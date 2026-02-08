@@ -1,0 +1,3068 @@
+{
+  "version": 1,
+  "modKey": "CalamityAffixes.esp",
+  "eslFlag": true,
+  "loot": {
+    "chancePercent": 25,
+    "runewordFragmentChancePercent": 0.3,
+    "renameItem": true,
+    "sharedPool": true,
+    "debugLog": false,
+    "trapGlobalMaxActive": 64,
+    "nameFormat": "{base}[{affix}]"
+  },
+  "keywords": {
+    "tags": [
+      {
+        "editorId": "CAFF_TAG_DOT",
+        "name": "Calamity: DoT Tag"
+      }
+    ],
+    "affixes": [
+      {
+        "id": "arc_lightning",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING",
+        "name": "\uC544\uD06C \uBC88\uAC1C (\uC801\uC911 100%): \uBC88\uAC1C \uD53C\uD574 10 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_ARC_LIGHTNING",
+            "name": "Calamity: Arc Lightning (Value Mod)",
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_ARC_LIGHTNING",
+            "name": "Calamity: Arc Lightning",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_ARC_LIGHTNING",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_ARC_LIGHTNING",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.1,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_fire_damage",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_DAMAGE",
+        "name": "\uD654\uC5FC \uD53C\uD574 (\uC801\uC911 100%): \uD654\uC5FC \uD53C\uD574 6 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_FIRE_DAMAGE",
+            "name": "Calamity: Fire Damage (Value Mod)",
+            "actorValue": "Health",
+            "resistValue": "ResistFire",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_FIRE_DAMAGE",
+            "name": "Calamity: Fire Damage",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_FIRE_DAMAGE",
+              "magnitude": 6,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FIRE_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.1,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_frost_damage",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_DAMAGE",
+        "name": "\uB0C9\uAE30 \uD53C\uD574 (\uC801\uC911 100%): \uB0C9\uAE30 \uD53C\uD574 6 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_FROST_DAMAGE",
+            "name": "Calamity: Frost Damage (Value Mod)",
+            "actorValue": "Health",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_FROST_DAMAGE",
+            "name": "Calamity: Frost Damage",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_FROST_DAMAGE",
+              "magnitude": 6,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FROST_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.1,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_shock_damage",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_DAMAGE",
+        "name": "\uBC88\uAC1C \uD53C\uD574 (\uC801\uC911 100%): \uBC88\uAC1C \uD53C\uD574 6 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SHOCK_DAMAGE",
+            "name": "Calamity: Shock Damage (Value Mod)",
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SHOCK_DAMAGE",
+            "name": "Calamity: Shock Damage",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SHOCK_DAMAGE",
+              "magnitude": 6,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_SHOCK_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.1,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_fire_shred",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_SHRED",
+        "name": "\uD654\uC5FC \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uD654\uC5FC \uC800\uD56D -15 (4\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_FIRE_SHRED",
+            "name": "Calamity: Fire Exposure (Value Mod)",
+            "actorValue": "ResistFire",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_FIRE_SHRED",
+            "name": "Calamity: Fire Exposure",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_FIRE_SHRED",
+              "magnitude": 15,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 4.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FIRE_SHRED",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_frost_shred",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_SHRED",
+        "name": "\uB0C9\uAE30 \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_FROST_SHRED",
+            "name": "Calamity: Frost Exposure (Value Mod)",
+            "actorValue": "ResistFrost",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_FROST_SHRED",
+            "name": "Calamity: Frost Exposure",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_FROST_SHRED",
+              "magnitude": 15,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 4.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FROST_SHRED",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_shock_shred",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
+        "name": "\uBC88\uAC1C \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uBC88\uAC1C \uC800\uD56D -15 (4\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SHOCK_SHRED",
+            "name": "Calamity: Shock Exposure (Value Mod)",
+            "actorValue": "ResistShock",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SHOCK_SHRED",
+            "name": "Calamity: Shock Exposure",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SHOCK_SHRED",
+              "magnitude": 15,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 4.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_familiar",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FAMILIAR",
+        "name": "\uBB34\uB9AC \uC6B0\uB450\uBA38\uB9AC (\uC801\uC911 12% / ICD 60\uCD08): \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 12.0,
+          "icdSeconds": 60.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|000640B6",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_flaming_familiar",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FLAMING_FAMILIAR",
+        "name": "\uD3ED\uACA9\uC218 (\uC801\uC911 8% / ICD 25\uCD08): \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 8.0,
+          "icdSeconds": 25.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|0009CE26",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_flame_atronach",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FLAME_ATRONACH",
+        "name": "\uC6D0\uC18C \uB3D9\uB9F9 (\uC801\uC911 6% / ICD 90\uCD08): \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 6.0,
+          "icdSeconds": 90.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|000204C3",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_frost_atronach",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FROST_ATRONACH",
+        "name": "\uC6D0\uC18C \uB3D9\uB9F9 (\uC801\uC911 6% / ICD 90\uCD08): \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 6.0,
+          "icdSeconds": 90.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|000204C4",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_storm_atronach",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_STORM_ATRONACH",
+        "name": "\uD3ED\uD48D \uB3D9\uB9F9 (\uC801\uC911 5% / ICD 120\uCD08): \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 5.0,
+          "icdSeconds": 120.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|000204C5",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_dremora_lord",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_DREMORA_LORD",
+        "name": "\uB370\uC774\uB4DC\uB77C \uACC4\uC57D (\uC801\uC911 3% / ICD 180\uCD08): \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.15
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 3.0,
+          "icdSeconds": 180.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|0010DDEC",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_soul_trap",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SOUL_TRAP",
+        "name": "\uC601\uD63C \uC218\uD655\uC790 (\uC801\uC911 25% / ICD 2.5\uCD08): \uC601\uD63C \uB36B (60\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 25.0,
+          "icdSeconds": 2.5,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|0004DBA4",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "incoming_invisibility",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_HIT_INVISIBILITY",
+        "name": "\uC0AC\uB77C\uC9D0 (\uD53C\uACA9 5% / ICD 45\uCD08): \uD22C\uBA85\uD654 (30\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.25
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 5.0,
+          "icdSeconds": 45.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|00027EB6",
+            "applyTo": "Self"
+          }
+        }
+      },
+      {
+        "id": "hit_muffle",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_MUFFLE",
+        "name": "\uBB34\uC74C \uBC1C\uAC78\uC74C (\uC801\uC911 10% / ICD 180\uCD08): \uBA38\uD50C(Muffle) (180\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 180.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|0008F3EB",
+            "applyTo": "Self"
+          }
+        }
+      },
+      {
+        "id": "trap_ironjaw",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_TRAP_IRONJAW",
+        "name": "\uCCA0\uD131 \uB36B (\uCE58\uBA85\uD0C0/\uD30C\uC6CC\uC5B4\uD0DD \uC801\uC911 20% / ICD 6\uCD08): \uC801 \uBC1C\uBC11\uC5D0 \uB36B \uC124\uCE58(\uC7AC\uC7A5\uC804 2.5\uCD08) \u2192 \uBC1F\uC740 \uC801 \uC774\uB3D9\uC18D\uB3C4 -100% (2\uCD08) \u002B \uB79C\uB364 \uCD94\uAC00 \uD6A8\uACFC",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
+            "name": "Calamity: Ironjaw Snare (SpeedMult)",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
+            "name": "Calamity: Ironjaw Snare",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
+              "magnitude": -100,
+              "duration": 2,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.6
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 6.0,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 108.0,
+            "ttlSeconds": 12.0,
+            "armDelaySeconds": 0.15,
+            "rearmDelaySeconds": 2.5,
+            "maxActive": 2,
+            "maxTriggers": 0,
+            "requireCritOrPowerAttack": true,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
+            "extraSpells": [
+              {
+                "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA"
+              },
+              {
+                "spellForm": "Skyrim.esm|0006D22C"
+              },
+              {
+                "spellForm": "Skyrim.esm|0004B146"
+              }
+            ],
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "internal_spell_trap_dragonteeth_poison",
+        "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_POISON",
+        "name": "INTERNAL: Trap Dragon\u0027s Teeth (Poison)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
+            "name": "Calamity: Dragon\u0027s Teeth (Poison)",
+            "actorValue": "Health",
+            "resistValue": "PoisonResist",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON",
+            "name": "Calamity: Dragon\u0027s Teeth (Poison)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
+              "magnitude": 4,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_trap_dragonteeth_drain_magicka",
+        "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
+        "name": "INTERNAL: Trap Dragon\u0027s Teeth (Drain Magicka)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
+            "name": "Calamity: Dragon\u0027s Teeth (Drain Magicka)",
+            "actorValue": "Magicka",
+            "resistValue": null,
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
+            "name": "Calamity: Dragon\u0027s Teeth (Drain Magicka)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_trap_dragonteeth_drain_stamina",
+        "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA",
+        "name": "INTERNAL: Trap Dragon\u0027s Teeth (Drain Stamina)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
+            "name": "Calamity: Dragon\u0027s Teeth (Drain Stamina)",
+            "actorValue": "Stamina",
+            "resistValue": null,
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA",
+            "name": "Calamity: Dragon\u0027s Teeth (Drain Stamina)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_fire_25",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_25",
+        "name": "\uBB3C\uB9AC\u2192\uD654\uC5FC \uC804\uD658 (25%)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
+            "name": "Calamity: Damage Health (Fire, Dynamic)",
+            "actorValue": "Health",
+            "resistValue": "ResistFire",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "name": "Calamity: Damage Health (Fire, Dynamic)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
+              "magnitude": 0,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Fire",
+            "percent": 25.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_fire_50",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_50",
+        "name": "\uBB3C\uB9AC\u2192\uD654\uC5FC \uC804\uD658 (50%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Fire",
+            "percent": 50.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_fire_75",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_75",
+        "name": "\uBB3C\uB9AC\u2192\uD654\uC5FC \uC804\uD658 (75%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Fire",
+            "percent": 75.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_fire_100",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_100",
+        "name": "\uBB3C\uB9AC\u2192\uD654\uC5FC \uC804\uD658 (100%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Fire",
+            "percent": 100.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_frost_25",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_25",
+        "name": "\uBB3C\uB9AC\u2192\uB0C9\uAE30 \uC804\uD658 (25%)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
+            "name": "Calamity: Damage Health (Frost, Dynamic)",
+            "actorValue": "Health",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "name": "Calamity: Damage Health (Frost, Dynamic)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
+              "magnitude": 0,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Frost",
+            "percent": 25.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_frost_50",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_50",
+        "name": "\uBB3C\uB9AC\u2192\uB0C9\uAE30 \uC804\uD658 (50%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Frost",
+            "percent": 50.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_frost_75",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_75",
+        "name": "\uBB3C\uB9AC\u2192\uB0C9\uAE30 \uC804\uD658 (75%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Frost",
+            "percent": 75.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_frost_100",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_100",
+        "name": "\uBB3C\uB9AC\u2192\uB0C9\uAE30 \uC804\uD658 (100%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Frost",
+            "percent": 100.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_shock_25",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_25",
+        "name": "\uBB3C\uB9AC\u2192\uBC88\uAC1C \uC804\uD658 (25%)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
+            "name": "Calamity: Damage Health (Shock, Dynamic)",
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "name": "Calamity: Damage Health (Shock, Dynamic)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
+              "magnitude": 0,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Shock",
+            "percent": 25.0,
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_shock_50",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_50",
+        "name": "\uBB3C\uB9AC\u2192\uBC88\uAC1C \uC804\uD658 (50%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Shock",
+            "percent": 50.0,
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_shock_75",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_75",
+        "name": "\uBB3C\uB9AC\u2192\uBC88\uAC1C \uC804\uD658 (75%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Shock",
+            "percent": 75.0,
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_shock_100",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_100",
+        "name": "\uBB3C\uB9AC\u2192\uBC88\uAC1C \uC804\uD658 (100%)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Shock",
+            "percent": 100.0,
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "archmage_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T1",
+        "name": "\uB300\uB9C8\uBC95\uC0AC (\uC8FC\uBB38 \uC801\uC911): \uCD5C\uB300 \uB9E4\uC9C0\uCE74 10% \uBC88\uAC1C \uD53C\uD574 / \uCD5C\uB300 \uB9E4\uC9C0\uCE74 5% \uCD94\uAC00 \uC18C\uBAA8",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "Archmage",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "damagePctOfMaxMagicka": 10.0,
+            "costPctOfMaxMagicka": 5.0,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "archmage_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T2",
+        "name": "\uB300\uB9C8\uBC95\uC0AC (\uC8FC\uBB38 \uC801\uC911): \uCD5C\uB300 \uB9E4\uC9C0\uCE74 12% \uBC88\uAC1C \uD53C\uD574 / \uCD5C\uB300 \uB9E4\uC9C0\uCE74 5% \uCD94\uAC00 \uC18C\uBAA8",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "Archmage",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "damagePctOfMaxMagicka": 12.0,
+            "costPctOfMaxMagicka": 5.0,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "archmage_t3",
+        "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T3",
+        "name": "\uB300\uB9C8\uBC95\uC0AC (\uC8FC\uBB38 \uC801\uC911): \uCD5C\uB300 \uB9E4\uC9C0\uCE74 14% \uBC88\uAC1C \uD53C\uD574 / \uCD5C\uB300 \uB9E4\uC9C0\uCE74 5% \uCD94\uAC00 \uC18C\uBAA8",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "Archmage",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "damagePctOfMaxMagicka": 14.0,
+            "costPctOfMaxMagicka": 5.0,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "archmage_t4",
+        "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T4",
+        "name": "\uB300\uB9C8\uBC95\uC0AC (\uC8FC\uBB38 \uC801\uC911): \uCD5C\uB300 \uB9E4\uC9C0\uCE74 16% \uBC88\uAC1C \uD53C\uD574 / \uCD5C\uB300 \uB9E4\uC9C0\uCE74 5% \uCD94\uAC00 \uC18C\uBAA8",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "Archmage",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "damagePctOfMaxMagicka": 16.0,
+            "costPctOfMaxMagicka": 5.0,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "coc_firebolt",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_FIREBOLT",
+        "name": "CoC: \uD30C\uC774\uC5B4\uBCFC\uD2B8 (\uCE58\uBA85\uD0C0/\uD30C\uC6CC\uC5B4\uD0DD \uC801\uC911, ICD 0.15\uCD08): Firebolt \uBC1C\uB3D9 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|00012FD0",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_ice_spike",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_SPIKE",
+        "name": "CoC: \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C (\uCE58\uBA85\uD0C0/\uD30C\uC6CC\uC5B4\uD0DD \uC801\uC911, ICD 0.15\uCD08): Ice Spike \uBC1C\uB3D9 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|0002B96C",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_lightning_bolt",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_LIGHTNING_BOLT",
+        "name": "CoC: \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8 (\uCE58\uBA85\uD0C0/\uD30C\uC6CC\uC5B4\uD0DD \uC801\uC911, ICD 0.15\uCD08): Lightning Bolt \uBC1C\uB3D9 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|0002DD29",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_thunderbolt",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_THUNDERBOLT",
+        "name": "CoC: \uC36C\uB354\uBCFC\uD2B8 (\uCE58\uBA85\uD0C0/\uD30C\uC6CC\uC5B4\uD0DD \uC801\uC911, ICD 0.15\uCD08): Thunderbolt \uBC1C\uB3D9 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|0010F7EE",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_icy_spear",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICY_SPEAR",
+        "name": "CoC: \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4 (\uCE58\uBA85\uD0C0/\uD30C\uC6CC\uC5B4\uD0DD \uC801\uC911, ICD 0.15\uCD08): Icy Spear \uBC1C\uB3D9 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|0010F7EC",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_chain_lightning",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_CHAIN_LIGHTNING",
+        "name": "CoC: \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD (\uCE58\uBA85\uD0C0/\uD30C\uC6CC\uC5B4\uD0DD \uC801\uC911, ICD 0.15\uCD08): Chain Lightning \uBC1C\uB3D9 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|00045F9D",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_ice_storm",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_STORM",
+        "name": "CoC: \uC544\uC774\uC2A4 \uC2A4\uD1B0 (\uCE58\uBA85\uD0C0/\uD30C\uC6CC\uC5B4\uD0DD \uC801\uC911, ICD 0.15\uCD08): Ice Storm \uBC1C\uB3D9 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|00045F9C",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T1",
+        "name": "\uC2DC\uCCB4 \uD3ED\uBC1C T1 (\uCC98\uCE58): \uBC18\uACBD 600, (12 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 6%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4(0.7x) \uCD5C\uB300 5\uD68C, 1\uCD08 4\uD68C \uC81C\uD55C",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 12.0,
+            "pctOfCorpseMaxHealth": 6.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T2",
+        "name": "\uC2DC\uCCB4 \uD3ED\uBC1C T2 (\uCC98\uCE58): \uBC18\uACBD 600, (14 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4(0.7x) \uCD5C\uB300 5\uD68C, 1\uCD08 4\uD68C \uC81C\uD55C",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 14.0,
+            "pctOfCorpseMaxHealth": 7.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t3",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T3",
+        "name": "\uC2DC\uCCB4 \uD3ED\uBC1C T3 (\uCC98\uCE58): \uBC18\uACBD 600, (16 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 8%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4(0.7x) \uCD5C\uB300 5\uD68C, 1\uCD08 4\uD68C \uC81C\uD55C",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.05
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 16.0,
+            "pctOfCorpseMaxHealth": 8.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t4",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T4",
+        "name": "\uC2DC\uCCB4 \uD3ED\uBC1C T4 (\uCC98\uCE58): \uBC18\uACBD 600, (18 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 9%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4(0.7x) \uCD5C\uB300 5\uD68C, 1\uCD08 4\uD68C \uC81C\uD55C",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.02
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 18.0,
+            "pctOfCorpseMaxHealth": 9.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t5",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T5",
+        "name": "\uC2DC\uCCB4 \uD3ED\uBC1C T5 (\uCC98\uCE58): \uBC18\uACBD 600, (20 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 10%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4(0.7x) \uCD5C\uB300 5\uD68C, 1\uCD08 4\uD68C \uC81C\uD55C",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.01
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 20.0,
+            "pctOfCorpseMaxHealth": 10.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "summon_corpse_explosion_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T1",
+        "name": "\uC18C\uD658 \uC2DC\uCCB4 \uD3ED\uBC1C T1 (\uC18C\uD658\uBB3C \uC0AC\uB9DD): \uBC18\uACBD 600, (14 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4(0.8x) \uCD5C\uB300 3\uD68C, 1\uCD08 3\uD68C \uC81C\uD55C",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "SummonCorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 14.0,
+            "pctOfCorpseMaxHealth": 7.0,
+            "radius": 600.0,
+            "maxTargets": 8,
+            "maxChainDepth": 3,
+            "chainFalloff": 0.8,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 3,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "summon_corpse_explosion_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T2",
+        "name": "\uC18C\uD658 \uC2DC\uCCB4 \uD3ED\uBC1C T2 (\uC18C\uD658\uBB3C \uC0AC\uB9DD): \uBC18\uACBD 600, (18 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 8.5%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4(0.8x) \uCD5C\uB300 3\uD68C, 1\uCD08 3\uD68C \uC81C\uD55C",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "SummonCorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 18.0,
+            "pctOfCorpseMaxHealth": 8.5,
+            "radius": 600.0,
+            "maxTargets": 8,
+            "maxChainDepth": 3,
+            "chainFalloff": 0.8,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 3,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "summon_corpse_explosion_t3",
+        "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T3",
+        "name": "\uC18C\uD658 \uC2DC\uCCB4 \uD3ED\uBC1C T3 (\uC18C\uD658\uBB3C \uC0AC\uB9DD): \uBC18\uACBD 600, (22 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 10%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4(0.8x) \uCD5C\uB300 3\uD68C, 1\uCD08 3\uD68C \uC81C\uD55C",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.05
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "SummonCorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 22.0,
+            "pctOfCorpseMaxHealth": 10.0,
+            "radius": 600.0,
+            "maxTargets": 8,
+            "maxChainDepth": 3,
+            "chainFalloff": 0.8,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 3,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "hit_minefield",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_MINEFIELD",
+        "name": "\uC9C0\uB8B0 \uBC2D (\uC801\uC911 12% / ICD 1.5\uCD08): \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.6\uCD08 \uD6C4, 8\uCD08, 1\uD68C) \u2192 \uBC18\uACBD 150 \uB454\uD654(-40%, 2\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_MINEFIELD_SNARE",
+            "name": "Calamity: Minefield Snare (SpeedMult)",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_MINEFIELD_SNARE",
+            "name": "Calamity: Minefield Snare",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_MINEFIELD_SNARE",
+              "magnitude": -40,
+              "duration": 2,
+              "area": 150
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 12.0,
+          "icdSeconds": 1.5,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 8.0,
+            "armDelaySeconds": 0.6,
+            "maxActive": 3,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_MINEFIELD_SNARE",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "hit_adaptive_exposure",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_ADAPTIVE_EXPOSURE",
+        "name": "\uC801\uC751\uD615 \uB178\uCD9C (\uC801\uC911 20% / ICD 1\uCD08 / \uD45C\uC801\uBCC4 ICD 12\uCD08): \uAC00\uC7A5 \uB192\uC740 \uC6D0\uC18C \uC800\uD56D -15 (4\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.25
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 1.0,
+          "perTargetICDSeconds": 12.0,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "StrongestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_FROST_SHRED",
+              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+            },
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "dot_bloom",
+        "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM",
+        "name": "DoT \uBE14\uB8F8 (\uC801\uC911 20% / ICD 1.5\uCD08): 0.6\uCD08 \uD6C4 \uD3EC\uC790 \uD3ED\uBC1C(\uBC18\uACBD 150, \uB3C5 \uD53C\uD574 3/s, 4\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_POISON",
+            "name": "Calamity: DoT Bloom (Poison)",
+            "actorValue": "Health",
+            "resistValue": "PoisonResist",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_POISON",
+            "name": "Calamity: DoT Bloom (Poison Cloud)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_POISON",
+              "magnitude": 3,
+              "duration": 4,
+              "area": 150
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 1.5,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 3.0,
+            "armDelaySeconds": 0.6,
+            "maxActive": 1,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_DOT_BLOOM_POISON",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "dot_bloom_tar",
+        "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_TAR",
+        "name": "DoT \uD0C0\uB974 \uBE14\uB8F8 (\uC801\uC911 18% / ICD 2\uCD08): 0.6\uCD08 \uD6C4 \uD0C0\uB974 \uD3ED\uBC1C(\uBC18\uACBD 170, \uB454\uD654 -35% \u002B \uBC29\uC5B4 -150, 4\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
+            "name": "Calamity: DoT Tar Bloom (SpeedMult)",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
+            "name": "Calamity: DoT Tar Bloom (Slow)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
+              "magnitude": -35,
+              "duration": 4,
+              "area": 170
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.6
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 2.0,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 3.0,
+            "armDelaySeconds": 0.6,
+            "maxActive": 1,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
+            "extraSpells": [
+              {
+                "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER"
+              }
+            ],
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "internal_spell_dot_bloom_tar_sunder",
+        "editorId": "CAFF_INTERNAL_SPEL_DOT_BLOOM_TAR_SUNDER",
+        "name": "INTERNAL: DoT Tar Bloom (Sunder Armor)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
+            "name": "Calamity: DoT Tar Bloom (DamageResist)",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER",
+            "name": "Calamity: DoT Tar Bloom (Sunder Armor)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
+              "magnitude": -150,
+              "duration": 4,
+              "area": 170
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "dot_bloom_siphon",
+        "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_SIPHON",
+        "name": "DoT \uD761\uC218 \uBE14\uB8F8 (\uC801\uC911 18% / ICD 2\uCD08): 0.6\uCD08 \uD6C4 \uD761\uC218 \uD3ED\uBC1C(\uBC18\uACBD 170, \uB9E4\uC9C0\uCE74/\uC2A4\uD0DC\uBBF8\uB098 \uC7AC\uC0DD -60%, 6\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
+            "name": "Calamity: DoT Siphon Bloom (MagickaRateMult)",
+            "actorValue": "MagickaRateMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
+            "name": "Calamity: DoT Siphon Bloom (Magicka Regen Down)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
+              "magnitude": -60,
+              "duration": 6,
+              "area": 170
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.6
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 2.0,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 3.0,
+            "armDelaySeconds": 0.6,
+            "maxActive": 1,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
+            "extraSpells": [
+              {
+                "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA"
+              }
+            ],
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "internal_spell_dot_bloom_siphon_sta",
+        "editorId": "CAFF_INTERNAL_SPEL_DOT_BLOOM_SIPHON_STA",
+        "name": "INTERNAL: DoT Siphon Bloom (Stamina Regen Down)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
+            "name": "Calamity: DoT Siphon Bloom (StaminaRateMult)",
+            "actorValue": "StaminaRateMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA",
+            "name": "Calamity: DoT Siphon Bloom (Stamina Regen Down)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
+              "magnitude": -60,
+              "duration": 6,
+              "area": 170
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "hit_chaos_mine",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CHAOS_MINE",
+        "name": "\uCE74\uC624\uC2A4 \uC9C0\uB8B0 (\uC801\uC911 12% / ICD 2\uCD08 / \uD45C\uC801\uBCC4 ICD 8\uCD08): \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.8\uCD08 \uD6C4, 10\uCD08, 1\uD68C) \u2192 \uB454\uD654 \u002B \uBB34\uC791\uC704 \uC800\uC8FC",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
+            "name": "Calamity: Chaos Mine (SpeedMult)",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
+            "name": "Calamity: Chaos Mine (Snare)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
+              "magnitude": -30,
+              "duration": 3,
+              "area": 150
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.35
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 12.0,
+          "icdSeconds": 2.0,
+          "perTargetICDSeconds": 8.0,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 10.0,
+            "armDelaySeconds": 0.8,
+            "maxActive": 2,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
+            "extraSpells": [
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE"
+              }
+            ],
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_sunder",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_SUNDER",
+        "name": "INTERNAL: Chaos Curse (Sunder Armor)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
+            "name": "Calamity: Chaos Curse (Sunder Armor)",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER",
+            "name": "Calamity: Chaos Curse (Sunder Armor)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
+              "magnitude": -150,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_drain_magregen",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
+        "name": "INTERNAL: Chaos Curse (Magicka Regen Down)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
+            "name": "Calamity: Chaos Curse (MagickaRateMult)",
+            "actorValue": "MagickaRateMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
+            "name": "Calamity: Chaos Curse (Magicka Regen Down)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
+              "magnitude": -60,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_drain_stamregen",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN",
+        "name": "INTERNAL: Chaos Curse (Stamina Regen Down)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
+            "name": "Calamity: Chaos Curse (StaminaRateMult)",
+            "actorValue": "StaminaRateMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN",
+            "name": "Calamity: Chaos Curse (Stamina Regen Down)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
+              "magnitude": -60,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_slow_attack",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_SLOW_ATTACK",
+        "name": "INTERNAL: Chaos Curse (Slow Attack Speed)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
+            "name": "Calamity: Chaos Curse (WeaponSpeedMult)",
+            "actorValue": "WeaponSpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK",
+            "name": "Calamity: Chaos Curse (Slow Attack Speed)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
+              "magnitude": -20,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_fragile",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_FRAGILE",
+        "name": "INTERNAL: Chaos Curse (Fragile Magic Resist)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
+            "name": "Calamity: Chaos Curse (Resist Magic)",
+            "actorValue": "ResistMagic",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE",
+            "name": "Calamity: Chaos Curse (Fragile Magic Resist)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
+              "magnitude": -20,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "hit_swap_jackpot",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SWAP_JACKPOT",
+        "name": "\uC2A4\uC651 \uC7AD\uD31F (\uC801\uC911 20% / ICD 0.6\uCD08 / \uD45C\uC801\uBCC4 ICD 12\uCD08): \uBB34\uAE30 \uACF5\uACA9\uC18D\uB3C4 \u002B15% (4\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
+            "name": "Calamity: Swap Jackpot (WeaponSpeedMult)",
+            "actorValue": "WeaponSpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
+            "name": "Calamity: Swap Jackpot (Haste)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
+              "magnitude": 15,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.25
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 0.6,
+          "perTargetICDSeconds": 12.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "hit_evolving_lightning",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_EVOLVING_LIGHTNING",
+        "name": "\uC9C4\uD654 \uBC88\uAC1C (\uC801\uC911 100%): \uB204\uC801 \uC131\uC7A5\uC73C\uB85C \uBC88\uAC1C \uD53C\uD574\uAC00 \uB2E8\uACC4\uC801\uC73C\uB85C \uAC15\uD654\uB428",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.2,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_SHOCK_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.08,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            },
+            "evolution": {
+              "xpPerProc": 1,
+              "thresholds": [
+                0,
+                15,
+                45,
+                90
+              ],
+              "multipliers": [
+                1.0,
+                1.25,
+                1.6,
+                2.1
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_mode_cycle_elements",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_MODE_CYCLE_ELEMENTS",
+        "name": "\uC6D0\uC18C \uBAA8\uB4DC \uC21C\uD658 (\uC801\uC911 100%): \uC131\uC7A5\uD615 \u002B \uC218\uB3D9 \uBAA8\uB4DC \uC804\uD658",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.2,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FIRE_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.08,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            },
+            "evolution": {
+              "xpPerProc": 1,
+              "thresholds": [
+                0,
+                20,
+                60,
+                120
+              ],
+              "multipliers": [
+                1.0,
+                1.3,
+                1.7,
+                2.2
+              ]
+            },
+            "modeCycle": {
+              "manualOnly": true,
+              "switchEveryProcs": 3,
+              "labels": [
+                "Flame",
+                "Frost",
+                "Storm"
+              ],
+              "spells": [
+                "CAFF_SPEL_FIRE_DAMAGE",
+                "CAFF_SPEL_FROST_DAMAGE",
+                "CAFF_SPEL_SHOCK_DAMAGE"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "runeword_enigma_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ENIGMA",
+        "name": "\uB8EC\uC6CC\uB4DC \uC218\uC218\uAED8\uB07C (Jah-Ith-Ber): \uD53C\uACA9 18% / ICD 18\uCD08 - \uCC28\uC6D0 \uC704\uC0C1(\uC774\uB3D9\uC18D\uB3C4 \u002B45%, 6\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
+            "name": "Calamity: Runeword Enigma (Phase Speed)",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+            "name": "Calamity: Runeword Enigma (Phase)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
+              "magnitude": 45,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 18.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_infinity_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INFINITY",
+        "name": "\uB8EC\uC6CC\uB4DC \uBB34\uD55C (Ber-Mal-Ber-Ist): \uC801\uC911 35% / ICD 0.5\uCD08 - \uC57D\uC810 \uC6D0\uC18C \uB178\uCD9C(\uC801 \uC800\uD56D \uAC10\uC18C)",
+        "records": null,
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 35.0,
+          "icdSeconds": 0.5,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "WeakestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_FROST_SHRED",
+              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_fortitude_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FORTITUDE",
+        "name": "\uB8EC\uC6CC\uB4DC \uC778\uB0B4 (El-Sol-Dol-Lo): \uD53C\uACA9 25% / ICD 16\uCD08 - \uC804\uC7A5\uC758 \uC778\uB0B4(\uBC29\uC5B4\uB3C4 \u002B120, 8\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
+            "name": "Calamity: Runeword Fortitude (Ward)",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_FORTITUDE_WARD",
+            "name": "Calamity: Runeword Fortitude (Ward)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
+              "magnitude": 120,
+              "duration": 8,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 25.0,
+          "icdSeconds": 16.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_FORTITUDE_WARD",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_insight_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INSIGHT",
+        "name": "\uB8EC\uC6CC\uB4DC \uD1B5\uCC30 (Ral-Tir-Tal-Sol): \uC801\uC911 30% / ICD 10\uCD08 - \uBA85\uC0C1(\uB9C8\uB098 \uC7AC\uC0DD \u002B150%, 12\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
+            "name": "Calamity: Runeword Insight (Meditation)",
+            "actorValue": "MagickaRateMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_INSIGHT_MEDITATION",
+            "name": "Calamity: Runeword Insight (Meditation)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
+              "magnitude": 150,
+              "duration": 12,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 30.0,
+          "icdSeconds": 10.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_INSIGHT_MEDITATION",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_spirit_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPIRIT",
+        "name": "\uB8EC\uC6CC\uB4DC \uC2A4\uD53C\uB9BF (Tal-Thul-Ort-Amn): \uC801\uC911 28% / ICD 9\uCD08 - \uC601\uD63C\uC758 \uBA85\uC0C1(\uB9C8\uB098 \uC7AC\uC0DD \u002B120%, 10\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
+            "name": "Calamity: Runeword Spirit (Meditation)",
+            "actorValue": "MagickaRateMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
+            "name": "Calamity: Runeword Spirit (Meditation)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
+              "magnitude": 120,
+              "duration": 10,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 28.0,
+          "icdSeconds": 9.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_grief_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_GRIEF",
+        "name": "\uB8EC\uC6CC\uB4DC \uC2AC\uD514 (Eth-Tir-Lo-Mal-Ral): \uC801\uC911 30% / ICD 0.4\uCD08 - \uC6D0\uC18C \uCC38\uACA9(\uC801\uC751\uD615 \uC6D0\uC18C \uD53C\uD574)",
+        "records": null,
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 30.0,
+          "icdSeconds": 0.4,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "WeakestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+              "Frost": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+              "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.12,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "runeword_call_to_arms_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CALL_TO_ARMS",
+        "name": "\uB8EC\uC6CC\uB4DC \uCF5C \uD22C \uC554\uC2A4 (Amn-Ral-Mal-Ist-Ohm): \uD53C\uACA9 24% / ICD 18\uCD08 - \uC804\uD22C \uD568\uC131(\uBC29\uC5B4\uB3C4 \u002B150, 8\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_CTA_WARCRY",
+            "name": "Calamity: Runeword Call to Arms (Warcry Ward)",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_CTA_WARCRY",
+            "name": "Calamity: Runeword Call to Arms (Warcry)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_CTA_WARCRY",
+              "magnitude": 150,
+              "duration": 8,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 24.0,
+          "icdSeconds": 18.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_CTA_WARCRY",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_chains_of_honor_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAINS_OF_HONOR",
+        "name": "\uB8EC\uC6CC\uB4DC \uBA85\uC608\uC758 \uC0AC\uC2AC (Dol-Um-Ber-Ist): \uD53C\uACA9 20% / ICD 16\uCD08 - \uC704\uC0C1 \uC9C8\uC8FC(\uC774\uB3D9\uC18D\uB3C4 \u002B35%, 5\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_COH_PHASE",
+            "name": "Calamity: Runeword Chains of Honor (Phase)",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_COH_PHASE",
+            "name": "Calamity: Runeword Chains of Honor (Phase)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_COH_PHASE",
+              "magnitude": 35,
+              "duration": 5,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 16.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_COH_PHASE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_heart_of_the_oak_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEART_OF_THE_OAK",
+        "name": "\uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 (Ko-Vex-Pul-Thul): \uC801\uC911 32% / ICD 8\uCD08 - \uBE44\uC804 \uADE0\uC5F4(\uC801\uC751\uD615 \uC6D0\uC18C \uB178\uCD9C)",
+        "records": null,
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 32.0,
+          "icdSeconds": 8.0,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "WeakestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_FROST_SHRED",
+              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_faith_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAITH",
+        "name": "\uB8EC\uC6CC\uB4DC \uC2E0\uB150 (Ohm-Jah-Lem-Eld): \uC801\uC911 22% / ICD 12\uCD08 - \uC704\uC0C1 \uC0AC\uB0E5\uAFBC(\uC774\uB3D9\uC18D\uB3C4 \u002B45%, 6\uCD08)",
+        "records": null,
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 22.0,
+          "icdSeconds": 12.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_exile_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_EXILE",
+        "name": "\uB8EC\uC6CC\uB4DC \uC5D1\uC790\uC77C (Vex-Ohm-Ist-Dol): \uD53C\uACA9 28% / ICD 14\uCD08 - \uCD94\uBC29\uC790\uC758 \uACB0\uACC4(\uBC29\uC5B4\uB3C4 \u002B180, 9\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_EXILE_BARRIER",
+            "name": "Calamity: Runeword Exile (Barrier)",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_EXILE_BARRIER",
+            "name": "Calamity: Runeword Exile (Barrier)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_EXILE_BARRIER",
+              "magnitude": 180,
+              "duration": 9,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 28.0,
+          "icdSeconds": 14.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_EXILE_BARRIER",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_breath_of_the_dying_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BREATH_OF_THE_DYING",
+        "name": "\uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 (Vex-Hel-El-Eld-Zod-Eth): \uC801\uC911 34% / ICD 0.35\uCD08 - \uBA78\uC808 \uCC38\uACA9(\uC801\uC751\uD615 \uC6D0\uC18C \uD53C\uD574)",
+        "records": null,
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 34.0,
+          "icdSeconds": 0.35,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "WeakestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+              "Frost": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+              "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.16,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "runeword_last_wish_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAST_WISH",
+        "name": "\uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC (Jah-Mal-Jah-Sur-Jah-Ber): \uC801\uC911 18% / ICD 3\uCD08 - \uC18C\uC6D0 \uBD95\uAD34(\uC801\uC751\uD615 \uC6D0\uC18C \uB178\uCD9C)",
+        "records": null,
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 3.0,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "StrongestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_FROST_SHRED",
+              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_phoenix_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PHOENIX",
+        "name": "\uB8EC\uC6CC\uB4DC \uD53C\uB2C9\uC2A4 (Vex-Vex-Lo-Jah): \uD53C\uACA9 18% / ICD 14\uCD08 - \uBD88\uC0AC \uC9C8\uC8FC(\uC774\uB3D9\uC18D\uB3C4 \u002B50%, 7\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
+            "name": "Calamity: Runeword Phoenix (Surge)",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_PHOENIX_SURGE",
+            "name": "Calamity: Runeword Phoenix (Surge)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
+              "magnitude": 50,
+              "duration": 7,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 14.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_PHOENIX_SURGE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_doom_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DOOM",
+        "name": "\uB8EC\uC6CC\uB4DC \uB460 (Hel-Ohm-Um-Lo-Cham): \uC801\uC911 30% / ICD 0.8\uCD08 - \uC808\uB9DD\uC758 \uB0C9\uAE30 \uC77C\uACA9",
+        "records": null,
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 30.0,
+          "icdSeconds": 0.8,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.14,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "runeword_dream_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DREAM",
+        "name": "\uB8EC\uC6CC\uB4DC \uB4DC\uB9BC (Io-Jah-Pul): \uC801\uC911 30% / ICD 0.8\uCD08 - \uBC88\uAC1C\uC758 \uAFC8 \uC77C\uACA9",
+        "records": null,
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 30.0,
+          "icdSeconds": 0.8,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.14,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      }
+    ],
+    "kidRules": [
+      {
+        "comment": "Optional (DISABLED): tag hostile alchemy magic effects for DotApply.",
+        "keywordEditorId": "CAFF_TAG_DOT",
+        "type": "Magic Effect",
+        "strings": "*Alch*",
+        "formFilters": "NONE",
+        "traits": "H",
+        "chance": 0
+      },
+      {
+        "comment": "Custom DoT tagging template (DISABLED): replace filters with a narrow set of MGEFs.",
+        "keywordEditorId": "CAFF_TAG_DOT",
+        "type": "Magic Effect",
+        "strings": "NONE",
+        "formFilters": "NONE",
+        "traits": "NONE",
+        "chance": 0
+      }
+    ],
+    "spidRules": []
+  }
+}

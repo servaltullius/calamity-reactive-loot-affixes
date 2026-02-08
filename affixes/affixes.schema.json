@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CalamityAffixes Affix Spec",
+  "type": "object",
+  "required": ["version", "modKey", "eslFlag", "keywords"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "modKey": { "type": "string", "minLength": 5 },
+    "eslFlag": { "type": "boolean" },
+    "loot": { "$ref": "#/$defs/loot" },
+    "keywords": {
+      "type": "object",
+      "required": ["tags", "affixes", "kidRules", "spidRules"],
+      "additionalProperties": false,
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/keyword" }
+        },
+        "affixes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/affix" }
+        },
+        "kidRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/kidRule" }
+        },
+        "spidRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/spidRule" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "loot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "chancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "runewordFragmentChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "renameItem": { "type": "boolean" },
+        "sharedPool": { "type": "boolean" },
+        "debugLog": { "type": "boolean" },
+        "trapGlobalMaxActive": { "type": "integer", "minimum": 0, "maximum": 4096 },
+        "nameFormat": { "type": "string" }
+      }
+    },
+    "keyword": {
+      "type": "object",
+      "required": ["editorId", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "editorId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "kid": {
+      "type": "object",
+      "required": ["type", "strings", "formFilters", "traits", "chance"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "strings": { "type": "string" },
+        "formFilters": { "type": "string" },
+        "traits": { "type": "string" },
+        "chance": { "type": "number", "minimum": 0.0, "maximum": 100.0 }
+      }
+    },
+    "affix": {
+      "type": "object",
+      "required": ["id", "editorId", "name", "kid", "runtime"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "editorId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "records": { "$ref": "#/$defs/records" },
+        "kid": { "$ref": "#/$defs/kid" },
+        "runtime": { "type": "object" }
+      }
+    },
+    "kidRule": {
+      "type": "object",
+      "required": ["keywordEditorId", "type", "strings", "formFilters", "traits", "chance"],
+      "additionalProperties": false,
+      "properties": {
+        "comment": { "type": "string" },
+        "keywordEditorId": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "strings": { "type": "string" },
+        "formFilters": { "type": "string" },
+        "traits": { "type": "string" },
+        "chance": { "type": "number", "minimum": 0.0, "maximum": 100.0 }
+      }
+    },
+    "records": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "magicEffect": { "$ref": "#/$defs/magicEffectRecord" },
+        "spell": { "$ref": "#/$defs/spellRecord" }
+      }
+    },
+    "magicEffectRecord": {
+      "type": "object",
+      "required": ["editorId", "actorValue"],
+      "additionalProperties": false,
+      "properties": {
+        "editorId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "actorValue": { "type": "string", "minLength": 1 },
+        "resistValue": { "type": "string" },
+        "magicSkill": { "type": "string" },
+        "hostile": { "type": "boolean" },
+        "recover": { "type": "boolean" }
+      }
+    },
+    "spellRecord": {
+      "type": "object",
+      "required": ["editorId", "delivery", "effect"],
+      "additionalProperties": false,
+      "properties": {
+        "editorId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "delivery": { "type": "string", "enum": ["Self", "TargetActor"] },
+        "effect": { "$ref": "#/$defs/spellEffectRecord" }
+      }
+    },
+    "spellEffectRecord": {
+      "type": "object",
+      "required": ["magicEffectEditorId", "magnitude", "duration", "area"],
+      "additionalProperties": false,
+      "properties": {
+        "magicEffectEditorId": { "type": "string", "minLength": 1 },
+        "magnitude": { "type": "number" },
+        "duration": { "type": "integer", "minimum": 0 },
+        "area": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "spidRule": {
+      "type": "object",
+      "required": ["line"],
+      "additionalProperties": false,
+      "properties": {
+        "comment": { "type": "string" },
+        "line": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

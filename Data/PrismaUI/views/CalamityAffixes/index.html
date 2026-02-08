@@ -1,0 +1,2334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Calamity Affixes Prisma UI</title>
+    <style>
+      :root {
+        --scale: 1;
+        --panel-ui-scale: 1;
+        --bg: rgba(0, 0, 0, 0.65);
+        --panel: rgba(10, 14, 18, 0.9);
+        --border: rgba(255, 255, 255, 0.16);
+        --accent: #00ff99;
+        --accent-soft: rgba(0, 255, 153, 0.25);
+        --text: rgba(255, 255, 255, 0.95);
+        --muted: rgba(255, 255, 255, 0.75);
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        overflow: hidden;
+        user-select: none;
+        pointer-events: none;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      #tooltipPanel {
+        position: fixed;
+        right: 70px;
+        top: 255px;
+        max-width: 720px;
+        max-height: 560px;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        border-radius: 12px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(8px);
+        display: none;
+        pointer-events: none;
+        transform: scale(var(--scale));
+        transform-origin: top right;
+      }
+
+      #tooltipTitle {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+
+      #tooltipText {
+        font-size: 18px;
+        line-height: 1.4;
+        color: var(--text);
+        white-space: pre-wrap;
+      }
+
+      #tooltipHint {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        display: none;
+      }
+
+      #tooltipActions {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tpPill {
+        pointer-events: auto;
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 12px;
+        line-height: 1.2;
+        font-family: inherit;
+        cursor: pointer;
+      }
+
+      .tpPill:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.1);
+      }
+
+      .tpPill:active {
+        transform: translateY(1px);
+      }
+
+      #quickLaunch {
+        position: fixed;
+        right: 70px;
+        top: 220px;
+        display: none;
+        gap: 8px;
+        align-items: center;
+        pointer-events: none;
+        transform: scale(var(--scale));
+        transform-origin: top right;
+      }
+
+      .qpPill {
+        pointer-events: auto;
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(0, 0, 0, 0.4);
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        line-height: 1.2;
+        font-family: inherit;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+      }
+
+      .qpPill:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.12);
+      }
+
+      .qpPill:active {
+        transform: translateY(1px);
+      }
+
+      #controlPanel {
+        position: fixed;
+        right: 40px;
+        top: 90px;
+        width: min(1320px, calc(100vw - 64px));
+        height: min(860px, calc(100vh - 72px));
+        min-width: 760px;
+        min-height: 500px;
+        max-width: calc(100vw - 24px);
+        max-height: calc(100vh - 24px);
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(8, 12, 16, 0.94), rgba(6, 8, 11, 0.94));
+        border-radius: 14px;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+        padding: 0;
+        display: none;
+        pointer-events: auto;
+        resize: none;
+        flex-direction: column;
+      }
+
+      .cpTitle {
+        color: var(--accent);
+        font-size: calc(20px * var(--panel-ui-scale));
+        font-weight: 700;
+      }
+
+      .cpSub {
+        margin-top: calc(4px * var(--panel-ui-scale));
+        color: var(--muted);
+        font-size: calc(13px * var(--panel-ui-scale));
+      }
+
+      .cpDragHandle {
+        margin: 0;
+        padding: calc(12px * var(--panel-ui-scale)) calc(14px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+        border-radius: 14px 14px 0 0;
+        cursor: move;
+        touch-action: none;
+        flex: 0 0 auto;
+      }
+
+      .cpTitleRow {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: calc(12px * var(--panel-ui-scale));
+      }
+
+      .cpIconButton {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.9);
+        width: calc(34px * var(--panel-ui-scale));
+        height: calc(34px * var(--panel-ui-scale));
+        border-radius: 10px;
+        cursor: pointer;
+        pointer-events: auto;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: calc(18px * var(--panel-ui-scale));
+        line-height: 1;
+      }
+
+      .cpIconButton:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.12);
+      }
+
+      .cpIconButton:active {
+        transform: translateY(1px);
+      }
+
+      .cpBody {
+        flex: 1 1 auto;
+        overflow: hidden;
+        padding: calc(12px * var(--panel-ui-scale)) calc(14px * var(--panel-ui-scale));
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .cpTabContent {
+        flex: 1 1 auto;
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      .cpMainPane {
+        height: 100%;
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      .cpMainPane.scrollY {
+        overflow-y: auto;
+        padding-right: calc(4px * var(--panel-ui-scale));
+      }
+
+      .cpDragHint {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        font-size: calc(11px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .cpContext {
+        margin-top: calc(10px * var(--panel-ui-scale));
+        padding: calc(10px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .cpContextLabel {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: calc(11px * var(--panel-ui-scale));
+        letter-spacing: 0.2px;
+      }
+
+      .cpContextValue {
+        margin-top: calc(4px * var(--panel-ui-scale));
+        color: var(--text);
+        font-size: calc(16px * var(--panel-ui-scale));
+        font-weight: 600;
+        line-height: 1.25;
+        word-break: break-word;
+      }
+
+      .cpContextMeta {
+        margin-top: calc(4px * var(--panel-ui-scale));
+        color: var(--muted);
+        font-size: calc(11px * var(--panel-ui-scale));
+      }
+
+      .cpTooltipBox {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        padding: calc(10px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        white-space: pre-wrap;
+        font-size: calc(14px * var(--panel-ui-scale));
+        line-height: 1.4;
+        color: var(--text);
+      }
+
+      .cpList {
+        display: grid;
+        gap: calc(6px * var(--panel-ui-scale));
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+      }
+
+      .cpListItem {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        font-size: calc(13px * var(--panel-ui-scale));
+        line-height: 1.3;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .cpListItem:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.12);
+      }
+
+      .cpListItem.selected {
+        border-color: var(--accent);
+        background: rgba(0, 255, 153, 0.18);
+        box-shadow: 0 0 0 1px rgba(0, 255, 153, 0.28) inset;
+      }
+
+      .cpListEmpty {
+        border: 1px dashed rgba(255, 255, 255, 0.24);
+        border-radius: 8px;
+        padding: calc(10px * var(--panel-ui-scale));
+        color: var(--muted);
+        font-size: calc(12px * var(--panel-ui-scale));
+      }
+
+      .cpSection {
+        margin-top: calc(12px * var(--panel-ui-scale));
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding-top: calc(10px * var(--panel-ui-scale));
+      }
+
+      .cpSectionTitle {
+        font-size: calc(13px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.82);
+        margin-bottom: calc(8px * var(--panel-ui-scale));
+      }
+
+      .cpTabs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        gap: calc(8px * var(--panel-ui-scale));
+        margin-bottom: calc(10px * var(--panel-ui-scale));
+      }
+
+      .cpTabButton {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.86);
+        padding: calc(9px * var(--panel-ui-scale)) calc(12px * var(--panel-ui-scale));
+        font-size: calc(13px * var(--panel-ui-scale));
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .cpTabButton:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.1);
+      }
+
+      .cpTabButton[aria-selected="true"] {
+        border-color: var(--accent);
+        background: rgba(0, 255, 153, 0.2);
+        color: var(--text);
+        box-shadow: 0 0 0 1px rgba(0, 255, 153, 0.28) inset;
+      }
+
+      .cpTabPane[hidden] {
+        display: none;
+      }
+
+      .cpGrid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: calc(8px * var(--panel-ui-scale));
+      }
+
+      .cpButton {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: calc(10px * var(--panel-ui-scale)) calc(12px * var(--panel-ui-scale));
+        font-size: calc(13px * var(--panel-ui-scale));
+        line-height: 1.3;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .cpButton:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.12);
+      }
+
+      .cpButton:active {
+        transform: translateY(1px);
+      }
+
+      .cpButton:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        border-color: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      #feedback {
+        flex: 1 1 auto;
+        margin: 0;
+        font-size: calc(13px * var(--panel-ui-scale));
+        color: rgba(173, 255, 219, 0.95);
+        min-height: 1.2em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .cpFooter {
+        margin-top: calc(10px * var(--panel-ui-scale));
+        display: flex;
+        align-items: center;
+        gap: calc(10px * var(--panel-ui-scale));
+        flex: 0 0 auto;
+      }
+
+      .cpFooter .cpButton {
+        flex: 0 0 auto;
+        min-width: calc(220px * var(--panel-ui-scale));
+        text-align: center;
+      }
+
+      #runewordPanelStatus {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        margin-bottom: calc(8px * var(--panel-ui-scale));
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.3;
+      }
+
+      .rwStatusHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwBadge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: calc(4px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
+        border-radius: 999px;
+        font-size: calc(11px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.92);
+        white-space: nowrap;
+      }
+
+      .rwBadge.ready {
+        border-color: rgba(0, 255, 153, 0.45);
+        background: rgba(0, 255, 153, 0.12);
+        color: rgba(173, 255, 219, 0.98);
+      }
+
+      .rwBadge.missing {
+        border-color: rgba(255, 120, 120, 0.45);
+        background: rgba(255, 90, 90, 0.08);
+        color: rgba(255, 210, 210, 0.98);
+      }
+
+      .rwBadge.complete {
+        border-color: rgba(160, 200, 255, 0.45);
+        background: rgba(120, 170, 255, 0.10);
+        color: rgba(220, 235, 255, 0.98);
+      }
+
+      .rwMetaLine {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.74);
+      }
+
+      .rwLayout {
+        height: 100%;
+        display: grid;
+        grid-template-columns: minmax(340px, 430px) 1fr;
+        gap: calc(12px * var(--panel-ui-scale));
+        min-height: 0;
+      }
+
+      .rwLeft,
+      .rwRight {
+        min-height: 0;
+      }
+
+      .rwLeft {
+        display: flex;
+        flex-direction: column;
+        gap: calc(10px * var(--panel-ui-scale));
+      }
+
+      .rwRight {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .rwCubeFrame {
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 12px;
+        background:
+          radial-gradient(120% 120% at 50% 20%, rgba(255, 255, 255, 0.05), transparent 55%),
+          linear-gradient(180deg, rgba(20, 24, 28, 0.85), rgba(8, 10, 12, 0.88));
+        box-shadow:
+          inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+          0 14px 30px rgba(0, 0, 0, 0.35);
+        padding: calc(10px * var(--panel-ui-scale));
+      }
+
+      .rwCubeGrid {
+        --rwCell: calc(62px * var(--panel-ui-scale));
+        display: grid;
+        grid-template-columns: repeat(3, var(--rwCell));
+        grid-template-rows: repeat(4, var(--rwCell));
+        gap: calc(6px * var(--panel-ui-scale));
+        justify-content: center;
+      }
+
+      .rwCell {
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 10px;
+        background:
+          repeating-linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.04) 0,
+            rgba(255, 255, 255, 0.04) 6px,
+            rgba(0, 0, 0, 0.0) 6px,
+            rgba(0, 0, 0, 0.0) 12px
+          ),
+          rgba(0, 0, 0, 0.2);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+        padding: calc(6px * var(--panel-ui-scale)) calc(7px * var(--panel-ui-scale));
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: calc(2px * var(--panel-ui-scale));
+        overflow: hidden;
+      }
+
+      .rwCell.empty {
+        opacity: 0.5;
+      }
+
+      .rwCell.base {
+        border-color: rgba(0, 255, 153, 0.28);
+        background: rgba(0, 255, 153, 0.06);
+      }
+
+      .rwCell.ready {
+        border-color: rgba(0, 255, 153, 0.32);
+        background: rgba(0, 255, 153, 0.08);
+      }
+
+      .rwCell.missing {
+        border-color: rgba(255, 120, 120, 0.38);
+        background: rgba(255, 90, 90, 0.06);
+      }
+
+      .rwCellTitle {
+        font-size: calc(10px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.72);
+        letter-spacing: 0.2px;
+      }
+
+      .rwCellName {
+        font-size: calc(12px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 600;
+        line-height: 1.15;
+        word-break: break-word;
+      }
+
+      .rwCellCounts {
+        font-size: calc(10px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .rwTransmuteBar {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwTransmuteButton {
+        text-align: center;
+        font-weight: 800;
+        background: rgba(0, 255, 153, 0.08);
+        border-color: rgba(0, 255, 153, 0.22);
+      }
+
+      .rwTransmuteButton:hover {
+        background: rgba(0, 255, 153, 0.14);
+        border-color: rgba(0, 255, 153, 0.35);
+      }
+
+      .rwPickers {
+        flex: 1 1 auto;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: calc(10px * var(--panel-ui-scale));
+        min-height: 0;
+      }
+
+      .rwPicker {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .rwRecipeTools {
+        display: flex;
+        align-items: center;
+        gap: calc(8px * var(--panel-ui-scale));
+        margin-bottom: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwSearchInput {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
+        font-size: calc(12px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeCount {
+        flex: 0 0 auto;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(11px * var(--panel-ui-scale));
+        white-space: nowrap;
+      }
+
+      .rwList {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        min-height: 0;
+        padding-right: calc(4px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeName {
+        font-size: calc(13px * var(--panel-ui-scale));
+        font-weight: 600;
+        line-height: 1.25;
+        color: var(--text);
+      }
+
+      .rwRecipeHead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeBaseBadge {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        padding: calc(1px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
+        font-size: calc(10px * var(--panel-ui-scale));
+        line-height: 1.4;
+        white-space: nowrap;
+        color: rgba(255, 255, 255, 0.88);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .rwRecipeBaseBadge.weapon {
+        border-color: rgba(255, 197, 118, 0.55);
+        background: rgba(255, 178, 79, 0.14);
+      }
+
+      .rwRecipeBaseBadge.armor {
+        border-color: rgba(124, 204, 255, 0.55);
+        background: rgba(74, 169, 255, 0.14);
+      }
+
+      .rwRecipeBaseBadge.mixed {
+        border-color: rgba(181, 255, 142, 0.55);
+        background: rgba(125, 235, 99, 0.14);
+      }
+
+      .rwRecipeSummary {
+        margin-top: calc(2px * var(--panel-ui-scale));
+        font-size: calc(11px * var(--panel-ui-scale));
+        line-height: 1.25;
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .cpListItem.selected .rwRecipeSummary {
+        color: rgba(225, 255, 240, 0.92);
+      }
+
+      @media (max-width: 1100px) {
+        .rwLayout {
+          grid-template-columns: 1fr;
+        }
+
+        .rwPickers {
+          grid-template-columns: 1fr;
+        }
+
+        .rwCubeGrid {
+          --rwCell: calc(56px * var(--panel-ui-scale));
+        }
+      }
+
+      .cpResizeHandle {
+        position: absolute;
+        z-index: 6;
+        touch-action: none;
+      }
+
+      .cpResizeRight {
+        top: 10px;
+        right: 0;
+        width: 14px;
+        height: calc(100% - 26px);
+        cursor: ew-resize;
+      }
+
+      .cpResizeBottom {
+        left: 10px;
+        bottom: 0;
+        width: calc(100% - 26px);
+        height: 14px;
+        cursor: ns-resize;
+      }
+
+      .cpResizeCorner {
+        right: 0;
+        bottom: 0;
+        width: 24px;
+        height: 24px;
+        cursor: nwse-resize;
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, transparent 44%, rgba(255, 255, 255, 0.28) 45%, rgba(255, 255, 255, 0.28) 56%, transparent 57%),
+          linear-gradient(135deg, transparent 58%, rgba(255, 255, 255, 0.45) 59%, rgba(255, 255, 255, 0.45) 70%, transparent 71%),
+          rgba(8, 12, 16, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+
+      @media (max-width: 900px) {
+        #tooltipPanel {
+          right: 16px;
+          top: 180px;
+          max-width: calc(100vw - 32px);
+        }
+
+        #quickLaunch {
+          right: 16px;
+          top: 155px;
+        }
+
+        #controlPanel {
+          right: 16px;
+          left: 16px;
+          bottom: 16px;
+          top: auto;
+          width: calc(100vw - 32px);
+          min-width: 0;
+          min-height: 0;
+          max-width: calc(100vw - 16px);
+          max-height: calc(100vh - 16px);
+          resize: none;
+        }
+
+        .cpResizeHandle {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quickLaunch" aria-live="polite">
+      <button
+          id="quickOpenRuneword"
+          class="qpPill"
+          type="button"
+          data-cmd="ui.open"
+          data-open-tab="runeword"
+          aria-label="Open Calamity panel">
+        Runeword / 룬워드 (F11)
+      </button>
+    </div>
+
+    <div id="tooltipPanel" aria-live="polite">
+      <div id="tooltipTitle">Affix / 어픽스</div>
+      <div id="tooltipText"></div>
+      <div id="tooltipHint"></div>
+      <div id="tooltipActions">
+        <button
+          id="tooltipRunewordHint"
+          class="tpPill"
+          type="button"
+          data-cmd="ui.open"
+          data-open-tab="runeword"
+          aria-label="Open Calamity panel">
+          Runeword / 룬워드: F11
+        </button>
+      </div>
+    </div>
+
+      <div id="controlPanel" aria-live="polite">
+      <div id="panelDragHandle" class="cpDragHandle">
+        <div class="cpTitleRow">
+          <div>
+            <div id="panelTitle" class="cpTitle">Calamity Controls / 칼래미티 조작</div>
+            <div id="panelSub" class="cpSub">
+              Prisma 메인 조작 패널입니다. ESC 또는 아래 Close 버튼으로 닫습니다.
+            </div>
+          </div>
+          <button
+            id="controlPanelCloseX"
+            class="cpIconButton"
+            type="button"
+            data-cmd="ui.close"
+            data-nodrag="1"
+            aria-label="Close panel">
+            ✕
+          </button>
+        </div>
+        <div class="cpDragHint" id="panelDragHint">
+          Drag this header to move panel / 이 헤더를 드래그해 패널 위치 이동
+        </div>
+      </div>
+      <div id="controlPanelBody" class="cpBody">
+        <div id="mainTabList" class="cpTabs" role="tablist" aria-label="Calamity tabs">
+          <button
+            id="mainRunewordTab"
+            class="cpTabButton"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="mainRunewordPane"
+            tabindex="0">
+            Runeword
+          </button>
+          <button
+            id="mainAffixTab"
+            class="cpTabButton"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="mainAffixPane"
+            tabindex="-1">
+            Affix
+          </button>
+          <button
+            id="mainAdvancedTab"
+            class="cpTabButton"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="mainAdvancedPane"
+            tabindex="-1">
+            Advanced
+          </button>
+        </div>
+
+        <div id="mainTabContent" class="cpTabContent">
+          <div
+            id="mainRunewordPane"
+            class="cpTabPane cpMainPane"
+            role="tabpanel"
+            aria-labelledby="mainRunewordTab">
+            <div class="rwLayout">
+              <div class="rwLeft">
+                <div class="cpContext">
+                  <div class="cpContextLabel" id="selectedItemLabel">Runeword Base / 룬워드 베이스</div>
+                  <div class="cpContextValue" id="selectedItemName">No base selected / 선택된 베이스 없음</div>
+                  <div class="cpContextMeta" id="selectedItemSource">Equipped only / 착용 장비 전용</div>
+                </div>
+
+                <div id="runewordPanelStatus">
+                  Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
+                </div>
+
+                <div class="rwCubeFrame">
+                  <div id="runewordCubeGrid" class="rwCubeGrid" aria-label="Horadric cube"></div>
+                  <div class="rwTransmuteBar">
+                    <button
+                      id="runewordInsertButton"
+                      class="cpButton rwTransmuteButton"
+                      data-cmd="runeword.insert">
+                      Transmute / 변환
+                    </button>
+                    <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Status / 상태</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rwRight">
+                <div class="rwPickers">
+                  <div class="rwPicker">
+                    <div class="cpSectionTitle" id="runewordRecipeListTitle">Recipe List / 레시피 목록</div>
+                    <div class="rwRecipeTools">
+                      <input
+                        id="recipeSearchInput"
+                        class="rwSearchInput"
+                        type="text"
+                        placeholder="Search recipe / 레시피 검색"
+                        aria-label="Search runeword recipe" />
+                      <div class="rwRecipeCount" id="recipeCountLabel">0</div>
+                    </div>
+                    <div id="recipeList" class="cpList rwList"></div>
+                    <div class="cpContextMeta" id="runewordRecipeListHint">
+                      Click recipe to select. / 클릭해서 레시피를 선택하세요.
+                    </div>
+                  </div>
+                  <div class="rwPicker">
+                    <div class="cpSectionTitle" id="runewordBaseListTitle">Equipped Base List / 착용 베이스 목록</div>
+                    <div id="inventoryBaseList" class="cpList rwList"></div>
+                    <div class="cpContextMeta" id="runewordBaseListHint">
+                      Click an equipped item to set it as runeword base. / 착용한 아이템을 클릭해 룬워드 베이스로 지정하세요.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="mainAffixPane"
+            class="cpTabPane cpMainPane"
+            role="tabpanel"
+            aria-labelledby="mainAffixTab"
+            hidden>
+            <div class="cpSectionTitle" id="panelTooltipTitle">Affix Tooltip / 어픽스</div>
+            <div id="panelTooltipText" class="cpTooltipBox"></div>
+            <div class="cpContextMeta" id="panelTooltipHint">
+              Select an item in inventory to view affixes. / 인벤토리에서 아이템을 선택하면 어픽스를 표시합니다.
+            </div>
+          </div>
+
+          <div
+            id="mainAdvancedPane"
+            class="cpTabPane cpMainPane scrollY"
+            role="tabpanel"
+            aria-labelledby="mainAdvancedTab"
+            hidden>
+            <div class="cpSection">
+              <div id="manualModeTitle" class="cpSectionTitle">Manual Mode / 수동 모드</div>
+              <div class="cpGrid">
+                <button id="manualPrevButton" class="cpButton" data-cmd="mode.prev">Manual Prev / 수동 이전</button>
+                <button id="manualNextButton" class="cpButton" data-cmd="mode.next">Manual Next / 수동 다음</button>
+              </div>
+            </div>
+
+            <div class="cpSection">
+              <div id="debugSectionTitle" class="cpSectionTitle">Debug / 디버그</div>
+              <div class="cpGrid">
+                <button id="debugGrantNextButton" class="cpButton" data-cmd="runeword.grant.next">+1 Next Fragment / 다음 조각 +1</button>
+                <button id="debugGrantSetButton" class="cpButton" data-cmd="runeword.grant.set">+1 Recipe Set / 레시피 세트 +1</button>
+                <button id="debugSpawnTestButton" class="cpButton" data-cmd="spawn.test">Spawn Test Item / 테스트 아이템 지급</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cpFooter">
+          <button id="footerCloseButton" class="cpButton" data-cmd="ui.close">Close Panel / 패널 닫기</button>
+          <div id="feedback"></div>
+        </div>
+      </div>
+      <div id="panelResizeRight" class="cpResizeHandle cpResizeRight" aria-hidden="true"></div>
+      <div id="panelResizeBottom" class="cpResizeHandle cpResizeBottom" aria-hidden="true"></div>
+      <div id="panelResizeCorner" class="cpResizeHandle cpResizeCorner" aria-hidden="true"></div>
+    </div>
+
+    <script>
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function applyAutoScale() {
+        const baseW = 1920;
+        const baseH = 1080;
+        const w = window.innerWidth || baseW;
+        const h = window.innerHeight || baseH;
+
+        const ratio = Math.min(w / baseW, h / baseH);
+        const scale = clamp(ratio * 1.55, 1.0, 2.5);
+        document.documentElement.style.setProperty("--scale", scale.toFixed(3));
+      }
+
+      const tooltipPanel = document.getElementById("tooltipPanel");
+      const tooltipTitle = document.getElementById("tooltipTitle");
+      const tooltipText = document.getElementById("tooltipText");
+      const tooltipHint = document.getElementById("tooltipHint");
+      const quickLaunch = document.getElementById("quickLaunch");
+      const quickOpenRuneword = document.getElementById("quickOpenRuneword");
+      const controlPanel = document.getElementById("controlPanel");
+      const panelTitle = document.getElementById("panelTitle");
+      const panelSub = document.getElementById("panelSub");
+      const feedback = document.getElementById("feedback");
+      const selectedItemLabel = document.getElementById("selectedItemLabel");
+      const selectedItemName = document.getElementById("selectedItemName");
+      const selectedItemSource = document.getElementById("selectedItemSource");
+      const panelTooltipTitle = document.getElementById("panelTooltipTitle");
+      const panelTooltipText = document.getElementById("panelTooltipText");
+      const panelTooltipHint = document.getElementById("panelTooltipHint");
+      const inventoryBaseList = document.getElementById("inventoryBaseList");
+      const recipeList = document.getElementById("recipeList");
+      const recipeSearchInput = document.getElementById("recipeSearchInput");
+      const recipeCountLabel = document.getElementById("recipeCountLabel");
+      const runewordCubeGrid = document.getElementById("runewordCubeGrid");
+      const runewordRecipeListTitle = document.getElementById("runewordRecipeListTitle");
+      const runewordRecipeListHint = document.getElementById("runewordRecipeListHint");
+      const runewordBaseListTitle = document.getElementById("runewordBaseListTitle");
+      const runewordBaseListHint = document.getElementById("runewordBaseListHint");
+      const runewordPanelStatus = document.getElementById("runewordPanelStatus");
+      const runewordInsertButton = document.getElementById("runewordInsertButton");
+      const runewordStatusButton = document.getElementById("runewordStatusButton");
+      const mainRunewordTab = document.getElementById("mainRunewordTab");
+      const mainAffixTab = document.getElementById("mainAffixTab");
+      const mainAdvancedTab = document.getElementById("mainAdvancedTab");
+      const mainTabList = document.getElementById("mainTabList");
+      const mainRunewordPane = document.getElementById("mainRunewordPane");
+      const mainAffixPane = document.getElementById("mainAffixPane");
+      const mainAdvancedPane = document.getElementById("mainAdvancedPane");
+      const manualModeTitle = document.getElementById("manualModeTitle");
+      const manualPrevButton = document.getElementById("manualPrevButton");
+      const manualNextButton = document.getElementById("manualNextButton");
+      const debugSectionTitle = document.getElementById("debugSectionTitle");
+      const debugGrantNextButton = document.getElementById("debugGrantNextButton");
+      const debugGrantSetButton = document.getElementById("debugGrantSetButton");
+      const debugSpawnTestButton = document.getElementById("debugSpawnTestButton");
+      const footerCloseButton = document.getElementById("footerCloseButton");
+      const controlPanelCloseX = document.getElementById("controlPanelCloseX");
+      const panelDragHandle = document.getElementById("panelDragHandle");
+      const panelDragHint = document.getElementById("panelDragHint");
+      const panelResizeRight = document.getElementById("panelResizeRight");
+      const panelResizeBottom = document.getElementById("panelResizeBottom");
+      const panelResizeCorner = document.getElementById("panelResizeCorner");
+      const tooltipRunewordHint = document.getElementById("tooltipRunewordHint");
+
+      let controlPanelOpen = false;
+      let tooltipTextState = "";
+      let panelHotkeyTextState = "F11";
+      let selectedItemNameState = "";
+      let selectedItemSourceState = "";
+      let inventoryItemsState = [];
+      let recipeItemsState = [];
+      let recipeSearchQuery = "";
+      let mainTabState = "runeword";
+      let pendingOpenMainTab = null;
+      let runewordPanelState = {
+        hasBase: false,
+        hasRecipe: false,
+        isComplete: false,
+        recipeName: "",
+        insertedRunes: 0,
+        totalRunes: 0,
+        nextRuneName: "",
+        nextRuneOwned: 0,
+        canInsert: false,
+        missingSummary: "",
+        requiredRunes: []
+      };
+      let panelDragState = null;
+      let panelResizeState = null;
+      let panelLayoutLoaded = false;
+
+      function normalizeUiLang(raw) {
+        const value = String(raw ?? "").trim().toLowerCase();
+        if (value === "en" || value === "english" || value === "0") return "en";
+        if (value === "ko" || value === "korean" || value === "kr" || value === "1") return "ko";
+        if (
+          value === "both" ||
+          value === "bilingual" ||
+          value === "en+ko" ||
+          value === "ko+en" ||
+          value === "2"
+        ) {
+          return "both";
+        }
+        return "both";
+      }
+
+      function resolveUiLang() {
+        try {
+          const url = new URL(window.location.href);
+          const forced = normalizeUiLang(url.searchParams.get("lang"));
+          if (forced === "en" || forced === "ko" || forced === "both") {
+            return forced;
+          }
+        } catch (_) {}
+
+        return "both";
+      }
+
+      let uiLang = resolveUiLang();
+
+      function t(en, ko) {
+        if (uiLang === "en") return en;
+        if (uiLang === "ko") return ko;
+        return `${en} / ${ko}`;
+      }
+
+      function updatePanelHotkeyHints() {
+        const key = panelHotkeyTextState || "";
+        const label = t(
+          `Open/Close Panel: ${key}`.trim(),
+          `패널 열기/닫기: ${key}`.trim()
+        );
+        if (quickOpenRuneword) {
+          quickOpenRuneword.textContent = label;
+        }
+        if (tooltipRunewordHint) {
+          tooltipRunewordHint.textContent = label;
+        }
+      }
+
+      function initUiText() {
+        document.documentElement.lang = uiLang === "ko" ? "ko" : "en";
+        tooltipTitle.textContent = t("Affix", "어픽스");
+        tooltipHint.textContent = t(
+          "Shows affixes of the selected inventory item.",
+          "인벤토리에서 선택한 아이템의 어픽스를 표시합니다."
+        );
+        if (panelTitle) {
+          panelTitle.textContent = t("Calamity Controls", "칼래미티 조작");
+        }
+        if (panelSub) {
+          panelSub.textContent = t(
+            "This is the main Prisma control panel. Close with ESC or the Close button below.",
+            "Prisma 메인 조작 패널입니다. ESC 또는 아래 Close 버튼으로 닫습니다."
+          );
+        }
+        if (mainTabList) {
+          mainTabList.setAttribute("aria-label", t("Calamity tabs", "칼래미티 탭"));
+        }
+        if (controlPanelCloseX) {
+          controlPanelCloseX.setAttribute("aria-label", t("Close panel", "패널 닫기"));
+        }
+        if (quickOpenRuneword) {
+          quickOpenRuneword.setAttribute("aria-label", t("Open Calamity panel", "칼래미티 패널 열기"));
+        }
+        if (tooltipRunewordHint) {
+          tooltipRunewordHint.setAttribute("aria-label", t("Open Calamity panel", "칼래미티 패널 열기"));
+        }
+        updatePanelHotkeyHints();
+        selectedItemLabel.textContent = t("Runeword Base", "룬워드 베이스");
+        if (panelTooltipTitle) {
+          panelTooltipTitle.textContent = t("Affix Tooltip", "어픽스");
+        }
+        if (panelTooltipHint) {
+          panelTooltipHint.textContent = t(
+            "Select an item in inventory to view affixes.",
+            "인벤토리에서 아이템을 선택하면 어픽스를 표시합니다."
+          );
+        }
+        runewordRecipeListTitle.textContent = t("Recipe List", "레시피 목록");
+        runewordRecipeListHint.textContent = t(
+          "Click recipe to select.",
+          "클릭해서 레시피를 선택하세요."
+        );
+        if (recipeSearchInput) {
+          recipeSearchInput.setAttribute("aria-label", t("Search runeword recipe", "룬워드 레시피 검색"));
+          recipeSearchInput.placeholder = t("Search recipe...", "레시피 검색...");
+        }
+        runewordBaseListTitle.textContent = t("Equipped Base List", "착용 베이스 목록");
+        runewordBaseListHint.textContent = t(
+          "Click an equipped item to set it as runeword base.",
+          "착용한 아이템을 클릭해 룬워드 베이스로 지정하세요."
+        );
+        if (runewordCubeGrid) {
+          runewordCubeGrid.setAttribute("aria-label", t("Horadric cube", "호라드릭 큐브"));
+        }
+        if (mainRunewordTab) {
+          mainRunewordTab.textContent = t("Runeword", "룬워드");
+        }
+        if (mainAffixTab) {
+          mainAffixTab.textContent = t("Affix", "어픽스");
+        }
+        if (mainAdvancedTab) {
+          mainAdvancedTab.textContent = t("Advanced", "고급");
+        }
+        panelDragHint.textContent = t(
+          "Drag this header to move panel",
+          "이 헤더를 드래그해 패널 위치 이동"
+        );
+        if (runewordStatusButton) {
+          runewordStatusButton.textContent = t("Status", "상태");
+        }
+        if (manualModeTitle) {
+          manualModeTitle.textContent = t("Manual Mode", "수동 모드");
+        }
+        if (manualPrevButton) {
+          manualPrevButton.textContent = t("Manual Prev", "수동 이전");
+        }
+        if (manualNextButton) {
+          manualNextButton.textContent = t("Manual Next", "수동 다음");
+        }
+        if (debugSectionTitle) {
+          debugSectionTitle.textContent = t("Debug", "디버그");
+        }
+        if (debugGrantNextButton) {
+          debugGrantNextButton.textContent = t("+1 Next Fragment", "다음 조각 +1");
+        }
+        if (debugGrantSetButton) {
+          debugGrantSetButton.textContent = t("+1 Recipe Set", "레시피 세트 +1");
+        }
+        if (debugSpawnTestButton) {
+          debugSpawnTestButton.textContent = t("Spawn Test Item", "테스트 아이템 지급");
+        }
+        if (footerCloseButton) {
+          footerCloseButton.textContent = t("Close Panel", "패널 닫기");
+        }
+        setMainTab(mainTabState);
+        renderSelectedItemContext();
+        renderRecipeItems();
+        renderInventoryItems();
+        renderRunewordPanelState();
+        applyTooltipPlacement();
+        applyQuickLaunchVisibility();
+      }
+
+      function clearChildren(node) {
+        if (!node) return;
+        while (node.firstChild) {
+          node.removeChild(node.firstChild);
+        }
+      }
+
+      function applyQuickLaunchVisibility() {
+        if (!quickLaunch) return;
+        const show = !controlPanelOpen && !tooltipTextState;
+        quickLaunch.style.display = show ? "flex" : "none";
+      }
+
+      function applyTooltipPlacement() {
+        const hasTooltip = Boolean(tooltipTextState);
+
+        if (panelTooltipText) {
+          panelTooltipText.textContent = hasTooltip
+            ? tooltipTextState
+            : t("No affix tooltip available.", "어픽스 툴팁이 없습니다.");
+        }
+
+        if (panelTooltipHint) {
+          panelTooltipHint.style.display = hasTooltip ? "none" : "block";
+        }
+
+        if (!hasTooltip) {
+          tooltipPanel.style.display = "none";
+          tooltipText.textContent = "";
+          applyQuickLaunchVisibility();
+          return;
+        }
+
+        if (controlPanelOpen) {
+          tooltipPanel.style.display = "none";
+          tooltipText.textContent = "";
+          applyQuickLaunchVisibility();
+          return;
+        }
+
+        tooltipPanel.style.display = "block";
+        tooltipText.textContent = tooltipTextState;
+        applyQuickLaunchVisibility();
+      }
+
+      function setMainTab(nextTab) {
+        const tab =
+          nextTab === "affix"
+            ? "affix"
+            : nextTab === "advanced"
+              ? "advanced"
+              : "runeword";
+        mainTabState = tab;
+
+        const isRuneword = tab === "runeword";
+        const isAffix = tab === "affix";
+        const isAdvanced = tab === "advanced";
+
+        if (mainRunewordTab && mainRunewordPane) {
+          mainRunewordTab.setAttribute("aria-selected", isRuneword ? "true" : "false");
+          mainRunewordTab.tabIndex = isRuneword ? 0 : -1;
+          mainRunewordPane.hidden = !isRuneword;
+        }
+
+        if (mainAffixTab && mainAffixPane) {
+          mainAffixTab.setAttribute("aria-selected", isAffix ? "true" : "false");
+          mainAffixTab.tabIndex = isAffix ? 0 : -1;
+          mainAffixPane.hidden = !isAffix;
+        }
+
+        if (mainAdvancedTab && mainAdvancedPane) {
+          mainAdvancedTab.setAttribute("aria-selected", isAdvanced ? "true" : "false");
+          mainAdvancedTab.tabIndex = isAdvanced ? 0 : -1;
+          mainAdvancedPane.hidden = !isAdvanced;
+        }
+      }
+
+      function wireMainTabs() {
+        const tabs = [
+          { id: "runeword", button: mainRunewordTab },
+          { id: "affix", button: mainAffixTab },
+          { id: "advanced", button: mainAdvancedTab }
+        ];
+
+        for (const item of tabs) {
+          if (!item.button) continue;
+          item.button.addEventListener("click", () => setMainTab(item.id));
+        }
+
+        const onTabKeydown = (event) => {
+          if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+            event.preventDefault();
+            const order = ["runeword", "affix", "advanced"];
+            const currentIndex = Math.max(0, order.indexOf(mainTabState));
+            const delta = event.key === "ArrowRight" ? 1 : -1;
+            const nextIndex = (currentIndex + delta + order.length) % order.length;
+            const next = order[nextIndex];
+            setMainTab(next);
+
+            const nextButton =
+              next === "runeword"
+                ? mainRunewordTab
+                : next === "affix"
+                  ? mainAffixTab
+                  : mainAdvancedTab;
+            if (nextButton && typeof nextButton.focus === "function") {
+              nextButton.focus();
+            }
+            return;
+          }
+
+          if (event.key === "Home") {
+            event.preventDefault();
+            setMainTab("runeword");
+            if (mainRunewordTab && typeof mainRunewordTab.focus === "function") {
+              mainRunewordTab.focus();
+            }
+            return;
+          }
+
+          if (event.key === "End") {
+            event.preventDefault();
+            setMainTab("advanced");
+            if (mainAdvancedTab && typeof mainAdvancedTab.focus === "function") {
+              mainAdvancedTab.focus();
+            }
+          }
+        };
+
+        if (mainRunewordTab) {
+          mainRunewordTab.addEventListener("keydown", onTabKeydown);
+        }
+        if (mainAffixTab) {
+          mainAffixTab.addEventListener("keydown", onTabKeydown);
+        }
+        if (mainAdvancedTab) {
+          mainAdvancedTab.addEventListener("keydown", onTabKeydown);
+        }
+      }
+
+      function panelSizeBounds() {
+        const margin = 8;
+        const minWidth = window.innerWidth <= 900 ? 360 : 760;
+        const minHeight = window.innerWidth <= 900 ? 260 : 500;
+        const maxWidth = Math.max(minWidth, window.innerWidth - margin * 2);
+        const maxHeight = Math.max(minHeight, window.innerHeight - margin * 2);
+        return { minWidth, minHeight, maxWidth, maxHeight, margin };
+      }
+
+      function updatePanelUiScale() {
+        const rect = controlPanel.getBoundingClientRect();
+        if (!rect.width || !rect.height) {
+          document.documentElement.style.setProperty("--panel-ui-scale", "1");
+          return;
+        }
+
+        const widthRatio = rect.width / 1320;
+        const heightRatio = rect.height / 860;
+        const nextScale = clamp(Math.min(widthRatio, heightRatio) * 1.25, 0.9, 1.75);
+        document.documentElement.style.setProperty("--panel-ui-scale", nextScale.toFixed(3));
+      }
+
+      function keepPanelInViewport() {
+        if (!controlPanelOpen) return;
+        if (!controlPanel.style.left || !controlPanel.style.top) return;
+
+        const rect = controlPanel.getBoundingClientRect();
+        const { minWidth, minHeight, maxWidth, maxHeight, margin } = panelSizeBounds();
+
+        const safeWidth = clamp(rect.width, minWidth, maxWidth);
+        const safeHeight = clamp(rect.height, minHeight, maxHeight);
+        if (Math.abs(safeWidth - rect.width) > 0.5) {
+          controlPanel.style.width = `${Math.round(safeWidth)}px`;
+        }
+        if (Math.abs(safeHeight - rect.height) > 0.5) {
+          controlPanel.style.height = `${Math.round(safeHeight)}px`;
+        }
+
+        const maxLeft = Math.max(margin, window.innerWidth - safeWidth - margin);
+        const maxTop = Math.max(margin, window.innerHeight - safeHeight - margin);
+        const nextLeft = clamp(rect.left, margin, maxLeft);
+        const nextTop = clamp(rect.top, margin, maxTop);
+
+        controlPanel.style.left = `${Math.round(nextLeft)}px`;
+        controlPanel.style.top = `${Math.round(nextTop)}px`;
+        controlPanel.style.right = "auto";
+        controlPanel.style.bottom = "auto";
+        updatePanelUiScale();
+      }
+
+      function persistPanelLayout() {
+        if (!controlPanel.style.left || !controlPanel.style.top) {
+          return;
+        }
+
+        const rect = controlPanel.getBoundingClientRect();
+        const left = Math.round(rect.left);
+        const top = Math.round(rect.top);
+        const width = Math.round(rect.width);
+        const height = Math.round(rect.height);
+        if (width <= 0 || height <= 0) {
+          return;
+        }
+
+        sendCommand(`ui.layout.save:${left},${top},${width},${height}`);
+      }
+
+      function beginPanelDrag(event) {
+        if (!controlPanelOpen) return;
+        if (panelResizeState) return;
+        if (event.button !== undefined && event.button !== 0) return;
+        if (event.target && typeof event.target.closest === "function") {
+          if (event.target.closest("[data-nodrag]")) {
+            return;
+          }
+        }
+
+        const rect = controlPanel.getBoundingClientRect();
+        controlPanel.style.left = `${Math.round(rect.left)}px`;
+        controlPanel.style.top = `${Math.round(rect.top)}px`;
+        controlPanel.style.right = "auto";
+        controlPanel.style.bottom = "auto";
+
+        panelDragState = {
+          pointerId: event.pointerId,
+          offsetX: event.clientX - rect.left,
+          offsetY: event.clientY - rect.top
+        };
+
+        if (typeof panelDragHandle.setPointerCapture === "function") {
+          panelDragHandle.setPointerCapture(event.pointerId);
+        }
+        event.preventDefault();
+      }
+
+      function beginPanelResize(mode, event) {
+        if (!controlPanelOpen) return;
+        if (panelDragState) return;
+        if (event.button !== undefined && event.button !== 0) return;
+
+        const rect = controlPanel.getBoundingClientRect();
+        controlPanel.style.left = `${Math.round(rect.left)}px`;
+        controlPanel.style.top = `${Math.round(rect.top)}px`;
+        controlPanel.style.width = `${Math.round(rect.width)}px`;
+        controlPanel.style.height = `${Math.round(rect.height)}px`;
+        controlPanel.style.right = "auto";
+        controlPanel.style.bottom = "auto";
+
+        panelResizeState = {
+          mode,
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startLeft: rect.left,
+          startTop: rect.top,
+          startWidth: rect.width,
+          startHeight: rect.height
+        };
+
+        const target = event.currentTarget;
+        if (target && typeof target.setPointerCapture === "function") {
+          target.setPointerCapture(event.pointerId);
+        }
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      function movePanel(event) {
+        if (panelResizeState) {
+          if (event.pointerId !== panelResizeState.pointerId) return;
+
+          const { minWidth, minHeight, maxWidth, maxHeight } = panelSizeBounds();
+          const deltaX = event.clientX - panelResizeState.startX;
+          const deltaY = event.clientY - panelResizeState.startY;
+
+          let nextWidth = panelResizeState.startWidth;
+          let nextHeight = panelResizeState.startHeight;
+
+          if (panelResizeState.mode === "x" || panelResizeState.mode === "xy") {
+            nextWidth = panelResizeState.startWidth + deltaX;
+          }
+          if (panelResizeState.mode === "y" || panelResizeState.mode === "xy") {
+            nextHeight = panelResizeState.startHeight + deltaY;
+          }
+
+          const limitWidth = Math.min(maxWidth, window.innerWidth - panelResizeState.startLeft - 8);
+          const limitHeight = Math.min(maxHeight, window.innerHeight - panelResizeState.startTop - 8);
+          nextWidth = clamp(nextWidth, minWidth, Math.max(minWidth, limitWidth));
+          nextHeight = clamp(nextHeight, minHeight, Math.max(minHeight, limitHeight));
+
+          controlPanel.style.width = `${Math.round(nextWidth)}px`;
+          controlPanel.style.height = `${Math.round(nextHeight)}px`;
+          updatePanelUiScale();
+          event.preventDefault();
+          return;
+        }
+
+        if (!panelDragState) return;
+        if (event.pointerId !== panelDragState.pointerId) return;
+
+        const width = controlPanel.offsetWidth;
+        const height = controlPanel.offsetHeight;
+        const margin = 8;
+        const maxLeft = Math.max(margin, window.innerWidth - width - margin);
+        const maxTop = Math.max(margin, window.innerHeight - height - margin);
+
+        const nextLeft = clamp(event.clientX - panelDragState.offsetX, margin, maxLeft);
+        const nextTop = clamp(event.clientY - panelDragState.offsetY, margin, maxTop);
+        controlPanel.style.left = `${Math.round(nextLeft)}px`;
+        controlPanel.style.top = `${Math.round(nextTop)}px`;
+        controlPanel.style.right = "auto";
+        controlPanel.style.bottom = "auto";
+        event.preventDefault();
+      }
+
+      function endPanelDrag(event) {
+        if (panelResizeState) {
+          if (!event || event.pointerId === panelResizeState.pointerId) {
+            const id = panelResizeState.pointerId;
+            const targets = [panelResizeRight, panelResizeBottom, panelResizeCorner];
+            for (const target of targets) {
+              if (target && typeof target.releasePointerCapture === "function") {
+                try {
+                  target.releasePointerCapture(id);
+                } catch (_) {}
+              }
+            }
+            panelResizeState = null;
+            keepPanelInViewport();
+            persistPanelLayout();
+          }
+          return;
+        }
+
+        if (!panelDragState) return;
+        if (event && event.pointerId !== panelDragState.pointerId) return;
+
+        if (typeof panelDragHandle.releasePointerCapture === "function") {
+          try {
+            panelDragHandle.releasePointerCapture(panelDragState.pointerId);
+          } catch (_) {}
+        }
+        panelDragState = null;
+        keepPanelInViewport();
+        persistPanelLayout();
+      }
+
+      function renderSelectedItemContext() {
+        const name = selectedItemNameState || t("No base selected", "선택된 베이스 없음");
+        selectedItemName.textContent = name;
+
+        const sourceText = t("Equipped only", "착용 장비 전용");
+        selectedItemSource.textContent = sourceText;
+      }
+
+      function renderInventoryItems() {
+        clearChildren(inventoryBaseList);
+
+        if (!Array.isArray(inventoryItemsState) || inventoryItemsState.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "cpListEmpty";
+          empty.textContent = t(
+            "No equipped weapon/armor base found.",
+            "착용 중인 무기/방어구 베이스를 찾지 못했습니다."
+          );
+          inventoryBaseList.appendChild(empty);
+          return;
+        }
+
+        for (const item of inventoryItemsState) {
+          const key = typeof item?.key === "string" ? item.key : "";
+          const name = typeof item?.name === "string" ? item.name : "";
+          const selected = Boolean(item?.selected);
+          if (!key || !name) {
+            continue;
+          }
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = selected ? "cpListItem selected" : "cpListItem";
+          button.textContent = name;
+          button.addEventListener("click", () => {
+            sendCommand(`runeword.base.select:${key}`);
+          });
+          inventoryBaseList.appendChild(button);
+        }
+      }
+
+      function resolveRecipeSummaryText(item) {
+        const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
+        switch (key) {
+          case "adaptive_strike":
+            return t("Adaptive elemental strike", "적응형 원소 참격");
+          case "adaptive_exposure":
+            return t("Elemental exposure / shred", "원소 노출/파쇄");
+          case "fire_strike":
+            return t("Fire strike proc", "화염 참격 발동");
+          case "frost_strike":
+            return t("Frost strike proc", "냉기 참격 발동");
+          case "shock_strike":
+            return t("Shock strike proc", "번개 참격 발동");
+          case "poison_bloom":
+            return t("Poison DoT bloom", "독 DoT 블룸");
+          case "tar_bloom":
+            return t("Tar bloom (slow)", "타르 블룸(둔화)");
+          case "siphon_bloom":
+            return t("Siphon bloom (resource drain)", "흡수 블룸(자원 약화)");
+          case "curse_fragile":
+            return t("Fragility curse", "취약 저주");
+          case "curse_slow_attack":
+            return t("Slow attack curse", "공속 저하 저주");
+          case "curse_fear":
+            return t("Fear crowd-control curse", "공포 군중제어 저주");
+          case "curse_frenzy":
+            return t("Frenzy chaos curse", "광란 혼란 저주");
+          case "self_haste":
+            return t("Self haste buff", "자가 가속 버프");
+          case "self_ward":
+            return t("Self ward defense buff", "자가 수호 방어 버프");
+          case "self_barrier":
+            return t("Self barrier defense buff", "자가 장벽 방어 버프");
+          case "self_meditation":
+            return t("Self meditation sustain buff", "자가 명상 유지 버프");
+          case "self_phase":
+            return t("Self phase mobility buff", "자가 위상 기동 버프");
+          case "self_phoenix":
+            return t("Self phoenix surge buff", "자가 피닉스 폭주 버프");
+          case "self_flame_cloak":
+            return t("Flame cloak aura", "화염 망토 오라");
+          case "self_frost_cloak":
+            return t("Frost cloak aura", "냉기 망토 오라");
+          case "self_shock_cloak":
+            return t("Shock cloak aura", "번개 망토 오라");
+          case "self_oakflesh":
+            return t("Oakflesh armor buff", "오크플레시 방어 버프");
+          case "self_stoneflesh":
+            return t("Stoneflesh armor buff", "스톤플레시 방어 버프");
+          case "self_ironflesh":
+            return t("Ironflesh armor buff", "아이언플레시 방어 버프");
+          case "self_ebonyflesh":
+            return t("Ebonyflesh armor buff", "에보니플레시 방어 버프");
+          case "self_muffle":
+            return t("Muffle stealth utility", "머플 은신 유틸");
+          case "self_invisibility":
+            return t("Invisibility stealth utility", "투명화 은신 유틸");
+          case "soul_trap":
+            return t("Soul Trap utility", "소울트랩 유틸");
+          default:
+            if (typeof item?.summary === "string" && item.summary.trim().length > 0) {
+              return item.summary.trim();
+            }
+            return "";
+        }
+      }
+
+      function resolveRecipeBaseBadge(item) {
+        const key = typeof item?.baseKey === "string" ? item.baseKey : "";
+        switch (key) {
+          case "polearm":
+            return { className: "weapon", text: t("Base: Polearm/Spear", "베이스: 폴암/창") };
+          case "bow":
+            return { className: "weapon", text: t("Base: Bow/Crossbow", "베이스: 활/석궁") };
+          case "staff_wand":
+            return { className: "weapon", text: t("Base: Staff/Wand", "베이스: 지팡이/완드") };
+          case "claw":
+            return { className: "weapon", text: t("Base: Claw", "베이스: 클로") };
+          case "sword":
+            return { className: "weapon", text: t("Base: Sword", "베이스: 검") };
+          case "shield":
+            return { className: "armor", text: t("Base: Shield", "베이스: 방패") };
+          case "helm":
+            return { className: "armor", text: t("Base: Helm", "베이스: 투구") };
+          case "armor":
+            return { className: "armor", text: t("Base: Armor", "베이스: 갑옷") };
+          case "weapon_shield":
+            return { className: "mixed", text: t("Base: Weapon/Shield", "베이스: 무기/방패") };
+          case "helm_shield":
+            return { className: "mixed", text: t("Base: Helm/Shield", "베이스: 투구/방패") };
+          case "armor_shield":
+            return { className: "mixed", text: t("Base: Armor/Shield", "베이스: 갑옷/방패") };
+          case "sword_shield":
+            return { className: "mixed", text: t("Base: Sword/Shield", "베이스: 검/방패") };
+          case "weapon":
+            return { className: "weapon", text: t("Base: Weapon", "베이스: 무기") };
+          case "mixed":
+            return { className: "mixed", text: t("Base: Mixed", "베이스: 혼합") };
+          case "armor_only":
+            return { className: "armor", text: t("Base: Armor", "베이스: 갑옷") };
+          default:
+            return { className: "mixed", text: t("Base: Mixed", "베이스: 혼합") };
+        }
+      }
+
+      function renderRecipeItems() {
+        clearChildren(recipeList);
+        const allItems = Array.isArray(recipeItemsState) ? recipeItemsState : [];
+        const query = recipeSearchQuery.trim().toLowerCase();
+        const visibleItems = allItems.filter((item) => {
+          if (!query) return true;
+          const name = typeof item?.name === "string" ? item.name.toLowerCase() : "";
+          const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
+          const base = resolveRecipeBaseBadge(item).text.toLowerCase();
+          const summary = resolveRecipeSummaryText(item).toLowerCase();
+          return name.includes(query) || runes.includes(query) || base.includes(query) || summary.includes(query);
+        });
+
+        if (runewordRecipeListTitle) {
+          runewordRecipeListTitle.textContent = t(
+            `Recipe List (${allItems.length})`,
+            `레시피 목록 (${allItems.length})`
+          );
+        }
+        if (recipeCountLabel) {
+          recipeCountLabel.textContent = query
+            ? t(`Matched ${visibleItems.length}/${allItems.length}`, `검색 ${visibleItems.length}/${allItems.length}`)
+            : t(`Total ${allItems.length}`, `총 ${allItems.length}`);
+        }
+
+        if (allItems.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "cpListEmpty";
+          empty.textContent = t(
+            "No runeword recipe available.",
+            "사용 가능한 룬워드 레시피가 없습니다."
+          );
+          recipeList.appendChild(empty);
+          return;
+        }
+
+        if (visibleItems.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "cpListEmpty";
+          empty.textContent = t(
+            "No recipe matches your search.",
+            "검색 조건에 맞는 레시피가 없습니다."
+          );
+          recipeList.appendChild(empty);
+          return;
+        }
+
+        for (const item of visibleItems) {
+          const token = typeof item?.token === "string" ? item.token : "";
+          const name = typeof item?.name === "string" ? item.name : "";
+          const runes = typeof item?.runes === "string" ? item.runes : "";
+          const baseBadge = resolveRecipeBaseBadge(item);
+          const summaryText = resolveRecipeSummaryText(item);
+          const selected = Boolean(item?.selected);
+          if (!token || !name) {
+            continue;
+          }
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = selected ? "cpListItem selected" : "cpListItem";
+          const head = document.createElement("div");
+          head.className = "rwRecipeHead";
+          const title = document.createElement("div");
+          title.className = "rwRecipeName";
+          title.textContent = runes ? `${name} [${runes}]` : name;
+          head.appendChild(title);
+
+          const badge = document.createElement("div");
+          badge.className = `rwRecipeBaseBadge ${baseBadge.className}`;
+          badge.textContent = baseBadge.text;
+          head.appendChild(badge);
+          button.appendChild(head);
+
+          if (summaryText) {
+            const summary = document.createElement("div");
+            summary.className = "rwRecipeSummary";
+            summary.textContent = summaryText;
+            button.appendChild(summary);
+          }
+
+          button.addEventListener("click", () => {
+            sendCommand(`runeword.recipe.select:${token}`);
+          });
+          recipeList.appendChild(button);
+        }
+      }
+
+      function renderRunewordPanelState() {
+        const state = runewordPanelState || {};
+        let buttonLabel = t("Transmute", "변환");
+
+        const hasBase = Boolean(state.hasBase);
+        const hasRecipe = Boolean(state.hasRecipe);
+        const isComplete = Boolean(state.isComplete);
+        const requiredRunes = Array.isArray(state.requiredRunes) ? state.requiredRunes : [];
+        const canTransmute = Boolean(state.canInsert) && hasBase && hasRecipe && !isComplete;
+
+        if (runewordCubeGrid) {
+          clearChildren(runewordCubeGrid);
+          const totalCells = 12;
+          let filled = 0;
+
+          const addCell = (className, title, name, counts) => {
+            if (filled >= totalCells) return;
+            const cell = document.createElement("div");
+            cell.className = `rwCell ${className || ""}`.trim();
+
+            if (title) {
+              const el = document.createElement("div");
+              el.className = "rwCellTitle";
+              el.textContent = title;
+              cell.appendChild(el);
+            }
+
+            if (name) {
+              const el = document.createElement("div");
+              el.className = "rwCellName";
+              el.textContent = name;
+              cell.appendChild(el);
+            }
+
+            if (counts) {
+              const el = document.createElement("div");
+              el.className = "rwCellCounts";
+              el.textContent = counts;
+              cell.appendChild(el);
+            }
+
+            runewordCubeGrid.appendChild(cell);
+            filled += 1;
+          };
+
+          addCell(
+            hasBase ? "base" : "base empty",
+            t("Base", "베이스"),
+            hasBase ? selectedItemNameState || t("Selected", "선택됨") : t("None", "없음"),
+            hasBase ? t("Equipped", "착용") : ""
+          );
+
+          if (hasRecipe && requiredRunes.length > 0) {
+            for (const req of requiredRunes) {
+              const name = typeof req?.name === "string" ? req.name : "";
+              const required = Number.isFinite(Number(req?.required)) ? Number(req.required) : 0;
+              const owned = Number.isFinite(Number(req?.owned)) ? Number(req.owned) : 0;
+              if (!name || required <= 0) continue;
+
+              const missing = owned < required;
+              addCell(
+                missing ? "missing" : "ready",
+                missing ? t("Rune (Missing)", "룬(부족)") : t("Rune", "룬"),
+                `${name} x${required}`,
+                `${t("Owned", "보유")}: ${owned}/${required}`
+              );
+            }
+          } else if (hasRecipe && requiredRunes.length === 0) {
+            addCell("empty", t("Runes", "룬"), t("No data", "정보 없음"), "");
+          }
+
+          while (filled < totalCells) {
+            addCell("empty", "", "", "");
+          }
+        }
+
+        clearChildren(runewordPanelStatus);
+
+        if (!hasBase) {
+          runewordPanelStatus.textContent = t(
+            "Select an equipped base first.",
+            "착용 베이스를 먼저 선택하세요."
+          );
+        } else if (!hasRecipe) {
+          runewordPanelStatus.textContent = t(
+            "Select a runeword recipe.",
+            "룬워드 레시피를 선택하세요."
+          );
+        } else {
+          const recipeName = state.recipeName || t("Unknown", "알 수 없음");
+          const inserted = Number(state.insertedRunes) || 0;
+          const total = Number(state.totalRunes) || 0;
+
+          const header = document.createElement("div");
+          header.className = "rwStatusHeader";
+
+          const left = document.createElement("div");
+          left.textContent = `${t("Recipe", "레시피")}: ${recipeName}`;
+
+          const badge = document.createElement("div");
+          let badgeClass = "rwBadge";
+          let badgeText = "";
+          if (isComplete) {
+            badgeClass += " complete";
+            badgeText = t("Complete", "완료");
+            buttonLabel = t("Complete", "완료");
+          } else if (canTransmute) {
+            badgeClass += " ready";
+            badgeText = t("Ready", "가능");
+          } else {
+            badgeClass += " missing";
+            badgeText = t("Missing", "부족");
+          }
+          badge.className = badgeClass;
+          badge.textContent = badgeText;
+
+          header.appendChild(left);
+          header.appendChild(badge);
+          runewordPanelStatus.appendChild(header);
+
+          const meta = document.createElement("div");
+          meta.className = "rwMetaLine";
+          if (isComplete) {
+            meta.textContent = t(
+              "This base already has a runeword.",
+              "이 베이스에는 이미 룬워드가 적용되어 있습니다."
+            );
+          } else if (canTransmute) {
+            meta.textContent = t(
+              "Transmute will consume all required fragments.",
+              "변환 시 필요한 룬조각을 모두 소모합니다."
+            );
+          } else if (state.missingSummary) {
+            meta.textContent = `${t("Missing", "부족")}: ${state.missingSummary}`;
+          }
+
+          if (meta.textContent) {
+            runewordPanelStatus.appendChild(meta);
+          }
+
+          if (total > 0 && !isComplete) {
+            const progress = document.createElement("div");
+            progress.className = "rwMetaLine";
+            progress.textContent = `${t("Progress", "진행도")}: ${inserted}/${total}`;
+            runewordPanelStatus.appendChild(progress);
+          }
+        }
+
+        runewordInsertButton.textContent = buttonLabel;
+        runewordInsertButton.disabled = !canTransmute;
+        let buttonHint = "";
+        if (isComplete) {
+          buttonHint = t(
+            "This base already has a completed runeword.",
+            "이 베이스에는 이미 룬워드가 완성되어 있습니다."
+          );
+        } else if (!hasBase) {
+          buttonHint = t(
+            "Select an equipped base first.",
+            "착용 베이스를 먼저 선택하세요."
+          );
+        } else if (!hasRecipe) {
+          buttonHint = t(
+            "Select a runeword recipe first.",
+            "룬워드 레시피를 먼저 선택하세요."
+          );
+        } else if (!canTransmute && state.missingSummary) {
+          buttonHint = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
+        } else if (!canTransmute) {
+          buttonHint = t(
+            "Transmute is not available yet.",
+            "아직 변환할 수 없습니다."
+          );
+        } else {
+          buttonHint = t(
+            "Transmute consumes all required fragments and applies the runeword.",
+            "변환 시 필요한 룬조각을 모두 소모하고 룬워드를 적용합니다."
+          );
+        }
+        runewordInsertButton.title = buttonHint;
+        runewordInsertButton.setAttribute("aria-label", buttonHint);
+      }
+
+      function setInventoryItems(raw) {
+        let items = [];
+        if (Array.isArray(raw)) {
+          items = raw;
+        } else if (typeof raw === "string" && raw.trim().length > 0) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              items = parsed;
+            }
+          } catch (_) {}
+        }
+
+        inventoryItemsState = items;
+        const selected = items.find((item) => item && item.selected && typeof item.name === "string");
+        if (selected && typeof selected.name === "string") {
+          selectedItemNameState = selected.name;
+          selectedItemSourceState = "equipped";
+        } else if (!selectedItemNameState) {
+          selectedItemSourceState = "equipped";
+        }
+
+        renderSelectedItemContext();
+        renderInventoryItems();
+        renderRunewordPanelState();
+      }
+
+      function setRecipeItems(raw) {
+        let items = [];
+        if (Array.isArray(raw)) {
+          items = raw;
+        } else if (typeof raw === "string" && raw.trim().length > 0) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              items = parsed;
+            }
+          } catch (_) {}
+        }
+
+        recipeItemsState = items;
+        renderRecipeItems();
+      }
+
+      function setRunewordPanelState(raw) {
+        let data = null;
+        if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+          data = raw;
+        } else if (typeof raw === "string" && raw.trim().length > 0) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+              data = parsed;
+            }
+          } catch (_) {}
+        }
+
+        if (!data) {
+          data = {};
+        }
+
+        runewordPanelState = {
+          hasBase: Boolean(data.hasBase),
+          hasRecipe: Boolean(data.hasRecipe),
+          isComplete: Boolean(data.isComplete),
+          recipeName: typeof data.recipeName === "string" ? data.recipeName : "",
+          insertedRunes: Number.isFinite(Number(data.insertedRunes)) ? Number(data.insertedRunes) : 0,
+          totalRunes: Number.isFinite(Number(data.totalRunes)) ? Number(data.totalRunes) : 0,
+          nextRuneName: typeof data.nextRuneName === "string" ? data.nextRuneName : "",
+          nextRuneOwned: Number.isFinite(Number(data.nextRuneOwned)) ? Number(data.nextRuneOwned) : 0,
+          canInsert: Boolean(data.canInsert),
+          missingSummary: typeof data.missingSummary === "string" ? data.missingSummary : "",
+          requiredRunes: Array.isArray(data.requiredRunes)
+            ? data.requiredRunes
+                .map((entry) => {
+                  const name = typeof entry?.name === "string" ? entry.name : "";
+                  const required = Number.isFinite(Number(entry?.required)) ? Number(entry.required) : 0;
+                  const owned = Number.isFinite(Number(entry?.owned)) ? Number(entry.owned) : 0;
+                  if (!name || required <= 0) return null;
+                  return { name, required, owned };
+                })
+                .filter(Boolean)
+            : []
+        };
+
+        renderRunewordPanelState();
+      }
+
+      function setTooltip(raw) {
+        const value = typeof raw === "string" ? raw : "";
+        tooltipTextState = value;
+        applyTooltipPlacement();
+      }
+
+      function setControlPanel(raw) {
+        const value = String(raw ?? "").toLowerCase();
+        controlPanelOpen = value === "1" || value === "true" || value === "open";
+        controlPanel.style.display = controlPanelOpen ? "flex" : "none";
+
+        if (!controlPanelOpen) {
+          feedback.textContent = "";
+          endPanelDrag();
+          persistPanelLayout();
+        } else {
+          if (!panelLayoutLoaded && !controlPanel.style.left) {
+            const rect = controlPanel.getBoundingClientRect();
+            controlPanel.style.left = `${Math.round(rect.left)}px`;
+            controlPanel.style.top = `${Math.round(rect.top)}px`;
+            controlPanel.style.right = "auto";
+            controlPanel.style.bottom = "auto";
+          }
+          updatePanelUiScale();
+          keepPanelInViewport();
+        }
+
+        document.body.style.pointerEvents = controlPanelOpen ? "auto" : "none";
+        applyTooltipPlacement();
+        applyQuickLaunchVisibility();
+
+        if (controlPanelOpen) {
+          if (pendingOpenMainTab) {
+            const next = pendingOpenMainTab;
+            pendingOpenMainTab = null;
+            setMainTab(next);
+            requestAnimationFrame(() => {
+              try {
+                const focusEl =
+                  next === "affix"
+                    ? mainAffixTab
+                    : next === "advanced"
+                      ? mainAdvancedTab
+                      : mainRunewordTab;
+                if (focusEl && typeof focusEl.focus === "function") {
+                  focusEl.focus();
+                }
+              } catch (_) {}
+            });
+          } else {
+            setMainTab(mainTabState);
+          }
+        }
+      }
+
+      function setPanelLayout(raw) {
+        let data = null;
+        if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+          data = raw;
+        } else if (typeof raw === "string" && raw.trim()) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+              data = parsed;
+            }
+          } catch (_) {}
+        }
+
+        if (!data) {
+          return;
+        }
+
+        const left = Number(data.left);
+        const top = Number(data.top);
+        const width = Number(data.width);
+        const height = Number(data.height);
+        if (!Number.isFinite(left) || !Number.isFinite(top) || !Number.isFinite(width) || !Number.isFinite(height)) {
+          return;
+        }
+        if (width <= 0 || height <= 0) {
+          return;
+        }
+
+        controlPanel.style.left = `${Math.round(left)}px`;
+        controlPanel.style.top = `${Math.round(top)}px`;
+        controlPanel.style.width = `${Math.round(width)}px`;
+        controlPanel.style.height = `${Math.round(height)}px`;
+        controlPanel.style.right = "auto";
+        controlPanel.style.bottom = "auto";
+        panelLayoutLoaded = true;
+        updatePanelUiScale();
+        if (controlPanelOpen) {
+          keepPanelInViewport();
+        }
+      }
+
+      function setActionFeedback(raw) {
+        const value = typeof raw === "string" ? raw : "";
+        feedback.textContent = value;
+      }
+
+      function setPanelHotkeyText(raw) {
+        const value = typeof raw === "string" ? raw.trim() : "";
+        if (value && value !== panelHotkeyTextState) {
+          panelHotkeyTextState = value;
+          updatePanelHotkeyHints();
+        }
+      }
+
+      function setUiLanguage(raw) {
+        const next = normalizeUiLang(raw);
+        if (next === uiLang) {
+          return;
+        }
+        uiLang = next;
+        initUiText();
+      }
+
+      function setSelectedItemName(raw) {
+        const value = typeof raw === "string" ? raw.trim() : "";
+        selectedItemNameState = value;
+        renderSelectedItemContext();
+        renderRunewordPanelState();
+      }
+
+      function setSelectedItemSource(raw) {
+        const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+        selectedItemSourceState = value;
+        renderSelectedItemContext();
+      }
+
+      function sendCommand(command) {
+        if (typeof window.calamityCommand === "function") {
+          window.calamityCommand(command);
+          return;
+        }
+
+        setActionFeedback(t("Command bridge unavailable.", "명령 브리지가 연결되지 않았습니다."));
+      }
+
+      function wireButtons() {
+        const buttons = document.querySelectorAll("[data-cmd]");
+        buttons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const openTab = button.getAttribute("data-open-tab");
+            if (openTab) {
+              pendingOpenMainTab = openTab;
+            }
+            const command = button.getAttribute("data-cmd");
+            if (command) {
+              sendCommand(command);
+            }
+          });
+        });
+
+        if (recipeSearchInput) {
+          recipeSearchInput.addEventListener("input", () => {
+            recipeSearchQuery = recipeSearchInput.value || "";
+            renderRecipeItems();
+          });
+        }
+      }
+
+      window.addEventListener("keydown", (event) => {
+        if (!controlPanelOpen) return;
+        const key = event.key;
+        const code = event.code;
+        const keyCode = event.keyCode || event.which;
+        const isEscape =
+          key === "Escape" ||
+          key === "Esc" ||
+          code === "Escape" ||
+          keyCode === 27;
+        if (isEscape) {
+          event.preventDefault();
+          event.stopPropagation();
+          sendCommand("ui.close");
+        }
+      });
+
+      if (typeof PrismaUI_Interop === "function") {
+        PrismaUI_Interop("setTooltip", (data) => setTooltip(data));
+        PrismaUI_Interop("setControlPanel", (data) => setControlPanel(data));
+        PrismaUI_Interop("setActionFeedback", (data) => setActionFeedback(data));
+        PrismaUI_Interop("setPanelHotkeyText", (data) => setPanelHotkeyText(data));
+        PrismaUI_Interop("setUiLanguage", (data) => setUiLanguage(data));
+        PrismaUI_Interop("setSelectedItemName", (data) => setSelectedItemName(data));
+        PrismaUI_Interop("setSelectedItemSource", (data) => setSelectedItemSource(data));
+        PrismaUI_Interop("setInventoryItems", (data) => setInventoryItems(data));
+        PrismaUI_Interop("setRecipeItems", (data) => setRecipeItems(data));
+        PrismaUI_Interop("setRunewordPanelState", (data) => setRunewordPanelState(data));
+        PrismaUI_Interop("setPanelLayout", (data) => setPanelLayout(data));
+      }
+
+      // Browser fallback and debugging hooks.
+      window.setTooltip = setTooltip;
+      window.setControlPanel = setControlPanel;
+      window.setActionFeedback = setActionFeedback;
+      window.setPanelHotkeyText = setPanelHotkeyText;
+      window.setUiLanguage = setUiLanguage;
+      window.setSelectedItemName = setSelectedItemName;
+      window.setSelectedItemSource = setSelectedItemSource;
+      window.setInventoryItems = setInventoryItems;
+      window.setRecipeItems = setRecipeItems;
+      window.setRunewordPanelState = setRunewordPanelState;
+      window.setPanelLayout = setPanelLayout;
+
+      initUiText();
+      wireButtons();
+      wireMainTabs();
+      panelDragHandle.addEventListener("pointerdown", beginPanelDrag);
+      panelResizeRight.addEventListener("pointerdown", (event) => beginPanelResize("x", event));
+      panelResizeBottom.addEventListener("pointerdown", (event) => beginPanelResize("y", event));
+      panelResizeCorner.addEventListener("pointerdown", (event) => beginPanelResize("xy", event));
+      window.addEventListener("pointermove", movePanel);
+      window.addEventListener("pointerup", endPanelDrag);
+      window.addEventListener("pointercancel", endPanelDrag);
+      applyAutoScale();
+      if (typeof ResizeObserver === "function") {
+        const ro = new ResizeObserver(() => {
+          updatePanelUiScale();
+        });
+        ro.observe(controlPanel);
+      }
+      window.addEventListener("resize", () => {
+        requestAnimationFrame(() => {
+          applyAutoScale();
+          updatePanelUiScale();
+          keepPanelInViewport();
+        });
+      });
+    </script>
+  </body>
+</html>

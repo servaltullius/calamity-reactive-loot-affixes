@@ -1,0 +1,10 @@
+Build output `CalamityAffixes.dll` goes here:
+
+  Data/SKSE/Plugins/CalamityAffixes.dll
+
+Note:
+- This repo may include `CalamityAffixes.dll.disabled` to avoid accidentally loading an out-of-date DLL.
+- Replace it with your freshly built `CalamityAffixes.dll`.
+
+Tip (MO2):
+- If you build to a separate folder, copy the DLL into your MO2 mod's `SKSE/Plugins/` directory.

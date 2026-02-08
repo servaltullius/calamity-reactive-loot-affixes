@@ -1,0 +1,411 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+
+
+SUPPORTED_TRIGGERS: Set[str] = {"Hit", "IncomingHit", "DotApply", "Kill"}
+SUPPORTED_ACTION_TYPES: Set[str] = {
+    "DebugNotify",
+    "CastSpell",
+    "CastSpellAdaptiveElement",
+    "CastOnCrit",
+    "ConvertDamage",
+    "Archmage",
+    "CorpseExplosion",
+    "SummonCorpseExplosion",
+    "SpawnTrap",
+}
+
+
+def _read_json(path: Path) -> Any:
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise RuntimeError(f"File not found: {path}")
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Invalid JSON ({path}:{e.lineno}:{e.colno}): {e.msg}")
+
+
+def _as_dict(value: Any) -> Optional[Dict[str, Any]]:
+    return value if isinstance(value, dict) else None
+
+
+def _as_list(value: Any) -> Optional[List[Any]]:
+    return value if isinstance(value, list) else None
+
+
+def _is_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _extract_spell_editor_id(value: Any) -> Optional[str]:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        editor_id = value.get("spellEditorId")
+        if isinstance(editor_id, str) and editor_id.strip():
+            return editor_id.strip()
+    return None
+
+
+def _collect_spell_refs_from_action(
+    action: Dict[str, Any], *, affix_id: str, out: List[Tuple[str, str]]
+) -> None:
+    action_type = action.get("type")
+    if not isinstance(action_type, str):
+        return
+
+    def add(ref: Optional[str], ctx: str) -> None:
+        if ref:
+            out.append((ref, ctx))
+
+    if action_type in {"CastSpell", "CastOnCrit", "ConvertDamage", "Archmage", "CorpseExplosion", "SummonCorpseExplosion", "SpawnTrap"}:
+        add(_extract_spell_editor_id(action.get("spellEditorId")), f"{affix_id}:action.spellEditorId")
+
+    if action_type == "CastSpellAdaptiveElement":
+        spells = _as_dict(action.get("spells")) or {}
+        for element in ("Fire", "Frost", "Shock"):
+            add(_extract_spell_editor_id(spells.get(element)), f"{affix_id}:action.spells.{element}")
+
+    if action_type == "SpawnTrap":
+        extra_spells = _as_list(action.get("extraSpells")) or []
+        for idx, entry in enumerate(extra_spells):
+            add(_extract_spell_editor_id(entry), f"{affix_id}:action.extraSpells[{idx}]")
+
+    if action_type == "CastSpell":
+        mode_cycle = _as_dict(action.get("modeCycle")) or {}
+        mode_spells = _as_list(mode_cycle.get("spells")) or []
+        for idx, entry in enumerate(mode_spells):
+            add(_extract_spell_editor_id(entry), f"{affix_id}:action.modeCycle.spells[{idx}]")
+
+
+def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) -> None:
+    loot = _as_dict(spec.get("loot")) or {}
+    shared_pool = loot.get("sharedPool")
+    if shared_pool is not None and not isinstance(shared_pool, bool):
+        errors.append("loot.sharedPool must be a boolean.")
+
+    trap_global_max = loot.get("trapGlobalMaxActive")
+    if trap_global_max is not None:
+        if not isinstance(trap_global_max, int) or isinstance(trap_global_max, bool):
+            errors.append("loot.trapGlobalMaxActive must be an integer (0 = unlimited).")
+        elif trap_global_max < 0:
+            errors.append("loot.trapGlobalMaxActive must be >= 0.")
+        elif trap_global_max == 0:
+            warnings.append("loot.trapGlobalMaxActive is 0 (unlimited). This can degrade performance with trap-heavy pools.")
+        elif trap_global_max > 4096:
+            warnings.append(f"loot.trapGlobalMaxActive is very high ({trap_global_max}). Consider keeping it <= 256.")
+
+    keywords = _as_dict(spec.get("keywords"))
+    if not keywords:
+        errors.append("Missing object: keywords")
+        return
+
+    affixes = _as_list(keywords.get("affixes"))
+    if affixes is None:
+        errors.append("Missing array: keywords.affixes")
+        return
+
+    seen_ids: Dict[str, int] = {}
+    seen_editor_ids: Dict[str, int] = {}
+    generated_spells: Set[str] = set()
+    spell_refs: List[Tuple[str, str]] = []
+
+    for idx, raw in enumerate(affixes):
+        affix = _as_dict(raw)
+        if not affix:
+            errors.append(f"keywords.affixes[{idx}] must be an object.")
+            continue
+
+        affix_id = affix.get("id")
+        editor_id = affix.get("editorId")
+
+        if not isinstance(affix_id, str) or not affix_id.strip():
+            errors.append(f"keywords.affixes[{idx}].id must be a non-empty string.")
+            affix_id = f"<index:{idx}>"
+        if not isinstance(editor_id, str) or not editor_id.strip():
+            errors.append(f"keywords.affixes[{idx}].editorId must be a non-empty string.")
+            editor_id = f"<index:{idx}>"
+
+        id_key = str(affix_id).strip().lower()
+        if id_key in seen_ids:
+            errors.append(
+                f"Duplicate affix id (case-insensitive): '{affix_id}' at keywords.affixes[{seen_ids[id_key]}] and keywords.affixes[{idx}]."
+            )
+        else:
+            seen_ids[id_key] = idx
+
+        editor_key = str(editor_id).strip().lower()
+        if editor_key in seen_editor_ids:
+            errors.append(
+                f"Duplicate affix editorId (case-insensitive): '{editor_id}' at keywords.affixes[{seen_editor_ids[editor_key]}] and keywords.affixes[{idx}]."
+            )
+        else:
+            seen_editor_ids[editor_key] = idx
+
+        records = _as_dict(affix.get("records"))
+        if records:
+            spell = _as_dict(records.get("spell"))
+            if spell:
+                spell_edid = spell.get("editorId")
+                if isinstance(spell_edid, str) and spell_edid.strip():
+                    generated_spells.add(spell_edid.strip())
+
+        runtime = _as_dict(affix.get("runtime"))
+        if not runtime:
+            errors.append(f"{affix_id}: missing runtime object.")
+            continue
+
+        trigger = runtime.get("trigger")
+        if not isinstance(trigger, str) or trigger not in SUPPORTED_TRIGGERS:
+            errors.append(f"{affix_id}: runtime.trigger must be one of {sorted(SUPPORTED_TRIGGERS)}.")
+
+        chance = runtime.get("procChancePercent")
+        if chance is not None:
+            if not _is_number(chance):
+                errors.append(f"{affix_id}: runtime.procChancePercent must be a number (0-100).")
+            else:
+                if chance < 0.0 or chance > 100.0:
+                    errors.append(f"{affix_id}: runtime.procChancePercent out of range: {chance} (expected 0-100).")
+
+        for key in ("icdSeconds", "perTargetICDSeconds"):
+            v = runtime.get(key)
+            if v is None:
+                continue
+            if not _is_number(v):
+                errors.append(f"{affix_id}: runtime.{key} must be a number (seconds).")
+            elif v < 0.0:
+                errors.append(f"{affix_id}: runtime.{key} must be >= 0.")
+
+        action = _as_dict(runtime.get("action"))
+        if not action:
+            errors.append(f"{affix_id}: runtime.action must be an object.")
+            continue
+
+        action_type = action.get("type")
+        if not isinstance(action_type, str) or action_type not in SUPPORTED_ACTION_TYPES:
+            errors.append(f"{affix_id}: action.type must be one of {sorted(SUPPORTED_ACTION_TYPES)}.")
+            continue
+
+        if action_type == "CastSpell":
+            if not isinstance(action.get("spellEditorId"), str) and not isinstance(action.get("spellForm"), str):
+                errors.append(f"{affix_id}: CastSpell requires spellEditorId or spellForm.")
+
+            evolution = action.get("evolution")
+            if evolution is not None:
+                evolution_obj = _as_dict(evolution)
+                if not evolution_obj:
+                    errors.append(f"{affix_id}: action.evolution must be an object.")
+                else:
+                    xp_per_proc = evolution_obj.get("xpPerProc")
+                    if xp_per_proc is not None:
+                        if not isinstance(xp_per_proc, int) or isinstance(xp_per_proc, bool) or xp_per_proc <= 0:
+                            errors.append(f"{affix_id}: action.evolution.xpPerProc must be an integer > 0.")
+
+                    thresholds = _as_list(evolution_obj.get("thresholds"))
+                    if thresholds is None or len(thresholds) == 0:
+                        errors.append(f"{affix_id}: action.evolution.thresholds must be a non-empty integer array.")
+                    else:
+                        for t_idx, value in enumerate(thresholds):
+                            if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                                errors.append(f"{affix_id}: action.evolution.thresholds[{t_idx}] must be an integer >= 0.")
+
+                    multipliers = _as_list(evolution_obj.get("multipliers"))
+                    if multipliers is None or len(multipliers) == 0:
+                        errors.append(f"{affix_id}: action.evolution.multipliers must be a non-empty number array.")
+                    else:
+                        for m_idx, value in enumerate(multipliers):
+                            if not _is_number(value) or value <= 0:
+                                errors.append(f"{affix_id}: action.evolution.multipliers[{m_idx}] must be > 0.")
+
+            mode_cycle = action.get("modeCycle")
+            if mode_cycle is not None:
+                mode_cycle_obj = _as_dict(mode_cycle)
+                if not mode_cycle_obj:
+                    errors.append(f"{affix_id}: action.modeCycle must be an object.")
+                else:
+                    spells = _as_list(mode_cycle_obj.get("spells"))
+                    if spells is None or len(spells) == 0:
+                        errors.append(f"{affix_id}: action.modeCycle.spells must be a non-empty array.")
+                    else:
+                        for s_idx, entry in enumerate(spells):
+                            ref = _extract_spell_editor_id(entry)
+                            if not ref:
+                                errors.append(
+                                    f"{affix_id}: action.modeCycle.spells[{s_idx}] must be a spellEditorId string or spell object."
+                                )
+
+                    labels = _as_list(mode_cycle_obj.get("labels"))
+                    if labels is not None:
+                        for l_idx, label in enumerate(labels):
+                            if not isinstance(label, str):
+                                errors.append(f"{affix_id}: action.modeCycle.labels[{l_idx}] must be a string.")
+
+                    switch_every = mode_cycle_obj.get("switchEveryProcs")
+                    if switch_every is not None:
+                        if not isinstance(switch_every, int) or isinstance(switch_every, bool) or switch_every <= 0:
+                            errors.append(f"{affix_id}: action.modeCycle.switchEveryProcs must be an integer > 0.")
+
+                    manual_only = mode_cycle_obj.get("manualOnly")
+                    if manual_only is not None and not isinstance(manual_only, bool):
+                        errors.append(f"{affix_id}: action.modeCycle.manualOnly must be a boolean.")
+
+        if action_type == "CastSpellAdaptiveElement":
+            spells = _as_dict(action.get("spells"))
+            if not spells:
+                errors.append(f"{affix_id}: CastSpellAdaptiveElement requires action.spells object.")
+
+        if action_type == "SpawnTrap":
+            ttl = action.get("ttlSeconds")
+            radius = action.get("radius")
+            if not _is_number(ttl) or ttl <= 0.0:
+                errors.append(f"{affix_id}: SpawnTrap requires ttlSeconds > 0.")
+            if not _is_number(radius) or radius <= 0.0:
+                errors.append(f"{affix_id}: SpawnTrap requires radius > 0.")
+            if trigger == "DotApply" and action.get("requireWeaponHit", False):
+                warnings.append(f"{affix_id}: DotApply + SpawnTrap has requireWeaponHit=true (will never fire).")
+
+        if str(affix_id).lower().startswith("internal_"):
+            kid = _as_dict(affix.get("kid")) or {}
+            kid_type = kid.get("type")
+            if isinstance(kid_type, str) and kid_type != "None":
+                warnings.append(f"{affix_id}: internal_ entry has kid.type={kid_type} (expected None).")
+
+        _collect_spell_refs_from_action(action, affix_id=str(affix_id), out=spell_refs)
+
+    # Validate spell editorId references that should exist in our generated plugin.
+    for ref, ctx in spell_refs:
+        if ref.startswith("CAFF_") and ref not in generated_spells:
+            errors.append(f"Missing generated spell for reference '{ref}' ({ctx}). Define it under records.spell somewhere.")
+
+
+def _check_generated_sync(
+    spec: Dict[str, Any],
+    generated: Dict[str, Any],
+    *,
+    spec_path: Path,
+    generated_path: Path,
+    errors: List[str],
+    warnings: List[str],
+) -> None:
+    # Keep this intentionally simple and robust:
+    # - The generator re-serializes the spec into Data/SKSE/Plugins/CalamityAffixes/affixes.json.
+    # - The serialized form may include defaulted fields (e.g., bools), so strict JSON equality
+    #   against the author spec is not reliable.
+    #
+    # We treat the generated file as stale if it's older than the spec file, and also sanity-check
+    # the affix id set to catch partial/corrupt outputs.
+    try:
+        spec_mtime = spec_path.stat().st_mtime_ns
+        gen_mtime = generated_path.stat().st_mtime_ns
+    except OSError as e:
+        warnings.append(f"Unable to stat files for staleness check: {e}")
+        spec_mtime = 0
+        gen_mtime = 0
+
+    if spec_mtime and gen_mtime and spec_mtime > gen_mtime:
+        errors.append(
+            "Generated runtime config is older than the spec (Data/SKSE/Plugins/CalamityAffixes/affixes.json looks stale). "
+            "Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
+        )
+
+    spec_kw = _as_dict(spec.get("keywords")) or {}
+    gen_kw = _as_dict(generated.get("keywords")) or {}
+    spec_affixes = _as_list(spec_kw.get("affixes")) or []
+    gen_affixes = _as_list(gen_kw.get("affixes")) or []
+
+    def ids(arr: Iterable[Any]) -> Set[str]:
+        out: Set[str] = set()
+        for entry in arr:
+            obj = _as_dict(entry)
+            if not obj:
+                continue
+            v = obj.get("id")
+            if isinstance(v, str) and v.strip():
+                out.add(v.strip())
+        return out
+
+    spec_ids = ids(spec_affixes)
+    gen_ids = ids(gen_affixes)
+
+    missing = sorted(spec_ids - gen_ids)
+    extra = sorted(gen_ids - spec_ids)
+    if missing or extra:
+        msg = "Generated runtime config affix id set mismatch."
+        if missing:
+            msg += f" Missing ids: {missing[:10]}{'...' if len(missing) > 10 else ''}."
+        if extra:
+            msg += f" Extra ids: {extra[:10]}{'...' if len(extra) > 10 else ''}."
+        errors.append(
+            msg
+            + " Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
+        )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Lint Calamity affix spec for common authoring mistakes.")
+    parser.add_argument("--spec", default="affixes/affixes.json", help="Path to affix spec JSON.")
+    parser.add_argument(
+        "--generated",
+        default=None,
+        help="Optional path to generated runtime config JSON to check for staleness (e.g. Data/SKSE/Plugins/CalamityAffixes/affixes.json).",
+    )
+    parser.add_argument("--strict", action="store_true", help="Treat warnings as errors.")
+    args = parser.parse_args()
+
+    spec_path = Path(args.spec)
+    errors: List[str] = []
+    warnings: List[str] = []
+
+    try:
+        spec = _read_json(spec_path)
+    except RuntimeError as e:
+        print(f"[ERROR] {e}", file=sys.stderr)
+        return 2
+
+    if not isinstance(spec, dict):
+        print("[ERROR] Spec JSON must be an object at top-level.", file=sys.stderr)
+        return 2
+
+    _lint_spec(spec, errors=errors, warnings=warnings)
+
+    if args.generated:
+        gen_path = Path(args.generated)
+        try:
+            gen = _read_json(gen_path)
+        except RuntimeError as e:
+            errors.append(str(e))
+        else:
+            if isinstance(gen, dict):
+                _check_generated_sync(
+                    spec,
+                    gen,
+                    spec_path=spec_path,
+                    generated_path=gen_path,
+                    errors=errors,
+                    warnings=warnings,
+                )
+            else:
+                errors.append(f"Generated runtime config JSON must be an object: {gen_path}")
+
+    for w in warnings:
+        print(f"[WARN] {w}", file=sys.stderr)
+    for e in errors:
+        print(f"[ERROR] {e}", file=sys.stderr)
+
+    if errors or (args.strict and warnings):
+        print(f"Lint FAILED: {len(errors)} error(s), {len(warnings)} warning(s).", file=sys.stderr)
+        return 1
+
+    print(f"Lint OK: {len(warnings)} warning(s).")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

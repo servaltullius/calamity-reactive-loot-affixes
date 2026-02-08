@@ -1,0 +1,2383 @@
+#include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/RunewordUtil.h"
+
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <cstdint>
+#include <initializer_list>
+#include <limits>
+#include <memory>
+#include <optional>
+#include <random>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+namespace CalamityAffixes
+{
+		namespace
+		{
+			std::string ToLowerAscii(std::string_view a_text)
+		{
+			std::string out(a_text);
+			std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c) {
+				return static_cast<char>(std::tolower(c));
+			});
+			return out;
+		}
+
+				// Weighted rune fragment distribution to mimic D2 rune tier rarity.
+				// Higher-tier runes intentionally have much lower weight.
+				[[nodiscard]] double ResolveRunewordFragmentWeight(std::string_view a_runeName)
+				{
+					if (a_runeName.empty()) {
+						return 1.0;
+					}
+
+					constexpr std::array<std::pair<std::string_view, double>, 33> kRuneWeights{ {
+						{ "El", 1200.0 },
+						{ "Eld", 1100.0 },
+						{ "Tir", 1000.0 },
+						{ "Nef", 900.0 },
+						{ "Eth", 800.0 },
+						{ "Ith", 700.0 },
+						{ "Tal", 620.0 },
+						{ "Ral", 560.0 },
+						{ "Ort", 500.0 },
+						{ "Thul", 450.0 },
+						{ "Amn", 400.0 },
+						{ "Sol", 340.0 },
+						{ "Shael", 280.0 },
+						{ "Dol", 230.0 },
+						{ "Hel", 190.0 },
+						{ "Io", 155.0 },
+						{ "Lum", 125.0 },
+						{ "Ko", 100.0 },
+						{ "Fal", 80.0 },
+						{ "Lem", 64.0 },
+						{ "Pul", 50.0 },
+						{ "Um", 39.0 },
+						{ "Mal", 30.0 },
+						{ "Ist", 23.0 },
+						{ "Gul", 17.0 },
+						{ "Vex", 12.0 },
+						{ "Ohm", 8.5 },
+						{ "Lo", 6.0 },
+						{ "Sur", 4.2 },
+						{ "Ber", 3.0 },
+						{ "Jah", 2.2 },
+						{ "Cham", 1.6 },
+						{ "Zod", 1.0 },
+					} };
+
+					for (const auto& [name, weight] : kRuneWeights) {
+						if (a_runeName == name) {
+							return weight;
+						}
+					}
+
+					return 25.0;
+				}
+
+				[[nodiscard]] bool IsLootSourceCorpseChestOrWorld(RE::FormID a_oldContainer, RE::FormID a_playerId)
+				{
+					if (a_oldContainer == LootRerollGuard::kWorldContainer) {
+						return true;
+					}
+					if (a_oldContainer == a_playerId) {
+						return false;
+					}
+
+					auto* sourceForm = RE::TESForm::LookupByID<RE::TESForm>(a_oldContainer);
+					if (!sourceForm) {
+						return false;
+					}
+
+					if (auto* sourceActor = sourceForm->As<RE::Actor>()) {
+						return sourceActor->IsDead();
+					}
+
+					if (auto* sourceRef = sourceForm->As<RE::TESObjectREFR>()) {
+						if (auto* sourceBase = sourceRef->GetBaseObject(); sourceBase && sourceBase->As<RE::TESObjectCONT>()) {
+							return true;
+						}
+					}
+
+					return sourceForm->As<RE::TESObjectCONT>() != nullptr;
+				}
+
+					constexpr std::string_view kRunewordFragmentEditorIdPrefix = "CAFF_RuneFrag_";
+
+				RE::TESObjectMISC* LookupRunewordFragmentItem(
+					const std::unordered_map<std::uint64_t, std::string>& a_runeNameByToken,
+					std::uint64_t a_runeToken)
+				{
+					if (a_runeToken == 0u) {
+						return nullptr;
+					}
+
+					static std::unordered_map<std::uint64_t, RE::TESObjectMISC*> cache;
+					if (const auto cacheIt = cache.find(a_runeToken); cacheIt != cache.end()) {
+						return cacheIt->second;
+					}
+
+					const auto nameIt = a_runeNameByToken.find(a_runeToken);
+					if (nameIt == a_runeNameByToken.end() || nameIt->second.empty()) {
+						return nullptr;
+					}
+
+					std::string editorId;
+					editorId.reserve(kRunewordFragmentEditorIdPrefix.size() + nameIt->second.size());
+					editorId.append(kRunewordFragmentEditorIdPrefix);
+					editorId.append(nameIt->second);
+
+					auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(editorId);
+					if (item) {
+						cache.emplace(a_runeToken, item);
+					}
+					return item;
+				}
+
+				std::uint32_t GetOwnedRunewordFragmentCount(
+					RE::PlayerCharacter* a_player,
+					const std::unordered_map<std::uint64_t, std::string>& a_runeNameByToken,
+					std::uint64_t a_runeToken)
+				{
+					if (!a_player) {
+						return 0u;
+					}
+
+					auto* item = LookupRunewordFragmentItem(a_runeNameByToken, a_runeToken);
+					if (!item) {
+						return 0u;
+					}
+
+					const auto owned = a_player->GetItemCount(item);
+					return owned > 0 ? static_cast<std::uint32_t>(owned) : 0u;
+				}
+
+				std::uint32_t GrantRunewordFragments(
+					RE::PlayerCharacter* a_player,
+					const std::unordered_map<std::uint64_t, std::string>& a_runeNameByToken,
+					std::uint64_t a_runeToken,
+					std::uint32_t a_amount)
+				{
+					if (!a_player || a_amount == 0u) {
+						return 0u;
+					}
+
+					auto* item = LookupRunewordFragmentItem(a_runeNameByToken, a_runeToken);
+					if (!item) {
+						return 0u;
+					}
+
+					const auto maxGive = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
+					const auto give = (a_amount > maxGive) ? maxGive : a_amount;
+					a_player->AddObjectToContainer(item, nullptr, static_cast<std::int32_t>(give), nullptr);
+					return give;
+				}
+
+				bool TryConsumeRunewordFragment(
+					RE::PlayerCharacter* a_player,
+					const std::unordered_map<std::uint64_t, std::string>& a_runeNameByToken,
+					std::uint64_t a_runeToken)
+				{
+					if (!a_player) {
+						return false;
+					}
+
+					auto* item = LookupRunewordFragmentItem(a_runeNameByToken, a_runeToken);
+					if (!item) {
+						return false;
+					}
+
+					if (a_player->GetItemCount(item) <= 0) {
+						return false;
+					}
+
+					a_player->RemoveItem(item, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+					return true;
+				}
+
+			}
+
+	std::vector<std::uint64_t> EventBridge::CollectEquippedInstanceKeysForAffixToken(std::uint64_t a_affixToken) const
+	{
+		std::vector<std::uint64_t> keys;
+		if (a_affixToken == 0u) {
+			return keys;
+		}
+
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return keys;
+		}
+
+		auto* changes = player->GetInventoryChanges();
+		if (!changes || !changes->entryList) {
+			return keys;
+		}
+
+		for (auto* entry : *changes->entryList) {
+			if (!entry || !entry->extraLists) {
+				continue;
+			}
+
+			for (auto* xList : *entry->extraLists) {
+				if (!xList) {
+					continue;
+				}
+
+				const bool worn = xList->HasType<RE::ExtraWorn>() || xList->HasType<RE::ExtraWornLeft>();
+				if (!worn) {
+					continue;
+				}
+
+				auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+				if (!uid) {
+					continue;
+				}
+
+				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+				const auto it = _instanceAffixes.find(key);
+				if (it == _instanceAffixes.end() || it->second != a_affixToken) {
+					continue;
+				}
+
+				keys.push_back(key);
+			}
+		}
+
+		std::sort(keys.begin(), keys.end());
+		keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
+		return keys;
+	}
+
+		std::optional<std::uint64_t> EventBridge::ResolvePrimaryEquippedInstanceKey(std::uint64_t a_affixToken) const
+		{
+			auto keys = CollectEquippedInstanceKeysForAffixToken(a_affixToken);
+			if (keys.empty()) {
+				return std::nullopt;
+			}
+			return keys.front();
+		}
+
+		std::vector<std::uint64_t> EventBridge::CollectEquippedRunewordBaseCandidates(bool a_ensureUniqueId)
+		{
+			std::vector<std::uint64_t> keys;
+
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!player) {
+				return keys;
+			}
+
+			auto* changes = player->GetInventoryChanges();
+			if (!changes || !changes->entryList) {
+				return keys;
+			}
+
+			for (auto* entry : *changes->entryList) {
+				if (!entry || !entry->object || !entry->extraLists) {
+					continue;
+				}
+
+				const bool isWeapon = entry->object->As<RE::TESObjectWEAP>() != nullptr;
+				const bool isArmor = entry->object->As<RE::TESObjectARMO>() != nullptr;
+				if (!isWeapon && !isArmor) {
+					continue;
+				}
+
+				for (auto* xList : *entry->extraLists) {
+					if (!xList) {
+						continue;
+					}
+
+					const bool worn = xList->HasType<RE::ExtraWorn>() || xList->HasType<RE::ExtraWornLeft>();
+					if (!worn) {
+						continue;
+					}
+
+					auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+					if (!uid && a_ensureUniqueId) {
+						auto* created = RE::BSExtraData::Create<RE::ExtraUniqueID>();
+						created->baseID = entry->object->GetFormID();
+						created->uniqueID = changes->GetNextUniqueID();
+						xList->Add(created);
+						uid = created;
+					}
+
+					if (!uid) {
+						continue;
+					}
+
+					keys.push_back(MakeInstanceKey(uid->baseID, uid->uniqueID));
+				}
+			}
+
+			std::sort(keys.begin(), keys.end());
+			keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
+			return keys;
+		}
+
+		bool EventBridge::SelectRunewordBase(std::uint64_t a_instanceKey)
+		{
+			if (!_configLoaded || a_instanceKey == 0u) {
+				return false;
+			}
+
+			SanitizeRunewordState();
+
+			RE::InventoryEntryData* entry = nullptr;
+			RE::ExtraDataList* xList = nullptr;
+			if (!ResolvePlayerInventoryInstance(a_instanceKey, entry, xList) || !entry || !entry->object) {
+				return false;
+			}
+
+			const bool isWeapon = entry->object->As<RE::TESObjectWEAP>() != nullptr;
+			const bool isArmor = entry->object->As<RE::TESObjectARMO>() != nullptr;
+			if (!isWeapon && !isArmor) {
+				return false;
+			}
+
+			_runewordSelectedBaseKey = a_instanceKey;
+
+			auto candidates = CollectEquippedRunewordBaseCandidates(true);
+			if (const auto it = std::find(candidates.begin(), candidates.end(), a_instanceKey); it != candidates.end()) {
+				_runewordBaseCycleCursor = static_cast<std::uint32_t>(std::distance(candidates.begin(), it));
+			}
+
+			auto& state = _runewordInstanceStates[a_instanceKey];
+			if (state.recipeToken == 0u) {
+				if (const auto* recipe = GetCurrentRunewordRecipe()) {
+					state.recipeToken = recipe->token;
+				}
+			}
+
+			const char* selectedNameRaw = xList ? xList->GetDisplayName(entry->object) : nullptr;
+			std::string selectedName = selectedNameRaw ? selectedNameRaw : "";
+			if (selectedName.empty()) {
+				const char* objectNameRaw = entry->object->GetName();
+				selectedName = objectNameRaw ? objectNameRaw : "";
+			}
+			if (selectedName.empty()) {
+				selectedName = "<Unknown>";
+			}
+
+			const auto* recipe = FindRunewordRecipeByToken(state.recipeToken);
+			if (!recipe) {
+				recipe = GetCurrentRunewordRecipe();
+			}
+
+			std::string note = "Runeword Base: " + selectedName;
+			if (recipe) {
+				note.append(" | ");
+				note.append(recipe->displayName);
+
+				const auto baseType = ResolveInstanceLootType(a_instanceKey);
+				if (recipe->recommendedBaseType && baseType && *recipe->recommendedBaseType != *baseType) {
+					note.append(" (Recommended ");
+					note.append(DescribeLootItemType(*recipe->recommendedBaseType));
+					note.append(", current ");
+					note.append(DescribeLootItemType(*baseType));
+					note.append(")");
+				}
+			}
+
+			RE::DebugNotification(note.c_str());
+			return true;
+		}
+
+		std::vector<EventBridge::RunewordBaseInventoryEntry> EventBridge::GetRunewordBaseInventoryEntries()
+		{
+			std::vector<RunewordBaseInventoryEntry> entries;
+			if (!_configLoaded) {
+				return entries;
+			}
+
+			SanitizeRunewordState();
+			const auto candidates = CollectEquippedRunewordBaseCandidates(true);
+			entries.reserve(candidates.size());
+
+			for (const auto key : candidates) {
+				RE::InventoryEntryData* entry = nullptr;
+				RE::ExtraDataList* xList = nullptr;
+				if (!ResolvePlayerInventoryInstance(key, entry, xList) || !entry || !entry->object) {
+					continue;
+				}
+
+				const char* displayRaw = xList ? xList->GetDisplayName(entry->object) : nullptr;
+				std::string displayName = displayRaw ? displayRaw : "";
+				if (displayName.empty()) {
+					const char* objectNameRaw = entry->object->GetName();
+					displayName = objectNameRaw ? objectNameRaw : "";
+				}
+				if (displayName.empty()) {
+					displayName = "<Unknown>";
+				}
+
+				entries.push_back(RunewordBaseInventoryEntry{
+					.instanceKey = key,
+					.displayName = std::move(displayName),
+					.selected = (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key)
+				});
+			}
+
+			return entries;
+		}
+
+		std::vector<EventBridge::RunewordRecipeEntry> EventBridge::GetRunewordRecipeEntries()
+		{
+			std::vector<RunewordRecipeEntry> entries;
+			if (!_configLoaded) {
+				return entries;
+			}
+
+			SanitizeRunewordState();
+			entries.reserve(_runewordRecipes.size());
+
+			auto recipeBucket = [](std::string_view a_id, std::uint32_t a_modulo) -> std::uint32_t {
+				if (a_modulo == 0u) {
+					return 0u;
+				}
+				std::uint32_t hash = 2166136261u;
+				for (const auto c : a_id) {
+					hash ^= static_cast<std::uint8_t>(c);
+					hash *= 16777619u;
+				}
+				return hash % a_modulo;
+			};
+
+			auto idIsOneOf = [](std::string_view a_id, std::initializer_list<std::string_view> a_candidates) -> bool {
+				for (const auto candidate : a_candidates) {
+					if (a_id == candidate) {
+						return true;
+					}
+				}
+				return false;
+			};
+
+			auto resolveRecommendedBaseKey = [&](const RunewordRecipe& a_recipe) -> std::string_view {
+				const std::string_view id = a_recipe.id;
+
+				if (idIsOneOf(id, { "rw_insight", "rw_infinity", "rw_pride", "rw_obedience" })) {
+					return "polearm";
+				}
+				if (idIsOneOf(id, { "rw_faith", "rw_ice", "rw_mist", "rw_harmony", "rw_edge", "rw_melody", "rw_wrath", "rw_brand" })) {
+					return "bow";
+				}
+				if (idIsOneOf(id, { "rw_leaf", "rw_memory", "rw_white", "rw_obsession" })) {
+					return "staff_wand";
+				}
+				if (idIsOneOf(id, { "rw_chaos", "rw_mosaic" })) {
+					return "claw";
+				}
+				if (idIsOneOf(id, { "rw_grief", "rw_lawbringer", "rw_oath", "rw_unbending_will", "rw_kingslayer" })) {
+					return "sword";
+				}
+				if (idIsOneOf(id, { "rw_exile", "rw_sanctuary", "rw_ancients_pledge", "rw_rhyme", "rw_splendor" })) {
+					return "shield";
+				}
+				if (idIsOneOf(id, { "rw_lore", "rw_nadir", "rw_delirium", "rw_bulwark", "rw_cure", "rw_ground", "rw_hearth", "rw_temper", "rw_flickering_flame", "rw_wisdom", "rw_metamorphosis" })) {
+					return "helm";
+				}
+				if (idIsOneOf(id, { "rw_enigma", "rw_chains_of_honor", "rw_stealth", "rw_smoke", "rw_treachery", "rw_duress", "rw_gloom", "rw_stone", "rw_bramble", "rw_myth", "rw_peace", "rw_prudence", "rw_rain" })) {
+					return "armor";
+				}
+				if (idIsOneOf(id, { "rw_spirit" })) {
+					return "sword_shield";
+				}
+				if (idIsOneOf(id, { "rw_phoenix" })) {
+					return "weapon_shield";
+				}
+				if (idIsOneOf(id, { "rw_dream" })) {
+					return "helm_shield";
+				}
+				if (idIsOneOf(id, { "rw_dragon" })) {
+					return "armor_shield";
+				}
+
+				if (!a_recipe.recommendedBaseType) {
+					return "mixed";
+				}
+				return *a_recipe.recommendedBaseType == LootItemType::kArmor ? "armor" : "weapon";
+			};
+
+			auto resolveRecipeEffectSummaryKey = [&](const RunewordRecipe& a_recipe) -> std::string_view {
+				const std::string_view id = a_recipe.id;
+
+				if (idIsOneOf(id, { "rw_spirit", "rw_insight" })) {
+					return "self_meditation";
+				}
+				if (idIsOneOf(id, { "rw_call_to_arms", "rw_fortitude" })) {
+					return "self_ward";
+				}
+				if (idIsOneOf(id, { "rw_heart_of_the_oak", "rw_infinity", "rw_last_wish" })) {
+					return "adaptive_exposure";
+				}
+				if (idIsOneOf(id, { "rw_exile" })) {
+					return "self_barrier";
+				}
+				if (idIsOneOf(id, { "rw_grief", "rw_breath_of_the_dying" })) {
+					return "adaptive_strike";
+				}
+				if (idIsOneOf(id, { "rw_chains_of_honor", "rw_enigma" })) {
+					return "self_phase";
+				}
+				if (idIsOneOf(id, { "rw_dream" })) {
+					return "shock_strike";
+				}
+				if (idIsOneOf(id, { "rw_faith" })) {
+					return "self_haste";
+				}
+				if (idIsOneOf(id, { "rw_phoenix" })) {
+					return "self_phoenix";
+				}
+				if (idIsOneOf(id, { "rw_doom" })) {
+					return "frost_strike";
+				}
+
+				if (idIsOneOf(id, { "rw_dragon", "rw_hand_of_justice", "rw_flickering_flame", "rw_temper" })) {
+					return "self_flame_cloak";
+				}
+				if (idIsOneOf(id, { "rw_ice", "rw_voice_of_reason", "rw_hearth" })) {
+					return "self_frost_cloak";
+				}
+				if (idIsOneOf(id, { "rw_holy_thunder", "rw_zephyr", "rw_wind" })) {
+					return "self_shock_cloak";
+				}
+				if (idIsOneOf(id, { "rw_bulwark", "rw_cure", "rw_ancients_pledge", "rw_lionheart", "rw_radiance" })) {
+					return "self_oakflesh";
+				}
+				if (idIsOneOf(id, { "rw_sanctuary", "rw_duress", "rw_peace", "rw_myth" })) {
+					return "self_stoneflesh";
+				}
+				if (idIsOneOf(id, { "rw_pride", "rw_stone", "rw_prudence", "rw_mist" })) {
+					return "self_ironflesh";
+				}
+				if (idIsOneOf(id, { "rw_metamorphosis" })) {
+					return "self_ebonyflesh";
+				}
+				if (idIsOneOf(id, { "rw_nadir" })) {
+					return "curse_fear";
+				}
+				if (idIsOneOf(id, { "rw_delirium", "rw_chaos" })) {
+					return "curse_frenzy";
+				}
+				if (idIsOneOf(id, { "rw_malice", "rw_venom", "rw_plague", "rw_bramble" })) {
+					return "poison_bloom";
+				}
+				if (idIsOneOf(id, { "rw_black", "rw_rift" })) {
+					return "tar_bloom";
+				}
+				if (idIsOneOf(id, { "rw_mosaic", "rw_obsession", "rw_white" })) {
+					return "siphon_bloom";
+				}
+				if (idIsOneOf(id, { "rw_lawbringer", "rw_wrath", "rw_kingslayer", "rw_principle" })) {
+					return "curse_fragile";
+				}
+				if (idIsOneOf(id, { "rw_death", "rw_famine" })) {
+					return "curse_slow_attack";
+				}
+				if (idIsOneOf(id, { "rw_leaf", "rw_destruction" })) {
+					return "fire_strike";
+				}
+				if (idIsOneOf(id, { "rw_crescent_moon" })) {
+					return "shock_strike";
+				}
+				if (idIsOneOf(id, { "rw_beast", "rw_hustle_w", "rw_harmony", "rw_fury", "rw_unbending_will", "rw_passion" })) {
+					return "self_haste";
+				}
+				if (idIsOneOf(id, { "rw_stealth", "rw_smoke", "rw_treachery" })) {
+					return "self_muffle";
+				}
+				if (idIsOneOf(id, { "rw_gloom" })) {
+					return "self_invisibility";
+				}
+				if (idIsOneOf(id, { "rw_wealth", "rw_obedience", "rw_honor", "rw_eternity" })) {
+					return "soul_trap";
+				}
+				if (idIsOneOf(id, { "rw_memory", "rw_wisdom", "rw_lore", "rw_melody", "rw_enlightenment" })) {
+					return "self_meditation";
+				}
+				if (idIsOneOf(id, { "rw_pattern", "rw_strength", "rw_kings_grace", "rw_edge", "rw_oath" })) {
+					return "adaptive_strike";
+				}
+				if (idIsOneOf(id, { "rw_silence", "rw_brand" })) {
+					return "adaptive_exposure";
+				}
+				if (idIsOneOf(id, { "rw_hustle_a", "rw_splendor", "rw_rhyme" })) {
+					return "self_phase";
+				}
+				if (idIsOneOf(id, { "rw_rain", "rw_ground" })) {
+					return "self_phoenix";
+				}
+
+				if (a_recipe.recommendedBaseType) {
+					if (*a_recipe.recommendedBaseType == LootItemType::kWeapon) {
+						switch (recipeBucket(id, 6u)) {
+						case 0u:
+							return "adaptive_strike";
+						case 1u:
+							return "adaptive_exposure";
+						case 2u:
+							return "fire_strike";
+						case 3u:
+							return "frost_strike";
+						case 4u:
+							return "shock_strike";
+						default:
+							return "self_haste";
+						}
+					}
+					if (*a_recipe.recommendedBaseType == LootItemType::kArmor) {
+						switch (recipeBucket(id, 6u)) {
+						case 0u:
+							return "self_ward";
+						case 1u:
+							return "self_barrier";
+						case 2u:
+							return "self_meditation";
+						case 3u:
+							return "self_phase";
+						case 4u:
+							return "self_muffle";
+						default:
+							return "self_phoenix";
+						}
+					}
+				}
+
+				return recipeBucket(id, 2u) == 0u ? "adaptive_exposure" : "adaptive_strike";
+			};
+
+			std::uint64_t selectedToken = 0u;
+			if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
+				selectedToken = currentRecipe->token;
+			}
+			if (_runewordSelectedBaseKey) {
+				if (const auto stateIt = _runewordInstanceStates.find(*_runewordSelectedBaseKey);
+					stateIt != _runewordInstanceStates.end() &&
+					stateIt->second.recipeToken != 0u) {
+					selectedToken = stateIt->second.recipeToken;
+				}
+			}
+
+			for (const auto& recipe : _runewordRecipes) {
+				std::string runes;
+				for (std::size_t i = 0; i < recipe.runeIds.size(); ++i) {
+					if (i > 0) {
+						runes.push_back('-');
+					}
+					runes.append(recipe.runeIds[i]);
+				}
+
+				entries.push_back(RunewordRecipeEntry{
+					.recipeToken = recipe.token,
+					.displayName = recipe.displayName,
+					.runeSequence = std::move(runes),
+					.effectSummaryKey = std::string(resolveRecipeEffectSummaryKey(recipe)),
+					.recommendedBaseKey = std::string(resolveRecommendedBaseKey(recipe)),
+					.selected = (selectedToken != 0u && selectedToken == recipe.token)
+				});
+			}
+
+			return entries;
+		}
+
+			EventBridge::RunewordPanelState EventBridge::GetRunewordPanelState()
+			{
+				RunewordPanelState panelState{};
+				if (!_configLoaded) {
+				return panelState;
+			}
+
+			SanitizeRunewordState();
+			if (!_runewordSelectedBaseKey) {
+				return panelState;
+			}
+			panelState.hasBase = true;
+
+			// If the selected base is already a completed runeword, show status and block further crafting.
+			if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
+				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(it->second);
+					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+					const auto& completed = _runewordRecipes[rwIt->second];
+					panelState.hasRecipe = true;
+					panelState.isComplete = true;
+					panelState.recipeName = completed.displayName;
+					panelState.totalRunes = static_cast<std::uint32_t>(completed.runeTokens.size());
+					panelState.insertedRunes = panelState.totalRunes;
+					panelState.canInsert = false;
+					return panelState;
+				}
+			}
+
+			const RunewordRecipe* recipe = nullptr;
+			std::uint32_t inserted = 0u;
+
+			const auto stateIt = _runewordInstanceStates.find(*_runewordSelectedBaseKey);
+			if (stateIt != _runewordInstanceStates.end()) {
+				inserted = stateIt->second.insertedRunes;
+				recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
+			}
+
+			if (!recipe) {
+				recipe = GetCurrentRunewordRecipe();
+			}
+			if (!recipe || recipe->runeTokens.empty()) {
+				return panelState;
+			}
+
+			panelState.hasRecipe = true;
+			panelState.recipeName = recipe->displayName;
+			panelState.totalRunes = static_cast<std::uint32_t>(recipe->runeTokens.size());
+			panelState.insertedRunes = std::min(inserted, panelState.totalRunes);
+
+			if (panelState.insertedRunes >= panelState.totalRunes) {
+				// Legacy: allow finalization when all runes have already been inserted.
+				panelState.canInsert = true;
+				return panelState;
+			}
+
+				// Transmute-only UI: require all remaining rune fragments at once.
+				const auto requiredCounts = BuildRuneTokenCounts<16>(
+					std::span<const std::uint64_t>(recipe->runeTokens.data(), recipe->runeTokens.size()),
+					panelState.insertedRunes);
+
+				auto* player = RE::PlayerCharacter::GetSingleton();
+					bool ready = true;
+					bool firstMissingSet = false;
+					std::string missingSummary;
+
+					panelState.requiredRunes.reserve(requiredCounts.size);
+					for (std::size_t i = 0; i < requiredCounts.size; ++i) {
+						const auto token = requiredCounts.entries[i].token;
+						const auto required = requiredCounts.entries[i].count;
+						if (token == 0u || required == 0u) {
+						continue;
+					}
+
+					std::string runeName = "Rune";
+					if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+						runeName = nameIt->second;
+					}
+
+					const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, token);
+					panelState.requiredRunes.push_back(RunewordRuneRequirement{
+						.runeName = runeName,
+						.required = required,
+						.owned = owned,
+					});
+					if (owned >= required) {
+						continue;
+					}
+
+				ready = false;
+				const auto missing = required - owned;
+				if (!missingSummary.empty()) {
+					missingSummary.append(", ");
+				}
+				missingSummary.append(runeName);
+				missingSummary.append(" x");
+				missingSummary.append(std::to_string(missing));
+
+				if (!firstMissingSet) {
+					firstMissingSet = true;
+					panelState.nextRuneName = runeName;
+					panelState.nextRuneOwned = owned;
+				}
+			}
+
+				panelState.missingSummary = std::move(missingSummary);
+				panelState.canInsert = ready;
+				return panelState;
+				}
+
+		bool EventBridge::SelectRunewordRecipe(std::uint64_t a_recipeToken)
+		{
+			if (!_configLoaded || a_recipeToken == 0u || _runewordRecipes.empty()) {
+				return false;
+			}
+
+			SanitizeRunewordState();
+			const auto it = _runewordRecipeIndexByToken.find(a_recipeToken);
+			if (it == _runewordRecipeIndexByToken.end() || it->second >= _runewordRecipes.size()) {
+				return false;
+			}
+
+			const auto idx = it->second;
+			_runewordRecipeCycleCursor = static_cast<std::uint32_t>(idx);
+			const auto& recipe = _runewordRecipes[idx];
+
+			if (_runewordSelectedBaseKey) {
+				auto& state = _runewordInstanceStates[*_runewordSelectedBaseKey];
+				if (state.recipeToken != recipe.token) {
+					state.recipeToken = recipe.token;
+					state.insertedRunes = 0u;
+				}
+			}
+
+			std::string runes;
+			for (std::size_t i = 0; i < recipe.runeIds.size(); ++i) {
+				if (i > 0) {
+					runes.push_back('-');
+				}
+				runes.append(recipe.runeIds[i]);
+			}
+
+			std::string note = "Runeword Recipe: " + recipe.displayName + " [" + runes + "]";
+			if (_runewordSelectedBaseKey) {
+				const auto baseType = ResolveInstanceLootType(*_runewordSelectedBaseKey);
+				if (recipe.recommendedBaseType && baseType && *recipe.recommendedBaseType != *baseType) {
+					note.append(" (Recommended ");
+					note.append(DescribeLootItemType(*recipe.recommendedBaseType));
+					note.append(", current ");
+					note.append(DescribeLootItemType(*baseType));
+					note.append(")");
+				}
+			}
+
+			RE::DebugNotification(note.c_str());
+			return true;
+		}
+
+		bool EventBridge::ResolvePlayerInventoryInstance(
+			std::uint64_t a_instanceKey,
+			RE::InventoryEntryData*& a_outEntry,
+			RE::ExtraDataList*& a_outXList) const
+		{
+			a_outEntry = nullptr;
+			a_outXList = nullptr;
+
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!player) {
+				return false;
+			}
+
+			auto* changes = player->GetInventoryChanges();
+			if (!changes || !changes->entryList) {
+				return false;
+			}
+
+			for (auto* entry : *changes->entryList) {
+				if (!entry || !entry->extraLists) {
+					continue;
+				}
+
+				for (auto* xList : *entry->extraLists) {
+					if (!xList) {
+						continue;
+					}
+
+					const auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+					if (!uid) {
+						continue;
+					}
+
+					if (MakeInstanceKey(uid->baseID, uid->uniqueID) != a_instanceKey) {
+						continue;
+					}
+
+					a_outEntry = entry;
+					a_outXList = xList;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		std::optional<EventBridge::LootItemType> EventBridge::ResolveInstanceLootType(std::uint64_t a_instanceKey) const
+		{
+			RE::InventoryEntryData* entry = nullptr;
+			RE::ExtraDataList* xList = nullptr;
+			if (!ResolvePlayerInventoryInstance(a_instanceKey, entry, xList) || !entry || !entry->object) {
+				return std::nullopt;
+			}
+
+			if (entry->object->As<RE::TESObjectWEAP>()) {
+				return LootItemType::kWeapon;
+			}
+			if (entry->object->As<RE::TESObjectARMO>()) {
+				return LootItemType::kArmor;
+			}
+
+			return std::nullopt;
+		}
+
+		const char* EventBridge::DescribeLootItemType(LootItemType a_type)
+		{
+			switch (a_type) {
+			case LootItemType::kWeapon:
+				return "Weapon";
+			case LootItemType::kArmor:
+				return "Armor";
+			}
+
+			return "Unknown";
+		}
+
+		const EventBridge::RunewordRecipe* EventBridge::FindRunewordRecipeByToken(std::uint64_t a_recipeToken) const
+		{
+			const auto it = _runewordRecipeIndexByToken.find(a_recipeToken);
+			if (it == _runewordRecipeIndexByToken.end() || it->second >= _runewordRecipes.size()) {
+				return nullptr;
+			}
+
+			return std::addressof(_runewordRecipes[it->second]);
+		}
+
+		const EventBridge::RunewordRecipe* EventBridge::GetCurrentRunewordRecipe() const
+		{
+			if (_runewordRecipes.empty()) {
+				return nullptr;
+			}
+
+			const auto idx = static_cast<std::size_t>(_runewordRecipeCycleCursor % _runewordRecipes.size());
+			return std::addressof(_runewordRecipes[idx]);
+		}
+
+		void EventBridge::InitializeRunewordCatalog()
+		{
+			_runewordRecipes.clear();
+				_runewordRecipeIndexByToken.clear();
+				_runewordRecipeIndexByResultAffixToken.clear();
+				_runewordRuneNameByToken.clear();
+				_runewordRuneTokenPool.clear();
+				_runewordRuneTokenWeights.clear();
+
+			auto addRecipe = [&](std::string_view a_recipeId,
+				std::string_view a_displayName,
+				const std::vector<std::string_view>& a_runes,
+				std::string_view a_resultAffixId,
+				std::optional<LootItemType> a_recommendedBaseType) {
+				RunewordRecipe recipe{};
+				recipe.id = std::string(a_recipeId);
+				recipe.token = MakeAffixToken(recipe.id);
+				recipe.displayName = std::string(a_displayName);
+				recipe.resultAffixToken = MakeAffixToken(a_resultAffixId);
+				recipe.recommendedBaseType = a_recommendedBaseType;
+
+				for (const auto rune : a_runes) {
+					if (rune.empty()) {
+						continue;
+					}
+
+					recipe.runeIds.emplace_back(rune);
+					const auto runeToken = MakeAffixToken(ToLowerAscii(rune));
+					recipe.runeTokens.push_back(runeToken);
+
+					_runewordRuneNameByToken.try_emplace(runeToken, std::string(rune));
+					if (std::find(_runewordRuneTokenPool.begin(), _runewordRuneTokenPool.end(), runeToken) == _runewordRuneTokenPool.end()) {
+						_runewordRuneTokenPool.push_back(runeToken);
+					}
+				}
+
+				if (recipe.token == 0u || recipe.resultAffixToken == 0u || recipe.runeTokens.empty()) {
+					return;
+				}
+
+				const auto idx = _runewordRecipes.size();
+				_runewordRecipeIndexByToken.emplace(recipe.token, idx);
+				_runewordRecipeIndexByResultAffixToken.emplace(recipe.resultAffixToken, idx);
+				_runewordRecipes.push_back(std::move(recipe));
+			};
+
+			struct RunewordCatalogRow
+			{
+				std::string_view recipeId{};
+				std::string_view displayName{};
+				std::string_view runeCsv{};
+				std::string_view resultAffixId{};
+				std::optional<LootItemType> recommendedBaseType{};
+			};
+
+			constexpr std::array<RunewordCatalogRow, 94> kRunewordCatalogRows{ {
+#include "RunewordCatalogRows.inl"
+			} };
+
+			auto splitRunes = [](std::string_view a_csv) {
+				std::vector<std::string_view> runes;
+				while (!a_csv.empty()) {
+					const auto pos = a_csv.find(',');
+					const auto token = (pos == std::string_view::npos) ? a_csv : a_csv.substr(0, pos);
+					if (!token.empty()) {
+						runes.push_back(token);
+					}
+					if (pos == std::string_view::npos) {
+						break;
+					}
+					a_csv.remove_prefix(pos + 1);
+				}
+				return runes;
+			};
+
+			// Extended D2/D2R runeword catalog (94 recipes).
+			for (const auto& row : kRunewordCatalogRows) {
+				const auto runes = splitRunes(row.runeCsv);
+				if (runes.empty()) {
+					continue;
+				}
+				addRecipe(
+					row.recipeId,
+					row.displayName,
+					runes,
+					row.resultAffixId,
+					row.recommendedBaseType);
+			}
+
+				if (_runewordRecipeCycleCursor >= _runewordRecipes.size()) {
+					_runewordRecipeCycleCursor = 0;
+				}
+
+				_runewordRuneTokenWeights.reserve(_runewordRuneTokenPool.size());
+				for (const auto token : _runewordRuneTokenPool) {
+					double weight = 1.0;
+					if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+						weight = ResolveRunewordFragmentWeight(nameIt->second);
+					}
+					_runewordRuneTokenWeights.push_back(weight);
+				}
+			}
+
+			void EventBridge::SanitizeRunewordState()
+			{
+				auto* player = RE::PlayerCharacter::GetSingleton();
+				const auto canValidateInventory = (player && player->GetInventoryChanges() && player->GetInventoryChanges()->entryList);
+				if (canValidateInventory) {
+					// Legacy -> physical item migration: older saves stored fragments in SKSE serialization.
+					// Convert those counters into real inventory items once, then clear the legacy map.
+					if (!_runewordRuneFragments.empty()) {
+						if (_runewordRuneNameByToken.empty()) {
+							InitializeRunewordCatalog();
+						}
+
+						std::uint32_t migrated = 0u;
+						for (auto it = _runewordRuneFragments.begin(); it != _runewordRuneFragments.end();) {
+							const auto runeToken = it->first;
+							const auto amount = it->second;
+							if (runeToken == 0u || amount == 0u) {
+								it = _runewordRuneFragments.erase(it);
+								continue;
+							}
+
+							const auto given = GrantRunewordFragments(player, _runewordRuneNameByToken, runeToken, amount);
+							if (given > 0u) {
+								const auto maxVal = std::numeric_limits<std::uint32_t>::max();
+								migrated = (migrated > maxVal - given) ? maxVal : (migrated + given);
+								it = _runewordRuneFragments.erase(it);
+							} else {
+								++it;
+							}
+						}
+
+						if (migrated > 0u) {
+							RE::DebugNotification("Runeword: migrated legacy rune fragments to inventory.");
+							SKSE::log::info(
+								"CalamityAffixes: migrated {} legacy runeword fragments to inventory items.",
+								migrated);
+						}
+					}
+
+					for (auto it = _runewordInstanceStates.begin(); it != _runewordInstanceStates.end();) {
+						if (!PlayerHasInstanceKey(it->first)) {
+							it = _runewordInstanceStates.erase(it);
+						} else {
+							++it;
+					}
+				}
+
+				if (_runewordSelectedBaseKey && !PlayerHasInstanceKey(*_runewordSelectedBaseKey)) {
+					_runewordSelectedBaseKey.reset();
+				}
+			}
+
+			if (_runewordRecipes.empty()) {
+				_runewordRecipeCycleCursor = 0;
+				return;
+			}
+
+			if (_runewordRecipeCycleCursor >= _runewordRecipes.size()) {
+				_runewordRecipeCycleCursor = 0;
+			}
+
+			const auto* currentRecipe = GetCurrentRunewordRecipe();
+			for (auto& [instanceKey, state] : _runewordInstanceStates) {
+				auto* recipe = FindRunewordRecipeByToken(state.recipeToken);
+				if (!recipe) {
+					if (currentRecipe) {
+						state.recipeToken = currentRecipe->token;
+						recipe = currentRecipe;
+					}
+				}
+
+				if (recipe && state.insertedRunes > recipe->runeTokens.size()) {
+					state.insertedRunes = static_cast<std::uint32_t>(recipe->runeTokens.size());
+				}
+			}
+		}
+
+		void EventBridge::CycleRunewordBase(std::int32_t a_direction)
+		{
+			if (!_configLoaded || a_direction == 0) {
+				return;
+			}
+
+			SanitizeRunewordState();
+			auto candidates = CollectEquippedRunewordBaseCandidates(true);
+			if (candidates.empty()) {
+				RE::DebugNotification("Runeword: no equipped weapon/armor base found.");
+				return;
+			}
+
+			std::size_t index = static_cast<std::size_t>(_runewordBaseCycleCursor % candidates.size());
+			if (_runewordSelectedBaseKey) {
+				const auto selectedIt = std::find(candidates.begin(), candidates.end(), *_runewordSelectedBaseKey);
+				if (selectedIt != candidates.end()) {
+					index = static_cast<std::size_t>(std::distance(candidates.begin(), selectedIt));
+				}
+			}
+
+			if (a_direction > 0) {
+				index = (index + 1u) % candidates.size();
+			} else {
+				index = (index + candidates.size() - 1u) % candidates.size();
+			}
+
+			const auto selectedKey = candidates[index];
+			_runewordBaseCycleCursor = static_cast<std::uint32_t>(index);
+			(void)SelectRunewordBase(selectedKey);
+		}
+
+		void EventBridge::CycleRunewordRecipe(std::int32_t a_direction)
+		{
+			if (!_configLoaded || a_direction == 0 || _runewordRecipes.empty()) {
+				return;
+			}
+
+			SanitizeRunewordState();
+			if (a_direction > 0) {
+				_runewordRecipeCycleCursor = static_cast<std::uint32_t>((_runewordRecipeCycleCursor + 1u) % _runewordRecipes.size());
+			} else {
+				const auto current = static_cast<std::size_t>(_runewordRecipeCycleCursor % _runewordRecipes.size());
+				const auto next = (current + _runewordRecipes.size() - 1u) % _runewordRecipes.size();
+				_runewordRecipeCycleCursor = static_cast<std::uint32_t>(next);
+			}
+
+			const auto* recipe = GetCurrentRunewordRecipe();
+			if (!recipe) {
+				return;
+			}
+			(void)SelectRunewordRecipe(recipe->token);
+		}
+
+		void EventBridge::GrantNextRequiredRuneFragment(std::uint32_t a_amount)
+		{
+			if (!_configLoaded || a_amount == 0u) {
+				return;
+			}
+
+			SanitizeRunewordState();
+			const RunewordRecipe* recipe = nullptr;
+			std::uint32_t nextIndex = 0u;
+			if (_runewordSelectedBaseKey) {
+				const auto stateIt = _runewordInstanceStates.find(*_runewordSelectedBaseKey);
+				if (stateIt != _runewordInstanceStates.end()) {
+					recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
+					nextIndex = stateIt->second.insertedRunes;
+				}
+			}
+
+			if (!recipe) {
+				recipe = GetCurrentRunewordRecipe();
+			}
+			if (!recipe || recipe->runeTokens.empty()) {
+				return;
+			}
+
+				if (nextIndex >= recipe->runeTokens.size()) {
+					nextIndex = 0u;
+				}
+
+				const auto runeToken = recipe->runeTokens[nextIndex];
+				std::string runeName = "Rune";
+				if (const auto nameIt = _runewordRuneNameByToken.find(runeToken); nameIt != _runewordRuneNameByToken.end()) {
+					runeName = nameIt->second;
+				}
+
+				auto* player = RE::PlayerCharacter::GetSingleton();
+				if (!player) {
+					return;
+				}
+
+				const auto given = GrantRunewordFragments(player, _runewordRuneNameByToken, runeToken, a_amount);
+				if (given == 0u) {
+					std::string note = "Runeword fragment item missing: ";
+					note.append(runeName);
+					RE::DebugNotification(note.c_str());
+					SKSE::log::error(
+						"CalamityAffixes: runeword fragment item missing (runeToken={:016X}, runeName={}).",
+						runeToken,
+						runeName);
+					return;
+				}
+
+				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, runeToken);
+				const std::string note = "Runeword Fragment + " + runeName + " (" + std::to_string(owned) + ")";
+				RE::DebugNotification(note.c_str());
+			}
+
+		void EventBridge::GrantCurrentRecipeRuneSet(std::uint32_t a_amount)
+		{
+			if (!_configLoaded || a_amount == 0u) {
+				return;
+			}
+
+			const auto* recipe = GetCurrentRunewordRecipe();
+				if (!recipe) {
+					return;
+				}
+
+				auto* player = RE::PlayerCharacter::GetSingleton();
+				if (!player) {
+					return;
+				}
+
+				std::uint32_t totalGiven = 0u;
+				for (const auto runeToken : recipe->runeTokens) {
+					const auto given = GrantRunewordFragments(player, _runewordRuneNameByToken, runeToken, a_amount);
+					const auto maxVal = std::numeric_limits<std::uint32_t>::max();
+					totalGiven = (totalGiven > maxVal - given) ? maxVal : (totalGiven + given);
+				}
+
+				if (totalGiven == 0u) {
+					RE::DebugNotification("Runeword fragments: missing rune fragment item records.");
+					SKSE::log::error("CalamityAffixes: runeword fragment items missing (grant recipe set).");
+					return;
+				}
+
+				const std::string note = "Runeword Fragments + Set: " + recipe->displayName;
+				RE::DebugNotification(note.c_str());
+			}
+
+		void EventBridge::MaybeGrantRandomRunewordFragment()
+		{
+			if (_runewordRuneTokenPool.empty()) {
+				return;
+			}
+
+			const float chance = std::clamp(_loot.runewordFragmentChancePercent, 0.0f, 100.0f);
+			if (chance <= 0.0f) {
+				return;
+			}
+
+			std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
+			if (chanceDist(_rng) >= chance) {
+				return;
+			}
+
+				std::uint64_t runeToken = 0u;
+				if (!_runewordRuneTokenWeights.empty() && _runewordRuneTokenWeights.size() == _runewordRuneTokenPool.size()) {
+					std::discrete_distribution<std::size_t> pick(_runewordRuneTokenWeights.begin(), _runewordRuneTokenWeights.end());
+					runeToken = _runewordRuneTokenPool[pick(_rng)];
+				} else {
+					std::uniform_int_distribution<std::size_t> pick(0, _runewordRuneTokenPool.size() - 1u);
+					runeToken = _runewordRuneTokenPool[pick(_rng)];
+				}
+
+				std::string runeName = "Rune";
+				if (const auto nameIt = _runewordRuneNameByToken.find(runeToken); nameIt != _runewordRuneNameByToken.end()) {
+					runeName = nameIt->second;
+				}
+
+				auto* player = RE::PlayerCharacter::GetSingleton();
+				if (!player) {
+					return;
+				}
+
+				const auto given = GrantRunewordFragments(player, _runewordRuneNameByToken, runeToken, 1u);
+				if (given == 0u) {
+					SKSE::log::error(
+						"CalamityAffixes: runeword fragment item missing (runeToken={:016X}, runeName={}).",
+						runeToken,
+						runeName);
+					return;
+				}
+
+				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, runeToken);
+
+				std::string note = "Runeword Fragment: ";
+				note.append(runeName);
+				note.append(" (");
+				note.append(std::to_string(owned));
+				note.push_back(')');
+				RE::DebugNotification(note.c_str());
+			}
+
+		void EventBridge::ApplyRunewordResult(std::uint64_t a_instanceKey, const RunewordRecipe& a_recipe)
+		{
+			const auto affixIt = _affixIndexByToken.find(a_recipe.resultAffixToken);
+			if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+				std::string note = "Runeword failed: missing affix ";
+				note.append(a_recipe.displayName);
+				RE::DebugNotification(note.c_str());
+				SKSE::log::error(
+					"CalamityAffixes: runeword result affix missing (recipe={}, resultToken={:016X}).",
+					a_recipe.id,
+					a_recipe.resultAffixToken);
+				return;
+			}
+
+			_instanceAffixes[a_instanceKey] = a_recipe.resultAffixToken;
+			_instanceStates[a_instanceKey] = {};
+			_runewordInstanceStates.erase(a_instanceKey);
+
+			RE::InventoryEntryData* entry = nullptr;
+			RE::ExtraDataList* xList = nullptr;
+			if (ResolvePlayerInventoryInstance(a_instanceKey, entry, xList) && entry && xList) {
+				EnsureAffixDisplayName(entry, xList, _affixes[affixIt->second]);
+			}
+
+			RebuildActiveCounts();
+
+			std::string note = "Runeword Complete: ";
+			note.append(a_recipe.displayName);
+			RE::DebugNotification(note.c_str());
+			SKSE::log::info(
+				"CalamityAffixes: runeword completed (recipe={}, resultAffix={}).",
+				a_recipe.id,
+				_affixes[affixIt->second].id);
+		}
+
+		void EventBridge::InsertRunewordRuneIntoSelectedBase()
+		{
+			if (!_configLoaded) {
+				return;
+			}
+
+			SanitizeRunewordState();
+			if (!_runewordSelectedBaseKey) {
+				RE::DebugNotification("Runeword: select a base first.");
+				return;
+			}
+
+			RE::InventoryEntryData* entry = nullptr;
+			RE::ExtraDataList* xList = nullptr;
+			if (!ResolvePlayerInventoryInstance(*_runewordSelectedBaseKey, entry, xList)) {
+				RE::DebugNotification("Runeword: selected base is no longer available.");
+				_runewordSelectedBaseKey.reset();
+				return;
+			}
+
+			// If base already has a completed runeword, block further crafting.
+			if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
+				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(it->second);
+					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+					std::string note = "Runeword: already complete (";
+					note.append(_runewordRecipes[rwIt->second].displayName);
+					note.push_back(')');
+					RE::DebugNotification(note.c_str());
+					return;
+				}
+			}
+
+			auto& state = _runewordInstanceStates[*_runewordSelectedBaseKey];
+			if (state.recipeToken == 0u) {
+				if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
+					state.recipeToken = currentRecipe->token;
+				}
+			}
+
+			const RunewordRecipe* recipe = FindRunewordRecipeByToken(state.recipeToken);
+			if (!recipe) {
+				recipe = GetCurrentRunewordRecipe();
+				if (recipe) {
+					state.recipeToken = recipe->token;
+				}
+			}
+			if (!recipe || recipe->runeTokens.empty()) {
+				RE::DebugNotification("Runeword: recipe is not set.");
+				return;
+			}
+
+			const auto totalRunes = recipe->runeTokens.size();
+			if (state.insertedRunes >= totalRunes) {
+				// Legacy finalize path.
+				ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe);
+				return;
+			}
+
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!player) {
+				return;
+			}
+
+			const auto requiredCounts = BuildRuneTokenCounts<16>(
+				std::span<const std::uint64_t>(recipe->runeTokens.data(), recipe->runeTokens.size()),
+				state.insertedRunes);
+
+			bool ready = true;
+			std::string missingSummary;
+			for (std::size_t i = 0; i < requiredCounts.size; ++i) {
+				const auto token = requiredCounts.entries[i].token;
+				const auto required = requiredCounts.entries[i].count;
+				if (token == 0u || required == 0u) {
+					continue;
+				}
+
+				std::string runeName = "Rune";
+				if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+					runeName = nameIt->second;
+				}
+
+				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, token);
+				if (owned >= required) {
+					continue;
+				}
+
+				ready = false;
+				const auto missing = required - owned;
+				if (!missingSummary.empty()) {
+					missingSummary.append(", ");
+				}
+				missingSummary.append(runeName);
+				missingSummary.append(" x");
+				missingSummary.append(std::to_string(missing));
+			}
+
+			if (!ready) {
+				std::string note = "Runeword missing fragments: ";
+				note.append(missingSummary.empty() ? "?" : missingSummary);
+				RE::DebugNotification(note.c_str());
+				return;
+			}
+
+			// Consume all required fragments.
+			for (std::size_t i = 0; i < requiredCounts.size; ++i) {
+				const auto token = requiredCounts.entries[i].token;
+				const auto required = requiredCounts.entries[i].count;
+				if (token == 0u || required == 0u) {
+					continue;
+				}
+
+				std::string runeName = "Rune";
+				if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+					runeName = nameIt->second;
+				}
+
+				auto* fragmentItem = LookupRunewordFragmentItem(_runewordRuneNameByToken, token);
+				if (!fragmentItem) {
+					std::string note = "Runeword fragment item missing: ";
+					note.append(runeName);
+					RE::DebugNotification(note.c_str());
+					SKSE::log::error(
+						"CalamityAffixes: runeword fragment item missing (requiredRuneToken={:016X}, runeName={}).",
+						token,
+						runeName);
+					return;
+				}
+
+				for (std::uint32_t n = 0; n < required; ++n) {
+					if (!TryConsumeRunewordFragment(player, _runewordRuneNameByToken, token)) {
+						std::string note = "Runeword failed to consume fragment: ";
+						note.append(runeName);
+						RE::DebugNotification(note.c_str());
+						SKSE::log::warn(
+							"CalamityAffixes: runeword failed to consume fragment (runeToken={:016X}, runeName={}).",
+							token,
+							runeName);
+						return;
+					}
+				}
+			}
+
+			ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe);
+		}
+
+		std::string EventBridge::BuildRunewordTooltip(std::uint64_t a_instanceKey) const
+		{
+			std::string tooltip;
+
+			if (const auto affixIt = _instanceAffixes.find(a_instanceKey); affixIt != _instanceAffixes.end()) {
+				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(affixIt->second);
+					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+					tooltip = "Runeword Complete: ";
+					tooltip.append(_runewordRecipes[rwIt->second].displayName);
+				}
+			}
+
+			const auto stateIt = _runewordInstanceStates.find(a_instanceKey);
+			if (stateIt == _runewordInstanceStates.end()) {
+				return tooltip;
+			}
+
+			const auto* recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
+			if (!recipe) {
+				return tooltip;
+			}
+
+			if (!tooltip.empty()) {
+				tooltip.push_back('\n');
+			}
+
+			tooltip.append("Runeword: ");
+			tooltip.append(recipe->displayName);
+			tooltip.append(" (");
+			tooltip.append(std::to_string(stateIt->second.insertedRunes));
+			tooltip.push_back('/');
+			tooltip.append(std::to_string(recipe->runeTokens.size()));
+			tooltip.push_back(')');
+
+				if (stateIt->second.insertedRunes < recipe->runeTokens.size()) {
+					const auto nextRuneToken = recipe->runeTokens[stateIt->second.insertedRunes];
+					std::string runeName = "Rune";
+					if (const auto nameIt = _runewordRuneNameByToken.find(nextRuneToken); nameIt != _runewordRuneNameByToken.end()) {
+						runeName = nameIt->second;
+					}
+					auto* player = RE::PlayerCharacter::GetSingleton();
+					const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, nextRuneToken);
+
+					tooltip.append(" / Next: ");
+					tooltip.append(runeName);
+					tooltip.append(" (owned ");
+				tooltip.append(std::to_string(owned));
+				tooltip.push_back(')');
+			}
+
+			if (recipe->recommendedBaseType) {
+				const auto baseType = ResolveInstanceLootType(a_instanceKey);
+				if (baseType && *baseType != *recipe->recommendedBaseType) {
+					tooltip.append("\nRecommended Base: ");
+					tooltip.append(DescribeLootItemType(*recipe->recommendedBaseType));
+					tooltip.append(" (current ");
+					tooltip.append(DescribeLootItemType(*baseType));
+					tooltip.push_back(')');
+				}
+			}
+
+			if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == a_instanceKey) {
+				tooltip.append("\nRuneword Base: Selected");
+			}
+
+			return tooltip;
+		}
+
+		void EventBridge::LogRunewordStatus() const
+		{
+			std::string note = "Runeword Status: ";
+			if (const auto* recipe = GetCurrentRunewordRecipe()) {
+				note.append(recipe->displayName);
+			} else {
+				note.append("No recipe");
+			}
+
+			if (_runewordSelectedBaseKey) {
+				note.append(" | Base selected");
+				const auto stateIt = _runewordInstanceStates.find(*_runewordSelectedBaseKey);
+				if (stateIt != _runewordInstanceStates.end()) {
+					const auto* recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
+					if (recipe) {
+						note.append(" | ");
+						note.append(std::to_string(stateIt->second.insertedRunes));
+						note.push_back('/');
+						note.append(std::to_string(recipe->runeTokens.size()));
+					}
+				}
+			}
+
+				if (const auto* recipe = GetCurrentRunewordRecipe()) {
+					note.append(" | Runes:");
+					auto* player = RE::PlayerCharacter::GetSingleton();
+					for (const auto token : recipe->runeTokens) {
+						std::string runeName = "Rune";
+						if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+							runeName = nameIt->second;
+						}
+						const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, token);
+						note.push_back(' ');
+						note.append(runeName);
+						note.push_back('=');
+						note.append(std::to_string(owned));
+					}
+				}
+
+			RE::DebugNotification(note.c_str());
+			SKSE::log::info("CalamityAffixes: {}", note);
+		}
+
+		EventBridge::InstanceRuntimeState& EventBridge::EnsureInstanceRuntimeState(std::uint64_t a_instanceKey)
+		{
+			return _instanceStates[a_instanceKey];
+		}
+
+	const EventBridge::InstanceRuntimeState* EventBridge::FindInstanceRuntimeState(std::uint64_t a_instanceKey) const
+	{
+		const auto it = _instanceStates.find(a_instanceKey);
+		return (it != _instanceStates.end()) ? std::addressof(it->second) : nullptr;
+	}
+
+	std::size_t EventBridge::ResolveEvolutionStageIndex(const Action& a_action, const InstanceRuntimeState* a_state) const
+	{
+		if (!a_action.evolutionEnabled || a_action.evolutionThresholds.empty()) {
+			return 0;
+		}
+
+		const std::uint32_t xp = a_state ? a_state->evolutionXp : 0u;
+		std::size_t stage = 0;
+		for (std::size_t i = 0; i < a_action.evolutionThresholds.size(); ++i) {
+			if (xp < a_action.evolutionThresholds[i]) {
+				break;
+			}
+			stage = i;
+		}
+		return stage;
+	}
+
+	float EventBridge::ResolveEvolutionMultiplier(const Action& a_action, const InstanceRuntimeState* a_state) const
+	{
+		if (!a_action.evolutionEnabled || a_action.evolutionMultipliers.empty()) {
+			return 1.0f;
+		}
+
+		std::size_t stage = ResolveEvolutionStageIndex(a_action, a_state);
+		if (stage >= a_action.evolutionMultipliers.size()) {
+			stage = a_action.evolutionMultipliers.size() - 1;
+		}
+
+		const float mult = a_action.evolutionMultipliers[stage];
+		return (mult > 0.0f) ? mult : 1.0f;
+	}
+
+	void EventBridge::AdvanceRuntimeStateForAffixProc(const AffixRuntime& a_affix)
+	{
+		const auto& action = a_affix.action;
+		const bool usesEvolution = action.evolutionEnabled && action.evolutionXpPerProc > 0u;
+		const bool usesModeCycle = action.modeCycleEnabled && !action.modeCycleSpells.empty() && !action.modeCycleManualOnly;
+		if (!usesEvolution && !usesModeCycle) {
+			return;
+		}
+
+		auto keys = CollectEquippedInstanceKeysForAffixToken(a_affix.token);
+		if (keys.empty()) {
+			return;
+		}
+
+		const std::uint32_t xpPerProc = action.evolutionXpPerProc;
+		const std::uint32_t switchEvery = std::max<std::uint32_t>(1u, action.modeCycleSwitchEveryProcs);
+		const auto modeCount = static_cast<std::uint32_t>(action.modeCycleSpells.size());
+
+		for (const auto key : keys) {
+			auto& state = EnsureInstanceRuntimeState(key);
+
+			if (usesEvolution) {
+				const auto maxVal = std::numeric_limits<std::uint32_t>::max();
+				if (state.evolutionXp > maxVal - xpPerProc) {
+					state.evolutionXp = maxVal;
+				} else {
+					state.evolutionXp += xpPerProc;
+				}
+			}
+
+			if (usesModeCycle && modeCount > 0u) {
+				const auto maxVal = std::numeric_limits<std::uint32_t>::max();
+				if (state.modeCycleCounter < maxVal) {
+					state.modeCycleCounter += 1u;
+				}
+				if (state.modeCycleCounter >= switchEvery) {
+					state.modeCycleCounter = 0u;
+					state.modeIndex = (state.modeIndex + 1u) % modeCount;
+				}
+			}
+		}
+	}
+
+	void EventBridge::CycleManualModeForEquippedAffixes(std::int32_t a_direction, std::string_view a_affixIdFilter)
+	{
+		if (!_configLoaded || a_direction == 0) {
+			return;
+		}
+
+		std::uint32_t switched = 0u;
+		for (const auto& affix : _affixes) {
+			const auto& action = affix.action;
+			if (action.type != ActionType::kCastSpell ||
+				!action.modeCycleEnabled ||
+				!action.modeCycleManualOnly ||
+				action.modeCycleSpells.empty()) {
+				continue;
+			}
+
+			if (!a_affixIdFilter.empty() && affix.id != a_affixIdFilter) {
+				continue;
+			}
+
+			const auto modeCount = static_cast<std::int32_t>(action.modeCycleSpells.size());
+			if (modeCount <= 0) {
+				continue;
+			}
+
+			const auto keys = CollectEquippedInstanceKeysForAffixToken(affix.token);
+			for (const auto key : keys) {
+				auto& state = EnsureInstanceRuntimeState(key);
+				const std::int32_t current = static_cast<std::int32_t>(state.modeIndex % static_cast<std::uint32_t>(modeCount));
+				std::int32_t next = (current + a_direction) % modeCount;
+				if (next < 0) {
+					next += modeCount;
+				}
+
+				state.modeIndex = static_cast<std::uint32_t>(next);
+				state.modeCycleCounter = 0u;
+				switched += 1u;
+			}
+		}
+
+		if (_loot.debugLog && switched > 0u) {
+			spdlog::debug(
+				"CalamityAffixes: manual mode cycle switched (count={}, direction={}, filter='{}').",
+				switched,
+				a_direction,
+				std::string(a_affixIdFilter));
+		}
+	}
+
+	std::optional<std::string> EventBridge::GetInstanceAffixTooltip(
+		const RE::InventoryEntryData* a_item,
+		std::string_view a_selectedDisplayName) const
+	{
+		if (!_configLoaded) {
+			return std::nullopt;
+		}
+		if (!a_item) {
+			return std::nullopt;
+		}
+
+		if (!a_item->extraLists) {
+			return std::nullopt;
+		}
+
+		auto resolveCandidate = [&](RE::ExtraDataList* a_xList) -> std::optional<std::pair<const AffixRuntime*, std::uint64_t>> {
+			if (!a_xList) {
+				return std::nullopt;
+			}
+
+			const auto* uid = a_xList->GetByType<RE::ExtraUniqueID>();
+			if (!uid) {
+				return std::nullopt;
+			}
+
+			const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+			const auto it = _instanceAffixes.find(key);
+			if (it == _instanceAffixes.end()) {
+				return std::nullopt;
+			}
+
+			const auto idxIt = _affixIndexByToken.find(it->second);
+			if (idxIt == _affixIndexByToken.end()) {
+				return std::nullopt;
+			}
+			const auto idx = idxIt->second;
+			if (idx >= _affixes.size()) {
+				return std::nullopt;
+			}
+
+			const auto& affix = _affixes[idx];
+			if (affix.displayName.empty()) {
+				return std::nullopt;
+			}
+
+			return std::pair<const AffixRuntime*, std::uint64_t>{ std::addressof(affix), key };
+		};
+
+		struct TooltipCandidate
+		{
+			const AffixRuntime* affix{ nullptr };
+			std::uint64_t instanceKey{ 0 };
+			std::string_view rowName{};
+		};
+
+		std::vector<TooltipCandidate> candidates;
+		for (auto* xList : *a_item->extraLists) {
+			const auto resolved = resolveCandidate(xList);
+			if (!resolved) {
+				continue;
+			}
+
+			const char* rowNameRaw = xList->GetDisplayName(a_item->object);
+			const std::string_view rowName = rowNameRaw ? std::string_view(rowNameRaw) : std::string_view{};
+			candidates.push_back(TooltipCandidate{
+				.affix = resolved->first,
+				.instanceKey = resolved->second,
+				.rowName = rowName
+			});
+		}
+
+			if (candidates.empty()) {
+				for (auto* xList : *a_item->extraLists) {
+					if (!xList) {
+						continue;
+					}
+					const auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+					if (!uid) {
+						continue;
+					}
+
+					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+					const auto rw = BuildRunewordTooltip(key);
+					if (!rw.empty()) {
+						return rw;
+					}
+				}
+
+				return std::nullopt;
+			}
+
+		auto formatTooltip = [&](const TooltipCandidate& a_candidate) -> std::string {
+			const auto& affix = *a_candidate.affix;
+			std::string tooltip = affix.displayName;
+			if (tooltip.empty()) {
+				return tooltip;
+			}
+
+			const auto* state = FindInstanceRuntimeState(a_candidate.instanceKey);
+			const auto& action = affix.action;
+
+			bool appended = false;
+			if (action.evolutionEnabled && !action.evolutionThresholds.empty()) {
+				if (!appended) {
+					tooltip.append("\n");
+					appended = true;
+				}
+
+				const std::size_t stage = ResolveEvolutionStageIndex(action, state);
+				const std::size_t totalStages = action.evolutionThresholds.size();
+				const std::uint32_t xp = state ? state->evolutionXp : 0u;
+				const float mult = ResolveEvolutionMultiplier(action, state);
+
+				tooltip.append("Evolution Stage ");
+				tooltip.append(std::to_string(stage + 1));
+				tooltip.push_back('/');
+				tooltip.append(std::to_string(totalStages));
+				tooltip.append(" (XP ");
+				tooltip.append(std::to_string(xp));
+				tooltip.append(", x");
+				tooltip.append(std::to_string(mult));
+				tooltip.push_back(')');
+
+				if (stage + 1 < action.evolutionThresholds.size()) {
+					tooltip.append(" -> Next ");
+					tooltip.append(std::to_string(action.evolutionThresholds[stage + 1]));
+				}
+			}
+
+				if (action.modeCycleEnabled && !action.modeCycleSpells.empty()) {
+					if (appended) {
+						tooltip.push_back('\n');
+					} else {
+					tooltip.append("\n");
+					appended = true;
+				}
+
+				const auto modeCount = static_cast<std::uint32_t>(action.modeCycleSpells.size());
+				const std::uint32_t idx = modeCount > 0u ? ((state ? state->modeIndex : 0u) % modeCount) : 0u;
+
+				tooltip.append("Mode ");
+				if (idx < action.modeCycleLabels.size() && !action.modeCycleLabels[idx].empty()) {
+					tooltip.append(action.modeCycleLabels[idx]);
+				} else {
+					tooltip.append(std::to_string(idx + 1));
+					tooltip.push_back('/');
+					tooltip.append(std::to_string(modeCount));
+				}
+					if (action.modeCycleManualOnly) {
+						tooltip.append(" (Manual)");
+					}
+				}
+
+				const auto runewordTooltip = BuildRunewordTooltip(a_candidate.instanceKey);
+				if (!runewordTooltip.empty()) {
+					if (appended) {
+						tooltip.push_back('\n');
+					} else {
+						tooltip.append("\n");
+					}
+					tooltip.append(runewordTooltip);
+				}
+
+				return tooltip;
+			};
+
+		if (!a_selectedDisplayName.empty()) {
+			const TooltipCandidate* match = nullptr;
+			bool ambiguous = false;
+
+			for (const auto& candidate : candidates) {
+				if (candidate.rowName.empty() || candidate.rowName != a_selectedDisplayName) {
+					continue;
+				}
+
+				if (!match) {
+					match = std::addressof(candidate);
+					continue;
+				}
+
+				if (match->affix != candidate.affix || match->instanceKey != candidate.instanceKey) {
+					ambiguous = true;
+					break;
+				}
+			}
+
+			if (match && !ambiguous) {
+				return formatTooltip(*match);
+			}
+
+			// If a specific row name is known but no safe exact match exists,
+			// avoid returning a tooltip for a different inventory row.
+			return std::nullopt;
+		}
+
+		return formatTooltip(candidates.front());
+	}
+
+	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+		const RE::TESContainerChangedEvent* a_event,
+		RE::BSTEventSource<RE::TESContainerChangedEvent>*)
+	{
+		if (!_configLoaded || !_runtimeEnabled) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		if (!a_event) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		if (_loot.chancePercent <= 0.0f) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		const auto playerId = player->GetFormID();
+		const auto refHandle = static_cast<LootRerollGuard::RefHandle>(RE::ObjectRefHandle(a_event->reference).native_handle());
+
+		// 1) Record player-dropped world references so re-picking them up can't "reroll" loot affixes.
+		if (a_event->oldContainer == playerId &&
+			a_event->newContainer == LootRerollGuard::kWorldContainer &&
+			refHandle != 0) {
+			std::uint64_t instanceKey = 0;
+			if (a_event->reference) {
+				if (auto ref = a_event->reference.get(); ref) {
+					if (const auto* uid = ref->extraList.GetByType<RE::ExtraUniqueID>(); uid && uid->baseID != 0 && uid->uniqueID != 0) {
+						instanceKey = MakeInstanceKey(uid->baseID, uid->uniqueID);
+					}
+				}
+			}
+			if (instanceKey == 0 && a_event->baseObj != 0 && a_event->uniqueID != 0) {
+				instanceKey = MakeInstanceKey(a_event->baseObj, a_event->uniqueID);
+			}
+
+			_lootRerollGuard.NotePlayerDrop(
+				playerId,
+				a_event->oldContainer,
+				a_event->newContainer,
+				a_event->itemCount,
+				refHandle,
+				instanceKey);
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		// 2) Only roll when items move INTO the player.
+		if (a_event->itemCount <= 0) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		if (a_event->newContainer != playerId) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		// 3) Skip if this pickup is the player re-acquiring their own dropped reference.
+		if (refHandle != 0 &&
+			_lootRerollGuard.ConsumeIfPlayerDropPickup(
+				playerId,
+				a_event->oldContainer,
+				a_event->newContainer,
+				a_event->itemCount,
+				refHandle)) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: skipping loot roll (player dropped + re-picked) (baseObj={:08X}, uniqueID={}).",
+					a_event->baseObj,
+					a_event->uniqueID);
+			}
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+			const auto baseObj = a_event->baseObj;
+			const auto count = a_event->itemCount;
+			const auto uid = a_event->uniqueID;
+			const auto allowRunewordFragmentRoll = IsLootSourceCorpseChestOrWorld(a_event->oldContainer, playerId);
+
+			if (!allowRunewordFragmentRoll) {
+				if (_loot.debugLog) {
+					SKSE::log::debug(
+						"CalamityAffixes: runeword fragment roll skipped (source filter) (oldContainer={:08X}, baseObj={:08X}, uniqueID={}).",
+						a_event->oldContainer,
+						baseObj,
+						uid);
+				}
+			}
+
+			SKSE::log::debug(
+				"CalamityAffixes: loot event queued (baseObj={:08X}, count={}, uniqueID={}).",
+			baseObj,
+			count,
+			uid);
+
+			if (auto* task = SKSE::GetTaskInterface()) {
+				task->AddTask([baseObj, count, uid, allowRunewordFragmentRoll]() {
+					EventBridge::GetSingleton()->ProcessLootAcquired(baseObj, count, uid, allowRunewordFragmentRoll);
+				});
+			} else {
+				ProcessLootAcquired(baseObj, count, uid, allowRunewordFragmentRoll);
+			}
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
+	{
+		return (static_cast<std::uint64_t>(a_baseID) << 16) | static_cast<std::uint64_t>(a_uniqueID);
+	}
+
+	std::optional<EventBridge::LootItemType> EventBridge::ParseLootItemType(std::string_view a_kidType) const
+	{
+		std::string type{ a_kidType };
+		std::transform(type.begin(), type.end(), type.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+		if (type.find("weapon") != std::string::npos) {
+			return LootItemType::kWeapon;
+		}
+		if (type.find("armor") != std::string::npos) {
+			return LootItemType::kArmor;
+		}
+
+		return std::nullopt;
+	}
+
+	std::string EventBridge::FormatLootName(std::string_view a_baseName, std::string_view a_affixName) const
+	{
+		std::string out = _loot.nameFormat;
+
+		auto replaceAll = [](std::string& a_text, std::string_view a_from, std::string_view a_to) {
+			if (a_from.empty()) {
+				return;
+			}
+
+			std::size_t pos = 0;
+			while ((pos = a_text.find(a_from, pos)) != std::string::npos) {
+				a_text.replace(pos, a_from.size(), a_to);
+				pos += a_to.size();
+			}
+		};
+
+		replaceAll(out, "{base}", a_baseName);
+		replaceAll(out, "{affix}", a_affixName);
+		return out;
+	}
+
+	std::optional<std::size_t> EventBridge::RollLootAffixIndex(LootItemType a_itemType)
+	{
+		if (_loot.chancePercent <= 0.0f) {
+			return std::nullopt;
+		}
+
+		if (_loot.chancePercent < 100.0f) {
+			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+			if (dist(_rng) >= _loot.chancePercent) {
+				return std::nullopt;
+			}
+		}
+
+		const auto weaponCount = _lootWeaponAffixes.size();
+		const auto armorCount = _lootArmorAffixes.size();
+
+		if (_loot.sharedPool) {
+			const auto total = weaponCount + armorCount;
+			if (total == 0) {
+				return std::nullopt;
+			}
+
+			std::uniform_int_distribution<std::size_t> pick(0, total - 1);
+			const auto slot = pick(_rng);
+			if (slot < weaponCount) {
+				return _lootWeaponAffixes[slot];
+			}
+			return _lootArmorAffixes[slot - weaponCount];
+		}
+
+		const auto& pool = (a_itemType == LootItemType::kWeapon) ? _lootWeaponAffixes : _lootArmorAffixes;
+		if (pool.empty()) {
+			return std::nullopt;
+		}
+
+		std::uniform_int_distribution<std::size_t> pick(0, pool.size() - 1);
+		return pool[pick(_rng)];
+	}
+
+		void EventBridge::ApplyChosenAffix(
+			RE::InventoryChanges* a_changes,
+			RE::InventoryEntryData* a_entry,
+			RE::ExtraDataList* a_xList,
+			LootItemType,
+			std::size_t a_affixIndex,
+			bool a_allowRunewordFragmentRoll)
+		{
+		if (!a_changes || !a_entry || !a_entry->object || !a_xList) {
+			return;
+		}
+
+		if (a_affixIndex >= _affixes.size()) {
+			return;
+		}
+
+		auto& affix = _affixes[a_affixIndex];
+		if (affix.id.empty()) {
+			return;
+		}
+
+		auto* uid = a_xList->GetByType<RE::ExtraUniqueID>();
+		if (!uid) {
+			auto* created = RE::BSExtraData::Create<RE::ExtraUniqueID>();
+			created->baseID = a_entry->object->GetFormID();
+			created->uniqueID = a_changes->GetNextUniqueID();
+			a_xList->Add(created);
+			uid = created;
+		}
+
+		const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+		if (const auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
+			EnsureInstanceRuntimeState(key);
+			const auto idxIt = _affixIndexByToken.find(existingIt->second);
+			if (idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
+				EnsureAffixDisplayName(a_entry, a_xList, _affixes[idxIt->second]);
+			}
+			return;
+		}
+
+		_instanceAffixes.emplace(key, affix.token);
+		EnsureInstanceRuntimeState(key);
+		SKSE::log::debug(
+			"CalamityAffixes: loot affix '{}' applied to {:08X}:{}.",
+			affix.id,
+			uid->baseID,
+			uid->uniqueID);
+
+				EnsureAffixDisplayName(a_entry, a_xList, affix);
+				if (a_allowRunewordFragmentRoll) {
+					MaybeGrantRandomRunewordFragment();
+				}
+			}
+
+		void EventBridge::ApplyAffixToInstance(
+			RE::InventoryChanges* a_changes,
+			RE::InventoryEntryData* a_entry,
+			RE::ExtraDataList* a_xList,
+			LootItemType a_itemType,
+			bool a_allowRunewordFragmentRoll)
+		{
+			const auto idx = RollLootAffixIndex(a_itemType);
+			if (!idx) {
+				return;
+			}
+
+			ApplyChosenAffix(a_changes, a_entry, a_xList, a_itemType, *idx, a_allowRunewordFragmentRoll);
+		}
+
+		void EventBridge::EnsureAffixDisplayName(
+			RE::InventoryEntryData* a_entry,
+			RE::ExtraDataList* a_xList,
+			const AffixRuntime& a_affix)
+		{
+			if (!_loot.renameItem || !a_entry || !a_entry->object || !a_xList) {
+				return;
+			}
+
+			if (a_affix.label.empty()) {
+				return;
+			}
+
+			const char* currentRaw = a_xList->GetDisplayName(a_entry->object);
+			const std::string currentName = currentRaw ? currentRaw : "";
+
+			auto isKnownAffixLabel = [&](std::string_view a_label) {
+				if (a_label.empty()) {
+					return false;
+				}
+
+				for (const auto& affix : _affixes) {
+					if (!affix.label.empty() && affix.label == a_label) {
+						return true;
+					}
+				}
+				return false;
+			};
+
+			auto stripKnownAffixTags = [&](std::string_view a_name) {
+				std::string cleaned;
+				cleaned.reserve(a_name.size());
+
+				std::size_t pos = 0;
+				while (pos < a_name.size()) {
+					if (a_name[pos] == '[') {
+						const auto right = a_name.find(']', pos + 1);
+						if (right != std::string::npos && right > pos + 1) {
+							const std::string_view label = a_name.substr(pos + 1, right - pos - 1);
+							if (isKnownAffixLabel(label)) {
+								while (!cleaned.empty() && cleaned.back() == ' ') {
+									cleaned.pop_back();
+								}
+								pos = right + 1;
+								while (pos < a_name.size() && a_name[pos] == ' ') {
+									++pos;
+								}
+								continue;
+							}
+						}
+					}
+
+					cleaned.push_back(a_name[pos]);
+					++pos;
+				}
+
+				const auto first = cleaned.find_first_not_of(' ');
+				if (first == std::string::npos) {
+					return std::string{};
+				}
+				const auto last = cleaned.find_last_not_of(' ');
+				return cleaned.substr(first, last - first + 1);
+			};
+
+			std::string baseName = stripKnownAffixTags(currentName);
+
+			if (baseName.empty()) {
+				const char* objectNameRaw = a_entry->object->GetName();
+				baseName = objectNameRaw ? objectNameRaw : "";
+			}
+
+			const std::string newName = FormatLootName(baseName, a_affix.label);
+			if (newName.empty()) {
+				return;
+			}
+			if (newName == currentName) {
+				return;
+			}
+
+			if (auto* text = a_xList->GetExtraTextDisplayData()) {
+				text->SetName(newName.c_str());
+			} else {
+				auto* created = RE::BSExtraData::Create<RE::ExtraTextDisplayData>();
+				created->SetName(newName.c_str());
+				a_xList->Add(created);
+			}
+		}
+
+			void EventBridge::ProcessLootAcquired(RE::FormID a_baseObj, std::int32_t a_count, std::uint16_t a_uniqueID, bool a_allowRunewordFragmentRoll)
+		{
+			if (!_configLoaded || !_runtimeEnabled || _loot.chancePercent <= 0.0f) {
+				return;
+			}
+
+			SKSE::log::debug(
+				"CalamityAffixes: ProcessLootAcquired(baseObj={:08X}, count={}, uniqueID={}).",
+				a_baseObj,
+				a_count,
+				a_uniqueID);
+
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!player) {
+				return;
+			}
+
+			auto* changes = player->GetInventoryChanges();
+			if (!changes || !changes->entryList) {
+				return;
+			}
+
+			auto* form = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
+			if (!form) {
+				return;
+			}
+
+			auto* weap = form->As<RE::TESObjectWEAP>();
+			auto* armo = form->As<RE::TESObjectARMO>();
+			if (!weap && !armo) {
+				return;
+			}
+
+			const auto itemType = weap ? LootItemType::kWeapon : LootItemType::kArmor;
+
+			RE::InventoryEntryData* entry = nullptr;
+			for (auto* e : *changes->entryList) {
+				if (e && e->object && e->object->GetFormID() == a_baseObj) {
+					entry = e;
+					break;
+				}
+			}
+
+		if (!entry) {
+			SKSE::log::debug("CalamityAffixes: ProcessLootAcquired skipped (entry not found).");
+			return;
+		}
+
+		if (!entry->extraLists) {
+			SKSE::log::debug("CalamityAffixes: ProcessLootAcquired skipped (entry->extraLists is null).");
+			return;
+		}
+
+		if (a_uniqueID != 0) {
+			for (auto* xList : *entry->extraLists) {
+				if (!xList) {
+					continue;
+				}
+
+					auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+					if (uid && uid->baseID == a_baseObj && uid->uniqueID == a_uniqueID) {
+						ApplyAffixToInstance(changes, entry, xList, itemType, a_allowRunewordFragmentRoll);
+						return;
+					}
+				}
+		}
+
+		// Fallback:
+		// If the container change event doesn't provide a usable uniqueID, attempt to apply loot rolls to
+		// currently-unassigned instances (extraLists). This avoids constructing ExtraDataList (not supported
+		// by CommonLibSSE-NG flatrim) and still covers most weapon/armor acquisitions.
+		std::int32_t processed = 0;
+		for (auto* xList : *entry->extraLists) {
+			if (processed >= a_count) {
+				break;
+			}
+
+			if (!xList) {
+				continue;
+			}
+
+			if (auto* uid = xList->GetByType<RE::ExtraUniqueID>()) {
+				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+				if (const auto mappedIt = _instanceAffixes.find(key); mappedIt != _instanceAffixes.end()) {
+					const auto idxIt = _affixIndexByToken.find(mappedIt->second);
+					if (idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
+						EnsureAffixDisplayName(entry, xList, _affixes[idxIt->second]);
+					}
+					continue;
+				}
+			}
+
+				ApplyAffixToInstance(changes, entry, xList, itemType, a_allowRunewordFragmentRoll);
+				processed += 1;
+			}
+		}
+}

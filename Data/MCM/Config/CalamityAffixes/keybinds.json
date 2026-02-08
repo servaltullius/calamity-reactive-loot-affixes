@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Exit-9B/MCM-Helper/main/docs/keybinds.schema.json",
+  "modName": "CalamityAffixes",
+  "keybinds": [
+    {
+      "id": "prisma_panel_toggle",
+      "desc": "Toggle Calamity panel / 칼래미티 패널 토글",
+      "action": {
+        "type": "CallGlobalFunction",
+        "script": "CalamityAffixes_ModeControl",
+        "function": "PanelHotkey_NoOp"
+      }
+    }
+  ]
+}

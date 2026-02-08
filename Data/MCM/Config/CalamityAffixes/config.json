@@ -1,0 +1,173 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Exit-9B/MCM-Helper/main/docs/config.schema.json",
+  "modName": "CalamityAffixes",
+  "displayName": "Calamity Affixes",
+  "pages": [
+    {
+      "pageDisplayName": "General / 일반",
+      "cursorFillMode": "topToBottom",
+      "content": [
+        {
+          "type": "header",
+          "text": "Runtime Settings / 런타임 설정"
+        },
+        {
+          "type": "toggle",
+          "id": "bEnabled:General",
+          "text": "Enable Mod / 모드 활성화",
+          "help": "Master enable/disable switch. / 모드 전체 활성/비활성 스위치.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": true
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetEnabled",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fValidationInterval:General",
+          "text": "Validation Interval / 검증 주기",
+          "help": "Seconds. 0 = off (safety-net rescan). / 초 단위. 0이면 주기 검증 OFF.",
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 5.0,
+            "min": 0.0,
+            "max": 30.0,
+            "step": 1.0,
+            "formatString": "%.0f s"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetValidationIntervalSeconds",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fProcChanceMult:General",
+          "text": "Proc Multiplier / 발동 배율",
+          "help": "Scales all proc chances (1.0 = default). / 전체 발동 확률 배율 (1.0 기본).",
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 1.0,
+            "min": 0.1,
+            "max": 3.0,
+            "step": 0.1,
+            "formatString": "%.1f"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetProcChanceMultiplier",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "toggle",
+          "id": "bDebugNotifications:General",
+          "text": "Debug Notifications / 디버그 알림",
+          "help": "Show extra notifications/logging. / 추가 알림/로그를 표시합니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": false
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetDebugNotificationsEnabled",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "type": "header",
+          "text": "Prisma UI Control Panel / 프리즈마 UI 조작 패널"
+        },
+        {
+          "type": "toggle",
+          "id": "bPrismaControlPanelOpen:General",
+          "text": "Open Prisma Panel / 프리즈마 패널 열기",
+          "help": "Main gameplay controls now live in Prisma UI. Turn this ON to open the interactive panel. / 주요 조작은 Prisma UI에서 수행합니다. ON으로 패널을 엽니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": false
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetPrismaControlPanel",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "enum",
+          "id": "iUiLanguage:General",
+          "text": "Panel Language / 패널 언어",
+          "help": "Select the Prisma panel language. English, Korean, or bilingual mode. / 프리즈마 패널 언어를 선택합니다. 영어/한국어/이중 표기 모드.",
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "defaultValue": 2,
+            "options": [
+              "English",
+              "한국어",
+              "English + 한국어"
+            ],
+            "shortNames": [
+              "EN",
+              "KO",
+              "EN+KO"
+            ]
+          }
+        },
+        {
+          "type": "text",
+          "id": "btnPrismaPanelToggle:General",
+          "text": "Toggle Panel (Button) / 패널 토글(버튼)",
+          "help": "Fallback button when the hotkey is not responding. / 단축키가 반응 없을 때 쓰는 백업 버튼입니다.",
+          "valueOptions": {
+            "value": "Toggle / 토글"
+          },
+          "action": {
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "TogglePrismaControlPanel"
+          }
+        },
+        {
+          "type": "text",
+          "id": "tPrismaGuide:General",
+          "text": "Guide / 안내",
+          "help": "Use Prisma panel buttons for manual mode and runeword operations. Close with ESC or Close button. / 수동 모드/룬워드 조작은 Prisma 패널 버튼을 사용하세요. ESC 또는 Close 버튼으로 닫습니다.",
+          "valueOptions": {
+            "value": "Prisma-first UX enabled / Prisma 우선 UX 적용"
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "type": "header",
+          "text": "Hotkey / 단축키"
+        },
+        {
+          "type": "keymap",
+          "id": "prisma_panel_toggle",
+          "text": "Toggle Calamity Panel / 칼래미티 패널 토글",
+          "help": "Single hotkey to open/close the Calamity panel. / 칼래미티 패널 열기/닫기 단축키(1개)입니다."
+        }
+      ]
+    }
+  ]
+}

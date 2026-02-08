@@ -1,0 +1,2910 @@
+{
+  "$schema": "./affixes.schema.json",
+  "version": 1,
+  "modKey": "CalamityAffixes.esp",
+  "eslFlag": true,
+  "loot": {
+    "chancePercent": 25.0,
+    "runewordFragmentChancePercent": 0.3,
+    "renameItem": true,
+    "sharedPool": true,
+    "debugLog": false,
+    "trapGlobalMaxActive": 64,
+    "nameFormat": "{base}[{affix}]"
+  },
+  "keywords": {
+    "tags": [
+      {
+        "editorId": "CAFF_TAG_DOT",
+        "name": "Calamity: DoT Tag"
+      }
+    ],
+    "affixes": [
+      {
+        "id": "arc_lightning",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING",
+        "name": "아크 번개 (적중 100%): 번개 피해 10 (적중 피해 스케일)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_ARC_LIGHTNING",
+            "name": "Calamity: Arc Lightning (Value Mod)",
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_ARC_LIGHTNING",
+            "name": "Calamity: Arc Lightning",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_ARC_LIGHTNING",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_ARC_LIGHTNING",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.1,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_fire_damage",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_DAMAGE",
+        "name": "화염 피해 (적중 100%): 화염 피해 6 (적중 피해 스케일)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_FIRE_DAMAGE",
+            "name": "Calamity: Fire Damage (Value Mod)",
+            "actorValue": "Health",
+            "resistValue": "ResistFire",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_FIRE_DAMAGE",
+            "name": "Calamity: Fire Damage",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_FIRE_DAMAGE",
+              "magnitude": 6,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FIRE_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.1,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_frost_damage",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_DAMAGE",
+        "name": "냉기 피해 (적중 100%): 냉기 피해 6 (적중 피해 스케일)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_FROST_DAMAGE",
+            "name": "Calamity: Frost Damage (Value Mod)",
+            "actorValue": "Health",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_FROST_DAMAGE",
+            "name": "Calamity: Frost Damage",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_FROST_DAMAGE",
+              "magnitude": 6,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FROST_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.1,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_shock_damage",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_DAMAGE",
+        "name": "번개 피해 (적중 100%): 번개 피해 6 (적중 피해 스케일)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SHOCK_DAMAGE",
+            "name": "Calamity: Shock Damage (Value Mod)",
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SHOCK_DAMAGE",
+            "name": "Calamity: Shock Damage",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SHOCK_DAMAGE",
+              "magnitude": 6,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_SHOCK_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.1,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_fire_shred",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_SHRED",
+        "name": "화염 노출 (적중 10% / ICD 4초): 화염 저항 -15 (4초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_FIRE_SHRED",
+            "name": "Calamity: Fire Exposure (Value Mod)",
+            "actorValue": "ResistFire",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_FIRE_SHRED",
+            "name": "Calamity: Fire Exposure",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_FIRE_SHRED",
+              "magnitude": 15,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 4.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FIRE_SHRED",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_frost_shred",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_SHRED",
+        "name": "냉기 노출 (적중 10% / ICD 4초): 냉기 저항 -15 (4초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_FROST_SHRED",
+            "name": "Calamity: Frost Exposure (Value Mod)",
+            "actorValue": "ResistFrost",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_FROST_SHRED",
+            "name": "Calamity: Frost Exposure",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_FROST_SHRED",
+              "magnitude": 15,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 4.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FROST_SHRED",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_shock_shred",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
+        "name": "번개 노출 (적중 10% / ICD 4초): 번개 저항 -15 (4초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SHOCK_SHRED",
+            "name": "Calamity: Shock Exposure (Value Mod)",
+            "actorValue": "ResistShock",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SHOCK_SHRED",
+            "name": "Calamity: Shock Exposure",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SHOCK_SHRED",
+              "magnitude": 15,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 4.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_familiar",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FAMILIAR",
+        "name": "무리 우두머리 (적중 12% / ICD 60초): 패밀리어 소환 (60초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 12.0,
+          "icdSeconds": 60.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|000640B6",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_flaming_familiar",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FLAMING_FAMILIAR",
+        "name": "폭격수 (적중 8% / ICD 25초): 폭발하는 불꽃 패밀리어 소환",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 8.0,
+          "icdSeconds": 25.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|0009CE26",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_flame_atronach",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FLAME_ATRONACH",
+        "name": "원소 동맹 (적중 6% / ICD 90초): 화염 아트로낙 소환 (60초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 6.0,
+          "icdSeconds": 90.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|000204C3",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_frost_atronach",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FROST_ATRONACH",
+        "name": "원소 동맹 (적중 6% / ICD 90초): 냉기 아트로낙 소환 (60초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 6.0,
+          "icdSeconds": 90.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|000204C4",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_storm_atronach",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_STORM_ATRONACH",
+        "name": "폭풍 동맹 (적중 5% / ICD 120초): 폭풍 아트로낙 소환 (60초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 5.0,
+          "icdSeconds": 120.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|000204C5",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_conjure_dremora_lord",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_DREMORA_LORD",
+        "name": "데이드라 계약 (적중 3% / ICD 180초): 드레모라 군주 소환 (60초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.15
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 3.0,
+          "icdSeconds": 180.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|0010DDEC",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_soul_trap",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SOUL_TRAP",
+        "name": "영혼 수확자 (적중 25% / ICD 2.5초): 영혼 덫 (60초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 25.0,
+          "icdSeconds": 2.5,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|0004DBA4",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "incoming_invisibility",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_HIT_INVISIBILITY",
+        "name": "사라짐 (피격 5% / ICD 45초): 투명화 (30초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.25
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 5.0,
+          "icdSeconds": 45.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|00027EB6",
+            "applyTo": "Self"
+          }
+        }
+      },
+      {
+        "id": "hit_muffle",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_MUFFLE",
+        "name": "무음 발걸음 (적중 10% / ICD 180초): 머플(Muffle) (180초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 180.0,
+          "action": {
+            "type": "CastSpell",
+            "spellForm": "Skyrim.esm|0008F3EB",
+            "applyTo": "Self"
+          }
+        }
+      },
+      {
+        "id": "trap_ironjaw",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_TRAP_IRONJAW",
+        "name": "철턱 덫 (치명타/파워어택 적중 20% / ICD 6초): 적 발밑에 덫 설치(재장전 2.5초) → 밟은 적 이동속도 -100% (2초) + 랜덤 추가 효과",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
+            "name": "Calamity: Ironjaw Snare (SpeedMult)",
+            "actorValue": "SpeedMult",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
+            "name": "Calamity: Ironjaw Snare",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
+              "magnitude": -100,
+              "duration": 2,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.6
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 6.0,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 108.0,
+            "ttlSeconds": 12.0,
+            "armDelaySeconds": 0.15,
+            "rearmDelaySeconds": 2.5,
+            "maxActive": 2,
+            "maxTriggers": 0,
+            "requireCritOrPowerAttack": true,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
+            "extraSpells": [
+              { "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON" },
+              { "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA" },
+              { "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA" },
+              { "spellForm": "Skyrim.esm|0006D22C" },
+              { "spellForm": "Skyrim.esm|0004B146" }
+            ],
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "internal_spell_trap_dragonteeth_poison",
+        "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_POISON",
+        "name": "INTERNAL: Trap Dragon's Teeth (Poison)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
+            "name": "Calamity: Dragon's Teeth (Poison)",
+            "actorValue": "Health",
+            "resistValue": "PoisonResist",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON",
+            "name": "Calamity: Dragon's Teeth (Poison)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
+              "magnitude": 4,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_trap_dragonteeth_drain_magicka",
+        "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
+        "name": "INTERNAL: Trap Dragon's Teeth (Drain Magicka)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
+            "name": "Calamity: Dragon's Teeth (Drain Magicka)",
+            "actorValue": "Magicka",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
+            "name": "Calamity: Dragon's Teeth (Drain Magicka)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_trap_dragonteeth_drain_stamina",
+        "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA",
+        "name": "INTERNAL: Trap Dragon's Teeth (Drain Stamina)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
+            "name": "Calamity: Dragon's Teeth (Drain Stamina)",
+            "actorValue": "Stamina",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA",
+            "name": "Calamity: Dragon's Teeth (Drain Stamina)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_fire_25",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_25",
+        "name": "물리→화염 전환 (25%)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
+            "name": "Calamity: Damage Health (Fire, Dynamic)",
+            "actorValue": "Health",
+            "resistValue": "ResistFire",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "name": "Calamity: Damage Health (Fire, Dynamic)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
+              "magnitude": 0,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Fire",
+            "percent": 25.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_fire_50",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_50",
+        "name": "물리→화염 전환 (50%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Fire",
+            "percent": 50.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_fire_75",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_75",
+        "name": "물리→화염 전환 (75%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Fire",
+            "percent": 75.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_fire_100",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_100",
+        "name": "물리→화염 전환 (100%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Fire",
+            "percent": 100.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_frost_25",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_25",
+        "name": "물리→냉기 전환 (25%)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
+            "name": "Calamity: Damage Health (Frost, Dynamic)",
+            "actorValue": "Health",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "name": "Calamity: Damage Health (Frost, Dynamic)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
+              "magnitude": 0,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Frost",
+            "percent": 25.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_frost_50",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_50",
+        "name": "물리→냉기 전환 (50%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Frost",
+            "percent": 50.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_frost_75",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_75",
+        "name": "물리→냉기 전환 (75%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Frost",
+            "percent": 75.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_frost_100",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_100",
+        "name": "물리→냉기 전환 (100%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Frost",
+            "percent": 100.0,
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_shock_25",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_25",
+        "name": "물리→번개 전환 (25%)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
+            "name": "Calamity: Damage Health (Shock, Dynamic)",
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "name": "Calamity: Damage Health (Shock, Dynamic)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
+              "magnitude": 0,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Shock",
+            "percent": 25.0,
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_shock_50",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_50",
+        "name": "물리→번개 전환 (50%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Shock",
+            "percent": 50.0,
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_shock_75",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_75",
+        "name": "물리→번개 전환 (75%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Shock",
+            "percent": 75.0,
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "convert_phys_to_shock_100",
+        "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_100",
+        "name": "물리→번개 전환 (100%)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "ConvertDamage",
+            "element": "Shock",
+            "percent": 100.0,
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "archmage_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T1",
+        "name": "대마법사 (주문 적중): 최대 매지카 10% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 2.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "Archmage",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "damagePctOfMaxMagicka": 10.0,
+            "costPctOfMaxMagicka": 5.0,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "archmage_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T2",
+        "name": "대마법사 (주문 적중): 최대 매지카 12% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "Archmage",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "damagePctOfMaxMagicka": 12.0,
+            "costPctOfMaxMagicka": 5.0,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "archmage_t3",
+        "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T3",
+        "name": "대마법사 (주문 적중): 최대 매지카 14% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "Archmage",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "damagePctOfMaxMagicka": 14.0,
+            "costPctOfMaxMagicka": 5.0,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "archmage_t4",
+        "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T4",
+        "name": "대마법사 (주문 적중): 최대 매지카 16% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "Archmage",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "damagePctOfMaxMagicka": 16.0,
+            "costPctOfMaxMagicka": 5.0,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "coc_firebolt",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_FIREBOLT",
+        "name": "CoC: 파이어볼트 (치명타/파워어택 적중, ICD 0.15초): Firebolt 발동 (적중 피해 스케일)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|00012FD0",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_ice_spike",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_SPIKE",
+        "name": "CoC: 아이스 스파이크 (치명타/파워어택 적중, ICD 0.15초): Ice Spike 발동 (적중 피해 스케일)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|0002B96C",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_lightning_bolt",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_LIGHTNING_BOLT",
+        "name": "CoC: 라이트닝 볼트 (치명타/파워어택 적중, ICD 0.15초): Lightning Bolt 발동 (적중 피해 스케일)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|0002DD29",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_thunderbolt",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_THUNDERBOLT",
+        "name": "CoC: 썬더볼트 (치명타/파워어택 적중, ICD 0.15초): Thunderbolt 발동 (적중 피해 스케일)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|0010F7EE",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_icy_spear",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICY_SPEAR",
+        "name": "CoC: 아이시 스피어 (치명타/파워어택 적중, ICD 0.15초): Icy Spear 발동 (적중 피해 스케일)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|0010F7EC",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_chain_lightning",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_CHAIN_LIGHTNING",
+        "name": "CoC: 체인 라이트닝 (치명타/파워어택 적중, ICD 0.15초): Chain Lightning 발동 (적중 피해 스케일)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|00045F9D",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "coc_ice_storm",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_STORM",
+        "name": "CoC: 아이스 스톰 (치명타/파워어택 적중, ICD 0.15초): Ice Storm 발동 (적중 피해 스케일)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CastOnCrit",
+            "spellForm": "Skyrim.esm|00045F9C",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.3,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T1",
+        "name": "시체 폭발 T1 (처치): 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 12.0,
+            "pctOfCorpseMaxHealth": 6.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T2",
+        "name": "시체 폭발 T2 (처치): 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 14.0,
+            "pctOfCorpseMaxHealth": 7.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t3",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T3",
+        "name": "시체 폭발 T3 (처치): 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.05
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 16.0,
+            "pctOfCorpseMaxHealth": 8.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t4",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T4",
+        "name": "시체 폭발 T4 (처치): 반경 600, (18 + 시체 최대체력 9%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.02
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 18.0,
+            "pctOfCorpseMaxHealth": 9.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "corpse_explosion_t5",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T5",
+        "name": "시체 폭발 T5 (처치): 반경 600, (20 + 시체 최대체력 10%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.01
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 20.0,
+            "pctOfCorpseMaxHealth": 10.0,
+            "radius": 600.0,
+            "maxTargets": 6,
+            "maxChainDepth": 5,
+            "chainFalloff": 0.7,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "summon_corpse_explosion_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T1",
+        "name": "소환 시체 폭발 T1 (소환물 사망): 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "SummonCorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 14.0,
+            "pctOfCorpseMaxHealth": 7.0,
+            "radius": 600.0,
+            "maxTargets": 8,
+            "maxChainDepth": 3,
+            "chainFalloff": 0.8,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 3,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "summon_corpse_explosion_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T2",
+        "name": "소환 시체 폭발 T2 (소환물 사망): 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.1
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "SummonCorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 18.0,
+            "pctOfCorpseMaxHealth": 8.5,
+            "radius": 600.0,
+            "maxTargets": 8,
+            "maxChainDepth": 3,
+            "chainFalloff": 0.8,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 3,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "summon_corpse_explosion_t3",
+        "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T3",
+        "name": "소환 시체 폭발 T3 (소환물 사망): 반경 600, (22 + 소환물 최대체력 10%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.05
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "SummonCorpseExplosion",
+            "debugNotify": false,
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 22.0,
+            "pctOfCorpseMaxHealth": 10.0,
+            "radius": 600.0,
+            "maxTargets": 8,
+            "maxChainDepth": 3,
+            "chainFalloff": 0.8,
+            "chainWindowSeconds": 0.9,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 3,
+            "noHitEffectArt": false
+          }
+        }
+      },
+      {
+        "id": "hit_minefield",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_MINEFIELD",
+        "name": "지뢰 밭 (적중 12% / ICD 1.5초): 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 둔화(-40%, 2초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_MINEFIELD_SNARE",
+            "name": "Calamity: Minefield Snare (SpeedMult)",
+            "actorValue": "SpeedMult",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_MINEFIELD_SNARE",
+            "name": "Calamity: Minefield Snare",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_MINEFIELD_SNARE",
+              "magnitude": -40,
+              "duration": 2,
+              "area": 150
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 12.0,
+          "icdSeconds": 1.5,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 8.0,
+            "armDelaySeconds": 0.6,
+            "maxActive": 3,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_MINEFIELD_SNARE",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "hit_adaptive_exposure",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_ADAPTIVE_EXPOSURE",
+        "name": "적응형 노출 (적중 20% / ICD 1초 / 표적별 ICD 12초): 가장 높은 원소 저항 -15 (4초)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.25
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 1.0,
+          "perTargetICDSeconds": 12.0,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "StrongestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_FROST_SHRED",
+              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+            },
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "dot_bloom",
+        "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM",
+        "name": "DoT 블룸 (적중 20% / ICD 1.5초): 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_POISON",
+            "name": "Calamity: DoT Bloom (Poison)",
+            "actorValue": "Health",
+            "resistValue": "PoisonResist",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_POISON",
+            "name": "Calamity: DoT Bloom (Poison Cloud)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_POISON",
+              "magnitude": 3,
+              "duration": 4,
+              "area": 150
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 1.5,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 3.0,
+            "armDelaySeconds": 0.6,
+            "maxActive": 1,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_DOT_BLOOM_POISON",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "dot_bloom_tar",
+        "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_TAR",
+        "name": "DoT 타르 블룸 (적중 18% / ICD 2초): 0.6초 후 타르 폭발(반경 170, 둔화 -35% + 방어 -150, 4초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
+            "name": "Calamity: DoT Tar Bloom (SpeedMult)",
+            "actorValue": "SpeedMult",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
+            "name": "Calamity: DoT Tar Bloom (Slow)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
+              "magnitude": -35,
+              "duration": 4,
+              "area": 170
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.6
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 2.0,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 3.0,
+            "armDelaySeconds": 0.6,
+            "maxActive": 1,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
+            "extraSpells": [
+              { "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER" }
+            ],
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "internal_spell_dot_bloom_tar_sunder",
+        "editorId": "CAFF_INTERNAL_SPEL_DOT_BLOOM_TAR_SUNDER",
+        "name": "INTERNAL: DoT Tar Bloom (Sunder Armor)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
+            "name": "Calamity: DoT Tar Bloom (DamageResist)",
+            "actorValue": "DamageResist",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER",
+            "name": "Calamity: DoT Tar Bloom (Sunder Armor)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
+              "magnitude": -150,
+              "duration": 4,
+              "area": 170
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "dot_bloom_siphon",
+        "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_SIPHON",
+        "name": "DoT 흡수 블룸 (적중 18% / ICD 2초): 0.6초 후 흡수 폭발(반경 170, 매지카/스태미나 재생 -60%, 6초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
+            "name": "Calamity: DoT Siphon Bloom (MagickaRateMult)",
+            "actorValue": "MagickaRateMult",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
+            "name": "Calamity: DoT Siphon Bloom (Magicka Regen Down)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
+              "magnitude": -60,
+              "duration": 6,
+              "area": 170
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.6
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 2.0,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 3.0,
+            "armDelaySeconds": 0.6,
+            "maxActive": 1,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
+            "extraSpells": [
+              { "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA" }
+            ],
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "internal_spell_dot_bloom_siphon_sta",
+        "editorId": "CAFF_INTERNAL_SPEL_DOT_BLOOM_SIPHON_STA",
+        "name": "INTERNAL: DoT Siphon Bloom (Stamina Regen Down)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
+            "name": "Calamity: DoT Siphon Bloom (StaminaRateMult)",
+            "actorValue": "StaminaRateMult",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA",
+            "name": "Calamity: DoT Siphon Bloom (Stamina Regen Down)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
+              "magnitude": -60,
+              "duration": 6,
+              "area": 170
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "hit_chaos_mine",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_CHAOS_MINE",
+        "name": "카오스 지뢰 (적중 12% / ICD 2초 / 표적별 ICD 8초): 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 둔화 + 무작위 저주",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
+            "name": "Calamity: Chaos Mine (SpeedMult)",
+            "actorValue": "SpeedMult",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
+            "name": "Calamity: Chaos Mine (Snare)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
+              "magnitude": -30,
+              "duration": 3,
+              "area": 150
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.35
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 12.0,
+          "icdSeconds": 2.0,
+          "perTargetICDSeconds": 8.0,
+          "action": {
+            "type": "SpawnTrap",
+            "spawnAt": "Target",
+            "radius": 160.0,
+            "ttlSeconds": 10.0,
+            "armDelaySeconds": 0.8,
+            "maxActive": 2,
+            "maxTriggers": 1,
+            "requireWeaponHit": true,
+            "spellEditorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
+            "extraSpells": [
+              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER" },
+              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN" },
+              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN" },
+              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK" },
+              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE" }
+            ],
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_sunder",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_SUNDER",
+        "name": "INTERNAL: Chaos Curse (Sunder Armor)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
+            "name": "Calamity: Chaos Curse (Sunder Armor)",
+            "actorValue": "DamageResist",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER",
+            "name": "Calamity: Chaos Curse (Sunder Armor)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
+              "magnitude": -150,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_drain_magregen",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
+        "name": "INTERNAL: Chaos Curse (Magicka Regen Down)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
+            "name": "Calamity: Chaos Curse (MagickaRateMult)",
+            "actorValue": "MagickaRateMult",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
+            "name": "Calamity: Chaos Curse (Magicka Regen Down)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
+              "magnitude": -60,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_drain_stamregen",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN",
+        "name": "INTERNAL: Chaos Curse (Stamina Regen Down)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
+            "name": "Calamity: Chaos Curse (StaminaRateMult)",
+            "actorValue": "StaminaRateMult",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN",
+            "name": "Calamity: Chaos Curse (Stamina Regen Down)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
+              "magnitude": -60,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_slow_attack",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_SLOW_ATTACK",
+        "name": "INTERNAL: Chaos Curse (Slow Attack Speed)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
+            "name": "Calamity: Chaos Curse (WeaponSpeedMult)",
+            "actorValue": "WeaponSpeedMult",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK",
+            "name": "Calamity: Chaos Curse (Slow Attack Speed)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
+              "magnitude": -20,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "internal_spell_chaos_curse_fragile",
+        "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_FRAGILE",
+        "name": "INTERNAL: Chaos Curse (Fragile Magic Resist)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
+            "name": "Calamity: Chaos Curse (Resist Magic)",
+            "actorValue": "ResistMagic",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE",
+            "name": "Calamity: Chaos Curse (Fragile Magic Resist)",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
+              "magnitude": -20,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "text": "INTERNAL"
+          }
+        }
+      },
+      {
+        "id": "hit_swap_jackpot",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SWAP_JACKPOT",
+        "name": "스왑 잭팟 (적중 20% / ICD 0.6초 / 표적별 ICD 12초): 무기 공격속도 +15% (4초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
+            "name": "Calamity: Swap Jackpot (WeaponSpeedMult)",
+            "actorValue": "WeaponSpeedMult",
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
+            "name": "Calamity: Swap Jackpot (Haste)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
+              "magnitude": 15,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.25
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 0.6,
+          "perTargetICDSeconds": 12.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "hit_evolving_lightning",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_EVOLVING_LIGHTNING",
+        "name": "진화 번개 (적중 100%): 누적 성장으로 번개 피해가 단계적으로 강화됨",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.2,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_SHOCK_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.08,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            },
+            "evolution": {
+              "xpPerProc": 1,
+              "thresholds": [0, 15, 45, 90],
+              "multipliers": [1.0, 1.25, 1.6, 2.1]
+            }
+          }
+        }
+      },
+      {
+        "id": "hit_mode_cycle_elements",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_MODE_CYCLE_ELEMENTS",
+        "name": "원소 모드 순환 (적중 100%): 성장형 + 수동 모드 전환",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.2,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_FIRE_DAMAGE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.08,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            },
+            "evolution": {
+              "xpPerProc": 1,
+              "thresholds": [0, 20, 60, 120],
+              "multipliers": [1.0, 1.3, 1.7, 2.2]
+            },
+            "modeCycle": {
+              "manualOnly": true,
+              "switchEveryProcs": 3,
+              "labels": ["Flame", "Frost", "Storm"],
+              "spells": [
+                "CAFF_SPEL_FIRE_DAMAGE",
+                "CAFF_SPEL_FROST_DAMAGE",
+                "CAFF_SPEL_SHOCK_DAMAGE"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "runeword_enigma_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ENIGMA",
+        "name": "룬워드 수수께끼 (Jah-Ith-Ber): 피격 18% / ICD 18초 - 차원 위상(이동속도 +45%, 6초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
+            "name": "Calamity: Runeword Enigma (Phase Speed)",
+            "actorValue": "SpeedMult",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+            "name": "Calamity: Runeword Enigma (Phase)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
+              "magnitude": 45,
+              "duration": 6,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 18.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_infinity_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INFINITY",
+        "name": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 35% / ICD 0.5초 - 약점 원소 노출(적 저항 감소)",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 35.0,
+          "icdSeconds": 0.5,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "WeakestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_FROST_SHRED",
+              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_fortitude_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FORTITUDE",
+        "name": "룬워드 인내 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 전장의 인내(방어도 +120, 8초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
+            "name": "Calamity: Runeword Fortitude (Ward)",
+            "actorValue": "DamageResist",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_FORTITUDE_WARD",
+            "name": "Calamity: Runeword Fortitude (Ward)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
+              "magnitude": 120,
+              "duration": 8,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 25.0,
+          "icdSeconds": 16.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_FORTITUDE_WARD",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_insight_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INSIGHT",
+        "name": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 명상(마나 재생 +150%, 12초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
+            "name": "Calamity: Runeword Insight (Meditation)",
+            "actorValue": "MagickaRateMult",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_INSIGHT_MEDITATION",
+            "name": "Calamity: Runeword Insight (Meditation)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
+              "magnitude": 150,
+              "duration": 12,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 30.0,
+          "icdSeconds": 10.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_INSIGHT_MEDITATION",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_spirit_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPIRIT",
+        "name": "룬워드 스피릿 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 영혼의 명상(마나 재생 +120%, 10초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
+            "name": "Calamity: Runeword Spirit (Meditation)",
+            "actorValue": "MagickaRateMult",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
+            "name": "Calamity: Runeword Spirit (Meditation)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
+              "magnitude": 120,
+              "duration": 10,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 28.0,
+          "icdSeconds": 9.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_grief_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_GRIEF",
+        "name": "룬워드 슬픔 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.4초 - 원소 참격(적응형 원소 피해)",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 30.0,
+          "icdSeconds": 0.4,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "WeakestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+              "Frost": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+              "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.12,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "runeword_call_to_arms_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CALL_TO_ARMS",
+        "name": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 피격 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_CTA_WARCRY",
+            "name": "Calamity: Runeword Call to Arms (Warcry Ward)",
+            "actorValue": "DamageResist",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_CTA_WARCRY",
+            "name": "Calamity: Runeword Call to Arms (Warcry)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_CTA_WARCRY",
+              "magnitude": 150,
+              "duration": 8,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 24.0,
+          "icdSeconds": 18.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_CTA_WARCRY",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_chains_of_honor_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAINS_OF_HONOR",
+        "name": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 위상 질주(이동속도 +35%, 5초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_COH_PHASE",
+            "name": "Calamity: Runeword Chains of Honor (Phase)",
+            "actorValue": "SpeedMult",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_COH_PHASE",
+            "name": "Calamity: Runeword Chains of Honor (Phase)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_COH_PHASE",
+              "magnitude": 35,
+              "duration": 5,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 16.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_COH_PHASE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_heart_of_the_oak_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEART_OF_THE_OAK",
+        "name": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 노출)",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 32.0,
+          "icdSeconds": 8.0,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "WeakestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_FROST_SHRED",
+              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_faith_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAITH",
+        "name": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 위상 사냥꾼(이동속도 +45%, 6초)",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 22.0,
+          "icdSeconds": 12.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_exile_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_EXILE",
+        "name": "룬워드 엑자일 (Vex-Ohm-Ist-Dol): 피격 28% / ICD 14초 - 추방자의 결계(방어도 +180, 9초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_EXILE_BARRIER",
+            "name": "Calamity: Runeword Exile (Barrier)",
+            "actorValue": "DamageResist",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_EXILE_BARRIER",
+            "name": "Calamity: Runeword Exile (Barrier)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_EXILE_BARRIER",
+              "magnitude": 180,
+              "duration": 9,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 28.0,
+          "icdSeconds": 14.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_EXILE_BARRIER",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_breath_of_the_dying_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BREATH_OF_THE_DYING",
+        "name": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적중 34% / ICD 0.35초 - 멸절 참격(적응형 원소 피해)",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 34.0,
+          "icdSeconds": 0.35,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "WeakestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+              "Frost": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+              "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.16,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "runeword_last_wish_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAST_WISH",
+        "name": "룬워드 라스트 위시 (Jah-Mal-Jah-Sur-Jah-Ber): 적중 18% / ICD 3초 - 소원 붕괴(적응형 원소 노출)",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 3.0,
+          "action": {
+            "type": "CastSpellAdaptiveElement",
+            "mode": "StrongestResist",
+            "spells": {
+              "Fire": "CAFF_SPEL_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_FROST_SHRED",
+              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+            },
+            "applyTo": "Target",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_phoenix_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PHOENIX",
+        "name": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 피격 18% / ICD 14초 - 불사 질주(이동속도 +50%, 7초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
+            "name": "Calamity: Runeword Phoenix (Surge)",
+            "actorValue": "SpeedMult",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_PHOENIX_SURGE",
+            "name": "Calamity: Runeword Phoenix (Surge)",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
+              "magnitude": 50,
+              "duration": 7,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 14.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_PHOENIX_SURGE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "runeword_doom_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DOOM",
+        "name": "룬워드 둠 (Hel-Ohm-Um-Lo-Cham): 적중 30% / ICD 0.8초 - 절망의 냉기 일격",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 30.0,
+          "icdSeconds": 0.8,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.14,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "runeword_dream_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DREAM",
+        "name": "룬워드 드림 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개의 꿈 일격",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 30.0,
+          "icdSeconds": 0.8,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.14,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      }
+    ],
+    "kidRules": [
+      {
+        "comment": "Optional (DISABLED): tag hostile alchemy magic effects for DotApply.",
+        "keywordEditorId": "CAFF_TAG_DOT",
+        "type": "Magic Effect",
+        "strings": "*Alch*",
+        "formFilters": "NONE",
+        "traits": "H",
+        "chance": 0.0
+      },
+      {
+        "comment": "Custom DoT tagging template (DISABLED): replace filters with a narrow set of MGEFs.",
+        "keywordEditorId": "CAFF_TAG_DOT",
+        "type": "Magic Effect",
+        "strings": "NONE",
+        "formFilters": "NONE",
+        "traits": "NONE",
+        "chance": 0.0
+      }
+    ],
+    "spidRules": []
+  }
+}

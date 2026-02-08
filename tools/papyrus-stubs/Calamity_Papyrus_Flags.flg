@@ -1,0 +1,21 @@
+/*
+  Custom flags for compiling this repo's Papyrus sources.
+  Includes vanilla TESV flags plus "Const" used by SKSE-era scripts.
+*/
+
+Flag Hidden 0
+{
+	Script
+	Property
+}
+
+Flag Conditional 1
+{
+	Script
+	Variable
+}
+
+Flag Const 2
+{
+	Property
+}
