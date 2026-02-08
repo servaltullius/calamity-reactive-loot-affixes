@@ -33,12 +33,12 @@ public static class KidIniWriter
 
             // Safety: a Magic Effect rule with no filters will tag *every* MGEF in the load order.
             // This is extremely risky (e.g., can unintentionally affect keyword-based dispels).
-            // Require at least one filter for Magic Effect tagging.
+            // Skip rendering this rule entirely.
             if (string.Equals(type, "Magic Effect", StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(filters, "NONE", StringComparison.OrdinalIgnoreCase))
             {
-                sb.AppendLine("; WARNING: Disabled unsafe KID rule (Magic Effect with no filters would tag ALL magic effects).");
-                sb.Append("; ");
+                sb.AppendLine("; WARNING: Skipped unsafe KID rule (Magic Effect with no filters would tag ALL magic effects).");
+                continue;
             }
 
             sb.Append("Keyword = ");

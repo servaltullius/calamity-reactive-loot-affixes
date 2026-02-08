@@ -43,7 +43,7 @@
     - `CalamityAffixes_ModeControl.psc` : Prisma/MCM 공용 글로벌 브리지(수동 모드 + 룬워드 + Prisma 패널 토글)
   - `Data/Scripts/*.pex` : MCM/런타임에 필요한 컴파일 결과물(빌드 시 자동 생성)
   - `Data/MCM/Config/CalamityAffixes/` : MCM Helper 설정
-    - `General / 일반` 페이지: 런타임 설정 + Prisma 패널 열기 토글 + 패널 언어(EN/KO/Both)
+    - `General / 일반` 페이지: 런타임 설정 + DotApply 안전 자동비활성 토글 + Prisma 패널 열기 토글 + 패널 언어(EN/KO/Both)
     - `keybinds.json`: `prisma_panel_toggle` 포함(Prisma 패널 빠른 토글)
     - MCM `Panel Language / 패널 언어`에서 Prisma 패널 텍스트를 영어/한국어/병행 표기로 전환
   - `Data/CalamityAffixes_KID.ini` : KID 템플릿(태그/옵션 분배)
@@ -75,7 +75,7 @@
 #### (권장) KID
 
 - KID (태그 분배; DoT 태그 `CAFF_TAG_DOT` 포함)
-- 주의: `CAFF_TAG_DOT`을 **필터 없이(Magic Effect + `NONE`) 전체 분배**하면, 키워드 기반 디스펠/정화 효과와 상호작용해 “적용중인 효과”가 사라지는 등 **심각한 부작용**이 날 수 있습니다. 그래서 기본 KID 규칙은 `*Alch*|H`(바닐라 독/알케미 해로운 MGEF)로 **좁게 제한**하고, `NONE` 규칙은 생성기가 자동으로 주석 처리합니다.
+- 주의: `CAFF_TAG_DOT`을 **필터 없이(Magic Effect + `NONE`) 전체 분배**하면, 키워드 기반 디스펠/정화 효과와 상호작용해 “적용중인 효과”가 사라지는 등 **심각한 부작용**이 날 수 있습니다. 그래서 기본 KID 규칙은 `*Alch*|H`(바닐라 독/알케미 해로운 MGEF)로 **좁게 제한**하고, 위험한 무필터 규칙은 생성 단계에서 출력 자체를 건너뜁니다.
 
 #### (선택) SPID
 
@@ -97,7 +97,7 @@
   - C++ 플러그인에서 `TESMagicEffectApplyEvent`를 받고
   - `CAFF_TAG_DOT` 키워드가 붙은 MGEF만 선별하여
   - 대상+이펙트 단위로 강한 ICD(기본 1.5초)로 레이트리밋 후 Papyrus로 전달
-- `CAFF_TAG_DOT`은 `DotApply` 트리거용 DoT 태그입니다. 기본 배포본에서는 **비활성(chance=0)** 이며, 필요하면 `Data/CalamityAffixes_KID.ini`에서 바닐라 독 규칙(`*Alch*|H`)의 chance를 `100`으로 바꿔 활성화하세요. 다른 DoT(모드/커스텀 MGEF)에 반응시키려면 `Data/CalamityAffixes_KID.ini`의 템플릿을 참고해 **대상 MGEF만** 태그하세요.
+- `CAFF_TAG_DOT`은 `DotApply` 트리거용 DoT 태그입니다. 기본 배포본에서는 **비활성(chance=0)** 이며, 필요하면 `Data/CalamityAffixes_KID.ini`에서 바닐라 독 규칙(`*Alch*|H`)의 chance를 `100`으로 바꿔 활성화하세요. 다른 DoT(모드/커스텀 MGEF)에 반응시키려면 `affixes/affixes.json`의 `keywords.kidRules`에 **좁은 필터 규칙**을 추가해 생성기로 다시 빌드하세요.
 
 관련 명세는 `doc/1.개발명세서.md`의 `5.4` 참고.
 

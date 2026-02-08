@@ -8,6 +8,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <RE/Skyrim.h>
@@ -372,6 +373,7 @@ namespace CalamityAffixes
 				static constexpr std::string_view kMcmSetDebugNotificationsEvent = "CalamityAffixes_MCM_SetDebugNotifications";
 				static constexpr std::string_view kMcmSetValidationIntervalEvent = "CalamityAffixes_MCM_SetValidationInterval";
 				static constexpr std::string_view kMcmSetProcChanceMultEvent = "CalamityAffixes_MCM_SetProcChanceMult";
+				static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
 				static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 
 			static constexpr std::uint32_t kSerializationVersion = 3;
@@ -381,16 +383,18 @@ namespace CalamityAffixes
 			static constexpr std::uint32_t kSerializationRecordRunewordState = 'RWRD';
 			static constexpr std::uint32_t kRunewordSerializationVersion = 1;
 
-			struct LootConfig
-			{
-				float chancePercent{ 0.0f };
-				float runewordFragmentChancePercent{ 1.0f };
-				bool renameItem{ false };
-				bool sharedPool{ false };
-				bool debugLog{ false };
-				std::uint32_t trapGlobalMaxActive{ 64 };
-			std::string nameFormat{ "{base} [{affix}]" };
-		};
+				struct LootConfig
+				{
+					float chancePercent{ 0.0f };
+					float runewordFragmentChancePercent{ 1.0f };
+					bool renameItem{ false };
+					bool sharedPool{ false };
+					bool debugLog{ false };
+					bool dotTagSafetyAutoDisable{ false };
+					std::uint32_t dotTagSafetyUniqueEffectThreshold{ 96 };
+					std::uint32_t trapGlobalMaxActive{ 64 };
+				std::string nameFormat{ "{base} [{affix}]" };
+			};
 
 		struct PerTargetCooldownKey
 		{
@@ -415,9 +419,12 @@ namespace CalamityAffixes
 			}
 		};
 
-		// key = (targetFormID << 32) | magicEffectFormID
-		std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> _dotCooldowns;
-		std::chrono::steady_clock::time_point _dotCooldownsLastPruneAt{};
+			// key = (targetFormID << 32) | magicEffectFormID
+			std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> _dotCooldowns;
+			std::chrono::steady_clock::time_point _dotCooldownsLastPruneAt{};
+			std::unordered_set<RE::FormID> _dotObservedMagicEffects;
+			bool _dotTagSafetyWarned{ false };
+			bool _dotTagSafetySuppressed{ false };
 
 		std::unordered_map<PerTargetCooldownKey, std::chrono::steady_clock::time_point, PerTargetCooldownKeyHash, PerTargetCooldownKeyEq> _perTargetCooldowns;
 		std::chrono::steady_clock::time_point _perTargetCooldownsLastPruneAt{};

@@ -9,6 +9,8 @@
     "renameItem": true,
     "sharedPool": true,
     "debugLog": false,
+    "dotTagSafetyAutoDisable": false,
+    "dotTagSafetyUniqueEffectThreshold": 96,
     "trapGlobalMaxActive": 64,
     "nameFormat": "{base}[{affix}]"
   },
@@ -2893,15 +2895,6 @@
         "strings": "*Alch*",
         "formFilters": "NONE",
         "traits": "H",
-        "chance": 0.0
-      },
-      {
-        "comment": "Custom DoT tagging template (DISABLED): replace filters with a narrow set of MGEFs.",
-        "keywordEditorId": "CAFF_TAG_DOT",
-        "type": "Magic Effect",
-        "strings": "NONE",
-        "formFilters": "NONE",
-        "traits": "NONE",
         "chance": 0.0
       }
     ],

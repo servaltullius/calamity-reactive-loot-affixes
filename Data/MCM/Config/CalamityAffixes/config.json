@@ -88,6 +88,23 @@
           }
         },
         {
+          "type": "toggle",
+          "id": "bDotSafetyAutoDisable:General",
+          "text": "Dot Safety Auto-Disable / DoT 안전 자동비활성",
+          "help": "When too many unique effects are tagged with CAFF_TAG_DOT, auto-disables DotApply triggers. OFF = warning only (recommended default). / CAFF_TAG_DOT 태그가 과도하게 넓게 퍼지면 DotApply 트리거를 자동 비활성합니다. OFF면 경고만 표시합니다(기본 권장).",
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": false
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetDotSafetyAutoDisable",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
           "type": "empty"
         },
         {

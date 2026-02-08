@@ -20,6 +20,10 @@ Function SetProcChanceMultiplier(float a_mult)
 	CalamityAffixes_ModeControl.SetProcChanceMultiplier(a_mult)
 EndFunction
 
+Function SetDotSafetyAutoDisable(bool a_enabled)
+	CalamityAffixes_ModeControl.SetDotSafetyAutoDisable(a_enabled)
+EndFunction
+
 Function SetPrismaControlPanel(bool a_open)
 	CalamityAffixes_ModeControl.SetPrismaControlPanel(a_open)
 EndFunction

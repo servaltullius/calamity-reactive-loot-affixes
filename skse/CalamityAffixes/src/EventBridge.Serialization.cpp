@@ -119,6 +119,9 @@ namespace CalamityAffixes
 
 			_instanceAffixes.clear();
 			_instanceStates.clear();
+			_dotObservedMagicEffects.clear();
+			_dotTagSafetyWarned = false;
+			_dotTagSafetySuppressed = false;
 			_runewordRuneFragments.clear();
 			_runewordInstanceStates.clear();
 			_runewordSelectedBaseKey.reset();
@@ -313,6 +316,9 @@ namespace CalamityAffixes
 			_hasActiveTraps.store(false, std::memory_order_relaxed);
 		_dotCooldowns.clear();
 		_dotCooldownsLastPruneAt = {};
+		_dotObservedMagicEffects.clear();
+		_dotTagSafetyWarned = false;
+		_dotTagSafetySuppressed = false;
 		_perTargetCooldowns.clear();
 		_perTargetCooldownsLastPruneAt = {};
 		_corpseExplosionSeenCorpses.clear();

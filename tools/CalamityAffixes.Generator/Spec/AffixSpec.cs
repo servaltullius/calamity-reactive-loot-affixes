@@ -38,6 +38,14 @@ public sealed class LootSpec
     [JsonPropertyName("debugLog")]
     public bool DebugLog { get; init; }
 
+    // If true, DotApply trigger handling auto-disables when CAFF_TAG_DOT coverage is detected as too broad.
+    [JsonPropertyName("dotTagSafetyAutoDisable")]
+    public bool DotTagSafetyAutoDisable { get; init; } = false;
+
+    // Unique tagged MGEF threshold for DotApply safety warning/auto-disable (0 = disabled).
+    [JsonPropertyName("dotTagSafetyUniqueEffectThreshold")]
+    public int DotTagSafetyUniqueEffectThreshold { get; init; } = 96;
+
     // Safety cap for trap-style procs (SpawnTrap) across all affixes.
     // 0 = unlimited (not recommended).
     [JsonPropertyName("trapGlobalMaxActive")]

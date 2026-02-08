@@ -71,8 +71,8 @@ public sealed class KidIniRendererTests
         Assert.DoesNotContain("Keyword = LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING|", ini);
         Assert.Contains("Keyword = CAFF_TAG_DOT|Magic Effect|*Alch*|H|100", ini);
         Assert.DoesNotContain("; Keyword = CAFF_TAG_DOT|Magic Effect|*Alch*|H|100", ini);
-        Assert.Contains("WARNING: Disabled unsafe KID rule", ini);
-        Assert.Contains("; Keyword = CAFF_TAG_DOT|Magic Effect|NONE|NONE|100", ini);
+        Assert.Contains("WARNING: Skipped unsafe KID rule", ini);
+        Assert.DoesNotContain("Keyword = CAFF_TAG_DOT|Magic Effect|NONE|NONE|100", ini);
     }
 
     [Fact]

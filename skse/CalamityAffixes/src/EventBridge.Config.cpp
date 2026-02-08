@@ -151,10 +151,13 @@ namespace CalamityAffixes
 		_lootArmorAffixes.clear();
 		_traps.clear();
 		_hasActiveTraps.store(false, std::memory_order_relaxed);
-		_dotCooldowns.clear();
-		_dotCooldownsLastPruneAt = {};
-		_perTargetCooldowns.clear();
-		_perTargetCooldownsLastPruneAt = {};
+			_dotCooldowns.clear();
+			_dotCooldownsLastPruneAt = {};
+			_dotObservedMagicEffects.clear();
+			_dotTagSafetyWarned = false;
+			_dotTagSafetySuppressed = false;
+			_perTargetCooldowns.clear();
+			_perTargetCooldownsLastPruneAt = {};
 		_corpseExplosionSeenCorpses.clear();
 		_corpseExplosionState = {};
 		_summonCorpseExplosionSeenCorpses.clear();
@@ -207,6 +210,9 @@ namespace CalamityAffixes
 				_loot.renameItem = loot.value("renameItem", false);
 				_loot.sharedPool = loot.value("sharedPool", false);
 				_loot.debugLog = loot.value("debugLog", false);
+				_loot.dotTagSafetyAutoDisable = loot.value("dotTagSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
+				const double dotTagSafetyThreshold =
+					loot.value("dotTagSafetyUniqueEffectThreshold", static_cast<double>(_loot.dotTagSafetyUniqueEffectThreshold));
 				const double trapGlobalMaxActive = loot.value("trapGlobalMaxActive", static_cast<double>(_loot.trapGlobalMaxActive));
 				_loot.nameFormat = loot.value("nameFormat", std::string{ "{base} [{affix}]" });
 
@@ -216,14 +222,21 @@ namespace CalamityAffixes
 				_loot.chancePercent = 100.0f;
 			}
 
-			if (_loot.runewordFragmentChancePercent < 0.0f) {
-				_loot.runewordFragmentChancePercent = 0.0f;
-			} else if (_loot.runewordFragmentChancePercent > 100.0f) {
-				_loot.runewordFragmentChancePercent = 100.0f;
-			}
+				if (_loot.runewordFragmentChancePercent < 0.0f) {
+					_loot.runewordFragmentChancePercent = 0.0f;
+				} else if (_loot.runewordFragmentChancePercent > 100.0f) {
+					_loot.runewordFragmentChancePercent = 100.0f;
+				}
 
-			if (trapGlobalMaxActive <= 0.0) {
-				_loot.trapGlobalMaxActive = 0u;
+				if (dotTagSafetyThreshold <= 0.0) {
+					_loot.dotTagSafetyUniqueEffectThreshold = 0u;
+				} else {
+					const double clamped = std::clamp(dotTagSafetyThreshold, 8.0, 4096.0);
+					_loot.dotTagSafetyUniqueEffectThreshold = static_cast<std::uint32_t>(clamped);
+				}
+
+				if (trapGlobalMaxActive <= 0.0) {
+					_loot.trapGlobalMaxActive = 0u;
 			} else {
 				const double clamped = std::clamp(trapGlobalMaxActive, 1.0, 4096.0);
 				_loot.trapGlobalMaxActive = static_cast<std::uint32_t>(clamped);

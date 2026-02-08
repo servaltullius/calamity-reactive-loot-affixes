@@ -640,6 +640,37 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		_dotObservedMagicEffects.insert(mgef->GetFormID());
+		const auto observedDotEffectCount = _dotObservedMagicEffects.size();
+		if (_loot.dotTagSafetyUniqueEffectThreshold > 0u &&
+			observedDotEffectCount > _loot.dotTagSafetyUniqueEffectThreshold) {
+			if (!_dotTagSafetyWarned) {
+				_dotTagSafetyWarned = true;
+				SKSE::log::warn(
+					"CalamityAffixes: DotApply safety warning (unique tagged magic effects={}, threshold={}, autoDisable={}).",
+					observedDotEffectCount,
+					_loot.dotTagSafetyUniqueEffectThreshold,
+					_loot.dotTagSafetyAutoDisable);
+				RE::DebugNotification("Calamity: DotApply safety warning (tag spread broad)");
+			}
+
+			if (_loot.dotTagSafetyAutoDisable) {
+				if (!_dotTagSafetySuppressed) {
+					_dotTagSafetySuppressed = true;
+					SKSE::log::error(
+						"CalamityAffixes: DotApply safety auto-disabled (unique tagged magic effects={}, threshold={}).",
+						observedDotEffectCount,
+						_loot.dotTagSafetyUniqueEffectThreshold);
+					RE::DebugNotification("Calamity: DotApply safety auto-disabled");
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		}
+
+		if (_dotTagSafetySuppressed) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
 		// Safety: avoid turning broad KID tagging into "any spell cast" proc storms.
 		// Treat DotApply as "harmful duration effect apply/refresh", not instant hits or buffs.
 		if (!mgef->IsHostile() || mgef->data.flags.all(RE::EffectSetting::EffectSettingData::Flag::kNoDuration)) {
@@ -752,6 +783,23 @@ namespace CalamityAffixes
 				std::string note = "Calamity: proc x";
 				note += std::to_string(_runtimeProcChanceMult);
 				RE::DebugNotification(note.c_str());
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			if (eventName == kMcmSetDotSafetyAutoDisableEvent) {
+				_loot.dotTagSafetyAutoDisable = (a_event->numArg > 0.5f);
+				if (!_loot.dotTagSafetyAutoDisable) {
+					_dotTagSafetySuppressed = false;
+					RE::DebugNotification("Calamity: DotApply auto-disable OFF (warn only)");
+				} else {
+					if (_loot.dotTagSafetyUniqueEffectThreshold > 0u &&
+						_dotObservedMagicEffects.size() > _loot.dotTagSafetyUniqueEffectThreshold) {
+						_dotTagSafetySuppressed = true;
+						RE::DebugNotification("Calamity: DotApply auto-disabled (safety)");
+					} else {
+						RE::DebugNotification("Calamity: DotApply auto-disable ON");
+					}
+				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
