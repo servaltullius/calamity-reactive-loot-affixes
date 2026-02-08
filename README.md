@@ -1,5 +1,10 @@
 # Calamity - Reactive Loot & Affixes
 
+[![Latest Release](https://img.shields.io/github/v/release/servaltullius/calamity-reactive-loot-affixes?include_prereleases&label=Latest%20Release)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases)
+[![Download MO2 Zip](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v0.1.0-beta/CalamityAffixes_MO2_2026-02-08.zip)
+
+최신 릴리즈/다운로드: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
+
 스카이림(SE/AE)용 “Diablo/PoE 스타일 어픽스 + 프로크(확률 발동) + ICD” 시스템을 만들기 위한 개발 레포입니다.
 
 ## 목표(요약)
