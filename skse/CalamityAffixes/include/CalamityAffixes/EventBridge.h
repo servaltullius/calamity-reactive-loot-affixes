@@ -17,6 +17,7 @@
 
 #include "CalamityAffixes/AdaptiveElement.h"
 #include "CalamityAffixes/AffixToken.h"
+#include "CalamityAffixes/InstanceStateKey.h"
 #include "CalamityAffixes/LootRerollGuard.h"
 #include "CalamityAffixes/MagnitudeScaling.h"
 #include "CalamityAffixes/ResyncScheduler.h"
@@ -376,12 +377,16 @@ namespace CalamityAffixes
 				static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
 				static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 
-			static constexpr std::uint32_t kSerializationVersion = 3;
+			static constexpr std::uint32_t kSerializationVersion = 5;
+			static constexpr std::uint32_t kSerializationVersionV4 = 4;
+			static constexpr std::uint32_t kSerializationVersionV3 = 3;
 			static constexpr std::uint32_t kSerializationVersionV2 = 2;
 			static constexpr std::uint32_t kSerializationVersionV1 = 1;
 			static constexpr std::uint32_t kSerializationRecordInstanceAffixes = 'IAXF';
+			static constexpr std::uint32_t kSerializationRecordInstanceRuntimeStates = 'IRST';
 			static constexpr std::uint32_t kSerializationRecordRunewordState = 'RWRD';
 			static constexpr std::uint32_t kRunewordSerializationVersion = 1;
+			static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
 
 				struct LootConfig
 				{
@@ -444,8 +449,9 @@ namespace CalamityAffixes
 		std::vector<std::size_t> _summonCorpseExplosionAffixIndices;
 		std::vector<std::size_t> _lootWeaponAffixes;
 		std::vector<std::size_t> _lootArmorAffixes;
-			std::unordered_map<std::uint64_t, std::uint64_t> _instanceAffixes;
-			std::unordered_map<std::uint64_t, InstanceRuntimeState> _instanceStates;
+				std::unordered_map<std::uint64_t, std::uint64_t> _instanceAffixes;
+				std::unordered_map<std::uint64_t, std::uint64_t> _instanceSupplementalAffixes;
+			std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash> _instanceStates;
 			std::vector<RunewordRecipe> _runewordRecipes;
 			std::unordered_map<std::uint64_t, std::size_t> _runewordRecipeIndexByToken;
 			std::unordered_map<std::uint64_t, std::size_t> _runewordRecipeIndexByResultAffixToken;
@@ -535,6 +541,7 @@ namespace CalamityAffixes
 			void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);
 			void RebuildActiveCounts();
 			void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
+			void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
 		[[nodiscard]] bool PlayerHasInstanceKey(std::uint64_t a_instanceKey) const;
 			[[nodiscard]] std::optional<std::uint64_t> ResolvePrimaryEquippedInstanceKey(std::uint64_t a_affixToken) const;
 			[[nodiscard]] std::vector<std::uint64_t> CollectEquippedInstanceKeysForAffixToken(std::uint64_t a_affixToken) const;
@@ -557,8 +564,8 @@ namespace CalamityAffixes
 			void MaybeGrantRandomRunewordFragment();
 			void ApplyRunewordResult(std::uint64_t a_instanceKey, const RunewordRecipe& a_recipe);
 			void LogRunewordStatus() const;
-			InstanceRuntimeState& EnsureInstanceRuntimeState(std::uint64_t a_instanceKey);
-			[[nodiscard]] const InstanceRuntimeState* FindInstanceRuntimeState(std::uint64_t a_instanceKey) const;
+			InstanceRuntimeState& EnsureInstanceRuntimeState(std::uint64_t a_instanceKey, std::uint64_t a_affixToken);
+			[[nodiscard]] const InstanceRuntimeState* FindInstanceRuntimeState(std::uint64_t a_instanceKey, std::uint64_t a_affixToken) const;
 		[[nodiscard]] std::size_t ResolveEvolutionStageIndex(const Action& a_action, const InstanceRuntimeState* a_state) const;
 		[[nodiscard]] float ResolveEvolutionMultiplier(const Action& a_action, const InstanceRuntimeState* a_state) const;
 		void AdvanceRuntimeStateForAffixProc(const AffixRuntime& a_affix);

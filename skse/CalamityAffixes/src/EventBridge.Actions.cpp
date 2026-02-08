@@ -1084,7 +1084,7 @@ namespace CalamityAffixes
 		const auto primaryKey = ResolvePrimaryEquippedInstanceKey(a_affix.token);
 		const InstanceRuntimeState* state = nullptr;
 		if (primaryKey) {
-			state = FindInstanceRuntimeState(*primaryKey);
+			state = FindInstanceRuntimeState(*primaryKey, a_affix.token);
 		}
 
 		RE::SpellItem* spell = a_action.spell;

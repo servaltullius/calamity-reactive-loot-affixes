@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <bit>
 #include <chrono>
+#include <limits>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -948,31 +949,50 @@ namespace CalamityAffixes
 					continue;
 				}
 
-				const auto it = _instanceAffixes.find(MakeInstanceKey(uid->baseID, uid->uniqueID));
-				if (it == _instanceAffixes.end()) {
-					continue;
-				}
-				EnsureInstanceRuntimeState(MakeInstanceKey(uid->baseID, uid->uniqueID));
+					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+					const auto it = _instanceAffixes.find(key);
+					const auto supplementalIt = _instanceSupplementalAffixes.find(key);
+					if (it == _instanceAffixes.end() && supplementalIt == _instanceSupplementalAffixes.end()) {
+						continue;
+					}
+					if (it != _instanceAffixes.end() && it->second != 0u) {
+						EnsureInstanceRuntimeState(key, it->second);
+					}
+					if (supplementalIt != _instanceSupplementalAffixes.end() && supplementalIt->second != 0u) {
+						EnsureInstanceRuntimeState(key, supplementalIt->second);
+					}
 
-				const auto idxIt = _affixIndexByToken.find(it->second);
-				if (idxIt == _affixIndexByToken.end()) {
-					continue;
-				}
+					std::size_t primaryIdx = std::numeric_limits<std::size_t>::max();
+					if (it != _instanceAffixes.end()) {
+						if (const auto idxIt = _affixIndexByToken.find(it->second); idxIt != _affixIndexByToken.end()) {
+							primaryIdx = idxIt->second;
+						}
+					}
 
-				if (idxIt->second < _affixes.size()) {
-					EnsureAffixDisplayName(entry, xList, _affixes[idxIt->second]);
-				}
+					std::size_t supplementalIdx = std::numeric_limits<std::size_t>::max();
+					if (supplementalIt != _instanceSupplementalAffixes.end()) {
+						if (const auto idxIt = _affixIndexByToken.find(supplementalIt->second); idxIt != _affixIndexByToken.end()) {
+							supplementalIdx = idxIt->second;
+						}
+					}
 
-				const bool worn = xList->HasType<RE::ExtraWorn>() || xList->HasType<RE::ExtraWornLeft>();
-				if (!worn) {
-					continue;
-				}
+					if (primaryIdx < _affixes.size()) {
+						EnsureAffixDisplayName(entry, xList, _affixes[primaryIdx]);
+					}
 
-				if (idxIt->second < _activeCounts.size()) {
-					_activeCounts[idxIt->second] += 1;
+					const bool worn = xList->HasType<RE::ExtraWorn>() || xList->HasType<RE::ExtraWornLeft>();
+					if (!worn) {
+						continue;
+					}
+
+					if (primaryIdx < _activeCounts.size()) {
+						_activeCounts[primaryIdx] += 1;
+					}
+					if (supplementalIdx < _activeCounts.size() && supplementalIdx != primaryIdx) {
+						_activeCounts[supplementalIdx] += 1;
+					}
 				}
 			}
-		}
 
 		if (_loot.debugLog) {
 			std::uint32_t shown = 0;

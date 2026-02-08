@@ -242,7 +242,10 @@ namespace CalamityAffixes
 
 				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
 				const auto it = _instanceAffixes.find(key);
-				if (it == _instanceAffixes.end() || it->second != a_affixToken) {
+				const auto supIt = _instanceSupplementalAffixes.find(key);
+				const bool primaryMatch = (it != _instanceAffixes.end() && it->second == a_affixToken);
+				const bool supplementalMatch = (supIt != _instanceSupplementalAffixes.end() && supIt->second == a_affixToken);
+				if (!primaryMatch && !supplementalMatch) {
 					continue;
 				}
 
@@ -1330,8 +1333,21 @@ namespace CalamityAffixes
 				return;
 			}
 
+			const auto prevIt = _instanceAffixes.find(a_instanceKey);
+			const std::uint64_t previousToken = (prevIt != _instanceAffixes.end()) ? prevIt->second : 0u;
+			const bool previousIsRuneword =
+				(previousToken != 0u && _runewordRecipeIndexByResultAffixToken.contains(previousToken));
+
 			_instanceAffixes[a_instanceKey] = a_recipe.resultAffixToken;
-			_instanceStates[a_instanceKey] = {};
+			if (previousToken != 0u &&
+				previousToken != a_recipe.resultAffixToken &&
+				!previousIsRuneword) {
+				_instanceSupplementalAffixes[a_instanceKey] = previousToken;
+			} else {
+				_instanceSupplementalAffixes.erase(a_instanceKey);
+			}
+
+			EnsureInstanceRuntimeState(a_instanceKey, a_recipe.resultAffixToken);
 			_runewordInstanceStates.erase(a_instanceKey);
 
 			RE::InventoryEntryData* entry = nullptr;
@@ -1496,39 +1512,130 @@ namespace CalamityAffixes
 			ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe);
 		}
 
-		std::string EventBridge::BuildRunewordTooltip(std::uint64_t a_instanceKey) const
-		{
-			std::string tooltip;
+			std::string EventBridge::BuildRunewordTooltip(std::uint64_t a_instanceKey) const
+			{
+				std::string tooltip;
+				const AffixRuntime* runewordAffix = nullptr;
 
-			if (const auto affixIt = _instanceAffixes.find(a_instanceKey); affixIt != _instanceAffixes.end()) {
-				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(affixIt->second);
-					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-					tooltip = "Runeword Complete: ";
-					tooltip.append(_runewordRecipes[rwIt->second].displayName);
+				auto appendRunewordEffectSummary = [&](const AffixRuntime& a_affix) {
+					auto readSpellName = [](const RE::SpellItem* a_spell) -> std::string {
+						if (!a_spell) {
+							return {};
+						}
+						const char* raw = a_spell->GetName();
+						if (!raw || !*raw) {
+							return {};
+						}
+						return std::string(raw);
+					};
+
+					std::string summary;
+					switch (a_affix.action.type) {
+					case ActionType::kCastSpell: {
+						summary = readSpellName(a_affix.action.spell);
+						if (summary.empty()) {
+							summary = a_affix.action.applyToSelf ? "Self spell buff" : "Spell proc";
+						}
+						break;
+					}
+					case ActionType::kCastSpellAdaptiveElement: {
+						std::vector<std::string> spellNames;
+						auto addUnique = [&](const std::string& a_name) {
+							if (a_name.empty()) {
+								return;
+							}
+							if (std::find(spellNames.begin(), spellNames.end(), a_name) == spellNames.end()) {
+								spellNames.push_back(a_name);
+							}
+						};
+						addUnique(readSpellName(a_affix.action.adaptiveFire));
+						addUnique(readSpellName(a_affix.action.adaptiveFrost));
+						addUnique(readSpellName(a_affix.action.adaptiveShock));
+
+						if (spellNames.empty()) {
+							summary = "Adaptive elemental effect";
+						} else {
+							for (std::size_t i = 0; i < spellNames.size(); ++i) {
+								if (i > 0) {
+									summary.append(" / ");
+								}
+								summary.append(spellNames[i]);
+							}
+						}
+						break;
+					}
+					case ActionType::kCastOnCrit:
+						summary = "Cast-on-crit effect";
+						break;
+					case ActionType::kConvertDamage:
+						summary = "Damage conversion effect";
+						break;
+					case ActionType::kArchmage:
+						summary = "Archmage scaling proc";
+						break;
+					case ActionType::kCorpseExplosion:
+						summary = "Corpse explosion proc";
+						break;
+					case ActionType::kSummonCorpseExplosion:
+						summary = "Summon corpse explosion proc";
+						break;
+					case ActionType::kSpawnTrap:
+						summary = "Trap spawn effect";
+						break;
+					case ActionType::kDebugNotify:
+					default:
+						break;
+					}
+
+					if (summary.empty()) {
+						return;
+					}
+
+					if (!tooltip.empty()) {
+						tooltip.push_back('\n');
+					}
+					tooltip.append("Runeword Effect: ");
+					tooltip.append(summary);
+				};
+
+				if (const auto affixIt = _instanceAffixes.find(a_instanceKey); affixIt != _instanceAffixes.end()) {
+					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(affixIt->second);
+						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+						tooltip = "Runeword Complete: ";
+						tooltip.append(_runewordRecipes[rwIt->second].displayName);
+
+						if (const auto idxIt = _affixIndexByToken.find(affixIt->second);
+							idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
+							runewordAffix = std::addressof(_affixes[idxIt->second]);
+						}
+					}
 				}
-			}
 
-			const auto stateIt = _runewordInstanceStates.find(a_instanceKey);
-			if (stateIt == _runewordInstanceStates.end()) {
-				return tooltip;
-			}
+				if (runewordAffix) {
+					appendRunewordEffectSummary(*runewordAffix);
+				}
 
-			const auto* recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
-			if (!recipe) {
-				return tooltip;
-			}
+				const auto stateIt = _runewordInstanceStates.find(a_instanceKey);
+				if (stateIt == _runewordInstanceStates.end()) {
+					return tooltip;
+				}
 
-			if (!tooltip.empty()) {
-				tooltip.push_back('\n');
-			}
+				const auto* recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
+				if (!recipe) {
+					return tooltip;
+				}
 
-			tooltip.append("Runeword: ");
-			tooltip.append(recipe->displayName);
-			tooltip.append(" (");
-			tooltip.append(std::to_string(stateIt->second.insertedRunes));
-			tooltip.push_back('/');
-			tooltip.append(std::to_string(recipe->runeTokens.size()));
-			tooltip.push_back(')');
+				if (!tooltip.empty()) {
+					tooltip.push_back('\n');
+				}
+
+				tooltip.append("Runeword: ");
+				tooltip.append(recipe->displayName);
+				tooltip.append(" (");
+				tooltip.append(std::to_string(stateIt->second.insertedRunes));
+				tooltip.push_back('/');
+				tooltip.append(std::to_string(recipe->runeTokens.size()));
+				tooltip.push_back(')');
 
 				if (stateIt->second.insertedRunes < recipe->runeTokens.size()) {
 					const auto nextRuneToken = recipe->runeTokens[stateIt->second.insertedRunes];
@@ -1542,27 +1649,27 @@ namespace CalamityAffixes
 					tooltip.append(" / Next: ");
 					tooltip.append(runeName);
 					tooltip.append(" (owned ");
-				tooltip.append(std::to_string(owned));
-				tooltip.push_back(')');
-			}
-
-			if (recipe->recommendedBaseType) {
-				const auto baseType = ResolveInstanceLootType(a_instanceKey);
-				if (baseType && *baseType != *recipe->recommendedBaseType) {
-					tooltip.append("\nRecommended Base: ");
-					tooltip.append(DescribeLootItemType(*recipe->recommendedBaseType));
-					tooltip.append(" (current ");
-					tooltip.append(DescribeLootItemType(*baseType));
+					tooltip.append(std::to_string(owned));
 					tooltip.push_back(')');
 				}
-			}
 
-			if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == a_instanceKey) {
-				tooltip.append("\nRuneword Base: Selected");
-			}
+				if (recipe->recommendedBaseType) {
+					const auto baseType = ResolveInstanceLootType(a_instanceKey);
+					if (baseType && *baseType != *recipe->recommendedBaseType) {
+						tooltip.append("\nRecommended Base: ");
+						tooltip.append(DescribeLootItemType(*recipe->recommendedBaseType));
+						tooltip.append(" (current ");
+						tooltip.append(DescribeLootItemType(*baseType));
+						tooltip.push_back(')');
+					}
+				}
 
-			return tooltip;
-		}
+				if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == a_instanceKey) {
+					tooltip.append("\nRuneword Base: Selected");
+				}
+
+				return tooltip;
+			}
 
 		void EventBridge::LogRunewordStatus() const
 		{
@@ -1607,14 +1714,22 @@ namespace CalamityAffixes
 			SKSE::log::info("CalamityAffixes: {}", note);
 		}
 
-		EventBridge::InstanceRuntimeState& EventBridge::EnsureInstanceRuntimeState(std::uint64_t a_instanceKey)
+		EventBridge::InstanceRuntimeState& EventBridge::EnsureInstanceRuntimeState(
+			std::uint64_t a_instanceKey,
+			std::uint64_t a_affixToken)
 		{
-			return _instanceStates[a_instanceKey];
+			return _instanceStates[MakeInstanceStateKey(a_instanceKey, a_affixToken)];
 		}
 
-	const EventBridge::InstanceRuntimeState* EventBridge::FindInstanceRuntimeState(std::uint64_t a_instanceKey) const
+	const EventBridge::InstanceRuntimeState* EventBridge::FindInstanceRuntimeState(
+		std::uint64_t a_instanceKey,
+		std::uint64_t a_affixToken) const
 	{
-		const auto it = _instanceStates.find(a_instanceKey);
+		if (a_affixToken == 0u) {
+			return nullptr;
+		}
+
+		const auto it = _instanceStates.find(MakeInstanceStateKey(a_instanceKey, a_affixToken));
 		return (it != _instanceStates.end()) ? std::addressof(it->second) : nullptr;
 	}
 
@@ -1669,7 +1784,7 @@ namespace CalamityAffixes
 		const auto modeCount = static_cast<std::uint32_t>(action.modeCycleSpells.size());
 
 		for (const auto key : keys) {
-			auto& state = EnsureInstanceRuntimeState(key);
+			auto& state = EnsureInstanceRuntimeState(key, a_affix.token);
 
 			if (usesEvolution) {
 				const auto maxVal = std::numeric_limits<std::uint32_t>::max();
@@ -1720,7 +1835,7 @@ namespace CalamityAffixes
 
 			const auto keys = CollectEquippedInstanceKeysForAffixToken(affix.token);
 			for (const auto key : keys) {
-				auto& state = EnsureInstanceRuntimeState(key);
+				auto& state = EnsureInstanceRuntimeState(key, affix.token);
 				const std::int32_t current = static_cast<std::int32_t>(state.modeIndex % static_cast<std::uint32_t>(modeCount));
 				std::int32_t next = (current + a_direction) % modeCount;
 				if (next < 0) {
@@ -1767,13 +1882,18 @@ namespace CalamityAffixes
 				return std::nullopt;
 			}
 
-			const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-			const auto it = _instanceAffixes.find(key);
-			if (it == _instanceAffixes.end()) {
-				return std::nullopt;
-			}
+				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+				std::uint64_t token = 0u;
+				if (const auto it = _instanceAffixes.find(key); it != _instanceAffixes.end()) {
+					token = it->second;
+				} else if (const auto supIt = _instanceSupplementalAffixes.find(key); supIt != _instanceSupplementalAffixes.end()) {
+					token = supIt->second;
+				}
+				if (token == 0u) {
+					return std::nullopt;
+				}
 
-			const auto idxIt = _affixIndexByToken.find(it->second);
+				const auto idxIt = _affixIndexByToken.find(token);
 			if (idxIt == _affixIndexByToken.end()) {
 				return std::nullopt;
 			}
@@ -1840,7 +1960,7 @@ namespace CalamityAffixes
 				return tooltip;
 			}
 
-			const auto* state = FindInstanceRuntimeState(a_candidate.instanceKey);
+			const auto* state = FindInstanceRuntimeState(a_candidate.instanceKey, affix.token);
 			const auto& action = affix.action;
 
 			bool appended = false;
@@ -1895,18 +2015,36 @@ namespace CalamityAffixes
 					}
 				}
 
-				const auto runewordTooltip = BuildRunewordTooltip(a_candidate.instanceKey);
-				if (!runewordTooltip.empty()) {
-					if (appended) {
-						tooltip.push_back('\n');
-					} else {
-						tooltip.append("\n");
+					const auto runewordTooltip = BuildRunewordTooltip(a_candidate.instanceKey);
+					if (!runewordTooltip.empty()) {
+						if (appended) {
+							tooltip.push_back('\n');
+						} else {
+							tooltip.append("\n");
+						}
+						tooltip.append(runewordTooltip);
+						appended = true;
 					}
-					tooltip.append(runewordTooltip);
-				}
 
-				return tooltip;
-			};
+					if (const auto supplementalIt = _instanceSupplementalAffixes.find(a_candidate.instanceKey);
+						supplementalIt != _instanceSupplementalAffixes.end() && supplementalIt->second != affix.token) {
+						if (const auto idxIt = _affixIndexByToken.find(supplementalIt->second);
+							idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
+							const auto& supplementalAffix = _affixes[idxIt->second];
+							if (!supplementalAffix.displayName.empty()) {
+								if (appended) {
+									tooltip.push_back('\n');
+								} else {
+									tooltip.append("\n");
+								}
+								tooltip.append("Inherited Affix: ");
+								tooltip.append(supplementalAffix.displayName);
+							}
+						}
+					}
+
+					return tooltip;
+				};
 
 		if (!a_selectedDisplayName.empty()) {
 			const TooltipCandidate* match = nullptr;
@@ -2159,7 +2297,7 @@ namespace CalamityAffixes
 
 		const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
 		if (const auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
-			EnsureInstanceRuntimeState(key);
+			EnsureInstanceRuntimeState(key, existingIt->second);
 			const auto idxIt = _affixIndexByToken.find(existingIt->second);
 			if (idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
 				EnsureAffixDisplayName(a_entry, a_xList, _affixes[idxIt->second]);
@@ -2168,7 +2306,7 @@ namespace CalamityAffixes
 		}
 
 		_instanceAffixes.emplace(key, affix.token);
-		EnsureInstanceRuntimeState(key);
+		EnsureInstanceRuntimeState(key, affix.token);
 		SKSE::log::debug(
 			"CalamityAffixes: loot affix '{}' applied to {:08X}:{}.",
 			affix.id,

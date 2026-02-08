@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -14,19 +15,20 @@ namespace CalamityAffixes
 		}
 
 		const std::uint32_t count = static_cast<std::uint32_t>(_instanceAffixes.size());
-
 		if (!a_intfc->OpenRecord(kSerializationRecordInstanceAffixes, kSerializationVersion)) {
 			return;
 		}
-
 		if (!a_intfc->WriteRecordData(count)) {
 			return;
 		}
 
-			for (const auto& [key, token] : _instanceAffixes) {
+		for (const auto& [key, token] : _instanceAffixes) {
 			const auto baseID = static_cast<RE::FormID>(key >> 16);
 			const auto uniqueID = static_cast<std::uint16_t>(key & 0xFFFFu);
-			const auto* state = FindInstanceRuntimeState(key);
+			const auto supplementalIt = _instanceSupplementalAffixes.find(key);
+			const std::uint64_t supplementalToken =
+				(supplementalIt != _instanceSupplementalAffixes.end()) ? supplementalIt->second : 0u;
+			const auto* state = FindInstanceRuntimeState(key, token);
 			const std::uint32_t evolutionXp = state ? state->evolutionXp : 0u;
 			const std::uint32_t modeCycleCounter = state ? state->modeCycleCounter : 0u;
 			const std::uint32_t modeIndex = state ? state->modeIndex : 0u;
@@ -37,8 +39,10 @@ namespace CalamityAffixes
 			if (!a_intfc->WriteRecordData(uniqueID)) {
 				return;
 			}
-
 			if (!a_intfc->WriteRecordData(token)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(supplementalToken)) {
 				return;
 			}
 			if (!a_intfc->WriteRecordData(evolutionXp)) {
@@ -47,69 +51,102 @@ namespace CalamityAffixes
 			if (!a_intfc->WriteRecordData(modeCycleCounter)) {
 				return;
 			}
-				if (!a_intfc->WriteRecordData(modeIndex)) {
-					return;
-				}
-			}
-
-			if (!a_intfc->OpenRecord(kSerializationRecordRunewordState, kRunewordSerializationVersion)) {
+			if (!a_intfc->WriteRecordData(modeIndex)) {
 				return;
-			}
-
-			RE::FormID selectedBaseID = 0;
-			std::uint16_t selectedUniqueID = 0;
-			if (_runewordSelectedBaseKey) {
-				selectedBaseID = static_cast<RE::FormID>(*_runewordSelectedBaseKey >> 16);
-				selectedUniqueID = static_cast<std::uint16_t>(*_runewordSelectedBaseKey & 0xFFFFu);
-			}
-
-			if (!a_intfc->WriteRecordData(selectedBaseID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(selectedUniqueID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(_runewordRecipeCycleCursor)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(_runewordBaseCycleCursor)) {
-				return;
-			}
-
-			const std::uint32_t fragmentCount = static_cast<std::uint32_t>(_runewordRuneFragments.size());
-			if (!a_intfc->WriteRecordData(fragmentCount)) {
-				return;
-			}
-			for (const auto& [runeToken, amount] : _runewordRuneFragments) {
-				if (!a_intfc->WriteRecordData(runeToken)) {
-					return;
-				}
-				if (!a_intfc->WriteRecordData(amount)) {
-					return;
-				}
-			}
-
-			const std::uint32_t runewordStateCount = static_cast<std::uint32_t>(_runewordInstanceStates.size());
-			if (!a_intfc->WriteRecordData(runewordStateCount)) {
-				return;
-			}
-			for (const auto& [instanceKey, state] : _runewordInstanceStates) {
-				const auto baseID = static_cast<RE::FormID>(instanceKey >> 16);
-				const auto uniqueID = static_cast<std::uint16_t>(instanceKey & 0xFFFFu);
-				if (!a_intfc->WriteRecordData(baseID)) {
-					return;
-				}
-				if (!a_intfc->WriteRecordData(uniqueID)) {
-					return;
-				}
-				if (!a_intfc->WriteRecordData(state.recipeToken)) {
-					return;
-				}
-				if (!a_intfc->WriteRecordData(state.insertedRunes)) {
-					return;
-				}
 			}
 		}
+
+		if (!a_intfc->OpenRecord(
+				kSerializationRecordInstanceRuntimeStates,
+				kInstanceRuntimeStateSerializationVersion)) {
+			return;
+		}
+
+		const std::uint32_t runtimeStateCount = static_cast<std::uint32_t>(_instanceStates.size());
+		if (!a_intfc->WriteRecordData(runtimeStateCount)) {
+			return;
+		}
+		for (const auto& [stateKey, state] : _instanceStates) {
+			const auto baseID = static_cast<RE::FormID>(stateKey.instanceKey >> 16);
+			const auto uniqueID = static_cast<std::uint16_t>(stateKey.instanceKey & 0xFFFFu);
+			if (!a_intfc->WriteRecordData(baseID)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(uniqueID)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(stateKey.affixToken)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(state.evolutionXp)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(state.modeCycleCounter)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(state.modeIndex)) {
+				return;
+			}
+		}
+
+		if (!a_intfc->OpenRecord(kSerializationRecordRunewordState, kRunewordSerializationVersion)) {
+			return;
+		}
+
+		RE::FormID selectedBaseID = 0;
+		std::uint16_t selectedUniqueID = 0;
+		if (_runewordSelectedBaseKey) {
+			selectedBaseID = static_cast<RE::FormID>(*_runewordSelectedBaseKey >> 16);
+			selectedUniqueID = static_cast<std::uint16_t>(*_runewordSelectedBaseKey & 0xFFFFu);
+		}
+
+		if (!a_intfc->WriteRecordData(selectedBaseID)) {
+			return;
+		}
+		if (!a_intfc->WriteRecordData(selectedUniqueID)) {
+			return;
+		}
+		if (!a_intfc->WriteRecordData(_runewordRecipeCycleCursor)) {
+			return;
+		}
+		if (!a_intfc->WriteRecordData(_runewordBaseCycleCursor)) {
+			return;
+		}
+
+		const std::uint32_t fragmentCount = static_cast<std::uint32_t>(_runewordRuneFragments.size());
+		if (!a_intfc->WriteRecordData(fragmentCount)) {
+			return;
+		}
+		for (const auto& [runeToken, amount] : _runewordRuneFragments) {
+			if (!a_intfc->WriteRecordData(runeToken)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(amount)) {
+				return;
+			}
+		}
+
+		const std::uint32_t runewordStateCount = static_cast<std::uint32_t>(_runewordInstanceStates.size());
+		if (!a_intfc->WriteRecordData(runewordStateCount)) {
+			return;
+		}
+		for (const auto& [instanceKey, state] : _runewordInstanceStates) {
+			const auto baseID = static_cast<RE::FormID>(instanceKey >> 16);
+			const auto uniqueID = static_cast<std::uint16_t>(instanceKey & 0xFFFFu);
+			if (!a_intfc->WriteRecordData(baseID)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(uniqueID)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(state.recipeToken)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(state.insertedRunes)) {
+				return;
+			}
+		}
+	}
 
 		void EventBridge::Load(SKSE::SerializationInterface* a_intfc)
 		{
@@ -118,6 +155,7 @@ namespace CalamityAffixes
 			}
 
 			_instanceAffixes.clear();
+			_instanceSupplementalAffixes.clear();
 			_instanceStates.clear();
 			_dotObservedMagicEffects.clear();
 			_dotTagSafetyWarned = false;
@@ -135,6 +173,8 @@ namespace CalamityAffixes
 			while (a_intfc->GetNextRecordInfo(type, version, length)) {
 				if (type == kSerializationRecordInstanceAffixes) {
 					if (version != kSerializationVersion &&
+						version != kSerializationVersionV4 &&
+						version != kSerializationVersionV3 &&
 						version != kSerializationVersionV2 &&
 						version != kSerializationVersionV1) {
 						// Drain unsupported version.
@@ -161,8 +201,9 @@ namespace CalamityAffixes
 							return;
 						}
 
-						std::uint64_t token = 0;
-						InstanceRuntimeState state{};
+							std::uint64_t token = 0;
+							std::uint64_t supplementalToken = 0;
+							InstanceRuntimeState state{};
 						if (version == kSerializationVersionV1) {
 							std::uint32_t len = 0;
 							if (a_intfc->ReadRecordData(len) != sizeof(len)) {
@@ -176,15 +217,22 @@ namespace CalamityAffixes
 							}
 
 							token = affixId.empty() ? 0u : MakeAffixToken(affixId);
-						} else {
-							if (a_intfc->ReadRecordData(token) != sizeof(token)) {
-								return;
-							}
-
-							if (version == kSerializationVersion) {
-								if (a_intfc->ReadRecordData(state.evolutionXp) != sizeof(state.evolutionXp)) {
+							} else {
+								if (a_intfc->ReadRecordData(token) != sizeof(token)) {
 									return;
 								}
+								if (version == kSerializationVersion || version == kSerializationVersionV4) {
+									if (a_intfc->ReadRecordData(supplementalToken) != sizeof(supplementalToken)) {
+										return;
+									}
+								}
+
+								if (version == kSerializationVersion ||
+									version == kSerializationVersionV4 ||
+									version == kSerializationVersionV3) {
+									if (a_intfc->ReadRecordData(state.evolutionXp) != sizeof(state.evolutionXp)) {
+										return;
+									}
 								if (a_intfc->ReadRecordData(state.modeCycleCounter) != sizeof(state.modeCycleCounter)) {
 									return;
 								}
@@ -199,11 +247,69 @@ namespace CalamityAffixes
 							continue;
 						}
 
-						const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
-						_instanceAffixes.emplace(key, token);
-						if (version == kSerializationVersion) {
-							_instanceStates.emplace(key, state);
+							const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
+							_instanceAffixes.emplace(key, token);
+							if (supplementalToken != 0u) {
+								_instanceSupplementalAffixes.emplace(key, supplementalToken);
+							}
+							if (version == kSerializationVersion ||
+								version == kSerializationVersionV4 ||
+								version == kSerializationVersionV3) {
+								const auto stateToken = (token != 0u) ? token : supplementalToken;
+								if (stateToken != 0u) {
+									_instanceStates[MakeInstanceStateKey(key, stateToken)] = state;
+								}
+							}
 						}
+
+					continue;
+				}
+
+				if (type == kSerializationRecordInstanceRuntimeStates) {
+					if (version != kInstanceRuntimeStateSerializationVersion) {
+						std::vector<std::uint8_t> sink(length);
+						if (length > 0) {
+							a_intfc->ReadRecordData(sink.data(), length);
+						}
+						continue;
+					}
+
+					std::uint32_t count = 0;
+					if (a_intfc->ReadRecordData(count) != sizeof(count)) {
+						return;
+					}
+
+					for (std::uint32_t i = 0; i < count; ++i) {
+						RE::FormID baseID = 0;
+						std::uint16_t uniqueID = 0;
+						std::uint64_t affixToken = 0;
+						InstanceRuntimeState state{};
+						if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
+							return;
+						}
+						if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
+							return;
+						}
+						if (a_intfc->ReadRecordData(affixToken) != sizeof(affixToken)) {
+							return;
+						}
+						if (a_intfc->ReadRecordData(state.evolutionXp) != sizeof(state.evolutionXp)) {
+							return;
+						}
+						if (a_intfc->ReadRecordData(state.modeCycleCounter) != sizeof(state.modeCycleCounter)) {
+							return;
+						}
+						if (a_intfc->ReadRecordData(state.modeIndex) != sizeof(state.modeIndex)) {
+							return;
+						}
+
+						RE::FormID resolvedBaseID = 0;
+						if (!a_intfc->ResolveFormID(baseID, resolvedBaseID) || affixToken == 0u) {
+							continue;
+						}
+
+						const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
+						_instanceStates[MakeInstanceStateKey(key, affixToken)] = state;
 					}
 
 					continue;
@@ -306,6 +412,7 @@ namespace CalamityAffixes
 		void EventBridge::Revert(SKSE::SerializationInterface*)
 		{
 			_instanceAffixes.clear();
+			_instanceSupplementalAffixes.clear();
 			_instanceStates.clear();
 			_runewordRuneFragments.clear();
 			_runewordInstanceStates.clear();
@@ -377,6 +484,13 @@ namespace CalamityAffixes
 		}
 	}
 
+		void EventBridge::EraseInstanceRuntimeStates(std::uint64_t a_instanceKey)
+		{
+			std::erase_if(_instanceStates, [a_instanceKey](const auto& entry) {
+				return entry.first.instanceKey == a_instanceKey;
+			});
+		}
+
 		void EventBridge::ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle)
 		{
 			const auto keyOpt = _lootRerollGuard.ConsumeIfPlayerDropDeleted(a_refHandle);
@@ -386,9 +500,13 @@ namespace CalamityAffixes
 
 			const auto key = *keyOpt;
 			const auto it = _instanceAffixes.find(key);
+			const auto supplementalIt = _instanceSupplementalAffixes.find(key);
 			const bool hasRunewordState = _runewordInstanceStates.contains(key);
 			const bool isSelectedRunewordBase = (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key);
-			if (it == _instanceAffixes.end() && !hasRunewordState && !isSelectedRunewordBase) {
+			if (it == _instanceAffixes.end() &&
+				supplementalIt == _instanceSupplementalAffixes.end() &&
+				!hasRunewordState &&
+				!isSelectedRunewordBase) {
 				return;
 			}
 
@@ -400,7 +518,10 @@ namespace CalamityAffixes
 			if (it != _instanceAffixes.end()) {
 				_instanceAffixes.erase(it);
 			}
-			_instanceStates.erase(key);
+			if (supplementalIt != _instanceSupplementalAffixes.end()) {
+				_instanceSupplementalAffixes.erase(supplementalIt);
+			}
+			EraseInstanceRuntimeStates(key);
 			_runewordInstanceStates.erase(key);
 			if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key) {
 				_runewordSelectedBaseKey.reset();
