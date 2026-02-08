@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
 [![Latest Release](https://img.shields.io/github/v/release/servaltullius/calamity-reactive-loot-affixes?include_prereleases&label=Latest%20Release)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases)
-[![Download MO2 Zip](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v0.1.0-beta/CalamityAffixes_MO2_2026-02-08.zip)
+[![Download MO2 Zip](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases)
 
 최신 릴리즈/다운로드: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 
@@ -16,7 +16,7 @@
 ## 어픽스 적용 방식(인스턴스 / Loot-time)
 
 - SKSE 플러그인이 **플레이어 획득/제작 시점**에 아이템 **인스턴스(ExtraUniqueID)** 별로 어픽스를 롤링/저장(=리롤)
-- 장기 세이브 안정성을 위해 인스턴스 어픽스는 SKSE 코세이브에 **문자열이 아닌 64-bit 토큰(FNV-1a)**로 저장합니다(v3). *(v1/v2 세이브는 로드 시 자동 마이그레이션)*
+- 장기 세이브 안정성을 위해 인스턴스 어픽스는 SKSE 코세이브에 **문자열이 아닌 64-bit 토큰(FNV-1a)**로 저장합니다(v5). *(v1~v4 세이브는 로드 시 자동 마이그레이션)*
   - 따라서 `affix.id`는 **리네임 금지**(기존 세이브 매칭이 깨짐). 변경이 필요하면 “새 id 추가”로 버전업합니다.
 - (안전한 프루닝) 플레이어가 월드에 **드랍한 아이템 레퍼런스가 삭제될 때만** 해당 인스턴스 엔트리를 정리해 코세이브 누적을 완화합니다(재획득 시엔 프루닝 안 함).
 - (기본 UX) Prisma UI 오버레이로 **선택 중인 아이템의 어픽스 효과 설명을 표시**합니다. (**Prisma UI 필수**, Norden UI 등 UI 테마와 무관)
