@@ -1,5 +1,19 @@
 # CalamityAffixes Release Notes (2026-02-09)
 
+## Prerequisites
+
+- Required:
+  - SKSE64 (runtime-matching build): https://skse.silverlock.org/
+  - Address Library for SKSE Plugins: https://www.nexusmods.com/skyrimspecialedition/mods/32444
+  - Prisma UI (tooltip/control panel framework): https://www.nexusmods.com/skyrimspecialedition/mods/148718
+- Recommended:
+  - SkyUI: https://www.nexusmods.com/skyrimspecialedition/mods/12604
+  - Keyword Item Distributor (KID): https://www.nexusmods.com/skyrimspecialedition/mods/55728
+  - Spell Perk Item Distributor (SPID): https://www.nexusmods.com/skyrimspecialedition/mods/36869
+- Optional:
+  - MCM Helper: https://www.nexusmods.com/skyrimspecialedition/mods/53000
+  - Inventory Interface Information Injector (I4): https://www.nexusmods.com/skyrimspecialedition/mods/85702
+
 ## Summary
 
 - Refactored runtime state tracking from instance-only keys to composite keys `(instanceKey, affixToken)` to prevent cross-affix state bleed.
@@ -24,4 +38,3 @@
 - `ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --output-on-failure`
 - `tools/build_mo2_zip.sh`
 - Produced: `dist/CalamityAffixes_MO2_2026-02-09.zip`
-
