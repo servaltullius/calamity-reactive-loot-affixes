@@ -56,11 +56,11 @@
 
 - Skyrim SE 1.5.97 포함 지원(그리고 AE 1.6.x까지 확장 가능)
 - SKSE64: 런타임에 맞는 버전 설치 (SE/AE 빌드가 분리됨) ([skse.silverlock.org](https://skse.silverlock.org/))
-- Address Library for SKSE Plugins: 런타임(1.5.x vs 1.6.x)에 맞는 파일 설치
+- Address Library for SKSE Plugins: 런타임(1.5.x vs 1.6.x)에 맞는 파일 설치 ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/32444))
 
 ### 의존성(기본 UX 기준)
 
-- Prisma UI (**필수**, 툴팁 오버레이)
+- Prisma UI (**필수**, 툴팁 오버레이) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/148718))
   - 뷰 파일 위치: `Data/PrismaUI/views/CalamityAffixes/index.html`
   - 메인 조작 UI(수동 모드/룬워드/디버그)도 Prisma 패널에서 처리
   - 인벤토리에서는 기본적으로 “툴팁은 클릭-스루(비상호작용)”입니다. 패널은 **단일 단축키**(`prisma_panel_toggle`, MCM에서 설정)로 열고/닫습니다. 키가 미설정이면 기본 `F11`로 토글됩니다(인벤 밖에서도 가능).
@@ -70,22 +70,22 @@
 
 #### (권장) SkyUI
 
-- SkyUI (인벤/루팅 UI 품질 향상; 본 모드 핵심 로직에는 필수 아님)
+- SkyUI (인벤/루팅 UI 품질 향상; 본 모드 핵심 로직에는 필수 아님) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/12604))
 
 #### (권장) KID
 
-- KID (태그 분배; DoT 태그 `CAFF_TAG_DOT` 포함)
+- KID (태그 분배; DoT 태그 `CAFF_TAG_DOT` 포함) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/55728))
 - 주의: `CAFF_TAG_DOT`을 **필터 없이(Magic Effect + `NONE`) 전체 분배**하면, 키워드 기반 디스펠/정화 효과와 상호작용해 “적용중인 효과”가 사라지는 등 **심각한 부작용**이 날 수 있습니다. 그래서 기본 KID 규칙은 `*Alch*|H`(바닐라 독/알케미 해로운 MGEF)로 **좁게 제한**하고, 위험한 무필터 규칙은 생성 단계에서 출력 자체를 건너뜁니다.
 
 #### (선택) SPID
 
-- SPID (NPC/아이템/퍼크 분배)
+- SPID (NPC/아이템/퍼크 분배) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/36869))
 
 ### 의존성(선택)
 
-- MCM Helper
+- MCM Helper ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/53000))
   - 본 모드 설정(향후)을 위해 사용합니다.
-- Inventory Interface Information Injector (I4)
+- Inventory Interface Information Injector (I4) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/85702))
   - 본 모드는 `Data/SKSE/Plugins/InventoryInjector/CalamityAffixes.json`를 **빈 placeholder**로 동봉합니다(`rules: []`).
   - 툴팁/효과 표시 자체에 필수는 아닙니다.
 
