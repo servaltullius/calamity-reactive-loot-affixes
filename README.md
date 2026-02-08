@@ -50,7 +50,7 @@
   - `Data/CalamityAffixes_DISTR.ini` : SPID 템플릿(분배)
 - `skse/CalamityAffixes/` : CommonLibSSE-NG 기반 SKSE 플러그인(CMake/vcpkg)
 
-## 준비물(개발/테스트)
+## 설치 전 준비물(플레이어)
 
 ### 게임/런타임
 
@@ -100,6 +100,15 @@
 - `CAFF_TAG_DOT`은 `DotApply` 트리거용 DoT 태그입니다. 기본 배포본에서는 **비활성(chance=0)** 이며, 필요하면 `Data/CalamityAffixes_KID.ini`에서 바닐라 독 규칙(`*Alch*|H`)의 chance를 `100`으로 바꿔 활성화하세요. 다른 DoT(모드/커스텀 MGEF)에 반응시키려면 `affixes/affixes.json`의 `keywords.kidRules`에 **좁은 필터 규칙**을 추가해 생성기로 다시 빌드하세요.
 
 관련 명세는 `doc/1.개발명세서.md`의 `5.4` 참고.
+
+## 개발/테스트 준비물
+
+- .NET SDK 8.0+ (`tools/CalamityAffixes.Generator`, `tools/CalamityAffixes.Generator.Tests`)
+- Python 3 (lint/JSON 스모크 체크)
+- CMake + Ninja + C++ toolchain (SKSE DLL 빌드)
+- Papyrus Compiler 환경 (`tools/compile_papyrus.sh`, `tools/build_mo2_zip.sh`에서 사용)
+
+상세 절차는 아래 `SKSE 플러그인 빌드(개발자용)` / `MO2 배포 ZIP 생성` 섹션을 따릅니다.
 
 ## SKSE 플러그인 빌드(개발자용)
 
