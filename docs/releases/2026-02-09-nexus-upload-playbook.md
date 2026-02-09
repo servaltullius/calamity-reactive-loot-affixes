@@ -11,6 +11,8 @@
 - Git tag: `v0.1.0-beta.1`
 - 현재 배포 산출물 예시: `dist/CalamityAffixes_MO2_2026-02-09.zip`
 - 붙여넣기 완성본: `docs/releases/2026-02-09-nexus-publish-copy-v0.1.0-beta.1.md`
+- 릴리즈 본문 템플릿: `docs/releases/release-note-template.md`
+- 인게임 QA 스모크 체크리스트: `docs/releases/2026-02-09-ingame-qa-smoke-checklist.md`
 
 ---
 
@@ -33,6 +35,7 @@ tools/build_mo2_zip.sh
 - ZIP 내부 루트가 `CalamityAffixes/`인지 확인 (`Data/` 이중 중첩 금지)
 - 최신 DLL 포함 확인: `Data/SKSE/Plugins/CalamityAffixes.dll`
 - 최신 런타임 설정 포함 확인: `Data/SKSE/Plugins/CalamityAffixes/affixes.json`
+- 인게임 QA 스모크 체크리스트 1회 수행: `docs/releases/2026-02-09-ingame-qa-smoke-checklist.md`
 
 ---
 
