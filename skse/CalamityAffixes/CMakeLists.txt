@@ -28,6 +28,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.cpp
 	    src/EventBridge.Config.cpp
 	    src/EventBridge.Loot.cpp
+	    src/EventBridge.Loot.Runtime.cpp
+	    src/EventBridge.Loot.Assign.cpp
 	    src/EventBridge.Triggers.cpp
 	    src/EventBridge.Actions.cpp
 	    src/EventBridge.Traps.cpp
