@@ -567,7 +567,7 @@ namespace CalamityAffixes
 				out.action.spell = parseSpell(action);
 				out.action.effectiveness = action.value("effectiveness", 1.0f);
 				out.action.magnitudeOverride = action.value("magnitudeOverride", 0.0f);
-				out.action.noHitEffectArt = action.value("noHitEffectArt", true);
+				out.action.noHitEffectArt = action.value("noHitEffectArt", false);
 
 				parseMagnitudeScaling(action, out.action.magnitudeScaling);
 
@@ -581,7 +581,7 @@ namespace CalamityAffixes
 				out.action.convertPct = action.value("percent", 0.0f);
 				out.action.spell = parseSpell(action);
 				out.action.effectiveness = action.value("effectiveness", 1.0f);
-				out.action.noHitEffectArt = action.value("noHitEffectArt", true);
+				out.action.noHitEffectArt = action.value("noHitEffectArt", false);
 
 				if (!out.action.spell || out.action.element == Element::kNone || out.action.convertPct <= 0.0f) {
 					continue;
@@ -590,7 +590,7 @@ namespace CalamityAffixes
 				out.action.type = ActionType::kArchmage;
 				out.action.spell = parseSpell(action);
 				out.action.effectiveness = action.value("effectiveness", 1.0f);
-				out.action.noHitEffectArt = action.value("noHitEffectArt", true);
+				out.action.noHitEffectArt = action.value("noHitEffectArt", false);
 				out.action.archmageDamagePctOfMaxMagicka = action.value("damagePctOfMaxMagicka", 0.0f);
 				out.action.archmageCostPctOfMaxMagicka = action.value("costPctOfMaxMagicka", 0.0f);
 
@@ -1191,7 +1191,7 @@ namespace CalamityAffixes
 					a_out.action.adaptiveFire = dynamicFire;
 					a_out.action.adaptiveFrost = dynamicFrost;
 					a_out.action.adaptiveShock = dynamicShock;
-					a_out.action.noHitEffectArt = true;
+					a_out.action.noHitEffectArt = false;
 					a_out.action.magnitudeScaling.source = MagnitudeScaling::Source::kHitPhysicalDealt;
 					a_out.action.magnitudeScaling.mult =
 						std::clamp(0.08f + static_cast<float>(a_runeCount) * 0.012f, 0.08f, 0.18f);
@@ -1210,7 +1210,7 @@ namespace CalamityAffixes
 				a_out.action.adaptiveFire = shredFire;
 				a_out.action.adaptiveFrost = shredFrost;
 				a_out.action.adaptiveShock = shredShock;
-				a_out.action.noHitEffectArt = true;
+				a_out.action.noHitEffectArt = false;
 				return true;
 			};
 
@@ -1289,7 +1289,7 @@ namespace CalamityAffixes
 					out.action.adaptiveFire = a_fire;
 					out.action.adaptiveFrost = a_frost;
 					out.action.adaptiveShock = a_shock;
-					out.action.noHitEffectArt = true;
+					out.action.noHitEffectArt = false;
 					if (a_scaleBase > 0.0f || a_scalePerRune > 0.0f) {
 						out.action.magnitudeScaling.source = MagnitudeScaling::Source::kHitPhysicalDealt;
 						out.action.magnitudeScaling.mult = std::clamp(a_scaleBase + runeScale * a_scalePerRune, 0.0f, 0.25f);

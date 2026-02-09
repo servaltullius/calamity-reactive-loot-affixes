@@ -768,7 +768,7 @@
             "element": "Fire",
             "percent": 25.0,
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -791,7 +791,7 @@
             "element": "Fire",
             "percent": 50.0,
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -814,7 +814,7 @@
             "element": "Fire",
             "percent": 75.0,
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -837,7 +837,7 @@
             "element": "Fire",
             "percent": 100.0,
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -881,7 +881,7 @@
             "element": "Frost",
             "percent": 25.0,
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -904,7 +904,7 @@
             "element": "Frost",
             "percent": 50.0,
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -927,7 +927,7 @@
             "element": "Frost",
             "percent": 75.0,
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -950,7 +950,7 @@
             "element": "Frost",
             "percent": 100.0,
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -994,7 +994,7 @@
             "element": "Shock",
             "percent": 25.0,
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -1017,7 +1017,7 @@
             "element": "Shock",
             "percent": 50.0,
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -1040,7 +1040,7 @@
             "element": "Shock",
             "percent": 75.0,
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -1063,7 +1063,7 @@
             "element": "Shock",
             "percent": 100.0,
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -1086,7 +1086,7 @@
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "damagePctOfMaxMagicka": 10.0,
             "costPctOfMaxMagicka": 5.0,
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -1109,7 +1109,7 @@
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "damagePctOfMaxMagicka": 12.0,
             "costPctOfMaxMagicka": 5.0,
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -1132,7 +1132,7 @@
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "damagePctOfMaxMagicka": 14.0,
             "costPctOfMaxMagicka": 5.0,
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -1155,7 +1155,7 @@
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "damagePctOfMaxMagicka": 16.0,
             "costPctOfMaxMagicka": 5.0,
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -1176,7 +1176,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00012FD0",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -1205,7 +1205,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0002B96C",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -1234,7 +1234,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0002DD29",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -1263,7 +1263,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0010F7EE",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -1292,7 +1292,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0010F7EC",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -1321,7 +1321,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00045F9D",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -1350,7 +1350,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00045F9C",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -2368,7 +2368,7 @@
               "Shock": "CAFF_SPEL_SHOCK_SHRED"
             },
             "applyTo": "Target",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -2525,7 +2525,7 @@
               "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
             },
             "applyTo": "Target",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.12,
@@ -2647,7 +2647,7 @@
               "Shock": "CAFF_SPEL_SHOCK_SHRED"
             },
             "applyTo": "Target",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -2741,7 +2741,7 @@
               "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
             },
             "applyTo": "Target",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.16,
@@ -2777,7 +2777,7 @@
               "Shock": "CAFF_SPEL_SHOCK_SHRED"
             },
             "applyTo": "Target",
-            "noHitEffectArt": true
+            "noHitEffectArt": false
           }
         }
       },
@@ -2843,7 +2843,7 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "applyTo": "Target",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.14,
@@ -2874,7 +2874,7 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "applyTo": "Target",
-            "noHitEffectArt": true,
+            "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.14,
