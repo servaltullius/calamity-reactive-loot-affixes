@@ -53,8 +53,10 @@
 - `Data/` : 게임 `Data/`에 그대로 설치 가능한 “스테이징” 폴더 (MO2 테스트용)
   - `Data/CalamityAffixes.esp` : 키워드/스펠/MGEF + MCM Helper Quest(자동 생성, 단일 ESP)
   - `Data/Scripts/Source/` : Papyrus 소스(.psc)
+    - 활성 컴파일 대상: `CalamityAffixes_ModeControl.psc`, `CalamityAffixes_ModEventEmitter.psc`, `CalamityAffixes_MCMConfig.psc`
     - `CalamityAffixes_MCMConfig.psc` : MCM Helper용 config 스크립트(Quest에 바인딩)
     - `CalamityAffixes_ModeControl.psc` : Prisma/MCM 공용 글로벌 브리지(수동 모드 + 룬워드 + Prisma 패널 토글)
+    - `CalamityAffixes_AffixManager.psc` / `CalamityAffixes_PlayerAlias.psc` / `CalamityAffixes_SkseBridge.psc`는 레거시 참고용 소스(현재 배포 빌드에서 .pex 미생성)
   - `Data/Scripts/*.pex` : MCM/런타임에 필요한 컴파일 결과물(빌드 시 자동 생성)
   - `Data/MCM/Config/CalamityAffixes/` : MCM Helper 설정
     - `General / 일반` 페이지: 런타임 설정 + DotApply 안전 자동비활성 토글 + Prisma 패널 열기 토글 + 패널 언어(EN/KO/Both)
@@ -159,8 +161,11 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
       → Prisma 조작 패널 열기/닫기
     - `CalamityAffixes_ModeCycle_Next` / `CalamityAffixes_ModeCycle_Prev` → 장착 중 `modeCycle.manualOnly=true` affix 모드 수동 전환
     - `CalamityAffixes_Runeword_*` → 룬워드 베이스 순환/레시피 순환/룬 삽입/상태 조회/테스트용 조각 지급
-  - Papyrus 수신: `Data/Scripts/Source/CalamityAffixes_SkseBridge.psc`
-  - `RegisterForModEvent`로 수신 후 `AffixManager.ProcessOutgoingHit(target)`로 전달
+  - 활성 Papyrus 브리지(컴파일 대상):
+    - `Data/Scripts/Source/CalamityAffixes_ModeControl.psc`
+    - `Data/Scripts/Source/CalamityAffixes_ModEventEmitter.psc`
+    - `Data/Scripts/Source/CalamityAffixes_MCMConfig.psc`
+  - `CalamityAffixes_SkseBridge.psc` / `AffixManager` 기반 경로는 레거시 참고용이며, 현재 기본 빌드 파이프라인에서는 컴파일하지 않습니다.
 
 ## 룬워드 제작(실험)
 

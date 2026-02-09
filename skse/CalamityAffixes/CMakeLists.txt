@@ -15,6 +15,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/Hooks.h
 	    include/CalamityAffixes/InstanceStateKey.h
 	    include/CalamityAffixes/LootRerollGuard.h
+	    include/CalamityAffixes/LootUiGuards.h
 	    include/CalamityAffixes/Papyrus.h
 	    include/CalamityAffixes/PrismaTooltip.h
 	    include/CalamityAffixes/RunewordUtil.h
@@ -122,6 +123,7 @@ if (BUILD_TESTING)
             tests/test_adaptive_element.cpp
             tests/test_magnitude_scaling.cpp
             tests/test_loot_reroll_guard.cpp
+            tests/test_loot_ui_guards.cpp
             tests/test_instance_state_key.cpp
             tests/test_resync_scheduler.cpp
             tests/test_runeword_util.cpp

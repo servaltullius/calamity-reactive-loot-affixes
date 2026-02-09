@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/RunewordUtil.h"
 
 #include <algorithm>
@@ -27,6 +28,36 @@ namespace CalamityAffixes
 			});
 			return out;
 		}
+
+				[[nodiscard]] bool IsWeaponOrArmor(const RE::TESBoundObject* a_object)
+				{
+					if (!a_object) {
+						return false;
+					}
+
+					return a_object->As<RE::TESObjectWEAP>() != nullptr || a_object->As<RE::TESObjectARMO>() != nullptr;
+				}
+
+				[[nodiscard]] std::string ResolveInventoryDisplayName(
+					const RE::InventoryEntryData* a_entry,
+					const RE::ExtraDataList* a_xList)
+				{
+					if (!a_entry || !a_entry->object) {
+						return "<Unknown>";
+					}
+
+					const char* displayRaw = a_xList ? a_xList->GetDisplayName(a_entry->object) : nullptr;
+					std::string displayName = displayRaw ? displayRaw : "";
+					if (displayName.empty()) {
+						const char* objectNameRaw = a_entry->object->GetName();
+						displayName = objectNameRaw ? objectNameRaw : "";
+					}
+					if (displayName.empty()) {
+						displayName = "<Unknown>";
+					}
+
+					return displayName;
+				}
 
 				// Weighted rune fragment distribution to mimic D2 rune tier rarity.
 				// Higher-tier runes intentionally have much lower weight.
@@ -286,9 +317,7 @@ namespace CalamityAffixes
 					continue;
 				}
 
-				const bool isWeapon = entry->object->As<RE::TESObjectWEAP>() != nullptr;
-				const bool isArmor = entry->object->As<RE::TESObjectARMO>() != nullptr;
-				if (!isWeapon && !isArmor) {
+				if (!IsWeaponOrArmor(entry->object)) {
 					continue;
 				}
 
@@ -338,17 +367,15 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			const bool isWeapon = entry->object->As<RE::TESObjectWEAP>() != nullptr;
-			const bool isArmor = entry->object->As<RE::TESObjectARMO>() != nullptr;
-			if (!isWeapon && !isArmor) {
+			if (!IsWeaponOrArmor(entry->object)) {
 				return false;
 			}
 
 			_runewordSelectedBaseKey = a_instanceKey;
 
-			auto candidates = CollectEquippedRunewordBaseCandidates(true);
-			if (const auto it = std::find(candidates.begin(), candidates.end(), a_instanceKey); it != candidates.end()) {
-				_runewordBaseCycleCursor = static_cast<std::uint32_t>(std::distance(candidates.begin(), it));
+			const auto candidates = CollectEquippedRunewordBaseCandidates(true);
+			if (const auto cursor = ResolveRunewordBaseCycleCursor(candidates, a_instanceKey); cursor) {
+				_runewordBaseCycleCursor = *cursor;
 			}
 
 			auto& state = _runewordInstanceStates[a_instanceKey];
@@ -358,15 +385,7 @@ namespace CalamityAffixes
 				}
 			}
 
-			const char* selectedNameRaw = xList ? xList->GetDisplayName(entry->object) : nullptr;
-			std::string selectedName = selectedNameRaw ? selectedNameRaw : "";
-			if (selectedName.empty()) {
-				const char* objectNameRaw = entry->object->GetName();
-				selectedName = objectNameRaw ? objectNameRaw : "";
-			}
-			if (selectedName.empty()) {
-				selectedName = "<Unknown>";
-			}
+			const std::string selectedName = ResolveInventoryDisplayName(entry, xList);
 
 			const auto* recipe = FindRunewordRecipeByToken(state.recipeToken);
 			if (!recipe) {
@@ -410,19 +429,9 @@ namespace CalamityAffixes
 					continue;
 				}
 
-				const char* displayRaw = xList ? xList->GetDisplayName(entry->object) : nullptr;
-				std::string displayName = displayRaw ? displayRaw : "";
-				if (displayName.empty()) {
-					const char* objectNameRaw = entry->object->GetName();
-					displayName = objectNameRaw ? objectNameRaw : "";
-				}
-				if (displayName.empty()) {
-					displayName = "<Unknown>";
-				}
-
 				entries.push_back(RunewordBaseInventoryEntry{
 					.instanceKey = key,
-					.displayName = std::move(displayName),
+					.displayName = ResolveInventoryDisplayName(entry, xList),
 					.selected = (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key)
 				});
 			}
@@ -2047,27 +2056,19 @@ namespace CalamityAffixes
 				};
 
 		if (!a_selectedDisplayName.empty()) {
-			const TooltipCandidate* match = nullptr;
-			bool ambiguous = false;
-
+			std::vector<TooltipResolutionCandidate> resolutionCandidates;
+			resolutionCandidates.reserve(candidates.size());
 			for (const auto& candidate : candidates) {
-				if (candidate.rowName.empty() || candidate.rowName != a_selectedDisplayName) {
-					continue;
-				}
-
-				if (!match) {
-					match = std::addressof(candidate);
-					continue;
-				}
-
-				if (match->affix != candidate.affix || match->instanceKey != candidate.instanceKey) {
-					ambiguous = true;
-					break;
-				}
+				resolutionCandidates.push_back(TooltipResolutionCandidate{
+					.rowName = candidate.rowName,
+					.affixToken = candidate.affix ? candidate.affix->token : 0u,
+					.instanceKey = candidate.instanceKey
+				});
 			}
 
-			if (match && !ambiguous) {
-				return formatTooltip(*match);
+			const auto resolution = ResolveTooltipCandidateSelection(resolutionCandidates, a_selectedDisplayName);
+			if (resolution.matchedIndex && *resolution.matchedIndex < candidates.size() && !resolution.ambiguous) {
+				return formatTooltip(candidates[*resolution.matchedIndex]);
 			}
 
 			// If a specific row name is known but no safe exact match exists,

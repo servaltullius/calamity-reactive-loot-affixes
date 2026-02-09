@@ -89,6 +89,9 @@ if ! command -v wslpath >/dev/null 2>&1; then
   exit 1
 fi
 
+# Active Papyrus bridge (SKSE-first runtime):
+# - compile only the lightweight ModEvent/MCM bridge scripts below.
+# - AffixManager/PlayerAlias/SkseBridge sources remain as legacy references and are intentionally not built here.
 targets=(
   "CalamityAffixes_ModeControl.psc"
   "CalamityAffixes_ModEventEmitter.psc"
@@ -106,6 +109,7 @@ imports="$(wslpath -w "${src_dir}");$(wslpath -w "${stub_dir}");$(wslpath -w "${
 flags_win="$(wslpath -w "${flags_file}")"
 out_win="$(wslpath -w "${out_dir}")"
 
+# Legacy outputs are removed on each build so packaged artifacts only contain active scripts.
 stale_outputs=(
   "CalamityAffixes_AffixEffectBase.pex"
   "CalamityAffixes_AffixManager.pex"
