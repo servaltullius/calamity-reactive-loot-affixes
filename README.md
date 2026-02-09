@@ -150,6 +150,7 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 
 ## Papyrus ↔ SKSE 브리지
 
+  - 이벤트 시그니처 근거 요약: `docs/references/2026-02-09-event-signatures.md`
   - C++ 이벤트 싱크: `skse/CalamityAffixes/src/EventBridge.cpp`
   - `TESHitEvent` → `CalamityAffixes_Hit` (sender = 대상 Actor)
   - `TESDeathEvent` → `CalamityAffixes_Kill` (sender = 사망한 Actor) *(현재 Papyrus로는 미연결 — 추후 확장용)*

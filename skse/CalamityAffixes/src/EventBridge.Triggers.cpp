@@ -3,6 +3,7 @@
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/PrismaTooltip.h"
+#include "CalamityAffixes/TriggerGuards.h"
 
 #include <algorithm>
 #include <bit>
@@ -106,6 +107,12 @@ namespace CalamityAffixes
 			}
 
 			return false;
+		}
+
+		[[nodiscard]] std::uint64_t ToNonNegativeMilliseconds(std::chrono::steady_clock::time_point a_value) noexcept
+		{
+			const auto count = std::chrono::duration_cast<std::chrono::milliseconds>(a_value.time_since_epoch()).count();
+			return count > 0 ? static_cast<std::uint64_t>(count) : 0u;
 		}
 	}
 
@@ -294,7 +301,9 @@ namespace CalamityAffixes
 			}
 
 			if (const auto it = _perTargetCooldowns.find(key); it != _perTargetCooldowns.end()) {
-				if (a_now < it->second) {
+				const auto nowMs = ToNonNegativeMilliseconds(a_now);
+				const auto nextAllowedMs = ToNonNegativeMilliseconds(it->second);
+				if (IsPerTargetCooldownBlockedMs(nowMs, nextAllowedMs)) {
 					return true;
 				}
 			}
@@ -307,7 +316,8 @@ namespace CalamityAffixes
 			std::chrono::milliseconds a_perTargetIcd,
 			std::chrono::steady_clock::time_point a_now)
 		{
-			if (a_perTargetIcd.count() <= 0 || a_key.token == 0u || a_key.target == 0u) {
+			const auto nowMs = ToNonNegativeMilliseconds(a_now);
+			if (!ComputePerTargetCooldownNextAllowedMs(nowMs, a_perTargetIcd.count(), a_key.token, a_key.target).has_value()) {
 				return;
 			}
 
@@ -1101,13 +1111,25 @@ namespace CalamityAffixes
 
 	bool EventBridge::ShouldSuppressDuplicateHit(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept
 	{
-		if ((a_now - _lastHitAt) < kDuplicateHitWindow) {
-			if (a_key.outgoing == _lastHit.outgoing &&
-				a_key.aggressor == _lastHit.aggressor &&
-				a_key.target == _lastHit.target &&
-				a_key.source == _lastHit.source) {
-				return true;
-			}
+		const DuplicateHitKey current{
+			.outgoing = a_key.outgoing,
+			.aggressor = a_key.aggressor,
+			.target = a_key.target,
+			.source = a_key.source
+		};
+		const DuplicateHitKey last{
+			.outgoing = _lastHit.outgoing,
+			.aggressor = _lastHit.aggressor,
+			.target = _lastHit.target,
+			.source = _lastHit.source
+		};
+		if (ShouldSuppressDuplicateHitWindow(
+				current,
+				last,
+				ToNonNegativeMilliseconds(a_now),
+				ToNonNegativeMilliseconds(_lastHitAt),
+				static_cast<std::uint64_t>(kDuplicateHitWindow.count()))) {
+			return true;
 		}
 
 		_lastHitAt = a_now;

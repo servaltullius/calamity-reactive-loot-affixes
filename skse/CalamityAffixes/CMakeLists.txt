@@ -19,6 +19,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/Papyrus.h
 	    include/CalamityAffixes/PrismaTooltip.h
 	    include/CalamityAffixes/RunewordUtil.h
+	    include/CalamityAffixes/TriggerGuards.h
 	    include/CalamityAffixes/TrapSystem.h
 	)
 
@@ -127,6 +128,7 @@ if (BUILD_TESTING)
             tests/test_instance_state_key.cpp
             tests/test_resync_scheduler.cpp
             tests/test_runeword_util.cpp
+            tests/test_trigger_guards.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 
