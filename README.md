@@ -4,6 +4,8 @@
 [![Download MO2 Zip](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases)
 
 최신 릴리즈/다운로드: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
+넥서스 업로드 실무 가이드: `docs/releases/2026-02-09-nexus-upload-playbook.md`
+넥서스 붙여넣기 완성본(v0.1.0-beta.1): `docs/releases/2026-02-09-nexus-publish-copy-v0.1.0-beta.1.md`
 
 스카이림(SE/AE)용 “Diablo/PoE 스타일 어픽스 + 프로크(확률 발동) + ICD” 시스템을 만들기 위한 개발 레포입니다.
 
@@ -12,6 +14,12 @@
 - 아이템(무기/아머)에 **어픽스(확률 발동 효과)**를 붙이고
 - 중앙 Papyrus 매니저가 **프로크/ICD/가드**를 처리하며
 - (권장) SKSE 플러그인이 **모든 무기/마법/소환수/DoT 적용(=틱 X)** 트리거를 안정적으로 공급합니다.
+
+## 적용 범위(현재)
+
+- 기본 런타임 대상은 **플레이어 장비/플레이어 인벤토리**입니다.
+- 전투 트리거는 **플레이어 본인 + 플레이어가 지휘하는 소환체(player-owned summon/proxy)** 까지 지원합니다.
+- **일반 팔로워/NPC가 착용한 장비를 독립 주체로 추적/발동**하는 모드는 현재 지원하지 않습니다.
 
 ## 어픽스 적용 방식(인스턴스 / Loot-time)
 
@@ -30,6 +38,12 @@
 
 - 제작 완료로 생성된 아이템이 **플레이어 인벤토리로 들어오는 순간**(ContainerChanged)에도 동일하게 “loot-time 롤링”이 적용됩니다.
 - 즉 “파밍/제작마다 리롤되는” ARPG식 인스턴스 어픽스를 의도합니다.
+
+## 팔로워/NPC에게 아이템을 주면 적용되나요?
+
+- 현재 설계는 플레이어 중심이라, **팔로워/NPC 장비를 별도 인스턴스로 굴리는 방식은 미지원**입니다.
+- 따라서 “NPC가 착용한 같은 아이템도 동일한 어픽스 시스템으로 발동”을 기대하면 현재 빌드에서는 동작이 제한적입니다.
+- 안정성을 우선해 범위를 좁힌 상태이며, 필요 시 추후 `팔로워 한정` 단계부터 확장하는 것을 권장합니다.
 
 ## 레포 구조
 
@@ -80,6 +94,7 @@
 #### (선택) SPID
 
 - SPID (NPC/아이템/퍼크 분배) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/36869))
+- 참고: SPID는 분배 도구이며, 본 모드의 어픽스 런타임 대상 범위를 자동으로 NPC 전체로 확장하지는 않습니다.
 
 ### 의존성(선택)
 

@@ -12,6 +12,15 @@
           "text": "Runtime Settings / 런타임 설정"
         },
         {
+          "type": "text",
+          "id": "tRuntimeScope:General",
+          "text": "Runtime Scope / 적용 범위",
+          "help": "Current runtime scope is player-centric: player inventory/equipment, plus player-owned summons/proxies for combat triggers. Follower/NPC equipment as independent affix owners is not supported yet. / 현재 런타임 범위는 플레이어 중심입니다: 플레이어 인벤/장비 + 전투 트리거에서 플레이어 지휘 소환체/프록시만 지원합니다. 팔로워/NPC 장비의 독립 어픽스 소유자 추적은 아직 지원하지 않습니다.",
+          "valueOptions": {
+            "value": "Player-centric runtime / 플레이어 중심 런타임"
+          }
+        },
+        {
           "type": "toggle",
           "id": "bEnabled:General",
           "text": "Enable Mod / 모드 활성화",
