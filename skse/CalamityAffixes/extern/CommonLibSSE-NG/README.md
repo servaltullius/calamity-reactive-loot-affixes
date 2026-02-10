@@ -113,7 +113,7 @@ project root (next to `vcpkg.json`) with the following contents:
             "kind": "git",
             "repository": "https://gitlab.com/colorglass/vcpkg-colorglass",
             // Update this baseline to the latest commit from the above repo.
-            "baseline": "bbd09a56b951d86dec3ea484ec183d00b013b486",
+            "baseline": "9eae9f03f03e0ca96fce5031f44f4e64cd6debdc",
             "packages": [
                 "commonlibsse-ng",
                 "commonlibsse-ng-ae",

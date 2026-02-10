@@ -115,10 +115,16 @@ namespace CalamityAffixes
 			return selection;
 		}
 
-		selection.resistFire = a_analysisTarget->GetActorValue(RE::ActorValue::kResistFire);
-		selection.resistFrost = a_analysisTarget->GetActorValue(RE::ActorValue::kResistFrost);
-		selection.resistShock = a_analysisTarget->GetActorValue(RE::ActorValue::kResistShock);
-		selection.pick = PickAdaptiveElement(selection.resistFire, selection.resistFrost, selection.resistShock, a_action.adaptiveMode);
+			// NOTE:
+			// Actor's multiple-inheritance layout differs across Skyrim versions (notably 1.6.629+),
+			// so accessing ActorValueOwner directly through Actor is unsafe for a multi-version DLL.
+			// CommonLibSSE-NG provides AsActorValueOwner() to do this cast in a layout-agnostic way.
+			if (auto* avOwner = a_analysisTarget->AsActorValueOwner()) {
+				selection.resistFire = avOwner->GetActorValue(RE::ActorValue::kResistFire);
+				selection.resistFrost = avOwner->GetActorValue(RE::ActorValue::kResistFrost);
+				selection.resistShock = avOwner->GetActorValue(RE::ActorValue::kResistShock);
+			}
+			selection.pick = PickAdaptiveElement(selection.resistFire, selection.resistFrost, selection.resistShock, a_action.adaptiveMode);
 
 		switch (selection.pick) {
 		case AdaptiveElement::kFire:

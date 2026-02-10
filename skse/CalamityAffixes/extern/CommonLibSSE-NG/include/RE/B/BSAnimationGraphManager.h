@@ -91,12 +91,12 @@ namespace RE
 
 		[[nodiscard]] inline RUNTIME_DATA& GetRuntimeData() noexcept
 		{
-			return REL::RelocateMember<RUNTIME_DATA>(this, 0x58, 0x60);
+			return REL::RelocateMember<RUNTIME_DATA>(this, 0x98, 0xA0);
 		}
 
 		[[nodiscard]] inline const RUNTIME_DATA& GetRuntimeData() const noexcept
 		{
-			return REL::RelocateMember<RUNTIME_DATA>(this, 0x58, 0x60);
+			return REL::RelocateMember<RUNTIME_DATA>(this, 0x98, 0xA0);
 		}
 
 		// members

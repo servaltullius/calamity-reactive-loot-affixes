@@ -17,7 +17,7 @@
 using namespace std::literals;
 
 SKSEPluginInfo(
-	.Version = REL::Version{ 1, 0, 1, 0 },
+	.Version = REL::Version{ 1, 0, 2, 0 },
 	.Name = "CalamityAffixes"sv,
 	.Author = ""sv,
 	.SupportEmail = ""sv,
@@ -26,9 +26,9 @@ SKSEPluginInfo(
 	.MinimumSKSEVersion = REL::Version{ 0, 0, 0, 0 }
 )
 
-namespace
-{
-	constexpr std::uint32_t kBuildSeq = 32;
+	namespace
+	{
+		constexpr std::uint32_t kBuildSeq = 33;
 
 	void SetupLogging()
 	{

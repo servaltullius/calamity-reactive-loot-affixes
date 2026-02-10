@@ -716,11 +716,11 @@ namespace RE
 
 	bool Actor::IsSneaking() const
 	{
-		if (!ActorState::IsSneaking()) {
+		if (!AsActorState()->IsSneaking()) {
 			return false;
 		}
 
-		if (ActorState::IsSwimming()) {
+		if (AsActorState()->IsSwimming()) {
 			return false;
 		}
 

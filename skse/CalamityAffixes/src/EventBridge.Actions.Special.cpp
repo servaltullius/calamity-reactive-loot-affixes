@@ -343,20 +343,25 @@ namespace CalamityAffixes
 		return selection;
 	}
 
-	bool EventBridge::ResolveArchmageResourceUsage(
-		RE::Actor* a_caster,
-		float a_damagePct,
-		float a_costPct,
-		float& a_outMaxMagicka,
-		float& a_outExtraCost,
-		float& a_outExtraDamage) const
-	{
-		if (!a_caster) {
-			return false;
-		}
+		bool EventBridge::ResolveArchmageResourceUsage(
+			RE::Actor* a_caster,
+			float a_damagePct,
+			float a_costPct,
+			float& a_outMaxMagicka,
+			float& a_outExtraCost,
+			float& a_outExtraDamage) const
+		{
+			if (!a_caster) {
+				return false;
+			}
 
-		a_outMaxMagicka = std::max(0.0f, a_caster->GetPermanentActorValue(RE::ActorValue::kMagicka));
-		const float currentMagicka = std::max(0.0f, a_caster->GetActorValue(RE::ActorValue::kMagicka));
+			auto* avOwner = a_caster->AsActorValueOwner();
+			if (!avOwner) {
+				return false;
+			}
+
+			a_outMaxMagicka = std::max(0.0f, avOwner->GetPermanentActorValue(RE::ActorValue::kMagicka));
+			const float currentMagicka = std::max(0.0f, avOwner->GetActorValue(RE::ActorValue::kMagicka));
 
 		a_outExtraCost = a_outMaxMagicka * (a_costPct / 100.0f);
 		if (a_outExtraCost <= 0.0f || currentMagicka < a_outExtraCost) {
@@ -371,21 +376,25 @@ namespace CalamityAffixes
 		return true;
 	}
 
-	bool EventBridge::ExecuteArchmageCast(
-		const Action& a_action,
-		RE::Actor* a_caster,
-		RE::Actor* a_target,
+		bool EventBridge::ExecuteArchmageCast(
+			const Action& a_action,
+			RE::Actor* a_caster,
+			RE::Actor* a_target,
 		std::string_view a_sourceEditorId,
 		float a_maxMagicka,
 		float a_extraCost,
 		float a_extraDamage)
 	{
 		auto* magicCaster = a_caster ? a_caster->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) : nullptr;
-		if (!magicCaster) {
-			return false;
-		}
+			if (!magicCaster) {
+				return false;
+			}
 
-		a_caster->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kMagicka, -a_extraCost);
+			auto* avOwner = a_caster ? a_caster->AsActorValueOwner() : nullptr;
+			if (!avOwner) {
+				return false;
+			}
+			avOwner->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kMagicka, -a_extraCost);
 
 		spdlog::debug(
 			"CalamityAffixes: Archmage (source={}, maxMagicka={}, extraCost={}, extraDamage={})",

@@ -116,14 +116,18 @@ namespace RE
 
 	NiSmartPointer(Actor);
 
-	class Actor :
-		public TESObjectREFR,                              // 000
-		public MagicTarget,                                // 098
-		public ActorValueOwner,                            // 0B0
-		public ActorState,                                 // 0B8
-		public BSTEventSink<BSTransformDeltaEvent>,        // 0C8
-		public BSTEventSink<bhkCharacterMoveFinishEvent>,  // 0D0
-		public IPostAnimationChannelUpdateFunctor          // 0D8
+    class Actor :
+#ifndef ENABLE_SKYRIM_AE
+            public TESObjectREFR,                              // 000
+            public MagicTarget,                                // 098, 0A0
+            public ActorValueOwner,                            // 0B0, 0B8
+            public ActorState,                                 // 0B8, 0C0
+            public BSTEventSink<BSTransformDeltaEvent>,        // 0C8, 0D0
+            public BSTEventSink<bhkCharacterMoveFinishEvent>,  // 0D0, 0D8
+            public IPostAnimationChannelUpdateFunctor          // 0D8, 0E0
+#else
+            public TESObjectREFR  // 000
+#endif
 	{
 	private:
 		using EntryPoint = BGSEntryPointPerkEntry::EntryPoint;
@@ -331,9 +335,11 @@ namespace RE
 #endif
 
 		// override (MagicTarget)
+#ifndef ENABLE_SKYRIM_AE
 		[[nodiscard]] Actor*                       GetTargetStatsObject() override;      // 002 - { return this; }
 		[[nodiscard]] bool                         MagicTargetIsActor() const override;  // 003 - { return true; }
 		[[nodiscard]] BSSimpleList<ActiveEffect*>* GetActiveEffectList() override;       // 007
+#endif
 
 		// add
 		SKYRIM_REL_VR_VIRTUAL void                Unk_A2(void);                                                                                                                                                                          // 0A2
@@ -658,6 +664,54 @@ namespace RE
 		{
 			return REL::RelocateMemberIfNewer<ACTOR_RUNTIME_DATA>(SKSE::RUNTIME_SSE_1_6_629, this, 0xE0, 0xE8);
 		}
+
+        [[nodiscard]] inline MagicTarget* AsMagicTarget() noexcept {
+            return &REL::RelocateMemberIfNewer<MagicTarget>(SKSE::RUNTIME_SSE_1_6_629, this, 0x98, 0xA0);
+        }
+
+        [[nodiscard]] inline const MagicTarget* AsMagicTarget() const noexcept {
+            return &REL::RelocateMemberIfNewer<MagicTarget>(SKSE::RUNTIME_SSE_1_6_629, this, 0x98, 0xA0);
+        }
+
+        [[nodiscard]] inline ActorValueOwner* AsActorValueOwner() noexcept {
+            return &REL::RelocateMemberIfNewer<ActorValueOwner>(SKSE::RUNTIME_SSE_1_6_629, this, 0xB0, 0xB8);
+        }
+
+        [[nodiscard]] inline const ActorValueOwner* AsActorValueOwner() const noexcept {
+            return &REL::RelocateMemberIfNewer<ActorValueOwner>(SKSE::RUNTIME_SSE_1_6_629, this, 0xB0, 0xB8);
+        }
+
+        [[nodiscard]] inline ActorState* AsActorState() noexcept {
+            return &REL::RelocateMemberIfNewer<ActorState>(SKSE::RUNTIME_SSE_1_6_629, this, 0xB8, 0xC0);
+        }
+
+        [[nodiscard]] inline const ActorState* AsActorState() const noexcept {
+            return &REL::RelocateMemberIfNewer<ActorState>(SKSE::RUNTIME_SSE_1_6_629, this, 0xB8, 0xC0);
+        }
+
+        [[nodiscard]] inline BSTEventSink<BSTransformDeltaEvent>* AsBSTransformDeltaEventSink() noexcept {
+            return &REL::RelocateMemberIfNewer<BSTEventSink<BSTransformDeltaEvent>>(SKSE::RUNTIME_SSE_1_6_629, this, 0xC8, 0xD0);
+        }
+
+        [[nodiscard]] inline const BSTEventSink<BSTransformDeltaEvent>* AsBSTransformDeltaEventSink() const noexcept {
+            return &REL::RelocateMemberIfNewer<BSTEventSink<BSTransformDeltaEvent>>(SKSE::RUNTIME_SSE_1_6_629, this, 0xC8, 0xD0);
+        }
+
+        [[nodiscard]] inline BSTEventSink<bhkCharacterMoveFinishEvent>* AsCharacterMoveFinishEventSink() noexcept {
+            return &REL::RelocateMemberIfNewer<BSTEventSink<bhkCharacterMoveFinishEvent>>(SKSE::RUNTIME_SSE_1_6_629, this, 0xD0, 0xD8);
+        }
+
+        [[nodiscard]] inline const BSTEventSink<bhkCharacterMoveFinishEvent>* AsCharacterMoveFinishEventSink() const noexcept {
+            return &REL::RelocateMemberIfNewer<BSTEventSink<bhkCharacterMoveFinishEvent>>(SKSE::RUNTIME_SSE_1_6_629, this, 0xD0, 0xD8);
+        }
+
+        [[nodiscard]] inline IPostAnimationChannelUpdateFunctor* AsIPostAnimationChannelUpdateFunctor() noexcept {
+            return &REL::RelocateMemberIfNewer<IPostAnimationChannelUpdateFunctor>(SKSE::RUNTIME_SSE_1_6_629, this, 0xD8, 0xE0);
+        }
+
+        [[nodiscard]] inline const IPostAnimationChannelUpdateFunctor* AsIPostAnimationChannelUpdateFunctor() const noexcept {
+            return &REL::RelocateMemberIfNewer<IPostAnimationChannelUpdateFunctor>(SKSE::RUNTIME_SSE_1_6_629, this, 0xD8, 0xE0);
+        }
 
 		// members
 #ifndef ENABLE_SKYRIM_AE
