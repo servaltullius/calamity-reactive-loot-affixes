@@ -29,6 +29,8 @@
 
 ## 테스트 범위 (정적)
 
+- (원샷) 로컬 검증 스크립트:
+  - `tools/release_verify.sh`
 - 빌드:
   - `cmake --build skse/CalamityAffixes/build.linux-clangcl-rel -j`
 - 정적 체크:
@@ -44,6 +46,8 @@
 
 - 체크리스트 기준:
   - `docs/releases/2026-02-09-ingame-qa-smoke-checklist.md`
+- (옵션) 로그 시그니처 체크:
+  - `python3 tools/qa_skse_logcheck.py --log "<CalamityAffixes.log 경로>"`
 - 실행 환경:
   - [런타임/모드셋/세이브 조건]
 - 결과:

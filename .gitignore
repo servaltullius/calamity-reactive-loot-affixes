@@ -4,6 +4,10 @@
 
 dist/
 
+# Python
+**/__pycache__/
+*.pyc
+
 **/bin/
 **/obj/
 
@@ -24,3 +28,11 @@ CTestTestfile.cmake
 
 *.log
 *:Zone.Identifier
+
+# vibe-kit
+.vibe/db/
+.vibe/reports/
+.vibe/locks/
+.vibe/context/LATEST_CONTEXT.md
+.vibe/context/PACK_*.md
+.vibe/context/typecheck_baseline.json

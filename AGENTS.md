@@ -9,6 +9,12 @@ This section is generated. Re-run pinning to update.
 - (none matched this repo)
 <!-- skills-scout:end -->
 
+## vibe-kit (에이전트 컨텍스트)
+
+- 먼저 실행: `python3 scripts/vibe.py doctor --full`
+- 최신 컨텍스트: `.vibe/context/LATEST_CONTEXT.md`
+- (선택) SKSE 컨텍스트 팩: `python3 scripts/vibe.py pack --scope path --path skse/CalamityAffixes --out .vibe/context/PACK_SKSE.md --max-kb 256`
+
 ## 프로젝트 목표 (요약)
 
 - Skyrim SE/AE용 “Diablo/PoE 스타일 어픽스 + 프로크 + ICD” 시스템

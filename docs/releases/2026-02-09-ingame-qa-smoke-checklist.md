@@ -16,6 +16,20 @@
    - MCM `Debug Notifications` ON (권장)
    - 필요 시 SKSE 로그 tail
 
+## (옵션) 로그 시그니처 자동 체크
+
+인게임 테스트 후, SKSE 로그에 “플러그인 로드/설정 로드/훅 설치/Prisma 초기화” 시그니처가 찍혔는지 자동으로 확인합니다.
+
+```bash
+python3 tools/qa_skse_logcheck.py --log "<CalamityAffixes.log 경로>"
+```
+
+WSL에서 흔한 경로 예시:
+
+```bash
+python3 tools/qa_skse_logcheck.py --log "/mnt/c/Users/<You>/Documents/My Games/Skyrim Special Edition/SKSE/CalamityAffixes.log"
+```
+
 ## 공통 성공 기준
 
 - CTD/무한 스크립트 지연 없음
