@@ -1255,8 +1255,11 @@
 
       function applyQuickLaunchVisibility() {
         if (!quickLaunch) return;
-        const show = !controlPanelOpen && !tooltipTextState;
-        quickLaunch.style.display = show ? "flex" : "none";
+        // The always-on quick-launch pill is helpful for discovery, but it is also
+        // visually noisy in inventory menus. Prefer a "silent" UI by default.
+        // Users can still open/close the panel via the hotkey (default: F11),
+        // and the tooltip UI already provides a contextual hint when relevant.
+        quickLaunch.style.display = "none";
       }
 
       function applyTooltipPlacement() {
