@@ -17,7 +17,7 @@
 using namespace std::literals;
 
 SKSEPluginInfo(
-	.Version = REL::Version{ 0, 1, 0, 0 },
+	.Version = REL::Version{ 1, 0, 0, 0 },
 	.Name = "CalamityAffixes"sv,
 	.Author = ""sv,
 	.SupportEmail = ""sv,
