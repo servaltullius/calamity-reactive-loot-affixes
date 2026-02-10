@@ -1,11 +1,54 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Latest Release](https://img.shields.io/github/v/release/servaltullius/calamity-reactive-loot-affixes?include_prereleases&label=Latest%20Release)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases)
-[![Download MO2 Zip](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases)
+[![Latest Release](https://img.shields.io/github/v/release/servaltullius/calamity-reactive-loot-affixes?label=Latest%20Release)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/latest)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/latest)
 
-최신 릴리즈/다운로드: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
-넥서스 업로드 실무 가이드: `docs/releases/2026-02-09-nexus-upload-playbook.md`
-넥서스 붙여넣기 완성본(v0.1.0-beta.1): `docs/releases/2026-02-09-nexus-publish-copy-v0.1.0-beta.1.md`
+## 다운로드 (플레이어)
+
+- GitHub Releases (최신): https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/latest
+- 다운로드 파일: `CalamityAffixes_MO2_YYYY-MM-DD.zip`
+
+## 필수/권장 모드
+
+- 필수: SKSE64, Address Library for SKSE Plugins, Prisma UI
+- 권장: SkyUI
+- 선택: KID, SPID, MCM Helper, I4
+
+## 5분 설치 (MO2 기준)
+
+1. 위 “필수” 모드를 설치합니다.
+2. GitHub Releases에서 `CalamityAffixes_MO2_YYYY-MM-DD.zip`을 다운로드합니다.
+3. MO2에서 “Install a new mod from an archive”로 ZIP을 설치하고 Enable 합니다.
+4. SKSE로 실행합니다.
+5. 정상 동작 확인: `Documents/My Games/Skyrim Special Edition/SKSE/CalamityAffixes.log`가 생성됩니다.
+
+## 사용법 (한 줄 요약)
+
+- 아이템을 줍거나 제작하면 **인스턴스(ExtraUniqueID) 어픽스**가 롤링됩니다.
+- 인벤/루팅/상점에서 아이템을 “선택”하면 Prisma UI 툴팁에 어픽스 설명이 표시됩니다.
+- Prisma 조작 패널 토글: 기본 `F11` (MCM에서 변경 가능)
+
+## 문제 해결 (가장 흔한 것)
+
+- 툴팁이 안 뜸: Prisma UI 설치 확인, `Data/PrismaUI/views/CalamityAffixes/index.html`가 있는지 확인, 로그 확인
+- 실행/크래시: 런타임과 맞는 SKSE/Address Library인지 확인, `Data/SKSE/Plugins/*.dll` 충돌 여부 확인
+- 설정 변경:
+  - MCM Helper가 있으면 MCM에서 조정
+  - 없으면 `Data/MCM/Config/CalamityAffixes/settings.ini`를 `Data/MCM/Settings/CalamityAffixes.ini`로 복사해서 오버라이드
+
+## 이 레포는 무엇인가요?
+
+- 플레이어용 배포 ZIP과 함께, 소스 코드(SKSE 플러그인), 생성기(dotnet), 문서를 같이 관리하는 개발 레포입니다.
+- 개발/설계/배포 자동화 상세는 아래 “펼치기” 섹션을 참고하세요.
+
+<details>
+<summary>개발/설계 상세 (펼치기)</summary>
+
+### Maintainer 빠른 링크
+
+- GitHub Releases(전체): https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
+- 넥서스 업로드 실무 가이드: `docs/releases/2026-02-09-nexus-upload-playbook.md`
+- 넥서스 붙여넣기 완성본(v0.1.0-beta.1): `docs/releases/2026-02-09-nexus-publish-copy-v0.1.0-beta.1.md`
 
 스카이림(SE/AE)용 “Diablo/PoE 스타일 어픽스 + 프로크(확률 발동) + ICD” 시스템을 만들기 위한 개발 레포입니다.
 
@@ -213,3 +256,5 @@ tools/build_mo2_zip.sh
 상세 CK 체크리스트: `doc/2.CK_MVP_셋업_체크리스트.md`
 
 자동화(B 방식) 워크플로우: `doc/3.B_데이터주도_생성기_워크플로우.md`
+
+</details>
