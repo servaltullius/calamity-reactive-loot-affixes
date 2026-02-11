@@ -1,10 +1,12 @@
 using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 
 namespace CalamityAffixes.Generator.Writers;
 
 public static class McmPluginBuilder
 {
+    private static readonly ModKey SkyrimModKey = ModKey.FromNameAndExtension("Skyrim.esm");
 
     public static void AddMcmQuest(SkyrimMod mod)
     {
@@ -34,9 +36,19 @@ public static class McmPluginBuilder
             Flags = ScriptEntry.Flag.Local,
         });
 
-        // NOTE: Player alias with SKI_PlayerLoadGameAlias is intentionally omitted.
-        // CalamityAffixes_MCMConfig extends MCM_ConfigBase, which handles game-load
-        // events internally. The alias + QuestFragmentAlias VMAD structure caused
-        // Wrye Bash parsing exceptions in some environments.
+        // Keep the player alias for quest-structure stability across save games,
+        // but do NOT attach scripts via QuestFragmentAlias in the VMAD.
+        // The QuestFragmentAlias serialization caused Wrye Bash parsing exceptions.
+        // CalamityAffixes_MCMConfig extends MCM_ConfigBase, so MCM Helper handles
+        // game-load events internally — SKI_PlayerLoadGameAlias is not needed.
+        var playerAlias = new QuestAlias
+        {
+            ID = 0,
+            Type = QuestAlias.TypeEnum.Reference,
+            Name = "PlayerAlias_MCM",
+            Flags = QuestAlias.Flag.AllowReserved,
+        };
+        playerAlias.ForcedReference.SetTo(new FormKey(SkyrimModKey, 0x000014));
+        quest.Aliases.Add(playerAlias);
     }
 }
