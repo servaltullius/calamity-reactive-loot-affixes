@@ -36,11 +36,7 @@ public static class McmPluginBuilder
             Flags = ScriptEntry.Flag.Local,
         });
 
-        // Keep the player alias for quest-structure stability across save games,
-        // but do NOT attach scripts via QuestFragmentAlias in the VMAD.
-        // The QuestFragmentAlias serialization caused Wrye Bash parsing exceptions.
-        // CalamityAffixes_MCMConfig extends MCM_ConfigBase, so MCM Helper handles
-        // game-load events internally — SKI_PlayerLoadGameAlias is not needed.
+        // Required for MCM Helper menu refresh after load.
         var playerAlias = new QuestAlias
         {
             ID = 0,
@@ -50,5 +46,23 @@ public static class McmPluginBuilder
         };
         playerAlias.ForcedReference.SetTo(new FormKey(SkyrimModKey, 0x000014));
         quest.Aliases.Add(playerAlias);
+
+        var aliasVm = new QuestFragmentAlias
+        {
+            Version = 5,
+            ObjectFormat = 2,
+            Property = new ScriptObjectProperty
+            {
+                Name = "::PlayerAlias_MCM_var",
+                Flags = ScriptProperty.Flag.Edited,
+                Alias = 0,
+            },
+        };
+        aliasVm.Scripts.Add(new ScriptEntry
+        {
+            Name = "SKI_PlayerLoadGameAlias",
+            Flags = ScriptEntry.Flag.Local,
+        });
+        quest.VirtualMachineAdapter.Aliases.Add(aliasVm);
     }
 }
