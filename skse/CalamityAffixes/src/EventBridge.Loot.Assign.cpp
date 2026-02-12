@@ -6,6 +6,7 @@
 #include <random>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace CalamityAffixes
 {
@@ -273,11 +274,11 @@ namespace CalamityAffixes
 				++pos;
 			}
 
-			const auto first = cleaned.find_first_not_of(' ');
+			const auto first = cleaned.find_first_not_of(" \n\r\t");
 			if (first == std::string::npos) {
 				return std::string{};
 			}
-			const auto last = cleaned.find_last_not_of(' ');
+			const auto last = cleaned.find_last_not_of(" \n\r\t");
 			return cleaned.substr(first, last - first + 1);
 		};
 
@@ -307,6 +308,12 @@ namespace CalamityAffixes
 		if (baseName.empty()) {
 			const char* objectNameRaw = a_entry->object->GetName();
 			baseName = objectNameRaw ? objectNameRaw : "";
+		}
+
+		// Strip trailing whitespace/newlines that some mods embed in form names
+		while (!baseName.empty() && (baseName.back() == '\n' || baseName.back() == '\r' ||
+			baseName.back() == ' ' || baseName.back() == '\t')) {
+			baseName.pop_back();
 		}
 
 		// Build name with star prefix for multi-affix items
@@ -340,12 +347,6 @@ namespace CalamityAffixes
 		if (!_configLoaded || !_runtimeEnabled || _loot.chancePercent <= 0.0f) {
 			return;
 		}
-
-		SKSE::log::debug(
-			"CalamityAffixes: ProcessLootAcquired(baseObj={:08X}, count={}, uniqueID={}).",
-			a_baseObj,
-			a_count,
-			a_uniqueID);
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (!player) {
@@ -405,12 +406,11 @@ namespace CalamityAffixes
 		// Fallback:
 		// If the container change event doesn't provide a usable uniqueID, attempt to apply loot rolls to
 		// currently-unassigned instances (extraLists).
-		std::int32_t processed = 0;
+		// Collect unassigned lists first, then process in REVERSE order — newly added items are
+		// typically appended at the end of extraLists, so reverse iteration ensures the most
+		// recently acquired instance receives the affix instead of an older one.
+		std::vector<RE::ExtraDataList*> unassigned;
 		for (auto* xList : *entry->extraLists) {
-			if (processed >= a_count) {
-				break;
-			}
-
 			if (!xList) {
 				continue;
 			}
@@ -423,7 +423,12 @@ namespace CalamityAffixes
 				}
 			}
 
-			ApplyMultipleAffixes(changes, entry, xList, itemType, a_allowRunewordFragmentRoll);
+			unassigned.push_back(xList);
+		}
+
+		std::int32_t processed = 0;
+		for (auto it = unassigned.rbegin(); it != unassigned.rend() && processed < a_count; ++it) {
+			ApplyMultipleAffixes(changes, entry, *it, itemType, a_allowRunewordFragmentRoll);
 			processed += 1;
 		}
 	}
