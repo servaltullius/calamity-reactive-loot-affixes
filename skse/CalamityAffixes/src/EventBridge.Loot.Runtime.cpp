@@ -257,33 +257,7 @@ namespace CalamityAffixes
 			const auto* state = FindInstanceRuntimeState(a_instanceKey, a_affix.token);
 			const auto& action = a_affix.action;
 
-			if (action.evolutionEnabled && !action.evolutionThresholds.empty()) {
-				const std::size_t stage = ResolveEvolutionStageIndex(action, state);
-				const std::size_t totalStages = action.evolutionThresholds.size();
-				const std::uint32_t xp = state ? state->evolutionXp : 0u;
-				const float mult = ResolveEvolutionMultiplier(action, state);
-
-				detail.append("Evolution Stage ");
-				detail.append(std::to_string(stage + 1));
-				detail.push_back('/');
-				detail.append(std::to_string(totalStages));
-				detail.append(" (XP ");
-				detail.append(std::to_string(xp));
-				detail.append(", x");
-				detail.append(std::to_string(mult));
-				detail.push_back(')');
-
-				if (stage + 1 < action.evolutionThresholds.size()) {
-					detail.append(" -> Next ");
-					detail.append(std::to_string(action.evolutionThresholds[stage + 1]));
-				}
-			}
-
 			if (action.modeCycleEnabled && !action.modeCycleSpells.empty()) {
-				if (!detail.empty()) {
-					detail.push_back('\n');
-				}
-
 				const auto modeCount = static_cast<std::uint32_t>(action.modeCycleSpells.size());
 				const std::uint32_t idx = modeCount > 0u ? ((state ? state->modeIndex : 0u) % modeCount) : 0u;
 
