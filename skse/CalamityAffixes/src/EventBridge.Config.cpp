@@ -394,8 +394,16 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			out.slot = parseAffixSlot(a.value("slot", std::string{}));
-			out.family = a.value("family", std::string{});
+			{
+				const auto slotIt = a.find("slot");
+				if (slotIt != a.end() && slotIt->is_string()) {
+					out.slot = parseAffixSlot(slotIt->get<std::string>());
+				}
+				const auto famIt = a.find("family");
+				if (famIt != a.end() && famIt->is_string()) {
+					out.family = famIt->get<std::string>();
+				}
+			}
 
 			const auto& kid = a.value("kid", nlohmann::json::object());
 			if (kid.is_object()) {
