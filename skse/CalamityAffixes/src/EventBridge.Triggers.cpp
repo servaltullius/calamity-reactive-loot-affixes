@@ -136,7 +136,8 @@ namespace CalamityAffixes
 					continue;
 				}
 
-			const float chance = std::clamp(affix.procChancePct * _runtimeProcChanceMult, 0.0f, 100.0f);
+			const float penalty = (i < _activeSlotPenalty.size() && _activeSlotPenalty[i] > 0.0f) ? _activeSlotPenalty[i] : 1.0f;
+			const float chance = std::clamp(affix.procChancePct * _runtimeProcChanceMult * penalty, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
 				continue;
 			}

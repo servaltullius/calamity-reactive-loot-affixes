@@ -76,10 +76,7 @@ namespace CalamityAffixes
 
 				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
 				const auto it = _instanceAffixes.find(key);
-				const auto supIt = _instanceSupplementalAffixes.find(key);
-				const bool primaryMatch = (it != _instanceAffixes.end() && it->second == a_affixToken);
-				const bool supplementalMatch = (supIt != _instanceSupplementalAffixes.end() && supIt->second == a_affixToken);
-				if (!primaryMatch && !supplementalMatch) {
+				if (it == _instanceAffixes.end() || !it->second.HasToken(a_affixToken)) {
 					continue;
 				}
 

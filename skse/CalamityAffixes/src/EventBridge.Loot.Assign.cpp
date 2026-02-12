@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <limits>
+#include <random>
 #include <string>
 #include <string_view>
 
@@ -49,7 +50,7 @@ namespace CalamityAffixes
 		return out;
 	}
 
-	std::optional<std::size_t> EventBridge::RollLootAffixIndex(LootItemType a_itemType)
+	std::optional<std::size_t> EventBridge::RollLootAffixIndex(LootItemType a_itemType, const std::vector<std::size_t>* a_exclude)
 	{
 		if (_loot.chancePercent <= 0.0f) {
 			return std::nullopt;
@@ -62,50 +63,69 @@ namespace CalamityAffixes
 			}
 		}
 
-		const auto weaponCount = _lootWeaponAffixes.size();
-		const auto armorCount = _lootArmorAffixes.size();
+		// Build eligible pool, excluding already-chosen indices and chance<=0 affixes.
+		// When sharedPool is enabled, combine weapon + armor pools (original behavior).
+		std::vector<std::size_t> eligible;
+		std::vector<double> weights;
+
+		auto collectFromPool = [&](const std::vector<std::size_t>& a_pool) {
+			for (const auto idx : a_pool) {
+				if (a_exclude) {
+					if (std::find(a_exclude->begin(), a_exclude->end(), idx) != a_exclude->end()) {
+						continue;
+					}
+				}
+				if (idx >= _affixes.size()) {
+					continue;
+				}
+				// Use procChancePct as loot weight; treat 0 or negative as excluded (runeword-only affixes)
+				const float weight = _affixes[idx].procChancePct;
+				if (weight <= 0.0f) {
+					continue;
+				}
+				eligible.push_back(idx);
+				weights.push_back(static_cast<double>(weight));
+			}
+		};
 
 		if (_loot.sharedPool) {
-			const auto total = weaponCount + armorCount;
-			if (total == 0) {
-				return std::nullopt;
-			}
-
-			std::uniform_int_distribution<std::size_t> pick(0, total - 1);
-			const auto slot = pick(_rng);
-			if (slot < weaponCount) {
-				return _lootWeaponAffixes[slot];
-			}
-			return _lootArmorAffixes[slot - weaponCount];
+			collectFromPool(_lootWeaponAffixes);
+			collectFromPool(_lootArmorAffixes);
+		} else {
+			const auto& typePool = (a_itemType == LootItemType::kWeapon) ? _lootWeaponAffixes : _lootArmorAffixes;
+			collectFromPool(typePool);
 		}
 
-		const auto& pool = (a_itemType == LootItemType::kWeapon) ? _lootWeaponAffixes : _lootArmorAffixes;
-		if (pool.empty()) {
+		if (eligible.empty()) {
 			return std::nullopt;
 		}
 
-		std::uniform_int_distribution<std::size_t> pick(0, pool.size() - 1);
-		return pool[pick(_rng)];
+		if (eligible.size() == 1) {
+			return eligible[0];
+		}
+
+		std::discrete_distribution<std::size_t> dist(weights.begin(), weights.end());
+		return eligible[dist(_rng)];
 	}
 
-		void EventBridge::ApplyChosenAffix(
-			RE::InventoryChanges* a_changes,
-			RE::InventoryEntryData* a_entry,
-			RE::ExtraDataList* a_xList,
-			LootItemType,
-			std::size_t a_affixIndex,
-			bool a_allowRunewordFragmentRoll)
-		{
+	std::uint8_t EventBridge::RollAffixCount()
+	{
+		std::discrete_distribution<unsigned int> dist({
+			static_cast<double>(kAffixCountWeights[0]),
+			static_cast<double>(kAffixCountWeights[1]),
+			static_cast<double>(kAffixCountWeights[2])
+		});
+		return static_cast<std::uint8_t>(dist(_rng) + 1);
+	}
+
+	void EventBridge::ApplyMultipleAffixes(
+		RE::InventoryChanges* a_changes,
+		RE::InventoryEntryData* a_entry,
+		RE::ExtraDataList* a_xList,
+		LootItemType a_itemType,
+		bool a_allowRunewordFragmentRoll)
+	{
 		if (!a_changes || !a_entry || !a_entry->object || !a_xList) {
-			return;
-		}
-
-		if (a_affixIndex >= _affixes.size()) {
-			return;
-		}
-
-		auto& affix = _affixes[a_affixIndex];
-		if (affix.id.empty()) {
 			return;
 		}
 
@@ -119,174 +139,244 @@ namespace CalamityAffixes
 		}
 
 		const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+
+		// If already assigned, just ensure display name and return
 		if (const auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
-			EnsureInstanceRuntimeState(key, existingIt->second);
-			const auto idxIt = _affixIndexByToken.find(existingIt->second);
-			if (idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
-				EnsureAffixDisplayName(a_entry, a_xList, _affixes[idxIt->second]);
+			const auto& existingSlots = existingIt->second;
+			for (std::uint8_t s = 0; s < existingSlots.count; ++s) {
+				EnsureInstanceRuntimeState(key, existingSlots.tokens[s]);
 			}
+			EnsureMultiAffixDisplayName(a_entry, a_xList, existingSlots);
 			return;
 		}
 
-		_instanceAffixes.emplace(key, affix.token);
-		EnsureInstanceRuntimeState(key, affix.token);
-		SKSE::log::debug(
-			"CalamityAffixes: loot affix '{}' applied to {:08X}:{}.",
-			affix.id,
-			uid->baseID,
-			uid->uniqueID);
+		// Roll how many affixes this item gets (1-3)
+		const std::uint8_t targetCount = RollAffixCount();
 
-				EnsureAffixDisplayName(a_entry, a_xList, affix);
-				if (a_allowRunewordFragmentRoll) {
-					MaybeGrantRandomRunewordFragment();
+		InstanceAffixSlots slots;
+		std::vector<std::size_t> chosen;
+		chosen.reserve(targetCount);
+
+		for (std::uint8_t attempt = 0; attempt < targetCount; ++attempt) {
+			static constexpr std::uint8_t kMaxRetries = 3;
+			bool found = false;
+			for (std::uint8_t retry = 0; retry < kMaxRetries; ++retry) {
+				const auto idx = RollLootAffixIndex(a_itemType, &chosen);
+				if (!idx) {
+					break;  // pool exhausted
 				}
+				if (std::find(chosen.begin(), chosen.end(), *idx) != chosen.end()) {
+					continue;  // duplicate, retry
+				}
+				if (*idx >= _affixes.size() || _affixes[*idx].id.empty()) {
+					continue;
+				}
+				chosen.push_back(*idx);
+				slots.AddToken(_affixes[*idx].token);
+				found = true;
+				break;
 			}
-
-		void EventBridge::ApplyAffixToInstance(
-			RE::InventoryChanges* a_changes,
-			RE::InventoryEntryData* a_entry,
-			RE::ExtraDataList* a_xList,
-			LootItemType a_itemType,
-			bool a_allowRunewordFragmentRoll)
-		{
-			const auto idx = RollLootAffixIndex(a_itemType);
-			if (!idx) {
-				return;
+			if (!found) {
+				break;  // can't find more unique affixes
 			}
-
-			ApplyChosenAffix(a_changes, a_entry, a_xList, a_itemType, *idx, a_allowRunewordFragmentRoll);
 		}
 
-		void EventBridge::EnsureAffixDisplayName(
-			RE::InventoryEntryData* a_entry,
-			RE::ExtraDataList* a_xList,
-			const AffixRuntime& a_affix)
-		{
-			if (!_loot.renameItem || !a_entry || !a_entry->object || !a_xList) {
-				return;
+		if (slots.count == 0) {
+			return;
+		}
+
+		_instanceAffixes.emplace(key, slots);
+
+		for (std::uint8_t s = 0; s < slots.count; ++s) {
+			EnsureInstanceRuntimeState(key, slots.tokens[s]);
+			if (s < chosen.size() && chosen[s] < _affixes.size()) {
+				SKSE::log::debug(
+					"CalamityAffixes: loot affix '{}' applied to {:08X}:{} (slot {}/{}).",
+					_affixes[chosen[s]].id,
+					uid->baseID,
+					uid->uniqueID,
+					s + 1,
+					slots.count);
 			}
+		}
 
-			if (a_affix.label.empty()) {
-				return;
-			}
+		EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
+		if (a_allowRunewordFragmentRoll) {
+			MaybeGrantRandomRunewordFragment();
+		}
+	}
 
-			const char* currentRaw = a_xList->GetDisplayName(a_entry->object);
-			const std::string currentName = currentRaw ? currentRaw : "";
+	void EventBridge::EnsureMultiAffixDisplayName(
+		RE::InventoryEntryData* a_entry,
+		RE::ExtraDataList* a_xList,
+		const InstanceAffixSlots& a_slots)
+	{
+		if (!_loot.renameItem || !a_entry || !a_entry->object || !a_xList) {
+			return;
+		}
 
-			auto isKnownAffixLabel = [&](std::string_view a_label) {
-				if (a_label.empty()) {
-					return false;
-				}
+		if (a_slots.count == 0) {
+			return;
+		}
 
-				for (const auto& affix : _affixes) {
-					if (!affix.label.empty() && affix.label == a_label) {
-						return true;
-					}
-				}
+		// Find primary affix label
+		const auto primaryToken = a_slots.GetPrimary();
+		const auto idxIt = _affixIndexByToken.find(primaryToken);
+		if (idxIt == _affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
+			return;
+		}
+		const auto& primaryAffix = _affixes[idxIt->second];
+		if (primaryAffix.label.empty()) {
+			return;
+		}
+
+		const char* currentRaw = a_xList->GetDisplayName(a_entry->object);
+		const std::string currentName = currentRaw ? currentRaw : "";
+
+		auto isKnownAffixLabel = [&](std::string_view a_label) {
+			if (a_label.empty()) {
 				return false;
-			};
+			}
 
-			auto stripKnownAffixTags = [&](std::string_view a_name) {
-				std::string cleaned;
-				cleaned.reserve(a_name.size());
+			for (const auto& affix : _affixes) {
+				if (!affix.label.empty() && affix.label == a_label) {
+					return true;
+				}
+			}
+			return false;
+		};
 
-				std::size_t pos = 0;
-				while (pos < a_name.size()) {
-					if (a_name[pos] == '[') {
-						const auto right = a_name.find(']', pos + 1);
-						if (right != std::string::npos && right > pos + 1) {
-							const std::string_view label = a_name.substr(pos + 1, right - pos - 1);
-							if (isKnownAffixLabel(label)) {
-								while (!cleaned.empty() && cleaned.back() == ' ') {
-									cleaned.pop_back();
-								}
-								pos = right + 1;
-								while (pos < a_name.size() && a_name[pos] == ' ') {
-									++pos;
-								}
-								continue;
+		auto stripKnownAffixTags = [&](std::string_view a_name) {
+			std::string cleaned;
+			cleaned.reserve(a_name.size());
+
+			std::size_t pos = 0;
+			while (pos < a_name.size()) {
+				if (a_name[pos] == '[') {
+					const auto right = a_name.find(']', pos + 1);
+					if (right != std::string::npos && right > pos + 1) {
+						const std::string_view label = a_name.substr(pos + 1, right - pos - 1);
+						if (isKnownAffixLabel(label)) {
+							while (!cleaned.empty() && cleaned.back() == ' ') {
+								cleaned.pop_back();
 							}
+							pos = right + 1;
+							while (pos < a_name.size() && a_name[pos] == ' ') {
+								++pos;
+							}
+							continue;
 						}
 					}
+				}
 
-					cleaned.push_back(a_name[pos]);
+				cleaned.push_back(a_name[pos]);
+				++pos;
+			}
+
+			const auto first = cleaned.find_first_not_of(' ');
+			if (first == std::string::npos) {
+				return std::string{};
+			}
+			const auto last = cleaned.find_last_not_of(' ');
+			return cleaned.substr(first, last - first + 1);
+		};
+
+		// Strip star prefixes as well
+		auto stripStarPrefix = [](std::string_view a_name) -> std::string_view {
+			std::size_t pos = 0;
+			while (pos < a_name.size()) {
+				// UTF-8 star: E2 98 85 (★)
+				if (pos + 2 < a_name.size() &&
+					static_cast<unsigned char>(a_name[pos]) == 0xE2 &&
+					static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
+					static_cast<unsigned char>(a_name[pos + 2]) == 0x85) {
+					pos += 3;
+					continue;
+				}
+				if (a_name[pos] == ' ') {
 					++pos;
+					continue;
 				}
-
-				const auto first = cleaned.find_first_not_of(' ');
-				if (first == std::string::npos) {
-					return std::string{};
-				}
-				const auto last = cleaned.find_last_not_of(' ');
-				return cleaned.substr(first, last - first + 1);
-			};
-
-			std::string baseName = stripKnownAffixTags(currentName);
-
-			if (baseName.empty()) {
-				const char* objectNameRaw = a_entry->object->GetName();
-				baseName = objectNameRaw ? objectNameRaw : "";
+				break;
 			}
+			return a_name.substr(pos);
+		};
 
-			const std::string newName = FormatLootName(baseName, a_affix.label);
-			if (newName.empty()) {
-				return;
-			}
-			if (newName == currentName) {
-				return;
-			}
+		std::string baseName = stripKnownAffixTags(stripStarPrefix(currentName));
 
-			if (auto* text = a_xList->GetExtraTextDisplayData()) {
-				text->SetName(newName.c_str());
-			} else {
-				auto* created = RE::BSExtraData::Create<RE::ExtraTextDisplayData>();
-				created->SetName(newName.c_str());
-				a_xList->Add(created);
-			}
+		if (baseName.empty()) {
+			const char* objectNameRaw = a_entry->object->GetName();
+			baseName = objectNameRaw ? objectNameRaw : "";
 		}
 
-			void EventBridge::ProcessLootAcquired(RE::FormID a_baseObj, std::int32_t a_count, std::uint16_t a_uniqueID, bool a_allowRunewordFragmentRoll)
-		{
-			if (!_configLoaded || !_runtimeEnabled || _loot.chancePercent <= 0.0f) {
-				return;
+		// Build name with star prefix for multi-affix items
+		std::string prefix;
+		if (a_slots.count == 3) {
+			prefix = "\xe2\x98\x85\xe2\x98\x85 ";  // ★★
+		} else if (a_slots.count == 2) {
+			prefix = "\xe2\x98\x85 ";  // ★
+		}
+
+		const std::string formatted = FormatLootName(baseName, primaryAffix.label);
+		const std::string newName = prefix + formatted;
+		if (newName.empty()) {
+			return;
+		}
+		if (newName == currentName) {
+			return;
+		}
+
+		if (auto* text = a_xList->GetExtraTextDisplayData()) {
+			text->SetName(newName.c_str());
+		} else {
+			auto* created = RE::BSExtraData::Create<RE::ExtraTextDisplayData>();
+			created->SetName(newName.c_str());
+			a_xList->Add(created);
+		}
+	}
+
+		void EventBridge::ProcessLootAcquired(RE::FormID a_baseObj, std::int32_t a_count, std::uint16_t a_uniqueID, bool a_allowRunewordFragmentRoll)
+	{
+		if (!_configLoaded || !_runtimeEnabled || _loot.chancePercent <= 0.0f) {
+			return;
+		}
+
+		SKSE::log::debug(
+			"CalamityAffixes: ProcessLootAcquired(baseObj={:08X}, count={}, uniqueID={}).",
+			a_baseObj,
+			a_count,
+			a_uniqueID);
+
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return;
+		}
+
+		auto* changes = player->GetInventoryChanges();
+		if (!changes || !changes->entryList) {
+			return;
+		}
+
+		auto* form = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
+		if (!form) {
+			return;
+		}
+
+		auto* weap = form->As<RE::TESObjectWEAP>();
+		auto* armo = form->As<RE::TESObjectARMO>();
+		if (!weap && !armo) {
+			return;
+		}
+
+		const auto itemType = weap ? LootItemType::kWeapon : LootItemType::kArmor;
+
+		RE::InventoryEntryData* entry = nullptr;
+		for (auto* e : *changes->entryList) {
+			if (e && e->object && e->object->GetFormID() == a_baseObj) {
+				entry = e;
+				break;
 			}
-
-			SKSE::log::debug(
-				"CalamityAffixes: ProcessLootAcquired(baseObj={:08X}, count={}, uniqueID={}).",
-				a_baseObj,
-				a_count,
-				a_uniqueID);
-
-			auto* player = RE::PlayerCharacter::GetSingleton();
-			if (!player) {
-				return;
-			}
-
-			auto* changes = player->GetInventoryChanges();
-			if (!changes || !changes->entryList) {
-				return;
-			}
-
-			auto* form = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
-			if (!form) {
-				return;
-			}
-
-			auto* weap = form->As<RE::TESObjectWEAP>();
-			auto* armo = form->As<RE::TESObjectARMO>();
-			if (!weap && !armo) {
-				return;
-			}
-
-			const auto itemType = weap ? LootItemType::kWeapon : LootItemType::kArmor;
-
-			RE::InventoryEntryData* entry = nullptr;
-			for (auto* e : *changes->entryList) {
-				if (e && e->object && e->object->GetFormID() == a_baseObj) {
-					entry = e;
-					break;
-				}
-			}
+		}
 
 		if (!entry) {
 			SKSE::log::debug("CalamityAffixes: ProcessLootAcquired skipped (entry not found).");
@@ -304,18 +394,17 @@ namespace CalamityAffixes
 					continue;
 				}
 
-					auto* uid = xList->GetByType<RE::ExtraUniqueID>();
-					if (uid && uid->baseID == a_baseObj && uid->uniqueID == a_uniqueID) {
-						ApplyAffixToInstance(changes, entry, xList, itemType, a_allowRunewordFragmentRoll);
-						return;
-					}
+				auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+				if (uid && uid->baseID == a_baseObj && uid->uniqueID == a_uniqueID) {
+					ApplyMultipleAffixes(changes, entry, xList, itemType, a_allowRunewordFragmentRoll);
+					return;
 				}
+			}
 		}
 
 		// Fallback:
 		// If the container change event doesn't provide a usable uniqueID, attempt to apply loot rolls to
-		// currently-unassigned instances (extraLists). This avoids constructing ExtraDataList (not supported
-		// by CommonLibSSE-NG flatrim) and still covers most weapon/armor acquisitions.
+		// currently-unassigned instances (extraLists).
 		std::int32_t processed = 0;
 		for (auto* xList : *entry->extraLists) {
 			if (processed >= a_count) {
@@ -329,16 +418,13 @@ namespace CalamityAffixes
 			if (auto* uid = xList->GetByType<RE::ExtraUniqueID>()) {
 				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
 				if (const auto mappedIt = _instanceAffixes.find(key); mappedIt != _instanceAffixes.end()) {
-					const auto idxIt = _affixIndexByToken.find(mappedIt->second);
-					if (idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
-						EnsureAffixDisplayName(entry, xList, _affixes[idxIt->second]);
-					}
+					EnsureMultiAffixDisplayName(entry, xList, mappedIt->second);
 					continue;
 				}
 			}
 
-				ApplyAffixToInstance(changes, entry, xList, itemType, a_allowRunewordFragmentRoll);
-				processed += 1;
-			}
+			ApplyMultipleAffixes(changes, entry, xList, itemType, a_allowRunewordFragmentRoll);
+			processed += 1;
 		}
+	}
 }

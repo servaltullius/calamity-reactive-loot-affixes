@@ -179,18 +179,19 @@ namespace CalamityAffixes
 				return std::nullopt;
 			}
 
-				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-				std::uint64_t token = 0u;
-				if (const auto it = _instanceAffixes.find(key); it != _instanceAffixes.end()) {
-					token = it->second;
-				} else if (const auto supIt = _instanceSupplementalAffixes.find(key); supIt != _instanceSupplementalAffixes.end()) {
-					token = supIt->second;
-				}
-				if (token == 0u) {
-					return std::nullopt;
-				}
+			const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+			const auto it = _instanceAffixes.find(key);
+			if (it == _instanceAffixes.end() || it->second.count == 0) {
+				return std::nullopt;
+			}
 
-				const auto idxIt = _affixIndexByToken.find(token);
+			const auto& slots = it->second;
+			const auto primaryToken = slots.GetPrimary();
+			if (primaryToken == 0u) {
+				return std::nullopt;
+			}
+
+			const auto idxIt = _affixIndexByToken.find(primaryToken);
 			if (idxIt == _affixIndexByToken.end()) {
 				return std::nullopt;
 			}
@@ -230,118 +231,132 @@ namespace CalamityAffixes
 			});
 		}
 
-			if (candidates.empty()) {
-				for (auto* xList : *a_item->extraLists) {
-					if (!xList) {
-						continue;
-					}
-					const auto* uid = xList->GetByType<RE::ExtraUniqueID>();
-					if (!uid) {
-						continue;
-					}
-
-					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-					const auto rw = BuildRunewordTooltip(key);
-					if (!rw.empty()) {
-						return rw;
-					}
+		if (candidates.empty()) {
+			for (auto* xList : *a_item->extraLists) {
+				if (!xList) {
+					continue;
+				}
+				const auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+				if (!uid) {
+					continue;
 				}
 
-				return std::nullopt;
+				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+				const auto rw = BuildRunewordTooltip(key);
+				if (!rw.empty()) {
+					return rw;
+				}
 			}
 
-		auto formatTooltip = [&](const TooltipCandidate& a_candidate) -> std::string {
-			const auto& affix = *a_candidate.affix;
-			std::string tooltip = affix.displayName;
-			if (tooltip.empty()) {
-				return tooltip;
-			}
+			return std::nullopt;
+		}
 
-			const auto* state = FindInstanceRuntimeState(a_candidate.instanceKey, affix.token);
-			const auto& action = affix.action;
+		// Helper to format a single affix's detail lines (evolution, mode cycle)
+		auto formatAffixDetail = [&](const AffixRuntime& a_affix, std::uint64_t a_instanceKey) -> std::string {
+			std::string detail;
+			const auto* state = FindInstanceRuntimeState(a_instanceKey, a_affix.token);
+			const auto& action = a_affix.action;
 
-			bool appended = false;
 			if (action.evolutionEnabled && !action.evolutionThresholds.empty()) {
-				if (!appended) {
-					tooltip.append("\n");
-					appended = true;
-				}
-
 				const std::size_t stage = ResolveEvolutionStageIndex(action, state);
 				const std::size_t totalStages = action.evolutionThresholds.size();
 				const std::uint32_t xp = state ? state->evolutionXp : 0u;
 				const float mult = ResolveEvolutionMultiplier(action, state);
 
-				tooltip.append("Evolution Stage ");
-				tooltip.append(std::to_string(stage + 1));
-				tooltip.push_back('/');
-				tooltip.append(std::to_string(totalStages));
-				tooltip.append(" (XP ");
-				tooltip.append(std::to_string(xp));
-				tooltip.append(", x");
-				tooltip.append(std::to_string(mult));
-				tooltip.push_back(')');
+				detail.append("Evolution Stage ");
+				detail.append(std::to_string(stage + 1));
+				detail.push_back('/');
+				detail.append(std::to_string(totalStages));
+				detail.append(" (XP ");
+				detail.append(std::to_string(xp));
+				detail.append(", x");
+				detail.append(std::to_string(mult));
+				detail.push_back(')');
 
 				if (stage + 1 < action.evolutionThresholds.size()) {
-					tooltip.append(" -> Next ");
-					tooltip.append(std::to_string(action.evolutionThresholds[stage + 1]));
+					detail.append(" -> Next ");
+					detail.append(std::to_string(action.evolutionThresholds[stage + 1]));
 				}
 			}
 
-				if (action.modeCycleEnabled && !action.modeCycleSpells.empty()) {
-					if (appended) {
-						tooltip.push_back('\n');
-					} else {
-					tooltip.append("\n");
-					appended = true;
+			if (action.modeCycleEnabled && !action.modeCycleSpells.empty()) {
+				if (!detail.empty()) {
+					detail.push_back('\n');
 				}
 
 				const auto modeCount = static_cast<std::uint32_t>(action.modeCycleSpells.size());
 				const std::uint32_t idx = modeCount > 0u ? ((state ? state->modeIndex : 0u) % modeCount) : 0u;
 
-				tooltip.append("Mode ");
+				detail.append("Mode ");
 				if (idx < action.modeCycleLabels.size() && !action.modeCycleLabels[idx].empty()) {
-					tooltip.append(action.modeCycleLabels[idx]);
+					detail.append(action.modeCycleLabels[idx]);
 				} else {
-					tooltip.append(std::to_string(idx + 1));
+					detail.append(std::to_string(idx + 1));
+					detail.push_back('/');
+					detail.append(std::to_string(modeCount));
+				}
+				if (action.modeCycleManualOnly) {
+					detail.append(" (Manual)");
+				}
+			}
+
+			return detail;
+		};
+
+		auto formatTooltip = [&](const TooltipCandidate& a_candidate) -> std::string {
+			const auto slotsIt = _instanceAffixes.find(a_candidate.instanceKey);
+			if (slotsIt == _instanceAffixes.end() || slotsIt->second.count == 0) {
+				return {};
+			}
+
+			const auto& slots = slotsIt->second;
+			std::string tooltip;
+
+			for (std::uint8_t s = 0; s < slots.count; ++s) {
+				const auto idxIt = _affixIndexByToken.find(slots.tokens[s]);
+				if (idxIt == _affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
+					continue;
+				}
+
+				const auto& affix = _affixes[idxIt->second];
+				if (affix.displayName.empty()) {
+					continue;
+				}
+
+				if (!tooltip.empty()) {
+					tooltip.push_back('\n');
+				}
+
+				// Slot number prefix for multi-affix items
+				if (slots.count > 1) {
+					tooltip.push_back('[');
+					tooltip.append(std::to_string(s + 1));
 					tooltip.push_back('/');
-					tooltip.append(std::to_string(modeCount));
-				}
-					if (action.modeCycleManualOnly) {
-						tooltip.append(" (Manual)");
-					}
+					tooltip.append(std::to_string(slots.count));
+					tooltip.append("] ");
 				}
 
-					const auto runewordTooltip = BuildRunewordTooltip(a_candidate.instanceKey);
-					if (!runewordTooltip.empty()) {
-						if (appended) {
-							tooltip.push_back('\n');
-						} else {
-							tooltip.append("\n");
-						}
-						tooltip.append(runewordTooltip);
-						appended = true;
-					}
+				tooltip.append(affix.displayName);
 
-					if (const auto supplementalIt = _instanceSupplementalAffixes.find(a_candidate.instanceKey);
-						supplementalIt != _instanceSupplementalAffixes.end() && supplementalIt->second != affix.token) {
-						if (const auto idxIt = _affixIndexByToken.find(supplementalIt->second);
-							idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
-							const auto& supplementalAffix = _affixes[idxIt->second];
-							if (!supplementalAffix.displayName.empty()) {
-								if (appended) {
-									tooltip.push_back('\n');
-								} else {
-									tooltip.append("\n");
-								}
-								tooltip.append("Inherited Affix: ");
-								tooltip.append(supplementalAffix.displayName);
-							}
-						}
-					}
+				// Append evolution/mode details for this affix
+				const auto detail = formatAffixDetail(affix, a_candidate.instanceKey);
+				if (!detail.empty()) {
+					tooltip.push_back('\n');
+					tooltip.append(detail);
+				}
+			}
 
-					return tooltip;
-				};
+			// Append runeword info
+			const auto runewordTooltip = BuildRunewordTooltip(a_candidate.instanceKey);
+			if (!runewordTooltip.empty()) {
+				if (!tooltip.empty()) {
+					tooltip.push_back('\n');
+				}
+				tooltip.append(runewordTooltip);
+			}
+
+			return tooltip;
+		};
 
 		if (!a_selectedDisplayName.empty()) {
 			std::vector<TooltipResolutionCandidate> resolutionCandidates;

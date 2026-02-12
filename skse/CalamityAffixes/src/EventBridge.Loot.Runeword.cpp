@@ -649,7 +649,8 @@ namespace CalamityAffixes
 
 			// If the selected base is already a completed runeword, show status and block further crafting.
 			if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
-				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(it->second);
+				const auto primaryToken = it->second.GetPrimary();
+				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
 					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
 					const auto& completed = _runewordRecipes[rwIt->second];
 					panelState.hasRecipe = true;
@@ -1278,19 +1279,9 @@ namespace CalamityAffixes
 				return;
 			}
 
-			const auto prevIt = _instanceAffixes.find(a_instanceKey);
-			const std::uint64_t previousToken = (prevIt != _instanceAffixes.end()) ? prevIt->second : 0u;
-			const bool previousIsRuneword =
-				(previousToken != 0u && _runewordRecipeIndexByResultAffixToken.contains(previousToken));
-
-			_instanceAffixes[a_instanceKey] = a_recipe.resultAffixToken;
-			if (previousToken != 0u &&
-				previousToken != a_recipe.resultAffixToken &&
-				!previousIsRuneword) {
-				_instanceSupplementalAffixes[a_instanceKey] = previousToken;
-			} else {
-				_instanceSupplementalAffixes.erase(a_instanceKey);
-			}
+			// Runeword replaces ALL existing affixes (D2-style full replacement).
+			auto& slots = _instanceAffixes[a_instanceKey];
+			slots.ReplaceAll(a_recipe.resultAffixToken);
 
 			EnsureInstanceRuntimeState(a_instanceKey, a_recipe.resultAffixToken);
 			_runewordInstanceStates.erase(a_instanceKey);
@@ -1298,7 +1289,7 @@ namespace CalamityAffixes
 			RE::InventoryEntryData* entry = nullptr;
 			RE::ExtraDataList* xList = nullptr;
 			if (ResolvePlayerInventoryInstance(a_instanceKey, entry, xList) && entry && xList) {
-				EnsureAffixDisplayName(entry, xList, _affixes[affixIt->second]);
+				EnsureMultiAffixDisplayName(entry, xList, slots);
 			}
 
 			RebuildActiveCounts();
@@ -1334,7 +1325,8 @@ namespace CalamityAffixes
 
 			// If base already has a completed runeword, block further crafting.
 			if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
-				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(it->second);
+				const auto primaryToken = it->second.GetPrimary();
+				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
 					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
 					std::string note = "Runeword: already complete (";
 					note.append(_runewordRecipes[rwIt->second].displayName);
@@ -1544,12 +1536,13 @@ namespace CalamityAffixes
 				};
 
 				if (const auto affixIt = _instanceAffixes.find(a_instanceKey); affixIt != _instanceAffixes.end()) {
-					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(affixIt->second);
+					const auto primaryToken = affixIt->second.GetPrimary();
+					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
 						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
 						tooltip = "Runeword Complete: ";
 						tooltip.append(_runewordRecipes[rwIt->second].displayName);
 
-						if (const auto idxIt = _affixIndexByToken.find(affixIt->second);
+						if (const auto idxIt = _affixIndexByToken.find(primaryToken);
 							idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
 							runewordAffix = std::addressof(_affixes[idxIt->second]);
 						}

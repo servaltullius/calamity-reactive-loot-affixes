@@ -17,6 +17,7 @@
 
 #include "CalamityAffixes/AdaptiveElement.h"
 #include "CalamityAffixes/AffixToken.h"
+#include "CalamityAffixes/InstanceAffixSlots.h"
 #include "CalamityAffixes/InstanceStateKey.h"
 #include "CalamityAffixes/LootRerollGuard.h"
 #include "CalamityAffixes/MagnitudeScaling.h"
@@ -377,7 +378,11 @@ namespace CalamityAffixes
 				static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
 				static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 
-			static constexpr std::uint32_t kSerializationVersion = 5;
+			static constexpr std::array<float, kMaxAffixesPerItem> kAffixCountWeights = { 70.0f, 25.0f, 5.0f };
+			static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f };
+
+			static constexpr std::uint32_t kSerializationVersion = 6;
+			static constexpr std::uint32_t kSerializationVersionV5 = 5;
 			static constexpr std::uint32_t kSerializationVersionV4 = 4;
 			static constexpr std::uint32_t kSerializationVersionV3 = 3;
 			static constexpr std::uint32_t kSerializationVersionV2 = 2;
@@ -449,8 +454,8 @@ namespace CalamityAffixes
 		std::vector<std::size_t> _summonCorpseExplosionAffixIndices;
 		std::vector<std::size_t> _lootWeaponAffixes;
 		std::vector<std::size_t> _lootArmorAffixes;
-				std::unordered_map<std::uint64_t, std::uint64_t> _instanceAffixes;
-				std::unordered_map<std::uint64_t, std::uint64_t> _instanceSupplementalAffixes;
+				std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;
+				std::vector<float> _activeSlotPenalty;
 			std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash> _instanceStates;
 			std::vector<RunewordRecipe> _runewordRecipes;
 			std::unordered_map<std::uint64_t, std::size_t> _runewordRecipeIndexByToken;
@@ -571,10 +576,11 @@ namespace CalamityAffixes
 		void AdvanceRuntimeStateForAffixProc(const AffixRuntime& a_affix);
 		void CycleManualModeForEquippedAffixes(std::int32_t a_direction, std::string_view a_affixIdFilter = {});
 			void ProcessLootAcquired(RE::FormID a_baseObj, std::int32_t a_count, std::uint16_t a_uniqueID, bool a_allowRunewordFragmentRoll);
-			[[nodiscard]] std::optional<std::size_t> RollLootAffixIndex(LootItemType a_itemType);
-			void ApplyChosenAffix(RE::InventoryChanges* a_changes, RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList, LootItemType a_itemType, std::size_t a_affixIndex, bool a_allowRunewordFragmentRoll);
-			void ApplyAffixToInstance(RE::InventoryChanges* a_changes, RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList, LootItemType a_itemType, bool a_allowRunewordFragmentRoll);
-			void EnsureAffixDisplayName(RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList, const AffixRuntime& a_affix);
+			[[nodiscard]] std::optional<std::size_t> RollLootAffixIndex(LootItemType a_itemType, const std::vector<std::size_t>* a_exclude = nullptr);
+			[[nodiscard]] std::uint8_t RollAffixCount();
+			void ApplyMultipleAffixes(RE::InventoryChanges* a_changes, RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList, LootItemType a_itemType, bool a_allowRunewordFragmentRoll);
+			void EnsureMultiAffixDisplayName(RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList, const InstanceAffixSlots& a_slots);
+
 			[[nodiscard]] std::optional<LootItemType> ParseLootItemType(std::string_view a_kidType) const;
 				[[nodiscard]] static const char* DescribeLootItemType(LootItemType a_type);
 				[[nodiscard]] std::string FormatLootName(std::string_view a_baseName, std::string_view a_affixName) const;

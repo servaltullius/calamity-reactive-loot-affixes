@@ -583,6 +583,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		}
 
 		_activeCounts.assign(_affixes.size(), 0);
+		_activeSlotPenalty.assign(_affixes.size(), 0.0f);
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (!player) {
@@ -609,50 +610,48 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 					continue;
 				}
 
-					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-					const auto it = _instanceAffixes.find(key);
-					const auto supplementalIt = _instanceSupplementalAffixes.find(key);
-					if (it == _instanceAffixes.end() && supplementalIt == _instanceSupplementalAffixes.end()) {
+				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+				const auto it = _instanceAffixes.find(key);
+				if (it == _instanceAffixes.end()) {
+					continue;
+				}
+
+				const auto& slots = it->second;
+				for (std::uint8_t slot = 0; slot < slots.count; ++slot) {
+					if (slots.tokens[slot] != 0u) {
+						EnsureInstanceRuntimeState(key, slots.tokens[slot]);
+					}
+				}
+
+				// Use primary affix for display name
+				if (slots.count > 0) {
+					if (const auto idxIt = _affixIndexByToken.find(slots.tokens[0]); idxIt != _affixIndexByToken.end() && idxIt->second < _affixes.size()) {
+						EnsureMultiAffixDisplayName(entry, xList, slots);
+					}
+				}
+
+				const bool worn = xList->HasType<RE::ExtraWorn>() || xList->HasType<RE::ExtraWornLeft>();
+				if (!worn) {
+					continue;
+				}
+
+				// Count each unique affix token as active, track best slot penalty
+				for (std::uint8_t slot = 0; slot < slots.count; ++slot) {
+					const auto idxIt = _affixIndexByToken.find(slots.tokens[slot]);
+					if (idxIt == _affixIndexByToken.end()) {
 						continue;
 					}
-					if (it != _instanceAffixes.end() && it->second != 0u) {
-						EnsureInstanceRuntimeState(key, it->second);
+					if (idxIt->second < _activeCounts.size()) {
+						_activeCounts[idxIt->second] += 1;
 					}
-					if (supplementalIt != _instanceSupplementalAffixes.end() && supplementalIt->second != 0u) {
-						EnsureInstanceRuntimeState(key, supplementalIt->second);
-					}
-
-					std::size_t primaryIdx = std::numeric_limits<std::size_t>::max();
-					if (it != _instanceAffixes.end()) {
-						if (const auto idxIt = _affixIndexByToken.find(it->second); idxIt != _affixIndexByToken.end()) {
-							primaryIdx = idxIt->second;
-						}
-					}
-
-					std::size_t supplementalIdx = std::numeric_limits<std::size_t>::max();
-					if (supplementalIt != _instanceSupplementalAffixes.end()) {
-						if (const auto idxIt = _affixIndexByToken.find(supplementalIt->second); idxIt != _affixIndexByToken.end()) {
-							supplementalIdx = idxIt->second;
-						}
-					}
-
-					if (primaryIdx < _affixes.size()) {
-						EnsureAffixDisplayName(entry, xList, _affixes[primaryIdx]);
-					}
-
-					const bool worn = xList->HasType<RE::ExtraWorn>() || xList->HasType<RE::ExtraWornLeft>();
-					if (!worn) {
-						continue;
-					}
-
-					if (primaryIdx < _activeCounts.size()) {
-						_activeCounts[primaryIdx] += 1;
-					}
-					if (supplementalIdx < _activeCounts.size() && supplementalIdx != primaryIdx) {
-						_activeCounts[supplementalIdx] += 1;
+					// "Best Slot Wins": each affix gets the best (highest) penalty factor across all items
+					const float penalty = kMultiAffixProcPenalty[std::min<std::uint8_t>(slots.count, static_cast<std::uint8_t>(kMaxAffixesPerItem)) - 1];
+					if (idxIt->second < _activeSlotPenalty.size()) {
+						_activeSlotPenalty[idxIt->second] = std::max(_activeSlotPenalty[idxIt->second], penalty);
 					}
 				}
 			}
+		}
 
 		if (_loot.debugLog) {
 			std::uint32_t shown = 0;

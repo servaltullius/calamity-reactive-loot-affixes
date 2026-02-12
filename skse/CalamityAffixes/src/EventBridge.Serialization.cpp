@@ -14,6 +14,7 @@ namespace CalamityAffixes
 			return;
 		}
 
+		// --- IAXF v6: fixed 3-token slots ---
 		const std::uint32_t count = static_cast<std::uint32_t>(_instanceAffixes.size());
 		if (!a_intfc->OpenRecord(kSerializationRecordInstanceAffixes, kSerializationVersion)) {
 			return;
@@ -22,16 +23,9 @@ namespace CalamityAffixes
 			return;
 		}
 
-		for (const auto& [key, token] : _instanceAffixes) {
+		for (const auto& [key, slots] : _instanceAffixes) {
 			const auto baseID = static_cast<RE::FormID>(key >> 16);
 			const auto uniqueID = static_cast<std::uint16_t>(key & 0xFFFFu);
-			const auto supplementalIt = _instanceSupplementalAffixes.find(key);
-			const std::uint64_t supplementalToken =
-				(supplementalIt != _instanceSupplementalAffixes.end()) ? supplementalIt->second : 0u;
-			const auto* state = FindInstanceRuntimeState(key, token);
-			const std::uint32_t evolutionXp = state ? state->evolutionXp : 0u;
-			const std::uint32_t modeCycleCounter = state ? state->modeCycleCounter : 0u;
-			const std::uint32_t modeIndex = state ? state->modeIndex : 0u;
 
 			if (!a_intfc->WriteRecordData(baseID)) {
 				return;
@@ -39,23 +33,17 @@ namespace CalamityAffixes
 			if (!a_intfc->WriteRecordData(uniqueID)) {
 				return;
 			}
-			if (!a_intfc->WriteRecordData(token)) {
+			if (!a_intfc->WriteRecordData(slots.count)) {
 				return;
 			}
-			if (!a_intfc->WriteRecordData(supplementalToken)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(evolutionXp)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(modeCycleCounter)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(modeIndex)) {
-				return;
+			for (std::size_t s = 0; s < kMaxAffixesPerItem; ++s) {
+				if (!a_intfc->WriteRecordData(slots.tokens[s])) {
+					return;
+				}
 			}
 		}
 
+		// --- IRST ---
 		if (!a_intfc->OpenRecord(
 				kSerializationRecordInstanceRuntimeStates,
 				kInstanceRuntimeStateSerializationVersion)) {
@@ -89,6 +77,7 @@ namespace CalamityAffixes
 			}
 		}
 
+		// --- RWRD ---
 		if (!a_intfc->OpenRecord(kSerializationRecordRunewordState, kRunewordSerializationVersion)) {
 			return;
 		}
@@ -155,7 +144,6 @@ namespace CalamityAffixes
 			}
 
 			_instanceAffixes.clear();
-			_instanceSupplementalAffixes.clear();
 			_instanceStates.clear();
 			_dotObservedMagicEffects.clear();
 			_dotTagSafetyWarned = false;
@@ -173,6 +161,7 @@ namespace CalamityAffixes
 			while (a_intfc->GetNextRecordInfo(type, version, length)) {
 				if (type == kSerializationRecordInstanceAffixes) {
 					if (version != kSerializationVersion &&
+						version != kSerializationVersionV5 &&
 						version != kSerializationVersionV4 &&
 						version != kSerializationVersionV3 &&
 						version != kSerializationVersionV2 &&
@@ -185,6 +174,50 @@ namespace CalamityAffixes
 						continue;
 					}
 
+					if (version == kSerializationVersion) {
+						// --- v6 load: fixed 3-token slots ---
+						std::uint32_t count = 0;
+						if (a_intfc->ReadRecordData(count) != sizeof(count)) {
+							return;
+						}
+
+						for (std::uint32_t i = 0; i < count; ++i) {
+							RE::FormID baseID = 0;
+							std::uint16_t uniqueID = 0;
+							std::uint8_t affixCount = 0;
+							std::array<std::uint64_t, kMaxAffixesPerItem> tokens{};
+
+							if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
+								return;
+							}
+							if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
+								return;
+							}
+							if (a_intfc->ReadRecordData(affixCount) != sizeof(affixCount)) {
+								return;
+							}
+							for (std::size_t s = 0; s < kMaxAffixesPerItem; ++s) {
+								if (a_intfc->ReadRecordData(tokens[s]) != sizeof(tokens[s])) {
+									return;
+								}
+							}
+
+							RE::FormID resolvedBaseID = 0;
+							if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+								continue;
+							}
+
+							const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
+							InstanceAffixSlots slots;
+							slots.count = std::min<std::uint8_t>(affixCount, static_cast<std::uint8_t>(kMaxAffixesPerItem));
+							slots.tokens = tokens;
+							_instanceAffixes.emplace(key, slots);
+						}
+
+						continue;
+					}
+
+					// --- v1~v5 legacy load ---
 					std::uint32_t count = 0;
 					if (a_intfc->ReadRecordData(count) != sizeof(count)) {
 						return;
@@ -221,13 +254,13 @@ namespace CalamityAffixes
 								if (a_intfc->ReadRecordData(token) != sizeof(token)) {
 									return;
 								}
-								if (version == kSerializationVersion || version == kSerializationVersionV4) {
+								if (version == kSerializationVersionV5 || version == kSerializationVersionV4) {
 									if (a_intfc->ReadRecordData(supplementalToken) != sizeof(supplementalToken)) {
 										return;
 									}
 								}
 
-								if (version == kSerializationVersion ||
+								if (version == kSerializationVersionV5 ||
 									version == kSerializationVersionV4 ||
 									version == kSerializationVersionV3) {
 									if (a_intfc->ReadRecordData(state.evolutionXp) != sizeof(state.evolutionXp)) {
@@ -247,12 +280,17 @@ namespace CalamityAffixes
 							continue;
 						}
 
+							// v5 migration: convert to InstanceAffixSlots
 							const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
-							_instanceAffixes.emplace(key, token);
-							if (supplementalToken != 0u) {
-								_instanceSupplementalAffixes.emplace(key, supplementalToken);
+							InstanceAffixSlots slots;
+							if (token != 0u) {
+								slots.AddToken(token);
 							}
-							if (version == kSerializationVersion ||
+							if (supplementalToken != 0u) {
+								slots.AddToken(supplementalToken);
+							}
+							_instanceAffixes.emplace(key, slots);
+							if (version == kSerializationVersionV5 ||
 								version == kSerializationVersionV4 ||
 								version == kSerializationVersionV3) {
 								const auto stateToken = (token != 0u) ? token : supplementalToken;
@@ -412,7 +450,6 @@ namespace CalamityAffixes
 		void EventBridge::Revert(SKSE::SerializationInterface*)
 		{
 			_instanceAffixes.clear();
-			_instanceSupplementalAffixes.clear();
 			_instanceStates.clear();
 			_runewordRuneFragments.clear();
 			_runewordInstanceStates.clear();
@@ -500,11 +537,9 @@ namespace CalamityAffixes
 
 			const auto key = *keyOpt;
 			const auto it = _instanceAffixes.find(key);
-			const auto supplementalIt = _instanceSupplementalAffixes.find(key);
 			const bool hasRunewordState = _runewordInstanceStates.contains(key);
 			const bool isSelectedRunewordBase = (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key);
 			if (it == _instanceAffixes.end() &&
-				supplementalIt == _instanceSupplementalAffixes.end() &&
 				!hasRunewordState &&
 				!isSelectedRunewordBase) {
 				return;
@@ -517,9 +552,6 @@ namespace CalamityAffixes
 
 			if (it != _instanceAffixes.end()) {
 				_instanceAffixes.erase(it);
-			}
-			if (supplementalIt != _instanceSupplementalAffixes.end()) {
-				_instanceSupplementalAffixes.erase(supplementalIt);
 			}
 			EraseInstanceRuntimeStates(key);
 			_runewordInstanceStates.erase(key);
