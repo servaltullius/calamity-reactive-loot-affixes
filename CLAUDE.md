@@ -147,6 +147,9 @@ dotnet run --project CalamityAffixes.Generator
 
 ## 릴리즈 프로세스
 
+- **릴리즈 노트/패치노트는 반드시 한국어로 작성**
+- DLL 바이너리를 MO2 zip에 포함했는지 반드시 확인 후 릴리즈
+
 ```bash
 # 1. 빌드 & 테스트 확인
 cmake --build build.linux-clangcl-rel --config Release
