@@ -449,7 +449,16 @@ namespace CalamityAffixes
 
 		void EventBridge::Revert(SKSE::SerializationInterface*)
 		{
+			// Remove any active passive suffix spells before clearing
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (player) {
+				for (auto* spell : _appliedPassiveSpells) {
+					player->RemoveSpell(spell);
+				}
+			}
+			_appliedPassiveSpells.clear();
 			_instanceAffixes.clear();
+			_activeSlotPenalty.clear();
 			_instanceStates.clear();
 			_runewordRuneFragments.clear();
 			_runewordInstanceStates.clear();

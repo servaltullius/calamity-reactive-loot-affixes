@@ -327,9 +327,14 @@ namespace CalamityAffixes
 					tooltip.push_back('\n');
 				}
 
-				// Slot number prefix for multi-affix items
+				// Slot number prefix for multi-affix items (with P/S indicator)
 				if (slots.count > 1) {
 					tooltip.push_back('[');
+					if (affix.slot == AffixSlot::kPrefix) {
+						tooltip.push_back('P');
+					} else if (affix.slot == AffixSlot::kSuffix) {
+						tooltip.push_back('S');
+					}
 					tooltip.append(std::to_string(s + 1));
 					tooltip.push_back('/');
 					tooltip.append(std::to_string(slots.count));

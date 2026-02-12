@@ -149,6 +149,9 @@ namespace CalamityAffixes
 		_summonCorpseExplosionAffixIndices.clear();
 		_lootWeaponAffixes.clear();
 		_lootArmorAffixes.clear();
+		_lootWeaponSuffixes.clear();
+		_lootArmorSuffixes.clear();
+		_appliedPassiveSpells.clear();
 		_traps.clear();
 		_hasActiveTraps.store(false, std::memory_order_relaxed);
 			_dotCooldowns.clear();
@@ -321,6 +324,16 @@ namespace CalamityAffixes
 			return TrapSpawnAt::kTargetFeet;
 		};
 
+		auto parseAffixSlot = [](std::string_view a_slot) -> AffixSlot {
+			if (a_slot == "Prefix" || a_slot == "prefix") {
+				return AffixSlot::kPrefix;
+			}
+			if (a_slot == "Suffix" || a_slot == "suffix") {
+				return AffixSlot::kSuffix;
+			}
+			return AffixSlot::kNone;
+		};
+
 		auto parseMagnitudeSource = [](std::string_view a_source) -> MagnitudeScaling::Source {
 			if (a_source == "HitPhysicalDealt") {
 				return MagnitudeScaling::Source::kHitPhysicalDealt;
@@ -381,6 +394,9 @@ namespace CalamityAffixes
 				continue;
 			}
 
+			out.slot = parseAffixSlot(a.value("slot", std::string{}));
+			out.family = a.value("family", std::string{});
+
 			const auto& kid = a.value("kid", nlohmann::json::object());
 			if (kid.is_object()) {
 				const auto type = kid.value("type", std::string{});
@@ -398,31 +414,45 @@ namespace CalamityAffixes
 			}
 			const auto type = action.value("type", std::string{});
 
-			const auto triggerStr = runtime.value("trigger", std::string{});
-			const auto trigger = parseTrigger(triggerStr);
-			if (!trigger) {
-				if (isSpecialActionType(type)) {
-					// Special actions use dedicated execution paths and do not consume Trigger routing.
-					// Keep loading them even if trigger text is missing/invalid.
-					out.trigger = Trigger::kHit;
-					SKSE::log::warn(
-						"CalamityAffixes: special action uses invalid trigger (affixId={}, actionType={}, trigger='{}'); defaulting to Hit.",
-						out.id,
-						type,
-						triggerStr);
-				} else {
-					SKSE::log::error(
-						"CalamityAffixes: invalid trigger '{}' (affixId={}, actionType={}); skipping affix.",
-						triggerStr,
-						out.id,
-						type);
-					continue;
+			if (out.slot == AffixSlot::kSuffix) {
+				out.trigger = Trigger::kHit;
+				out.procChancePct = static_cast<float>(kid.value("chance", 1.0));
+
+				const auto passiveSpellId = action.value("passiveSpellEditorId", std::string{});
+				if (!passiveSpellId.empty()) {
+					out.passiveSpell = RE::TESForm::LookupByEditorID<RE::SpellItem>(passiveSpellId);
+					if (!out.passiveSpell) {
+						SKSE::log::warn(
+							"CalamityAffixes: suffix passive spell not found (affixId={}, spellEditorId={}).",
+							out.id, passiveSpellId);
+					}
 				}
 			} else {
-				out.trigger = *trigger;
-			}
+				const auto triggerStr = runtime.value("trigger", std::string{});
+				const auto trigger = parseTrigger(triggerStr);
+				if (!trigger) {
+					if (isSpecialActionType(type)) {
+						// Special actions use dedicated execution paths and do not consume Trigger routing.
+						// Keep loading them even if trigger text is missing/invalid.
+						out.trigger = Trigger::kHit;
+						SKSE::log::warn(
+							"CalamityAffixes: special action uses invalid trigger (affixId={}, actionType={}, trigger='{}'); defaulting to Hit.",
+							out.id,
+							type,
+							triggerStr);
+					} else {
+						SKSE::log::error(
+							"CalamityAffixes: invalid trigger '{}' (affixId={}, actionType={}); skipping affix.",
+							triggerStr,
+							out.id,
+							type);
+						continue;
+					}
+				} else {
+					out.trigger = *trigger;
+				}
 
-			out.procChancePct = runtime.value("procChancePercent", 0.0f);
+				out.procChancePct = runtime.value("procChancePercent", 0.0f);
 			const float icdSeconds = runtime.value("icdSeconds", 0.0f);
 			if (icdSeconds > 0.0f) {
 				out.icd = std::chrono::milliseconds(static_cast<std::int64_t>(icdSeconds * 1000.0f));
@@ -431,6 +461,8 @@ namespace CalamityAffixes
 			if (perTargetIcdSeconds > 0.0f) {
 				out.perTargetIcd = std::chrono::milliseconds(static_cast<std::int64_t>(perTargetIcdSeconds * 1000.0f));
 			}
+			}
+
 			if (type == "DebugNotify") {
 				out.action.type = ActionType::kDebugNotify;
 				out.action.text = action.value("text", std::string{});
@@ -787,10 +819,18 @@ namespace CalamityAffixes
 			}
 
 			if (affix.lootType) {
-				if (*affix.lootType == LootItemType::kWeapon) {
-					_lootWeaponAffixes.push_back(i);
-				} else if (*affix.lootType == LootItemType::kArmor) {
-					_lootArmorAffixes.push_back(i);
+				if (affix.slot == AffixSlot::kSuffix) {
+					if (*affix.lootType == LootItemType::kWeapon) {
+						_lootWeaponSuffixes.push_back(i);
+					} else if (*affix.lootType == LootItemType::kArmor) {
+						_lootArmorSuffixes.push_back(i);
+					}
+				} else {
+					if (*affix.lootType == LootItemType::kWeapon) {
+						_lootWeaponAffixes.push_back(i);
+					} else if (*affix.lootType == LootItemType::kArmor) {
+						_lootArmorAffixes.push_back(i);
+					}
 				}
 			}
 		}
@@ -845,10 +885,18 @@ namespace CalamityAffixes
 			}
 
 			if (affix.lootType) {
-				if (*affix.lootType == LootItemType::kWeapon) {
-					_lootWeaponAffixes.push_back(idx);
-				} else if (*affix.lootType == LootItemType::kArmor) {
-					_lootArmorAffixes.push_back(idx);
+				if (affix.slot == AffixSlot::kSuffix) {
+					if (*affix.lootType == LootItemType::kWeapon) {
+						_lootWeaponSuffixes.push_back(idx);
+					} else if (*affix.lootType == LootItemType::kArmor) {
+						_lootArmorSuffixes.push_back(idx);
+					}
+				} else {
+					if (*affix.lootType == LootItemType::kWeapon) {
+						_lootWeaponAffixes.push_back(idx);
+					} else if (*affix.lootType == LootItemType::kArmor) {
+						_lootArmorAffixes.push_back(idx);
+					}
 				}
 			}
 		};
@@ -1946,13 +1994,11 @@ namespace CalamityAffixes
 		RebuildActiveCounts();
 
 			SKSE::log::info(
-				"CalamityAffixes: runtime config loaded (affixes={}, lootWeaponPool={}, lootArmorPool={}, lootChance={}%, renameItem={}, sharedPool={}).",
+				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%).",
 				_affixes.size(),
-				_lootWeaponAffixes.size(),
-				_lootArmorAffixes.size(),
-				_loot.chancePercent,
-				_loot.renameItem,
-				_loot.sharedPool);
+				_lootWeaponAffixes.size(), _lootArmorAffixes.size(),
+				_lootWeaponSuffixes.size(), _lootArmorSuffixes.size(),
+				_loot.chancePercent);
 
 		if (_affixes.empty()) {
 			SKSE::log::error("CalamityAffixes: no affixes loaded. Is the generated CalamityAffixes plugin enabled?");

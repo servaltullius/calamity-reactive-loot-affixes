@@ -136,6 +136,7 @@ if (BUILD_TESTING)
             tests/test_resync_scheduler.cpp
             tests/test_runeword_util.cpp
             tests/test_trigger_guards.cpp
+            tests/test_instance_affix_slots.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

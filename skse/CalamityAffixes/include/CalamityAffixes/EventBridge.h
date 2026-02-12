@@ -203,6 +203,13 @@ namespace CalamityAffixes
 			kArmor,
 		};
 
+		enum class AffixSlot : std::uint8_t
+		{
+			kNone,      // runeword-only or legacy
+			kPrefix,    // active proc effects
+			kSuffix,    // passive stat bonuses
+		};
+
 		enum class Element : std::uint8_t
 		{
 			kNone,
@@ -336,6 +343,11 @@ namespace CalamityAffixes
 			std::chrono::milliseconds perTargetIcd{ 0 };
 			Action action{};
 
+			// Prefix/Suffix classification
+			AffixSlot slot{ AffixSlot::kNone };
+			std::string family{};            // suffix family grouping (e.g., "max_health")
+			RE::SpellItem* passiveSpell{ nullptr };  // suffix: Ability spell to add/remove on equip
+
 			std::chrono::steady_clock::time_point nextAllowed{};
 		};
 
@@ -454,6 +466,9 @@ namespace CalamityAffixes
 		std::vector<std::size_t> _summonCorpseExplosionAffixIndices;
 		std::vector<std::size_t> _lootWeaponAffixes;
 		std::vector<std::size_t> _lootArmorAffixes;
+		std::vector<std::size_t> _lootWeaponSuffixes;
+		std::vector<std::size_t> _lootArmorSuffixes;
+		std::unordered_set<RE::SpellItem*> _appliedPassiveSpells;
 				std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;
 				std::vector<float> _activeSlotPenalty;
 			std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash> _instanceStates;
@@ -576,7 +591,10 @@ namespace CalamityAffixes
 		void AdvanceRuntimeStateForAffixProc(const AffixRuntime& a_affix);
 		void CycleManualModeForEquippedAffixes(std::int32_t a_direction, std::string_view a_affixIdFilter = {});
 			void ProcessLootAcquired(RE::FormID a_baseObj, std::int32_t a_count, std::uint16_t a_uniqueID, bool a_allowRunewordFragmentRoll);
-			[[nodiscard]] std::optional<std::size_t> RollLootAffixIndex(LootItemType a_itemType, const std::vector<std::size_t>* a_exclude = nullptr);
+			[[nodiscard]] std::optional<std::size_t> RollLootAffixIndex(LootItemType a_itemType, const std::vector<std::size_t>* a_exclude = nullptr, bool a_skipChanceCheck = false);
+			[[nodiscard]] std::optional<std::size_t> RollSuffixIndex(
+				LootItemType a_itemType,
+				const std::vector<std::string>* a_excludeFamilies = nullptr);
 			[[nodiscard]] std::uint8_t RollAffixCount();
 			void ApplyMultipleAffixes(RE::InventoryChanges* a_changes, RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList, LootItemType a_itemType, bool a_allowRunewordFragmentRoll);
 			void EnsureMultiAffixDisplayName(RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList, const InstanceAffixSlots& a_slots);

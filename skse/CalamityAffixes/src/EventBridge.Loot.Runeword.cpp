@@ -1280,6 +1280,8 @@ namespace CalamityAffixes
 			}
 
 			// Runeword replaces ALL existing affixes (D2-style full replacement).
+			// Clean up runtime states for any previous affixes before replacing.
+			EraseInstanceRuntimeStates(a_instanceKey);
 			auto& slots = _instanceAffixes[a_instanceKey];
 			slots.ReplaceAll(a_recipe.resultAffixToken);
 

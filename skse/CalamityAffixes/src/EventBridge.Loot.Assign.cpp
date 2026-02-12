@@ -51,16 +51,18 @@ namespace CalamityAffixes
 		return out;
 	}
 
-	std::optional<std::size_t> EventBridge::RollLootAffixIndex(LootItemType a_itemType, const std::vector<std::size_t>* a_exclude)
+	std::optional<std::size_t> EventBridge::RollLootAffixIndex(LootItemType a_itemType, const std::vector<std::size_t>* a_exclude, bool a_skipChanceCheck)
 	{
-		if (_loot.chancePercent <= 0.0f) {
-			return std::nullopt;
-		}
-
-		if (_loot.chancePercent < 100.0f) {
-			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
-			if (dist(_rng) >= _loot.chancePercent) {
+		if (!a_skipChanceCheck) {
+			if (_loot.chancePercent <= 0.0f) {
 				return std::nullopt;
+			}
+
+			if (_loot.chancePercent < 100.0f) {
+				std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+				if (dist(_rng) >= _loot.chancePercent) {
+					return std::nullopt;
+				}
 			}
 		}
 
@@ -94,6 +96,56 @@ namespace CalamityAffixes
 			collectFromPool(_lootArmorAffixes);
 		} else {
 			const auto& typePool = (a_itemType == LootItemType::kWeapon) ? _lootWeaponAffixes : _lootArmorAffixes;
+			collectFromPool(typePool);
+		}
+
+		if (eligible.empty()) {
+			return std::nullopt;
+		}
+
+		if (eligible.size() == 1) {
+			return eligible[0];
+		}
+
+		std::discrete_distribution<std::size_t> dist(weights.begin(), weights.end());
+		return eligible[dist(_rng)];
+	}
+
+	std::optional<std::size_t> EventBridge::RollSuffixIndex(
+		LootItemType a_itemType,
+		const std::vector<std::string>* a_excludeFamilies)
+	{
+		std::vector<std::size_t> eligible;
+		std::vector<double> weights;
+
+		auto collectFromPool = [&](const std::vector<std::size_t>& a_pool) {
+			for (const auto idx : a_pool) {
+				if (idx >= _affixes.size()) {
+					continue;
+				}
+				const auto& affix = _affixes[idx];
+				if (affix.slot != AffixSlot::kSuffix) {
+					continue;
+				}
+				if (a_excludeFamilies && !affix.family.empty()) {
+					if (std::find(a_excludeFamilies->begin(), a_excludeFamilies->end(), affix.family) != a_excludeFamilies->end()) {
+						continue;
+					}
+				}
+				const float weight = affix.procChancePct;
+				if (weight <= 0.0f) {
+					continue;
+				}
+				eligible.push_back(idx);
+				weights.push_back(static_cast<double>(weight));
+			}
+		};
+
+		if (_loot.sharedPool) {
+			collectFromPool(_lootWeaponSuffixes);
+			collectFromPool(_lootArmorSuffixes);
+		} else {
+			const auto& typePool = (a_itemType == LootItemType::kWeapon) ? _lootWeaponSuffixes : _lootArmorSuffixes;
 			collectFromPool(typePool);
 		}
 
@@ -154,32 +206,90 @@ namespace CalamityAffixes
 		// Roll how many affixes this item gets (1-3)
 		const std::uint8_t targetCount = RollAffixCount();
 
-		InstanceAffixSlots slots;
-		std::vector<std::size_t> chosen;
-		chosen.reserve(targetCount);
+		// Determine prefix/suffix composition
+		std::uint8_t prefixTarget = 0;
+		std::uint8_t suffixTarget = 0;
 
-		for (std::uint8_t attempt = 0; attempt < targetCount; ++attempt) {
+		if (targetCount == 1) {
+			std::uniform_int_distribution<int> coinFlip(0, 1);
+			if (coinFlip(_rng) == 0) {
+				prefixTarget = 1;
+			} else {
+				suffixTarget = 1;
+			}
+		} else if (targetCount == 2) {
+			prefixTarget = 1;
+			suffixTarget = 1;
+		} else {
+			std::uniform_int_distribution<int> coinFlip(0, 1);
+			if (coinFlip(_rng) == 0) {
+				prefixTarget = 2;
+				suffixTarget = 1;
+			} else {
+				prefixTarget = 1;
+				suffixTarget = 2;
+			}
+		}
+
+		// If no prefixes targeted, apply chance check before suffix rolling
+		if (prefixTarget == 0 && suffixTarget > 0) {
+			if (_loot.chancePercent <= 0.0f) {
+				return;
+			}
+			if (_loot.chancePercent < 100.0f) {
+				std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+				if (dist(_rng) >= _loot.chancePercent) {
+					return;
+				}
+			}
+		}
+
+		InstanceAffixSlots slots;
+		std::vector<std::size_t> chosenIndices;
+		chosenIndices.reserve(targetCount);
+
+		// Roll prefixes
+		std::vector<std::size_t> chosenPrefixIndices;
+		for (std::uint8_t p = 0; p < prefixTarget; ++p) {
 			static constexpr std::uint8_t kMaxRetries = 3;
 			bool found = false;
 			for (std::uint8_t retry = 0; retry < kMaxRetries; ++retry) {
-				const auto idx = RollLootAffixIndex(a_itemType, &chosen);
+				const auto idx = RollLootAffixIndex(a_itemType, &chosenPrefixIndices, /*a_skipChanceCheck=*/p > 0 || !chosenIndices.empty());
 				if (!idx) {
-					break;  // pool exhausted
+					break;
 				}
-				if (std::find(chosen.begin(), chosen.end(), *idx) != chosen.end()) {
-					continue;  // duplicate, retry
+				if (std::find(chosenPrefixIndices.begin(), chosenPrefixIndices.end(), *idx) != chosenPrefixIndices.end()) {
+					continue;
 				}
 				if (*idx >= _affixes.size() || _affixes[*idx].id.empty()) {
 					continue;
 				}
-				chosen.push_back(*idx);
+				chosenPrefixIndices.push_back(*idx);
+				chosenIndices.push_back(*idx);
 				slots.AddToken(_affixes[*idx].token);
 				found = true;
 				break;
 			}
 			if (!found) {
-				break;  // can't find more unique affixes
+				break;
 			}
+		}
+
+		// Roll suffixes (family-based dedup)
+		std::vector<std::string> chosenFamilies;
+		for (std::uint8_t s = 0; s < suffixTarget; ++s) {
+			const auto idx = RollSuffixIndex(a_itemType, &chosenFamilies);
+			if (!idx) {
+				break;
+			}
+			if (*idx >= _affixes.size() || _affixes[*idx].id.empty()) {
+				continue;
+			}
+			if (!_affixes[*idx].family.empty()) {
+				chosenFamilies.push_back(_affixes[*idx].family);
+			}
+			chosenIndices.push_back(*idx);
+			slots.AddToken(_affixes[*idx].token);
 		}
 
 		if (slots.count == 0) {
@@ -190,10 +300,10 @@ namespace CalamityAffixes
 
 		for (std::uint8_t s = 0; s < slots.count; ++s) {
 			EnsureInstanceRuntimeState(key, slots.tokens[s]);
-			if (s < chosen.size() && chosen[s] < _affixes.size()) {
+			if (s < chosenIndices.size() && chosenIndices[s] < _affixes.size()) {
 				SKSE::log::debug(
 					"CalamityAffixes: loot affix '{}' applied to {:08X}:{} (slot {}/{}).",
-					_affixes[chosen[s]].id,
+					_affixes[chosenIndices[s]].id,
 					uid->baseID,
 					uid->uniqueID,
 					s + 1,
@@ -217,17 +327,6 @@ namespace CalamityAffixes
 		}
 
 		if (a_slots.count == 0) {
-			return;
-		}
-
-		// Find primary affix label
-		const auto primaryToken = a_slots.GetPrimary();
-		const auto idxIt = _affixIndexByToken.find(primaryToken);
-		if (idxIt == _affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
-			return;
-		}
-		const auto& primaryAffix = _affixes[idxIt->second];
-		if (primaryAffix.label.empty()) {
 			return;
 		}
 
@@ -316,16 +415,17 @@ namespace CalamityAffixes
 			baseName.pop_back();
 		}
 
-		// Build name with star prefix for multi-affix items
+		// Build name with star prefix based on affix count
 		std::string prefix;
-		if (a_slots.count == 3) {
-			prefix = "\xe2\x98\x85\xe2\x98\x85 ";  // ★★
+		if (a_slots.count >= 3) {
+			prefix = "\xe2\x98\x85\xe2\x98\x85\xe2\x98\x85 ";  // ★★★
 		} else if (a_slots.count == 2) {
+			prefix = "\xe2\x98\x85\xe2\x98\x85 ";  // ★★
+		} else {
 			prefix = "\xe2\x98\x85 ";  // ★
 		}
 
-		const std::string formatted = FormatLootName(baseName, primaryAffix.label);
-		const std::string newName = prefix + formatted;
+		const std::string newName = prefix + baseName;
 		if (newName.empty()) {
 			return;
 		}

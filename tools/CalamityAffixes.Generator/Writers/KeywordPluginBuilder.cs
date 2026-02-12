@@ -205,15 +205,23 @@ public static class KeywordPluginBuilder
             spell.Name = spec.Name;
         }
 
-        spell.Type = SpellType.Spell;
-        spell.CastType = CastType.FireAndForget;
+        spell.Type = spec.SpellType switch
+        {
+            "Ability" => Mutagen.Bethesda.Skyrim.SpellType.Ability,
+            _ => Mutagen.Bethesda.Skyrim.SpellType.Spell,
+        };
+        spell.CastType = spec.CastType switch
+        {
+            "ConstantEffect" => Mutagen.Bethesda.Skyrim.CastType.ConstantEffect,
+            _ => Mutagen.Bethesda.Skyrim.CastType.FireAndForget,
+        };
         spell.TargetType = spec.Delivery switch
         {
             "Self" => TargetType.Self,
             "TargetActor" => TargetType.TargetActor,
             _ => throw new InvalidDataException($"Unknown Spell delivery: {spec.Delivery} (Spell: {spec.EditorId})"),
         };
-        spell.Range = spell.TargetType == TargetType.TargetActor ? 4096.0f : 0.0f;
+        spell.Range = (spell.TargetType == TargetType.TargetActor && spell.CastType != Mutagen.Bethesda.Skyrim.CastType.ConstantEffect) ? 4096.0f : 0.0f;
 
         if (!magicEffectsByEditorId.TryGetValue(spec.Effect.MagicEffectEditorId, out var magicEffect))
         {

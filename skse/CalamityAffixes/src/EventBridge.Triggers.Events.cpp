@@ -584,6 +584,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 		_activeCounts.assign(_affixes.size(), 0);
 		_activeSlotPenalty.assign(_affixes.size(), 0.0f);
+		std::unordered_set<RE::SpellItem*> desiredPassives;
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (!player) {
@@ -641,13 +642,23 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 					if (idxIt == _affixIndexByToken.end()) {
 						continue;
 					}
-					if (idxIt->second < _activeCounts.size()) {
-						_activeCounts[idxIt->second] += 1;
+					const auto affixIdx = idxIt->second;
+
+					if (affixIdx < _activeCounts.size()) {
+						_activeCounts[affixIdx] += 1;
 					}
-					// "Best Slot Wins": each affix gets the best (highest) penalty factor across all items
-					const float penalty = kMultiAffixProcPenalty[std::min<std::uint8_t>(slots.count, static_cast<std::uint8_t>(kMaxAffixesPerItem)) - 1];
-					if (idxIt->second < _activeSlotPenalty.size()) {
-						_activeSlotPenalty[idxIt->second] = std::max(_activeSlotPenalty[idxIt->second], penalty);
+
+					// Collect passive spells for equipped suffixes
+					if (affixIdx < _affixes.size() && _affixes[affixIdx].slot == AffixSlot::kSuffix && _affixes[affixIdx].passiveSpell) {
+						desiredPassives.insert(_affixes[affixIdx].passiveSpell);
+					}
+
+					// "Best Slot Wins" penalty only for prefixes
+					if (affixIdx < _affixes.size() && _affixes[affixIdx].slot != AffixSlot::kSuffix) {
+						const float penalty = kMultiAffixProcPenalty[std::min<std::uint8_t>(slots.count, static_cast<std::uint8_t>(kMaxAffixesPerItem)) - 1];
+						if (affixIdx < _activeSlotPenalty.size()) {
+							_activeSlotPenalty[affixIdx] = std::max(_activeSlotPenalty[affixIdx], penalty);
+						}
 					}
 				}
 			}
@@ -667,6 +678,28 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			}
 			if (shown == 0) {
 				spdlog::debug("CalamityAffixes: active affix list is empty (no equipped affix instances detected).");
+			}
+		}
+
+		// Apply/remove passive suffix spells
+		if (player) {
+			// Remove spells no longer needed
+			for (auto it = _appliedPassiveSpells.begin(); it != _appliedPassiveSpells.end(); ) {
+				if (desiredPassives.find(*it) == desiredPassives.end()) {
+					player->RemoveSpell(*it);
+					SKSE::log::debug("CalamityAffixes: removed passive suffix spell {:08X}.", (*it)->GetFormID());
+					it = _appliedPassiveSpells.erase(it);
+				} else {
+					++it;
+				}
+			}
+			// Add new spells
+			for (auto* spell : desiredPassives) {
+				if (_appliedPassiveSpells.find(spell) == _appliedPassiveSpells.end()) {
+					player->AddSpell(spell);
+					_appliedPassiveSpells.insert(spell);
+					SKSE::log::debug("CalamityAffixes: applied passive suffix spell {:08X}.", spell->GetFormID());
+				}
 			}
 		}
 	}

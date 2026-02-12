@@ -96,6 +96,12 @@ public sealed class AffixDefinition
     [JsonPropertyName("kid")]
     public required KidRule Kid { get; init; }
 
+    [JsonPropertyName("slot")]
+    public string? Slot { get; init; }
+
+    [JsonPropertyName("family")]
+    public string? Family { get; init; }
+
     [JsonPropertyName("runtime")]
     public required Dictionary<string, object?> Runtime { get; init; }
 }
@@ -143,6 +149,12 @@ public sealed class SpellRecordSpec
 
     [JsonPropertyName("delivery")]
     public required string Delivery { get; init; }
+
+    [JsonPropertyName("spellType")]
+    public string? SpellType { get; init; }
+
+    [JsonPropertyName("castType")]
+    public string? CastType { get; init; }
 
     [JsonPropertyName("effect")]
     public required SpellEffectRecordSpec Effect { get; init; }
