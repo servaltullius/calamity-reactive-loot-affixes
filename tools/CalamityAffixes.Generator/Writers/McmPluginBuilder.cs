@@ -46,23 +46,5 @@ public static class McmPluginBuilder
         };
         playerAlias.ForcedReference.SetTo(new FormKey(SkyrimModKey, 0x000014));
         quest.Aliases.Add(playerAlias);
-
-        var aliasVm = new QuestFragmentAlias
-        {
-            Version = 5,
-            ObjectFormat = 2,
-            Property = new ScriptObjectProperty
-            {
-                Name = "::PlayerAlias_MCM_var",
-                Flags = ScriptProperty.Flag.Edited,
-                Alias = 0,
-            },
-        };
-        aliasVm.Scripts.Add(new ScriptEntry
-        {
-            Name = "SKI_PlayerLoadGameAlias",
-            Flags = ScriptEntry.Flag.Local,
-        });
-        quest.VirtualMachineAdapter.Aliases.Add(aliasVm);
     }
 }

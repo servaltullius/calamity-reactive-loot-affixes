@@ -37,8 +37,6 @@ public sealed class McmPluginBuilderTests
         Assert.Equal(QuestAlias.TypeEnum.Reference, alias.Type);
         Assert.Equal(new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000014), alias.ForcedReference.FormKeyNullable);
 
-        var aliasVm = Assert.Single(quest.VirtualMachineAdapter.Aliases);
-        Assert.Equal("::PlayerAlias_MCM_var", aliasVm.Property.Name);
-        Assert.Contains(aliasVm.Scripts, s => s.Name == "SKI_PlayerLoadGameAlias");
+        Assert.Empty(quest.VirtualMachineAdapter.Aliases);
     }
 }
