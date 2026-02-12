@@ -91,9 +91,44 @@ _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
 | `src/EventBridge.Loot.Runtime.cpp` | 툴팁, 런타임 뮤테이션 | 390 |
 | `src/EventBridge.Loot.Runeword.cpp` | 룬워드 레시피 처리 | 1659 |
 
-### C# Generator (`tools/CalamityAffixes.Generator/`)
+### C# Generator (`tools/CalamityAffixes.Generator/`) — xEdit/CK 불필요
 
-affixes.json → ESP/MCM/KID/SPID/Prisma JSON 자동 생성.
+**Mutagen 라이브러리 기반**으로 ESP를 코드에서 직접 생성한다. Creation Kit이나 xEdit 없이 CLI만으로 게임 레코드 생성 가능.
+
+```bash
+# ESP + INI + JSON 전체 재생성
+cd tools
+dotnet run --project CalamityAffixes.Generator
+# → Data/CalamityAffixes.esp (Keyword, MagicEffect, Spell 레코드)
+# → Data/CalamityAffixes_KID.ini, CalamityAffixes_DISTR.ini
+# → Data/SKSE/Plugins/InventoryInjector/CalamityAffixes.json
+```
+
+**ESP 레코드 추가 방법**: `affixes.json`의 각 어픽스에 `records` 필드 작성 → Generator가 파싱하여 ESP에 반영.
+
+```jsonc
+// affixes.json 예시 — Suffix용 Ability Spell
+{
+  "id": "suffix_max_health_t2",
+  "records": {
+    "magicEffect": {
+      "editorId": "CA_MGEF_SuffixMaxHealthT2",
+      "name": "Calamity Suffix: Max Health (Major)",
+      "actorValue": "Health",
+      "magnitude": 50.0
+    },
+    "spell": {
+      "editorId": "CA_SPEL_SuffixMaxHealthT2",
+      "name": "Calamity Suffix: Max Health (Major)",
+      "spellType": "Ability",        // Ability = 패시브 상시 적용
+      "castType": "ConstantEffect",  // ConstantEffect = 장비 중 유지
+      "magicEffectId": "CA_MGEF_SuffixMaxHealthT2"
+    }
+  }
+}
+```
+
+**지원 SpellType**: `Spell` (기본, FireAndForget), `Ability` (패시브, ConstantEffect)
 
 | 파일 | 역할 |
 |------|------|
