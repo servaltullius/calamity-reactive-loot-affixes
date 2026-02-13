@@ -123,7 +123,7 @@ namespace CalamityAffixes
 		const auto playerId = player->GetFormID();
 		const auto refHandle = static_cast<LootRerollGuard::RefHandle>(RE::ObjectRefHandle(a_event->reference).native_handle());
 
-		// 1) Record player-dropped world references so re-picking them up can't "reroll" loot affixes.
+		// 1a) Record player-dropped world references so re-picking them up can't "reroll" loot affixes.
 		if (a_event->oldContainer == playerId &&
 			a_event->newContainer == LootRerollGuard::kWorldContainer &&
 			refHandle != 0) {
@@ -146,6 +146,20 @@ namespace CalamityAffixes
 				a_event->itemCount,
 				refHandle,
 				instanceKey);
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		// 1b) Record items the player puts into any container (chest, barrel, etc.)
+		//     so re-taking them can't reroll.
+		if (a_event->oldContainer == playerId &&
+			a_event->newContainer != 0 &&
+			a_event->newContainer != playerId) {
+			if (a_event->baseObj != 0 && a_event->uniqueID != 0) {
+				const auto stashKey = MakeInstanceKey(a_event->baseObj, a_event->uniqueID);
+				if (_instanceAffixes.find(stashKey) != _instanceAffixes.end()) {
+					_playerStashedKeys.insert(stashKey);
+				}
+			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -173,6 +187,21 @@ namespace CalamityAffixes
 					a_event->uniqueID);
 			}
 			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		// 3b) Skip if this item was stashed in a container by the player.
+		if (a_event->baseObj != 0 && a_event->uniqueID != 0) {
+			const auto stashKey = MakeInstanceKey(a_event->baseObj, a_event->uniqueID);
+			if (auto stashIt = _playerStashedKeys.find(stashKey); stashIt != _playerStashedKeys.end()) {
+				_playerStashedKeys.erase(stashIt);
+				if (_loot.debugLog) {
+					SKSE::log::debug(
+						"CalamityAffixes: skipping loot roll (player stashed + retrieved) (baseObj={:08X}, uniqueID={}).",
+						a_event->baseObj,
+						a_event->uniqueID);
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
 		}
 
 			const auto baseObj = a_event->baseObj;

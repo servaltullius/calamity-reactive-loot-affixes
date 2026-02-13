@@ -500,6 +500,7 @@ namespace CalamityAffixes
 			bool _runtimeEnabled{ true };
 			float _runtimeProcChanceMult{ 1.0f };
 		LootRerollGuard _lootRerollGuard{};
+		std::unordered_set<std::uint64_t> _playerStashedKeys;  // instanceKeys of items player put in containers
 		bool _configLoaded{ false };
 		std::uint32_t _procDepth{ 0 };
 		bool _healthDamageHookSeen{ false };
