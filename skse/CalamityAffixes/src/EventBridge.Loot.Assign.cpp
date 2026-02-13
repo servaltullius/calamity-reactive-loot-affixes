@@ -81,8 +81,7 @@ namespace CalamityAffixes
 				if (idx >= _affixes.size()) {
 					continue;
 				}
-				// Use procChancePct as loot weight; treat 0 or negative as excluded (runeword-only affixes)
-				const float weight = _affixes[idx].procChancePct;
+				const float weight = _affixes[idx].EffectiveLootWeight();
 				if (weight <= 0.0f) {
 					continue;
 				}
@@ -132,7 +131,7 @@ namespace CalamityAffixes
 						continue;
 					}
 				}
-				const float weight = affix.procChancePct;
+				const float weight = affix.EffectiveLootWeight();
 				if (weight <= 0.0f) {
 					continue;
 				}

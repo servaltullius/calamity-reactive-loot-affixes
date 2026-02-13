@@ -71,7 +71,8 @@
               "spellBaseAsMin": true
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_fire_damage",
@@ -122,7 +123,8 @@
               "spellBaseAsMin": true
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_frost_damage",
@@ -173,7 +175,8 @@
               "spellBaseAsMin": true
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_shock_damage",
@@ -224,7 +227,8 @@
               "spellBaseAsMin": true
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_fire_shred",
@@ -266,7 +270,8 @@
             "spellEditorId": "CAFF_SPEL_FIRE_SHRED",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_frost_shred",
@@ -308,7 +313,8 @@
             "spellEditorId": "CAFF_SPEL_FROST_SHRED",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_shock_shred",
@@ -350,7 +356,8 @@
             "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_conjure_familiar",
@@ -372,7 +379,8 @@
             "spellForm": "Skyrim.esm|000640B6",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_flaming_familiar",
@@ -394,7 +402,8 @@
             "spellForm": "Skyrim.esm|0009CE26",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_conjure_flame_atronach",
@@ -416,7 +425,8 @@
             "spellForm": "Skyrim.esm|000204C3",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_conjure_frost_atronach",
@@ -438,7 +448,8 @@
             "spellForm": "Skyrim.esm|000204C4",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_conjure_storm_atronach",
@@ -460,7 +471,8 @@
             "spellForm": "Skyrim.esm|000204C5",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_conjure_dremora_lord",
@@ -482,7 +494,8 @@
             "spellForm": "Skyrim.esm|0010DDEC",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_soul_trap",
@@ -504,7 +517,8 @@
             "spellForm": "Skyrim.esm|0004DBA4",
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "incoming_invisibility",
@@ -526,7 +540,8 @@
             "spellForm": "Skyrim.esm|00027EB6",
             "applyTo": "Self"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_muffle",
@@ -548,7 +563,8 @@
             "spellForm": "Skyrim.esm|0008F3EB",
             "applyTo": "Self"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "trap_ironjaw",
@@ -597,15 +613,26 @@
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
             "extraSpells": [
-              { "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON" },
-              { "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA" },
-              { "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA" },
-              { "spellForm": "Skyrim.esm|0006D22C" },
-              { "spellForm": "Skyrim.esm|0004B146" }
+              {
+                "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA"
+              },
+              {
+                "spellForm": "Skyrim.esm|0006D22C"
+              },
+              {
+                "spellForm": "Skyrim.esm|0004B146"
+              }
             ],
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_trap_dragonteeth_poison",
@@ -646,7 +673,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_trap_dragonteeth_drain_magicka",
@@ -686,7 +714,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_trap_dragonteeth_drain_stamina",
@@ -726,7 +755,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_fire_25",
@@ -770,7 +800,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_fire_50",
@@ -793,7 +824,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_fire_75",
@@ -816,7 +848,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_fire_100",
@@ -839,7 +872,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_frost_25",
@@ -883,7 +917,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_frost_50",
@@ -906,7 +941,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_frost_75",
@@ -929,7 +965,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_frost_100",
@@ -952,7 +989,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_shock_25",
@@ -996,7 +1034,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_shock_50",
@@ -1019,7 +1058,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_shock_75",
@@ -1042,7 +1082,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "convert_phys_to_shock_100",
@@ -1065,7 +1106,8 @@
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "archmage_t1",
@@ -1087,8 +1129,10 @@
             "damagePctOfMaxMagicka": 10.0,
             "costPctOfMaxMagicka": 5.0,
             "noHitEffectArt": false
-          }
-        }
+          },
+          "lootWeight": 20.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "archmage_t2",
@@ -1110,8 +1154,10 @@
             "damagePctOfMaxMagicka": 12.0,
             "costPctOfMaxMagicka": 5.0,
             "noHitEffectArt": false
-          }
-        }
+          },
+          "lootWeight": 15.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "archmage_t3",
@@ -1133,8 +1179,10 @@
             "damagePctOfMaxMagicka": 14.0,
             "costPctOfMaxMagicka": 5.0,
             "noHitEffectArt": false
-          }
-        }
+          },
+          "lootWeight": 10.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "archmage_t4",
@@ -1156,8 +1204,10 @@
             "damagePctOfMaxMagicka": 16.0,
             "costPctOfMaxMagicka": 5.0,
             "noHitEffectArt": false
-          }
-        }
+          },
+          "lootWeight": 5.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "coc_firebolt",
@@ -1185,8 +1235,10 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
-        }
+          },
+          "lootWeight": 12.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "coc_ice_spike",
@@ -1214,8 +1266,10 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
-        }
+          },
+          "lootWeight": 10.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "coc_lightning_bolt",
@@ -1243,8 +1297,10 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
-        }
+          },
+          "lootWeight": 10.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "coc_thunderbolt",
@@ -1272,8 +1328,10 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
-        }
+          },
+          "lootWeight": 8.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "coc_icy_spear",
@@ -1301,8 +1359,10 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
-        }
+          },
+          "lootWeight": 8.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "coc_chain_lightning",
@@ -1330,8 +1390,10 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
-        }
+          },
+          "lootWeight": 8.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "coc_ice_storm",
@@ -1359,8 +1421,10 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
-        }
+          },
+          "lootWeight": 8.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "corpse_explosion_t1",
@@ -1391,7 +1455,8 @@
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "corpse_explosion_t2",
@@ -1422,7 +1487,8 @@
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "corpse_explosion_t3",
@@ -1453,7 +1519,8 @@
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "corpse_explosion_t4",
@@ -1484,7 +1551,8 @@
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "corpse_explosion_t5",
@@ -1515,7 +1583,8 @@
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "summon_corpse_explosion_t1",
@@ -1545,8 +1614,10 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 3,
             "noHitEffectArt": false
-          }
-        }
+          },
+          "lootWeight": 8.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "summon_corpse_explosion_t2",
@@ -1576,8 +1647,10 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 3,
             "noHitEffectArt": false
-          }
-        }
+          },
+          "lootWeight": 5.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "summon_corpse_explosion_t3",
@@ -1607,8 +1680,10 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 3,
             "noHitEffectArt": false
-          }
-        }
+          },
+          "lootWeight": 3.0
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_minefield",
@@ -1657,7 +1732,8 @@
             "spellEditorId": "CAFF_SPEL_MINEFIELD_SNARE",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_adaptive_exposure",
@@ -1685,7 +1761,8 @@
             },
             "applyTo": "Target"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "dot_bloom",
@@ -1735,7 +1812,8 @@
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_POISON",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "dot_bloom_tar",
@@ -1783,11 +1861,14 @@
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
             "extraSpells": [
-              { "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER" }
+              {
+                "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER"
+              }
             ],
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_dot_bloom_tar_sunder",
@@ -1827,7 +1908,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "dot_bloom_siphon",
@@ -1875,11 +1957,14 @@
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
             "extraSpells": [
-              { "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA" }
+              {
+                "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA"
+              }
             ],
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_dot_bloom_siphon_sta",
@@ -1919,7 +2004,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_chaos_mine",
@@ -1968,15 +2054,26 @@
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
             "extraSpells": [
-              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER" },
-              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN" },
-              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN" },
-              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK" },
-              { "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE" }
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK"
+              },
+              {
+                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE"
+              }
             ],
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_chaos_curse_sunder",
@@ -2016,7 +2113,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_chaos_curse_drain_magregen",
@@ -2056,7 +2154,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_chaos_curse_drain_stamregen",
@@ -2096,7 +2195,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_chaos_curse_slow_attack",
@@ -2136,7 +2236,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "internal_spell_chaos_curse_fragile",
@@ -2176,7 +2277,8 @@
             "type": "DebugNotify",
             "text": "INTERNAL"
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_swap_jackpot",
@@ -2219,7 +2321,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_evolving_lightning",
@@ -2250,11 +2353,22 @@
             },
             "evolution": {
               "xpPerProc": 1,
-              "thresholds": [0, 15, 45, 90],
-              "multipliers": [1.0, 1.25, 1.6, 2.1]
+              "thresholds": [
+                0,
+                15,
+                45,
+                90
+              ],
+              "multipliers": [
+                1.0,
+                1.25,
+                1.6,
+                2.1
+              ]
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "hit_mode_cycle_elements",
@@ -2285,13 +2399,27 @@
             },
             "evolution": {
               "xpPerProc": 1,
-              "thresholds": [0, 20, 60, 120],
-              "multipliers": [1.0, 1.3, 1.7, 2.2]
+              "thresholds": [
+                0,
+                20,
+                60,
+                120
+              ],
+              "multipliers": [
+                1.0,
+                1.3,
+                1.7,
+                2.2
+              ]
             },
             "modeCycle": {
               "manualOnly": true,
               "switchEveryProcs": 3,
-              "labels": ["Flame", "Frost", "Storm"],
+              "labels": [
+                "Flame",
+                "Frost",
+                "Storm"
+              ],
               "spells": [
                 "CAFF_SPEL_FIRE_DAMAGE",
                 "CAFF_SPEL_FROST_DAMAGE",
@@ -2299,7 +2427,8 @@
               ]
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_enigma_final",
@@ -2342,7 +2471,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_infinity_final",
@@ -2370,7 +2500,8 @@
             "applyTo": "Target",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_fortitude_final",
@@ -2413,7 +2544,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_insight_final",
@@ -2456,7 +2588,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_spirit_final",
@@ -2499,7 +2632,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_grief_final",
@@ -2535,7 +2669,8 @@
               "spellBaseAsMin": true
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_call_to_arms_final",
@@ -2578,7 +2713,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_chains_of_honor_final",
@@ -2621,7 +2757,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_heart_of_the_oak_final",
@@ -2649,7 +2786,8 @@
             "applyTo": "Target",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_faith_final",
@@ -2672,7 +2810,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_exile_final",
@@ -2715,7 +2854,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_breath_of_the_dying_final",
@@ -2751,7 +2891,8 @@
               "spellBaseAsMin": true
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_last_wish_final",
@@ -2779,7 +2920,8 @@
             "applyTo": "Target",
             "noHitEffectArt": false
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_phoenix_final",
@@ -2822,7 +2964,8 @@
             "applyTo": "Self",
             "noHitEffectArt": true
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_doom_final",
@@ -2853,7 +2996,8 @@
               "spellBaseAsMin": true
             }
           }
-        }
+        },
+        "slot": "prefix"
       },
       {
         "id": "runeword_dream_final",
@@ -2883,6 +3027,2767 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "suffix_max_health_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T1",
+        "name": "of Minor Vitality: Max Health +25",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T1",
+            "name": "Calamity Suffix: Max Health +25",
+            "actorValue": "Health",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T1",
+            "name": "Calamity Suffix: Max Health +25",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T1",
+              "magnitude": 25,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "max_health",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_max_health_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T2",
+        "name": "of Vitality: Max Health +50",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T2",
+            "name": "Calamity Suffix: Max Health +50",
+            "actorValue": "Health",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T2",
+            "name": "Calamity Suffix: Max Health +50",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T2",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "max_health",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_max_health_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T3",
+        "name": "of Grand Vitality: Max Health +75",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T3",
+            "name": "Calamity Suffix: Max Health +75",
+            "actorValue": "Health",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T3",
+            "name": "Calamity Suffix: Max Health +75",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T3",
+              "magnitude": 75,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "max_health",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_max_stamina_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T1",
+        "name": "of Minor Endurance: Max Stamina +20",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T1",
+            "name": "Calamity Suffix: Max Stamina +20",
+            "actorValue": "Stamina",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T1",
+            "name": "Calamity Suffix: Max Stamina +20",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T1",
+              "magnitude": 20,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "max_stamina",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_max_stamina_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T2",
+        "name": "of Endurance: Max Stamina +40",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T2",
+            "name": "Calamity Suffix: Max Stamina +40",
+            "actorValue": "Stamina",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T2",
+            "name": "Calamity Suffix: Max Stamina +40",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T2",
+              "magnitude": 40,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "max_stamina",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_max_stamina_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T3",
+        "name": "of Grand Endurance: Max Stamina +60",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T3",
+            "name": "Calamity Suffix: Max Stamina +60",
+            "actorValue": "Stamina",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T3",
+            "name": "Calamity Suffix: Max Stamina +60",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T3",
+              "magnitude": 60,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "max_stamina",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_max_magicka_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T1",
+        "name": "of Minor Sorcery: Max Magicka +20",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T1",
+            "name": "Calamity Suffix: Max Magicka +20",
+            "actorValue": "Magicka",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T1",
+            "name": "Calamity Suffix: Max Magicka +20",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T1",
+              "magnitude": 20,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "max_magicka",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_max_magicka_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T2",
+        "name": "of Sorcery: Max Magicka +40",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T2",
+            "name": "Calamity Suffix: Max Magicka +40",
+            "actorValue": "Magicka",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T2",
+            "name": "Calamity Suffix: Max Magicka +40",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T2",
+              "magnitude": 40,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "max_magicka",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_max_magicka_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T3",
+        "name": "of Grand Sorcery: Max Magicka +60",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T3",
+            "name": "Calamity Suffix: Max Magicka +60",
+            "actorValue": "Magicka",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T3",
+            "name": "Calamity Suffix: Max Magicka +60",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T3",
+              "magnitude": 60,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "max_magicka",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_health_regen_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T1",
+        "name": "of Minor Mending: Health Regen +25%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T1",
+            "name": "Calamity Suffix: Health Regen +25%",
+            "actorValue": "HealRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T1",
+            "name": "Calamity Suffix: Health Regen +25%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T1",
+              "magnitude": 25,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "health_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_health_regen_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T2",
+        "name": "of Mending: Health Regen +50%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T2",
+            "name": "Calamity Suffix: Health Regen +50%",
+            "actorValue": "HealRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T2",
+            "name": "Calamity Suffix: Health Regen +50%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T2",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "health_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_health_regen_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T3",
+        "name": "of Grand Mending: Health Regen +75%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T3",
+            "name": "Calamity Suffix: Health Regen +75%",
+            "actorValue": "HealRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T3",
+            "name": "Calamity Suffix: Health Regen +75%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T3",
+              "magnitude": 75,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "health_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_stamina_regen_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T1",
+        "name": "of Minor Recovery: Stamina Regen +25%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T1",
+            "name": "Calamity Suffix: Stamina Regen +25%",
+            "actorValue": "StaminaRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T1",
+            "name": "Calamity Suffix: Stamina Regen +25%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T1",
+              "magnitude": 25,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "stamina_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_stamina_regen_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T2",
+        "name": "of Recovery: Stamina Regen +50%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T2",
+            "name": "Calamity Suffix: Stamina Regen +50%",
+            "actorValue": "StaminaRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T2",
+            "name": "Calamity Suffix: Stamina Regen +50%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T2",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "stamina_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_stamina_regen_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T3",
+        "name": "of Grand Recovery: Stamina Regen +75%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T3",
+            "name": "Calamity Suffix: Stamina Regen +75%",
+            "actorValue": "StaminaRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T3",
+            "name": "Calamity Suffix: Stamina Regen +75%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T3",
+              "magnitude": 75,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "stamina_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_magicka_regen_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T1",
+        "name": "of Minor Insight: Magicka Regen +25%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T1",
+            "name": "Calamity Suffix: Magicka Regen +25%",
+            "actorValue": "MagickaRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T1",
+            "name": "Calamity Suffix: Magicka Regen +25%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T1",
+              "magnitude": 25,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "magicka_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_magicka_regen_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T2",
+        "name": "of Insight: Magicka Regen +50%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T2",
+            "name": "Calamity Suffix: Magicka Regen +50%",
+            "actorValue": "MagickaRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T2",
+            "name": "Calamity Suffix: Magicka Regen +50%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T2",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "magicka_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_magicka_regen_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T3",
+        "name": "of Grand Insight: Magicka Regen +75%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T3",
+            "name": "Calamity Suffix: Magicka Regen +75%",
+            "actorValue": "MagickaRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T3",
+            "name": "Calamity Suffix: Magicka Regen +75%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T3",
+              "magnitude": 75,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "magicka_regen",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_armor_rating_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T1",
+        "name": "of Minor Warding: Armor +25",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T1",
+            "name": "Calamity Suffix: Armor +25",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T1",
+            "name": "Calamity Suffix: Armor +25",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T1",
+              "magnitude": 25,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "armor_rating",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_armor_rating_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T2",
+        "name": "of Warding: Armor +50",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T2",
+            "name": "Calamity Suffix: Armor +50",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T2",
+            "name": "Calamity Suffix: Armor +50",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T2",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "armor_rating",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_armor_rating_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T3",
+        "name": "of Grand Warding: Armor +80",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T3",
+            "name": "Calamity Suffix: Armor +80",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T3",
+            "name": "Calamity Suffix: Armor +80",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T3",
+              "magnitude": 80,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "armor_rating",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_fire_resist_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T1",
+        "name": "of Minor Flame Guard: Fire Resist +5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T1",
+            "name": "Calamity Suffix: Fire Resist +5%",
+            "actorValue": "ResistFire",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T1",
+            "name": "Calamity Suffix: Fire Resist +5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "fire_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_fire_resist_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T2",
+        "name": "of Flame Guard: Fire Resist +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T2",
+            "name": "Calamity Suffix: Fire Resist +10%",
+            "actorValue": "ResistFire",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T2",
+            "name": "Calamity Suffix: Fire Resist +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "fire_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_fire_resist_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T3",
+        "name": "of Grand Flame Guard: Fire Resist +15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T3",
+            "name": "Calamity Suffix: Fire Resist +15%",
+            "actorValue": "ResistFire",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T3",
+            "name": "Calamity Suffix: Fire Resist +15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "fire_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_frost_resist_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T1",
+        "name": "of Minor Frost Guard: Frost Resist +5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T1",
+            "name": "Calamity Suffix: Frost Resist +5%",
+            "actorValue": "ResistFrost",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T1",
+            "name": "Calamity Suffix: Frost Resist +5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "frost_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_frost_resist_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T2",
+        "name": "of Frost Guard: Frost Resist +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T2",
+            "name": "Calamity Suffix: Frost Resist +10%",
+            "actorValue": "ResistFrost",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T2",
+            "name": "Calamity Suffix: Frost Resist +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "frost_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_frost_resist_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T3",
+        "name": "of Grand Frost Guard: Frost Resist +15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T3",
+            "name": "Calamity Suffix: Frost Resist +15%",
+            "actorValue": "ResistFrost",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T3",
+            "name": "Calamity Suffix: Frost Resist +15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "frost_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_shock_resist_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T1",
+        "name": "of Minor Shock Guard: Shock Resist +5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T1",
+            "name": "Calamity Suffix: Shock Resist +5%",
+            "actorValue": "ResistShock",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T1",
+            "name": "Calamity Suffix: Shock Resist +5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "shock_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_shock_resist_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T2",
+        "name": "of Shock Guard: Shock Resist +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T2",
+            "name": "Calamity Suffix: Shock Resist +10%",
+            "actorValue": "ResistShock",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T2",
+            "name": "Calamity Suffix: Shock Resist +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "shock_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_shock_resist_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T3",
+        "name": "of Grand Shock Guard: Shock Resist +15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T3",
+            "name": "Calamity Suffix: Shock Resist +15%",
+            "actorValue": "ResistShock",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T3",
+            "name": "Calamity Suffix: Shock Resist +15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "shock_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_magic_resist_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T1",
+        "name": "of Minor Spell Guard: Magic Resist +3%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T1",
+            "name": "Calamity Suffix: Magic Resist +3%",
+            "actorValue": "ResistMagic",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T1",
+            "name": "Calamity Suffix: Magic Resist +3%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T1",
+              "magnitude": 3,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "magic_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_magic_resist_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T2",
+        "name": "of Spell Guard: Magic Resist +8%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T2",
+            "name": "Calamity Suffix: Magic Resist +8%",
+            "actorValue": "ResistMagic",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T2",
+            "name": "Calamity Suffix: Magic Resist +8%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T2",
+              "magnitude": 8,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "magic_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_magic_resist_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T3",
+        "name": "of Grand Spell Guard: Magic Resist +12%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T3",
+            "name": "Calamity Suffix: Magic Resist +12%",
+            "actorValue": "ResistMagic",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T3",
+            "name": "Calamity Suffix: Magic Resist +12%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T3",
+              "magnitude": 12,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "magic_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_poison_resist_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T1",
+        "name": "of Minor Antivenom: Poison Resist +5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T1",
+            "name": "Calamity Suffix: Poison Resist +5%",
+            "actorValue": "PoisonResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T1",
+            "name": "Calamity Suffix: Poison Resist +5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "poison_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_poison_resist_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T2",
+        "name": "of Antivenom: Poison Resist +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T2",
+            "name": "Calamity Suffix: Poison Resist +10%",
+            "actorValue": "PoisonResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T2",
+            "name": "Calamity Suffix: Poison Resist +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "poison_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_poison_resist_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T3",
+        "name": "of Grand Antivenom: Poison Resist +15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T3",
+            "name": "Calamity Suffix: Poison Resist +15%",
+            "actorValue": "PoisonResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T3",
+            "name": "Calamity Suffix: Poison Resist +15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "poison_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_disease_resist_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T1",
+        "name": "of Minor Purity: Disease Resist +25%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T1",
+            "name": "Calamity Suffix: Disease Resist +25%",
+            "actorValue": "ResistDisease",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T1",
+            "name": "Calamity Suffix: Disease Resist +25%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T1",
+              "magnitude": 25,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "disease_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_disease_resist_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T2",
+        "name": "of Purity: Disease Resist +50%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T2",
+            "name": "Calamity Suffix: Disease Resist +50%",
+            "actorValue": "ResistDisease",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T2",
+            "name": "Calamity Suffix: Disease Resist +50%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T2",
+              "magnitude": 50,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "disease_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_disease_resist_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T3",
+        "name": "of Grand Purity: Disease Resist +100%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T3",
+            "name": "Calamity Suffix: Disease Resist +100%",
+            "actorValue": "ResistDisease",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T3",
+            "name": "Calamity Suffix: Disease Resist +100%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T3",
+              "magnitude": 100,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "disease_resist",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_attack_speed_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T1",
+        "name": "of Minor Alacrity: Attack Speed +5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
+            "name": "Calamity Suffix: Attack Speed +5%",
+            "actorValue": "WeaponSpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T1",
+            "name": "Calamity Suffix: Attack Speed +5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "attack_speed",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_attack_speed_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T2",
+        "name": "of Alacrity: Attack Speed +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
+            "name": "Calamity Suffix: Attack Speed +10%",
+            "actorValue": "WeaponSpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T2",
+            "name": "Calamity Suffix: Attack Speed +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "attack_speed",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_attack_speed_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T3",
+        "name": "of Grand Alacrity: Attack Speed +15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
+            "name": "Calamity Suffix: Attack Speed +15%",
+            "actorValue": "WeaponSpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T3",
+            "name": "Calamity Suffix: Attack Speed +15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "attack_speed",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_critical_damage_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T1",
+        "name": "of Minor Precision: Critical Damage +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T1",
+            "name": "Calamity Suffix: Critical Damage +10%",
+            "actorValue": "CriticalChance",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T1",
+            "name": "Calamity Suffix: Critical Damage +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T1",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "critical_damage",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_critical_damage_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T2",
+        "name": "of Precision: Critical Damage +20%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T2",
+            "name": "Calamity Suffix: Critical Damage +20%",
+            "actorValue": "CriticalChance",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T2",
+            "name": "Calamity Suffix: Critical Damage +20%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T2",
+              "magnitude": 20,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "critical_damage",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_critical_damage_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T3",
+        "name": "of Grand Precision: Critical Damage +30%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T3",
+            "name": "Calamity Suffix: Critical Damage +30%",
+            "actorValue": "CriticalChance",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T3",
+            "name": "Calamity Suffix: Critical Damage +30%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T3",
+              "magnitude": 30,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "critical_damage",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_destruction_cost_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T1",
+        "name": "of Minor Efficiency: Destruction Cost -5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T1",
+            "name": "Calamity Suffix: Destruction Cost -5%",
+            "actorValue": "DestructionModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T1",
+            "name": "Calamity Suffix: Destruction Cost -5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "destruction_cost",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_destruction_cost_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T2",
+        "name": "of Efficiency: Destruction Cost -10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T2",
+            "name": "Calamity Suffix: Destruction Cost -10%",
+            "actorValue": "DestructionModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T2",
+            "name": "Calamity Suffix: Destruction Cost -10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "destruction_cost",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_destruction_cost_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T3",
+        "name": "of Grand Efficiency: Destruction Cost -15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T3",
+            "name": "Calamity Suffix: Destruction Cost -15%",
+            "actorValue": "DestructionModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T3",
+            "name": "Calamity Suffix: Destruction Cost -15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "destruction_cost",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_move_speed_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T1",
+        "name": "of Minor Swiftness: Move Speed +4%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T1",
+            "name": "Calamity Suffix: Move Speed +4%",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T1",
+            "name": "Calamity Suffix: Move Speed +4%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T1",
+              "magnitude": 4,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "move_speed",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_move_speed_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T2",
+        "name": "of Swiftness: Move Speed +7%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T2",
+            "name": "Calamity Suffix: Move Speed +7%",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T2",
+            "name": "Calamity Suffix: Move Speed +7%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T2",
+              "magnitude": 7,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "move_speed",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_move_speed_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T3",
+        "name": "of Grand Swiftness: Move Speed +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T3",
+            "name": "Calamity Suffix: Move Speed +10%",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T3",
+            "name": "Calamity Suffix: Move Speed +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T3",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "move_speed",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_carry_weight_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T1",
+        "name": "of Minor Burden: Carry Weight +20",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T1",
+            "name": "Calamity Suffix: Carry Weight +20",
+            "actorValue": "CarryWeight",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T1",
+            "name": "Calamity Suffix: Carry Weight +20",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T1",
+              "magnitude": 20,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "carry_weight",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_carry_weight_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T2",
+        "name": "of Burden: Carry Weight +40",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T2",
+            "name": "Calamity Suffix: Carry Weight +40",
+            "actorValue": "CarryWeight",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T2",
+            "name": "Calamity Suffix: Carry Weight +40",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T2",
+              "magnitude": 40,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "carry_weight",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_carry_weight_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T3",
+        "name": "of Grand Burden: Carry Weight +60",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T3",
+            "name": "Calamity Suffix: Carry Weight +60",
+            "actorValue": "CarryWeight",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T3",
+            "name": "Calamity Suffix: Carry Weight +60",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T3",
+              "magnitude": 60,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "carry_weight",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_shout_cooldown_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T1",
+        "name": "of Minor Voice: Shout Cooldown -5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T1",
+            "name": "Calamity Suffix: Shout Cooldown -5%",
+            "actorValue": "ShoutRecoveryMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T1",
+            "name": "Calamity Suffix: Shout Cooldown -5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "shout_cooldown",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_shout_cooldown_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T2",
+        "name": "of the Voice: Shout Cooldown -10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T2",
+            "name": "Calamity Suffix: Shout Cooldown -10%",
+            "actorValue": "ShoutRecoveryMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T2",
+            "name": "Calamity Suffix: Shout Cooldown -10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "shout_cooldown",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_shout_cooldown_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T3",
+        "name": "of Grand Voice: Shout Cooldown -15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3",
+            "name": "Calamity Suffix: Shout Cooldown -15%",
+            "actorValue": "ShoutRecoveryMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T3",
+            "name": "Calamity Suffix: Shout Cooldown -15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "shout_cooldown",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_experience_gain_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T1",
+        "name": "of Minor Wisdom: Experience +5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T1",
+            "name": "Calamity Suffix: Experience +5%",
+            "actorValue": "VoiceRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T1",
+            "name": "Calamity Suffix: Experience +5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "experience_gain",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_experience_gain_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T2",
+        "name": "of Wisdom: Experience +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T2",
+            "name": "Calamity Suffix: Experience +10%",
+            "actorValue": "VoiceRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T2",
+            "name": "Calamity Suffix: Experience +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "experience_gain",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_experience_gain_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T3",
+        "name": "of Grand Wisdom: Experience +15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T3",
+            "name": "Calamity Suffix: Experience +15%",
+            "actorValue": "VoiceRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T3",
+            "name": "Calamity Suffix: Experience +15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "experience_gain",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T3"
           }
         }
       }

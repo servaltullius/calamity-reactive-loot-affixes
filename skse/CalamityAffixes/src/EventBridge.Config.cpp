@@ -461,6 +461,9 @@ namespace CalamityAffixes
 				}
 
 				out.procChancePct = runtime.value("procChancePercent", 0.0f);
+				if (const auto lwIt = runtime.find("lootWeight"); lwIt != runtime.end() && lwIt->is_number()) {
+					out.lootWeight = lwIt->get<float>();
+				}
 			const float icdSeconds = runtime.value("icdSeconds", 0.0f);
 			if (icdSeconds > 0.0f) {
 				out.icd = std::chrono::milliseconds(static_cast<std::int64_t>(icdSeconds * 1000.0f));

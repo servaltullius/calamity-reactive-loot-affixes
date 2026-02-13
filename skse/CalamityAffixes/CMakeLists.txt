@@ -137,6 +137,7 @@ if (BUILD_TESTING)
             tests/test_runeword_util.cpp
             tests/test_trigger_guards.cpp
             tests/test_instance_affix_slots.cpp
+            tests/test_effective_loot_weight.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 
