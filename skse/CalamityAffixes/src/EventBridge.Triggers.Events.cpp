@@ -654,7 +654,8 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 						desiredPassives.insert(_affixes[affixIdx].passiveSpell);
 					}
 
-					// Accumulate crit damage bonus for equipped suffixes
+					// Accumulate crit damage bonus for equipped suffixes.
+					// Intentionally stacks across multiple equipped items (same suffix on sword + shield = additive).
 					if (affixIdx < _affixes.size() && _affixes[affixIdx].critDamageBonusPct > 0.0f) {
 						_activeCritDamageBonusPct += _affixes[affixIdx].critDamageBonusPct;
 					}

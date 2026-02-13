@@ -316,7 +316,11 @@ namespace CalamityAffixes
 			return 1.0f;
 		}
 
-		return 1.0f + (_activeCritDamageBonusPct / 100.0f);
+		const float mult = 1.0f + (_activeCritDamageBonusPct / 100.0f);
+		if (_loot.debugLog) {
+			spdlog::debug("CalamityAffixes: crit damage bonus {:.0f}% -> multiplier {:.2f}", _activeCritDamageBonusPct, mult);
+		}
+		return mult;
 	}
 
 	EventBridge::ArchmageSelection EventBridge::SelectBestArchmageAction(
