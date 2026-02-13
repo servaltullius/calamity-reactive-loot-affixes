@@ -5277,7 +5277,8 @@
           "procChancePercent": 0,
           "action": {
             "type": "DebugNotify",
-            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T1"
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T1",
+            "critDamageBonusPct": 10
           }
         }
       },
@@ -5325,7 +5326,8 @@
           "procChancePercent": 0,
           "action": {
             "type": "DebugNotify",
-            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T2"
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T2",
+            "critDamageBonusPct": 20
           }
         }
       },
@@ -5373,7 +5375,8 @@
           "procChancePercent": 0,
           "action": {
             "type": "DebugNotify",
-            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T3"
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T3",
+            "critDamageBonusPct": 30
           }
         }
       },
