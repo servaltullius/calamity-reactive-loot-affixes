@@ -207,12 +207,6 @@ namespace CalamityAffixes
 								continue;
 							}
 
-							// Skip non-weapon/armor items (e.g. MiscItems from stale save data).
-							auto* baseForm = RE::TESForm::LookupByID(resolvedBaseID);
-							if (!baseForm || (!baseForm->As<RE::TESObjectWEAP>() && !baseForm->As<RE::TESObjectARMO>())) {
-								continue;
-							}
-
 							const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
 							InstanceAffixSlots slots;
 							slots.count = std::min<std::uint8_t>(affixCount, static_cast<std::uint8_t>(kMaxAffixesPerItem));
@@ -285,12 +279,6 @@ namespace CalamityAffixes
 						if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
 							continue;
 						}
-
-							// Skip non-weapon/armor items (e.g. MiscItems from stale save data).
-							auto* baseForm = RE::TESForm::LookupByID(resolvedBaseID);
-							if (!baseForm || (!baseForm->As<RE::TESObjectWEAP>() && !baseForm->As<RE::TESObjectARMO>())) {
-								continue;
-							}
 
 							// v5 migration: convert to InstanceAffixSlots
 							const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);

@@ -618,6 +618,12 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 					continue;
 				}
 
+				// Lazy cleanup: remove stale affix data for non-weapon/armor items.
+				if (entry->object && !entry->object->As<RE::TESObjectWEAP>() && !entry->object->As<RE::TESObjectARMO>()) {
+					_instanceAffixes.erase(it);
+					continue;
+				}
+
 				const auto& slots = it->second;
 				for (std::uint8_t slot = 0; slot < slots.count; ++slot) {
 					if (slots.tokens[slot] != 0u) {
