@@ -143,6 +143,9 @@ public sealed class MagicEffectRecordSpec
 
     [JsonPropertyName("recover")]
     public bool Recover { get; init; }
+
+    [JsonPropertyName("archetype")]
+    public string? Archetype { get; init; }
 }
 
 public sealed class SpellRecordSpec

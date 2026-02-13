@@ -173,9 +173,19 @@ public static class KeywordPluginBuilder
             mgef.MagicSkill = magicSkill;
         }
 
+        var archetypeType = MagicEffectArchetype.TypeEnum.ValueModifier;
+        if (!string.IsNullOrWhiteSpace(spec.Archetype))
+        {
+            if (!Enum.TryParse<MagicEffectArchetype.TypeEnum>(spec.Archetype, ignoreCase: true, out archetypeType))
+            {
+                throw new InvalidDataException(
+                    $"Unknown MagicEffect archetype: {spec.Archetype} (MagicEffect: {spec.EditorId})");
+            }
+        }
+
         mgef.Archetype = new MagicEffectArchetype
         {
-            Type = MagicEffectArchetype.TypeEnum.ValueModifier,
+            Type = archetypeType,
             ActorValue = actorValue,
         };
 
@@ -222,6 +232,7 @@ public static class KeywordPluginBuilder
             _ => throw new InvalidDataException($"Unknown Spell delivery: {spec.Delivery} (Spell: {spec.EditorId})"),
         };
         spell.Range = (spell.TargetType == TargetType.TargetActor && spell.CastType != Mutagen.Bethesda.Skyrim.CastType.ConstantEffect) ? 4096.0f : 0.0f;
+        spell.Flags = (SpellDataFlag)0;
 
         if (!magicEffectsByEditorId.TryGetValue(spec.Effect.MagicEffectEditorId, out var magicEffect))
         {

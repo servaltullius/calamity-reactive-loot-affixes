@@ -341,4 +341,139 @@ public sealed class KeywordPluginBuilderTests
             File.Delete(path);
         }
     }
+
+    [Fact]
+    public void BuildKeywordPlugin_WhenArchetypeInvisibility_SetsInvisibilityArchetype()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes =
+                [
+                    new AffixDefinition
+                    {
+                        Id = "test_invisibility",
+                        EditorId = "LoreBox_CAFF_AFFIX_TEST_INVIS",
+                        Name = "Affix: Test Invisibility",
+                        Records = new AffixRecordSpec
+                        {
+                            MagicEffect = new MagicEffectRecordSpec
+                            {
+                                EditorId = "CAFF_MGEF_TEST_INVIS",
+                                Name = "Calamity: Test Invisibility",
+                                ActorValue = "Invisibility",
+                                Archetype = "Invisibility",
+                                Hostile = false,
+                            },
+                            Spell = new SpellRecordSpec
+                            {
+                                EditorId = "CAFF_SPEL_TEST_INVIS",
+                                Name = "Calamity: Test Invisibility",
+                                Delivery = "Self",
+                                Effect = new SpellEffectRecordSpec
+                                {
+                                    MagicEffectEditorId = "CAFF_MGEF_TEST_INVIS",
+                                    Magnitude = 1,
+                                    Duration = 30,
+                                    Area = 0,
+                                },
+                            },
+                        },
+                        Kid = new KidRule
+                        {
+                            Type = "Weapon",
+                            Strings = "NONE",
+                            FormFilters = "NONE",
+                            Traits = "-E",
+                            Chance = 100.0,
+                        },
+                        Runtime = new Dictionary<string, object?>(),
+                    },
+                ],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var mgef = Assert.Single(mod.MagicEffects, m => m.EditorID == "CAFF_MGEF_TEST_INVIS");
+        var archetype = Assert.IsType<MagicEffectArchetype>(mgef.Archetype);
+        Assert.Equal(MagicEffectArchetype.TypeEnum.Invisibility, archetype.Type);
+        Assert.Equal(ActorValue.Invisibility, archetype.ActorValue);
+        Assert.False(mgef.Flags.HasFlag(MagicEffect.Flag.Hostile));
+
+        var spell = Assert.Single(mod.Spells, s => s.EditorID == "CAFF_SPEL_TEST_INVIS");
+        Assert.Equal(TargetType.Self, spell.TargetType);
+        Assert.Equal(CastType.FireAndForget, spell.CastType);
+    }
+
+    [Fact]
+    public void BuildKeywordPlugin_SpellFlagsExplicitlyZeroForNonHostile()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes =
+                [
+                    new AffixDefinition
+                    {
+                        Id = "test_passive",
+                        EditorId = "LoreBox_CAFF_AFFIX_TEST_PASSIVE",
+                        Name = "Affix: Test Passive",
+                        Records = new AffixRecordSpec
+                        {
+                            MagicEffect = new MagicEffectRecordSpec
+                            {
+                                EditorId = "CAFF_MGEF_TEST_PASSIVE",
+                                ActorValue = "Health",
+                                Hostile = false,
+                                Recover = true,
+                            },
+                            Spell = new SpellRecordSpec
+                            {
+                                EditorId = "CAFF_SPEL_TEST_PASSIVE",
+                                Delivery = "Self",
+                                SpellType = "Ability",
+                                CastType = "ConstantEffect",
+                                Effect = new SpellEffectRecordSpec
+                                {
+                                    MagicEffectEditorId = "CAFF_MGEF_TEST_PASSIVE",
+                                    Magnitude = 50,
+                                    Duration = 0,
+                                    Area = 0,
+                                },
+                            },
+                        },
+                        Kid = new KidRule
+                        {
+                            Type = "Weapon",
+                            Strings = "NONE",
+                            FormFilters = "NONE",
+                            Traits = "-E",
+                            Chance = 100.0,
+                        },
+                        Runtime = new Dictionary<string, object?>(),
+                    },
+                ],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var spell = Assert.Single(mod.Spells, s => s.EditorID == "CAFF_SPEL_TEST_PASSIVE");
+        Assert.Equal((SpellDataFlag)0, spell.Flags);
+    }
 }
