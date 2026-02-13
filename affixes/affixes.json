@@ -26,10 +26,12 @@
         "id": "arc_lightning",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING",
         "name": "아크 번개 (적중 100%): 번개 피해 10 (적중 피해 스케일)",
+        "nameEn": "Arc Lightning (100% on hit): 10 Lightning Damage (Hit Damage Scaling)",
+        "nameKo": "아크 번개 (적중 100%): 번개 피해 10 (적중 피해 스케일)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_ARC_LIGHTNING",
-            "name": "Calamity: Arc Lightning (Value Mod)",
+            "name": "Calamity: Arc Lightning / 아크 번개",
             "actorValue": "Health",
             "resistValue": "ResistShock",
             "magicSkill": "Destruction",
@@ -37,7 +39,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_ARC_LIGHTNING",
-            "name": "Calamity: Arc Lightning",
+            "name": "Calamity: Arc Lightning / 아크 번개",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_ARC_LIGHTNING",
@@ -78,10 +80,12 @@
         "id": "hit_fire_damage",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_DAMAGE",
         "name": "화염 피해 (적중 100%): 화염 피해 6 (적중 피해 스케일)",
+        "nameEn": "Fire Damage (100% on hit): 6 Fire Damage (Hit Damage Scaling)",
+        "nameKo": "화염 피해 (적중 100%): 화염 피해 6 (적중 피해 스케일)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FIRE_DAMAGE",
-            "name": "Calamity: Fire Damage (Value Mod)",
+            "name": "Calamity: Fire Damage / 화염 피해",
             "actorValue": "Health",
             "resistValue": "ResistFire",
             "magicSkill": "Destruction",
@@ -89,7 +93,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_FIRE_DAMAGE",
-            "name": "Calamity: Fire Damage",
+            "name": "Calamity: Fire Damage / 화염 피해",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_FIRE_DAMAGE",
@@ -130,10 +134,12 @@
         "id": "hit_frost_damage",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_DAMAGE",
         "name": "냉기 피해 (적중 100%): 냉기 피해 6 (적중 피해 스케일)",
+        "nameEn": "Frost Damage (100% on hit): 6 Frost Damage (Hit Damage Scaling)",
+        "nameKo": "냉기 피해 (적중 100%): 냉기 피해 6 (적중 피해 스케일)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FROST_DAMAGE",
-            "name": "Calamity: Frost Damage (Value Mod)",
+            "name": "Calamity: Frost Damage / 냉기 피해",
             "actorValue": "Health",
             "resistValue": "ResistFrost",
             "magicSkill": "Destruction",
@@ -141,7 +147,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_FROST_DAMAGE",
-            "name": "Calamity: Frost Damage",
+            "name": "Calamity: Frost Damage / 냉기 피해",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_FROST_DAMAGE",
@@ -182,10 +188,12 @@
         "id": "hit_shock_damage",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_DAMAGE",
         "name": "번개 피해 (적중 100%): 번개 피해 6 (적중 피해 스케일)",
+        "nameEn": "Shock Damage (100% on hit): 6 Shock Damage (Hit Damage Scaling)",
+        "nameKo": "번개 피해 (적중 100%): 번개 피해 6 (적중 피해 스케일)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SHOCK_DAMAGE",
-            "name": "Calamity: Shock Damage (Value Mod)",
+            "name": "Calamity: Shock Damage / 번개 피해",
             "actorValue": "Health",
             "resistValue": "ResistShock",
             "magicSkill": "Destruction",
@@ -193,7 +201,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SHOCK_DAMAGE",
-            "name": "Calamity: Shock Damage",
+            "name": "Calamity: Shock Damage / 번개 피해",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SHOCK_DAMAGE",
@@ -234,17 +242,19 @@
         "id": "hit_fire_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_SHRED",
         "name": "화염 노출 (적중 10% / ICD 4초): 화염 저항 -15 (4초)",
+        "nameEn": "Fire Exposure (10% on hit / ICD 4s): Fire Resist -15 (4s)",
+        "nameKo": "화염 노출 (적중 10% / ICD 4초): 화염 저항 -15 (4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FIRE_SHRED",
-            "name": "Calamity: Fire Exposure (Value Mod)",
+            "name": "Calamity: Fire Exposure / 화염 노출",
             "actorValue": "ResistFire",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_FIRE_SHRED",
-            "name": "Calamity: Fire Exposure",
+            "name": "Calamity: Fire Exposure / 화염 노출",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_FIRE_SHRED",
@@ -277,17 +287,19 @@
         "id": "hit_frost_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_SHRED",
         "name": "냉기 노출 (적중 10% / ICD 4초): 냉기 저항 -15 (4초)",
+        "nameEn": "Frost Exposure (10% on hit / ICD 4s): Frost Resist -15 (4s)",
+        "nameKo": "냉기 노출 (적중 10% / ICD 4초): 냉기 저항 -15 (4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FROST_SHRED",
-            "name": "Calamity: Frost Exposure (Value Mod)",
+            "name": "Calamity: Frost Exposure / 냉기 노출",
             "actorValue": "ResistFrost",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_FROST_SHRED",
-            "name": "Calamity: Frost Exposure",
+            "name": "Calamity: Frost Exposure / 냉기 노출",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_FROST_SHRED",
@@ -320,17 +332,19 @@
         "id": "hit_shock_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
         "name": "번개 노출 (적중 10% / ICD 4초): 번개 저항 -15 (4초)",
+        "nameEn": "Shock Exposure (10% on hit / ICD 4s): Shock Resist -15 (4s)",
+        "nameKo": "번개 노출 (적중 10% / ICD 4초): 번개 저항 -15 (4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SHOCK_SHRED",
-            "name": "Calamity: Shock Exposure (Value Mod)",
+            "name": "Calamity: Shock Exposure / 번개 노출",
             "actorValue": "ResistShock",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SHOCK_SHRED",
-            "name": "Calamity: Shock Exposure",
+            "name": "Calamity: Shock Exposure / 번개 노출",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SHOCK_SHRED",
@@ -363,6 +377,8 @@
         "id": "hit_conjure_familiar",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FAMILIAR",
         "name": "무리 우두머리 (적중 12% / ICD 60초): 패밀리어 소환 (60초)",
+        "nameEn": "Pack Leader (12% on hit / ICD 60s): Summon Familiar (60s)",
+        "nameKo": "무리 우두머리 (적중 12% / ICD 60초): 패밀리어 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -386,6 +402,8 @@
         "id": "hit_flaming_familiar",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FLAMING_FAMILIAR",
         "name": "폭격수 (적중 8% / ICD 25초): 폭발하는 불꽃 패밀리어 소환",
+        "nameEn": "Bombardier (8% on hit / ICD 25s): Summon Exploding Flame Familiar",
+        "nameKo": "폭격수 (적중 8% / ICD 25초): 폭발하는 불꽃 패밀리어 소환",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -409,6 +427,8 @@
         "id": "hit_conjure_flame_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FLAME_ATRONACH",
         "name": "원소 동맹 (적중 6% / ICD 90초): 화염 아트로낙 소환 (60초)",
+        "nameEn": "Elemental Ally (6% on hit / ICD 90s): Summon Flame Atronach (60s)",
+        "nameKo": "원소 동맹 (적중 6% / ICD 90초): 화염 아트로낙 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -432,6 +452,8 @@
         "id": "hit_conjure_frost_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FROST_ATRONACH",
         "name": "원소 동맹 (적중 6% / ICD 90초): 냉기 아트로낙 소환 (60초)",
+        "nameEn": "Elemental Ally (6% on hit / ICD 90s): Summon Frost Atronach (60s)",
+        "nameKo": "원소 동맹 (적중 6% / ICD 90초): 냉기 아트로낙 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -455,6 +477,8 @@
         "id": "hit_conjure_storm_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_STORM_ATRONACH",
         "name": "폭풍 동맹 (적중 5% / ICD 120초): 폭풍 아트로낙 소환 (60초)",
+        "nameEn": "Storm Ally (5% on hit / ICD 120s): Summon Storm Atronach (60s)",
+        "nameKo": "폭풍 동맹 (적중 5% / ICD 120초): 폭풍 아트로낙 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -478,6 +502,8 @@
         "id": "hit_conjure_dremora_lord",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_DREMORA_LORD",
         "name": "데이드라 계약 (적중 3% / ICD 180초): 드레모라 군주 소환 (60초)",
+        "nameEn": "Daedric Pact (3% on hit / ICD 180s): Summon Dremora Lord (60s)",
+        "nameKo": "데이드라 계약 (적중 3% / ICD 180초): 드레모라 군주 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -501,6 +527,8 @@
         "id": "hit_soul_trap",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SOUL_TRAP",
         "name": "영혼 수확자 (적중 25% / ICD 2.5초): 영혼 덫 (60초)",
+        "nameEn": "Soul Reaper (25% on hit / ICD 2.5s): Soul Trap (60s)",
+        "nameKo": "영혼 수확자 (적중 25% / ICD 2.5초): 영혼 덫 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -524,6 +552,8 @@
         "id": "incoming_invisibility",
         "editorId": "LoreBox_CAFF_AFFIX_INCOMING_HIT_INVISIBILITY",
         "name": "사라짐 (피격 5% / ICD 45초): 투명화 (30초)",
+        "nameEn": "Vanish (5% on hit taken / ICD 45s): Invisibility (30s)",
+        "nameKo": "사라짐 (피격 5% / ICD 45초): 투명화 (30초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -547,6 +577,8 @@
         "id": "hit_muffle",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MUFFLE",
         "name": "무음 발걸음 (적중 10% / ICD 180초): 머플(Muffle) (180초)",
+        "nameEn": "Silent Step (10% on hit / ICD 180s): Muffle (180s)",
+        "nameKo": "무음 발걸음 (적중 10% / ICD 180초): 머플(Muffle) (180초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -570,16 +602,18 @@
         "id": "trap_ironjaw",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_TRAP_IRONJAW",
         "name": "철턱 덫 (치명타/파워어택 적중 20% / ICD 6초): 적 발밑에 덫 설치(재장전 2.5초) → 밟은 적 이동속도 -100% (2초) + 랜덤 추가 효과",
+        "nameEn": "Ironjaw Trap (20% crit/power attack / ICD 6s): Deploy trap at enemy feet (2.5s reload) -> Snare -100% Move Speed (2s) + Random bonus effect",
+        "nameKo": "철턱 덫 (치명타/파워어택 적중 20% / ICD 6초): 적 발밑에 덫 설치(재장전 2.5초) → 밟은 적 이동속도 -100% (2초) + 랜덤 추가 효과",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
-            "name": "Calamity: Ironjaw Snare (SpeedMult)",
+            "name": "Calamity: Ironjaw Trap / 철턱 덫",
             "actorValue": "SpeedMult",
             "hostile": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
-            "name": "Calamity: Ironjaw Snare",
+            "name": "Calamity: Ironjaw Trap / 철턱 덫",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
@@ -638,6 +672,8 @@
         "id": "internal_spell_trap_dragonteeth_poison",
         "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_POISON",
         "name": "INTERNAL: Trap Dragon's Teeth (Poison)",
+        "nameEn": "INTERNAL: Trap Dragon's Teeth (Poison)",
+        "nameKo": "INTERNAL: Trap Dragon's Teeth (Poison)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
@@ -680,6 +716,8 @@
         "id": "internal_spell_trap_dragonteeth_drain_magicka",
         "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
         "name": "INTERNAL: Trap Dragon's Teeth (Drain Magicka)",
+        "nameEn": "INTERNAL: Trap Dragon's Teeth (Drain Magicka)",
+        "nameKo": "INTERNAL: Trap Dragon's Teeth (Drain Magicka)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
@@ -721,6 +759,8 @@
         "id": "internal_spell_trap_dragonteeth_drain_stamina",
         "editorId": "CAFF_INTERNAL_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA",
         "name": "INTERNAL: Trap Dragon's Teeth (Drain Stamina)",
+        "nameEn": "INTERNAL: Trap Dragon's Teeth (Drain Stamina)",
+        "nameKo": "INTERNAL: Trap Dragon's Teeth (Drain Stamina)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
@@ -762,10 +802,12 @@
         "id": "convert_phys_to_fire_25",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_25",
         "name": "물리→화염 전환 (25%)",
+        "nameEn": "Physical->Fire Conversion (25%)",
+        "nameKo": "물리→화염 전환 (25%)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
-            "name": "Calamity: Damage Health (Fire, Dynamic)",
+            "name": "Calamity: Physical->Fire Conversion / 물리→화염 전환",
             "actorValue": "Health",
             "resistValue": "ResistFire",
             "magicSkill": "Destruction",
@@ -773,7 +815,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-            "name": "Calamity: Damage Health (Fire, Dynamic)",
+            "name": "Calamity: Physical->Fire Conversion / 물리→화염 전환",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
@@ -807,6 +849,8 @@
         "id": "convert_phys_to_fire_50",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_50",
         "name": "물리→화염 전환 (50%)",
+        "nameEn": "Physical->Fire Conversion (50%)",
+        "nameKo": "물리→화염 전환 (50%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -831,6 +875,8 @@
         "id": "convert_phys_to_fire_75",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_75",
         "name": "물리→화염 전환 (75%)",
+        "nameEn": "Physical->Fire Conversion (75%)",
+        "nameKo": "물리→화염 전환 (75%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -855,6 +901,8 @@
         "id": "convert_phys_to_fire_100",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_100",
         "name": "물리→화염 전환 (100%)",
+        "nameEn": "Physical->Fire Conversion (100%)",
+        "nameKo": "물리→화염 전환 (100%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -879,10 +927,12 @@
         "id": "convert_phys_to_frost_25",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_25",
         "name": "물리→냉기 전환 (25%)",
+        "nameEn": "Physical->Frost Conversion (25%)",
+        "nameKo": "물리→냉기 전환 (25%)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
-            "name": "Calamity: Damage Health (Frost, Dynamic)",
+            "name": "Calamity: Physical->Frost Conversion / 물리→냉기 전환",
             "actorValue": "Health",
             "resistValue": "ResistFrost",
             "magicSkill": "Destruction",
@@ -890,7 +940,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-            "name": "Calamity: Damage Health (Frost, Dynamic)",
+            "name": "Calamity: Physical->Frost Conversion / 물리→냉기 전환",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
@@ -924,6 +974,8 @@
         "id": "convert_phys_to_frost_50",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_50",
         "name": "물리→냉기 전환 (50%)",
+        "nameEn": "Physical->Frost Conversion (50%)",
+        "nameKo": "물리→냉기 전환 (50%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -948,6 +1000,8 @@
         "id": "convert_phys_to_frost_75",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_75",
         "name": "물리→냉기 전환 (75%)",
+        "nameEn": "Physical->Frost Conversion (75%)",
+        "nameKo": "물리→냉기 전환 (75%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -972,6 +1026,8 @@
         "id": "convert_phys_to_frost_100",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_100",
         "name": "물리→냉기 전환 (100%)",
+        "nameEn": "Physical->Frost Conversion (100%)",
+        "nameKo": "물리→냉기 전환 (100%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -996,10 +1052,12 @@
         "id": "convert_phys_to_shock_25",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_25",
         "name": "물리→번개 전환 (25%)",
+        "nameEn": "Physical->Shock Conversion (25%)",
+        "nameKo": "물리→번개 전환 (25%)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
-            "name": "Calamity: Damage Health (Shock, Dynamic)",
+            "name": "Calamity: Physical->Shock Conversion / 물리→번개 전환",
             "actorValue": "Health",
             "resistValue": "ResistShock",
             "magicSkill": "Destruction",
@@ -1007,7 +1065,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
-            "name": "Calamity: Damage Health (Shock, Dynamic)",
+            "name": "Calamity: Physical->Shock Conversion / 물리→번개 전환",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
@@ -1041,6 +1099,8 @@
         "id": "convert_phys_to_shock_50",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_50",
         "name": "물리→번개 전환 (50%)",
+        "nameEn": "Physical->Shock Conversion (50%)",
+        "nameKo": "물리→번개 전환 (50%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1065,6 +1125,8 @@
         "id": "convert_phys_to_shock_75",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_75",
         "name": "물리→번개 전환 (75%)",
+        "nameEn": "Physical->Shock Conversion (75%)",
+        "nameKo": "물리→번개 전환 (75%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1089,6 +1151,8 @@
         "id": "convert_phys_to_shock_100",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_100",
         "name": "물리→번개 전환 (100%)",
+        "nameEn": "Physical->Shock Conversion (100%)",
+        "nameKo": "물리→번개 전환 (100%)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1113,6 +1177,8 @@
         "id": "archmage_t1",
         "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T1",
         "name": "대마법사 (주문 적중): 최대 매지카 10% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "nameEn": "Archmage (on spell hit): 10% Max Magicka as Lightning Damage / 5% Max Magicka extra cost",
+        "nameKo": "대마법사 (주문 적중): 최대 매지카 10% 번개 피해 / 최대 매지카 5% 추가 소모",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1138,6 +1204,8 @@
         "id": "archmage_t2",
         "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T2",
         "name": "대마법사 (주문 적중): 최대 매지카 12% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "nameEn": "Archmage (on spell hit): 12% Max Magicka as Lightning Damage / 5% Max Magicka extra cost",
+        "nameKo": "대마법사 (주문 적중): 최대 매지카 12% 번개 피해 / 최대 매지카 5% 추가 소모",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1163,6 +1231,8 @@
         "id": "archmage_t3",
         "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T3",
         "name": "대마법사 (주문 적중): 최대 매지카 14% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "nameEn": "Archmage (on spell hit): 14% Max Magicka as Lightning Damage / 5% Max Magicka extra cost",
+        "nameKo": "대마법사 (주문 적중): 최대 매지카 14% 번개 피해 / 최대 매지카 5% 추가 소모",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1188,6 +1258,8 @@
         "id": "archmage_t4",
         "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T4",
         "name": "대마법사 (주문 적중): 최대 매지카 16% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "nameEn": "Archmage (on spell hit): 16% Max Magicka as Lightning Damage / 5% Max Magicka extra cost",
+        "nameKo": "대마법사 (주문 적중): 최대 매지카 16% 번개 피해 / 최대 매지카 5% 추가 소모",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1213,6 +1285,8 @@
         "id": "coc_firebolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_FIREBOLT",
         "name": "CoC: 파이어볼트 (치명타/파워어택 적중, ICD 0.15초): Firebolt 발동 (적중 피해 스케일)",
+        "nameEn": "CoC: Firebolt (Crit/Power Attack, ICD 0.15s): Cast Firebolt (Hit Damage Scaling)",
+        "nameKo": "CoC: 파이어볼트 (치명타/파워어택 적중, ICD 0.15초): Firebolt 발동 (적중 피해 스케일)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1244,6 +1318,8 @@
         "id": "coc_ice_spike",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_SPIKE",
         "name": "CoC: 아이스 스파이크 (치명타/파워어택 적중, ICD 0.15초): Ice Spike 발동 (적중 피해 스케일)",
+        "nameEn": "CoC: Ice Spike (Crit/Power Attack, ICD 0.15s): Cast Ice Spike (Hit Damage Scaling)",
+        "nameKo": "CoC: 아이스 스파이크 (치명타/파워어택 적중, ICD 0.15초): Ice Spike 발동 (적중 피해 스케일)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1275,6 +1351,8 @@
         "id": "coc_lightning_bolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_LIGHTNING_BOLT",
         "name": "CoC: 라이트닝 볼트 (치명타/파워어택 적중, ICD 0.15초): Lightning Bolt 발동 (적중 피해 스케일)",
+        "nameEn": "CoC: Lightning Bolt (Crit/Power Attack, ICD 0.15s): Cast Lightning Bolt (Hit Damage Scaling)",
+        "nameKo": "CoC: 라이트닝 볼트 (치명타/파워어택 적중, ICD 0.15초): Lightning Bolt 발동 (적중 피해 스케일)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1306,6 +1384,8 @@
         "id": "coc_thunderbolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_THUNDERBOLT",
         "name": "CoC: 썬더볼트 (치명타/파워어택 적중, ICD 0.15초): Thunderbolt 발동 (적중 피해 스케일)",
+        "nameEn": "CoC: Thunderbolt (Crit/Power Attack, ICD 0.15s): Cast Thunderbolt (Hit Damage Scaling)",
+        "nameKo": "CoC: 썬더볼트 (치명타/파워어택 적중, ICD 0.15초): Thunderbolt 발동 (적중 피해 스케일)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1337,6 +1417,8 @@
         "id": "coc_icy_spear",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICY_SPEAR",
         "name": "CoC: 아이시 스피어 (치명타/파워어택 적중, ICD 0.15초): Icy Spear 발동 (적중 피해 스케일)",
+        "nameEn": "CoC: Icy Spear (Crit/Power Attack, ICD 0.15s): Cast Icy Spear (Hit Damage Scaling)",
+        "nameKo": "CoC: 아이시 스피어 (치명타/파워어택 적중, ICD 0.15초): Icy Spear 발동 (적중 피해 스케일)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1368,6 +1450,8 @@
         "id": "coc_chain_lightning",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_CHAIN_LIGHTNING",
         "name": "CoC: 체인 라이트닝 (치명타/파워어택 적중, ICD 0.15초): Chain Lightning 발동 (적중 피해 스케일)",
+        "nameEn": "CoC: Chain Lightning (Crit/Power Attack, ICD 0.15s): Cast Chain Lightning (Hit Damage Scaling)",
+        "nameKo": "CoC: 체인 라이트닝 (치명타/파워어택 적중, ICD 0.15초): Chain Lightning 발동 (적중 피해 스케일)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1399,6 +1483,8 @@
         "id": "coc_ice_storm",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_STORM",
         "name": "CoC: 아이스 스톰 (치명타/파워어택 적중, ICD 0.15초): Ice Storm 발동 (적중 피해 스케일)",
+        "nameEn": "CoC: Ice Storm (Crit/Power Attack, ICD 0.15s): Cast Ice Storm (Hit Damage Scaling)",
+        "nameKo": "CoC: 아이스 스톰 (치명타/파워어택 적중, ICD 0.15초): Ice Storm 발동 (적중 피해 스케일)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1430,6 +1516,8 @@
         "id": "corpse_explosion_t1",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T1",
         "name": "시체 폭발 T1 (처치): 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "nameEn": "Corpse Explosion T1 (on kill): Radius 600, (12 + 6% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
+        "nameKo": "시체 폭발 T1 (처치): 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1462,6 +1550,8 @@
         "id": "corpse_explosion_t2",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T2",
         "name": "시체 폭발 T2 (처치): 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "nameEn": "Corpse Explosion T2 (on kill): Radius 600, (14 + 7% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
+        "nameKo": "시체 폭발 T2 (처치): 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1494,6 +1584,8 @@
         "id": "corpse_explosion_t3",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T3",
         "name": "시체 폭발 T3 (처치): 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "nameEn": "Corpse Explosion T3 (on kill): Radius 600, (16 + 8% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
+        "nameKo": "시체 폭발 T3 (처치): 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1526,6 +1618,8 @@
         "id": "corpse_explosion_t4",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T4",
         "name": "시체 폭발 T4 (처치): 반경 600, (18 + 시체 최대체력 9%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "nameEn": "Corpse Explosion T4 (on kill): Radius 600, (18 + 9% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
+        "nameKo": "시체 폭발 T4 (처치): 반경 600, (18 + 시체 최대체력 9%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1558,6 +1652,8 @@
         "id": "corpse_explosion_t5",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T5",
         "name": "시체 폭발 T5 (처치): 반경 600, (20 + 시체 최대체력 10%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "nameEn": "Corpse Explosion T5 (on kill): Radius 600, (20 + 10% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
+        "nameKo": "시체 폭발 T5 (처치): 반경 600, (20 + 시체 최대체력 10%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1590,6 +1686,8 @@
         "id": "summon_corpse_explosion_t1",
         "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T1",
         "name": "소환 시체 폭발 T1 (소환물 사망): 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "nameEn": "Summon Corpse Explosion T1 (on summon death): Radius 600, (14 + 7% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
+        "nameKo": "소환 시체 폭발 T1 (소환물 사망): 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1623,6 +1721,8 @@
         "id": "summon_corpse_explosion_t2",
         "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T2",
         "name": "소환 시체 폭발 T2 (소환물 사망): 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "nameEn": "Summon Corpse Explosion T2 (on summon death): Radius 600, (18 + 8.5% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
+        "nameKo": "소환 시체 폭발 T2 (소환물 사망): 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1656,6 +1756,8 @@
         "id": "summon_corpse_explosion_t3",
         "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T3",
         "name": "소환 시체 폭발 T3 (소환물 사망): 반경 600, (22 + 소환물 최대체력 10%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "nameEn": "Summon Corpse Explosion T3 (on summon death): Radius 600, (22 + 10% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
+        "nameKo": "소환 시체 폭발 T3 (소환물 사망): 반경 600, (22 + 소환물 최대체력 10%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1689,17 +1791,19 @@
         "id": "hit_minefield",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MINEFIELD",
         "name": "지뢰 밭 (적중 12% / ICD 1.5초): 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 둔화(-40%, 2초)",
+        "nameEn": "Minefield (12% on hit / ICD 1.5s): Deploy mine at target (0.6s delay, 8s, 1 charge) -> Radius 150 Slow (-40%, 2s)",
+        "nameKo": "지뢰 밭 (적중 12% / ICD 1.5초): 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 둔화(-40%, 2초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_MINEFIELD_SNARE",
-            "name": "Calamity: Minefield Snare (SpeedMult)",
+            "name": "Calamity: Minefield / 지뢰 밭",
             "actorValue": "SpeedMult",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_MINEFIELD_SNARE",
-            "name": "Calamity: Minefield Snare",
+            "name": "Calamity: Minefield / 지뢰 밭",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_MINEFIELD_SNARE",
@@ -1739,6 +1843,8 @@
         "id": "hit_adaptive_exposure",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_ADAPTIVE_EXPOSURE",
         "name": "적응형 노출 (적중 20% / ICD 1초 / 표적별 ICD 12초): 가장 높은 원소 저항 -15 (4초)",
+        "nameEn": "Adaptive Exposure (20% on hit / ICD 1s / per-target ICD 12s): Highest elemental resist -15 (4s)",
+        "nameKo": "적응형 노출 (적중 20% / ICD 1초 / 표적별 ICD 12초): 가장 높은 원소 저항 -15 (4초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1768,10 +1874,12 @@
         "id": "dot_bloom",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM",
         "name": "DoT 블룸 (적중 20% / ICD 1.5초): 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초)",
+        "nameEn": "DoT Bloom (20% on hit / ICD 1.5s): Spore burst after 0.6s (Radius 150, Poison 3/s, 4s)",
+        "nameKo": "DoT 블룸 (적중 20% / ICD 1.5초): 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_POISON",
-            "name": "Calamity: DoT Bloom (Poison)",
+            "name": "Calamity: DoT Bloom / DoT 블룸",
             "actorValue": "Health",
             "resistValue": "PoisonResist",
             "magicSkill": "Destruction",
@@ -1779,7 +1887,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_DOT_BLOOM_POISON",
-            "name": "Calamity: DoT Bloom (Poison Cloud)",
+            "name": "Calamity: DoT Bloom / DoT 블룸",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_POISON",
@@ -1819,17 +1927,19 @@
         "id": "dot_bloom_tar",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_TAR",
         "name": "DoT 타르 블룸 (적중 18% / ICD 2초): 0.6초 후 타르 폭발(반경 170, 둔화 -35% + 방어 -150, 4초)",
+        "nameEn": "DoT Tar Bloom (18% on hit / ICD 2s): Tar burst after 0.6s (Radius 170, Slow -35% + Armor -150, 4s)",
+        "nameKo": "DoT 타르 블룸 (적중 18% / ICD 2초): 0.6초 후 타르 폭발(반경 170, 둔화 -35% + 방어 -150, 4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
-            "name": "Calamity: DoT Tar Bloom (SpeedMult)",
+            "name": "Calamity: DoT Tar Bloom / DoT 타르 블룸",
             "actorValue": "SpeedMult",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
-            "name": "Calamity: DoT Tar Bloom (Slow)",
+            "name": "Calamity: DoT Tar Bloom / DoT 타르 블룸",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
@@ -1874,6 +1984,8 @@
         "id": "internal_spell_dot_bloom_tar_sunder",
         "editorId": "CAFF_INTERNAL_SPEL_DOT_BLOOM_TAR_SUNDER",
         "name": "INTERNAL: DoT Tar Bloom (Sunder Armor)",
+        "nameEn": "INTERNAL: DoT Tar Bloom (Sunder Armor)",
+        "nameKo": "INTERNAL: DoT Tar Bloom (Sunder Armor)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
@@ -1915,17 +2027,19 @@
         "id": "dot_bloom_siphon",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_SIPHON",
         "name": "DoT 흡수 블룸 (적중 18% / ICD 2초): 0.6초 후 흡수 폭발(반경 170, 매지카/스태미나 재생 -60%, 6초)",
+        "nameEn": "DoT Siphon Bloom (18% on hit / ICD 2s): Siphon burst after 0.6s (Radius 170, Magicka/Stamina Regen -60%, 6s)",
+        "nameKo": "DoT 흡수 블룸 (적중 18% / ICD 2초): 0.6초 후 흡수 폭발(반경 170, 매지카/스태미나 재생 -60%, 6초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
-            "name": "Calamity: DoT Siphon Bloom (MagickaRateMult)",
+            "name": "Calamity: DoT Siphon Bloom / DoT 흡수 블룸",
             "actorValue": "MagickaRateMult",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
-            "name": "Calamity: DoT Siphon Bloom (Magicka Regen Down)",
+            "name": "Calamity: DoT Siphon Bloom / DoT 흡수 블룸",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
@@ -1970,6 +2084,8 @@
         "id": "internal_spell_dot_bloom_siphon_sta",
         "editorId": "CAFF_INTERNAL_SPEL_DOT_BLOOM_SIPHON_STA",
         "name": "INTERNAL: DoT Siphon Bloom (Stamina Regen Down)",
+        "nameEn": "INTERNAL: DoT Siphon Bloom (Stamina Regen Down)",
+        "nameKo": "INTERNAL: DoT Siphon Bloom (Stamina Regen Down)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
@@ -2011,17 +2127,19 @@
         "id": "hit_chaos_mine",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CHAOS_MINE",
         "name": "카오스 지뢰 (적중 12% / ICD 2초 / 표적별 ICD 8초): 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 둔화 + 무작위 저주",
+        "nameEn": "Chaos Mine (12% on hit / ICD 2s / per-target ICD 8s): Deploy mine at target (0.8s delay, 10s, 1 charge) -> Slow + Random curse",
+        "nameKo": "카오스 지뢰 (적중 12% / ICD 2초 / 표적별 ICD 8초): 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 둔화 + 무작위 저주",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
-            "name": "Calamity: Chaos Mine (SpeedMult)",
+            "name": "Calamity: Chaos Mine / 카오스 지뢰",
             "actorValue": "SpeedMult",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
-            "name": "Calamity: Chaos Mine (Snare)",
+            "name": "Calamity: Chaos Mine / 카오스 지뢰",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
@@ -2079,6 +2197,8 @@
         "id": "internal_spell_chaos_curse_sunder",
         "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_SUNDER",
         "name": "INTERNAL: Chaos Curse (Sunder Armor)",
+        "nameEn": "INTERNAL: Chaos Curse (Sunder Armor)",
+        "nameKo": "INTERNAL: Chaos Curse (Sunder Armor)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
@@ -2120,6 +2240,8 @@
         "id": "internal_spell_chaos_curse_drain_magregen",
         "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
         "name": "INTERNAL: Chaos Curse (Magicka Regen Down)",
+        "nameEn": "INTERNAL: Chaos Curse (Magicka Regen Down)",
+        "nameKo": "INTERNAL: Chaos Curse (Magicka Regen Down)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
@@ -2161,6 +2283,8 @@
         "id": "internal_spell_chaos_curse_drain_stamregen",
         "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN",
         "name": "INTERNAL: Chaos Curse (Stamina Regen Down)",
+        "nameEn": "INTERNAL: Chaos Curse (Stamina Regen Down)",
+        "nameKo": "INTERNAL: Chaos Curse (Stamina Regen Down)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
@@ -2202,6 +2326,8 @@
         "id": "internal_spell_chaos_curse_slow_attack",
         "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_SLOW_ATTACK",
         "name": "INTERNAL: Chaos Curse (Slow Attack Speed)",
+        "nameEn": "INTERNAL: Chaos Curse (Slow Attack Speed)",
+        "nameKo": "INTERNAL: Chaos Curse (Slow Attack Speed)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
@@ -2243,6 +2369,8 @@
         "id": "internal_spell_chaos_curse_fragile",
         "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_FRAGILE",
         "name": "INTERNAL: Chaos Curse (Fragile Magic Resist)",
+        "nameEn": "INTERNAL: Chaos Curse (Fragile Magic Resist)",
+        "nameKo": "INTERNAL: Chaos Curse (Fragile Magic Resist)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
@@ -2284,16 +2412,18 @@
         "id": "hit_swap_jackpot",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SWAP_JACKPOT",
         "name": "스왑 잭팟 (적중 20% / ICD 0.6초 / 표적별 ICD 12초): 무기 공격속도 +15% (4초)",
+        "nameEn": "Swap Jackpot (20% on hit / ICD 0.6s / per-target ICD 12s): Weapon Attack Speed +15% (4s)",
+        "nameKo": "스왑 잭팟 (적중 20% / ICD 0.6초 / 표적별 ICD 12초): 무기 공격속도 +15% (4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
-            "name": "Calamity: Swap Jackpot (WeaponSpeedMult)",
+            "name": "Calamity: Swap Jackpot / 스왑 잭팟",
             "actorValue": "WeaponSpeedMult",
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
-            "name": "Calamity: Swap Jackpot (Haste)",
+            "name": "Calamity: Swap Jackpot / 스왑 잭팟",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
@@ -2328,6 +2458,8 @@
         "id": "hit_evolving_lightning",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_EVOLVING_LIGHTNING",
         "name": "진화 번개 (적중 100%): 누적 성장으로 번개 피해가 단계적으로 강화됨",
+        "nameEn": "Evolving Lightning (100% on hit): Accumulative growth — lightning damage scales up in stages",
+        "nameKo": "진화 번개 (적중 100%): 누적 성장으로 번개 피해가 단계적으로 강화됨",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2374,6 +2506,8 @@
         "id": "hit_mode_cycle_elements",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MODE_CYCLE_ELEMENTS",
         "name": "원소 모드 순환 (적중 100%): 성장형 + 수동 모드 전환",
+        "nameEn": "Elemental Mode Cycle (100% on hit): Growth-type + Manual mode switching",
+        "nameKo": "원소 모드 순환 (적중 100%): 성장형 + 수동 모드 전환",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2434,17 +2568,19 @@
         "id": "runeword_enigma_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ENIGMA",
         "name": "룬워드 수수께끼 (Jah-Ith-Ber): 피격 18% / ICD 18초 - 차원 위상(이동속도 +45%, 6초)",
+        "nameEn": "Runeword Enigma (Jah-Ith-Ber): 18% on hit taken / ICD 18s - Dimensional Phase (Move Speed +45%, 6s)",
+        "nameKo": "룬워드 수수께끼 (Jah-Ith-Ber): 피격 18% / ICD 18초 - 차원 위상(이동속도 +45%, 6초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
-            "name": "Calamity: Runeword Enigma (Phase Speed)",
+            "name": "Calamity: Runeword Enigma / 룬워드 수수께끼",
             "actorValue": "SpeedMult",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
-            "name": "Calamity: Runeword Enigma (Phase)",
+            "name": "Calamity: Runeword Enigma / 룬워드 수수께끼",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
@@ -2478,6 +2614,8 @@
         "id": "runeword_infinity_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INFINITY",
         "name": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 35% / ICD 0.5초 - 약점 원소 노출(적 저항 감소)",
+        "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 35% on hit / ICD 0.5s - Weakness Exposure (Enemy resist reduction)",
+        "nameKo": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 35% / ICD 0.5초 - 약점 원소 노출(적 저항 감소)",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -2507,17 +2645,19 @@
         "id": "runeword_fortitude_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FORTITUDE",
         "name": "룬워드 인내 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 전장의 인내(방어도 +120, 8초)",
+        "nameEn": "Runeword Fortitude (El-Sol-Dol-Lo): 25% on hit taken / ICD 16s - Battlefield Fortitude (Armor +120, 8s)",
+        "nameKo": "룬워드 인내 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 전장의 인내(방어도 +120, 8초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
-            "name": "Calamity: Runeword Fortitude (Ward)",
+            "name": "Calamity: Runeword Fortitude / 룬워드 인내",
             "actorValue": "DamageResist",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_FORTITUDE_WARD",
-            "name": "Calamity: Runeword Fortitude (Ward)",
+            "name": "Calamity: Runeword Fortitude / 룬워드 인내",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
@@ -2551,17 +2691,19 @@
         "id": "runeword_insight_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INSIGHT",
         "name": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 명상(마나 재생 +150%, 12초)",
+        "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on hit / ICD 10s - Meditation (Mana Regen +150%, 12s)",
+        "nameKo": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 명상(마나 재생 +150%, 12초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
-            "name": "Calamity: Runeword Insight (Meditation)",
+            "name": "Calamity: Runeword Insight / 룬워드 통찰",
             "actorValue": "MagickaRateMult",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_INSIGHT_MEDITATION",
-            "name": "Calamity: Runeword Insight (Meditation)",
+            "name": "Calamity: Runeword Insight / 룬워드 통찰",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
@@ -2595,17 +2737,19 @@
         "id": "runeword_spirit_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPIRIT",
         "name": "룬워드 스피릿 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 영혼의 명상(마나 재생 +120%, 10초)",
+        "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on hit / ICD 9s - Soul Meditation (Mana Regen +120%, 10s)",
+        "nameKo": "룬워드 스피릿 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 영혼의 명상(마나 재생 +120%, 10초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
-            "name": "Calamity: Runeword Spirit (Meditation)",
+            "name": "Calamity: Runeword Spirit / 룬워드 스피릿",
             "actorValue": "MagickaRateMult",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
-            "name": "Calamity: Runeword Spirit (Meditation)",
+            "name": "Calamity: Runeword Spirit / 룬워드 스피릿",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
@@ -2639,6 +2783,8 @@
         "id": "runeword_grief_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_GRIEF",
         "name": "룬워드 슬픔 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.4초 - 원소 참격(적응형 원소 피해)",
+        "nameEn": "Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on hit / ICD 0.4s - Elemental Slash (Adaptive elemental damage)",
+        "nameKo": "룬워드 슬픔 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.4초 - 원소 참격(적응형 원소 피해)",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -2676,17 +2822,19 @@
         "id": "runeword_call_to_arms_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CALL_TO_ARMS",
         "name": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 피격 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
+        "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on hit taken / ICD 18s - Warcry (Armor +150, 8s)",
+        "nameKo": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 피격 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_CTA_WARCRY",
-            "name": "Calamity: Runeword Call to Arms (Warcry Ward)",
+            "name": "Calamity: Runeword Call to Arms / 룬워드 콜 투 암스",
             "actorValue": "DamageResist",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_CTA_WARCRY",
-            "name": "Calamity: Runeword Call to Arms (Warcry)",
+            "name": "Calamity: Runeword Call to Arms / 룬워드 콜 투 암스",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_CTA_WARCRY",
@@ -2720,17 +2868,19 @@
         "id": "runeword_chains_of_honor_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAINS_OF_HONOR",
         "name": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 위상 질주(이동속도 +35%, 5초)",
+        "nameEn": "Runeword Chains of Honor (Dol-Um-Ber-Ist): 20% on hit taken / ICD 16s - Phase Rush (Move Speed +35%, 5s)",
+        "nameKo": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 위상 질주(이동속도 +35%, 5초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_COH_PHASE",
-            "name": "Calamity: Runeword Chains of Honor (Phase)",
+            "name": "Calamity: Runeword Chains of Honor / 룬워드 명예의 사슬",
             "actorValue": "SpeedMult",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_COH_PHASE",
-            "name": "Calamity: Runeword Chains of Honor (Phase)",
+            "name": "Calamity: Runeword Chains of Honor / 룬워드 명예의 사슬",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_COH_PHASE",
@@ -2764,6 +2914,8 @@
         "id": "runeword_heart_of_the_oak_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEART_OF_THE_OAK",
         "name": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 노출)",
+        "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental exposure)",
+        "nameKo": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 노출)",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -2793,6 +2945,8 @@
         "id": "runeword_faith_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAITH",
         "name": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 위상 사냥꾼(이동속도 +45%, 6초)",
+        "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on hit / ICD 12s - Phase Hunter (Move Speed +45%, 6s)",
+        "nameKo": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 위상 사냥꾼(이동속도 +45%, 6초)",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -2817,17 +2971,19 @@
         "id": "runeword_exile_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_EXILE",
         "name": "룬워드 엑자일 (Vex-Ohm-Ist-Dol): 피격 28% / ICD 14초 - 추방자의 결계(방어도 +180, 9초)",
+        "nameEn": "Runeword Exile (Vex-Ohm-Ist-Dol): 28% on hit taken / ICD 14s - Exile's Barrier (Armor +180, 9s)",
+        "nameKo": "룬워드 엑자일 (Vex-Ohm-Ist-Dol): 피격 28% / ICD 14초 - 추방자의 결계(방어도 +180, 9초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_EXILE_BARRIER",
-            "name": "Calamity: Runeword Exile (Barrier)",
+            "name": "Calamity: Runeword Exile / 룬워드 엑자일",
             "actorValue": "DamageResist",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_EXILE_BARRIER",
-            "name": "Calamity: Runeword Exile (Barrier)",
+            "name": "Calamity: Runeword Exile / 룬워드 엑자일",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_EXILE_BARRIER",
@@ -2861,6 +3017,8 @@
         "id": "runeword_breath_of_the_dying_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BREATH_OF_THE_DYING",
         "name": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적중 34% / ICD 0.35초 - 멸절 참격(적응형 원소 피해)",
+        "nameEn": "Runeword Breath of the Dying (Vex-Hel-El-Eld-Zod-Eth): 34% on hit / ICD 0.35s - Annihilation Slash (Adaptive elemental damage)",
+        "nameKo": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적중 34% / ICD 0.35초 - 멸절 참격(적응형 원소 피해)",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -2898,6 +3056,8 @@
         "id": "runeword_last_wish_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAST_WISH",
         "name": "룬워드 라스트 위시 (Jah-Mal-Jah-Sur-Jah-Ber): 적중 18% / ICD 3초 - 소원 붕괴(적응형 원소 노출)",
+        "nameEn": "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): 18% on hit / ICD 3s - Wish Collapse (Adaptive elemental exposure)",
+        "nameKo": "룬워드 라스트 위시 (Jah-Mal-Jah-Sur-Jah-Ber): 적중 18% / ICD 3초 - 소원 붕괴(적응형 원소 노출)",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -2927,17 +3087,19 @@
         "id": "runeword_phoenix_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PHOENIX",
         "name": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 피격 18% / ICD 14초 - 불사 질주(이동속도 +50%, 7초)",
+        "nameEn": "Runeword Phoenix (Vex-Vex-Lo-Jah): 18% on hit taken / ICD 14s - Immortal Rush (Move Speed +50%, 7s)",
+        "nameKo": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 피격 18% / ICD 14초 - 불사 질주(이동속도 +50%, 7초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
-            "name": "Calamity: Runeword Phoenix (Surge)",
+            "name": "Calamity: Runeword Phoenix / 룬워드 피닉스",
             "actorValue": "SpeedMult",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_PHOENIX_SURGE",
-            "name": "Calamity: Runeword Phoenix (Surge)",
+            "name": "Calamity: Runeword Phoenix / 룬워드 피닉스",
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
@@ -2971,6 +3133,8 @@
         "id": "runeword_doom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DOOM",
         "name": "룬워드 둠 (Hel-Ohm-Um-Lo-Cham): 적중 30% / ICD 0.8초 - 절망의 냉기 일격",
+        "nameEn": "Runeword Doom (Hel-Ohm-Um-Lo-Cham): 30% on hit / ICD 0.8s - Doom Frost Strike",
+        "nameKo": "룬워드 둠 (Hel-Ohm-Um-Lo-Cham): 적중 30% / ICD 0.8초 - 절망의 냉기 일격",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3003,6 +3167,8 @@
         "id": "runeword_dream_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DREAM",
         "name": "룬워드 드림 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개의 꿈 일격",
+        "nameEn": "Runeword Dream (Io-Jah-Pul): 30% on hit / ICD 0.8s - Lightning Dream Strike",
+        "nameKo": "룬워드 드림 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개의 꿈 일격",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3034,11 +3200,13 @@
       {
         "id": "suffix_max_health_t1",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T1",
-        "name": "of Minor Vitality: Max Health +25",
+        "name": "약간의 활력: 최대 체력 +25",
+        "nameEn": "of Minor Vitality: Max Health +25",
+        "nameKo": "약간의 활력: 최대 체력 +25",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T1",
-            "name": "Calamity Suffix: Max Health +25",
+            "name": "Calamity Suffix: Max Health +25 / 최대 체력 +25",
             "actorValue": "Health",
             "resistValue": null,
             "magicSkill": null,
@@ -3047,7 +3215,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T1",
-            "name": "Calamity Suffix: Max Health +25",
+            "name": "Calamity Suffix: Max Health +25 / 최대 체력 +25",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3080,11 +3248,13 @@
       {
         "id": "suffix_max_health_t2",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T2",
-        "name": "of Vitality: Max Health +50",
+        "name": "활력: 최대 체력 +50",
+        "nameEn": "of Vitality: Max Health +50",
+        "nameKo": "활력: 최대 체력 +50",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T2",
-            "name": "Calamity Suffix: Max Health +50",
+            "name": "Calamity Suffix: Max Health +50 / 최대 체력 +50",
             "actorValue": "Health",
             "resistValue": null,
             "magicSkill": null,
@@ -3093,7 +3263,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T2",
-            "name": "Calamity Suffix: Max Health +50",
+            "name": "Calamity Suffix: Max Health +50 / 최대 체력 +50",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3126,11 +3296,13 @@
       {
         "id": "suffix_max_health_t3",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T3",
-        "name": "of Grand Vitality: Max Health +75",
+        "name": "위대한 활력: 최대 체력 +75",
+        "nameEn": "of Grand Vitality: Max Health +75",
+        "nameKo": "위대한 활력: 최대 체력 +75",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T3",
-            "name": "Calamity Suffix: Max Health +75",
+            "name": "Calamity Suffix: Max Health +75 / 최대 체력 +75",
             "actorValue": "Health",
             "resistValue": null,
             "magicSkill": null,
@@ -3139,7 +3311,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T3",
-            "name": "Calamity Suffix: Max Health +75",
+            "name": "Calamity Suffix: Max Health +75 / 최대 체력 +75",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3172,11 +3344,13 @@
       {
         "id": "suffix_max_stamina_t1",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T1",
-        "name": "of Minor Endurance: Max Stamina +20",
+        "name": "약간의 지구력: 최대 스태미나 +20",
+        "nameEn": "of Minor Endurance: Max Stamina +20",
+        "nameKo": "약간의 지구력: 최대 스태미나 +20",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T1",
-            "name": "Calamity Suffix: Max Stamina +20",
+            "name": "Calamity Suffix: Max Stamina +20 / 최대 스태미나 +20",
             "actorValue": "Stamina",
             "resistValue": null,
             "magicSkill": null,
@@ -3185,7 +3359,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T1",
-            "name": "Calamity Suffix: Max Stamina +20",
+            "name": "Calamity Suffix: Max Stamina +20 / 최대 스태미나 +20",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3218,11 +3392,13 @@
       {
         "id": "suffix_max_stamina_t2",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T2",
-        "name": "of Endurance: Max Stamina +40",
+        "name": "지구력: 최대 스태미나 +40",
+        "nameEn": "of Endurance: Max Stamina +40",
+        "nameKo": "지구력: 최대 스태미나 +40",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T2",
-            "name": "Calamity Suffix: Max Stamina +40",
+            "name": "Calamity Suffix: Max Stamina +40 / 최대 스태미나 +40",
             "actorValue": "Stamina",
             "resistValue": null,
             "magicSkill": null,
@@ -3231,7 +3407,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T2",
-            "name": "Calamity Suffix: Max Stamina +40",
+            "name": "Calamity Suffix: Max Stamina +40 / 최대 스태미나 +40",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3264,11 +3440,13 @@
       {
         "id": "suffix_max_stamina_t3",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T3",
-        "name": "of Grand Endurance: Max Stamina +60",
+        "name": "위대한 지구력: 최대 스태미나 +60",
+        "nameEn": "of Grand Endurance: Max Stamina +60",
+        "nameKo": "위대한 지구력: 최대 스태미나 +60",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T3",
-            "name": "Calamity Suffix: Max Stamina +60",
+            "name": "Calamity Suffix: Max Stamina +60 / 최대 스태미나 +60",
             "actorValue": "Stamina",
             "resistValue": null,
             "magicSkill": null,
@@ -3277,7 +3455,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T3",
-            "name": "Calamity Suffix: Max Stamina +60",
+            "name": "Calamity Suffix: Max Stamina +60 / 최대 스태미나 +60",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3310,11 +3488,13 @@
       {
         "id": "suffix_max_magicka_t1",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T1",
-        "name": "of Minor Sorcery: Max Magicka +20",
+        "name": "약간의 마력: 최대 매지카 +20",
+        "nameEn": "of Minor Sorcery: Max Magicka +20",
+        "nameKo": "약간의 마력: 최대 매지카 +20",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T1",
-            "name": "Calamity Suffix: Max Magicka +20",
+            "name": "Calamity Suffix: Max Magicka +20 / 최대 매지카 +20",
             "actorValue": "Magicka",
             "resistValue": null,
             "magicSkill": null,
@@ -3323,7 +3503,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T1",
-            "name": "Calamity Suffix: Max Magicka +20",
+            "name": "Calamity Suffix: Max Magicka +20 / 최대 매지카 +20",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3356,11 +3536,13 @@
       {
         "id": "suffix_max_magicka_t2",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T2",
-        "name": "of Sorcery: Max Magicka +40",
+        "name": "마력: 최대 매지카 +40",
+        "nameEn": "of Sorcery: Max Magicka +40",
+        "nameKo": "마력: 최대 매지카 +40",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T2",
-            "name": "Calamity Suffix: Max Magicka +40",
+            "name": "Calamity Suffix: Max Magicka +40 / 최대 매지카 +40",
             "actorValue": "Magicka",
             "resistValue": null,
             "magicSkill": null,
@@ -3369,7 +3551,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T2",
-            "name": "Calamity Suffix: Max Magicka +40",
+            "name": "Calamity Suffix: Max Magicka +40 / 최대 매지카 +40",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3402,11 +3584,13 @@
       {
         "id": "suffix_max_magicka_t3",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T3",
-        "name": "of Grand Sorcery: Max Magicka +60",
+        "name": "위대한 마력: 최대 매지카 +60",
+        "nameEn": "of Grand Sorcery: Max Magicka +60",
+        "nameKo": "위대한 마력: 최대 매지카 +60",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T3",
-            "name": "Calamity Suffix: Max Magicka +60",
+            "name": "Calamity Suffix: Max Magicka +60 / 최대 매지카 +60",
             "actorValue": "Magicka",
             "resistValue": null,
             "magicSkill": null,
@@ -3415,7 +3599,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T3",
-            "name": "Calamity Suffix: Max Magicka +60",
+            "name": "Calamity Suffix: Max Magicka +60 / 최대 매지카 +60",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3448,11 +3632,13 @@
       {
         "id": "suffix_health_regen_t1",
         "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T1",
-        "name": "of Minor Mending: Health Regen +25%",
+        "name": "약간의 치유: 체력 재생 +25%",
+        "nameEn": "of Minor Mending: Health Regen +25%",
+        "nameKo": "약간의 치유: 체력 재생 +25%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T1",
-            "name": "Calamity Suffix: Health Regen +25%",
+            "name": "Calamity Suffix: Health Regen +25% / 체력 재생 +25%",
             "actorValue": "HealRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3461,7 +3647,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T1",
-            "name": "Calamity Suffix: Health Regen +25%",
+            "name": "Calamity Suffix: Health Regen +25% / 체력 재생 +25%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3494,11 +3680,13 @@
       {
         "id": "suffix_health_regen_t2",
         "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T2",
-        "name": "of Mending: Health Regen +50%",
+        "name": "치유: 체력 재생 +50%",
+        "nameEn": "of Mending: Health Regen +50%",
+        "nameKo": "치유: 체력 재생 +50%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T2",
-            "name": "Calamity Suffix: Health Regen +50%",
+            "name": "Calamity Suffix: Health Regen +50% / 체력 재생 +50%",
             "actorValue": "HealRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3507,7 +3695,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T2",
-            "name": "Calamity Suffix: Health Regen +50%",
+            "name": "Calamity Suffix: Health Regen +50% / 체력 재생 +50%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3540,11 +3728,13 @@
       {
         "id": "suffix_health_regen_t3",
         "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T3",
-        "name": "of Grand Mending: Health Regen +75%",
+        "name": "위대한 치유: 체력 재생 +75%",
+        "nameEn": "of Grand Mending: Health Regen +75%",
+        "nameKo": "위대한 치유: 체력 재생 +75%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T3",
-            "name": "Calamity Suffix: Health Regen +75%",
+            "name": "Calamity Suffix: Health Regen +75% / 체력 재생 +75%",
             "actorValue": "HealRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3553,7 +3743,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T3",
-            "name": "Calamity Suffix: Health Regen +75%",
+            "name": "Calamity Suffix: Health Regen +75% / 체력 재생 +75%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3586,11 +3776,13 @@
       {
         "id": "suffix_stamina_regen_t1",
         "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T1",
-        "name": "of Minor Recovery: Stamina Regen +25%",
+        "name": "약간의 회복: 스태미나 재생 +25%",
+        "nameEn": "of Minor Recovery: Stamina Regen +25%",
+        "nameKo": "약간의 회복: 스태미나 재생 +25%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T1",
-            "name": "Calamity Suffix: Stamina Regen +25%",
+            "name": "Calamity Suffix: Stamina Regen +25% / 스태미나 재생 +25%",
             "actorValue": "StaminaRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3599,7 +3791,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T1",
-            "name": "Calamity Suffix: Stamina Regen +25%",
+            "name": "Calamity Suffix: Stamina Regen +25% / 스태미나 재생 +25%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3632,11 +3824,13 @@
       {
         "id": "suffix_stamina_regen_t2",
         "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T2",
-        "name": "of Recovery: Stamina Regen +50%",
+        "name": "회복: 스태미나 재생 +50%",
+        "nameEn": "of Recovery: Stamina Regen +50%",
+        "nameKo": "회복: 스태미나 재생 +50%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T2",
-            "name": "Calamity Suffix: Stamina Regen +50%",
+            "name": "Calamity Suffix: Stamina Regen +50% / 스태미나 재생 +50%",
             "actorValue": "StaminaRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3645,7 +3839,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T2",
-            "name": "Calamity Suffix: Stamina Regen +50%",
+            "name": "Calamity Suffix: Stamina Regen +50% / 스태미나 재생 +50%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3678,11 +3872,13 @@
       {
         "id": "suffix_stamina_regen_t3",
         "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T3",
-        "name": "of Grand Recovery: Stamina Regen +75%",
+        "name": "위대한 회복: 스태미나 재생 +75%",
+        "nameEn": "of Grand Recovery: Stamina Regen +75%",
+        "nameKo": "위대한 회복: 스태미나 재생 +75%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T3",
-            "name": "Calamity Suffix: Stamina Regen +75%",
+            "name": "Calamity Suffix: Stamina Regen +75% / 스태미나 재생 +75%",
             "actorValue": "StaminaRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3691,7 +3887,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T3",
-            "name": "Calamity Suffix: Stamina Regen +75%",
+            "name": "Calamity Suffix: Stamina Regen +75% / 스태미나 재생 +75%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3724,11 +3920,13 @@
       {
         "id": "suffix_magicka_regen_t1",
         "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T1",
-        "name": "of Minor Insight: Magicka Regen +25%",
+        "name": "약간의 통찰: 매지카 재생 +25%",
+        "nameEn": "of Minor Insight: Magicka Regen +25%",
+        "nameKo": "약간의 통찰: 매지카 재생 +25%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T1",
-            "name": "Calamity Suffix: Magicka Regen +25%",
+            "name": "Calamity Suffix: Magicka Regen +25% / 매지카 재생 +25%",
             "actorValue": "MagickaRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3737,7 +3935,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T1",
-            "name": "Calamity Suffix: Magicka Regen +25%",
+            "name": "Calamity Suffix: Magicka Regen +25% / 매지카 재생 +25%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3770,11 +3968,13 @@
       {
         "id": "suffix_magicka_regen_t2",
         "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T2",
-        "name": "of Insight: Magicka Regen +50%",
+        "name": "통찰: 매지카 재생 +50%",
+        "nameEn": "of Insight: Magicka Regen +50%",
+        "nameKo": "통찰: 매지카 재생 +50%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T2",
-            "name": "Calamity Suffix: Magicka Regen +50%",
+            "name": "Calamity Suffix: Magicka Regen +50% / 매지카 재생 +50%",
             "actorValue": "MagickaRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3783,7 +3983,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T2",
-            "name": "Calamity Suffix: Magicka Regen +50%",
+            "name": "Calamity Suffix: Magicka Regen +50% / 매지카 재생 +50%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3816,11 +4016,13 @@
       {
         "id": "suffix_magicka_regen_t3",
         "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T3",
-        "name": "of Grand Insight: Magicka Regen +75%",
+        "name": "위대한 통찰: 매지카 재생 +75%",
+        "nameEn": "of Grand Insight: Magicka Regen +75%",
+        "nameKo": "위대한 통찰: 매지카 재생 +75%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T3",
-            "name": "Calamity Suffix: Magicka Regen +75%",
+            "name": "Calamity Suffix: Magicka Regen +75% / 매지카 재생 +75%",
             "actorValue": "MagickaRate",
             "resistValue": null,
             "magicSkill": null,
@@ -3829,7 +4031,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T3",
-            "name": "Calamity Suffix: Magicka Regen +75%",
+            "name": "Calamity Suffix: Magicka Regen +75% / 매지카 재생 +75%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3862,11 +4064,13 @@
       {
         "id": "suffix_armor_rating_t1",
         "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T1",
-        "name": "of Minor Warding: Armor +25",
+        "name": "약간의 수호: 방어력 +25",
+        "nameEn": "of Minor Warding: Armor +25",
+        "nameKo": "약간의 수호: 방어력 +25",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T1",
-            "name": "Calamity Suffix: Armor +25",
+            "name": "Calamity Suffix: Armor +25 / 방어력 +25",
             "actorValue": "DamageResist",
             "resistValue": null,
             "magicSkill": null,
@@ -3875,7 +4079,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T1",
-            "name": "Calamity Suffix: Armor +25",
+            "name": "Calamity Suffix: Armor +25 / 방어력 +25",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3908,11 +4112,13 @@
       {
         "id": "suffix_armor_rating_t2",
         "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T2",
-        "name": "of Warding: Armor +50",
+        "name": "수호: 방어력 +50",
+        "nameEn": "of Warding: Armor +50",
+        "nameKo": "수호: 방어력 +50",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T2",
-            "name": "Calamity Suffix: Armor +50",
+            "name": "Calamity Suffix: Armor +50 / 방어력 +50",
             "actorValue": "DamageResist",
             "resistValue": null,
             "magicSkill": null,
@@ -3921,7 +4127,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T2",
-            "name": "Calamity Suffix: Armor +50",
+            "name": "Calamity Suffix: Armor +50 / 방어력 +50",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -3954,11 +4160,13 @@
       {
         "id": "suffix_armor_rating_t3",
         "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T3",
-        "name": "of Grand Warding: Armor +80",
+        "name": "위대한 수호: 방어력 +80",
+        "nameEn": "of Grand Warding: Armor +80",
+        "nameKo": "위대한 수호: 방어력 +80",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T3",
-            "name": "Calamity Suffix: Armor +80",
+            "name": "Calamity Suffix: Armor +80 / 방어력 +80",
             "actorValue": "DamageResist",
             "resistValue": null,
             "magicSkill": null,
@@ -3967,7 +4175,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T3",
-            "name": "Calamity Suffix: Armor +80",
+            "name": "Calamity Suffix: Armor +80 / 방어력 +80",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4000,11 +4208,13 @@
       {
         "id": "suffix_fire_resist_t1",
         "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T1",
-        "name": "of Minor Flame Guard: Fire Resist +5%",
+        "name": "약간의 화염 보호: 화염 저항 +5%",
+        "nameEn": "of Minor Flame Guard: Fire Resist +5%",
+        "nameKo": "약간의 화염 보호: 화염 저항 +5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T1",
-            "name": "Calamity Suffix: Fire Resist +5%",
+            "name": "Calamity Suffix: Fire Resist +5% / 화염 저항 +5%",
             "actorValue": "ResistFire",
             "resistValue": null,
             "magicSkill": null,
@@ -4013,7 +4223,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T1",
-            "name": "Calamity Suffix: Fire Resist +5%",
+            "name": "Calamity Suffix: Fire Resist +5% / 화염 저항 +5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4046,11 +4256,13 @@
       {
         "id": "suffix_fire_resist_t2",
         "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T2",
-        "name": "of Flame Guard: Fire Resist +10%",
+        "name": "화염 보호: 화염 저항 +10%",
+        "nameEn": "of Flame Guard: Fire Resist +10%",
+        "nameKo": "화염 보호: 화염 저항 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T2",
-            "name": "Calamity Suffix: Fire Resist +10%",
+            "name": "Calamity Suffix: Fire Resist +10% / 화염 저항 +10%",
             "actorValue": "ResistFire",
             "resistValue": null,
             "magicSkill": null,
@@ -4059,7 +4271,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T2",
-            "name": "Calamity Suffix: Fire Resist +10%",
+            "name": "Calamity Suffix: Fire Resist +10% / 화염 저항 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4092,11 +4304,13 @@
       {
         "id": "suffix_fire_resist_t3",
         "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T3",
-        "name": "of Grand Flame Guard: Fire Resist +15%",
+        "name": "위대한 화염 보호: 화염 저항 +15%",
+        "nameEn": "of Grand Flame Guard: Fire Resist +15%",
+        "nameKo": "위대한 화염 보호: 화염 저항 +15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T3",
-            "name": "Calamity Suffix: Fire Resist +15%",
+            "name": "Calamity Suffix: Fire Resist +15% / 화염 저항 +15%",
             "actorValue": "ResistFire",
             "resistValue": null,
             "magicSkill": null,
@@ -4105,7 +4319,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T3",
-            "name": "Calamity Suffix: Fire Resist +15%",
+            "name": "Calamity Suffix: Fire Resist +15% / 화염 저항 +15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4138,11 +4352,13 @@
       {
         "id": "suffix_frost_resist_t1",
         "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T1",
-        "name": "of Minor Frost Guard: Frost Resist +5%",
+        "name": "약간의 냉기 보호: 냉기 저항 +5%",
+        "nameEn": "of Minor Frost Guard: Frost Resist +5%",
+        "nameKo": "약간의 냉기 보호: 냉기 저항 +5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T1",
-            "name": "Calamity Suffix: Frost Resist +5%",
+            "name": "Calamity Suffix: Frost Resist +5% / 냉기 저항 +5%",
             "actorValue": "ResistFrost",
             "resistValue": null,
             "magicSkill": null,
@@ -4151,7 +4367,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T1",
-            "name": "Calamity Suffix: Frost Resist +5%",
+            "name": "Calamity Suffix: Frost Resist +5% / 냉기 저항 +5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4184,11 +4400,13 @@
       {
         "id": "suffix_frost_resist_t2",
         "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T2",
-        "name": "of Frost Guard: Frost Resist +10%",
+        "name": "냉기 보호: 냉기 저항 +10%",
+        "nameEn": "of Frost Guard: Frost Resist +10%",
+        "nameKo": "냉기 보호: 냉기 저항 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T2",
-            "name": "Calamity Suffix: Frost Resist +10%",
+            "name": "Calamity Suffix: Frost Resist +10% / 냉기 저항 +10%",
             "actorValue": "ResistFrost",
             "resistValue": null,
             "magicSkill": null,
@@ -4197,7 +4415,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T2",
-            "name": "Calamity Suffix: Frost Resist +10%",
+            "name": "Calamity Suffix: Frost Resist +10% / 냉기 저항 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4230,11 +4448,13 @@
       {
         "id": "suffix_frost_resist_t3",
         "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T3",
-        "name": "of Grand Frost Guard: Frost Resist +15%",
+        "name": "위대한 냉기 보호: 냉기 저항 +15%",
+        "nameEn": "of Grand Frost Guard: Frost Resist +15%",
+        "nameKo": "위대한 냉기 보호: 냉기 저항 +15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T3",
-            "name": "Calamity Suffix: Frost Resist +15%",
+            "name": "Calamity Suffix: Frost Resist +15% / 냉기 저항 +15%",
             "actorValue": "ResistFrost",
             "resistValue": null,
             "magicSkill": null,
@@ -4243,7 +4463,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T3",
-            "name": "Calamity Suffix: Frost Resist +15%",
+            "name": "Calamity Suffix: Frost Resist +15% / 냉기 저항 +15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4276,11 +4496,13 @@
       {
         "id": "suffix_shock_resist_t1",
         "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T1",
-        "name": "of Minor Shock Guard: Shock Resist +5%",
+        "name": "약간의 전격 보호: 전격 저항 +5%",
+        "nameEn": "of Minor Shock Guard: Shock Resist +5%",
+        "nameKo": "약간의 전격 보호: 전격 저항 +5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T1",
-            "name": "Calamity Suffix: Shock Resist +5%",
+            "name": "Calamity Suffix: Shock Resist +5% / 전격 저항 +5%",
             "actorValue": "ResistShock",
             "resistValue": null,
             "magicSkill": null,
@@ -4289,7 +4511,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T1",
-            "name": "Calamity Suffix: Shock Resist +5%",
+            "name": "Calamity Suffix: Shock Resist +5% / 전격 저항 +5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4322,11 +4544,13 @@
       {
         "id": "suffix_shock_resist_t2",
         "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T2",
-        "name": "of Shock Guard: Shock Resist +10%",
+        "name": "전격 보호: 전격 저항 +10%",
+        "nameEn": "of Shock Guard: Shock Resist +10%",
+        "nameKo": "전격 보호: 전격 저항 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T2",
-            "name": "Calamity Suffix: Shock Resist +10%",
+            "name": "Calamity Suffix: Shock Resist +10% / 전격 저항 +10%",
             "actorValue": "ResistShock",
             "resistValue": null,
             "magicSkill": null,
@@ -4335,7 +4559,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T2",
-            "name": "Calamity Suffix: Shock Resist +10%",
+            "name": "Calamity Suffix: Shock Resist +10% / 전격 저항 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4368,11 +4592,13 @@
       {
         "id": "suffix_shock_resist_t3",
         "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T3",
-        "name": "of Grand Shock Guard: Shock Resist +15%",
+        "name": "위대한 전격 보호: 전격 저항 +15%",
+        "nameEn": "of Grand Shock Guard: Shock Resist +15%",
+        "nameKo": "위대한 전격 보호: 전격 저항 +15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T3",
-            "name": "Calamity Suffix: Shock Resist +15%",
+            "name": "Calamity Suffix: Shock Resist +15% / 전격 저항 +15%",
             "actorValue": "ResistShock",
             "resistValue": null,
             "magicSkill": null,
@@ -4381,7 +4607,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T3",
-            "name": "Calamity Suffix: Shock Resist +15%",
+            "name": "Calamity Suffix: Shock Resist +15% / 전격 저항 +15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4414,11 +4640,13 @@
       {
         "id": "suffix_magic_resist_t1",
         "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T1",
-        "name": "of Minor Spell Guard: Magic Resist +3%",
+        "name": "약간의 마법 보호: 마법 저항 +3%",
+        "nameEn": "of Minor Spell Guard: Magic Resist +3%",
+        "nameKo": "약간의 마법 보호: 마법 저항 +3%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T1",
-            "name": "Calamity Suffix: Magic Resist +3%",
+            "name": "Calamity Suffix: Magic Resist +3% / 마법 저항 +3%",
             "actorValue": "ResistMagic",
             "resistValue": null,
             "magicSkill": null,
@@ -4427,7 +4655,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T1",
-            "name": "Calamity Suffix: Magic Resist +3%",
+            "name": "Calamity Suffix: Magic Resist +3% / 마법 저항 +3%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4460,11 +4688,13 @@
       {
         "id": "suffix_magic_resist_t2",
         "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T2",
-        "name": "of Spell Guard: Magic Resist +8%",
+        "name": "마법 보호: 마법 저항 +8%",
+        "nameEn": "of Spell Guard: Magic Resist +8%",
+        "nameKo": "마법 보호: 마법 저항 +8%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T2",
-            "name": "Calamity Suffix: Magic Resist +8%",
+            "name": "Calamity Suffix: Magic Resist +8% / 마법 저항 +8%",
             "actorValue": "ResistMagic",
             "resistValue": null,
             "magicSkill": null,
@@ -4473,7 +4703,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T2",
-            "name": "Calamity Suffix: Magic Resist +8%",
+            "name": "Calamity Suffix: Magic Resist +8% / 마법 저항 +8%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4506,11 +4736,13 @@
       {
         "id": "suffix_magic_resist_t3",
         "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T3",
-        "name": "of Grand Spell Guard: Magic Resist +12%",
+        "name": "위대한 마법 보호: 마법 저항 +12%",
+        "nameEn": "of Grand Spell Guard: Magic Resist +12%",
+        "nameKo": "위대한 마법 보호: 마법 저항 +12%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T3",
-            "name": "Calamity Suffix: Magic Resist +12%",
+            "name": "Calamity Suffix: Magic Resist +12% / 마법 저항 +12%",
             "actorValue": "ResistMagic",
             "resistValue": null,
             "magicSkill": null,
@@ -4519,7 +4751,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T3",
-            "name": "Calamity Suffix: Magic Resist +12%",
+            "name": "Calamity Suffix: Magic Resist +12% / 마법 저항 +12%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4552,11 +4784,13 @@
       {
         "id": "suffix_poison_resist_t1",
         "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T1",
-        "name": "of Minor Antivenom: Poison Resist +5%",
+        "name": "약간의 해독: 독 저항 +5%",
+        "nameEn": "of Minor Antivenom: Poison Resist +5%",
+        "nameKo": "약간의 해독: 독 저항 +5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T1",
-            "name": "Calamity Suffix: Poison Resist +5%",
+            "name": "Calamity Suffix: Poison Resist +5% / 독 저항 +5%",
             "actorValue": "PoisonResist",
             "resistValue": null,
             "magicSkill": null,
@@ -4565,7 +4799,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T1",
-            "name": "Calamity Suffix: Poison Resist +5%",
+            "name": "Calamity Suffix: Poison Resist +5% / 독 저항 +5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4598,11 +4832,13 @@
       {
         "id": "suffix_poison_resist_t2",
         "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T2",
-        "name": "of Antivenom: Poison Resist +10%",
+        "name": "해독: 독 저항 +10%",
+        "nameEn": "of Antivenom: Poison Resist +10%",
+        "nameKo": "해독: 독 저항 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T2",
-            "name": "Calamity Suffix: Poison Resist +10%",
+            "name": "Calamity Suffix: Poison Resist +10% / 독 저항 +10%",
             "actorValue": "PoisonResist",
             "resistValue": null,
             "magicSkill": null,
@@ -4611,7 +4847,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T2",
-            "name": "Calamity Suffix: Poison Resist +10%",
+            "name": "Calamity Suffix: Poison Resist +10% / 독 저항 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4644,11 +4880,13 @@
       {
         "id": "suffix_poison_resist_t3",
         "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T3",
-        "name": "of Grand Antivenom: Poison Resist +15%",
+        "name": "위대한 해독: 독 저항 +15%",
+        "nameEn": "of Grand Antivenom: Poison Resist +15%",
+        "nameKo": "위대한 해독: 독 저항 +15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T3",
-            "name": "Calamity Suffix: Poison Resist +15%",
+            "name": "Calamity Suffix: Poison Resist +15% / 독 저항 +15%",
             "actorValue": "PoisonResist",
             "resistValue": null,
             "magicSkill": null,
@@ -4657,7 +4895,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T3",
-            "name": "Calamity Suffix: Poison Resist +15%",
+            "name": "Calamity Suffix: Poison Resist +15% / 독 저항 +15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4690,11 +4928,13 @@
       {
         "id": "suffix_disease_resist_t1",
         "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T1",
-        "name": "of Minor Purity: Disease Resist +25%",
+        "name": "약간의 정화: 질병 저항 +25%",
+        "nameEn": "of Minor Purity: Disease Resist +25%",
+        "nameKo": "약간의 정화: 질병 저항 +25%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T1",
-            "name": "Calamity Suffix: Disease Resist +25%",
+            "name": "Calamity Suffix: Disease Resist +25% / 질병 저항 +25%",
             "actorValue": "ResistDisease",
             "resistValue": null,
             "magicSkill": null,
@@ -4703,7 +4943,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T1",
-            "name": "Calamity Suffix: Disease Resist +25%",
+            "name": "Calamity Suffix: Disease Resist +25% / 질병 저항 +25%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4736,11 +4976,13 @@
       {
         "id": "suffix_disease_resist_t2",
         "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T2",
-        "name": "of Purity: Disease Resist +50%",
+        "name": "정화: 질병 저항 +50%",
+        "nameEn": "of Purity: Disease Resist +50%",
+        "nameKo": "정화: 질병 저항 +50%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T2",
-            "name": "Calamity Suffix: Disease Resist +50%",
+            "name": "Calamity Suffix: Disease Resist +50% / 질병 저항 +50%",
             "actorValue": "ResistDisease",
             "resistValue": null,
             "magicSkill": null,
@@ -4749,7 +4991,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T2",
-            "name": "Calamity Suffix: Disease Resist +50%",
+            "name": "Calamity Suffix: Disease Resist +50% / 질병 저항 +50%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4782,11 +5024,13 @@
       {
         "id": "suffix_disease_resist_t3",
         "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T3",
-        "name": "of Grand Purity: Disease Resist +100%",
+        "name": "위대한 정화: 질병 저항 +100%",
+        "nameEn": "of Grand Purity: Disease Resist +100%",
+        "nameKo": "위대한 정화: 질병 저항 +100%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T3",
-            "name": "Calamity Suffix: Disease Resist +100%",
+            "name": "Calamity Suffix: Disease Resist +100% / 질병 저항 +100%",
             "actorValue": "ResistDisease",
             "resistValue": null,
             "magicSkill": null,
@@ -4795,7 +5039,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T3",
-            "name": "Calamity Suffix: Disease Resist +100%",
+            "name": "Calamity Suffix: Disease Resist +100% / 질병 저항 +100%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4828,11 +5072,13 @@
       {
         "id": "suffix_attack_speed_t1",
         "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T1",
-        "name": "of Minor Alacrity: Attack Speed +5%",
+        "name": "약간의 민첩: 공격 속도 +5%",
+        "nameEn": "of Minor Alacrity: Attack Speed +5%",
+        "nameKo": "약간의 민첩: 공격 속도 +5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
-            "name": "Calamity Suffix: Attack Speed +5%",
+            "name": "Calamity Suffix: Attack Speed +5% / 공격 속도 +5%",
             "actorValue": "WeaponSpeedMult",
             "resistValue": null,
             "magicSkill": null,
@@ -4841,7 +5087,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T1",
-            "name": "Calamity Suffix: Attack Speed +5%",
+            "name": "Calamity Suffix: Attack Speed +5% / 공격 속도 +5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4874,11 +5120,13 @@
       {
         "id": "suffix_attack_speed_t2",
         "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T2",
-        "name": "of Alacrity: Attack Speed +10%",
+        "name": "민첩: 공격 속도 +10%",
+        "nameEn": "of Alacrity: Attack Speed +10%",
+        "nameKo": "민첩: 공격 속도 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
-            "name": "Calamity Suffix: Attack Speed +10%",
+            "name": "Calamity Suffix: Attack Speed +10% / 공격 속도 +10%",
             "actorValue": "WeaponSpeedMult",
             "resistValue": null,
             "magicSkill": null,
@@ -4887,7 +5135,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T2",
-            "name": "Calamity Suffix: Attack Speed +10%",
+            "name": "Calamity Suffix: Attack Speed +10% / 공격 속도 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4920,11 +5168,13 @@
       {
         "id": "suffix_attack_speed_t3",
         "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T3",
-        "name": "of Grand Alacrity: Attack Speed +15%",
+        "name": "위대한 민첩: 공격 속도 +15%",
+        "nameEn": "of Grand Alacrity: Attack Speed +15%",
+        "nameKo": "위대한 민첩: 공격 속도 +15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
-            "name": "Calamity Suffix: Attack Speed +15%",
+            "name": "Calamity Suffix: Attack Speed +15% / 공격 속도 +15%",
             "actorValue": "WeaponSpeedMult",
             "resistValue": null,
             "magicSkill": null,
@@ -4933,7 +5183,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T3",
-            "name": "Calamity Suffix: Attack Speed +15%",
+            "name": "Calamity Suffix: Attack Speed +15% / 공격 속도 +15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -4966,11 +5216,13 @@
       {
         "id": "suffix_critical_damage_t1",
         "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T1",
-        "name": "of Minor Precision: Critical Damage +10%",
+        "name": "약간의 정밀: 치명타 피해 +10%",
+        "nameEn": "of Minor Precision: Critical Damage +10%",
+        "nameKo": "약간의 정밀: 치명타 피해 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T1",
-            "name": "Calamity Suffix: Critical Damage +10%",
+            "name": "Calamity Suffix: Critical Damage +10% / 치명타 피해 +10%",
             "actorValue": "CriticalChance",
             "resistValue": null,
             "magicSkill": null,
@@ -4979,7 +5231,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T1",
-            "name": "Calamity Suffix: Critical Damage +10%",
+            "name": "Calamity Suffix: Critical Damage +10% / 치명타 피해 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5012,11 +5264,13 @@
       {
         "id": "suffix_critical_damage_t2",
         "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T2",
-        "name": "of Precision: Critical Damage +20%",
+        "name": "정밀: 치명타 피해 +20%",
+        "nameEn": "of Precision: Critical Damage +20%",
+        "nameKo": "정밀: 치명타 피해 +20%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T2",
-            "name": "Calamity Suffix: Critical Damage +20%",
+            "name": "Calamity Suffix: Critical Damage +20% / 치명타 피해 +20%",
             "actorValue": "CriticalChance",
             "resistValue": null,
             "magicSkill": null,
@@ -5025,7 +5279,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T2",
-            "name": "Calamity Suffix: Critical Damage +20%",
+            "name": "Calamity Suffix: Critical Damage +20% / 치명타 피해 +20%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5058,11 +5312,13 @@
       {
         "id": "suffix_critical_damage_t3",
         "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T3",
-        "name": "of Grand Precision: Critical Damage +30%",
+        "name": "위대한 정밀: 치명타 피해 +30%",
+        "nameEn": "of Grand Precision: Critical Damage +30%",
+        "nameKo": "위대한 정밀: 치명타 피해 +30%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T3",
-            "name": "Calamity Suffix: Critical Damage +30%",
+            "name": "Calamity Suffix: Critical Damage +30% / 치명타 피해 +30%",
             "actorValue": "CriticalChance",
             "resistValue": null,
             "magicSkill": null,
@@ -5071,7 +5327,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T3",
-            "name": "Calamity Suffix: Critical Damage +30%",
+            "name": "Calamity Suffix: Critical Damage +30% / 치명타 피해 +30%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5104,11 +5360,13 @@
       {
         "id": "suffix_destruction_cost_t1",
         "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T1",
-        "name": "of Minor Efficiency: Destruction Cost -5%",
+        "name": "약간의 효율: 파괴 마법 비용 -5%",
+        "nameEn": "of Minor Efficiency: Destruction Cost -5%",
+        "nameKo": "약간의 효율: 파괴 마법 비용 -5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T1",
-            "name": "Calamity Suffix: Destruction Cost -5%",
+            "name": "Calamity Suffix: Destruction Cost -5% / 파괴 마법 비용 -5%",
             "actorValue": "DestructionModifier",
             "resistValue": null,
             "magicSkill": null,
@@ -5117,7 +5375,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T1",
-            "name": "Calamity Suffix: Destruction Cost -5%",
+            "name": "Calamity Suffix: Destruction Cost -5% / 파괴 마법 비용 -5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5150,11 +5408,13 @@
       {
         "id": "suffix_destruction_cost_t2",
         "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T2",
-        "name": "of Efficiency: Destruction Cost -10%",
+        "name": "효율: 파괴 마법 비용 -10%",
+        "nameEn": "of Efficiency: Destruction Cost -10%",
+        "nameKo": "효율: 파괴 마법 비용 -10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T2",
-            "name": "Calamity Suffix: Destruction Cost -10%",
+            "name": "Calamity Suffix: Destruction Cost -10% / 파괴 마법 비용 -10%",
             "actorValue": "DestructionModifier",
             "resistValue": null,
             "magicSkill": null,
@@ -5163,7 +5423,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T2",
-            "name": "Calamity Suffix: Destruction Cost -10%",
+            "name": "Calamity Suffix: Destruction Cost -10% / 파괴 마법 비용 -10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5196,11 +5456,13 @@
       {
         "id": "suffix_destruction_cost_t3",
         "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T3",
-        "name": "of Grand Efficiency: Destruction Cost -15%",
+        "name": "위대한 효율: 파괴 마법 비용 -15%",
+        "nameEn": "of Grand Efficiency: Destruction Cost -15%",
+        "nameKo": "위대한 효율: 파괴 마법 비용 -15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T3",
-            "name": "Calamity Suffix: Destruction Cost -15%",
+            "name": "Calamity Suffix: Destruction Cost -15% / 파괴 마법 비용 -15%",
             "actorValue": "DestructionModifier",
             "resistValue": null,
             "magicSkill": null,
@@ -5209,7 +5471,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T3",
-            "name": "Calamity Suffix: Destruction Cost -15%",
+            "name": "Calamity Suffix: Destruction Cost -15% / 파괴 마법 비용 -15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5242,11 +5504,13 @@
       {
         "id": "suffix_move_speed_t1",
         "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T1",
-        "name": "of Minor Swiftness: Move Speed +4%",
+        "name": "약간의 신속: 이동 속도 +4%",
+        "nameEn": "of Minor Swiftness: Move Speed +4%",
+        "nameKo": "약간의 신속: 이동 속도 +4%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T1",
-            "name": "Calamity Suffix: Move Speed +4%",
+            "name": "Calamity Suffix: Move Speed +4% / 이동 속도 +4%",
             "actorValue": "SpeedMult",
             "resistValue": null,
             "magicSkill": null,
@@ -5255,7 +5519,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T1",
-            "name": "Calamity Suffix: Move Speed +4%",
+            "name": "Calamity Suffix: Move Speed +4% / 이동 속도 +4%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5288,11 +5552,13 @@
       {
         "id": "suffix_move_speed_t2",
         "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T2",
-        "name": "of Swiftness: Move Speed +7%",
+        "name": "신속: 이동 속도 +7%",
+        "nameEn": "of Swiftness: Move Speed +7%",
+        "nameKo": "신속: 이동 속도 +7%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T2",
-            "name": "Calamity Suffix: Move Speed +7%",
+            "name": "Calamity Suffix: Move Speed +7% / 이동 속도 +7%",
             "actorValue": "SpeedMult",
             "resistValue": null,
             "magicSkill": null,
@@ -5301,7 +5567,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T2",
-            "name": "Calamity Suffix: Move Speed +7%",
+            "name": "Calamity Suffix: Move Speed +7% / 이동 속도 +7%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5334,11 +5600,13 @@
       {
         "id": "suffix_move_speed_t3",
         "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T3",
-        "name": "of Grand Swiftness: Move Speed +10%",
+        "name": "위대한 신속: 이동 속도 +10%",
+        "nameEn": "of Grand Swiftness: Move Speed +10%",
+        "nameKo": "위대한 신속: 이동 속도 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T3",
-            "name": "Calamity Suffix: Move Speed +10%",
+            "name": "Calamity Suffix: Move Speed +10% / 이동 속도 +10%",
             "actorValue": "SpeedMult",
             "resistValue": null,
             "magicSkill": null,
@@ -5347,7 +5615,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T3",
-            "name": "Calamity Suffix: Move Speed +10%",
+            "name": "Calamity Suffix: Move Speed +10% / 이동 속도 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5380,11 +5648,13 @@
       {
         "id": "suffix_carry_weight_t1",
         "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T1",
-        "name": "of Minor Burden: Carry Weight +20",
+        "name": "약간의 운반: 소지 무게 +20",
+        "nameEn": "of Minor Burden: Carry Weight +20",
+        "nameKo": "약간의 운반: 소지 무게 +20",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T1",
-            "name": "Calamity Suffix: Carry Weight +20",
+            "name": "Calamity Suffix: Carry Weight +20 / 소지 무게 +20",
             "actorValue": "CarryWeight",
             "resistValue": null,
             "magicSkill": null,
@@ -5393,7 +5663,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T1",
-            "name": "Calamity Suffix: Carry Weight +20",
+            "name": "Calamity Suffix: Carry Weight +20 / 소지 무게 +20",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5426,11 +5696,13 @@
       {
         "id": "suffix_carry_weight_t2",
         "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T2",
-        "name": "of Burden: Carry Weight +40",
+        "name": "운반: 소지 무게 +40",
+        "nameEn": "of Burden: Carry Weight +40",
+        "nameKo": "운반: 소지 무게 +40",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T2",
-            "name": "Calamity Suffix: Carry Weight +40",
+            "name": "Calamity Suffix: Carry Weight +40 / 소지 무게 +40",
             "actorValue": "CarryWeight",
             "resistValue": null,
             "magicSkill": null,
@@ -5439,7 +5711,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T2",
-            "name": "Calamity Suffix: Carry Weight +40",
+            "name": "Calamity Suffix: Carry Weight +40 / 소지 무게 +40",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5472,11 +5744,13 @@
       {
         "id": "suffix_carry_weight_t3",
         "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T3",
-        "name": "of Grand Burden: Carry Weight +60",
+        "name": "위대한 운반: 소지 무게 +60",
+        "nameEn": "of Grand Burden: Carry Weight +60",
+        "nameKo": "위대한 운반: 소지 무게 +60",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T3",
-            "name": "Calamity Suffix: Carry Weight +60",
+            "name": "Calamity Suffix: Carry Weight +60 / 소지 무게 +60",
             "actorValue": "CarryWeight",
             "resistValue": null,
             "magicSkill": null,
@@ -5485,7 +5759,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T3",
-            "name": "Calamity Suffix: Carry Weight +60",
+            "name": "Calamity Suffix: Carry Weight +60 / 소지 무게 +60",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5518,11 +5792,13 @@
       {
         "id": "suffix_shout_cooldown_t1",
         "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T1",
-        "name": "of Minor Voice: Shout Cooldown -5%",
+        "name": "약간의 음성: 쇼우트 쿨다운 -5%",
+        "nameEn": "of Minor Voice: Shout Cooldown -5%",
+        "nameKo": "약간의 음성: 쇼우트 쿨다운 -5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T1",
-            "name": "Calamity Suffix: Shout Cooldown -5%",
+            "name": "Calamity Suffix: Shout Cooldown -5% / 쇼우트 쿨다운 -5%",
             "actorValue": "ShoutRecoveryMult",
             "resistValue": null,
             "magicSkill": null,
@@ -5531,7 +5807,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T1",
-            "name": "Calamity Suffix: Shout Cooldown -5%",
+            "name": "Calamity Suffix: Shout Cooldown -5% / 쇼우트 쿨다운 -5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5564,11 +5840,13 @@
       {
         "id": "suffix_shout_cooldown_t2",
         "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T2",
-        "name": "of the Voice: Shout Cooldown -10%",
+        "name": "음성: 쇼우트 쿨다운 -10%",
+        "nameEn": "of the Voice: Shout Cooldown -10%",
+        "nameKo": "음성: 쇼우트 쿨다운 -10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T2",
-            "name": "Calamity Suffix: Shout Cooldown -10%",
+            "name": "Calamity Suffix: Shout Cooldown -10% / 쇼우트 쿨다운 -10%",
             "actorValue": "ShoutRecoveryMult",
             "resistValue": null,
             "magicSkill": null,
@@ -5577,7 +5855,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T2",
-            "name": "Calamity Suffix: Shout Cooldown -10%",
+            "name": "Calamity Suffix: Shout Cooldown -10% / 쇼우트 쿨다운 -10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5610,11 +5888,13 @@
       {
         "id": "suffix_shout_cooldown_t3",
         "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T3",
-        "name": "of Grand Voice: Shout Cooldown -15%",
+        "name": "위대한 음성: 쇼우트 쿨다운 -15%",
+        "nameEn": "of Grand Voice: Shout Cooldown -15%",
+        "nameKo": "위대한 음성: 쇼우트 쿨다운 -15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3",
-            "name": "Calamity Suffix: Shout Cooldown -15%",
+            "name": "Calamity Suffix: Shout Cooldown -15% / 쇼우트 쿨다운 -15%",
             "actorValue": "ShoutRecoveryMult",
             "resistValue": null,
             "magicSkill": null,
@@ -5623,7 +5903,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T3",
-            "name": "Calamity Suffix: Shout Cooldown -15%",
+            "name": "Calamity Suffix: Shout Cooldown -15% / 쇼우트 쿨다운 -15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5656,11 +5936,13 @@
       {
         "id": "suffix_experience_gain_t1",
         "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T1",
-        "name": "of Minor Wisdom: Experience +5%",
+        "name": "약간의 지혜: 경험치 +5%",
+        "nameEn": "of Minor Wisdom: Experience +5%",
+        "nameKo": "약간의 지혜: 경험치 +5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T1",
-            "name": "Calamity Suffix: Experience +5%",
+            "name": "Calamity Suffix: Experience +5% / 경험치 +5%",
             "actorValue": "VoiceRate",
             "resistValue": null,
             "magicSkill": null,
@@ -5669,7 +5951,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T1",
-            "name": "Calamity Suffix: Experience +5%",
+            "name": "Calamity Suffix: Experience +5% / 경험치 +5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5702,11 +5984,13 @@
       {
         "id": "suffix_experience_gain_t2",
         "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T2",
-        "name": "of Wisdom: Experience +10%",
+        "name": "지혜: 경험치 +10%",
+        "nameEn": "of Wisdom: Experience +10%",
+        "nameKo": "지혜: 경험치 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T2",
-            "name": "Calamity Suffix: Experience +10%",
+            "name": "Calamity Suffix: Experience +10% / 경험치 +10%",
             "actorValue": "VoiceRate",
             "resistValue": null,
             "magicSkill": null,
@@ -5715,7 +5999,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T2",
-            "name": "Calamity Suffix: Experience +10%",
+            "name": "Calamity Suffix: Experience +10% / 경험치 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -5748,11 +6032,13 @@
       {
         "id": "suffix_experience_gain_t3",
         "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T3",
-        "name": "of Grand Wisdom: Experience +15%",
+        "name": "위대한 지혜: 경험치 +15%",
+        "nameEn": "of Grand Wisdom: Experience +15%",
+        "nameKo": "위대한 지혜: 경험치 +15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T3",
-            "name": "Calamity Suffix: Experience +15%",
+            "name": "Calamity Suffix: Experience +15% / 경험치 +15%",
             "actorValue": "VoiceRate",
             "resistValue": null,
             "magicSkill": null,
@@ -5761,7 +6047,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T3",
-            "name": "Calamity Suffix: Experience +15%",
+            "name": "Calamity Suffix: Experience +15% / 경험치 +15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",

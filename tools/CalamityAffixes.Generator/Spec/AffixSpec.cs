@@ -90,6 +90,12 @@ public sealed class AffixDefinition
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
+    [JsonPropertyName("nameEn")]
+    public string? NameEn { get; init; }
+
+    [JsonPropertyName("nameKo")]
+    public string? NameKo { get; init; }
+
     [JsonPropertyName("records")]
     public AffixRecordSpec? Records { get; init; }
 

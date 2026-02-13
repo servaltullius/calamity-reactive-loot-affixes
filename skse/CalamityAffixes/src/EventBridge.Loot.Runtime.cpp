@@ -156,7 +156,8 @@ namespace CalamityAffixes
 
 	std::optional<std::string> EventBridge::GetInstanceAffixTooltip(
 		const RE::InventoryEntryData* a_item,
-		std::string_view a_selectedDisplayName) const
+		std::string_view a_selectedDisplayName,
+		int a_uiLanguageMode) const
 	{
 		if (!_configLoaded) {
 			return std::nullopt;
@@ -293,7 +294,31 @@ namespace CalamityAffixes
 				}
 
 				const auto& affix = _affixes[idxIt->second];
-				if (affix.displayName.empty()) {
+
+				// Resolve display name based on language mode
+				std::string resolvedName;
+				switch (a_uiLanguageMode) {
+				case 0:  // English
+					resolvedName = affix.displayNameEn;
+					break;
+				case 1:  // Korean
+					resolvedName = affix.displayNameKo;
+					break;
+				case 2:  // Both
+				default:
+					if (affix.displayNameKo == affix.displayNameEn || affix.displayNameEn.empty()) {
+						resolvedName = affix.displayNameKo;
+					} else if (affix.displayNameKo.empty()) {
+						resolvedName = affix.displayNameEn;
+					} else {
+						resolvedName = affix.displayNameKo;
+						resolvedName.append(" / ");
+						resolvedName.append(affix.displayNameEn);
+					}
+					break;
+				}
+
+				if (resolvedName.empty()) {
 					continue;
 				}
 
@@ -315,7 +340,7 @@ namespace CalamityAffixes
 					tooltip.append("] ");
 				}
 
-				tooltip.append(affix.displayName);
+				tooltip.append(resolvedName);
 
 				// Append evolution/mode details for this affix
 				const auto detail = formatAffixDetail(affix, a_candidate.instanceKey);

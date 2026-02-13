@@ -256,6 +256,25 @@ public sealed class RepoSpecRegressionTests
             "Expected at least one affix with both runtime.action.evolution and runtime.action.modeCycle.manualOnly == true in affixes/affixes.json");
     }
 
+    [Fact]
+    public void RepoSpec_AllAffixesHaveBilingualNames()
+    {
+        var repoRoot = FindRepoRoot();
+        var specPath = Path.Combine(repoRoot, "affixes", "affixes.json");
+
+        var spec = AffixSpecLoader.Load(specPath);
+
+        foreach (var affix in spec.Keywords.Affixes)
+        {
+            Assert.False(
+                string.IsNullOrWhiteSpace(affix.NameEn),
+                $"Affix {affix.Id} missing nameEn");
+            Assert.False(
+                string.IsNullOrWhiteSpace(affix.NameKo),
+                $"Affix {affix.Id} missing nameKo");
+        }
+    }
+
     private static string FindRepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

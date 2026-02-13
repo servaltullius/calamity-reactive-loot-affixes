@@ -111,7 +111,8 @@ namespace CalamityAffixes
 		// Instance affixes are stored per item instance (ExtraUniqueID -> _instanceAffixes).
 		[[nodiscard]] std::optional<std::string> GetInstanceAffixTooltip(
 			const RE::InventoryEntryData* a_item,
-			std::string_view a_selectedDisplayName = {}) const;
+			std::string_view a_selectedDisplayName = {},
+			int a_uiLanguageMode = 2) const;
 
 		// UI helper: enumerate runeword-base candidates from player's inventory.
 		[[nodiscard]] std::vector<RunewordBaseInventoryEntry> GetRunewordBaseInventoryEntries();
@@ -335,6 +336,8 @@ namespace CalamityAffixes
 			std::string keywordEditorId{};
 			std::string label{};
 			std::string displayName{};
+			std::string displayNameEn{};
+			std::string displayNameKo{};
 			RE::BGSKeyword* keyword{ nullptr };
 			std::optional<LootItemType> lootType{};
 			Trigger trigger{ Trigger::kHit };

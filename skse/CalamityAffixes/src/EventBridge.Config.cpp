@@ -384,6 +384,14 @@ namespace CalamityAffixes
 			if (out.displayName.empty()) {
 				out.displayName = out.keywordEditorId;
 			}
+			out.displayNameEn = a.value("nameEn", std::string{});
+			out.displayNameKo = a.value("nameKo", std::string{});
+			if (out.displayNameEn.empty()) {
+				out.displayNameEn = out.displayName;
+			}
+			if (out.displayNameKo.empty()) {
+				out.displayNameKo = out.displayName;
+			}
 			out.label = DeriveAffixLabel(out.displayName);
 			if (out.label.empty()) {
 				out.label = out.displayName;
