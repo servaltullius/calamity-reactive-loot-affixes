@@ -174,7 +174,7 @@ namespace CalamityAffixes
 		_runtimeEnabled = true;
 		_runtimeProcChanceMult = 1.0f;
 		_lootRerollGuard.Reset();
-		_playerStashedKeys.clear();
+		_playerContainerStash.clear();
 		_configLoaded = false;
 		_lastHealthDamageSignature = 0;
 		_lastHealthDamageSignatureAt = {};

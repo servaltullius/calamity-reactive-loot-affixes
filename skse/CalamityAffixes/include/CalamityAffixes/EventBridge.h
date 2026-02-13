@@ -3,6 +3,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <map>
 #include <optional>
 #include <random>
 #include <string>
@@ -500,7 +501,7 @@ namespace CalamityAffixes
 			bool _runtimeEnabled{ true };
 			float _runtimeProcChanceMult{ 1.0f };
 		LootRerollGuard _lootRerollGuard{};
-		std::unordered_set<std::uint64_t> _playerStashedKeys;  // instanceKeys of items player put in containers
+		std::map<std::pair<RE::FormID, RE::FormID>, std::int32_t> _playerContainerStash;  // {containerID, baseObj} -> count
 		bool _configLoaded{ false };
 		std::uint32_t _procDepth{ 0 };
 		bool _healthDamageHookSeen{ false };
