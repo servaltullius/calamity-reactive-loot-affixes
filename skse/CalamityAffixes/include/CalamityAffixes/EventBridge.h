@@ -144,6 +144,10 @@ namespace CalamityAffixes
 			RE::Actor* a_target,
 			const RE::HitData* a_hitData);
 
+		[[nodiscard]] float GetCritDamageMultiplier(
+			RE::Actor* a_attacker,
+			const RE::HitData* a_hitData) const;
+
 		RE::BSEventNotifyControl ProcessEvent(
 			const RE::TESHitEvent* a_event,
 			RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override;
@@ -352,6 +356,7 @@ namespace CalamityAffixes
 			AffixSlot slot{ AffixSlot::kNone };
 			std::string family{};            // suffix family grouping (e.g., "max_health")
 			RE::SpellItem* passiveSpell{ nullptr };  // suffix: Ability spell to add/remove on equip
+			float critDamageBonusPct{ 0.0f };        // suffix: crit damage bonus (applied in HandleHealthDamage hook)
 
 			std::chrono::steady_clock::time_point nextAllowed{};
 		};
@@ -458,6 +463,7 @@ namespace CalamityAffixes
 
 		std::vector<AffixRuntime> _affixes;
 		std::vector<std::uint32_t> _activeCounts;
+		float _activeCritDamageBonusPct{ 0.0f };
 		std::unordered_map<std::string, std::size_t> _affixIndexById;
 		std::unordered_map<std::uint64_t, std::size_t> _affixIndexByToken;
 		std::vector<std::size_t> _hitTriggerAffixIndices;

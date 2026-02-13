@@ -86,6 +86,11 @@ namespace CalamityAffixes::Hooks
 
 				const auto* hitData = HitDataUtil::GetLastHitData(a_this);
 				float adjustedDamage = a_damage;
+				const float critMult = CalamityAffixes::EventBridge::GetSingleton()->GetCritDamageMultiplier(
+					a_attacker, hitData);
+				if (critMult > 1.0f) {
+					adjustedDamage *= critMult;
+				}
 				const auto conversion = CalamityAffixes::EventBridge::GetSingleton()->EvaluateConversion(
 					a_attacker,
 					a_this,

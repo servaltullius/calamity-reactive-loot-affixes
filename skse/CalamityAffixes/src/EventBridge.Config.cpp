@@ -136,6 +136,7 @@ namespace CalamityAffixes
 	{
 		_affixes.clear();
 		_activeCounts.clear();
+		_activeCritDamageBonusPct = 0.0f;
 		_affixIndexById.clear();
 		_affixIndexByToken.clear();
 		_hitTriggerAffixIndices.clear();
@@ -443,6 +444,7 @@ namespace CalamityAffixes
 							out.id, passiveSpellId);
 					}
 				}
+				out.critDamageBonusPct = static_cast<float>(action.value("critDamageBonusPct", 0.0));
 			} else {
 				const auto triggerStr = runtime.value("trigger", std::string{});
 				const auto trigger = parseTrigger(triggerStr);

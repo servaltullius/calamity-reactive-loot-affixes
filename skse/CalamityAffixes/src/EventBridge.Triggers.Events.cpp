@@ -584,6 +584,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 		_activeCounts.assign(_affixes.size(), 0);
 		_activeSlotPenalty.assign(_affixes.size(), 0.0f);
+		_activeCritDamageBonusPct = 0.0f;
 		std::unordered_set<RE::SpellItem*> desiredPassives;
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
@@ -651,6 +652,11 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 					// Collect passive spells for equipped suffixes
 					if (affixIdx < _affixes.size() && _affixes[affixIdx].slot == AffixSlot::kSuffix && _affixes[affixIdx].passiveSpell) {
 						desiredPassives.insert(_affixes[affixIdx].passiveSpell);
+					}
+
+					// Accumulate crit damage bonus for equipped suffixes
+					if (affixIdx < _affixes.size() && _affixes[affixIdx].critDamageBonusPct > 0.0f) {
+						_activeCritDamageBonusPct += _affixes[affixIdx].critDamageBonusPct;
 					}
 
 					// "Best Slot Wins" penalty only for prefixes

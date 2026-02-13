@@ -300,6 +300,25 @@ namespace CalamityAffixes
 		};
 	}
 
+	float EventBridge::GetCritDamageMultiplier(
+		RE::Actor* a_attacker,
+		const RE::HitData* a_hitData) const
+	{
+		if (!_configLoaded || !_runtimeEnabled || _activeCritDamageBonusPct <= 0.0f) {
+			return 1.0f;
+		}
+
+		if (!a_attacker || !a_attacker->IsPlayerRef()) {
+			return 1.0f;
+		}
+
+		if (!a_hitData || !a_hitData->flags.any(RE::HitData::Flag::kCritical)) {
+			return 1.0f;
+		}
+
+		return 1.0f + (_activeCritDamageBonusPct / 100.0f);
+	}
+
 	EventBridge::ArchmageSelection EventBridge::SelectBestArchmageAction(
 		std::chrono::steady_clock::time_point a_now,
 		RE::Actor* a_target)
