@@ -202,6 +202,23 @@ namespace CalamityAffixes
 			return;
 		}
 
+		// Guard: if the item already has a star-prefixed display name (★),
+		// it was a previous affix item whose UniqueID changed during container transfer.
+		// Do NOT reroll — just skip.
+		if (auto* text = a_xList->GetExtraTextDisplayData()) {
+			const auto* name = text->GetDisplayName(a_entry->object, 0);
+			if (name && name[0] != '\0') {
+				// UTF-8 star: E2 98 85
+				const auto* raw = reinterpret_cast<const unsigned char*>(name);
+				if (raw[0] == 0xE2 && raw[1] == 0x98 && raw[2] == 0x85) {
+					SKSE::log::debug(
+						"CalamityAffixes: skipping reroll (item already has star prefix) (baseObj={:08X}, uniqueID={}).",
+						uid->baseID, uid->uniqueID);
+					return;
+				}
+			}
+		}
+
 		// Roll how many affixes this item gets (1-3)
 		const std::uint8_t targetCount = RollAffixCount();
 
