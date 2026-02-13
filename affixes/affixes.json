@@ -554,6 +554,26 @@
         "name": "사라짐 (피격 5% / ICD 45초): 투명화 (30초)",
         "nameEn": "Vanish (5% on hit taken / ICD 45s): Invisibility (30s)",
         "nameKo": "사라짐 (피격 5% / ICD 45초): 투명화 (30초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_INVISIBILITY",
+            "name": "Calamity: Invisibility / 투명화",
+            "actorValue": "Invisibility",
+            "archetype": "Invisibility",
+            "hostile": false
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_INVISIBILITY",
+            "name": "Calamity: Invisibility / 투명화",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_INVISIBILITY",
+              "magnitude": 1,
+              "duration": 30,
+              "area": 0
+            }
+          }
+        },
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -567,7 +587,7 @@
           "icdSeconds": 45.0,
           "action": {
             "type": "CastSpell",
-            "spellForm": "Skyrim.esm|00027EB6",
+            "spellEditorId": "CAFF_SPEL_INVISIBILITY",
             "applyTo": "Self"
           }
         },

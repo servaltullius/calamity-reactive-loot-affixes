@@ -940,7 +940,7 @@ namespace CalamityAffixes
 			auto* spellChaosFragile = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_CHAOS_CURSE_FRAGILE");
 			auto* spellChaosSlowAttack = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK");
 			auto* spellVanillaSoulTrap = parseSpellFromString("Skyrim.esm|0004DBA4");
-			auto* spellVanillaInvisibility = parseSpellFromString("Skyrim.esm|00027EB6");
+			auto* spellCustomInvisibility = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_INVISIBILITY");
 			auto* spellVanillaMuffle = parseSpellFromString("Skyrim.esm|0008F3EB");
 			auto* spellVanillaFlameCloak = parseSpellFromString("Skyrim.esm|0003AE9F");
 			auto* spellVanillaFrostCloak = parseSpellFromString("Skyrim.esm|0003AEA2");
@@ -1760,7 +1760,7 @@ namespace CalamityAffixes
 					break;
 				case SyntheticRunewordStyle::kSelfInvisibility:
 					ready = configureSelfBuff(
-						spellVanillaInvisibility ? spellVanillaInvisibility : spellPhase,
+						spellCustomInvisibility ? spellCustomInvisibility : spellPhase,
 						Trigger::kIncomingHit,
 						8.0f,
 						0.9f,
