@@ -13,6 +13,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include <RE/Skyrim.h>
 #include <SKSE/Events.h>
 #include <SKSE/SKSE.h>
@@ -606,6 +608,12 @@ namespace CalamityAffixes
 			[[nodiscard]] const RunewordRecipe* GetCurrentRunewordRecipe() const;
 			[[nodiscard]] std::string BuildRunewordTooltip(std::uint64_t a_instanceKey) const;
 			void InitializeRunewordCatalog();
+			bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
+			void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
+			[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
+			void IndexConfiguredAffixes();
+			void RegisterSynthesizedAffix(AffixRuntime&& a_affix, bool a_warnOnDuplicate);
+			void SynthesizeRunewordRuntimeAffixes();
 			void SanitizeRunewordState();
 			void CycleRunewordBase(std::int32_t a_direction);
 			void CycleRunewordRecipe(std::int32_t a_direction);

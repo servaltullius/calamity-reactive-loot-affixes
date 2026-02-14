@@ -19,6 +19,8 @@ namespace CalamityAffixes
 {
 	namespace
 	{
+		const nlohmann::json kEmptyAffixArray = nlohmann::json::array();
+
 		std::string_view Trim(std::string_view a_text) noexcept
 		{
 			auto isWs = [](unsigned char c) {
@@ -185,75 +187,16 @@ namespace CalamityAffixes
 			ResetRuntimeStateForConfigReload();
 			InitializeRunewordCatalog();
 
-		const auto runtimeDir = GetRuntimeDirectory();
-		const auto configPath =
-			runtimeDir ?
-				(*runtimeDir / std::filesystem::path(kRuntimeConfigRelativePath)) :
-				(std::filesystem::current_path() / std::filesystem::path(kRuntimeConfigRelativePath));
-
-		SKSE::log::info("CalamityAffixes: loading runtime config from: {}", configPath.string());
-
-		std::ifstream in(configPath);
-		if (!in.is_open()) {
-			SKSE::log::warn("CalamityAffixes: runtime config not found: {}", configPath.string());
-			return;
-		}
-
 		nlohmann::json j;
-		try {
-			in >> j;
-		} catch (const std::exception&) {
-			SKSE::log::error("CalamityAffixes: failed to parse runtime config (affixes.json).");
+		if (!LoadRuntimeConfigJson(j)) {
 			return;
 		}
 
-			const auto& loot = j.value("loot", nlohmann::json::object());
-			if (loot.is_object()) {
-				_loot.chancePercent = loot.value("chancePercent", 0.0f);
-				_loot.runewordFragmentChancePercent =
-					static_cast<float>(loot.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent)));
-				_loot.renameItem = loot.value("renameItem", false);
-				_loot.sharedPool = loot.value("sharedPool", false);
-				_loot.debugLog = loot.value("debugLog", false);
-				_loot.dotTagSafetyAutoDisable = loot.value("dotTagSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
-				const double dotTagSafetyThreshold =
-					loot.value("dotTagSafetyUniqueEffectThreshold", static_cast<double>(_loot.dotTagSafetyUniqueEffectThreshold));
-				const double trapGlobalMaxActive = loot.value("trapGlobalMaxActive", static_cast<double>(_loot.trapGlobalMaxActive));
-				_loot.nameFormat = loot.value("nameFormat", std::string{ "{base} [{affix}]" });
+		ApplyLootConfigFromJson(j);
 
-			if (_loot.chancePercent < 0.0f) {
-				_loot.chancePercent = 0.0f;
-			} else if (_loot.chancePercent > 100.0f) {
-				_loot.chancePercent = 100.0f;
-			}
-
-				if (_loot.runewordFragmentChancePercent < 0.0f) {
-					_loot.runewordFragmentChancePercent = 0.0f;
-				} else if (_loot.runewordFragmentChancePercent > 100.0f) {
-					_loot.runewordFragmentChancePercent = 100.0f;
-				}
-
-				if (dotTagSafetyThreshold <= 0.0) {
-					_loot.dotTagSafetyUniqueEffectThreshold = 0u;
-				} else {
-					const double clamped = std::clamp(dotTagSafetyThreshold, 8.0, 4096.0);
-					_loot.dotTagSafetyUniqueEffectThreshold = static_cast<std::uint32_t>(clamped);
-				}
-
-				if (trapGlobalMaxActive <= 0.0) {
-					_loot.trapGlobalMaxActive = 0u;
-			} else {
-				const double clamped = std::clamp(trapGlobalMaxActive, 1.0, 4096.0);
-				_loot.trapGlobalMaxActive = static_cast<std::uint32_t>(clamped);
-			}
-		}
-
-		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
-		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
-
-		const auto& keywords = j.value("keywords", nlohmann::json::object());
-		const auto& affixes = keywords.value("affixes", nlohmann::json::array());
-		if (!affixes.is_array()) {
+		const auto* affixes = ResolveAffixArray(j);
+		if (!affixes) {
+			SKSE::log::error("CalamityAffixes: invalid runtime config schema (keywords.affixes).");
 			return;
 		}
 
@@ -368,7 +311,7 @@ namespace CalamityAffixes
 			       a_type == "SummonCorpseExplosion";
 		};
 
-		for (const auto& a : affixes) {
+		for (const auto& a : *affixes) {
 			if (!a.is_object()) {
 				continue;
 			}
@@ -817,6 +760,126 @@ namespace CalamityAffixes
 			}
 		}
 
+		IndexConfiguredAffixes();
+		SynthesizeRunewordRuntimeAffixes();
+
+		_activeCounts.assign(_affixes.size(), 0);
+
+		SanitizeRunewordState();
+		_configLoaded = true;
+
+		RebuildActiveCounts();
+
+			SKSE::log::info(
+				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%).",
+				_affixes.size(),
+				_lootWeaponAffixes.size(), _lootArmorAffixes.size(),
+				_lootWeaponSuffixes.size(), _lootArmorSuffixes.size(),
+				_loot.chancePercent);
+
+		if (_affixes.empty()) {
+			SKSE::log::error("CalamityAffixes: no affixes loaded. Is the generated CalamityAffixes plugin enabled?");
+		}
+	}
+
+	bool EventBridge::LoadRuntimeConfigJson(nlohmann::json& a_outJson) const
+	{
+		const auto runtimeDir = GetRuntimeDirectory();
+		const auto configPath =
+			runtimeDir ?
+				(*runtimeDir / std::filesystem::path(kRuntimeConfigRelativePath)) :
+				(std::filesystem::current_path() / std::filesystem::path(kRuntimeConfigRelativePath));
+
+		SKSE::log::info("CalamityAffixes: loading runtime config from: {}", configPath.string());
+
+		std::ifstream in(configPath);
+		if (!in.is_open()) {
+			SKSE::log::warn("CalamityAffixes: runtime config not found: {}", configPath.string());
+			return false;
+		}
+
+		try {
+			in >> a_outJson;
+		} catch (const std::exception&) {
+			SKSE::log::error("CalamityAffixes: failed to parse runtime config (affixes.json).");
+			return false;
+		}
+
+		return true;
+	}
+
+	void EventBridge::ApplyLootConfigFromJson(const nlohmann::json& a_configRoot)
+	{
+		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
+		if (loot.is_object()) {
+			_loot.chancePercent = loot.value("chancePercent", 0.0f);
+			_loot.runewordFragmentChancePercent =
+				static_cast<float>(loot.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent)));
+			_loot.renameItem = loot.value("renameItem", false);
+			_loot.sharedPool = loot.value("sharedPool", false);
+			_loot.debugLog = loot.value("debugLog", false);
+			_loot.dotTagSafetyAutoDisable = loot.value("dotTagSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
+			const double dotTagSafetyThreshold =
+				loot.value("dotTagSafetyUniqueEffectThreshold", static_cast<double>(_loot.dotTagSafetyUniqueEffectThreshold));
+			const double trapGlobalMaxActive = loot.value("trapGlobalMaxActive", static_cast<double>(_loot.trapGlobalMaxActive));
+			_loot.nameFormat = loot.value("nameFormat", std::string{ "{base} [{affix}]" });
+
+			if (_loot.chancePercent < 0.0f) {
+				_loot.chancePercent = 0.0f;
+			} else if (_loot.chancePercent > 100.0f) {
+				_loot.chancePercent = 100.0f;
+			}
+
+			if (_loot.runewordFragmentChancePercent < 0.0f) {
+				_loot.runewordFragmentChancePercent = 0.0f;
+			} else if (_loot.runewordFragmentChancePercent > 100.0f) {
+				_loot.runewordFragmentChancePercent = 100.0f;
+			}
+
+			if (dotTagSafetyThreshold <= 0.0) {
+				_loot.dotTagSafetyUniqueEffectThreshold = 0u;
+			} else {
+				const double clamped = std::clamp(dotTagSafetyThreshold, 8.0, 4096.0);
+				_loot.dotTagSafetyUniqueEffectThreshold = static_cast<std::uint32_t>(clamped);
+			}
+
+			if (trapGlobalMaxActive <= 0.0) {
+				_loot.trapGlobalMaxActive = 0u;
+			} else {
+				const double clamped = std::clamp(trapGlobalMaxActive, 1.0, 4096.0);
+				_loot.trapGlobalMaxActive = static_cast<std::uint32_t>(clamped);
+			}
+		}
+
+		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+	}
+
+	const nlohmann::json* EventBridge::ResolveAffixArray(const nlohmann::json& a_configRoot) const
+	{
+		const auto keywordsIt = a_configRoot.find("keywords");
+		if (keywordsIt == a_configRoot.end()) {
+			return &kEmptyAffixArray;
+		}
+		if (!keywordsIt->is_object()) {
+			SKSE::log::error("CalamityAffixes: runtime config field 'keywords' must be an object.");
+			return nullptr;
+		}
+
+		const auto affixesIt = keywordsIt->find("affixes");
+		if (affixesIt == keywordsIt->end()) {
+			return &kEmptyAffixArray;
+		}
+		if (!affixesIt->is_array()) {
+			SKSE::log::error("CalamityAffixes: runtime config field 'keywords.affixes' must be an array.");
+			return nullptr;
+		}
+
+		return &(*affixesIt);
+	}
+
+	void EventBridge::IndexConfiguredAffixes()
+	{
 		for (std::size_t i = 0; i < _affixes.size(); i++) {
 			const auto& affix = _affixes[i];
 			if (!affix.id.empty()) {
@@ -856,8 +919,10 @@ namespace CalamityAffixes
 				}
 			}
 		}
+	}
 
-		auto registerRuntimeAffix = [&](AffixRuntime&& a_affix, bool a_warnOnDuplicate = true) {
+	void EventBridge::RegisterSynthesizedAffix(AffixRuntime&& a_affix, bool a_warnOnDuplicate)
+	{
 			_affixes.push_back(std::move(a_affix));
 			const auto idx = _affixes.size() - 1;
 			const auto& affix = _affixes[idx];
@@ -921,6 +986,13 @@ namespace CalamityAffixes
 					}
 				}
 			}
+	}
+
+	void EventBridge::SynthesizeRunewordRuntimeAffixes()
+	{
+		auto* handler = RE::TESDataHandler::GetSingleton();
+		auto parseSpellFromString = [handler](std::string_view a_spec) -> RE::SpellItem* {
+			return LookupSpellFromSpec(a_spec, handler);
 		};
 
 			auto* dynamicFire = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_DMG_FIRE_DYNAMIC");
@@ -1870,6 +1942,68 @@ namespace CalamityAffixes
 					}
 				}
 
+				constexpr float kUnsetValue = -1.0f;
+				struct RecipeTuning
+				{
+					std::string_view id;
+					float procPct;
+					float icdSec;
+					float perTargetIcdSec;
+					float magnitudeMult;
+				};
+				static constexpr RecipeTuning kRecipeTunings[] = {
+					{ "rw_lawbringer", 13.0f, 3.8f, 10.0f, kUnsetValue },
+					{ "rw_wrath", 16.0f, 3.2f, 8.0f, kUnsetValue },
+					{ "rw_kingslayer", 18.0f, 2.6f, 7.0f, kUnsetValue },
+					{ "rw_principle", 14.0f, 4.2f, 9.0f, kUnsetValue },
+					{ "rw_black", 14.0f, 2.4f, 3.5f, kUnsetValue },
+					{ "rw_rift", 15.0f, 2.0f, 3.0f, kUnsetValue },
+					{ "rw_malice", 14.0f, 2.3f, 4.0f, kUnsetValue },
+					{ "rw_plague", 14.0f, 2.2f, 4.0f, kUnsetValue },
+					{ "rw_wealth", 24.0f, 4.8f, 5.0f, kUnsetValue },
+					{ "rw_obedience", 22.0f, 5.2f, 5.0f, kUnsetValue },
+					{ "rw_honor", 20.0f, 5.6f, 6.0f, kUnsetValue },
+					{ "rw_eternity", 24.0f, 4.4f, 4.5f, kUnsetValue },
+					{ "rw_stealth", 15.0f, 16.0f, kUnsetValue, kUnsetValue },
+					{ "rw_smoke", 15.0f, 15.0f, kUnsetValue, kUnsetValue },
+					{ "rw_treachery", 18.0f, 12.0f, kUnsetValue, kUnsetValue },
+					{ "rw_gloom", 7.0f, 24.0f, kUnsetValue, kUnsetValue },
+					{ "rw_delirium", 11.0f, 8.5f, 11.0f, kUnsetValue },
+					{ "rw_nadir", 14.0f, 6.5f, 10.0f, kUnsetValue },
+					{ "rw_beast", 26.0f, 3.0f, kUnsetValue, kUnsetValue },
+					{ "rw_dragon", 16.0f, 10.0f, kUnsetValue, kUnsetValue },
+					{ "rw_hand_of_justice", 18.0f, 8.5f, kUnsetValue, kUnsetValue },
+					{ "rw_flickering_flame", 14.0f, 11.0f, kUnsetValue, kUnsetValue },
+					{ "rw_temper", 17.0f, 8.8f, kUnsetValue, kUnsetValue },
+					{ "rw_voice_of_reason", 16.0f, 9.5f, kUnsetValue, kUnsetValue },
+					{ "rw_ice", 14.0f, 11.0f, kUnsetValue, kUnsetValue },
+					{ "rw_pride", 14.0f, 12.5f, kUnsetValue, kUnsetValue },
+					{ "rw_metamorphosis", 13.0f, 16.0f, kUnsetValue, kUnsetValue },
+					{ "rw_destruction", 22.0f, 1.1f, kUnsetValue, 0.17f },
+					{ "rw_hustle_w", 24.0f, 2.8f, kUnsetValue, kUnsetValue },
+					{ "rw_harmony", 21.0f, 3.8f, kUnsetValue, kUnsetValue },
+					{ "rw_unbending_will", 25.0f, 2.6f, kUnsetValue, kUnsetValue },
+					{ "rw_stone", 18.0f, 13.0f, kUnsetValue, kUnsetValue },
+					{ "rw_sanctuary", 17.0f, 13.0f, kUnsetValue, kUnsetValue },
+					{ "rw_memory", 18.0f, 12.0f, kUnsetValue, kUnsetValue },
+					{ "rw_wisdom", 17.0f, 13.0f, kUnsetValue, kUnsetValue },
+					{ "rw_holy_thunder", 17.0f, 9.0f, kUnsetValue, kUnsetValue },
+					{ "rw_mist", 15.0f, 11.5f, kUnsetValue, kUnsetValue }
+				};
+				struct StyleTuning
+				{
+					SyntheticRunewordStyle style;
+					float procPct;
+					float icdSec;
+				};
+				static constexpr StyleTuning kSummonStyleTunings[] = {
+					{ SyntheticRunewordStyle::kSummonDremoraLord, 5.0f, 34.0f },
+					{ SyntheticRunewordStyle::kSummonStormAtronach, 7.0f, 26.0f },
+					{ SyntheticRunewordStyle::kSummonFlameAtronach, 8.0f, 24.0f },
+					{ SyntheticRunewordStyle::kSummonFrostAtronach, 8.0f, 24.0f },
+					{ SyntheticRunewordStyle::kSummonFamiliar, 10.0f, 22.0f }
+				};
+
 				auto applyRunewordIndividualTuning = [&](std::string_view a_recipeId, SyntheticRunewordStyle a_style) {
 					auto setProcIcd = [&](float a_procPct, float a_icdSec) {
 						out.procChancePct = a_procPct;
@@ -1884,107 +2018,26 @@ namespace CalamityAffixes
 						}
 					};
 
-					if (a_recipeId == "rw_lawbringer") {
-						setProcIcd(13.0f, 3.8f);
-						setPerTargetIcd(10.0f);
-					} else if (a_recipeId == "rw_wrath") {
-						setProcIcd(16.0f, 3.2f);
-						setPerTargetIcd(8.0f);
-					} else if (a_recipeId == "rw_kingslayer") {
-						setProcIcd(18.0f, 2.6f);
-						setPerTargetIcd(7.0f);
-					} else if (a_recipeId == "rw_principle") {
-						setProcIcd(14.0f, 4.2f);
-						setPerTargetIcd(9.0f);
-					} else if (a_recipeId == "rw_black") {
-						setProcIcd(14.0f, 2.4f);
-						setPerTargetIcd(3.5f);
-					} else if (a_recipeId == "rw_rift") {
-						setProcIcd(15.0f, 2.0f);
-						setPerTargetIcd(3.0f);
-					} else if (a_recipeId == "rw_malice") {
-						setProcIcd(14.0f, 2.3f);
-						setPerTargetIcd(4.0f);
-					} else if (a_recipeId == "rw_plague") {
-						setProcIcd(14.0f, 2.2f);
-						setPerTargetIcd(4.0f);
-					} else if (a_recipeId == "rw_wealth") {
-						setProcIcd(24.0f, 4.8f);
-						setPerTargetIcd(5.0f);
-					} else if (a_recipeId == "rw_obedience") {
-						setProcIcd(22.0f, 5.2f);
-						setPerTargetIcd(5.0f);
-					} else if (a_recipeId == "rw_honor") {
-						setProcIcd(20.0f, 5.6f);
-						setPerTargetIcd(6.0f);
-					} else if (a_recipeId == "rw_eternity") {
-						setProcIcd(24.0f, 4.4f);
-						setPerTargetIcd(4.5f);
-					} else if (a_recipeId == "rw_stealth") {
-						setProcIcd(15.0f, 16.0f);
-					} else if (a_recipeId == "rw_smoke") {
-						setProcIcd(15.0f, 15.0f);
-					} else if (a_recipeId == "rw_treachery") {
-						setProcIcd(18.0f, 12.0f);
-					} else if (a_recipeId == "rw_gloom") {
-						setProcIcd(7.0f, 24.0f);
-					} else if (a_recipeId == "rw_delirium") {
-						setProcIcd(11.0f, 8.5f);
-						setPerTargetIcd(11.0f);
-					} else if (a_recipeId == "rw_nadir") {
-						setProcIcd(14.0f, 6.5f);
-						setPerTargetIcd(10.0f);
-					} else if (a_recipeId == "rw_beast") {
-						setProcIcd(26.0f, 3.0f);
-					} else if (a_recipeId == "rw_dragon") {
-						setProcIcd(16.0f, 10.0f);
-					} else if (a_recipeId == "rw_hand_of_justice") {
-						setProcIcd(18.0f, 8.5f);
-					} else if (a_recipeId == "rw_flickering_flame") {
-						setProcIcd(14.0f, 11.0f);
-					} else if (a_recipeId == "rw_temper") {
-						setProcIcd(17.0f, 8.8f);
-					} else if (a_recipeId == "rw_voice_of_reason") {
-						setProcIcd(16.0f, 9.5f);
-					} else if (a_recipeId == "rw_ice") {
-						setProcIcd(14.0f, 11.0f);
-					} else if (a_recipeId == "rw_pride") {
-						setProcIcd(14.0f, 12.5f);
-					} else if (a_recipeId == "rw_metamorphosis") {
-						setProcIcd(13.0f, 16.0f);
-					} else if (a_recipeId == "rw_destruction") {
-						setProcIcd(22.0f, 1.1f);
-						setMagnitudeMult(0.17f);
-					} else if (a_recipeId == "rw_hustle_w") {
-						setProcIcd(24.0f, 2.8f);
-					} else if (a_recipeId == "rw_harmony") {
-						setProcIcd(21.0f, 3.8f);
-					} else if (a_recipeId == "rw_unbending_will") {
-						setProcIcd(25.0f, 2.6f);
-					} else if (a_recipeId == "rw_stone") {
-						setProcIcd(18.0f, 13.0f);
-					} else if (a_recipeId == "rw_sanctuary") {
-						setProcIcd(17.0f, 13.0f);
-					} else if (a_recipeId == "rw_memory") {
-						setProcIcd(18.0f, 12.0f);
-					} else if (a_recipeId == "rw_wisdom") {
-						setProcIcd(17.0f, 13.0f);
-					} else if (a_recipeId == "rw_holy_thunder") {
-						setProcIcd(17.0f, 9.0f);
-					} else if (a_recipeId == "rw_mist") {
-						setProcIcd(15.0f, 11.5f);
+					for (const auto& tuning : kRecipeTunings) {
+						if (tuning.id != a_recipeId) {
+							continue;
+						}
+						setProcIcd(tuning.procPct, tuning.icdSec);
+						if (tuning.perTargetIcdSec > 0.0f) {
+							setPerTargetIcd(tuning.perTargetIcdSec);
+						}
+						if (tuning.magnitudeMult > 0.0f) {
+							setMagnitudeMult(tuning.magnitudeMult);
+						}
+						break;
 					}
 
-					if (a_style == SyntheticRunewordStyle::kSummonDremoraLord) {
-						setProcIcd(5.0f, 34.0f);
-					} else if (a_style == SyntheticRunewordStyle::kSummonStormAtronach) {
-						setProcIcd(7.0f, 26.0f);
-					} else if (a_style == SyntheticRunewordStyle::kSummonFlameAtronach) {
-						setProcIcd(8.0f, 24.0f);
-					} else if (a_style == SyntheticRunewordStyle::kSummonFrostAtronach) {
-						setProcIcd(8.0f, 24.0f);
-					} else if (a_style == SyntheticRunewordStyle::kSummonFamiliar) {
-						setProcIcd(10.0f, 22.0f);
+					for (const auto& tuning : kSummonStyleTunings) {
+						if (tuning.style != a_style) {
+							continue;
+						}
+						setProcIcd(tuning.procPct, tuning.icdSec);
+						break;
 					}
 				};
 
@@ -2000,7 +2053,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-				registerRuntimeAffix(std::move(out), false);
+				RegisterSynthesizedAffix(std::move(out), false);
 				synthesizedRunewordAffixes += 1u;
 				SKSE::log::warn(
 					"CalamityAffixes: synthesized runeword runtime affix (recipe={}, style={}, resultToken={:016X}).",
@@ -2014,23 +2067,6 @@ namespace CalamityAffixes
 				"CalamityAffixes: synthesized {} runeword runtime affix definitions.",
 				synthesizedRunewordAffixes);
 		}
-
-		_activeCounts.assign(_affixes.size(), 0);
-
-		SanitizeRunewordState();
-		_configLoaded = true;
-
-		RebuildActiveCounts();
-
-			SKSE::log::info(
-				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%).",
-				_affixes.size(),
-				_lootWeaponAffixes.size(), _lootArmorAffixes.size(),
-				_lootWeaponSuffixes.size(), _lootArmorSuffixes.size(),
-				_loot.chancePercent);
-
-		if (_affixes.empty()) {
-			SKSE::log::error("CalamityAffixes: no affixes loaded. Is the generated CalamityAffixes plugin enabled?");
-		}
 	}
+
 }

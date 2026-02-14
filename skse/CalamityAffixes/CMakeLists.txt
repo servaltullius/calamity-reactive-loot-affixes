@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 1.2.9 LANGUAGES CXX)
+project(CalamityAffixes VERSION 1.2.10 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,6 +17,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/LootRerollGuard.h
 	    include/CalamityAffixes/LootUiGuards.h
 	    include/CalamityAffixes/Papyrus.h
+	    include/CalamityAffixes/PrismaLayoutPersistence.h
 	    include/CalamityAffixes/PrismaTooltip.h
 	    include/CalamityAffixes/RunewordUtil.h
 	    include/CalamityAffixes/TriggerGuards.h
@@ -41,6 +42,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Serialization.cpp
 	    src/Hooks.cpp
 	    src/Papyrus.cpp
+	    src/PrismaLayoutPersistence.cpp
 	    src/PrismaTooltip.cpp
 	    src/TrapSystem.cpp
 	)

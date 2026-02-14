@@ -8,6 +8,7 @@
       :root {
         --scale: 1;
         --panel-ui-scale: 1;
+        --tooltip-font-scale: 1;
         --bg: rgba(0, 0, 0, 0.65);
         --panel: rgba(10, 14, 18, 0.9);
         --border: rgba(255, 255, 255, 0.16);
@@ -55,15 +56,22 @@
       }
 
       #tooltipTitle {
-        font-size: 16px;
+        font-size: calc(16px * var(--tooltip-font-scale));
         font-weight: 700;
         letter-spacing: 0.2px;
         color: var(--accent);
         margin-bottom: 6px;
+        pointer-events: auto;
+        cursor: grab;
+        touch-action: none;
+      }
+
+      #tooltipTitle.dragging {
+        cursor: grabbing;
       }
 
       #tooltipText {
-        font-size: 18px;
+        font-size: calc(18px * var(--tooltip-font-scale));
         line-height: 1.4;
         color: var(--text);
         white-space: pre-wrap;
@@ -71,7 +79,7 @@
 
       #tooltipHint {
         margin-top: 8px;
-        font-size: 12px;
+        font-size: calc(12px * var(--tooltip-font-scale));
         color: var(--muted);
         display: none;
       }
@@ -91,7 +99,7 @@
         color: var(--text);
         padding: 8px 10px;
         border-radius: 10px;
-        font-size: 12px;
+        font-size: calc(12px * var(--tooltip-font-scale));
         line-height: 1.2;
         font-family: inherit;
         cursor: pointer;
@@ -126,7 +134,7 @@
         color: var(--text);
         padding: 8px 10px;
         border-radius: 999px;
-        font-size: 12px;
+        font-size: calc(12px * var(--tooltip-font-scale));
         line-height: 1.2;
         font-family: inherit;
         cursor: pointer;
@@ -969,6 +977,57 @@
             aria-labelledby="mainAdvancedTab"
             hidden>
             <div class="cpSection">
+              <div id="tooltipUiSectionTitle" class="cpSectionTitle">Tooltip UI / 툴팁 UI</div>
+              <div id="tooltipUiSummary" class="cpContextMeta">
+                글자 100% / 위치 우측 70px 상단 255px
+              </div>
+              <div class="cpGrid">
+                <button
+                  id="tooltipTextSmallerButton"
+                  class="cpButton"
+                  data-cmd="ui.tooltip.font:-0.08">
+                  Text - / 글자 -
+                </button>
+                <button
+                  id="tooltipTextLargerButton"
+                  class="cpButton"
+                  data-cmd="ui.tooltip.font:0.08">
+                  Text + / 글자 +
+                </button>
+                <button
+                  id="tooltipMoveLeftButton"
+                  class="cpButton"
+                  data-cmd="ui.tooltip.nudge:-24,0">
+                  Move Left / 왼쪽
+                </button>
+                <button
+                  id="tooltipMoveRightButton"
+                  class="cpButton"
+                  data-cmd="ui.tooltip.nudge:24,0">
+                  Move Right / 오른쪽
+                </button>
+                <button
+                  id="tooltipMoveUpButton"
+                  class="cpButton"
+                  data-cmd="ui.tooltip.nudge:0,-24">
+                  Move Up / 위로
+                </button>
+                <button
+                  id="tooltipMoveDownButton"
+                  class="cpButton"
+                  data-cmd="ui.tooltip.nudge:0,24">
+                  Move Down / 아래로
+                </button>
+                <button
+                  id="tooltipResetButton"
+                  class="cpButton"
+                  data-cmd="ui.tooltip.reset">
+                  Reset Tooltip / 툴팁 초기화
+                </button>
+              </div>
+            </div>
+
+            <div class="cpSection">
               <div id="manualModeTitle" class="cpSectionTitle">Manual Mode / 수동 모드</div>
               <div class="cpGrid">
                 <button id="manualPrevButton" class="cpButton" data-cmd="mode.prev">Manual Prev / 수동 이전</button>
@@ -1048,6 +1107,15 @@
       const mainRunewordPane = document.getElementById("mainRunewordPane");
       const mainAffixPane = document.getElementById("mainAffixPane");
       const mainAdvancedPane = document.getElementById("mainAdvancedPane");
+      const tooltipUiSectionTitle = document.getElementById("tooltipUiSectionTitle");
+      const tooltipUiSummary = document.getElementById("tooltipUiSummary");
+      const tooltipTextSmallerButton = document.getElementById("tooltipTextSmallerButton");
+      const tooltipTextLargerButton = document.getElementById("tooltipTextLargerButton");
+      const tooltipMoveLeftButton = document.getElementById("tooltipMoveLeftButton");
+      const tooltipMoveRightButton = document.getElementById("tooltipMoveRightButton");
+      const tooltipMoveUpButton = document.getElementById("tooltipMoveUpButton");
+      const tooltipMoveDownButton = document.getElementById("tooltipMoveDownButton");
+      const tooltipResetButton = document.getElementById("tooltipResetButton");
       const manualModeTitle = document.getElementById("manualModeTitle");
       const manualPrevButton = document.getElementById("manualPrevButton");
       const manualNextButton = document.getElementById("manualNextButton");
@@ -1063,6 +1131,9 @@
       const panelResizeBottom = document.getElementById("panelResizeBottom");
       const panelResizeCorner = document.getElementById("panelResizeCorner");
       const tooltipRunewordHint = document.getElementById("tooltipRunewordHint");
+
+      const tooltipDefaultsDesktop = Object.freeze({ right: 70, top: 255, fontScale: 1 });
+      const tooltipDefaultsMobile = Object.freeze({ right: 16, top: 180, fontScale: 1 });
 
       let controlPanelOpen = false;
       let tooltipTextState = "";
@@ -1089,7 +1160,10 @@
       };
       let panelDragState = null;
       let panelResizeState = null;
+      let tooltipDragState = null;
       let panelLayoutLoaded = false;
+      let tooltipLayoutLoaded = false;
+      let tooltipLayout = getDefaultTooltipLayout();
 
       function normalizeUiLang(raw) {
         const value = String(raw ?? "").trim().toLowerCase();
@@ -1139,6 +1213,153 @@
         if (tooltipRunewordHint) {
           tooltipRunewordHint.textContent = label;
         }
+      }
+
+      function getDefaultTooltipLayout() {
+        if (window.innerWidth <= 900) {
+          return { ...tooltipDefaultsMobile };
+        }
+        return { ...tooltipDefaultsDesktop };
+      }
+
+      function tooltipBounds() {
+        const margin = 8;
+        const maxRight = Math.max(margin, window.innerWidth - 80);
+        const maxTop = Math.max(margin, window.innerHeight - 80);
+        return { margin, maxRight, maxTop };
+      }
+
+      function normalizeTooltipLayout(raw) {
+        const defaults = getDefaultTooltipLayout();
+        const { margin, maxRight, maxTop } = tooltipBounds();
+        const source = raw && typeof raw === "object" ? raw : {};
+
+        let right = Number(source.right);
+        if (!Number.isFinite(right)) {
+          right = defaults.right;
+        }
+
+        let top = Number(source.top);
+        if (!Number.isFinite(top)) {
+          top = defaults.top;
+        }
+
+        let fontScale = Number(source.fontScale);
+        if (!Number.isFinite(fontScale)) {
+          const permille = Number(source.fontPermille);
+          if (Number.isFinite(permille) && permille > 0) {
+            fontScale = permille / 1000;
+          }
+        }
+        if (!Number.isFinite(fontScale)) {
+          fontScale = defaults.fontScale;
+        }
+
+        return {
+          right: clamp(Math.round(right), margin, maxRight),
+          top: clamp(Math.round(top), margin, maxTop),
+          fontScale: clamp(fontScale, 0.7, 1.8)
+        };
+      }
+
+      function setTooltipSummaryText() {
+        if (!tooltipUiSummary) return;
+        const percent = Math.round(tooltipLayout.fontScale * 100);
+        tooltipUiSummary.textContent = t(
+          `Text ${percent}% · Right ${tooltipLayout.right}px / Top ${tooltipLayout.top}px`,
+          `글자 ${percent}% · 우측 ${tooltipLayout.right}px / 상단 ${tooltipLayout.top}px`
+        );
+      }
+
+      function applyTooltipLayout() {
+        tooltipLayout = normalizeTooltipLayout(tooltipLayout);
+        tooltipPanel.style.right = `${tooltipLayout.right}px`;
+        tooltipPanel.style.top = `${tooltipLayout.top}px`;
+        quickLaunch.style.right = `${tooltipLayout.right}px`;
+        const quickOffset = window.innerWidth <= 900 ? 25 : 35;
+        const quickTop = clamp(tooltipLayout.top - quickOffset, 8, Math.max(8, window.innerHeight - 56));
+        quickLaunch.style.top = `${Math.round(quickTop)}px`;
+        document.documentElement.style.setProperty("--tooltip-font-scale", tooltipLayout.fontScale.toFixed(3));
+        setTooltipSummaryText();
+      }
+
+      function persistTooltipLayout() {
+        const right = Math.round(tooltipLayout.right);
+        const top = Math.round(tooltipLayout.top);
+        const fontPermille = Math.round(tooltipLayout.fontScale * 1000);
+        sendCommand(`ui.tooltip.save:${right},${top},${fontPermille}`);
+      }
+
+      function applyAndPersistTooltipLayout(feedbackMessage) {
+        applyTooltipLayout();
+        persistTooltipLayout();
+        if (feedbackMessage) {
+          setActionFeedback(feedbackMessage);
+        }
+      }
+
+      function handleTooltipUiCommand(command) {
+        if (typeof command !== "string" || !command.startsWith("ui.tooltip.")) {
+          return false;
+        }
+
+        if (command === "ui.tooltip.reset") {
+          tooltipLayout = normalizeTooltipLayout(getDefaultTooltipLayout());
+          tooltipLayoutLoaded = true;
+          applyAndPersistTooltipLayout(t("Tooltip UI reset.", "툴팁 UI를 초기화했습니다."));
+          return true;
+        }
+
+        if (command.startsWith("ui.tooltip.font:")) {
+          const delta = Number(command.slice("ui.tooltip.font:".length));
+          if (!Number.isFinite(delta)) {
+            setActionFeedback(t("Invalid tooltip font command.", "툴팁 글자 명령이 올바르지 않습니다."));
+            return true;
+          }
+
+          tooltipLayout = {
+            ...tooltipLayout,
+            fontScale: tooltipLayout.fontScale + delta
+          };
+          tooltipLayoutLoaded = true;
+          applyAndPersistTooltipLayout();
+          setActionFeedback(
+            t(
+              `Tooltip text size ${Math.round(tooltipLayout.fontScale * 100)}%.`,
+              `툴팁 글자 크기 ${Math.round(tooltipLayout.fontScale * 100)}%.`
+            )
+          );
+          return true;
+        }
+
+        if (command.startsWith("ui.tooltip.nudge:")) {
+          const payload = command.slice("ui.tooltip.nudge:".length);
+          const [dxText = "0", dyText = "0"] = payload.split(",", 2);
+          const deltaX = Number(dxText);
+          const deltaY = Number(dyText);
+          if (!Number.isFinite(deltaX) || !Number.isFinite(deltaY)) {
+            setActionFeedback(t("Invalid tooltip position command.", "툴팁 위치 명령이 올바르지 않습니다."));
+            return true;
+          }
+
+          tooltipLayout = {
+            ...tooltipLayout,
+            right: tooltipLayout.right - deltaX,
+            top: tooltipLayout.top + deltaY
+          };
+          tooltipLayoutLoaded = true;
+          applyAndPersistTooltipLayout();
+          setActionFeedback(
+            t(
+              `Tooltip moved (right ${tooltipLayout.right}px, top ${tooltipLayout.top}px).`,
+              `툴팁 이동됨 (우측 ${tooltipLayout.right}px, 상단 ${tooltipLayout.top}px).`
+            )
+          );
+          return true;
+        }
+
+        setActionFeedback(t("Unknown tooltip command.", "알 수 없는 툴팁 명령입니다."));
+        return true;
       }
 
       function initUiText() {
@@ -1206,6 +1427,31 @@
         if (mainAdvancedTab) {
           mainAdvancedTab.textContent = t("Advanced", "고급");
         }
+        if (tooltipUiSectionTitle) {
+          tooltipUiSectionTitle.textContent = t("Tooltip UI", "툴팁 UI");
+        }
+        if (tooltipTextSmallerButton) {
+          tooltipTextSmallerButton.textContent = t("Text -", "글자 -");
+        }
+        if (tooltipTextLargerButton) {
+          tooltipTextLargerButton.textContent = t("Text +", "글자 +");
+        }
+        if (tooltipMoveLeftButton) {
+          tooltipMoveLeftButton.textContent = t("Move Left", "왼쪽 이동");
+        }
+        if (tooltipMoveRightButton) {
+          tooltipMoveRightButton.textContent = t("Move Right", "오른쪽 이동");
+        }
+        if (tooltipMoveUpButton) {
+          tooltipMoveUpButton.textContent = t("Move Up", "위로 이동");
+        }
+        if (tooltipMoveDownButton) {
+          tooltipMoveDownButton.textContent = t("Move Down", "아래로 이동");
+        }
+        if (tooltipResetButton) {
+          tooltipResetButton.textContent = t("Reset Tooltip", "툴팁 초기화");
+        }
+        setTooltipSummaryText();
         panelDragHint.textContent = t(
           "Drag this header to move panel",
           "이 헤더를 드래그해 패널 위치 이동"
@@ -1242,6 +1488,7 @@
         renderRecipeItems();
         renderInventoryItems();
         renderRunewordPanelState();
+        applyTooltipLayout();
         applyTooltipPlacement();
         applyQuickLaunchVisibility();
       }
@@ -1516,7 +1763,50 @@
         event.stopPropagation();
       }
 
+      function beginTooltipDrag(event) {
+        if (controlPanelOpen) return;
+        if (!tooltipTextState) return;
+        if (tooltipDragState) return;
+        if (panelDragState || panelResizeState) return;
+        if (event.button !== undefined && event.button !== 0) return;
+
+        tooltipLayout = normalizeTooltipLayout(tooltipLayout);
+        tooltipDragState = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startRight: tooltipLayout.right,
+          startTop: tooltipLayout.top
+        };
+
+        tooltipTitle.classList.add("dragging");
+        if (typeof tooltipTitle.setPointerCapture === "function") {
+          try {
+            tooltipTitle.setPointerCapture(event.pointerId);
+          } catch (_) {}
+        }
+
+        setActionFeedback(t("Drag to move tooltip.", "드래그해서 툴팁 위치를 이동하세요."));
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
       function movePanel(event) {
+        if (tooltipDragState) {
+          if (event.pointerId !== tooltipDragState.pointerId) return;
+
+          const deltaX = event.clientX - tooltipDragState.startX;
+          const deltaY = event.clientY - tooltipDragState.startY;
+          tooltipLayout = {
+            ...tooltipLayout,
+            right: tooltipDragState.startRight - deltaX,
+            top: tooltipDragState.startTop + deltaY
+          };
+          applyTooltipLayout();
+          event.preventDefault();
+          return;
+        }
+
         if (panelResizeState) {
           if (event.pointerId !== panelResizeState.pointerId) return;
 
@@ -1565,6 +1855,48 @@
       }
 
       function endPanelDrag(event) {
+        if (tooltipDragState) {
+          if (event && event.pointerId !== tooltipDragState.pointerId) return;
+
+          const wasCancel = Boolean(event && event.type === "pointercancel");
+          const dragStart = {
+            right: tooltipDragState.startRight,
+            top: tooltipDragState.startTop
+          };
+          const dragPointerId = tooltipDragState.pointerId;
+          if (typeof tooltipTitle.releasePointerCapture === "function") {
+            try {
+              tooltipTitle.releasePointerCapture(dragPointerId);
+            } catch (_) {}
+          }
+
+          tooltipDragState = null;
+          tooltipTitle.classList.remove("dragging");
+          applyTooltipLayout();
+
+          const moved =
+            Math.abs(tooltipLayout.right - dragStart.right) >= 1 ||
+            Math.abs(tooltipLayout.top - dragStart.top) >= 1;
+
+          if (wasCancel) {
+            setActionFeedback(t("Tooltip move canceled.", "툴팁 이동이 취소되었습니다."));
+            return;
+          }
+
+          if (!moved) {
+            return;
+          }
+
+          persistTooltipLayout();
+          setActionFeedback(
+            t(
+              `Tooltip moved (right ${tooltipLayout.right}px, top ${tooltipLayout.top}px).`,
+              `툴팁 이동됨 (우측 ${tooltipLayout.right}px, 상단 ${tooltipLayout.top}px).`
+            )
+          );
+          return;
+        }
+
         if (panelResizeState) {
           if (!event || event.pointerId === panelResizeState.pointerId) {
             const id = panelResizeState.pointerId;
@@ -2197,6 +2529,28 @@
         }
       }
 
+      function setTooltipLayout(raw) {
+        let data = null;
+        if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+          data = raw;
+        } else if (typeof raw === "string" && raw.trim()) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+              data = parsed;
+            }
+          } catch (_) {}
+        }
+
+        if (!data) {
+          return;
+        }
+
+        tooltipLayout = normalizeTooltipLayout(data);
+        tooltipLayoutLoaded = true;
+        applyTooltipLayout();
+      }
+
       function setActionFeedback(raw) {
         const value = typeof raw === "string" ? raw : "";
         feedback.textContent = value;
@@ -2245,11 +2599,15 @@
         const buttons = document.querySelectorAll("[data-cmd]");
         buttons.forEach((button) => {
           button.addEventListener("click", () => {
+            const command = button.getAttribute("data-cmd");
+            if (command && handleTooltipUiCommand(command)) {
+              return;
+            }
+
             const openTab = button.getAttribute("data-open-tab");
             if (openTab) {
               pendingOpenMainTab = openTab;
             }
-            const command = button.getAttribute("data-cmd");
             if (command) {
               sendCommand(command);
             }
@@ -2293,6 +2651,7 @@
         PrismaUI_Interop("setRecipeItems", (data) => setRecipeItems(data));
         PrismaUI_Interop("setRunewordPanelState", (data) => setRunewordPanelState(data));
         PrismaUI_Interop("setPanelLayout", (data) => setPanelLayout(data));
+        PrismaUI_Interop("setTooltipLayout", (data) => setTooltipLayout(data));
       }
 
       // Browser fallback and debugging hooks.
@@ -2307,10 +2666,12 @@
       window.setRecipeItems = setRecipeItems;
       window.setRunewordPanelState = setRunewordPanelState;
       window.setPanelLayout = setPanelLayout;
+      window.setTooltipLayout = setTooltipLayout;
 
       initUiText();
       wireButtons();
       wireMainTabs();
+      tooltipTitle.addEventListener("pointerdown", beginTooltipDrag);
       panelDragHandle.addEventListener("pointerdown", beginPanelDrag);
       panelResizeRight.addEventListener("pointerdown", (event) => beginPanelResize("x", event));
       panelResizeBottom.addEventListener("pointerdown", (event) => beginPanelResize("y", event));
@@ -2328,6 +2689,10 @@
       window.addEventListener("resize", () => {
         requestAnimationFrame(() => {
           applyAutoScale();
+          if (!tooltipLayoutLoaded) {
+            tooltipLayout = getDefaultTooltipLayout();
+          }
+          applyTooltipLayout();
           updatePanelUiScale();
           keepPanelInViewport();
         });

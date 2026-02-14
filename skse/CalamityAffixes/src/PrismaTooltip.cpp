@@ -1,6 +1,5 @@
 #include "CalamityAffixes/PrismaTooltip.h"
 
-#include <array>
 #include <atomic>
 #include <cctype>
 #include <charconv>
@@ -20,6 +19,7 @@
 #include <SKSE/SKSE.h>
 
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/PrismaLayoutPersistence.h"
 
 #include "PrismaUI_API.h"
 
@@ -46,8 +46,15 @@ namespace CalamityAffixes::PrismaTooltip
 		constexpr std::string_view kRunewordBaseSelectPrefix = "runeword.base.select:";
 		constexpr std::string_view kRunewordRecipeSelectPrefix = "runeword.recipe.select:";
 		constexpr std::string_view kPanelLayoutSavePrefix = "ui.layout.save:";
+		constexpr std::string_view kTooltipLayoutSavePrefix = "ui.tooltip.save:";
 		constexpr std::string_view kItemSourceInventory = "inventory";
 		constexpr std::string_view kPanelLayoutPath = "Data/SKSE/Plugins/CalamityAffixes/prisma_panel_layout.json";
+		constexpr std::string_view kTooltipLayoutPath = "Data/SKSE/Plugins/CalamityAffixes/prisma_tooltip_layout.json";
+		constexpr int kDefaultTooltipRight = 70;
+		constexpr int kDefaultTooltipTop = 255;
+		constexpr int kDefaultTooltipFontPermille = 1000;
+		constexpr int kMinTooltipFontPermille = 700;
+		constexpr int kMaxTooltipFontPermille = 1800;
 
 		constexpr std::string_view kManualModeCycleNextEvent = "CalamityAffixes_ModeCycle_Next";
 		constexpr std::string_view kManualModeCyclePrevEvent = "CalamityAffixes_ModeCycle_Prev";
@@ -80,6 +87,7 @@ namespace CalamityAffixes::PrismaTooltip
 		std::string g_lastRunewordRecipeListJson = "[]";
 		std::string g_lastRunewordPanelStateJson = "{}";
 		std::string g_lastPanelLayoutJson = "{}";
+		std::string g_lastTooltipLayoutJson = "{}";
 		std::string g_lastPanelHotkeyText;
 		std::string g_lastUiLanguageCode;
 		std::jthread g_worker;
@@ -97,25 +105,26 @@ namespace CalamityAffixes::PrismaTooltip
 		std::mutex g_uiLanguageRefreshLock;
 		bool g_panelLayoutLoaded = false;
 		bool g_panelLayoutNeedsPush = false;
+		bool g_tooltipLayoutLoaded = false;
+		bool g_tooltipLayoutNeedsPush = false;
 
-		struct PanelLayout
-		{
-			int left{ 0 };
-			int top{ 0 };
-			int width{ 0 };
-			int height{ 0 };
-			bool valid{ false };
-		};
+		using PanelLayout = PrismaLayoutPersistence::PanelLayout;
+		using TooltipLayout = PrismaLayoutPersistence::TooltipLayout;
+
 		PanelLayout g_panelLayout{};
+
+		TooltipLayout g_tooltipLayout{};
 
 		void SetControlPanelOpenImpl(bool a_open);
 		void HandleUiCommand(std::string_view a_command);
 		void RefreshControlPanelHotkeyFromMcm(bool a_force = false);
 		void RefreshUiLanguageFromMcm(bool a_force = false);
 		void LoadPanelLayoutFromDisk();
+		void LoadTooltipLayoutFromDisk();
 		void SavePanelLayoutToDisk(const PanelLayout& a_layout);
+		void SaveTooltipLayoutToDisk(const TooltipLayout& a_layout);
 		void PushPanelLayoutToJs();
-		[[nodiscard]] bool ParsePanelLayout(std::string_view a_payload, PanelLayout& a_out);
+		void PushTooltipLayoutToJs();
 		void Tick();
 
 		[[nodiscard]] bool IsRelevantMenu(std::string_view a_name) noexcept
@@ -838,70 +847,6 @@ namespace CalamityAffixes::PrismaTooltip
 			}
 		}
 
-		[[nodiscard]] bool ParsePanelLayout(std::string_view a_payload, PanelLayout& a_out)
-		{
-			auto trim = [](std::string_view& text) {
-				while (!text.empty() && std::isspace(static_cast<unsigned char>(text.front()))) {
-					text.remove_prefix(1);
-				}
-				while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back()))) {
-					text.remove_suffix(1);
-				}
-			};
-
-			std::array<int, 4> values{};
-			size_t cursor = 0;
-			for (size_t i = 0; i < values.size(); ++i) {
-				const size_t next = a_payload.find(',', cursor);
-				if (next == std::string_view::npos && i < values.size() - 1) {
-					return false;
-				}
-
-				std::string_view token =
-					next == std::string_view::npos
-						? a_payload.substr(cursor)
-						: a_payload.substr(cursor, next - cursor);
-				trim(token);
-				if (token.empty()) {
-					return false;
-				}
-
-				int parsed = 0;
-				const auto* first = token.data();
-				const auto* last = first + token.size();
-				const auto [ptr, ec] = std::from_chars(first, last, parsed);
-				if (ec != std::errc{} || ptr != last) {
-					return false;
-				}
-				values[i] = parsed;
-
-				if (next == std::string_view::npos) {
-					cursor = a_payload.size();
-				} else {
-					cursor = next + 1;
-				}
-			}
-
-			if (cursor < a_payload.size()) {
-				std::string_view trailing = a_payload.substr(cursor);
-				trim(trailing);
-				if (!trailing.empty()) {
-					return false;
-				}
-			}
-
-			if (values[2] <= 0 || values[3] <= 0) {
-				return false;
-			}
-
-			a_out.left = values[0];
-			a_out.top = values[1];
-			a_out.width = values[2];
-			a_out.height = values[3];
-			a_out.valid = true;
-			return true;
-		}
-
 		void LoadPanelLayoutFromDisk()
 		{
 			if (g_panelLayoutLoaded) {
@@ -915,32 +860,54 @@ namespace CalamityAffixes::PrismaTooltip
 				return;
 			}
 
-			std::ifstream in(path);
-			if (!in.good()) {
-				return;
-			}
-
 			try {
-				nlohmann::json j;
-				in >> j;
-
-				PanelLayout loaded{};
-				loaded.left = j.value("left", 0);
-				loaded.top = j.value("top", 0);
-				loaded.width = j.value("width", 0);
-				loaded.height = j.value("height", 0);
-				loaded.valid = loaded.width > 0 && loaded.height > 0;
-				if (!loaded.valid) {
+				const auto loaded = PrismaLayoutPersistence::LoadPanelLayoutFile(kPanelLayoutPath);
+				if (!loaded) {
 					SKSE::log::warn("CalamityAffixes: invalid Prisma panel layout file at {}.", kPanelLayoutPath);
 					return;
 				}
 
-				g_panelLayout = loaded;
+				g_panelLayout = *loaded;
 				g_panelLayoutNeedsPush = true;
 				g_lastPanelLayoutJson.clear();
 				SKSE::log::info("CalamityAffixes: loaded Prisma panel layout from {}.", kPanelLayoutPath);
 			} catch (const std::exception& e) {
 				SKSE::log::warn("CalamityAffixes: failed to parse panel layout {} ({})", kPanelLayoutPath, e.what());
+			}
+		}
+
+		void LoadTooltipLayoutFromDisk()
+		{
+			if (g_tooltipLayoutLoaded) {
+				return;
+			}
+			g_tooltipLayoutLoaded = true;
+
+			const std::filesystem::path path{ std::string(kTooltipLayoutPath) };
+			std::error_code ec;
+			if (!std::filesystem::exists(path, ec) || ec) {
+				return;
+			}
+
+			try {
+				const auto loaded = PrismaLayoutPersistence::LoadTooltipLayoutFile(
+					kTooltipLayoutPath,
+					kDefaultTooltipRight,
+					kDefaultTooltipTop,
+					kDefaultTooltipFontPermille,
+					kMinTooltipFontPermille,
+					kMaxTooltipFontPermille);
+				if (!loaded) {
+					SKSE::log::warn("CalamityAffixes: invalid Prisma tooltip layout file at {}.", kTooltipLayoutPath);
+					return;
+				}
+
+				g_tooltipLayout = *loaded;
+				g_tooltipLayoutNeedsPush = true;
+				g_lastTooltipLayoutJson.clear();
+				SKSE::log::info("CalamityAffixes: loaded Prisma tooltip layout from {}.", kTooltipLayoutPath);
+			} catch (const std::exception& e) {
+				SKSE::log::warn("CalamityAffixes: failed to parse tooltip layout {} ({})", kTooltipLayoutPath, e.what());
 			}
 		}
 
@@ -950,34 +917,26 @@ namespace CalamityAffixes::PrismaTooltip
 				return;
 			}
 
-			const std::filesystem::path path{ std::string(kPanelLayoutPath) };
-			std::error_code ec;
-			std::filesystem::create_directories(path.parent_path(), ec);
-			if (ec) {
-				SKSE::log::warn("CalamityAffixes: failed to create layout directory for {} ({})", kPanelLayoutPath, ec.message());
+			if (!PrismaLayoutPersistence::SavePanelLayoutFile(kPanelLayoutPath, a_layout)) {
+				SKSE::log::warn("CalamityAffixes: failed to save panel layout file {}.", kPanelLayoutPath);
 				return;
 			}
 
-			const nlohmann::json j{
-				{ "left", a_layout.left },
-				{ "top", a_layout.top },
-				{ "width", a_layout.width },
-				{ "height", a_layout.height }
-			};
+			g_lastPanelLayoutJson = PrismaLayoutPersistence::EncodePanelLayoutJson(a_layout);
+		}
 
-			std::ofstream out(path, std::ios::trunc);
-			if (!out.good()) {
-				SKSE::log::warn("CalamityAffixes: failed to open panel layout file {} for write.", kPanelLayoutPath);
+		void SaveTooltipLayoutToDisk(const TooltipLayout& a_layout)
+		{
+			if (!a_layout.valid) {
 				return;
 			}
 
-			out << j.dump(2);
-			if (!out.good()) {
-				SKSE::log::warn("CalamityAffixes: failed to write panel layout file {}.", kPanelLayoutPath);
+			if (!PrismaLayoutPersistence::SaveTooltipLayoutFile(kTooltipLayoutPath, a_layout)) {
+				SKSE::log::warn("CalamityAffixes: failed to save tooltip layout file {}.", kTooltipLayoutPath);
 				return;
 			}
 
-			g_lastPanelLayoutJson = j.dump();
+			g_lastTooltipLayoutJson = PrismaLayoutPersistence::EncodeTooltipLayoutJsonForDisk(a_layout);
 		}
 
 		void PushPanelLayoutToJs()
@@ -986,19 +945,28 @@ namespace CalamityAffixes::PrismaTooltip
 				return;
 			}
 
-			const nlohmann::json j{
-				{ "left", g_panelLayout.left },
-				{ "top", g_panelLayout.top },
-				{ "width", g_panelLayout.width },
-				{ "height", g_panelLayout.height }
-			};
-			const std::string payload = j.dump();
+			const std::string payload = PrismaLayoutPersistence::EncodePanelLayoutJson(g_panelLayout);
 			if (payload == g_lastPanelLayoutJson) {
 				return;
 			}
 
 			g_lastPanelLayoutJson = payload;
 			g_api->InteropCall(g_view, "setPanelLayout", g_lastPanelLayoutJson.c_str());
+		}
+
+		void PushTooltipLayoutToJs()
+		{
+			if (!IsViewReady() || !g_tooltipLayout.valid) {
+				return;
+			}
+
+			const std::string payload = PrismaLayoutPersistence::EncodeTooltipLayoutJsonForJs(g_tooltipLayout);
+			if (payload == g_lastTooltipLayoutJson) {
+				return;
+			}
+
+			g_lastTooltipLayoutJson = payload;
+			g_api->InteropCall(g_view, "setTooltipLayout", g_lastTooltipLayoutJson.c_str());
 		}
 
 		class PanelHotkeyEventSink final : public RE::BSInputDeviceManager::Sink
@@ -1178,6 +1146,7 @@ namespace CalamityAffixes::PrismaTooltip
 		void EnsurePrisma()
 		{
 			LoadPanelLayoutFromDisk();
+			LoadTooltipLayoutFromDisk();
 
 			if (g_api && g_view && g_api->IsValid(g_view)) {
 				return;
@@ -1219,6 +1188,10 @@ namespace CalamityAffixes::PrismaTooltip
 				if (g_panelLayout.valid) {
 					g_lastPanelLayoutJson.clear();
 					g_panelLayoutNeedsPush = true;
+				}
+				if (g_tooltipLayout.valid) {
+					g_lastTooltipLayoutJson.clear();
+					g_tooltipLayoutNeedsPush = true;
 				}
 
 				SKSE::log::info("CalamityAffixes: PrismaUI view created (view={}, path={}).", g_view, kViewPath);
@@ -1308,7 +1281,9 @@ namespace CalamityAffixes::PrismaTooltip
 
 			if (a_command.rfind(kPanelLayoutSavePrefix, 0) == 0) {
 				PanelLayout parsed{};
-				if (!ParsePanelLayout(a_command.substr(kPanelLayoutSavePrefix.size()), parsed)) {
+				if (!PrismaLayoutPersistence::ParsePanelLayoutPayload(
+						a_command.substr(kPanelLayoutSavePrefix.size()),
+						parsed)) {
 					SKSE::log::warn("CalamityAffixes: invalid panel layout payload: {}", a_command);
 					return;
 				}
@@ -1317,6 +1292,24 @@ namespace CalamityAffixes::PrismaTooltip
 				g_panelLayoutLoaded = true;
 				g_panelLayoutNeedsPush = false;
 				SavePanelLayoutToDisk(g_panelLayout);
+				return;
+			}
+
+			if (a_command.rfind(kTooltipLayoutSavePrefix, 0) == 0) {
+				TooltipLayout parsed{};
+				if (!PrismaLayoutPersistence::ParseTooltipLayoutPayload(
+						a_command.substr(kTooltipLayoutSavePrefix.size()),
+						kMinTooltipFontPermille,
+						kMaxTooltipFontPermille,
+						parsed)) {
+					SKSE::log::warn("CalamityAffixes: invalid tooltip layout payload: {}", a_command);
+					return;
+				}
+
+				g_tooltipLayout = parsed;
+				g_tooltipLayoutLoaded = true;
+				g_tooltipLayoutNeedsPush = false;
+				SaveTooltipLayoutToDisk(g_tooltipLayout);
 				return;
 			}
 
@@ -1430,6 +1423,10 @@ namespace CalamityAffixes::PrismaTooltip
 			if (g_panelLayoutNeedsPush) {
 				PushPanelLayoutToJs();
 				g_panelLayoutNeedsPush = false;
+			}
+			if (g_tooltipLayoutNeedsPush) {
+				PushTooltipLayoutToJs();
+				g_tooltipLayoutNeedsPush = false;
 			}
 
 			if (!IsGameplayReady()) {
