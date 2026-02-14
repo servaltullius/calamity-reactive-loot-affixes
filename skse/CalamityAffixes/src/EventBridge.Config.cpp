@@ -1284,12 +1284,19 @@ namespace CalamityAffixes
 				return true;
 			};
 
-		const AffixRuntime* runewordTemplate = nullptr;
+		std::string runewordTemplateKeywordEditorId;
+		RE::BGSKeyword* runewordTemplateKeyword = nullptr;
 		for (const auto& affix : _affixes) {
 			if (affix.id.rfind("runeword_", 0) == 0 && affix.keyword) {
-				runewordTemplate = std::addressof(affix);
+				runewordTemplateKeywordEditorId = affix.keywordEditorId;
+				runewordTemplateKeyword = affix.keyword;
 				break;
 			}
+		}
+
+		if (!_runewordRecipes.empty()) {
+			// Runeword synthesis appends many entries; reserve once to reduce realloc churn.
+			_affixes.reserve(_affixes.size() + _runewordRecipes.size());
 		}
 
 		std::uint32_t synthesizedRunewordAffixes = 0u;
@@ -1317,9 +1324,9 @@ namespace CalamityAffixes
 				("Runeword " + recipe.displayName + " (Auto)") :
 				("Runeword " + recipe.displayName + " [" + runeSequence + "]");
 			out.label = recipe.displayName;
-			if (runewordTemplate) {
-				out.keywordEditorId = runewordTemplate->keywordEditorId;
-				out.keyword = runewordTemplate->keyword;
+			if (runewordTemplateKeyword) {
+				out.keywordEditorId = runewordTemplateKeywordEditorId;
+				out.keyword = runewordTemplateKeyword;
 			}
 
 				auto style = resolveRunewordStyle(recipe);
