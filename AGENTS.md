@@ -31,7 +31,7 @@ This section is generated. Re-run pinning to update.
 - 스펙 편집: `affixes/affixes.json`
 - 생성(esp/ini/runtime/i4): `dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data`
 - 생성기 테스트: `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release`
-- MO2 배포 ZIP: `tools/build_mo2_zip.sh` → `dist/CalamityAffixes_MO2_<YYYY-MM-DD>.zip`
+- MO2 배포 ZIP: `tools/build_mo2_zip.sh` → `dist/CalamityAffixes_MO2_vX.Y.Z_<YYYY-MM-DD>.zip`
 
 ## 툴팁 (기본: SKSE DLL / LoreBox 없음)
 

@@ -10,6 +10,43 @@
 
 namespace CalamityAffixes
 {
+	namespace
+	{
+		[[nodiscard]] bool HasLeadingStarPrefix(std::string_view a_name) noexcept
+		{
+			std::size_t pos = 0;
+			while (pos < a_name.size() && a_name[pos] == ' ') {
+				++pos;
+			}
+
+			return pos + 2 < a_name.size() &&
+			       static_cast<unsigned char>(a_name[pos]) == 0xE2 &&
+			       static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
+			       static_cast<unsigned char>(a_name[pos + 2]) == 0x85;
+		}
+
+		[[nodiscard]] std::string_view StripLeadingStarPrefix(std::string_view a_name) noexcept
+		{
+			std::size_t pos = 0;
+			while (pos < a_name.size()) {
+				// UTF-8 star: E2 98 85 (★)
+				if (pos + 2 < a_name.size() &&
+					static_cast<unsigned char>(a_name[pos]) == 0xE2 &&
+					static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
+					static_cast<unsigned char>(a_name[pos + 2]) == 0x85) {
+					pos += 3;
+					continue;
+				}
+				if (a_name[pos] == ' ') {
+					++pos;
+					continue;
+				}
+				break;
+			}
+			return a_name.substr(pos);
+		}
+	}
+
 	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
 	{
 		return (static_cast<std::uint64_t>(a_baseID) << 16) | static_cast<std::uint64_t>(a_uniqueID);
@@ -192,9 +229,34 @@ namespace CalamityAffixes
 
 		const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
 
+		auto clearStaleStarPrefix = [&]() {
+			auto* text = a_xList->GetExtraTextDisplayData();
+			if (!text) {
+				return false;
+			}
+
+			const auto* name = text->GetDisplayName(a_entry->object, 0);
+			if (!name || name[0] == '\0' || !HasLeadingStarPrefix(name)) {
+				return false;
+			}
+
+			std::string cleaned = std::string(StripLeadingStarPrefix(name));
+			if (cleaned.empty()) {
+				const char* objectNameRaw = a_entry->object->GetName();
+				cleaned = objectNameRaw ? objectNameRaw : "";
+			}
+			if (cleaned.empty() || cleaned == name) {
+				return false;
+			}
+
+			text->SetName(cleaned.c_str());
+			return true;
+		};
+
 		// If already assigned, just ensure display name and return
 		if (const auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
 			const auto& existingSlots = existingIt->second;
+			MarkLootEvaluatedInstance(key);
 			for (std::uint8_t s = 0; s < existingSlots.count; ++s) {
 				EnsureInstanceRuntimeState(key, existingSlots.tokens[s]);
 			}
@@ -202,22 +264,27 @@ namespace CalamityAffixes
 			return;
 		}
 
-		// Guard: if the item already has a star-prefixed display name (★),
-		// it was a previous affix item whose UniqueID changed during container transfer.
-		// Do NOT reroll — just skip.
-		if (auto* text = a_xList->GetExtraTextDisplayData()) {
-			const auto* name = text->GetDisplayName(a_entry->object, 0);
-			if (name && name[0] != '\0') {
-				// UTF-8 star: E2 98 85
-				const auto* raw = reinterpret_cast<const unsigned char*>(name);
-				if (raw[0] == 0xE2 && raw[1] == 0x98 && raw[2] == 0x85) {
-					SKSE::log::debug(
-						"CalamityAffixes: skipping reroll (item already has star prefix) (baseObj={:08X}, uniqueID={}).",
-						uid->baseID, uid->uniqueID);
-					return;
-				}
-			}
+		// 1) Hard guard: any instance evaluated once is never rolled again.
+		if (IsLootEvaluatedInstance(key)) {
+			(void)clearStaleStarPrefix();
+			return;
 		}
+
+		// 2) Legacy cleanup path:
+		// If stale old data left only the star marker, treat as already evaluated and strip marker.
+		if (clearStaleStarPrefix()) {
+			MarkLootEvaluatedInstance(key);
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: stripped stale star marker without affix mapping (baseObj={:08X}, uniqueID={}).",
+					uid->baseID,
+					uid->uniqueID);
+			}
+			return;
+		}
+
+		// Mark before rolling so "failed/no-affix" outcomes are also one-shot.
+		MarkLootEvaluatedInstance(key);
 
 		// Roll how many affixes this item gets (1-3)
 		const std::uint8_t targetCount = RollAffixCount();
@@ -397,28 +464,7 @@ namespace CalamityAffixes
 			return cleaned.substr(first, last - first + 1);
 		};
 
-		// Strip star prefixes as well
-		auto stripStarPrefix = [](std::string_view a_name) -> std::string_view {
-			std::size_t pos = 0;
-			while (pos < a_name.size()) {
-				// UTF-8 star: E2 98 85 (★)
-				if (pos + 2 < a_name.size() &&
-					static_cast<unsigned char>(a_name[pos]) == 0xE2 &&
-					static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
-					static_cast<unsigned char>(a_name[pos + 2]) == 0x85) {
-					pos += 3;
-					continue;
-				}
-				if (a_name[pos] == ' ') {
-					++pos;
-					continue;
-				}
-				break;
-			}
-			return a_name.substr(pos);
-		};
-
-		std::string baseName = stripKnownAffixTags(stripStarPrefix(currentName));
+		std::string baseName = stripKnownAffixTags(StripLeadingStarPrefix(currentName));
 
 		if (baseName.empty()) {
 			const char* objectNameRaw = a_entry->object->GetName();
@@ -525,7 +571,8 @@ namespace CalamityAffixes
 		// Collect unassigned lists first, then process in REVERSE order — newly added items are
 		// typically appended at the end of extraLists, so reverse iteration ensures the most
 		// recently acquired instance receives the affix instead of an older one.
-		std::vector<RE::ExtraDataList*> unassigned;
+		std::vector<RE::ExtraDataList*> unevaluatedCandidates;
+		std::vector<RE::ExtraDataList*> evaluatedCandidates;
 		for (auto* xList : *entry->extraLists) {
 			if (!xList) {
 				continue;
@@ -537,13 +584,22 @@ namespace CalamityAffixes
 					EnsureMultiAffixDisplayName(entry, xList, mappedIt->second);
 					continue;
 				}
+				if (IsLootEvaluatedInstance(key)) {
+					evaluatedCandidates.push_back(xList);
+					continue;
+				}
 			}
 
-			unassigned.push_back(xList);
+			unevaluatedCandidates.push_back(xList);
 		}
 
 		std::int32_t processed = 0;
-		for (auto it = unassigned.rbegin(); it != unassigned.rend() && processed < a_count; ++it) {
+		for (auto it = unevaluatedCandidates.rbegin(); it != unevaluatedCandidates.rend() && processed < a_count; ++it) {
+			ApplyMultipleAffixes(changes, entry, *it, itemType, a_allowRunewordFragmentRoll);
+			processed += 1;
+		}
+
+		for (auto it = evaluatedCandidates.rbegin(); it != evaluatedCandidates.rend() && processed < a_count; ++it) {
 			ApplyMultipleAffixes(changes, entry, *it, itemType, a_allowRunewordFragmentRoll);
 			processed += 1;
 		}

@@ -6,7 +6,7 @@
 ## 다운로드 (플레이어)
 
 - GitHub Releases (최신): https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/latest
-- 다운로드 파일: `CalamityAffixes_MO2_YYYY-MM-DD.zip`
+- 다운로드 파일: `CalamityAffixes_MO2_vX.Y.Z_YYYY-MM-DD.zip`
 
 ## 필수/권장 모드
 
@@ -17,7 +17,7 @@
 ## 5분 설치 (MO2 기준)
 
 1. 위 “필수” 모드를 설치합니다.
-2. GitHub Releases에서 `CalamityAffixes_MO2_YYYY-MM-DD.zip`을 다운로드합니다.
+2. GitHub Releases에서 `CalamityAffixes_MO2_vX.Y.Z_YYYY-MM-DD.zip`을 다운로드합니다.
 3. MO2에서 “Install a new mod from an archive”로 ZIP을 설치하고 Enable 합니다.
 4. SKSE로 실행합니다.
 5. 정상 동작 확인: `Documents/My Games/Skyrim Special Edition/SKSE/CalamityAffixes.log`가 생성됩니다.

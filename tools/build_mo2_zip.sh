@@ -4,6 +4,15 @@ set -euo pipefail
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 mod_name="CalamityAffixes"
 repo_run_root="${repo_root}"
+version="0.0.0"
+
+cmake_project_file="${repo_root}/skse/CalamityAffixes/CMakeLists.txt"
+if [[ -f "${cmake_project_file}" ]]; then
+  detected_version="$(grep -Eo 'project\(CalamityAffixes VERSION [0-9]+\.[0-9]+\.[0-9]+' "${cmake_project_file}" | awk '{print $3}' | head -n1)"
+  if [[ -n "${detected_version}" ]]; then
+    version="${detected_version}"
+  fi
+fi
 
 # Windows-hosted dotnet can break on WSL paths containing spaces.
 # Prefer the existing no-space symlink path when it points to the same repo.
@@ -46,7 +55,7 @@ python3 "${repo_root}/tools/lint_affixes.py" \
   --generated "${data_dir}/SKSE/Plugins/CalamityAffixes/affixes.json"
 
 date_tag="$(date +%Y-%m-%d)"
-out_zip="${dist_dir}/${mod_name}_MO2_${date_tag}.zip"
+out_zip="${dist_dir}/${mod_name}_MO2_v${version}_${date_tag}.zip"
 
 mkdir -p "${dist_dir}"
 rm -f "${out_zip}"

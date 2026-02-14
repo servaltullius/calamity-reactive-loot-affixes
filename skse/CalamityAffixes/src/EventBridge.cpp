@@ -18,6 +18,7 @@ namespace CalamityAffixes
 		holder->AddEventSink<RE::TESEquipEvent>(this);
 		holder->AddEventSink<RE::TESMagicEffectApplyEvent>(this);
 		holder->AddEventSink<RE::TESContainerChangedEvent>(this);
+		holder->AddEventSink<RE::TESUniqueIDChangeEvent>(this);
 
 		if (auto* modCallbackSource = SKSE::GetModCallbackEventSource()) {
 			modCallbackSource->AddEventSink(this);

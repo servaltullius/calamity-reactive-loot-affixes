@@ -14,6 +14,8 @@ namespace CalamityAffixes
 			return;
 		}
 
+		PruneLootEvaluatedInstances();
+
 		// --- IAXF v6: fixed 3-token slots ---
 		const std::uint32_t count = static_cast<std::uint32_t>(_instanceAffixes.size());
 		if (!a_intfc->OpenRecord(kSerializationRecordInstanceAffixes, kSerializationVersion)) {
@@ -135,6 +137,26 @@ namespace CalamityAffixes
 				return;
 			}
 		}
+
+		// --- LRLD ---
+		if (!a_intfc->OpenRecord(kSerializationRecordLootEvaluated, kLootEvaluatedSerializationVersion)) {
+			return;
+		}
+
+		const std::uint32_t lootEvaluatedCount = static_cast<std::uint32_t>(_lootEvaluatedInstances.size());
+		if (!a_intfc->WriteRecordData(lootEvaluatedCount)) {
+			return;
+		}
+		for (const auto key : _lootEvaluatedInstances) {
+			const auto baseID = static_cast<RE::FormID>(key >> 16);
+			const auto uniqueID = static_cast<std::uint16_t>(key & 0xFFFFu);
+			if (!a_intfc->WriteRecordData(baseID)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(uniqueID)) {
+				return;
+			}
+		}
 	}
 
 		void EventBridge::Load(SKSE::SerializationInterface* a_intfc)
@@ -144,6 +166,9 @@ namespace CalamityAffixes
 			}
 
 			_instanceAffixes.clear();
+			_lootEvaluatedInstances.clear();
+			_lootEvaluatedRecent.clear();
+			_lootEvaluatedInsertionsSincePrune = 0;
 			_instanceStates.clear();
 			_dotObservedMagicEffects.clear();
 			_dotTagSafetyWarned = false;
@@ -435,6 +460,44 @@ namespace CalamityAffixes
 					continue;
 				}
 
+				if (type == kSerializationRecordLootEvaluated) {
+					if (version != kLootEvaluatedSerializationVersion) {
+						std::vector<std::uint8_t> sink(length);
+						if (length > 0) {
+							a_intfc->ReadRecordData(sink.data(), length);
+						}
+						continue;
+					}
+
+					std::uint32_t count = 0;
+					if (a_intfc->ReadRecordData(count) != sizeof(count)) {
+						return;
+					}
+
+					for (std::uint32_t i = 0; i < count; ++i) {
+						RE::FormID baseID = 0;
+						std::uint16_t uniqueID = 0;
+						if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
+							return;
+						}
+						if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
+							return;
+						}
+
+						RE::FormID resolvedBaseID = 0;
+						if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+							continue;
+						}
+
+						const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
+						if (key != 0) {
+							_lootEvaluatedInstances.insert(key);
+						}
+					}
+
+					continue;
+				}
+
 				{
 					// Drain unknown record.
 					std::vector<std::uint8_t> sink(length);
@@ -443,6 +506,22 @@ namespace CalamityAffixes
 					}
 				}
 			}
+
+			for (const auto& [key, _] : _instanceAffixes) {
+				_lootEvaluatedInstances.insert(key);
+			}
+
+			_lootEvaluatedRecent.clear();
+			for (const auto key : _lootEvaluatedInstances) {
+				if (key != 0) {
+					_lootEvaluatedRecent.push_back(key);
+				}
+			}
+			const std::size_t maxRecentEntries = kLootEvaluatedRecentKeep * 2;
+			while (_lootEvaluatedRecent.size() > maxRecentEntries) {
+				_lootEvaluatedRecent.pop_front();
+			}
+			_lootEvaluatedInsertionsSincePrune = 0;
 
 			SanitizeRunewordState();
 		}
@@ -458,6 +537,9 @@ namespace CalamityAffixes
 			}
 			_appliedPassiveSpells.clear();
 			_instanceAffixes.clear();
+			_lootEvaluatedInstances.clear();
+			_lootEvaluatedRecent.clear();
+			_lootEvaluatedInsertionsSincePrune = 0;
 			_activeSlotPenalty.clear();
 			_instanceStates.clear();
 			_runewordRuneFragments.clear();
@@ -546,9 +628,11 @@ namespace CalamityAffixes
 
 			const auto key = *keyOpt;
 			const auto it = _instanceAffixes.find(key);
+			const bool wasLootEvaluated = IsLootEvaluatedInstance(key);
 			const bool hasRunewordState = _runewordInstanceStates.contains(key);
 			const bool isSelectedRunewordBase = (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key);
 			if (it == _instanceAffixes.end() &&
+				!wasLootEvaluated &&
 				!hasRunewordState &&
 				!isSelectedRunewordBase) {
 				return;
@@ -562,6 +646,7 @@ namespace CalamityAffixes
 			if (it != _instanceAffixes.end()) {
 				_instanceAffixes.erase(it);
 			}
+			ForgetLootEvaluatedInstance(key);
 			EraseInstanceRuntimeStates(key);
 			_runewordInstanceStates.erase(key);
 			if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key) {

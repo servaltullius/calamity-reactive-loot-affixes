@@ -3,6 +3,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <deque>
 #include <map>
 #include <optional>
 #include <random>
@@ -32,6 +33,7 @@ namespace CalamityAffixes
 		public RE::BSTEventSink<RE::TESEquipEvent>,
 		public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>,
 		public RE::BSTEventSink<RE::TESContainerChangedEvent>,
+		public RE::BSTEventSink<RE::TESUniqueIDChangeEvent>,
 		public RE::BSTEventSink<SKSE::ModCallbackEvent>
 	{
 	public:
@@ -168,6 +170,10 @@ namespace CalamityAffixes
 		RE::BSEventNotifyControl ProcessEvent(
 			const RE::TESContainerChangedEvent* a_event,
 			RE::BSTEventSource<RE::TESContainerChangedEvent>* a_eventSource) override;
+
+		RE::BSEventNotifyControl ProcessEvent(
+			const RE::TESUniqueIDChangeEvent* a_event,
+			RE::BSTEventSource<RE::TESUniqueIDChangeEvent>* a_eventSource) override;
 
 		RE::BSEventNotifyControl ProcessEvent(
 			const SKSE::ModCallbackEvent* a_event,
@@ -403,6 +409,8 @@ namespace CalamityAffixes
 
 			static constexpr std::array<float, kMaxAffixesPerItem> kAffixCountWeights = { 70.0f, 25.0f, 5.0f };
 			static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f };
+			static constexpr std::size_t kLootEvaluatedRecentKeep = 2048;
+			static constexpr std::size_t kLootEvaluatedPruneEveryInserts = 128;
 
 			static constexpr std::uint32_t kSerializationVersion = 6;
 			static constexpr std::uint32_t kSerializationVersionV5 = 5;
@@ -413,8 +421,10 @@ namespace CalamityAffixes
 			static constexpr std::uint32_t kSerializationRecordInstanceAffixes = 'IAXF';
 			static constexpr std::uint32_t kSerializationRecordInstanceRuntimeStates = 'IRST';
 			static constexpr std::uint32_t kSerializationRecordRunewordState = 'RWRD';
+			static constexpr std::uint32_t kSerializationRecordLootEvaluated = 'LRLD';
 			static constexpr std::uint32_t kRunewordSerializationVersion = 1;
 			static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
+			static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
 
 				struct LootConfig
 				{
@@ -482,6 +492,9 @@ namespace CalamityAffixes
 		std::vector<std::size_t> _lootArmorSuffixes;
 		std::unordered_set<RE::SpellItem*> _appliedPassiveSpells;
 				std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;
+				std::unordered_set<std::uint64_t> _lootEvaluatedInstances;
+				std::deque<std::uint64_t> _lootEvaluatedRecent;
+				std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
 				std::vector<float> _activeSlotPenalty;
 			std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash> _instanceStates;
 			std::vector<RunewordRecipe> _runewordRecipes;
@@ -573,6 +586,11 @@ namespace CalamityAffixes
 			void ResetRuntimeStateForConfigReload();
 			void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);
 			void RebuildActiveCounts();
+			void MarkLootEvaluatedInstance(std::uint64_t a_instanceKey);
+			void ForgetLootEvaluatedInstance(std::uint64_t a_instanceKey);
+			void PruneLootEvaluatedInstances();
+			[[nodiscard]] bool IsLootEvaluatedInstance(std::uint64_t a_instanceKey) const;
+			void RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey);
 			void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
 			void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
 		[[nodiscard]] bool PlayerHasInstanceKey(std::uint64_t a_instanceKey) const;
