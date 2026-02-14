@@ -24,6 +24,9 @@ public static class McmPluginBuilder
         quest.Flags = Quest.Flag.StartGameEnabled;
         quest.Priority = 60;
         quest.Type = Quest.TypeEnum.None;
+        // Emit QUST:ANAM (Next Alias ID) so alias parsing tools like Wrye Bash
+        // can enter the alias section before seeing ALST/ALID/FNAM.
+        quest.NextAliasID = 1;
 
         quest.VirtualMachineAdapter = new QuestAdapter
         {

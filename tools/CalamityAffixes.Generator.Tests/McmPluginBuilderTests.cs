@@ -30,6 +30,7 @@ public sealed class McmPluginBuilderTests
 
         var quest = Assert.Single(mod.Quests, q => q.EditorID == "CalamityAffixes_MCM");
         Assert.True(quest.Flags.HasFlag(Quest.Flag.StartGameEnabled));
+        Assert.Equal((uint)1, quest.NextAliasID);
         Assert.NotNull(quest.VirtualMachineAdapter);
         Assert.Contains(quest.VirtualMachineAdapter!.Scripts, s => s.Name == "CalamityAffixes_MCMConfig");
 
