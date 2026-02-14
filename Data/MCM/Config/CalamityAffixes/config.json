@@ -2,10 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/Exit-9B/MCM-Helper/main/docs/config.schema.json",
   "modName": "CalamityAffixes",
   "displayName": "Calamity Affixes",
+  "cursorFillMode": "topToBottom",
   "pages": [
     {
       "pageDisplayName": "General / 일반",
-      "cursorFillMode": "topToBottom",
       "content": [
         {
           "type": "header",
