@@ -6,15 +6,14 @@
 
 namespace CalamityAffixes
 {
-	class NonHostileFirstHitGate
+	namespace detail
 	{
-	public:
-		[[nodiscard]] static constexpr bool IsValidKey(std::uint32_t a_ownerFormID, std::uint32_t a_targetFormID) noexcept
+		[[nodiscard]] constexpr bool IsValidNonHostileFirstHitKey(std::uint32_t a_ownerFormID, std::uint32_t a_targetFormID) noexcept
 		{
 			return a_ownerFormID != 0u && a_targetFormID != 0u;
 		}
 
-		[[nodiscard]] static constexpr bool ShouldTrackNonHostileHit(
+		[[nodiscard]] constexpr bool ShouldTrackNonHostileFirstHit(
 			bool a_allowNonHostileOutgoing,
 			bool a_hostileEitherDirection,
 			bool a_targetIsPlayer) noexcept
@@ -22,20 +21,24 @@ namespace CalamityAffixes
 			return a_allowNonHostileOutgoing && !a_hostileEitherDirection && !a_targetIsPlayer;
 		}
 
-		[[nodiscard]] static constexpr bool IsPruneDue(
+		[[nodiscard]] constexpr bool IsNonHostileFirstHitPruneDue(
 			std::chrono::steady_clock::duration a_elapsed,
 			std::chrono::steady_clock::duration a_pruneInterval) noexcept
 		{
 			return a_elapsed > a_pruneInterval;
 		}
 
-		[[nodiscard]] static constexpr bool IsReentryAllowed(
+		[[nodiscard]] constexpr bool IsNonHostileFirstHitReentryAllowed(
 			std::chrono::steady_clock::duration a_elapsed,
 			std::chrono::steady_clock::duration a_reentryWindow) noexcept
 		{
 			return a_elapsed <= a_reentryWindow;
 		}
+	}
 
+	class NonHostileFirstHitGate
+	{
+	public:
 		[[nodiscard]] bool Resolve(
 			std::uint32_t a_ownerFormID,
 			std::uint32_t a_targetFormID,
@@ -48,7 +51,7 @@ namespace CalamityAffixes
 				.owner = a_ownerFormID,
 				.target = a_targetFormID
 			};
-			if (!IsValidKey(key.owner, key.target)) {
+			if (!detail::IsValidNonHostileFirstHitKey(key.owner, key.target)) {
 				return false;
 			}
 
@@ -57,13 +60,13 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			if (!ShouldTrackNonHostileHit(a_allowNonHostileOutgoing, a_hostileEitherDirection, a_targetIsPlayer)) {
+			if (!detail::ShouldTrackNonHostileFirstHit(a_allowNonHostileOutgoing, a_hostileEitherDirection, a_targetIsPlayer)) {
 				return false;
 			}
 
 			const bool shouldPrune =
 				_lastPruneAt.time_since_epoch().count() == 0 ||
-				IsPruneDue(a_now - _lastPruneAt, kPruneInterval) ||
+				detail::IsNonHostileFirstHitPruneDue(a_now - _lastPruneAt, kPruneInterval) ||
 				_seen.size() > kMaxEntries;
 			if (shouldPrune) {
 				_lastPruneAt = a_now;
@@ -80,7 +83,7 @@ namespace CalamityAffixes
 				return true;
 			}
 
-			return IsReentryAllowed(a_now - it->second, kReentryWindow);
+			return detail::IsNonHostileFirstHitReentryAllowed(a_now - it->second, kReentryWindow);
 		}
 
 		void Clear() noexcept

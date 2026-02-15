@@ -170,4 +170,11 @@ if (BUILD_TESTING)
         NAME ${PROJECT_NAME}StaticChecks
         COMMAND ${calamity_static_checks_cmd}
     )
+
+    if (CMAKE_HOST_UNIX)
+        add_test(
+            NAME ${PROJECT_NAME}RuntimeGateStoreChecks
+            COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_runtime_gate_store_checks.sh
+        )
+    endif()
 endif()
