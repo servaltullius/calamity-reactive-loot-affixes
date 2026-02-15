@@ -166,6 +166,8 @@ namespace CalamityAffixes
 			}
 
 			_instanceAffixes.clear();
+			_equippedInstanceKeysByToken.clear();
+			_equippedTokenCacheReady = false;
 			_lootEvaluatedInstances.clear();
 			_lootEvaluatedRecent.clear();
 			_lootEvaluatedInsertionsSincePrune = 0;
@@ -537,6 +539,8 @@ namespace CalamityAffixes
 			}
 			_appliedPassiveSpells.clear();
 			_instanceAffixes.clear();
+			_equippedInstanceKeysByToken.clear();
+			_equippedTokenCacheReady = false;
 			_lootEvaluatedInstances.clear();
 			_lootEvaluatedRecent.clear();
 			_lootEvaluatedInsertionsSincePrune = 0;

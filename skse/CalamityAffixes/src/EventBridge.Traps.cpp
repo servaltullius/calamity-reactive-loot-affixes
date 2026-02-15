@@ -57,6 +57,7 @@ namespace CalamityAffixes
 
 			bool triggered = false;
 			RE::Actor* triggeredTarget = nullptr;
+			const float radiusSq = trap.radius * trap.radius;
 
 			processLists->ForEachHighActor([&](RE::Actor& a) {
 				if (&a == owner) {
@@ -71,8 +72,12 @@ namespace CalamityAffixes
 					return RE::BSContainer::ForEachResult::kContinue;
 				}
 
-				const float dist = trap.position.GetDistance(a.GetPosition());
-				if (dist > trap.radius) {
+				const auto targetPos = a.GetPosition();
+				const float dx = targetPos.x - trap.position.x;
+				const float dy = targetPos.y - trap.position.y;
+				const float dz = targetPos.z - trap.position.z;
+				const float distSq = (dx * dx) + (dy * dy) + (dz * dz);
+				if (distSq > radiusSq) {
 					return RE::BSContainer::ForEachResult::kContinue;
 				}
 

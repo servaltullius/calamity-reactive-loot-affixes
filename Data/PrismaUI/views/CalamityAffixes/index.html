@@ -1772,7 +1772,7 @@
 
         tooltipLayout = normalizeTooltipLayout(tooltipLayout);
         tooltipDragState = {
-          pointerId: event.pointerId,
+          pointerId: typeof event.pointerId === "number" ? event.pointerId : null,
           startX: event.clientX,
           startY: event.clientY,
           startRight: tooltipLayout.right,
@@ -1780,9 +1780,12 @@
         };
 
         tooltipTitle.classList.add("dragging");
-        if (typeof tooltipTitle.setPointerCapture === "function") {
+        if (
+          tooltipDragState.pointerId !== null &&
+          typeof tooltipTitle.setPointerCapture === "function"
+        ) {
           try {
-            tooltipTitle.setPointerCapture(event.pointerId);
+            tooltipTitle.setPointerCapture(tooltipDragState.pointerId);
           } catch (_) {}
         }
 
@@ -1793,7 +1796,11 @@
 
       function movePanel(event) {
         if (tooltipDragState) {
-          if (event.pointerId !== tooltipDragState.pointerId) return;
+          if (tooltipDragState.pointerId !== null) {
+            if (event.pointerId !== tooltipDragState.pointerId) return;
+          } else if (event.type.startsWith("pointer")) {
+            return;
+          }
 
           const deltaX = event.clientX - tooltipDragState.startX;
           const deltaY = event.clientY - tooltipDragState.startY;
@@ -1856,7 +1863,11 @@
 
       function endPanelDrag(event) {
         if (tooltipDragState) {
-          if (event && event.pointerId !== tooltipDragState.pointerId) return;
+          if (tooltipDragState.pointerId !== null) {
+            if (event && event.pointerId !== tooltipDragState.pointerId) return;
+          } else if (event && event.type.startsWith("pointer")) {
+            return;
+          }
 
           const wasCancel = Boolean(event && event.type === "pointercancel");
           const dragStart = {
@@ -1864,7 +1875,10 @@
             top: tooltipDragState.startTop
           };
           const dragPointerId = tooltipDragState.pointerId;
-          if (typeof tooltipTitle.releasePointerCapture === "function") {
+          if (
+            dragPointerId !== null &&
+            typeof tooltipTitle.releasePointerCapture === "function"
+          ) {
             try {
               tooltipTitle.releasePointerCapture(dragPointerId);
             } catch (_) {}
@@ -2672,6 +2686,8 @@
       wireButtons();
       wireMainTabs();
       tooltipTitle.addEventListener("pointerdown", beginTooltipDrag);
+      tooltipTitle.addEventListener("mousedown", beginTooltipDrag);
+      tooltipTitle.addEventListener("dragstart", (event) => event.preventDefault());
       panelDragHandle.addEventListener("pointerdown", beginPanelDrag);
       panelResizeRight.addEventListener("pointerdown", (event) => beginPanelResize("x", event));
       panelResizeBottom.addEventListener("pointerdown", (event) => beginPanelResize("y", event));
@@ -2679,6 +2695,8 @@
       window.addEventListener("pointermove", movePanel);
       window.addEventListener("pointerup", endPanelDrag);
       window.addEventListener("pointercancel", endPanelDrag);
+      window.addEventListener("mousemove", movePanel);
+      window.addEventListener("mouseup", endPanelDrag);
       applyAutoScale();
       if (typeof ResizeObserver === "function") {
         const ro = new ResizeObserver(() => {

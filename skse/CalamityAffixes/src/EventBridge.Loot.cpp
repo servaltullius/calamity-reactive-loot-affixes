@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <unordered_set>
 #include <vector>
@@ -38,10 +39,31 @@ namespace CalamityAffixes
 				}
 	}
 
+	const std::vector<std::uint64_t>* EventBridge::FindEquippedInstanceKeysForAffixTokenCached(std::uint64_t a_affixToken) const
+	{
+		if (a_affixToken == 0u || !_equippedTokenCacheReady) {
+			return nullptr;
+		}
+
+		const auto it = _equippedInstanceKeysByToken.find(a_affixToken);
+		if (it == _equippedInstanceKeysByToken.end()) {
+			return nullptr;
+		}
+
+		return std::addressof(it->second);
+	}
+
 	std::vector<std::uint64_t> EventBridge::CollectEquippedInstanceKeysForAffixToken(std::uint64_t a_affixToken) const
 	{
 		std::vector<std::uint64_t> keys;
 		if (a_affixToken == 0u) {
+			return keys;
+		}
+
+		if (const auto* cached = FindEquippedInstanceKeysForAffixTokenCached(a_affixToken); cached) {
+			return *cached;
+		}
+		if (_equippedTokenCacheReady) {
 			return keys;
 		}
 
@@ -90,14 +112,18 @@ namespace CalamityAffixes
 		return keys;
 	}
 
-		std::optional<std::uint64_t> EventBridge::ResolvePrimaryEquippedInstanceKey(std::uint64_t a_affixToken) const
-		{
-			auto keys = CollectEquippedInstanceKeysForAffixToken(a_affixToken);
-			if (keys.empty()) {
-				return std::nullopt;
-			}
-			return keys.front();
+	std::optional<std::uint64_t> EventBridge::ResolvePrimaryEquippedInstanceKey(std::uint64_t a_affixToken) const
+	{
+		if (const auto* cached = FindEquippedInstanceKeysForAffixTokenCached(a_affixToken); cached && !cached->empty()) {
+			return cached->front();
 		}
+
+		auto keys = CollectEquippedInstanceKeysForAffixToken(a_affixToken);
+		if (keys.empty()) {
+			return std::nullopt;
+		}
+		return keys.front();
+	}
 
 	void EventBridge::MarkLootEvaluatedInstance(std::uint64_t a_instanceKey)
 	{

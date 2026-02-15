@@ -499,6 +499,8 @@ namespace CalamityAffixes
 				std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
 				std::vector<float> _activeSlotPenalty;
 			std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash> _instanceStates;
+			std::unordered_map<std::uint64_t, std::vector<std::uint64_t>> _equippedInstanceKeysByToken;
+			bool _equippedTokenCacheReady{ false };
 			std::vector<RunewordRecipe> _runewordRecipes;
 			std::unordered_map<std::uint64_t, std::size_t> _runewordRecipeIndexByToken;
 			std::unordered_map<std::uint64_t, std::size_t> _runewordRecipeIndexByResultAffixToken;
@@ -595,7 +597,8 @@ namespace CalamityAffixes
 			void RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey);
 			void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
 			void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
-		[[nodiscard]] bool PlayerHasInstanceKey(std::uint64_t a_instanceKey) const;
+			[[nodiscard]] bool PlayerHasInstanceKey(std::uint64_t a_instanceKey) const;
+			[[nodiscard]] const std::vector<std::uint64_t>* FindEquippedInstanceKeysForAffixTokenCached(std::uint64_t a_affixToken) const;
 			[[nodiscard]] std::optional<std::uint64_t> ResolvePrimaryEquippedInstanceKey(std::uint64_t a_affixToken) const;
 			[[nodiscard]] std::vector<std::uint64_t> CollectEquippedInstanceKeysForAffixToken(std::uint64_t a_affixToken) const;
 			[[nodiscard]] std::vector<std::uint64_t> CollectEquippedRunewordBaseCandidates(bool a_ensureUniqueId);

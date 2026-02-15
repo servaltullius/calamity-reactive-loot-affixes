@@ -54,4 +54,24 @@ namespace CalamityAffixes
 	{
 		return a_nowMs < a_nextAllowedMs;
 	}
+
+	// Safety guard for trigger actions that are configured as guaranteed proc with zero ICD.
+	// This prevents runaway proc storms without changing non-guaranteed behavior.
+	[[nodiscard]] constexpr std::int64_t ResolveTriggerProcCooldownMs(
+		std::int64_t a_configuredIcdMs,
+		bool a_hasPerTargetIcd,
+		float a_procChancePct,
+		std::int64_t a_zeroIcdSafetyGuardMs) noexcept
+	{
+		if (a_configuredIcdMs > 0) {
+			return a_configuredIcdMs;
+		}
+		if (a_hasPerTargetIcd) {
+			return 0;
+		}
+		if (a_procChancePct >= 100.0f && a_zeroIcdSafetyGuardMs > 0) {
+			return a_zeroIcdSafetyGuardMs;
+		}
+		return 0;
+	}
 }

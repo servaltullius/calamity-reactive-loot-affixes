@@ -3,11 +3,75 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 using System.IO;
+using System.Text;
 
 namespace CalamityAffixes.Generator.Writers;
 
 public static class KeywordPluginBuilder
 {
+    // Non-localized ESP records cannot safely carry Hangul in all Skyrim UI paths.
+    // For ESP-facing display names, keep a printable ASCII variant (usually English side of "EN / KO").
+    private static string ToPluginSafeName(string rawName, string editorId)
+    {
+        if (string.IsNullOrWhiteSpace(rawName))
+        {
+            return string.Empty;
+        }
+
+        var preferred = rawName;
+        var slashIndex = preferred.IndexOf('/');
+        if (slashIndex > 0)
+        {
+            preferred = preferred[..slashIndex].Trim();
+        }
+
+        var asciiPreferred = ToPrintableAscii(preferred);
+        if (!string.IsNullOrWhiteSpace(asciiPreferred))
+        {
+            return asciiPreferred;
+        }
+
+        var asciiFull = ToPrintableAscii(rawName);
+        if (!string.IsNullOrWhiteSpace(asciiFull))
+        {
+            return asciiFull;
+        }
+
+        return editorId;
+    }
+
+    private static string ToPrintableAscii(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var sb = new StringBuilder(value.Length);
+        var previousWasSpace = false;
+
+        foreach (var ch in value)
+        {
+            if (char.IsWhiteSpace(ch))
+            {
+                if (sb.Length > 0 && !previousWasSpace)
+                {
+                    sb.Append(' ');
+                    previousWasSpace = true;
+                }
+                continue;
+            }
+
+            if (ch is >= ' ' and <= '~')
+            {
+                sb.Append(ch);
+                previousWasSpace = false;
+            }
+        }
+
+        return sb.ToString().Trim();
+    }
+
     public static SkyrimMod Build(AffixSpec spec)
     {
         var mod = new SkyrimMod(ModKey.FromFileName(spec.ModKey), SkyrimRelease.SkyrimSE);
@@ -121,7 +185,7 @@ public static class KeywordPluginBuilder
 
         if (!string.IsNullOrWhiteSpace(spec.Name))
         {
-            mgef.Name = spec.Name;
+            mgef.Name = ToPluginSafeName(spec.Name, spec.EditorId);
         }
 
         if (!Enum.TryParse<ActorValue>(spec.ActorValue, ignoreCase: true, out var actorValue))
@@ -212,7 +276,7 @@ public static class KeywordPluginBuilder
 
         if (!string.IsNullOrWhiteSpace(spec.Name))
         {
-            spell.Name = spec.Name;
+            spell.Name = ToPluginSafeName(spec.Name, spec.EditorId);
         }
 
         spell.Type = spec.SpellType switch

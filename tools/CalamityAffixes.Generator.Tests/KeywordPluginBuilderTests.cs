@@ -476,4 +476,72 @@ public sealed class KeywordPluginBuilderTests
         var spell = Assert.Single(mod.Spells, s => s.EditorID == "CAFF_SPEL_TEST_PASSIVE");
         Assert.Equal((SpellDataFlag)0, spell.Flags);
     }
+
+    [Fact]
+    public void BuildKeywordPlugin_WhenRecordNameIsBilingual_UsesAsciiPluginName()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes =
+                [
+                    new AffixDefinition
+                    {
+                        Id = "test_bilingual_name",
+                        EditorId = "CAFF_AFFIX_TEST_BILINGUAL",
+                        Name = "Affix: Test",
+                        Records = new AffixRecordSpec
+                        {
+                            MagicEffect = new MagicEffectRecordSpec
+                            {
+                                EditorId = "CAFF_MGEF_TEST_BILINGUAL",
+                                Name = "Calamity Suffix: Critical Damage +10% / 치명타 피해 +10%",
+                                ActorValue = "Health",
+                                Hostile = false,
+                            },
+                            Spell = new SpellRecordSpec
+                            {
+                                EditorId = "CAFF_SPEL_TEST_BILINGUAL",
+                                Name = "Calamity Suffix: Critical Damage +10% / 치명타 피해 +10%",
+                                Delivery = "Self",
+                                SpellType = "Ability",
+                                CastType = "ConstantEffect",
+                                Effect = new SpellEffectRecordSpec
+                                {
+                                    MagicEffectEditorId = "CAFF_MGEF_TEST_BILINGUAL",
+                                    Magnitude = 10,
+                                    Duration = 0,
+                                    Area = 0,
+                                },
+                            },
+                        },
+                        Kid = new KidRule
+                        {
+                            Type = "Weapon",
+                            Strings = "NONE",
+                            FormFilters = "NONE",
+                            Traits = "-E",
+                            Chance = 100.0,
+                        },
+                        Runtime = new Dictionary<string, object?>(),
+                    },
+                ],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var mgef = Assert.Single(mod.MagicEffects, m => m.EditorID == "CAFF_MGEF_TEST_BILINGUAL");
+        var spell = Assert.Single(mod.Spells, s => s.EditorID == "CAFF_SPEL_TEST_BILINGUAL");
+
+        Assert.Equal("Calamity Suffix: Critical Damage +10%", mgef.Name?.String);
+        Assert.Equal("Calamity Suffix: Critical Damage +10%", spell.Name?.String);
+    }
 }

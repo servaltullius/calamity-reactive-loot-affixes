@@ -3,6 +3,7 @@
 using CalamityAffixes::ComputePerTargetCooldownNextAllowedMs;
 using CalamityAffixes::DuplicateHitKey;
 using CalamityAffixes::IsPerTargetCooldownBlockedMs;
+using CalamityAffixes::ResolveTriggerProcCooldownMs;
 using CalamityAffixes::ShouldSuppressDuplicateHitWindow;
 
 static_assert([] {
@@ -63,3 +64,23 @@ static_assert([] {
 	return !IsPerTargetCooldownBlockedMs(1300u, 1300u);
 }(),
 	"IsPerTargetCooldownBlockedMs: allows exactly at next allowed time");
+
+static_assert([] {
+	return ResolveTriggerProcCooldownMs(600, false, 100.0f, 120) == 600;
+}(),
+	"ResolveTriggerProcCooldownMs: keeps configured positive ICD");
+
+static_assert([] {
+	return ResolveTriggerProcCooldownMs(0, true, 100.0f, 120) == 0;
+}(),
+	"ResolveTriggerProcCooldownMs: keeps zero ICD when per-target ICD is enabled");
+
+static_assert([] {
+	return ResolveTriggerProcCooldownMs(0, false, 100.0f, 120) == 120;
+}(),
+	"ResolveTriggerProcCooldownMs: applies zero-ICD safety guard for guaranteed proc chance");
+
+static_assert([] {
+	return ResolveTriggerProcCooldownMs(0, false, 35.0f, 120) == 0;
+}(),
+	"ResolveTriggerProcCooldownMs: leaves non-guaranteed chance unchanged when ICD is zero");

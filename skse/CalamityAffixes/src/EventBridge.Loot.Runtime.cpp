@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -71,8 +72,13 @@ namespace CalamityAffixes
 			return;
 		}
 
-		auto keys = CollectEquippedInstanceKeysForAffixToken(a_affix.token);
-		if (keys.empty()) {
+		const auto* cachedKeys = FindEquippedInstanceKeysForAffixTokenCached(a_affix.token);
+		std::vector<std::uint64_t> fallbackKeys;
+		if (!cachedKeys) {
+			fallbackKeys = CollectEquippedInstanceKeysForAffixToken(a_affix.token);
+			cachedKeys = std::addressof(fallbackKeys);
+		}
+		if (!cachedKeys || cachedKeys->empty()) {
 			return;
 		}
 
@@ -80,7 +86,7 @@ namespace CalamityAffixes
 		const std::uint32_t switchEvery = std::max<std::uint32_t>(1u, action.modeCycleSwitchEveryProcs);
 		const auto modeCount = static_cast<std::uint32_t>(action.modeCycleSpells.size());
 
-		for (const auto key : keys) {
+		for (const auto key : *cachedKeys) {
 			auto& state = EnsureInstanceRuntimeState(key, a_affix.token);
 
 			if (usesEvolution) {

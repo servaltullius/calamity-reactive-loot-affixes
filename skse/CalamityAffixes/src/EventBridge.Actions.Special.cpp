@@ -159,13 +159,15 @@ namespace CalamityAffixes
 			CommitPerTargetCooldown(selectedPerTargetKey, selectedAffix->perTargetIcd, now);
 		}
 
-		spdlog::debug(
-			"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={}, convertPct={}%, converted={}, inOutDamage={})",
-			a_hitData->weapon->GetName(),
-			physicalDealt,
-			action->convertPct,
-			converted,
-			a_inOutDamage);
+		if (_loot.debugLog) {
+			spdlog::debug(
+				"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={}, convertPct={}%, converted={}, inOutDamage={})",
+				a_hitData->weapon->GetName(),
+				physicalDealt,
+				action->convertPct,
+				converted,
+				a_inOutDamage);
+		}
 
 		return ConversionResult{
 			.spell = action->spell,
@@ -272,12 +274,14 @@ namespace CalamityAffixes
 			CommitPerTargetCooldown(perTargetKey, pickedAffix.perTargetIcd, now);
 		}
 
-		spdlog::debug(
-			"CalamityAffixes: CastOnCrit triggered (crit={}, powerAttack={}, spells={}, picked={}).",
-			isCrit,
-			isPowerAttack,
-			pool.size(),
-			pick->spell->GetName());
+		if (_loot.debugLog) {
+			spdlog::debug(
+				"CalamityAffixes: CastOnCrit triggered (crit={}, powerAttack={}, spells={}, picked={}).",
+				isCrit,
+				isPowerAttack,
+				pool.size(),
+				pick->spell->GetName());
+		}
 
 		float magnitudeOverride = pick->magnitudeOverride;
 		if (pick->magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
@@ -419,12 +423,14 @@ namespace CalamityAffixes
 			}
 			avOwner->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kMagicka, -a_extraCost);
 
-		spdlog::debug(
-			"CalamityAffixes: Archmage (source={}, maxMagicka={}, extraCost={}, extraDamage={})",
-			a_sourceEditorId,
-			a_maxMagicka,
-			a_extraCost,
-			a_extraDamage);
+		if (_loot.debugLog) {
+			spdlog::debug(
+				"CalamityAffixes: Archmage (source={}, maxMagicka={}, extraCost={}, extraDamage={})",
+				a_sourceEditorId,
+				a_maxMagicka,
+				a_extraCost,
+				a_extraDamage);
+		}
 
 		magicCaster->CastSpellImmediate(
 			a_action.spell,

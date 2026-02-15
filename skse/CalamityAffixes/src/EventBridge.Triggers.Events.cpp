@@ -21,6 +21,22 @@ namespace
 constexpr std::size_t kDotCooldownMaxEntries = 4096;
 constexpr auto kDotCooldownTtl = std::chrono::seconds(30);
 constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
+
+[[nodiscard]] bool IsInternalProcSpellSource(RE::FormID a_sourceFormID)
+{
+	if (a_sourceFormID == 0u) {
+		return false;
+	}
+
+	auto* sourceForm = RE::TESForm::LookupByID<RE::TESForm>(a_sourceFormID);
+	auto* sourceSpell = sourceForm ? sourceForm->As<RE::SpellItem>() : nullptr;
+	if (!sourceSpell) {
+		return false;
+	}
+
+	const auto editorId = std::string_view(sourceSpell->GetFormEditorID());
+	return !editorId.empty() && editorId.starts_with("CAFF_");
+}
 }
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
 		const RE::TESHitEvent* a_event,
@@ -83,41 +99,54 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				}
 			}
 
-			// Outgoing (player-owned).
-			if (_configLoaded && IsPlayerOwned(aggressor)) {
-				const LastHitKey key{
-					.outgoing = true,
-					.aggressor = aggressor->GetFormID(),
-					.target = target->GetFormID(),
-					.source = a_event->source
-				};
+			const bool internalProcSource = IsInternalProcSpellSource(a_event->source);
+			if (internalProcSource) {
+				if (_loot.debugLog) {
+					static std::uint32_t suppressedInternalProcHits = 0;
+					suppressedInternalProcHits += 1;
+					if (suppressedInternalProcHits <= 3) {
+						SKSE::log::debug(
+							"CalamityAffixes: TESHitEvent fallback ignored internal proc spell source (source=0x{:X}).",
+							a_event->source);
+					}
+				}
+			} else {
+				// Outgoing (player-owned).
+				if (_configLoaded && IsPlayerOwned(aggressor)) {
+					const LastHitKey key{
+						.outgoing = true,
+						.aggressor = aggressor->GetFormID(),
+						.target = target->GetFormID(),
+						.source = a_event->source
+					};
 
-				if (!ShouldSuppressDuplicateHit(key, now)) {
-					const auto* hitData = HitDataUtil::GetLastHitData(target);
-					ProcessTrigger(Trigger::kHit, GetPlayerOwner(aggressor), target, hitData);
+					if (!ShouldSuppressDuplicateHit(key, now)) {
+						const auto* hitData = HitDataUtil::GetLastHitData(target);
+						ProcessTrigger(Trigger::kHit, GetPlayerOwner(aggressor), target, hitData);
 
-					if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
-						auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
-						auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
-						if (spell) {
-							ProcessArchmageSpellHit(aggressor, target, spell);
+						if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
+							auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
+							auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
+							if (spell) {
+								ProcessArchmageSpellHit(aggressor, target, spell);
+							}
 						}
 					}
 				}
-			}
 
-			// Incoming (player hit).
-			if (_configLoaded && target->IsPlayerRef()) {
-				const LastHitKey key{
-					.outgoing = false,
-					.aggressor = aggressor->GetFormID(),
-					.target = target->GetFormID(),
-					.source = a_event->source
-				};
+				// Incoming (player hit).
+				if (_configLoaded && target->IsPlayerRef()) {
+					const LastHitKey key{
+						.outgoing = false,
+						.aggressor = aggressor->GetFormID(),
+						.target = target->GetFormID(),
+						.source = a_event->source
+					};
 
-				if (!ShouldSuppressDuplicateHit(key, now)) {
-					const auto* hitData = HitDataUtil::GetLastHitData(target);
-					ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
+					if (!ShouldSuppressDuplicateHit(key, now)) {
+						const auto* hitData = HitDataUtil::GetLastHitData(target);
+						ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
+					}
 				}
 			}
 		}
@@ -585,6 +614,9 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		_activeCounts.assign(_affixes.size(), 0);
 		_activeSlotPenalty.assign(_affixes.size(), 0.0f);
 		_activeCritDamageBonusPct = 0.0f;
+		_equippedInstanceKeysByToken.clear();
+		_equippedTokenCacheReady = false;
+		_equippedInstanceKeysByToken.reserve(_affixIndexByToken.size());
 		std::unordered_set<RE::SpellItem*> desiredPassives;
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
@@ -645,7 +677,12 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 				// Count each unique affix token as active, track best slot penalty
 				for (std::uint8_t slot = 0; slot < slots.count; ++slot) {
-					const auto idxIt = _affixIndexByToken.find(slots.tokens[slot]);
+					const auto token = slots.tokens[slot];
+					if (token != 0u) {
+						_equippedInstanceKeysByToken[token].push_back(key);
+					}
+
+					const auto idxIt = _affixIndexByToken.find(token);
 					if (idxIt == _affixIndexByToken.end()) {
 						continue;
 					}
@@ -676,6 +713,12 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				}
 			}
 		}
+
+		for (auto& [_, keys] : _equippedInstanceKeysByToken) {
+			std::sort(keys.begin(), keys.end());
+			keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
+		}
+		_equippedTokenCacheReady = true;
 
 		if (_loot.debugLog) {
 			std::uint32_t shown = 0;

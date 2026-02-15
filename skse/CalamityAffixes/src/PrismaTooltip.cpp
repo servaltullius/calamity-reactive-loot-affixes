@@ -1470,6 +1470,9 @@ namespace CalamityAffixes::PrismaTooltip
 					g_lastTooltip.clear();
 					g_api->InteropCall(g_view, "setTooltip", "");
 				}
+				if (!panelRequested && g_api->HasFocus(g_view)) {
+					g_api->Unfocus(g_view);
+				}
 
 				if (!panelRequested) {
 					// Keep the view visible in inventory so the quick-launch button can open the control panel
@@ -1487,6 +1490,10 @@ namespace CalamityAffixes::PrismaTooltip
 			}
 
 			SetVisible(true);
+			if (!panelRequested && !g_api->HasFocus(g_view)) {
+				// Non-modal focus keeps inventory usable while still allowing tooltip mouse drag input.
+				g_api->Focus(g_view, false, true);
+			}
 		}
 	}
 

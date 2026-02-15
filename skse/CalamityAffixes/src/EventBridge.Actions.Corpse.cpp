@@ -292,14 +292,16 @@ namespace CalamityAffixes
 			return;
 		}
 
-		spdlog::debug(
-			"CalamityAffixes: {} (corpse={}, maxHealth={}, baseDamage={}, chainDepth={}, chainMult={})",
-			a_actionName ? a_actionName : "CorpseExplosion",
-			a_corpse->GetName(),
-			corpseMaxHealth,
-			selection.bestBaseDamage,
-			chainDepth,
-			chainMultiplier);
+		if (_loot.debugLog) {
+			spdlog::debug(
+				"CalamityAffixes: {} (corpse={}, maxHealth={}, baseDamage={}, chainDepth={}, chainMult={})",
+				a_actionName ? a_actionName : "CorpseExplosion",
+				a_corpse->GetName(),
+				corpseMaxHealth,
+				selection.bestBaseDamage,
+				chainDepth,
+				chainMultiplier);
+		}
 
 		_procDepth += 1;
 		const std::uint32_t targetsHit = ExecuteCorpseExplosion(bestAffix.action, a_owner, a_corpse, finalDamage);
@@ -439,6 +441,7 @@ namespace CalamityAffixes
 
 		const auto origin = a_corpse->GetPosition();
 		const float radius = a_action.corpseExplosionRadius;
+		const float radiusSq = radius * radius;
 
 		if (auto* shader = GetInstantCorpseExplosionShader()) {
 			a_corpse->InstantiateHitShader(
@@ -454,10 +457,11 @@ namespace CalamityAffixes
 		struct Target
 		{
 			RE::Actor* actor{ nullptr };
-			float distance{ 0.0f };
+			float distanceSq{ 0.0f };
 		};
 
 		std::vector<Target> targets;
+		targets.reserve(32);
 		processLists->ForEachHighActor([&](RE::Actor& a) {
 			if (&a == a_owner || &a == a_corpse) {
 				return RE::BSContainer::ForEachResult::kContinue;
@@ -471,12 +475,16 @@ namespace CalamityAffixes
 				return RE::BSContainer::ForEachResult::kContinue;
 			}
 
-			const float dist = origin.GetDistance(a.GetPosition());
-			if (dist > radius) {
+			const auto targetPos = a.GetPosition();
+			const float dx = targetPos.x - origin.x;
+			const float dy = targetPos.y - origin.y;
+			const float dz = targetPos.z - origin.z;
+			const float distSq = (dx * dx) + (dy * dy) + (dz * dz);
+			if (distSq > radiusSq) {
 				return RE::BSContainer::ForEachResult::kContinue;
 			}
 
-			targets.push_back(Target{ std::addressof(a), dist });
+			targets.push_back(Target{ std::addressof(a), distSq });
 			return RE::BSContainer::ForEachResult::kContinue;
 		});
 
@@ -484,20 +492,28 @@ namespace CalamityAffixes
 			return 0;
 		}
 
-		std::sort(targets.begin(), targets.end(), [](const Target& a, const Target& b) {
-			return a.distance < b.distance;
-		});
-
 		const auto maxTargets = static_cast<std::size_t>(a_action.corpseExplosionMaxTargets);
 		if (maxTargets > 0 && targets.size() > maxTargets) {
+			std::nth_element(
+				targets.begin(),
+				targets.begin() + static_cast<std::ptrdiff_t>(maxTargets),
+				targets.end(),
+				[](const Target& a, const Target& b) {
+					return a.distanceSq < b.distanceSq;
+				});
 			targets.resize(maxTargets);
 		}
+		std::sort(targets.begin(), targets.end(), [](const Target& a, const Target& b) {
+			return a.distanceSq < b.distanceSq;
+		});
 
-		spdlog::debug(
-			"CalamityAffixes: CorpseExplosion applying damage (targets={}, radius={}, damage={}).",
-			targets.size(),
-			radius,
-			a_baseDamage);
+		if (_loot.debugLog) {
+			spdlog::debug(
+				"CalamityAffixes: CorpseExplosion applying damage (targets={}, radius={}, damage={}).",
+				targets.size(),
+				radius,
+				a_baseDamage);
+		}
 
 		std::uint32_t hitCount = 0;
 		for (const auto& t : targets) {

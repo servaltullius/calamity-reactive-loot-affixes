@@ -24,6 +24,8 @@ namespace CalamityAffixes
 				const auto count = std::chrono::duration_cast<std::chrono::milliseconds>(a_value.time_since_epoch()).count();
 				return count > 0 ? static_cast<std::uint64_t>(count) : 0u;
 			}
+
+			constexpr auto kZeroIcdProcSafetyGuard = std::chrono::milliseconds(120);
 	}
 
 		bool EventBridge::IsPerTargetCooldownBlocked(
@@ -149,8 +151,13 @@ namespace CalamityAffixes
 				}
 			}
 
-			if (affix.icd.count() > 0) {
-				affix.nextAllowed = now + affix.icd;
+			const auto effectiveIcdMs = ResolveTriggerProcCooldownMs(
+				affix.icd.count(),
+				usesPerTargetIcd,
+				chance,
+				kZeroIcdProcSafetyGuard.count());
+			if (effectiveIcdMs > 0) {
+				affix.nextAllowed = now + std::chrono::milliseconds(effectiveIcdMs);
 			}
 
 				if (usesPerTargetIcd) {

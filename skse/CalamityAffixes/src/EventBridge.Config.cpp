@@ -155,6 +155,8 @@ namespace CalamityAffixes
 		_lootWeaponSuffixes.clear();
 		_lootArmorSuffixes.clear();
 		_appliedPassiveSpells.clear();
+		_equippedInstanceKeysByToken.clear();
+		_equippedTokenCacheReady = false;
 		_traps.clear();
 		_hasActiveTraps.store(false, std::memory_order_relaxed);
 			_dotCooldowns.clear();
