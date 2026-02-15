@@ -9,6 +9,7 @@ find_package(CommonLibSSE CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 	set(headers
+	    include/CalamityAffixes/CombatContext.h
 	    include/CalamityAffixes/AffixToken.h
 	    include/CalamityAffixes/EventBridge.h
 	    include/CalamityAffixes/HitDataUtil.h
@@ -16,7 +17,10 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/InstanceStateKey.h
 	    include/CalamityAffixes/LootRerollGuard.h
 	    include/CalamityAffixes/LootUiGuards.h
+	    include/CalamityAffixes/NonHostileFirstHitGate.h
 	    include/CalamityAffixes/Papyrus.h
+	    include/CalamityAffixes/PerTargetCooldownStore.h
+	    include/CalamityAffixes/PlayerOwnership.h
 	    include/CalamityAffixes/PrismaLayoutPersistence.h
 	    include/CalamityAffixes/PrismaTooltip.h
 	    include/CalamityAffixes/RunewordUtil.h

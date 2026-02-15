@@ -7,6 +7,7 @@
 #include <REL/Relocation.h>
 #include <SKSE/SKSE.h>
 
+#include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/TriggerGuards.h"
@@ -15,34 +16,6 @@ namespace CalamityAffixes::Hooks
 {
 	namespace
 	{
-		[[nodiscard]] bool IsPlayerOwned(RE::Actor* a_actor) noexcept
-		{
-			if (!a_actor) {
-				return false;
-			}
-			if (a_actor->IsPlayerRef()) {
-				return true;
-			}
-
-			auto commandingAny = a_actor->GetCommandingActor();
-			auto* commanding = commandingAny.get();
-			return commanding && commanding->IsPlayerRef();
-		}
-
-		[[nodiscard]] RE::Actor* ResolvePlayerOwner(RE::Actor* a_actor) noexcept
-		{
-			if (!a_actor) {
-				return nullptr;
-			}
-			if (a_actor->IsPlayerRef()) {
-				return a_actor;
-			}
-
-			auto commandingAny = a_actor->GetCommandingActor();
-			auto* commanding = commandingAny.get();
-			return (commanding && commanding->IsPlayerRef()) ? commanding : nullptr;
-		}
-
 		class ActorHandleHealthDamageHook
 		{
 		public:
@@ -114,35 +87,22 @@ namespace CalamityAffixes::Hooks
 
 				ScopedFlag guard(inHook);
 
-					const bool hasTarget = (a_this != nullptr);
-					const bool hasAttacker = (a_attacker != nullptr);
-					const bool targetIsPlayer = hasTarget && a_this->IsPlayerRef();
-					const bool attackerIsPlayerOwned = hasAttacker && IsPlayerOwned(a_attacker);
-					auto* playerOwner = attackerIsPlayerOwned ? ResolvePlayerOwner(a_attacker) : nullptr;
-					const bool hasPlayerOwner = (playerOwner != nullptr);
+					const auto context = BuildCombatTriggerContext(a_this, a_attacker);
 					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 					const auto now = std::chrono::steady_clock::now();
 
-					bool hostileEitherDirection = false;
-					if (hasTarget && hasAttacker) {
-						if (targetIsPlayer) {
-							hostileEitherDirection = a_this->IsHostileToActor(a_attacker) || a_attacker->IsHostileToActor(a_this);
-						} else if (playerOwner) {
-							hostileEitherDirection = playerOwner->IsHostileToActor(a_this) || a_this->IsHostileToActor(playerOwner);
-						}
-					}
 					const bool allowNeutralOutgoing =
-						hasTarget && !targetIsPlayer && playerOwner &&
-						bridge->ResolveNonHostileOutgoingFirstHitAllowance(playerOwner, a_this, hostileEitherDirection, now);
+						context.hasTarget && !context.targetIsPlayer && context.playerOwner &&
+						bridge->ResolveNonHostileOutgoingFirstHitAllowance(context.playerOwner, a_this, context.hostileEitherDirection, now);
 
 					if (!ShouldProcessHealthDamageProcPath(
-							hasTarget,
-							hasAttacker,
-							targetIsPlayer,
-						attackerIsPlayerOwned,
-						hasPlayerOwner,
-						hostileEitherDirection,
-						allowNeutralOutgoing)) {
+							context.hasTarget,
+							context.hasAttacker,
+							context.targetIsPlayer,
+							context.attackerIsPlayerOwned,
+							context.hasPlayerOwner,
+							context.hostileEitherDirection,
+							allowNeutralOutgoing)) {
 					a_original(a_this, a_attacker, a_damage);
 					return;
 				}

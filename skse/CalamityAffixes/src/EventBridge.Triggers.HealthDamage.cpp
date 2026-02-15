@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 
+#include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/PrismaTooltip.h"
@@ -219,21 +220,18 @@ namespace CalamityAffixes
 		RE::FormID a_sourceFormID,
 		std::chrono::steady_clock::time_point a_now)
 	{
-		if (!a_attacker || !IsPlayerOwned(a_attacker)) {
+		const auto context = BuildCombatTriggerContext(a_target, a_attacker);
+		if (!context.attackerIsPlayerOwned || !context.playerOwner) {
 			return;
 		}
-
-		auto* owner = GetPlayerOwner(a_attacker);
-		if (!owner) {
+		const bool allowNeutralOutgoing = ResolveNonHostileOutgoingFirstHitAllowance(
+			context.playerOwner,
+			a_target,
+			context.hostileEitherDirection,
+			a_now);
+		if (!(context.hostileEitherDirection || allowNeutralOutgoing)) {
 			return;
 		}
-			const bool hostileEitherDirection =
-				owner->IsHostileToActor(a_target) || a_target->IsHostileToActor(owner);
-			const bool allowNeutralOutgoing =
-				ResolveNonHostileOutgoingFirstHitAllowance(owner, a_target, hostileEitherDirection, a_now);
-			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
-				return;
-			}
 
 		const LastHitKey key{
 			.outgoing = true,
@@ -246,7 +244,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		ProcessTrigger(Trigger::kHit, owner, a_target, a_hitData);
+		ProcessTrigger(Trigger::kHit, context.playerOwner, a_target, a_hitData);
 
 		if (a_attacker->IsPlayerRef() && a_hitData && a_hitData->attackDataSpell && !_archmageAffixIndices.empty()) {
 			ProcessArchmageSpellHit(a_attacker, a_target, a_hitData->attackDataSpell);
@@ -263,7 +261,7 @@ namespace CalamityAffixes
 		if (!_configLoaded || !a_target->IsPlayerRef() || !a_attacker) {
 			return;
 		}
-		if (!(a_target->IsHostileToActor(a_attacker) || a_attacker->IsHostileToActor(a_target))) {
+		if (!IsHostileEitherDirection(a_target, a_attacker)) {
 			return;
 		}
 
@@ -285,21 +283,14 @@ namespace CalamityAffixes
 	{
 		// For hit-like lethal damage, fire corpse explosion immediately instead of waiting for TESDeathEvent dispatch.
 		// Duplicate explosions are still blocked by corpse-budget dedupe in ProcessCorpseExplosionKill.
+		const auto context = BuildCombatTriggerContext(a_target, a_attacker);
 		if (a_target->IsPlayerRef() ||
 			!a_target->IsDead() ||
-			!a_attacker ||
-			!IsPlayerOwned(a_attacker) ||
+			!context.attackerIsPlayerOwned ||
 			_corpseExplosionAffixIndices.empty()) {
 			return;
 		}
-
-		auto* owner = GetPlayerOwner(a_attacker);
-		if (!owner) {
-			return;
-		}
-
-		const bool hostile = owner->IsHostileToActor(a_target) || a_target->IsHostileToActor(owner);
-		if (!hostile) {
+		if (!context.playerOwner || !context.hostileEitherDirection) {
 			return;
 		}
 
@@ -309,6 +300,6 @@ namespace CalamityAffixes
 				a_target->GetName(),
 				a_attacker->GetName());
 		}
-		ProcessCorpseExplosionKill(owner, a_target);
+		ProcessCorpseExplosionKill(context.playerOwner, a_target);
 	}
 }

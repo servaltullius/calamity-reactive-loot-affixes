@@ -1,7 +1,9 @@
 #include "CalamityAffixes/EventBridge.h"
 
+#include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
+#include "CalamityAffixes/PlayerOwnership.h"
 #include "CalamityAffixes/PrismaTooltip.h"
 #include "CalamityAffixes/TriggerGuards.h"
 
@@ -57,6 +59,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		}
 
 		const auto now = std::chrono::steady_clock::now();
+		const auto relation = BuildCombatTriggerContext(target, aggressor);
 
 		if (_loot.debugLog) {
 			static std::uint32_t windowCount = 0;
@@ -113,23 +116,23 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				}
 			} else {
 				// Outgoing (player-owned).
-					if (_configLoaded && IsPlayerOwned(aggressor)) {
-						auto* owner = GetPlayerOwner(aggressor);
-						const bool hostileEitherDirection =
-							owner && (owner->IsHostileToActor(target) || target->IsHostileToActor(owner));
-						const bool allowNeutralOutgoing =
-							owner && ResolveNonHostileOutgoingFirstHitAllowance(owner, target, hostileEitherDirection, now);
-						if (owner && (hostileEitherDirection || allowNeutralOutgoing)) {
-							const LastHitKey key{
-								.outgoing = true,
-								.aggressor = aggressor->GetFormID(),
+				if (_configLoaded && relation.attackerIsPlayerOwned && relation.playerOwner) {
+					const bool allowNeutralOutgoing = ResolveNonHostileOutgoingFirstHitAllowance(
+						relation.playerOwner,
+						target,
+						relation.hostileEitherDirection,
+						now);
+					if (relation.hostileEitherDirection || allowNeutralOutgoing) {
+						const LastHitKey key{
+							.outgoing = true,
+							.aggressor = aggressor->GetFormID(),
 							.target = target->GetFormID(),
 							.source = a_event->source
 						};
 
 						if (!ShouldSuppressDuplicateHit(key, now)) {
 							const auto* hitData = HitDataUtil::GetLastHitData(target);
-							ProcessTrigger(Trigger::kHit, owner, target, hitData);
+							ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
 
 							if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
 								auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
@@ -143,38 +146,35 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				}
 
 				// Incoming (player hit).
-				if (_configLoaded && target->IsPlayerRef()) {
-					if (target->IsHostileToActor(aggressor) || aggressor->IsHostileToActor(target)) {
-						const LastHitKey key{
-							.outgoing = false,
-							.aggressor = aggressor->GetFormID(),
-							.target = target->GetFormID(),
-							.source = a_event->source
-						};
+				if (_configLoaded && relation.targetIsPlayer && relation.hostileEitherDirection) {
+					const LastHitKey key{
+						.outgoing = false,
+						.aggressor = aggressor->GetFormID(),
+						.target = target->GetFormID(),
+						.source = a_event->source
+					};
 
-						if (!ShouldSuppressDuplicateHit(key, now)) {
-							const auto* hitData = HitDataUtil::GetLastHitData(target);
-							ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
-						}
+					if (!ShouldSuppressDuplicateHit(key, now)) {
+						const auto* hitData = HitDataUtil::GetLastHitData(target);
+						ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
 					}
 				}
 			}
 		}
 
-			const bool playerOwnedAggressor = IsPlayerOwned(aggressor);
-			auto* playerOwner = playerOwnedAggressor ? GetPlayerOwner(aggressor) : nullptr;
-			const bool hostileEitherDirection =
-				playerOwner && (playerOwner->IsHostileToActor(target) || target->IsHostileToActor(playerOwner));
-			const bool allowNeutralOutgoing =
-				playerOwner && ResolveNonHostileOutgoingFirstHitAllowance(playerOwner, target, hostileEitherDirection, now);
-			if (ShouldSendPlayerOwnedHitEvent(
-					playerOwnedAggressor,
-					playerOwner != nullptr,
-					hostileEitherDirection,
-					allowNeutralOutgoing,
-					target->IsPlayerRef())) {
-				SendModEvent("CalamityAffixes_Hit", target);
-			}
+		const bool allowNeutralOutgoing = relation.playerOwner && ResolveNonHostileOutgoingFirstHitAllowance(
+			relation.playerOwner,
+			target,
+			relation.hostileEitherDirection,
+			now);
+		if (ShouldSendPlayerOwnedHitEvent(
+				relation.attackerIsPlayerOwned,
+				relation.hasPlayerOwner,
+				relation.hostileEitherDirection,
+				allowNeutralOutgoing,
+				relation.targetIsPlayer)) {
+			SendModEvent("CalamityAffixes_Hit", target);
+		}
 
 		return RE::BSEventNotifyControl::kContinue;
 	}
@@ -517,8 +517,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			if (eventName == kMcmSetAllowNonHostileFirstHitProcEvent) {
 				const bool enabled = (a_event->numArg > 0.5f);
 				_allowNonHostilePlayerOwnedOutgoingProcs.store(enabled, std::memory_order_relaxed);
-				_nonHostileFirstHitSeen.clear();
-				_nonHostileFirstHitLastPruneAt = {};
+				_nonHostileFirstHitGate.Clear();
 				RE::DebugNotification(enabled ?
 					"Calamity: non-hostile first-hit proc ON" :
 					"Calamity: non-hostile first-hit proc OFF");
@@ -568,36 +567,12 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 	bool EventBridge::IsPlayerOwned(RE::Actor* a_actor)
 	{
-		if (!a_actor) {
-			return false;
-		}
-
-		if (a_actor->IsPlayerRef()) {
-			return true;
-		}
-
-		// Summon/proxy attribution:
-		// If the actor is commanded by the player, treat it as "player-owned".
-		auto commandingAny = a_actor->GetCommandingActor();
-		auto* commanding = commandingAny.get();
-
-		return commanding && commanding->IsPlayerRef();
+		return IsPlayerOwnedActor(a_actor);
 	}
 
 	RE::Actor* EventBridge::GetPlayerOwner(RE::Actor* a_actor)
 	{
-		if (!a_actor) {
-			return nullptr;
-		}
-
-		if (a_actor->IsPlayerRef()) {
-			return a_actor;
-		}
-
-		auto commandingAny = a_actor->GetCommandingActor();
-		auto* commanding = commandingAny.get();
-
-		return (commanding && commanding->IsPlayerRef()) ? commanding : nullptr;
+		return ResolvePlayerOwnerActor(a_actor);
 	}
 
 	void EventBridge::SendModEvent(std::string_view a_eventName, RE::TESForm* a_sender)

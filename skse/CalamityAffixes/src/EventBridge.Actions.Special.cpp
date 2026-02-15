@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 
+#include "CalamityAffixes/CombatContext.h"
 #include <algorithm>
 #include <string_view>
 #include <vector>
@@ -68,8 +69,7 @@ namespace CalamityAffixes
 				return {};
 			}
 			const auto now = std::chrono::steady_clock::now();
-			const bool hostileEitherDirection =
-				a_attacker->IsHostileToActor(a_target) || a_target->IsHostileToActor(a_attacker);
+			const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
 			const bool allowNeutralOutgoing =
 				ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
 			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
@@ -218,10 +218,9 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		// Avoid friendly-fire spam.
+			// Avoid friendly-fire spam.
 			const auto now = std::chrono::steady_clock::now();
-			const bool hostileEitherDirection =
-				a_attacker->IsHostileToActor(a_target) || a_target->IsHostileToActor(a_attacker);
+			const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
 			const bool allowNeutralOutgoing =
 				ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
 			if (!(hostileEitherDirection || allowNeutralOutgoing)) {

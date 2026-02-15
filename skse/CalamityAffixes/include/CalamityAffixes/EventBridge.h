@@ -25,6 +25,8 @@
 #include "CalamityAffixes/InstanceStateKey.h"
 #include "CalamityAffixes/LootRerollGuard.h"
 #include "CalamityAffixes/MagnitudeScaling.h"
+#include "CalamityAffixes/NonHostileFirstHitGate.h"
+#include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/ResyncScheduler.h"
 
 namespace CalamityAffixes
@@ -391,14 +393,12 @@ namespace CalamityAffixes
 		static RE::Actor* GetPlayerOwner(RE::Actor* a_actor);
 		static void SendModEvent(std::string_view a_eventName, RE::TESForm* a_sender);
 
-			static constexpr std::string_view kDotKeywordEditorID = "CAFF_TAG_DOT";
-			static constexpr std::chrono::milliseconds kDotApplyICD{ 1500 };
-			static constexpr std::chrono::milliseconds kCastOnCritICD{ 150 };
-			static constexpr std::chrono::milliseconds kDuplicateHitWindow{ 100 };
-				static constexpr std::chrono::milliseconds kHealthDamageHookStaleWindow{ 5000 };
-				static constexpr std::size_t kPerTargetCooldownMaxEntries = 8192;
-				static constexpr auto kPerTargetCooldownPruneInterval = std::chrono::seconds(10);
-				static constexpr std::string_view kRuntimeConfigRelativePath = "Data/SKSE/Plugins/CalamityAffixes/affixes.json";
+				static constexpr std::string_view kDotKeywordEditorID = "CAFF_TAG_DOT";
+				static constexpr std::chrono::milliseconds kDotApplyICD{ 1500 };
+				static constexpr std::chrono::milliseconds kCastOnCritICD{ 150 };
+				static constexpr std::chrono::milliseconds kDuplicateHitWindow{ 100 };
+					static constexpr std::chrono::milliseconds kHealthDamageHookStaleWindow{ 5000 };
+					static constexpr std::string_view kRuntimeConfigRelativePath = "Data/SKSE/Plugins/CalamityAffixes/affixes.json";
 				static constexpr std::string_view kManualModeCycleNextEvent = "CalamityAffixes_ModeCycle_Next";
 				static constexpr std::string_view kManualModeCyclePrevEvent = "CalamityAffixes_ModeCycle_Prev";
 				static constexpr std::string_view kRunewordBaseNextEvent = "CalamityAffixes_Runeword_Base_Next";
@@ -457,53 +457,6 @@ namespace CalamityAffixes
 			RE::FormID target{ 0 };
 		};
 
-		struct PerTargetCooldownKeyHash
-		{
-			[[nodiscard]] std::size_t operator()(const PerTargetCooldownKey& a_key) const noexcept
-			{
-				const std::uint64_t mixed = a_key.token ^ (static_cast<std::uint64_t>(a_key.target) << 1);
-				return std::hash<std::uint64_t>{}(mixed);
-			}
-		};
-
-		struct PerTargetCooldownKeyEq
-		{
-			[[nodiscard]] bool operator()(const PerTargetCooldownKey& a, const PerTargetCooldownKey& b) const noexcept
-			{
-				return a.token == b.token && a.target == b.target;
-			}
-		};
-
-		struct NonHostileFirstHitKey
-		{
-			RE::FormID owner{ 0 };
-			RE::FormID target{ 0 };
-		};
-
-		struct NonHostileFirstHitKeyHash
-		{
-			[[nodiscard]] std::size_t operator()(const NonHostileFirstHitKey& a_key) const noexcept
-			{
-				const std::uint64_t packed =
-					(static_cast<std::uint64_t>(a_key.owner) << 32) |
-					static_cast<std::uint64_t>(a_key.target);
-				return std::hash<std::uint64_t>{}(packed);
-			}
-		};
-
-		struct NonHostileFirstHitKeyEq
-		{
-			[[nodiscard]] bool operator()(const NonHostileFirstHitKey& a, const NonHostileFirstHitKey& b) const noexcept
-			{
-				return a.owner == b.owner && a.target == b.target;
-			}
-		};
-
-		static constexpr std::size_t kNonHostileFirstHitMaxEntries = 8192;
-		static constexpr auto kNonHostileFirstHitPruneInterval = std::chrono::seconds(10);
-		static constexpr auto kNonHostileFirstHitTtl = std::chrono::seconds(120);
-		static constexpr auto kNonHostileFirstHitReentryWindow = std::chrono::milliseconds(100);
-
 			// key = (targetFormID << 32) | magicEffectFormID
 			std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> _dotCooldowns;
 			std::chrono::steady_clock::time_point _dotCooldownsLastPruneAt{};
@@ -511,10 +464,8 @@ namespace CalamityAffixes
 			bool _dotTagSafetyWarned{ false };
 			bool _dotTagSafetySuppressed{ false };
 
-		std::unordered_map<PerTargetCooldownKey, std::chrono::steady_clock::time_point, PerTargetCooldownKeyHash, PerTargetCooldownKeyEq> _perTargetCooldowns;
-		std::chrono::steady_clock::time_point _perTargetCooldownsLastPruneAt{};
-		std::unordered_map<NonHostileFirstHitKey, std::chrono::steady_clock::time_point, NonHostileFirstHitKeyHash, NonHostileFirstHitKeyEq> _nonHostileFirstHitSeen;
-		std::chrono::steady_clock::time_point _nonHostileFirstHitLastPruneAt{};
+		PerTargetCooldownStore _perTargetCooldownStore{};
+		NonHostileFirstHitGate _nonHostileFirstHitGate{};
 
 		std::vector<AffixRuntime> _affixes;
 		std::vector<std::uint32_t> _activeCounts;
