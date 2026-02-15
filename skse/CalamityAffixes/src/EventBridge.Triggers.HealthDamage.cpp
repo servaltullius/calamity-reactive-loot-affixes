@@ -227,6 +227,9 @@ namespace CalamityAffixes
 		if (!owner) {
 			return;
 		}
+		if (!(owner->IsHostileToActor(a_target) || a_target->IsHostileToActor(owner))) {
+			return;
+		}
 
 		const LastHitKey key{
 			.outgoing = true,
@@ -254,6 +257,9 @@ namespace CalamityAffixes
 		std::chrono::steady_clock::time_point a_now)
 	{
 		if (!_configLoaded || !a_target->IsPlayerRef() || !a_attacker) {
+			return;
+		}
+		if (!(a_target->IsHostileToActor(a_attacker) || a_attacker->IsHostileToActor(a_target))) {
 			return;
 		}
 
@@ -302,4 +308,3 @@ namespace CalamityAffixes
 		ProcessCorpseExplosionKill(owner, a_target);
 	}
 }
-

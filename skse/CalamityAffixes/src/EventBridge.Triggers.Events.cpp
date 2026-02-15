@@ -113,22 +113,25 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			} else {
 				// Outgoing (player-owned).
 				if (_configLoaded && IsPlayerOwned(aggressor)) {
-					const LastHitKey key{
-						.outgoing = true,
-						.aggressor = aggressor->GetFormID(),
-						.target = target->GetFormID(),
-						.source = a_event->source
-					};
+					auto* owner = GetPlayerOwner(aggressor);
+					if (owner && (owner->IsHostileToActor(target) || target->IsHostileToActor(owner))) {
+						const LastHitKey key{
+							.outgoing = true,
+							.aggressor = aggressor->GetFormID(),
+							.target = target->GetFormID(),
+							.source = a_event->source
+						};
 
-					if (!ShouldSuppressDuplicateHit(key, now)) {
-						const auto* hitData = HitDataUtil::GetLastHitData(target);
-						ProcessTrigger(Trigger::kHit, GetPlayerOwner(aggressor), target, hitData);
+						if (!ShouldSuppressDuplicateHit(key, now)) {
+							const auto* hitData = HitDataUtil::GetLastHitData(target);
+							ProcessTrigger(Trigger::kHit, owner, target, hitData);
 
-						if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
-							auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
-							auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
-							if (spell) {
-								ProcessArchmageSpellHit(aggressor, target, spell);
+							if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
+								auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
+								auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
+								if (spell) {
+									ProcessArchmageSpellHit(aggressor, target, spell);
+								}
 							}
 						}
 					}
@@ -136,16 +139,18 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 				// Incoming (player hit).
 				if (_configLoaded && target->IsPlayerRef()) {
-					const LastHitKey key{
-						.outgoing = false,
-						.aggressor = aggressor->GetFormID(),
-						.target = target->GetFormID(),
-						.source = a_event->source
-					};
+					if (target->IsHostileToActor(aggressor) || aggressor->IsHostileToActor(target)) {
+						const LastHitKey key{
+							.outgoing = false,
+							.aggressor = aggressor->GetFormID(),
+							.target = target->GetFormID(),
+							.source = a_event->source
+						};
 
-					if (!ShouldSuppressDuplicateHit(key, now)) {
-						const auto* hitData = HitDataUtil::GetLastHitData(target);
-						ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
+						if (!ShouldSuppressDuplicateHit(key, now)) {
+							const auto* hitData = HitDataUtil::GetLastHitData(target);
+							ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
+						}
 					}
 				}
 			}

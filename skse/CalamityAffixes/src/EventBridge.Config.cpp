@@ -420,15 +420,23 @@ namespace CalamityAffixes
 				if (const auto lwIt = runtime.find("lootWeight"); lwIt != runtime.end() && lwIt->is_number()) {
 					out.lootWeight = lwIt->get<float>();
 				}
-			const float icdSeconds = runtime.value("icdSeconds", 0.0f);
-			if (icdSeconds > 0.0f) {
-				out.icd = std::chrono::milliseconds(static_cast<std::int64_t>(icdSeconds * 1000.0f));
-			}
-			const float perTargetIcdSeconds = runtime.value("perTargetICDSeconds", 0.0f);
-			if (perTargetIcdSeconds > 0.0f) {
-				out.perTargetIcd = std::chrono::milliseconds(static_cast<std::int64_t>(perTargetIcdSeconds * 1000.0f));
-			}
-			}
+				// Backward-compat: legacy prefix entries used kid.chance as loot weight while
+				// runtime.procChancePercent remained 0 for action semantics.
+				if (out.lootWeight < 0.0f && out.procChancePct <= 0.0f) {
+					const auto kidChance = static_cast<float>(kid.value("chance", 0.0));
+					if (kidChance > 0.0f) {
+						out.lootWeight = kidChance;
+					}
+				}
+				const float icdSeconds = runtime.value("icdSeconds", 0.0f);
+				if (icdSeconds > 0.0f) {
+					out.icd = std::chrono::milliseconds(static_cast<std::int64_t>(icdSeconds * 1000.0f));
+				}
+				const float perTargetIcdSeconds = runtime.value("perTargetICDSeconds", 0.0f);
+				if (perTargetIcdSeconds > 0.0f) {
+					out.perTargetIcd = std::chrono::milliseconds(static_cast<std::int64_t>(perTargetIcdSeconds * 1000.0f));
+				}
+				}
 
 			if (type == "DebugNotify") {
 				out.action.type = ActionType::kDebugNotify;

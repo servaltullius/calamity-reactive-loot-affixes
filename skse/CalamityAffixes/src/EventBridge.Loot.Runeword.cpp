@@ -237,6 +237,16 @@ namespace CalamityAffixes
 		std::vector<std::uint64_t> EventBridge::CollectEquippedRunewordBaseCandidates(bool a_ensureUniqueId)
 		{
 			std::vector<std::uint64_t> keys;
+			auto isCompletedRuneword = [&](std::uint64_t a_instanceKey) {
+				if (const auto it = _instanceAffixes.find(a_instanceKey); it != _instanceAffixes.end()) {
+					const auto primaryToken = it->second.GetPrimary();
+					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
+						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+						return true;
+					}
+				}
+				return false;
+			};
 
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			if (!player) {
@@ -280,7 +290,11 @@ namespace CalamityAffixes
 						continue;
 					}
 
-					keys.push_back(MakeInstanceKey(uid->baseID, uid->uniqueID));
+					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+					if (isCompletedRuneword(key)) {
+						continue;
+					}
+					keys.push_back(key);
 				}
 			}
 
@@ -305,6 +319,17 @@ namespace CalamityAffixes
 
 			if (!IsWeaponOrArmor(entry->object)) {
 				return false;
+			}
+			if (const auto it = _instanceAffixes.find(a_instanceKey); it != _instanceAffixes.end()) {
+				const auto primaryToken = it->second.GetPrimary();
+				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
+					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+					std::string note = "Runeword: already complete (";
+					note.append(_runewordRecipes[rwIt->second].displayName);
+					note.push_back(')');
+					RE::DebugNotification(note.c_str());
+					return false;
+				}
 			}
 
 			_runewordSelectedBaseKey = a_instanceKey;
@@ -1038,10 +1063,19 @@ namespace CalamityAffixes
 					}
 				}
 
-				if (_runewordSelectedBaseKey && !PlayerHasInstanceKey(*_runewordSelectedBaseKey)) {
-					_runewordSelectedBaseKey.reset();
+					if (_runewordSelectedBaseKey && !PlayerHasInstanceKey(*_runewordSelectedBaseKey)) {
+						_runewordSelectedBaseKey.reset();
+					}
+					if (_runewordSelectedBaseKey) {
+						if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
+							const auto primaryToken = it->second.GetPrimary();
+							if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
+								rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+								_runewordSelectedBaseKey.reset();
+							}
+						}
+					}
 				}
-			}
 
 			if (_runewordRecipes.empty()) {
 				_runewordRecipeCycleCursor = 0;

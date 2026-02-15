@@ -19,10 +19,13 @@ namespace CalamityAffixes
 				++pos;
 			}
 
-			return pos + 2 < a_name.size() &&
-			       static_cast<unsigned char>(a_name[pos]) == 0xE2 &&
-			       static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
-			       static_cast<unsigned char>(a_name[pos + 2]) == 0x85;
+			const bool utf8Star =
+				pos + 2 < a_name.size() &&
+				static_cast<unsigned char>(a_name[pos]) == 0xE2 &&
+				static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
+				static_cast<unsigned char>(a_name[pos + 2]) == 0x85;
+			const bool asciiStar = pos < a_name.size() && a_name[pos] == '*';
+			return utf8Star || asciiStar;
 		}
 
 		[[nodiscard]] std::string_view StripLeadingStarPrefix(std::string_view a_name) noexcept
@@ -35,6 +38,10 @@ namespace CalamityAffixes
 					static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
 					static_cast<unsigned char>(a_name[pos + 2]) == 0x85) {
 					pos += 3;
+					continue;
+				}
+				if (a_name[pos] == '*') {
+					++pos;
 					continue;
 				}
 				if (a_name[pos] == ' ') {
@@ -286,6 +293,17 @@ namespace CalamityAffixes
 		// Mark before rolling so "failed/no-affix" outcomes are also one-shot.
 		MarkLootEvaluatedInstance(key);
 
+		// Global per-item loot chance gate (applies once regardless of P/S composition).
+		if (_loot.chancePercent <= 0.0f) {
+			return;
+		}
+		if (_loot.chancePercent < 100.0f) {
+			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+			if (dist(_rng) >= _loot.chancePercent) {
+				return;
+			}
+		}
+
 		// Roll how many affixes this item gets (1-3)
 		const std::uint8_t targetCount = RollAffixCount();
 
@@ -314,19 +332,6 @@ namespace CalamityAffixes
 			}
 		}
 
-		// If no prefixes targeted, apply chance check before suffix rolling
-		if (prefixTarget == 0 && suffixTarget > 0) {
-			if (_loot.chancePercent <= 0.0f) {
-				return;
-			}
-			if (_loot.chancePercent < 100.0f) {
-				std::uniform_real_distribution<float> dist(0.0f, 100.0f);
-				if (dist(_rng) >= _loot.chancePercent) {
-					return;
-				}
-			}
-		}
-
 		InstanceAffixSlots slots;
 		std::vector<std::size_t> chosenIndices;
 		chosenIndices.reserve(targetCount);
@@ -337,7 +342,7 @@ namespace CalamityAffixes
 			static constexpr std::uint8_t kMaxRetries = 3;
 			bool found = false;
 			for (std::uint8_t retry = 0; retry < kMaxRetries; ++retry) {
-				const auto idx = RollLootAffixIndex(a_itemType, &chosenPrefixIndices, /*a_skipChanceCheck=*/p > 0 || !chosenIndices.empty());
+				const auto idx = RollLootAffixIndex(a_itemType, &chosenPrefixIndices, /*a_skipChanceCheck=*/true);
 				if (!idx) {
 					break;
 				}
@@ -480,11 +485,11 @@ namespace CalamityAffixes
 		// Build name with star prefix based on affix count
 		std::string prefix;
 		if (a_slots.count >= 3) {
-			prefix = "\xe2\x98\x85\xe2\x98\x85\xe2\x98\x85 ";  // ★★★
+			prefix = "*** ";
 		} else if (a_slots.count == 2) {
-			prefix = "\xe2\x98\x85\xe2\x98\x85 ";  // ★★
+			prefix = "** ";
 		} else {
-			prefix = "\xe2\x98\x85 ";  // ★
+			prefix = "* ";
 		}
 
 		const std::string newName = prefix + baseName;
