@@ -78,8 +78,49 @@ namespace CalamityAffixes
 	[[nodiscard]] constexpr bool ShouldSendPlayerOwnedHitEvent(
 		bool a_isPlayerOwnedAggressor,
 		bool a_hasPlayerOwner,
-		bool a_hostileEitherDirection) noexcept
+		bool a_hostileEitherDirection,
+		bool a_allowNonHostilePlayerOwnedOutgoing,
+		bool a_targetIsPlayer) noexcept
 	{
-		return a_isPlayerOwnedAggressor && a_hasPlayerOwner && a_hostileEitherDirection;
+		if (!a_isPlayerOwnedAggressor || !a_hasPlayerOwner) {
+			return false;
+		}
+
+		if (a_hostileEitherDirection) {
+			return true;
+		}
+
+		return a_allowNonHostilePlayerOwnedOutgoing && !a_targetIsPlayer;
+	}
+
+	[[nodiscard]] constexpr bool ShouldProcessHealthDamageProcPath(
+		bool a_hasTarget,
+		bool a_hasAttacker,
+		bool a_targetIsPlayer,
+		bool a_attackerIsPlayerOwned,
+		bool a_hasPlayerOwner,
+		bool a_hostileEitherDirection,
+		bool a_allowNonHostilePlayerOwnedOutgoing) noexcept
+	{
+		if (!a_hasTarget || !a_hasAttacker) {
+			return false;
+		}
+
+		if (a_hostileEitherDirection) {
+			if (a_targetIsPlayer) {
+				return true;
+			}
+
+			return a_attackerIsPlayerOwned && a_hasPlayerOwner;
+		}
+
+		if (a_allowNonHostilePlayerOwnedOutgoing &&
+			!a_targetIsPlayer &&
+			a_attackerIsPlayerOwned &&
+			a_hasPlayerOwner) {
+			return true;
+		}
+
+		return false;
 	}
 }

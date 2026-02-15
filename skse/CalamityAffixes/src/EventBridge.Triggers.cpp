@@ -61,11 +61,11 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		void EventBridge::CommitPerTargetCooldown(
-			const PerTargetCooldownKey& a_key,
-			std::chrono::milliseconds a_perTargetIcd,
-			std::chrono::steady_clock::time_point a_now)
-		{
+			void EventBridge::CommitPerTargetCooldown(
+				const PerTargetCooldownKey& a_key,
+				std::chrono::milliseconds a_perTargetIcd,
+				std::chrono::steady_clock::time_point a_now)
+			{
 			const auto nowMs = ToNonNegativeMilliseconds(a_now);
 			if (!ComputePerTargetCooldownNextAllowedMs(nowMs, a_perTargetIcd.count(), a_key.token, a_key.target).has_value()) {
 				return;
@@ -86,8 +86,76 @@ namespace CalamityAffixes
 						}
 					}
 				}
+				}
 			}
-		}
+
+			bool EventBridge::ResolveNonHostileOutgoingFirstHitAllowance(
+				RE::Actor* a_owner,
+				RE::Actor* a_target,
+				bool a_hostileEitherDirection,
+				std::chrono::steady_clock::time_point a_now)
+			{
+				if (!a_owner || !a_target) {
+					return false;
+				}
+
+				const NonHostileFirstHitKey key{
+					.owner = a_owner->GetFormID(),
+					.target = a_target->GetFormID()
+				};
+				if (key.owner == 0u || key.target == 0u) {
+					return false;
+				}
+
+				if (a_hostileEitherDirection) {
+					_nonHostileFirstHitSeen.erase(key);
+					return false;
+				}
+
+				if (!_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed) ||
+					a_target->IsPlayerRef()) {
+					return false;
+				}
+
+				const bool shouldPrune =
+					_nonHostileFirstHitLastPruneAt.time_since_epoch().count() == 0 ||
+					(a_now - _nonHostileFirstHitLastPruneAt) > kNonHostileFirstHitPruneInterval ||
+					_nonHostileFirstHitSeen.size() > kNonHostileFirstHitMaxEntries;
+				if (shouldPrune) {
+					_nonHostileFirstHitLastPruneAt = a_now;
+
+					const auto expireBefore = a_now - kNonHostileFirstHitTtl;
+					for (auto it = _nonHostileFirstHitSeen.begin(); it != _nonHostileFirstHitSeen.end();) {
+						if (it->second <= expireBefore) {
+							it = _nonHostileFirstHitSeen.erase(it);
+						} else {
+							++it;
+						}
+					}
+
+					while (_nonHostileFirstHitSeen.size() > kNonHostileFirstHitMaxEntries) {
+						auto oldest = _nonHostileFirstHitSeen.begin();
+						for (auto it = _nonHostileFirstHitSeen.begin(); it != _nonHostileFirstHitSeen.end(); ++it) {
+							if (it->second < oldest->second) {
+								oldest = it;
+							}
+						}
+						_nonHostileFirstHitSeen.erase(oldest);
+					}
+				}
+
+				const auto [it, inserted] = _nonHostileFirstHitSeen.emplace(key, a_now);
+				if (inserted) {
+					return true;
+				}
+
+				if (a_now < it->second) {
+					it->second = a_now;
+					return true;
+				}
+
+				return (a_now - it->second) <= kNonHostileFirstHitReentryWindow;
+			}
 
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{

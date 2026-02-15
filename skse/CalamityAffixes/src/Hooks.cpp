@@ -1,5 +1,6 @@
 #include "CalamityAffixes/Hooks.h"
 
+#include <chrono>
 #include <cstddef>
 
 #include <RE/Skyrim.h>
@@ -8,11 +9,40 @@
 
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HitDataUtil.h"
+#include "CalamityAffixes/TriggerGuards.h"
 
 namespace CalamityAffixes::Hooks
 {
 	namespace
 	{
+		[[nodiscard]] bool IsPlayerOwned(RE::Actor* a_actor) noexcept
+		{
+			if (!a_actor) {
+				return false;
+			}
+			if (a_actor->IsPlayerRef()) {
+				return true;
+			}
+
+			auto commandingAny = a_actor->GetCommandingActor();
+			auto* commanding = commandingAny.get();
+			return commanding && commanding->IsPlayerRef();
+		}
+
+		[[nodiscard]] RE::Actor* ResolvePlayerOwner(RE::Actor* a_actor) noexcept
+		{
+			if (!a_actor) {
+				return nullptr;
+			}
+			if (a_actor->IsPlayerRef()) {
+				return a_actor;
+			}
+
+			auto commandingAny = a_actor->GetCommandingActor();
+			auto* commanding = commandingAny.get();
+			return (commanding && commanding->IsPlayerRef()) ? commanding : nullptr;
+		}
+
 		class ActorHandleHealthDamageHook
 		{
 		public:
@@ -70,11 +100,11 @@ namespace CalamityAffixes::Hooks
 				}
 			};
 
-			static void ThunkImpl(
-				const REL::Relocation<ThunkFn>& a_original,
-				RE::Actor* a_this,
-				RE::Actor* a_attacker,
-				float a_damage)
+				static void ThunkImpl(
+					const REL::Relocation<ThunkFn>& a_original,
+					RE::Actor* a_this,
+					RE::Actor* a_attacker,
+					float a_damage)
 			{
 				static thread_local bool inHook = false;
 				if (inHook) {
@@ -84,18 +114,51 @@ namespace CalamityAffixes::Hooks
 
 				ScopedFlag guard(inHook);
 
-				const auto* hitData = HitDataUtil::GetLastHitData(a_this);
-				float adjustedDamage = a_damage;
-				const float critMult = CalamityAffixes::EventBridge::GetSingleton()->GetCritDamageMultiplier(
-					a_attacker, hitData);
-				if (critMult > 1.0f) {
-					adjustedDamage *= critMult;
+					const bool hasTarget = (a_this != nullptr);
+					const bool hasAttacker = (a_attacker != nullptr);
+					const bool targetIsPlayer = hasTarget && a_this->IsPlayerRef();
+					const bool attackerIsPlayerOwned = hasAttacker && IsPlayerOwned(a_attacker);
+					auto* playerOwner = attackerIsPlayerOwned ? ResolvePlayerOwner(a_attacker) : nullptr;
+					const bool hasPlayerOwner = (playerOwner != nullptr);
+					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+					const auto now = std::chrono::steady_clock::now();
+
+					bool hostileEitherDirection = false;
+					if (hasTarget && hasAttacker) {
+						if (targetIsPlayer) {
+							hostileEitherDirection = a_this->IsHostileToActor(a_attacker) || a_attacker->IsHostileToActor(a_this);
+						} else if (playerOwner) {
+							hostileEitherDirection = playerOwner->IsHostileToActor(a_this) || a_this->IsHostileToActor(playerOwner);
+						}
+					}
+					const bool allowNeutralOutgoing =
+						hasTarget && !targetIsPlayer && playerOwner &&
+						bridge->ResolveNonHostileOutgoingFirstHitAllowance(playerOwner, a_this, hostileEitherDirection, now);
+
+					if (!ShouldProcessHealthDamageProcPath(
+							hasTarget,
+							hasAttacker,
+							targetIsPlayer,
+						attackerIsPlayerOwned,
+						hasPlayerOwner,
+						hostileEitherDirection,
+						allowNeutralOutgoing)) {
+					a_original(a_this, a_attacker, a_damage);
+					return;
 				}
-				const auto conversion = CalamityAffixes::EventBridge::GetSingleton()->EvaluateConversion(
-					a_attacker,
-					a_this,
-					hitData,
-					adjustedDamage);
+
+					const auto* hitData = HitDataUtil::GetLastHitData(a_this);
+					float adjustedDamage = a_damage;
+					const float critMult = bridge->GetCritDamageMultiplier(
+						a_attacker, hitData);
+					if (critMult > 1.0f) {
+						adjustedDamage *= critMult;
+					}
+					const auto conversion = bridge->EvaluateConversion(
+						a_attacker,
+						a_this,
+						hitData,
+						adjustedDamage);
 
 				a_original(a_this, a_attacker, adjustedDamage);
 
@@ -112,10 +175,10 @@ namespace CalamityAffixes::Hooks
 					}
 				}
 
-				const auto coc = CalamityAffixes::EventBridge::GetSingleton()->EvaluateCastOnCrit(
-					a_attacker,
-					a_this,
-					hitData);
+					const auto coc = bridge->EvaluateCastOnCrit(
+						a_attacker,
+						a_this,
+						hitData);
 				if (coc.spell && a_attacker && a_this) {
 					if (auto* magicCaster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
 						magicCaster->CastSpellImmediate(
@@ -129,8 +192,8 @@ namespace CalamityAffixes::Hooks
 					}
 				}
 
-				CalamityAffixes::EventBridge::GetSingleton()->OnHealthDamage(a_this, a_attacker, hitData, a_damage);
-			}
+					bridge->OnHealthDamage(a_this, a_attacker, hitData, a_damage);
+				}
 
 			static void ThunkActor(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{

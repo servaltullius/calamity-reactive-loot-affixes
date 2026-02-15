@@ -60,12 +60,23 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		if (!a_attacker || !a_target || !a_hitData || !a_hitData->weapon) {
+		if (!a_attacker || !a_target) {
 			return {};
 		}
 
-		if (!a_attacker->IsPlayerRef()) {
-			return {};
+			if (!a_attacker->IsPlayerRef()) {
+				return {};
+			}
+			const auto now = std::chrono::steady_clock::now();
+			const bool hostileEitherDirection =
+				a_attacker->IsHostileToActor(a_target) || a_target->IsHostileToActor(a_attacker);
+			const bool allowNeutralOutgoing =
+				ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
+			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
+				return {};
+			}
+			if (!a_hitData || !a_hitData->weapon) {
+				return {};
 		}
 
 		MaybeResyncEquippedAffixes(std::chrono::steady_clock::now());
@@ -81,9 +92,7 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		const auto now = std::chrono::steady_clock::now();
-
-		AffixRuntime* selectedAffix = nullptr;
+			AffixRuntime* selectedAffix = nullptr;
 		PerTargetCooldownKey selectedPerTargetKey{};
 		bool selectedUsesPerTargetIcd = false;
 		const Action* action = nullptr;
@@ -210,14 +219,17 @@ namespace CalamityAffixes
 		}
 
 		// Avoid friendly-fire spam.
-		if (!a_attacker->IsHostileToActor(a_target)) {
-			return {};
-		}
-
-		const auto now = std::chrono::steady_clock::now();
-		if (now < _castOnCritNextAllowed) {
-			return {};
-		}
+			const auto now = std::chrono::steady_clock::now();
+			const bool hostileEitherDirection =
+				a_attacker->IsHostileToActor(a_target) || a_target->IsHostileToActor(a_attacker);
+			const bool allowNeutralOutgoing =
+				ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
+			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
+				return {};
+			}
+			if (now < _castOnCritNextAllowed) {
+				return {};
+			}
 
 		std::vector<std::size_t> pool;
 		pool.reserve(_castOnCritAffixIndices.size());

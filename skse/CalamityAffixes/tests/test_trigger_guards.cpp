@@ -4,6 +4,7 @@ using CalamityAffixes::ComputePerTargetCooldownNextAllowedMs;
 using CalamityAffixes::DuplicateHitKey;
 using CalamityAffixes::IsPerTargetCooldownBlockedMs;
 using CalamityAffixes::ResolveTriggerProcCooldownMs;
+using CalamityAffixes::ShouldProcessHealthDamageProcPath;
 using CalamityAffixes::ShouldSendPlayerOwnedHitEvent;
 using CalamityAffixes::ShouldSuppressDuplicateHitWindow;
 
@@ -87,16 +88,98 @@ static_assert([] {
 	"ResolveTriggerProcCooldownMs: leaves non-guaranteed chance unchanged when ICD is zero");
 
 static_assert([] {
-	return ShouldSendPlayerOwnedHitEvent(true, true, true);
+	return ShouldSendPlayerOwnedHitEvent(true, true, true, false, false);
 }(),
 	"ShouldSendPlayerOwnedHitEvent: sends only when player-owned hit is hostile");
 
 static_assert([] {
-	return !ShouldSendPlayerOwnedHitEvent(true, true, false);
+	return !ShouldSendPlayerOwnedHitEvent(true, true, false, false, false);
 }(),
 	"ShouldSendPlayerOwnedHitEvent: blocks non-hostile player-owned hits");
 
 static_assert([] {
-	return !ShouldSendPlayerOwnedHitEvent(true, false, true);
+	return !ShouldSendPlayerOwnedHitEvent(true, false, true, false, false);
 }(),
 	"ShouldSendPlayerOwnedHitEvent: blocks unresolved player owner");
+
+static_assert([] {
+	return ShouldSendPlayerOwnedHitEvent(true, true, false, true, false);
+}(),
+	"ShouldSendPlayerOwnedHitEvent: optionally allows non-hostile outgoing events for non-player targets");
+
+static_assert([] {
+	return !ShouldSendPlayerOwnedHitEvent(true, true, false, true, true);
+}(),
+	"ShouldSendPlayerOwnedHitEvent: keeps non-hostile incoming-to-player blocked");
+
+static_assert([] {
+	return ShouldProcessHealthDamageProcPath(
+		true,
+		true,
+		true,
+		false,
+		false,
+		true,
+		false);
+}(),
+	"ShouldProcessHealthDamageProcPath: processes incoming hostile damage to player");
+
+static_assert([] {
+	return ShouldProcessHealthDamageProcPath(
+		true,
+		true,
+		false,
+		true,
+		true,
+		true,
+		false);
+}(),
+	"ShouldProcessHealthDamageProcPath: processes outgoing hostile damage from player-owned attacker");
+
+static_assert([] {
+	return !ShouldProcessHealthDamageProcPath(
+		true,
+		true,
+		false,
+		true,
+		true,
+		false,
+		false);
+}(),
+	"ShouldProcessHealthDamageProcPath: blocks non-hostile pairs");
+
+static_assert([] {
+	return !ShouldProcessHealthDamageProcPath(
+		true,
+		false,
+		true,
+		false,
+		false,
+		false,
+		false);
+}(),
+	"ShouldProcessHealthDamageProcPath: blocks events without attacker");
+
+static_assert([] {
+	return !ShouldProcessHealthDamageProcPath(
+		true,
+		true,
+		false,
+		false,
+		false,
+		true,
+		false);
+}(),
+	"ShouldProcessHealthDamageProcPath: blocks non-player-owned outgoing paths");
+
+static_assert([] {
+	return ShouldProcessHealthDamageProcPath(
+		true,
+		true,
+		false,
+		true,
+		true,
+		false,
+		true);
+}(),
+	"ShouldProcessHealthDamageProcPath: allows optional non-hostile outgoing player-owned path");

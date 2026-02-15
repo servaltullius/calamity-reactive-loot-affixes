@@ -227,9 +227,13 @@ namespace CalamityAffixes
 		if (!owner) {
 			return;
 		}
-		if (!(owner->IsHostileToActor(a_target) || a_target->IsHostileToActor(owner))) {
-			return;
-		}
+			const bool hostileEitherDirection =
+				owner->IsHostileToActor(a_target) || a_target->IsHostileToActor(owner);
+			const bool allowNeutralOutgoing =
+				ResolveNonHostileOutgoingFirstHitAllowance(owner, a_target, hostileEitherDirection, a_now);
+			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
+				return;
+			}
 
 		const LastHitKey key{
 			.outgoing = true,

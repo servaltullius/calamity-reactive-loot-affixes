@@ -113,12 +113,16 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				}
 			} else {
 				// Outgoing (player-owned).
-				if (_configLoaded && IsPlayerOwned(aggressor)) {
-					auto* owner = GetPlayerOwner(aggressor);
-					if (owner && (owner->IsHostileToActor(target) || target->IsHostileToActor(owner))) {
-						const LastHitKey key{
-							.outgoing = true,
-							.aggressor = aggressor->GetFormID(),
+					if (_configLoaded && IsPlayerOwned(aggressor)) {
+						auto* owner = GetPlayerOwner(aggressor);
+						const bool hostileEitherDirection =
+							owner && (owner->IsHostileToActor(target) || target->IsHostileToActor(owner));
+						const bool allowNeutralOutgoing =
+							owner && ResolveNonHostileOutgoingFirstHitAllowance(owner, target, hostileEitherDirection, now);
+						if (owner && (hostileEitherDirection || allowNeutralOutgoing)) {
+							const LastHitKey key{
+								.outgoing = true,
+								.aggressor = aggressor->GetFormID(),
 							.target = target->GetFormID(),
 							.source = a_event->source
 						};
@@ -161,7 +165,14 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			auto* playerOwner = playerOwnedAggressor ? GetPlayerOwner(aggressor) : nullptr;
 			const bool hostileEitherDirection =
 				playerOwner && (playerOwner->IsHostileToActor(target) || target->IsHostileToActor(playerOwner));
-			if (ShouldSendPlayerOwnedHitEvent(playerOwnedAggressor, playerOwner != nullptr, hostileEitherDirection)) {
+			const bool allowNeutralOutgoing =
+				playerOwner && ResolveNonHostileOutgoingFirstHitAllowance(playerOwner, target, hostileEitherDirection, now);
+			if (ShouldSendPlayerOwnedHitEvent(
+					playerOwnedAggressor,
+					playerOwner != nullptr,
+					hostileEitherDirection,
+					allowNeutralOutgoing,
+					target->IsPlayerRef())) {
 				SendModEvent("CalamityAffixes_Hit", target);
 			}
 
@@ -500,6 +511,17 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 						RE::DebugNotification("Calamity: DotApply auto-disable ON");
 					}
 				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			if (eventName == kMcmSetAllowNonHostileFirstHitProcEvent) {
+				const bool enabled = (a_event->numArg > 0.5f);
+				_allowNonHostilePlayerOwnedOutgoingProcs.store(enabled, std::memory_order_relaxed);
+				_nonHostileFirstHitSeen.clear();
+				_nonHostileFirstHitLastPruneAt = {};
+				RE::DebugNotification(enabled ?
+					"Calamity: non-hostile first-hit proc ON" :
+					"Calamity: non-hostile first-hit proc OFF");
 				return RE::BSEventNotifyControl::kContinue;
 			}
 

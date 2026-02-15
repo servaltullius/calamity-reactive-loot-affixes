@@ -114,6 +114,23 @@
           }
         },
         {
+          "type": "toggle",
+          "id": "bAllowNonHostileFirstHitProc:General",
+          "text": "Allow Neutral First-Hit Proc / 중립 첫 타격 프로크 허용",
+          "help": "OFF (recommended): blocks first-hit procs on non-hostile targets to avoid accidental combat lock side effects near interactions. ON: allows first-hit procs even before hostility flips. / OFF(권장): 상호작용 근처에서 비적대 대상 첫 타격 프로크를 막아 전투 고착 부작용을 줄입니다. ON: 적대 전환 전에도 첫 타격 프로크를 허용합니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": false
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetAllowNonHostileFirstHitProc",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
           "type": "empty"
         },
         {

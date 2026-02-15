@@ -45,6 +45,14 @@ Function SetDotSafetyAutoDisable(bool a_enabled) global
 	endif
 EndFunction
 
+Function SetAllowNonHostileFirstHitProc(bool a_enabled) global
+	if a_enabled
+		Emit("CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc", "", 1.0)
+	else
+		Emit("CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc", "", 0.0)
+	endif
+EndFunction
+
 Function SpawnTestItem() global
 	Emit("CalamityAffixes_MCM_SpawnTestItem", "", 1.0)
 EndFunction

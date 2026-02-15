@@ -111,6 +111,15 @@ namespace CalamityAffixes
 		// Tick lightweight runtime systems that need polling (e.g., ground traps).
 		void TickTraps();
 		[[nodiscard]] bool HasActiveTraps() const noexcept { return _hasActiveTraps.load(std::memory_order_relaxed); }
+		[[nodiscard]] bool AllowsNonHostilePlayerOwnedOutgoingProcs() const noexcept
+		{
+			return _allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
+		}
+		[[nodiscard]] bool ResolveNonHostileOutgoingFirstHitAllowance(
+			RE::Actor* a_owner,
+			RE::Actor* a_target,
+			bool a_hostileEitherDirection,
+			std::chrono::steady_clock::time_point a_now);
 
 		// UI helper: returns the affix tooltip text for this entry (if any).
 		// Instance affixes are stored per item instance (ExtraUniqueID -> _instanceAffixes).
@@ -407,6 +416,7 @@ namespace CalamityAffixes
 				static constexpr std::string_view kMcmSetValidationIntervalEvent = "CalamityAffixes_MCM_SetValidationInterval";
 				static constexpr std::string_view kMcmSetProcChanceMultEvent = "CalamityAffixes_MCM_SetProcChanceMult";
 				static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
+				static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = "CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc";
 				static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 
 			static constexpr std::array<float, kMaxAffixesPerItem> kAffixCountWeights = { 70.0f, 25.0f, 5.0f };
@@ -464,6 +474,36 @@ namespace CalamityAffixes
 			}
 		};
 
+		struct NonHostileFirstHitKey
+		{
+			RE::FormID owner{ 0 };
+			RE::FormID target{ 0 };
+		};
+
+		struct NonHostileFirstHitKeyHash
+		{
+			[[nodiscard]] std::size_t operator()(const NonHostileFirstHitKey& a_key) const noexcept
+			{
+				const std::uint64_t packed =
+					(static_cast<std::uint64_t>(a_key.owner) << 32) |
+					static_cast<std::uint64_t>(a_key.target);
+				return std::hash<std::uint64_t>{}(packed);
+			}
+		};
+
+		struct NonHostileFirstHitKeyEq
+		{
+			[[nodiscard]] bool operator()(const NonHostileFirstHitKey& a, const NonHostileFirstHitKey& b) const noexcept
+			{
+				return a.owner == b.owner && a.target == b.target;
+			}
+		};
+
+		static constexpr std::size_t kNonHostileFirstHitMaxEntries = 8192;
+		static constexpr auto kNonHostileFirstHitPruneInterval = std::chrono::seconds(10);
+		static constexpr auto kNonHostileFirstHitTtl = std::chrono::seconds(120);
+		static constexpr auto kNonHostileFirstHitReentryWindow = std::chrono::milliseconds(100);
+
 			// key = (targetFormID << 32) | magicEffectFormID
 			std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> _dotCooldowns;
 			std::chrono::steady_clock::time_point _dotCooldownsLastPruneAt{};
@@ -473,6 +513,8 @@ namespace CalamityAffixes
 
 		std::unordered_map<PerTargetCooldownKey, std::chrono::steady_clock::time_point, PerTargetCooldownKeyHash, PerTargetCooldownKeyEq> _perTargetCooldowns;
 		std::chrono::steady_clock::time_point _perTargetCooldownsLastPruneAt{};
+		std::unordered_map<NonHostileFirstHitKey, std::chrono::steady_clock::time_point, NonHostileFirstHitKeyHash, NonHostileFirstHitKeyEq> _nonHostileFirstHitSeen;
+		std::chrono::steady_clock::time_point _nonHostileFirstHitLastPruneAt{};
 
 		std::vector<AffixRuntime> _affixes;
 		std::vector<std::uint32_t> _activeCounts;
@@ -517,6 +559,7 @@ namespace CalamityAffixes
 			LootConfig _loot{};
 			bool _runtimeEnabled{ true };
 			float _runtimeProcChanceMult{ 1.0f };
+			std::atomic_bool _allowNonHostilePlayerOwnedOutgoingProcs{ false };
 		LootRerollGuard _lootRerollGuard{};
 		std::map<std::pair<RE::FormID, RE::FormID>, std::int32_t> _playerContainerStash;  // {containerID, baseObj} -> count
 		bool _configLoaded{ false };

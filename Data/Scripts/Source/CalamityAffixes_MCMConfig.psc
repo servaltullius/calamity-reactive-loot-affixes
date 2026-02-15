@@ -24,6 +24,10 @@ Function SetDotSafetyAutoDisable(bool a_enabled)
 	CalamityAffixes_ModeControl.SetDotSafetyAutoDisable(a_enabled)
 EndFunction
 
+Function SetAllowNonHostileFirstHitProc(bool a_enabled)
+	CalamityAffixes_ModeControl.SetAllowNonHostileFirstHitProc(a_enabled)
+EndFunction
+
 Function SetPrismaControlPanel(bool a_open)
 	CalamityAffixes_ModeControl.SetPrismaControlPanel(a_open)
 EndFunction
