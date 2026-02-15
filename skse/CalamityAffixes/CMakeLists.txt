@@ -40,6 +40,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Triggers.HealthDamage.cpp
 	    src/EventBridge.Triggers.Events.cpp
 	    src/EventBridge.Actions.cpp
+	    src/EventBridge.Actions.Trap.cpp
 	    src/EventBridge.Actions.Special.cpp
 	    src/EventBridge.Actions.Corpse.cpp
 	    src/EventBridge.Traps.cpp
