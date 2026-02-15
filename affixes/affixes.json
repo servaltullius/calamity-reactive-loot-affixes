@@ -5,7 +5,7 @@
   "eslFlag": true,
   "loot": {
     "chancePercent": 25.0,
-    "runewordFragmentChancePercent": 0.3,
+    "runewordFragmentChancePercent": 5.0,
     "renameItem": true,
     "sharedPool": true,
     "debugLog": false,
