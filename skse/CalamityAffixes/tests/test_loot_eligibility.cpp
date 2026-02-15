@@ -23,15 +23,13 @@ static_assert(IsLootArmorEligible(LootArmorEligibilityInput{
 	.playable = true,
 	.hasSlotMask = true,
 	.hasArmorAddons = true,
-	.hasTemplateArmor = false,
 	.editorIdDenied = false
 }));
 
-static_assert(IsLootArmorEligible(LootArmorEligibilityInput{
+static_assert(!IsLootArmorEligible(LootArmorEligibilityInput{
 	.playable = true,
 	.hasSlotMask = true,
 	.hasArmorAddons = false,
-	.hasTemplateArmor = true,
 	.editorIdDenied = false
 }));
 
@@ -39,7 +37,6 @@ static_assert(!IsLootArmorEligible(LootArmorEligibilityInput{
 	.playable = false,
 	.hasSlotMask = true,
 	.hasArmorAddons = true,
-	.hasTemplateArmor = false,
 	.editorIdDenied = false
 }));
 
@@ -47,7 +44,6 @@ static_assert(!IsLootArmorEligible(LootArmorEligibilityInput{
 	.playable = true,
 	.hasSlotMask = false,
 	.hasArmorAddons = true,
-	.hasTemplateArmor = false,
 	.editorIdDenied = false
 }));
 
@@ -55,6 +51,5 @@ static_assert(!IsLootArmorEligible(LootArmorEligibilityInput{
 	.playable = true,
 	.hasSlotMask = true,
 	.hasArmorAddons = true,
-	.hasTemplateArmor = false,
 	.editorIdDenied = true
 }));

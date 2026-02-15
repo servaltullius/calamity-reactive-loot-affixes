@@ -30,7 +30,6 @@ namespace CalamityAffixes
 
 		bool hasSlotMask = false;
 		bool hasArmorAddons = false;
-		bool hasTemplateArmor = false;
 
 		const RE::TESObjectARMO* cursor = a_armor;
 		for (std::size_t depth = 0; cursor && depth < kArmorTemplateScanDepth; ++depth) {
@@ -39,7 +38,6 @@ namespace CalamityAffixes
 			if (!cursor->templateArmor) {
 				break;
 			}
-			hasTemplateArmor = true;
 			if (cursor->templateArmor == cursor) {
 				break;
 			}
@@ -55,7 +53,6 @@ namespace CalamityAffixes
 			.playable = a_armor->GetPlayable(),
 			.hasSlotMask = hasSlotMask,
 			.hasArmorAddons = hasArmorAddons,
-			.hasTemplateArmor = hasTemplateArmor,
 			.editorIdDenied = editorIdDenied
 		};
 		return detail::IsLootArmorEligible(input);

@@ -76,7 +76,6 @@ namespace CalamityAffixes::detail
 		bool playable{ false };
 		bool hasSlotMask{ false };
 		bool hasArmorAddons{ false };
-		bool hasTemplateArmor{ false };
 		bool editorIdDenied{ false };
 	};
 
@@ -88,7 +87,7 @@ namespace CalamityAffixes::detail
 		if (!a_input.hasSlotMask) {
 			return false;
 		}
-		if (!a_input.hasArmorAddons && !a_input.hasTemplateArmor) {
+		if (!a_input.hasArmorAddons) {
 			return false;
 		}
 		if (a_input.editorIdDenied) {
