@@ -9,6 +9,33 @@ namespace CalamityAffixes
 	class NonHostileFirstHitGate
 	{
 	public:
+		[[nodiscard]] static constexpr bool IsValidKey(std::uint32_t a_ownerFormID, std::uint32_t a_targetFormID) noexcept
+		{
+			return a_ownerFormID != 0u && a_targetFormID != 0u;
+		}
+
+		[[nodiscard]] static constexpr bool ShouldTrackNonHostileHit(
+			bool a_allowNonHostileOutgoing,
+			bool a_hostileEitherDirection,
+			bool a_targetIsPlayer) noexcept
+		{
+			return a_allowNonHostileOutgoing && !a_hostileEitherDirection && !a_targetIsPlayer;
+		}
+
+		[[nodiscard]] static constexpr bool IsPruneDue(
+			std::chrono::steady_clock::duration a_elapsed,
+			std::chrono::steady_clock::duration a_pruneInterval) noexcept
+		{
+			return a_elapsed > a_pruneInterval;
+		}
+
+		[[nodiscard]] static constexpr bool IsReentryAllowed(
+			std::chrono::steady_clock::duration a_elapsed,
+			std::chrono::steady_clock::duration a_reentryWindow) noexcept
+		{
+			return a_elapsed <= a_reentryWindow;
+		}
+
 		[[nodiscard]] bool Resolve(
 			std::uint32_t a_ownerFormID,
 			std::uint32_t a_targetFormID,
@@ -21,7 +48,7 @@ namespace CalamityAffixes
 				.owner = a_ownerFormID,
 				.target = a_targetFormID
 			};
-			if (key.owner == 0u || key.target == 0u) {
+			if (!IsValidKey(key.owner, key.target)) {
 				return false;
 			}
 
@@ -30,13 +57,13 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			if (!a_allowNonHostileOutgoing || a_targetIsPlayer) {
+			if (!ShouldTrackNonHostileHit(a_allowNonHostileOutgoing, a_hostileEitherDirection, a_targetIsPlayer)) {
 				return false;
 			}
 
 			const bool shouldPrune =
 				_lastPruneAt.time_since_epoch().count() == 0 ||
-				(a_now - _lastPruneAt) > kPruneInterval ||
+				IsPruneDue(a_now - _lastPruneAt, kPruneInterval) ||
 				_seen.size() > kMaxEntries;
 			if (shouldPrune) {
 				_lastPruneAt = a_now;
@@ -53,7 +80,7 @@ namespace CalamityAffixes
 				return true;
 			}
 
-			return (a_now - it->second) <= kReentryWindow;
+			return IsReentryAllowed(a_now - it->second, kReentryWindow);
 		}
 
 		void Clear() noexcept

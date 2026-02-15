@@ -9,12 +9,37 @@ namespace CalamityAffixes
 	class PerTargetCooldownStore
 	{
 	public:
+		[[nodiscard]] static constexpr bool IsValidKey(std::uint64_t a_token, std::uint32_t a_targetFormID) noexcept
+		{
+			return a_token != 0u && a_targetFormID != 0u;
+		}
+
+		[[nodiscard]] static constexpr bool IsValidCommitInput(
+			std::uint64_t a_token,
+			std::uint32_t a_targetFormID,
+			std::chrono::milliseconds a_perTargetIcd) noexcept
+		{
+			return IsValidKey(a_token, a_targetFormID) && a_perTargetIcd.count() > 0;
+		}
+
+		[[nodiscard]] static constexpr bool IsPruneDue(
+			std::chrono::steady_clock::duration a_elapsed,
+			std::chrono::steady_clock::duration a_pruneInterval) noexcept
+		{
+			return a_elapsed > a_pruneInterval;
+		}
+
+		[[nodiscard]] static constexpr bool IsPruneSizeExceeded(std::size_t a_size, std::size_t a_maxEntries) noexcept
+		{
+			return a_size > a_maxEntries;
+		}
+
 		[[nodiscard]] bool IsBlocked(
 			std::uint64_t a_token,
 			std::uint32_t a_targetFormID,
 			std::chrono::steady_clock::time_point a_now) const
 		{
-			if (a_token == 0u || a_targetFormID == 0u) {
+			if (!IsValidKey(a_token, a_targetFormID)) {
 				return false;
 			}
 
@@ -34,7 +59,7 @@ namespace CalamityAffixes
 			std::chrono::milliseconds a_perTargetIcd,
 			std::chrono::steady_clock::time_point a_now)
 		{
-			if (a_token == 0u || a_targetFormID == 0u || a_perTargetIcd.count() <= 0) {
+			if (!IsValidCommitInput(a_token, a_targetFormID, a_perTargetIcd)) {
 				return;
 			}
 
@@ -44,9 +69,9 @@ namespace CalamityAffixes
 			};
 			_nextAllowed[key] = a_now + a_perTargetIcd;
 
-			if (_nextAllowed.size() > kMaxEntries) {
+			if (IsPruneSizeExceeded(_nextAllowed.size(), kMaxEntries)) {
 				if (_lastPruneAt.time_since_epoch().count() == 0 ||
-					(a_now - _lastPruneAt) > kPruneInterval) {
+					IsPruneDue(a_now - _lastPruneAt, kPruneInterval)) {
 					_lastPruneAt = a_now;
 					for (auto it = _nextAllowed.begin(); it != _nextAllowed.end();) {
 						if (a_now >= it->second) {
