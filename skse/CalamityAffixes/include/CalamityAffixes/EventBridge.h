@@ -41,6 +41,7 @@ namespace CalamityAffixes
 		public RE::BSTEventSink<SKSE::ModCallbackEvent>
 	{
 	public:
+		// Public result/value DTOs.
 		struct ConversionResult
 		{
 			RE::SpellItem* spell{ nullptr };
@@ -97,11 +98,13 @@ namespace CalamityAffixes
 			std::vector<RunewordRuneRequirement> requiredRunes{};
 		};
 
+		// Lifecycle and config entrypoints.
 		static EventBridge* GetSingleton();
 
 		void Register();
 		void LoadConfig();
 
+		// Serialization callbacks.
 		void Save(SKSE::SerializationInterface* a_intfc);
 		void Load(SKSE::SerializationInterface* a_intfc);
 		void Revert(SKSE::SerializationInterface* a_intfc);
@@ -110,6 +113,7 @@ namespace CalamityAffixes
 		// We use this to prune instance-affix entries for player-dropped world refs that are later deleted.
 		void OnFormDelete(RE::VMHandle a_handle);
 
+		// Runtime polling/feature gates.
 		// Tick lightweight runtime systems that need polling (e.g., ground traps).
 		void TickTraps();
 		[[nodiscard]] bool HasActiveTraps() const noexcept { return _hasActiveTraps.load(std::memory_order_relaxed); }
@@ -123,6 +127,7 @@ namespace CalamityAffixes
 			bool a_hostileEitherDirection,
 			std::chrono::steady_clock::time_point a_now);
 
+		// UI-facing helpers.
 		// UI helper: returns the affix tooltip text for this entry (if any).
 		// Instance affixes are stored per item instance (ExtraUniqueID -> _instanceAffixes).
 		[[nodiscard]] std::optional<std::string> GetInstanceAffixTooltip(
@@ -141,6 +146,7 @@ namespace CalamityAffixes
 		// UI helper: current runeword crafting status for Prisma panel.
 		[[nodiscard]] RunewordPanelState GetRunewordPanelState();
 
+		// Combat/runtime evaluation entrypoints.
 		// Called from Actor::HandleHealthDamage hook to drive hit/incoming-hit procs reliably,
 		// even when TESHitEvent is delayed or suppressed by other mods.
 		void OnHealthDamage(
@@ -195,6 +201,7 @@ namespace CalamityAffixes
 	private:
 		EventBridge() = default;
 
+		// Internal domain enums.
 		enum class Trigger : std::uint8_t
 		{
 			kHit,
@@ -389,10 +396,12 @@ namespace CalamityAffixes
 			RE::FormID source{ 0 };
 		};
 
+		// Shared wrappers (implemented via dedicated helper headers).
 		static bool IsPlayerOwned(RE::Actor* a_actor);
 		static RE::Actor* GetPlayerOwner(RE::Actor* a_actor);
 		static void SendModEvent(std::string_view a_eventName, RE::TESForm* a_sender);
 
+		// Config/event string constants and runtime guards.
 		static constexpr std::string_view kDotKeywordEditorID = "CAFF_TAG_DOT";
 		static constexpr std::chrono::milliseconds kDotApplyICD{ 1500 };
 		static constexpr std::chrono::milliseconds kCastOnCritICD{ 150 };
@@ -438,6 +447,7 @@ namespace CalamityAffixes
 		static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
 		static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
 
+		// Runtime config/state PODs.
 		struct LootConfig
 		{
 			float chancePercent{ 0.0f };
@@ -457,6 +467,7 @@ namespace CalamityAffixes
 			RE::FormID target{ 0 };
 		};
 
+		// Runtime state storage.
 		// key = (targetFormID << 32) | magicEffectFormID
 		std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> _dotCooldowns;
 		std::chrono::steady_clock::time_point _dotCooldownsLastPruneAt{};
@@ -532,6 +543,7 @@ namespace CalamityAffixes
 		static constexpr std::chrono::milliseconds kEquipResyncInterval{ 5000 };
 		ResyncScheduler _equipResync{ .nextAtMs = 0, .intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count()) };
 
+		// Special-action selection/runtime structs.
 		struct CorpseExplosionState
 		{
 			std::chrono::steady_clock::time_point lastExplosionAt{};
@@ -581,6 +593,7 @@ namespace CalamityAffixes
 		CorpseExplosionState _summonCorpseExplosionState{};
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _summonCorpseExplosionSeenCorpses;
 
+		// Runtime lifecycle and data maintenance.
 		void ResetRuntimeStateForConfigReload();
 		void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);
 		void RebuildActiveCounts();
@@ -626,6 +639,8 @@ namespace CalamityAffixes
 		[[nodiscard]] float ResolveEvolutionMultiplier(const Action& a_action, const InstanceRuntimeState* a_state) const;
 		void AdvanceRuntimeStateForAffixProc(const AffixRuntime& a_affix);
 		void CycleManualModeForEquippedAffixes(std::int32_t a_direction, std::string_view a_affixIdFilter = {});
+
+		// Loot processing path.
 		void ProcessLootAcquired(RE::FormID a_baseObj, std::int32_t a_count, std::uint16_t a_uniqueID, bool a_allowRunewordFragmentRoll);
 		[[nodiscard]] std::optional<std::size_t> RollLootAffixIndex(
 			LootItemType a_itemType,
@@ -650,6 +665,8 @@ namespace CalamityAffixes
 		[[nodiscard]] static const char* DescribeLootItemType(LootItemType a_type);
 		[[nodiscard]] std::string FormatLootName(std::string_view a_baseName, std::string_view a_affixName) const;
 		[[nodiscard]] static std::uint64_t MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept;
+
+		// Health-damage/TESHit trigger routing path.
 		[[nodiscard]] bool RouteHealthDamageAsHit(
 			RE::Actor* a_target,
 			RE::Actor* a_attacker,
@@ -682,6 +699,8 @@ namespace CalamityAffixes
 			RE::Actor* a_target,
 			RE::Actor* a_attacker);
 		void ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);
+
+		// Corpse-explosion helpers.
 		void ProcessCorpseExplosionKill(RE::Actor* a_owner, RE::Actor* a_corpse);
 		void ProcessSummonCorpseExplosionDeath(RE::Actor* a_owner, RE::Actor* a_corpse);
 		void ProcessCorpseExplosionAction(
@@ -723,6 +742,8 @@ namespace CalamityAffixes
 			CorpseExplosionBudgetDenyReason* a_outDenyReason = nullptr,
 			bool a_summonMode = false);
 		std::uint32_t ExecuteCorpseExplosion(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_corpse, float a_baseDamage);
+
+		// Archmage helpers.
 		[[nodiscard]] ArchmageSelection SelectBestArchmageAction(
 			std::chrono::steady_clock::time_point a_now,
 			RE::Actor* a_target);
@@ -743,6 +764,8 @@ namespace CalamityAffixes
 			float a_extraDamage);
 		void ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell);
 		bool ShouldSuppressDuplicateHit(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept;
+
+		// Action execution helpers (dispatch + typed executors).
 		void ExecuteDebugNotifyAction(const Action& a_action);
 		[[nodiscard]] RE::TESObjectREFR* ResolveSpellCastTarget(const Action& a_action, RE::Actor* a_target) const;
 		[[nodiscard]] float ResolveSpellMagnitudeOverride(
