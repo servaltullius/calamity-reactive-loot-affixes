@@ -2,6 +2,7 @@
 #include "CalamityAffixes/LootUiGuards.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <limits>
 #include <random>
@@ -11,7 +12,77 @@
 
 namespace CalamityAffixes
 {
-		std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
+	namespace
+	{
+		[[nodiscard]] constexpr char ToLowerAscii(char a_char) noexcept
+		{
+			return (a_char >= 'A' && a_char <= 'Z') ? static_cast<char>(a_char + ('a' - 'A')) : a_char;
+		}
+
+		[[nodiscard]] bool ContainsCaseInsensitiveAscii(std::string_view a_text, std::string_view a_pattern) noexcept
+		{
+			if (a_pattern.empty() || a_text.size() < a_pattern.size()) {
+				return false;
+			}
+
+			for (std::size_t i = 0; i + a_pattern.size() <= a_text.size(); ++i) {
+				bool matched = true;
+				for (std::size_t j = 0; j < a_pattern.size(); ++j) {
+					if (ToLowerAscii(a_text[i + j]) != ToLowerAscii(a_pattern[j])) {
+						matched = false;
+						break;
+					}
+				}
+				if (matched) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		[[nodiscard]] bool IsEditorIdConsumableRewardArmor(const RE::TESObjectARMO& a_armor) noexcept
+		{
+			const char* editorIdRaw = a_armor.GetFormEditorID();
+			if (!editorIdRaw || editorIdRaw[0] == '\0') {
+				return false;
+			}
+
+			const std::string_view editorId{ editorIdRaw };
+			static constexpr std::array<std::string_view, 5> kDenyMarkers{
+				"adventurerguild",
+				"adventurersguild",
+				"rewardbox",
+				"randombox",
+				"lootbox"
+			};
+
+			for (const auto marker : kDenyMarkers) {
+				if (ContainsCaseInsensitiveAscii(editorId, marker)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		[[nodiscard]] bool IsEligibleLootArmor(const RE::TESObjectARMO& a_armor) noexcept
+		{
+			if (!a_armor.GetPlayable()) {
+				return false;
+			}
+			if (a_armor.GetSlotMask() == RE::BIPED_MODEL::BipedObjectSlot::kNone) {
+				return false;
+			}
+			if (a_armor.armorAddons.empty()) {
+				return false;
+			}
+			if (IsEditorIdConsumableRewardArmor(a_armor)) {
+				return false;
+			}
+			return true;
+		}
+	}
+
+	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
 	{
 		return (static_cast<std::uint64_t>(a_baseID) << 16) | static_cast<std::uint64_t>(a_uniqueID);
 	}
@@ -490,6 +561,16 @@ namespace CalamityAffixes
 		auto* weap = form->As<RE::TESObjectWEAP>();
 		auto* armo = form->As<RE::TESObjectARMO>();
 		if (!weap && !armo) {
+			return;
+		}
+		if (armo && !IsEligibleLootArmor(*armo)) {
+			if (_loot.debugLog) {
+				const char* editorId = armo->GetFormEditorID();
+				SKSE::log::debug(
+					"CalamityAffixes: ProcessLootAcquired skipped non-eligible armor item (baseObj={:08X}, editorId={}).",
+					a_baseObj,
+					editorId ? editorId : "<none>");
+			}
 			return;
 		}
 
