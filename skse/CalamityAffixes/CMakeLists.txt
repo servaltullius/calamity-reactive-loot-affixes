@@ -140,6 +140,7 @@ if (BUILD_TESTING)
             tests/test_adaptive_element.cpp
             tests/test_magnitude_scaling.cpp
             tests/test_loot_reroll_guard.cpp
+            tests/test_loot_eligibility.cpp
             tests/test_loot_ui_guards.cpp
             tests/test_instance_state_key.cpp
             tests/test_resync_scheduler.cpp

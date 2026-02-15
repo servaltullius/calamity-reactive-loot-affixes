@@ -657,9 +657,11 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 					continue;
 				}
 
-				// Lazy cleanup: remove stale affix data for non-weapon/armor items.
-				if (entry->object && !entry->object->As<RE::TESObjectWEAP>() && !entry->object->As<RE::TESObjectARMO>()) {
-					_instanceAffixes.erase(it);
+				// Lazy cleanup: strip stale mappings for non-eligible items from older versions/saves.
+				if (!IsLootObjectEligibleForAffixes(entry->object)) {
+					if (_loot.cleanupInvalidLegacyAffixes) {
+						CleanupInvalidLootInstance(entry, xList, key, "RebuildActiveCounts.ineligible");
+					}
 					continue;
 				}
 

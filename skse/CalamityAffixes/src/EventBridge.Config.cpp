@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootEligibility.h"
 
 #include <algorithm>
 #include <charconv>
@@ -821,6 +822,7 @@ namespace CalamityAffixes
 
 	void EventBridge::ApplyLootConfigFromJson(const nlohmann::json& a_configRoot)
 	{
+		_loot.armorEditorIdDenyContains = detail::MakeDefaultLootArmorEditorIdDenyContains();
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
 			_loot.chancePercent = loot.value("chancePercent", 0.0f);
@@ -833,7 +835,26 @@ namespace CalamityAffixes
 			const double dotTagSafetyThreshold =
 				loot.value("dotTagSafetyUniqueEffectThreshold", static_cast<double>(_loot.dotTagSafetyUniqueEffectThreshold));
 			const double trapGlobalMaxActive = loot.value("trapGlobalMaxActive", static_cast<double>(_loot.trapGlobalMaxActive));
+			_loot.cleanupInvalidLegacyAffixes = loot.value("cleanupInvalidLegacyAffixes", _loot.cleanupInvalidLegacyAffixes);
 			_loot.nameFormat = loot.value("nameFormat", std::string{ "{base} [{affix}]" });
+
+			if (const auto denyIt = loot.find("armorEditorIdDenyContains"); denyIt != loot.end()) {
+				if (denyIt->is_array()) {
+					_loot.armorEditorIdDenyContains.clear();
+					for (const auto& raw : *denyIt) {
+						if (!raw.is_string()) {
+							continue;
+						}
+						std::string markerRaw = raw.get<std::string>();
+						const auto marker = Trim(markerRaw);
+						if (!marker.empty()) {
+							_loot.armorEditorIdDenyContains.emplace_back(marker);
+						}
+					}
+				} else {
+					SKSE::log::warn("CalamityAffixes: loot.armorEditorIdDenyContains must be an array of strings.");
+				}
+			}
 
 			if (_loot.chancePercent < 0.0f) {
 				_loot.chancePercent = 0.0f;

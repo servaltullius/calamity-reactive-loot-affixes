@@ -51,6 +51,14 @@ public sealed class LootSpec
     [JsonPropertyName("trapGlobalMaxActive")]
     public int TrapGlobalMaxActive { get; init; } = 64;
 
+    // If true, removes stale legacy affix mappings from items that are no longer loot-eligible.
+    [JsonPropertyName("cleanupInvalidLegacyAffixes")]
+    public bool CleanupInvalidLegacyAffixes { get; init; } = true;
+
+    // Case-insensitive EditorID substrings that disqualify armor-like consumable reward boxes from loot affixes.
+    [JsonPropertyName("armorEditorIdDenyContains")]
+    public List<string>? ArmorEditorIdDenyContains { get; init; }
+
     [JsonPropertyName("nameFormat")]
     public string? NameFormat { get; init; }
 }

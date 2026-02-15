@@ -458,6 +458,8 @@ namespace CalamityAffixes
 			bool dotTagSafetyAutoDisable{ false };
 			std::uint32_t dotTagSafetyUniqueEffectThreshold{ 96 };
 			std::uint32_t trapGlobalMaxActive{ 64 };
+			bool cleanupInvalidLegacyAffixes{ true };
+			std::vector<std::string> armorEditorIdDenyContains{};
 			std::string nameFormat{ "{base} [{affix}]" };
 		};
 
@@ -660,6 +662,14 @@ namespace CalamityAffixes
 			RE::InventoryEntryData* a_entry,
 			RE::ExtraDataList* a_xList,
 			const InstanceAffixSlots& a_slots);
+		[[nodiscard]] bool IsLootObjectEligibleForAffixes(const RE::TESBoundObject* a_object) const;
+		[[nodiscard]] bool IsLootArmorEligibleForAffixes(const RE::TESObjectARMO* a_armor) const;
+		[[nodiscard]] bool TryClearStaleLootDisplayName(RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList);
+		void CleanupInvalidLootInstance(
+			RE::InventoryEntryData* a_entry,
+			RE::ExtraDataList* a_xList,
+			std::uint64_t a_key,
+			std::string_view a_reason);
 
 		[[nodiscard]] std::optional<LootItemType> ParseLootItemType(std::string_view a_kidType) const;
 		[[nodiscard]] static const char* DescribeLootItemType(LootItemType a_type);

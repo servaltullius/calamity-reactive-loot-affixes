@@ -102,6 +102,19 @@ def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) 
         elif trap_global_max > 4096:
             warnings.append(f"loot.trapGlobalMaxActive is very high ({trap_global_max}). Consider keeping it <= 256.")
 
+    cleanup_legacy = loot.get("cleanupInvalidLegacyAffixes")
+    if cleanup_legacy is not None and not isinstance(cleanup_legacy, bool):
+        errors.append("loot.cleanupInvalidLegacyAffixes must be a boolean.")
+
+    deny_markers = loot.get("armorEditorIdDenyContains")
+    if deny_markers is not None:
+        if not isinstance(deny_markers, list):
+            errors.append("loot.armorEditorIdDenyContains must be an array of strings.")
+        else:
+            for idx, marker in enumerate(deny_markers):
+                if not isinstance(marker, str) or not marker.strip():
+                    errors.append(f"loot.armorEditorIdDenyContains[{idx}] must be a non-empty string.")
+
     keywords = _as_dict(spec.get("keywords"))
     if not keywords:
         errors.append("Missing object: keywords")

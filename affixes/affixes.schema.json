@@ -47,6 +47,11 @@
         "dotTagSafetyAutoDisable": { "type": "boolean" },
         "dotTagSafetyUniqueEffectThreshold": { "type": "integer", "minimum": 0, "maximum": 4096 },
         "trapGlobalMaxActive": { "type": "integer", "minimum": 0, "maximum": 4096 },
+        "cleanupInvalidLegacyAffixes": { "type": "boolean" },
+        "armorEditorIdDenyContains": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
         "nameFormat": { "type": "string" }
       }
     },

@@ -12,6 +12,14 @@
     "dotTagSafetyAutoDisable": false,
     "dotTagSafetyUniqueEffectThreshold": 96,
     "trapGlobalMaxActive": 64,
+    "cleanupInvalidLegacyAffixes": true,
+    "armorEditorIdDenyContains": [
+      "adventurerguild",
+      "adventurersguild",
+      "rewardbox",
+      "randombox",
+      "lootbox"
+    ],
     "nameFormat": "{base}[{affix}]"
   },
   "keywords": {

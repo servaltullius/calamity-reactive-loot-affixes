@@ -1,8 +1,8 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootEligibility.h"
 #include "CalamityAffixes/LootUiGuards.h"
 
 #include <algorithm>
-#include <array>
 #include <cctype>
 #include <limits>
 #include <random>
@@ -14,77 +14,119 @@ namespace CalamityAffixes
 {
 	namespace
 	{
-		[[nodiscard]] constexpr char ToLowerAscii(char a_char) noexcept
-		{
-			return (a_char >= 'A' && a_char <= 'Z') ? static_cast<char>(a_char + ('a' - 'A')) : a_char;
-		}
-
-		[[nodiscard]] bool ContainsCaseInsensitiveAscii(std::string_view a_text, std::string_view a_pattern) noexcept
-		{
-			if (a_pattern.empty() || a_text.size() < a_pattern.size()) {
-				return false;
-			}
-
-			for (std::size_t i = 0; i + a_pattern.size() <= a_text.size(); ++i) {
-				bool matched = true;
-				for (std::size_t j = 0; j < a_pattern.size(); ++j) {
-					if (ToLowerAscii(a_text[i + j]) != ToLowerAscii(a_pattern[j])) {
-						matched = false;
-						break;
-					}
-				}
-				if (matched) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		[[nodiscard]] bool IsEditorIdConsumableRewardArmor(const RE::TESObjectARMO& a_armor) noexcept
-		{
-			const char* editorIdRaw = a_armor.GetFormEditorID();
-			if (!editorIdRaw || editorIdRaw[0] == '\0') {
-				return false;
-			}
-
-			const std::string_view editorId{ editorIdRaw };
-			static constexpr std::array<std::string_view, 5> kDenyMarkers{
-				"adventurerguild",
-				"adventurersguild",
-				"rewardbox",
-				"randombox",
-				"lootbox"
-			};
-
-			for (const auto marker : kDenyMarkers) {
-				if (ContainsCaseInsensitiveAscii(editorId, marker)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		[[nodiscard]] bool IsEligibleLootArmor(const RE::TESObjectARMO& a_armor) noexcept
-		{
-			if (!a_armor.GetPlayable()) {
-				return false;
-			}
-			if (a_armor.GetSlotMask() == RE::BIPED_MODEL::BipedObjectSlot::kNone) {
-				return false;
-			}
-			if (a_armor.armorAddons.empty()) {
-				return false;
-			}
-			if (IsEditorIdConsumableRewardArmor(a_armor)) {
-				return false;
-			}
-			return true;
-		}
+		static constexpr std::size_t kArmorTemplateScanDepth = 8;
 	}
 
 	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
 	{
 		return (static_cast<std::uint64_t>(a_baseID) << 16) | static_cast<std::uint64_t>(a_uniqueID);
+	}
+
+	bool EventBridge::IsLootArmorEligibleForAffixes(const RE::TESObjectARMO* a_armor) const
+	{
+		if (!a_armor) {
+			return false;
+		}
+
+		bool hasSlotMask = false;
+		bool hasArmorAddons = false;
+		bool hasTemplateArmor = false;
+
+		const RE::TESObjectARMO* cursor = a_armor;
+		for (std::size_t depth = 0; cursor && depth < kArmorTemplateScanDepth; ++depth) {
+			hasSlotMask = hasSlotMask || (cursor->GetSlotMask() != RE::BIPED_MODEL::BipedObjectSlot::kNone);
+			hasArmorAddons = hasArmorAddons || !cursor->armorAddons.empty();
+			if (!cursor->templateArmor) {
+				break;
+			}
+			hasTemplateArmor = true;
+			if (cursor->templateArmor == cursor) {
+				break;
+			}
+			cursor = cursor->templateArmor;
+		}
+
+		const char* editorIdRaw = a_armor->GetFormEditorID();
+		const std::string_view editorId = editorIdRaw ? std::string_view(editorIdRaw) : std::string_view{};
+		const bool editorIdDenied =
+			detail::MatchesAnyCaseInsensitiveMarker(editorId, _loot.armorEditorIdDenyContains);
+
+		const detail::LootArmorEligibilityInput input{
+			.playable = a_armor->GetPlayable(),
+			.hasSlotMask = hasSlotMask,
+			.hasArmorAddons = hasArmorAddons,
+			.hasTemplateArmor = hasTemplateArmor,
+			.editorIdDenied = editorIdDenied
+		};
+		return detail::IsLootArmorEligible(input);
+	}
+
+	bool EventBridge::IsLootObjectEligibleForAffixes(const RE::TESBoundObject* a_object) const
+	{
+		if (!a_object) {
+			return false;
+		}
+		if (a_object->As<RE::TESObjectWEAP>()) {
+			return true;
+		}
+		if (const auto* armo = a_object->As<RE::TESObjectARMO>()) {
+			return IsLootArmorEligibleForAffixes(armo);
+		}
+		return false;
+	}
+
+	bool EventBridge::TryClearStaleLootDisplayName(RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList)
+	{
+		if (!a_entry || !a_entry->object || !a_xList) {
+			return false;
+		}
+
+		auto* text = a_xList->GetExtraTextDisplayData();
+		if (!text) {
+			return false;
+		}
+
+		const auto* name = text->GetDisplayName(a_entry->object, 0);
+		if (!name || name[0] == '\0' || !HasLeadingLootStarPrefix(name)) {
+			return false;
+		}
+
+		std::string cleaned = std::string(StripLeadingLootStarPrefix(name));
+		if (cleaned.empty()) {
+			const char* objectNameRaw = a_entry->object->GetName();
+			cleaned = objectNameRaw ? objectNameRaw : "";
+		}
+		if (cleaned.empty() || cleaned == name) {
+			return false;
+		}
+
+		text->SetName(cleaned.c_str());
+		return true;
+	}
+
+	void EventBridge::CleanupInvalidLootInstance(
+		RE::InventoryEntryData* a_entry,
+		RE::ExtraDataList* a_xList,
+		std::uint64_t a_key,
+		std::string_view a_reason)
+	{
+		const auto erasedAffixCount = _instanceAffixes.erase(a_key);
+		EraseInstanceRuntimeStates(a_key);
+		ForgetLootEvaluatedInstance(a_key);
+		_runewordInstanceStates.erase(a_key);
+		if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == a_key) {
+			_runewordSelectedBaseKey.reset();
+		}
+
+		const bool renamed = TryClearStaleLootDisplayName(a_entry, a_xList);
+		if (_loot.debugLog && (erasedAffixCount > 0 || renamed)) {
+			SKSE::log::debug(
+				"CalamityAffixes: cleaned invalid loot instance (key={:016X}, reason={}, removedAffixes={}, renamed={}).",
+				a_key,
+				a_reason,
+				erasedAffixCount,
+				renamed);
+		}
 	}
 
 	std::optional<EventBridge::LootItemType> EventBridge::ParseLootItemType(std::string_view a_kidType) const
@@ -264,29 +306,14 @@ namespace CalamityAffixes
 
 		const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
 
-		auto clearStaleStarPrefix = [&]() {
-			auto* text = a_xList->GetExtraTextDisplayData();
-			if (!text) {
-				return false;
+		if (!IsLootObjectEligibleForAffixes(a_entry->object)) {
+			if (_loot.cleanupInvalidLegacyAffixes) {
+				CleanupInvalidLootInstance(a_entry, a_xList, key, "ApplyMultipleAffixes.ineligible");
+			} else {
+				(void)TryClearStaleLootDisplayName(a_entry, a_xList);
 			}
-
-			const auto* name = text->GetDisplayName(a_entry->object, 0);
-			if (!name || name[0] == '\0' || !HasLeadingLootStarPrefix(name)) {
-				return false;
-			}
-
-			std::string cleaned = std::string(StripLeadingLootStarPrefix(name));
-			if (cleaned.empty()) {
-				const char* objectNameRaw = a_entry->object->GetName();
-				cleaned = objectNameRaw ? objectNameRaw : "";
-			}
-			if (cleaned.empty() || cleaned == name) {
-				return false;
-			}
-
-			text->SetName(cleaned.c_str());
-			return true;
-		};
+			return;
+		}
 
 		// If already assigned, just ensure display name and return
 		if (const auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
@@ -301,13 +328,13 @@ namespace CalamityAffixes
 
 		// 1) Hard guard: any instance evaluated once is never rolled again.
 		if (IsLootEvaluatedInstance(key)) {
-			(void)clearStaleStarPrefix();
+			(void)TryClearStaleLootDisplayName(a_entry, a_xList);
 			return;
 		}
 
 		// 2) Legacy cleanup path:
 		// If stale old data left only the star marker, treat as already evaluated and strip marker.
-		if (clearStaleStarPrefix()) {
+		if (TryClearStaleLootDisplayName(a_entry, a_xList)) {
 			MarkLootEvaluatedInstance(key);
 			if (_loot.debugLog) {
 				SKSE::log::debug(
@@ -563,18 +590,6 @@ namespace CalamityAffixes
 		if (!weap && !armo) {
 			return;
 		}
-		if (armo && !IsEligibleLootArmor(*armo)) {
-			if (_loot.debugLog) {
-				const char* editorId = armo->GetFormEditorID();
-				SKSE::log::debug(
-					"CalamityAffixes: ProcessLootAcquired skipped non-eligible armor item (baseObj={:08X}, editorId={}).",
-					a_baseObj,
-					editorId ? editorId : "<none>");
-			}
-			return;
-		}
-
-		const auto itemType = weap ? LootItemType::kWeapon : LootItemType::kArmor;
 
 		RE::InventoryEntryData* entry = nullptr;
 		for (auto* e : *changes->entryList) {
@@ -593,6 +608,54 @@ namespace CalamityAffixes
 			SKSE::log::debug("CalamityAffixes: ProcessLootAcquired skipped (entry->extraLists is null).");
 			return;
 		}
+
+		if (!IsLootObjectEligibleForAffixes(entry->object)) {
+			if (_loot.cleanupInvalidLegacyAffixes) {
+				auto cleanupByUnique = [&](RE::ExtraDataList* a_xList) {
+					if (!a_xList) {
+						return false;
+					}
+
+					auto* uid = a_xList->GetByType<RE::ExtraUniqueID>();
+					if (!uid || uid->baseID != a_baseObj) {
+						return false;
+					}
+					if (a_uniqueID != 0 && uid->uniqueID != a_uniqueID) {
+						return false;
+					}
+
+					CleanupInvalidLootInstance(
+						entry,
+						a_xList,
+						MakeInstanceKey(uid->baseID, uid->uniqueID),
+						"ProcessLootAcquired.ineligible");
+					return true;
+				};
+
+				if (a_uniqueID != 0) {
+					for (auto* xList : *entry->extraLists) {
+						if (cleanupByUnique(xList)) {
+							break;
+						}
+					}
+				} else {
+					for (auto* xList : *entry->extraLists) {
+						(void)cleanupByUnique(xList);
+					}
+				}
+			}
+
+			if (_loot.debugLog) {
+				const char* editorId = armo ? armo->GetFormEditorID() : nullptr;
+				SKSE::log::debug(
+					"CalamityAffixes: ProcessLootAcquired skipped non-eligible item (baseObj={:08X}, editorId={}).",
+					a_baseObj,
+					editorId ? editorId : "<none>");
+			}
+			return;
+		}
+
+		const auto itemType = entry->object->As<RE::TESObjectWEAP>() ? LootItemType::kWeapon : LootItemType::kArmor;
 
 		if (a_uniqueID != 0) {
 			for (auto* xList : *entry->extraLists) {
