@@ -248,6 +248,10 @@ Function ProcessIncomingHit(ObjectReference akAggressor, Form akSource, Projecti
 		return
 	endif
 
+	if !player.IsHostileToActor(attacker) && !attacker.IsHostileToActor(player)
+		return
+	endif
+
 	ProcessHit(false, attacker, player, akSource, akProjectile, abPowerAttack, abSneakAttack, abBashAttack, abHitBlocked)
 EndFunction
 
@@ -258,6 +262,10 @@ Function ProcessOutgoingHit(Actor akTarget)
 
 	Actor player = GetPlayer()
 	if !player || !akTarget
+		return
+	endif
+
+	if !player.IsHostileToActor(akTarget) && !akTarget.IsHostileToActor(player)
 		return
 	endif
 

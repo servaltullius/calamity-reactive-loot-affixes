@@ -9,6 +9,79 @@
 
 namespace CalamityAffixes
 {
+	namespace detail
+	{
+		[[nodiscard]] constexpr std::size_t SkipLeadingSpaces(std::string_view a_text) noexcept
+		{
+			std::size_t pos = 0;
+			while (pos < a_text.size() && a_text[pos] == ' ') {
+				++pos;
+			}
+			return pos;
+		}
+
+		[[nodiscard]] constexpr bool HasUtf8StarAt(std::string_view a_text, std::size_t a_pos) noexcept
+		{
+			return a_pos + 2 < a_text.size() &&
+			       static_cast<unsigned char>(a_text[a_pos]) == 0xE2 &&
+			       static_cast<unsigned char>(a_text[a_pos + 1]) == 0x98 &&
+			       static_cast<unsigned char>(a_text[a_pos + 2]) == 0x85;
+		}
+
+		[[nodiscard]] constexpr std::size_t ConsumeAsciiStarMarkerLen(std::string_view a_text, std::size_t a_pos) noexcept
+		{
+			std::size_t count = 0;
+			std::size_t pos = a_pos;
+			while (pos < a_text.size() && a_text[pos] == '*') {
+				++count;
+				++pos;
+			}
+
+			if (count == 0 || count > 3) {
+				return 0;
+			}
+
+			if (pos >= a_text.size() || a_text[pos] != ' ') {
+				return 0;
+			}
+
+			// Include the trailing marker delimiter space.
+			return count + 1;
+		}
+	}
+
+	[[nodiscard]] constexpr bool HasLeadingLootStarPrefix(std::string_view a_name) noexcept
+	{
+		const auto pos = detail::SkipLeadingSpaces(a_name);
+		return detail::HasUtf8StarAt(a_name, pos) || detail::ConsumeAsciiStarMarkerLen(a_name, pos) > 0;
+	}
+
+	[[nodiscard]] constexpr std::string_view StripLeadingLootStarPrefix(std::string_view a_name) noexcept
+	{
+		std::size_t pos = detail::SkipLeadingSpaces(a_name);
+
+		if (detail::HasUtf8StarAt(a_name, pos)) {
+			while (detail::HasUtf8StarAt(a_name, pos)) {
+				pos += 3;
+			}
+			while (pos < a_name.size() && a_name[pos] == ' ') {
+				++pos;
+			}
+			return a_name.substr(pos);
+		}
+
+		if (const auto markerLen = detail::ConsumeAsciiStarMarkerLen(a_name, pos); markerLen > 0) {
+			pos += markerLen;
+			while (pos < a_name.size() && a_name[pos] == ' ') {
+				++pos;
+			}
+			return a_name.substr(pos);
+		}
+
+		// Keep legacy behavior: leading spaces are trimmed even when no marker is present.
+		return a_name.substr(pos);
+	}
+
 	struct TooltipResolutionCandidate
 	{
 		std::string_view rowName{};

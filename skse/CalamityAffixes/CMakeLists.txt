@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 1.2.13 LANGUAGES CXX)
+project(CalamityAffixes VERSION 1.2.14 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

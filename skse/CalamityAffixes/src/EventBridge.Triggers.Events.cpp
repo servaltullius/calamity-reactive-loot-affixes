@@ -3,6 +3,7 @@
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/PrismaTooltip.h"
+#include "CalamityAffixes/TriggerGuards.h"
 
 #include <algorithm>
 #include <chrono>
@@ -156,9 +157,13 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			}
 		}
 
-		if (IsPlayerOwned(aggressor)) {
-			SendModEvent("CalamityAffixes_Hit", target);
-		}
+			const bool playerOwnedAggressor = IsPlayerOwned(aggressor);
+			auto* playerOwner = playerOwnedAggressor ? GetPlayerOwner(aggressor) : nullptr;
+			const bool hostileEitherDirection =
+				playerOwner && (playerOwner->IsHostileToActor(target) || target->IsHostileToActor(playerOwner));
+			if (ShouldSendPlayerOwnedHitEvent(playerOwnedAggressor, playerOwner != nullptr, hostileEitherDirection)) {
+				SendModEvent("CalamityAffixes_Hit", target);
+			}
 
 		return RE::BSEventNotifyControl::kContinue;
 	}

@@ -74,4 +74,12 @@ namespace CalamityAffixes
 		}
 		return 0;
 	}
+
+	[[nodiscard]] constexpr bool ShouldSendPlayerOwnedHitEvent(
+		bool a_isPlayerOwnedAggressor,
+		bool a_hasPlayerOwner,
+		bool a_hostileEitherDirection) noexcept
+	{
+		return a_isPlayerOwnedAggressor && a_hasPlayerOwner && a_hostileEitherDirection;
+	}
 }

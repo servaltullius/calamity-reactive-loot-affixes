@@ -4,7 +4,9 @@
 
 using CalamityAffixes::ResolveRunewordBaseCycleCursor;
 using CalamityAffixes::ResolveTooltipCandidateSelection;
+using CalamityAffixes::StripLeadingLootStarPrefix;
 using CalamityAffixes::TooltipResolutionCandidate;
+using CalamityAffixes::HasLeadingLootStarPrefix;
 
 static_assert([] {
 	constexpr std::array<std::uint64_t, 4> candidates{ 11u, 22u, 33u, 44u };
@@ -24,6 +26,38 @@ static_assert([] {
 	return !ResolveRunewordBaseCycleCursor(std::span(candidates), 0u).has_value();
 }(),
 	"ResolveRunewordBaseCycleCursor: rejects zero instance key");
+
+static_assert([] {
+	return HasLeadingLootStarPrefix("*** Iron Sword");
+}(),
+	"HasLeadingLootStarPrefix: detects ASCII marker with delimiter space");
+
+static_assert([] {
+	return !HasLeadingLootStarPrefix("*Iron Sword");
+}(),
+	"HasLeadingLootStarPrefix: does not treat natural '*' names as marker");
+
+static_assert([] {
+	constexpr std::string_view utf8Marked = "\xE2\x98\x85\xE2\x98\x85 Iron Sword";
+	return HasLeadingLootStarPrefix(utf8Marked);
+}(),
+	"HasLeadingLootStarPrefix: keeps UTF-8 star marker compatibility");
+
+static_assert([] {
+	return StripLeadingLootStarPrefix("*** Iron Sword") == "Iron Sword";
+}(),
+	"StripLeadingLootStarPrefix: strips ASCII marker safely");
+
+static_assert([] {
+	return StripLeadingLootStarPrefix("*Iron Sword") == "*Iron Sword";
+}(),
+	"StripLeadingLootStarPrefix: preserves non-marker natural '*' names");
+
+static_assert([] {
+	constexpr std::string_view utf8Marked = "  \xE2\x98\x85\xE2\x98\x85 Iron Sword";
+	return StripLeadingLootStarPrefix(utf8Marked) == "Iron Sword";
+}(),
+	"StripLeadingLootStarPrefix: strips UTF-8 marker with leading spaces");
 
 static_assert([] {
 	constexpr std::array<TooltipResolutionCandidate, 2> candidates{ {

@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootUiGuards.h"
 
 #include <algorithm>
 #include <cctype>
@@ -10,51 +11,7 @@
 
 namespace CalamityAffixes
 {
-	namespace
-	{
-		[[nodiscard]] bool HasLeadingStarPrefix(std::string_view a_name) noexcept
-		{
-			std::size_t pos = 0;
-			while (pos < a_name.size() && a_name[pos] == ' ') {
-				++pos;
-			}
-
-			const bool utf8Star =
-				pos + 2 < a_name.size() &&
-				static_cast<unsigned char>(a_name[pos]) == 0xE2 &&
-				static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
-				static_cast<unsigned char>(a_name[pos + 2]) == 0x85;
-			const bool asciiStar = pos < a_name.size() && a_name[pos] == '*';
-			return utf8Star || asciiStar;
-		}
-
-		[[nodiscard]] std::string_view StripLeadingStarPrefix(std::string_view a_name) noexcept
-		{
-			std::size_t pos = 0;
-			while (pos < a_name.size()) {
-				// UTF-8 star: E2 98 85 (★)
-				if (pos + 2 < a_name.size() &&
-					static_cast<unsigned char>(a_name[pos]) == 0xE2 &&
-					static_cast<unsigned char>(a_name[pos + 1]) == 0x98 &&
-					static_cast<unsigned char>(a_name[pos + 2]) == 0x85) {
-					pos += 3;
-					continue;
-				}
-				if (a_name[pos] == '*') {
-					++pos;
-					continue;
-				}
-				if (a_name[pos] == ' ') {
-					++pos;
-					continue;
-				}
-				break;
-			}
-			return a_name.substr(pos);
-		}
-	}
-
-	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
+		std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
 	{
 		return (static_cast<std::uint64_t>(a_baseID) << 16) | static_cast<std::uint64_t>(a_uniqueID);
 	}
@@ -243,11 +200,11 @@ namespace CalamityAffixes
 			}
 
 			const auto* name = text->GetDisplayName(a_entry->object, 0);
-			if (!name || name[0] == '\0' || !HasLeadingStarPrefix(name)) {
+			if (!name || name[0] == '\0' || !HasLeadingLootStarPrefix(name)) {
 				return false;
 			}
 
-			std::string cleaned = std::string(StripLeadingStarPrefix(name));
+			std::string cleaned = std::string(StripLeadingLootStarPrefix(name));
 			if (cleaned.empty()) {
 				const char* objectNameRaw = a_entry->object->GetName();
 				cleaned = objectNameRaw ? objectNameRaw : "";
@@ -469,7 +426,7 @@ namespace CalamityAffixes
 			return cleaned.substr(first, last - first + 1);
 		};
 
-		std::string baseName = stripKnownAffixTags(StripLeadingStarPrefix(currentName));
+		std::string baseName = stripKnownAffixTags(StripLeadingLootStarPrefix(currentName));
 
 		if (baseName.empty()) {
 			const char* objectNameRaw = a_entry->object->GetName();

@@ -4,6 +4,7 @@ using CalamityAffixes::ComputePerTargetCooldownNextAllowedMs;
 using CalamityAffixes::DuplicateHitKey;
 using CalamityAffixes::IsPerTargetCooldownBlockedMs;
 using CalamityAffixes::ResolveTriggerProcCooldownMs;
+using CalamityAffixes::ShouldSendPlayerOwnedHitEvent;
 using CalamityAffixes::ShouldSuppressDuplicateHitWindow;
 
 static_assert([] {
@@ -84,3 +85,18 @@ static_assert([] {
 	return ResolveTriggerProcCooldownMs(0, false, 35.0f, 120) == 0;
 }(),
 	"ResolveTriggerProcCooldownMs: leaves non-guaranteed chance unchanged when ICD is zero");
+
+static_assert([] {
+	return ShouldSendPlayerOwnedHitEvent(true, true, true);
+}(),
+	"ShouldSendPlayerOwnedHitEvent: sends only when player-owned hit is hostile");
+
+static_assert([] {
+	return !ShouldSendPlayerOwnedHitEvent(true, true, false);
+}(),
+	"ShouldSendPlayerOwnedHitEvent: blocks non-hostile player-owned hits");
+
+static_assert([] {
+	return !ShouldSendPlayerOwnedHitEvent(true, false, true);
+}(),
+	"ShouldSendPlayerOwnedHitEvent: blocks unresolved player owner");
