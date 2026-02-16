@@ -403,6 +403,11 @@ namespace CalamityAffixes
 				}
 				}
 
+			if (action.is_object()) {
+				const float rawScrollNoConsumeChancePct = static_cast<float>(action.value("scrollNoConsumeChancePct", 0.0));
+				out.scrollNoConsumeChancePct = std::clamp(rawScrollNoConsumeChancePct, 0.0f, 100.0f);
+			}
+
 			if (type == "DebugNotify") {
 				out.action.type = ActionType::kDebugNotify;
 				out.action.text = action.value("text", std::string{});

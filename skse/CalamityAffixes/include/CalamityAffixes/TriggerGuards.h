@@ -161,4 +161,29 @@ namespace CalamityAffixes
 
 		return false;
 	}
+
+	[[nodiscard]] constexpr bool ShouldHandleScrollConsumePreservation(
+		std::uint32_t a_oldContainer,
+		std::uint32_t a_newContainer,
+		std::int32_t a_itemCount,
+		std::uint32_t a_baseObj,
+		std::uint32_t a_referenceHandle,
+		std::uint32_t a_playerId) noexcept
+	{
+		// Scroll consume is modeled as player inventory -> null container with no world reference.
+		// Player drop to world also uses newContainer == 0, but keeps a valid reference handle.
+		if (a_playerId == 0u) {
+			return false;
+		}
+		if (a_oldContainer != a_playerId || a_newContainer != 0u) {
+			return false;
+		}
+		if (a_itemCount <= 0 || a_baseObj == 0u) {
+			return false;
+		}
+		if (a_referenceHandle != 0u) {
+			return false;
+		}
+		return true;
+	}
 }

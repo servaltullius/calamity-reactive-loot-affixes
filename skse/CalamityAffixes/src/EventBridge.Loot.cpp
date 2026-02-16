@@ -1,9 +1,11 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/TriggerGuards.h"
 
 #include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <random>
 #include <unordered_set>
 #include <vector>
 
@@ -243,6 +245,55 @@ namespace CalamityAffixes
 		_lootEvaluatedInsertionsSincePrune = 0;
 	}
 
+	float EventBridge::ComputeActiveScrollNoConsumeChancePct() const
+	{
+		if (_affixes.empty() || _activeCounts.empty()) {
+			return 0.0f;
+		}
+
+		const auto limit = std::min(_affixes.size(), _activeCounts.size());
+		double totalChancePct = 0.0;
+		for (std::size_t i = 0; i < limit; ++i) {
+			const auto stacks = _activeCounts[i];
+			if (stacks == 0) {
+				continue;
+			}
+
+			const float perAffixChancePct = _affixes[i].scrollNoConsumeChancePct;
+			if (perAffixChancePct <= 0.0f) {
+				continue;
+			}
+
+			totalChancePct += static_cast<double>(perAffixChancePct) * static_cast<double>(stacks);
+			if (totalChancePct >= 100.0) {
+				return 100.0f;
+			}
+		}
+
+		return static_cast<float>(std::clamp(totalChancePct, 0.0, 100.0));
+	}
+
+	std::int32_t EventBridge::RollScrollNoConsumeRestoreCount(
+		std::int32_t a_consumedCount,
+		float a_preserveChancePct)
+	{
+		if (a_consumedCount <= 0 || a_preserveChancePct <= 0.0f) {
+			return 0;
+		}
+		if (a_preserveChancePct >= 100.0f) {
+			return a_consumedCount;
+		}
+
+		std::int32_t restoreCount = 0;
+		std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+		for (std::int32_t i = 0; i < a_consumedCount; ++i) {
+			if (dist(_rng) < a_preserveChancePct) {
+				restoreCount += 1;
+			}
+		}
+		return restoreCount;
+	}
+
 
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
 		const RE::TESContainerChangedEvent* a_event,
@@ -256,10 +307,6 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		if (_loot.chancePercent <= 0.0f) {
-			return RE::BSEventNotifyControl::kContinue;
-		}
-
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (!player) {
 			return RE::BSEventNotifyControl::kContinue;
@@ -267,6 +314,46 @@ namespace CalamityAffixes
 
 		const auto playerId = player->GetFormID();
 		const auto refHandle = static_cast<LootRerollGuard::RefHandle>(RE::ObjectRefHandle(a_event->reference).native_handle());
+
+		// Scroll preserve path:
+		// - event shape: player inventory -> null container
+		// - additive chance from equipped affixes (capped at 100)
+		if (ShouldHandleScrollConsumePreservation(
+				a_event->oldContainer,
+				a_event->newContainer,
+				a_event->itemCount,
+				a_event->baseObj,
+				refHandle,
+				playerId)) {
+			auto* consumed = RE::TESForm::LookupByID<RE::TESForm>(a_event->baseObj);
+			auto* consumedScroll = consumed ? consumed->As<RE::ScrollItem>() : nullptr;
+			if (consumedScroll) {
+				const float preserveChancePct = ComputeActiveScrollNoConsumeChancePct();
+				const auto restoreCount = RollScrollNoConsumeRestoreCount(a_event->itemCount, preserveChancePct);
+				if (restoreCount > 0) {
+					player->AddObjectToContainer(consumedScroll, nullptr, restoreCount, nullptr);
+					if (_loot.debugLog) {
+						SKSE::log::debug(
+							"CalamityAffixes: restored consumed scroll (baseObj={:08X}, consumed={}, restored={}, chancePct={:.2f}).",
+							a_event->baseObj,
+							a_event->itemCount,
+							restoreCount,
+							preserveChancePct);
+					}
+				} else if (_loot.debugLog && preserveChancePct > 0.0f) {
+					SKSE::log::debug(
+						"CalamityAffixes: scroll preserve roll failed (baseObj={:08X}, consumed={}, chancePct={:.2f}).",
+						a_event->baseObj,
+						a_event->itemCount,
+						preserveChancePct);
+				}
+			}
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		if (_loot.chancePercent <= 0.0f) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
 
 		// 1a) Record player-dropped world references so re-picking them up can't "reroll" loot affixes.
 		if (a_event->oldContainer == playerId &&

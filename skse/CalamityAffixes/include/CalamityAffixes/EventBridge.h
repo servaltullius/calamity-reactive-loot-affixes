@@ -390,6 +390,7 @@ namespace CalamityAffixes
 			std::string family{};            // suffix family grouping (e.g., "max_health")
 			RE::SpellItem* passiveSpell{ nullptr };  // suffix: Ability spell to add/remove on equip
 			float critDamageBonusPct{ 0.0f };        // suffix: crit damage bonus (applied in HandleHealthDamage hook)
+			float scrollNoConsumeChancePct{ 0.0f };  // equipped: additive chance to preserve consumed scrolls
 
 			std::chrono::steady_clock::time_point nextAllowed{};
 		};
@@ -702,6 +703,10 @@ namespace CalamityAffixes
 		[[nodiscard]] std::optional<LootItemType> ParseLootItemType(std::string_view a_kidType) const;
 		[[nodiscard]] static const char* DescribeLootItemType(LootItemType a_type);
 		[[nodiscard]] std::string FormatLootName(std::string_view a_baseName, std::string_view a_affixName) const;
+		[[nodiscard]] float ComputeActiveScrollNoConsumeChancePct() const;
+		[[nodiscard]] std::int32_t RollScrollNoConsumeRestoreCount(
+			std::int32_t a_consumedCount,
+			float a_preserveChancePct);
 		[[nodiscard]] static std::uint64_t MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept;
 
 		// Health-damage/TESHit trigger routing path.

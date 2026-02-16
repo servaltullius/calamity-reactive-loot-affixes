@@ -662,6 +662,83 @@
         }
       },
       {
+        "id": "incoming_warden_shell",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_WARDEN_SHELL",
+        "name": "\uC218\uD638 \uAECD\uC9C8 (\uD53C\uACA9 10% / ICD 6\uCD08): \uD53C\uD574 \uC800\uD56D \u002B120 (3\uCD08)",
+        "nameEn": "Warden Shell (10% on hit taken / ICD 6s): Damage Resist \u002B120 (3s)",
+        "nameKo": "\uC218\uD638 \uAECD\uC9C8 (\uD53C\uACA9 10% / ICD 6\uCD08): \uD53C\uD574 \uC800\uD56D \u002B120 (3\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_INCOMING_WARDEN_SHELL",
+            "name": "Calamity: Warden Shell / \uC218\uD638 \uAECD\uC9C8",
+            "actorValue": "DamageResist",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_INCOMING_WARDEN_SHELL",
+            "name": "Calamity: Warden Shell / \uC218\uD638 \uAECD\uC9C8",
+            "delivery": "Self",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_WARDEN_SHELL",
+              "magnitude": 120,
+              "duration": 3,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 6.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_INCOMING_WARDEN_SHELL",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "scroll_echo_preservation",
+        "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION",
+        "name": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B30%",
+        "nameEn": "Scroll Echo: \u002B30% chance to not consume scrolls",
+        "nameKo": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B30%",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "scrollNoConsumeChancePct": 30.0
+          }
+        }
+      },
+      {
         "id": "hit_muffle",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MUFFLE",
         "name": "\uBB34\uC74C \uBC1C\uAC78\uC74C (\uC801\uC911 10% / ICD 180\uCD08): \uBA38\uD50C(Muffle) (180\uCD08)",

@@ -605,6 +605,75 @@
         "slot": "prefix"
       },
       {
+        "id": "incoming_warden_shell",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_WARDEN_SHELL",
+        "name": "수호 껍질 (피격 10% / ICD 6초): 피해 저항 +120 (3초)",
+        "nameEn": "Warden Shell (10% on hit taken / ICD 6s): Damage Resist +120 (3s)",
+        "nameKo": "수호 껍질 (피격 10% / ICD 6초): 피해 저항 +120 (3초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_INCOMING_WARDEN_SHELL",
+            "name": "Calamity: Warden Shell / 수호 껍질",
+            "actorValue": "DamageResist",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_INCOMING_WARDEN_SHELL",
+            "name": "Calamity: Warden Shell / 수호 껍질",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_WARDEN_SHELL",
+              "magnitude": 120,
+              "duration": 3,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.4
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 10.0,
+          "icdSeconds": 6.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_INCOMING_WARDEN_SHELL",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "scroll_echo_preservation",
+        "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION",
+        "name": "두루마리 메아리: 스크롤 비소모 +30%",
+        "nameEn": "Scroll Echo: +30% chance to not consume scrolls",
+        "nameKo": "두루마리 메아리: 스크롤 비소모 +30%",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "action": {
+            "type": "DebugNotify",
+            "scrollNoConsumeChancePct": 30.0
+          }
+        },
+        "slot": "prefix"
+      },
+      {
         "id": "hit_muffle",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MUFFLE",
         "name": "무음 발걸음 (적중 10% / ICD 180초): 머플(Muffle) (180초)",

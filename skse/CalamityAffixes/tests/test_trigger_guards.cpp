@@ -4,6 +4,7 @@ using CalamityAffixes::ComputePerTargetCooldownNextAllowedMs;
 using CalamityAffixes::DuplicateHitKey;
 using CalamityAffixes::IsPerTargetCooldownBlockedMs;
 using CalamityAffixes::ResolveTriggerProcCooldownMs;
+using CalamityAffixes::ShouldHandleScrollConsumePreservation;
 using CalamityAffixes::ShouldResolveNonHostileOutgoingFirstHitAllowance;
 using CalamityAffixes::ShouldProcessHealthDamageProcPath;
 using CalamityAffixes::ShouldSendPlayerOwnedHitEvent;
@@ -204,3 +205,36 @@ static_assert([] {
 		true);
 }(),
 	"ShouldProcessHealthDamageProcPath: allows optional non-hostile outgoing player-owned path");
+
+static_assert([] {
+	return ShouldHandleScrollConsumePreservation(
+		/*oldContainer=*/0x14u,
+		/*newContainer=*/0u,
+		/*itemCount=*/1,
+		/*baseObj=*/0xABCDu,
+		/*referenceHandle=*/0u,
+		/*playerId=*/0x14u);
+}(),
+	"ShouldHandleScrollConsumePreservation: allows consume-shaped container events");
+
+static_assert([] {
+	return !ShouldHandleScrollConsumePreservation(
+		/*oldContainer=*/0x14u,
+		/*newContainer=*/0u,
+		/*itemCount=*/1,
+		/*baseObj=*/0xABCDu,
+		/*referenceHandle=*/0x77u,
+		/*playerId=*/0x14u);
+}(),
+	"ShouldHandleScrollConsumePreservation: blocks world-drop-shaped events with reference handles");
+
+static_assert([] {
+	return !ShouldHandleScrollConsumePreservation(
+		/*oldContainer=*/0x14u,
+		/*newContainer=*/0u,
+		/*itemCount=*/0,
+		/*baseObj=*/0xABCDu,
+		/*referenceHandle=*/0u,
+		/*playerId=*/0x14u);
+}(),
+	"ShouldHandleScrollConsumePreservation: blocks zero-count events");
