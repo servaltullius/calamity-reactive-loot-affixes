@@ -100,8 +100,9 @@
 			}
 
 			SetVisible(true);
-			if (!panelRequested && !g_api->HasFocus(g_view)) {
-				// Non-modal focus keeps inventory usable while still allowing tooltip mouse drag input.
-				g_api->Focus(g_view, false, true);
+			if (!panelRequested && g_api->HasFocus(g_view)) {
+				// Stability mode: tooltip-only state should never own cursor/focus.
+				// This disables drag-to-move, but prevents lingering cursor state after menu close.
+				g_api->Unfocus(g_view);
 			}
 		}
