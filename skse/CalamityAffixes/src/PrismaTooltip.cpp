@@ -35,7 +35,8 @@ namespace CalamityAffixes::PrismaTooltip
 		constexpr std::uint32_t kFallbackPanelHotkey = RE::BSKeyboardDevice::Keys::kF11;
 		constexpr int kDefaultUiLanguageMode = 2;  // 0=en, 1=ko, 2=both
 
-		constexpr std::string_view kMenuInventory = "InventoryMenu";
+		constexpr std::string_view kMenuInventory = RE::InventoryMenu::MENU_NAME;
+		constexpr std::string_view kMenuBarter = RE::BarterMenu::MENU_NAME;
 		constexpr std::string_view kMcmKeybindSettingsPath = "Data/MCM/Settings/keybinds.json";
 		constexpr std::string_view kMcmModSettingsPath = "Data/MCM/Settings/CalamityAffixes.ini";
 		constexpr std::string_view kMcmModDefaultSettingsPath = "Data/MCM/Config/CalamityAffixes/settings.ini";
@@ -48,6 +49,7 @@ namespace CalamityAffixes::PrismaTooltip
 		constexpr std::string_view kPanelLayoutSavePrefix = "ui.layout.save:";
 		constexpr std::string_view kTooltipLayoutSavePrefix = "ui.tooltip.save:";
 		constexpr std::string_view kItemSourceInventory = "inventory";
+		constexpr std::string_view kItemSourceBarter = "barter";
 		constexpr std::string_view kPanelLayoutPath = "Data/SKSE/Plugins/CalamityAffixes/prisma_panel_layout.json";
 		constexpr std::string_view kTooltipLayoutPath = "Data/SKSE/Plugins/CalamityAffixes/prisma_tooltip_layout.json";
 		constexpr int kDefaultTooltipRight = 70;
@@ -129,7 +131,7 @@ namespace CalamityAffixes::PrismaTooltip
 
 		[[nodiscard]] bool IsRelevantMenu(std::string_view a_name) noexcept
 		{
-			return a_name == kMenuInventory;
+			return a_name == kMenuInventory || a_name == kMenuBarter;
 		}
 
 		[[nodiscard]] bool IsViewReady() noexcept
@@ -464,9 +466,19 @@ namespace CalamityAffixes::PrismaTooltip
 				if (prev <= 1) {
 					g_relevantMenusOpen.store(0);
 
-					if (!g_controlPanelOpen.load() && IsViewReady()) {
-						g_lastTooltip.clear();
-						g_api->InteropCall(g_view, "setTooltip", "");
+					if (!g_controlPanelOpen.load() && g_api && g_view && g_api->IsValid(g_view)) {
+						// Keep cursor/focus state in sync with menu lifetime.
+						// If focus remains after menu close, the cursor can linger until reopening a menu.
+						if (g_api->HasFocus(g_view)) {
+							g_api->Unfocus(g_view);
+						}
+
+						if (IsViewReady()) {
+							g_lastTooltip.clear();
+							g_api->InteropCall(g_view, "setTooltip", "");
+							SetSelectedItemContext({}, {});
+						}
+
 						SetVisible(false);
 					}
 				}
@@ -559,6 +571,12 @@ namespace CalamityAffixes::PrismaTooltip
 			if (auto menu = ui->GetMenu<RE::InventoryMenu>(); menu) {
 				auto& data = menu->GetRuntimeData();
 				if (readItem(data.itemList, kItemSourceInventory)) {
+					return result;
+				}
+			}
+			if (auto menu = ui->GetMenu<RE::BarterMenu>(); menu) {
+				auto& data = menu->GetRuntimeData();
+				if (readItem(data.itemList, kItemSourceBarter)) {
 					return result;
 				}
 			}
