@@ -195,15 +195,19 @@ namespace CalamityAffixes
 			*sourcePool,
 			bagState.order,
 			bagState.cursor,
-			[&](std::size_t a_idx) {
-				if (a_idx >= _affixes.size()) {
-					return false;
-				}
-				if (a_exclude && std::find(a_exclude->begin(), a_exclude->end(), a_idx) != a_exclude->end()) {
-					return false;
-				}
-				return _affixes[a_idx].EffectiveLootWeight() > 0.0f;
-			},
+				[&](std::size_t a_idx) {
+					if (a_idx >= _affixes.size()) {
+						return false;
+					}
+					if (_affixes[a_idx].slot == AffixSlot::kSuffix) {
+						// Hard gate: prefix roll path must never emit suffix entries.
+						return false;
+					}
+					if (a_exclude && std::find(a_exclude->begin(), a_exclude->end(), a_idx) != a_exclude->end()) {
+						return false;
+					}
+					return _affixes[a_idx].EffectiveLootWeight() > 0.0f;
+				},
 			[&](std::size_t a_idx) {
 				if (a_idx >= _affixes.size()) {
 					return 0.0f;
@@ -297,10 +301,11 @@ namespace CalamityAffixes
 			return;
 		}
 
-		// If already assigned, just ensure display name and return
+		// If already assigned, just ensure display name and return.
 		if (const auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
 			const auto& existingSlots = existingIt->second;
 			MarkLootEvaluatedInstance(key);
+
 			for (std::uint8_t s = 0; s < existingSlots.count; ++s) {
 				EnsureInstanceRuntimeState(key, existingSlots.tokens[s]);
 			}
