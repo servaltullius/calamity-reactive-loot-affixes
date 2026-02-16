@@ -134,6 +134,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100.0,
+          "lootWeight": 0.0,
           "icdSeconds": 0.0,
           "action": {
             "type": "CastSpell",
@@ -193,6 +194,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100.0,
+          "lootWeight": 0.0,
           "icdSeconds": 0.0,
           "action": {
             "type": "CastSpell",
@@ -252,6 +254,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100.0,
+          "lootWeight": 0.0,
           "icdSeconds": 0.0,
           "action": {
             "type": "CastSpell",
@@ -602,6 +605,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 25.0,
+          "lootWeight": 0.0,
           "icdSeconds": 2.5,
           "action": {
             "type": "CastSpell",
@@ -653,6 +657,7 @@
         "runtime": {
           "trigger": "IncomingHit",
           "procChancePercent": 5.0,
+          "lootWeight": 0.0,
           "icdSeconds": 45.0,
           "action": {
             "type": "CastSpell",
@@ -732,9 +737,311 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0.0,
+          "lootWeight": 8.0,
           "action": {
             "type": "DebugNotify",
             "scrollNoConsumeChancePct": 30.0
+          }
+        }
+      },
+      {
+        "id": "hit_emberbrand_ignite",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_EMBERBRAND_IGNITE",
+        "name": "\uBD88\uC528 \uAC01\uC778 (\uC801\uC911 40% / ICD 0.8\uCD08): \uC810\uD654 \uD53C\uD574 4 (4\uCD08, \uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "nameEn": "Emberbrand (40% on hit / ICD 0.8s): Ignite 4 (4s, hit scaling)",
+        "nameKo": "\uBD88\uC528 \uAC01\uC778 (\uC801\uC911 40% / ICD 0.8\uCD08): \uC810\uD654 \uD53C\uD574 4 (4\uCD08, \uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_EMBERBRAND_IGNITE",
+            "name": "Calamity: Emberbrand Ignite / \uBD88\uC528 \uAC01\uC778 \uC810\uD654",
+            "actorValue": "Health",
+            "resistValue": "ResistFire",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_EMBERBRAND_IGNITE",
+            "name": "Calamity: Emberbrand Ignite / \uBD88\uC528 \uAC01\uC778 \uC810\uD654",
+            "delivery": "TargetActor",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_EMBERBRAND_IGNITE",
+              "magnitude": 4,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 40.0,
+          "icdSeconds": 0.8,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_EMBERBRAND_IGNITE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.04,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        }
+      },
+      {
+        "id": "kill_emberbrand_burst",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_EMBERBRAND_BURST",
+        "name": "\uBD88\uC528 \uD3ED\uBC1C (\uCC98\uCE58 18% / ICD 1\uCD08): \uC2DC\uCCB4 \uD3ED\uBC1C (\uBC18\uACBD 320, \uCD5C\uB300\uCCB4\uB825 8% \u002B 14 \uD654\uC5FC)",
+        "nameEn": "Emberbrand Burst (18% on kill / ICD 1s): Corpse explosion (320 radius, 8% max health \u002B 14 fire)",
+        "nameKo": "\uBD88\uC528 \uD3ED\uBC1C (\uCC98\uCE58 18% / ICD 1\uCD08): \uC2DC\uCCB4 \uD3ED\uBC1C (\uBC18\uACBD 320, \uCD5C\uB300\uCCB4\uB825 8% \u002B 14 \uD654\uC5FC)",
+        "records": null,
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 18.0,
+          "icdSeconds": 1.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 14.0,
+            "pctOfCorpseMaxHealth": 0.08,
+            "radius": 320.0,
+            "maxTargets": 8,
+            "maxChainDepth": 2,
+            "chainFalloff": 0.8,
+            "chainWindowSeconds": 1.5,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "hit_frostlock_snare",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FROSTLOCK_SNARE",
+        "name": "\uC11C\uB9AC \uC871\uC1C4 (\uC801\uC911 24% / ICD 2.5\uCD08): \uB0C9\uAE30 \uAC10\uC18D -35% (2\uCD08)",
+        "nameEn": "Frostlock (24% on hit / ICD 2.5s): Frost snare -35% (2s)",
+        "nameKo": "\uC11C\uB9AC \uC871\uC1C4 (\uC801\uC911 24% / ICD 2.5\uCD08): \uB0C9\uAE30 \uAC10\uC18D -35% (2\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_FROSTLOCK_SNARE",
+            "name": "Calamity: Frostlock Snare / \uC11C\uB9AC \uC871\uC1C4",
+            "actorValue": "SpeedMult",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": true,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_FROSTLOCK_SNARE",
+            "name": "Calamity: Frostlock Snare / \uC11C\uB9AC \uC871\uC1C4",
+            "delivery": "TargetActor",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_FROSTLOCK_SNARE",
+              "magnitude": -35,
+              "duration": 2,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.7
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 24.0,
+          "icdSeconds": 2.5,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_FROSTLOCK_SNARE",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_shock_overload",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_OVERLOAD",
+        "name": "\uACFC\uC804\uB958 (\uC801\uC911 35% / ICD 1.2\uCD08): \uB9E4\uC9C0\uCE74 60 \uD761\uC218",
+        "nameEn": "Overload (35% on hit / ICD 1.2s): Drain 60 Magicka",
+        "nameKo": "\uACFC\uC804\uB958 (\uC801\uC911 35% / ICD 1.2\uCD08): \uB9E4\uC9C0\uCE74 60 \uD761\uC218",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
+            "name": "Calamity: Shock Overload / \uACFC\uC804\uB958",
+            "actorValue": "Magicka",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_SHOCK_OVERLOAD",
+            "name": "Calamity: Shock Overload / \uACFC\uC804\uB958",
+            "delivery": "TargetActor",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
+              "magnitude": 60,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.7
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 35.0,
+          "icdSeconds": 1.2,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_SHOCK_OVERLOAD",
+            "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "kill_soul_surge",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_SOUL_SURGE",
+        "name": "\uC601\uD63C \uC1C4\uB3C4 (\uCC98\uCE58 30% / ICD 2\uCD08): \uB9C8\uB098 \uC7AC\uC0DD \u002B35% (8\uCD08)",
+        "nameEn": "Soul Surge (30% on kill / ICD 2s): Magicka Regen \u002B35% (8s)",
+        "nameKo": "\uC601\uD63C \uC1C4\uB3C4 (\uCC98\uCE58 30% / ICD 2\uCD08): \uB9C8\uB098 \uC7AC\uC0DD \u002B35% (8\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_KILL_SOUL_SURGE",
+            "name": "Calamity: Soul Surge / \uC601\uD63C \uC1C4\uB3C4",
+            "actorValue": "MagickaRateMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_KILL_SOUL_SURGE",
+            "name": "Calamity: Soul Surge / \uC601\uD63C \uC1C4\uB3C4",
+            "delivery": "Self",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_KILL_SOUL_SURGE",
+              "magnitude": 35,
+              "duration": 8,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.6
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 30.0,
+          "icdSeconds": 2.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_KILL_SOUL_SURGE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "hit_shadowstep_burst",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SHADOWSTEP_BURST",
+        "name": "\uADF8\uB9BC\uC790 \uC9C8\uC8FC (\uC801\uC911 20% / ICD 12\uCD08): \uC774\uB3D9\uC18D\uB3C4 \u002B20% (4\uCD08)",
+        "nameEn": "Shadowstep Burst (20% on hit / ICD 12s): Move Speed \u002B20% (4s)",
+        "nameKo": "\uADF8\uB9BC\uC790 \uC9C8\uC8FC (\uC801\uC911 20% / ICD 12\uCD08): \uC774\uB3D9\uC18D\uB3C4 \u002B20% (4\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
+            "name": "Calamity: Shadowstep Burst / \uADF8\uB9BC\uC790 \uC9C8\uC8FC",
+            "actorValue": "SpeedMult",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_SHADOWSTEP_BURST",
+            "name": "Calamity: Shadowstep Burst / \uADF8\uB9BC\uC790 \uC9C8\uC8FC",
+            "delivery": "Self",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
+              "magnitude": 20,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 12.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_SHADOWSTEP_BURST",
+            "applyTo": "Self",
+            "noHitEffectArt": true
           }
         }
       },
@@ -757,6 +1064,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 10.0,
+          "lootWeight": 0.0,
           "icdSeconds": 180.0,
           "action": {
             "type": "CastSpell",

@@ -124,6 +124,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100.0,
+          "lootWeight": 0.0,
           "icdSeconds": 0.0,
           "action": {
             "type": "CastSpell",
@@ -178,6 +179,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100.0,
+          "lootWeight": 0.0,
           "icdSeconds": 0.0,
           "action": {
             "type": "CastSpell",
@@ -232,6 +234,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100.0,
+          "lootWeight": 0.0,
           "icdSeconds": 0.0,
           "action": {
             "type": "CastSpell",
@@ -550,6 +553,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 25.0,
+          "lootWeight": 0.0,
           "icdSeconds": 2.5,
           "action": {
             "type": "CastSpell",
@@ -595,6 +599,7 @@
         "runtime": {
           "trigger": "IncomingHit",
           "procChancePercent": 5.0,
+          "lootWeight": 0.0,
           "icdSeconds": 45.0,
           "action": {
             "type": "CastSpell",
@@ -666,9 +671,283 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0.0,
+          "lootWeight": 8.0,
           "action": {
             "type": "DebugNotify",
             "scrollNoConsumeChancePct": 30.0
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "hit_emberbrand_ignite",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_EMBERBRAND_IGNITE",
+        "name": "불씨 각인 (적중 40% / ICD 0.8초): 점화 피해 4 (4초, 적중 피해 스케일)",
+        "nameEn": "Emberbrand (40% on hit / ICD 0.8s): Ignite 4 (4s, hit scaling)",
+        "nameKo": "불씨 각인 (적중 40% / ICD 0.8초): 점화 피해 4 (4초, 적중 피해 스케일)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_EMBERBRAND_IGNITE",
+            "name": "Calamity: Emberbrand Ignite / 불씨 각인 점화",
+            "actorValue": "Health",
+            "resistValue": "ResistFire",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_EMBERBRAND_IGNITE",
+            "name": "Calamity: Emberbrand Ignite / 불씨 각인 점화",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_EMBERBRAND_IGNITE",
+              "magnitude": 4,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.8
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 40.0,
+          "icdSeconds": 0.8,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_EMBERBRAND_IGNITE",
+            "applyTo": "Target",
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.04,
+              "add": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "kill_emberbrand_burst",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_EMBERBRAND_BURST",
+        "name": "불씨 폭발 (처치 18% / ICD 1초): 시체 폭발 (반경 320, 최대체력 8% + 14 화염)",
+        "nameEn": "Emberbrand Burst (18% on kill / ICD 1s): Corpse explosion (320 radius, 8% max health + 14 fire)",
+        "nameKo": "불씨 폭발 (처치 18% / ICD 1초): 시체 폭발 (반경 320, 최대체력 8% + 14 화염)",
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 18.0,
+          "icdSeconds": 1.0,
+          "action": {
+            "type": "CorpseExplosion",
+            "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
+            "flatDamage": 14.0,
+            "pctOfCorpseMaxHealth": 0.08,
+            "radius": 320.0,
+            "maxTargets": 8,
+            "maxChainDepth": 2,
+            "chainFalloff": 0.8,
+            "chainWindowSeconds": 1.5,
+            "rateLimitWindowSeconds": 1.0,
+            "maxExplosionsPerWindow": 4,
+            "noHitEffectArt": true
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "hit_frostlock_snare",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_FROSTLOCK_SNARE",
+        "name": "서리 족쇄 (적중 24% / ICD 2.5초): 냉기 감속 -35% (2초)",
+        "nameEn": "Frostlock (24% on hit / ICD 2.5s): Frost snare -35% (2s)",
+        "nameKo": "서리 족쇄 (적중 24% / ICD 2.5초): 냉기 감속 -35% (2초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_FROSTLOCK_SNARE",
+            "name": "Calamity: Frostlock Snare / 서리 족쇄",
+            "actorValue": "SpeedMult",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_FROSTLOCK_SNARE",
+            "name": "Calamity: Frostlock Snare / 서리 족쇄",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_FROSTLOCK_SNARE",
+              "magnitude": -35,
+              "duration": 2,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.7
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 24.0,
+          "icdSeconds": 2.5,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_FROSTLOCK_SNARE",
+            "applyTo": "Target"
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "hit_shock_overload",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_OVERLOAD",
+        "name": "과전류 (적중 35% / ICD 1.2초): 매지카 60 흡수",
+        "nameEn": "Overload (35% on hit / ICD 1.2s): Drain 60 Magicka",
+        "nameKo": "과전류 (적중 35% / ICD 1.2초): 매지카 60 흡수",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
+            "name": "Calamity: Shock Overload / 과전류",
+            "actorValue": "Magicka",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_SHOCK_OVERLOAD",
+            "name": "Calamity: Shock Overload / 과전류",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
+              "magnitude": 60,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.7
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 35.0,
+          "icdSeconds": 1.2,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_SHOCK_OVERLOAD",
+            "applyTo": "Target"
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "kill_soul_surge",
+        "editorId": "LoreBox_CAFF_AFFIX_KILL_SOUL_SURGE",
+        "name": "영혼 쇄도 (처치 30% / ICD 2초): 마나 재생 +35% (8초)",
+        "nameEn": "Soul Surge (30% on kill / ICD 2s): Magicka Regen +35% (8s)",
+        "nameKo": "영혼 쇄도 (처치 30% / ICD 2초): 마나 재생 +35% (8초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_KILL_SOUL_SURGE",
+            "name": "Calamity: Soul Surge / 영혼 쇄도",
+            "actorValue": "MagickaRateMult",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_KILL_SOUL_SURGE",
+            "name": "Calamity: Soul Surge / 영혼 쇄도",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_KILL_SOUL_SURGE",
+              "magnitude": 35,
+              "duration": 8,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.6
+        },
+        "runtime": {
+          "trigger": "Kill",
+          "procChancePercent": 30.0,
+          "icdSeconds": 2.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_KILL_SOUL_SURGE",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "hit_shadowstep_burst",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_SHADOWSTEP_BURST",
+        "name": "그림자 질주 (적중 20% / ICD 12초): 이동속도 +20% (4초)",
+        "nameEn": "Shadowstep Burst (20% on hit / ICD 12s): Move Speed +20% (4s)",
+        "nameKo": "그림자 질주 (적중 20% / ICD 12초): 이동속도 +20% (4초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
+            "name": "Calamity: Shadowstep Burst / 그림자 질주",
+            "actorValue": "SpeedMult",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_SHADOWSTEP_BURST",
+            "name": "Calamity: Shadowstep Burst / 그림자 질주",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
+              "magnitude": 20,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.5
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 12.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_SHADOWSTEP_BURST",
+            "applyTo": "Self",
+            "noHitEffectArt": true
           }
         },
         "slot": "prefix"
@@ -689,6 +968,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 10.0,
+          "lootWeight": 0.0,
           "icdSeconds": 180.0,
           "action": {
             "type": "CastSpell",
