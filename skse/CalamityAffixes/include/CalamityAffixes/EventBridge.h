@@ -58,6 +58,13 @@ namespace CalamityAffixes
 			bool noHitEffectArt{ false };
 		};
 
+		struct MindOverMatterResult
+		{
+			float redirectedDamage{ 0.0f };
+			float consumedMagicka{ 0.0f };
+			float redirectPct{ 0.0f };
+		};
+
 		struct RunewordBaseInventoryEntry
 		{
 			std::uint64_t instanceKey{ 0 };
@@ -161,6 +168,12 @@ namespace CalamityAffixes
 			const RE::HitData* a_hitData,
 			float& a_inOutDamage);
 
+		[[nodiscard]] MindOverMatterResult EvaluateMindOverMatter(
+			RE::Actor* a_target,
+			RE::Actor* a_attacker,
+			const RE::HitData* a_hitData,
+			float& a_inOutDamage);
+
 		[[nodiscard]] CastOnCritResult EvaluateCastOnCrit(
 			RE::Actor* a_attacker,
 			RE::Actor* a_target,
@@ -217,6 +230,7 @@ namespace CalamityAffixes
 			kCastSpellAdaptiveElement,
 			kCastOnCrit,
 			kConvertDamage,
+			kMindOverMatter,
 			kArchmage,
 			kCorpseExplosion,
 			kSummonCorpseExplosion,
@@ -272,6 +286,10 @@ namespace CalamityAffixes
 			// ConvertDamage
 			Element element{ Element::kNone };
 			float convertPct{ 0.0f };
+
+			// MindOverMatter
+			float mindOverMatterDamageToMagickaPct{ 0.0f };
+			float mindOverMatterMaxRedirectPerHit{ 0.0f };
 
 			// Archmage
 			float archmageDamagePctOfMaxMagicka{ 0.0f };
@@ -514,6 +532,7 @@ namespace CalamityAffixes
 		std::vector<std::size_t> _killTriggerAffixIndices;
 		std::vector<std::size_t> _castOnCritAffixIndices;
 		std::vector<std::size_t> _convertAffixIndices;
+		std::vector<std::size_t> _mindOverMatterAffixIndices;
 		std::vector<std::size_t> _archmageAffixIndices;
 		std::vector<std::size_t> _corpseExplosionAffixIndices;
 		std::vector<std::size_t> _summonCorpseExplosionAffixIndices;

@@ -296,13 +296,63 @@ public sealed class RepoSpecRegressionTests
             _ = TryGetActionType(affix.Runtime, out var actionType);
 
             var supported =
-                actionType is "CastOnCrit" or "ConvertDamage" or "Archmage" ||
+                actionType is "CastOnCrit" or "ConvertDamage" or "MindOverMatter" or "Archmage" ||
                 trigger is "Hit" or "IncomingHit";
 
             Assert.True(
                 supported,
                 $"Affix {affix.Id} uses luckyHit settings in unsupported context (trigger={trigger ?? "<none>"}, action.type={actionType ?? "<none>"}).");
         }
+    }
+
+    [Fact]
+    public void RepoSpec_IncludesMindOverMatterAffixWithValidFields()
+    {
+        var repoRoot = FindRepoRoot();
+        var specPath = Path.Combine(repoRoot, "affixes", "affixes.json");
+
+        var spec = AffixSpecLoader.Load(specPath);
+        var found = false;
+
+        foreach (var affix in spec.Keywords.Affixes)
+        {
+            if (!TryGetActionType(affix.Runtime, out var actionType) || actionType != "MindOverMatter")
+            {
+                continue;
+            }
+
+            found = true;
+
+            Assert.True(
+                TryGetRuntimeString(affix.Runtime, "trigger", out var trigger) && trigger == "IncomingHit",
+                $"MindOverMatter affix {affix.Id} must use runtime.trigger == IncomingHit.");
+
+            Assert.True(affix.Runtime.TryGetValue("action", out var actionObj),
+                $"MindOverMatter affix {affix.Id} must have runtime.action.");
+            Assert.True(actionObj is JsonElement, $"MindOverMatter affix {affix.Id} runtime.action must be JSON.");
+            var actionEl = (JsonElement)actionObj!;
+            Assert.True(actionEl.ValueKind == JsonValueKind.Object,
+                $"MindOverMatter affix {affix.Id} runtime.action must be object.");
+
+            Assert.True(
+                actionEl.TryGetProperty("damageToMagickaPct", out var redirectPctEl) &&
+                redirectPctEl.ValueKind == JsonValueKind.Number &&
+                redirectPctEl.TryGetDouble(out var redirectPct) &&
+                redirectPct > 0.0 &&
+                redirectPct <= 100.0,
+                $"MindOverMatter affix {affix.Id} must define action.damageToMagickaPct in (0, 100].");
+
+            if (actionEl.TryGetProperty("maxRedirectPerHit", out var maxRedirectEl))
+            {
+                Assert.True(
+                    maxRedirectEl.ValueKind == JsonValueKind.Number &&
+                    maxRedirectEl.TryGetDouble(out var maxRedirect) &&
+                    maxRedirect >= 0.0,
+                    $"MindOverMatter affix {affix.Id} has invalid action.maxRedirectPerHit (expected >= 0).");
+            }
+        }
+
+        Assert.True(found, "Expected at least one MindOverMatter affix in affixes/affixes.json.");
     }
 
     private static string FindRepoRoot()

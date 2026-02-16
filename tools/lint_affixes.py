@@ -15,6 +15,7 @@ SUPPORTED_ACTION_TYPES: Set[str] = {
     "CastSpellAdaptiveElement",
     "CastOnCrit",
     "ConvertDamage",
+    "MindOverMatter",
     "Archmage",
     "CorpseExplosion",
     "SummonCorpseExplosion",
@@ -247,7 +248,7 @@ def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) 
         )
         if lucky_hit_configured:
             lucky_supported = False
-            if action_type in {"CastOnCrit", "ConvertDamage", "Archmage"}:
+            if action_type in {"CastOnCrit", "ConvertDamage", "MindOverMatter", "Archmage"}:
                 lucky_supported = True
             elif trigger in {"Hit", "IncomingHit"}:
                 lucky_supported = True
@@ -335,6 +336,27 @@ def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) 
                 errors.append(f"{affix_id}: SpawnTrap requires radius > 0.")
             if trigger == "DotApply" and action.get("requireWeaponHit", False):
                 warnings.append(f"{affix_id}: DotApply + SpawnTrap has requireWeaponHit=true (will never fire).")
+
+        if action_type == "MindOverMatter":
+            damage_to_magicka_pct = action.get("damageToMagickaPct")
+            if not _is_number(damage_to_magicka_pct):
+                errors.append(f"{affix_id}: MindOverMatter requires action.damageToMagickaPct as a number.")
+            elif damage_to_magicka_pct <= 0.0 or damage_to_magicka_pct > 100.0:
+                errors.append(
+                    f"{affix_id}: action.damageToMagickaPct out of range: {damage_to_magicka_pct} (expected >0 and <=100)."
+                )
+
+            max_redirect_per_hit = action.get("maxRedirectPerHit")
+            if max_redirect_per_hit is not None:
+                if not _is_number(max_redirect_per_hit):
+                    errors.append(f"{affix_id}: action.maxRedirectPerHit must be a number when provided.")
+                elif max_redirect_per_hit < 0.0:
+                    errors.append(f"{affix_id}: action.maxRedirectPerHit must be >= 0.")
+
+            if trigger != "IncomingHit":
+                errors.append(
+                    f"{affix_id}: MindOverMatter requires trigger=IncomingHit (current trigger={trigger})."
+                )
 
         if str(affix_id).lower().startswith("internal_"):
             kid = _as_dict(affix.get("kid")) or {}

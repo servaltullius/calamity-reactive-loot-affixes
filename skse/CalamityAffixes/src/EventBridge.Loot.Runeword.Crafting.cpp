@@ -402,6 +402,9 @@ namespace CalamityAffixes
 					case ActionType::kConvertDamage:
 						summary = "Damage conversion effect";
 						break;
+					case ActionType::kMindOverMatter:
+						summary = "Mind-over-matter damage redirect";
+						break;
 					case ActionType::kArchmage:
 						summary = "Archmage scaling proc";
 						break;

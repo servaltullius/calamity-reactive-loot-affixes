@@ -161,6 +161,32 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 					if (!ShouldSuppressDuplicateHit(key, now)) {
 						const auto* hitData = HitDataUtil::GetLastHitData(target);
+
+						// Hook-compat fallback:
+						// If HandleHealthDamage hook is not routed, emulate MoM by refunding Health after hit landed.
+						// (Hook path reduces damage pre-hit; TESHitEvent fallback can only correct post-hit.)
+						if (hitData && !target->IsDead()) {
+							float fallbackIncomingDamage = std::max(
+								0.0f,
+								hitData->totalDamage - hitData->resistedPhysicalDamage - hitData->resistedTypedDamage);
+							if (fallbackIncomingDamage > 0.0f) {
+								const auto mom = EvaluateMindOverMatter(target, aggressor, hitData, fallbackIncomingDamage);
+								if (mom.redirectedDamage > 0.0f) {
+									if (auto* avOwner = target->AsActorValueOwner()) {
+										avOwner->RestoreActorValue(
+											RE::ACTOR_VALUE_MODIFIER::kDamage,
+											RE::ActorValue::kHealth,
+											mom.redirectedDamage);
+										if (_loot.debugLog) {
+											spdlog::debug(
+												"CalamityAffixes: TESHitEvent fallback applied MoM heal correction (redirected={}).",
+												mom.redirectedDamage);
+										}
+									}
+								}
+							}
+						}
+
 						ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
 					}
 				}

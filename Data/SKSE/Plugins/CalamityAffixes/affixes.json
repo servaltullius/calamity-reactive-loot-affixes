@@ -735,11 +735,221 @@
         }
       },
       {
+        "id": "incoming_resolve_barrier",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_RESOLVE_BARRIER",
+        "name": "\uACB0\uC758 \uC7A5\uB9C9 (\uD53C\uACA9 18% / ICD 8\uCD08): \uB9C8\uBC95 \uC800\uD56D \u002B25% (4\uCD08)",
+        "nameEn": "Resolve Barrier (18% on hit taken / ICD 8s): Magic Resist \u002B25% (4s)",
+        "nameKo": "\uACB0\uC758 \uC7A5\uB9C9 (\uD53C\uACA9 18% / ICD 8\uCD08): \uB9C8\uBC95 \uC800\uD56D \u002B25% (4\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_INCOMING_RESOLVE_BARRIER",
+            "name": "Calamity: Resolve Barrier / \uACB0\uC758 \uC7A5\uB9C9",
+            "actorValue": "ResistMagic",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_INCOMING_RESOLVE_BARRIER",
+            "name": "Calamity: Resolve Barrier / \uACB0\uC758 \uC7A5\uB9C9",
+            "delivery": "Self",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_RESOLVE_BARRIER",
+              "magnitude": 25,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.35
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 8.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_INCOMING_RESOLVE_BARRIER",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "incoming_vital_rebound",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_VITAL_REBOUND",
+        "name": "\uC7AC\uAE30 \uBC18\uB3D9 (\uD53C\uACA9 20% / ICD 9\uCD08): \uCCB4\uB825 \uC7AC\uC0DD \u002B140% (5\uCD08)",
+        "nameEn": "Vital Rebound (20% on hit taken / ICD 9s): Health Regen \u002B140% (5s)",
+        "nameKo": "\uC7AC\uAE30 \uBC18\uB3D9 (\uD53C\uACA9 20% / ICD 9\uCD08): \uCCB4\uB825 \uC7AC\uC0DD \u002B140% (5\uCD08)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_INCOMING_VITAL_REBOUND",
+            "name": "Calamity: Vital Rebound / \uC7AC\uAE30 \uBC18\uB3D9",
+            "actorValue": "HealRate",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_INCOMING_VITAL_REBOUND",
+            "name": "Calamity: Vital Rebound / \uC7AC\uAE30 \uBC18\uB3D9",
+            "delivery": "Self",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_VITAL_REBOUND",
+              "magnitude": 140,
+              "duration": 5,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.35
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 9.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_INCOMING_VITAL_REBOUND",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        }
+      },
+      {
+        "id": "incoming_mind_over_matter_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_MIND_OVER_MATTER_T1",
+        "name": "\uC815\uC2E0\uB825 \uC644\uCDA9 I: \uBB3C\uB9AC \uD53C\uD574 10%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658 (\uD788\uD2B8\uB2F9 \uCD5C\uB300 35)",
+        "nameEn": "Mind Buffer I: Redirect 10% of physical hit damage to Magicka (max 35 per hit)",
+        "nameKo": "\uC815\uC2E0\uB825 \uC644\uCDA9 I: \uBB3C\uB9AC \uD53C\uD574 10%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658 (\uD788\uD2B8\uB2F9 \uCD5C\uB300 35)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.25
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 100.0,
+          "lootWeight": 6.0,
+          "action": {
+            "type": "MindOverMatter",
+            "damageToMagickaPct": 10.0,
+            "maxRedirectPerHit": 35.0
+          }
+        }
+      },
+      {
+        "id": "incoming_mind_over_matter_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_MIND_OVER_MATTER_T2",
+        "name": "\uC815\uC2E0\uB825 \uC644\uCDA9 II: \uBB3C\uB9AC \uD53C\uD574 15%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658 (\uD788\uD2B8\uB2F9 \uCD5C\uB300 50)",
+        "nameEn": "Mind Buffer II: Redirect 15% of physical hit damage to Magicka (max 50 per hit)",
+        "nameKo": "\uC815\uC2E0\uB825 \uC644\uCDA9 II: \uBB3C\uB9AC \uD53C\uD574 15%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658 (\uD788\uD2B8\uB2F9 \uCD5C\uB300 50)",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 100.0,
+          "lootWeight": 3.5,
+          "action": {
+            "type": "MindOverMatter",
+            "damageToMagickaPct": 15.0,
+            "maxRedirectPerHit": 50.0
+          }
+        }
+      },
+      {
+        "id": "scroll_echo_preservation_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION_T1",
+        "name": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC I: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B20%",
+        "nameEn": "Scroll Echo I: \u002B20% chance to not consume scrolls",
+        "nameKo": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC I: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B20%",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.35
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "lootWeight": 10.0,
+          "action": {
+            "type": "DebugNotify",
+            "scrollNoConsumeChancePct": 20.0
+          }
+        }
+      },
+      {
+        "id": "scroll_echo_preservation_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION_T2",
+        "name": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC II: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B25%",
+        "nameEn": "Scroll Echo II: \u002B25% chance to not consume scrolls",
+        "nameKo": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC II: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B25%",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "lootWeight": 8.5,
+          "action": {
+            "type": "DebugNotify",
+            "scrollNoConsumeChancePct": 25.0
+          }
+        }
+      },
+      {
         "id": "scroll_echo_preservation",
         "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION",
-        "name": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B30%",
-        "nameEn": "Scroll Echo: \u002B30% chance to not consume scrolls",
-        "nameKo": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B30%",
+        "name": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC III: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B30%",
+        "nameEn": "Scroll Echo III: \u002B30% chance to not consume scrolls",
+        "nameKo": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC III: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B30%",
         "records": null,
         "kid": {
           "type": "Armor",
@@ -757,6 +967,32 @@
           "action": {
             "type": "DebugNotify",
             "scrollNoConsumeChancePct": 30.0
+          }
+        }
+      },
+      {
+        "id": "scroll_echo_preservation_t4",
+        "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION_T4",
+        "name": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC IV: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B35%",
+        "nameEn": "Scroll Echo IV: \u002B35% chance to not consume scrolls",
+        "nameKo": "\uB450\uB8E8\uB9C8\uB9AC \uBA54\uC544\uB9AC IV: \uC2A4\uD06C\uB864 \uBE44\uC18C\uBAA8 \u002B35%",
+        "records": null,
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.22
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "lootWeight": 5.5,
+          "action": {
+            "type": "DebugNotify",
+            "scrollNoConsumeChancePct": 35.0
           }
         }
       },
@@ -956,6 +1192,68 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_HIT_SHOCK_OVERLOAD",
             "applyTo": "Target"
+          }
+        }
+      },
+      {
+        "id": "hit_blood_siphon",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_BLOOD_SIPHON",
+        "name": "\uD608\uB958 \uD761\uC218 (Lucky Hit 38% / ICD 0.7\uCD08): \uCCB4\uB825 \uD68C\uBCF5 4 \u002B \uBB3C\uB9AC \uD53C\uD574\uC758 4.5% (\uCD5C\uB300 24)",
+        "nameEn": "Blood Siphon (Lucky Hit 38% / ICD 0.7s): Heal 4 \u002B 4.5% of physical hit damage (max 24)",
+        "nameKo": "\uD608\uB958 \uD761\uC218 (Lucky Hit 38% / ICD 0.7\uCD08): \uCCB4\uB825 \uD68C\uBCF5 4 \u002B \uBB3C\uB9AC \uD53C\uD574\uC758 4.5% (\uCD5C\uB300 24)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_BLOOD_SIPHON",
+            "name": "Calamity: Blood Siphon / \uD608\uB958 \uD761\uC218",
+            "actorValue": "Health",
+            "resistValue": null,
+            "magicSkill": "Restoration",
+            "hostile": false,
+            "recover": true,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_BLOOD_SIPHON",
+            "name": "Calamity: Blood Siphon / \uD608\uB958 \uD761\uC218",
+            "delivery": "Self",
+            "spellType": null,
+            "castType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_BLOOD_SIPHON",
+              "magnitude": 4,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.55
+        },
+        "slot": "prefix",
+        "family": null,
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 38.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 0.7,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_BLOOD_SIPHON",
+            "applyTo": "Self",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.045,
+              "add": 4.0,
+              "min": 4.0,
+              "max": 24.0,
+              "spellBaseAsMin": true
+            }
           }
         }
       },

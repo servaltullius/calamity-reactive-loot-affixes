@@ -122,6 +122,12 @@ namespace CalamityAffixes::Hooks
 						a_this,
 						hitData,
 						adjustedDamage);
+					const auto mindOverMatter = bridge->EvaluateMindOverMatter(
+						a_this,
+						a_attacker,
+						hitData,
+						adjustedDamage);
+					(void)mindOverMatter;
 
 				a_original(a_this, a_attacker, adjustedDamage);
 

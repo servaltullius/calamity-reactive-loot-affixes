@@ -199,6 +199,151 @@ namespace CalamityAffixes
 		};
 	}
 
+	EventBridge::MindOverMatterResult EventBridge::EvaluateMindOverMatter(
+		RE::Actor* a_target,
+		RE::Actor* a_attacker,
+		const RE::HitData* a_hitData,
+		float& a_inOutDamage)
+	{
+		MindOverMatterResult result{};
+		if (!_configLoaded || !_runtimeEnabled || _mindOverMatterAffixIndices.empty()) {
+			return result;
+		}
+		if (!a_target || !a_attacker || !a_target->IsPlayerRef()) {
+			return result;
+		}
+		if (!IsHostileEitherDirection(a_target, a_attacker)) {
+			return result;
+		}
+		if (!a_hitData || a_inOutDamage <= 0.0f) {
+			return result;
+		}
+
+		const float physicalTaken = std::max(0.0f, a_hitData->physicalDamage - a_hitData->resistedPhysicalDamage);
+		if (physicalTaken <= 0.0f) {
+			return result;
+		}
+
+		MaybeResyncEquippedAffixes(std::chrono::steady_clock::now());
+
+		bool hasAnyMindOverMatter = false;
+		for (const auto idx : _mindOverMatterAffixIndices) {
+			if (idx < _activeCounts.size() && _activeCounts[idx] > 0) {
+				hasAnyMindOverMatter = true;
+				break;
+			}
+		}
+		if (!hasAnyMindOverMatter) {
+			return result;
+		}
+
+		const auto now = std::chrono::steady_clock::now();
+		AffixRuntime* selectedAffix = nullptr;
+		PerTargetCooldownKey selectedPerTargetKey{};
+		bool selectedUsesPerTargetIcd = false;
+		const Action* action = nullptr;
+		float bestRedirectPct = 0.0f;
+
+		for (const auto idx : _mindOverMatterAffixIndices) {
+			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
+				continue;
+			}
+			if (_activeCounts[idx] == 0) {
+				continue;
+			}
+
+			auto& affix = _affixes[idx];
+			const auto& candidate = affix.action;
+			if (candidate.type != ActionType::kMindOverMatter || candidate.mindOverMatterDamageToMagickaPct <= 0.0f) {
+				continue;
+			}
+
+			if (now < affix.nextAllowed) {
+				continue;
+			}
+			if (!PassesRecentlyGates(affix, a_target, now)) {
+				continue;
+			}
+			if (!PassesLuckyHitGate(affix, Trigger::kIncomingHit, a_hitData, now)) {
+				continue;
+			}
+
+			PerTargetCooldownKey perTargetKey{};
+			const bool usesPerTargetIcd = (affix.perTargetIcd.count() > 0 && a_attacker && affix.token != 0u);
+			if (IsPerTargetCooldownBlocked(affix, a_attacker, now, &perTargetKey)) {
+				continue;
+			}
+
+			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult);
+			if (!RollProcChance(_rng, chancePct)) {
+				continue;
+			}
+
+			if (!action || candidate.mindOverMatterDamageToMagickaPct > bestRedirectPct) {
+				action = std::addressof(candidate);
+				selectedAffix = std::addressof(affix);
+				selectedPerTargetKey = perTargetKey;
+				selectedUsesPerTargetIcd = usesPerTargetIcd;
+				bestRedirectPct = candidate.mindOverMatterDamageToMagickaPct;
+			}
+		}
+
+		if (!action || action->mindOverMatterDamageToMagickaPct <= 0.0f) {
+			return result;
+		}
+
+		auto* avOwner = a_target->AsActorValueOwner();
+		if (!avOwner) {
+			return result;
+		}
+
+		const float currentMagicka = std::max(0.0f, avOwner->GetActorValue(RE::ActorValue::kMagicka));
+		if (currentMagicka <= 0.0f) {
+			return result;
+		}
+
+		float redirect = physicalTaken * (action->mindOverMatterDamageToMagickaPct / 100.0f);
+		if (redirect <= 0.0f) {
+			return result;
+		}
+		redirect = std::min(redirect, a_inOutDamage);
+		if (action->mindOverMatterMaxRedirectPerHit > 0.0f) {
+			redirect = std::min(redirect, action->mindOverMatterMaxRedirectPerHit);
+		}
+		redirect = std::min(redirect, currentMagicka);
+		if (redirect <= 0.0f) {
+			return result;
+		}
+
+		avOwner->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kMagicka, -redirect);
+		a_inOutDamage -= redirect;
+		if (a_inOutDamage < 0.0f) {
+			a_inOutDamage = 0.0f;
+		}
+
+		if (selectedAffix && selectedAffix->icd.count() > 0) {
+			selectedAffix->nextAllowed = now + selectedAffix->icd;
+		}
+		if (selectedUsesPerTargetIcd && selectedAffix) {
+			CommitPerTargetCooldown(selectedPerTargetKey, selectedAffix->perTargetIcd, now);
+		}
+
+		result.redirectedDamage = redirect;
+		result.consumedMagicka = redirect;
+		result.redirectPct = action->mindOverMatterDamageToMagickaPct;
+
+		if (_loot.debugLog) {
+			spdlog::debug(
+				"CalamityAffixes: MindOverMatter (physicalTaken={}, redirectPct={}%, redirected={}, remainingHealthDamage={}).",
+				physicalTaken,
+				result.redirectPct,
+				result.redirectedDamage,
+				a_inOutDamage);
+		}
+
+		return result;
+	}
+
 	EventBridge::CastOnCritResult EventBridge::EvaluateCastOnCrit(
 		RE::Actor* a_attacker,
 		RE::Actor* a_target,

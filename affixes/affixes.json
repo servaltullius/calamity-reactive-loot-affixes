@@ -672,11 +672,201 @@
         "slot": "prefix"
       },
       {
+        "id": "incoming_resolve_barrier",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_RESOLVE_BARRIER",
+        "name": "결의 장막 (피격 18% / ICD 8초): 마법 저항 +25% (4초)",
+        "nameEn": "Resolve Barrier (18% on hit taken / ICD 8s): Magic Resist +25% (4s)",
+        "nameKo": "결의 장막 (피격 18% / ICD 8초): 마법 저항 +25% (4초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_INCOMING_RESOLVE_BARRIER",
+            "name": "Calamity: Resolve Barrier / 결의 장막",
+            "actorValue": "ResistMagic",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_INCOMING_RESOLVE_BARRIER",
+            "name": "Calamity: Resolve Barrier / 결의 장막",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_RESOLVE_BARRIER",
+              "magnitude": 25,
+              "duration": 4,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.35
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 18.0,
+          "icdSeconds": 8.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_INCOMING_RESOLVE_BARRIER",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "incoming_vital_rebound",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_VITAL_REBOUND",
+        "name": "재기 반동 (피격 20% / ICD 9초): 체력 재생 +140% (5초)",
+        "nameEn": "Vital Rebound (20% on hit taken / ICD 9s): Health Regen +140% (5s)",
+        "nameKo": "재기 반동 (피격 20% / ICD 9초): 체력 재생 +140% (5초)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_INCOMING_VITAL_REBOUND",
+            "name": "Calamity: Vital Rebound / 재기 반동",
+            "actorValue": "HealRate",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_INCOMING_VITAL_REBOUND",
+            "name": "Calamity: Vital Rebound / 재기 반동",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_VITAL_REBOUND",
+              "magnitude": 140,
+              "duration": 5,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.35
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 20.0,
+          "icdSeconds": 9.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_INCOMING_VITAL_REBOUND",
+            "applyTo": "Self",
+            "noHitEffectArt": true
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "incoming_mind_over_matter_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_MIND_OVER_MATTER_T1",
+        "name": "정신력 완충 I: 물리 피해 10%를 매지카로 전환 (히트당 최대 35)",
+        "nameEn": "Mind Buffer I: Redirect 10% of physical hit damage to Magicka (max 35 per hit)",
+        "nameKo": "정신력 완충 I: 물리 피해 10%를 매지카로 전환 (히트당 최대 35)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.25
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 100.0,
+          "lootWeight": 6.0,
+          "action": {
+            "type": "MindOverMatter",
+            "damageToMagickaPct": 10.0,
+            "maxRedirectPerHit": 35.0
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "incoming_mind_over_matter_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_INCOMING_MIND_OVER_MATTER_T2",
+        "name": "정신력 완충 II: 물리 피해 15%를 매지카로 전환 (히트당 최대 50)",
+        "nameEn": "Mind Buffer II: Redirect 15% of physical hit damage to Magicka (max 50 per hit)",
+        "nameKo": "정신력 완충 II: 물리 피해 15%를 매지카로 전환 (히트당 최대 50)",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.2
+        },
+        "runtime": {
+          "trigger": "IncomingHit",
+          "procChancePercent": 100.0,
+          "lootWeight": 3.5,
+          "action": {
+            "type": "MindOverMatter",
+            "damageToMagickaPct": 15.0,
+            "maxRedirectPerHit": 50.0
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "scroll_echo_preservation_t1",
+        "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION_T1",
+        "name": "두루마리 메아리 I: 스크롤 비소모 +20%",
+        "nameEn": "Scroll Echo I: +20% chance to not consume scrolls",
+        "nameKo": "두루마리 메아리 I: 스크롤 비소모 +20%",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.35
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "lootWeight": 10.0,
+          "action": {
+            "type": "DebugNotify",
+            "scrollNoConsumeChancePct": 20.0
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "scroll_echo_preservation_t2",
+        "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION_T2",
+        "name": "두루마리 메아리 II: 스크롤 비소모 +25%",
+        "nameEn": "Scroll Echo II: +25% chance to not consume scrolls",
+        "nameKo": "두루마리 메아리 II: 스크롤 비소모 +25%",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.3
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "lootWeight": 8.5,
+          "action": {
+            "type": "DebugNotify",
+            "scrollNoConsumeChancePct": 25.0
+          }
+        },
+        "slot": "prefix"
+      },
+      {
         "id": "scroll_echo_preservation",
         "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION",
-        "name": "두루마리 메아리: 스크롤 비소모 +30%",
-        "nameEn": "Scroll Echo: +30% chance to not consume scrolls",
-        "nameKo": "두루마리 메아리: 스크롤 비소모 +30%",
+        "name": "두루마리 메아리 III: 스크롤 비소모 +30%",
+        "nameEn": "Scroll Echo III: +30% chance to not consume scrolls",
+        "nameKo": "두루마리 메아리 III: 스크롤 비소모 +30%",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -691,6 +881,30 @@
           "action": {
             "type": "DebugNotify",
             "scrollNoConsumeChancePct": 30.0
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "scroll_echo_preservation_t4",
+        "editorId": "LoreBox_CAFF_AFFIX_SCROLL_ECHO_PRESERVATION_T4",
+        "name": "두루마리 메아리 IV: 스크롤 비소모 +35%",
+        "nameEn": "Scroll Echo IV: +35% chance to not consume scrolls",
+        "nameKo": "두루마리 메아리 IV: 스크롤 비소모 +35%",
+        "kid": {
+          "type": "Armor",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.22
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0.0,
+          "lootWeight": 5.5,
+          "action": {
+            "type": "DebugNotify",
+            "scrollNoConsumeChancePct": 35.0
           }
         },
         "slot": "prefix"
@@ -874,6 +1088,63 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_HIT_SHOCK_OVERLOAD",
             "applyTo": "Target"
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "hit_blood_siphon",
+        "editorId": "LoreBox_CAFF_AFFIX_HIT_BLOOD_SIPHON",
+        "name": "혈류 흡수 (Lucky Hit 38% / ICD 0.7초): 체력 회복 4 + 물리 피해의 4.5% (최대 24)",
+        "nameEn": "Blood Siphon (Lucky Hit 38% / ICD 0.7s): Heal 4 + 4.5% of physical hit damage (max 24)",
+        "nameKo": "혈류 흡수 (Lucky Hit 38% / ICD 0.7초): 체력 회복 4 + 물리 피해의 4.5% (최대 24)",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_HIT_BLOOD_SIPHON",
+            "name": "Calamity: Blood Siphon / 혈류 흡수",
+            "actorValue": "Health",
+            "magicSkill": "Restoration",
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_HIT_BLOOD_SIPHON",
+            "name": "Calamity: Blood Siphon / 혈류 흡수",
+            "delivery": "Self",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_HIT_BLOOD_SIPHON",
+              "magnitude": 4,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0.55
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 38.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 0.7,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_HIT_BLOOD_SIPHON",
+            "applyTo": "Self",
+            "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.045,
+              "add": 4.0,
+              "min": 4.0,
+              "max": 24.0,
+              "spellBaseAsMin": true
+            }
           }
         },
         "slot": "prefix"

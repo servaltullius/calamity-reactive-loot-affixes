@@ -101,6 +101,7 @@ namespace CalamityAffixes
 		_killTriggerAffixIndices.clear();
 		_castOnCritAffixIndices.clear();
 		_convertAffixIndices.clear();
+		_mindOverMatterAffixIndices.clear();
 		_archmageAffixIndices.clear();
 		_corpseExplosionAffixIndices.clear();
 		_summonCorpseExplosionAffixIndices.clear();
@@ -278,6 +279,7 @@ namespace CalamityAffixes
 		auto isSpecialActionType = [](std::string_view a_type) -> bool {
 			return a_type == "CastOnCrit" ||
 			       a_type == "ConvertDamage" ||
+			       a_type == "MindOverMatter" ||
 			       a_type == "Archmage" ||
 			       a_type == "CorpseExplosion" ||
 			       a_type == "SummonCorpseExplosion";
@@ -588,19 +590,58 @@ namespace CalamityAffixes
 				if (!out.action.spell) {
 					continue;
 				}
-			} else if (type == "ConvertDamage") {
-				out.action.type = ActionType::kConvertDamage;
-				const auto element = action.value("element", std::string{});
-				out.action.element = parseElement(element);
-				out.action.convertPct = action.value("percent", 0.0f);
+				} else if (type == "ConvertDamage") {
+					out.action.type = ActionType::kConvertDamage;
+					const auto element = action.value("element", std::string{});
+					out.action.element = parseElement(element);
+					out.action.convertPct = action.value("percent", 0.0f);
 				out.action.spell = parseSpell(action);
 				out.action.effectiveness = action.value("effectiveness", 1.0f);
 				out.action.noHitEffectArt = action.value("noHitEffectArt", false);
 
-				if (!out.action.spell || out.action.element == Element::kNone || out.action.convertPct <= 0.0f) {
-					continue;
-				}
-			} else if (type == "Archmage") {
+					if (!out.action.spell || out.action.element == Element::kNone || out.action.convertPct <= 0.0f) {
+						continue;
+					}
+				} else if (type == "MindOverMatter") {
+					out.action.type = ActionType::kMindOverMatter;
+
+					auto readMindOverMatterNumber = [&](std::string_view a_key, double a_fallback = 0.0) -> double {
+						const auto key = std::string(a_key);
+						const auto it = action.find(key);
+						if (it == action.end()) {
+							return a_fallback;
+						}
+						if (it->is_number()) {
+							return it->get<double>();
+						}
+
+						SKSE::log::warn(
+							"CalamityAffixes: MindOverMatter expects numeric '{}' (affixId={}, gotType={}); using fallback={}.",
+							key,
+							out.id,
+							it->type_name(),
+							a_fallback);
+						return a_fallback;
+					};
+
+					out.action.mindOverMatterDamageToMagickaPct =
+						static_cast<float>(readMindOverMatterNumber("damageToMagickaPct"));
+					out.action.mindOverMatterMaxRedirectPerHit =
+						static_cast<float>(readMindOverMatterNumber("maxRedirectPerHit"));
+
+					if (out.action.mindOverMatterDamageToMagickaPct <= 0.0f) {
+						continue;
+					}
+					if (out.trigger != Trigger::kIncomingHit) {
+						SKSE::log::warn(
+							"CalamityAffixes: MindOverMatter requires trigger=IncomingHit (affixId={}, trigger={}); skipping.",
+							out.id,
+							static_cast<std::uint32_t>(out.trigger));
+						continue;
+					}
+					out.action.mindOverMatterDamageToMagickaPct = std::clamp(out.action.mindOverMatterDamageToMagickaPct, 0.0f, 100.0f);
+					out.action.mindOverMatterMaxRedirectPerHit = std::max(0.0f, out.action.mindOverMatterMaxRedirectPerHit);
+				} else if (type == "Archmage") {
 				out.action.type = ActionType::kArchmage;
 				out.action.spell = parseSpell(action);
 				out.action.effectiveness = action.value("effectiveness", 1.0f);
@@ -733,6 +774,7 @@ namespace CalamityAffixes
 				const bool isSpecialAction =
 					out.action.type == ActionType::kCastOnCrit ||
 					out.action.type == ActionType::kConvertDamage ||
+					out.action.type == ActionType::kMindOverMatter ||
 					out.action.type == ActionType::kArchmage ||
 					out.action.type == ActionType::kCorpseExplosion ||
 					out.action.type == ActionType::kSummonCorpseExplosion;
@@ -742,6 +784,7 @@ namespace CalamityAffixes
 					switch (out.action.type) {
 					case ActionType::kCastOnCrit:
 					case ActionType::kConvertDamage:
+					case ActionType::kMindOverMatter:
 					case ActionType::kArchmage:
 						luckyHitSupported = true;
 						break;
@@ -802,6 +845,8 @@ namespace CalamityAffixes
 				_castOnCritAffixIndices.push_back(idx);
 			} else if (_affixes[idx].action.type == ActionType::kConvertDamage) {
 				_convertAffixIndices.push_back(idx);
+			} else if (_affixes[idx].action.type == ActionType::kMindOverMatter) {
+				_mindOverMatterAffixIndices.push_back(idx);
 			} else if (_affixes[idx].action.type == ActionType::kArchmage) {
 				_archmageAffixIndices.push_back(idx);
 			} else if (_affixes[idx].action.type == ActionType::kCorpseExplosion) {
