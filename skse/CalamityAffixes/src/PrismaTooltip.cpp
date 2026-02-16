@@ -134,6 +134,23 @@ namespace CalamityAffixes::PrismaTooltip
 			return a_name == kMenuInventory || a_name == kMenuBarter;
 		}
 
+		[[nodiscard]] int CountRelevantMenusOpenFromUi() noexcept
+		{
+			auto* ui = RE::UI::GetSingleton();
+			if (!ui) {
+				return -1;
+			}
+
+			int count = 0;
+			if (ui->IsMenuOpen(kMenuInventory)) {
+				++count;
+			}
+			if (ui->IsMenuOpen(kMenuBarter)) {
+				++count;
+			}
+			return count;
+		}
+
 		[[nodiscard]] bool IsViewReady() noexcept
 		{
 			return g_api && g_view && g_api->IsValid(g_view) && g_domReady.load();
@@ -458,12 +475,23 @@ namespace CalamityAffixes::PrismaTooltip
 				}
 
 				if (a_event->opening) {
-					g_relevantMenusOpen.fetch_add(1);
+					const int openCount = CountRelevantMenusOpenFromUi();
+					if (openCount >= 0) {
+						g_relevantMenusOpen.store(openCount);
+					} else {
+						g_relevantMenusOpen.fetch_add(1);
+					}
 					return RE::BSEventNotifyControl::kContinue;
 				}
 
-				const int prev = g_relevantMenusOpen.fetch_sub(1);
-				if (prev <= 1) {
+				int openCount = CountRelevantMenusOpenFromUi();
+				if (openCount < 0) {
+					const int prev = g_relevantMenusOpen.fetch_sub(1);
+					openCount = std::max(0, prev - 1);
+				}
+				g_relevantMenusOpen.store(std::max(0, openCount));
+
+				if (openCount <= 0) {
 					g_relevantMenusOpen.store(0);
 
 					if (!g_controlPanelOpen.load() && g_api && g_view && g_api->IsValid(g_view)) {
@@ -569,15 +597,19 @@ namespace CalamityAffixes::PrismaTooltip
 			};
 
 			if (auto menu = ui->GetMenu<RE::InventoryMenu>(); menu) {
-				auto& data = menu->GetRuntimeData();
-				if (readItem(data.itemList, kItemSourceInventory)) {
-					return result;
+				if (ui->IsMenuOpen(kMenuInventory)) {
+					auto& data = menu->GetRuntimeData();
+					if (readItem(data.itemList, kItemSourceInventory)) {
+						return result;
+					}
 				}
 			}
 			if (auto menu = ui->GetMenu<RE::BarterMenu>(); menu) {
-				auto& data = menu->GetRuntimeData();
-				if (readItem(data.itemList, kItemSourceBarter)) {
-					return result;
+				if (ui->IsMenuOpen(kMenuBarter)) {
+					auto& data = menu->GetRuntimeData();
+					if (readItem(data.itemList, kItemSourceBarter)) {
+						return result;
+					}
 				}
 			}
 
