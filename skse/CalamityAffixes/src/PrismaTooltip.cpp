@@ -476,9 +476,11 @@ namespace CalamityAffixes::PrismaTooltip
 
 				if (a_event->opening) {
 					const int openCount = CountRelevantMenusOpenFromUi();
-					if (openCount >= 0) {
+					if (openCount > 0) {
 						g_relevantMenusOpen.store(openCount);
 					} else {
+						// Opening events can race before UI::IsMenuOpen reflects the new state.
+						// Fall back to event-based increment so polling doesn't stall at zero.
 						g_relevantMenusOpen.fetch_add(1);
 					}
 					return RE::BSEventNotifyControl::kContinue;
