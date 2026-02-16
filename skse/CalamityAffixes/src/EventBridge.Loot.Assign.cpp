@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootEligibility.h"
+#include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/LootUiGuards.h"
 
 #include <algorithm>
@@ -177,10 +178,9 @@ namespace CalamityAffixes
 			}
 		}
 
-		// Build eligible pool, excluding already-chosen indices and chance<=0 affixes.
-		// When sharedPool is enabled, combine weapon + armor pools (original behavior).
+		// Build eligible pool, excluding already-chosen indices and disabled entries.
+		// EffectiveLootWeight is a compatibility gate here (<=0 excluded), not a roll weight.
 		std::vector<std::size_t> eligible;
-		std::vector<double> weights;
 
 		auto collectFromPool = [&](const std::vector<std::size_t>& a_pool) {
 			for (const auto idx : a_pool) {
@@ -192,12 +192,11 @@ namespace CalamityAffixes
 				if (idx >= _affixes.size()) {
 					continue;
 				}
-				const float weight = _affixes[idx].EffectiveLootWeight();
-				if (weight <= 0.0f) {
+				const float eligibilityGate = _affixes[idx].EffectiveLootWeight();
+				if (eligibilityGate <= 0.0f) {
 					continue;
 				}
 				eligible.push_back(idx);
-				weights.push_back(static_cast<double>(weight));
 			}
 		};
 
@@ -213,12 +212,7 @@ namespace CalamityAffixes
 			return std::nullopt;
 		}
 
-		if (eligible.size() == 1) {
-			return eligible[0];
-		}
-
-		std::discrete_distribution<std::size_t> dist(weights.begin(), weights.end());
-		return eligible[dist(_rng)];
+		return detail::SelectUniformEligibleLootIndex(_rng, eligible);
 	}
 
 	std::optional<std::size_t> EventBridge::RollSuffixIndex(
@@ -226,7 +220,6 @@ namespace CalamityAffixes
 		const std::vector<std::string>* a_excludeFamilies)
 	{
 		std::vector<std::size_t> eligible;
-		std::vector<double> weights;
 
 		auto collectFromPool = [&](const std::vector<std::size_t>& a_pool) {
 			for (const auto idx : a_pool) {
@@ -242,12 +235,11 @@ namespace CalamityAffixes
 						continue;
 					}
 				}
-				const float weight = affix.EffectiveLootWeight();
-				if (weight <= 0.0f) {
+				const float eligibilityGate = affix.EffectiveLootWeight();
+				if (eligibilityGate <= 0.0f) {
 					continue;
 				}
 				eligible.push_back(idx);
-				weights.push_back(static_cast<double>(weight));
 			}
 		};
 
@@ -263,12 +255,7 @@ namespace CalamityAffixes
 			return std::nullopt;
 		}
 
-		if (eligible.size() == 1) {
-			return eligible[0];
-		}
-
-		std::discrete_distribution<std::size_t> dist(weights.begin(), weights.end());
-		return eligible[dist(_rng)];
+		return detail::SelectUniformEligibleLootIndex(_rng, eligible);
 	}
 
 	std::uint8_t EventBridge::RollAffixCount()

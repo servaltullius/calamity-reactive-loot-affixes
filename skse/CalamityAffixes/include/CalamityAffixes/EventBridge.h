@@ -373,7 +373,11 @@ namespace CalamityAffixes
 			std::optional<LootItemType> lootType{};
 			Trigger trigger{ Trigger::kHit };
 			float procChancePct{ 0.0f };
-			float lootWeight{ -1.0f };  // optional override for loot rolling weight; -1 = use procChancePct
+			// Compatibility gate for loot eligibility:
+			// - lootWeight >= 0 uses that value
+			// - lootWeight < 0 falls back to procChancePct
+			// In the current uniform roller, values >0 are eligible and <=0 are excluded.
+			float lootWeight{ -1.0f };
 			[[nodiscard]] constexpr float EffectiveLootWeight() const noexcept { return (lootWeight >= 0.0f) ? lootWeight : procChancePct; }
 			std::chrono::milliseconds icd{ 0 };
 			std::chrono::milliseconds perTargetIcd{ 0 };

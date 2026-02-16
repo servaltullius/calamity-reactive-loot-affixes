@@ -1,8 +1,14 @@
+#include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 
+#include <algorithm>
+#include <array>
 #include <chrono>
+#include <cmath>
 #include <iostream>
+#include <random>
+#include <vector>
 
 namespace
 {
@@ -96,11 +102,66 @@ namespace
 
 		return true;
 	}
+
+	bool CheckUniformLootRollSelection()
+	{
+		std::mt19937 rng{ 0xCAFFu };
+
+		{
+			const std::vector<std::size_t> empty{};
+			if (CalamityAffixes::detail::SelectUniformEligibleLootIndex(rng, empty).has_value()) {
+				std::cerr << "loot_select: expected empty candidate set to return nullopt\n";
+				return false;
+			}
+		}
+
+		{
+			const std::vector<std::size_t> single{ 42u };
+			const auto picked = CalamityAffixes::detail::SelectUniformEligibleLootIndex(rng, single);
+			if (!picked.has_value() || *picked != 42u) {
+				std::cerr << "loot_select: expected single candidate set to return that element\n";
+				return false;
+			}
+		}
+
+		const std::vector<std::size_t> candidates{ 0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u };
+		std::array<std::size_t, 8> counts{};
+		constexpr std::size_t kDraws = 100000u;
+
+		for (std::size_t i = 0; i < kDraws; ++i) {
+			const auto picked = CalamityAffixes::detail::SelectUniformEligibleLootIndex(rng, candidates);
+			if (!picked.has_value() || *picked >= counts.size()) {
+				std::cerr << "loot_select: invalid pick while sampling uniform distribution\n";
+				return false;
+			}
+			counts[*picked] += 1u;
+		}
+
+		const double expected = static_cast<double>(kDraws) / static_cast<double>(counts.size());
+		const double tolerance = expected * 0.05;  // wide enough to avoid flake; tight enough to catch weighting regressions.
+		for (std::size_t i = 0; i < counts.size(); ++i) {
+			const double diff = std::abs(static_cast<double>(counts[i]) - expected);
+			if (diff > tolerance) {
+				std::cerr << "loot_select: bucket " << i << " outside tolerance (count="
+				          << counts[i] << ", expected=" << expected << ", tolerance=" << tolerance << ")\n";
+				return false;
+			}
+		}
+
+		const auto [minIt, maxIt] = std::minmax_element(counts.begin(), counts.end());
+		if (static_cast<double>(*maxIt - *minIt) > expected * 0.09) {
+			std::cerr << "loot_select: spread too wide (min=" << *minIt << ", max=" << *maxIt << ")\n";
+			return false;
+		}
+
+		return true;
+	}
 }
 
 int main()
 {
 	const bool gateOk = CheckNonHostileFirstHitGate();
 	const bool storeOk = CheckPerTargetCooldownStore();
-	return (gateOk && storeOk) ? 0 : 1;
+	const bool lootSelectionOk = CheckUniformLootRollSelection();
+	return (gateOk && storeOk && lootSelectionOk) ? 0 : 1;
 }
