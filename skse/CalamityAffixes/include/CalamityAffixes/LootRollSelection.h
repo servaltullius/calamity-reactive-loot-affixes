@@ -163,4 +163,62 @@ namespace CalamityAffixes::detail
 		}
 		return drawFromRemaining();
 	}
+
+	template <class URBG, class IsEligibleFn, class WeightFn>
+	[[nodiscard]] inline std::optional<std::size_t> SelectWeightedEligibleLootIndexWithShuffleBag(
+		URBG& a_rng,
+		const std::vector<std::size_t>& a_pool,
+		std::vector<std::size_t>& a_bag,
+		std::size_t& a_cursor,
+		IsEligibleFn&& a_isEligible,
+		WeightFn&& a_weightOf)
+	{
+		if (a_pool.empty()) {
+			return std::nullopt;
+		}
+
+		// Keep persisted shuffle-bag state structurally valid for serialization/backward compatibility,
+		// but use true weighted sampling for each draw.
+		SyncLootShuffleBag(a_rng, a_pool, a_bag, a_cursor);
+
+		std::vector<std::size_t> eligible{};
+		std::vector<std::size_t> weightedEligible{};
+		std::vector<double> weightedValues{};
+		eligible.reserve(a_pool.size());
+		weightedEligible.reserve(a_pool.size());
+		weightedValues.reserve(a_pool.size());
+
+		for (const auto idx : a_pool) {
+			if (!a_isEligible(idx)) {
+				continue;
+			}
+
+			eligible.push_back(idx);
+			const double weight = std::max(0.0, static_cast<double>(a_weightOf(idx)));
+			if (weight > 0.0) {
+				weightedEligible.push_back(idx);
+				weightedValues.push_back(weight);
+			}
+		}
+
+		if (eligible.empty()) {
+			return std::nullopt;
+		}
+
+		// If all effective weights are 0, gracefully fall back to uniform among eligible entries.
+		if (weightedEligible.empty()) {
+			if (eligible.size() == 1) {
+				return eligible.front();
+			}
+			std::uniform_int_distribution<std::size_t> dist(0, eligible.size() - 1);
+			return eligible[dist(a_rng)];
+		}
+
+		if (weightedEligible.size() == 1) {
+			return weightedEligible.front();
+		}
+
+		std::discrete_distribution<std::size_t> dist(weightedValues.begin(), weightedValues.end());
+		return weightedEligible[dist(a_rng)];
+	}
 }

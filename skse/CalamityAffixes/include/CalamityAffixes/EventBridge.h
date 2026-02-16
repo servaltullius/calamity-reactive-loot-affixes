@@ -393,10 +393,10 @@ namespace CalamityAffixes
 			std::optional<LootItemType> lootType{};
 			Trigger trigger{ Trigger::kHit };
 			float procChancePct{ 0.0f };
-			// Compatibility gate for loot eligibility:
+			// Weighted loot source:
 			// - lootWeight >= 0 uses that value
 			// - lootWeight < 0 falls back to procChancePct
-			// In the current uniform roller, values >0 are eligible and <=0 are excluded.
+			// Values <=0 are excluded from weighted rolling.
 			float lootWeight{ -1.0f };
 			[[nodiscard]] constexpr float EffectiveLootWeight() const noexcept { return (lootWeight >= 0.0f) ? lootWeight : procChancePct; }
 			std::chrono::milliseconds icd{ 0 };
@@ -473,11 +473,11 @@ namespace CalamityAffixes
 		static constexpr std::uint32_t kSerializationRecordInstanceRuntimeStates = 'IRST';
 		static constexpr std::uint32_t kSerializationRecordRunewordState = 'RWRD';
 		static constexpr std::uint32_t kSerializationRecordLootEvaluated = 'LRLD';
-		static constexpr std::uint32_t kSerializationRecordLootShuffleBags = 'LSBG';
-		static constexpr std::uint32_t kRunewordSerializationVersion = 1;
-		static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
-		static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
-		static constexpr std::uint32_t kLootShuffleBagSerializationVersion = 1;
+			static constexpr std::uint32_t kSerializationRecordLootShuffleBags = 'LSBG';
+			static constexpr std::uint32_t kRunewordSerializationVersion = 1;
+			static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
+			static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
+			static constexpr std::uint32_t kLootShuffleBagSerializationVersion = 2;
 
 		// Runtime config/state PODs.
 		struct LootConfig

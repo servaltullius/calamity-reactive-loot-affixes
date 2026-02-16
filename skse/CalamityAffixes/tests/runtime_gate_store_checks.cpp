@@ -241,6 +241,100 @@ namespace
 		return true;
 	}
 
+	bool CheckWeightedShuffleBagLootRollSelection()
+	{
+		std::mt19937 rng{ 0xC0FFEEu };
+		const std::vector<std::size_t> pool{ 0u, 1u, 2u, 3u };
+		const std::array<float, 4> weights{ 8.0f, 4.0f, 2.0f, 1.0f };
+		std::array<std::size_t, 4> counts{};
+
+		std::vector<std::size_t> bag{};
+		std::size_t cursor = 0u;
+		constexpr std::size_t kDraws = 200000u;
+
+		// Long-run frequency should track configured weights.
+		for (std::size_t draw = 0; draw < kDraws; ++draw) {
+			const auto picked = CalamityAffixes::detail::SelectWeightedEligibleLootIndexWithShuffleBag(
+				rng,
+				pool,
+				bag,
+				cursor,
+				[](std::size_t) { return true; },
+				[&](std::size_t idx) {
+					if (idx >= weights.size()) {
+						return 0.0f;
+					}
+					return weights[idx];
+				});
+			if (!picked.has_value() || *picked >= counts.size()) {
+				std::cerr << "weighted_shuffle_bag: invalid weighted draw\n";
+				return false;
+			}
+			counts[*picked] += 1u;
+		}
+
+		const double weightSum = 15.0;
+		const std::array<double, 4> expected{
+			8.0 / weightSum,
+			4.0 / weightSum,
+			2.0 / weightSum,
+			1.0 / weightSum
+		};
+
+		for (std::size_t i = 0; i < counts.size(); ++i) {
+			const double observed = static_cast<double>(counts[i]) / static_cast<double>(kDraws);
+			if (std::abs(observed - expected[i]) > 0.015) {
+				std::cerr << "weighted_shuffle_bag: distribution drift on bucket " << i
+				          << " (observed=" << observed << ", expected=" << expected[i] << ")\n";
+				return false;
+			}
+		}
+
+		// Zero-weight entries should never win while a positive-weight option exists.
+		const std::array<float, 4> zeroHeavy{ 10.0f, 0.0f, 0.0f, 0.0f };
+		for (std::size_t draw = 0; draw < 1000u; ++draw) {
+			const auto picked = CalamityAffixes::detail::SelectWeightedEligibleLootIndexWithShuffleBag(
+				rng,
+				pool,
+				bag,
+				cursor,
+				[](std::size_t) { return true; },
+				[&](std::size_t idx) {
+					if (idx >= zeroHeavy.size()) {
+						return 0.0f;
+					}
+					return zeroHeavy[idx];
+				});
+			if (!picked.has_value() || *picked != 0u) {
+				std::cerr << "weighted_shuffle_bag: zero-weight candidate selected unexpectedly\n";
+				return false;
+			}
+		}
+
+		// All-zero weights must still produce a valid eligible pick (uniform fallback).
+		const std::array<float, 4> allZero{ 0.0f, 0.0f, 0.0f, 0.0f };
+		for (std::size_t draw = 0; draw < 1000u; ++draw) {
+			const auto picked = CalamityAffixes::detail::SelectWeightedEligibleLootIndexWithShuffleBag(
+				rng,
+				pool,
+				bag,
+				cursor,
+				[](std::size_t) { return true; },
+				[&](std::size_t idx) {
+					if (idx >= allZero.size()) {
+						return 0.0f;
+					}
+					return allZero[idx];
+				});
+			if (!picked.has_value() || *picked >= pool.size()) {
+				std::cerr << "weighted_shuffle_bag: all-zero fallback failed\n";
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	bool CheckFixedWindowBudget()
 	{
 		std::uint64_t windowStartMs = 0u;
@@ -506,8 +600,11 @@ int main()
 	const bool storeOk = CheckPerTargetCooldownStore();
 	const bool lootSelectionOk = CheckUniformLootRollSelection();
 	const bool shuffleBagSelectionOk = CheckShuffleBagLootRollSelection();
+	const bool weightedShuffleBagSelectionOk = CheckWeightedShuffleBagLootRollSelection();
 	const bool shuffleBagConstraintsOk = CheckShuffleBagSanitizeAndRollConstraints();
 	const bool fixedWindowBudgetOk = CheckFixedWindowBudget();
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
-	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && shuffleBagConstraintsOk && fixedWindowBudgetOk && recentlyLuckyOk) ? 0 : 1;
+	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
+	        shuffleBagConstraintsOk && fixedWindowBudgetOk && recentlyLuckyOk) ? 0 :
+	                                                                               1;
 }

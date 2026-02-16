@@ -179,7 +179,7 @@ namespace CalamityAffixes
 		}
 
 		// Build eligible pool, excluding already-chosen indices and disabled entries.
-		// EffectiveLootWeight is a compatibility gate here (<=0 excluded), not a roll weight.
+		// EffectiveLootWeight is used as the weighted roll source (>0 eligible, larger = more likely).
 		const std::vector<std::size_t>* sourcePool = nullptr;
 		if (_loot.sharedPool) {
 			sourcePool = &_lootSharedAffixes;
@@ -190,7 +190,7 @@ namespace CalamityAffixes
 		LootShuffleBagState& bagState = _loot.sharedPool ?
 			_lootPrefixSharedBag :
 			((a_itemType == LootItemType::kWeapon) ? _lootPrefixWeaponBag : _lootPrefixArmorBag);
-		const auto picked = detail::SelectUniformEligibleLootIndexWithShuffleBag(
+		const auto picked = detail::SelectWeightedEligibleLootIndexWithShuffleBag(
 			_rng,
 			*sourcePool,
 			bagState.order,
@@ -203,6 +203,12 @@ namespace CalamityAffixes
 					return false;
 				}
 				return _affixes[a_idx].EffectiveLootWeight() > 0.0f;
+			},
+			[&](std::size_t a_idx) {
+				if (a_idx >= _affixes.size()) {
+					return 0.0f;
+				}
+				return _affixes[a_idx].EffectiveLootWeight();
 			});
 		return picked;
 	}
@@ -221,7 +227,7 @@ namespace CalamityAffixes
 		LootShuffleBagState& bagState = _loot.sharedPool ?
 			_lootSuffixSharedBag :
 			((a_itemType == LootItemType::kWeapon) ? _lootSuffixWeaponBag : _lootSuffixArmorBag);
-		const auto picked = detail::SelectUniformEligibleLootIndexWithShuffleBag(
+		const auto picked = detail::SelectWeightedEligibleLootIndexWithShuffleBag(
 			_rng,
 			*sourcePool,
 			bagState.order,
@@ -240,6 +246,12 @@ namespace CalamityAffixes
 					}
 				}
 				return true;
+			},
+			[&](std::size_t a_idx) {
+				if (a_idx >= _affixes.size()) {
+					return 0.0f;
+				}
+				return _affixes[a_idx].EffectiveLootWeight();
 			});
 		return picked;
 	}
