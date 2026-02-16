@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <random>
+#include <string>
 #include <vector>
 
 namespace
@@ -156,6 +157,213 @@ namespace
 
 		return true;
 	}
+
+	bool CheckShuffleBagLootRollSelection()
+	{
+		std::mt19937 rng{ 0xBA6Au };
+		const std::vector<std::size_t> pool{ 0u, 1u, 2u, 3u, 4u, 5u };
+		std::vector<std::size_t> bag{};
+		std::size_t cursor = 0u;
+
+		// Full-eligible draws should behave as "without replacement" per cycle.
+		for (int cycle = 0; cycle < 4; ++cycle) {
+			std::array<std::size_t, 6> seen{};
+			for (std::size_t draw = 0; draw < pool.size(); ++draw) {
+				const auto picked = CalamityAffixes::detail::SelectUniformEligibleLootIndexWithShuffleBag(
+					rng,
+					pool,
+					bag,
+					cursor,
+					[](std::size_t) { return true; });
+				if (!picked.has_value() || *picked >= seen.size()) {
+					std::cerr << "shuffle_bag: invalid draw in full-eligible cycle\n";
+					return false;
+				}
+				seen[*picked] += 1u;
+			}
+			for (std::size_t i = 0; i < seen.size(); ++i) {
+				if (seen[i] != 1u) {
+					std::cerr << "shuffle_bag: expected exactly one hit per bucket in a cycle (bucket="
+					          << i << ", count=" << seen[i] << ")\n";
+					return false;
+				}
+			}
+		}
+
+		// Temporary ineligibility must not consume that entry from the bag.
+		bag.clear();
+		cursor = 0u;
+
+		const auto first = CalamityAffixes::detail::SelectUniformEligibleLootIndexWithShuffleBag(
+			rng,
+			pool,
+			bag,
+			cursor,
+			[](std::size_t) { return true; });
+		if (!first.has_value()) {
+			std::cerr << "shuffle_bag: expected first draw to succeed\n";
+			return false;
+		}
+
+		if (cursor >= bag.size()) {
+			std::cerr << "shuffle_bag: invalid cursor after first draw\n";
+			return false;
+		}
+
+		const auto temporarilyExcluded = bag[cursor];
+		const auto second = CalamityAffixes::detail::SelectUniformEligibleLootIndexWithShuffleBag(
+			rng,
+			pool,
+			bag,
+			cursor,
+			[temporarilyExcluded](std::size_t idx) { return idx != temporarilyExcluded; });
+		if (!second.has_value()) {
+			std::cerr << "shuffle_bag: expected second draw to succeed with one temporary exclusion\n";
+			return false;
+		}
+
+		const auto third = CalamityAffixes::detail::SelectUniformEligibleLootIndexWithShuffleBag(
+			rng,
+			pool,
+			bag,
+			cursor,
+			[](std::size_t) { return true; });
+		if (!third.has_value()) {
+			std::cerr << "shuffle_bag: expected third draw to succeed\n";
+			return false;
+		}
+		if (*third != temporarilyExcluded) {
+			std::cerr << "shuffle_bag: temporarily excluded entry was consumed unexpectedly\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckShuffleBagSanitizeAndRollConstraints()
+	{
+		struct MockAffix
+		{
+			float effectiveLootWeight{ 0.0f };
+			bool isSuffix{ false };
+			std::string family{};
+		};
+
+		std::mt19937 rng{ 0x5EEDu };
+		std::vector<MockAffix> affixes{
+			{ 1.0f, false, "" },      // 0 weapon prefix
+			{ 1.0f, false, "" },      // 1 weapon prefix
+			{ 0.0f, false, "" },      // 2 weapon prefix (disabled)
+			{ 1.0f, false, "" },      // 3 armor prefix
+			{ 1.0f, false, "" },      // 4 armor prefix
+			{ 1.0f, true, "life" },   // 5 suffix
+			{ 1.0f, true, "mana" },   // 6 suffix
+			{ 1.0f, true, "life" },   // 7 suffix
+		};
+
+		const std::vector<std::size_t> weaponPrefixes{ 0u, 1u, 2u };
+		const std::vector<std::size_t> armorPrefixes{ 3u, 4u };
+		const std::vector<std::size_t> sharedPrefixes{ 0u, 1u, 2u, 3u, 4u };
+		const std::vector<std::size_t> sharedSuffixes{ 5u, 6u, 7u };
+
+		std::vector<std::size_t> prefixWeaponBag{};
+		std::size_t prefixWeaponCursor = 0u;
+		std::vector<std::size_t> prefixSharedBag{};
+		std::size_t prefixSharedCursor = 0u;
+		std::vector<std::size_t> suffixSharedBag{};
+		std::size_t suffixSharedCursor = 0u;
+
+		{
+			std::vector<std::size_t> dirtyBag{ 99u, 2u, 2u, 1u };
+			std::size_t dirtyCursor = 99u;
+			CalamityAffixes::detail::SanitizeLootShuffleBagOrder(sharedPrefixes, dirtyBag, dirtyCursor);
+			const std::vector<std::size_t> expected{ 2u, 1u, 0u, 3u, 4u };
+			if (dirtyBag != expected || dirtyCursor != expected.size()) {
+				std::cerr << "shuffle_bag: sanitize did not normalize bag as expected\n";
+				return false;
+			}
+		}
+
+		{
+			// Non-shared weapon pool must never pick armor indices and must skip disabled index 2.
+			for (std::size_t draw = 0; draw < 40; ++draw) {
+				const auto picked = CalamityAffixes::detail::SelectUniformEligibleLootIndexWithShuffleBag(
+					rng,
+					weaponPrefixes,
+					prefixWeaponBag,
+					prefixWeaponCursor,
+					[&](std::size_t idx) {
+						return idx < affixes.size() && affixes[idx].effectiveLootWeight > 0.0f;
+					});
+				if (!picked.has_value()) {
+					std::cerr << "shuffle_bag: weapon-prefix draw unexpectedly failed\n";
+					return false;
+				}
+				if (*picked >= 3u) {
+					std::cerr << "shuffle_bag: weapon-only draw leaked into armor pool (idx=" << *picked << ")\n";
+					return false;
+				}
+				if (*picked == 2u) {
+					std::cerr << "shuffle_bag: disabled prefix was selected\n";
+					return false;
+				}
+			}
+		}
+
+		{
+			// Shared prefix pool with exclusions should converge to the only allowed prefix (idx=4).
+			const std::vector<std::size_t> exclude{ 0u, 1u, 2u, 3u };
+			for (std::size_t draw = 0; draw < 10; ++draw) {
+				const auto picked = CalamityAffixes::detail::SelectUniformEligibleLootIndexWithShuffleBag(
+					rng,
+					sharedPrefixes,
+					prefixSharedBag,
+					prefixSharedCursor,
+					[&](std::size_t idx) {
+						if (idx >= affixes.size() || affixes[idx].effectiveLootWeight <= 0.0f) {
+							return false;
+						}
+						return std::find(exclude.begin(), exclude.end(), idx) == exclude.end();
+					});
+				if (!picked.has_value() || *picked != 4u) {
+					std::cerr << "shuffle_bag: shared-prefix exclusion constraint broken\n";
+					return false;
+				}
+			}
+		}
+
+		{
+			// Suffix family exclusion should never pick family='life' (idx=5,7).
+			const std::vector<std::string> excludeFamilies{ "life" };
+			for (std::size_t draw = 0; draw < 10; ++draw) {
+				const auto picked = CalamityAffixes::detail::SelectUniformEligibleLootIndexWithShuffleBag(
+					rng,
+					sharedSuffixes,
+					suffixSharedBag,
+					suffixSharedCursor,
+					[&](std::size_t idx) {
+						if (idx >= affixes.size()) {
+							return false;
+						}
+						const auto& affix = affixes[idx];
+						if (!affix.isSuffix || affix.effectiveLootWeight <= 0.0f) {
+							return false;
+						}
+						if (!affix.family.empty()) {
+							return std::find(excludeFamilies.begin(), excludeFamilies.end(), affix.family) == excludeFamilies.end();
+						}
+						return true;
+					});
+				if (!picked.has_value() || *picked != 6u) {
+					std::cerr << "shuffle_bag: suffix family exclusion constraint broken\n";
+					return false;
+				}
+			}
+		}
+
+		(void)armorPrefixes;  // documents that armor pool exists in this integration-like scenario.
+		return true;
+	}
 }
 
 int main()
@@ -163,5 +371,7 @@ int main()
 	const bool gateOk = CheckNonHostileFirstHitGate();
 	const bool storeOk = CheckPerTargetCooldownStore();
 	const bool lootSelectionOk = CheckUniformLootRollSelection();
-	return (gateOk && storeOk && lootSelectionOk) ? 0 : 1;
+	const bool shuffleBagSelectionOk = CheckShuffleBagLootRollSelection();
+	const bool shuffleBagConstraintsOk = CheckShuffleBagSanitizeAndRollConstraints();
+	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && shuffleBagConstraintsOk) ? 0 : 1;
 }

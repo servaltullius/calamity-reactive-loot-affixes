@@ -1,6 +1,8 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootRollSelection.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -157,6 +159,50 @@ namespace CalamityAffixes
 				return;
 			}
 		}
+
+		// --- LSBG ---
+		if (!a_intfc->OpenRecord(kSerializationRecordLootShuffleBags, kLootShuffleBagSerializationVersion)) {
+			return;
+		}
+
+		auto writeBag = [&](std::uint8_t a_id, const LootShuffleBagState& a_bag) -> bool {
+			const auto bagSize = static_cast<std::uint32_t>(a_bag.order.size());
+			const auto bagCursor = static_cast<std::uint32_t>(std::min<std::size_t>(a_bag.cursor, a_bag.order.size()));
+			if (!a_intfc->WriteRecordData(a_id)) {
+				return false;
+			}
+			if (!a_intfc->WriteRecordData(bagCursor)) {
+				return false;
+			}
+			if (!a_intfc->WriteRecordData(bagSize)) {
+				return false;
+			}
+			for (const auto idx : a_bag.order) {
+				const auto raw = static_cast<std::uint32_t>(idx);
+				if (!a_intfc->WriteRecordData(raw)) {
+					return false;
+				}
+			}
+			return true;
+		};
+
+		const std::array<std::pair<std::uint8_t, const LootShuffleBagState*>, 6> kBags{ {
+			{ 0u, &_lootPrefixSharedBag },
+			{ 1u, &_lootPrefixWeaponBag },
+			{ 2u, &_lootPrefixArmorBag },
+			{ 3u, &_lootSuffixSharedBag },
+			{ 4u, &_lootSuffixWeaponBag },
+			{ 5u, &_lootSuffixArmorBag },
+		} };
+		const auto bagCount = static_cast<std::uint8_t>(kBags.size());
+		if (!a_intfc->WriteRecordData(bagCount)) {
+			return;
+		}
+		for (const auto& [id, bag] : kBags) {
+			if (!bag || !writeBag(id, *bag)) {
+				return;
+			}
+		}
 	}
 
 		void EventBridge::Load(SKSE::SerializationInterface* a_intfc)
@@ -168,6 +214,12 @@ namespace CalamityAffixes
 			_instanceAffixes.clear();
 			_equippedInstanceKeysByToken.clear();
 			_equippedTokenCacheReady = false;
+			_lootPrefixSharedBag = {};
+			_lootPrefixWeaponBag = {};
+			_lootPrefixArmorBag = {};
+			_lootSuffixSharedBag = {};
+			_lootSuffixWeaponBag = {};
+			_lootSuffixArmorBag = {};
 			_lootEvaluatedInstances.clear();
 			_lootEvaluatedRecent.clear();
 			_lootEvaluatedInsertionsSincePrune = 0;
@@ -500,6 +552,72 @@ namespace CalamityAffixes
 					continue;
 				}
 
+				if (type == kSerializationRecordLootShuffleBags) {
+					if (version != kLootShuffleBagSerializationVersion) {
+						std::vector<std::uint8_t> sink(length);
+						if (length > 0) {
+							a_intfc->ReadRecordData(sink.data(), length);
+						}
+						continue;
+					}
+
+					std::uint8_t bagCount = 0;
+					if (a_intfc->ReadRecordData(bagCount) != sizeof(bagCount)) {
+						return;
+					}
+
+					auto resolveBag = [&](std::uint8_t a_id) -> LootShuffleBagState* {
+						switch (a_id) {
+						case 0u:
+							return &_lootPrefixSharedBag;
+						case 1u:
+							return &_lootPrefixWeaponBag;
+						case 2u:
+							return &_lootPrefixArmorBag;
+						case 3u:
+							return &_lootSuffixSharedBag;
+						case 4u:
+							return &_lootSuffixWeaponBag;
+						case 5u:
+							return &_lootSuffixArmorBag;
+						default:
+							return nullptr;
+						}
+					};
+
+					for (std::uint8_t i = 0; i < bagCount; ++i) {
+						std::uint8_t id = 0;
+						std::uint32_t cursor = 0;
+						std::uint32_t size = 0;
+						if (a_intfc->ReadRecordData(id) != sizeof(id)) {
+							return;
+						}
+						if (a_intfc->ReadRecordData(cursor) != sizeof(cursor)) {
+							return;
+						}
+						if (a_intfc->ReadRecordData(size) != sizeof(size)) {
+							return;
+						}
+
+						std::vector<std::size_t> order;
+						order.reserve(size);
+						for (std::uint32_t n = 0; n < size; ++n) {
+							std::uint32_t rawIdx = 0;
+							if (a_intfc->ReadRecordData(rawIdx) != sizeof(rawIdx)) {
+								return;
+							}
+							order.push_back(static_cast<std::size_t>(rawIdx));
+						}
+
+						if (auto* bag = resolveBag(id)) {
+							bag->order = std::move(order);
+							bag->cursor = std::min<std::size_t>(cursor, bag->order.size());
+						}
+					}
+
+					continue;
+				}
+
 				{
 					// Drain unknown record.
 					std::vector<std::uint8_t> sink(length);
@@ -525,6 +643,13 @@ namespace CalamityAffixes
 			}
 			_lootEvaluatedInsertionsSincePrune = 0;
 
+			detail::SanitizeLootShuffleBagOrder(_lootSharedAffixes, _lootPrefixSharedBag.order, _lootPrefixSharedBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(_lootWeaponAffixes, _lootPrefixWeaponBag.order, _lootPrefixWeaponBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(_lootArmorAffixes, _lootPrefixArmorBag.order, _lootPrefixArmorBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(_lootSharedSuffixes, _lootSuffixSharedBag.order, _lootSuffixSharedBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(_lootWeaponSuffixes, _lootSuffixWeaponBag.order, _lootSuffixWeaponBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(_lootArmorSuffixes, _lootSuffixArmorBag.order, _lootSuffixArmorBag.cursor);
+
 			SanitizeRunewordState();
 		}
 
@@ -541,6 +666,12 @@ namespace CalamityAffixes
 			_instanceAffixes.clear();
 			_equippedInstanceKeysByToken.clear();
 			_equippedTokenCacheReady = false;
+			_lootPrefixSharedBag = {};
+			_lootPrefixWeaponBag = {};
+			_lootPrefixArmorBag = {};
+			_lootSuffixSharedBag = {};
+			_lootSuffixWeaponBag = {};
+			_lootSuffixArmorBag = {};
 			_lootEvaluatedInstances.clear();
 			_lootEvaluatedRecent.clear();
 			_lootEvaluatedInsertionsSincePrune = 0;

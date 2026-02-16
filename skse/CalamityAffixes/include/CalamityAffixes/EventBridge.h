@@ -447,9 +447,11 @@ namespace CalamityAffixes
 		static constexpr std::uint32_t kSerializationRecordInstanceRuntimeStates = 'IRST';
 		static constexpr std::uint32_t kSerializationRecordRunewordState = 'RWRD';
 		static constexpr std::uint32_t kSerializationRecordLootEvaluated = 'LRLD';
+		static constexpr std::uint32_t kSerializationRecordLootShuffleBags = 'LSBG';
 		static constexpr std::uint32_t kRunewordSerializationVersion = 1;
 		static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
 		static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
+		static constexpr std::uint32_t kLootShuffleBagSerializationVersion = 1;
 
 		// Runtime config/state PODs.
 		struct LootConfig
@@ -465,6 +467,12 @@ namespace CalamityAffixes
 			bool cleanupInvalidLegacyAffixes{ true };
 			std::vector<std::string> armorEditorIdDenyContains{};
 			std::string nameFormat{ "{base} [{affix}]" };
+		};
+
+		struct LootShuffleBagState
+		{
+			std::vector<std::size_t> order{};
+			std::size_t cursor{ 0 };
 		};
 
 		struct PerTargetCooldownKey
@@ -502,6 +510,14 @@ namespace CalamityAffixes
 		std::vector<std::size_t> _lootArmorAffixes;
 		std::vector<std::size_t> _lootWeaponSuffixes;
 		std::vector<std::size_t> _lootArmorSuffixes;
+		std::vector<std::size_t> _lootSharedAffixes;
+		std::vector<std::size_t> _lootSharedSuffixes;
+		LootShuffleBagState _lootPrefixSharedBag{};
+		LootShuffleBagState _lootPrefixWeaponBag{};
+		LootShuffleBagState _lootPrefixArmorBag{};
+		LootShuffleBagState _lootSuffixSharedBag{};
+		LootShuffleBagState _lootSuffixWeaponBag{};
+		LootShuffleBagState _lootSuffixArmorBag{};
 		std::unordered_set<RE::SpellItem*> _appliedPassiveSpells;
 		std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;
 		std::unordered_set<std::uint64_t> _lootEvaluatedInstances;
@@ -628,6 +644,7 @@ namespace CalamityAffixes
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
 		void IndexConfiguredAffixes();
+		void RebuildSharedLootPools();
 		void RegisterSynthesizedAffix(AffixRuntime&& a_affix, bool a_warnOnDuplicate);
 		void SynthesizeRunewordRuntimeAffixes();
 		void SanitizeRunewordState();

@@ -180,82 +180,68 @@ namespace CalamityAffixes
 
 		// Build eligible pool, excluding already-chosen indices and disabled entries.
 		// EffectiveLootWeight is a compatibility gate here (<=0 excluded), not a roll weight.
-		std::vector<std::size_t> eligible;
-
-		auto collectFromPool = [&](const std::vector<std::size_t>& a_pool) {
-			for (const auto idx : a_pool) {
-				if (a_exclude) {
-					if (std::find(a_exclude->begin(), a_exclude->end(), idx) != a_exclude->end()) {
-						continue;
-					}
-				}
-				if (idx >= _affixes.size()) {
-					continue;
-				}
-				const float eligibilityGate = _affixes[idx].EffectiveLootWeight();
-				if (eligibilityGate <= 0.0f) {
-					continue;
-				}
-				eligible.push_back(idx);
-			}
-		};
-
+		const std::vector<std::size_t>* sourcePool = nullptr;
 		if (_loot.sharedPool) {
-			collectFromPool(_lootWeaponAffixes);
-			collectFromPool(_lootArmorAffixes);
+			sourcePool = &_lootSharedAffixes;
 		} else {
-			const auto& typePool = (a_itemType == LootItemType::kWeapon) ? _lootWeaponAffixes : _lootArmorAffixes;
-			collectFromPool(typePool);
+			sourcePool = (a_itemType == LootItemType::kWeapon) ? &_lootWeaponAffixes : &_lootArmorAffixes;
 		}
 
-		if (eligible.empty()) {
-			return std::nullopt;
-		}
-
-		return detail::SelectUniformEligibleLootIndex(_rng, eligible);
+		LootShuffleBagState& bagState = _loot.sharedPool ?
+			_lootPrefixSharedBag :
+			((a_itemType == LootItemType::kWeapon) ? _lootPrefixWeaponBag : _lootPrefixArmorBag);
+		const auto picked = detail::SelectUniformEligibleLootIndexWithShuffleBag(
+			_rng,
+			*sourcePool,
+			bagState.order,
+			bagState.cursor,
+			[&](std::size_t a_idx) {
+				if (a_idx >= _affixes.size()) {
+					return false;
+				}
+				if (a_exclude && std::find(a_exclude->begin(), a_exclude->end(), a_idx) != a_exclude->end()) {
+					return false;
+				}
+				return _affixes[a_idx].EffectiveLootWeight() > 0.0f;
+			});
+		return picked;
 	}
 
 	std::optional<std::size_t> EventBridge::RollSuffixIndex(
 		LootItemType a_itemType,
 		const std::vector<std::string>* a_excludeFamilies)
 	{
-		std::vector<std::size_t> eligible;
+		const std::vector<std::size_t>* sourcePool = nullptr;
+		if (_loot.sharedPool) {
+			sourcePool = &_lootSharedSuffixes;
+		} else {
+			sourcePool = (a_itemType == LootItemType::kWeapon) ? &_lootWeaponSuffixes : &_lootArmorSuffixes;
+		}
 
-		auto collectFromPool = [&](const std::vector<std::size_t>& a_pool) {
-			for (const auto idx : a_pool) {
-				if (idx >= _affixes.size()) {
-					continue;
+		LootShuffleBagState& bagState = _loot.sharedPool ?
+			_lootSuffixSharedBag :
+			((a_itemType == LootItemType::kWeapon) ? _lootSuffixWeaponBag : _lootSuffixArmorBag);
+		const auto picked = detail::SelectUniformEligibleLootIndexWithShuffleBag(
+			_rng,
+			*sourcePool,
+			bagState.order,
+			bagState.cursor,
+			[&](std::size_t a_idx) {
+				if (a_idx >= _affixes.size()) {
+					return false;
 				}
-				const auto& affix = _affixes[idx];
-				if (affix.slot != AffixSlot::kSuffix) {
-					continue;
+				const auto& affix = _affixes[a_idx];
+				if (affix.slot != AffixSlot::kSuffix || affix.EffectiveLootWeight() <= 0.0f) {
+					return false;
 				}
 				if (a_excludeFamilies && !affix.family.empty()) {
 					if (std::find(a_excludeFamilies->begin(), a_excludeFamilies->end(), affix.family) != a_excludeFamilies->end()) {
-						continue;
+						return false;
 					}
 				}
-				const float eligibilityGate = affix.EffectiveLootWeight();
-				if (eligibilityGate <= 0.0f) {
-					continue;
-				}
-				eligible.push_back(idx);
-			}
-		};
-
-		if (_loot.sharedPool) {
-			collectFromPool(_lootWeaponSuffixes);
-			collectFromPool(_lootArmorSuffixes);
-		} else {
-			const auto& typePool = (a_itemType == LootItemType::kWeapon) ? _lootWeaponSuffixes : _lootArmorSuffixes;
-			collectFromPool(typePool);
-		}
-
-		if (eligible.empty()) {
-			return std::nullopt;
-		}
-
-		return detail::SelectUniformEligibleLootIndex(_rng, eligible);
+				return true;
+			});
+		return picked;
 	}
 
 	std::uint8_t EventBridge::RollAffixCount()

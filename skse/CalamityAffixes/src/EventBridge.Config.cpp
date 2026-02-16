@@ -155,6 +155,14 @@ namespace CalamityAffixes
 		_lootArmorAffixes.clear();
 		_lootWeaponSuffixes.clear();
 		_lootArmorSuffixes.clear();
+		_lootSharedAffixes.clear();
+		_lootSharedSuffixes.clear();
+		_lootPrefixSharedBag = {};
+		_lootPrefixWeaponBag = {};
+		_lootPrefixArmorBag = {};
+		_lootSuffixSharedBag = {};
+		_lootSuffixWeaponBag = {};
+		_lootSuffixArmorBag = {};
 		_appliedPassiveSpells.clear();
 		_equippedInstanceKeysByToken.clear();
 		_equippedTokenCacheReady = false;
@@ -774,6 +782,7 @@ namespace CalamityAffixes
 
 		IndexConfiguredAffixes();
 		SynthesizeRunewordRuntimeAffixes();
+		RebuildSharedLootPools();
 
 		_activeCounts.assign(_affixes.size(), 0);
 
@@ -951,6 +960,27 @@ namespace CalamityAffixes
 				}
 			}
 		}
+	}
+
+	void EventBridge::RebuildSharedLootPools()
+	{
+		auto appendUnique = [](std::vector<std::size_t>& a_out, const std::vector<std::size_t>& a_src) {
+			for (const auto idx : a_src) {
+				if (std::find(a_out.begin(), a_out.end(), idx) == a_out.end()) {
+					a_out.push_back(idx);
+				}
+			}
+		};
+
+		_lootSharedAffixes.clear();
+		_lootSharedAffixes.reserve(_lootWeaponAffixes.size() + _lootArmorAffixes.size());
+		appendUnique(_lootSharedAffixes, _lootWeaponAffixes);
+		appendUnique(_lootSharedAffixes, _lootArmorAffixes);
+
+		_lootSharedSuffixes.clear();
+		_lootSharedSuffixes.reserve(_lootWeaponSuffixes.size() + _lootArmorSuffixes.size());
+		appendUnique(_lootSharedSuffixes, _lootWeaponSuffixes);
+		appendUnique(_lootSharedSuffixes, _lootArmorSuffixes);
 	}
 
 	void EventBridge::RegisterSynthesizedAffix(AffixRuntime&& a_affix, bool a_warnOnDuplicate)
