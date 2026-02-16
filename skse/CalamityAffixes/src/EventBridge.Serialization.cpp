@@ -697,12 +697,15 @@ namespace CalamityAffixes
 		_procDepth = 0;
 		_healthDamageHookSeen = false;
 		_healthDamageHookLastAt = {};
-		_castOnCritNextAllowed = {};
-		_castOnCritCycleCursor = 0;
-		_lastHitAt = {};
-		_lastHit = {};
-		_lastHealthDamageSignature = 0;
-		_lastHealthDamageSignatureAt = {};
+			_castOnCritNextAllowed = {};
+			_castOnCritCycleCursor = 0;
+			_lastHitAt = {};
+			_lastHit = {};
+			_recentOwnerHitAt.clear();
+			_recentOwnerKillAt.clear();
+			_recentOwnerIncomingHitAt.clear();
+			_lastHealthDamageSignature = 0;
+			_lastHealthDamageSignatureAt = {};
 
 		for (auto& affix : _affixes) {
 			affix.nextAllowed = {};

@@ -366,7 +366,8 @@ namespace CalamityAffixes
 	EventBridge::ArchmageSelection EventBridge::SelectBestArchmageAction(
 		std::chrono::steady_clock::time_point a_now,
 		RE::Actor* a_owner,
-		RE::Actor* a_target)
+		RE::Actor* a_target,
+		const RE::HitData* a_hitData)
 	{
 		ArchmageSelection selection{};
 
@@ -386,6 +387,9 @@ namespace CalamityAffixes
 				continue;
 			}
 			if (IsPerTargetCooldownBlocked(affix, a_target, a_now, nullptr)) {
+				continue;
+			}
+			if (!PassesLuckyHitGate(affix, Trigger::kHit, a_hitData, a_now)) {
 				continue;
 			}
 
@@ -483,7 +487,7 @@ namespace CalamityAffixes
 		return true;
 	}
 
-	void EventBridge::ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell)
+	void EventBridge::ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell, const RE::HitData* a_hitData)
 	{
 		if (!_configLoaded || !_runtimeEnabled || !a_caster || !a_target || !a_sourceSpell) {
 			return;
@@ -502,7 +506,7 @@ namespace CalamityAffixes
 		}
 
 		const auto now = std::chrono::steady_clock::now();
-		const auto selection = SelectBestArchmageAction(now, a_caster, a_target);
+		const auto selection = SelectBestArchmageAction(now, a_caster, a_target, a_hitData);
 		if (!selection.bestIdx || !selection.bestAction || !selection.bestAction->spell || selection.bestDamagePct <= 0.0f || selection.bestCostPct <= 0.0f) {
 			return;
 		}

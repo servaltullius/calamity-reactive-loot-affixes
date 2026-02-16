@@ -288,6 +288,61 @@ namespace
 		return true;
 	}
 
+	bool CheckRecentlyAndLuckyHitGuards()
+	{
+		// Recently window semantics.
+		if (!CalamityAffixes::IsWithinRecentlyWindowMs(1200u, 1000u, 250u)) {
+			std::cerr << "recently: expected event inside window to pass\n";
+			return false;
+		}
+		if (CalamityAffixes::IsWithinRecentlyWindowMs(1301u, 1000u, 250u)) {
+			std::cerr << "recently: expected event outside window to fail\n";
+			return false;
+		}
+		if (!CalamityAffixes::IsOutsideRecentlyWindowMs(1300u, 1000u, 250u)) {
+			std::cerr << "recently: expected not-hit-recently gate to pass for old hit\n";
+			return false;
+		}
+		if (CalamityAffixes::IsOutsideRecentlyWindowMs(1199u, 1000u, 250u)) {
+			std::cerr << "recently: expected not-hit-recently gate to fail for fresh hit\n";
+			return false;
+		}
+
+		// Lucky-hit effective chance envelope.
+		if (CalamityAffixes::ResolveLuckyHitEffectiveChancePct(25.0f, 0.5f) != 12.5f) {
+			std::cerr << "lucky_hit: expected 25% * 0.5 = 12.5%\n";
+			return false;
+		}
+		if (CalamityAffixes::ResolveLuckyHitEffectiveChancePct(80.0f, 2.0f) != 100.0f) {
+			std::cerr << "lucky_hit: expected clamp to 100%\n";
+			return false;
+		}
+
+		// Runtime-like stochastic sanity check for lucky-hit chance.
+		std::mt19937 rng{ 0x1A2Bu };
+		std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+
+		const float effectiveChance = CalamityAffixes::ResolveLuckyHitEffectiveChancePct(25.0f, 0.5f);  // 12.5%
+		constexpr std::size_t kTrials = 120000u;
+		std::size_t hits = 0u;
+		for (std::size_t i = 0; i < kTrials; ++i) {
+			if (dist(rng) < effectiveChance) {
+				++hits;
+			}
+		}
+
+		const double observedPct = static_cast<double>(hits) * 100.0 / static_cast<double>(kTrials);
+		const double expectedPct = 12.5;
+		const double tolerancePct = 0.8;  // wide enough to avoid flakes, tight enough to catch regressions.
+		if (std::abs(observedPct - expectedPct) > tolerancePct) {
+			std::cerr << "lucky_hit: stochastic distribution drifted (observed="
+			          << observedPct << "%, expected=" << expectedPct << "%)\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckShuffleBagSanitizeAndRollConstraints()
 	{
 		struct MockAffix
@@ -453,5 +508,6 @@ int main()
 	const bool shuffleBagSelectionOk = CheckShuffleBagLootRollSelection();
 	const bool shuffleBagConstraintsOk = CheckShuffleBagSanitizeAndRollConstraints();
 	const bool fixedWindowBudgetOk = CheckFixedWindowBudget();
-	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && shuffleBagConstraintsOk && fixedWindowBudgetOk) ? 0 : 1;
+	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
+	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && shuffleBagConstraintsOk && fixedWindowBudgetOk && recentlyLuckyOk) ? 0 : 1;
 }

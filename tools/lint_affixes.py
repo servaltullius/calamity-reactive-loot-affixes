@@ -241,6 +241,23 @@ def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) 
             errors.append(f"{affix_id}: action.type must be one of {sorted(SUPPORTED_ACTION_TYPES)}.")
             continue
 
+        lucky_hit_configured = (
+            (lucky_hit_chance is not None and _is_number(lucky_hit_chance) and lucky_hit_chance > 0.0) or
+            (lucky_hit_coeff is not None and _is_number(lucky_hit_coeff) and lucky_hit_coeff > 0.0)
+        )
+        if lucky_hit_configured:
+            lucky_supported = False
+            if action_type in {"CastOnCrit", "ConvertDamage", "Archmage"}:
+                lucky_supported = True
+            elif trigger in {"Hit", "IncomingHit"}:
+                lucky_supported = True
+
+            if not lucky_supported:
+                warnings.append(
+                    f"{affix_id}: luckyHit settings are ignored for this action/trigger combination "
+                    f"(action.type={action_type}, trigger={trigger})."
+                )
+
         if action_type == "CastSpell":
             if not isinstance(action.get("spellEditorId"), str) and not isinstance(action.get("spellForm"), str):
                 errors.append(f"{affix_id}: CastSpell requires spellEditorId or spellForm.")

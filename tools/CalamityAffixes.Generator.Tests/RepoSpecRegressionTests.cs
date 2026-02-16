@@ -275,6 +275,36 @@ public sealed class RepoSpecRegressionTests
         }
     }
 
+    [Fact]
+    public void RepoSpec_LuckyHitSettingsUseSupportedContextsOnly()
+    {
+        var repoRoot = FindRepoRoot();
+        var specPath = Path.Combine(repoRoot, "affixes", "affixes.json");
+
+        var spec = AffixSpecLoader.Load(specPath);
+
+        foreach (var affix in spec.Keywords.Affixes)
+        {
+            var hasLuckyChance = TryGetRuntimeNumber(affix.Runtime, "luckyHitChancePercent", out var luckyChancePct);
+            var hasLuckyCoeff = TryGetRuntimeNumber(affix.Runtime, "luckyHitProcCoefficient", out var luckyCoeff);
+            if ((!hasLuckyChance || luckyChancePct <= 0.0) && !hasLuckyCoeff)
+            {
+                continue;
+            }
+
+            _ = TryGetRuntimeString(affix.Runtime, "trigger", out var trigger);
+            _ = TryGetActionType(affix.Runtime, out var actionType);
+
+            var supported =
+                actionType is "CastOnCrit" or "ConvertDamage" or "Archmage" ||
+                trigger is "Hit" or "IncomingHit";
+
+            Assert.True(
+                supported,
+                $"Affix {affix.Id} uses luckyHit settings in unsupported context (trigger={trigger ?? "<none>"}, action.type={actionType ?? "<none>"}).");
+        }
+    }
+
     private static string FindRepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
@@ -306,6 +336,41 @@ public sealed class RepoSpecRegressionTests
         }
 
         value = el.GetString();
+        return value is not null;
+    }
+
+    private static bool TryGetRuntimeNumber(Dictionary<string, object?> runtime, string key, out double value)
+    {
+        value = 0.0;
+
+        if (!runtime.TryGetValue(key, out var obj))
+        {
+            return false;
+        }
+
+        if (obj is not JsonElement el || el.ValueKind is not (JsonValueKind.Number))
+        {
+            return false;
+        }
+
+        return el.TryGetDouble(out value);
+    }
+
+    private static bool TryGetActionType(Dictionary<string, object?> runtime, out string? value)
+    {
+        value = null;
+
+        if (!runtime.TryGetValue("action", out var obj) || obj is not JsonElement actionEl || actionEl.ValueKind != JsonValueKind.Object)
+        {
+            return false;
+        }
+
+        if (!actionEl.TryGetProperty("type", out var typeEl) || typeEl.ValueKind != JsonValueKind.String)
+        {
+            return false;
+        }
+
+        value = typeEl.GetString();
         return value is not null;
     }
 }

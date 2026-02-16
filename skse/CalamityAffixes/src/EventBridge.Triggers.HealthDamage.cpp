@@ -252,7 +252,7 @@ namespace CalamityAffixes
 		ProcessTrigger(Trigger::kHit, context.playerOwner, a_target, a_hitData);
 
 		if (a_attacker->IsPlayerRef() && a_hitData && a_hitData->attackDataSpell && !_archmageAffixIndices.empty()) {
-			ProcessArchmageSpellHit(a_attacker, a_target, a_hitData->attackDataSpell);
+			ProcessArchmageSpellHit(a_attacker, a_target, a_hitData->attackDataSpell, a_hitData);
 		}
 	}
 

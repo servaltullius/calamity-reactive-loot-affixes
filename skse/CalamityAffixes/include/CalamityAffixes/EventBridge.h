@@ -808,7 +808,8 @@ namespace CalamityAffixes
 		[[nodiscard]] ArchmageSelection SelectBestArchmageAction(
 			std::chrono::steady_clock::time_point a_now,
 			RE::Actor* a_owner,
-			RE::Actor* a_target);
+			RE::Actor* a_target,
+			const RE::HitData* a_hitData);
 		[[nodiscard]] bool ResolveArchmageResourceUsage(
 			RE::Actor* a_caster,
 			float a_damagePct,
@@ -824,7 +825,7 @@ namespace CalamityAffixes
 			float a_maxMagicka,
 			float a_extraCost,
 			float a_extraDamage);
-		void ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell);
+		void ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell, const RE::HitData* a_hitData = nullptr);
 		bool ShouldSuppressDuplicateHit(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept;
 		[[nodiscard]] bool TryConsumeTriggerProcBudget(std::chrono::steady_clock::time_point a_now) noexcept;
 

@@ -143,7 +143,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 								auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
 								auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
 								if (spell) {
-									ProcessArchmageSpellHit(aggressor, target, spell);
+									ProcessArchmageSpellHit(aggressor, target, spell, hitData);
 								}
 							}
 						}

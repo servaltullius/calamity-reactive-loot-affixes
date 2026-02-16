@@ -730,16 +730,44 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const bool isSpecialAction =
-				out.action.type == ActionType::kCastOnCrit ||
-				out.action.type == ActionType::kConvertDamage ||
-				out.action.type == ActionType::kArchmage ||
-				out.action.type == ActionType::kCorpseExplosion ||
-				out.action.type == ActionType::kSummonCorpseExplosion;
+				const bool isSpecialAction =
+					out.action.type == ActionType::kCastOnCrit ||
+					out.action.type == ActionType::kConvertDamage ||
+					out.action.type == ActionType::kArchmage ||
+					out.action.type == ActionType::kCorpseExplosion ||
+					out.action.type == ActionType::kSummonCorpseExplosion;
 
-			if (isSpecialAction && out.perTargetIcd.count() > 0) {
-				SKSE::log::warn(
-					"CalamityAffixes: perTargetICDSeconds is ignored for special action (affixId={}, actionType={}).",
+				if (out.luckyHitChancePct > 0.0f) {
+					bool luckyHitSupported = false;
+					switch (out.action.type) {
+					case ActionType::kCastOnCrit:
+					case ActionType::kConvertDamage:
+					case ActionType::kArchmage:
+						luckyHitSupported = true;
+						break;
+					case ActionType::kCorpseExplosion:
+					case ActionType::kSummonCorpseExplosion:
+						luckyHitSupported = false;
+						break;
+					default:
+						luckyHitSupported = (out.trigger == Trigger::kHit || out.trigger == Trigger::kIncomingHit);
+						break;
+					}
+
+					if (!luckyHitSupported) {
+						SKSE::log::warn(
+							"CalamityAffixes: luckyHitChancePercent is ignored for unsupported affix context (affixId={}, actionType={}, trigger={}).",
+							out.id,
+							type,
+							static_cast<std::uint32_t>(out.trigger));
+						out.luckyHitChancePct = 0.0f;
+						out.luckyHitProcCoefficient = 1.0f;
+					}
+				}
+
+				if (isSpecialAction && out.perTargetIcd.count() > 0) {
+					SKSE::log::warn(
+						"CalamityAffixes: perTargetICDSeconds is ignored for special action (affixId={}, actionType={}).",
 					out.id,
 					type);
 			}
