@@ -92,7 +92,10 @@ namespace CalamityAffixes::Hooks
 					const auto now = std::chrono::steady_clock::now();
 
 					const bool allowNeutralOutgoing =
-						context.hasTarget && !context.targetIsPlayer && context.playerOwner &&
+						ShouldResolveNonHostileOutgoingFirstHitAllowance(
+							context.hasPlayerOwner,
+							context.targetIsPlayer,
+							bridge->AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
 						bridge->ResolveNonHostileOutgoingFirstHitAllowance(context.playerOwner, a_this, context.hostileEitherDirection, now);
 
 					if (!ShouldProcessHealthDamageProcPath(

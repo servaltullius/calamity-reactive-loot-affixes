@@ -117,11 +117,16 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			} else {
 				// Outgoing (player-owned).
 				if (_configLoaded && relation.attackerIsPlayerOwned && relation.playerOwner) {
-					const bool allowNeutralOutgoing = ResolveNonHostileOutgoingFirstHitAllowance(
-						relation.playerOwner,
-						target,
-						relation.hostileEitherDirection,
-						now);
+					const bool allowNeutralOutgoing =
+						ShouldResolveNonHostileOutgoingFirstHitAllowance(
+							relation.hasPlayerOwner,
+							relation.targetIsPlayer,
+							AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
+						ResolveNonHostileOutgoingFirstHitAllowance(
+							relation.playerOwner,
+							target,
+							relation.hostileEitherDirection,
+							now);
 					if (relation.hostileEitherDirection || allowNeutralOutgoing) {
 						const LastHitKey key{
 							.outgoing = true,
@@ -162,11 +167,16 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			}
 		}
 
-		const bool allowNeutralOutgoing = relation.playerOwner && ResolveNonHostileOutgoingFirstHitAllowance(
-			relation.playerOwner,
-			target,
-			relation.hostileEitherDirection,
-			now);
+		const bool allowNeutralOutgoing =
+			ShouldResolveNonHostileOutgoingFirstHitAllowance(
+				relation.hasPlayerOwner,
+				relation.targetIsPlayer,
+				AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
+			ResolveNonHostileOutgoingFirstHitAllowance(
+				relation.playerOwner,
+				target,
+				relation.hostileEitherDirection,
+				now);
 		if (ShouldSendPlayerOwnedHitEvent(
 				relation.attackerIsPlayerOwned,
 				relation.hasPlayerOwner,

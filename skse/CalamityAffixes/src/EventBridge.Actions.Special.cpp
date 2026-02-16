@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 
 #include "CalamityAffixes/CombatContext.h"
+#include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
 #include <string_view>
 #include <vector>
@@ -71,6 +72,10 @@ namespace CalamityAffixes
 			const auto now = std::chrono::steady_clock::now();
 			const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
 			const bool allowNeutralOutgoing =
+				ShouldResolveNonHostileOutgoingFirstHitAllowance(
+					true,
+					a_target->IsPlayerRef(),
+					AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
 				ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
 			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
 				return {};
@@ -222,6 +227,10 @@ namespace CalamityAffixes
 			const auto now = std::chrono::steady_clock::now();
 			const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
 			const bool allowNeutralOutgoing =
+				ShouldResolveNonHostileOutgoingFirstHitAllowance(
+					true,
+					a_target->IsPlayerRef(),
+					AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
 				ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
 			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
 				return {};

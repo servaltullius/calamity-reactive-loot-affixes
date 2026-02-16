@@ -26,14 +26,14 @@ namespace
 			return false;
 		}
 
-		// Reentry within the window stays allowed.
-		if (!gate.Resolve(0x14u, 0x1234u, true, false, false, now + milliseconds(50))) {
+		// Reentry within the short window stays allowed.
+		if (!gate.Resolve(0x14u, 0x1234u, true, false, false, now + milliseconds(10))) {
 			std::cerr << "gate: expected reentry within window to be allowed\n";
 			return false;
 		}
 
 		// Reentry beyond the window is denied.
-		if (gate.Resolve(0x14u, 0x1234u, true, false, false, now + milliseconds(150))) {
+		if (gate.Resolve(0x14u, 0x1234u, true, false, false, now + milliseconds(30))) {
 			std::cerr << "gate: expected reentry after window to be denied\n";
 			return false;
 		}

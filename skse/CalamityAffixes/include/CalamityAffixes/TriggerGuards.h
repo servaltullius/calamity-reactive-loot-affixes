@@ -93,6 +93,14 @@ namespace CalamityAffixes
 		return a_allowNonHostilePlayerOwnedOutgoing && !a_targetIsPlayer;
 	}
 
+	[[nodiscard]] constexpr bool ShouldResolveNonHostileOutgoingFirstHitAllowance(
+		bool a_hasPlayerOwner,
+		bool a_targetIsPlayer,
+		bool a_allowNonHostilePlayerOwnedOutgoing) noexcept
+	{
+		return a_hasPlayerOwner && !a_targetIsPlayer && a_allowNonHostilePlayerOwnedOutgoing;
+	}
+
 	[[nodiscard]] constexpr bool ShouldProcessHealthDamageProcPath(
 		bool a_hasTarget,
 		bool a_hasAttacker,

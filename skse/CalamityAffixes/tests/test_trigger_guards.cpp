@@ -4,6 +4,7 @@ using CalamityAffixes::ComputePerTargetCooldownNextAllowedMs;
 using CalamityAffixes::DuplicateHitKey;
 using CalamityAffixes::IsPerTargetCooldownBlockedMs;
 using CalamityAffixes::ResolveTriggerProcCooldownMs;
+using CalamityAffixes::ShouldResolveNonHostileOutgoingFirstHitAllowance;
 using CalamityAffixes::ShouldProcessHealthDamageProcPath;
 using CalamityAffixes::ShouldSendPlayerOwnedHitEvent;
 using CalamityAffixes::ShouldSuppressDuplicateHitWindow;
@@ -111,6 +112,26 @@ static_assert([] {
 	return !ShouldSendPlayerOwnedHitEvent(true, true, false, true, true);
 }(),
 	"ShouldSendPlayerOwnedHitEvent: keeps non-hostile incoming-to-player blocked");
+
+static_assert([] {
+	return ShouldResolveNonHostileOutgoingFirstHitAllowance(true, false, true);
+}(),
+	"ShouldResolveNonHostileOutgoingFirstHitAllowance: resolves only when owner exists, target is non-player, and option is enabled");
+
+static_assert([] {
+	return !ShouldResolveNonHostileOutgoingFirstHitAllowance(true, false, false);
+}(),
+	"ShouldResolveNonHostileOutgoingFirstHitAllowance: skips gate lookup when option is disabled");
+
+static_assert([] {
+	return !ShouldResolveNonHostileOutgoingFirstHitAllowance(false, false, true);
+}(),
+	"ShouldResolveNonHostileOutgoingFirstHitAllowance: skips gate lookup without player owner");
+
+static_assert([] {
+	return !ShouldResolveNonHostileOutgoingFirstHitAllowance(true, true, true);
+}(),
+	"ShouldResolveNonHostileOutgoingFirstHitAllowance: skips gate lookup for player targets");
 
 static_assert([] {
 	return ShouldProcessHealthDamageProcPath(

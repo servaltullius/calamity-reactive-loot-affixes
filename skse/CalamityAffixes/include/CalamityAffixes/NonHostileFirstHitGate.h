@@ -143,7 +143,7 @@ namespace CalamityAffixes
 		static constexpr std::size_t kMaxEntries = 8192;
 		static constexpr auto kPruneInterval = std::chrono::seconds(10);
 		static constexpr auto kTtl = std::chrono::seconds(120);
-		static constexpr auto kReentryWindow = std::chrono::milliseconds(100);
+		static constexpr auto kReentryWindow = std::chrono::milliseconds(20);
 
 		std::unordered_map<Key, std::chrono::steady_clock::time_point, KeyHash, KeyEq> _seen;
 		std::chrono::steady_clock::time_point _lastPruneAt{};

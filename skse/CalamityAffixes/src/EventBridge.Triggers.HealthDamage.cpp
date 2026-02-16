@@ -224,11 +224,16 @@ namespace CalamityAffixes
 		if (!context.attackerIsPlayerOwned || !context.playerOwner) {
 			return;
 		}
-		const bool allowNeutralOutgoing = ResolveNonHostileOutgoingFirstHitAllowance(
-			context.playerOwner,
-			a_target,
-			context.hostileEitherDirection,
-			a_now);
+		const bool allowNeutralOutgoing =
+			ShouldResolveNonHostileOutgoingFirstHitAllowance(
+				context.hasPlayerOwner,
+				context.targetIsPlayer,
+				AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
+			ResolveNonHostileOutgoingFirstHitAllowance(
+				context.playerOwner,
+				a_target,
+				context.hostileEitherDirection,
+				a_now);
 		if (!(context.hostileEitherDirection || allowNeutralOutgoing)) {
 			return;
 		}
