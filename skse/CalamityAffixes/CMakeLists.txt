@@ -32,8 +32,13 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/main.cpp
 	    src/EventBridge.cpp
 	    src/EventBridge.Config.cpp
+	    src/EventBridge.Config.Indexing.cpp
+	    src/EventBridge.Config.RunewordSynthesis.cpp
 	    src/EventBridge.Loot.cpp
-	    src/EventBridge.Loot.Runeword.cpp
+	    src/EventBridge.Loot.Runeword.Detail.cpp
+	    src/EventBridge.Loot.Runeword.Selection.cpp
+	    src/EventBridge.Loot.Runeword.Catalog.cpp
+	    src/EventBridge.Loot.Runeword.Crafting.cpp
 	    src/EventBridge.Loot.Runtime.cpp
 	    src/EventBridge.Loot.Assign.cpp
 	    src/EventBridge.Triggers.cpp
