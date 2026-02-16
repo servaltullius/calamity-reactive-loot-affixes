@@ -60,7 +60,6 @@
 						g_api->Unfocus(g_view);
 					}
 					SetVisible(false);
-					ForceHideCursorMenuIfSafe();
 					return;
 				}
 			}
@@ -90,9 +89,6 @@
 					// even when the selected item has no affix tooltip.
 					const bool inventoryOpen = g_gatePollingOnMenus.load() && g_relevantMenusOpen.load() > 0;
 					SetVisible(inventoryOpen);
-					if (!inventoryOpen) {
-						ForceHideCursorMenuIfSafe();
-					}
 				}
 				return;
 			}

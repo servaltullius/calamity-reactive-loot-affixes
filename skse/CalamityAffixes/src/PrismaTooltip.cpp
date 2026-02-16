@@ -151,29 +151,6 @@ namespace CalamityAffixes::PrismaTooltip
 			return count;
 		}
 
-		void ForceHideCursorMenuIfSafe() noexcept
-		{
-			if (g_controlPanelOpen.load()) {
-				return;
-			}
-
-			auto* ui = RE::UI::GetSingleton();
-			if (!ui) {
-				return;
-			}
-			if (ui->IsMenuOpen(kMenuInventory) || ui->IsMenuOpen(kMenuBarter)) {
-				return;
-			}
-
-			auto* queue = RE::UIMessageQueue::GetSingleton();
-			auto* strings = RE::InterfaceStrings::GetSingleton();
-			if (!queue || !strings) {
-				return;
-			}
-
-			queue->AddMessage(strings->cursorMenu, RE::UI_MESSAGE_TYPE::kForceHide, nullptr);
-		}
-
 		[[nodiscard]] bool IsViewReady() noexcept
 		{
 			return g_api && g_view && g_api->IsValid(g_view) && g_domReady.load();
@@ -519,11 +496,11 @@ namespace CalamityAffixes::PrismaTooltip
 				if (openCount <= 0) {
 					g_relevantMenusOpen.store(0);
 
-						if (!g_controlPanelOpen.load() && g_api && g_view && g_api->IsValid(g_view)) {
-							// Keep cursor/focus state in sync with menu lifetime.
-							// If focus remains after menu close, the cursor can linger until reopening a menu.
-							if (g_api->HasFocus(g_view)) {
-								g_api->Unfocus(g_view);
+					if (!g_controlPanelOpen.load() && g_api && g_view && g_api->IsValid(g_view)) {
+						// Keep cursor/focus state in sync with menu lifetime.
+						// If focus remains after menu close, the cursor can linger until reopening a menu.
+						if (g_api->HasFocus(g_view)) {
+							g_api->Unfocus(g_view);
 						}
 
 						if (IsViewReady()) {
@@ -532,10 +509,9 @@ namespace CalamityAffixes::PrismaTooltip
 							SetSelectedItemContext({}, {});
 						}
 
-							SetVisible(false);
-							ForceHideCursorMenuIfSafe();
-						}
+						SetVisible(false);
 					}
+				}
 
 				return RE::BSEventNotifyControl::kContinue;
 			}
