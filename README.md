@@ -74,7 +74,7 @@
   - 아이템 메뉴(인벤/루팅/상점)에서 “선택된 아이템”이 어픽스 인스턴스면 표시되고, 아니면 자동으로 숨겨집니다.
 - (기본값) `loot.renameItem=true` : 아이템 이름에 **짧은 어픽스 라벨**을 붙여(좌측 리스트) 빠르게 식별합니다.
 
-기본값: `loot.chancePercent=25`, `loot.renameItem=true`, `loot.sharedPool=true` (무기/방어구 공용 풀 롤링)
+기본값: `loot.chancePercent=25`, `loot.runewordFragmentChancePercent=40`, `loot.renameItem=true`, `loot.sharedPool=true` (무기/방어구 공용 풀 롤링)
 추가 안전장치(권장): `loot.trapGlobalMaxActive=64` (전역 트랩 하드캡, 0=무제한)
 
 ## 제작 아이템(대장간/제작)에서는 어픽스가 어떻게 붙나요?
