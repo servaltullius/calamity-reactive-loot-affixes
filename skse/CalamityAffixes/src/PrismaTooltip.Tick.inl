@@ -45,6 +45,25 @@
 				g_lastPanelStateKnown = true;
 			}
 
+			// Failsafe: heal stale menu-open counters from actual UI state.
+			// Some close paths can race event delivery and leave cursor/focus behind.
+			const int observedRelevantMenus = CountRelevantMenusOpenFromUi();
+			if (observedRelevantMenus >= 0) {
+				g_relevantMenusOpen.store(observedRelevantMenus);
+				if (!panelRequested && observedRelevantMenus == 0) {
+					if (!g_lastTooltip.empty()) {
+						g_lastTooltip.clear();
+						g_api->InteropCall(g_view, "setTooltip", "");
+					}
+					SetSelectedItemContext({}, {});
+					if (g_api->HasFocus(g_view)) {
+						g_api->Unfocus(g_view);
+					}
+					SetVisible(false);
+					return;
+				}
+			}
+
 			if (panelRequested) {
 				if (auto* bridge = CalamityAffixes::EventBridge::GetSingleton()) {
 					SetRunewordBaseInventoryList(bridge->GetRunewordBaseInventoryEntries());
