@@ -3,7 +3,7 @@
   "modKey": "CalamityAffixes.esp",
   "eslFlag": true,
   "loot": {
-    "chancePercent": 25,
+    "chancePercent": 30,
     "runewordFragmentChancePercent": 40,
     "renameItem": true,
     "sharedPool": true,

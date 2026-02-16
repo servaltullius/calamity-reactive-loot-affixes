@@ -333,29 +333,9 @@ namespace CalamityAffixes
 		const std::uint8_t targetCount = RollAffixCount();
 
 		// Determine prefix/suffix composition
-		std::uint8_t prefixTarget = 0;
-		std::uint8_t suffixTarget = 0;
-
-		if (targetCount == 1) {
-			std::uniform_int_distribution<int> coinFlip(0, 1);
-			if (coinFlip(_rng) == 0) {
-				prefixTarget = 1;
-			} else {
-				suffixTarget = 1;
-			}
-		} else if (targetCount == 2) {
-			prefixTarget = 1;
-			suffixTarget = 1;
-		} else {
-			std::uniform_int_distribution<int> coinFlip(0, 1);
-			if (coinFlip(_rng) == 0) {
-				prefixTarget = 2;
-				suffixTarget = 1;
-			} else {
-				prefixTarget = 1;
-				suffixTarget = 2;
-			}
-		}
+		const auto targets = detail::DetermineLootPrefixSuffixTargets(targetCount);
+		const std::uint8_t prefixTarget = targets.prefixTarget;
+		const std::uint8_t suffixTarget = targets.suffixTarget;
 
 		InstanceAffixSlots slots;
 		std::vector<std::size_t> chosenIndices;
@@ -391,6 +371,10 @@ namespace CalamityAffixes
 		// Roll suffixes (family-based dedup)
 		std::vector<std::string> chosenFamilies;
 		for (std::uint8_t s = 0; s < suffixTarget; ++s) {
+			if (!detail::ShouldConsumeSuffixRollForSingleAffixTarget(targetCount, slots.count)) {
+				break;
+			}
+
 			const auto idx = RollSuffixIndex(a_itemType, &chosenFamilies);
 			if (!idx) {
 				break;

@@ -285,6 +285,37 @@ namespace
 		}
 
 		{
+			const auto one = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(1u);
+			if (one.prefixTarget != 1u || one.suffixTarget != 0u) {
+				std::cerr << "shuffle_bag: target=1 composition should be prefix-only (1/0)\n";
+				return false;
+			}
+			const auto two = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(2u);
+			if (two.prefixTarget != 2u || two.suffixTarget != 0u) {
+				std::cerr << "shuffle_bag: target=2 composition should be prefix-only (2/0)\n";
+				return false;
+			}
+			const auto three = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(3u);
+			if (three.prefixTarget != 3u || three.suffixTarget != 0u) {
+				std::cerr << "shuffle_bag: target=3 composition should be prefix-only (3/0)\n";
+				return false;
+			}
+
+			if (!CalamityAffixes::detail::ShouldConsumeSuffixRollForSingleAffixTarget(1u, 0u)) {
+				std::cerr << "shuffle_bag: single-affix suffix fallback should be allowed before prefix assignment\n";
+				return false;
+			}
+			if (CalamityAffixes::detail::ShouldConsumeSuffixRollForSingleAffixTarget(1u, 1u)) {
+				std::cerr << "shuffle_bag: single-affix suffix fallback should be blocked after prefix assignment\n";
+				return false;
+			}
+			if (!CalamityAffixes::detail::ShouldConsumeSuffixRollForSingleAffixTarget(2u, 1u)) {
+				std::cerr << "shuffle_bag: multi-affix suffix roll should remain enabled\n";
+				return false;
+			}
+		}
+
+		{
 			// Non-shared weapon pool must never pick armor indices and must skip disabled index 2.
 			for (std::size_t draw = 0; draw < 40; ++draw) {
 				const auto picked = CalamityAffixes::detail::SelectUniformEligibleLootIndexWithShuffleBag(

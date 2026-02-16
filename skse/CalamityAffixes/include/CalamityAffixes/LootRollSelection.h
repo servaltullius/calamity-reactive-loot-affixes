@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <random>
 #include <unordered_set>
@@ -9,6 +10,31 @@
 
 namespace CalamityAffixes::detail
 {
+	struct LootPrefixSuffixTargets
+	{
+		std::uint8_t prefixTarget{ 0u };
+		std::uint8_t suffixTarget{ 0u };
+	};
+
+	[[nodiscard]] constexpr LootPrefixSuffixTargets DetermineLootPrefixSuffixTargets(std::uint8_t a_targetAffixCount) noexcept
+	{
+		// Soft-disable suffix drops for new loot rolls.
+		// Keep suffix data/runtime handling for backward compatibility with existing items.
+		const std::uint8_t clamped = (a_targetAffixCount > 3u) ? 3u : a_targetAffixCount;
+		return { clamped, 0u };
+	}
+
+	[[nodiscard]] constexpr bool ShouldConsumeSuffixRollForSingleAffixTarget(
+		std::uint8_t a_targetAffixCount,
+		std::uint8_t a_currentAssignedCount) noexcept
+	{
+		if (a_targetAffixCount != 1u) {
+			return true;
+		}
+
+		return a_currentAssignedCount == 0u;
+	}
+
 	inline void SanitizeLootShuffleBagOrder(
 		const std::vector<std::size_t>& a_pool,
 		std::vector<std::size_t>& a_bag,
