@@ -120,6 +120,14 @@ namespace CalamityAffixes
 				continue;
 			}
 
+			if (!PassesRecentlyGates(affix, a_attacker, now)) {
+				continue;
+			}
+
+			if (!PassesLuckyHitGate(affix, Trigger::kHit, a_hitData, now)) {
+				continue;
+			}
+
 			PerTargetCooldownKey perTargetKey{};
 			const bool usesPerTargetIcd = (affix.perTargetIcd.count() > 0 && a_target && affix.token != 0u);
 			if (IsPerTargetCooldownBlocked(affix, a_target, now, &perTargetKey)) {
@@ -261,6 +269,14 @@ namespace CalamityAffixes
 				continue;
 			}
 
+			if (!PassesRecentlyGates(affix, a_attacker, now)) {
+				continue;
+			}
+
+			if (!PassesLuckyHitGate(affix, Trigger::kHit, a_hitData, now)) {
+				continue;
+			}
+
 			PerTargetCooldownKey perTargetKey{};
 			if (IsPerTargetCooldownBlocked(affix, a_target, now, &perTargetKey)) {
 				continue;
@@ -349,6 +365,7 @@ namespace CalamityAffixes
 
 	EventBridge::ArchmageSelection EventBridge::SelectBestArchmageAction(
 		std::chrono::steady_clock::time_point a_now,
+		RE::Actor* a_owner,
 		RE::Actor* a_target)
 	{
 		ArchmageSelection selection{};
@@ -363,6 +380,9 @@ namespace CalamityAffixes
 
 			auto& affix = _affixes[idx];
 			if (a_now < affix.nextAllowed) {
+				continue;
+			}
+			if (!PassesRecentlyGates(affix, a_owner, a_now)) {
 				continue;
 			}
 			if (IsPerTargetCooldownBlocked(affix, a_target, a_now, nullptr)) {
@@ -482,7 +502,7 @@ namespace CalamityAffixes
 		}
 
 		const auto now = std::chrono::steady_clock::now();
-		const auto selection = SelectBestArchmageAction(now, a_target);
+		const auto selection = SelectBestArchmageAction(now, a_caster, a_target);
 		if (!selection.bestIdx || !selection.bestAction || !selection.bestAction->spell || selection.bestDamagePct <= 0.0f || selection.bestCostPct <= 0.0f) {
 			return;
 		}

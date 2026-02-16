@@ -893,9 +893,9 @@
       {
         "id": "hit_shock_overload",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_OVERLOAD",
-        "name": "\uACFC\uC804\uB958 (\uC801\uC911 35% / ICD 1.2\uCD08): \uB9E4\uC9C0\uCE74 60 \uD761\uC218",
-        "nameEn": "Overload (35% on hit / ICD 1.2s): Drain 60 Magicka",
-        "nameKo": "\uACFC\uC804\uB958 (\uC801\uC911 35% / ICD 1.2\uCD08): \uB9E4\uC9C0\uCE74 60 \uD761\uC218",
+        "name": "\uACFC\uC804\uB958 (Lucky Hit 35% / ICD 1.2\uCD08): \uB9E4\uC9C0\uCE74 60 \uD761\uC218",
+        "nameEn": "Overload (Lucky Hit 35% / ICD 1.2s): Drain 60 Magicka",
+        "nameKo": "\uACFC\uC804\uB958 (Lucky Hit 35% / ICD 1.2\uCD08): \uB9E4\uC9C0\uCE74 60 \uD761\uC218",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
@@ -932,7 +932,9 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 35.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 35.0,
+          "luckyHitProcCoefficient": 1.0,
           "icdSeconds": 1.2,
           "action": {
             "type": "CastSpell",
@@ -996,9 +998,9 @@
       {
         "id": "hit_shadowstep_burst",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHADOWSTEP_BURST",
-        "name": "\uADF8\uB9BC\uC790 \uC9C8\uC8FC (\uC801\uC911 20% / ICD 12\uCD08): \uC774\uB3D9\uC18D\uB3C4 \u002B20% (4\uCD08)",
-        "nameEn": "Shadowstep Burst (20% on hit / ICD 12s): Move Speed \u002B20% (4s)",
-        "nameKo": "\uADF8\uB9BC\uC790 \uC9C8\uC8FC (\uC801\uC911 20% / ICD 12\uCD08): \uC774\uB3D9\uC18D\uB3C4 \u002B20% (4\uCD08)",
+        "name": "\uADF8\uB9BC\uC790 \uC9C8\uC8FC (\uCD5C\uADFC 4\uCD08 \uB0B4 \uCC98\uCE58 \uD6C4 \uC801\uC911 20% / ICD 12\uCD08): \uC774\uB3D9\uC18D\uB3C4 \u002B20% (4\uCD08)",
+        "nameEn": "Shadowstep Burst (20% on hit after a kill in the last 4s / ICD 12s): Move Speed \u002B20% (4s)",
+        "nameKo": "\uADF8\uB9BC\uC790 \uC9C8\uC8FC (\uCD5C\uADFC 4\uCD08 \uB0B4 \uCC98\uCE58 \uD6C4 \uC801\uC911 20% / ICD 12\uCD08): \uC774\uB3D9\uC18D\uB3C4 \u002B20% (4\uCD08)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
@@ -1036,6 +1038,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 20.0,
+          "requireRecentlyKillSeconds": 4.0,
           "icdSeconds": 12.0,
           "action": {
             "type": "CastSpell",

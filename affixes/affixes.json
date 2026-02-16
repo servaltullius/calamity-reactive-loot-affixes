@@ -817,9 +817,9 @@
       {
         "id": "hit_shock_overload",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_OVERLOAD",
-        "name": "과전류 (적중 35% / ICD 1.2초): 매지카 60 흡수",
-        "nameEn": "Overload (35% on hit / ICD 1.2s): Drain 60 Magicka",
-        "nameKo": "과전류 (적중 35% / ICD 1.2초): 매지카 60 흡수",
+        "name": "과전류 (Lucky Hit 35% / ICD 1.2초): 매지카 60 흡수",
+        "nameEn": "Overload (Lucky Hit 35% / ICD 1.2s): Drain 60 Magicka",
+        "nameKo": "과전류 (Lucky Hit 35% / ICD 1.2초): 매지카 60 흡수",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
@@ -850,7 +850,9 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 35.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 35.0,
+          "luckyHitProcCoefficient": 1.0,
           "icdSeconds": 1.2,
           "action": {
             "type": "CastSpell",
@@ -909,9 +911,9 @@
       {
         "id": "hit_shadowstep_burst",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHADOWSTEP_BURST",
-        "name": "그림자 질주 (적중 20% / ICD 12초): 이동속도 +20% (4초)",
-        "nameEn": "Shadowstep Burst (20% on hit / ICD 12s): Move Speed +20% (4s)",
-        "nameKo": "그림자 질주 (적중 20% / ICD 12초): 이동속도 +20% (4초)",
+        "name": "그림자 질주 (최근 4초 내 처치 후 적중 20% / ICD 12초): 이동속도 +20% (4초)",
+        "nameEn": "Shadowstep Burst (20% on hit after a kill in the last 4s / ICD 12s): Move Speed +20% (4s)",
+        "nameKo": "그림자 질주 (최근 4초 내 처치 후 적중 20% / ICD 12초): 이동속도 +20% (4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
@@ -942,6 +944,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 20.0,
+          "requireRecentlyKillSeconds": 4.0,
           "icdSeconds": 12.0,
           "action": {
             "type": "CastSpell",

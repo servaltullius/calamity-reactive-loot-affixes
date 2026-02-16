@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <random>
 #include <string>
 #include <string_view>
@@ -23,6 +24,33 @@ namespace CalamityAffixes
 			{
 				const auto count = std::chrono::duration_cast<std::chrono::milliseconds>(a_value.time_since_epoch()).count();
 				return count > 0 ? static_cast<std::uint64_t>(count) : 0u;
+			}
+
+			void RecordRecentEventTimestamp(
+				std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point>& a_store,
+				RE::FormID a_ownerFormId,
+				std::chrono::steady_clock::time_point a_now)
+			{
+				if (a_ownerFormId == 0u) {
+					return;
+				}
+
+				a_store[a_ownerFormId] = a_now;
+
+				// Player-owned actor population is tiny, but keep this bounded for long sessions.
+				static constexpr auto kTtl = std::chrono::seconds(90);
+				static constexpr std::size_t kHardCap = 256;
+				if (a_store.size() <= kHardCap) {
+					return;
+				}
+
+				for (auto it = a_store.begin(); it != a_store.end();) {
+					if ((a_now - it->second) > kTtl) {
+						it = a_store.erase(it);
+					} else {
+						++it;
+					}
+				}
 			}
 
 			constexpr auto kZeroIcdProcSafetyGuard = std::chrono::milliseconds(120);
@@ -94,6 +122,105 @@ namespace CalamityAffixes
 			_triggerProcBudgetConsumed);
 	}
 
+	void EventBridge::RecordRecentCombatEvent(
+		Trigger a_trigger,
+		RE::Actor* a_owner,
+		std::chrono::steady_clock::time_point a_now)
+	{
+		if (!a_owner) {
+			return;
+		}
+
+		const auto ownerFormId = a_owner->GetFormID();
+		switch (a_trigger) {
+		case Trigger::kHit:
+			RecordRecentEventTimestamp(_recentOwnerHitAt, ownerFormId, a_now);
+			break;
+		case Trigger::kKill:
+			RecordRecentEventTimestamp(_recentOwnerKillAt, ownerFormId, a_now);
+			break;
+		case Trigger::kIncomingHit:
+			RecordRecentEventTimestamp(_recentOwnerIncomingHitAt, ownerFormId, a_now);
+			break;
+		case Trigger::kDotApply:
+		default:
+			break;
+		}
+	}
+
+	bool EventBridge::PassesRecentlyGates(
+		const AffixRuntime& a_affix,
+		RE::Actor* a_owner,
+		std::chrono::steady_clock::time_point a_now) const
+	{
+		if (!a_owner) {
+			return false;
+		}
+
+		const auto ownerFormId = a_owner->GetFormID();
+		if (ownerFormId == 0u) {
+			return false;
+		}
+
+		const auto nowMs = ToNonNegativeMilliseconds(a_now);
+		auto findLastMs = [&](const std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point>& a_store) -> std::uint64_t {
+			const auto it = a_store.find(ownerFormId);
+			if (it == a_store.end()) {
+				return 0u;
+			}
+			return ToNonNegativeMilliseconds(it->second);
+		};
+
+		const auto recentHitWindowMs = static_cast<std::uint64_t>(std::max<std::int64_t>(0, a_affix.requireRecentlyHit.count()));
+		const auto recentKillWindowMs = static_cast<std::uint64_t>(std::max<std::int64_t>(0, a_affix.requireRecentlyKill.count()));
+		const auto notHitWindowMs = static_cast<std::uint64_t>(std::max<std::int64_t>(0, a_affix.requireNotHitRecently.count()));
+
+		if (!IsWithinRecentlyWindowMs(nowMs, findLastMs(_recentOwnerHitAt), recentHitWindowMs)) {
+			return false;
+		}
+		if (!IsWithinRecentlyWindowMs(nowMs, findLastMs(_recentOwnerKillAt), recentKillWindowMs)) {
+			return false;
+		}
+		if (!IsOutsideRecentlyWindowMs(nowMs, findLastMs(_recentOwnerIncomingHitAt), notHitWindowMs)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	bool EventBridge::PassesLuckyHitGate(
+		const AffixRuntime& a_affix,
+		Trigger a_trigger,
+		const RE::HitData* a_hitData,
+		std::chrono::steady_clock::time_point)
+	{
+		if (a_affix.luckyHitChancePct <= 0.0f) {
+			return true;
+		}
+
+		// Lucky-hit semantics only apply to direct hit style triggers.
+		if (a_trigger != Trigger::kHit && a_trigger != Trigger::kIncomingHit) {
+			return true;
+		}
+
+		if (!a_hitData) {
+			return false;
+		}
+
+		const float luckyChancePct = ResolveLuckyHitEffectiveChancePct(
+			a_affix.luckyHitChancePct,
+			a_affix.luckyHitProcCoefficient);
+		if (luckyChancePct <= 0.0f) {
+			return false;
+		}
+		if (luckyChancePct >= 100.0f) {
+			return true;
+		}
+
+		std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+		return dist(_rng) < luckyChancePct;
+	}
+
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
 		if (!_configLoaded || !_runtimeEnabled || !a_owner) {
@@ -124,6 +251,7 @@ namespace CalamityAffixes
 		}
 
 		if (!indices || indices->empty()) {
+			RecordRecentCombatEvent(a_trigger, a_owner, now);
 			return;
 		}
 
@@ -135,6 +263,14 @@ namespace CalamityAffixes
 
 			auto& affix = _affixes[i];
 			if (now < affix.nextAllowed) {
+				continue;
+			}
+
+			if (!PassesRecentlyGates(affix, a_owner, now)) {
+				continue;
+			}
+
+			if (!PassesLuckyHitGate(affix, a_trigger, a_hitData, now)) {
 				continue;
 			}
 
@@ -197,6 +333,8 @@ namespace CalamityAffixes
 				AdvanceRuntimeStateForAffixProc(affix);
 				ExecuteActionWithProcDepthGuard(affix, a_owner, a_target, a_hitData);
 			}
+
+		RecordRecentCombatEvent(a_trigger, a_owner, now);
 		}
 
 	bool EventBridge::ShouldSuppressDuplicateHit(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept

@@ -257,6 +257,10 @@ namespace CalamityAffixes
 
 		auto& bestAffix = _affixes[*selection.bestIdx];
 
+		if (!PassesRecentlyGates(bestAffix, a_owner, now)) {
+			return;
+		}
+
 		PerTargetCooldownKey perTargetKey{};
 		const bool usesPerTargetIcd = (bestAffix.perTargetIcd.count() > 0 && a_corpse && bestAffix.token != 0u);
 		if (IsPerTargetCooldownBlocked(bestAffix, a_corpse, now, &perTargetKey)) {

@@ -383,6 +383,11 @@ namespace CalamityAffixes
 			[[nodiscard]] constexpr float EffectiveLootWeight() const noexcept { return (lootWeight >= 0.0f) ? lootWeight : procChancePct; }
 			std::chrono::milliseconds icd{ 0 };
 			std::chrono::milliseconds perTargetIcd{ 0 };
+			std::chrono::milliseconds requireRecentlyHit{ 0 };
+			std::chrono::milliseconds requireRecentlyKill{ 0 };
+			std::chrono::milliseconds requireNotHitRecently{ 0 };
+			float luckyHitChancePct{ 0.0f };
+			float luckyHitProcCoefficient{ 1.0f };
 			Action action{};
 
 			// Prefix/Suffix classification
@@ -561,6 +566,9 @@ namespace CalamityAffixes
 
 		std::chrono::steady_clock::time_point _lastHitAt{};
 		LastHitKey _lastHit{};
+		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerHitAt;
+		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerKillAt;
+		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerIncomingHitAt;
 
 		std::uint64_t _lastHealthDamageSignature{ 0 };
 		std::chrono::steady_clock::time_point _lastHealthDamageSignatureAt{};
@@ -742,6 +750,16 @@ namespace CalamityAffixes
 			RE::Actor* a_target,
 			RE::Actor* a_attacker);
 		void ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);
+		void RecordRecentCombatEvent(Trigger a_trigger, RE::Actor* a_owner, std::chrono::steady_clock::time_point a_now);
+		[[nodiscard]] bool PassesRecentlyGates(
+			const AffixRuntime& a_affix,
+			RE::Actor* a_owner,
+			std::chrono::steady_clock::time_point a_now) const;
+		[[nodiscard]] bool PassesLuckyHitGate(
+			const AffixRuntime& a_affix,
+			Trigger a_trigger,
+			const RE::HitData* a_hitData,
+			std::chrono::steady_clock::time_point a_now);
 
 		// Corpse-explosion helpers.
 		void ProcessCorpseExplosionKill(RE::Actor* a_owner, RE::Actor* a_corpse);
@@ -789,6 +807,7 @@ namespace CalamityAffixes
 		// Archmage helpers.
 		[[nodiscard]] ArchmageSelection SelectBestArchmageAction(
 			std::chrono::steady_clock::time_point a_now,
+			RE::Actor* a_owner,
 			RE::Actor* a_target);
 		[[nodiscard]] bool ResolveArchmageResourceUsage(
 			RE::Actor* a_caster,

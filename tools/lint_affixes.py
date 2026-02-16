@@ -196,6 +196,41 @@ def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) 
             elif v < 0.0:
                 errors.append(f"{affix_id}: runtime.{key} must be >= 0.")
 
+        conditions = _as_dict(runtime.get("conditions")) or {}
+
+        for key in ("requireRecentlyHitSeconds", "requireRecentlyKillSeconds", "requireNotHitRecentlySeconds"):
+            v = runtime.get(key)
+            if v is None:
+                v = conditions.get(key)
+            if v is None:
+                continue
+            if not _is_number(v):
+                errors.append(f"{affix_id}: runtime.{key} must be a number (seconds).")
+            elif v < 0.0:
+                errors.append(f"{affix_id}: runtime.{key} must be >= 0.")
+            elif v > 600.0:
+                warnings.append(f"{affix_id}: runtime.{key} is very high ({v}s). Consider <= 60s for combat readability.")
+
+        lucky_hit_chance = runtime.get("luckyHitChancePercent")
+        if lucky_hit_chance is None:
+            lucky_hit_chance = conditions.get("luckyHitChancePercent")
+        if lucky_hit_chance is not None:
+            if not _is_number(lucky_hit_chance):
+                errors.append(f"{affix_id}: runtime.luckyHitChancePercent must be a number (0-100).")
+            elif lucky_hit_chance < 0.0 or lucky_hit_chance > 100.0:
+                errors.append(f"{affix_id}: runtime.luckyHitChancePercent out of range: {lucky_hit_chance} (expected 0-100).")
+
+        lucky_hit_coeff = runtime.get("luckyHitProcCoefficient")
+        if lucky_hit_coeff is None:
+            lucky_hit_coeff = conditions.get("luckyHitProcCoefficient")
+        if lucky_hit_coeff is not None:
+            if not _is_number(lucky_hit_coeff):
+                errors.append(f"{affix_id}: runtime.luckyHitProcCoefficient must be a number (> 0).")
+            elif lucky_hit_coeff <= 0.0:
+                errors.append(f"{affix_id}: runtime.luckyHitProcCoefficient must be > 0.")
+            elif lucky_hit_coeff > 5.0:
+                warnings.append(f"{affix_id}: runtime.luckyHitProcCoefficient is very high ({lucky_hit_coeff}).")
+
         action = _as_dict(runtime.get("action"))
         if not action:
             errors.append(f"{affix_id}: runtime.action must be an object.")

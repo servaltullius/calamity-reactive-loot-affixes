@@ -147,6 +147,11 @@ namespace CalamityAffixes
 		_lastHealthDamageSignatureAt = {};
 		_triggerProcBudgetWindowStartMs = 0u;
 		_triggerProcBudgetConsumed = 0u;
+		_lastHitAt = {};
+		_lastHit = {};
+		_recentOwnerHitAt.clear();
+		_recentOwnerKillAt.clear();
+		_recentOwnerIncomingHitAt.clear();
 	}
 
 		void EventBridge::LoadConfig()
@@ -401,6 +406,38 @@ namespace CalamityAffixes
 				if (perTargetIcdSeconds > 0.0f) {
 					out.perTargetIcd = std::chrono::milliseconds(static_cast<std::int64_t>(perTargetIcdSeconds * 1000.0f));
 				}
+
+				const auto& conditions = runtime.value("conditions", nlohmann::json::object());
+				auto readRuntimeNumber = [&](std::string_view a_key, double a_fallback = 0.0) -> double {
+					const auto key = std::string(a_key);
+					if (const auto it = runtime.find(key); it != runtime.end() && it->is_number()) {
+						return it->get<double>();
+					}
+					if (conditions.is_object()) {
+						if (const auto it = conditions.find(key); it != conditions.end() && it->is_number()) {
+							return it->get<double>();
+						}
+					}
+					return a_fallback;
+				};
+
+				const double requireRecentlyHitSeconds = std::clamp(readRuntimeNumber("requireRecentlyHitSeconds"), 0.0, 600.0);
+				if (requireRecentlyHitSeconds > 0.0) {
+					out.requireRecentlyHit = std::chrono::milliseconds(static_cast<std::int64_t>(requireRecentlyHitSeconds * 1000.0));
+				}
+
+				const double requireRecentlyKillSeconds = std::clamp(readRuntimeNumber("requireRecentlyKillSeconds"), 0.0, 600.0);
+				if (requireRecentlyKillSeconds > 0.0) {
+					out.requireRecentlyKill = std::chrono::milliseconds(static_cast<std::int64_t>(requireRecentlyKillSeconds * 1000.0));
+				}
+
+				const double requireNotHitRecentlySeconds = std::clamp(readRuntimeNumber("requireNotHitRecentlySeconds"), 0.0, 600.0);
+				if (requireNotHitRecentlySeconds > 0.0) {
+					out.requireNotHitRecently = std::chrono::milliseconds(static_cast<std::int64_t>(requireNotHitRecentlySeconds * 1000.0));
+				}
+
+				out.luckyHitChancePct = static_cast<float>(std::clamp(readRuntimeNumber("luckyHitChancePercent"), 0.0, 100.0));
+				out.luckyHitProcCoefficient = static_cast<float>(std::clamp(readRuntimeNumber("luckyHitProcCoefficient", 1.0), 0.0, 5.0));
 				}
 
 			if (action.is_object()) {

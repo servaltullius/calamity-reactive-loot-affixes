@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <optional>
 
@@ -53,6 +54,58 @@ namespace CalamityAffixes
 		std::uint64_t a_nextAllowedMs) noexcept
 	{
 		return a_nowMs < a_nextAllowedMs;
+	}
+
+	// Shared "recently" window helper.
+	// - a_windowMs == 0 means "disabled / always pass"
+	// - a_lastEventMs == 0 with enabled window means "no history / fail"
+	[[nodiscard]] constexpr bool IsWithinRecentlyWindowMs(
+		std::uint64_t a_nowMs,
+		std::uint64_t a_lastEventMs,
+		std::uint64_t a_windowMs) noexcept
+	{
+		if (a_windowMs == 0u) {
+			return true;
+		}
+		if (a_lastEventMs == 0u || a_nowMs < a_lastEventMs) {
+			return false;
+		}
+		return (a_nowMs - a_lastEventMs) <= a_windowMs;
+	}
+
+	// "Not hit recently" helper.
+	// - a_windowMs == 0 means "disabled / always pass"
+	// - a_lastHitMs == 0 with enabled window means "never hit yet / pass"
+	[[nodiscard]] constexpr bool IsOutsideRecentlyWindowMs(
+		std::uint64_t a_nowMs,
+		std::uint64_t a_lastHitMs,
+		std::uint64_t a_windowMs) noexcept
+	{
+		if (a_windowMs == 0u) {
+			return true;
+		}
+		if (a_lastHitMs == 0u) {
+			return true;
+		}
+		if (a_nowMs < a_lastHitMs) {
+			return false;
+		}
+		return (a_nowMs - a_lastHitMs) >= a_windowMs;
+	}
+
+	// Diablo-like lucky-hit shape:
+	// effective chance = base chance * proc coefficient (clamped).
+	[[nodiscard]] constexpr float ResolveLuckyHitEffectiveChancePct(
+		float a_baseChancePct,
+		float a_procCoefficient) noexcept
+	{
+		if (a_baseChancePct <= 0.0f || a_procCoefficient <= 0.0f) {
+			return 0.0f;
+		}
+
+		const float clampedBase = std::clamp(a_baseChancePct, 0.0f, 100.0f);
+		const float clampedCoefficient = std::clamp(a_procCoefficient, 0.0f, 5.0f);
+		return std::clamp(clampedBase * clampedCoefficient, 0.0f, 100.0f);
 	}
 
 	// Shared fixed-window budget gate used to cap bursty proc execution.

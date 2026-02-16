@@ -3,6 +3,9 @@
 using CalamityAffixes::ComputePerTargetCooldownNextAllowedMs;
 using CalamityAffixes::DuplicateHitKey;
 using CalamityAffixes::IsPerTargetCooldownBlockedMs;
+using CalamityAffixes::IsOutsideRecentlyWindowMs;
+using CalamityAffixes::IsWithinRecentlyWindowMs;
+using CalamityAffixes::ResolveLuckyHitEffectiveChancePct;
 using CalamityAffixes::ResolveTriggerProcCooldownMs;
 using CalamityAffixes::ShouldHandleScrollConsumePreservation;
 using CalamityAffixes::ShouldResolveNonHostileOutgoingFirstHitAllowance;
@@ -68,6 +71,36 @@ static_assert([] {
 	return !IsPerTargetCooldownBlockedMs(1300u, 1300u);
 }(),
 	"IsPerTargetCooldownBlockedMs: allows exactly at next allowed time");
+
+static_assert([] {
+	return IsWithinRecentlyWindowMs(1300u, 1100u, 250u);
+}(),
+	"IsWithinRecentlyWindowMs: passes when event is inside window");
+
+static_assert([] {
+	return !IsWithinRecentlyWindowMs(1400u, 1100u, 250u);
+}(),
+	"IsWithinRecentlyWindowMs: fails when event is outside window");
+
+static_assert([] {
+	return IsOutsideRecentlyWindowMs(1400u, 1100u, 250u);
+}(),
+	"IsOutsideRecentlyWindowMs: passes when last hit is old enough");
+
+static_assert([] {
+	return !IsOutsideRecentlyWindowMs(1300u, 1200u, 250u);
+}(),
+	"IsOutsideRecentlyWindowMs: fails when last hit is still recent");
+
+static_assert([] {
+	return ResolveLuckyHitEffectiveChancePct(25.0f, 0.5f) == 12.5f;
+}(),
+	"ResolveLuckyHitEffectiveChancePct: multiplies base chance by proc coefficient");
+
+static_assert([] {
+	return ResolveLuckyHitEffectiveChancePct(80.0f, 2.0f) == 100.0f;
+}(),
+	"ResolveLuckyHitEffectiveChancePct: clamps to 100%");
 
 static_assert([] {
 	return ResolveTriggerProcCooldownMs(600, false, 100.0f, 120) == 600;
