@@ -35,9 +35,9 @@
       {
         "id": "arc_lightning",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING",
-        "name": "\uC544\uD06C \uBC88\uAC1C (\uC801\uC911 100%): \uBC88\uAC1C \uD53C\uD574 10 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
-        "nameEn": "Arc Lightning (100% on hit): 10 Lightning Damage (Hit Damage Scaling)",
-        "nameKo": "\uC544\uD06C \uBC88\uAC1C (\uC801\uC911 100%): \uBC88\uAC1C \uD53C\uD574 10 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "name": "\uC5F0\uC1C4 \uB1CC\uACA9 (Lucky Hit 38% / ICD 1.5\uCD08): \uBC88\uAC1C \uD53C\uD574 10 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
+        "nameEn": "Chain Lightning (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage (Hit Damage Scaling)",
+        "nameKo": "\uC5F0\uC1C4 \uB1CC\uACA9 (Lucky Hit 38% / ICD 1.5\uCD08): \uBC88\uAC1C \uD53C\uD574 10 (\uC801\uC911 \uD53C\uD574 \uC2A4\uCF00\uC77C)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_ARC_LIGHTNING",
@@ -75,7 +75,9 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100.0,
-          "icdSeconds": 0.0,
+          "luckyHitChancePercent": 38.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 1.5,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_ARC_LIGHTNING",
@@ -274,9 +276,9 @@
       {
         "id": "hit_fire_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_SHRED",
-        "name": "\uD654\uC5FC \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uD654\uC5FC \uC800\uD56D -15 (4\uCD08)",
-        "nameEn": "Fire Exposure (10% on hit / ICD 4s): Fire Resist -15 (4s)",
-        "nameKo": "\uD654\uC5FC \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uD654\uC5FC \uC800\uD56D -15 (4\uCD08)",
+        "name": "\uD654\uC5FC \uB178\uCD9C (Lucky Hit 36% / ICD 2.8\uCD08): \uD654\uC5FC \uC800\uD56D -15 (4\uCD08)",
+        "nameEn": "Fire Exposure (Lucky Hit 36% / ICD 2.8s): Fire Resist -15 (4s)",
+        "nameKo": "\uD654\uC5FC \uB178\uCD9C (Lucky Hit 36% / ICD 2.8\uCD08): \uD654\uC5FC \uC800\uD56D -15 (4\uCD08)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FIRE_SHRED",
@@ -313,8 +315,10 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 10.0,
-          "icdSeconds": 4.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 36.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 2.8,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_FIRE_SHRED",
@@ -325,9 +329,9 @@
       {
         "id": "hit_frost_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_SHRED",
-        "name": "\uB0C9\uAE30 \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08)",
-        "nameEn": "Frost Exposure (10% on hit / ICD 4s): Frost Resist -15 (4s)",
-        "nameKo": "\uB0C9\uAE30 \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08)",
+        "name": "\uB0C9\uAE30 \uB178\uCD9C (\uCD5C\uADFC 2\uCD08 \uB0B4 \uC801\uC911 \uC720\uC9C0 \uC2DC 24% / ICD 2.4\uCD08): \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08)",
+        "nameEn": "Frost Exposure (24% on hit while chaining hits in the last 2s / ICD 2.4s): Frost Resist -15 (4s)",
+        "nameKo": "\uB0C9\uAE30 \uB178\uCD9C (\uCD5C\uADFC 2\uCD08 \uB0B4 \uC801\uC911 \uC720\uC9C0 \uC2DC 24% / ICD 2.4\uCD08): \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FROST_SHRED",
@@ -364,8 +368,9 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 10.0,
-          "icdSeconds": 4.0,
+          "procChancePercent": 24.0,
+          "requireRecentlyHitSeconds": 2.0,
+          "icdSeconds": 2.4,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_FROST_SHRED",
@@ -376,9 +381,9 @@
       {
         "id": "hit_shock_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
-        "name": "\uBC88\uAC1C \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uBC88\uAC1C \uC800\uD56D -15 (4\uCD08)",
-        "nameEn": "Shock Exposure (10% on hit / ICD 4s): Shock Resist -15 (4s)",
-        "nameKo": "\uBC88\uAC1C \uB178\uCD9C (\uC801\uC911 10% / ICD 4\uCD08): \uBC88\uAC1C \uC800\uD56D -15 (4\uCD08)",
+        "name": "\uBC88\uAC1C \uB178\uCD9C (\uCD5C\uADFC 4\uCD08 \uB0B4 \uCC98\uCE58 \uD6C4 \uC801\uC911 30% / ICD 2\uCD08): \uBC88\uAC1C \uC800\uD56D -15 (4\uCD08)",
+        "nameEn": "Shock Exposure (30% on hit after a kill in the last 4s / ICD 2s): Shock Resist -15 (4s)",
+        "nameKo": "\uBC88\uAC1C \uB178\uCD9C (\uCD5C\uADFC 4\uCD08 \uB0B4 \uCC98\uCE58 \uD6C4 \uC801\uC911 30% / ICD 2\uCD08): \uBC88\uAC1C \uC800\uD56D -15 (4\uCD08)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SHOCK_SHRED",
@@ -415,8 +420,9 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 10.0,
-          "icdSeconds": 4.0,
+          "procChancePercent": 30.0,
+          "requireRecentlyKillSeconds": 4.0,
+          "icdSeconds": 2.0,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
@@ -427,9 +433,9 @@
       {
         "id": "hit_conjure_familiar",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FAMILIAR",
-        "name": "\uBB34\uB9AC \uC6B0\uB450\uBA38\uB9AC (\uC801\uC911 12% / ICD 60\uCD08): \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08)",
-        "nameEn": "Pack Leader (12% on hit / ICD 60s): Summon Familiar (60s)",
-        "nameKo": "\uBB34\uB9AC \uC6B0\uB450\uBA38\uB9AC (\uC801\uC911 12% / ICD 60\uCD08): \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08)",
+        "name": "\uBB34\uB9AC \uC6B0\uB450\uBA38\uB9AC (\uC801\uC911 30% / ICD 24\uCD08): \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08)",
+        "nameEn": "Pack Leader (30% on hit / ICD 24s): Summon Familiar (60s)",
+        "nameKo": "\uBB34\uB9AC \uC6B0\uB450\uBA38\uB9AC (\uC801\uC911 30% / ICD 24\uCD08): \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08)",
         "records": null,
         "kid": {
           "type": "Weapon",
@@ -442,8 +448,8 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 12.0,
-          "icdSeconds": 60.0,
+          "procChancePercent": 30.0,
+          "icdSeconds": 24.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000640B6",
@@ -454,9 +460,9 @@
       {
         "id": "hit_flaming_familiar",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FLAMING_FAMILIAR",
-        "name": "\uD3ED\uACA9\uC218 (\uC801\uC911 8% / ICD 25\uCD08): \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658",
-        "nameEn": "Bombardier (8% on hit / ICD 25s): Summon Exploding Flame Familiar",
-        "nameKo": "\uD3ED\uACA9\uC218 (\uC801\uC911 8% / ICD 25\uCD08): \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658",
+        "name": "\uD3ED\uACA9\uC218 (Lucky Hit 36% / ICD 14\uCD08): \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658",
+        "nameEn": "Bombardier (Lucky Hit 36% / ICD 14s): Summon Exploding Flame Familiar",
+        "nameKo": "\uD3ED\uACA9\uC218 (Lucky Hit 36% / ICD 14\uCD08): \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658",
         "records": null,
         "kid": {
           "type": "Weapon",
@@ -469,8 +475,10 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 8.0,
-          "icdSeconds": 25.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 36.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 14.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|0009CE26",
@@ -481,9 +489,9 @@
       {
         "id": "hit_conjure_flame_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FLAME_ATRONACH",
-        "name": "\uC6D0\uC18C \uB3D9\uB9F9 (\uC801\uC911 6% / ICD 90\uCD08): \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
-        "nameEn": "Elemental Ally (6% on hit / ICD 90s): Summon Flame Atronach (60s)",
-        "nameKo": "\uC6D0\uC18C \uB3D9\uB9F9 (\uC801\uC911 6% / ICD 90\uCD08): \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "name": "\uC6D0\uC18C \uB3D9\uB9F9 - \uD654\uC5FC (Lucky Hit 30% / ICD 32\uCD08): \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "nameEn": "Elemental Ally - Flame (Lucky Hit 30% / ICD 32s): Summon Flame Atronach (60s)",
+        "nameKo": "\uC6D0\uC18C \uB3D9\uB9F9 - \uD654\uC5FC (Lucky Hit 30% / ICD 32\uCD08): \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
         "records": null,
         "kid": {
           "type": "Weapon",
@@ -496,8 +504,10 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 6.0,
-          "icdSeconds": 90.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 30.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 32.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C3",
@@ -508,9 +518,9 @@
       {
         "id": "hit_conjure_frost_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FROST_ATRONACH",
-        "name": "\uC6D0\uC18C \uB3D9\uB9F9 (\uC801\uC911 6% / ICD 90\uCD08): \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
-        "nameEn": "Elemental Ally (6% on hit / ICD 90s): Summon Frost Atronach (60s)",
-        "nameKo": "\uC6D0\uC18C \uB3D9\uB9F9 (\uC801\uC911 6% / ICD 90\uCD08): \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "name": "\uC6D0\uC18C \uB3D9\uB9F9 - \uB0C9\uAE30 (Lucky Hit 30% / ICD 32\uCD08): \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "nameEn": "Elemental Ally - Frost (Lucky Hit 30% / ICD 32s): Summon Frost Atronach (60s)",
+        "nameKo": "\uC6D0\uC18C \uB3D9\uB9F9 - \uB0C9\uAE30 (Lucky Hit 30% / ICD 32\uCD08): \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
         "records": null,
         "kid": {
           "type": "Weapon",
@@ -523,8 +533,10 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 6.0,
-          "icdSeconds": 90.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 30.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 32.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C4",
@@ -535,9 +547,9 @@
       {
         "id": "hit_conjure_storm_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_STORM_ATRONACH",
-        "name": "\uD3ED\uD48D \uB3D9\uB9F9 (\uC801\uC911 5% / ICD 120\uCD08): \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
-        "nameEn": "Storm Ally (5% on hit / ICD 120s): Summon Storm Atronach (60s)",
-        "nameKo": "\uD3ED\uD48D \uB3D9\uB9F9 (\uC801\uC911 5% / ICD 120\uCD08): \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "name": "\uD3ED\uD48D \uB3D9\uB9F9 (Lucky Hit 26% / ICD 40\uCD08): \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
+        "nameEn": "Storm Ally (Lucky Hit 26% / ICD 40s): Summon Storm Atronach (60s)",
+        "nameKo": "\uD3ED\uD48D \uB3D9\uB9F9 (Lucky Hit 26% / ICD 40\uCD08): \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08)",
         "records": null,
         "kid": {
           "type": "Weapon",
@@ -550,8 +562,10 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 5.0,
-          "icdSeconds": 120.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 26.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 40.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C5",
@@ -562,9 +576,9 @@
       {
         "id": "hit_conjure_dremora_lord",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_DREMORA_LORD",
-        "name": "\uB370\uC774\uB4DC\uB77C \uACC4\uC57D (\uC801\uC911 3% / ICD 180\uCD08): \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08)",
-        "nameEn": "Daedric Pact (3% on hit / ICD 180s): Summon Dremora Lord (60s)",
-        "nameKo": "\uB370\uC774\uB4DC\uB77C \uACC4\uC57D (\uC801\uC911 3% / ICD 180\uCD08): \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08)",
+        "name": "\uB370\uC774\uB4DC\uB77C \uACC4\uC57D (Lucky Hit 22% / ICD 52\uCD08): \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08)",
+        "nameEn": "Daedric Pact (Lucky Hit 22% / ICD 52s): Summon Dremora Lord (60s)",
+        "nameKo": "\uB370\uC774\uB4DC\uB77C \uACC4\uC57D (Lucky Hit 22% / ICD 52\uCD08): \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08)",
         "records": null,
         "kid": {
           "type": "Weapon",
@@ -577,8 +591,10 @@
         "family": null,
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 3.0,
-          "icdSeconds": 180.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 22.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 52.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|0010DDEC",

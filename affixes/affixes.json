@@ -36,9 +36,9 @@
       {
         "id": "arc_lightning",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING",
-        "name": "아크 번개 (적중 100%): 번개 피해 10 (적중 피해 스케일)",
-        "nameEn": "Arc Lightning (100% on hit): 10 Lightning Damage (Hit Damage Scaling)",
-        "nameKo": "아크 번개 (적중 100%): 번개 피해 10 (적중 피해 스케일)",
+        "name": "연쇄 뇌격 (Lucky Hit 38% / ICD 1.5초): 번개 피해 10 (적중 피해 스케일)",
+        "nameEn": "Chain Lightning (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage (Hit Damage Scaling)",
+        "nameKo": "연쇄 뇌격 (Lucky Hit 38% / ICD 1.5초): 번개 피해 10 (적중 피해 스케일)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_ARC_LIGHTNING",
@@ -70,7 +70,9 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100.0,
-          "icdSeconds": 0.0,
+          "luckyHitChancePercent": 38.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 1.5,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_ARC_LIGHTNING",
@@ -255,9 +257,9 @@
       {
         "id": "hit_fire_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_SHRED",
-        "name": "화염 노출 (적중 10% / ICD 4초): 화염 저항 -15 (4초)",
-        "nameEn": "Fire Exposure (10% on hit / ICD 4s): Fire Resist -15 (4s)",
-        "nameKo": "화염 노출 (적중 10% / ICD 4초): 화염 저항 -15 (4초)",
+        "name": "화염 노출 (Lucky Hit 36% / ICD 2.8초): 화염 저항 -15 (4초)",
+        "nameEn": "Fire Exposure (Lucky Hit 36% / ICD 2.8s): Fire Resist -15 (4s)",
+        "nameKo": "화염 노출 (Lucky Hit 36% / ICD 2.8초): 화염 저항 -15 (4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FIRE_SHRED",
@@ -287,8 +289,10 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 10.0,
-          "icdSeconds": 4.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 36.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 2.8,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_FIRE_SHRED",
@@ -300,9 +304,9 @@
       {
         "id": "hit_frost_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_SHRED",
-        "name": "냉기 노출 (적중 10% / ICD 4초): 냉기 저항 -15 (4초)",
-        "nameEn": "Frost Exposure (10% on hit / ICD 4s): Frost Resist -15 (4s)",
-        "nameKo": "냉기 노출 (적중 10% / ICD 4초): 냉기 저항 -15 (4초)",
+        "name": "냉기 노출 (최근 2초 내 적중 유지 시 24% / ICD 2.4초): 냉기 저항 -15 (4초)",
+        "nameEn": "Frost Exposure (24% on hit while chaining hits in the last 2s / ICD 2.4s): Frost Resist -15 (4s)",
+        "nameKo": "냉기 노출 (최근 2초 내 적중 유지 시 24% / ICD 2.4초): 냉기 저항 -15 (4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FROST_SHRED",
@@ -332,8 +336,9 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 10.0,
-          "icdSeconds": 4.0,
+          "procChancePercent": 24.0,
+          "requireRecentlyHitSeconds": 2.0,
+          "icdSeconds": 2.4,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_FROST_SHRED",
@@ -345,9 +350,9 @@
       {
         "id": "hit_shock_shred",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
-        "name": "번개 노출 (적중 10% / ICD 4초): 번개 저항 -15 (4초)",
-        "nameEn": "Shock Exposure (10% on hit / ICD 4s): Shock Resist -15 (4s)",
-        "nameKo": "번개 노출 (적중 10% / ICD 4초): 번개 저항 -15 (4초)",
+        "name": "번개 노출 (최근 4초 내 처치 후 적중 30% / ICD 2초): 번개 저항 -15 (4초)",
+        "nameEn": "Shock Exposure (30% on hit after a kill in the last 4s / ICD 2s): Shock Resist -15 (4s)",
+        "nameKo": "번개 노출 (최근 4초 내 처치 후 적중 30% / ICD 2초): 번개 저항 -15 (4초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SHOCK_SHRED",
@@ -377,8 +382,9 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 10.0,
-          "icdSeconds": 4.0,
+          "procChancePercent": 30.0,
+          "requireRecentlyKillSeconds": 4.0,
+          "icdSeconds": 2.0,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
@@ -390,9 +396,9 @@
       {
         "id": "hit_conjure_familiar",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FAMILIAR",
-        "name": "무리 우두머리 (적중 12% / ICD 60초): 패밀리어 소환 (60초)",
-        "nameEn": "Pack Leader (12% on hit / ICD 60s): Summon Familiar (60s)",
-        "nameKo": "무리 우두머리 (적중 12% / ICD 60초): 패밀리어 소환 (60초)",
+        "name": "무리 우두머리 (적중 30% / ICD 24초): 패밀리어 소환 (60초)",
+        "nameEn": "Pack Leader (30% on hit / ICD 24s): Summon Familiar (60s)",
+        "nameKo": "무리 우두머리 (적중 30% / ICD 24초): 패밀리어 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -402,8 +408,8 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 12.0,
-          "icdSeconds": 60.0,
+          "procChancePercent": 30.0,
+          "icdSeconds": 24.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000640B6",
@@ -415,9 +421,9 @@
       {
         "id": "hit_flaming_familiar",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FLAMING_FAMILIAR",
-        "name": "폭격수 (적중 8% / ICD 25초): 폭발하는 불꽃 패밀리어 소환",
-        "nameEn": "Bombardier (8% on hit / ICD 25s): Summon Exploding Flame Familiar",
-        "nameKo": "폭격수 (적중 8% / ICD 25초): 폭발하는 불꽃 패밀리어 소환",
+        "name": "폭격수 (Lucky Hit 36% / ICD 14초): 폭발하는 불꽃 패밀리어 소환",
+        "nameEn": "Bombardier (Lucky Hit 36% / ICD 14s): Summon Exploding Flame Familiar",
+        "nameKo": "폭격수 (Lucky Hit 36% / ICD 14초): 폭발하는 불꽃 패밀리어 소환",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -427,8 +433,10 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 8.0,
-          "icdSeconds": 25.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 36.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 14.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|0009CE26",
@@ -440,9 +448,9 @@
       {
         "id": "hit_conjure_flame_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FLAME_ATRONACH",
-        "name": "원소 동맹 (적중 6% / ICD 90초): 화염 아트로낙 소환 (60초)",
-        "nameEn": "Elemental Ally (6% on hit / ICD 90s): Summon Flame Atronach (60s)",
-        "nameKo": "원소 동맹 (적중 6% / ICD 90초): 화염 아트로낙 소환 (60초)",
+        "name": "원소 동맹 - 화염 (Lucky Hit 30% / ICD 32초): 화염 아트로낙 소환 (60초)",
+        "nameEn": "Elemental Ally - Flame (Lucky Hit 30% / ICD 32s): Summon Flame Atronach (60s)",
+        "nameKo": "원소 동맹 - 화염 (Lucky Hit 30% / ICD 32초): 화염 아트로낙 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -452,8 +460,10 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 6.0,
-          "icdSeconds": 90.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 30.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 32.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C3",
@@ -465,9 +475,9 @@
       {
         "id": "hit_conjure_frost_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FROST_ATRONACH",
-        "name": "원소 동맹 (적중 6% / ICD 90초): 냉기 아트로낙 소환 (60초)",
-        "nameEn": "Elemental Ally (6% on hit / ICD 90s): Summon Frost Atronach (60s)",
-        "nameKo": "원소 동맹 (적중 6% / ICD 90초): 냉기 아트로낙 소환 (60초)",
+        "name": "원소 동맹 - 냉기 (Lucky Hit 30% / ICD 32초): 냉기 아트로낙 소환 (60초)",
+        "nameEn": "Elemental Ally - Frost (Lucky Hit 30% / ICD 32s): Summon Frost Atronach (60s)",
+        "nameKo": "원소 동맹 - 냉기 (Lucky Hit 30% / ICD 32초): 냉기 아트로낙 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -477,8 +487,10 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 6.0,
-          "icdSeconds": 90.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 30.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 32.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C4",
@@ -490,9 +502,9 @@
       {
         "id": "hit_conjure_storm_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_STORM_ATRONACH",
-        "name": "폭풍 동맹 (적중 5% / ICD 120초): 폭풍 아트로낙 소환 (60초)",
-        "nameEn": "Storm Ally (5% on hit / ICD 120s): Summon Storm Atronach (60s)",
-        "nameKo": "폭풍 동맹 (적중 5% / ICD 120초): 폭풍 아트로낙 소환 (60초)",
+        "name": "폭풍 동맹 (Lucky Hit 26% / ICD 40초): 폭풍 아트로낙 소환 (60초)",
+        "nameEn": "Storm Ally (Lucky Hit 26% / ICD 40s): Summon Storm Atronach (60s)",
+        "nameKo": "폭풍 동맹 (Lucky Hit 26% / ICD 40초): 폭풍 아트로낙 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -502,8 +514,10 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 5.0,
-          "icdSeconds": 120.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 26.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 40.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C5",
@@ -515,9 +529,9 @@
       {
         "id": "hit_conjure_dremora_lord",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_DREMORA_LORD",
-        "name": "데이드라 계약 (적중 3% / ICD 180초): 드레모라 군주 소환 (60초)",
-        "nameEn": "Daedric Pact (3% on hit / ICD 180s): Summon Dremora Lord (60s)",
-        "nameKo": "데이드라 계약 (적중 3% / ICD 180초): 드레모라 군주 소환 (60초)",
+        "name": "데이드라 계약 (Lucky Hit 22% / ICD 52초): 드레모라 군주 소환 (60초)",
+        "nameEn": "Daedric Pact (Lucky Hit 22% / ICD 52s): Summon Dremora Lord (60s)",
+        "nameKo": "데이드라 계약 (Lucky Hit 22% / ICD 52초): 드레모라 군주 소환 (60초)",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -527,8 +541,10 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 3.0,
-          "icdSeconds": 180.0,
+          "procChancePercent": 100.0,
+          "luckyHitChancePercent": 22.0,
+          "luckyHitProcCoefficient": 1.0,
+          "icdSeconds": 52.0,
           "action": {
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|0010DDEC",
