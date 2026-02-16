@@ -1,6 +1,7 @@
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
+#include "CalamityAffixes/TriggerGuards.h"
 
 #include <algorithm>
 #include <array>
@@ -240,6 +241,53 @@ namespace
 		return true;
 	}
 
+	bool CheckFixedWindowBudget()
+	{
+		std::uint64_t windowStartMs = 0u;
+		std::uint32_t consumed = 0u;
+
+		// Disabled budget settings should always pass.
+		if (!CalamityAffixes::TryConsumeFixedWindowBudget(100u, 0u, 5u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected windowMs=0 to disable budget gate\n";
+			return false;
+		}
+		if (!CalamityAffixes::TryConsumeFixedWindowBudget(100u, 50u, 0u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected maxPerWindow=0 to disable budget gate\n";
+			return false;
+		}
+
+		windowStartMs = 0u;
+		consumed = 0u;
+
+		// First two consumes pass, third in same window fails.
+		if (!CalamityAffixes::TryConsumeFixedWindowBudget(100u, 50u, 2u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected first consume to pass\n";
+			return false;
+		}
+		if (!CalamityAffixes::TryConsumeFixedWindowBudget(120u, 50u, 2u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected second consume to pass within same window\n";
+			return false;
+		}
+		if (CalamityAffixes::TryConsumeFixedWindowBudget(130u, 50u, 2u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected third consume in same window to fail\n";
+			return false;
+		}
+
+		// New window should reset budget.
+		if (!CalamityAffixes::TryConsumeFixedWindowBudget(151u, 50u, 2u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected consume to pass after window rollover\n";
+			return false;
+		}
+
+		// Time rewind should also reset window safely.
+		if (!CalamityAffixes::TryConsumeFixedWindowBudget(40u, 50u, 2u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected consume to pass after timestamp rewind reset\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckShuffleBagSanitizeAndRollConstraints()
 	{
 		struct MockAffix
@@ -404,5 +452,6 @@ int main()
 	const bool lootSelectionOk = CheckUniformLootRollSelection();
 	const bool shuffleBagSelectionOk = CheckShuffleBagLootRollSelection();
 	const bool shuffleBagConstraintsOk = CheckShuffleBagSanitizeAndRollConstraints();
-	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && shuffleBagConstraintsOk) ? 0 : 1;
+	const bool fixedWindowBudgetOk = CheckFixedWindowBudget();
+	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && shuffleBagConstraintsOk && fixedWindowBudgetOk) ? 0 : 1;
 }

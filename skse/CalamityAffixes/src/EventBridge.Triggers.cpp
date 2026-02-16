@@ -66,10 +66,10 @@ namespace CalamityAffixes
 				_perTargetCooldownStore.Commit(a_key.token, a_key.target, a_perTargetIcd, a_now);
 				}
 
-			bool EventBridge::ResolveNonHostileOutgoingFirstHitAllowance(
-				RE::Actor* a_owner,
-				RE::Actor* a_target,
-				bool a_hostileEitherDirection,
+	bool EventBridge::ResolveNonHostileOutgoingFirstHitAllowance(
+		RE::Actor* a_owner,
+		RE::Actor* a_target,
+		bool a_hostileEitherDirection,
 				std::chrono::steady_clock::time_point a_now)
 			{
 				if (!a_owner || !a_target) {
@@ -83,6 +83,16 @@ namespace CalamityAffixes
 					a_target->IsPlayerRef(),
 					a_now);
 			}
+
+	bool EventBridge::TryConsumeTriggerProcBudget(std::chrono::steady_clock::time_point a_now) noexcept
+	{
+		return TryConsumeFixedWindowBudget(
+			ToNonNegativeMilliseconds(a_now),
+			static_cast<std::uint64_t>(_loot.triggerProcBudgetWindowMs),
+			_loot.triggerProcBudgetPerWindow,
+			_triggerProcBudgetWindowStartMs,
+			_triggerProcBudgetConsumed);
+	}
 
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
@@ -117,6 +127,7 @@ namespace CalamityAffixes
 			return;
 		}
 
+		bool loggedProcBudgetDenied = false;
 		for (const auto i : *indices) {
 			if (i >= _affixes.size() || i >= _activeCounts.size() || _activeCounts[i] == 0) {
 				continue;
@@ -144,6 +155,17 @@ namespace CalamityAffixes
 				if (roll >= chance) {
 					continue;
 				}
+			}
+
+			if (!TryConsumeTriggerProcBudget(now)) {
+				if (_loot.debugLog && !loggedProcBudgetDenied) {
+					spdlog::debug(
+						"CalamityAffixes: trigger proc budget exhausted (budget={} / windowMs={}).",
+						_loot.triggerProcBudgetPerWindow,
+						_loot.triggerProcBudgetWindowMs);
+					loggedProcBudgetDenied = true;
+				}
+				continue;
 			}
 
 			const auto effectiveIcdMs = ResolveTriggerProcCooldownMs(

@@ -47,6 +47,9 @@
         "dotTagSafetyAutoDisable": { "type": "boolean" },
         "dotTagSafetyUniqueEffectThreshold": { "type": "integer", "minimum": 0, "maximum": 4096 },
         "trapGlobalMaxActive": { "type": "integer", "minimum": 0, "maximum": 4096 },
+        "trapCastBudgetPerTick": { "type": "integer", "minimum": 0, "maximum": 256 },
+        "triggerProcBudgetPerWindow": { "type": "integer", "minimum": 0, "maximum": 512 },
+        "triggerProcBudgetWindowMs": { "type": "integer", "minimum": 0, "maximum": 5000 },
         "cleanupInvalidLegacyAffixes": { "type": "boolean" },
         "armorEditorIdDenyContains": {
           "type": "array",

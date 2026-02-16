@@ -179,6 +179,7 @@ namespace CalamityAffixes
 		trap.rearmDelay = a_action.trapRearmDelay;
 		trap.maxTriggers = a_action.trapMaxTriggers;
 		trap.triggeredCount = 0;
+		trap.maxTargetsPerTrigger = a_action.trapMaxTargetsPerTrigger;
 		return trap;
 	}
 
@@ -190,13 +191,14 @@ namespace CalamityAffixes
 
 		const char* extraName = (a_trap.extraSpell && a_trap.extraSpell->GetName()) ? a_trap.extraSpell->GetName() : "<none>";
 		spdlog::debug(
-			"CalamityAffixes: trap spawned (token={}, radius={}, ttlMs={}, armDelayMs={}, rearmDelayMs={}, maxTriggers={}, extra={}, pos=({}, {}, {})).",
+			"CalamityAffixes: trap spawned (token={}, radius={}, ttlMs={}, armDelayMs={}, rearmDelayMs={}, maxTriggers={}, maxTargetsPerTrigger={}, extra={}, pos=({}, {}, {})).",
 			a_trap.sourceToken,
 			a_trap.radius,
 			a_action.trapTtl.count(),
 			a_action.trapArmDelay.count(),
 			a_action.trapRearmDelay.count(),
 			a_action.trapMaxTriggers,
+			a_action.trapMaxTargetsPerTrigger,
 			extraName,
 			a_trap.position.x,
 			a_trap.position.y,

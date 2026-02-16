@@ -51,6 +51,18 @@ public sealed class LootSpec
     [JsonPropertyName("trapGlobalMaxActive")]
     public int TrapGlobalMaxActive { get; init; } = 64;
 
+    // Tick-level cast budget for SpawnTrap processing (0 = unlimited).
+    [JsonPropertyName("trapCastBudgetPerTick")]
+    public int TrapCastBudgetPerTick { get; init; } = 8;
+
+    // Trigger proc budget in fixed window (0 = unlimited).
+    [JsonPropertyName("triggerProcBudgetPerWindow")]
+    public int TriggerProcBudgetPerWindow { get; init; } = 12;
+
+    // Window size for Trigger proc budget in milliseconds (0 = unlimited).
+    [JsonPropertyName("triggerProcBudgetWindowMs")]
+    public int TriggerProcBudgetWindowMs { get; init; } = 100;
+
     // If true, removes stale legacy affix mappings from items that are no longer loot-eligible.
     [JsonPropertyName("cleanupInvalidLegacyAffixes")]
     public bool CleanupInvalidLegacyAffixes { get; init; } = true;

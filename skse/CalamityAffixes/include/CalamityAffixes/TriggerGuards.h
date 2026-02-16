@@ -55,6 +55,36 @@ namespace CalamityAffixes
 		return a_nowMs < a_nextAllowedMs;
 	}
 
+	// Shared fixed-window budget gate used to cap bursty proc execution.
+	[[nodiscard]] constexpr bool TryConsumeFixedWindowBudget(
+		std::uint64_t a_nowMs,
+		std::uint64_t a_windowMs,
+		std::uint32_t a_maxPerWindow,
+		std::uint64_t& a_inOutWindowStartMs,
+		std::uint32_t& a_inOutConsumed) noexcept
+	{
+		// 0 means "disabled / unlimited".
+		if (a_windowMs == 0u || a_maxPerWindow == 0u) {
+			return true;
+		}
+
+		const bool staleWindow =
+			a_inOutWindowStartMs == 0u ||
+			a_nowMs < a_inOutWindowStartMs ||
+			(a_nowMs - a_inOutWindowStartMs) >= a_windowMs;
+		if (staleWindow) {
+			a_inOutWindowStartMs = a_nowMs;
+			a_inOutConsumed = 0u;
+		}
+
+		if (a_inOutConsumed >= a_maxPerWindow) {
+			return false;
+		}
+
+		a_inOutConsumed += 1u;
+		return true;
+	}
+
 	// Safety guard for trigger actions that are configured as guaranteed proc with zero ICD.
 	// This prevents runaway proc storms without changing non-guaranteed behavior.
 	[[nodiscard]] constexpr std::int64_t ResolveTriggerProcCooldownMs(

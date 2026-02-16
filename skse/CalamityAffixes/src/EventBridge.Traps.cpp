@@ -35,7 +35,24 @@ namespace CalamityAffixes
 			return;
 		}
 
+		const std::size_t trapCastBudgetPerTick = static_cast<std::size_t>(_loot.trapCastBudgetPerTick);
+		std::size_t trapCastsConsumed = 0u;
+		bool loggedBudgetExhausted = false;
+		const auto hasTrapCastBudget = [&](std::size_t a_cost = 1u) noexcept {
+			return trapCastBudgetPerTick == 0u || (trapCastsConsumed + a_cost) <= trapCastBudgetPerTick;
+		};
+
 		for (std::size_t i = 0; i < _traps.size();) {
+			if (!hasTrapCastBudget()) {
+				if (_loot.debugLog && !loggedBudgetExhausted) {
+					spdlog::debug(
+						"CalamityAffixes: trap cast budget exhausted for this tick (budget={}).",
+						trapCastBudgetPerTick);
+					loggedBudgetExhausted = true;
+				}
+				break;
+			}
+
 			auto& trap = _traps[i];
 			if (now < trap.armedAt) {
 				++i;
@@ -57,9 +74,15 @@ namespace CalamityAffixes
 
 			bool triggered = false;
 			RE::Actor* triggeredTarget = nullptr;
+			std::uint32_t triggeredTargets = 0u;
+			const std::uint32_t maxTargetsPerTrigger = std::max(1u, trap.maxTargetsPerTrigger);
 			const float radiusSq = trap.radius * trap.radius;
 
 			processLists->ForEachHighActor([&](RE::Actor& a) {
+				if (!hasTrapCastBudget()) {
+					return RE::BSContainer::ForEachResult::kStop;
+				}
+
 				if (&a == owner) {
 					return RE::BSContainer::ForEachResult::kContinue;
 				}
@@ -81,6 +104,9 @@ namespace CalamityAffixes
 					return RE::BSContainer::ForEachResult::kContinue;
 				}
 
+				if (!hasTrapCastBudget()) {
+					return RE::BSContainer::ForEachResult::kStop;
+				}
 				magicCaster->CastSpellImmediate(
 					trap.spell,
 					trap.noHitEffectArt,
@@ -89,8 +115,9 @@ namespace CalamityAffixes
 					false,
 					trap.magnitudeOverride,
 					owner);
+				trapCastsConsumed += 1u;
 
-				if (trap.extraSpell) {
+				if (trap.extraSpell && hasTrapCastBudget()) {
 					magicCaster->CastSpellImmediate(
 						trap.extraSpell,
 						false,
@@ -99,19 +126,31 @@ namespace CalamityAffixes
 						false,
 						0.0f,
 						owner);
+					trapCastsConsumed += 1u;
 				}
 
+				if (!triggered) {
+					triggeredTarget = std::addressof(a);
+				}
 				triggered = true;
-				triggeredTarget = std::addressof(a);
-				return RE::BSContainer::ForEachResult::kStop;
+				triggeredTargets += 1u;
+
+				if (triggeredTargets >= maxTargetsPerTrigger) {
+					return RE::BSContainer::ForEachResult::kStop;
+				}
+				if (!hasTrapCastBudget()) {
+					return RE::BSContainer::ForEachResult::kStop;
+				}
+				return RE::BSContainer::ForEachResult::kContinue;
 			});
 
 			if (triggered) {
 				if (_loot.debugLog) {
 					spdlog::debug(
-						"CalamityAffixes: trap triggered (token={}, target={}, count={} / max={}).",
+						"CalamityAffixes: trap triggered (token={}, target={}, targetsHit={}, count={} / max={}).",
 						trap.sourceToken,
 						triggeredTarget ? triggeredTarget->GetName() : "<none>",
+						triggeredTargets,
 						trap.triggeredCount + 1,
 						trap.maxTriggers);
 				}

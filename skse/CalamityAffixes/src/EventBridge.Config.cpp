@@ -145,6 +145,8 @@ namespace CalamityAffixes
 		_configLoaded = false;
 		_lastHealthDamageSignature = 0;
 		_lastHealthDamageSignatureAt = {};
+		_triggerProcBudgetWindowStartMs = 0u;
+		_triggerProcBudgetConsumed = 0u;
 	}
 
 		void EventBridge::LoadConfig()
@@ -623,6 +625,7 @@ namespace CalamityAffixes
 				out.action.trapRadius = action.value("radius", 0.0f);
 				out.action.trapMaxActive = action.value("maxActive", 2u);
 				out.action.trapMaxTriggers = action.value("maxTriggers", 1u);
+				out.action.trapMaxTargetsPerTrigger = action.value("maxTargetsPerTrigger", 1u);
 				out.action.trapRequireCritOrPowerAttack = action.value("requireCritOrPowerAttack", false);
 				out.action.trapRequireWeaponHit = action.value("requireWeaponHit", true);
 
@@ -671,6 +674,11 @@ namespace CalamityAffixes
 					// 0 = unlimited triggers until TTL.
 				} else if (out.action.trapMaxTriggers < 1u) {
 					out.action.trapMaxTriggers = 1u;
+				}
+				if (out.action.trapMaxTargetsPerTrigger == 0u) {
+					out.action.trapMaxTargetsPerTrigger = 1u;
+				} else if (out.action.trapMaxTargetsPerTrigger > 64u) {
+					out.action.trapMaxTargetsPerTrigger = 64u;
 				}
 				if (out.action.trapRearmDelay.count() <= 0) {
 					// No rearm: force one-shot semantics regardless of maxTriggers.
@@ -745,11 +753,14 @@ namespace CalamityAffixes
 		RebuildActiveCounts();
 
 			SKSE::log::info(
-				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%).",
+				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
 				_affixes.size(),
 				_lootWeaponAffixes.size(), _lootArmorAffixes.size(),
 				_lootWeaponSuffixes.size(), _lootArmorSuffixes.size(),
-				_loot.chancePercent);
+				_loot.chancePercent,
+				_loot.triggerProcBudgetPerWindow,
+				_loot.triggerProcBudgetWindowMs,
+				_loot.trapCastBudgetPerTick);
 
 		if (_affixes.empty()) {
 			SKSE::log::error("CalamityAffixes: no affixes loaded. Is the generated CalamityAffixes plugin enabled?");
@@ -797,6 +808,9 @@ namespace CalamityAffixes
 			const double dotTagSafetyThreshold =
 				loot.value("dotTagSafetyUniqueEffectThreshold", static_cast<double>(_loot.dotTagSafetyUniqueEffectThreshold));
 			const double trapGlobalMaxActive = loot.value("trapGlobalMaxActive", static_cast<double>(_loot.trapGlobalMaxActive));
+			const double trapCastBudgetPerTick = loot.value("trapCastBudgetPerTick", static_cast<double>(_loot.trapCastBudgetPerTick));
+			const double triggerProcBudgetPerWindow = loot.value("triggerProcBudgetPerWindow", static_cast<double>(_loot.triggerProcBudgetPerWindow));
+			const double triggerProcBudgetWindowMs = loot.value("triggerProcBudgetWindowMs", static_cast<double>(_loot.triggerProcBudgetWindowMs));
 			_loot.cleanupInvalidLegacyAffixes = loot.value("cleanupInvalidLegacyAffixes", _loot.cleanupInvalidLegacyAffixes);
 			_loot.nameFormat = loot.value("nameFormat", std::string{ "{base} [{affix}]" });
 
@@ -842,6 +856,27 @@ namespace CalamityAffixes
 			} else {
 				const double clamped = std::clamp(trapGlobalMaxActive, 1.0, 4096.0);
 				_loot.trapGlobalMaxActive = static_cast<std::uint32_t>(clamped);
+			}
+
+			if (trapCastBudgetPerTick <= 0.0) {
+				_loot.trapCastBudgetPerTick = 0u;
+			} else {
+				const double clamped = std::clamp(trapCastBudgetPerTick, 1.0, 256.0);
+				_loot.trapCastBudgetPerTick = static_cast<std::uint32_t>(clamped);
+			}
+
+			if (triggerProcBudgetPerWindow <= 0.0) {
+				_loot.triggerProcBudgetPerWindow = 0u;
+			} else {
+				const double clamped = std::clamp(triggerProcBudgetPerWindow, 1.0, 512.0);
+				_loot.triggerProcBudgetPerWindow = static_cast<std::uint32_t>(clamped);
+			}
+
+			if (triggerProcBudgetWindowMs <= 0.0) {
+				_loot.triggerProcBudgetWindowMs = 0u;
+			} else {
+				const double clamped = std::clamp(triggerProcBudgetWindowMs, 1.0, 5000.0);
+				_loot.triggerProcBudgetWindowMs = static_cast<std::uint32_t>(clamped);
 			}
 		}
 

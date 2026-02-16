@@ -296,6 +296,7 @@ namespace CalamityAffixes
 			std::chrono::milliseconds trapRearmDelay{ 0 };
 			std::uint32_t trapMaxActive{ 0 };
 			std::uint32_t trapMaxTriggers{ 1 };
+			std::uint32_t trapMaxTargetsPerTrigger{ 1 };
 			std::vector<RE::SpellItem*> trapExtraSpells{};
 			bool trapRequireCritOrPowerAttack{ false };
 			bool trapRequireWeaponHit{ true };
@@ -334,6 +335,7 @@ namespace CalamityAffixes
 			std::chrono::milliseconds rearmDelay{ 0 };
 			std::uint32_t maxTriggers{ 1 };
 			std::uint32_t triggeredCount{ 0 };
+			std::uint32_t maxTargetsPerTrigger{ 1 };
 		};
 
 			struct InstanceRuntimeState
@@ -464,6 +466,9 @@ namespace CalamityAffixes
 			bool dotTagSafetyAutoDisable{ false };
 			std::uint32_t dotTagSafetyUniqueEffectThreshold{ 96 };
 			std::uint32_t trapGlobalMaxActive{ 64 };
+			std::uint32_t trapCastBudgetPerTick{ 8 };
+			std::uint32_t triggerProcBudgetPerWindow{ 12 };
+			std::uint32_t triggerProcBudgetWindowMs{ 100 };
 			bool cleanupInvalidLegacyAffixes{ true };
 			std::vector<std::string> armorEditorIdDenyContains{};
 			std::string nameFormat{ "{base} [{affix}]" };
@@ -550,6 +555,8 @@ namespace CalamityAffixes
 		std::uint32_t _procDepth{ 0 };
 		bool _healthDamageHookSeen{ false };
 		std::chrono::steady_clock::time_point _healthDamageHookLastAt{};
+		std::uint64_t _triggerProcBudgetWindowStartMs{ 0u };
+		std::uint32_t _triggerProcBudgetConsumed{ 0u };
 
 		std::chrono::steady_clock::time_point _lastHitAt{};
 		LastHitKey _lastHit{};
@@ -795,6 +802,7 @@ namespace CalamityAffixes
 			float a_extraDamage);
 		void ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell);
 		bool ShouldSuppressDuplicateHit(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept;
+		[[nodiscard]] bool TryConsumeTriggerProcBudget(std::chrono::steady_clock::time_point a_now) noexcept;
 
 		// Action execution helpers (dispatch + typed executors).
 		void ExecuteDebugNotifyAction(const Action& a_action);

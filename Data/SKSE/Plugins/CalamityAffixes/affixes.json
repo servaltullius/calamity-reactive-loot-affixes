@@ -11,6 +11,9 @@
     "dotTagSafetyAutoDisable": false,
     "dotTagSafetyUniqueEffectThreshold": 96,
     "trapGlobalMaxActive": 64,
+    "trapCastBudgetPerTick": 8,
+    "triggerProcBudgetPerWindow": 12,
+    "triggerProcBudgetWindowMs": 100,
     "cleanupInvalidLegacyAffixes": true,
     "armorEditorIdDenyContains": [
       "adventurerguild",
@@ -2112,6 +2115,7 @@
             "armDelaySeconds": 0.6,
             "maxActive": 1,
             "maxTriggers": 1,
+            "maxTargetsPerTrigger": 2,
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_POISON",
             "noHitEffectArt": true
@@ -2170,6 +2174,7 @@
             "armDelaySeconds": 0.6,
             "maxActive": 1,
             "maxTriggers": 1,
+            "maxTargetsPerTrigger": 2,
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
             "extraSpells": [
@@ -2282,6 +2287,7 @@
             "armDelaySeconds": 0.6,
             "maxActive": 1,
             "maxTriggers": 1,
+            "maxTargetsPerTrigger": 2,
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
             "extraSpells": [

@@ -1,6 +1,7 @@
 using CalamityAffixes.Generator.Spec;
 using CalamityAffixes.Generator.Writers;
 using System.Text;
+using System.Text.Json;
 
 namespace CalamityAffixes.Generator.Tests;
 
@@ -154,6 +155,66 @@ public sealed class GeneratorRunnerTests
             var text = File.ReadAllText(Path.Combine(dataDir, "CalamityAffixes_DISTR.ini"));
             Assert.Contains("; Test SPID rule", text);
             Assert.Contains("Spell = Fireball|NONE|NONE|NONE|NONE|NONE|100", text);
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void Generate_PreservesLootBudgetFieldsInRuntimeJson()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes.esp",
+            EslFlag = true,
+            Loot = new LootSpec
+            {
+                ChancePercent = 30.0,
+                RunewordFragmentChancePercent = 40.0,
+                RenameItem = true,
+                SharedPool = true,
+                DebugLog = false,
+                DotTagSafetyAutoDisable = false,
+                DotTagSafetyUniqueEffectThreshold = 96,
+                TrapGlobalMaxActive = 64,
+                TrapCastBudgetPerTick = 7,
+                TriggerProcBudgetPerWindow = 11,
+                TriggerProcBudgetWindowMs = 90,
+                CleanupInvalidLegacyAffixes = true,
+                ArmorEditorIdDenyContains = ["lootbox"],
+                NameFormat = "{base}[{affix}]",
+            },
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        var dataDir = Path.Combine(tempRoot, "Data");
+        Directory.CreateDirectory(dataDir);
+
+        try
+        {
+            GeneratorRunner.Generate(spec, dataDir);
+
+            var runtimeJsonPath = Path.Combine(dataDir, "SKSE", "Plugins", "CalamityAffixes", "affixes.json");
+            Assert.True(File.Exists(runtimeJsonPath));
+
+            using var doc = JsonDocument.Parse(File.ReadAllText(runtimeJsonPath, Encoding.UTF8));
+            var loot = doc.RootElement.GetProperty("loot");
+            Assert.Equal(7, loot.GetProperty("trapCastBudgetPerTick").GetInt32());
+            Assert.Equal(11, loot.GetProperty("triggerProcBudgetPerWindow").GetInt32());
+            Assert.Equal(90, loot.GetProperty("triggerProcBudgetWindowMs").GetInt32());
         }
         finally
         {
