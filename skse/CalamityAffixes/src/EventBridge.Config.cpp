@@ -138,6 +138,7 @@ namespace CalamityAffixes
 		_equipResync.nextAtMs = 0;
 		_equipResync.intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count());
 		_loot = {};
+		_lootChanceEligibleFailStreak = 0;
 		_runtimeEnabled = true;
 		_runtimeProcChanceMult = 1.0f;
 		_allowNonHostilePlayerOwnedOutgoingProcs.store(false, std::memory_order_relaxed);
@@ -333,6 +334,14 @@ namespace CalamityAffixes
 			}
 
 			const auto& kid = a.value("kid", nlohmann::json::object());
+			const float kidChancePct = kid.is_object() ?
+				static_cast<float>(kid.value("chance", 0.0)) :
+				0.0f;
+			if (kidChancePct > 0.0f) {
+				// Loot-time drop weighting is sourced from explicit loot weight or legacy kid.chance.
+				// Keep this independent from runtime trigger proc chance.
+				out.lootWeight = kidChancePct;
+			}
 			if (kid.is_object()) {
 				const auto type = kid.value("type", std::string{});
 				out.lootType = ParseLootItemType(type);
@@ -351,7 +360,7 @@ namespace CalamityAffixes
 
 			if (out.slot == AffixSlot::kSuffix) {
 				out.trigger = Trigger::kHit;
-				out.procChancePct = static_cast<float>(kid.value("chance", 1.0));
+				out.procChancePct = (kidChancePct > 0.0f) ? kidChancePct : 1.0f;
 
 				const auto passiveSpellId = action.value("passiveSpellEditorId", std::string{});
 				if (!passiveSpellId.empty()) {
@@ -391,14 +400,6 @@ namespace CalamityAffixes
 				out.procChancePct = runtime.value("procChancePercent", 0.0f);
 				if (const auto lwIt = runtime.find("lootWeight"); lwIt != runtime.end() && lwIt->is_number()) {
 					out.lootWeight = lwIt->get<float>();
-				}
-				// Backward-compat: legacy prefix entries used kid.chance as loot weight while
-				// runtime.procChancePercent remained 0 for action semantics.
-				if (out.lootWeight < 0.0f && out.procChancePct <= 0.0f) {
-					const auto kidChance = static_cast<float>(kid.value("chance", 0.0));
-					if (kidChance > 0.0f) {
-						out.lootWeight = kidChance;
-					}
 				}
 				const float icdSeconds = runtime.value("icdSeconds", 0.0f);
 				if (icdSeconds > 0.0f) {

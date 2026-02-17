@@ -395,10 +395,10 @@ namespace CalamityAffixes
 			float procChancePct{ 0.0f };
 			// Weighted loot source:
 			// - lootWeight >= 0 uses that value
-			// - lootWeight < 0 falls back to procChancePct
+			// - lootWeight < 0 means "not rollable from loot-time pool"
 			// Values <=0 are excluded from weighted rolling.
 			float lootWeight{ -1.0f };
-			[[nodiscard]] constexpr float EffectiveLootWeight() const noexcept { return (lootWeight >= 0.0f) ? lootWeight : procChancePct; }
+			[[nodiscard]] constexpr float EffectiveLootWeight() const noexcept { return (lootWeight >= 0.0f) ? lootWeight : 0.0f; }
 			std::chrono::milliseconds icd{ 0 };
 			std::chrono::milliseconds perTargetIcd{ 0 };
 			std::chrono::milliseconds requireRecentlyHit{ 0 };
@@ -460,6 +460,7 @@ namespace CalamityAffixes
 
 		static constexpr std::array<float, kMaxAffixesPerItem> kAffixCountWeights = { 70.0f, 25.0f, 5.0f };
 		static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f };
+		static constexpr std::uint32_t kLootChancePityFailThreshold = 3u;
 		static constexpr std::size_t kLootEvaluatedRecentKeep = 2048;
 		static constexpr std::size_t kLootEvaluatedPruneEveryInserts = 128;
 
@@ -554,6 +555,7 @@ namespace CalamityAffixes
 		std::unordered_set<std::uint64_t> _lootEvaluatedInstances;
 		std::deque<std::uint64_t> _lootEvaluatedRecent;
 		std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
+		std::uint32_t _lootChanceEligibleFailStreak{ 0 };
 		std::vector<float> _activeSlotPenalty;
 		std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash> _instanceStates;
 		std::unordered_map<std::uint64_t, std::vector<std::uint64_t>> _equippedInstanceKeysByToken;
@@ -709,6 +711,7 @@ namespace CalamityAffixes
 			LootItemType a_itemType,
 			const std::vector<std::string>* a_excludeFamilies = nullptr);
 		[[nodiscard]] std::uint8_t RollAffixCount();
+		[[nodiscard]] bool RollLootChanceGateForEligibleInstance();
 		void ApplyMultipleAffixes(
 			RE::InventoryChanges* a_changes,
 			RE::InventoryEntryData* a_entry,

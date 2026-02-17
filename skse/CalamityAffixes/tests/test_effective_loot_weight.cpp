@@ -1,16 +1,17 @@
-// Tests for EffectiveLootWeight compatibility gate:
-//   return (lootWeight >= 0.0f) ? lootWeight : procChancePct;
+// Tests for EffectiveLootWeight gate:
+//   return (lootWeight >= 0.0f) ? lootWeight : 0.0f;
 // We replicate the exact expression here since AffixRuntime lives behind
 // the RE/Skyrim.h wall and can't be included in lightweight static tests.
 
 static constexpr float EffectiveLootWeight(float procChancePct, float lootWeight) noexcept
 {
-	return (lootWeight >= 0.0f) ? lootWeight : procChancePct;
+	(void)procChancePct;
+	return (lootWeight >= 0.0f) ? lootWeight : 0.0f;
 }
 
-// Default lootWeight (-1) → fall back to procChancePct
-static_assert(EffectiveLootWeight(25.0f, -1.0f) == 25.0f,
-	"Default lootWeight should fall back to procChancePct");
+// Default lootWeight (-1) => not rollable.
+static_assert(EffectiveLootWeight(25.0f, -1.0f) == 0.0f,
+	"Default lootWeight should be excluded from loot-time rolling");
 
 // Explicit lootWeight overrides procChancePct for eligibility gating.
 static_assert(EffectiveLootWeight(0.0f, 15.0f) == 15.0f,
@@ -22,12 +23,12 @@ static_assert(EffectiveLootWeight(100.0f, 0.0f) == 0.0f,
 
 // Both zero → returns 0 (excluded)
 static_assert(EffectiveLootWeight(0.0f, -1.0f) == 0.0f,
-	"procChancePct=0 with no lootWeight should return 0");
+	"procChancePct=0 with no lootWeight should be excluded");
 
 // Armor prefix pattern: procChancePct=0 (special-action semantics), lootWeight=20 enables loot eligibility.
 static_assert(EffectiveLootWeight(0.0f, 20.0f) == 20.0f,
 	"Armor prefix: procChancePct=0 with lootWeight=20 should use lootWeight");
 
-// Standard weapon prefix: procChancePct=100, no lootWeight override (legacy fallback path).
-static_assert(EffectiveLootWeight(100.0f, -1.0f) == 100.0f,
-	"Weapon prefix: procChancePct=100 with default lootWeight should use procChancePct");
+// proc chance and loot chance are independent.
+static_assert(EffectiveLootWeight(100.0f, -1.0f) == 0.0f,
+	"Weapon prefix: procChancePct must not implicitly become loot weight");

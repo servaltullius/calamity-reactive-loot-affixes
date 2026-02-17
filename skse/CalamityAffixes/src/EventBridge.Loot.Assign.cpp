@@ -167,17 +167,8 @@ namespace CalamityAffixes
 
 	std::optional<std::size_t> EventBridge::RollLootAffixIndex(LootItemType a_itemType, const std::vector<std::size_t>* a_exclude, bool a_skipChanceCheck)
 	{
-		if (!a_skipChanceCheck) {
-			if (_loot.chancePercent <= 0.0f) {
-				return std::nullopt;
-			}
-
-			if (_loot.chancePercent < 100.0f) {
-				std::uniform_real_distribution<float> dist(0.0f, 100.0f);
-				if (dist(_rng) >= _loot.chancePercent) {
-					return std::nullopt;
-				}
-			}
+		if (!a_skipChanceCheck && !RollLootChanceGateForEligibleInstance()) {
+			return std::nullopt;
 		}
 
 		// Build eligible pool, excluding already-chosen indices and disabled entries.
@@ -270,6 +261,41 @@ namespace CalamityAffixes
 			static_cast<double>(kAffixCountWeights[2])
 		});
 		return static_cast<std::uint8_t>(dist(_rng) + 1);
+	}
+
+	bool EventBridge::RollLootChanceGateForEligibleInstance()
+	{
+		const float chancePct = std::clamp(_loot.chancePercent, 0.0f, 100.0f);
+		if (chancePct <= 0.0f) {
+			_lootChanceEligibleFailStreak = 0;
+			return false;
+		}
+
+		if (_lootChanceEligibleFailStreak >= kLootChancePityFailThreshold) {
+			_lootChanceEligibleFailStreak = 0;
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: loot chance pity triggered (threshold={} failures).",
+					kLootChancePityFailThreshold);
+			}
+			return true;
+		}
+
+		if (chancePct >= 100.0f) {
+			_lootChanceEligibleFailStreak = 0;
+			return true;
+		}
+
+		std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+		if (dist(_rng) < chancePct) {
+			_lootChanceEligibleFailStreak = 0;
+			return true;
+		}
+
+		if (_lootChanceEligibleFailStreak < std::numeric_limits<std::uint32_t>::max()) {
+			++_lootChanceEligibleFailStreak;
+		}
+		return false;
 	}
 
 	bool EventBridge::SanitizeInstanceAffixSlotsForCurrentLootRules(
@@ -450,14 +476,9 @@ namespace CalamityAffixes
 		MarkLootEvaluatedInstance(key);
 
 		// Global per-item loot chance gate (applies once regardless of P/S composition).
-		if (_loot.chancePercent <= 0.0f) {
+		// Includes pity: after N consecutive eligible failures, next eligible roll is guaranteed.
+		if (!RollLootChanceGateForEligibleInstance()) {
 			return;
-		}
-		if (_loot.chancePercent < 100.0f) {
-			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
-			if (dist(_rng) >= _loot.chancePercent) {
-				return;
-			}
 		}
 
 		// Roll how many affixes this item gets (1-3)
@@ -521,8 +542,13 @@ namespace CalamityAffixes
 		}
 
 		if (slots.count == 0) {
+			if (_lootChanceEligibleFailStreak < std::numeric_limits<std::uint32_t>::max()) {
+				++_lootChanceEligibleFailStreak;
+			}
 			return;
 		}
+
+		_lootChanceEligibleFailStreak = 0;
 
 		_instanceAffixes.emplace(key, slots);
 
