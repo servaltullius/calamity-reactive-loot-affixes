@@ -51,6 +51,7 @@
         "triggerProcBudgetPerWindow": { "type": "integer", "minimum": 0, "maximum": 512 },
         "triggerProcBudgetWindowMs": { "type": "integer", "minimum": 0, "maximum": 5000 },
         "cleanupInvalidLegacyAffixes": { "type": "boolean" },
+        "stripTrackedSuffixSlots": { "type": "boolean" },
         "armorEditorIdDenyContains": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 }

@@ -494,6 +494,7 @@ namespace CalamityAffixes
 			std::uint32_t triggerProcBudgetPerWindow{ 12 };
 			std::uint32_t triggerProcBudgetWindowMs{ 100 };
 			bool cleanupInvalidLegacyAffixes{ true };
+			bool stripTrackedSuffixSlots{ true };
 			std::vector<std::string> armorEditorIdDenyContains{};
 			std::string nameFormat{ "{base} [{affix}]" };
 		};
@@ -718,6 +719,11 @@ namespace CalamityAffixes
 			RE::InventoryEntryData* a_entry,
 			RE::ExtraDataList* a_xList,
 			const InstanceAffixSlots& a_slots);
+		[[nodiscard]] bool SanitizeInstanceAffixSlotsForCurrentLootRules(
+			std::uint64_t a_instanceKey,
+			InstanceAffixSlots& a_slots,
+			std::string_view a_context);
+		void SanitizeAllTrackedLootInstancesForCurrentLootRules(std::string_view a_context);
 		[[nodiscard]] bool IsLootObjectEligibleForAffixes(const RE::TESBoundObject* a_object) const;
 		[[nodiscard]] bool IsLootArmorEligibleForAffixes(const RE::TESObjectARMO* a_armor) const;
 		[[nodiscard]] bool TryClearStaleLootDisplayName(RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList);

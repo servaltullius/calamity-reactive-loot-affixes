@@ -863,6 +863,7 @@ namespace CalamityAffixes
 		_activeCounts.assign(_affixes.size(), 0);
 
 		SanitizeRunewordState();
+		SanitizeAllTrackedLootInstancesForCurrentLootRules("LoadConfig.postIndex");
 		_configLoaded = true;
 
 		RebuildActiveCounts();
@@ -927,6 +928,7 @@ namespace CalamityAffixes
 			const double triggerProcBudgetPerWindow = loot.value("triggerProcBudgetPerWindow", static_cast<double>(_loot.triggerProcBudgetPerWindow));
 			const double triggerProcBudgetWindowMs = loot.value("triggerProcBudgetWindowMs", static_cast<double>(_loot.triggerProcBudgetWindowMs));
 			_loot.cleanupInvalidLegacyAffixes = loot.value("cleanupInvalidLegacyAffixes", _loot.cleanupInvalidLegacyAffixes);
+			_loot.stripTrackedSuffixSlots = loot.value("stripTrackedSuffixSlots", _loot.stripTrackedSuffixSlots);
 			_loot.nameFormat = loot.value("nameFormat", std::string{ "{base} [{affix}]" });
 
 			if (const auto denyIt = loot.find("armorEditorIdDenyContains"); denyIt != loot.end()) {

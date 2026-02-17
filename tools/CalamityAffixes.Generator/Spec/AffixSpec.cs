@@ -67,6 +67,10 @@ public sealed class LootSpec
     [JsonPropertyName("cleanupInvalidLegacyAffixes")]
     public bool CleanupInvalidLegacyAffixes { get; init; } = true;
 
+    // If true, strips tracked suffix slots from mapped item instances during runtime sanitization.
+    [JsonPropertyName("stripTrackedSuffixSlots")]
+    public bool StripTrackedSuffixSlots { get; init; } = true;
+
     // Case-insensitive EditorID substrings that disqualify armor-like consumable reward boxes from loot affixes.
     [JsonPropertyName("armorEditorIdDenyContains")]
     public List<string>? ArmorEditorIdDenyContains { get; init; }

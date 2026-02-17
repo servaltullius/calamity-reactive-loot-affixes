@@ -1,4 +1,5 @@
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/TriggerGuards.h"
@@ -592,6 +593,49 @@ namespace
 		(void)armorPrefixes;  // documents that armor pool exists in this integration-like scenario.
 		return true;
 	}
+
+	bool CheckLootSlotSanitizer()
+	{
+		CalamityAffixes::InstanceAffixSlots slots{};
+		slots.count = 3u;
+		slots.tokens[0] = 101u;
+		slots.tokens[1] = 202u;
+		slots.tokens[2] = 101u;  // duplicate should be removed.
+
+		std::array<std::uint64_t, CalamityAffixes::kMaxAffixesPerItem> removed{};
+		std::uint8_t removedCount = 0u;
+		const auto sanitized = CalamityAffixes::detail::BuildSanitizedInstanceAffixSlots(
+			slots,
+			[](std::uint64_t token) { return token != 202u; },
+			&removed,
+			&removedCount);
+
+		if (sanitized.count != 1u || sanitized.tokens[0] != 101u) {
+			std::cerr << "slot_sanitize: expected only token 101 to remain\n";
+			return false;
+		}
+		if (removedCount != 2u) {
+			std::cerr << "slot_sanitize: expected two removed tokens (disallowed + duplicate)\n";
+			return false;
+		}
+
+		CalamityAffixes::InstanceAffixSlots corrupted{};
+		corrupted.count = 7u;  // out-of-range count should be clamped internally.
+		corrupted.tokens[0] = 0u;
+		corrupted.tokens[1] = 301u;
+		corrupted.tokens[2] = 302u;
+		const auto sanitizedCorrupted = CalamityAffixes::detail::BuildSanitizedInstanceAffixSlots(
+			corrupted,
+			[](std::uint64_t) { return true; });
+		if (sanitizedCorrupted.count != 2u ||
+			sanitizedCorrupted.tokens[0] != 301u ||
+			sanitizedCorrupted.tokens[1] != 302u) {
+			std::cerr << "slot_sanitize: expected clamp+zero-filter behavior for corrupted slot input\n";
+			return false;
+		}
+
+		return true;
+	}
 }
 
 int main()
@@ -602,9 +646,10 @@ int main()
 	const bool shuffleBagSelectionOk = CheckShuffleBagLootRollSelection();
 	const bool weightedShuffleBagSelectionOk = CheckWeightedShuffleBagLootRollSelection();
 	const bool shuffleBagConstraintsOk = CheckShuffleBagSanitizeAndRollConstraints();
+	const bool slotSanitizerOk = CheckLootSlotSanitizer();
 	const bool fixedWindowBudgetOk = CheckFixedWindowBudget();
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
-	        shuffleBagConstraintsOk && fixedWindowBudgetOk && recentlyLuckyOk) ? 0 :
+	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk) ? 0 :
 	                                                                               1;
 }

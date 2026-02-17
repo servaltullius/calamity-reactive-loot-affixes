@@ -627,6 +627,10 @@ namespace CalamityAffixes
 				}
 			}
 
+			if (!_affixIndexByToken.empty() && !_affixes.empty()) {
+				SanitizeAllTrackedLootInstancesForCurrentLootRules("Serialization.Load");
+			}
+
 			for (const auto& [key, _] : _instanceAffixes) {
 				_lootEvaluatedInstances.insert(key);
 			}

@@ -16,6 +16,7 @@
     "triggerProcBudgetPerWindow": 12,
     "triggerProcBudgetWindowMs": 100,
     "cleanupInvalidLegacyAffixes": true,
+    "stripTrackedSuffixSlots": true,
     "armorEditorIdDenyContains": [
       "adventurerguild",
       "adventurersguild",

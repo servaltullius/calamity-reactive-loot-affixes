@@ -1,9 +1,11 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootEligibility.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/LootUiGuards.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <limits>
 #include <random>
@@ -270,6 +272,106 @@ namespace CalamityAffixes
 		return static_cast<std::uint8_t>(dist(_rng) + 1);
 	}
 
+	bool EventBridge::SanitizeInstanceAffixSlotsForCurrentLootRules(
+		std::uint64_t a_instanceKey,
+		InstanceAffixSlots& a_slots,
+		std::string_view a_context)
+	{
+		if (a_slots.count == 0) {
+			a_slots.Clear();
+			return false;
+		}
+
+		std::array<std::uint64_t, kMaxAffixesPerItem> removedTokens{};
+		std::uint8_t removedCount = 0;
+		const auto sanitized = detail::BuildSanitizedInstanceAffixSlots(
+			a_slots,
+			[&](std::uint64_t a_token) {
+				const auto idxIt = _affixIndexByToken.find(a_token);
+				if (idxIt == _affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
+					return false;
+				}
+				if (_loot.stripTrackedSuffixSlots && _affixes[idxIt->second].slot == AffixSlot::kSuffix) {
+					return false;
+				}
+				return true;
+			},
+			&removedTokens,
+			&removedCount);
+
+		auto matchesCurrent = [&]() {
+			if (a_slots.count != sanitized.count) {
+				return false;
+			}
+			for (std::uint8_t i = 0; i < a_slots.count; ++i) {
+				if (a_slots.tokens[i] != sanitized.tokens[i]) {
+					return false;
+				}
+			}
+			return true;
+		};
+		const bool changed = !matchesCurrent();
+
+		if (!changed) {
+			return false;
+		}
+
+		a_slots = sanitized;
+		for (std::uint8_t i = 0; i < removedCount; ++i) {
+			const auto removedToken = removedTokens[i];
+			if (removedToken == 0u || a_slots.HasToken(removedToken)) {
+				continue;
+			}
+			_instanceStates.erase(MakeInstanceStateKey(a_instanceKey, removedToken));
+		}
+		if (a_slots.count == 0) {
+			EraseInstanceRuntimeStates(a_instanceKey);
+		}
+
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: sanitized mapped instance slots (context={}, key={:016X}, removed={}, remaining={}).",
+				a_context,
+				a_instanceKey,
+				removedCount,
+				a_slots.count);
+		}
+		return true;
+	}
+
+	void EventBridge::SanitizeAllTrackedLootInstancesForCurrentLootRules(std::string_view a_context)
+	{
+		if (_affixes.empty() || _affixIndexByToken.empty()) {
+			return;
+		}
+
+		std::uint32_t sanitizedInstances = 0u;
+		std::uint32_t erasedInstances = 0u;
+		for (auto it = _instanceAffixes.begin(); it != _instanceAffixes.end();) {
+			auto& slots = it->second;
+			const bool changed = SanitizeInstanceAffixSlotsForCurrentLootRules(it->first, slots, a_context);
+			if (changed) {
+				++sanitizedInstances;
+			}
+
+			if (slots.count == 0) {
+				ForgetLootEvaluatedInstance(it->first);
+				it = _instanceAffixes.erase(it);
+				++erasedInstances;
+				continue;
+			}
+			++it;
+		}
+
+		if (_loot.debugLog && (sanitizedInstances > 0u || erasedInstances > 0u)) {
+			SKSE::log::debug(
+				"CalamityAffixes: sanitized tracked loot instances (context={}, changed={}, erased={}).",
+				a_context,
+				sanitizedInstances,
+				erasedInstances);
+		}
+	}
+
 	void EventBridge::ApplyMultipleAffixes(
 		RE::InventoryChanges* a_changes,
 		RE::InventoryEntryData* a_entry,
@@ -291,6 +393,7 @@ namespace CalamityAffixes
 		}
 
 		const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+		bool skipStaleMarkerShortCircuit = false;
 
 		if (!IsLootObjectEligibleForAffixes(a_entry->object)) {
 			if (_loot.cleanupInvalidLegacyAffixes) {
@@ -302,15 +405,26 @@ namespace CalamityAffixes
 		}
 
 		// If already assigned, just ensure display name and return.
-		if (const auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
-			const auto& existingSlots = existingIt->second;
-			MarkLootEvaluatedInstance(key);
+		if (auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
+			auto& existingSlots = existingIt->second;
+			(void)SanitizeInstanceAffixSlotsForCurrentLootRules(
+				key,
+				existingSlots,
+				"ApplyMultipleAffixes.existing");
 
-			for (std::uint8_t s = 0; s < existingSlots.count; ++s) {
-				EnsureInstanceRuntimeState(key, existingSlots.tokens[s]);
+			if (existingSlots.count == 0) {
+				_instanceAffixes.erase(existingIt);
+				ForgetLootEvaluatedInstance(key);
+				(void)TryClearStaleLootDisplayName(a_entry, a_xList);
+				skipStaleMarkerShortCircuit = true;
+			} else {
+				MarkLootEvaluatedInstance(key);
+				for (std::uint8_t s = 0; s < existingSlots.count; ++s) {
+					EnsureInstanceRuntimeState(key, existingSlots.tokens[s]);
+				}
+				EnsureMultiAffixDisplayName(a_entry, a_xList, existingSlots);
+				return;
 			}
-			EnsureMultiAffixDisplayName(a_entry, a_xList, existingSlots);
-			return;
 		}
 
 		// 1) Hard guard: any instance evaluated once is never rolled again.
@@ -321,7 +435,7 @@ namespace CalamityAffixes
 
 		// 2) Legacy cleanup path:
 		// If stale old data left only the star marker, treat as already evaluated and strip marker.
-		if (TryClearStaleLootDisplayName(a_entry, a_xList)) {
+		if (!skipStaleMarkerShortCircuit && TryClearStaleLootDisplayName(a_entry, a_xList)) {
 			MarkLootEvaluatedInstance(key);
 			if (_loot.debugLog) {
 				SKSE::log::debug(
@@ -657,8 +771,21 @@ namespace CalamityAffixes
 
 			if (auto* uid = xList->GetByType<RE::ExtraUniqueID>()) {
 				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-				if (const auto mappedIt = _instanceAffixes.find(key); mappedIt != _instanceAffixes.end()) {
-					EnsureMultiAffixDisplayName(entry, xList, mappedIt->second);
+				if (auto mappedIt = _instanceAffixes.find(key); mappedIt != _instanceAffixes.end()) {
+					auto& slots = mappedIt->second;
+					(void)SanitizeInstanceAffixSlotsForCurrentLootRules(
+						key,
+						slots,
+						"ProcessLootAcquired.fallback");
+					if (slots.count == 0) {
+						_instanceAffixes.erase(mappedIt);
+						ForgetLootEvaluatedInstance(key);
+						(void)TryClearStaleLootDisplayName(entry, xList);
+						unevaluatedCandidates.push_back(xList);
+						continue;
+					}
+
+					EnsureMultiAffixDisplayName(entry, xList, slots);
 					continue;
 				}
 				if (IsLootEvaluatedInstance(key)) {
