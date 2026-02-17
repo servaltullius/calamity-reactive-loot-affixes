@@ -734,8 +734,8 @@ namespace
 		return true;
 	}
 
-	bool CheckRunewordCompletedSelectionPolicy()
-	{
+		bool CheckRunewordCompletedSelectionPolicy()
+		{
 		namespace fs = std::filesystem;
 		const fs::path testFile{ __FILE__ };
 		const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
@@ -752,23 +752,64 @@ namespace
 
 		// Completed runeword base must pin recipe highlight to completed recipe token.
 		if (source.find("bool resolvedFromCompleted = false;") == std::string::npos ||
-			source.find("selectedToken = _runewordRecipes[rwIt->second].token;") == std::string::npos ||
+			source.find("selectedToken = completed->token;") == std::string::npos ||
 			source.find("if (!resolvedFromCompleted)") == std::string::npos) {
 			std::cerr << "runeword_completed_selection: completed recipe highlight guard is missing\n";
 			return false;
 		}
 
 		// Completed runeword base must not persist mutable in-progress recipe state.
-		if (source.find("bool completedBase = false;") == std::string::npos ||
+		if (source.find("const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;") == std::string::npos ||
 			source.find("if (completedBase)") == std::string::npos ||
 			source.find("_runewordInstanceStates.erase(selectedKey);") == std::string::npos) {
 			std::cerr << "runeword_completed_selection: completed-base state write guard is missing\n";
 			return false;
 		}
 
-		return true;
+			return true;
+		}
+
+		bool CheckRunewordTransmuteSafetyPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
+			const fs::path craftingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Crafting.cpp";
+
+			std::ifstream selectionIn(selectionFile);
+			if (!selectionIn.is_open()) {
+				std::cerr << "runeword_transmute_safety: failed to open selection source: " << selectionFile << "\n";
+				return false;
+			}
+			std::string selectionSource(
+				(std::istreambuf_iterator<char>(selectionIn)),
+				std::istreambuf_iterator<char>());
+
+			if (selectionSource.find("panelState.canInsert = ready && canApplyResult;") == std::string::npos ||
+				selectionSource.find("Affix slots full (max ") == std::string::npos ||
+				selectionSource.find("Runeword result affix missing") == std::string::npos) {
+				std::cerr << "runeword_transmute_safety: panel canInsert/apply safety guard is missing\n";
+				return false;
+			}
+
+			std::ifstream craftingIn(craftingFile);
+			if (!craftingIn.is_open()) {
+				std::cerr << "runeword_transmute_safety: failed to open crafting source: " << craftingFile << "\n";
+				return false;
+			}
+			std::string craftingSource(
+				(std::istreambuf_iterator<char>(craftingIn)),
+				std::istreambuf_iterator<char>());
+
+			if (craftingSource.find("runeword result affix missing before transmute") == std::string::npos ||
+				craftingSource.find("Runeword blocked: affix slots full (max ") == std::string::npos) {
+				std::cerr << "runeword_transmute_safety: transmute pre-consume safety guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
 	}
-}
 
 int main()
 {
@@ -784,8 +825,9 @@ int main()
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	const bool lootChanceMcmSyncOk = CheckLootChanceMcmSyncPolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
+	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
-	        lootChanceMcmSyncOk && runewordCompletedSelectionOk) ? 0 :
+	        lootChanceMcmSyncOk && runewordCompletedSelectionOk && runewordTransmuteSafetyOk) ? 0 :
 	                                                             1;
 }

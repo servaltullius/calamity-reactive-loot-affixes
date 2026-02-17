@@ -122,6 +122,49 @@ static_assert([] {
 }(),
 	"ReplaceAll with zero token should result in empty slots");
 
+// --- PromoteTokenToPrimary ---
+
+static_assert([] {
+	CalamityAffixes::InstanceAffixSlots slots{};
+	slots.AddToken(0xAAAAu);
+	slots.AddToken(0xBBBBu);
+	slots.AddToken(0xCCCCu);
+	const bool promoted = slots.PromoteTokenToPrimary(0xBBBBu);
+	return promoted &&
+		slots.count == 3 &&
+		slots.tokens[0] == 0xBBBBu &&
+		slots.tokens[1] == 0xAAAAu &&
+		slots.tokens[2] == 0xCCCCu;
+}(),
+	"PromoteTokenToPrimary should move existing token to index 0 and preserve others");
+
+static_assert([] {
+	CalamityAffixes::InstanceAffixSlots slots{};
+	slots.AddToken(0xAAAAu);
+	slots.AddToken(0xBBBBu);
+	const bool promoted = slots.PromoteTokenToPrimary(0xCCCCu);
+	return promoted &&
+		slots.count == 3 &&
+		slots.tokens[0] == 0xCCCCu &&
+		slots.tokens[1] == 0xAAAAu &&
+		slots.tokens[2] == 0xBBBBu;
+}(),
+	"PromoteTokenToPrimary should insert missing token at index 0 when capacity is available");
+
+static_assert([] {
+	CalamityAffixes::InstanceAffixSlots slots{};
+	slots.AddToken(0xAAAAu);
+	slots.AddToken(0xBBBBu);
+	slots.AddToken(0xCCCCu);
+	const bool promoted = slots.PromoteTokenToPrimary(0xDDDDu);
+	return !promoted &&
+		slots.count == 3 &&
+		slots.tokens[0] == 0xAAAAu &&
+		slots.tokens[1] == 0xBBBBu &&
+		slots.tokens[2] == 0xCCCCu;
+}(),
+	"PromoteTokenToPrimary should reject missing token when slots are full");
+
 // --- begin/end iteration ---
 
 static_assert([] {

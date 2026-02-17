@@ -219,13 +219,9 @@ namespace CalamityAffixes
 			}
 
 			const auto instanceKey = *_runewordSelectedBaseKey;
-			if (const auto it = _instanceAffixes.find(instanceKey); it != _instanceAffixes.end()) {
-				const auto primaryToken = it->second.GetPrimary();
-				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-					result.message = "Reforge blocked: completed runeword base.";
-					return result;
-				}
+			if (ResolveCompletedRunewordRecipe(instanceKey)) {
+				result.message = "Reforge blocked: completed runeword base.";
+				return result;
 			}
 
 			const auto lootType = ResolveInstanceLootType(instanceKey);
@@ -394,11 +390,17 @@ namespace CalamityAffixes
 				return;
 			}
 
-			// Runeword replaces ALL existing affixes (D2-style full replacement).
-			// Clean up runtime states for any previous affixes before replacing.
-			EraseInstanceRuntimeStates(a_instanceKey);
 			auto& slots = _instanceAffixes[a_instanceKey];
-			slots.ReplaceAll(a_recipe.resultAffixToken);
+			if (!slots.PromoteTokenToPrimary(a_recipe.resultAffixToken)) {
+				std::string note = "Runeword failed: base has max affixes";
+				RE::DebugNotification(note.c_str());
+				SKSE::log::warn(
+					"CalamityAffixes: runeword apply blocked (instance={:016X}, recipe={}, reason=max-affixes-full, max={}).",
+					a_instanceKey,
+					a_recipe.id,
+					kMaxAffixesPerItem);
+				return;
+			}
 
 			EnsureInstanceRuntimeState(a_instanceKey, a_recipe.resultAffixToken);
 			_runewordInstanceStates.erase(a_instanceKey);
@@ -441,16 +443,12 @@ namespace CalamityAffixes
 			}
 
 			// If base already has a completed runeword, block further crafting.
-			if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
-				const auto primaryToken = it->second.GetPrimary();
-				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-					std::string note = "Runeword: already complete (";
-					note.append(_runewordRecipes[rwIt->second].displayName);
-					note.push_back(')');
-					RE::DebugNotification(note.c_str());
-					return;
-				}
+			if (const auto* completed = ResolveCompletedRunewordRecipe(*_runewordSelectedBaseKey)) {
+				std::string note = "Runeword: already complete (";
+				note.append(completed->displayName);
+				note.push_back(')');
+				RE::DebugNotification(note.c_str());
+				return;
 			}
 
 			auto& state = _runewordInstanceStates[*_runewordSelectedBaseKey];
@@ -470,6 +468,30 @@ namespace CalamityAffixes
 			if (!recipe || recipe->runeTokens.empty()) {
 				RE::DebugNotification("Runeword: recipe is not set.");
 				return;
+			}
+
+			const auto resultAffixIt = _affixIndexByToken.find(recipe->resultAffixToken);
+			if (resultAffixIt == _affixIndexByToken.end() || resultAffixIt->second >= _affixes.size()) {
+				std::string note = "Runeword failed: missing affix ";
+				note.append(recipe->displayName);
+				RE::DebugNotification(note.c_str());
+				SKSE::log::error(
+					"CalamityAffixes: runeword result affix missing before transmute (recipe={}, resultToken={:016X}).",
+					recipe->id,
+					recipe->resultAffixToken);
+				return;
+			}
+
+			if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
+				const auto& slots = it->second;
+				if (!slots.HasToken(recipe->resultAffixToken) &&
+					slots.count >= static_cast<std::uint8_t>(kMaxAffixesPerItem)) {
+					std::string note = "Runeword blocked: affix slots full (max ";
+					note.append(std::to_string(kMaxAffixesPerItem));
+					note.push_back(')');
+					RE::DebugNotification(note.c_str());
+					return;
+				}
 			}
 
 			const auto totalRunes = recipe->runeTokens.size();

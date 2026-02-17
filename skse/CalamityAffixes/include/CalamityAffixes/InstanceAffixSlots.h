@@ -43,6 +43,45 @@ namespace CalamityAffixes
 			return true;
 		}
 
+		constexpr bool PromoteTokenToPrimary(std::uint64_t a_token) noexcept
+		{
+			if (a_token == 0u) {
+				return false;
+			}
+
+			std::uint8_t existingIndex = count;
+			for (std::uint8_t i = 0; i < count; ++i) {
+				if (tokens[i] == a_token) {
+					existingIndex = i;
+					break;
+				}
+			}
+
+			if (existingIndex == 0u) {
+				return true;
+			}
+
+			if (existingIndex < count) {
+				const auto matched = tokens[existingIndex];
+				for (std::uint8_t i = existingIndex; i > 0; --i) {
+					tokens[i] = tokens[i - 1u];
+				}
+				tokens[0] = matched;
+				return true;
+			}
+
+			if (count >= kMaxAffixesPerItem) {
+				return false;
+			}
+
+			for (std::uint8_t i = count; i > 0; --i) {
+				tokens[i] = tokens[i - 1u];
+			}
+			tokens[0] = a_token;
+			++count;
+			return true;
+		}
+
 		[[nodiscard]] constexpr std::uint64_t GetPrimary() const noexcept
 		{
 			return (count > 0) ? tokens[0] : 0u;

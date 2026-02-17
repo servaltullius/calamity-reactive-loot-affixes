@@ -73,11 +73,41 @@ namespace CalamityAffixes
 			return keys;
 		}
 
-		bool EventBridge::SelectRunewordBase(std::uint64_t a_instanceKey)
+		const EventBridge::RunewordRecipe* EventBridge::ResolveCompletedRunewordRecipe(const InstanceAffixSlots& a_slots) const
 		{
-			if (!_configLoaded || a_instanceKey == 0u) {
-				return false;
+			const auto cappedCount = std::min<std::uint8_t>(a_slots.count, static_cast<std::uint8_t>(kMaxAffixesPerItem));
+			for (std::uint8_t i = 0; i < cappedCount; ++i) {
+				const auto token = a_slots.tokens[i];
+				if (token == 0u) {
+					continue;
+				}
+
+				const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(token);
+				if (rwIt == _runewordRecipeIndexByResultAffixToken.end() || rwIt->second >= _runewordRecipes.size()) {
+					continue;
+				}
+
+				return std::addressof(_runewordRecipes[rwIt->second]);
 			}
+
+			return nullptr;
+		}
+
+		const EventBridge::RunewordRecipe* EventBridge::ResolveCompletedRunewordRecipe(std::uint64_t a_instanceKey) const
+		{
+			const auto it = _instanceAffixes.find(a_instanceKey);
+			if (it == _instanceAffixes.end()) {
+				return nullptr;
+			}
+
+			return ResolveCompletedRunewordRecipe(it->second);
+		}
+
+			bool EventBridge::SelectRunewordBase(std::uint64_t a_instanceKey)
+			{
+				if (!_configLoaded || a_instanceKey == 0u) {
+					return false;
+				}
 
 			SanitizeRunewordState();
 
@@ -90,14 +120,7 @@ namespace CalamityAffixes
 			if (!IsWeaponOrArmor(entry->object)) {
 				return false;
 			}
-			const RunewordRecipe* completedRecipe = nullptr;
-			if (const auto it = _instanceAffixes.find(a_instanceKey); it != _instanceAffixes.end()) {
-				const auto primaryToken = it->second.GetPrimary();
-				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-					completedRecipe = std::addressof(_runewordRecipes[rwIt->second]);
-				}
-			}
+				const RunewordRecipe* completedRecipe = ResolveCompletedRunewordRecipe(a_instanceKey);
 
 			_runewordSelectedBaseKey = a_instanceKey;
 
@@ -167,14 +190,10 @@ namespace CalamityAffixes
 				}
 
 				std::string displayName = ResolveInventoryDisplayName(entry, xList);
-				if (const auto it = _instanceAffixes.find(key); it != _instanceAffixes.end()) {
-					const auto primaryToken = it->second.GetPrimary();
-					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-						displayName.append(" [Runeword: ");
-						displayName.append(_runewordRecipes[rwIt->second].displayName);
-						displayName.push_back(']');
-					}
+				if (const auto* completed = ResolveCompletedRunewordRecipe(key)) {
+					displayName.append(" [Runeword: ");
+					displayName.append(completed->displayName);
+					displayName.push_back(']');
 				}
 
 				entries.push_back(RunewordBaseInventoryEntry{
@@ -419,13 +438,9 @@ namespace CalamityAffixes
 			if (_runewordSelectedBaseKey) {
 				const auto selectedKey = *_runewordSelectedBaseKey;
 				bool resolvedFromCompleted = false;
-				if (const auto it = _instanceAffixes.find(selectedKey); it != _instanceAffixes.end()) {
-					const auto primaryToken = it->second.GetPrimary();
-					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-						selectedToken = _runewordRecipes[rwIt->second].token;
-						resolvedFromCompleted = true;
-					}
+				if (const auto* completed = ResolveCompletedRunewordRecipe(selectedKey)) {
+					selectedToken = completed->token;
+					resolvedFromCompleted = true;
 				}
 				if (!resolvedFromCompleted) {
 					if (const auto stateIt = _runewordInstanceStates.find(selectedKey);
@@ -458,10 +473,10 @@ namespace CalamityAffixes
 			return entries;
 		}
 
-			EventBridge::RunewordPanelState EventBridge::GetRunewordPanelState()
-			{
-				RunewordPanelState panelState{};
-				if (!_configLoaded) {
+		EventBridge::RunewordPanelState EventBridge::GetRunewordPanelState()
+		{
+			RunewordPanelState panelState{};
+			if (!_configLoaded) {
 				return panelState;
 			}
 
@@ -472,19 +487,14 @@ namespace CalamityAffixes
 			panelState.hasBase = true;
 
 			// If the selected base is already a completed runeword, show status and block further crafting.
-			if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
-				const auto primaryToken = it->second.GetPrimary();
-				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-					const auto& completed = _runewordRecipes[rwIt->second];
-					panelState.hasRecipe = true;
-					panelState.isComplete = true;
-					panelState.recipeName = completed.displayName;
-					panelState.totalRunes = static_cast<std::uint32_t>(completed.runeTokens.size());
-					panelState.insertedRunes = panelState.totalRunes;
-					panelState.canInsert = false;
-					return panelState;
-				}
+			if (const auto* completed = ResolveCompletedRunewordRecipe(*_runewordSelectedBaseKey)) {
+				panelState.hasRecipe = true;
+				panelState.isComplete = true;
+				panelState.recipeName = completed->displayName;
+				panelState.totalRunes = static_cast<std::uint32_t>(completed->runeTokens.size());
+				panelState.insertedRunes = panelState.totalRunes;
+				panelState.canInsert = false;
+				return panelState;
 			}
 
 			const RunewordRecipe* recipe = nullptr;
@@ -508,44 +518,70 @@ namespace CalamityAffixes
 			panelState.totalRunes = static_cast<std::uint32_t>(recipe->runeTokens.size());
 			panelState.insertedRunes = std::min(inserted, panelState.totalRunes);
 
+			auto resolveApplyBlockReason = [&]() -> std::optional<std::string> {
+				const auto affixIt = _affixIndexByToken.find(recipe->resultAffixToken);
+				if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+					return std::string("Runeword result affix missing");
+				}
+
+				if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
+					const auto& slots = it->second;
+					if (!slots.HasToken(recipe->resultAffixToken) &&
+						slots.count >= static_cast<std::uint8_t>(kMaxAffixesPerItem)) {
+						std::string reason = "Affix slots full (max ";
+						reason.append(std::to_string(kMaxAffixesPerItem));
+						reason.push_back(')');
+						return reason;
+					}
+				}
+
+				return std::nullopt;
+			};
+
+			const auto applyBlockReason = resolveApplyBlockReason();
+			const bool canApplyResult = !applyBlockReason.has_value();
+
 			if (panelState.insertedRunes >= panelState.totalRunes) {
-				// Legacy: allow finalization when all runes have already been inserted.
-				panelState.canInsert = true;
+				// Legacy: allow finalization only when result can actually be applied.
+				panelState.canInsert = canApplyResult;
+				if (applyBlockReason) {
+					panelState.missingSummary = *applyBlockReason;
+				}
 				return panelState;
 			}
 
-				// Transmute-only UI: require all remaining rune fragments at once.
-				const auto requiredCounts = BuildRuneTokenCounts<16>(
-					std::span<const std::uint64_t>(recipe->runeTokens.data(), recipe->runeTokens.size()),
-					panelState.insertedRunes);
+			// Transmute-only UI: require all remaining rune fragments at once.
+			const auto requiredCounts = BuildRuneTokenCounts<16>(
+				std::span<const std::uint64_t>(recipe->runeTokens.data(), recipe->runeTokens.size()),
+				panelState.insertedRunes);
 
-				auto* player = RE::PlayerCharacter::GetSingleton();
-					bool ready = true;
-					bool firstMissingSet = false;
-					std::string missingSummary;
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			bool ready = true;
+			bool firstMissingSet = false;
+			std::string missingSummary;
 
-					panelState.requiredRunes.reserve(requiredCounts.size);
-					for (std::size_t i = 0; i < requiredCounts.size; ++i) {
-						const auto token = requiredCounts.entries[i].token;
-						const auto required = requiredCounts.entries[i].count;
-						if (token == 0u || required == 0u) {
-						continue;
-					}
+			panelState.requiredRunes.reserve(requiredCounts.size);
+			for (std::size_t i = 0; i < requiredCounts.size; ++i) {
+				const auto token = requiredCounts.entries[i].token;
+				const auto required = requiredCounts.entries[i].count;
+				if (token == 0u || required == 0u) {
+					continue;
+				}
 
-					std::string runeName = "Rune";
-					if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
-						runeName = nameIt->second;
-					}
+				std::string runeName = "Rune";
+				if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+					runeName = nameIt->second;
+				}
 
-					const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, token);
-					panelState.requiredRunes.push_back(RunewordRuneRequirement{
-						.runeName = runeName,
-						.required = required,
-						.owned = owned,
-					});
-					if (owned >= required) {
-						continue;
-					}
+				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, token);
+				panelState.requiredRunes.push_back(RunewordRuneRequirement{
+					.runeName = runeName,
+					.required = required,
+					.owned = owned,
+				});
+				if (owned >= required) {
+					continue;
+				}
 
 				ready = false;
 				const auto missing = required - owned;
@@ -563,10 +599,15 @@ namespace CalamityAffixes
 				}
 			}
 
+			if (!missingSummary.empty()) {
 				panelState.missingSummary = std::move(missingSummary);
-				panelState.canInsert = ready;
-				return panelState;
-				}
+			} else if (applyBlockReason) {
+				panelState.missingSummary = *applyBlockReason;
+			}
+
+			panelState.canInsert = ready && canApplyResult;
+			return panelState;
+		}
 
 		bool EventBridge::SelectRunewordRecipe(std::uint64_t a_recipeToken)
 		{
@@ -584,20 +625,13 @@ namespace CalamityAffixes
 			_runewordRecipeCycleCursor = static_cast<std::uint32_t>(idx);
 			const auto& recipe = _runewordRecipes[idx];
 
-			if (_runewordSelectedBaseKey) {
-				const auto selectedKey = *_runewordSelectedBaseKey;
-				bool completedBase = false;
-				if (const auto itState = _instanceAffixes.find(selectedKey); itState != _instanceAffixes.end()) {
-					const auto primaryToken = itState->second.GetPrimary();
-					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-						completedBase = true;
-					}
-				}
+				if (_runewordSelectedBaseKey) {
+					const auto selectedKey = *_runewordSelectedBaseKey;
+					const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;
 
-				if (completedBase) {
-					_runewordInstanceStates.erase(selectedKey);
-				} else {
+					if (completedBase) {
+						_runewordInstanceStates.erase(selectedKey);
+					} else {
 					auto& state = _runewordInstanceStates[selectedKey];
 					if (state.recipeToken != recipe.token) {
 						state.recipeToken = recipe.token;
