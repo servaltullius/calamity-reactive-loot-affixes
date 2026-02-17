@@ -8,6 +8,10 @@ Scriptname CalamityAffixes_MCMConfig extends MCM_ConfigBase
 ; This filters stale quest instances left in saves after generated FormID churn.
 int Property LocalFormIdModulo = 16777216 AutoReadOnly Hidden ; 0x01000000
 string Property PluginFileName = "CalamityAffixes.esp" AutoReadOnly Hidden
+string Property LeaderTokenSettingName = "iMcmLeaderToken:General" AutoReadOnly Hidden
+
+bool _didLeaderElection = false
+bool _isSessionLeader = false
 
 bool Function IsCanonicalMcmQuest()
 	int localFormId = GetFormID()
@@ -28,11 +32,32 @@ bool Function IsCanonicalMcmQuest()
 	return (resolvedQuest == selfQuest)
 EndFunction
 
+bool Function EnsureSessionLeader()
+	if _didLeaderElection
+		return _isSessionLeader
+	endif
+
+	_didLeaderElection = true
+
+	int token = Utility.RandomInt(1, 2147483646)
+	SetModSettingInt(LeaderTokenSettingName, token)
+	Utility.WaitMenuMode(0.05)
+
+	int chosen = GetModSettingInt(LeaderTokenSettingName)
+	_isSessionLeader = (chosen == token)
+	return _isSessionLeader
+EndFunction
+
 Event OnGameReload()
 	; Leave stale quest instances inert so only canonical MCM quest participates.
 	if !IsCanonicalMcmQuest()
 		return
 	endif
+
+	if !EnsureSessionLeader()
+		return
+	endif
+
 	Parent.OnGameReload()
 EndEvent
 
@@ -42,11 +67,22 @@ Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, 
 		return
 	endif
 
+	if !EnsureSessionLeader()
+		return
+	endif
+
 	Parent.OnConfigManagerReady(a_eventName, a_strArg, a_numArg, a_sender)
 EndEvent
 
 Event OnConfigManagerReset(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
 	if !IsCanonicalMcmQuest()
+		return
+	endif
+
+	bool wasLeader = _isSessionLeader
+	_didLeaderElection = false
+	_isSessionLeader = false
+	if !wasLeader
 		return
 	endif
 

@@ -17,3 +17,10 @@ EndEvent
 
 Event OnConfigClose()
 EndEvent
+
+int Function GetModSettingInt(string a_settingName)
+	Return 0
+EndFunction
+
+Function SetModSettingInt(string a_settingName, int a_value)
+EndFunction
