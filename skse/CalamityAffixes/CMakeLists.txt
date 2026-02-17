@@ -150,6 +150,7 @@ if (BUILD_TESTING)
             tests/test_instance_state_key.cpp
             tests/test_resync_scheduler.cpp
             tests/test_runeword_util.cpp
+            tests/test_reforge_rules.cpp
             tests/test_trigger_guards.cpp
             tests/test_non_hostile_first_hit_gate.cpp
             tests/test_per_target_cooldown_store.cpp

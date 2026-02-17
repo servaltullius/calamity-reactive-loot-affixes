@@ -483,6 +483,15 @@ namespace
 		}
 
 		{
+			if (CalamityAffixes::detail::ResolveReforgeTargetAffixCount(0u) != 1u) {
+				std::cerr << "reforge: zero-affix bases should reroll with one target slot\n";
+				return false;
+			}
+			if (CalamityAffixes::detail::ResolveReforgeTargetAffixCount(7u) != 3u) {
+				std::cerr << "reforge: corrupted high affix counts should clamp to max slots\n";
+				return false;
+			}
+
 			const auto one = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(1u);
 			if (one.prefixTarget != 1u || one.suffixTarget != 0u) {
 				std::cerr << "shuffle_bag: target=1 composition should be prefix-only (1/0)\n";

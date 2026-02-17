@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CalamityAffixes/InstanceAffixSlots.h"
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -10,6 +12,16 @@
 
 namespace CalamityAffixes::detail
 {
+	[[nodiscard]] constexpr std::uint8_t ResolveReforgeTargetAffixCount(std::uint8_t a_existingAffixCount) noexcept
+	{
+		constexpr std::uint8_t kMaxCount = static_cast<std::uint8_t>(kMaxAffixesPerItem);
+		if (a_existingAffixCount == 0u) {
+			return 1u;
+		}
+
+		return (a_existingAffixCount > kMaxCount) ? kMaxCount : a_existingAffixCount;
+	}
+
 	struct LootPrefixSuffixTargets
 	{
 		std::uint8_t prefixTarget{ 0u };
@@ -20,7 +32,8 @@ namespace CalamityAffixes::detail
 	{
 		// Soft-disable suffix drops for new loot rolls.
 		// Keep suffix data/runtime handling for backward compatibility with existing items.
-		const std::uint8_t clamped = (a_targetAffixCount > 3u) ? 3u : a_targetAffixCount;
+		constexpr std::uint8_t kMaxCount = static_cast<std::uint8_t>(kMaxAffixesPerItem);
+		const std::uint8_t clamped = (a_targetAffixCount > kMaxCount) ? kMaxCount : a_targetAffixCount;
 		return { clamped, 0u };
 	}
 
