@@ -3,6 +3,38 @@ Scriptname CalamityAffixes_MCMConfig extends MCM_ConfigBase
 ; Minimal MCM Helper config script.
 ; Bind this script to a Quest in the Creation Kit (see docs / README).
 ; General actions and runeword/manual controls are forwarded to SKSE via ModEvent.
+;
+; Only the generated canonical MCM quest (FormID 0x000800) should register.
+; This filters out stale quest instances left in old saves and prevents duplicate MCM entries.
+int Property ExpectedMcmQuestFormId = 0x000800 AutoReadOnly Hidden
+bool _isCanonicalMcmQuest = false
+
+Event OnConfigInit()
+	_isCanonicalMcmQuest = (GetFormID() == ExpectedMcmQuestFormId)
+EndEvent
+
+Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
+	SKI_ConfigManager manager = a_sender as SKI_ConfigManager
+	SKI_ConfigBase selfConfig = self as SKI_ConfigBase
+	if manager == None || selfConfig == None
+		return
+	endif
+
+	if !_isCanonicalMcmQuest
+		manager.UnregisterMod(selfConfig)
+		return
+	endif
+
+	if ModName == ""
+		return
+	endif
+
+	manager.RegisterMod(selfConfig, ModName)
+EndEvent
+
+Event OnConfigManagerReset(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
+	; No-op. Canonical/non-canonical registration is resolved in OnConfigManagerReady.
+EndEvent
 
 Function SetEnabled(bool a_enabled)
 	CalamityAffixes_ModeControl.SetEnabled(a_enabled)
