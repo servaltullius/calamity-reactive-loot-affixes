@@ -7,10 +7,12 @@ Scriptname CalamityAffixes_MCMConfig extends MCM_ConfigBase
 ; Only the generated canonical MCM quest (FormID 0x000800) should register.
 ; This filters out stale quest instances left in old saves and prevents duplicate MCM entries.
 int Property ExpectedMcmQuestFormId = 0x000800 AutoReadOnly Hidden
+int Property LocalFormIdModulo = 16777216 AutoReadOnly Hidden ; 0x01000000
 bool _isCanonicalMcmQuest = false
 
 Event OnConfigInit()
-	_isCanonicalMcmQuest = (GetFormID() == ExpectedMcmQuestFormId)
+	int localFormId = GetFormID() % LocalFormIdModulo
+	_isCanonicalMcmQuest = (localFormId == ExpectedMcmQuestFormId)
 EndEvent
 
 Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
@@ -29,6 +31,8 @@ Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, 
 		return
 	endif
 
+	; Normalize any stale slot for this instance before re-registering.
+	manager.UnregisterMod(selfConfig)
 	manager.RegisterMod(selfConfig, ModName)
 EndEvent
 
