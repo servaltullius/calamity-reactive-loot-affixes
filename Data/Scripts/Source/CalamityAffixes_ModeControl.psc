@@ -37,6 +37,10 @@ Function SetProcChanceMultiplier(float a_mult) global
 	Emit("CalamityAffixes_MCM_SetProcChanceMult", "", a_mult)
 EndFunction
 
+Function SetLootChancePercent(float a_percent) global
+	Emit("CalamityAffixes_MCM_SetLootChance", "", a_percent)
+EndFunction
+
 Function SetDotSafetyAutoDisable(bool a_enabled) global
 	if a_enabled
 		Emit("CalamityAffixes_MCM_SetDotSafetyAutoDisable", "", 1.0)

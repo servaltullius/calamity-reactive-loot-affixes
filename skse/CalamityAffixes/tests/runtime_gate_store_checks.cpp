@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <random>
 #include <string>
 #include <vector>
@@ -677,6 +678,61 @@ namespace
 
 		return true;
 	}
+
+	bool CheckLootChanceMcmSyncPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path triggerEventsFile = repoRoot / "src" / "EventBridge.Triggers.Events.cpp";
+		const fs::path configFile = repoRoot / "src" / "EventBridge.Config.cpp";
+		const fs::path headerFile = repoRoot / "include" / "CalamityAffixes" / "EventBridge.h";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto headerText = loadText(headerFile);
+		if (!headerText.has_value()) {
+			std::cerr << "loot_chance_mcm: failed to open header file: " << headerFile << "\n";
+			return false;
+		}
+		if (headerText->find("kMcmSetLootChanceEvent") == std::string::npos) {
+			std::cerr << "loot_chance_mcm: missing MCM loot chance event constant in EventBridge.h\n";
+			return false;
+		}
+
+		const auto triggerText = loadText(triggerEventsFile);
+		if (!triggerText.has_value()) {
+			std::cerr << "loot_chance_mcm: failed to open trigger events source: " << triggerEventsFile << "\n";
+			return false;
+		}
+		if (triggerText->find("eventName == kMcmSetLootChanceEvent") == std::string::npos ||
+			triggerText->find("_loot.chancePercent = chancePct;") == std::string::npos ||
+			triggerText->find("PersistLootChancePercentToMcmSettings(chancePct, true)") == std::string::npos) {
+			std::cerr << "loot_chance_mcm: trigger event handler does not fully apply/persist loot chance updates\n";
+			return false;
+		}
+
+		const auto configText = loadText(configFile);
+		if (!configText.has_value()) {
+			std::cerr << "loot_chance_mcm: failed to open config source: " << configFile << "\n";
+			return false;
+		}
+		if (configText->find("LoadLootChancePercentFromMcmSettings()") == std::string::npos ||
+			configText->find("PersistLootChancePercentToMcmSettings(_loot.chancePercent, false)") == std::string::npos) {
+			std::cerr << "loot_chance_mcm: config load path does not sync MCM loot chance override\n";
+			return false;
+		}
+
+		return true;
+	}
 }
 
 int main()
@@ -691,7 +747,9 @@ int main()
 	const bool fixedWindowBudgetOk = CheckFixedWindowBudget();
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
+	const bool lootChanceMcmSyncOk = CheckLootChanceMcmSyncPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
-	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk) ? 0 :
+	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
+	        lootChanceMcmSyncOk) ? 0 :
 	                                                                               1;
 }

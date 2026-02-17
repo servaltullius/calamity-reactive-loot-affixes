@@ -80,6 +80,27 @@
           }
         },
         {
+          "type": "slider",
+          "id": "fLootChancePercent:General",
+          "text": "Affix Drop Chance / 어픽스 부여 확률",
+          "help": "Chance for eligible loot to receive affixes. Lower values make magic items rarer. / 적격 아이템에 어픽스가 붙을 확률입니다. 낮출수록 매직 아이템이 희귀해집니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 50.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 1.0,
+            "formatString": "%.0f %%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetLootChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
           "type": "toggle",
           "id": "bDebugNotifications:General",
           "text": "Debug Notifications / 디버그 알림",

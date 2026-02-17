@@ -20,6 +20,10 @@ Function SetProcChanceMultiplier(float a_mult)
 	CalamityAffixes_ModeControl.SetProcChanceMultiplier(a_mult)
 EndFunction
 
+Function SetLootChancePercent(float a_percent)
+	CalamityAffixes_ModeControl.SetLootChancePercent(a_percent)
+EndFunction
+
 Function SetDotSafetyAutoDisable(bool a_enabled)
 	CalamityAffixes_ModeControl.SetDotSafetyAutoDisable(a_enabled)
 EndFunction

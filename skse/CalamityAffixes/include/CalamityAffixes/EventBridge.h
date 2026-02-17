@@ -461,6 +461,7 @@ namespace CalamityAffixes
 		static constexpr std::string_view kMcmSetDebugNotificationsEvent = "CalamityAffixes_MCM_SetDebugNotifications";
 		static constexpr std::string_view kMcmSetValidationIntervalEvent = "CalamityAffixes_MCM_SetValidationInterval";
 		static constexpr std::string_view kMcmSetProcChanceMultEvent = "CalamityAffixes_MCM_SetProcChanceMult";
+		static constexpr std::string_view kMcmSetLootChanceEvent = "CalamityAffixes_MCM_SetLootChance";
 		static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = "CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc";
 		static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
@@ -681,11 +682,13 @@ namespace CalamityAffixes
 			std::uint64_t a_instanceKey,
 			RE::InventoryEntryData*& a_outEntry,
 			RE::ExtraDataList*& a_outXList) const;
-			[[nodiscard]] std::optional<LootItemType> ResolveInstanceLootType(std::uint64_t a_instanceKey) const;
-			[[nodiscard]] const RunewordRecipe* FindRunewordRecipeByToken(std::uint64_t a_recipeToken) const;
-			[[nodiscard]] const RunewordRecipe* GetCurrentRunewordRecipe() const;
-			void InitializeRunewordCatalog();
+		[[nodiscard]] std::optional<LootItemType> ResolveInstanceLootType(std::uint64_t a_instanceKey) const;
+		[[nodiscard]] const RunewordRecipe* FindRunewordRecipeByToken(std::uint64_t a_recipeToken) const;
+		[[nodiscard]] const RunewordRecipe* GetCurrentRunewordRecipe() const;
+		void InitializeRunewordCatalog();
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
+		[[nodiscard]] std::optional<float> LoadLootChancePercentFromMcmSettings() const;
+		bool PersistLootChancePercentToMcmSettings(float a_chancePercent, bool a_overwriteExisting) const;
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
 		void IndexConfiguredAffixes();

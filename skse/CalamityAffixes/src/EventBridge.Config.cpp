@@ -3,11 +3,15 @@
 #include "EventBridge.Config.Shared.h"
 
 #include <algorithm>
+#include <cerrno>
 #include <charconv>
+#include <cctype>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <initializer_list>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <system_error>
 #include <vector>
@@ -24,6 +28,11 @@ namespace CalamityAffixes
 		const nlohmann::json kEmptyAffixArray = nlohmann::json::array();
 		using ConfigShared::LookupSpellFromSpec;
 		using ConfigShared::Trim;
+		constexpr std::string_view kMcmSettingsRelativePath = "Data/MCM/Settings/CalamityAffixes.ini";
+		constexpr std::string_view kMcmGeneralSection = "General";
+		constexpr std::string_view kMcmGeneralSectionLower = "general";
+		constexpr std::string_view kMcmLootChanceKey = "fLootChancePercent";
+		constexpr std::string_view kMcmLootChanceKeyLower = "flootchancepercent";
 
 		std::string DeriveAffixLabel(std::string_view a_displayName)
 		{
@@ -85,6 +94,69 @@ namespace CalamityAffixes
 			std::filesystem::path path(buffer.data());
 			path = path.remove_filename();
 			return path;
+		}
+
+		[[nodiscard]] std::filesystem::path ResolveRuntimeRelativePath(std::string_view a_relativePath)
+		{
+			if (const auto runtimeDir = GetRuntimeDirectory(); runtimeDir) {
+				return *runtimeDir / std::filesystem::path(a_relativePath);
+			}
+			return std::filesystem::current_path() / std::filesystem::path(a_relativePath);
+		}
+
+		[[nodiscard]] std::string ToLowerAscii(std::string_view a_text)
+		{
+			std::string out;
+			out.reserve(a_text.size());
+			for (char c : a_text) {
+				out.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
+			}
+			return out;
+		}
+
+		[[nodiscard]] std::string_view StripIniCommentAndTrim(std::string_view a_line) noexcept
+		{
+			if (const auto comment = a_line.find_first_of(";#"); comment != std::string_view::npos) {
+				a_line = a_line.substr(0, comment);
+			}
+			return Trim(a_line);
+		}
+
+		[[nodiscard]] std::optional<float> TryParseFloat(std::string_view a_text) noexcept
+		{
+			std::string parsed(Trim(a_text));
+			if (parsed.empty()) {
+				return std::nullopt;
+			}
+
+			char* end = nullptr;
+			errno = 0;
+			const float value = std::strtof(parsed.c_str(), &end);
+			if (end == parsed.c_str() || errno == ERANGE) {
+				return std::nullopt;
+			}
+			while (*end != '\0' && std::isspace(static_cast<unsigned char>(*end))) {
+				++end;
+			}
+			if (*end != '\0') {
+				return std::nullopt;
+			}
+			return value;
+		}
+
+		[[nodiscard]] std::string FormatCompactFloat(float a_value)
+		{
+			std::string text = std::to_string(a_value);
+			while (!text.empty() && text.back() == '0') {
+				text.pop_back();
+			}
+			if (!text.empty() && text.back() == '.') {
+				text.pop_back();
+			}
+			if (text.empty() || text == "-0") {
+				return "0";
+			}
+			return text;
 		}
 	}
 
@@ -870,11 +942,13 @@ namespace CalamityAffixes
 		RebuildActiveCounts();
 
 			SKSE::log::info(
-				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
+				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
 				_affixes.size(),
 				_lootWeaponAffixes.size(), _lootArmorAffixes.size(),
 				_lootWeaponSuffixes.size(), _lootArmorSuffixes.size(),
 				_loot.chancePercent,
+				_loot.runewordFragmentChancePercent,
+				_loot.reforgeOrbChancePercent,
 				_loot.triggerProcBudgetPerWindow,
 				_loot.triggerProcBudgetWindowMs,
 				_loot.trapCastBudgetPerTick);
@@ -886,11 +960,7 @@ namespace CalamityAffixes
 
 	bool EventBridge::LoadRuntimeConfigJson(nlohmann::json& a_outJson) const
 	{
-		const auto runtimeDir = GetRuntimeDirectory();
-		const auto configPath =
-			runtimeDir ?
-				(*runtimeDir / std::filesystem::path(kRuntimeConfigRelativePath)) :
-				(std::filesystem::current_path() / std::filesystem::path(kRuntimeConfigRelativePath));
+		const auto configPath = ResolveRuntimeRelativePath(kRuntimeConfigRelativePath);
 
 		SKSE::log::info("CalamityAffixes: loading runtime config from: {}", configPath.string());
 
@@ -910,6 +980,189 @@ namespace CalamityAffixes
 		return true;
 	}
 
+	std::optional<float> EventBridge::LoadLootChancePercentFromMcmSettings() const
+	{
+		const auto settingsPath = ResolveRuntimeRelativePath(kMcmSettingsRelativePath);
+		std::ifstream in(settingsPath);
+		if (!in.is_open()) {
+			return std::nullopt;
+		}
+
+		std::string activeSectionLower;
+		std::string line;
+		while (std::getline(in, line)) {
+			std::string_view text(line);
+			if (text.size() >= 3 &&
+				static_cast<unsigned char>(text[0]) == 0xEF &&
+				static_cast<unsigned char>(text[1]) == 0xBB &&
+				static_cast<unsigned char>(text[2]) == 0xBF) {
+				text.remove_prefix(3);
+			}
+
+			text = StripIniCommentAndTrim(text);
+			if (text.empty()) {
+				continue;
+			}
+
+			if (text.front() == '[' && text.back() == ']') {
+				activeSectionLower = ToLowerAscii(Trim(text.substr(1, text.size() - 2)));
+				continue;
+			}
+			if (activeSectionLower != kMcmGeneralSectionLower) {
+				continue;
+			}
+
+			const auto separator = text.find('=');
+			if (separator == std::string_view::npos) {
+				continue;
+			}
+
+			const auto keyLower = ToLowerAscii(Trim(text.substr(0, separator)));
+			if (keyLower != kMcmLootChanceKeyLower) {
+				continue;
+			}
+
+			const auto parsed = TryParseFloat(text.substr(separator + 1));
+			if (!parsed.has_value()) {
+				SKSE::log::warn(
+					"CalamityAffixes: invalid MCM loot chance value in {} (line='{}').",
+					settingsPath.string(),
+					std::string(text));
+				return std::nullopt;
+			}
+			return std::clamp(*parsed, 0.0f, 100.0f);
+		}
+
+		return std::nullopt;
+	}
+
+	bool EventBridge::PersistLootChancePercentToMcmSettings(float a_chancePercent, bool a_overwriteExisting) const
+	{
+		const float clampedChance = std::clamp(a_chancePercent, 0.0f, 100.0f);
+		const auto settingsPath = ResolveRuntimeRelativePath(kMcmSettingsRelativePath);
+		const std::string desiredLine = std::string(kMcmLootChanceKey) + "=" + FormatCompactFloat(clampedChance);
+
+		std::vector<std::string> lines;
+		{
+			std::ifstream in(settingsPath);
+			std::string line;
+			while (std::getline(in, line)) {
+				lines.push_back(line);
+			}
+		}
+
+		auto normalizeSection = [](std::string_view a_text) {
+			return ToLowerAscii(Trim(a_text));
+		};
+
+		auto normalizeKey = [](std::string_view a_text) {
+			return ToLowerAscii(Trim(a_text));
+		};
+
+		std::size_t targetSectionStart = std::string::npos;
+		std::size_t targetSectionEnd = lines.size();
+		std::size_t targetKeyLine = std::string::npos;
+		std::string activeSectionLower;
+
+		for (std::size_t i = 0; i < lines.size(); ++i) {
+			std::string_view text(lines[i]);
+			if (text.size() >= 3 &&
+				static_cast<unsigned char>(text[0]) == 0xEF &&
+				static_cast<unsigned char>(text[1]) == 0xBB &&
+				static_cast<unsigned char>(text[2]) == 0xBF) {
+				text.remove_prefix(3);
+			}
+
+			text = StripIniCommentAndTrim(text);
+			if (text.empty()) {
+				continue;
+			}
+
+			if (text.front() == '[' && text.back() == ']') {
+				if (targetSectionStart != std::string::npos &&
+					targetSectionEnd == lines.size() &&
+					activeSectionLower == kMcmGeneralSectionLower) {
+					targetSectionEnd = i;
+				}
+
+				activeSectionLower = normalizeSection(text.substr(1, text.size() - 2));
+				if (activeSectionLower == kMcmGeneralSectionLower && targetSectionStart == std::string::npos) {
+					targetSectionStart = i;
+					targetSectionEnd = lines.size();
+				}
+				continue;
+			}
+
+			if (activeSectionLower != kMcmGeneralSectionLower) {
+				continue;
+			}
+
+			const auto separator = text.find('=');
+			if (separator == std::string_view::npos) {
+				continue;
+			}
+
+			if (normalizeKey(text.substr(0, separator)) == kMcmLootChanceKeyLower) {
+				targetKeyLine = i;
+				break;
+			}
+		}
+
+		if (targetSectionStart != std::string::npos &&
+			targetSectionEnd == lines.size() &&
+			targetKeyLine == std::string::npos) {
+			targetSectionEnd = lines.size();
+		}
+
+		bool changed = false;
+		if (targetKeyLine != std::string::npos) {
+			if (!a_overwriteExisting) {
+				return true;
+			}
+			if (lines[targetKeyLine] != desiredLine) {
+				lines[targetKeyLine] = desiredLine;
+				changed = true;
+			}
+		} else if (targetSectionStart != std::string::npos) {
+			const auto insertAt = std::min(targetSectionEnd, lines.size());
+			lines.insert(lines.begin() + static_cast<std::ptrdiff_t>(insertAt), desiredLine);
+			changed = true;
+		} else {
+			if (!lines.empty() && !lines.back().empty()) {
+				lines.emplace_back();
+			}
+			lines.emplace_back("[" + std::string(kMcmGeneralSection) + "]");
+			lines.emplace_back(desiredLine);
+			changed = true;
+		}
+
+		if (!changed) {
+			return true;
+		}
+
+		std::error_code ec;
+		std::filesystem::create_directories(settingsPath.parent_path(), ec);
+		if (ec) {
+			SKSE::log::warn(
+				"CalamityAffixes: failed to create MCM settings directory for loot chance sync ({}).",
+				settingsPath.parent_path().string());
+			return false;
+		}
+
+		std::ofstream out(settingsPath, std::ios::trunc);
+		if (!out.is_open()) {
+			SKSE::log::warn(
+				"CalamityAffixes: failed to open MCM settings for loot chance sync ({}).",
+				settingsPath.string());
+			return false;
+		}
+
+		for (const auto& line : lines) {
+			out << line << '\n';
+		}
+		return true;
+	}
+
 	void EventBridge::ApplyLootConfigFromJson(const nlohmann::json& a_configRoot)
 	{
 		_loot.armorEditorIdDenyContains = detail::MakeDefaultLootArmorEditorIdDenyContains();
@@ -918,6 +1171,8 @@ namespace CalamityAffixes
 			_loot.chancePercent = loot.value("chancePercent", 0.0f);
 			_loot.runewordFragmentChancePercent =
 				static_cast<float>(loot.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent)));
+			_loot.reforgeOrbChancePercent =
+				static_cast<float>(loot.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent)));
 			_loot.renameItem = loot.value("renameItem", false);
 			_loot.sharedPool = loot.value("sharedPool", false);
 			_loot.debugLog = loot.value("debugLog", false);
@@ -962,6 +1217,12 @@ namespace CalamityAffixes
 				_loot.runewordFragmentChancePercent = 100.0f;
 			}
 
+			if (_loot.reforgeOrbChancePercent < 0.0f) {
+				_loot.reforgeOrbChancePercent = 0.0f;
+			} else if (_loot.reforgeOrbChancePercent > 100.0f) {
+				_loot.reforgeOrbChancePercent = 100.0f;
+			}
+
 			if (dotTagSafetyThreshold <= 0.0) {
 				_loot.dotTagSafetyUniqueEffectThreshold = 0u;
 			} else {
@@ -990,13 +1251,18 @@ namespace CalamityAffixes
 				_loot.triggerProcBudgetPerWindow = static_cast<std::uint32_t>(clamped);
 			}
 
-			if (triggerProcBudgetWindowMs <= 0.0) {
-				_loot.triggerProcBudgetWindowMs = 0u;
-			} else {
-				const double clamped = std::clamp(triggerProcBudgetWindowMs, 1.0, 5000.0);
-				_loot.triggerProcBudgetWindowMs = static_cast<std::uint32_t>(clamped);
+				if (triggerProcBudgetWindowMs <= 0.0) {
+					_loot.triggerProcBudgetWindowMs = 0u;
+				} else {
+					const double clamped = std::clamp(triggerProcBudgetWindowMs, 1.0, 5000.0);
+					_loot.triggerProcBudgetWindowMs = static_cast<std::uint32_t>(clamped);
+				}
 			}
+
+		if (const auto mcmLootChance = LoadLootChancePercentFromMcmSettings(); mcmLootChance.has_value()) {
+			_loot.chancePercent = std::clamp(*mcmLootChance, 0.0f, 100.0f);
 		}
+		(void)PersistLootChancePercentToMcmSettings(_loot.chancePercent, false);
 
 		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
 		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
