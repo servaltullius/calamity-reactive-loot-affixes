@@ -28,6 +28,11 @@ static_assert([] {
 	"ResolveRunewordBaseCycleCursor: rejects zero instance key");
 
 static_assert([] {
+	return !CalamityAffixes::ShouldShowRunewordTooltipInItemOverlay();
+}(),
+	"ShouldShowRunewordTooltipInItemOverlay: runeword text is panel-only by policy");
+
+static_assert([] {
 	return HasLeadingLootStarPrefix("*** Iron Sword");
 }(),
 	"HasLeadingLootStarPrefix: detects ASCII marker with delimiter space");

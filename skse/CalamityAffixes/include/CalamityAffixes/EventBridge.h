@@ -105,6 +105,12 @@ namespace CalamityAffixes
 			std::vector<RunewordRuneRequirement> requiredRunes{};
 		};
 
+		struct OperationResult
+		{
+			bool success{ false };
+			std::string message{};
+		};
+
 		// Lifecycle and config entrypoints.
 		static EventBridge* GetSingleton();
 
@@ -152,6 +158,7 @@ namespace CalamityAffixes
 		[[nodiscard]] bool SelectRunewordRecipe(std::uint64_t a_recipeToken);
 		// UI helper: current runeword crafting status for Prisma panel.
 		[[nodiscard]] RunewordPanelState GetRunewordPanelState();
+		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseWithOrb();
 
 		// Combat/runtime evaluation entrypoints.
 		// Called from Actor::HandleHealthDamage hook to drive hit/incoming-hit procs reliably,
@@ -485,6 +492,7 @@ namespace CalamityAffixes
 		{
 			float chancePercent{ 0.0f };
 			float runewordFragmentChancePercent{ 1.0f };
+			float reforgeOrbChancePercent{ 6.0f };
 			bool renameItem{ false };
 			bool sharedPool{ false };
 			bool debugLog{ false };
@@ -673,11 +681,10 @@ namespace CalamityAffixes
 			std::uint64_t a_instanceKey,
 			RE::InventoryEntryData*& a_outEntry,
 			RE::ExtraDataList*& a_outXList) const;
-		[[nodiscard]] std::optional<LootItemType> ResolveInstanceLootType(std::uint64_t a_instanceKey) const;
-		[[nodiscard]] const RunewordRecipe* FindRunewordRecipeByToken(std::uint64_t a_recipeToken) const;
-		[[nodiscard]] const RunewordRecipe* GetCurrentRunewordRecipe() const;
-		[[nodiscard]] std::string BuildRunewordTooltip(std::uint64_t a_instanceKey) const;
-		void InitializeRunewordCatalog();
+			[[nodiscard]] std::optional<LootItemType> ResolveInstanceLootType(std::uint64_t a_instanceKey) const;
+			[[nodiscard]] const RunewordRecipe* FindRunewordRecipeByToken(std::uint64_t a_recipeToken) const;
+			[[nodiscard]] const RunewordRecipe* GetCurrentRunewordRecipe() const;
+			void InitializeRunewordCatalog();
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
@@ -692,6 +699,7 @@ namespace CalamityAffixes
 		void GrantNextRequiredRuneFragment(std::uint32_t a_amount = 1u);
 		void GrantCurrentRecipeRuneSet(std::uint32_t a_amount = 1u);
 		void MaybeGrantRandomRunewordFragment();
+		void MaybeGrantRandomReforgeOrb();
 		void ApplyRunewordResult(std::uint64_t a_instanceKey, const RunewordRecipe& a_recipe);
 		void LogRunewordStatus() const;
 		InstanceRuntimeState& EnsureInstanceRuntimeState(std::uint64_t a_instanceKey, std::uint64_t a_affixToken);

@@ -82,6 +82,13 @@ namespace CalamityAffixes
 		return a_name.substr(pos);
 	}
 
+	// Policy: runeword progress/details are shown in the dedicated runeword panel only.
+	// Item tooltip overlay should show affix lines only.
+	[[nodiscard]] constexpr bool ShouldShowRunewordTooltipInItemOverlay() noexcept
+	{
+		return false;
+	}
+
 	struct TooltipResolutionCandidate
 	{
 		std::string_view rowName{};

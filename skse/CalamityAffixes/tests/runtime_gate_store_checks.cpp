@@ -1,5 +1,6 @@
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/LootSlotSanitizer.h"
+#include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/TriggerGuards.h"
@@ -8,6 +9,8 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <random>
 #include <string>
@@ -645,6 +648,35 @@ namespace
 
 		return true;
 	}
+
+	bool CheckRunewordTooltipOverlayPolicy()
+	{
+		if (CalamityAffixes::ShouldShowRunewordTooltipInItemOverlay()) {
+			std::cerr << "tooltip_policy: runeword text must stay panel-only\n";
+			return false;
+		}
+
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runtime.cpp";
+
+		std::ifstream in(runtimeTooltipFile);
+		if (!in.is_open()) {
+			std::cerr << "tooltip_policy: failed to open runtime tooltip source: " << runtimeTooltipFile << "\n";
+			return false;
+		}
+
+		std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("BuildRunewordTooltip(") != std::string::npos) {
+			std::cerr << "tooltip_policy: runtime tooltip source still references runeword tooltip builder\n";
+			return false;
+		}
+
+		return true;
+	}
 }
 
 int main()
@@ -658,7 +690,8 @@ int main()
 	const bool slotSanitizerOk = CheckLootSlotSanitizer();
 	const bool fixedWindowBudgetOk = CheckFixedWindowBudget();
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
+	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
-	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk) ? 0 :
+	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk) ? 0 :
 	                                                                               1;
 }

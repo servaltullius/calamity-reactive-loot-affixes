@@ -239,22 +239,6 @@ namespace CalamityAffixes
 		}
 
 		if (candidates.empty()) {
-			for (auto* xList : *a_item->extraLists) {
-				if (!xList) {
-					continue;
-				}
-				const auto* uid = xList->GetByType<RE::ExtraUniqueID>();
-				if (!uid) {
-					continue;
-				}
-
-				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-				const auto rw = BuildRunewordTooltip(key);
-				if (!rw.empty()) {
-					return rw;
-				}
-			}
-
 			return std::nullopt;
 		}
 
@@ -354,15 +338,6 @@ namespace CalamityAffixes
 					tooltip.push_back('\n');
 					tooltip.append(detail);
 				}
-			}
-
-			// Append runeword info
-			const auto runewordTooltip = BuildRunewordTooltip(a_candidate.instanceKey);
-			if (!runewordTooltip.empty()) {
-				if (!tooltip.empty()) {
-					tooltip.push_back('\n');
-				}
-				tooltip.append(runewordTooltip);
 			}
 
 			return tooltip;
