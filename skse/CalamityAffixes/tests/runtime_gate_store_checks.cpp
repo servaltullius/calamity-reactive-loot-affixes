@@ -733,6 +733,41 @@ namespace
 
 		return true;
 	}
+
+	bool CheckRunewordCompletedSelectionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
+
+		std::ifstream in(selectionFile);
+		if (!in.is_open()) {
+			std::cerr << "runeword_completed_selection: failed to open source file: " << selectionFile << "\n";
+			return false;
+		}
+
+		std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		// Completed runeword base must pin recipe highlight to completed recipe token.
+		if (source.find("bool resolvedFromCompleted = false;") == std::string::npos ||
+			source.find("selectedToken = _runewordRecipes[rwIt->second].token;") == std::string::npos ||
+			source.find("if (!resolvedFromCompleted)") == std::string::npos) {
+			std::cerr << "runeword_completed_selection: completed recipe highlight guard is missing\n";
+			return false;
+		}
+
+		// Completed runeword base must not persist mutable in-progress recipe state.
+		if (source.find("bool completedBase = false;") == std::string::npos ||
+			source.find("if (completedBase)") == std::string::npos ||
+			source.find("_runewordInstanceStates.erase(selectedKey);") == std::string::npos) {
+			std::cerr << "runeword_completed_selection: completed-base state write guard is missing\n";
+			return false;
+		}
+
+		return true;
+	}
 }
 
 int main()
@@ -748,8 +783,9 @@ int main()
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	const bool lootChanceMcmSyncOk = CheckLootChanceMcmSyncPolicy();
+	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
-	        lootChanceMcmSyncOk) ? 0 :
-	                                                                               1;
+	        lootChanceMcmSyncOk && runewordCompletedSelectionOk) ? 0 :
+	                                                             1;
 }

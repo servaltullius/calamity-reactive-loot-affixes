@@ -107,7 +107,9 @@ namespace CalamityAffixes
 			}
 
 			std::optional<RunewordInstanceState> stateCopy;
-			if (!completedRecipe) {
+			if (completedRecipe) {
+				_runewordInstanceStates.erase(a_instanceKey);
+			} else {
 				auto& state = _runewordInstanceStates[a_instanceKey];
 				if (state.recipeToken == 0u) {
 					if (const auto* recipe = GetCurrentRunewordRecipe()) {
@@ -415,10 +417,22 @@ namespace CalamityAffixes
 				selectedToken = currentRecipe->token;
 			}
 			if (_runewordSelectedBaseKey) {
-				if (const auto stateIt = _runewordInstanceStates.find(*_runewordSelectedBaseKey);
-					stateIt != _runewordInstanceStates.end() &&
-					stateIt->second.recipeToken != 0u) {
-					selectedToken = stateIt->second.recipeToken;
+				const auto selectedKey = *_runewordSelectedBaseKey;
+				bool resolvedFromCompleted = false;
+				if (const auto it = _instanceAffixes.find(selectedKey); it != _instanceAffixes.end()) {
+					const auto primaryToken = it->second.GetPrimary();
+					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
+						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+						selectedToken = _runewordRecipes[rwIt->second].token;
+						resolvedFromCompleted = true;
+					}
+				}
+				if (!resolvedFromCompleted) {
+					if (const auto stateIt = _runewordInstanceStates.find(selectedKey);
+						stateIt != _runewordInstanceStates.end() &&
+						stateIt->second.recipeToken != 0u) {
+						selectedToken = stateIt->second.recipeToken;
+					}
 				}
 			}
 
@@ -571,10 +585,24 @@ namespace CalamityAffixes
 			const auto& recipe = _runewordRecipes[idx];
 
 			if (_runewordSelectedBaseKey) {
-				auto& state = _runewordInstanceStates[*_runewordSelectedBaseKey];
-				if (state.recipeToken != recipe.token) {
-					state.recipeToken = recipe.token;
-					state.insertedRunes = 0u;
+				const auto selectedKey = *_runewordSelectedBaseKey;
+				bool completedBase = false;
+				if (const auto itState = _instanceAffixes.find(selectedKey); itState != _instanceAffixes.end()) {
+					const auto primaryToken = itState->second.GetPrimary();
+					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
+						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+						completedBase = true;
+					}
+				}
+
+				if (completedBase) {
+					_runewordInstanceStates.erase(selectedKey);
+				} else {
+					auto& state = _runewordInstanceStates[selectedKey];
+					if (state.recipeToken != recipe.token) {
+						state.recipeToken = recipe.token;
+						state.insertedRunes = 0u;
+					}
 				}
 			}
 
