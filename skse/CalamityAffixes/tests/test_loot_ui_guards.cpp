@@ -33,6 +33,46 @@ static_assert([] {
 	"ShouldShowRunewordTooltipInItemOverlay: runeword text is panel-only by policy");
 
 static_assert([] {
+	return CalamityAffixes::IsPrismaTooltipRelevantMenu("InventoryMenu");
+}(),
+	"IsPrismaTooltipRelevantMenu: supports InventoryMenu");
+
+static_assert([] {
+	return CalamityAffixes::IsPrismaTooltipRelevantMenu("BarterMenu");
+}(),
+	"IsPrismaTooltipRelevantMenu: supports BarterMenu");
+
+static_assert([] {
+	return CalamityAffixes::IsPrismaTooltipRelevantMenu("ContainerMenu");
+}(),
+	"IsPrismaTooltipRelevantMenu: supports ContainerMenu");
+
+static_assert([] {
+	return CalamityAffixes::IsPrismaTooltipRelevantMenu("GiftMenu");
+}(),
+	"IsPrismaTooltipRelevantMenu: supports GiftMenu");
+
+static_assert([] {
+	return !CalamityAffixes::IsPrismaTooltipRelevantMenu("MagicMenu");
+}(),
+	"IsPrismaTooltipRelevantMenu: rejects non-item menus");
+
+static_assert([] {
+	return CalamityAffixes::IsRunewordOverlayTooltipLine("Runeword: Nadir (0/2) / Next: Nef (owned 0)");
+}(),
+	"IsRunewordOverlayTooltipLine: detects runeword progress lines");
+
+static_assert([] {
+	return CalamityAffixes::IsRunewordOverlayTooltipLine("Runeword Base: Selected");
+}(),
+	"IsRunewordOverlayTooltipLine: detects runeword base lines");
+
+static_assert([] {
+	return !CalamityAffixes::IsRunewordOverlayTooltipLine("Runeword Doom (Hel-Ohm-Um-Lo-Cham): on-hit proc");
+}(),
+	"IsRunewordOverlayTooltipLine: keeps normal runeword affix names");
+
+static_assert([] {
 	return HasLeadingLootStarPrefix("*** Iron Sword");
 }(),
 	"HasLeadingLootStarPrefix: detects ASCII marker with delimiter space");

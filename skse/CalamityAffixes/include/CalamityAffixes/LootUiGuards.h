@@ -11,6 +11,39 @@ namespace CalamityAffixes
 {
 	namespace detail
 	{
+		[[nodiscard]] constexpr std::string_view TrimLeadingAsciiWhitespace(std::string_view a_text) noexcept
+		{
+			std::size_t pos = 0;
+			while (pos < a_text.size()) {
+				const char ch = a_text[pos];
+				if (ch != ' ' && ch != '\t' && ch != '\r') {
+					break;
+				}
+				++pos;
+			}
+			return a_text.substr(pos);
+		}
+
+		[[nodiscard]] constexpr char AsciiLower(char a_ch) noexcept
+		{
+			return (a_ch >= 'A' && a_ch <= 'Z') ? static_cast<char>(a_ch - 'A' + 'a') : a_ch;
+		}
+
+		[[nodiscard]] constexpr bool StartsWithAsciiInsensitive(std::string_view a_text, std::string_view a_prefix) noexcept
+		{
+			if (a_prefix.size() > a_text.size()) {
+				return false;
+			}
+
+			for (std::size_t i = 0; i < a_prefix.size(); ++i) {
+				if (AsciiLower(a_text[i]) != AsciiLower(a_prefix[i])) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		[[nodiscard]] constexpr std::size_t SkipLeadingSpaces(std::string_view a_text) noexcept
 		{
 			std::size_t pos = 0;
@@ -87,6 +120,23 @@ namespace CalamityAffixes
 	[[nodiscard]] constexpr bool ShouldShowRunewordTooltipInItemOverlay() noexcept
 	{
 		return false;
+	}
+
+	[[nodiscard]] constexpr bool IsPrismaTooltipRelevantMenu(std::string_view a_name) noexcept
+	{
+		return a_name == "InventoryMenu" ||
+		       a_name == "BarterMenu" ||
+		       a_name == "ContainerMenu" ||
+		       a_name == "GiftMenu";
+	}
+
+	[[nodiscard]] constexpr bool IsRunewordOverlayTooltipLine(std::string_view a_line) noexcept
+	{
+		const auto line = detail::TrimLeadingAsciiWhitespace(a_line);
+		return detail::StartsWithAsciiInsensitive(line, "Runeword:") ||
+		       detail::StartsWithAsciiInsensitive(line, "Runeword Base:") ||
+		       line.starts_with("룬워드:") ||
+		       line.starts_with("룬워드 베이스:");
 	}
 
 	struct TooltipResolutionCandidate

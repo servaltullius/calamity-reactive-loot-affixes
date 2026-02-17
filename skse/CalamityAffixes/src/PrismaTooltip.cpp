@@ -19,6 +19,7 @@
 #include <SKSE/SKSE.h>
 
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/PrismaLayoutPersistence.h"
 
 #include "PrismaUI_API.h"
@@ -37,6 +38,8 @@ namespace CalamityAffixes::PrismaTooltip
 
 		constexpr std::string_view kMenuInventory = RE::InventoryMenu::MENU_NAME;
 		constexpr std::string_view kMenuBarter = RE::BarterMenu::MENU_NAME;
+		constexpr std::string_view kMenuContainer = RE::ContainerMenu::MENU_NAME;
+		constexpr std::string_view kMenuGift = RE::GiftMenu::MENU_NAME;
 		constexpr std::string_view kMcmKeybindSettingsPath = "Data/MCM/Settings/keybinds.json";
 		constexpr std::string_view kMcmModSettingsPath = "Data/MCM/Settings/CalamityAffixes.ini";
 		constexpr std::string_view kMcmModDefaultSettingsPath = "Data/MCM/Config/CalamityAffixes/settings.ini";
@@ -50,6 +53,8 @@ namespace CalamityAffixes::PrismaTooltip
 		constexpr std::string_view kTooltipLayoutSavePrefix = "ui.tooltip.save:";
 		constexpr std::string_view kItemSourceInventory = "inventory";
 		constexpr std::string_view kItemSourceBarter = "barter";
+		constexpr std::string_view kItemSourceContainer = "container";
+		constexpr std::string_view kItemSourceGift = "gift";
 		constexpr std::string_view kPanelLayoutPath = "Data/SKSE/Plugins/CalamityAffixes/prisma_panel_layout.json";
 		constexpr std::string_view kTooltipLayoutPath = "Data/SKSE/Plugins/CalamityAffixes/prisma_tooltip_layout.json";
 		constexpr int kDefaultTooltipRight = 70;
@@ -131,7 +136,7 @@ namespace CalamityAffixes::PrismaTooltip
 
 		[[nodiscard]] bool IsRelevantMenu(std::string_view a_name) noexcept
 		{
-			return a_name == kMenuInventory || a_name == kMenuBarter;
+			return CalamityAffixes::IsPrismaTooltipRelevantMenu(a_name);
 		}
 
 		[[nodiscard]] int CountRelevantMenusOpenFromUi() noexcept
@@ -148,7 +153,41 @@ namespace CalamityAffixes::PrismaTooltip
 			if (ui->IsMenuOpen(kMenuBarter)) {
 				++count;
 			}
+			if (ui->IsMenuOpen(kMenuContainer)) {
+				++count;
+			}
+			if (ui->IsMenuOpen(kMenuGift)) {
+				++count;
+			}
 			return count;
+		}
+
+		[[nodiscard]] std::string StripRunewordOverlayTooltipLines(std::string_view a_tooltip)
+		{
+			if (a_tooltip.empty() || ShouldShowRunewordTooltipInItemOverlay()) {
+				return std::string(a_tooltip);
+			}
+
+			std::string filtered;
+			filtered.reserve(a_tooltip.size());
+			std::size_t start = 0;
+			while (start <= a_tooltip.size()) {
+				const auto end = a_tooltip.find('\n', start);
+				const auto lineEnd = end == std::string_view::npos ? a_tooltip.size() : end;
+				const auto line = a_tooltip.substr(start, lineEnd - start);
+				if (!IsRunewordOverlayTooltipLine(line)) {
+					if (!filtered.empty()) {
+						filtered.push_back('\n');
+					}
+					filtered.append(line);
+				}
+				if (lineEnd == a_tooltip.size()) {
+					break;
+				}
+				start = lineEnd + 1;
+			}
+
+			return filtered;
 		}
 
 		[[nodiscard]] bool IsViewReady() noexcept
@@ -610,6 +649,22 @@ namespace CalamityAffixes::PrismaTooltip
 				if (ui->IsMenuOpen(kMenuBarter)) {
 					auto& data = menu->GetRuntimeData();
 					if (readItem(data.itemList, kItemSourceBarter)) {
+						return result;
+					}
+				}
+			}
+			if (auto menu = ui->GetMenu<RE::ContainerMenu>(); menu) {
+				if (ui->IsMenuOpen(kMenuContainer)) {
+					auto& data = menu->GetRuntimeData();
+					if (readItem(data.itemList, kItemSourceContainer)) {
+						return result;
+					}
+				}
+			}
+			if (auto menu = ui->GetMenu<RE::GiftMenu>(); menu) {
+				if (ui->IsMenuOpen(kMenuGift)) {
+					auto& data = menu->GetRuntimeData();
+					if (readItem(data.itemList, kItemSourceGift)) {
 						return result;
 					}
 				}
