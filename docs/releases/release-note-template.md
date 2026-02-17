@@ -11,6 +11,7 @@
 - [핵심 변경 1]
 - [핵심 변경 2]
 - [핵심 변경 3]
+- [재련 오브(Reforge Orb) 관련 변경: 획득/소모/대상/예외 규칙]
 
 ## 적용 범위
 
@@ -57,6 +58,7 @@
   - D Suppression/ICD: PASS/FAIL
   - E DotApply: PASS/FAIL
   - F Scope: PASS/FAIL
+  - G Reforge Orb: PASS/FAIL (오브 획득/소모/무어픽스 재련/완성 룬워드 차단)
 
 ## 알려진 이슈 / 다음 단계
 
