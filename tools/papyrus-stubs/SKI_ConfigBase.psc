@@ -6,6 +6,12 @@ string[] Property Pages Auto
 Event OnGameReload()
 EndEvent
 
+Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
+EndEvent
+
+Event OnConfigManagerReset(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
+EndEvent
+
 Event OnConfigInit()
 EndEvent
 

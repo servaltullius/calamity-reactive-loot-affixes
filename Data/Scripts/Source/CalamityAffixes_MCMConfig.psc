@@ -28,6 +28,23 @@ Event OnGameReload()
 	Parent.OnGameReload()
 EndEvent
 
+Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
+	; Hard gate registration path: only canonical quest instance can reach parent registration logic.
+	if !IsCanonicalMcmQuest()
+		return
+	endif
+
+	Parent.OnConfigManagerReady(a_eventName, a_strArg, a_numArg, a_sender)
+EndEvent
+
+Event OnConfigManagerReset(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
+	if !IsCanonicalMcmQuest()
+		return
+	endif
+
+	Parent.OnConfigManagerReset(a_eventName, a_strArg, a_numArg, a_sender)
+EndEvent
+
 Function SetEnabled(bool a_enabled)
 	CalamityAffixes_ModeControl.SetEnabled(a_enabled)
 EndFunction
