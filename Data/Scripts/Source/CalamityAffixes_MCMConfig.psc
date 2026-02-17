@@ -4,10 +4,10 @@ Scriptname CalamityAffixes_MCMConfig extends MCM_ConfigBase
 ; Bind this script to a Quest in the Creation Kit (see docs / README).
 ; General actions and runeword/manual controls are forwarded to SKSE via ModEvent.
 ;
-; Only the generated canonical MCM quest (FormID 0x000800) should register.
-; This filters out stale quest instances left in old saves and prevents duplicate MCM entries.
-int Property ExpectedMcmQuestFormId = 0x000800 AutoReadOnly Hidden
+; Only the canonical quest instance that still exists in the currently loaded plugin should register.
+; This filters stale quest instances left in saves after generated FormID churn.
 int Property LocalFormIdModulo = 16777216 AutoReadOnly Hidden ; 0x01000000
+string Property PluginFileName = "CalamityAffixes.esp" AutoReadOnly Hidden
 
 bool Function IsCanonicalMcmQuest()
 	int localFormId = GetFormID()
@@ -17,7 +17,15 @@ bool Function IsCanonicalMcmQuest()
 		localFormId += LocalFormIdModulo
 	endWhile
 	localFormId = localFormId % LocalFormIdModulo
-	return (localFormId == ExpectedMcmQuestFormId)
+
+	Form resolved = Game.GetFormFromFile(localFormId, PluginFileName)
+	Quest resolvedQuest = resolved as Quest
+	Quest selfQuest = self as Quest
+	if resolvedQuest == None || selfQuest == None
+		return false
+	endif
+
+	return (resolvedQuest == selfQuest)
 EndFunction
 
 Event OnGameReload()
