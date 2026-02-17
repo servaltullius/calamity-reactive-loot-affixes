@@ -6,8 +6,21 @@ mod_name="CalamityAffixes"
 repo_run_root="${repo_root}"
 version="0.0.0"
 
+# Version precedence for package naming:
+# 1) explicit env override (CAFF_PACKAGE_VERSION)
+# 2) exact git tag on HEAD (v*)
+# 3) fallback to CMake project version
+if [[ -n "${CAFF_PACKAGE_VERSION:-}" ]]; then
+  version="${CAFF_PACKAGE_VERSION}"
+elif command -v git >/dev/null 2>&1; then
+  tagged_version="$(git -C "${repo_root}" tag --points-at HEAD --list 'v*' | sort -V | tail -n1 || true)"
+  if [[ -n "${tagged_version}" ]]; then
+    version="${tagged_version#v}"
+  fi
+fi
+
 cmake_project_file="${repo_root}/skse/CalamityAffixes/CMakeLists.txt"
-if [[ -f "${cmake_project_file}" ]]; then
+if [[ "${version}" == "0.0.0" && -f "${cmake_project_file}" ]]; then
   detected_version="$(grep -Eo 'project\(CalamityAffixes VERSION [0-9]+\.[0-9]+\.[0-9]+' "${cmake_project_file}" | awk '{print $3}' | head -n1)"
   if [[ -n "${detected_version}" ]]; then
     version="${detected_version}"
