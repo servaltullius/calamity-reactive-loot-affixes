@@ -1,0 +1,47 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "linux-release-commonlibsse",
+      "displayName": "Linux Release (Local CommonLibSSE)",
+      "description": "Configure with the repo-local CommonLibSSE-NG install tree.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/presets/linux-release-commonlibsse",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": "ON",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/extern/CommonLibSSE-NG/install.linux-clangcl-rel-se"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux-release-commonlibsse",
+      "displayName": "Build (Linux Release, Local CommonLibSSE)",
+      "configurePreset": "linux-release-commonlibsse"
+    },
+    {
+      "name": "linux-release-commonlibsse-static-checks",
+      "displayName": "Build Static Checks (Linux Release, Local CommonLibSSE)",
+      "configurePreset": "linux-release-commonlibsse",
+      "targets": [
+        "CalamityAffixesStaticChecks"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "linux-release-commonlibsse-runtime-checks",
+      "displayName": "Runtime/Static Checks (Linux Release, Local CommonLibSSE)",
+      "configurePreset": "linux-release-commonlibsse",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
