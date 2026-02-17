@@ -1,0 +1,58 @@
+name: ci-verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  affix-lint:
+    name: Affix lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lint affix spec and generated snapshot
+        run: python3 tools/lint_affixes.py --spec affixes/affixes.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json
+
+  generator-tests:
+    name: Generator tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Run generator tests
+        run: dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release --nologo
+
+  runtime-gate-tests:
+    name: Runtime gate tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure runtime gate checks
+        run: cmake -S skse/CalamityAffixes/tests -B skse/CalamityAffixes/tests/build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build runtime gate checks
+        run: cmake --build skse/CalamityAffixes/tests/build --parallel
+
+      - name: Execute runtime gate checks
+        run: ctest --test-dir skse/CalamityAffixes/tests/build --output-on-failure
