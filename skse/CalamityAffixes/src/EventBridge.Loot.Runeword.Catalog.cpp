@@ -264,15 +264,6 @@ namespace CalamityAffixes
 					if (_runewordSelectedBaseKey && !PlayerHasInstanceKey(*_runewordSelectedBaseKey)) {
 						_runewordSelectedBaseKey.reset();
 					}
-					if (_runewordSelectedBaseKey) {
-						if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
-							const auto primaryToken = it->second.GetPrimary();
-							if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-								rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-								_runewordSelectedBaseKey.reset();
-							}
-						}
-					}
 				}
 
 			if (_runewordRecipes.empty()) {

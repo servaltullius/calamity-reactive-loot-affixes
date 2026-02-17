@@ -10,6 +10,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace CalamityAffixes
@@ -19,16 +20,6 @@ namespace CalamityAffixes
 		std::vector<std::uint64_t> EventBridge::CollectEquippedRunewordBaseCandidates(bool a_ensureUniqueId)
 		{
 			std::vector<std::uint64_t> keys;
-			auto isCompletedRuneword = [&](std::uint64_t a_instanceKey) {
-				if (const auto it = _instanceAffixes.find(a_instanceKey); it != _instanceAffixes.end()) {
-					const auto primaryToken = it->second.GetPrimary();
-					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
-						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-						return true;
-					}
-				}
-				return false;
-			};
 
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			if (!player) {
@@ -73,9 +64,6 @@ namespace CalamityAffixes
 					}
 
 					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-					if (isCompletedRuneword(key)) {
-						continue;
-					}
 					keys.push_back(key);
 				}
 			}
@@ -102,15 +90,12 @@ namespace CalamityAffixes
 			if (!IsWeaponOrArmor(entry->object)) {
 				return false;
 			}
+			const RunewordRecipe* completedRecipe = nullptr;
 			if (const auto it = _instanceAffixes.find(a_instanceKey); it != _instanceAffixes.end()) {
 				const auto primaryToken = it->second.GetPrimary();
 				if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
 					rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
-					std::string note = "Runeword: already complete (";
-					note.append(_runewordRecipes[rwIt->second].displayName);
-					note.push_back(')');
-					RE::DebugNotification(note.c_str());
-					return false;
+					completedRecipe = std::addressof(_runewordRecipes[rwIt->second]);
 				}
 			}
 
@@ -121,16 +106,23 @@ namespace CalamityAffixes
 				_runewordBaseCycleCursor = *cursor;
 			}
 
-			auto& state = _runewordInstanceStates[a_instanceKey];
-			if (state.recipeToken == 0u) {
-				if (const auto* recipe = GetCurrentRunewordRecipe()) {
-					state.recipeToken = recipe->token;
+			std::optional<RunewordInstanceState> stateCopy;
+			if (!completedRecipe) {
+				auto& state = _runewordInstanceStates[a_instanceKey];
+				if (state.recipeToken == 0u) {
+					if (const auto* recipe = GetCurrentRunewordRecipe()) {
+						state.recipeToken = recipe->token;
+					}
 				}
+				stateCopy = state;
 			}
 
 			const std::string selectedName = ResolveInventoryDisplayName(entry, xList);
 
-			const auto* recipe = FindRunewordRecipeByToken(state.recipeToken);
+			const auto* recipe = completedRecipe;
+			if (!recipe && stateCopy) {
+				recipe = FindRunewordRecipeByToken(stateCopy->recipeToken);
+			}
 			if (!recipe) {
 				recipe = GetCurrentRunewordRecipe();
 			}
@@ -172,9 +164,20 @@ namespace CalamityAffixes
 					continue;
 				}
 
+				std::string displayName = ResolveInventoryDisplayName(entry, xList);
+				if (const auto it = _instanceAffixes.find(key); it != _instanceAffixes.end()) {
+					const auto primaryToken = it->second.GetPrimary();
+					if (const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(primaryToken);
+						rwIt != _runewordRecipeIndexByResultAffixToken.end() && rwIt->second < _runewordRecipes.size()) {
+						displayName.append(" [Runeword: ");
+						displayName.append(_runewordRecipes[rwIt->second].displayName);
+						displayName.push_back(']');
+					}
+				}
+
 				entries.push_back(RunewordBaseInventoryEntry{
 					.instanceKey = key,
-					.displayName = ResolveInventoryDisplayName(entry, xList),
+					.displayName = std::move(displayName),
 					.selected = (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key)
 				});
 			}
