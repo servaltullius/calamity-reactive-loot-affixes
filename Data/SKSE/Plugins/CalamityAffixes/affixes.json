@@ -5,7 +5,6 @@
   "loot": {
     "chancePercent": 50,
     "runewordFragmentChancePercent": 40,
-    "reforgeOrbChancePercent": 40,
     "renameItem": true,
     "sharedPool": true,
     "debugLog": false,
