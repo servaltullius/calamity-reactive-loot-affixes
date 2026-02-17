@@ -11,7 +11,13 @@ int Property LocalFormIdModulo = 16777216 AutoReadOnly Hidden ; 0x01000000
 bool _isCanonicalMcmQuest = false
 
 Event OnConfigInit()
-	int localFormId = GetFormID() % LocalFormIdModulo
+	int localFormId = GetFormID()
+	; Papyrus int is signed. ESL/FE load-order FormIDs can be negative here,
+	; so normalize first before taking local (lower 24-bit) id.
+	while localFormId < 0
+		localFormId += LocalFormIdModulo
+	endWhile
+	localFormId = localFormId % LocalFormIdModulo
 	_isCanonicalMcmQuest = (localFormId == ExpectedMcmQuestFormId)
 EndEvent
 
