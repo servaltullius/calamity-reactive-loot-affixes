@@ -122,60 +122,72 @@
 			} else if (a_command == "runeword.recipe.next") {
 				sent = EmitModEvent(kRunewordRecipeNextEvent);
 				feedback = "Runeword recipe -> next";
-				} else if (a_command == "runeword.recipe.prev") {
-					sent = EmitModEvent(kRunewordRecipePrevEvent);
-					feedback = "Runeword recipe -> previous";
-					} else if (a_command == "runeword.insert") {
-						auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-						CalamityAffixes::EventBridge::RunewordPanelState before{};
-						if (bridge) {
-						before = bridge->GetRunewordPanelState();
+			} else if (a_command == "runeword.recipe.prev") {
+				sent = EmitModEvent(kRunewordRecipePrevEvent);
+				feedback = "Runeword recipe -> previous";
+			} else if (a_command == "runeword.insert") {
+				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+				CalamityAffixes::EventBridge::RunewordPanelState before{};
+				if (bridge) {
+					before = bridge->GetRunewordPanelState();
+				}
+
+				sent = EmitModEvent(kRunewordInsertRuneEvent);
+
+				if (sent && bridge) {
+					// SendEvent is synchronous; refresh status immediately so UI feedback isn't misleading.
+					const auto after = bridge->GetRunewordPanelState();
+					SetRunewordPanelState(after);
+
+					if (after.isComplete && !before.isComplete) {
+						std::string msg = "Runeword: transmuted ";
+						msg.append(after.recipeName.empty() ? "Runeword" : after.recipeName);
+						PushUiFeedback(msg);
+						return;
 					}
 
-					sent = EmitModEvent(kRunewordInsertRuneEvent);
+					if (after.isComplete) {
+						PushUiFeedback("Runeword: already complete");
+						return;
+					}
 
-						if (sent && bridge) {
-							// SendEvent is synchronous; refresh status immediately so UI feedback isn't misleading.
-							const auto after = bridge->GetRunewordPanelState();
-							SetRunewordPanelState(after);
-
-							if (after.isComplete && !before.isComplete) {
-								std::string msg = "Runeword: transmuted ";
-								msg.append(after.recipeName.empty() ? "Runeword" : after.recipeName);
-								PushUiFeedback(msg);
-								return;
-							}
-
-							if (after.isComplete) {
-								PushUiFeedback("Runeword: already complete");
-								return;
-							}
-
-							if (!after.canInsert && after.hasRecipe) {
-								if (!after.missingSummary.empty()) {
-									std::string msg = "Runeword: missing fragments ";
-									msg.append(after.missingSummary);
-									PushUiFeedback(msg);
-									return;
-								}
-
-								if (!after.nextRuneName.empty()) {
-									std::string msg = "Runeword: missing fragment ";
-									msg.append(after.nextRuneName);
-									msg.append(" (owned ");
-									msg.append(std::to_string(after.nextRuneOwned));
-									msg.push_back(')');
-									PushUiFeedback(msg);
-									return;
-								}
-							}
+					if (!after.canInsert && after.hasRecipe) {
+						if (!after.missingSummary.empty()) {
+							std::string msg = "Runeword: missing fragments ";
+							msg.append(after.missingSummary);
+							PushUiFeedback(msg);
+							return;
 						}
 
-						feedback = "Runeword -> transmute requested";
-					} else if (a_command == "runeword.status") {
-						sent = EmitModEvent(kRunewordStatusEvent);
-						feedback = "Runeword -> status";
-				} else if (a_command == "runeword.grant.next") {
+						if (!after.nextRuneName.empty()) {
+							std::string msg = "Runeword: missing fragment ";
+							msg.append(after.nextRuneName);
+							msg.append(" (owned ");
+							msg.append(std::to_string(after.nextRuneOwned));
+							msg.push_back(')');
+							PushUiFeedback(msg);
+							return;
+						}
+					}
+				}
+
+				feedback = "Runeword -> transmute requested";
+			} else if (a_command == "runeword.status") {
+				sent = EmitModEvent(kRunewordStatusEvent);
+				feedback = "Runeword -> status";
+			} else if (a_command == "runeword.reforge") {
+				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+				if (!bridge) {
+					PushUiFeedback("Reforge system unavailable.");
+					return;
+				}
+
+				const auto outcome = bridge->ReforgeSelectedRunewordBaseWithOrb();
+				SetRunewordPanelState(bridge->GetRunewordPanelState());
+				SetRunewordBaseInventoryList(bridge->GetRunewordBaseInventoryEntries());
+				PushUiFeedback(outcome.message.empty() ? "Reforge action processed." : outcome.message);
+				return;
+			} else if (a_command == "runeword.grant.next") {
 				sent = EmitModEvent(kRunewordGrantNextRuneEvent, {}, 1.0f);
 				feedback = "Debug -> +1 next fragment";
 			} else if (a_command == "runeword.grant.set") {
