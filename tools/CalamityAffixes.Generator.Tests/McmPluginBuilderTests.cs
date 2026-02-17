@@ -7,10 +7,29 @@ namespace CalamityAffixes.Generator.Tests;
 
 public sealed class McmPluginBuilderTests
 {
-    [Fact]
-    public void AddMcmQuest_AddsQuestToMainPlugin()
+    private static AffixSpec CreateSpec(int affixCount = 0)
     {
-        var spec = new AffixSpec
+        var affixes = new List<AffixDefinition>();
+        for (var i = 0; i < affixCount; i++)
+        {
+            affixes.Add(new AffixDefinition
+            {
+                Id = $"test_affix_{i}",
+                EditorId = $"CAFF_TEST_AFFIX_{i}",
+                Name = $"Test Affix {i}",
+                Kid = new KidRule
+                {
+                    Type = "Weapon",
+                    Strings = "NONE",
+                    FormFilters = "NONE",
+                    Traits = "-E",
+                    Chance = 1.0,
+                },
+                Runtime = new Dictionary<string, object?>(),
+            });
+        }
+
+        return new AffixSpec
         {
             Version = 1,
             ModKey = "CalamityAffixes.esp",
@@ -18,11 +37,17 @@ public sealed class McmPluginBuilderTests
             Keywords = new KeywordSpec
             {
                 Tags = [],
-                Affixes = [],
+                Affixes = affixes,
                 KidRules = [],
                 SpidRules = [],
             },
         };
+    }
+
+    [Fact]
+    public void AddMcmQuest_AddsQuestToMainPlugin()
+    {
+        var spec = CreateSpec();
 
         var mod = KeywordPluginBuilder.Build(spec);
 
@@ -39,5 +64,17 @@ public sealed class McmPluginBuilderTests
         Assert.Equal(new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000014), alias.ForcedReference.FormKeyNullable);
 
         Assert.Empty(quest.VirtualMachineAdapter.Aliases);
+    }
+
+    [Fact]
+    public void AddMcmQuest_KeepsStableFormKeyWhenAffixCountChanges()
+    {
+        var baseMod = KeywordPluginBuilder.Build(CreateSpec(0));
+        var expandedMod = KeywordPluginBuilder.Build(CreateSpec(50));
+
+        var baseQuest = Assert.Single(baseMod.Quests, q => q.EditorID == "CalamityAffixes_MCM");
+        var expandedQuest = Assert.Single(expandedMod.Quests, q => q.EditorID == "CalamityAffixes_MCM");
+
+        Assert.Equal(baseQuest.FormKey, expandedQuest.FormKey);
     }
 }

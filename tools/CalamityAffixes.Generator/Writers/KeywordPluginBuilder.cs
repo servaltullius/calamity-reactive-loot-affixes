@@ -81,6 +81,10 @@ public static class KeywordPluginBuilder
             mod.ModHeader.Flags |= SkyrimModHeader.HeaderFlag.Small;
         }
 
+        // Keep the MCM quest FormID stable across content expansion by creating it first.
+        // This prevents MCM duplicate/ghost entries caused by shifting generated record order.
+        McmPluginBuilder.AddMcmQuest(mod);
+
         var seenMagicEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var magicEffectsByEditorId = new Dictionary<string, MagicEffect>(StringComparer.OrdinalIgnoreCase);
@@ -111,8 +115,6 @@ public static class KeywordPluginBuilder
         }
 
         AddRunewordRuneFragments(mod);
-
-        McmPluginBuilder.AddMcmQuest(mod);
 
         return mod;
     }
