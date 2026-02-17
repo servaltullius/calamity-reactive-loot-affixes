@@ -8,9 +8,8 @@ Scriptname CalamityAffixes_MCMConfig extends MCM_ConfigBase
 ; This filters out stale quest instances left in old saves and prevents duplicate MCM entries.
 int Property ExpectedMcmQuestFormId = 0x000800 AutoReadOnly Hidden
 int Property LocalFormIdModulo = 16777216 AutoReadOnly Hidden ; 0x01000000
-bool _isCanonicalMcmQuest = false
 
-Event OnConfigInit()
+bool Function IsCanonicalMcmQuest()
 	int localFormId = GetFormID()
 	; Papyrus int is signed. ESL/FE load-order FormIDs can be negative here,
 	; so normalize first before taking local (lower 24-bit) id.
@@ -18,32 +17,15 @@ Event OnConfigInit()
 		localFormId += LocalFormIdModulo
 	endWhile
 	localFormId = localFormId % LocalFormIdModulo
-	_isCanonicalMcmQuest = (localFormId == ExpectedMcmQuestFormId)
-EndEvent
+	return (localFormId == ExpectedMcmQuestFormId)
+EndFunction
 
-Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
-	SKI_ConfigManager manager = a_sender as SKI_ConfigManager
-	SKI_ConfigBase selfConfig = self as SKI_ConfigBase
-	if manager == None || selfConfig == None
+Event OnGameReload()
+	; Leave stale quest instances inert so only canonical MCM quest participates.
+	if !IsCanonicalMcmQuest()
 		return
 	endif
-
-	if !_isCanonicalMcmQuest
-		manager.UnregisterMod(selfConfig)
-		return
-	endif
-
-	if ModName == ""
-		return
-	endif
-
-	; Normalize any stale slot for this instance before re-registering.
-	manager.UnregisterMod(selfConfig)
-	manager.RegisterMod(selfConfig, ModName)
-EndEvent
-
-Event OnConfigManagerReset(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
-	; No-op. Canonical/non-canonical registration is resolved in OnConfigManagerReady.
+	Parent.OnGameReload()
 EndEvent
 
 Function SetEnabled(bool a_enabled)

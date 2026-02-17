@@ -1,7 +1,10 @@
-Scriptname SKI_ConfigBase extends Quest hidden
+Scriptname SKI_ConfigBase extends SKI_QuestBase hidden
 
 string Property ModName Auto
 string[] Property Pages Auto
+
+Event OnGameReload()
+EndEvent
 
 Event OnConfigInit()
 EndEvent

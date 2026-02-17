@@ -6,6 +6,9 @@ EndEvent
 Event OnPageSelect(string a_page)
 EndEvent
 
+Event OnGameReload()
+EndEvent
+
 Event OnConfigInit()
 EndEvent
 
