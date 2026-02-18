@@ -113,6 +113,7 @@ namespace CalamityAffixes
 		const auto erasedAffixCount = _instanceAffixes.erase(a_key);
 		EraseInstanceRuntimeStates(a_key);
 		ForgetLootEvaluatedInstance(a_key);
+		ForgetLootPreviewSlots(a_key);
 		_runewordInstanceStates.erase(a_key);
 		if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == a_key) {
 			_runewordSelectedBaseKey.reset();
@@ -456,6 +457,57 @@ namespace CalamityAffixes
 		// 1) Hard guard: any instance evaluated once is never rolled again.
 		if (IsLootEvaluatedInstance(key)) {
 			(void)TryClearStaleLootDisplayName(a_entry, a_xList);
+			return;
+		}
+
+		// Preview path: container/barter tooltip can pre-roll and cache this instance.
+		// On pickup, consume cached preview so the observed result matches what the player inspected.
+		if (const auto* previewSlots = FindLootPreviewSlots(key)) {
+			auto applyPreviewPityOutcome = [&](bool a_success) {
+				const float chancePct = std::clamp(_loot.chancePercent, 0.0f, 100.0f);
+				if (chancePct <= 0.0f) {
+					_lootChanceEligibleFailStreak = 0;
+					return;
+				}
+
+				if (a_success) {
+					_lootChanceEligibleFailStreak = 0;
+					return;
+				}
+
+				if (_lootChanceEligibleFailStreak < std::numeric_limits<std::uint32_t>::max()) {
+					++_lootChanceEligibleFailStreak;
+				}
+			};
+
+			const auto preview = *previewSlots;
+			ForgetLootPreviewSlots(key);
+			MarkLootEvaluatedInstance(key);
+
+			if (preview.count == 0) {
+				applyPreviewPityOutcome(false);
+				return;
+			}
+
+			auto slots = preview;
+			(void)SanitizeInstanceAffixSlotsForCurrentLootRules(
+				key,
+				slots,
+				"ApplyMultipleAffixes.preview");
+			if (slots.count == 0) {
+				applyPreviewPityOutcome(false);
+				return;
+			}
+
+			_instanceAffixes[key] = slots;
+			for (std::uint8_t s = 0; s < slots.count; ++s) {
+				EnsureInstanceRuntimeState(key, slots.tokens[s]);
+			}
+			EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
+			if (a_allowRunewordFragmentRoll) {
+				MaybeGrantRandomRunewordFragment();
+			}
+			applyPreviewPityOutcome(true);
 			return;
 		}
 

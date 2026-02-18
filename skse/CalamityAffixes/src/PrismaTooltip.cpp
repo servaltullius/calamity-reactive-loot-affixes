@@ -633,7 +633,11 @@ namespace CalamityAffixes::PrismaTooltip
 				result.hasSelection = true;
 				result.itemName = std::move(selectedName);
 				result.itemSource = std::string(a_source);
-				result.tooltip = bridge->GetInstanceAffixTooltip(item->data.objDesc, result.itemName, g_uiLanguageMode.load());
+				result.tooltip = bridge->GetInstanceAffixTooltip(
+					item->data.objDesc,
+					result.itemName,
+					g_uiLanguageMode.load(),
+					result.itemSource);
 				return true;
 			};
 

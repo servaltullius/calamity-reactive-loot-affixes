@@ -680,6 +680,73 @@ namespace
 		return true;
 	}
 
+	bool CheckLootPreviewRuntimePolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path assignFile = repoRoot / "src" / "EventBridge.Loot.Assign.cpp";
+		const fs::path runtimeFile = repoRoot / "src" / "EventBridge.Loot.Runtime.cpp";
+		const fs::path configFile = repoRoot / "src" / "EventBridge.Config.cpp";
+		const fs::path serializationFile = repoRoot / "src" / "EventBridge.Serialization.cpp";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto assignText = loadText(assignFile);
+		if (!assignText.has_value()) {
+			std::cerr << "loot_preview_policy: failed to open assign source: " << assignFile << "\n";
+			return false;
+		}
+		if (assignText->find("applyPreviewPityOutcome") == std::string::npos ||
+			assignText->find("applyPreviewPityOutcome(false);") == std::string::npos ||
+			assignText->find("applyPreviewPityOutcome(true);") == std::string::npos) {
+			std::cerr << "loot_preview_policy: preview consumption path must update pity streak outcomes\n";
+			return false;
+		}
+
+		const auto runtimeText = loadText(runtimeFile);
+		if (!runtimeText.has_value()) {
+			std::cerr << "loot_preview_policy: failed to open runtime source: " << runtimeFile << "\n";
+			return false;
+		}
+		if (runtimeText->find("std::erase(_lootPreviewRecent, a_instanceKey);") == std::string::npos) {
+			std::cerr << "loot_preview_policy: preview cache forget path must prune recent-key deque entries\n";
+			return false;
+		}
+
+		const auto configText = loadText(configFile);
+		if (!configText.has_value()) {
+			std::cerr << "loot_preview_policy: failed to open config source: " << configFile << "\n";
+			return false;
+		}
+		if (configText->find("_lootPreviewAffixes.clear();") == std::string::npos ||
+			configText->find("_lootPreviewRecent.clear();") == std::string::npos) {
+			std::cerr << "loot_preview_policy: config reload reset must clear preview caches\n";
+			return false;
+		}
+
+		const auto serializationText = loadText(serializationFile);
+		if (!serializationText.has_value()) {
+			std::cerr << "loot_preview_policy: failed to open serialization source: " << serializationFile << "\n";
+			return false;
+		}
+		if (serializationText->find("_lootPreviewAffixes.clear();") == std::string::npos ||
+			serializationText->find("_lootPreviewRecent.clear();") == std::string::npos) {
+			std::cerr << "loot_preview_policy: load/revert must clear preview caches\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckLootChanceMcmSyncPolicy()
 	{
 		namespace fs = std::filesystem;
@@ -972,6 +1039,7 @@ int main()
 	const bool fixedWindowBudgetOk = CheckFixedWindowBudget();
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
+	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
 	const bool lootChanceMcmSyncOk = CheckLootChanceMcmSyncPolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
@@ -980,6 +1048,7 @@ int main()
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
+	        lootPreviewPolicyOk &&
 	        lootChanceMcmSyncOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
 	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&

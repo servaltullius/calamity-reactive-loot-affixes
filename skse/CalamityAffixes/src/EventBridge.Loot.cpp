@@ -531,6 +531,12 @@ namespace CalamityAffixes
 			MarkLootEvaluatedInstance(a_newKey);
 		}
 
+		if (const auto* previewSlots = FindLootPreviewSlots(a_oldKey)) {
+			const auto preview = *previewSlots;
+			ForgetLootPreviewSlots(a_oldKey);
+			RememberLootPreviewSlots(a_newKey, preview);
+		}
+
 		if (auto affixNode = _instanceAffixes.extract(a_oldKey); !affixNode.empty()) {
 			if (auto it = _instanceAffixes.find(a_newKey); it != _instanceAffixes.end()) {
 				for (std::uint8_t slot = 0; slot < affixNode.mapped().count; ++slot) {

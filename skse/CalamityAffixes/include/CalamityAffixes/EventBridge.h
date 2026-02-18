@@ -146,7 +146,8 @@ namespace CalamityAffixes
 		[[nodiscard]] std::optional<std::string> GetInstanceAffixTooltip(
 			const RE::InventoryEntryData* a_item,
 			std::string_view a_selectedDisplayName = {},
-			int a_uiLanguageMode = 2) const;
+			int a_uiLanguageMode = 2,
+			std::string_view a_itemSource = {});
 
 		// UI helper: enumerate runeword-base candidates from player's inventory.
 		[[nodiscard]] std::vector<RunewordBaseInventoryEntry> GetRunewordBaseInventoryEntries();
@@ -471,6 +472,7 @@ namespace CalamityAffixes
 		static constexpr std::uint32_t kLootChancePityFailThreshold = 3u;
 		static constexpr std::size_t kLootEvaluatedRecentKeep = 2048;
 		static constexpr std::size_t kLootEvaluatedPruneEveryInserts = 128;
+		static constexpr std::size_t kLootPreviewCacheMax = 1024;
 
 		static constexpr std::uint32_t kSerializationVersion = 6;
 		static constexpr std::uint32_t kSerializationVersionV5 = 5;
@@ -561,6 +563,8 @@ namespace CalamityAffixes
 		LootShuffleBagState _lootSuffixArmorBag{};
 		std::unordered_set<RE::SpellItem*> _appliedPassiveSpells;
 		std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;
+		std::unordered_map<std::uint64_t, InstanceAffixSlots> _lootPreviewAffixes;
+		std::deque<std::uint64_t> _lootPreviewRecent;
 		std::unordered_set<std::uint64_t> _lootEvaluatedInstances;
 		std::deque<std::uint64_t> _lootEvaluatedRecent;
 		std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
@@ -680,6 +684,13 @@ namespace CalamityAffixes
 		void RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey);
 		void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
 		void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
+		[[nodiscard]] const InstanceAffixSlots* FindLootPreviewSlots(std::uint64_t a_instanceKey) const;
+		void RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots);
+		void ForgetLootPreviewSlots(std::uint64_t a_instanceKey);
+		[[nodiscard]] std::optional<InstanceAffixSlots> BuildLootPreviewAffixSlots(
+			std::uint64_t a_instanceKey,
+			LootItemType a_itemType) const;
+		[[nodiscard]] static std::uint64_t HashLootPreviewSeed(std::uint64_t a_instanceKey, std::uint64_t a_salt);
 		[[nodiscard]] bool PlayerHasInstanceKey(std::uint64_t a_instanceKey) const;
 		[[nodiscard]] const std::vector<std::uint64_t>* FindEquippedInstanceKeysForAffixTokenCached(std::uint64_t a_affixToken) const;
 		[[nodiscard]] std::optional<std::uint64_t> ResolvePrimaryEquippedInstanceKey(std::uint64_t a_affixToken) const;

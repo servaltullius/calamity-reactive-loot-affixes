@@ -1,9 +1,12 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/LootUiGuards.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <limits>
 #include <memory>
+#include <random>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -12,6 +15,30 @@
 
 namespace CalamityAffixes
 {
+	namespace
+	{
+		[[nodiscard]] bool IsPreviewItemSource(std::string_view a_source) noexcept
+		{
+			return a_source == "barter" || a_source == "container" || a_source == "gift";
+		}
+
+		[[nodiscard]] std::uint64_t NextPreviewRand(std::uint64_t& a_state) noexcept
+		{
+			a_state += 0x9E3779B97F4A7C15ull;
+			std::uint64_t z = a_state;
+			z = (z ^ (z >> 30u)) * 0xBF58476D1CE4E5B9ull;
+			z = (z ^ (z >> 27u)) * 0x94D049BB133111EBull;
+			return z ^ (z >> 31u);
+		}
+
+		[[nodiscard]] double NextPreviewUnit(std::uint64_t& a_state) noexcept
+		{
+			// Keep only 53 bits so the value maps cleanly to IEEE-754 double mantissa.
+			const auto value = NextPreviewRand(a_state) >> 11u;
+			return static_cast<double>(value) * (1.0 / 9007199254740992.0);
+		}
+	}
+
 		EventBridge::InstanceRuntimeState& EventBridge::EnsureInstanceRuntimeState(
 			std::uint64_t a_instanceKey,
 			std::uint64_t a_affixToken)
@@ -160,10 +187,217 @@ namespace CalamityAffixes
 		}
 	}
 
+	const InstanceAffixSlots* EventBridge::FindLootPreviewSlots(std::uint64_t a_instanceKey) const
+	{
+		if (a_instanceKey == 0u) {
+			return nullptr;
+		}
+
+		const auto it = _lootPreviewAffixes.find(a_instanceKey);
+		if (it == _lootPreviewAffixes.end()) {
+			return nullptr;
+		}
+
+		return std::addressof(it->second);
+	}
+
+	void EventBridge::RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots)
+	{
+		if (a_instanceKey == 0u) {
+			return;
+		}
+
+		const auto [_, inserted] = _lootPreviewAffixes.insert_or_assign(a_instanceKey, a_slots);
+		if (!inserted) {
+			return;
+		}
+
+		_lootPreviewRecent.push_back(a_instanceKey);
+		while (_lootPreviewAffixes.size() > kLootPreviewCacheMax && !_lootPreviewRecent.empty()) {
+			const auto oldest = _lootPreviewRecent.front();
+			_lootPreviewRecent.pop_front();
+			if (oldest != 0u) {
+				_lootPreviewAffixes.erase(oldest);
+			}
+		}
+	}
+
+	void EventBridge::ForgetLootPreviewSlots(std::uint64_t a_instanceKey)
+	{
+		if (a_instanceKey == 0u) {
+			return;
+		}
+		_lootPreviewAffixes.erase(a_instanceKey);
+		std::erase(_lootPreviewRecent, a_instanceKey);
+	}
+
+	std::uint64_t EventBridge::HashLootPreviewSeed(std::uint64_t a_instanceKey, std::uint64_t a_salt)
+	{
+		std::uint64_t x = a_instanceKey ^ a_salt;
+		x ^= x >> 33u;
+		x *= 0xff51afd7ed558ccdull;
+		x ^= x >> 33u;
+		x *= 0xc4ceb9fe1a85ec53ull;
+		x ^= x >> 33u;
+		return x;
+	}
+
+	std::optional<InstanceAffixSlots> EventBridge::BuildLootPreviewAffixSlots(
+		std::uint64_t a_instanceKey,
+		LootItemType a_itemType) const
+	{
+		const std::vector<std::size_t>* prefixPool = nullptr;
+		const std::vector<std::size_t>* suffixPool = nullptr;
+		if (_loot.sharedPool) {
+			prefixPool = std::addressof(_lootSharedAffixes);
+			suffixPool = std::addressof(_lootSharedSuffixes);
+		} else {
+			prefixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_lootWeaponAffixes) : std::addressof(_lootArmorAffixes);
+			suffixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_lootWeaponSuffixes) : std::addressof(_lootArmorSuffixes);
+		}
+
+		if (!prefixPool || prefixPool->empty()) {
+			return std::nullopt;
+		}
+
+		InstanceAffixSlots slots{};
+
+		const float chancePct = std::clamp(_loot.chancePercent, 0.0f, 100.0f);
+		if (chancePct <= 0.0f) {
+			return slots;
+		}
+
+		std::uint64_t rngState = HashLootPreviewSeed(
+			a_instanceKey,
+			(a_itemType == LootItemType::kWeapon) ? 0xA11CE5F17E5ull : 0xA11CE5F17A2ull);
+
+		const double chanceRoll = NextPreviewUnit(rngState) * 100.0;
+		if (chanceRoll >= static_cast<double>(chancePct)) {
+			return slots;
+		}
+
+		const auto rollAffixCount = [&]() -> std::uint8_t {
+			double totalWeight = 0.0;
+			for (const auto weight : kAffixCountWeights) {
+				totalWeight += std::max(0.0, static_cast<double>(weight));
+			}
+			if (totalWeight <= 0.0) {
+				return 1u;
+			}
+
+			double roll = NextPreviewUnit(rngState) * totalWeight;
+			for (std::size_t i = 0; i < kAffixCountWeights.size(); ++i) {
+				const double weight = std::max(0.0, static_cast<double>(kAffixCountWeights[i]));
+				if (weight <= 0.0) {
+					continue;
+				}
+				if (roll < weight) {
+					return static_cast<std::uint8_t>(i + 1u);
+				}
+				roll -= weight;
+			}
+
+			return static_cast<std::uint8_t>(kAffixCountWeights.size());
+		};
+
+		const auto pickWeightedIndex = [&](const std::vector<std::size_t>& a_pool, auto&& a_isEligible) -> std::optional<std::size_t> {
+			double totalWeight = 0.0;
+			for (const auto idx : a_pool) {
+				if (idx >= _affixes.size()) {
+					continue;
+				}
+				if (!a_isEligible(idx)) {
+					continue;
+				}
+				const double weight = std::max(0.0, static_cast<double>(_affixes[idx].EffectiveLootWeight()));
+				totalWeight += weight;
+			}
+
+			if (totalWeight <= 0.0) {
+				return std::nullopt;
+			}
+
+			double roll = NextPreviewUnit(rngState) * totalWeight;
+			std::optional<std::size_t> lastEligible;
+			for (const auto idx : a_pool) {
+				if (idx >= _affixes.size()) {
+					continue;
+				}
+				if (!a_isEligible(idx)) {
+					continue;
+				}
+				const double weight = std::max(0.0, static_cast<double>(_affixes[idx].EffectiveLootWeight()));
+				if (weight <= 0.0) {
+					continue;
+				}
+				lastEligible = idx;
+				if (roll < weight) {
+					return idx;
+				}
+				roll -= weight;
+			}
+
+			return lastEligible;
+		};
+
+		const std::uint8_t targetCount = rollAffixCount();
+		const auto targets = detail::DetermineLootPrefixSuffixTargets(targetCount);
+		const std::uint8_t prefixTarget = targets.prefixTarget;
+		const std::uint8_t suffixTarget = targets.suffixTarget;
+
+		std::vector<std::size_t> chosenPrefixIndices;
+		chosenPrefixIndices.reserve(prefixTarget);
+		for (std::uint8_t p = 0; p < prefixTarget; ++p) {
+			const auto idx = pickWeightedIndex(*prefixPool, [&](std::size_t a_idx) {
+				if (std::find(chosenPrefixIndices.begin(), chosenPrefixIndices.end(), a_idx) != chosenPrefixIndices.end()) {
+					return false;
+				}
+				return _affixes[a_idx].slot != AffixSlot::kSuffix;
+			});
+			if (!idx) {
+				break;
+			}
+			chosenPrefixIndices.push_back(*idx);
+			slots.AddToken(_affixes[*idx].token);
+		}
+
+		std::vector<std::string> chosenFamilies;
+		chosenFamilies.reserve(suffixTarget);
+		for (std::uint8_t s = 0; s < suffixTarget; ++s) {
+			if (!detail::ShouldConsumeSuffixRollForSingleAffixTarget(targetCount, slots.count)) {
+				break;
+			}
+
+			const auto idx = pickWeightedIndex(*suffixPool, [&](std::size_t a_idx) {
+				const auto& affix = _affixes[a_idx];
+				if (affix.slot != AffixSlot::kSuffix) {
+					return false;
+				}
+				if (!affix.family.empty() &&
+					std::find(chosenFamilies.begin(), chosenFamilies.end(), affix.family) != chosenFamilies.end()) {
+					return false;
+				}
+				return true;
+			});
+			if (!idx) {
+				break;
+			}
+
+			const auto& affix = _affixes[*idx];
+			if (!affix.family.empty()) {
+				chosenFamilies.push_back(affix.family);
+			}
+			slots.AddToken(affix.token);
+		}
+
+		return slots;
+	}
+
 	std::optional<std::string> EventBridge::GetInstanceAffixTooltip(
 		const RE::InventoryEntryData* a_item,
 		std::string_view a_selectedDisplayName,
-		int a_uiLanguageMode) const
+		int a_uiLanguageMode,
+		std::string_view a_itemSource)
 	{
 		if (!_configLoaded) {
 			return std::nullopt;
@@ -176,73 +410,78 @@ namespace CalamityAffixes
 			return std::nullopt;
 		}
 
-		auto resolveCandidate = [&](RE::ExtraDataList* a_xList) -> std::optional<std::pair<const AffixRuntime*, std::uint64_t>> {
-			if (!a_xList) {
-				return std::nullopt;
-			}
+		std::optional<LootItemType> itemType{};
+		if (a_item->object && a_item->object->As<RE::TESObjectWEAP>()) {
+			itemType = LootItemType::kWeapon;
+		} else if (a_item->object && a_item->object->As<RE::TESObjectARMO>()) {
+			itemType = LootItemType::kArmor;
+		}
 
-			const auto* uid = a_xList->GetByType<RE::ExtraUniqueID>();
-			if (!uid) {
-				return std::nullopt;
-			}
-
-			const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-			const auto it = _instanceAffixes.find(key);
-			if (it == _instanceAffixes.end() || it->second.count == 0) {
-				return std::nullopt;
-			}
-
-			const auto& slots = it->second;
-			const auto primaryToken = slots.GetPrimary();
-			if (primaryToken == 0u) {
-				return std::nullopt;
-			}
-
-			const auto idxIt = _affixIndexByToken.find(primaryToken);
-			if (idxIt == _affixIndexByToken.end()) {
-				return std::nullopt;
-			}
-			const auto idx = idxIt->second;
-			if (idx >= _affixes.size()) {
-				return std::nullopt;
-			}
-
-			const auto& affix = _affixes[idx];
-			if (affix.displayName.empty()) {
-				return std::nullopt;
-			}
-
-			return std::pair<const AffixRuntime*, std::uint64_t>{ std::addressof(affix), key };
-		};
+		const bool allowPreview =
+			itemType.has_value() &&
+			IsPreviewItemSource(a_itemSource) &&
+			IsLootObjectEligibleForAffixes(a_item->object);
 
 		struct TooltipCandidate
 		{
-			const AffixRuntime* affix{ nullptr };
-			std::uint64_t instanceKey{ 0 };
-			std::string_view rowName{};
+			std::uint64_t instanceKey{ 0u };
+			std::uint64_t primaryToken{ 0u };
+			std::string rowName{};
+			InstanceAffixSlots slots{};
+			bool preview{ false };
 		};
 
 		std::vector<TooltipCandidate> candidates;
 		for (auto* xList : *a_item->extraLists) {
-			const auto resolved = resolveCandidate(xList);
-			if (!resolved) {
+			if (!xList) {
 				continue;
 			}
 
+			const auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+			if (!uid) {
+				continue;
+			}
+
+			const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+
+			TooltipCandidate candidate{};
+			candidate.instanceKey = key;
+			candidate.preview = false;
+			candidate.slots.Clear();
+
+			if (const auto mappedIt = _instanceAffixes.find(key); mappedIt != _instanceAffixes.end()) {
+				candidate.slots = mappedIt->second;
+			}
+
+			if (candidate.slots.count == 0 && allowPreview) {
+				if (const auto* previewSlots = FindLootPreviewSlots(key)) {
+					candidate.slots = *previewSlots;
+					candidate.preview = true;
+				} else if (const auto generatedPreview = BuildLootPreviewAffixSlots(key, *itemType); generatedPreview.has_value()) {
+					RememberLootPreviewSlots(key, *generatedPreview);
+					if (const auto* storedPreview = FindLootPreviewSlots(key)) {
+						candidate.slots = *storedPreview;
+						candidate.preview = true;
+					}
+				}
+			}
+
+			// For normal runtime candidates, skip items without mapped slots.
+			// For preview mode, keep zero-slot candidates so users can see "no affix" before pickup.
+			if (candidate.slots.count == 0 && !candidate.preview) {
+				continue;
+			}
+
+			candidate.primaryToken = candidate.slots.GetPrimary();
 			const char* rowNameRaw = xList->GetDisplayName(a_item->object);
-			const std::string_view rowName = rowNameRaw ? std::string_view(rowNameRaw) : std::string_view{};
-			candidates.push_back(TooltipCandidate{
-				.affix = resolved->first,
-				.instanceKey = resolved->second,
-				.rowName = rowName
-			});
+			candidate.rowName = rowNameRaw ? rowNameRaw : "";
+			candidates.push_back(std::move(candidate));
 		}
 
 		if (candidates.empty()) {
 			return std::nullopt;
 		}
 
-		// Helper to format a single affix's detail lines (evolution, mode cycle)
 		auto formatAffixDetail = [&](const AffixRuntime& a_affix, std::uint64_t a_instanceKey) -> std::string {
 			std::string detail;
 			const auto* state = FindInstanceRuntimeState(a_instanceKey, a_affix.token);
@@ -268,56 +507,55 @@ namespace CalamityAffixes
 			return detail;
 		};
 
+		auto resolveDisplayName = [&](const AffixRuntime& a_affix) -> std::string {
+			switch (a_uiLanguageMode) {
+			case 0:
+				return a_affix.displayNameEn;
+			case 1:
+				return a_affix.displayNameKo;
+			case 2:
+			default:
+				if (a_affix.displayNameKo == a_affix.displayNameEn || a_affix.displayNameEn.empty()) {
+					return a_affix.displayNameKo;
+				}
+				if (a_affix.displayNameKo.empty()) {
+					return a_affix.displayNameEn;
+				}
+				return a_affix.displayNameKo + " / " + a_affix.displayNameEn;
+			}
+		};
+
 		auto formatTooltip = [&](const TooltipCandidate& a_candidate) -> std::string {
-			const auto slotsIt = _instanceAffixes.find(a_candidate.instanceKey);
-			if (slotsIt == _instanceAffixes.end() || slotsIt->second.count == 0) {
+			if (a_candidate.slots.count == 0) {
+				if (a_candidate.preview) {
+					return "Preview: No affix";
+				}
 				return {};
 			}
 
-			const auto& slots = slotsIt->second;
 			std::string tooltip;
+			if (a_candidate.preview) {
+				tooltip.append("Preview\n");
+			}
 
-			for (std::uint8_t s = 0; s < slots.count; ++s) {
-				const auto idxIt = _affixIndexByToken.find(slots.tokens[s]);
+			for (std::uint8_t s = 0; s < a_candidate.slots.count; ++s) {
+				const auto token = a_candidate.slots.tokens[s];
+				const auto idxIt = _affixIndexByToken.find(token);
 				if (idxIt == _affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
 					continue;
 				}
 
 				const auto& affix = _affixes[idxIt->second];
-
-				// Resolve display name based on language mode
-				std::string resolvedName;
-				switch (a_uiLanguageMode) {
-				case 0:  // English
-					resolvedName = affix.displayNameEn;
-					break;
-				case 1:  // Korean
-					resolvedName = affix.displayNameKo;
-					break;
-				case 2:  // Both
-				default:
-					if (affix.displayNameKo == affix.displayNameEn || affix.displayNameEn.empty()) {
-						resolvedName = affix.displayNameKo;
-					} else if (affix.displayNameKo.empty()) {
-						resolvedName = affix.displayNameEn;
-					} else {
-						resolvedName = affix.displayNameKo;
-						resolvedName.append(" / ");
-						resolvedName.append(affix.displayNameEn);
-					}
-					break;
-				}
-
+				auto resolvedName = resolveDisplayName(affix);
 				if (resolvedName.empty()) {
 					continue;
 				}
 
-				if (!tooltip.empty()) {
+				if (!tooltip.empty() && tooltip.back() != '\n') {
 					tooltip.push_back('\n');
 				}
 
-				// Slot number prefix for multi-affix items (with P/S indicator)
-				if (slots.count > 1) {
+				if (a_candidate.slots.count > 1) {
 					tooltip.push_back('[');
 					if (affix.slot == AffixSlot::kPrefix) {
 						tooltip.push_back('P');
@@ -326,13 +564,12 @@ namespace CalamityAffixes
 					}
 					tooltip.append(std::to_string(s + 1));
 					tooltip.push_back('/');
-					tooltip.append(std::to_string(slots.count));
+					tooltip.append(std::to_string(a_candidate.slots.count));
 					tooltip.append("] ");
 				}
 
 				tooltip.append(resolvedName);
 
-				// Append evolution/mode details for this affix
 				const auto detail = formatAffixDetail(affix, a_candidate.instanceKey);
 				if (!detail.empty()) {
 					tooltip.push_back('\n');
@@ -343,27 +580,35 @@ namespace CalamityAffixes
 			return tooltip;
 		};
 
+		std::vector<TooltipResolutionCandidate> resolutionCandidates;
+		resolutionCandidates.reserve(candidates.size());
+		for (const auto& candidate : candidates) {
+			resolutionCandidates.push_back(TooltipResolutionCandidate{
+				.rowName = candidate.rowName,
+				.affixToken = candidate.primaryToken,
+				.instanceKey = candidate.instanceKey
+			});
+		}
+
+		const auto resolution = ResolveTooltipCandidateSelection(resolutionCandidates, a_selectedDisplayName);
+		if (resolution.matchedIndex &&
+			*resolution.matchedIndex < candidates.size() &&
+			!resolution.ambiguous) {
+			const auto formatted = formatTooltip(candidates[*resolution.matchedIndex]);
+			if (formatted.empty()) {
+				return std::nullopt;
+			}
+			return formatted;
+		}
+
 		if (!a_selectedDisplayName.empty()) {
-			std::vector<TooltipResolutionCandidate> resolutionCandidates;
-			resolutionCandidates.reserve(candidates.size());
-			for (const auto& candidate : candidates) {
-				resolutionCandidates.push_back(TooltipResolutionCandidate{
-					.rowName = candidate.rowName,
-					.affixToken = candidate.affix ? candidate.affix->token : 0u,
-					.instanceKey = candidate.instanceKey
-				});
-			}
-
-			const auto resolution = ResolveTooltipCandidateSelection(resolutionCandidates, a_selectedDisplayName);
-			if (resolution.matchedIndex && *resolution.matchedIndex < candidates.size() && !resolution.ambiguous) {
-				return formatTooltip(candidates[*resolution.matchedIndex]);
-			}
-
-			// If a specific row name is known but no safe exact match exists,
-			// avoid returning a tooltip for a different inventory row.
 			return std::nullopt;
 		}
 
-		return formatTooltip(candidates.front());
+		const auto fallback = formatTooltip(candidates.front());
+		if (fallback.empty()) {
+			return std::nullopt;
+		}
+		return fallback;
 	}
 }

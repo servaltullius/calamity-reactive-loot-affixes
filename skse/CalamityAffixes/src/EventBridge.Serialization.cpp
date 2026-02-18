@@ -220,9 +220,12 @@ namespace CalamityAffixes
 			_lootSuffixSharedBag = {};
 			_lootSuffixWeaponBag = {};
 			_lootSuffixArmorBag = {};
+			_lootPreviewAffixes.clear();
+			_lootPreviewRecent.clear();
 			_lootEvaluatedInstances.clear();
 			_lootEvaluatedRecent.clear();
 			_lootEvaluatedInsertionsSincePrune = 0;
+			_lootChanceEligibleFailStreak = 0;
 			_instanceStates.clear();
 			_dotObservedMagicEffects.clear();
 			_dotTagSafetyWarned = false;
@@ -676,9 +679,12 @@ namespace CalamityAffixes
 			_lootSuffixSharedBag = {};
 			_lootSuffixWeaponBag = {};
 			_lootSuffixArmorBag = {};
+			_lootPreviewAffixes.clear();
+			_lootPreviewRecent.clear();
 			_lootEvaluatedInstances.clear();
 			_lootEvaluatedRecent.clear();
 			_lootEvaluatedInsertionsSincePrune = 0;
+			_lootChanceEligibleFailStreak = 0;
 			_activeSlotPenalty.clear();
 			_instanceStates.clear();
 			_runewordRuneFragments.clear();

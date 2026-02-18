@@ -189,6 +189,8 @@ namespace CalamityAffixes
 		_lootSuffixSharedBag = {};
 		_lootSuffixWeaponBag = {};
 		_lootSuffixArmorBag = {};
+		_lootPreviewAffixes.clear();
+		_lootPreviewRecent.clear();
 		_appliedPassiveSpells.clear();
 		_equippedInstanceKeysByToken.clear();
 		_equippedTokenCacheReady = false;
