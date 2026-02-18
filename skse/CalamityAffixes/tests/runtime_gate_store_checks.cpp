@@ -845,6 +845,31 @@ namespace
 
 			return true;
 		}
+
+		bool CheckRunewordReforgeSafetyPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path reforgeFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Reforge.cpp";
+
+			std::ifstream reforgeIn(reforgeFile);
+			if (!reforgeIn.is_open()) {
+				std::cerr << "runeword_reforge_safety: failed to open reforge source: " << reforgeFile << "\n";
+				return false;
+			}
+			std::string reforgeSource(
+				(std::istreambuf_iterator<char>(reforgeIn)),
+				std::istreambuf_iterator<char>());
+
+			if (reforgeSource.find("ResolveCompletedRunewordRecipe(instanceKey)") == std::string::npos ||
+				reforgeSource.find("Reforge blocked: completed runeword base.") == std::string::npos ||
+				reforgeSource.find("IsLootObjectEligibleForAffixes(entry->object)") == std::string::npos) {
+				std::cerr << "runeword_reforge_safety: completed-base/type eligibility guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
 	}
 
 int main()
@@ -862,8 +887,10 @@ int main()
 	const bool lootChanceMcmSyncOk = CheckLootChanceMcmSyncPolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
+	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
-	        lootChanceMcmSyncOk && runewordCompletedSelectionOk && runewordTransmuteSafetyOk) ? 0 :
+	        lootChanceMcmSyncOk && runewordCompletedSelectionOk && runewordTransmuteSafetyOk &&
+	        runewordReforgeSafetyOk) ? 0 :
 	                                                             1;
 }
