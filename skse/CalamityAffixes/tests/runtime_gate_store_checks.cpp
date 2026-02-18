@@ -792,21 +792,38 @@ namespace
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
 			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
+			const fs::path panelStateFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.PanelState.cpp";
 			const fs::path transmuteFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Transmute.cpp";
 			const fs::path policyFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Policy.cpp";
 
-			std::ifstream selectionIn(recipeUiFile);
-			if (!selectionIn.is_open()) {
-				std::cerr << "runeword_transmute_safety: failed to open selection source: " << recipeUiFile << "\n";
+			std::ifstream recipeUiIn(recipeUiFile);
+			if (!recipeUiIn.is_open()) {
+				std::cerr << "runeword_transmute_safety: failed to open recipe-ui source: " << recipeUiFile << "\n";
 				return false;
 			}
-			std::string selectionSource(
-				(std::istreambuf_iterator<char>(selectionIn)),
+			std::string recipeUiSource(
+				(std::istreambuf_iterator<char>(recipeUiIn)),
 				std::istreambuf_iterator<char>());
 
-			if (selectionSource.find("ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe)") == std::string::npos ||
-				selectionSource.find("BuildRunewordApplyBlockMessage(applyBlockReason)") == std::string::npos ||
-				selectionSource.find("panelState.canInsert = ready && canApplyResult;") == std::string::npos) {
+			if (recipeUiSource.find("const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;") ==
+				    std::string::npos ||
+				recipeUiSource.find("_runewordInstanceStates.erase(selectedKey);") == std::string::npos) {
+				std::cerr << "runeword_transmute_safety: completed-base recipe selection state guard is missing\n";
+				return false;
+			}
+
+			std::ifstream panelIn(panelStateFile);
+			if (!panelIn.is_open()) {
+				std::cerr << "runeword_transmute_safety: failed to open panel-state source: " << panelStateFile << "\n";
+				return false;
+			}
+			std::string panelSource(
+				(std::istreambuf_iterator<char>(panelIn)),
+				std::istreambuf_iterator<char>());
+
+			if (panelSource.find("ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe)") == std::string::npos ||
+				panelSource.find("BuildRunewordApplyBlockMessage(applyBlockReason)") == std::string::npos ||
+				panelSource.find("panelState.canInsert = ready && canApplyResult;") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: panel canInsert/apply safety guard is missing\n";
 				return false;
 			}
