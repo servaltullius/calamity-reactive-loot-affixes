@@ -792,7 +792,7 @@ namespace
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
 			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
-			const fs::path craftingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Crafting.cpp";
+			const fs::path transmuteFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Transmute.cpp";
 			const fs::path policyFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Policy.cpp";
 
 			std::ifstream selectionIn(recipeUiFile);
@@ -826,19 +826,19 @@ namespace
 				return false;
 			}
 
-			std::ifstream craftingIn(craftingFile);
-			if (!craftingIn.is_open()) {
-				std::cerr << "runeword_transmute_safety: failed to open crafting source: " << craftingFile << "\n";
+			std::ifstream transmuteIn(transmuteFile);
+			if (!transmuteIn.is_open()) {
+				std::cerr << "runeword_transmute_safety: failed to open transmute source: " << transmuteFile << "\n";
 				return false;
 			}
-			std::string craftingSource(
-				(std::istreambuf_iterator<char>(craftingIn)),
+			std::string transmuteSource(
+				(std::istreambuf_iterator<char>(transmuteIn)),
 				std::istreambuf_iterator<char>());
 
-			if (craftingSource.find("ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe)") == std::string::npos ||
-				craftingSource.find("ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe)") == std::string::npos ||
-				craftingSource.find("runeword result affix missing before transmute") == std::string::npos ||
-				craftingSource.find("note.append(BuildRunewordApplyBlockMessage(blockReason));") == std::string::npos) {
+			if (transmuteSource.find("ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe)") == std::string::npos ||
+				transmuteSource.find("ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe)") == std::string::npos ||
+				transmuteSource.find("runeword result affix missing before transmute") == std::string::npos ||
+				transmuteSource.find("note.append(BuildRunewordApplyBlockMessage(blockReason));") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: transmute pre-consume safety guard is missing\n";
 				return false;
 			}
