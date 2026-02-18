@@ -738,33 +738,51 @@ namespace
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
+			const fs::path baseSelectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.BaseSelection.cpp";
 			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
 
-			std::ifstream in(recipeUiFile);
-			if (!in.is_open()) {
+			std::ifstream recipeIn(recipeUiFile);
+			if (!recipeIn.is_open()) {
 				std::cerr << "runeword_completed_selection: failed to open source file: " << recipeUiFile << "\n";
 				return false;
 			}
 
-		std::string source(
-			(std::istreambuf_iterator<char>(in)),
-			std::istreambuf_iterator<char>());
+			std::string recipeSource(
+				(std::istreambuf_iterator<char>(recipeIn)),
+				std::istreambuf_iterator<char>());
 
-		// Completed runeword base must pin recipe highlight to completed recipe token.
-		if (source.find("bool resolvedFromCompleted = false;") == std::string::npos ||
-			source.find("selectedToken = completed->token;") == std::string::npos ||
-			source.find("if (!resolvedFromCompleted)") == std::string::npos) {
-			std::cerr << "runeword_completed_selection: completed recipe highlight guard is missing\n";
-			return false;
-		}
+			std::ifstream baseIn(baseSelectionFile);
+			if (!baseIn.is_open()) {
+				std::cerr << "runeword_completed_selection: failed to open source file: " << baseSelectionFile << "\n";
+				return false;
+			}
 
-		// Completed runeword base must not persist mutable in-progress recipe state.
-		if (source.find("const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;") == std::string::npos ||
-			source.find("if (completedBase)") == std::string::npos ||
-			source.find("_runewordInstanceStates.erase(selectedKey);") == std::string::npos) {
-			std::cerr << "runeword_completed_selection: completed-base state write guard is missing\n";
-			return false;
-		}
+			std::string baseSource(
+				(std::istreambuf_iterator<char>(baseIn)),
+				std::istreambuf_iterator<char>());
+
+			// Completed runeword base must pin recipe highlight to completed recipe token.
+			if (recipeSource.find("bool resolvedFromCompleted = false;") == std::string::npos ||
+				recipeSource.find("selectedToken = completed->token;") == std::string::npos ||
+				recipeSource.find("if (!resolvedFromCompleted)") == std::string::npos) {
+				std::cerr << "runeword_completed_selection: completed recipe highlight guard is missing\n";
+				return false;
+			}
+
+			// Completed runeword base must not persist mutable in-progress recipe state.
+			if (recipeSource.find("const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;") == std::string::npos ||
+				recipeSource.find("if (completedBase)") == std::string::npos ||
+				recipeSource.find("_runewordInstanceStates.erase(selectedKey);") == std::string::npos) {
+				std::cerr << "runeword_completed_selection: completed-base state write guard is missing\n";
+				return false;
+			}
+
+			// Base selection should also clear mutable in-progress state for completed runeword bases.
+			if (baseSource.find("if (completedRecipe)") == std::string::npos ||
+				baseSource.find("_runewordInstanceStates.erase(a_instanceKey);") == std::string::npos) {
+				std::cerr << "runeword_completed_selection: base-selection completed-state guard is missing\n";
+				return false;
+			}
 
 			return true;
 		}
