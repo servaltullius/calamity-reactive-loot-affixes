@@ -35,6 +35,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.cpp
 	    src/EventBridge.Config.cpp
 	    src/EventBridge.Config.Indexing.cpp
+	    src/EventBridge.Config.IndexingShared.cpp
+	    src/EventBridge.Config.AffixRegistry.cpp
+	    src/EventBridge.Config.LootPools.cpp
 	    src/EventBridge.Config.RunewordSynthesis.cpp
 	    src/EventBridge.Loot.cpp
 	    src/EventBridge.Loot.Runeword.Detail.cpp
@@ -49,6 +52,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Loot.Runeword.Reforge.cpp
 	    src/EventBridge.Loot.Runeword.Policy.cpp
 	    src/EventBridge.Loot.Runtime.cpp
+	    src/EventBridge.Loot.TooltipResolution.cpp
+	    src/EventBridge.Loot.PreviewClaimStore.cpp
+	    src/EventBridge.Loot.AffixSlotRoll.cpp
 	    src/EventBridge.Loot.Assign.cpp
 	    src/EventBridge.Triggers.cpp
 	    src/EventBridge.Triggers.HealthDamage.cpp

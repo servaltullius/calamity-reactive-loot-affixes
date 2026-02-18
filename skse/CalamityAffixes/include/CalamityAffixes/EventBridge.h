@@ -537,12 +537,6 @@ namespace CalamityAffixes
 			std::size_t cursor{ 0 };
 		};
 
-		struct LootPreviewClaim
-		{
-			InstanceAffixSlots slots{};
-			std::uint64_t recordedAtMs{ 0u };
-		};
-
 		struct PerTargetCooldownKey
 		{
 			std::uint64_t token{ 0 };
@@ -591,7 +585,6 @@ namespace CalamityAffixes
 		std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;
 		std::unordered_map<std::uint64_t, InstanceAffixSlots> _lootPreviewAffixes;
 		std::deque<std::uint64_t> _lootPreviewRecent;
-		std::unordered_map<std::uint64_t, std::deque<LootPreviewClaim>> _lootPreviewClaimsBySourceBase;
 		std::unordered_set<std::uint64_t> _lootEvaluatedInstances;
 		std::deque<std::uint64_t> _lootEvaluatedRecent;
 		std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
@@ -713,18 +706,7 @@ namespace CalamityAffixes
 		void RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey);
 		void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
 		void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
-		[[nodiscard]] static std::uint64_t MakeLootPreviewClaimKey(RE::FormID a_sourceContainer, RE::FormID a_baseObj) noexcept;
 		[[nodiscard]] const InstanceAffixSlots* FindLootPreviewSlots(std::uint64_t a_instanceKey) const;
-		void RememberLootPreviewClaim(
-			RE::FormID a_sourceContainer,
-			RE::FormID a_baseObj,
-			const InstanceAffixSlots& a_slots,
-			std::uint64_t a_nowMs);
-		[[nodiscard]] std::optional<InstanceAffixSlots> ConsumeLootPreviewClaim(
-			RE::FormID a_sourceContainer,
-			RE::FormID a_baseObj,
-			std::uint64_t a_nowMs);
-		void ForgetLootPreviewClaims(RE::FormID a_sourceContainer, RE::FormID a_baseObj);
 		void RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots);
 		void ForgetLootPreviewSlots(std::uint64_t a_instanceKey);
 		[[nodiscard]] std::optional<InstanceAffixSlots> BuildLootPreviewAffixSlots(
@@ -754,6 +736,12 @@ namespace CalamityAffixes
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
 		void IndexConfiguredAffixes();
+		void IndexAffixLookupKeys(
+			const AffixRuntime& a_affix,
+			std::size_t a_index,
+			bool a_useSynthesizedDuplicateLogFormat,
+			bool a_warnOnDuplicate);
+		void IndexAffixLootPool(const AffixRuntime& a_affix, std::size_t a_index);
 		void RebuildSharedLootPools();
 		void RegisterSynthesizedAffix(AffixRuntime&& a_affix, bool a_warnOnDuplicate);
 		void SynthesizeRunewordRuntimeAffixes();

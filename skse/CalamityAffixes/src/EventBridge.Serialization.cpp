@@ -222,7 +222,6 @@ namespace CalamityAffixes
 			_lootSuffixArmorBag = {};
 			_lootPreviewAffixes.clear();
 			_lootPreviewRecent.clear();
-			_lootPreviewClaimsBySourceBase.clear();
 				_lootEvaluatedInstances.clear();
 				_lootEvaluatedRecent.clear();
 				_lootEvaluatedInsertionsSincePrune = 0;
@@ -730,7 +729,6 @@ namespace CalamityAffixes
 			_lootSuffixArmorBag = {};
 			_lootPreviewAffixes.clear();
 			_lootPreviewRecent.clear();
-			_lootPreviewClaimsBySourceBase.clear();
 				_lootEvaluatedInstances.clear();
 				_lootEvaluatedRecent.clear();
 				_lootEvaluatedInsertionsSincePrune = 0;

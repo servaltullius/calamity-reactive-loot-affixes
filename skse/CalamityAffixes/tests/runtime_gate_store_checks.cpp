@@ -661,7 +661,7 @@ namespace
 
 		namespace fs = std::filesystem;
 		const fs::path testFile{ __FILE__ };
-		const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runtime.cpp";
+		const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.TooltipResolution.cpp";
 
 		std::ifstream in(runtimeTooltipFile);
 		if (!in.is_open()) {
@@ -687,7 +687,8 @@ namespace
 		const fs::path testFile{ __FILE__ };
 		const fs::path repoRoot = testFile.parent_path().parent_path();
 		const fs::path assignFile = repoRoot / "src" / "EventBridge.Loot.Assign.cpp";
-		const fs::path runtimeFile = repoRoot / "src" / "EventBridge.Loot.Runtime.cpp";
+		const fs::path previewStoreFile = repoRoot / "src" / "EventBridge.Loot.PreviewClaimStore.cpp";
+		const fs::path affixSlotRollFile = repoRoot / "src" / "EventBridge.Loot.AffixSlotRoll.cpp";
 		const fs::path lootFile = repoRoot / "src" / "EventBridge.Loot.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
@@ -718,13 +719,25 @@ namespace
 			return false;
 		}
 
-		const auto runtimeText = loadText(runtimeFile);
-		if (!runtimeText.has_value()) {
-			std::cerr << "loot_preview_policy: failed to open runtime source: " << runtimeFile << "\n";
+		if (CalamityAffixes::ShouldEnableSyntheticLootPreviewTooltip()) {
+			std::cerr << "loot_preview_policy: synthetic preview rollout must remain disabled by policy helper\n";
 			return false;
 		}
-		if (runtimeText->find("const bool allowPreview = false &&") == std::string::npos) {
-			std::cerr << "loot_preview_policy: runtime tooltip must keep synthetic preview disabled\n";
+		const auto previewStoreText = loadText(previewStoreFile);
+		if (!previewStoreText.has_value()) {
+			std::cerr << "loot_preview_policy: failed to open preview store source: " << previewStoreFile << "\n";
+			return false;
+		}
+		const auto affixSlotRollText = loadText(affixSlotRollFile);
+		if (!affixSlotRollText.has_value()) {
+			std::cerr << "loot_preview_policy: failed to open affix-slot roll source: " << affixSlotRollFile << "\n";
+			return false;
+		}
+		if (previewStoreText->find("void EventBridge::RememberLootPreviewSlots(") == std::string::npos ||
+			previewStoreText->find("const InstanceAffixSlots* EventBridge::FindLootPreviewSlots(") == std::string::npos ||
+			affixSlotRollText->find("std::optional<InstanceAffixSlots> EventBridge::BuildLootPreviewAffixSlots(") == std::string::npos ||
+			affixSlotRollText->find("std::uint64_t EventBridge::HashLootPreviewSeed(") == std::string::npos) {
+			std::cerr << "loot_preview_policy: loot runtime modular split guards are missing\n";
 			return false;
 		}
 
@@ -987,7 +1000,7 @@ namespace
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
-			const fs::path synthesisFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RunewordSynthesis.cpp";
+			const fs::path synthesisFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixRegistry.cpp";
 
 			std::ifstream in(synthesisFile);
 			if (!in.is_open()) {
@@ -1148,7 +1161,7 @@ namespace
 			const fs::path testFile{ __FILE__ };
 			const fs::path prismaHandleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.HandleUiCommand.inl";
 			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
-			const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runtime.cpp";
+			const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.TooltipResolution.cpp";
 			const fs::path runewordPanelStateFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.PanelState.cpp";
 			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
 				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";

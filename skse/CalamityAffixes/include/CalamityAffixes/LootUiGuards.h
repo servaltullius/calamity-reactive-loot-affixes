@@ -210,6 +210,12 @@ namespace CalamityAffixes
 		return false;
 	}
 
+	// Policy: synthetic loot preview rolls are disabled in runtime tooltip flow.
+	[[nodiscard]] constexpr bool ShouldEnableSyntheticLootPreviewTooltip() noexcept
+	{
+		return false;
+	}
+
 	[[nodiscard]] constexpr bool IsPrismaTooltipRelevantMenu(std::string_view a_name) noexcept
 	{
 		return a_name == "InventoryMenu" ||

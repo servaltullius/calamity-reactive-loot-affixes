@@ -153,7 +153,6 @@ namespace CalamityAffixes
 		_lootSuffixArmorBag = {};
 		_lootPreviewAffixes.clear();
 		_lootPreviewRecent.clear();
-		_lootPreviewClaimsBySourceBase.clear();
 		_appliedPassiveSpells.clear();
 		_equippedInstanceKeysByToken.clear();
 		_equippedTokenCacheReady = false;

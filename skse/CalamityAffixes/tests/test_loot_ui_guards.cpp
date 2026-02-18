@@ -36,6 +36,11 @@ static_assert([] {
 	"ShouldShowRunewordTooltipInItemOverlay: runeword text is panel-only by policy");
 
 static_assert([] {
+	return !CalamityAffixes::ShouldEnableSyntheticLootPreviewTooltip();
+}(),
+	"ShouldEnableSyntheticLootPreviewTooltip: synthetic preview roll must stay disabled by policy");
+
+static_assert([] {
 	return CalamityAffixes::IsPrismaTooltipRelevantMenu("InventoryMenu");
 }(),
 	"IsPrismaTooltipRelevantMenu: supports InventoryMenu");
