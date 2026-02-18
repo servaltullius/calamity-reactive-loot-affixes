@@ -78,8 +78,12 @@
 ## Implementation status (this workspace)
 - `S1 modKey path traversal`: fixed in `tools/CalamityAffixes.Generator/Spec/AffixSpecLoader.cs` with filename-only validation and invalid-char guards.
 - `S1 Revert reset asymmetry`: fixed in `skse/CalamityAffixes/src/EventBridge.Serialization.cpp` by clearing summon corpse-explosion caches/states in `Load` and `Revert`.
+- `S2 validation split`: fixed by adding core runtime/action validation to `AffixSpecLoader` so generator CLI fails fast on invalid runtime shape.
+- `S2 validation drift risk`: fixed by introducing shared validation contract (`tools/affix_validation_contract.json`) used by both C# loader and `tools/lint_affixes.py`.
+- `S3 precommit complexity args`: fixed by correcting `--files` argument construction in `.vibe/brain/precommit.py` and making `.vibe/brain/check_complexity.py` accept one-or-more file values per flag.
 - Added regression tests:
   - `tools/CalamityAffixes.Generator.Tests/AffixSpecLoaderTests.cs` (`Load_WhenModKeyContainsPathSegments_Throws`, `Load_WhenModKeyIsRootedPath_Throws`)
+  - `tools/CalamityAffixes.Generator.Tests/AffixSpecLoaderTests.cs` runtime validation failures (`trigger` missing, unsupported `action.type`, out-of-range `procChancePercent`, negative `icdSeconds`, non-numeric `perTargetICDSeconds`)
 
 ## No critical findings in Papyrus active build path
 - Checked active compile target declarations:
@@ -91,7 +95,7 @@
 
 ## Verification commands executed
 - `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release --nologo`
-  - Result: PASS (`33 passed, 0 failed`)
+  - Result: PASS (`38 passed, 0 failed`)
 - `ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --output-on-failure`
   - Result: PASS (`2/2`)
 - `python3 tools/lint_affixes.py --spec affixes/affixes.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json`

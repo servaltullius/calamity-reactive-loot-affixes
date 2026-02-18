@@ -1,0 +1,20 @@
+{
+  "supportedTriggers": [
+    "Hit",
+    "IncomingHit",
+    "DotApply",
+    "Kill"
+  ],
+  "supportedActionTypes": [
+    "DebugNotify",
+    "CastSpell",
+    "CastSpellAdaptiveElement",
+    "CastOnCrit",
+    "ConvertDamage",
+    "MindOverMatter",
+    "Archmage",
+    "CorpseExplosion",
+    "SummonCorpseExplosion",
+    "SpawnTrap"
+  ]
+}

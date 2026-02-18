@@ -8,21 +8,6 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 
-SUPPORTED_TRIGGERS: Set[str] = {"Hit", "IncomingHit", "DotApply", "Kill"}
-SUPPORTED_ACTION_TYPES: Set[str] = {
-    "DebugNotify",
-    "CastSpell",
-    "CastSpellAdaptiveElement",
-    "CastOnCrit",
-    "ConvertDamage",
-    "MindOverMatter",
-    "Archmage",
-    "CorpseExplosion",
-    "SummonCorpseExplosion",
-    "SpawnTrap",
-}
-
-
 def _read_json(path: Path) -> Any:
     try:
         with path.open("r", encoding="utf-8") as f:
@@ -86,7 +71,36 @@ def _collect_spell_refs_from_action(
             add(_extract_spell_editor_id(entry), f"{affix_id}:action.modeCycle.spells[{idx}]")
 
 
-def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) -> None:
+def _load_validation_contract() -> Tuple[Set[str], Set[str]]:
+    contract_path = Path(__file__).resolve().parent / "affix_validation_contract.json"
+    contract = _as_dict(_read_json(contract_path))
+    if not contract:
+        raise RuntimeError(f"Invalid validation contract (expected object): {contract_path}")
+
+    def read_set(key: str) -> Set[str]:
+        raw = _as_list(contract.get(key))
+        if raw is None:
+            raise RuntimeError(f"Validation contract missing array: {contract_path}:{key}")
+        values: Set[str] = set()
+        for idx, item in enumerate(raw):
+            if not isinstance(item, str) or not item.strip():
+                raise RuntimeError(f"Validation contract invalid value: {contract_path}:{key}[{idx}]")
+            values.add(item.strip())
+        if not values:
+            raise RuntimeError(f"Validation contract array must not be empty: {contract_path}:{key}")
+        return values
+
+    return read_set("supportedTriggers"), read_set("supportedActionTypes")
+
+
+def _lint_spec(
+    spec: Dict[str, Any],
+    *,
+    errors: List[str],
+    warnings: List[str],
+    supported_triggers: Set[str],
+    supported_action_types: Set[str],
+) -> None:
     loot = _as_dict(spec.get("loot")) or {}
     shared_pool = loot.get("sharedPool")
     if shared_pool is not None and not isinstance(shared_pool, bool):
@@ -177,8 +191,8 @@ def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) 
             continue
 
         trigger = runtime.get("trigger")
-        if not isinstance(trigger, str) or trigger not in SUPPORTED_TRIGGERS:
-            errors.append(f"{affix_id}: runtime.trigger must be one of {sorted(SUPPORTED_TRIGGERS)}.")
+        if not isinstance(trigger, str) or trigger not in supported_triggers:
+            errors.append(f"{affix_id}: runtime.trigger must be one of {sorted(supported_triggers)}.")
 
         chance = runtime.get("procChancePercent")
         if chance is not None:
@@ -238,8 +252,8 @@ def _lint_spec(spec: Dict[str, Any], *, errors: List[str], warnings: List[str]) 
             continue
 
         action_type = action.get("type")
-        if not isinstance(action_type, str) or action_type not in SUPPORTED_ACTION_TYPES:
-            errors.append(f"{affix_id}: action.type must be one of {sorted(SUPPORTED_ACTION_TYPES)}.")
+        if not isinstance(action_type, str) or action_type not in supported_action_types:
+            errors.append(f"{affix_id}: action.type must be one of {sorted(supported_action_types)}.")
             continue
 
         lucky_hit_configured = (
@@ -456,11 +470,23 @@ def main() -> int:
         print(f"[ERROR] {e}", file=sys.stderr)
         return 2
 
+    try:
+        supported_triggers, supported_action_types = _load_validation_contract()
+    except RuntimeError as e:
+        print(f"[ERROR] {e}", file=sys.stderr)
+        return 2
+
     if not isinstance(spec, dict):
         print("[ERROR] Spec JSON must be an object at top-level.", file=sys.stderr)
         return 2
 
-    _lint_spec(spec, errors=errors, warnings=warnings)
+    _lint_spec(
+        spec,
+        errors=errors,
+        warnings=warnings,
+        supported_triggers=supported_triggers,
+        supported_action_types=supported_action_types,
+    )
 
     if args.generated:
         gen_path = Path(args.generated)

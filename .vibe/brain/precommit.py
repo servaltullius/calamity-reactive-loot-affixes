@@ -110,7 +110,10 @@ def main(argv: list[str]) -> int:
 
     # Complexity: warnings only (staged .cs).
     if staged_cs:
-        _run(brain / "check_complexity.py", ["--files", *staged_cs])
+        complexity_args: list[str] = []
+        for path in staged_cs:
+            complexity_args.extend(["--files", path])
+        _run(brain / "check_complexity.py", complexity_args)
 
     if args.run_tests:
         rc = max(rc, _run(brain / "run_core_tests.py", ["--fast"]))

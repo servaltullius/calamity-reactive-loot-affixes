@@ -267,7 +267,12 @@ public sealed class KeywordPluginBuilderTests
                              "traits": "-E",
                              "chance": 100.0
                            },
-                           "runtime": {}
+                           "runtime": {
+                             "trigger": "Hit",
+                             "action": {
+                               "type": "DebugNotify"
+                             }
+                           }
                          }
                        ],
                        "kidRules": [],
@@ -336,7 +341,12 @@ public sealed class KeywordPluginBuilderTests
                              "traits": "-E",
                              "chance": 100.0
                            },
-                           "runtime": {}
+                           "runtime": {
+                             "trigger": "Hit",
+                             "action": {
+                               "type": "DebugNotify"
+                             }
+                           }
                          }
                        ],
                        "kidRules": [],

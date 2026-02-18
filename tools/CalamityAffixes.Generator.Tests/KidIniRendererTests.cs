@@ -106,7 +106,12 @@ public sealed class KidIniRendererTests
                       "traits": "-E",
                       "chance": 2.0
                     },
-                    "runtime": {}
+                    "runtime": {
+                      "trigger": "Hit",
+                      "action": {
+                        "type": "DebugNotify"
+                      }
+                    }
                   }
                 ],
                 "kidRules": [

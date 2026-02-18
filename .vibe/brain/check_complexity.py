@@ -211,15 +211,21 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--files",
         action="append",
+        nargs="+",
         default=None,
-        help="Analyze only specific repo-relative files (repeatable).",
+        help="Analyze only specific repo-relative files (repeatable; accepts one or more files per flag).",
     )
     args = parser.parse_args(argv)
 
     cfg = load_config()
     results: list[ComplexityFinding] = []
+    files: list[str] = []
     if args.files:
-        for f in args.files:
+        for batch in args.files:
+            files.extend(batch)
+
+    if files:
+        for f in files:
             p = Path(f)
             if not p.is_absolute():
                 p = cfg.root / p
