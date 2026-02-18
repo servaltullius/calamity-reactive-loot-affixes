@@ -94,6 +94,7 @@ namespace CalamityAffixes::PrismaTooltip
 		std::string g_lastRunewordBaseListJson = "[]";
 		std::string g_lastRunewordRecipeListJson = "[]";
 		std::string g_lastRunewordPanelStateJson = "{}";
+		std::string g_lastRunewordAffixPreview;
 		std::string g_lastPanelLayoutJson = "{}";
 		std::string g_lastTooltipLayoutJson = "{}";
 		std::string g_lastPanelHotkeyText;
@@ -266,7 +267,7 @@ namespace CalamityAffixes::PrismaTooltip
 			g_api->InteropCall(g_view, "setSelectedItemSource", g_lastSelectedItemSource.c_str());
 		}
 
-		void SetRunewordBaseInventoryList(const std::vector<EventBridge::RunewordBaseInventoryEntry>& a_entries)
+			void SetRunewordBaseInventoryList(const std::vector<EventBridge::RunewordBaseInventoryEntry>& a_entries)
 		{
 			if (!IsViewReady()) {
 				return;
@@ -290,7 +291,7 @@ namespace CalamityAffixes::PrismaTooltip
 			g_api->InteropCall(g_view, "setInventoryItems", g_lastRunewordBaseListJson.c_str());
 		}
 
-		void SetRunewordRecipeList(const std::vector<EventBridge::RunewordRecipeEntry>& a_entries)
+			void SetRunewordRecipeList(const std::vector<EventBridge::RunewordRecipeEntry>& a_entries)
 		{
 			if (!IsViewReady()) {
 				return;
@@ -313,9 +314,24 @@ namespace CalamityAffixes::PrismaTooltip
 				return;
 			}
 
-			g_lastRunewordRecipeListJson = encoded;
-			g_api->InteropCall(g_view, "setRecipeItems", g_lastRunewordRecipeListJson.c_str());
-		}
+				g_lastRunewordRecipeListJson = encoded;
+				g_api->InteropCall(g_view, "setRecipeItems", g_lastRunewordRecipeListJson.c_str());
+			}
+
+			void SetRunewordAffixPreview(std::string_view a_text)
+			{
+				if (!IsViewReady()) {
+					return;
+				}
+
+				const std::string next(a_text);
+				if (next == g_lastRunewordAffixPreview) {
+					return;
+				}
+
+				g_lastRunewordAffixPreview = next;
+				g_api->InteropCall(g_view, "setRunewordAffixPreview", g_lastRunewordAffixPreview.c_str());
+			}
 
 			void SetRunewordPanelState(const EventBridge::RunewordPanelState& a_state)
 			{
@@ -753,12 +769,13 @@ namespace CalamityAffixes::PrismaTooltip
 				SKSE::log::info("CalamityAffixes: PrismaUI API acquired.");
 			}
 
-			if (!g_view) {
-				g_domReady = false;
-				g_lastPanelStateKnown = false;
-				g_lastUiLanguageCode.clear();
-				g_view = g_api->CreateView(
-					kViewPath,
+				if (!g_view) {
+					g_domReady = false;
+					g_lastPanelStateKnown = false;
+					g_lastUiLanguageCode.clear();
+					g_lastRunewordAffixPreview.clear();
+					g_view = g_api->CreateView(
+						kViewPath,
 					[](PRISMA_UI_API::PrismaView) {
 						g_domReady = true;
 					});

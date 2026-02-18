@@ -581,7 +581,8 @@ namespace CalamityAffixes
 		std::string_view a_selectedDisplayName,
 		int a_uiLanguageMode,
 		std::string_view a_itemSource,
-		RE::FormID a_sourceContainerFormID)
+		RE::FormID a_sourceContainerFormID,
+		std::uint64_t a_preferredInstanceKey)
 	{
 		if (!_configLoaded) {
 			return std::nullopt;
@@ -805,6 +806,44 @@ namespace CalamityAffixes
 					previewCandidateIndices.push_back(index);
 				}
 			}
+		}
+
+		if (a_preferredInstanceKey != 0u) {
+			const auto preferredIt = std::find_if(
+				candidates.begin(),
+				candidates.end(),
+				[a_preferredInstanceKey](const TooltipCandidate& a_candidate) {
+					return a_candidate.instanceKey == a_preferredInstanceKey;
+				});
+
+			if (preferredIt == candidates.end()) {
+				if (hasClaimContext) {
+					ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
+				}
+				return std::nullopt;
+			}
+
+			if (hasClaimContext) {
+				if (preferredIt->preview) {
+					const auto nowMs = NowSteadyMilliseconds();
+					RememberLootPreviewClaim(
+						a_sourceContainerFormID,
+						itemBaseObj,
+						preferredIt->slots,
+						nowMs);
+				} else {
+					ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
+				}
+			}
+
+			const auto preferredTooltip = formatTooltip(*preferredIt);
+			if (preferredTooltip.empty()) {
+				if (hasClaimContext) {
+					ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
+				}
+				return std::nullopt;
+			}
+			return preferredTooltip;
 		}
 
 		const auto resolution = ResolveTooltipCandidateSelection(resolutionCandidates, a_selectedDisplayName);

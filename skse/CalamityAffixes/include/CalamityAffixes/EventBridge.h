@@ -148,7 +148,8 @@ namespace CalamityAffixes
 			std::string_view a_selectedDisplayName = {},
 			int a_uiLanguageMode = 2,
 			std::string_view a_itemSource = {},
-			RE::FormID a_sourceContainerFormID = 0u);
+			RE::FormID a_sourceContainerFormID = 0u,
+			std::uint64_t a_preferredInstanceKey = 0u);
 
 		// UI helper: enumerate runeword-base candidates from player's inventory.
 		[[nodiscard]] std::vector<RunewordBaseInventoryEntry> GetRunewordBaseInventoryEntries();
@@ -160,6 +161,8 @@ namespace CalamityAffixes
 		[[nodiscard]] bool SelectRunewordRecipe(std::uint64_t a_recipeToken);
 		// UI helper: current runeword crafting status for Prisma panel.
 		[[nodiscard]] RunewordPanelState GetRunewordPanelState();
+		// UI helper: affix tooltip for currently selected runeword base.
+		[[nodiscard]] std::optional<std::string> GetSelectedRunewordBaseAffixTooltip(int a_uiLanguageMode = 2);
 		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseWithOrb();
 
 		// Combat/runtime evaluation entrypoints.

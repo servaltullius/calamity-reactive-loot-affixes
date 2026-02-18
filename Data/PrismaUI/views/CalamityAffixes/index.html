@@ -1572,7 +1572,6 @@
         window.setTimeout(() => {
           if (!runewordAffixPendingState) return;
           if (pendingNonce !== runewordAffixPendingNonce) return;
-          runewordAffixTextState = tooltipTextState;
           runewordAffixPendingState = false;
           applyTooltipPlacement();
         }, runewordAffixPendingTimeoutMs);
@@ -2558,20 +2557,21 @@
         };
 
         if (runewordAffixPendingState) {
-          runewordAffixTextState = tooltipTextState;
           runewordAffixPendingState = false;
         }
         renderRunewordPanelState();
         applyTooltipPlacement();
       }
 
+      function setRunewordAffixPreview(raw) {
+        runewordAffixTextState = typeof raw === "string" ? raw : "";
+        runewordAffixPendingState = false;
+        applyTooltipPlacement();
+      }
+
       function setTooltip(raw) {
         const value = typeof raw === "string" ? raw : "";
         tooltipTextState = value;
-        if (runewordAffixPendingState) {
-          runewordAffixTextState = value;
-          runewordAffixPendingState = false;
-        }
         applyTooltipPlacement();
       }
 
@@ -2691,7 +2691,6 @@
         const value = typeof raw === "string" ? raw : "";
         feedback.textContent = value;
         if (runewordAffixPendingState) {
-          runewordAffixTextState = tooltipTextState;
           runewordAffixPendingState = false;
           applyTooltipPlacement();
         }
@@ -2802,6 +2801,7 @@
         PrismaUI_Interop("setInventoryItems", (data) => setInventoryItems(data));
         PrismaUI_Interop("setRecipeItems", (data) => setRecipeItems(data));
         PrismaUI_Interop("setRunewordPanelState", (data) => setRunewordPanelState(data));
+        PrismaUI_Interop("setRunewordAffixPreview", (data) => setRunewordAffixPreview(data));
         PrismaUI_Interop("setPanelLayout", (data) => setPanelLayout(data));
         PrismaUI_Interop("setTooltipLayout", (data) => setTooltipLayout(data));
       }
@@ -2817,6 +2817,7 @@
       window.setInventoryItems = setInventoryItems;
       window.setRecipeItems = setRecipeItems;
       window.setRunewordPanelState = setRunewordPanelState;
+      window.setRunewordAffixPreview = setRunewordAffixPreview;
       window.setPanelLayout = setPanelLayout;
       window.setTooltipLayout = setTooltipLayout;
 

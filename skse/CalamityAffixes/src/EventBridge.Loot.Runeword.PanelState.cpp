@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <string>
 
@@ -129,6 +130,33 @@ namespace CalamityAffixes
 
 		panelState.canInsert = CanInsertRunewordFromPanel(ready, canApplyResult);
 		return panelState;
+	}
+
+	std::optional<std::string> EventBridge::GetSelectedRunewordBaseAffixTooltip(int a_uiLanguageMode)
+	{
+		if (!_configLoaded) {
+			return std::nullopt;
+		}
+
+		SanitizeRunewordState();
+		if (!_runewordSelectedBaseKey) {
+			return std::nullopt;
+		}
+
+		RE::InventoryEntryData* entry = nullptr;
+		RE::ExtraDataList* xList = nullptr;
+		if (!ResolvePlayerInventoryInstance(*_runewordSelectedBaseKey, entry, xList) || !entry || !entry->object || !xList) {
+			return std::nullopt;
+		}
+
+		const std::string selectedName = ResolveInventoryDisplayName(entry, xList);
+		return GetInstanceAffixTooltip(
+			entry,
+			selectedName,
+			a_uiLanguageMode,
+			"inventory",
+			0u,
+			*_runewordSelectedBaseKey);
 	}
 
 }

@@ -1058,6 +1058,10 @@ namespace
 			const fs::path testFile{ __FILE__ };
 			const fs::path prismaHandleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.HandleUiCommand.inl";
 			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runtime.cpp";
+			const fs::path runewordPanelStateFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.PanelState.cpp";
+			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
+				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
 
 			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 				std::ifstream in(path);
@@ -1079,12 +1083,36 @@ namespace
 				std::cerr << "prisma_tooltip_refresh: failed to open prisma source: " << prismaCoreFile << "\n";
 				return false;
 			}
+			const auto uiText = loadText(prismaUiFile);
+			if (!uiText.has_value()) {
+				std::cerr << "prisma_tooltip_refresh: failed to open ui source: " << prismaUiFile << "\n";
+				return false;
+			}
+			const auto runtimeText = loadText(runtimeTooltipFile);
+			if (!runtimeText.has_value()) {
+				std::cerr << "prisma_tooltip_refresh: failed to open runtime source: " << runtimeTooltipFile << "\n";
+				return false;
+			}
+			const auto panelStateText = loadText(runewordPanelStateFile);
+			if (!panelStateText.has_value()) {
+				std::cerr << "prisma_tooltip_refresh: failed to open runeword panel state source: " << runewordPanelStateFile << "\n";
+				return false;
+			}
 
 			if (coreText->find("PushSelectedTooltipSnapshot(") == std::string::npos ||
 				handleText->find("PushSelectedTooltipSnapshot(true);") == std::string::npos ||
 				coreText->find("const bool selectionChanged =") == std::string::npos ||
 				coreText->find("if (a_force || selectionChanged || !g_lastTooltip.empty())") == std::string::npos ||
-				coreText->find("if (a_force || selectionChanged || next != g_lastTooltip)") == std::string::npos) {
+				coreText->find("if (a_force || selectionChanged || next != g_lastTooltip)") == std::string::npos ||
+				coreText->find("setRunewordAffixPreview") == std::string::npos ||
+				handleText->find("SetRunewordAffixPreview(") == std::string::npos ||
+				uiText->find("PrismaUI_Interop(\"setRunewordAffixPreview\"") == std::string::npos ||
+				uiText->find("function setRunewordAffixPreview(raw)") == std::string::npos ||
+				runtimeText->find("std::uint64_t a_preferredInstanceKey") == std::string::npos ||
+				runtimeText->find("if (a_preferredInstanceKey != 0u)") == std::string::npos ||
+				runtimeText->find("a_candidate.instanceKey == a_preferredInstanceKey") == std::string::npos ||
+				panelStateText->find("GetInstanceAffixTooltip(") == std::string::npos ||
+				panelStateText->find("*_runewordSelectedBaseKey") == std::string::npos) {
 				std::cerr << "prisma_tooltip_refresh: immediate tooltip refresh guard is missing for runeword actions\n";
 				return false;
 			}

@@ -40,6 +40,8 @@
 				}
 
 				SetRunewordBaseInventoryList(bridge->GetRunewordBaseInventoryEntries());
+				SetRunewordPanelState(bridge->GetRunewordPanelState());
+				SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
 				PushUiFeedback("Runeword base selected.");
 				return;
 			}
@@ -67,6 +69,8 @@
 				}
 
 				SetRunewordRecipeList(bridge->GetRunewordRecipeEntries());
+				SetRunewordPanelState(bridge->GetRunewordPanelState());
+				SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
 				PushUiFeedback("Runeword recipe selected.");
 				return;
 			}
@@ -138,6 +142,7 @@
 					// SendEvent is synchronous; refresh status immediately so UI feedback isn't misleading.
 					const auto after = bridge->GetRunewordPanelState();
 					SetRunewordPanelState(after);
+					SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
 					PushSelectedTooltipSnapshot(true);
 
 					if (after.isComplete && !before.isComplete) {
@@ -186,6 +191,7 @@
 				const auto outcome = bridge->ReforgeSelectedRunewordBaseWithOrb();
 				SetRunewordPanelState(bridge->GetRunewordPanelState());
 				SetRunewordBaseInventoryList(bridge->GetRunewordBaseInventoryEntries());
+				SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
 				PushSelectedTooltipSnapshot(true);
 				PushUiFeedback(outcome.message.empty() ? "Reforge action processed." : outcome.message);
 				return;

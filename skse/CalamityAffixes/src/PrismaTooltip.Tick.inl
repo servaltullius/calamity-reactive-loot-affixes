@@ -30,6 +30,7 @@
 				SetRunewordBaseInventoryList({});
 				SetRunewordRecipeList({});
 				SetRunewordPanelState({});
+				SetRunewordAffixPreview("");
 				SetControlPanelJsState(false);
 				if (g_api->HasFocus(g_view)) {
 					g_api->Unfocus(g_view);
@@ -69,6 +70,7 @@
 					SetRunewordBaseInventoryList(bridge->GetRunewordBaseInventoryEntries());
 					SetRunewordRecipeList(bridge->GetRunewordRecipeEntries());
 					SetRunewordPanelState(bridge->GetRunewordPanelState());
+					SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
 				}
 			}
 
