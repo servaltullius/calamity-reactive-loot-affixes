@@ -4,9 +4,12 @@
 
 using CalamityAffixes::ResolveRunewordBaseCycleCursor;
 using CalamityAffixes::ResolveTooltipCandidateSelection;
+using CalamityAffixes::StripLootStarMarkers;
 using CalamityAffixes::StripLeadingLootStarPrefix;
+using CalamityAffixes::StripTrailingLootStarMarker;
 using CalamityAffixes::TooltipResolutionCandidate;
 using CalamityAffixes::HasLeadingLootStarPrefix;
+using CalamityAffixes::HasTrailingLootStarMarker;
 
 static_assert([] {
 	constexpr std::array<std::uint64_t, 4> candidates{ 11u, 22u, 33u, 44u };
@@ -143,6 +146,41 @@ static_assert([] {
 	return StripLeadingLootStarPrefix(utf8Marked) == "Iron Sword";
 }(),
 	"StripLeadingLootStarPrefix: strips UTF-8 marker with leading spaces");
+
+static_assert([] {
+	return HasTrailingLootStarMarker("Iron Sword*");
+}(),
+	"HasTrailingLootStarMarker: detects no-space trailing marker");
+
+static_assert([] {
+	return HasTrailingLootStarMarker("Iron Sword **");
+}(),
+	"HasTrailingLootStarMarker: detects spaced trailing marker");
+
+static_assert([] {
+	return !HasTrailingLootStarMarker("Iron Sword****");
+}(),
+	"HasTrailingLootStarMarker: rejects out-of-range marker length");
+
+static_assert([] {
+	return StripTrailingLootStarMarker("Iron Sword*") == "Iron Sword";
+}(),
+	"StripTrailingLootStarMarker: strips no-space trailing marker");
+
+static_assert([] {
+	return StripTrailingLootStarMarker("Iron Sword ***") == "Iron Sword";
+}(),
+	"StripTrailingLootStarMarker: strips spaced trailing marker");
+
+static_assert([] {
+	return StripLootStarMarkers("*** Iron Sword**") == "Iron Sword";
+}(),
+	"StripLootStarMarkers: normalizes mixed leading and trailing markers");
+
+static_assert([] {
+	return StripLootStarMarkers("Iron Sword") == "Iron Sword";
+}(),
+	"StripLootStarMarkers: preserves names without markers");
 
 static_assert([] {
 	constexpr std::array<TooltipResolutionCandidate, 2> candidates{ {

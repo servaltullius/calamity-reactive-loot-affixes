@@ -8,6 +8,7 @@
     "runewordFragmentChancePercent": 40.0,
     "reforgeOrbChancePercent": 40.0,
     "renameItem": true,
+    "nameMarkerPosition": "trailing",
     "sharedPool": true,
     "debugLog": false,
     "dotTagSafetyAutoDisable": false,

@@ -53,6 +53,15 @@ namespace CalamityAffixes
 			return pos;
 		}
 
+		[[nodiscard]] constexpr std::size_t SkipTrailingSpaces(std::string_view a_text) noexcept
+		{
+			std::size_t end = a_text.size();
+			while (end > 0 && a_text[end - 1] == ' ') {
+				--end;
+			}
+			return end;
+		}
+
 		[[nodiscard]] constexpr bool HasUtf8StarAt(std::string_view a_text, std::size_t a_pos) noexcept
 		{
 			return a_pos + 2 < a_text.size() &&
@@ -113,6 +122,85 @@ namespace CalamityAffixes
 
 		// Keep legacy behavior: leading spaces are trimmed even when no marker is present.
 		return a_name.substr(pos);
+	}
+
+	[[nodiscard]] constexpr bool HasTrailingLootStarMarker(std::string_view a_name) noexcept
+	{
+		const auto trimmedEnd = detail::SkipTrailingSpaces(a_name);
+		if (trimmedEnd == 0) {
+			return false;
+		}
+
+		std::size_t utf8Count = 0;
+		std::size_t utf8Pos = trimmedEnd;
+		while (utf8Pos >= 3 && detail::HasUtf8StarAt(a_name, utf8Pos - 3)) {
+			++utf8Count;
+			utf8Pos -= 3;
+		}
+		if (utf8Count >= 1 && utf8Count <= 3) {
+			return true;
+		}
+
+		std::size_t asciiCount = 0;
+		std::size_t asciiPos = trimmedEnd;
+		while (asciiPos > 0 && a_name[asciiPos - 1] == '*') {
+			++asciiCount;
+			--asciiPos;
+		}
+		return asciiCount >= 1 && asciiCount <= 3;
+	}
+
+	[[nodiscard]] constexpr std::string_view StripTrailingLootStarMarker(std::string_view a_name) noexcept
+	{
+		const auto trimmedEnd = detail::SkipTrailingSpaces(a_name);
+		if (trimmedEnd == 0) {
+			return a_name.substr(0, trimmedEnd);
+		}
+
+		std::size_t markerPos = trimmedEnd;
+		std::size_t utf8Count = 0;
+		while (markerPos >= 3 && detail::HasUtf8StarAt(a_name, markerPos - 3)) {
+			++utf8Count;
+			markerPos -= 3;
+		}
+		if (utf8Count >= 1 && utf8Count <= 3) {
+			while (markerPos > 0 && a_name[markerPos - 1] == ' ') {
+				--markerPos;
+			}
+			return a_name.substr(0, markerPos);
+		}
+
+		markerPos = trimmedEnd;
+		std::size_t asciiCount = 0;
+		while (markerPos > 0 && a_name[markerPos - 1] == '*') {
+			++asciiCount;
+			--markerPos;
+		}
+		if (asciiCount >= 1 && asciiCount <= 3) {
+			while (markerPos > 0 && a_name[markerPos - 1] == ' ') {
+				--markerPos;
+			}
+			return a_name.substr(0, markerPos);
+		}
+
+		return a_name;
+	}
+
+	[[nodiscard]] constexpr std::string_view StripLootStarMarkers(std::string_view a_name) noexcept
+	{
+		if (!HasLeadingLootStarPrefix(a_name) && !HasTrailingLootStarMarker(a_name)) {
+			return a_name;
+		}
+
+		auto stripped = a_name;
+		for (std::size_t i = 0; i < 4; ++i) {
+			const auto next = StripTrailingLootStarMarker(StripLeadingLootStarPrefix(stripped));
+			if (next == stripped) {
+				return next;
+			}
+			stripped = next;
+		}
+		return stripped;
 	}
 
 	// Policy: runeword progress/details are shown in the dedicated runeword panel only.

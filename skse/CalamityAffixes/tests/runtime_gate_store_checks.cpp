@@ -717,6 +717,16 @@ namespace
 			std::cerr << "loot_preview_policy: fallback path must rebind pending preview cache before reroll\n";
 			return false;
 		}
+		if (assignText->find("StripLootStarMarkers(") == std::string::npos ||
+			assignText->find("_loot.nameMarkerPosition == LootNameMarkerPosition::kTrailing") == std::string::npos) {
+			std::cerr << "loot_preview_policy: rename path must support marker normalization and trailing marker mode\n";
+			return false;
+		}
+		if (assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, false)") == std::string::npos ||
+			assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, true)") == std::string::npos) {
+			std::cerr << "loot_preview_policy: stale-marker cleanup must separate legacy-only and mapped trailing cleanup paths\n";
+			return false;
+		}
 
 		const auto runtimeText = loadText(runtimeFile);
 		if (!runtimeText.has_value()) {
@@ -749,6 +759,15 @@ namespace
 		const auto configText = loadText(configFile);
 		if (!configText.has_value()) {
 			std::cerr << "loot_preview_policy: failed to open config source: " << configFile << "\n";
+			return false;
+		}
+		if (configText->find("ParseLootNameMarkerPosition") == std::string::npos ||
+			configText->find("nameMarkerPosition") == std::string::npos) {
+			std::cerr << "loot_preview_policy: config load must parse loot.nameMarkerPosition\n";
+			return false;
+		}
+		if (configText->find("_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;") == std::string::npos) {
+			std::cerr << "loot_preview_policy: config reload must reset loot.nameMarkerPosition to trailing default before parsing\n";
 			return false;
 		}
 		if (configText->find("_lootPreviewAffixes.clear();") == std::string::npos ||

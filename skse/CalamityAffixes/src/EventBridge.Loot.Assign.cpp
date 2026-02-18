@@ -75,7 +75,10 @@ namespace CalamityAffixes
 		return false;
 	}
 
-	bool EventBridge::TryClearStaleLootDisplayName(RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList)
+	bool EventBridge::TryClearStaleLootDisplayName(
+		RE::InventoryEntryData* a_entry,
+		RE::ExtraDataList* a_xList,
+		bool a_allowTrailingMarkerClear)
 	{
 		if (!a_entry || !a_entry->object || !a_xList) {
 			return false;
@@ -87,11 +90,22 @@ namespace CalamityAffixes
 		}
 
 		const auto* name = text->GetDisplayName(a_entry->object, 0);
-		if (!name || name[0] == '\0' || !HasLeadingLootStarPrefix(name)) {
+		if (!name || name[0] == '\0') {
 			return false;
 		}
 
-		std::string cleaned = std::string(StripLeadingLootStarPrefix(name));
+		const bool hasLeadingMarker = HasLeadingLootStarPrefix(name);
+		const bool hasTrailingMarker = HasTrailingLootStarMarker(name);
+		if (!hasLeadingMarker && !(a_allowTrailingMarkerClear && hasTrailingMarker)) {
+			return false;
+		}
+
+		std::string cleaned;
+		if (a_allowTrailingMarkerClear && hasTrailingMarker) {
+			cleaned = std::string(StripLootStarMarkers(name));
+		} else {
+			cleaned = std::string(StripLeadingLootStarPrefix(name));
+		}
 		if (cleaned.empty()) {
 			const char* objectNameRaw = a_entry->object->GetName();
 			cleaned = objectNameRaw ? objectNameRaw : "";
@@ -119,7 +133,7 @@ namespace CalamityAffixes
 			_runewordSelectedBaseKey.reset();
 		}
 
-		const bool renamed = TryClearStaleLootDisplayName(a_entry, a_xList);
+		const bool renamed = TryClearStaleLootDisplayName(a_entry, a_xList, true);
 		if (_loot.debugLog && (erasedAffixCount > 0 || renamed)) {
 			SKSE::log::debug(
 				"CalamityAffixes: cleaned invalid loot instance (key={:016X}, reason={}, removedAffixes={}, renamed={}).",
@@ -519,7 +533,7 @@ namespace CalamityAffixes
 			if (_loot.cleanupInvalidLegacyAffixes) {
 				CleanupInvalidLootInstance(a_entry, a_xList, key, "ApplyMultipleAffixes.ineligible");
 			} else {
-				(void)TryClearStaleLootDisplayName(a_entry, a_xList);
+					(void)TryClearStaleLootDisplayName(a_entry, a_xList, false);
 			}
 			return;
 		}
@@ -535,7 +549,7 @@ namespace CalamityAffixes
 			if (existingSlots.count == 0) {
 				_instanceAffixes.erase(existingIt);
 				ForgetLootEvaluatedInstance(key);
-				(void)TryClearStaleLootDisplayName(a_entry, a_xList);
+					(void)TryClearStaleLootDisplayName(a_entry, a_xList, true);
 				skipStaleMarkerShortCircuit = true;
 			} else {
 				MarkLootEvaluatedInstance(key);
@@ -549,7 +563,7 @@ namespace CalamityAffixes
 
 		// 1) Hard guard: any instance evaluated once is never rolled again.
 		if (IsLootEvaluatedInstance(key)) {
-			(void)TryClearStaleLootDisplayName(a_entry, a_xList);
+			(void)TryClearStaleLootDisplayName(a_entry, a_xList, false);
 			return;
 		}
 
@@ -606,7 +620,7 @@ namespace CalamityAffixes
 
 		// 2) Legacy cleanup path:
 		// If stale old data left only the star marker, treat as already evaluated and strip marker.
-		if (!skipStaleMarkerShortCircuit && TryClearStaleLootDisplayName(a_entry, a_xList)) {
+		if (!skipStaleMarkerShortCircuit && TryClearStaleLootDisplayName(a_entry, a_xList, false)) {
 			MarkLootEvaluatedInstance(key);
 			if (_loot.debugLog) {
 				SKSE::log::debug(
@@ -780,7 +794,7 @@ namespace CalamityAffixes
 			return cleaned.substr(first, last - first + 1);
 		};
 
-		std::string baseName = stripKnownAffixTags(StripLeadingLootStarPrefix(currentName));
+		std::string baseName = stripKnownAffixTags(StripLootStarMarkers(currentName));
 
 		if (baseName.empty()) {
 			const char* objectNameRaw = a_entry->object->GetName();
@@ -793,17 +807,23 @@ namespace CalamityAffixes
 			baseName.pop_back();
 		}
 
-		// Build name with star prefix based on affix count
-		std::string prefix;
+		// Build name marker based on affix count.
+		std::string marker;
 		if (a_slots.count >= 3) {
-			prefix = "*** ";
+			marker = "***";
 		} else if (a_slots.count == 2) {
-			prefix = "** ";
+			marker = "**";
 		} else {
-			prefix = "* ";
+			marker = "*";
 		}
 
-		const std::string newName = prefix + baseName;
+		std::string newName;
+		if (_loot.nameMarkerPosition == LootNameMarkerPosition::kTrailing) {
+			// Requested UX default: "철검*" (no delimiter space) for stable name sorting.
+			newName = baseName + marker;
+		} else {
+			newName = marker + " " + baseName;
+		}
 		if (newName.empty()) {
 			return;
 		}
@@ -951,7 +971,7 @@ namespace CalamityAffixes
 					if (slots.count == 0) {
 						_instanceAffixes.erase(mappedIt);
 						ForgetLootEvaluatedInstance(key);
-						(void)TryClearStaleLootDisplayName(entry, xList);
+						(void)TryClearStaleLootDisplayName(entry, xList, true);
 						unevaluatedCandidates.push_back(xList);
 						continue;
 					}

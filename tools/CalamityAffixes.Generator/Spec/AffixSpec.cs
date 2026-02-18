@@ -32,6 +32,9 @@ public sealed class LootSpec
     [JsonPropertyName("renameItem")]
     public bool RenameItem { get; init; }
 
+    [JsonPropertyName("nameMarkerPosition")]
+    public string? NameMarkerPosition { get; init; }
+
     [JsonPropertyName("sharedPool")]
     public bool SharedPool { get; init; }
 

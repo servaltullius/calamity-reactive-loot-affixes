@@ -87,6 +87,7 @@ public sealed class KidIniRendererTests
               "loot": {
                 "chancePercent": 25.0,
                 "renameItem": true,
+                "nameMarkerPosition": "trailing",
                 "nameFormat": "{base} [{affix}]"
               },
               "keywords": {

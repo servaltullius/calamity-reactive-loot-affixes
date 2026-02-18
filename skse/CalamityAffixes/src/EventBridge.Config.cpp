@@ -114,6 +114,18 @@ namespace CalamityAffixes
 			return out;
 		}
 
+		[[nodiscard]] std::optional<bool> ParseLootNameMarkerPositionIsTrailing(std::string_view a_text)
+		{
+			const auto normalized = ToLowerAscii(Trim(a_text));
+			if (normalized == "leading") {
+				return false;
+			}
+			if (normalized == "trailing") {
+				return true;
+			}
+			return std::nullopt;
+		}
+
 		[[nodiscard]] std::string_view StripIniCommentAndTrim(std::string_view a_line) noexcept
 		{
 			if (const auto comment = a_line.find_first_of(";#"); comment != std::string_view::npos) {
@@ -1168,6 +1180,7 @@ namespace CalamityAffixes
 	void EventBridge::ApplyLootConfigFromJson(const nlohmann::json& a_configRoot)
 	{
 		_loot.armorEditorIdDenyContains = detail::MakeDefaultLootArmorEditorIdDenyContains();
+		_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
 			_loot.chancePercent = loot.value("chancePercent", 0.0f);
@@ -1188,6 +1201,22 @@ namespace CalamityAffixes
 			_loot.cleanupInvalidLegacyAffixes = loot.value("cleanupInvalidLegacyAffixes", _loot.cleanupInvalidLegacyAffixes);
 			_loot.stripTrackedSuffixSlots = loot.value("stripTrackedSuffixSlots", _loot.stripTrackedSuffixSlots);
 			_loot.nameFormat = loot.value("nameFormat", std::string{ "{base} [{affix}]" });
+			if (const auto markerPosIt = loot.find("nameMarkerPosition"); markerPosIt != loot.end()) {
+				if (markerPosIt->is_string()) {
+					if (const auto isTrailing = ParseLootNameMarkerPositionIsTrailing(markerPosIt->get<std::string>()); isTrailing.has_value()) {
+						_loot.nameMarkerPosition = *isTrailing ? LootNameMarkerPosition::kTrailing : LootNameMarkerPosition::kLeading;
+					} else {
+						SKSE::log::warn(
+							"CalamityAffixes: invalid loot.nameMarkerPosition '{}'; expected 'leading' or 'trailing'. Falling back to trailing.",
+							markerPosIt->get<std::string>());
+						_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
+					}
+				} else {
+					SKSE::log::warn(
+						"CalamityAffixes: loot.nameMarkerPosition must be a string ('leading' or 'trailing'). Falling back to trailing.");
+					_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
+				}
+			}
 
 			if (const auto denyIt = loot.find("armorEditorIdDenyContains"); denyIt != loot.end()) {
 				if (denyIt->is_array()) {

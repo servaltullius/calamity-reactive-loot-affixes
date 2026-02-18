@@ -42,6 +42,7 @@
         "chancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
         "runewordFragmentChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
         "renameItem": { "type": "boolean" },
+        "nameMarkerPosition": { "type": "string", "enum": ["leading", "trailing"] },
         "sharedPool": { "type": "boolean" },
         "debugLog": { "type": "boolean" },
         "dotTagSafetyAutoDisable": { "type": "boolean" },

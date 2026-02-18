@@ -491,6 +491,12 @@ namespace CalamityAffixes
 			static constexpr std::uint32_t kLootShuffleBagSerializationVersion = 2;
 
 		// Runtime config/state PODs.
+		enum class LootNameMarkerPosition : std::uint8_t
+		{
+			kLeading = 0,
+			kTrailing = 1,
+		};
+
 		struct LootConfig
 		{
 			float chancePercent{ 0.0f };
@@ -509,6 +515,7 @@ namespace CalamityAffixes
 			bool stripTrackedSuffixSlots{ true };
 			std::vector<std::string> armorEditorIdDenyContains{};
 			std::string nameFormat{ "{base} [{affix}]" };
+			LootNameMarkerPosition nameMarkerPosition{ LootNameMarkerPosition::kTrailing };
 		};
 
 		struct LootShuffleBagState
@@ -769,7 +776,10 @@ namespace CalamityAffixes
 		void SanitizeAllTrackedLootInstancesForCurrentLootRules(std::string_view a_context);
 		[[nodiscard]] bool IsLootObjectEligibleForAffixes(const RE::TESBoundObject* a_object) const;
 		[[nodiscard]] bool IsLootArmorEligibleForAffixes(const RE::TESObjectARMO* a_armor) const;
-		[[nodiscard]] bool TryClearStaleLootDisplayName(RE::InventoryEntryData* a_entry, RE::ExtraDataList* a_xList);
+		[[nodiscard]] bool TryClearStaleLootDisplayName(
+			RE::InventoryEntryData* a_entry,
+			RE::ExtraDataList* a_xList,
+			bool a_allowTrailingMarkerClear);
 		void CleanupInvalidLootInstance(
 			RE::InventoryEntryData* a_entry,
 			RE::ExtraDataList* a_xList,
