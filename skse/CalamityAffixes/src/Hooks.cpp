@@ -10,6 +10,7 @@
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HitDataUtil.h"
+#include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/TriggerGuards.h"
 
 namespace CalamityAffixes::Hooks
@@ -87,82 +88,94 @@ namespace CalamityAffixes::Hooks
 
 				ScopedFlag guard(inHook);
 
-					const auto context = BuildCombatTriggerContext(a_this, a_attacker);
-					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-					const auto now = std::chrono::steady_clock::now();
-
-					const bool allowNeutralOutgoing =
-						ShouldResolveNonHostileOutgoingFirstHitAllowance(
-							context.hasPlayerOwner,
-							context.targetIsPlayer,
-							bridge->AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
-						bridge->ResolveNonHostileOutgoingFirstHitAllowance(context.playerOwner, a_this, context.hostileEitherDirection, now);
-
-					if (!ShouldProcessHealthDamageProcPath(
-							context.hasTarget,
-							context.hasAttacker,
-							context.targetIsPlayer,
-							context.attackerIsPlayerOwned,
-							context.hasPlayerOwner,
-							context.hostileEitherDirection,
-							allowNeutralOutgoing)) {
+				if (!ShouldProcessHealthDamageHookPointers(a_this, a_attacker)) {
 					a_original(a_this, a_attacker, a_damage);
 					return;
 				}
 
-					const auto* hitData = HitDataUtil::GetLastHitData(a_this);
-					float adjustedDamage = a_damage;
-					const float critMult = bridge->GetCritDamageMultiplier(
-						a_attacker, hitData);
-					if (critMult > 1.0f) {
-						adjustedDamage *= critMult;
-					}
-					const auto conversion = bridge->EvaluateConversion(
-						a_attacker,
-						a_this,
-						hitData,
-						adjustedDamage);
-					const auto mindOverMatter = bridge->EvaluateMindOverMatter(
-						a_this,
-						a_attacker,
-						hitData,
-						adjustedDamage);
-					(void)mindOverMatter;
+				auto* safeTarget = SanitizeObjectPointer(a_this);
+				auto* safeAttacker = SanitizeObjectPointer(a_attacker);
+				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+				if (!bridge) {
+					a_original(a_this, a_attacker, a_damage);
+					return;
+				}
+
+				const auto context = BuildCombatTriggerContext(safeTarget, safeAttacker);
+				const auto now = std::chrono::steady_clock::now();
+
+				const bool allowNeutralOutgoing =
+					ShouldResolveNonHostileOutgoingFirstHitAllowance(
+						context.hasPlayerOwner,
+						context.targetIsPlayer,
+						bridge->AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
+					bridge->ResolveNonHostileOutgoingFirstHitAllowance(context.playerOwner, safeTarget, context.hostileEitherDirection, now);
+
+				if (!ShouldProcessHealthDamageProcPath(
+						context.hasTarget,
+						context.hasAttacker,
+						context.targetIsPlayer,
+						context.attackerIsPlayerOwned,
+						context.hasPlayerOwner,
+						context.hostileEitherDirection,
+						allowNeutralOutgoing)) {
+					a_original(a_this, a_attacker, a_damage);
+					return;
+				}
+
+				const auto* hitData = HitDataUtil::GetLastHitData(safeTarget);
+				float adjustedDamage = a_damage;
+				const float critMult = bridge->GetCritDamageMultiplier(
+					safeAttacker, hitData);
+				if (critMult > 1.0f) {
+					adjustedDamage *= critMult;
+				}
+				const auto conversion = bridge->EvaluateConversion(
+					safeAttacker,
+					safeTarget,
+					hitData,
+					adjustedDamage);
+				const auto mindOverMatter = bridge->EvaluateMindOverMatter(
+					safeTarget,
+					safeAttacker,
+					hitData,
+					adjustedDamage);
+				(void)mindOverMatter;
 
 				a_original(a_this, a_attacker, adjustedDamage);
 
-				if (conversion.spell && conversion.convertedDamage > 0.0f && a_attacker && a_this) {
-					if (auto* magicCaster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+				if (conversion.spell && conversion.convertedDamage > 0.0f && safeAttacker && safeTarget) {
+					if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
 						magicCaster->CastSpellImmediate(
 							conversion.spell,
 							conversion.noHitEffectArt,
-							a_this,
+							safeTarget,
 							conversion.effectiveness,
 							false,
 							conversion.convertedDamage,
-							a_attacker);
+							safeAttacker);
 					}
 				}
 
-					const auto coc = bridge->EvaluateCastOnCrit(
-						a_attacker,
-						a_this,
-						hitData);
-				if (coc.spell && a_attacker && a_this) {
-					if (auto* magicCaster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+				const auto coc = bridge->EvaluateCastOnCrit(
+					safeAttacker,
+					safeTarget,
+					hitData);
+				if (coc.spell && safeAttacker && safeTarget) {
+					if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
 						magicCaster->CastSpellImmediate(
 							coc.spell,
 							coc.noHitEffectArt,
-							a_this,
+							safeTarget,
 							coc.effectiveness,
 							false,
 							coc.magnitudeOverride,
-							a_attacker);
+							safeAttacker);
 					}
 				}
 
-					bridge->OnHealthDamage(a_this, a_attacker, hitData, a_damage);
-				}
+				bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, a_damage);
+			}
 
 			static void ThunkActor(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{

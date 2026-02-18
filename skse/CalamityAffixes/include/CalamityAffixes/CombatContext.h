@@ -2,6 +2,7 @@
 
 #include <RE/Skyrim.h>
 
+#include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/PlayerOwnership.h"
 
 namespace CalamityAffixes
@@ -19,6 +20,8 @@ namespace CalamityAffixes
 
 	[[nodiscard]] inline bool IsHostileEitherDirection(RE::Actor* a_lhs, RE::Actor* a_rhs) noexcept
 	{
+		a_lhs = SanitizeObjectPointer(a_lhs);
+		a_rhs = SanitizeObjectPointer(a_rhs);
 		return a_lhs && a_rhs &&
 		       (a_lhs->IsHostileToActor(a_rhs) || a_rhs->IsHostileToActor(a_lhs));
 	}
@@ -27,6 +30,9 @@ namespace CalamityAffixes
 		RE::Actor* a_target,
 		RE::Actor* a_attacker) noexcept
 	{
+		a_target = SanitizeObjectPointer(a_target);
+		a_attacker = SanitizeObjectPointer(a_attacker);
+
 		CombatTriggerContext context{};
 		context.hasTarget = (a_target != nullptr);
 		context.hasAttacker = (a_attacker != nullptr);

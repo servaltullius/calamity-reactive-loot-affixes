@@ -20,6 +20,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/NonHostileFirstHitGate.h
 	    include/CalamityAffixes/Papyrus.h
 	    include/CalamityAffixes/PerTargetCooldownStore.h
+	    include/CalamityAffixes/PointerSafety.h
 	    include/CalamityAffixes/PlayerOwnership.h
 	    include/CalamityAffixes/PrismaLayoutPersistence.h
 	    include/CalamityAffixes/PrismaTooltip.h
@@ -164,6 +165,7 @@ if (BUILD_TESTING)
             tests/test_per_target_cooldown_store.cpp
             tests/test_instance_affix_slots.cpp
             tests/test_effective_loot_weight.cpp
+            tests/test_pointer_safety.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 
