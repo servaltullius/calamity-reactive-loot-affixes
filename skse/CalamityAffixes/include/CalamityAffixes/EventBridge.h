@@ -464,7 +464,6 @@ namespace CalamityAffixes
 		static constexpr std::string_view kMcmSetDebugNotificationsEvent = "CalamityAffixes_MCM_SetDebugNotifications";
 		static constexpr std::string_view kMcmSetValidationIntervalEvent = "CalamityAffixes_MCM_SetValidationInterval";
 		static constexpr std::string_view kMcmSetProcChanceMultEvent = "CalamityAffixes_MCM_SetProcChanceMult";
-		static constexpr std::string_view kMcmSetLootChanceEvent = "CalamityAffixes_MCM_SetLootChance";
 		static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = "CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc";
 		static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
@@ -749,8 +748,6 @@ namespace CalamityAffixes
 		[[nodiscard]] static std::string BuildRunewordApplyBlockMessage(RunewordApplyBlockReason a_reason);
 		void InitializeRunewordCatalog();
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
-		[[nodiscard]] std::optional<float> LoadLootChancePercentFromMcmSettings() const;
-		bool PersistLootChancePercentToMcmSettings(float a_chancePercent, bool a_overwriteExisting) const;
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
 		void IndexConfiguredAffixes();

@@ -5,7 +5,7 @@
   "cursorFillMode": "topToBottom",
   "pages": [
     {
-      "pageDisplayName": "General / 일반",
+      "pageDisplayName": "Runtime / 런타임",
       "content": [
         {
           "type": "header",
@@ -18,6 +18,15 @@
           "help": "Current runtime scope is player-centric: player inventory/equipment, plus player-owned summons/proxies for combat triggers. Follower/NPC equipment as independent affix owners is not supported yet. / 현재 런타임 범위는 플레이어 중심입니다: 플레이어 인벤/장비 + 전투 트리거에서 플레이어 지휘 소환체/프록시만 지원합니다. 팔로워/NPC 장비의 독립 어픽스 소유자 추적은 아직 지원하지 않습니다.",
           "valueOptions": {
             "value": "Player-centric runtime / 플레이어 중심 런타임"
+          }
+        },
+        {
+          "type": "text",
+          "id": "tLootPolicy:General",
+          "text": "Loot Policy / 루팅 정책",
+          "help": "Auto affix assignment on pickup is disabled by design. Pickup rolls only runeword fragments/reforge orbs. / 아이템 획득 시 자동 어픽스 부여는 비활성 설계입니다. 획득 시에는 룬워드 조각/재련 오브만 확률 롤됩니다.",
+          "valueOptions": {
+            "value": "No pickup affix auto-assign / 획득 자동 어픽스 부여 없음"
           }
         },
         {
@@ -80,44 +89,6 @@
           }
         },
         {
-          "type": "slider",
-          "id": "fLootChancePercent:General",
-          "text": "Affix Drop Chance / 어픽스 부여 확률",
-          "help": "Chance for eligible loot to receive affixes. Lower values make magic items rarer. / 적격 아이템에 어픽스가 붙을 확률입니다. 낮출수록 매직 아이템이 희귀해집니다.",
-          "valueOptions": {
-            "sourceType": "ModSettingFloat",
-            "defaultValue": 50.0,
-            "min": 0.0,
-            "max": 100.0,
-            "step": 1.0,
-            "formatString": "%.0f %%"
-          },
-          "action": {
-            "type": "CallFunction",
-            "function": "SetLootChancePercent",
-            "params": [
-              "{value}"
-            ]
-          }
-        },
-        {
-          "type": "toggle",
-          "id": "bDebugNotifications:General",
-          "text": "Debug Notifications / 디버그 알림",
-          "help": "Show extra notifications/logging. / 추가 알림/로그를 표시합니다.",
-          "valueOptions": {
-            "sourceType": "ModSettingBool",
-            "defaultValue": false
-          },
-          "action": {
-            "type": "CallFunction",
-            "function": "SetDebugNotificationsEnabled",
-            "params": [
-              "{value}"
-            ]
-          }
-        },
-        {
           "type": "toggle",
           "id": "bDotSafetyAutoDisable:General",
           "text": "Dot Safety Auto-Disable / DoT 안전 자동비활성",
@@ -150,29 +121,28 @@
               "{value}"
             ]
           }
-        },
-        {
-          "type": "empty"
-        },
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "Prisma UI / 프리즈마 UI",
+      "content": [
         {
           "type": "header",
           "text": "Prisma UI Control Panel / 프리즈마 UI 조작 패널"
         },
         {
-          "type": "toggle",
-          "id": "bPrismaControlPanelOpen:General",
-          "text": "Open Prisma Panel / 프리즈마 패널 열기",
-          "help": "Main gameplay controls now live in Prisma UI. Turn this ON to open the interactive panel. / 주요 조작은 Prisma UI에서 수행합니다. ON으로 패널을 엽니다.",
+          "type": "text",
+          "id": "btnPrismaPanelToggle:General",
+          "text": "Toggle Panel (Button) / 패널 토글(버튼)",
+          "help": "Opens/closes the Prisma panel immediately. Use this if hotkey is not responding. / 프리즈마 패널을 즉시 열고/닫습니다. 단축키가 반응 없을 때 사용하세요.",
           "valueOptions": {
-            "sourceType": "ModSettingBool",
-            "defaultValue": false
+            "value": "Toggle / 토글"
           },
           "action": {
-            "type": "CallFunction",
-            "function": "SetPrismaControlPanel",
-            "params": [
-              "{value}"
-            ]
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "TogglePrismaControlPanel"
           }
         },
         {
@@ -192,30 +162,18 @@
         },
         {
           "type": "text",
-          "id": "btnPrismaPanelToggle:General",
-          "text": "Toggle Panel (Button) / 패널 토글(버튼)",
-          "help": "Fallback button when the hotkey is not responding. / 단축키가 반응 없을 때 쓰는 백업 버튼입니다.",
-          "valueOptions": {
-            "value": "Toggle / 토글"
-          },
-          "action": {
-            "type": "CallGlobalFunction",
-            "script": "CalamityAffixes_ModeControl",
-            "function": "TogglePrismaControlPanel"
-          }
-        },
-        {
-          "type": "text",
           "id": "tPrismaGuide:General",
           "text": "Guide / 안내",
-          "help": "Use Prisma panel buttons for manual mode and runeword operations. Close with ESC or Close button. / 수동 모드/룬워드 조작은 Prisma 패널 버튼을 사용하세요. ESC 또는 Close 버튼으로 닫습니다.",
+          "help": "Use Prisma panel buttons for runeword and reforge operations. Close with ESC or Close button. / 룬워드/재련 조작은 Prisma 패널 버튼을 사용하세요. ESC 또는 Close 버튼으로 닫습니다.",
           "valueOptions": {
             "value": "Prisma-first UX enabled / Prisma 우선 UX 적용"
           }
-        },
-        {
-          "type": "empty"
-        },
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "Hotkey & Debug / 단축키·디버그",
+      "content": [
         {
           "type": "header",
           "text": "Hotkey / 단축키"
@@ -225,6 +183,30 @@
           "id": "prisma_panel_toggle",
           "text": "Toggle Calamity Panel / 칼래미티 패널 토글",
           "help": "Single hotkey to open/close the Calamity panel. / 칼래미티 패널 열기/닫기 단축키(1개)입니다."
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "type": "header",
+          "text": "Debug / 디버그"
+        },
+        {
+          "type": "toggle",
+          "id": "bDebugNotifications:General",
+          "text": "Debug Notifications / 디버그 알림",
+          "help": "Show extra notifications/logging. / 추가 알림/로그를 표시합니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": false
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetDebugNotificationsEnabled",
+            "params": [
+              "{value}"
+            ]
+          }
         }
       ]
     }

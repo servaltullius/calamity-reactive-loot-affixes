@@ -742,7 +742,7 @@ namespace
 		return true;
 	}
 
-	bool CheckLootChanceMcmSyncPolicy()
+	bool CheckLootChanceMcmCleanupPolicy()
 	{
 		namespace fs = std::filesystem;
 		const fs::path testFile{ __FILE__ };
@@ -763,34 +763,33 @@ namespace
 
 		const auto headerText = loadText(headerFile);
 		if (!headerText.has_value()) {
-			std::cerr << "loot_chance_mcm: failed to open header file: " << headerFile << "\n";
+			std::cerr << "loot_chance_mcm_cleanup: failed to open header file: " << headerFile << "\n";
 			return false;
 		}
-		if (headerText->find("kMcmSetLootChanceEvent") == std::string::npos) {
-			std::cerr << "loot_chance_mcm: missing MCM loot chance event constant in EventBridge.h\n";
+		if (headerText->find("kMcmSetLootChanceEvent") != std::string::npos) {
+			std::cerr << "loot_chance_mcm_cleanup: legacy loot-chance MCM event constant still exists in EventBridge.h\n";
 			return false;
 		}
 
 		const auto triggerText = loadText(triggerEventsFile);
 		if (!triggerText.has_value()) {
-			std::cerr << "loot_chance_mcm: failed to open trigger events source: " << triggerEventsFile << "\n";
+			std::cerr << "loot_chance_mcm_cleanup: failed to open trigger events source: " << triggerEventsFile << "\n";
 			return false;
 		}
-		if (triggerText->find("eventName == kMcmSetLootChanceEvent") == std::string::npos ||
-			triggerText->find("_loot.chancePercent = chancePct;") == std::string::npos ||
-			triggerText->find("PersistLootChancePercentToMcmSettings(chancePct, true)") == std::string::npos) {
-			std::cerr << "loot_chance_mcm: trigger event handler does not fully apply/persist loot chance updates\n";
+		if (triggerText->find("eventName == kMcmSetLootChanceEvent") != std::string::npos ||
+			triggerText->find("PersistLootChancePercentToMcmSettings(chancePct, true)") != std::string::npos) {
+			std::cerr << "loot_chance_mcm_cleanup: trigger source still handles deprecated loot-chance MCM event\n";
 			return false;
 		}
 
 		const auto configText = loadText(configFile);
 		if (!configText.has_value()) {
-			std::cerr << "loot_chance_mcm: failed to open config source: " << configFile << "\n";
+			std::cerr << "loot_chance_mcm_cleanup: failed to open config source: " << configFile << "\n";
 			return false;
 		}
-		if (configText->find("LoadLootChancePercentFromMcmSettings()") == std::string::npos ||
-			configText->find("PersistLootChancePercentToMcmSettings(_loot.chancePercent, false)") == std::string::npos) {
-			std::cerr << "loot_chance_mcm: config load path does not sync MCM loot chance override\n";
+		if (configText->find("LoadLootChancePercentFromMcmSettings()") != std::string::npos ||
+			configText->find("PersistLootChancePercentToMcmSettings(") != std::string::npos) {
+			std::cerr << "loot_chance_mcm_cleanup: config source still contains deprecated loot-chance MCM sync helpers\n";
 			return false;
 		}
 
@@ -1039,7 +1038,7 @@ int main()
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
-	const bool lootChanceMcmSyncOk = CheckLootChanceMcmSyncPolicy();
+	const bool lootChanceMcmCleanupOk = CheckLootChanceMcmCleanupPolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
 	const bool runewordUiPolicyHelpersOk = CheckRunewordUiPolicyHelpers();
@@ -1048,7 +1047,7 @@ int main()
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
-	        lootChanceMcmSyncOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
+	        lootChanceMcmCleanupOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
 	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&
 	        runewordReforgeSafetyOk) ? 0 :

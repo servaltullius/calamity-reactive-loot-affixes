@@ -38,7 +38,8 @@ Function SetProcChanceMultiplier(float a_mult) global
 EndFunction
 
 Function SetLootChancePercent(float a_percent) global
-	Emit("CalamityAffixes_MCM_SetLootChance", "", a_percent)
+	; Legacy no-op (pickup affix auto-assignment removed by design).
+	; Kept for backward compatibility with older MCM configs that may still call this function.
 EndFunction
 
 Function SetDotSafetyAutoDisable(bool a_enabled) global

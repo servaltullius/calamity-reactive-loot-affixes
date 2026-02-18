@@ -34,7 +34,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 #### UI & 설정
 - **Prisma UI** 기반 툴팁 및 조작 패널
-- **MCM** 설정 패널 (드롭 확률, 핫키, UI 언어 등)
+- **MCM** 설정 패널 (런타임 토글, 핫키, UI 언어, 디버그 등)
 - **한국어 / 영어 이중언어** 지원 (MCM에서 전환)
 - SKSE 코세이브 기반 인스턴스 상태 유지
 
@@ -103,7 +103,7 @@ The mod tracks item instances via ExtraUniqueID and currently uses a **Reforge-c
 
 #### UI & Settings
 - **Prisma UI** tooltip and control panel
-- **MCM** settings panel (drop rate, hotkeys, UI language, etc.)
+- **MCM** settings panel (runtime toggles, hotkeys, UI language, debug, etc.)
 - **Korean / English bilingual** support (switchable in MCM)
 - SKSE co-save based instance state persistence
 

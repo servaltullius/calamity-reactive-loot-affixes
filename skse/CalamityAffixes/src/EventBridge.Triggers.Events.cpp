@@ -533,19 +533,6 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
-			if (eventName == kMcmSetLootChanceEvent) {
-				const float chancePct = std::clamp(a_event->numArg, 0.0f, 100.0f);
-				_loot.chancePercent = chancePct;
-				_lootChanceEligibleFailStreak = 0;
-				(void)PersistLootChancePercentToMcmSettings(chancePct, true);
-
-				std::string note = "Calamity: loot chance ";
-				note += std::to_string(static_cast<int>(chancePct));
-				note += "%";
-				RE::DebugNotification(note.c_str());
-				return RE::BSEventNotifyControl::kContinue;
-			}
-
 			if (eventName == kMcmSetDotSafetyAutoDisableEvent) {
 				_loot.dotTagSafetyAutoDisable = (a_event->numArg > 0.5f);
 				if (!_loot.dotTagSafetyAutoDisable) {
