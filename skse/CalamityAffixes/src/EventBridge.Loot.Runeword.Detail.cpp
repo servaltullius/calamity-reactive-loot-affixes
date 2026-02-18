@@ -86,14 +86,14 @@ namespace CalamityAffixes::RunewordDetail
 						{ "Mal", 30.0 },
 						{ "Ist", 23.0 },
 						{ "Gul", 17.0 },
-						{ "Vex", 12.0 },
-						{ "Ohm", 8.5 },
-						{ "Lo", 6.0 },
-						{ "Sur", 4.2 },
-						{ "Ber", 3.0 },
-						{ "Jah", 2.2 },
-						{ "Cham", 1.6 },
-						{ "Zod", 1.0 },
+						{ "Vex", 14.0 },
+						{ "Ohm", 11.0 },
+						{ "Lo", 8.0 },
+						{ "Sur", 6.0 },
+						{ "Ber", 5.0 },
+						{ "Jah", 4.0 },
+						{ "Cham", 3.0 },
+						{ "Zod", 2.0 },
 					} };
 
 					for (const auto& [name, weight] : kRuneWeights) {

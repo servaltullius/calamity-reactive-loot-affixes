@@ -9,7 +9,7 @@
     "reforgeOrbChancePercent": 4.0,
     "lootSourceChanceMultCorpse": 0.8,
     "lootSourceChanceMultContainer": 1.0,
-    "lootSourceChanceMultBossContainer": 1.35,
+    "lootSourceChanceMultBossContainer": 1.15,
     "lootSourceChanceMultWorld": 1.0,
     "renameItem": true,
     "nameMarkerPosition": "trailing",

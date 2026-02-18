@@ -742,6 +742,34 @@ namespace
 		return true;
 	}
 
+	bool CheckLootRerollExploitGuardPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path lootFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.cpp";
+
+		std::ifstream in(lootFile);
+		if (!in.is_open()) {
+			std::cerr << "loot_reroll_exploit_guard: failed to open loot source: " << lootFile << "\n";
+			return false;
+		}
+
+		std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("IsLootSourceCorpseChestOrWorld(") == std::string::npos ||
+			source.find("_lootRerollGuard.ConsumeIfPlayerDropPickup(") == std::string::npos ||
+			source.find("_playerContainerStash[stashKey] += a_event->itemCount;") == std::string::npos ||
+			source.find("skipping loot roll (player dropped + re-picked)") == std::string::npos ||
+			source.find("skipping loot roll (player stashed + retrieved)") == std::string::npos) {
+			std::cerr << "loot_reroll_exploit_guard: anti-reroll pickup guards are missing\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckLootChanceMcmCleanupPolicy()
 	{
 		namespace fs = std::filesystem;
@@ -1038,6 +1066,7 @@ int main()
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
+	const bool lootRerollExploitGuardOk = CheckLootRerollExploitGuardPolicy();
 	const bool lootChanceMcmCleanupOk = CheckLootChanceMcmCleanupPolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
@@ -1047,6 +1076,7 @@ int main()
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
+	        lootRerollExploitGuardOk &&
 	        lootChanceMcmCleanupOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
 	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&

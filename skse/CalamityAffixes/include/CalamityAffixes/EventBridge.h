@@ -472,7 +472,7 @@ namespace CalamityAffixes
 		static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f, 0.5f };
 		static constexpr std::uint32_t kLootChancePityFailThreshold = 3u;
 		static constexpr std::uint32_t kRunewordFragmentPityFailThreshold = 99u;
-		static constexpr std::uint32_t kReforgeOrbPityFailThreshold = 24u;
+		static constexpr std::uint32_t kReforgeOrbPityFailThreshold = 39u;
 		static constexpr std::size_t kLootEvaluatedRecentKeep = 2048;
 		static constexpr std::size_t kLootEvaluatedPruneEveryInserts = 128;
 		static constexpr std::size_t kLootPreviewCacheMax = 1024;
@@ -505,10 +505,10 @@ namespace CalamityAffixes
 		{
 			float chancePercent{ 0.0f };
 			float runewordFragmentChancePercent{ 1.0f };
-			float reforgeOrbChancePercent{ 6.0f };
+			float reforgeOrbChancePercent{ 4.0f };
 			float lootSourceChanceMultCorpse{ 0.80f };
 			float lootSourceChanceMultContainer{ 1.00f };
-			float lootSourceChanceMultBossContainer{ 1.35f };
+			float lootSourceChanceMultBossContainer{ 1.15f };
 			float lootSourceChanceMultWorld{ 1.00f };
 			bool renameItem{ false };
 			bool sharedPool{ false };
