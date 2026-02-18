@@ -732,6 +732,11 @@ namespace
 			std::cerr << "loot_preview_policy: selected preview hint must be gated by explicit freshness checks\n";
 			return false;
 		}
+		if (assignText->find("MaybeGrantRandomRunewordFragment();") == std::string::npos ||
+			assignText->find("MaybeGrantRandomReforgeOrb();") == std::string::npos) {
+			std::cerr << "loot_preview_policy: loot assignment path must trigger both fragment and reforge-orb grants\n";
+			return false;
+		}
 		if (assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, false)") == std::string::npos ||
 			assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, true)") == std::string::npos) {
 			std::cerr << "loot_preview_policy: stale-marker cleanup must separate legacy-only and mapped trailing cleanup paths\n";

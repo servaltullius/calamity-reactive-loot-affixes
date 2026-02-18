@@ -628,6 +628,7 @@ namespace CalamityAffixes
 			EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
 			if (a_allowRunewordFragmentRoll) {
 				MaybeGrantRandomRunewordFragment();
+				MaybeGrantRandomReforgeOrb();
 			}
 			applyPreviewPityOutcome(true);
 			return;
@@ -742,6 +743,7 @@ namespace CalamityAffixes
 		EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
 		if (a_allowRunewordFragmentRoll) {
 			MaybeGrantRandomRunewordFragment();
+			MaybeGrantRandomReforgeOrb();
 		}
 	}
 
