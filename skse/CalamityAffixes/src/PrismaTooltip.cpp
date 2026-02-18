@@ -133,6 +133,7 @@ namespace CalamityAffixes::PrismaTooltip
 		void SaveTooltipLayoutToDisk(const TooltipLayout& a_layout);
 		void PushPanelLayoutToJs();
 		void PushTooltipLayoutToJs();
+		bool PushSelectedTooltipSnapshot(bool a_force = false);
 		void Tick();
 
 		[[nodiscard]] bool IsRelevantMenu(std::string_view a_name) noexcept
@@ -690,6 +691,40 @@ namespace CalamityAffixes::PrismaTooltip
 			}
 
 			return result;
+		}
+
+		bool PushSelectedTooltipSnapshot(bool a_force /*= false*/)
+		{
+			if (!IsViewReady()) {
+				return false;
+			}
+
+			const auto selected = GetSelectedItemContext();
+			SetSelectedItemContext(selected.itemName, selected.itemSource);
+
+			const auto clearTooltip = [&]() {
+				if (a_force || !g_lastTooltip.empty()) {
+					g_lastTooltip.clear();
+					g_api->InteropCall(g_view, "setTooltip", "");
+				}
+			};
+
+			if (!selected.tooltip || selected.tooltip->empty()) {
+				clearTooltip();
+				return false;
+			}
+
+			const std::string next = StripRunewordOverlayTooltipLines(*selected.tooltip);
+			if (next.empty()) {
+				clearTooltip();
+				return false;
+			}
+
+			if (a_force || next != g_lastTooltip) {
+				g_lastTooltip = next;
+				g_api->InteropCall(g_view, "setTooltip", g_lastTooltip.c_str());
+			}
+			return true;
 		}
 
 		void EnsurePrisma()

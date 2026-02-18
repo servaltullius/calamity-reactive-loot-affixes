@@ -1051,7 +1051,44 @@ namespace
 
 			return true;
 		}
-	}
+
+		bool CheckPrismaTooltipImmediateRefreshPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path prismaHandleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.HandleUiCommand.inl";
+			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto handleText = loadText(prismaHandleFile);
+			if (!handleText.has_value()) {
+				std::cerr << "prisma_tooltip_refresh: failed to open handle source: " << prismaHandleFile << "\n";
+				return false;
+			}
+			const auto coreText = loadText(prismaCoreFile);
+			if (!coreText.has_value()) {
+				std::cerr << "prisma_tooltip_refresh: failed to open prisma source: " << prismaCoreFile << "\n";
+				return false;
+			}
+
+			if (coreText->find("PushSelectedTooltipSnapshot(") == std::string::npos ||
+				handleText->find("PushSelectedTooltipSnapshot(true);") == std::string::npos) {
+				std::cerr << "prisma_tooltip_refresh: immediate tooltip refresh guard is missing for runeword actions\n";
+				return false;
+			}
+
+			return true;
+		}
+}
 
 int main()
 {
@@ -1073,6 +1110,7 @@ int main()
 	const bool runewordUiPolicyHelpersOk = CheckRunewordUiPolicyHelpers();
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
+	const bool prismaTooltipImmediateRefreshOk = CheckPrismaTooltipImmediateRefreshPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
@@ -1080,6 +1118,7 @@ int main()
 	        lootChanceMcmCleanupOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
 	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&
-	        runewordReforgeSafetyOk) ? 0 :
+	        runewordReforgeSafetyOk &&
+	        prismaTooltipImmediateRefreshOk) ? 0 :
 	                                                             1;
 }

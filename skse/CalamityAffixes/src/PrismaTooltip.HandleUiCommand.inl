@@ -138,6 +138,7 @@
 					// SendEvent is synchronous; refresh status immediately so UI feedback isn't misleading.
 					const auto after = bridge->GetRunewordPanelState();
 					SetRunewordPanelState(after);
+					PushSelectedTooltipSnapshot(true);
 
 					if (after.isComplete && !before.isComplete) {
 						std::string msg = "Runeword: transmuted ";
@@ -185,6 +186,7 @@
 				const auto outcome = bridge->ReforgeSelectedRunewordBaseWithOrb();
 				SetRunewordPanelState(bridge->GetRunewordPanelState());
 				SetRunewordBaseInventoryList(bridge->GetRunewordBaseInventoryEntries());
+				PushSelectedTooltipSnapshot(true);
 				PushUiFeedback(outcome.message.empty() ? "Reforge action processed." : outcome.message);
 				return;
 			} else if (a_command == "runeword.grant.next") {

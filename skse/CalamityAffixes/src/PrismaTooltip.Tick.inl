@@ -72,14 +72,8 @@
 				}
 			}
 
-			const auto selected = GetSelectedItemContext();
-
-			const auto& tooltip = selected.tooltip;
-			if (!tooltip || tooltip->empty()) {
-				if (!g_lastTooltip.empty()) {
-					g_lastTooltip.clear();
-					g_api->InteropCall(g_view, "setTooltip", "");
-				}
+			const bool hasTooltip = PushSelectedTooltipSnapshot(false);
+			if (!hasTooltip) {
 				if (!panelRequested && g_api->HasFocus(g_view)) {
 					g_api->Unfocus(g_view);
 				}
@@ -91,28 +85,6 @@
 					SetVisible(inventoryOpen);
 				}
 				return;
-			}
-
-			const std::string next = StripRunewordOverlayTooltipLines(*tooltip);
-			if (next.empty()) {
-				if (!g_lastTooltip.empty()) {
-					g_lastTooltip.clear();
-					g_api->InteropCall(g_view, "setTooltip", "");
-				}
-				if (!panelRequested && g_api->HasFocus(g_view)) {
-					g_api->Unfocus(g_view);
-				}
-
-				if (!panelRequested) {
-					const bool inventoryOpen = g_gatePollingOnMenus.load() && g_relevantMenusOpen.load() > 0;
-					SetVisible(inventoryOpen);
-				}
-				return;
-			}
-
-			if (next != g_lastTooltip) {
-				g_lastTooltip = next;
-				g_api->InteropCall(g_view, "setTooltip", g_lastTooltip.c_str());
 			}
 
 			SetVisible(true);
