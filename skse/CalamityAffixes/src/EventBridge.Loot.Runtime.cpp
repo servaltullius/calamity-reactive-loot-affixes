@@ -521,8 +521,12 @@ namespace CalamityAffixes
 
 		const std::uint8_t targetCount = rollAffixCount();
 		const auto targets = detail::DetermineLootPrefixSuffixTargets(targetCount);
-		const std::uint8_t prefixTarget = targets.prefixTarget;
-		const std::uint8_t suffixTarget = targets.suffixTarget;
+		std::uint8_t prefixTarget = targets.prefixTarget;
+		std::uint8_t suffixTarget = targets.suffixTarget;
+		if (_loot.stripTrackedSuffixSlots) {
+			prefixTarget = targetCount;
+			suffixTarget = 0u;
+		}
 
 		std::vector<std::size_t> chosenPrefixIndices;
 		chosenPrefixIndices.reserve(prefixTarget);
@@ -597,7 +601,9 @@ namespace CalamityAffixes
 			itemType = LootItemType::kArmor;
 		}
 
-		const bool allowPreview =
+		// Preview-time synthetic affix rolls are disabled by policy.
+		// Tooltip now surfaces only already-materialized instance data.
+		const bool allowPreview = false &&
 			itemType.has_value() &&
 			IsPreviewItemSource(a_itemSource) &&
 			IsLootObjectEligibleForAffixes(a_item->object);

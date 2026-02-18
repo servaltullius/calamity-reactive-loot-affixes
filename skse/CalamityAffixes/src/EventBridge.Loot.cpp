@@ -379,10 +379,6 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		if (_loot.chancePercent <= 0.0f) {
-			return RE::BSEventNotifyControl::kContinue;
-		}
-
 		// 1a) Record player-dropped world references so re-picking them up can't "reroll" loot affixes.
 		if (a_event->oldContainer == playerId &&
 			a_event->newContainer == LootRerollGuard::kWorldContainer) {

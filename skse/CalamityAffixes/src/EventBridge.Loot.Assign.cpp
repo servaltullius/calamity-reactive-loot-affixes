@@ -270,11 +270,18 @@ namespace CalamityAffixes
 
 	std::uint8_t EventBridge::RollAffixCount()
 	{
-		std::discrete_distribution<unsigned int> dist({
-			static_cast<double>(kAffixCountWeights[0]),
-			static_cast<double>(kAffixCountWeights[1]),
-			static_cast<double>(kAffixCountWeights[2])
-		});
+		std::array<double, kMaxRegularAffixesPerItem> weights{};
+		bool hasPositiveWeight = false;
+		for (std::size_t i = 0; i < kAffixCountWeights.size(); ++i) {
+			const double weight = std::max(0.0, static_cast<double>(kAffixCountWeights[i]));
+			weights[i] = weight;
+			hasPositiveWeight = hasPositiveWeight || (weight > 0.0);
+		}
+		if (!hasPositiveWeight) {
+			return 1u;
+		}
+
+		std::discrete_distribution<unsigned int> dist(weights.begin(), weights.end());
 		return static_cast<std::uint8_t>(dist(_rng) + 1);
 	}
 
@@ -581,13 +588,17 @@ namespace CalamityAffixes
 			return;
 		}
 
-		// Roll how many affixes this item gets (1-3)
+		// Roll how many affixes this item gets (1-4)
 		const std::uint8_t targetCount = RollAffixCount();
 
 		// Determine prefix/suffix composition
 		const auto targets = detail::DetermineLootPrefixSuffixTargets(targetCount);
-		const std::uint8_t prefixTarget = targets.prefixTarget;
-		const std::uint8_t suffixTarget = targets.suffixTarget;
+		std::uint8_t prefixTarget = targets.prefixTarget;
+		std::uint8_t suffixTarget = targets.suffixTarget;
+		if (_loot.stripTrackedSuffixSlots) {
+			prefixTarget = targetCount;
+			suffixTarget = 0u;
+		}
 
 		InstanceAffixSlots slots;
 		std::vector<std::size_t> chosenIndices;
@@ -782,178 +793,45 @@ namespace CalamityAffixes
 		}
 	}
 
-		void EventBridge::ProcessLootAcquired(
-			RE::FormID a_baseObj,
-			std::int32_t a_count,
-			std::uint16_t a_uniqueID,
-			RE::FormID a_oldContainer,
-			bool a_allowRunewordFragmentRoll)
+	void EventBridge::ProcessLootAcquired(
+		RE::FormID a_baseObj,
+		std::int32_t a_count,
+		std::uint16_t a_uniqueID,
+		RE::FormID a_oldContainer,
+		bool a_allowRunewordFragmentRoll)
 	{
-		if (!_configLoaded || !_runtimeEnabled || _loot.chancePercent <= 0.0f) {
+		if (!_configLoaded || !_runtimeEnabled) {
 			return;
 		}
 
-		auto* player = RE::PlayerCharacter::GetSingleton();
-		if (!player) {
+		// Loot policy:
+		// - no random affix assignment on pickup
+		// - pickup only rolls auxiliary currencies (runeword fragment / reforge orb)
+		//   for eligible weapon/armor items from allowed sources
+		if (!a_allowRunewordFragmentRoll || a_count <= 0) {
 			return;
 		}
 
-		auto* changes = player->GetInventoryChanges();
-		if (!changes || !changes->entryList) {
+		auto* baseForm = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
+		auto* baseObj = baseForm ? baseForm->As<RE::TESBoundObject>() : nullptr;
+		if (!IsLootObjectEligibleForAffixes(baseObj)) {
 			return;
 		}
 
-		auto* form = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
-		if (!form) {
-			return;
+		const std::uint32_t rollCount = static_cast<std::uint32_t>(std::clamp(a_count, 1, 8));
+		for (std::uint32_t i = 0; i < rollCount; ++i) {
+			MaybeGrantRandomRunewordFragment();
+			MaybeGrantRandomReforgeOrb();
 		}
 
-		auto* weap = form->As<RE::TESObjectWEAP>();
-		auto* armo = form->As<RE::TESObjectARMO>();
-		if (!weap && !armo) {
-			return;
-		}
-
-		RE::InventoryEntryData* entry = nullptr;
-		for (auto* e : *changes->entryList) {
-			if (e && e->object && e->object->GetFormID() == a_baseObj) {
-				entry = e;
-				break;
-			}
-		}
-
-		if (!entry) {
-			SKSE::log::debug("CalamityAffixes: ProcessLootAcquired skipped (entry not found).");
-			return;
-		}
-
-		if (!entry->extraLists) {
-			SKSE::log::debug("CalamityAffixes: ProcessLootAcquired skipped (entry->extraLists is null).");
-			return;
-		}
-
-		if (!IsLootObjectEligibleForAffixes(entry->object)) {
-			if (_loot.cleanupInvalidLegacyAffixes) {
-				auto cleanupByUnique = [&](RE::ExtraDataList* a_xList) {
-					if (!a_xList) {
-						return false;
-					}
-
-					auto* uid = a_xList->GetByType<RE::ExtraUniqueID>();
-					if (!uid || uid->baseID != a_baseObj) {
-						return false;
-					}
-					if (a_uniqueID != 0 && uid->uniqueID != a_uniqueID) {
-						return false;
-					}
-
-					CleanupInvalidLootInstance(
-						entry,
-						a_xList,
-						MakeInstanceKey(uid->baseID, uid->uniqueID),
-						"ProcessLootAcquired.ineligible");
-					return true;
-				};
-
-				if (a_uniqueID != 0) {
-					for (auto* xList : *entry->extraLists) {
-						if (cleanupByUnique(xList)) {
-							break;
-						}
-					}
-				} else {
-					for (auto* xList : *entry->extraLists) {
-						(void)cleanupByUnique(xList);
-					}
-				}
-			}
-
-			if (_loot.debugLog) {
-				const char* editorId = armo ? armo->GetFormEditorID() : nullptr;
-				SKSE::log::debug(
-					"CalamityAffixes: ProcessLootAcquired skipped non-eligible item (baseObj={:08X}, editorId={}).",
-					a_baseObj,
-					editorId ? editorId : "<none>");
-			}
-			return;
-		}
-
-		const auto itemType = entry->object->As<RE::TESObjectWEAP>() ? LootItemType::kWeapon : LootItemType::kArmor;
-		const auto nowMs = static_cast<std::uint64_t>(
-			std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::steady_clock::now().time_since_epoch())
-				.count());
-
-		if (a_uniqueID != 0) {
-			for (auto* xList : *entry->extraLists) {
-				if (!xList) {
-					continue;
-				}
-
-				auto* uid = xList->GetByType<RE::ExtraUniqueID>();
-				if (uid && uid->baseID == a_baseObj && uid->uniqueID == a_uniqueID) {
-					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-					std::optional<InstanceAffixSlots> forcedSlots = std::nullopt;
-					if (!_instanceAffixes.contains(key) && !IsLootEvaluatedInstance(key)) {
-						forcedSlots = ConsumeLootPreviewClaim(a_oldContainer, a_baseObj, nowMs);
-					}
-					ApplyMultipleAffixes(changes, entry, xList, itemType, a_allowRunewordFragmentRoll, forcedSlots);
-					return;
-				}
-			}
-		}
-
-		// Fallback:
-		// If the container change event doesn't provide a usable uniqueID, attempt to apply loot rolls to
-		// currently-unassigned instances (extraLists).
-		// Collect unassigned lists first, then process in REVERSE order — newly added items are
-		// typically appended at the end of extraLists, so reverse iteration ensures the most
-		// recently acquired instance receives the affix instead of an older one.
-		std::vector<RE::ExtraDataList*> unevaluatedCandidates;
-		std::vector<RE::ExtraDataList*> evaluatedCandidates;
-		for (auto* xList : *entry->extraLists) {
-			if (!xList) {
-				continue;
-			}
-
-			if (auto* uid = xList->GetByType<RE::ExtraUniqueID>()) {
-				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-				if (auto mappedIt = _instanceAffixes.find(key); mappedIt != _instanceAffixes.end()) {
-					auto& slots = mappedIt->second;
-					(void)SanitizeInstanceAffixSlotsForCurrentLootRules(
-						key,
-						slots,
-						"ProcessLootAcquired.fallback");
-					if (slots.count == 0) {
-						_instanceAffixes.erase(mappedIt);
-						ForgetLootEvaluatedInstance(key);
-						(void)TryClearStaleLootDisplayName(entry, xList, true);
-						unevaluatedCandidates.push_back(xList);
-						continue;
-					}
-
-					EnsureMultiAffixDisplayName(entry, xList, slots);
-					continue;
-				}
-				if (IsLootEvaluatedInstance(key)) {
-					evaluatedCandidates.push_back(xList);
-					continue;
-				}
-			}
-
-			unevaluatedCandidates.push_back(xList);
-		}
-
-		std::int32_t processed = 0;
-		for (auto it = unevaluatedCandidates.rbegin(); it != unevaluatedCandidates.rend() && processed < a_count; ++it) {
-			const auto forcedSlots = ConsumeLootPreviewClaim(a_oldContainer, a_baseObj, nowMs);
-			ApplyMultipleAffixes(changes, entry, *it, itemType, a_allowRunewordFragmentRoll, forcedSlots);
-			processed += 1;
-		}
-
-		for (auto it = evaluatedCandidates.rbegin(); it != evaluatedCandidates.rend() && processed < a_count; ++it) {
-			ApplyMultipleAffixes(changes, entry, *it, itemType, a_allowRunewordFragmentRoll);
-			processed += 1;
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: pickup loot rolls applied (baseObj={:08X}, count={}, rolls={}, uniqueID={}, oldContainer={:08X}).",
+				a_baseObj,
+				a_count,
+				rollCount,
+				a_uniqueID,
+				a_oldContainer);
 		}
 	}
 }

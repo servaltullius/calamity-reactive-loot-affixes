@@ -14,7 +14,7 @@ namespace CalamityAffixes::detail
 {
 	[[nodiscard]] constexpr std::uint8_t ResolveReforgeTargetAffixCount(std::uint8_t a_existingAffixCount) noexcept
 	{
-		constexpr std::uint8_t kMaxCount = static_cast<std::uint8_t>(kMaxAffixesPerItem);
+		constexpr std::uint8_t kMaxCount = static_cast<std::uint8_t>(kMaxRegularAffixesPerItem);
 		if (a_existingAffixCount == 0u) {
 			return 1u;
 		}
@@ -32,7 +32,7 @@ namespace CalamityAffixes::detail
 	{
 		// Soft-disable suffix drops for new loot rolls.
 		// Keep suffix data/runtime handling for backward compatibility with existing items.
-		constexpr std::uint8_t kMaxCount = static_cast<std::uint8_t>(kMaxAffixesPerItem);
+		constexpr std::uint8_t kMaxCount = static_cast<std::uint8_t>(kMaxRegularAffixesPerItem);
 		const std::uint8_t clamped = (a_targetAffixCount > kMaxCount) ? kMaxCount : a_targetAffixCount;
 		return { clamped, 0u };
 	}

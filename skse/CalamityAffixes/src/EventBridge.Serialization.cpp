@@ -18,7 +18,7 @@ namespace CalamityAffixes
 
 		PruneLootEvaluatedInstances();
 
-		// --- IAXF v6: fixed 3-token slots ---
+		// --- IAXF v7: fixed 4-token slots ---
 		const std::uint32_t count = static_cast<std::uint32_t>(_instanceAffixes.size());
 		if (!a_intfc->OpenRecord(kSerializationRecordInstanceAffixes, kSerializationVersion)) {
 			return;
@@ -244,6 +244,7 @@ namespace CalamityAffixes
 			while (a_intfc->GetNextRecordInfo(type, version, length)) {
 				if (type == kSerializationRecordInstanceAffixes) {
 					if (version != kSerializationVersion &&
+						version != kSerializationVersionV6 &&
 						version != kSerializationVersionV5 &&
 						version != kSerializationVersionV4 &&
 						version != kSerializationVersionV3 &&
@@ -258,7 +259,7 @@ namespace CalamityAffixes
 					}
 
 					if (version == kSerializationVersion) {
-						// --- v6 load: fixed 3-token slots ---
+						// --- v7 load: fixed 4-token slots ---
 						std::uint32_t count = 0;
 						if (a_intfc->ReadRecordData(count) != sizeof(count)) {
 							return;
@@ -294,6 +295,51 @@ namespace CalamityAffixes
 							InstanceAffixSlots slots;
 							slots.count = std::min<std::uint8_t>(affixCount, static_cast<std::uint8_t>(kMaxAffixesPerItem));
 							slots.tokens = tokens;
+							_instanceAffixes.emplace(key, slots);
+						}
+
+						continue;
+					}
+
+					if (version == kSerializationVersionV6) {
+						// --- v6 load: fixed 3-token slots ---
+						std::uint32_t count = 0;
+						if (a_intfc->ReadRecordData(count) != sizeof(count)) {
+							return;
+						}
+
+						for (std::uint32_t i = 0; i < count; ++i) {
+							RE::FormID baseID = 0;
+							std::uint16_t uniqueID = 0;
+							std::uint8_t affixCount = 0;
+							std::array<std::uint64_t, 3> legacyTokens{};
+
+							if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
+								return;
+							}
+							if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
+								return;
+							}
+							if (a_intfc->ReadRecordData(affixCount) != sizeof(affixCount)) {
+								return;
+							}
+							for (std::size_t s = 0; s < legacyTokens.size(); ++s) {
+								if (a_intfc->ReadRecordData(legacyTokens[s]) != sizeof(legacyTokens[s])) {
+									return;
+								}
+							}
+
+							RE::FormID resolvedBaseID = 0;
+							if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+								continue;
+							}
+
+							const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
+							InstanceAffixSlots slots;
+							slots.count = std::min<std::uint8_t>(affixCount, static_cast<std::uint8_t>(legacyTokens.size()));
+							for (std::uint8_t s = 0; s < slots.count; ++s) {
+								slots.tokens[s] = legacyTokens[s];
+							}
 							_instanceAffixes.emplace(key, slots);
 						}
 

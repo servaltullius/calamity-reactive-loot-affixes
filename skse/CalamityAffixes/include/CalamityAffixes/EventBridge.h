@@ -468,14 +468,15 @@ namespace CalamityAffixes
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = "CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc";
 		static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 
-		static constexpr std::array<float, kMaxAffixesPerItem> kAffixCountWeights = { 70.0f, 25.0f, 5.0f };
-		static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f };
+		static constexpr std::array<float, kMaxRegularAffixesPerItem> kAffixCountWeights = { 70.0f, 22.0f, 8.0f };
+		static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f, 0.5f };
 		static constexpr std::uint32_t kLootChancePityFailThreshold = 3u;
 		static constexpr std::size_t kLootEvaluatedRecentKeep = 2048;
 		static constexpr std::size_t kLootEvaluatedPruneEveryInserts = 128;
 		static constexpr std::size_t kLootPreviewCacheMax = 1024;
 
-		static constexpr std::uint32_t kSerializationVersion = 6;
+		static constexpr std::uint32_t kSerializationVersion = 7;
+		static constexpr std::uint32_t kSerializationVersionV6 = 6;
 		static constexpr std::uint32_t kSerializationVersionV5 = 5;
 		static constexpr std::uint32_t kSerializationVersionV4 = 4;
 		static constexpr std::uint32_t kSerializationVersionV3 = 3;

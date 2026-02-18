@@ -2364,16 +2364,21 @@
         runewordInsertButton.setAttribute("aria-label", buttonHint);
 
         if (runewordReforgeButton) {
-          const reforgeEnabled = hasBase && !isComplete;
+          const reforgeEnabled = hasBase;
           runewordReforgeButton.disabled = !reforgeEnabled;
           const reforgeHint = reforgeEnabled ?
+            (isComplete ?
+              t(
+                "Consume 1 Reforge Orb and reroll the runeword effect + affixes on the selected base.",
+                "재련 오브 1개를 소모해 선택 베이스의 룬워드 효과와 어픽스를 함께 재굴림합니다."
+              ) :
+              t(
+                "Consume 1 Reforge Orb and reroll affixes on the selected base.",
+                "재련 오브 1개를 소모해 선택 베이스의 어픽스를 재굴림합니다."
+              )) :
             t(
-              "Consume 1 Reforge Orb and reroll affixes on the selected base.",
-              "재련 오브 1개를 소모해 선택 베이스의 어픽스를 재굴림합니다."
-            ) :
-            t(
-              "Select a non-completed base first.",
-              "완성 룬워드가 아닌 베이스를 먼저 선택하세요."
+              "Select a base first.",
+              "베이스를 먼저 선택하세요."
             );
           runewordReforgeButton.title = reforgeHint;
           runewordReforgeButton.setAttribute("aria-label", reforgeHint);

@@ -1,5 +1,7 @@
 #include "CalamityAffixes/InstanceAffixSlots.h"
 
+static constexpr auto kMaxSlots = static_cast<std::uint8_t>(CalamityAffixes::kMaxAffixesPerItem);
+
 // --- AddToken ---
 
 static_assert([] {
@@ -20,20 +22,23 @@ static_assert([] {
 	slots.AddToken(0xAAAAu);
 	slots.AddToken(0xBBBBu);
 	slots.AddToken(0xCCCCu);
-	return slots.count == 3 &&
+	slots.AddToken(0xDDDDu);
+	return slots.count == kMaxSlots &&
 		slots.tokens[0] == 0xAAAAu &&
 		slots.tokens[1] == 0xBBBBu &&
-		slots.tokens[2] == 0xCCCCu;
+		slots.tokens[2] == 0xCCCCu &&
+		slots.tokens[3] == 0xDDDDu;
 }(),
-	"AddToken should fill all 3 slots in order");
+	"AddToken should fill all slots in order");
 
 static_assert([] {
 	CalamityAffixes::InstanceAffixSlots slots{};
 	slots.AddToken(0xAAAAu);
 	slots.AddToken(0xBBBBu);
 	slots.AddToken(0xCCCCu);
-	const bool added = slots.AddToken(0xDDDDu);
-	return !added && slots.count == 3;
+	slots.AddToken(0xDDDDu);
+	const bool added = slots.AddToken(0xEEEEu);
+	return !added && slots.count == kMaxSlots;
 }(),
 	"AddToken should reject when full (capacity exceeded)");
 
@@ -95,6 +100,7 @@ static_assert([] {
 		slots.tokens[0] == 0u &&
 		slots.tokens[1] == 0u &&
 		slots.tokens[2] == 0u &&
+		slots.tokens[3] == 0u &&
 		slots.GetPrimary() == 0u;
 }(),
 	"Clear should zero all tokens and reset count");
@@ -106,11 +112,13 @@ static_assert([] {
 	slots.AddToken(0xAAAAu);
 	slots.AddToken(0xBBBBu);
 	slots.AddToken(0xCCCCu);
+	slots.AddToken(0xEEEEu);
 	slots.ReplaceAll(0xDDDDu);
 	return slots.count == 1 &&
 		slots.tokens[0] == 0xDDDDu &&
 		slots.tokens[1] == 0u &&
-		slots.tokens[2] == 0u;
+		slots.tokens[2] == 0u &&
+		slots.tokens[3] == 0u;
 }(),
 	"ReplaceAll should clear all slots and set single token");
 
@@ -156,12 +164,14 @@ static_assert([] {
 	slots.AddToken(0xAAAAu);
 	slots.AddToken(0xBBBBu);
 	slots.AddToken(0xCCCCu);
-	const bool promoted = slots.PromoteTokenToPrimary(0xDDDDu);
+	slots.AddToken(0xDDDDu);
+	const bool promoted = slots.PromoteTokenToPrimary(0xEEEEu);
 	return !promoted &&
-		slots.count == 3 &&
+		slots.count == kMaxSlots &&
 		slots.tokens[0] == 0xAAAAu &&
 		slots.tokens[1] == 0xBBBBu &&
-		slots.tokens[2] == 0xCCCCu;
+		slots.tokens[2] == 0xCCCCu &&
+		slots.tokens[3] == 0xDDDDu;
 }(),
 	"PromoteTokenToPrimary should reject missing token when slots are full");
 

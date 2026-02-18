@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -39,10 +40,8 @@ namespace CalamityAffixes
 		}
 
 		const auto instanceKey = *_runewordSelectedBaseKey;
-		if (ResolveCompletedRunewordRecipe(instanceKey)) {
-			result.message = "Reforge blocked: completed runeword base.";
-			return result;
-		}
+		const auto* completedRunewordRecipe = ResolveCompletedRunewordRecipe(instanceKey);
+		const bool rerollRuneword = completedRunewordRecipe != nullptr;
 
 		const auto lootType = ResolveInstanceLootType(instanceKey);
 		if (!lootType) {
@@ -74,8 +73,6 @@ namespace CalamityAffixes
 			previousSlots = it->second;
 		}
 
-		const std::uint8_t targetCount = detail::ResolveReforgeTargetAffixCount(previousSlots.count);
-
 		auto sameSlots = [](const InstanceAffixSlots& a_left, const InstanceAffixSlots& a_right) {
 			if (a_left.count != a_right.count) {
 				return false;
@@ -88,7 +85,7 @@ namespace CalamityAffixes
 			return true;
 		};
 
-		auto rollSlots = [&](std::uint8_t a_rollCount) -> InstanceAffixSlots {
+		auto rollRegularAffixSlots = [&](std::uint8_t a_rollCount) -> InstanceAffixSlots {
 			InstanceAffixSlots slots{};
 			std::vector<std::size_t> chosenIndices;
 			chosenIndices.reserve(a_rollCount);
@@ -153,10 +150,73 @@ namespace CalamityAffixes
 			return slots;
 		};
 
+		auto pickReforgeRunewordRecipe = [&]() -> const RunewordRecipe* {
+			if (_runewordRecipes.empty()) {
+				return nullptr;
+			}
+
+			std::vector<const RunewordRecipe*> eligible;
+			eligible.reserve(_runewordRecipes.size());
+
+			for (const auto& recipe : _runewordRecipes) {
+				if (recipe.resultAffixToken == 0u) {
+					continue;
+				}
+				if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
+					affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+					continue;
+				}
+
+				eligible.push_back(std::addressof(recipe));
+			}
+
+			if (eligible.empty()) {
+				return nullptr;
+			}
+
+			const auto currentToken = completedRunewordRecipe ? completedRunewordRecipe->resultAffixToken : 0u;
+			std::uniform_int_distribution<std::size_t> pick(0, eligible.size() - 1u);
+			const RunewordRecipe* selected = eligible[pick(_rng)];
+			if (eligible.size() <= 1u || currentToken == 0u) {
+				return selected;
+			}
+
+			// Try a few times to avoid returning the same completed runeword token.
+			for (std::uint8_t retry = 0; retry < 3u; ++retry) {
+				if (selected->resultAffixToken != currentToken) {
+					return selected;
+				}
+				selected = eligible[pick(_rng)];
+			}
+			return selected;
+		};
+
 		InstanceAffixSlots newSlots{};
+		const RunewordRecipe* rolledRunewordRecipe = nullptr;
 		static constexpr std::uint8_t kReforgeMaxAttempts = 4;
 		for (std::uint8_t attempt = 0; attempt < kReforgeMaxAttempts; ++attempt) {
-			const auto rolled = rollSlots(targetCount);
+			InstanceAffixSlots rolled{};
+			const RunewordRecipe* attemptRunewordRecipe = nullptr;
+
+			if (rerollRuneword) {
+				attemptRunewordRecipe = pickReforgeRunewordRecipe();
+				if (!attemptRunewordRecipe) {
+					result.message = "Reforge failed: no eligible runeword effect.";
+					return result;
+				}
+
+				rolled.AddToken(attemptRunewordRecipe->resultAffixToken);
+				const std::uint8_t regularTargetCount = static_cast<std::uint8_t>(
+					std::clamp<int>(RollAffixCount(), 1, static_cast<int>(kMaxRegularAffixesPerItem)));
+				const auto regularSlots = rollRegularAffixSlots(regularTargetCount);
+				for (std::uint8_t i = 0; i < regularSlots.count; ++i) {
+					(void)rolled.AddToken(regularSlots.tokens[i]);
+				}
+			} else {
+				const std::uint8_t targetCount = detail::ResolveReforgeTargetAffixCount(previousSlots.count);
+				rolled = rollRegularAffixSlots(targetCount);
+			}
+
 			if (rolled.count == 0) {
 				continue;
 			}
@@ -164,6 +224,7 @@ namespace CalamityAffixes
 				continue;
 			}
 			newSlots = rolled;
+			rolledRunewordRecipe = attemptRunewordRecipe;
 			break;
 		}
 
@@ -175,6 +236,7 @@ namespace CalamityAffixes
 		player->RemoveItem(orb, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
 
 		EraseInstanceRuntimeStates(instanceKey);
+		_runewordInstanceStates.erase(instanceKey);
 		_instanceAffixes[instanceKey] = newSlots;
 		MarkLootEvaluatedInstance(instanceKey);
 
@@ -192,7 +254,12 @@ namespace CalamityAffixes
 		}
 
 		result.success = true;
-		result.message = "Reforged: " + itemName + " (Orbs: " + std::to_string(ownedAfter) + ")";
+		if (rerollRuneword && rolledRunewordRecipe) {
+			result.message = "Reforged: " + itemName +
+				" [Runeword: " + rolledRunewordRecipe->displayName + "] (Orbs: " + std::to_string(ownedAfter) + ")";
+		} else {
+			result.message = "Reforged: " + itemName + " (Orbs: " + std::to_string(ownedAfter) + ")";
+		}
 		return result;
 	}
 

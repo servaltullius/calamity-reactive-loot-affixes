@@ -7,7 +7,11 @@
 
 namespace CalamityAffixes
 {
-	static constexpr std::size_t kMaxAffixesPerItem = 3;
+	static constexpr std::size_t kMaxRegularAffixesPerItem = 3;
+	static constexpr std::size_t kMaxRunewordAffixesPerItem = 1;
+	// Slot model: runeword(1) + regular affixes(3) = total(4).
+	static constexpr std::size_t kMaxAffixesPerItem =
+		kMaxRegularAffixesPerItem + kMaxRunewordAffixesPerItem;
 
 	struct InstanceAffixSlots
 	{

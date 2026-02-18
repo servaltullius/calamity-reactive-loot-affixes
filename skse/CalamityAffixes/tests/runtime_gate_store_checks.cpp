@@ -492,7 +492,8 @@ namespace
 				std::cerr << "reforge: zero-affix bases should reroll with one target slot\n";
 				return false;
 			}
-			if (CalamityAffixes::detail::ResolveReforgeTargetAffixCount(7u) != 3u) {
+			if (CalamityAffixes::detail::ResolveReforgeTargetAffixCount(7u) !=
+				static_cast<std::uint8_t>(CalamityAffixes::kMaxRegularAffixesPerItem)) {
 				std::cerr << "reforge: corrupted high affix counts should clamp to max slots\n";
 				return false;
 			}
@@ -688,8 +689,6 @@ namespace
 		const fs::path assignFile = repoRoot / "src" / "EventBridge.Loot.Assign.cpp";
 		const fs::path runtimeFile = repoRoot / "src" / "EventBridge.Loot.Runtime.cpp";
 		const fs::path lootFile = repoRoot / "src" / "EventBridge.Loot.cpp";
-		const fs::path configFile = repoRoot / "src" / "EventBridge.Config.cpp";
-		const fs::path serializationFile = repoRoot / "src" / "EventBridge.Serialization.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
@@ -706,30 +705,13 @@ namespace
 			std::cerr << "loot_preview_policy: failed to open assign source: " << assignFile << "\n";
 			return false;
 		}
-		if (assignText->find("applyPreviewPityOutcome") == std::string::npos ||
-			assignText->find("applyPreviewPityOutcome(false);") == std::string::npos ||
-			assignText->find("applyPreviewPityOutcome(true);") == std::string::npos) {
-			std::cerr << "loot_preview_policy: preview consumption path must update pity streak outcomes\n";
-			return false;
-		}
-		if (assignText->find("RE::FormID a_oldContainer") == std::string::npos ||
-			assignText->find("ConsumeLootPreviewClaim(a_oldContainer, a_baseObj, nowMs)") == std::string::npos) {
-			std::cerr << "loot_preview_policy: pickup path must consume preview claims by source container and base object\n";
-			return false;
-		}
-		if (assignText->find("StripLootStarMarkers(") == std::string::npos ||
-			assignText->find("_loot.nameMarkerPosition == LootNameMarkerPosition::kTrailing") == std::string::npos) {
-			std::cerr << "loot_preview_policy: rename path must support marker normalization and trailing marker mode\n";
-			return false;
-		}
-		if (assignText->find("MaybeGrantRandomRunewordFragment();") == std::string::npos ||
-			assignText->find("MaybeGrantRandomReforgeOrb();") == std::string::npos) {
-			std::cerr << "loot_preview_policy: loot assignment path must trigger both fragment and reforge-orb grants\n";
-			return false;
-		}
-		if (assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, false)") == std::string::npos ||
-			assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, true)") == std::string::npos) {
-			std::cerr << "loot_preview_policy: stale-marker cleanup must separate legacy-only and mapped trailing cleanup paths\n";
+		if (assignText->find("no random affix assignment on pickup") == std::string::npos ||
+			assignText->find("!a_allowRunewordFragmentRoll || a_count <= 0") == std::string::npos ||
+			assignText->find("MaybeGrantRandomRunewordFragment();") == std::string::npos ||
+			assignText->find("MaybeGrantRandomReforgeOrb();") == std::string::npos ||
+			assignText->find("std::clamp(a_count, 1, 8)") == std::string::npos ||
+			assignText->find("allowLegacyPickupAffixRoll") != std::string::npos) {
+			std::cerr << "loot_preview_policy: pickup flow must remain orb/fragment-only without legacy affix roll branch\n";
 			return false;
 		}
 
@@ -738,24 +720,8 @@ namespace
 			std::cerr << "loot_preview_policy: failed to open runtime source: " << runtimeFile << "\n";
 			return false;
 		}
-		if (runtimeText->find("std::erase(_lootPreviewRecent, a_instanceKey);") == std::string::npos) {
-			std::cerr << "loot_preview_policy: preview cache forget path must prune recent-key deque entries\n";
-			return false;
-		}
-		if (runtimeText->find("RememberLootPreviewClaim(") == std::string::npos ||
-			runtimeText->find("ConsumeLootPreviewClaim(") == std::string::npos ||
-			runtimeText->find("kLootPreviewClaimTtlMs") == std::string::npos) {
-			std::cerr << "loot_preview_policy: source-container claim lifecycle must be maintained\n";
-			return false;
-		}
-		if (runtimeText->find("a_sourceContainerFormID") == std::string::npos ||
-			runtimeText->find("previewCandidateIndices.size() != 1u") == std::string::npos) {
-			std::cerr << "loot_preview_policy: preview path must hide ambiguous candidates and use source container claims\n";
-			return false;
-		}
-		if (runtimeText->find("BSExtraData::Create<RE::ExtraUniqueID>()") == std::string::npos ||
-			runtimeText->find("changes->GetNextUniqueID()") == std::string::npos) {
-			std::cerr << "loot_preview_policy: preview path must bootstrap missing ExtraUniqueID for menu items\n";
+		if (runtimeText->find("const bool allowPreview = false &&") == std::string::npos) {
+			std::cerr << "loot_preview_policy: runtime tooltip must keep synthetic preview disabled\n";
 			return false;
 		}
 
@@ -764,45 +730,9 @@ namespace
 			std::cerr << "loot_preview_policy: failed to open loot event source: " << lootFile << "\n";
 			return false;
 		}
-		if (lootText->find("const bool trackedPreview = FindLootPreviewSlots(oldKey) != nullptr;") == std::string::npos ||
-			lootText->find("trackedPreview ||") == std::string::npos ||
-			lootText->find("const bool previewMenuContextOpen = IsPreviewRemapMenuContextOpen();") == std::string::npos ||
-			lootText->find("ShouldAllowPreviewUniqueIdRemap(playerOwnsEither, trackedPreview, previewMenuContextOpen)") == std::string::npos ||
-			lootText->find("ProcessLootAcquired(baseObj, count, uid, oldContainer, allowRunewordFragmentRoll)") == std::string::npos) {
-			std::cerr << "loot_preview_policy: unique-id remap and pickup task path must preserve preview cache and source-container context\n";
-			return false;
-		}
-
-		const auto configText = loadText(configFile);
-		if (!configText.has_value()) {
-			std::cerr << "loot_preview_policy: failed to open config source: " << configFile << "\n";
-			return false;
-		}
-		if (configText->find("ParseLootNameMarkerPosition") == std::string::npos ||
-			configText->find("nameMarkerPosition") == std::string::npos) {
-			std::cerr << "loot_preview_policy: config load must parse loot.nameMarkerPosition\n";
-			return false;
-		}
-		if (configText->find("_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;") == std::string::npos) {
-			std::cerr << "loot_preview_policy: config reload must reset loot.nameMarkerPosition to trailing default before parsing\n";
-			return false;
-		}
-		if (configText->find("_lootPreviewAffixes.clear();") == std::string::npos ||
-			configText->find("_lootPreviewRecent.clear();") == std::string::npos ||
-			configText->find("_lootPreviewClaimsBySourceBase.clear();") == std::string::npos) {
-			std::cerr << "loot_preview_policy: config reload reset must clear preview caches\n";
-			return false;
-		}
-
-		const auto serializationText = loadText(serializationFile);
-		if (!serializationText.has_value()) {
-			std::cerr << "loot_preview_policy: failed to open serialization source: " << serializationFile << "\n";
-			return false;
-		}
-		if (serializationText->find("_lootPreviewAffixes.clear();") == std::string::npos ||
-			serializationText->find("_lootPreviewRecent.clear();") == std::string::npos ||
-			serializationText->find("_lootPreviewClaimsBySourceBase.clear();") == std::string::npos) {
-			std::cerr << "loot_preview_policy: load/revert must clear preview caches\n";
+		if (lootText->find("ProcessLootAcquired(baseObj, count, uid, oldContainer, allowRunewordFragmentRoll)") == std::string::npos ||
+			lootText->find("_loot.chancePercent <= 0.0f") != std::string::npos) {
+			std::cerr << "loot_preview_policy: pickup event path must always dispatch loot processing independent of loot chance\n";
 			return false;
 		}
 
@@ -1078,10 +1008,14 @@ namespace
 				(std::istreambuf_iterator<char>(reforgeIn)),
 				std::istreambuf_iterator<char>());
 
-			if (reforgeSource.find("ResolveCompletedRunewordRecipe(instanceKey)") == std::string::npos ||
-				reforgeSource.find("Reforge blocked: completed runeword base.") == std::string::npos ||
-				reforgeSource.find("IsLootObjectEligibleForAffixes(entry->object)") == std::string::npos) {
-				std::cerr << "runeword_reforge_safety: completed-base/type eligibility guard is missing\n";
+			if (reforgeSource.find("const bool rerollRuneword = completedRunewordRecipe != nullptr;") == std::string::npos ||
+				reforgeSource.find("pickReforgeRunewordRecipe") == std::string::npos ||
+				reforgeSource.find("rolled.AddToken(attemptRunewordRecipe->resultAffixToken);") == std::string::npos ||
+				reforgeSource.find("kMaxRegularAffixesPerItem") == std::string::npos ||
+				reforgeSource.find("_runewordInstanceStates.erase(instanceKey);") == std::string::npos ||
+				reforgeSource.find("IsLootObjectEligibleForAffixes(entry->object)") == std::string::npos ||
+				reforgeSource.find("Reforge blocked: completed runeword base.") != std::string::npos) {
+				std::cerr << "runeword_reforge_safety: completed-base reroll integration guard is missing\n";
 				return false;
 			}
 
