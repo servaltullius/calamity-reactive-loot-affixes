@@ -107,18 +107,28 @@ namespace CalamityAffixes
 				return nullptr;
 			}
 
-			const auto idx = static_cast<std::size_t>(_runewordRecipeCycleCursor % _runewordRecipes.size());
-			return std::addressof(_runewordRecipes[idx]);
+			const std::size_t count = _runewordRecipes.size();
+			const auto start = static_cast<std::size_t>(_runewordRecipeCycleCursor % count);
+			for (std::size_t offset = 0; offset < count; ++offset) {
+				const auto idx = (start + offset) % count;
+				const auto& recipe = _runewordRecipes[idx];
+				if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
+					affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+					continue;
+				}
+				return std::addressof(recipe);
+			}
+			return nullptr;
 		}
 
 		void EventBridge::InitializeRunewordCatalog()
 		{
 			_runewordRecipes.clear();
-				_runewordRecipeIndexByToken.clear();
-				_runewordRecipeIndexByResultAffixToken.clear();
-				_runewordRuneNameByToken.clear();
-				_runewordRuneTokenPool.clear();
-				_runewordRuneTokenWeights.clear();
+			_runewordRecipeIndexByToken.clear();
+			_runewordRecipeIndexByResultAffixToken.clear();
+			_runewordRuneNameByToken.clear();
+			_runewordRuneTokenPool.clear();
+			_runewordRuneTokenWeights.clear();
 
 			auto addRecipe = [&](std::string_view a_recipeId,
 				std::string_view a_displayName,
@@ -330,12 +340,25 @@ namespace CalamityAffixes
 			}
 
 			SanitizeRunewordState();
-			if (a_direction > 0) {
-				_runewordRecipeCycleCursor = static_cast<std::uint32_t>((_runewordRecipeCycleCursor + 1u) % _runewordRecipes.size());
-			} else {
-				const auto current = static_cast<std::size_t>(_runewordRecipeCycleCursor % _runewordRecipes.size());
-				const auto next = (current + _runewordRecipes.size() - 1u) % _runewordRecipes.size();
-				_runewordRecipeCycleCursor = static_cast<std::uint32_t>(next);
+			const std::size_t count = _runewordRecipes.size();
+			auto cursor = static_cast<std::size_t>(_runewordRecipeCycleCursor % count);
+			const auto isEligible = [&](std::size_t a_idx) {
+				const auto& recipe = _runewordRecipes[a_idx];
+				const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
+				return affixIt != _affixIndexByToken.end() && affixIt->second < _affixes.size();
+			};
+
+			for (std::size_t step = 0; step < count; ++step) {
+				if (a_direction > 0) {
+					cursor = (cursor + 1u) % count;
+				} else {
+					cursor = (cursor + count - 1u) % count;
+				}
+				if (!isEligible(cursor)) {
+					continue;
+				}
+				_runewordRecipeCycleCursor = static_cast<std::uint32_t>(cursor);
+				break;
 			}
 
 			const auto* recipe = GetCurrentRunewordRecipe();

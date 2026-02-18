@@ -23,8 +23,13 @@ namespace CalamityAffixes
 		}
 
 		const auto idx = it->second;
-		_runewordRecipeCycleCursor = static_cast<std::uint32_t>(idx);
 		const auto& recipe = _runewordRecipes[idx];
+		if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
+			affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+			RE::DebugNotification("Runeword Recipe: runtime effect not available.");
+			return false;
+		}
+		_runewordRecipeCycleCursor = static_cast<std::uint32_t>(idx);
 
 		if (_runewordSelectedBaseKey) {
 			const auto selectedKey = *_runewordSelectedBaseKey;

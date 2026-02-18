@@ -921,6 +921,68 @@ namespace
 			return true;
 		}
 
+		bool CheckRunewordRecipeRuntimeEligibilityPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
+			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
+			const fs::path catalogFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Catalog.cpp";
+			const fs::path baseSelectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.BaseSelection.cpp";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto recipeEntriesText = loadText(recipeEntriesFile);
+			if (!recipeEntriesText.has_value()) {
+				std::cerr << "runeword_recipe_runtime_eligibility: failed to open source file: " << recipeEntriesFile << "\n";
+				return false;
+			}
+			const auto recipeUiText = loadText(recipeUiFile);
+			if (!recipeUiText.has_value()) {
+				std::cerr << "runeword_recipe_runtime_eligibility: failed to open source file: " << recipeUiFile << "\n";
+				return false;
+			}
+			const auto catalogText = loadText(catalogFile);
+			if (!catalogText.has_value()) {
+				std::cerr << "runeword_recipe_runtime_eligibility: failed to open source file: " << catalogFile << "\n";
+				return false;
+			}
+			const auto baseSelectionText = loadText(baseSelectionFile);
+			if (!baseSelectionText.has_value()) {
+				std::cerr << "runeword_recipe_runtime_eligibility: failed to open source file: " << baseSelectionFile << "\n";
+				return false;
+			}
+
+			const auto recipeUiGuardPos = recipeUiText->find("Runeword Recipe: runtime effect not available.");
+			const auto recipeUiCursorUpdatePos = recipeUiText->find("_runewordRecipeCycleCursor = static_cast<std::uint32_t>(idx);");
+
+			if (recipeEntriesText->find("if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);") == std::string::npos ||
+				recipeEntriesText->find("affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size())") == std::string::npos ||
+				recipeUiText->find("Runeword Recipe: runtime effect not available.") == std::string::npos ||
+				recipeUiGuardPos == std::string::npos ||
+				recipeUiCursorUpdatePos == std::string::npos ||
+				recipeUiCursorUpdatePos < recipeUiGuardPos ||
+				catalogText->find("const auto isEligible = [&](std::size_t a_idx)") == std::string::npos ||
+				catalogText->find("if (!isEligible(cursor))") == std::string::npos ||
+				catalogText->find("if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);") == std::string::npos ||
+				baseSelectionText->find("const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(token);") == std::string::npos ||
+				baseSelectionText->find("if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);") == std::string::npos ||
+				baseSelectionText->find("return std::addressof(recipe);") == std::string::npos) {
+				std::cerr << "runeword_recipe_runtime_eligibility: unsupported recipe guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
 		bool CheckRunewordTransmuteSafetyPolicy()
 		{
 			namespace fs = std::filesystem;
@@ -1138,6 +1200,7 @@ int main()
 	const bool lootChanceMcmCleanupOk = CheckLootChanceMcmCleanupPolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
+	const bool runewordRecipeRuntimeEligibilityOk = CheckRunewordRecipeRuntimeEligibilityPolicy();
 	const bool runewordUiPolicyHelpersOk = CheckRunewordUiPolicyHelpers();
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
@@ -1147,6 +1210,7 @@ int main()
 	        lootPreviewPolicyOk &&
 	        lootRerollExploitGuardOk &&
 	        lootChanceMcmCleanupOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
+	        runewordRecipeRuntimeEligibilityOk &&
 	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&
 	        runewordReforgeSafetyOk &&

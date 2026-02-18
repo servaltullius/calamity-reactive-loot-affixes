@@ -83,7 +83,13 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			return std::addressof(_runewordRecipes[rwIt->second]);
+			const auto& recipe = _runewordRecipes[rwIt->second];
+			if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
+				affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+				continue;
+			}
+
+			return std::addressof(recipe);
 		}
 
 		return nullptr;

@@ -305,6 +305,11 @@ namespace CalamityAffixes
 		}
 
 		for (const auto& recipe : _runewordRecipes) {
+			if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
+				affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+				continue;
+			}
+
 			std::string runes;
 			for (std::size_t i = 0; i < recipe.runeIds.size(); ++i) {
 				if (i > 0) {
