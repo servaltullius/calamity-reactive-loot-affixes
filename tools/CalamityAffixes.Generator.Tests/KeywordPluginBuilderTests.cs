@@ -118,6 +118,31 @@ public sealed class KeywordPluginBuilderTests
     }
 
     [Fact]
+    public void BuildKeywordPlugin_CreatesReforgeOrbMiscItem()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var orb = Assert.Single(mod.MiscItems, item => item.EditorID == "CAFF_Misc_ReforgeOrb");
+        Assert.Equal("Reforge Orb", orb.Name?.String);
+        Assert.NotNull(orb.Model);
+        Assert.Equal(@"Meshes\Clutter\SoulGem\SoulGemGrandFilled.nif", orb.Model!.File.ToString());
+    }
+
+    [Fact]
     public void BuildKeywordPlugin_CreatesGeneratedMagicEffectAndSpellRecords()
     {
         var spec = new AffixSpec

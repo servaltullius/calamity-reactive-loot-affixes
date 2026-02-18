@@ -115,6 +115,7 @@ public static class KeywordPluginBuilder
         }
 
         AddRunewordRuneFragments(mod);
+        AddReforgeOrb(mod);
 
         return mod;
     }
@@ -172,6 +173,17 @@ public static class KeywordPluginBuilder
             item.Value = 0;
             item.Model = new Model { File = sharedFragmentModel };
         }
+    }
+
+    private static void AddReforgeOrb(SkyrimMod mod)
+    {
+        // Runtime uses this exact EditorID in SKSE reforge grant/consume paths.
+        var item = mod.MiscItems.AddNew();
+        item.EditorID = "CAFF_Misc_ReforgeOrb";
+        item.Name = "Reforge Orb";
+        item.Weight = 0.0f;
+        item.Value = 0;
+        item.Model = new Model { File = @"Meshes\Clutter\SoulGem\SoulGemGrandFilled.nif" };
     }
 
     private static void AddKeyword(SkyrimMod mod, string editorId)
