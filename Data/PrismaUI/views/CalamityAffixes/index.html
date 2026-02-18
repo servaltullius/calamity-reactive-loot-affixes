@@ -1167,6 +1167,8 @@
       let tooltipTextState = "";
       let runewordAffixTextState = "";
       let runewordAffixPendingState = false;
+      let runewordAffixPendingNonce = 0;
+      const runewordAffixPendingTimeoutMs = 1200;
       let panelHotkeyTextState = "F11";
       let selectedItemNameState = "";
       let selectedItemSourceState = "";
@@ -1560,6 +1562,20 @@
       function invalidateRunewordAffixPreview(pending) {
         runewordAffixTextState = "";
         runewordAffixPendingState = Boolean(pending);
+        if (!runewordAffixPendingState) {
+          runewordAffixPendingNonce += 1;
+          return;
+        }
+
+        const pendingNonce = ++runewordAffixPendingNonce;
+        // Failsafe: never leave preview in perpetual "refreshing" state.
+        window.setTimeout(() => {
+          if (!runewordAffixPendingState) return;
+          if (pendingNonce !== runewordAffixPendingNonce) return;
+          runewordAffixTextState = tooltipTextState;
+          runewordAffixPendingState = false;
+          applyTooltipPlacement();
+        }, runewordAffixPendingTimeoutMs);
       }
 
       function applyTooltipPlacement() {
@@ -2541,7 +2557,12 @@
             : []
         };
 
+        if (runewordAffixPendingState) {
+          runewordAffixTextState = tooltipTextState;
+          runewordAffixPendingState = false;
+        }
         renderRunewordPanelState();
+        applyTooltipPlacement();
       }
 
       function setTooltip(raw) {
@@ -2669,6 +2690,11 @@
       function setActionFeedback(raw) {
         const value = typeof raw === "string" ? raw : "";
         feedback.textContent = value;
+        if (runewordAffixPendingState) {
+          runewordAffixTextState = tooltipTextState;
+          runewordAffixPendingState = false;
+          applyTooltipPlacement();
+        }
       }
 
       function setPanelHotkeyText(raw) {
