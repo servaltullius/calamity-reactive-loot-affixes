@@ -25,6 +25,21 @@ cd "/home/kdw73/projects/Calamity - Reactive Loot & Affixes"
 tools/build_mo2_zip.sh
 ```
 
+수동으로 DLL만 재빌드해야 할 때(WSL/Linux cross):
+
+```bash
+cd "/home/kdw73/projects/Calamity - Reactive Loot & Affixes/skse/CalamityAffixes"
+cmake --build build.linux-clangcl-rel --target CalamityAffixes
+ctest --test-dir build.linux-clangcl-rel --output-on-failure
+cp -f build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
+sha256sum build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
+```
+
+주의:
+- DLL 빌드는 `build.linux-clangcl-rel` lane을 사용합니다.
+- `linux-release-commonlibsse`는 테스트/정적체크 lane(g++)이며 DLL 산출 lane이 아닙니다.
+- `fatal error: Windows.h: No such file or directory`는 대체로 lane 선택 오류 신호입니다.
+
 스크립트가 자동 수행하는 항목:
 - 생성기 실행: `affixes/affixes.json` -> `Data/*` 산출물 동기화
 - Papyrus 컴파일: `Data/Scripts/*.pex`

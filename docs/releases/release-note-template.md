@@ -30,12 +30,19 @@
 
 ## 테스트 범위 (정적)
 
+- 빌드 lane 확인(실수 방지):
+  - 테스트/정적체크: `linux-release-commonlibsse` (g++)
+  - 실제 DLL 산출: `build.linux-clangcl-rel` (clang-cl + lld-link + xwin)
+  - `fatal error: Windows.h: No such file or directory` 발생 시 DLL 빌드 lane이 잘못된 경우가 대부분입니다.
 - (원샷) 로컬 검증 스크립트:
   - `tools/release_verify.sh`
 - 빌드:
   - `cmake --build skse/CalamityAffixes/build.linux-clangcl-rel -j`
 - 정적 체크:
   - `ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --output-on-failure`
+- DLL 최신 반영 확인:
+  - `cp -f skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll Data/SKSE/Plugins/CalamityAffixes.dll`
+  - `sha256sum skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll Data/SKSE/Plugins/CalamityAffixes.dll`
 - 데이터/생성기:
   - `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release`
   - `python3 tools/lint_affixes.py --spec affixes/affixes.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json`
