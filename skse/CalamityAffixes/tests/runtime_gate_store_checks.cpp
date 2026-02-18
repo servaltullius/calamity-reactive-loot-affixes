@@ -736,15 +736,15 @@ namespace
 
 		bool CheckRunewordCompletedSelectionPolicy()
 		{
-		namespace fs = std::filesystem;
-		const fs::path testFile{ __FILE__ };
-		const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
 
-		std::ifstream in(selectionFile);
-		if (!in.is_open()) {
-			std::cerr << "runeword_completed_selection: failed to open source file: " << selectionFile << "\n";
-			return false;
-		}
+			std::ifstream in(recipeUiFile);
+			if (!in.is_open()) {
+				std::cerr << "runeword_completed_selection: failed to open source file: " << recipeUiFile << "\n";
+				return false;
+			}
 
 		std::string source(
 			(std::istreambuf_iterator<char>(in)),
@@ -773,13 +773,13 @@ namespace
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
-			const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
+			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
 			const fs::path craftingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Crafting.cpp";
 			const fs::path policyFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Policy.cpp";
 
-			std::ifstream selectionIn(selectionFile);
+			std::ifstream selectionIn(recipeUiFile);
 			if (!selectionIn.is_open()) {
-				std::cerr << "runeword_transmute_safety: failed to open selection source: " << selectionFile << "\n";
+				std::cerr << "runeword_transmute_safety: failed to open selection source: " << recipeUiFile << "\n";
 				return false;
 			}
 			std::string selectionSource(
