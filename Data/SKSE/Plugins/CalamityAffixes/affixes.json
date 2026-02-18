@@ -4,8 +4,8 @@
   "eslFlag": true,
   "loot": {
     "chancePercent": 50,
-    "runewordFragmentChancePercent": 10,
-    "reforgeOrbChancePercent": 4,
+    "runewordFragmentChancePercent": 8,
+    "reforgeOrbChancePercent": 3,
     "lootSourceChanceMultCorpse": 0.8,
     "lootSourceChanceMultContainer": 1,
     "lootSourceChanceMultBossContainer": 1.15,
