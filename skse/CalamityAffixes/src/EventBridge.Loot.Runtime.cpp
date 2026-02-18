@@ -437,7 +437,21 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+			auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+			if (!uid && allowPreview) {
+				auto* player = RE::PlayerCharacter::GetSingleton();
+				auto* changes = player ? player->GetInventoryChanges() : nullptr;
+				if (changes) {
+					auto* created = RE::BSExtraData::Create<RE::ExtraUniqueID>();
+					if (created) {
+						created->baseID = a_item->object ? a_item->object->GetFormID() : 0u;
+						created->uniqueID = changes->GetNextUniqueID();
+						xList->Add(created);
+						uid = created;
+					}
+				}
+			}
+
 			if (!uid) {
 				continue;
 			}

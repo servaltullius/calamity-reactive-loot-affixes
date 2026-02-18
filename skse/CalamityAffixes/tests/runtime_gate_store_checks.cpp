@@ -721,6 +721,11 @@ namespace
 			std::cerr << "loot_preview_policy: preview cache forget path must prune recent-key deque entries\n";
 			return false;
 		}
+		if (runtimeText->find("BSExtraData::Create<RE::ExtraUniqueID>()") == std::string::npos ||
+			runtimeText->find("changes->GetNextUniqueID()") == std::string::npos) {
+			std::cerr << "loot_preview_policy: preview path must bootstrap missing ExtraUniqueID for menu items\n";
+			return false;
+		}
 
 		const auto configText = loadText(configFile);
 		if (!configText.has_value()) {
