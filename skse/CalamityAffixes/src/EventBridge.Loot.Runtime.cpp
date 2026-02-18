@@ -9,6 +9,7 @@
 #include <random>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 #include <spdlog/spdlog.h>
@@ -715,7 +716,26 @@ namespace CalamityAffixes
 		}
 
 		if (allowPreview && itemBaseObj != 0u) {
-			_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
+			std::vector<std::uint64_t> previewCandidateKeys;
+			std::unordered_set<std::uint64_t> seenPreviewKeys;
+			previewCandidateKeys.reserve(candidates.size());
+			for (const auto& candidate : candidates) {
+				if (!candidate.preview || candidate.instanceKey == 0u) {
+					continue;
+				}
+				if (seenPreviewKeys.insert(candidate.instanceKey).second) {
+					previewCandidateKeys.push_back(candidate.instanceKey);
+				}
+			}
+
+			if (previewCandidateKeys.size() == 1u) {
+				const auto nowMs = NowSteadyMilliseconds();
+				RememberSelectedLootPreviewKey(itemBaseObj, previewCandidateKeys.front(), nowMs);
+			} else if (previewCandidateKeys.size() > 1u) {
+				_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
+			} else if (previewCandidateKeys.empty()) {
+				_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
+			}
 		}
 
 		if (!a_selectedDisplayName.empty()) {

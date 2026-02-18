@@ -417,7 +417,8 @@ namespace CalamityAffixes
 		RE::FormID a_baseObj,
 		std::uint16_t a_uniqueID,
 		RE::InventoryChanges* a_changes,
-		RE::ExtraDataList* a_targetXList)
+		RE::ExtraDataList* a_targetXList,
+		std::uint64_t a_preferredSourcePreviewKey)
 	{
 		if (a_baseObj == 0u || !a_targetXList) {
 			return false;
@@ -429,9 +430,16 @@ namespace CalamityAffixes
 				.count());
 
 		std::uint64_t sourcePreviewKey = 0u;
+		if (a_preferredSourcePreviewKey != 0u &&
+			static_cast<RE::FormID>(a_preferredSourcePreviewKey >> 16u) == a_baseObj &&
+			FindLootPreviewSlots(a_preferredSourcePreviewKey) != nullptr) {
+			sourcePreviewKey = a_preferredSourcePreviewKey;
+		}
+
 		if (a_uniqueID != 0u) {
 			const auto eventPreviewKey = MakeInstanceKey(a_baseObj, a_uniqueID);
-			if (FindLootPreviewSlots(eventPreviewKey) != nullptr) {
+			if (sourcePreviewKey == 0u &&
+				FindLootPreviewSlots(eventPreviewKey) != nullptr) {
 				sourcePreviewKey = eventPreviewKey;
 			}
 		}
@@ -1006,11 +1014,64 @@ namespace CalamityAffixes
 		}
 
 		if (!unevaluatedCandidates.empty()) {
+			const auto nowMs = static_cast<std::uint64_t>(
+				std::chrono::duration_cast<std::chrono::milliseconds>(
+					std::chrono::steady_clock::now().time_since_epoch())
+					.count());
+			const auto selectedPreviewKey = FindSelectedLootPreviewKey(a_baseObj, nowMs);
+			RE::ExtraDataList* preferredCandidate = nullptr;
+			std::uint64_t preferredSourcePreviewKey = 0u;
+			if (selectedPreviewKey != 0u) {
+				for (auto* xList : unevaluatedCandidates) {
+					if (!xList) {
+						continue;
+					}
+					auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+					if (!uid) {
+						continue;
+					}
+					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+					if (key == selectedPreviewKey) {
+						preferredCandidate = xList;
+						preferredSourcePreviewKey = key;
+						break;
+					}
+				}
+			}
+			if (!preferredCandidate) {
+				for (auto* xList : unevaluatedCandidates) {
+					if (!xList) {
+						continue;
+					}
+					auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+					if (!uid) {
+						continue;
+					}
+					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+					if (FindLootPreviewSlots(key) != nullptr) {
+						preferredCandidate = xList;
+						preferredSourcePreviewKey = key;
+						break;
+					}
+				}
+			}
+			if (preferredCandidate &&
+				unevaluatedCandidates.back() != preferredCandidate) {
+				auto preferredIt = std::find(
+					unevaluatedCandidates.begin(),
+					unevaluatedCandidates.end(),
+					preferredCandidate);
+				if (preferredIt != unevaluatedCandidates.end()) {
+					std::iter_swap(preferredIt, unevaluatedCandidates.end() - 1);
+				}
+			}
+
 			(void)RebindPendingLootPreviewForFallbackCandidate(
 				a_baseObj,
 				a_uniqueID,
 				changes,
-				unevaluatedCandidates.back());
+				unevaluatedCandidates.back(),
+				preferredSourcePreviewKey);
 		}
 
 		std::int32_t processed = 0;

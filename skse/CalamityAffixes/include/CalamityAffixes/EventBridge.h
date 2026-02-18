@@ -708,7 +708,8 @@ namespace CalamityAffixes
 			RE::FormID a_baseObj,
 			std::uint16_t a_uniqueID,
 			RE::InventoryChanges* a_changes,
-			RE::ExtraDataList* a_targetXList);
+			RE::ExtraDataList* a_targetXList,
+			std::uint64_t a_preferredSourcePreviewKey = 0u);
 		[[nodiscard]] std::optional<InstanceAffixSlots> BuildLootPreviewAffixSlots(
 			std::uint64_t a_instanceKey,
 			LootItemType a_itemType) const;

@@ -717,6 +717,11 @@ namespace
 			std::cerr << "loot_preview_policy: fallback path must rebind pending preview cache before reroll\n";
 			return false;
 		}
+		if (assignText->find("a_preferredSourcePreviewKey") == std::string::npos ||
+			assignText->find("preferredSourcePreviewKey") == std::string::npos) {
+			std::cerr << "loot_preview_policy: fallback rebind must carry selected candidate preview key explicitly\n";
+			return false;
+		}
 		if (assignText->find("StripLootStarMarkers(") == std::string::npos ||
 			assignText->find("_loot.nameMarkerPosition == LootNameMarkerPosition::kTrailing") == std::string::npos) {
 			std::cerr << "loot_preview_policy: rename path must support marker normalization and trailing marker mode\n";
@@ -756,6 +761,11 @@ namespace
 			runtimeText->find("ForgetSelectedLootPreviewKeyForInstance(a_instanceKey);") == std::string::npos ||
 			runtimeText->find("kSelectedPreviewHintTtlMs") == std::string::npos) {
 			std::cerr << "loot_preview_policy: preview selection hint lifecycle must be maintained\n";
+			return false;
+		}
+		if (runtimeText->find("previewCandidateKeys") == std::string::npos ||
+			runtimeText->find("previewCandidateKeys.size() > 1u") == std::string::npos) {
+			std::cerr << "loot_preview_policy: preview mismatch path must sanitize selected hint by current preview candidates\n";
 			return false;
 		}
 		if (runtimeText->find("BSExtraData::Create<RE::ExtraUniqueID>()") == std::string::npos ||
