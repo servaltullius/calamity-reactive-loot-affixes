@@ -979,7 +979,10 @@ namespace CalamityAffixes
 			break;
 		}
 		sourceChanceMultiplier = std::clamp(sourceChanceMultiplier, 0.0f, 5.0f);
-		const std::uint32_t rollCount = static_cast<std::uint32_t>(std::clamp(a_count, 1, 8));
+		// OnItemAdded.itemCount is the stack size for this pickup event.
+		// Rolling per stack count causes burst grants (e.g., arrows/gold/stacked misc).
+		// Keep currency roll strictly once per pickup event for stable economy pacing.
+		const std::uint32_t rollCount = 1u;
 		for (std::uint32_t i = 0; i < rollCount; ++i) {
 			MaybeGrantRandomRunewordFragment(sourceChanceMultiplier);
 			MaybeGrantRandomReforgeOrb(sourceChanceMultiplier);

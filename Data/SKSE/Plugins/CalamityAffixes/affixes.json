@@ -4,7 +4,12 @@
   "eslFlag": true,
   "loot": {
     "chancePercent": 50,
-    "runewordFragmentChancePercent": 40,
+    "runewordFragmentChancePercent": 10,
+    "reforgeOrbChancePercent": 4,
+    "lootSourceChanceMultCorpse": 0.8,
+    "lootSourceChanceMultContainer": 1,
+    "lootSourceChanceMultBossContainer": 1.35,
+    "lootSourceChanceMultWorld": 1,
     "renameItem": true,
     "nameMarkerPosition": "trailing",
     "sharedPool": true,
@@ -24,6 +29,12 @@
       "randombox",
       "lootbox"
     ],
+    "bossContainerEditorIdAllowContains": [
+      "bosschest",
+      "boss_chest",
+      "boss"
+    ],
+    "bossContainerEditorIdDenyContains": [],
     "nameFormat": "{base}[{affix}]"
   },
   "keywords": {

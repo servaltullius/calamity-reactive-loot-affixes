@@ -29,6 +29,21 @@ public sealed class LootSpec
     [JsonPropertyName("runewordFragmentChancePercent")]
     public double RunewordFragmentChancePercent { get; init; } = 1.0;
 
+    [JsonPropertyName("reforgeOrbChancePercent")]
+    public double ReforgeOrbChancePercent { get; init; } = 6.0;
+
+    [JsonPropertyName("lootSourceChanceMultCorpse")]
+    public double LootSourceChanceMultCorpse { get; init; } = 0.8;
+
+    [JsonPropertyName("lootSourceChanceMultContainer")]
+    public double LootSourceChanceMultContainer { get; init; } = 1.0;
+
+    [JsonPropertyName("lootSourceChanceMultBossContainer")]
+    public double LootSourceChanceMultBossContainer { get; init; } = 1.35;
+
+    [JsonPropertyName("lootSourceChanceMultWorld")]
+    public double LootSourceChanceMultWorld { get; init; } = 1.0;
+
     [JsonPropertyName("renameItem")]
     public bool RenameItem { get; init; }
 
@@ -77,6 +92,12 @@ public sealed class LootSpec
     // Case-insensitive EditorID substrings that disqualify armor-like consumable reward boxes from loot affixes.
     [JsonPropertyName("armorEditorIdDenyContains")]
     public List<string>? ArmorEditorIdDenyContains { get; init; }
+
+    [JsonPropertyName("bossContainerEditorIdAllowContains")]
+    public List<string>? BossContainerEditorIdAllowContains { get; init; }
+
+    [JsonPropertyName("bossContainerEditorIdDenyContains")]
+    public List<string>? BossContainerEditorIdDenyContains { get; init; }
 
     [JsonPropertyName("nameFormat")]
     public string? NameFormat { get; init; }

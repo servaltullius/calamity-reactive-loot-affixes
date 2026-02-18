@@ -178,12 +178,14 @@ public static class KeywordPluginBuilder
     private static void AddReforgeOrb(SkyrimMod mod)
     {
         // Runtime uses this exact EditorID in SKSE reforge grant/consume paths.
+        // Keep visual consistency with rune fragments (soul gem shard style).
+        const string sharedFragmentModel = @"Meshes\Clutter\SoulGem\SoulGemPiece01.nif";
         var item = mod.MiscItems.AddNew();
         item.EditorID = "CAFF_Misc_ReforgeOrb";
         item.Name = "Reforge Orb";
         item.Weight = 0.0f;
         item.Value = 0;
-        item.Model = new Model { File = @"Meshes\Clutter\SoulGem\SoulGemGrandFilled.nif" };
+        item.Model = new Model { File = sharedFragmentModel };
     }
 
     private static void AddKeyword(SkyrimMod mod, string editorId)

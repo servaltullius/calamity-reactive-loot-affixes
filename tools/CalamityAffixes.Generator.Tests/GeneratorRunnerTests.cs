@@ -177,6 +177,11 @@ public sealed class GeneratorRunnerTests
             {
                 ChancePercent = 30.0,
                 RunewordFragmentChancePercent = 40.0,
+                ReforgeOrbChancePercent = 7.0,
+                LootSourceChanceMultCorpse = 0.75,
+                LootSourceChanceMultContainer = 1.1,
+                LootSourceChanceMultBossContainer = 1.5,
+                LootSourceChanceMultWorld = 0.9,
                 RenameItem = true,
                 SharedPool = true,
                 DebugLog = false,
@@ -188,6 +193,8 @@ public sealed class GeneratorRunnerTests
                 TriggerProcBudgetWindowMs = 90,
                 CleanupInvalidLegacyAffixes = true,
                 ArmorEditorIdDenyContains = ["lootbox"],
+                BossContainerEditorIdAllowContains = ["bosschest", "boss"],
+                BossContainerEditorIdDenyContains = ["fakeboss"],
                 NameFormat = "{base}[{affix}]",
             },
             Keywords = new KeywordSpec
@@ -212,9 +219,16 @@ public sealed class GeneratorRunnerTests
 
             using var doc = JsonDocument.Parse(File.ReadAllText(runtimeJsonPath, Encoding.UTF8));
             var loot = doc.RootElement.GetProperty("loot");
+            Assert.Equal(7.0, loot.GetProperty("reforgeOrbChancePercent").GetDouble());
+            Assert.Equal(0.75, loot.GetProperty("lootSourceChanceMultCorpse").GetDouble());
+            Assert.Equal(1.1, loot.GetProperty("lootSourceChanceMultContainer").GetDouble());
+            Assert.Equal(1.5, loot.GetProperty("lootSourceChanceMultBossContainer").GetDouble());
+            Assert.Equal(0.9, loot.GetProperty("lootSourceChanceMultWorld").GetDouble());
             Assert.Equal(7, loot.GetProperty("trapCastBudgetPerTick").GetInt32());
             Assert.Equal(11, loot.GetProperty("triggerProcBudgetPerWindow").GetInt32());
             Assert.Equal(90, loot.GetProperty("triggerProcBudgetWindowMs").GetInt32());
+            Assert.Equal("bosschest", loot.GetProperty("bossContainerEditorIdAllowContains")[0].GetString());
+            Assert.Equal("fakeboss", loot.GetProperty("bossContainerEditorIdDenyContains")[0].GetString());
         }
         finally
         {

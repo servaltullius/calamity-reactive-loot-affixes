@@ -139,7 +139,7 @@ public sealed class KeywordPluginBuilderTests
         var orb = Assert.Single(mod.MiscItems, item => item.EditorID == "CAFF_Misc_ReforgeOrb");
         Assert.Equal("Reforge Orb", orb.Name?.String);
         Assert.NotNull(orb.Model);
-        Assert.Equal(@"Meshes\Clutter\SoulGem\SoulGemGrandFilled.nif", orb.Model!.File.ToString());
+        Assert.Equal(@"Meshes\Clutter\SoulGem\SoulGemPiece01.nif", orb.Model!.File.ToString());
     }
 
     [Fact]
