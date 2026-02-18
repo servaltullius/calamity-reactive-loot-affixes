@@ -237,6 +237,10 @@ namespace CalamityAffixes
 			_runewordSelectedBaseKey.reset();
 			_runewordBaseCycleCursor = 0;
 			_runewordRecipeCycleCursor = 0;
+			_corpseExplosionSeenCorpses.clear();
+			_corpseExplosionState = {};
+			_summonCorpseExplosionSeenCorpses.clear();
+			_summonCorpseExplosionState = {};
 
 			std::uint32_t type = 0;
 			std::uint32_t version = 0;
@@ -752,11 +756,13 @@ namespace CalamityAffixes
 			_perTargetCooldownStore.Clear();
 			_nonHostileFirstHitGate.Clear();
 			_corpseExplosionSeenCorpses.clear();
-		_lootRerollGuard.Reset();
-		_corpseExplosionState = {};
-		_procDepth = 0;
-		_healthDamageHookSeen = false;
-		_healthDamageHookLastAt = {};
+			_summonCorpseExplosionSeenCorpses.clear();
+			_lootRerollGuard.Reset();
+			_corpseExplosionState = {};
+			_summonCorpseExplosionState = {};
+			_procDepth = 0;
+			_healthDamageHookSeen = false;
+			_healthDamageHookLastAt = {};
 			_castOnCritNextAllowed = {};
 			_castOnCritCycleCursor = 0;
 			_lastHitAt = {};

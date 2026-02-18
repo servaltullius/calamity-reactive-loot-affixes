@@ -122,4 +122,69 @@ public sealed class AffixSpecLoaderTests
             Directory.Delete(tempRoot, recursive: true);
         }
     }
+
+    [Fact]
+    public void Load_WhenModKeyContainsPathSegments_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "../CalamityAffixes.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [{"editorId":"CAFF_TAG_DOT","name":"dot"}],
+            "affixes": [],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("file name only", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenModKeyIsRootedPath_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        var rootedModKey = Path.Combine(Path.GetTempPath(), "CalamityAffixes.esp").Replace("\\", "\\\\");
+        File.WriteAllText(specPath, $$"""
+        {
+          "version": 1,
+          "modKey": "{{rootedModKey}}",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [{"editorId":"CAFF_TAG_DOT","name":"dot"}],
+            "affixes": [],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("must not be rooted", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
 }

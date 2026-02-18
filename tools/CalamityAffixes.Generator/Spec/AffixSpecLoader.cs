@@ -5,6 +5,8 @@ namespace CalamityAffixes.Generator.Spec;
 
 public static class AffixSpecLoader
 {
+    private static readonly char[] InvalidModKeyFileNameChars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
+
     public static AffixSpec Load(string path)
     {
         var json = File.ReadAllText(path);
@@ -25,6 +27,8 @@ public static class AffixSpecLoader
 
     private static void Validate(AffixSpec spec)
     {
+        ValidateModKey(spec.ModKey);
+
         if (!spec.ModKey.EndsWith(".esp", StringComparison.OrdinalIgnoreCase) &&
             !spec.ModKey.EndsWith(".esm", StringComparison.OrdinalIgnoreCase) &&
             !spec.ModKey.EndsWith(".esl", StringComparison.OrdinalIgnoreCase))
@@ -81,6 +85,34 @@ public static class AffixSpecLoader
                     throw new InvalidDataException($"Spell {spell.EditorId} requires effect.magicEffectEditorId");
                 }
             }
+        }
+    }
+
+    private static void ValidateModKey(string modKey)
+    {
+        if (string.IsNullOrWhiteSpace(modKey))
+        {
+            throw new InvalidDataException("modKey must be a non-empty file name.");
+        }
+
+        if (Path.IsPathRooted(modKey))
+        {
+            throw new InvalidDataException($"modKey must not be rooted: {modKey}");
+        }
+
+        if (!string.Equals(modKey, Path.GetFileName(modKey), StringComparison.Ordinal))
+        {
+            throw new InvalidDataException($"modKey must be a file name only (no path segments): {modKey}");
+        }
+
+        if (modKey.IndexOfAny(InvalidModKeyFileNameChars) >= 0)
+        {
+            throw new InvalidDataException($"modKey contains invalid file name characters: {modKey}");
+        }
+
+        if (modKey.EndsWith(' ') || modKey.EndsWith('.'))
+        {
+            throw new InvalidDataException($"modKey must not end with space or dot: {modKey}");
         }
     }
 }
