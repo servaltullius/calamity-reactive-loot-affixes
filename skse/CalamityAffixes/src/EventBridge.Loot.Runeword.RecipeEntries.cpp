@@ -32,6 +32,19 @@ namespace CalamityAffixes
 			return {};
 		}
 
+		template <std::size_t N>
+		[[nodiscard]] constexpr bool HasDuplicateOverrideIds(const RecipeKeyOverride (&a_overrides)[N]) noexcept
+		{
+			for (std::size_t i = 0; i < N; ++i) {
+				for (std::size_t j = i + 1; j < N; ++j) {
+					if (a_overrides[i].id == a_overrides[j].id) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		[[nodiscard]] constexpr std::uint32_t RecipeBucket(std::string_view a_id, std::uint32_t a_modulo) noexcept
 		{
 			if (a_modulo == 0u) {
@@ -198,6 +211,11 @@ namespace CalamityAffixes
 			{ "rw_rain", "self_phoenix" },
 			{ "rw_ground", "self_phoenix" },
 		};
+
+		static_assert(!HasDuplicateOverrideIds(kRecommendedBaseOverrides),
+			"kRecommendedBaseOverrides must not contain duplicate recipe ids.");
+		static_assert(!HasDuplicateOverrideIds(kEffectSummaryOverrides),
+			"kEffectSummaryOverrides must not contain duplicate recipe ids.");
 	}
 
 	std::vector<EventBridge::RunewordRecipeEntry> EventBridge::GetRunewordRecipeEntries()

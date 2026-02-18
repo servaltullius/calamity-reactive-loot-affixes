@@ -24,6 +24,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/PrismaLayoutPersistence.h
 	    include/CalamityAffixes/PrismaTooltip.h
 	    include/CalamityAffixes/RunewordUtil.h
+	    include/CalamityAffixes/RunewordUiPolicy.h
 	    include/CalamityAffixes/TriggerGuards.h
 	    include/CalamityAffixes/TrapSystem.h
 	)

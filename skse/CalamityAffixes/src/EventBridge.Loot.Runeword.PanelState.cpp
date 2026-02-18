@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/RunewordUtil.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
@@ -61,7 +62,10 @@ namespace CalamityAffixes
 
 		if (panelState.insertedRunes >= panelState.totalRunes) {
 			// Legacy: allow finalization only when result can actually be applied.
-			panelState.canInsert = canApplyResult;
+			panelState.canInsert = CanFinalizeRunewordFromPanel(
+				panelState.insertedRunes,
+				panelState.totalRunes,
+				canApplyResult);
 			if (!canApplyResult) {
 				panelState.missingSummary = BuildRunewordApplyBlockMessage(applyBlockReason);
 			}
@@ -123,7 +127,7 @@ namespace CalamityAffixes
 			panelState.missingSummary = BuildRunewordApplyBlockMessage(applyBlockReason);
 		}
 
-		panelState.canInsert = ready && canApplyResult;
+		panelState.canInsert = CanInsertRunewordFromPanel(ready, canApplyResult);
 		return panelState;
 	}
 

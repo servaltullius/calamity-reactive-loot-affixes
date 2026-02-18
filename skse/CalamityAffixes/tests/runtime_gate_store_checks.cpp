@@ -3,6 +3,7 @@
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
+#include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/TriggerGuards.h"
 
 #include <algorithm>
@@ -783,7 +784,7 @@ namespace
 			// Completed runeword base must not persist mutable in-progress recipe state.
 			if (recipeUiSource.find("const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;") ==
 				    std::string::npos ||
-				recipeUiSource.find("if (completedBase)") == std::string::npos ||
+				recipeUiSource.find("ShouldClearRunewordInProgressState(completedBase)") == std::string::npos ||
 				recipeUiSource.find("_runewordInstanceStates.erase(selectedKey);") == std::string::npos) {
 				std::cerr << "runeword_completed_selection: completed-base state write guard is missing\n";
 				return false;
@@ -819,6 +820,9 @@ namespace
 				source.find("kEffectSummaryOverrides") == std::string::npos ||
 				source.find("FindKeyOverride(id, kRecommendedBaseOverrides)") == std::string::npos ||
 				source.find("FindKeyOverride(id, kEffectSummaryOverrides)") == std::string::npos ||
+				source.find("HasDuplicateOverrideIds(") == std::string::npos ||
+				source.find("static_assert(!HasDuplicateOverrideIds(kRecommendedBaseOverrides)") == std::string::npos ||
+				source.find("static_assert(!HasDuplicateOverrideIds(kEffectSummaryOverrides)") == std::string::npos ||
 				source.find("{ \"rw_spirit\", \"sword_shield\" }") == std::string::npos ||
 				source.find("{ \"rw_spirit\", \"self_meditation\" }") == std::string::npos) {
 				std::cerr << "runeword_recipe_entries_mapping: recipe-entry table mapping guard is missing\n";
@@ -864,7 +868,8 @@ namespace
 
 			if (panelSource.find("ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe)") == std::string::npos ||
 				panelSource.find("BuildRunewordApplyBlockMessage(applyBlockReason)") == std::string::npos ||
-				panelSource.find("panelState.canInsert = ready && canApplyResult;") == std::string::npos) {
+				panelSource.find("CanFinalizeRunewordFromPanel(") == std::string::npos ||
+				panelSource.find("CanInsertRunewordFromPanel(") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: panel canInsert/apply safety guard is missing\n";
 				return false;
 			}
@@ -898,6 +903,31 @@ namespace
 				transmuteSource.find("runeword result affix missing before transmute") == std::string::npos ||
 				transmuteSource.find("note.append(BuildRunewordApplyBlockMessage(blockReason));") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: transmute pre-consume safety guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckRunewordUiPolicyHelpers()
+		{
+			if (!CalamityAffixes::ShouldClearRunewordInProgressState(true) ||
+				CalamityAffixes::ShouldClearRunewordInProgressState(false)) {
+				std::cerr << "runeword_ui_policy: completed-base clear policy helper mismatch\n";
+				return false;
+			}
+
+			if (!CalamityAffixes::CanFinalizeRunewordFromPanel(3u, 3u, true) ||
+				CalamityAffixes::CanFinalizeRunewordFromPanel(2u, 3u, true) ||
+				CalamityAffixes::CanFinalizeRunewordFromPanel(3u, 3u, false)) {
+				std::cerr << "runeword_ui_policy: finalize helper mismatch\n";
+				return false;
+			}
+
+			if (!CalamityAffixes::CanInsertRunewordFromPanel(true, true) ||
+				CalamityAffixes::CanInsertRunewordFromPanel(true, false) ||
+				CalamityAffixes::CanInsertRunewordFromPanel(false, true)) {
+				std::cerr << "runeword_ui_policy: can-insert helper mismatch\n";
 				return false;
 			}
 
@@ -945,11 +975,13 @@ int main()
 	const bool lootChanceMcmSyncOk = CheckLootChanceMcmSyncPolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
+	const bool runewordUiPolicyHelpersOk = CheckRunewordUiPolicyHelpers();
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootChanceMcmSyncOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
+	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&
 	        runewordReforgeSafetyOk) ? 0 :
 	                                                             1;

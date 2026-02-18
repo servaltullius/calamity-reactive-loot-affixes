@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/RunewordUiPolicy.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <cstddef>
@@ -29,7 +30,7 @@ namespace CalamityAffixes
 			const auto selectedKey = *_runewordSelectedBaseKey;
 			const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;
 
-			if (completedBase) {
+			if (ShouldClearRunewordInProgressState(completedBase)) {
 				_runewordInstanceStates.erase(selectedKey);
 			} else {
 				auto& state = _runewordInstanceStates[selectedKey];
