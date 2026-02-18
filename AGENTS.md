@@ -54,6 +54,22 @@ This section is generated. Re-run pinning to update.
 - 프로젝트: `skse/CalamityAffixes/`
 - 출력 DLL: `Data/SKSE/Plugins/CalamityAffixes.dll`
 
+### 빌드 경로 분리 (중요, 실수 방지)
+
+- `linux-release-commonlibsse` 프리셋은 **테스트/정적체크 전용(g++)** 입니다. DLL 산출물 경로로 쓰지 않습니다.
+- 실제 DLL 빌드는 `skse/CalamityAffixes/build.linux-clangcl-rel` (clang-cl + lld-link + xwin) 을 사용합니다.
+- `fatal error: Windows.h: No such file or directory` 가 나오면 대체로 잘못된(g++) 빌드 경로를 사용한 신호입니다.
+
+권장 명령(WSL/Linux cross):
+
+```bash
+cd skse/CalamityAffixes
+cmake --build build.linux-clangcl-rel --target CalamityAffixes
+ctest --test-dir build.linux-clangcl-rel --output-on-failure
+cp -f build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
+sha256sum build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
+```
+
 ### Linux에서 cross (고급/실험)
 
 이 레포는 WSL/Linux에서 cross로 `CalamityAffixes.dll`을 만들 수 있게 설정되어 있습니다.

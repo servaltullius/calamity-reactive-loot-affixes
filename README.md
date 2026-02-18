@@ -184,6 +184,33 @@
 - 빌드 산출물: `CalamityAffixes.dll`
 - 설치 위치(스테이징): `Data/SKSE/Plugins/CalamityAffixes.dll`
 
+### 빌드 경로 선택 (실수 방지)
+
+- `linux-release-commonlibsse` 프리셋: 테스트/정적체크 용도(g++).
+- `build.linux-clangcl-rel`: 실제 Windows 타깃 DLL 산출용(WSL cross, `clang-cl + lld-link + xwin`).
+- Windows 환경에서는 Visual Studio Developer Command Prompt에서 빌드하는 경로를 권장합니다.
+
+`fatal error: Windows.h: No such file or directory` 발생 시:
+- 대부분 `g++` 경로(테스트 프리셋)로 DLL 빌드를 시도한 경우입니다.
+- DLL 빌드 경로를 `build.linux-clangcl-rel` 또는 Windows VS 경로로 전환하세요.
+
+### WSL/Linux cross로 DLL 빌드
+
+```bash
+cd skse/CalamityAffixes
+cmake --build build.linux-clangcl-rel --target CalamityAffixes
+ctest --test-dir build.linux-clangcl-rel --output-on-failure
+cp -f build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
+```
+
+최신 DLL 반영 확인:
+
+```bash
+sha256sum build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
+```
+
+두 해시가 동일하면 `Data/SKSE/Plugins/CalamityAffixes.dll`이 최신 산출물입니다.
+
 ### 최소 스모크 체크(레포 내에서 가능한 것)
 
 ```bash
