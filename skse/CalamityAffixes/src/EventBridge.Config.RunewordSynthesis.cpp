@@ -14,69 +14,83 @@ namespace CalamityAffixes
 
 	void EventBridge::RegisterSynthesizedAffix(AffixRuntime&& a_affix, bool a_warnOnDuplicate)
 	{
-			_affixes.push_back(std::move(a_affix));
-			const auto idx = _affixes.size() - 1;
-			const auto& affix = _affixes[idx];
+		if (a_affix.displayName.empty()) {
+			if (!a_affix.label.empty()) {
+				a_affix.displayName = a_affix.label;
+			} else {
+				a_affix.displayName = a_affix.id;
+			}
+		}
+		if (a_affix.displayNameEn.empty()) {
+			a_affix.displayNameEn = a_affix.displayName;
+		}
+		if (a_affix.displayNameKo.empty()) {
+			a_affix.displayNameKo = a_affix.displayName;
+		}
 
-			const bool isTriggerAction =
-				affix.action.type == ActionType::kDebugNotify ||
-				affix.action.type == ActionType::kCastSpell ||
-				affix.action.type == ActionType::kCastSpellAdaptiveElement ||
-				affix.action.type == ActionType::kSpawnTrap;
-			if (isTriggerAction) {
-				switch (affix.trigger) {
-				case Trigger::kHit:
-					_hitTriggerAffixIndices.push_back(idx);
-					break;
-				case Trigger::kIncomingHit:
-					_incomingHitTriggerAffixIndices.push_back(idx);
-					break;
-				case Trigger::kDotApply:
-					_dotApplyTriggerAffixIndices.push_back(idx);
-					break;
-				case Trigger::kKill:
-					_killTriggerAffixIndices.push_back(idx);
-					break;
+		_affixes.push_back(std::move(a_affix));
+		const auto idx = _affixes.size() - 1;
+		const auto& affix = _affixes[idx];
+
+		const bool isTriggerAction =
+			affix.action.type == ActionType::kDebugNotify ||
+			affix.action.type == ActionType::kCastSpell ||
+			affix.action.type == ActionType::kCastSpellAdaptiveElement ||
+			affix.action.type == ActionType::kSpawnTrap;
+		if (isTriggerAction) {
+			switch (affix.trigger) {
+			case Trigger::kHit:
+				_hitTriggerAffixIndices.push_back(idx);
+				break;
+			case Trigger::kIncomingHit:
+				_incomingHitTriggerAffixIndices.push_back(idx);
+				break;
+			case Trigger::kDotApply:
+				_dotApplyTriggerAffixIndices.push_back(idx);
+				break;
+			case Trigger::kKill:
+				_killTriggerAffixIndices.push_back(idx);
+				break;
+			}
+		}
+
+		if (!affix.id.empty()) {
+			const auto [it, inserted] = _affixIndexById.emplace(affix.id, idx);
+			if (!inserted && a_warnOnDuplicate) {
+				SKSE::log::warn(
+					"CalamityAffixes: synthesized affix id duplicated (id='{}', firstIdx={}, dupIdx={}).",
+					affix.id,
+					it->second,
+					idx);
+			}
+		}
+
+		if (affix.token != 0u) {
+			const auto [it, inserted] = _affixIndexByToken.emplace(affix.token, idx);
+			if (!inserted && a_warnOnDuplicate) {
+				SKSE::log::warn(
+					"CalamityAffixes: synthesized affix token duplicated (id='{}', firstIdx={}, dupIdx={}).",
+					affix.id,
+					it->second,
+					idx);
+			}
+		}
+
+		if (affix.lootType) {
+			if (affix.slot == AffixSlot::kSuffix) {
+				if (*affix.lootType == LootItemType::kWeapon) {
+					_lootWeaponSuffixes.push_back(idx);
+				} else if (*affix.lootType == LootItemType::kArmor) {
+					_lootArmorSuffixes.push_back(idx);
+				}
+			} else {
+				if (*affix.lootType == LootItemType::kWeapon) {
+					_lootWeaponAffixes.push_back(idx);
+				} else if (*affix.lootType == LootItemType::kArmor) {
+					_lootArmorAffixes.push_back(idx);
 				}
 			}
-
-			if (!affix.id.empty()) {
-				const auto [it, inserted] = _affixIndexById.emplace(affix.id, idx);
-				if (!inserted && a_warnOnDuplicate) {
-					SKSE::log::warn(
-						"CalamityAffixes: synthesized affix id duplicated (id='{}', firstIdx={}, dupIdx={}).",
-						affix.id,
-						it->second,
-						idx);
-				}
-			}
-
-			if (affix.token != 0u) {
-				const auto [it, inserted] = _affixIndexByToken.emplace(affix.token, idx);
-				if (!inserted && a_warnOnDuplicate) {
-					SKSE::log::warn(
-						"CalamityAffixes: synthesized affix token duplicated (id='{}', firstIdx={}, dupIdx={}).",
-						affix.id,
-						it->second,
-						idx);
-				}
-			}
-
-			if (affix.lootType) {
-				if (affix.slot == AffixSlot::kSuffix) {
-					if (*affix.lootType == LootItemType::kWeapon) {
-						_lootWeaponSuffixes.push_back(idx);
-					} else if (*affix.lootType == LootItemType::kArmor) {
-						_lootArmorSuffixes.push_back(idx);
-					}
-				} else {
-					if (*affix.lootType == LootItemType::kWeapon) {
-						_lootWeaponAffixes.push_back(idx);
-					} else if (*affix.lootType == LootItemType::kArmor) {
-						_lootArmorAffixes.push_back(idx);
-					}
-				}
-			}
+		}
 	}
 
 	void EventBridge::SynthesizeRunewordRuntimeAffixes()

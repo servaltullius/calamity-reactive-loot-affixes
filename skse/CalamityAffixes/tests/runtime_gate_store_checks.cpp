@@ -983,6 +983,34 @@ namespace
 			return true;
 		}
 
+		bool CheckSynthesizedAffixDisplayNameFallbackPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path synthesisFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RunewordSynthesis.cpp";
+
+			std::ifstream in(synthesisFile);
+			if (!in.is_open()) {
+				std::cerr << "synthesized_affix_displayname_fallback: failed to open source file: " << synthesisFile << "\n";
+				return false;
+			}
+
+			std::string source(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+
+			if (source.find("if (a_affix.displayName.empty()) {") == std::string::npos ||
+				source.find("if (a_affix.displayNameEn.empty()) {") == std::string::npos ||
+				source.find("if (a_affix.displayNameKo.empty()) {") == std::string::npos ||
+				source.find("a_affix.displayNameEn = a_affix.displayName;") == std::string::npos ||
+				source.find("a_affix.displayNameKo = a_affix.displayName;") == std::string::npos) {
+				std::cerr << "synthesized_affix_displayname_fallback: synthesized affix tooltip-name fallback guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
 		bool CheckRunewordTransmuteSafetyPolicy()
 		{
 			namespace fs = std::filesystem;
@@ -1201,6 +1229,7 @@ int main()
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
 	const bool runewordRecipeRuntimeEligibilityOk = CheckRunewordRecipeRuntimeEligibilityPolicy();
+	const bool synthesizedAffixDisplayNameFallbackOk = CheckSynthesizedAffixDisplayNameFallbackPolicy();
 	const bool runewordUiPolicyHelpersOk = CheckRunewordUiPolicyHelpers();
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
@@ -1211,6 +1240,7 @@ int main()
 	        lootRerollExploitGuardOk &&
 	        lootChanceMcmCleanupOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
 	        runewordRecipeRuntimeEligibilityOk &&
+	        synthesizedAffixDisplayNameFallbackOk &&
 	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&
 	        runewordReforgeSafetyOk &&
