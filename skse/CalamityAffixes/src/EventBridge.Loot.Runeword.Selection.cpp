@@ -518,34 +518,14 @@ namespace CalamityAffixes
 			panelState.totalRunes = static_cast<std::uint32_t>(recipe->runeTokens.size());
 			panelState.insertedRunes = std::min(inserted, panelState.totalRunes);
 
-			auto resolveApplyBlockReason = [&]() -> std::optional<std::string> {
-				const auto affixIt = _affixIndexByToken.find(recipe->resultAffixToken);
-				if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
-					return std::string("Runeword result affix missing");
-				}
-
-				if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
-					const auto& slots = it->second;
-					if (!slots.HasToken(recipe->resultAffixToken) &&
-						slots.count >= static_cast<std::uint8_t>(kMaxAffixesPerItem)) {
-						std::string reason = "Affix slots full (max ";
-						reason.append(std::to_string(kMaxAffixesPerItem));
-						reason.push_back(')');
-						return reason;
-					}
-				}
-
-				return std::nullopt;
-			};
-
-			const auto applyBlockReason = resolveApplyBlockReason();
-			const bool canApplyResult = !applyBlockReason.has_value();
+			const auto applyBlockReason = ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe);
+			const bool canApplyResult = applyBlockReason == RunewordApplyBlockReason::kNone;
 
 			if (panelState.insertedRunes >= panelState.totalRunes) {
 				// Legacy: allow finalization only when result can actually be applied.
 				panelState.canInsert = canApplyResult;
-				if (applyBlockReason) {
-					panelState.missingSummary = *applyBlockReason;
+				if (!canApplyResult) {
+					panelState.missingSummary = BuildRunewordApplyBlockMessage(applyBlockReason);
 				}
 				return panelState;
 			}
@@ -601,8 +581,8 @@ namespace CalamityAffixes
 
 			if (!missingSummary.empty()) {
 				panelState.missingSummary = std::move(missingSummary);
-			} else if (applyBlockReason) {
-				panelState.missingSummary = *applyBlockReason;
+			} else if (!canApplyResult) {
+				panelState.missingSummary = BuildRunewordApplyBlockMessage(applyBlockReason);
 			}
 
 			panelState.canInsert = ready && canApplyResult;

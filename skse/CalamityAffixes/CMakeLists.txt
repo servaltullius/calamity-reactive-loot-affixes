@@ -39,6 +39,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Loot.Runeword.Selection.cpp
 	    src/EventBridge.Loot.Runeword.Catalog.cpp
 	    src/EventBridge.Loot.Runeword.Crafting.cpp
+	    src/EventBridge.Loot.Runeword.Policy.cpp
 	    src/EventBridge.Loot.Runtime.cpp
 	    src/EventBridge.Loot.Assign.cpp
 	    src/EventBridge.Triggers.cpp

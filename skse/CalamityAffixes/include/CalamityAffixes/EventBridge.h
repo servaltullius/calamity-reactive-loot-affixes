@@ -657,6 +657,13 @@ namespace CalamityAffixes
 			float resistShock{ 0.0f };
 		};
 
+		enum class RunewordApplyBlockReason : std::uint8_t
+		{
+			kNone = 0,
+			kMissingResultAffix,
+			kAffixSlotsFull,
+		};
+
 		CorpseExplosionState _corpseExplosionState{};
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _corpseExplosionSeenCorpses;
 		CorpseExplosionState _summonCorpseExplosionState{};
@@ -687,6 +694,10 @@ namespace CalamityAffixes
 		[[nodiscard]] const RunewordRecipe* GetCurrentRunewordRecipe() const;
 		[[nodiscard]] const RunewordRecipe* ResolveCompletedRunewordRecipe(const InstanceAffixSlots& a_slots) const;
 		[[nodiscard]] const RunewordRecipe* ResolveCompletedRunewordRecipe(std::uint64_t a_instanceKey) const;
+		[[nodiscard]] RunewordApplyBlockReason ResolveRunewordApplyBlockReason(
+			std::uint64_t a_instanceKey,
+			const RunewordRecipe& a_recipe) const;
+		[[nodiscard]] static std::string BuildRunewordApplyBlockMessage(RunewordApplyBlockReason a_reason);
 		void InitializeRunewordCatalog();
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
 		[[nodiscard]] std::optional<float> LoadLootChancePercentFromMcmSettings() const;

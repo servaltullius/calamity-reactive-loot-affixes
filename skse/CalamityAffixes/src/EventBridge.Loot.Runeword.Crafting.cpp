@@ -378,8 +378,8 @@ namespace CalamityAffixes
 
 		void EventBridge::ApplyRunewordResult(std::uint64_t a_instanceKey, const RunewordRecipe& a_recipe)
 		{
-			const auto affixIt = _affixIndexByToken.find(a_recipe.resultAffixToken);
-			if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+			const auto blockReason = ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe);
+			if (blockReason == RunewordApplyBlockReason::kMissingResultAffix) {
 				std::string note = "Runeword failed: missing affix ";
 				note.append(a_recipe.displayName);
 				RE::DebugNotification(note.c_str());
@@ -389,9 +389,7 @@ namespace CalamityAffixes
 					a_recipe.resultAffixToken);
 				return;
 			}
-
-			auto& slots = _instanceAffixes[a_instanceKey];
-			if (!slots.PromoteTokenToPrimary(a_recipe.resultAffixToken)) {
+			if (blockReason == RunewordApplyBlockReason::kAffixSlotsFull) {
 				std::string note = "Runeword failed: base has max affixes";
 				RE::DebugNotification(note.c_str());
 				SKSE::log::warn(
@@ -399,6 +397,25 @@ namespace CalamityAffixes
 					a_instanceKey,
 					a_recipe.id,
 					kMaxAffixesPerItem);
+				return;
+			}
+
+			const auto affixIt = _affixIndexByToken.find(a_recipe.resultAffixToken);
+			if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+				SKSE::log::error(
+					"CalamityAffixes: runeword result affix became invalid after policy check (recipe={}, resultToken={:016X}).",
+					a_recipe.id,
+					a_recipe.resultAffixToken);
+				return;
+			}
+
+			auto& slots = _instanceAffixes[a_instanceKey];
+			if (!slots.PromoteTokenToPrimary(a_recipe.resultAffixToken)) {
+				SKSE::log::error(
+					"CalamityAffixes: runeword promote-to-primary failed after policy check (instance={:016X}, recipe={}, resultToken={:016X}).",
+					a_instanceKey,
+					a_recipe.id,
+					a_recipe.resultAffixToken);
 				return;
 			}
 
@@ -470,8 +487,8 @@ namespace CalamityAffixes
 				return;
 			}
 
-			const auto resultAffixIt = _affixIndexByToken.find(recipe->resultAffixToken);
-			if (resultAffixIt == _affixIndexByToken.end() || resultAffixIt->second >= _affixes.size()) {
+			const auto blockReason = ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe);
+			if (blockReason == RunewordApplyBlockReason::kMissingResultAffix) {
 				std::string note = "Runeword failed: missing affix ";
 				note.append(recipe->displayName);
 				RE::DebugNotification(note.c_str());
@@ -481,17 +498,11 @@ namespace CalamityAffixes
 					recipe->resultAffixToken);
 				return;
 			}
-
-			if (const auto it = _instanceAffixes.find(*_runewordSelectedBaseKey); it != _instanceAffixes.end()) {
-				const auto& slots = it->second;
-				if (!slots.HasToken(recipe->resultAffixToken) &&
-					slots.count >= static_cast<std::uint8_t>(kMaxAffixesPerItem)) {
-					std::string note = "Runeword blocked: affix slots full (max ";
-					note.append(std::to_string(kMaxAffixesPerItem));
-					note.push_back(')');
-					RE::DebugNotification(note.c_str());
-					return;
-				}
+			if (blockReason == RunewordApplyBlockReason::kAffixSlotsFull) {
+				std::string note = "Runeword blocked: ";
+				note.append(BuildRunewordApplyBlockMessage(blockReason));
+				RE::DebugNotification(note.c_str());
+				return;
 			}
 
 			const auto totalRunes = recipe->runeTokens.size();

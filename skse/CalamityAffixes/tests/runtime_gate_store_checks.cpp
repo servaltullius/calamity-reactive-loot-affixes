@@ -775,6 +775,7 @@ namespace
 			const fs::path testFile{ __FILE__ };
 			const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
 			const fs::path craftingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Crafting.cpp";
+			const fs::path policyFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Policy.cpp";
 
 			std::ifstream selectionIn(selectionFile);
 			if (!selectionIn.is_open()) {
@@ -785,10 +786,25 @@ namespace
 				(std::istreambuf_iterator<char>(selectionIn)),
 				std::istreambuf_iterator<char>());
 
-			if (selectionSource.find("panelState.canInsert = ready && canApplyResult;") == std::string::npos ||
-				selectionSource.find("Affix slots full (max ") == std::string::npos ||
-				selectionSource.find("Runeword result affix missing") == std::string::npos) {
+			if (selectionSource.find("ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe)") == std::string::npos ||
+				selectionSource.find("BuildRunewordApplyBlockMessage(applyBlockReason)") == std::string::npos ||
+				selectionSource.find("panelState.canInsert = ready && canApplyResult;") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: panel canInsert/apply safety guard is missing\n";
+				return false;
+			}
+
+			std::ifstream policyIn(policyFile);
+			if (!policyIn.is_open()) {
+				std::cerr << "runeword_transmute_safety: failed to open policy source: " << policyFile << "\n";
+				return false;
+			}
+			std::string policySource(
+				(std::istreambuf_iterator<char>(policyIn)),
+				std::istreambuf_iterator<char>());
+
+			if (policySource.find("Runeword result affix missing") == std::string::npos ||
+				policySource.find("Affix slots full (max ") == std::string::npos) {
+				std::cerr << "runeword_transmute_safety: policy messages for apply block reasons are missing\n";
 				return false;
 			}
 
@@ -801,8 +817,10 @@ namespace
 				(std::istreambuf_iterator<char>(craftingIn)),
 				std::istreambuf_iterator<char>());
 
-			if (craftingSource.find("runeword result affix missing before transmute") == std::string::npos ||
-				craftingSource.find("Runeword blocked: affix slots full (max ") == std::string::npos) {
+			if (craftingSource.find("ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe)") == std::string::npos ||
+				craftingSource.find("ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe)") == std::string::npos ||
+				craftingSource.find("runeword result affix missing before transmute") == std::string::npos ||
+				craftingSource.find("note.append(BuildRunewordApplyBlockMessage(blockReason));") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: transmute pre-consume safety guard is missing\n";
 				return false;
 			}
