@@ -9,6 +9,10 @@ Scriptname CalamityAffixes_MCMConfig extends MCM_ConfigBase
 int Property LocalFormIdModulo = 16777216 AutoReadOnly Hidden ; 0x01000000
 string Property PluginFileName = "CalamityAffixes.esp" AutoReadOnly Hidden
 string Property LeaderTokenSettingName = "iMcmLeaderToken:General" AutoReadOnly Hidden
+string Property RunewordFragmentChanceSettingName = "fRunewordFragmentChancePercent:General" AutoReadOnly Hidden
+string Property ReforgeOrbChanceSettingName = "fReforgeOrbChancePercent:General" AutoReadOnly Hidden
+float Property RunewordFragmentChanceDefault = 8.0 AutoReadOnly Hidden
+float Property ReforgeOrbChanceDefault = 3.0 AutoReadOnly Hidden
 
 bool _didLeaderElection = false
 bool _isSessionLeader = false
@@ -59,6 +63,7 @@ Event OnGameReload()
 	endif
 
 	Parent.OnGameReload()
+	SyncRuntimeDropChanceSettings()
 EndEvent
 
 Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
@@ -72,6 +77,7 @@ Event OnConfigManagerReady(string a_eventName, string a_strArg, float a_numArg, 
 	endif
 
 	Parent.OnConfigManagerReady(a_eventName, a_strArg, a_numArg, a_sender)
+	SyncRuntimeDropChanceSettings()
 EndEvent
 
 Event OnConfigManagerReset(string a_eventName, string a_strArg, float a_numArg, Form a_sender)
@@ -89,6 +95,34 @@ Event OnConfigManagerReset(string a_eventName, string a_strArg, float a_numArg, 
 	Parent.OnConfigManagerReset(a_eventName, a_strArg, a_numArg, a_sender)
 EndEvent
 
+Event OnSettingChange(string a_ID)
+	if !IsCanonicalMcmQuest()
+		return
+	endif
+
+	if !EnsureSessionLeader()
+		return
+	endif
+
+	if a_ID == RunewordFragmentChanceSettingName || a_ID == ReforgeOrbChanceSettingName
+		SyncRuntimeDropChanceSettings()
+	endif
+EndEvent
+
+Function SyncRuntimeDropChanceSettings()
+	float runewordChance = GetModSettingFloat(RunewordFragmentChanceSettingName)
+	if runewordChance < 0.0
+		runewordChance = RunewordFragmentChanceDefault
+	endif
+	SetRunewordFragmentChancePercent(runewordChance)
+
+	float reforgeChance = GetModSettingFloat(ReforgeOrbChanceSettingName)
+	if reforgeChance < 0.0
+		reforgeChance = ReforgeOrbChanceDefault
+	endif
+	SetReforgeOrbChancePercent(reforgeChance)
+EndFunction
+
 Function SetEnabled(bool a_enabled)
 	CalamityAffixes_ModeControl.SetEnabled(a_enabled)
 EndFunction
@@ -103,6 +137,14 @@ EndFunction
 
 Function SetProcChanceMultiplier(float a_mult)
 	CalamityAffixes_ModeControl.SetProcChanceMultiplier(a_mult)
+EndFunction
+
+Function SetRunewordFragmentChancePercent(float a_percent)
+	CalamityAffixes_ModeControl.SetRunewordFragmentChancePercent(a_percent)
+EndFunction
+
+Function SetReforgeOrbChancePercent(float a_percent)
+	CalamityAffixes_ModeControl.SetReforgeOrbChancePercent(a_percent)
 EndFunction
 
 Function SetLootChancePercent(float a_percent)

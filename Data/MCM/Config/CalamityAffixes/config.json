@@ -89,6 +89,48 @@
           }
         },
         {
+          "type": "slider",
+          "id": "fRunewordFragmentChancePercent:General",
+          "text": "Runeword Fragment Chance / 룬워드 조각 확률",
+          "help": "Pickup chance (%) for runeword fragments. / 룬워드 조각 획득 확률(%)입니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 8.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 0.5,
+            "formatString": "%.1f%%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetRunewordFragmentChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fReforgeOrbChancePercent:General",
+          "text": "Reforge Orb Chance / 재련 오브 확률",
+          "help": "Pickup chance (%) for reforge orbs. / 재련 오브 획득 확률(%)입니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 3.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 0.5,
+            "formatString": "%.1f%%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetReforgeOrbChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
           "type": "toggle",
           "id": "bDotSafetyAutoDisable:General",
           "text": "Dot Safety Auto-Disable / DoT 안전 자동비활성",

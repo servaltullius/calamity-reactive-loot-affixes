@@ -467,6 +467,8 @@ namespace CalamityAffixes
 		static constexpr std::string_view kMcmSetDebugNotificationsEvent = "CalamityAffixes_MCM_SetDebugNotifications";
 		static constexpr std::string_view kMcmSetValidationIntervalEvent = "CalamityAffixes_MCM_SetValidationInterval";
 		static constexpr std::string_view kMcmSetProcChanceMultEvent = "CalamityAffixes_MCM_SetProcChanceMult";
+		static constexpr std::string_view kMcmSetRunewordFragmentChanceEvent = "CalamityAffixes_MCM_SetRunewordFragmentChance";
+		static constexpr std::string_view kMcmSetReforgeOrbChanceEvent = "CalamityAffixes_MCM_SetReforgeOrbChance";
 		static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = "CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc";
 		static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";

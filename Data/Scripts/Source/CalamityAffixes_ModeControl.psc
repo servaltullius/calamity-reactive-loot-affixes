@@ -37,6 +37,14 @@ Function SetProcChanceMultiplier(float a_mult) global
 	Emit("CalamityAffixes_MCM_SetProcChanceMult", "", a_mult)
 EndFunction
 
+Function SetRunewordFragmentChancePercent(float a_percent) global
+	Emit("CalamityAffixes_MCM_SetRunewordFragmentChance", "", a_percent)
+EndFunction
+
+Function SetReforgeOrbChancePercent(float a_percent) global
+	Emit("CalamityAffixes_MCM_SetReforgeOrbChance", "", a_percent)
+EndFunction
+
 Function SetLootChancePercent(float a_percent) global
 	; Legacy no-op (pickup affix auto-assignment removed by design).
 	; Kept for backward compatibility with older MCM configs that may still call this function.

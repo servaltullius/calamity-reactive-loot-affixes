@@ -837,6 +837,93 @@ namespace
 		return true;
 	}
 
+	bool CheckMcmDropChanceRuntimeBridgePolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path().parent_path().parent_path();
+		const fs::path configJsonFile = repoRoot / "Data" / "MCM" / "Config" / "CalamityAffixes" / "config.json";
+		const fs::path mcmConfigScriptFile = repoRoot / "Data" / "Scripts" / "Source" / "CalamityAffixes_MCMConfig.psc";
+		const fs::path modeControlScriptFile = repoRoot / "Data" / "Scripts" / "Source" / "CalamityAffixes_ModeControl.psc";
+		const fs::path eventBridgeHeaderFile = repoRoot / "skse" / "CalamityAffixes" / "include" / "CalamityAffixes" / "EventBridge.h";
+		const fs::path triggerEventsFile = repoRoot / "skse" / "CalamityAffixes" / "src" / "EventBridge.Triggers.Events.cpp";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto configJsonText = loadText(configJsonFile);
+		if (!configJsonText.has_value()) {
+			std::cerr << "mcm_drop_chance_bridge: failed to open MCM config: " << configJsonFile << "\n";
+			return false;
+		}
+		if (configJsonText->find("\"id\": \"fRunewordFragmentChancePercent:General\"") == std::string::npos ||
+			configJsonText->find("\"function\": \"SetRunewordFragmentChancePercent\"") == std::string::npos ||
+			configJsonText->find("\"id\": \"fReforgeOrbChancePercent:General\"") == std::string::npos ||
+			configJsonText->find("\"function\": \"SetReforgeOrbChancePercent\"") == std::string::npos) {
+			std::cerr << "mcm_drop_chance_bridge: MCM slider/action wiring is missing\n";
+			return false;
+		}
+
+		const auto mcmConfigText = loadText(mcmConfigScriptFile);
+		if (!mcmConfigText.has_value()) {
+			std::cerr << "mcm_drop_chance_bridge: failed to open MCM script: " << mcmConfigScriptFile << "\n";
+			return false;
+		}
+		if (mcmConfigText->find("Event OnSettingChange(string a_ID)") == std::string::npos ||
+			mcmConfigText->find("a_ID == RunewordFragmentChanceSettingName || a_ID == ReforgeOrbChanceSettingName") == std::string::npos ||
+			mcmConfigText->find("float runewordChance = GetModSettingFloat(RunewordFragmentChanceSettingName)") == std::string::npos ||
+			mcmConfigText->find("runewordChance = RunewordFragmentChanceDefault") == std::string::npos ||
+			mcmConfigText->find("float reforgeChance = GetModSettingFloat(ReforgeOrbChanceSettingName)") == std::string::npos ||
+			mcmConfigText->find("reforgeChance = ReforgeOrbChanceDefault") == std::string::npos) {
+			std::cerr << "mcm_drop_chance_bridge: MCM setting-change/sentinel fallback guard is missing\n";
+			return false;
+		}
+
+		const auto modeControlText = loadText(modeControlScriptFile);
+		if (!modeControlText.has_value()) {
+			std::cerr << "mcm_drop_chance_bridge: failed to open mode-control script: " << modeControlScriptFile << "\n";
+			return false;
+		}
+		if (modeControlText->find("Emit(\"CalamityAffixes_MCM_SetRunewordFragmentChance\"") == std::string::npos ||
+			modeControlText->find("Emit(\"CalamityAffixes_MCM_SetReforgeOrbChance\"") == std::string::npos) {
+			std::cerr << "mcm_drop_chance_bridge: mode-control mod-event bridge is missing\n";
+			return false;
+		}
+
+		const auto eventBridgeHeaderText = loadText(eventBridgeHeaderFile);
+		if (!eventBridgeHeaderText.has_value()) {
+			std::cerr << "mcm_drop_chance_bridge: failed to open EventBridge header: " << eventBridgeHeaderFile << "\n";
+			return false;
+		}
+		if (eventBridgeHeaderText->find("kMcmSetRunewordFragmentChanceEvent") == std::string::npos ||
+			eventBridgeHeaderText->find("kMcmSetReforgeOrbChanceEvent") == std::string::npos) {
+			std::cerr << "mcm_drop_chance_bridge: EventBridge event constants are missing\n";
+			return false;
+		}
+
+		const auto triggerText = loadText(triggerEventsFile);
+		if (!triggerText.has_value()) {
+			std::cerr << "mcm_drop_chance_bridge: failed to open trigger source: " << triggerEventsFile << "\n";
+			return false;
+		}
+		if (triggerText->find("eventName == kMcmSetRunewordFragmentChanceEvent") == std::string::npos ||
+			triggerText->find("_loot.runewordFragmentChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);") == std::string::npos ||
+			triggerText->find("eventName == kMcmSetReforgeOrbChanceEvent") == std::string::npos ||
+			triggerText->find("_loot.reforgeOrbChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);") == std::string::npos) {
+			std::cerr << "mcm_drop_chance_bridge: trigger event handlers are missing\n";
+			return false;
+		}
+
+		return true;
+	}
+
 		bool CheckRunewordCompletedSelectionPolicy()
 		{
 			namespace fs = std::filesystem;
@@ -1239,6 +1326,7 @@ int main()
 	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
 	const bool lootRerollExploitGuardOk = CheckLootRerollExploitGuardPolicy();
 	const bool lootChanceMcmCleanupOk = CheckLootChanceMcmCleanupPolicy();
+	const bool mcmDropChanceBridgeOk = CheckMcmDropChanceRuntimeBridgePolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
 	const bool runewordRecipeRuntimeEligibilityOk = CheckRunewordRecipeRuntimeEligibilityPolicy();
@@ -1251,7 +1339,9 @@ int main()
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
 	        lootRerollExploitGuardOk &&
-	        lootChanceMcmCleanupOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
+	        lootChanceMcmCleanupOk &&
+	        mcmDropChanceBridgeOk &&
+	        runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
 	        runewordRecipeRuntimeEligibilityOk &&
 	        synthesizedAffixDisplayNameFallbackOk &&
 	        runewordUiPolicyHelpersOk &&

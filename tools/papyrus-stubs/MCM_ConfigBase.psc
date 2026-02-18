@@ -24,3 +24,10 @@ EndFunction
 
 Function SetModSettingInt(string a_settingName, int a_value)
 EndFunction
+
+float Function GetModSettingFloat(string a_settingName)
+	Return 0.0
+EndFunction
+
+Function SetModSettingFloat(string a_settingName, float a_value)
+EndFunction
