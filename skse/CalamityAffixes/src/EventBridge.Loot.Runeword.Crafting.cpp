@@ -100,7 +100,37 @@ namespace CalamityAffixes
 				RE::DebugNotification(note.c_str());
 			}
 
-		void EventBridge::MaybeGrantRandomRunewordFragment()
+		void EventBridge::GrantReforgeOrbs(std::uint32_t a_amount)
+		{
+			if (!_configLoaded || a_amount == 0u) {
+				return;
+			}
+
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!player) {
+				return;
+			}
+
+			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+			if (!orb) {
+				SKSE::log::error("CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
+				return;
+			}
+
+			const auto maxGive = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
+			const auto give = (a_amount > maxGive) ? maxGive : a_amount;
+			player->AddObjectToContainer(orb, nullptr, static_cast<std::int32_t>(give), nullptr);
+
+			const auto owned = std::max(0, player->GetItemCount(orb));
+			std::string note = "Reforge Orbs +";
+			note.append(std::to_string(give));
+			note.append(" (");
+			note.append(std::to_string(owned));
+			note.push_back(')');
+			RE::DebugNotification(note.c_str());
+		}
+
+		void EventBridge::MaybeGrantRandomRunewordFragment(float a_sourceChanceMultiplier)
 		{
 			if (_runewordRuneTokenPool.empty()) {
 				return;
@@ -108,11 +138,26 @@ namespace CalamityAffixes
 
 			const float chance = std::clamp(_loot.runewordFragmentChancePercent, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
+				_runewordFragmentFailStreak = 0;
+				return;
+			}
+			const float sourceChanceMultiplier = std::max(0.0f, a_sourceChanceMultiplier);
+			const float effectiveChance = std::clamp(chance * sourceChanceMultiplier, 0.0f, 100.0f);
+			if (effectiveChance <= 0.0f) {
 				return;
 			}
 
-			std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
-			if (chanceDist(_rng) >= chance) {
+			const bool pityTriggered = (_runewordFragmentFailStreak >= kRunewordFragmentPityFailThreshold);
+			bool grant = pityTriggered;
+			if (!grant) {
+				std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
+				grant = (chanceDist(_rng) < effectiveChance);
+			}
+
+			if (!grant) {
+				if (_runewordFragmentFailStreak < std::numeric_limits<std::uint32_t>::max()) {
+					++_runewordFragmentFailStreak;
+				}
 				return;
 			}
 
@@ -143,47 +188,53 @@ namespace CalamityAffixes
 						runeName);
 					return;
 				}
+				_runewordFragmentFailStreak = 0;
 
 				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, runeToken);
 
 				std::string note = "Runeword Fragment: ";
 				note.append(runeName);
+				if (pityTriggered) {
+					note.append(" [Pity]");
+				}
 				note.append(" (");
 				note.append(std::to_string(owned));
 				note.push_back(')');
 				RE::DebugNotification(note.c_str());
 			}
 
-		void EventBridge::MaybeGrantRandomReforgeOrb()
+		void EventBridge::MaybeGrantRandomReforgeOrb(float a_sourceChanceMultiplier)
 		{
 			const float chance = std::clamp(_loot.reforgeOrbChancePercent, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
+				_reforgeOrbFailStreak = 0;
+				return;
+			}
+			const float sourceChanceMultiplier = std::max(0.0f, a_sourceChanceMultiplier);
+			const float effectiveChance = std::clamp(chance * sourceChanceMultiplier, 0.0f, 100.0f);
+			if (effectiveChance <= 0.0f) {
 				return;
 			}
 
-			std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
-			if (chanceDist(_rng) >= chance) {
+			const bool pityTriggered = (_reforgeOrbFailStreak >= kReforgeOrbPityFailThreshold);
+			bool grant = pityTriggered;
+			if (!grant) {
+				std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
+				grant = (chanceDist(_rng) < effectiveChance);
+			}
+
+			if (!grant) {
+				if (_reforgeOrbFailStreak < std::numeric_limits<std::uint32_t>::max()) {
+					++_reforgeOrbFailStreak;
+				}
 				return;
 			}
 
-			auto* player = RE::PlayerCharacter::GetSingleton();
-			if (!player) {
-				return;
+			GrantReforgeOrbs(1u);
+			_reforgeOrbFailStreak = 0;
+			if (pityTriggered && _loot.debugLog) {
+				SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");
 			}
-
-			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
-			if (!orb) {
-				SKSE::log::error("CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
-				return;
-			}
-
-			player->AddObjectToContainer(orb, nullptr, 1, nullptr);
-			const auto owned = std::max(0, player->GetItemCount(orb));
-
-			std::string note = "Reforge Orb (";
-			note.append(std::to_string(owned));
-			note.push_back(')');
-			RE::DebugNotification(note.c_str());
 		}
 
 		void EventBridge::LogRunewordStatus() const

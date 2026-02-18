@@ -8,12 +8,13 @@ Player-centric ARPG-style instance affix mod for Skyrim SE/AE
 
 ### 모드 소개
 Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG 스타일 어픽스 모드입니다.
-아이템을 획득하거나 제작해 플레이어 인벤토리로 들어오는 순간, 아이템 인스턴스(ExtraUniqueID) 기준으로 **1~3개의 어픽스**를 롤링합니다.
+아이템 인스턴스(ExtraUniqueID) 단위로 상태를 추적하며, 기본 정책은 자동 어픽스 드랍이 아니라 **재련(Reforge) 중심**입니다.
 
 ### 핵심 기능
 
 #### 다중 어픽스 시스템
-- 아이템당 **1~3개** 어픽스 부여 (70% / 25% / 5%)
+- 기본 자동 어픽스 부여 없이, 재련 경로에서 일반 어픽스를 부여/재롤
+- 슬롯 모델: **룬워드 1 + 일반 어픽스 최대 3**
 - 아이템 이름에 **★ / ★★ / ★★★** 표시로 어픽스 수 구분
 - **Prefix (57개)**: 전투 중 확률 발동(Proc) 효과 — Firestorm, Thunderbolt, Soul Trap 등
 - **Suffix (60개)**: 장비 착용 시 상시 적용되는 패시브 스탯 보너스 — 체력 +50, 화염 저항 +10% 등
@@ -28,7 +29,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 #### 룬워드
 - **94개 레시피**, Diablo 2 스타일 룬 조합 시스템
 - 룬 프래그먼트 수집 → 레시피 완성 → 장비에 적용
-- 적용 시 기존 어픽스를 교체 (ReplaceAll)
+- 완성 룬워드 장비도 재련 가능하며, 재련 시 룬워드 1개 + 일반 어픽스 최대 3개를 함께 재롤
 - Prisma UI에서 진행 상태 확인 가능
 
 #### UI & 설정
@@ -76,12 +77,13 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 ### Overview
 Calamity - Reactive Loot & Affixes is a player-centric ARPG-style affix mod for Skyrim SE/AE.
-When an item is looted or crafted and enters the player inventory, **1 to 3 affixes** are rolled per item instance (ExtraUniqueID).
+The mod tracks item instances via ExtraUniqueID and currently uses a **Reforge-centric** model rather than auto-rolling affixes on pickup.
 
 ### Core Features
 
 #### Multi-Affix System
-- **1 to 3 affixes** per item (70% / 25% / 5%)
+- No default auto-affix assignment on pickup; affixes are granted/rerolled via Reforge
+- Slot model: **1 runeword + up to 3 regular affixes**
 - Items display **★ / ★★ / ★★★** prefix to indicate affix count
 - **Prefix (57)**: Combat proc effects — Firestorm, Thunderbolt, Soul Trap, etc.
 - **Suffix (60)**: Passive stat bonuses while equipped — Health +50, Fire Resist +10%, etc.
@@ -96,7 +98,7 @@ When an item is looted or crafted and enters the player inventory, **1 to 3 affi
 #### Runewords
 - **94 recipes**, Diablo 2-style rune combination system
 - Collect rune fragments → complete recipe → apply to equipment
-- Replaces all existing affixes on application (ReplaceAll)
+- Completed runeword items can also be reforged; reforge rerolls 1 runeword + up to 3 regular affixes
 - Track progress via Prisma UI panel
 
 #### UI & Settings

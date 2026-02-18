@@ -73,6 +73,7 @@ namespace CalamityAffixes::PrismaTooltip
 		constexpr std::string_view kRunewordStatusEvent = "CalamityAffixes_Runeword_Status";
 		constexpr std::string_view kRunewordGrantNextRuneEvent = "CalamityAffixes_Runeword_GrantNextRune";
 		constexpr std::string_view kRunewordGrantRecipeSetEvent = "CalamityAffixes_Runeword_GrantRecipeSet";
+		constexpr std::string_view kRunewordGrantStarterOrbsEvent = "CalamityAffixes_Runeword_GrantStarterOrbs";
 		constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 
 		std::atomic_bool g_installed{ false };

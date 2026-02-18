@@ -15,11 +15,27 @@ namespace CalamityAffixes::detail
 		"lootbox"
 	};
 
+	inline constexpr std::array<std::string_view, 3> kDefaultBossContainerEditorIdAllowContains{
+		"bosschest",
+		"boss_chest",
+		"boss"
+	};
+
 	[[nodiscard]] inline std::vector<std::string> MakeDefaultLootArmorEditorIdDenyContains()
 	{
 		std::vector<std::string> out;
 		out.reserve(kDefaultLootArmorEditorIdDenyContains.size());
 		for (const auto marker : kDefaultLootArmorEditorIdDenyContains) {
+			out.emplace_back(marker);
+		}
+		return out;
+	}
+
+	[[nodiscard]] inline std::vector<std::string> MakeDefaultBossContainerEditorIdAllowContains()
+	{
+		std::vector<std::string> out;
+		out.reserve(kDefaultBossContainerEditorIdAllowContains.size());
+		for (const auto marker : kDefaultBossContainerEditorIdAllowContains) {
 			out.emplace_back(marker);
 		}
 		return out;

@@ -193,6 +193,9 @@
 			} else if (a_command == "runeword.grant.set") {
 				sent = EmitModEvent(kRunewordGrantRecipeSetEvent, {}, 1.0f);
 				feedback = "Debug -> +1 recipe set";
+			} else if (a_command == "runeword.grant.orb3") {
+				sent = EmitModEvent(kRunewordGrantStarterOrbsEvent, {}, 3.0f);
+				feedback = "Debug -> +3 reforge orbs";
 			} else if (a_command == "spawn.test") {
 				sent = EmitModEvent(kMcmSpawnTestItemEvent, {}, 1.0f);
 				feedback = "Spawned test item request";

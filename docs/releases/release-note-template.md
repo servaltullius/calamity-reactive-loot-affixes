@@ -65,7 +65,7 @@
   - D Suppression/ICD: PASS/FAIL
   - E DotApply: PASS/FAIL
   - F Scope: PASS/FAIL
-  - G Reforge Orb: PASS/FAIL (오브 획득/소모/무어픽스 재련/완성 룬워드 차단)
+  - G Reforge Orb: PASS/FAIL (오브 획득/소모/무어픽스 재련/완성 룬워드 재롤)
 
 ## 알려진 이슈 / 다음 단계
 

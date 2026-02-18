@@ -457,6 +457,7 @@ namespace CalamityAffixes
 		static constexpr std::string_view kRunewordStatusEvent = "CalamityAffixes_Runeword_Status";
 		static constexpr std::string_view kRunewordGrantNextRuneEvent = "CalamityAffixes_Runeword_GrantNextRune";
 		static constexpr std::string_view kRunewordGrantRecipeSetEvent = "CalamityAffixes_Runeword_GrantRecipeSet";
+		static constexpr std::string_view kRunewordGrantStarterOrbsEvent = "CalamityAffixes_Runeword_GrantStarterOrbs";
 		static constexpr std::string_view kUiSetPanelEvent = "CalamityAffixes_UI_SetPanel";
 		static constexpr std::string_view kUiTogglePanelEvent = "CalamityAffixes_UI_TogglePanel";
 		static constexpr std::string_view kMcmSetEnabledEvent = "CalamityAffixes_MCM_SetEnabled";
@@ -471,6 +472,8 @@ namespace CalamityAffixes
 		static constexpr std::array<float, kMaxRegularAffixesPerItem> kAffixCountWeights = { 70.0f, 22.0f, 8.0f };
 		static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f, 0.5f };
 		static constexpr std::uint32_t kLootChancePityFailThreshold = 3u;
+		static constexpr std::uint32_t kRunewordFragmentPityFailThreshold = 99u;
+		static constexpr std::uint32_t kReforgeOrbPityFailThreshold = 24u;
 		static constexpr std::size_t kLootEvaluatedRecentKeep = 2048;
 		static constexpr std::size_t kLootEvaluatedPruneEveryInserts = 128;
 		static constexpr std::size_t kLootPreviewCacheMax = 1024;
@@ -504,6 +507,10 @@ namespace CalamityAffixes
 			float chancePercent{ 0.0f };
 			float runewordFragmentChancePercent{ 1.0f };
 			float reforgeOrbChancePercent{ 6.0f };
+			float lootSourceChanceMultCorpse{ 0.80f };
+			float lootSourceChanceMultContainer{ 1.00f };
+			float lootSourceChanceMultBossContainer{ 1.35f };
+			float lootSourceChanceMultWorld{ 1.00f };
 			bool renameItem{ false };
 			bool sharedPool{ false };
 			bool debugLog{ false };
@@ -516,6 +523,8 @@ namespace CalamityAffixes
 			bool cleanupInvalidLegacyAffixes{ true };
 			bool stripTrackedSuffixSlots{ true };
 			std::vector<std::string> armorEditorIdDenyContains{};
+			std::vector<std::string> bossContainerEditorIdAllowContains{};
+			std::vector<std::string> bossContainerEditorIdDenyContains{};
 			std::string nameFormat{ "{base} [{affix}]" };
 			LootNameMarkerPosition nameMarkerPosition{ LootNameMarkerPosition::kTrailing };
 		};
@@ -585,6 +594,8 @@ namespace CalamityAffixes
 		std::deque<std::uint64_t> _lootEvaluatedRecent;
 		std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
 		std::uint32_t _lootChanceEligibleFailStreak{ 0 };
+		std::uint32_t _runewordFragmentFailStreak{ 0 };
+		std::uint32_t _reforgeOrbFailStreak{ 0 };
 		std::vector<float> _activeSlotPenalty;
 		std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash> _instanceStates;
 		std::unordered_map<std::uint64_t, std::vector<std::uint64_t>> _equippedInstanceKeysByToken;
@@ -752,8 +763,9 @@ namespace CalamityAffixes
 		void InsertRunewordRuneIntoSelectedBase();
 		void GrantNextRequiredRuneFragment(std::uint32_t a_amount = 1u);
 		void GrantCurrentRecipeRuneSet(std::uint32_t a_amount = 1u);
-		void MaybeGrantRandomRunewordFragment();
-		void MaybeGrantRandomReforgeOrb();
+		void GrantReforgeOrbs(std::uint32_t a_amount = 1u);
+		void MaybeGrantRandomRunewordFragment(float a_sourceChanceMultiplier = 1.0f);
+		void MaybeGrantRandomReforgeOrb(float a_sourceChanceMultiplier = 1.0f);
 		void ApplyRunewordResult(std::uint64_t a_instanceKey, const RunewordRecipe& a_recipe);
 		void LogRunewordStatus() const;
 		InstanceRuntimeState& EnsureInstanceRuntimeState(std::uint64_t a_instanceKey, std::uint64_t a_affixToken);

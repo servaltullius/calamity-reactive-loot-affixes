@@ -224,9 +224,11 @@ namespace CalamityAffixes
 		_castOnCritCycleCursor = 0;
 		_equipResync.nextAtMs = 0;
 		_equipResync.intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count());
-		_loot = {};
-		_lootChanceEligibleFailStreak = 0;
-		_runtimeEnabled = true;
+			_loot = {};
+			_lootChanceEligibleFailStreak = 0;
+			_runewordFragmentFailStreak = 0;
+			_reforgeOrbFailStreak = 0;
+			_runtimeEnabled = true;
 		_runtimeProcChanceMult = 1.0f;
 		_allowNonHostilePlayerOwnedOutgoingProcs.store(false, std::memory_order_relaxed);
 		_lootRerollGuard.Reset();
@@ -957,13 +959,17 @@ namespace CalamityAffixes
 		RebuildActiveCounts();
 
 			SKSE::log::info(
-				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
+				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, sourceMult(corpse/container/boss/world)={:.2f}/{:.2f}/{:.2f}/{:.2f}, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
 				_affixes.size(),
 				_lootWeaponAffixes.size(), _lootArmorAffixes.size(),
 				_lootWeaponSuffixes.size(), _lootArmorSuffixes.size(),
 				_loot.chancePercent,
 				_loot.runewordFragmentChancePercent,
 				_loot.reforgeOrbChancePercent,
+				_loot.lootSourceChanceMultCorpse,
+				_loot.lootSourceChanceMultContainer,
+				_loot.lootSourceChanceMultBossContainer,
+				_loot.lootSourceChanceMultWorld,
 				_loot.triggerProcBudgetPerWindow,
 				_loot.triggerProcBudgetWindowMs,
 				_loot.trapCastBudgetPerTick);
@@ -1181,6 +1187,8 @@ namespace CalamityAffixes
 	void EventBridge::ApplyLootConfigFromJson(const nlohmann::json& a_configRoot)
 	{
 		_loot.armorEditorIdDenyContains = detail::MakeDefaultLootArmorEditorIdDenyContains();
+		_loot.bossContainerEditorIdAllowContains = detail::MakeDefaultBossContainerEditorIdAllowContains();
+		_loot.bossContainerEditorIdDenyContains.clear();
 		_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
@@ -1189,6 +1197,14 @@ namespace CalamityAffixes
 				static_cast<float>(loot.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent)));
 			_loot.reforgeOrbChancePercent =
 				static_cast<float>(loot.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent)));
+			_loot.lootSourceChanceMultCorpse =
+				static_cast<float>(loot.value("lootSourceChanceMultCorpse", static_cast<double>(_loot.lootSourceChanceMultCorpse)));
+			_loot.lootSourceChanceMultContainer =
+				static_cast<float>(loot.value("lootSourceChanceMultContainer", static_cast<double>(_loot.lootSourceChanceMultContainer)));
+			_loot.lootSourceChanceMultBossContainer =
+				static_cast<float>(loot.value("lootSourceChanceMultBossContainer", static_cast<double>(_loot.lootSourceChanceMultBossContainer)));
+			_loot.lootSourceChanceMultWorld =
+				static_cast<float>(loot.value("lootSourceChanceMultWorld", static_cast<double>(_loot.lootSourceChanceMultWorld)));
 			_loot.renameItem = loot.value("renameItem", false);
 			_loot.sharedPool = loot.value("sharedPool", false);
 			_loot.debugLog = loot.value("debugLog", false);
@@ -1237,6 +1253,42 @@ namespace CalamityAffixes
 				}
 			}
 
+			if (const auto allowIt = loot.find("bossContainerEditorIdAllowContains"); allowIt != loot.end()) {
+				if (allowIt->is_array()) {
+					_loot.bossContainerEditorIdAllowContains.clear();
+					for (const auto& raw : *allowIt) {
+						if (!raw.is_string()) {
+							continue;
+						}
+						std::string markerRaw = raw.get<std::string>();
+						const auto marker = Trim(markerRaw);
+						if (!marker.empty()) {
+							_loot.bossContainerEditorIdAllowContains.emplace_back(marker);
+						}
+					}
+				} else {
+					SKSE::log::warn("CalamityAffixes: loot.bossContainerEditorIdAllowContains must be an array of strings.");
+				}
+			}
+
+			if (const auto denyBossIt = loot.find("bossContainerEditorIdDenyContains"); denyBossIt != loot.end()) {
+				if (denyBossIt->is_array()) {
+					_loot.bossContainerEditorIdDenyContains.clear();
+					for (const auto& raw : *denyBossIt) {
+						if (!raw.is_string()) {
+							continue;
+						}
+						std::string markerRaw = raw.get<std::string>();
+						const auto marker = Trim(markerRaw);
+						if (!marker.empty()) {
+							_loot.bossContainerEditorIdDenyContains.emplace_back(marker);
+						}
+					}
+				} else {
+					SKSE::log::warn("CalamityAffixes: loot.bossContainerEditorIdDenyContains must be an array of strings.");
+				}
+			}
+
 			if (_loot.chancePercent < 0.0f) {
 				_loot.chancePercent = 0.0f;
 			} else if (_loot.chancePercent > 100.0f) {
@@ -1254,6 +1306,11 @@ namespace CalamityAffixes
 			} else if (_loot.reforgeOrbChancePercent > 100.0f) {
 				_loot.reforgeOrbChancePercent = 100.0f;
 			}
+
+			_loot.lootSourceChanceMultCorpse = std::clamp(_loot.lootSourceChanceMultCorpse, 0.0f, 5.0f);
+			_loot.lootSourceChanceMultContainer = std::clamp(_loot.lootSourceChanceMultContainer, 0.0f, 5.0f);
+			_loot.lootSourceChanceMultBossContainer = std::clamp(_loot.lootSourceChanceMultBossContainer, 0.0f, 5.0f);
+			_loot.lootSourceChanceMultWorld = std::clamp(_loot.lootSourceChanceMultWorld, 0.0f, 5.0f);
 
 			if (dotTagSafetyThreshold <= 0.0) {
 				_loot.dotTagSafetyUniqueEffectThreshold = 0u;

@@ -520,6 +520,19 @@
         display: flex;
         flex-direction: column;
         gap: calc(10px * var(--panel-ui-scale));
+        overflow-y: auto;
+        min-height: 0;
+        padding-right: calc(4px * var(--panel-ui-scale));
+      }
+
+      .rwAffixBox {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        max-height: calc(190px * var(--panel-ui-scale));
+        overflow-y: auto;
+      }
+
+      .rwAffixHint {
+        margin-top: calc(6px * var(--panel-ui-scale));
       }
 
       .rwRight {
@@ -909,6 +922,14 @@
                   <div class="cpContextMeta" id="selectedItemSource">Equipped only / 착용 장비 전용</div>
                 </div>
 
+                <div class="rwAffixBlock">
+                  <div class="cpSectionTitle" id="runewordAffixTitle">Current Affix Preview / 현재 어픽스 미리보기</div>
+                  <div id="runewordAffixText" class="cpTooltipBox rwAffixBox"></div>
+                  <div class="cpContextMeta rwAffixHint" id="runewordAffixHint">
+                    Select an item in inventory to view affixes here. / 인벤토리에서 아이템을 선택하면 여기에서 어픽스를 표시합니다.
+                  </div>
+                </div>
+
                 <div id="runewordPanelStatus">
                   Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
                 </div>
@@ -1041,6 +1062,7 @@
               <div class="cpGrid">
                 <button id="debugGrantNextButton" class="cpButton" data-cmd="runeword.grant.next">+1 Next Fragment / 다음 조각 +1</button>
                 <button id="debugGrantSetButton" class="cpButton" data-cmd="runeword.grant.set">+1 Recipe Set / 레시피 세트 +1</button>
+                <button id="debugGrantStarterOrbsButton" class="cpButton" data-cmd="runeword.grant.orb3">Starter +3 Reforge Orbs / 스타트 재련 오브 +3</button>
                 <button id="debugSpawnTestButton" class="cpButton" data-cmd="spawn.test">Spawn Test Item / 테스트 아이템 지급</button>
               </div>
             </div>
@@ -1098,6 +1120,9 @@
       const runewordRecipeListHint = document.getElementById("runewordRecipeListHint");
       const runewordBaseListTitle = document.getElementById("runewordBaseListTitle");
       const runewordBaseListHint = document.getElementById("runewordBaseListHint");
+      const runewordAffixTitle = document.getElementById("runewordAffixTitle");
+      const runewordAffixText = document.getElementById("runewordAffixText");
+      const runewordAffixHint = document.getElementById("runewordAffixHint");
       const runewordPanelStatus = document.getElementById("runewordPanelStatus");
       const runewordInsertButton = document.getElementById("runewordInsertButton");
       const runewordReforgeButton = document.getElementById("runewordReforgeButton");
@@ -1124,6 +1149,7 @@
       const debugSectionTitle = document.getElementById("debugSectionTitle");
       const debugGrantNextButton = document.getElementById("debugGrantNextButton");
       const debugGrantSetButton = document.getElementById("debugGrantSetButton");
+      const debugGrantStarterOrbsButton = document.getElementById("debugGrantStarterOrbsButton");
       const debugSpawnTestButton = document.getElementById("debugSpawnTestButton");
       const footerCloseButton = document.getElementById("footerCloseButton");
       const controlPanelCloseX = document.getElementById("controlPanelCloseX");
@@ -1139,6 +1165,8 @@
 
       let controlPanelOpen = false;
       let tooltipTextState = "";
+      let runewordAffixTextState = "";
+      let runewordAffixPendingState = false;
       let panelHotkeyTextState = "F11";
       let selectedItemNameState = "";
       let selectedItemSourceState = "";
@@ -1417,6 +1445,15 @@
           "Click an equipped item to set it as runeword base.",
           "착용한 아이템을 클릭해 룬워드 베이스로 지정하세요."
         );
+        if (runewordAffixTitle) {
+          runewordAffixTitle.textContent = t("Current Affix Preview", "현재 어픽스 미리보기");
+        }
+        if (runewordAffixHint) {
+          runewordAffixHint.textContent = t(
+            "Select an item in inventory to view affixes here.",
+            "인벤토리에서 아이템을 선택하면 여기에서 어픽스를 표시합니다."
+          );
+        }
         if (runewordCubeGrid) {
           runewordCubeGrid.setAttribute("aria-label", t("Horadric cube", "호라드릭 큐브"));
         }
@@ -1482,6 +1519,12 @@
         if (debugGrantSetButton) {
           debugGrantSetButton.textContent = t("+1 Recipe Set", "레시피 세트 +1");
         }
+        if (debugGrantStarterOrbsButton) {
+          debugGrantStarterOrbsButton.textContent = t(
+            "Starter +3 Reforge Orbs",
+            "스타트 재련 오브 +3"
+          );
+        }
         if (debugSpawnTestButton) {
           debugSpawnTestButton.textContent = t("Spawn Test Item", "테스트 아이템 지급");
         }
@@ -1514,8 +1557,14 @@
         quickLaunch.style.display = "none";
       }
 
+      function invalidateRunewordAffixPreview(pending) {
+        runewordAffixTextState = "";
+        runewordAffixPendingState = Boolean(pending);
+      }
+
       function applyTooltipPlacement() {
         const hasTooltip = Boolean(tooltipTextState);
+        const hasRunewordAffix = Boolean(runewordAffixTextState);
 
         if (panelTooltipText) {
           panelTooltipText.textContent = hasTooltip
@@ -1525,6 +1574,18 @@
 
         if (panelTooltipHint) {
           panelTooltipHint.style.display = hasTooltip ? "none" : "block";
+        }
+
+        if (runewordAffixText) {
+          runewordAffixText.textContent = hasRunewordAffix
+            ? runewordAffixTextState
+            : runewordAffixPendingState
+              ? t("Refreshing affix preview...", "어픽스 미리보기를 갱신 중입니다.")
+              : t("No affix tooltip available.", "어픽스 툴팁이 없습니다.");
+        }
+
+        if (runewordAffixHint) {
+          runewordAffixHint.style.display = hasRunewordAffix ? "none" : "block";
         }
 
         if (!hasTooltip) {
@@ -1982,6 +2043,8 @@
           button.className = selected ? "cpListItem selected" : "cpListItem";
           button.textContent = name;
           button.addEventListener("click", () => {
+            invalidateRunewordAffixPreview(true);
+            applyTooltipPlacement();
             sendCommand(`runeword.base.select:${key}`);
           });
           inventoryBaseList.appendChild(button);
@@ -2386,6 +2449,7 @@
       }
 
       function setInventoryItems(raw) {
+        const prevSelectedItemName = selectedItemNameState;
         let items = [];
         if (Array.isArray(raw)) {
           items = raw;
@@ -2407,9 +2471,16 @@
           selectedItemSourceState = "equipped";
         }
 
+        if (selectedItemNameState !== prevSelectedItemName) {
+          invalidateRunewordAffixPreview(Boolean(selectedItemNameState));
+        }
+
         renderSelectedItemContext();
         renderInventoryItems();
         renderRunewordPanelState();
+        if (selectedItemNameState !== prevSelectedItemName) {
+          applyTooltipPlacement();
+        }
       }
 
       function setRecipeItems(raw) {
@@ -2476,6 +2547,10 @@
       function setTooltip(raw) {
         const value = typeof raw === "string" ? raw : "";
         tooltipTextState = value;
+        if (runewordAffixPendingState) {
+          runewordAffixTextState = value;
+          runewordAffixPendingState = false;
+        }
         applyTooltipPlacement();
       }
 
@@ -2614,10 +2689,17 @@
       }
 
       function setSelectedItemName(raw) {
+        const prev = selectedItemNameState;
         const value = typeof raw === "string" ? raw.trim() : "";
         selectedItemNameState = value;
+        if (value !== prev) {
+          invalidateRunewordAffixPreview(Boolean(value));
+        }
         renderSelectedItemContext();
         renderRunewordPanelState();
+        if (value !== prev) {
+          applyTooltipPlacement();
+        }
       }
 
       function setSelectedItemSource(raw) {
@@ -2649,6 +2731,10 @@
               pendingOpenMainTab = openTab;
             }
             if (command) {
+              if (command === "runeword.insert" || command === "runeword.reforge") {
+                invalidateRunewordAffixPreview(Boolean(selectedItemNameState));
+                applyTooltipPlacement();
+              }
               sendCommand(command);
             }
           });

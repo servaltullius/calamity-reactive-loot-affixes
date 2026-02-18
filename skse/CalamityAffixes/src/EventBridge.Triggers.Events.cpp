@@ -583,6 +583,12 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
+			if (eventName == kRunewordGrantStarterOrbsEvent) {
+				const auto amount = (a_event->numArg > 0.0f) ? static_cast<std::uint32_t>(a_event->numArg) : 3u;
+				GrantReforgeOrbs(amount);
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
 			if (!_runtimeEnabled) {
 				return RE::BSEventNotifyControl::kContinue;
 			}

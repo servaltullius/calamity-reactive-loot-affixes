@@ -18,6 +18,132 @@ namespace CalamityAffixes
 	namespace
 	{
 		static constexpr std::size_t kArmorTemplateScanDepth = 8;
+
+		enum class LootCurrencySourceTier : std::uint8_t
+		{
+			kUnknown = 0,
+			kCorpse,
+			kContainer,
+			kBossContainer,
+			kWorld
+		};
+
+		[[nodiscard]] bool ContainsAsciiNoCase(std::string_view a_text, std::string_view a_needle)
+		{
+			if (a_text.empty() || a_needle.empty() || a_needle.size() > a_text.size()) {
+				return false;
+			}
+
+			for (std::size_t i = 0; i + a_needle.size() <= a_text.size(); ++i) {
+				bool match = true;
+				for (std::size_t j = 0; j < a_needle.size(); ++j) {
+					const auto lhs = static_cast<char>(std::tolower(static_cast<unsigned char>(a_text[i + j])));
+					const auto rhs = static_cast<char>(std::tolower(static_cast<unsigned char>(a_needle[j])));
+					if (lhs != rhs) {
+						match = false;
+						break;
+					}
+				}
+				if (match) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		[[nodiscard]] bool IsBossContainerEditorId(
+			std::string_view a_editorId,
+			const std::vector<std::string>& a_allowContains,
+			const std::vector<std::string>& a_denyContains)
+		{
+			if (a_editorId.empty()) {
+				return false;
+			}
+
+			if (detail::MatchesAnyCaseInsensitiveMarker(a_editorId, a_denyContains)) {
+				return false;
+			}
+
+			if (!a_allowContains.empty()) {
+				return detail::MatchesAnyCaseInsensitiveMarker(a_editorId, a_allowContains);
+			}
+
+			// Fallback heuristic when allow-list is intentionally empty.
+			return ContainsAsciiNoCase(a_editorId, "boss");
+		}
+
+		[[nodiscard]] LootCurrencySourceTier ResolveLootCurrencySourceTier(
+			RE::FormID a_oldContainer,
+			const std::vector<std::string>& a_bossAllowContains,
+			const std::vector<std::string>& a_bossDenyContains)
+		{
+			if (a_oldContainer == LootRerollGuard::kWorldContainer) {
+				return LootCurrencySourceTier::kWorld;
+			}
+
+			auto* sourceForm = RE::TESForm::LookupByID<RE::TESForm>(a_oldContainer);
+			if (!sourceForm) {
+				return LootCurrencySourceTier::kUnknown;
+			}
+
+			if (auto* sourceActor = sourceForm->As<RE::Actor>(); sourceActor && sourceActor->IsDead()) {
+				return LootCurrencySourceTier::kCorpse;
+			}
+
+			auto isBossContainer = [&](const RE::TESForm* a_form) {
+				if (!a_form) {
+					return false;
+				}
+				const char* editorIdRaw = a_form->GetFormEditorID();
+				return editorIdRaw && IsBossContainerEditorId(editorIdRaw, a_bossAllowContains, a_bossDenyContains);
+			};
+
+			if (auto* sourceRef = sourceForm->As<RE::TESObjectREFR>()) {
+				if (auto* sourceBase = sourceRef->GetBaseObject(); sourceBase && sourceBase->As<RE::TESObjectCONT>()) {
+					if (isBossContainer(sourceRef) || isBossContainer(sourceBase)) {
+						return LootCurrencySourceTier::kBossContainer;
+					}
+					return LootCurrencySourceTier::kContainer;
+				}
+			}
+
+			if (sourceForm->As<RE::TESObjectCONT>()) {
+				return isBossContainer(sourceForm) ? LootCurrencySourceTier::kBossContainer : LootCurrencySourceTier::kContainer;
+			}
+
+			return LootCurrencySourceTier::kUnknown;
+		}
+
+		[[nodiscard]] std::string_view LootCurrencySourceTierLabel(LootCurrencySourceTier a_tier)
+		{
+			switch (a_tier) {
+			case LootCurrencySourceTier::kCorpse:
+				return "corpse";
+			case LootCurrencySourceTier::kContainer:
+				return "container";
+			case LootCurrencySourceTier::kBossContainer:
+				return "boss_container";
+			case LootCurrencySourceTier::kWorld:
+				return "world";
+			default:
+				return "unknown";
+			}
+		}
+
+		[[nodiscard]] bool IsCalamityResourceCurrencyItem(const RE::TESBoundObject* a_object) noexcept
+		{
+			if (!a_object || !a_object->As<RE::TESObjectMISC>()) {
+				return false;
+			}
+
+			const char* editorIdRaw = a_object->GetFormEditorID();
+			if (!editorIdRaw || editorIdRaw[0] == '\0') {
+				return false;
+			}
+
+			const std::string_view editorId(editorIdRaw);
+			return editorId == "CAFF_Misc_ReforgeOrb" || editorId.starts_with("CAFF_RuneFrag_");
+		}
 	}
 
 	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
@@ -804,34 +930,71 @@ namespace CalamityAffixes
 			return;
 		}
 
-		// Loot policy:
-		// - no random affix assignment on pickup
-		// - pickup only rolls auxiliary currencies (runeword fragment / reforge orb)
-		//   for eligible weapon/armor items from allowed sources
-		if (!a_allowRunewordFragmentRoll || a_count <= 0) {
+			// Loot policy:
+			// - no random affix assignment on pickup
+			// - pickup only rolls auxiliary currencies (runeword fragment / reforge orb)
+			//   for eligible source pickups (corpse/chest/world)
+			if (!a_allowRunewordFragmentRoll || a_count <= 0) {
+				return;
+			}
+
+			auto* baseForm = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
+			auto* baseObj = baseForm ? baseForm->As<RE::TESBoundObject>() : nullptr;
+			if (!baseObj) {
+				return;
+			}
+
+			// Guard against recursive self-feedback on Calamity resource currencies.
+		if (IsCalamityResourceCurrencyItem(baseObj)) {
+				if (_loot.debugLog) {
+					SKSE::log::debug(
+						"CalamityAffixes: pickup loot roll skipped for resource currency item (baseObj={:08X}, uniqueID={}, oldContainer={:08X}).",
+						a_baseObj,
+						a_uniqueID,
+						a_oldContainer);
+				}
 			return;
 		}
 
-		auto* baseForm = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
-		auto* baseObj = baseForm ? baseForm->As<RE::TESBoundObject>() : nullptr;
-		if (!IsLootObjectEligibleForAffixes(baseObj)) {
-			return;
+		const auto sourceTier = ResolveLootCurrencySourceTier(
+			a_oldContainer,
+			_loot.bossContainerEditorIdAllowContains,
+			_loot.bossContainerEditorIdDenyContains);
+		float sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
+		switch (sourceTier) {
+		case LootCurrencySourceTier::kCorpse:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultCorpse;
+			break;
+		case LootCurrencySourceTier::kContainer:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
+			break;
+		case LootCurrencySourceTier::kBossContainer:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultBossContainer;
+			break;
+		case LootCurrencySourceTier::kWorld:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultWorld;
+			break;
+		default:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
+			break;
 		}
-
+		sourceChanceMultiplier = std::clamp(sourceChanceMultiplier, 0.0f, 5.0f);
 		const std::uint32_t rollCount = static_cast<std::uint32_t>(std::clamp(a_count, 1, 8));
 		for (std::uint32_t i = 0; i < rollCount; ++i) {
-			MaybeGrantRandomRunewordFragment();
-			MaybeGrantRandomReforgeOrb();
+			MaybeGrantRandomRunewordFragment(sourceChanceMultiplier);
+			MaybeGrantRandomReforgeOrb(sourceChanceMultiplier);
 		}
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
-				"CalamityAffixes: pickup loot rolls applied (baseObj={:08X}, count={}, rolls={}, uniqueID={}, oldContainer={:08X}).",
+				"CalamityAffixes: pickup loot rolls applied (baseObj={:08X}, count={}, rolls={}, uniqueID={}, oldContainer={:08X}, sourceTier={}, sourceChanceMult={:.2f}).",
 				a_baseObj,
 				a_count,
 				rollCount,
 				a_uniqueID,
-				a_oldContainer);
+				a_oldContainer,
+				LootCurrencySourceTierLabel(sourceTier),
+				sourceChanceMultiplier);
 		}
 	}
 }

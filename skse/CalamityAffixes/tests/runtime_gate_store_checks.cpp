@@ -707,11 +707,14 @@ namespace
 		}
 		if (assignText->find("no random affix assignment on pickup") == std::string::npos ||
 			assignText->find("!a_allowRunewordFragmentRoll || a_count <= 0") == std::string::npos ||
-			assignText->find("MaybeGrantRandomRunewordFragment();") == std::string::npos ||
-			assignText->find("MaybeGrantRandomReforgeOrb();") == std::string::npos ||
+			assignText->find("ResolveLootCurrencySourceTier(") == std::string::npos ||
+			assignText->find("_loot.bossContainerEditorIdAllowContains") == std::string::npos ||
+			assignText->find("_loot.lootSourceChanceMultBossContainer") == std::string::npos ||
+			assignText->find("MaybeGrantRandomRunewordFragment(sourceChanceMultiplier);") == std::string::npos ||
+			assignText->find("MaybeGrantRandomReforgeOrb(sourceChanceMultiplier);") == std::string::npos ||
 			assignText->find("std::clamp(a_count, 1, 8)") == std::string::npos ||
 			assignText->find("allowLegacyPickupAffixRoll") != std::string::npos) {
-			std::cerr << "loot_preview_policy: pickup flow must remain orb/fragment-only without legacy affix roll branch\n";
+			std::cerr << "loot_preview_policy: pickup flow must remain orb/fragment-only, include source weighting, and avoid legacy affix roll branch\n";
 			return false;
 		}
 
