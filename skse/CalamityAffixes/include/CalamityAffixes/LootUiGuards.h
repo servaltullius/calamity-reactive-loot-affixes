@@ -130,6 +130,21 @@ namespace CalamityAffixes
 		       a_name == "GiftMenu";
 	}
 
+	[[nodiscard]] constexpr bool IsPreviewItemSourceMenu(std::string_view a_name) noexcept
+	{
+		return a_name == "BarterMenu" ||
+		       a_name == "ContainerMenu" ||
+		       a_name == "GiftMenu";
+	}
+
+	[[nodiscard]] constexpr bool ShouldAllowPreviewUniqueIdRemap(
+		bool a_playerOwnsEither,
+		bool a_trackedPreview,
+		bool a_previewMenuContextOpen) noexcept
+	{
+		return a_playerOwnsEither || (a_trackedPreview && a_previewMenuContextOpen);
+	}
+
 	[[nodiscard]] constexpr bool IsRunewordOverlayTooltipLine(std::string_view a_line) noexcept
 	{
 		const auto line = detail::TrimLeadingAsciiWhitespace(a_line);

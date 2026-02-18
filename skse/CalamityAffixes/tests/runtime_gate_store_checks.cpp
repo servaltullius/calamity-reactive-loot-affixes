@@ -687,6 +687,7 @@ namespace
 		const fs::path repoRoot = testFile.parent_path().parent_path();
 		const fs::path assignFile = repoRoot / "src" / "EventBridge.Loot.Assign.cpp";
 		const fs::path runtimeFile = repoRoot / "src" / "EventBridge.Loot.Runtime.cpp";
+		const fs::path lootFile = repoRoot / "src" / "EventBridge.Loot.cpp";
 		const fs::path configFile = repoRoot / "src" / "EventBridge.Config.cpp";
 		const fs::path serializationFile = repoRoot / "src" / "EventBridge.Serialization.cpp";
 
@@ -724,6 +725,19 @@ namespace
 		if (runtimeText->find("BSExtraData::Create<RE::ExtraUniqueID>()") == std::string::npos ||
 			runtimeText->find("changes->GetNextUniqueID()") == std::string::npos) {
 			std::cerr << "loot_preview_policy: preview path must bootstrap missing ExtraUniqueID for menu items\n";
+			return false;
+		}
+
+		const auto lootText = loadText(lootFile);
+		if (!lootText.has_value()) {
+			std::cerr << "loot_preview_policy: failed to open loot event source: " << lootFile << "\n";
+			return false;
+		}
+		if (lootText->find("const bool trackedPreview = FindLootPreviewSlots(oldKey) != nullptr;") == std::string::npos ||
+			lootText->find("trackedPreview ||") == std::string::npos ||
+			lootText->find("const bool previewMenuContextOpen = IsPreviewRemapMenuContextOpen();") == std::string::npos ||
+			lootText->find("ShouldAllowPreviewUniqueIdRemap(playerOwnsEither, trackedPreview, previewMenuContextOpen)") == std::string::npos) {
+			std::cerr << "loot_preview_policy: unique-id remap path must preserve preview cache across key changes\n";
 			return false;
 		}
 

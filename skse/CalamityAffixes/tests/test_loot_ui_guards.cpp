@@ -58,6 +58,46 @@ static_assert([] {
 	"IsPrismaTooltipRelevantMenu: rejects non-item menus");
 
 static_assert([] {
+	return CalamityAffixes::IsPreviewItemSourceMenu("BarterMenu");
+}(),
+	"IsPreviewItemSourceMenu: supports BarterMenu");
+
+static_assert([] {
+	return CalamityAffixes::IsPreviewItemSourceMenu("ContainerMenu");
+}(),
+	"IsPreviewItemSourceMenu: supports ContainerMenu");
+
+static_assert([] {
+	return CalamityAffixes::IsPreviewItemSourceMenu("GiftMenu");
+}(),
+	"IsPreviewItemSourceMenu: supports GiftMenu");
+
+static_assert([] {
+	return !CalamityAffixes::IsPreviewItemSourceMenu("InventoryMenu");
+}(),
+	"IsPreviewItemSourceMenu: excludes inventory menu");
+
+static_assert([] {
+	return CalamityAffixes::ShouldAllowPreviewUniqueIdRemap(true, false, false);
+}(),
+	"ShouldAllowPreviewUniqueIdRemap: always allow when player owns either key");
+
+static_assert([] {
+	return CalamityAffixes::ShouldAllowPreviewUniqueIdRemap(false, true, true);
+}(),
+	"ShouldAllowPreviewUniqueIdRemap: allow tracked preview remap only in preview source menus");
+
+static_assert([] {
+	return !CalamityAffixes::ShouldAllowPreviewUniqueIdRemap(false, true, false);
+}(),
+	"ShouldAllowPreviewUniqueIdRemap: block tracked preview remap when preview source menus are closed");
+
+static_assert([] {
+	return !CalamityAffixes::ShouldAllowPreviewUniqueIdRemap(false, false, true);
+}(),
+	"ShouldAllowPreviewUniqueIdRemap: block remap when not player-owned and not tracked preview");
+
+static_assert([] {
 	return CalamityAffixes::IsRunewordOverlayTooltipLine("Runeword: Nadir (0/2) / Next: Nef (owned 0)");
 }(),
 	"IsRunewordOverlayTooltipLine: detects runeword progress lines");

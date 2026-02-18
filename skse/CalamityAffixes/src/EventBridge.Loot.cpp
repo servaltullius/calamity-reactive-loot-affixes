@@ -1,7 +1,9 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/TriggerGuards.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -13,6 +15,32 @@ namespace CalamityAffixes
 {
 	namespace
 	{
+		[[nodiscard]] bool IsPreviewRemapMenuContextOpen() noexcept
+		{
+			auto* ui = RE::UI::GetSingleton();
+			if (!ui) {
+				return false;
+			}
+
+			constexpr std::array<std::string_view, 3> kPreviewMenus{
+				RE::BarterMenu::MENU_NAME,
+				RE::ContainerMenu::MENU_NAME,
+				RE::GiftMenu::MENU_NAME
+			};
+
+			for (const auto menuName : kPreviewMenus) {
+				if (!IsPreviewItemSourceMenu(menuName)) {
+					continue;
+				}
+
+				if (ui->IsMenuOpen(menuName.data())) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 				[[nodiscard]] bool IsLootSourceCorpseChestOrWorld(RE::FormID a_oldContainer, RE::FormID a_playerId)
 				{
 					if (a_oldContainer == LootRerollGuard::kWorldContainer) {
@@ -492,9 +520,11 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		const bool trackedPreview = FindLootPreviewSlots(oldKey) != nullptr;
 		const bool trackedOld =
 			_instanceAffixes.contains(oldKey) ||
 			IsLootEvaluatedInstance(oldKey) ||
+			trackedPreview ||
 			_runewordInstanceStates.contains(oldKey) ||
 			(_runewordSelectedBaseKey && *_runewordSelectedBaseKey == oldKey);
 		if (!trackedOld) {
@@ -505,13 +535,16 @@ namespace CalamityAffixes
 		const auto playerId = player ? player->GetFormID() : 0u;
 		const bool ownerIsPlayer = (playerId != 0u && a_event->objectID == playerId);
 		const bool playerOwnsEither = ownerIsPlayer || PlayerHasInstanceKey(oldKey) || PlayerHasInstanceKey(newKey);
-		if (!playerOwnsEither) {
+		const bool previewMenuContextOpen = IsPreviewRemapMenuContextOpen();
+		if (!ShouldAllowPreviewUniqueIdRemap(playerOwnsEither, trackedPreview, previewMenuContextOpen)) {
 			if (_loot.debugLog) {
 				SKSE::log::debug(
-					"CalamityAffixes: ignored TESUniqueIDChangeEvent not associated with player-tracked item (obj={:08X}, old={:016X}, new={:016X}).",
+					"CalamityAffixes: ignored TESUniqueIDChangeEvent not associated with player-tracked item (obj={:08X}, old={:016X}, new={:016X}, trackedPreview={}, previewMenuOpen={}).",
 					a_event->objectID,
 					oldKey,
-					newKey);
+					newKey,
+					trackedPreview,
+					previewMenuContextOpen);
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
