@@ -399,6 +399,99 @@ namespace CalamityAffixes
 		}
 	}
 
+	bool EventBridge::RebindPendingLootPreviewForFallbackCandidate(
+		RE::FormID a_baseObj,
+		std::uint16_t a_uniqueID,
+		RE::InventoryChanges* a_changes,
+		RE::ExtraDataList* a_targetXList)
+	{
+		if (a_baseObj == 0u || !a_targetXList) {
+			return false;
+		}
+
+		std::uint64_t sourcePreviewKey = 0u;
+		if (a_uniqueID != 0u) {
+			const auto eventPreviewKey = MakeInstanceKey(a_baseObj, a_uniqueID);
+			if (FindLootPreviewSlots(eventPreviewKey) != nullptr) {
+				sourcePreviewKey = eventPreviewKey;
+			}
+		}
+
+		if (sourcePreviewKey == 0u) {
+			for (auto it = _lootPreviewRecent.rbegin(); it != _lootPreviewRecent.rend(); ++it) {
+				const auto key = *it;
+				const auto previewBaseObj = static_cast<RE::FormID>(key >> 16u);
+				if (previewBaseObj != a_baseObj) {
+					continue;
+				}
+				if (FindLootPreviewSlots(key) != nullptr) {
+					sourcePreviewKey = key;
+					break;
+				}
+			}
+		}
+
+		if (sourcePreviewKey == 0u) {
+			return false;
+		}
+
+		const auto* sourcePreviewSlots = FindLootPreviewSlots(sourcePreviewKey);
+		if (!sourcePreviewSlots) {
+			return false;
+		}
+		const auto previewSlots = *sourcePreviewSlots;
+
+		auto* uid = a_targetXList->GetByType<RE::ExtraUniqueID>();
+		if (!uid) {
+			if (!a_changes) {
+				return false;
+			}
+
+			auto* created = RE::BSExtraData::Create<RE::ExtraUniqueID>();
+			if (!created) {
+				return false;
+			}
+
+			created->baseID = a_baseObj;
+			const auto sourceUniqueID = static_cast<std::uint16_t>(sourcePreviewKey & 0xFFFFu);
+			created->uniqueID = (a_uniqueID != 0u) ? a_uniqueID : sourceUniqueID;
+			if (created->uniqueID == 0u) {
+				created->uniqueID = a_changes->GetNextUniqueID();
+			}
+			a_targetXList->Add(created);
+			uid = created;
+		}
+
+		if (uid->baseID == 0u) {
+			uid->baseID = a_baseObj;
+		}
+		if (uid->uniqueID == 0u) {
+			const auto sourceUniqueID = static_cast<std::uint16_t>(sourcePreviewKey & 0xFFFFu);
+			uid->uniqueID = (a_uniqueID != 0u) ? a_uniqueID : sourceUniqueID;
+			if (uid->uniqueID == 0u && a_changes) {
+				uid->uniqueID = a_changes->GetNextUniqueID();
+			}
+		}
+		if (uid->baseID == 0u || uid->uniqueID == 0u) {
+			return false;
+		}
+
+		const auto targetPreviewKey = MakeInstanceKey(uid->baseID, uid->uniqueID);
+		RememberLootPreviewSlots(targetPreviewKey, previewSlots);
+		if (targetPreviewKey != sourcePreviewKey) {
+			ForgetLootPreviewSlots(sourcePreviewKey);
+		}
+
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: rebound pending loot preview for fallback candidate (baseObj={:08X}, sourceKey={:016X}, targetKey={:016X}).",
+				a_baseObj,
+				sourcePreviewKey,
+				targetPreviewKey);
+		}
+		return true;
+	}
+
 	void EventBridge::ApplyMultipleAffixes(
 		RE::InventoryChanges* a_changes,
 		RE::InventoryEntryData* a_entry,
@@ -873,6 +966,14 @@ namespace CalamityAffixes
 			}
 
 			unevaluatedCandidates.push_back(xList);
+		}
+
+		if (!unevaluatedCandidates.empty()) {
+			(void)RebindPendingLootPreviewForFallbackCandidate(
+				a_baseObj,
+				a_uniqueID,
+				changes,
+				unevaluatedCandidates.back());
 		}
 
 		std::int32_t processed = 0;

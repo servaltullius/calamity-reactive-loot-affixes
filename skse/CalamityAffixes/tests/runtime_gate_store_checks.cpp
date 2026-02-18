@@ -712,6 +712,11 @@ namespace
 			std::cerr << "loot_preview_policy: preview consumption path must update pity streak outcomes\n";
 			return false;
 		}
+		if (assignText->find("bool EventBridge::RebindPendingLootPreviewForFallbackCandidate(") == std::string::npos ||
+			assignText->find("(void)RebindPendingLootPreviewForFallbackCandidate(") == std::string::npos) {
+			std::cerr << "loot_preview_policy: fallback path must rebind pending preview cache before reroll\n";
+			return false;
+		}
 
 		const auto runtimeText = loadText(runtimeFile);
 		if (!runtimeText.has_value()) {

@@ -687,6 +687,11 @@ namespace CalamityAffixes
 		[[nodiscard]] const InstanceAffixSlots* FindLootPreviewSlots(std::uint64_t a_instanceKey) const;
 		void RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots);
 		void ForgetLootPreviewSlots(std::uint64_t a_instanceKey);
+		[[nodiscard]] bool RebindPendingLootPreviewForFallbackCandidate(
+			RE::FormID a_baseObj,
+			std::uint16_t a_uniqueID,
+			RE::InventoryChanges* a_changes,
+			RE::ExtraDataList* a_targetXList);
 		[[nodiscard]] std::optional<InstanceAffixSlots> BuildLootPreviewAffixSlots(
 			std::uint64_t a_instanceKey,
 			LootItemType a_itemType) const;
