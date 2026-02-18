@@ -700,10 +700,13 @@ namespace CalamityAffixes::PrismaTooltip
 			}
 
 			const auto selected = GetSelectedItemContext();
+			const bool selectionChanged =
+				selected.itemName != g_lastSelectedItemName ||
+				selected.itemSource != g_lastSelectedItemSource;
 			SetSelectedItemContext(selected.itemName, selected.itemSource);
 
 			const auto clearTooltip = [&]() {
-				if (a_force || !g_lastTooltip.empty()) {
+				if (a_force || selectionChanged || !g_lastTooltip.empty()) {
 					g_lastTooltip.clear();
 					g_api->InteropCall(g_view, "setTooltip", "");
 				}
@@ -720,7 +723,7 @@ namespace CalamityAffixes::PrismaTooltip
 				return false;
 			}
 
-			if (a_force || next != g_lastTooltip) {
+			if (a_force || selectionChanged || next != g_lastTooltip) {
 				g_lastTooltip = next;
 				g_api->InteropCall(g_view, "setTooltip", g_lastTooltip.c_str());
 			}

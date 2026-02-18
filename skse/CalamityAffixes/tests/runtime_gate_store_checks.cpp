@@ -1081,7 +1081,10 @@ namespace
 			}
 
 			if (coreText->find("PushSelectedTooltipSnapshot(") == std::string::npos ||
-				handleText->find("PushSelectedTooltipSnapshot(true);") == std::string::npos) {
+				handleText->find("PushSelectedTooltipSnapshot(true);") == std::string::npos ||
+				coreText->find("const bool selectionChanged =") == std::string::npos ||
+				coreText->find("if (a_force || selectionChanged || !g_lastTooltip.empty())") == std::string::npos ||
+				coreText->find("if (a_force || selectionChanged || next != g_lastTooltip)") == std::string::npos) {
 				std::cerr << "prisma_tooltip_refresh: immediate tooltip refresh guard is missing for runeword actions\n";
 				return false;
 			}
