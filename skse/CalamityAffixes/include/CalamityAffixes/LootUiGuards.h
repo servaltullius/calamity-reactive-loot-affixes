@@ -233,6 +233,13 @@ namespace CalamityAffixes
 		return a_playerOwnsEither || (a_trackedPreview && a_previewMenuContextOpen);
 	}
 
+	[[nodiscard]] constexpr bool ShouldUseSelectedLootPreviewHint(
+		bool a_previewMenuContextOpen,
+		bool a_selectedPreviewTracked) noexcept
+	{
+		return a_previewMenuContextOpen && a_selectedPreviewTracked;
+	}
+
 	[[nodiscard]] constexpr bool IsRunewordOverlayTooltipLine(std::string_view a_line) noexcept
 	{
 		const auto line = detail::TrimLeadingAsciiWhitespace(a_line);

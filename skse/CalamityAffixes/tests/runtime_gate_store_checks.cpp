@@ -722,6 +722,16 @@ namespace
 			std::cerr << "loot_preview_policy: rename path must support marker normalization and trailing marker mode\n";
 			return false;
 		}
+		if (assignText->find("FindSelectedLootPreviewKey(a_baseObj)") == std::string::npos ||
+			assignText->find("RememberSelectedLootPreviewKey(a_baseObj, targetPreviewKey)") == std::string::npos) {
+			std::cerr << "loot_preview_policy: fallback rebind must prioritize selected preview key hint\n";
+			return false;
+		}
+		if (assignText->find("ShouldUseSelectedLootPreviewHint(") == std::string::npos ||
+			assignText->find("_lootPreviewSelectedByBaseObj.erase(a_baseObj);") == std::string::npos) {
+			std::cerr << "loot_preview_policy: selected preview hint must be guarded by preview-menu context and stale-hint cleanup\n";
+			return false;
+		}
 		if (assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, false)") == std::string::npos ||
 			assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, true)") == std::string::npos) {
 			std::cerr << "loot_preview_policy: stale-marker cleanup must separate legacy-only and mapped trailing cleanup paths\n";
@@ -735,6 +745,11 @@ namespace
 		}
 		if (runtimeText->find("std::erase(_lootPreviewRecent, a_instanceKey);") == std::string::npos) {
 			std::cerr << "loot_preview_policy: preview cache forget path must prune recent-key deque entries\n";
+			return false;
+		}
+		if (runtimeText->find("RememberSelectedLootPreviewKey(itemBaseObj, matched.instanceKey)") == std::string::npos ||
+			runtimeText->find("ForgetSelectedLootPreviewKeyForInstance(a_instanceKey);") == std::string::npos) {
+			std::cerr << "loot_preview_policy: preview selection hint lifecycle must be maintained\n";
 			return false;
 		}
 		if (runtimeText->find("BSExtraData::Create<RE::ExtraUniqueID>()") == std::string::npos ||

@@ -201,6 +201,52 @@ namespace CalamityAffixes
 		return std::addressof(it->second);
 	}
 
+	std::uint64_t EventBridge::FindSelectedLootPreviewKey(RE::FormID a_baseObj) const
+	{
+		if (a_baseObj == 0u) {
+			return 0u;
+		}
+
+		const auto it = _lootPreviewSelectedByBaseObj.find(a_baseObj);
+		if (it == _lootPreviewSelectedByBaseObj.end()) {
+			return 0u;
+		}
+
+		const auto key = it->second;
+		if (key == 0u || static_cast<RE::FormID>(key >> 16u) != a_baseObj) {
+			return 0u;
+		}
+
+		return key;
+	}
+
+	void EventBridge::RememberSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_instanceKey)
+	{
+		if (a_baseObj == 0u || a_instanceKey == 0u) {
+			return;
+		}
+		if (static_cast<RE::FormID>(a_instanceKey >> 16u) != a_baseObj) {
+			return;
+		}
+
+		_lootPreviewSelectedByBaseObj[a_baseObj] = a_instanceKey;
+	}
+
+	void EventBridge::ForgetSelectedLootPreviewKeyForInstance(std::uint64_t a_instanceKey)
+	{
+		if (a_instanceKey == 0u || _lootPreviewSelectedByBaseObj.empty()) {
+			return;
+		}
+
+		for (auto it = _lootPreviewSelectedByBaseObj.begin(); it != _lootPreviewSelectedByBaseObj.end();) {
+			if (it->second == a_instanceKey) {
+				it = _lootPreviewSelectedByBaseObj.erase(it);
+			} else {
+				++it;
+			}
+		}
+	}
+
 	void EventBridge::RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots)
 	{
 		if (a_instanceKey == 0u) {
@@ -229,6 +275,7 @@ namespace CalamityAffixes
 		}
 		_lootPreviewAffixes.erase(a_instanceKey);
 		std::erase(_lootPreviewRecent, a_instanceKey);
+		ForgetSelectedLootPreviewKeyForInstance(a_instanceKey);
 	}
 
 	std::uint64_t EventBridge::HashLootPreviewSeed(std::uint64_t a_instanceKey, std::uint64_t a_salt)
@@ -421,6 +468,10 @@ namespace CalamityAffixes
 			itemType.has_value() &&
 			IsPreviewItemSource(a_itemSource) &&
 			IsLootObjectEligibleForAffixes(a_item->object);
+		const RE::FormID itemBaseObj = (a_item->object ? a_item->object->GetFormID() : 0u);
+		if (!allowPreview && itemBaseObj != 0u) {
+			_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
+		}
 
 		struct TooltipCandidate
 		{
@@ -608,11 +659,23 @@ namespace CalamityAffixes
 		if (resolution.matchedIndex &&
 			*resolution.matchedIndex < candidates.size() &&
 			!resolution.ambiguous) {
-			const auto formatted = formatTooltip(candidates[*resolution.matchedIndex]);
+			const auto& matched = candidates[*resolution.matchedIndex];
+			if (allowPreview && itemBaseObj != 0u) {
+				if (matched.preview) {
+					RememberSelectedLootPreviewKey(itemBaseObj, matched.instanceKey);
+				} else {
+					_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
+				}
+			}
+			const auto formatted = formatTooltip(matched);
 			if (formatted.empty()) {
 				return std::nullopt;
 			}
 			return formatted;
+		}
+
+		if (allowPreview && itemBaseObj != 0u) {
+			_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
 		}
 
 		if (!a_selectedDisplayName.empty()) {

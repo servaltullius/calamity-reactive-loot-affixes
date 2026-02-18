@@ -18,6 +18,30 @@ namespace CalamityAffixes
 	namespace
 	{
 		static constexpr std::size_t kArmorTemplateScanDepth = 8;
+
+		[[nodiscard]] bool IsPreviewSelectionMenuContextOpen() noexcept
+		{
+			auto* ui = RE::UI::GetSingleton();
+			if (!ui) {
+				return false;
+			}
+
+			constexpr std::array<std::string_view, 3> kPreviewMenus{
+				RE::BarterMenu::MENU_NAME,
+				RE::ContainerMenu::MENU_NAME,
+				RE::GiftMenu::MENU_NAME
+			};
+			for (const auto menuName : kPreviewMenus) {
+				if (!IsPreviewItemSourceMenu(menuName)) {
+					continue;
+				}
+				if (ui->IsMenuOpen(menuName.data())) {
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 
 	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
@@ -431,6 +455,20 @@ namespace CalamityAffixes
 			}
 		}
 
+		const bool previewMenuContextOpen = IsPreviewSelectionMenuContextOpen();
+		if (!previewMenuContextOpen) {
+			_lootPreviewSelectedByBaseObj.erase(a_baseObj);
+		}
+
+		if (sourcePreviewKey == 0u) {
+			const auto selectedPreviewKey = FindSelectedLootPreviewKey(a_baseObj);
+			const bool selectedPreviewTracked =
+				selectedPreviewKey != 0u && FindLootPreviewSlots(selectedPreviewKey) != nullptr;
+			if (ShouldUseSelectedLootPreviewHint(previewMenuContextOpen, selectedPreviewTracked)) {
+				sourcePreviewKey = selectedPreviewKey;
+			}
+		}
+
 		if (sourcePreviewKey == 0u) {
 			for (auto it = _lootPreviewRecent.rbegin(); it != _lootPreviewRecent.rend(); ++it) {
 				const auto key = *it;
@@ -492,6 +530,7 @@ namespace CalamityAffixes
 
 		const auto targetPreviewKey = MakeInstanceKey(uid->baseID, uid->uniqueID);
 		RememberLootPreviewSlots(targetPreviewKey, previewSlots);
+		RememberSelectedLootPreviewKey(a_baseObj, targetPreviewKey);
 		if (targetPreviewKey != sourcePreviewKey) {
 			ForgetLootPreviewSlots(sourcePreviewKey);
 		}

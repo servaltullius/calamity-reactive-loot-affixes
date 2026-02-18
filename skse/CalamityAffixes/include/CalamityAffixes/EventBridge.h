@@ -572,6 +572,7 @@ namespace CalamityAffixes
 		std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;
 		std::unordered_map<std::uint64_t, InstanceAffixSlots> _lootPreviewAffixes;
 		std::deque<std::uint64_t> _lootPreviewRecent;
+		std::unordered_map<RE::FormID, std::uint64_t> _lootPreviewSelectedByBaseObj;
 		std::unordered_set<std::uint64_t> _lootEvaluatedInstances;
 		std::deque<std::uint64_t> _lootEvaluatedRecent;
 		std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
@@ -692,6 +693,9 @@ namespace CalamityAffixes
 		void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
 		void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
 		[[nodiscard]] const InstanceAffixSlots* FindLootPreviewSlots(std::uint64_t a_instanceKey) const;
+		[[nodiscard]] std::uint64_t FindSelectedLootPreviewKey(RE::FormID a_baseObj) const;
+		void RememberSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_instanceKey);
+		void ForgetSelectedLootPreviewKeyForInstance(std::uint64_t a_instanceKey);
 		void RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots);
 		void ForgetLootPreviewSlots(std::uint64_t a_instanceKey);
 		[[nodiscard]] bool RebindPendingLootPreviewForFallbackCandidate(

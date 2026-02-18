@@ -101,6 +101,21 @@ static_assert([] {
 	"ShouldAllowPreviewUniqueIdRemap: block remap when not player-owned and not tracked preview");
 
 static_assert([] {
+	return CalamityAffixes::ShouldUseSelectedLootPreviewHint(true, true);
+}(),
+	"ShouldUseSelectedLootPreviewHint: allow selected preview hint only while preview menus are open");
+
+static_assert([] {
+	return !CalamityAffixes::ShouldUseSelectedLootPreviewHint(false, true);
+}(),
+	"ShouldUseSelectedLootPreviewHint: reject stale selected preview hint when preview menus are closed");
+
+static_assert([] {
+	return !CalamityAffixes::ShouldUseSelectedLootPreviewHint(true, false);
+}(),
+	"ShouldUseSelectedLootPreviewHint: requires tracked selected preview key");
+
+static_assert([] {
 	return CalamityAffixes::IsRunewordOverlayTooltipLine("Runeword: Nadir (0/2) / Next: Nef (owned 0)");
 }(),
 	"IsRunewordOverlayTooltipLine: detects runeword progress lines");
