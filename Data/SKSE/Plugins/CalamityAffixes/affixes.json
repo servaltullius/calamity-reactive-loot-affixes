@@ -6,6 +6,7 @@
     "chancePercent": 50,
     "runewordFragmentChancePercent": 40,
     "renameItem": true,
+    "nameMarkerPosition": "trailing",
     "sharedPool": true,
     "debugLog": false,
     "dotTagSafetyAutoDisable": false,

@@ -413,128 +413,13 @@ namespace CalamityAffixes
 		}
 	}
 
-	bool EventBridge::RebindPendingLootPreviewForFallbackCandidate(
-		RE::FormID a_baseObj,
-		std::uint16_t a_uniqueID,
-		RE::InventoryChanges* a_changes,
-		RE::ExtraDataList* a_targetXList,
-		std::uint64_t a_preferredSourcePreviewKey)
-	{
-		if (a_baseObj == 0u || !a_targetXList) {
-			return false;
-		}
-
-		const auto nowMs = static_cast<std::uint64_t>(
-			std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::steady_clock::now().time_since_epoch())
-				.count());
-
-		std::uint64_t sourcePreviewKey = 0u;
-		if (a_preferredSourcePreviewKey != 0u &&
-			static_cast<RE::FormID>(a_preferredSourcePreviewKey >> 16u) == a_baseObj &&
-			FindLootPreviewSlots(a_preferredSourcePreviewKey) != nullptr) {
-			sourcePreviewKey = a_preferredSourcePreviewKey;
-		}
-
-		if (a_uniqueID != 0u) {
-			const auto eventPreviewKey = MakeInstanceKey(a_baseObj, a_uniqueID);
-			if (sourcePreviewKey == 0u &&
-				FindLootPreviewSlots(eventPreviewKey) != nullptr) {
-				sourcePreviewKey = eventPreviewKey;
-			}
-		}
-
-		if (sourcePreviewKey == 0u) {
-			const auto selectedPreviewKey = FindSelectedLootPreviewKey(a_baseObj, nowMs);
-			const bool selectedPreviewTracked = selectedPreviewKey != 0u;
-			const bool selectedPreviewFresh = selectedPreviewTracked;
-			if (ShouldUseSelectedLootPreviewHint(selectedPreviewTracked, selectedPreviewFresh)) {
-				sourcePreviewKey = selectedPreviewKey;
-			}
-		}
-
-		if (sourcePreviewKey == 0u) {
-			for (auto it = _lootPreviewRecent.rbegin(); it != _lootPreviewRecent.rend(); ++it) {
-				const auto key = *it;
-				const auto previewBaseObj = static_cast<RE::FormID>(key >> 16u);
-				if (previewBaseObj != a_baseObj) {
-					continue;
-				}
-				if (FindLootPreviewSlots(key) != nullptr) {
-					sourcePreviewKey = key;
-					break;
-				}
-			}
-		}
-
-		if (sourcePreviewKey == 0u) {
-			return false;
-		}
-
-		const auto* sourcePreviewSlots = FindLootPreviewSlots(sourcePreviewKey);
-		if (!sourcePreviewSlots) {
-			return false;
-		}
-		const auto previewSlots = *sourcePreviewSlots;
-
-		auto* uid = a_targetXList->GetByType<RE::ExtraUniqueID>();
-		if (!uid) {
-			if (!a_changes) {
-				return false;
-			}
-
-			auto* created = RE::BSExtraData::Create<RE::ExtraUniqueID>();
-			if (!created) {
-				return false;
-			}
-
-			created->baseID = a_baseObj;
-			const auto sourceUniqueID = static_cast<std::uint16_t>(sourcePreviewKey & 0xFFFFu);
-			created->uniqueID = (a_uniqueID != 0u) ? a_uniqueID : sourceUniqueID;
-			if (created->uniqueID == 0u) {
-				created->uniqueID = a_changes->GetNextUniqueID();
-			}
-			a_targetXList->Add(created);
-			uid = created;
-		}
-
-		if (uid->baseID == 0u) {
-			uid->baseID = a_baseObj;
-		}
-		if (uid->uniqueID == 0u) {
-			const auto sourceUniqueID = static_cast<std::uint16_t>(sourcePreviewKey & 0xFFFFu);
-			uid->uniqueID = (a_uniqueID != 0u) ? a_uniqueID : sourceUniqueID;
-			if (uid->uniqueID == 0u && a_changes) {
-				uid->uniqueID = a_changes->GetNextUniqueID();
-			}
-		}
-		if (uid->baseID == 0u || uid->uniqueID == 0u) {
-			return false;
-		}
-
-		const auto targetPreviewKey = MakeInstanceKey(uid->baseID, uid->uniqueID);
-		RememberLootPreviewSlots(targetPreviewKey, previewSlots);
-		RememberSelectedLootPreviewKey(a_baseObj, targetPreviewKey, nowMs);
-		if (targetPreviewKey != sourcePreviewKey) {
-			ForgetLootPreviewSlots(sourcePreviewKey);
-		}
-
-		if (_loot.debugLog) {
-			SKSE::log::debug(
-				"CalamityAffixes: rebound pending loot preview for fallback candidate (baseObj={:08X}, sourceKey={:016X}, targetKey={:016X}).",
-				a_baseObj,
-				sourcePreviewKey,
-				targetPreviewKey);
-		}
-		return true;
-	}
-
 	void EventBridge::ApplyMultipleAffixes(
 		RE::InventoryChanges* a_changes,
 		RE::InventoryEntryData* a_entry,
 		RE::ExtraDataList* a_xList,
 		LootItemType a_itemType,
-		bool a_allowRunewordFragmentRoll)
+		bool a_allowRunewordFragmentRoll,
+		const std::optional<InstanceAffixSlots>& a_forcedSlots)
 	{
 		if (!a_changes || !a_entry || !a_entry->object || !a_xList) {
 			return;
@@ -590,26 +475,58 @@ namespace CalamityAffixes
 			return;
 		}
 
+		auto applyPreviewPityOutcome = [&](bool a_success) {
+			const float chancePct = std::clamp(_loot.chancePercent, 0.0f, 100.0f);
+			if (chancePct <= 0.0f) {
+				_lootChanceEligibleFailStreak = 0;
+				return;
+			}
+
+			if (a_success) {
+				_lootChanceEligibleFailStreak = 0;
+				return;
+			}
+
+			if (_lootChanceEligibleFailStreak < std::numeric_limits<std::uint32_t>::max()) {
+				++_lootChanceEligibleFailStreak;
+			}
+		};
+
+		if (a_forcedSlots.has_value()) {
+			auto slots = *a_forcedSlots;
+			ForgetLootPreviewSlots(key);
+			MarkLootEvaluatedInstance(key);
+
+			if (slots.count == 0) {
+				applyPreviewPityOutcome(false);
+				return;
+			}
+
+			(void)SanitizeInstanceAffixSlotsForCurrentLootRules(
+				key,
+				slots,
+				"ApplyMultipleAffixes.claim");
+			if (slots.count == 0) {
+				applyPreviewPityOutcome(false);
+				return;
+			}
+
+			_instanceAffixes[key] = slots;
+			for (std::uint8_t s = 0; s < slots.count; ++s) {
+				EnsureInstanceRuntimeState(key, slots.tokens[s]);
+			}
+			EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
+			if (a_allowRunewordFragmentRoll) {
+				MaybeGrantRandomRunewordFragment();
+				MaybeGrantRandomReforgeOrb();
+			}
+			applyPreviewPityOutcome(true);
+			return;
+		}
+
 		// Preview path: container/barter tooltip can pre-roll and cache this instance.
 		// On pickup, consume cached preview so the observed result matches what the player inspected.
 		if (const auto* previewSlots = FindLootPreviewSlots(key)) {
-			auto applyPreviewPityOutcome = [&](bool a_success) {
-				const float chancePct = std::clamp(_loot.chancePercent, 0.0f, 100.0f);
-				if (chancePct <= 0.0f) {
-					_lootChanceEligibleFailStreak = 0;
-					return;
-				}
-
-				if (a_success) {
-					_lootChanceEligibleFailStreak = 0;
-					return;
-				}
-
-				if (_lootChanceEligibleFailStreak < std::numeric_limits<std::uint32_t>::max()) {
-					++_lootChanceEligibleFailStreak;
-				}
-			};
-
 			const auto preview = *previewSlots;
 			ForgetLootPreviewSlots(key);
 			MarkLootEvaluatedInstance(key);
@@ -865,7 +782,12 @@ namespace CalamityAffixes
 		}
 	}
 
-		void EventBridge::ProcessLootAcquired(RE::FormID a_baseObj, std::int32_t a_count, std::uint16_t a_uniqueID, bool a_allowRunewordFragmentRoll)
+		void EventBridge::ProcessLootAcquired(
+			RE::FormID a_baseObj,
+			std::int32_t a_count,
+			std::uint16_t a_uniqueID,
+			RE::FormID a_oldContainer,
+			bool a_allowRunewordFragmentRoll)
 	{
 		if (!_configLoaded || !_runtimeEnabled || _loot.chancePercent <= 0.0f) {
 			return;
@@ -957,6 +879,10 @@ namespace CalamityAffixes
 		}
 
 		const auto itemType = entry->object->As<RE::TESObjectWEAP>() ? LootItemType::kWeapon : LootItemType::kArmor;
+		const auto nowMs = static_cast<std::uint64_t>(
+			std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::steady_clock::now().time_since_epoch())
+				.count());
 
 		if (a_uniqueID != 0) {
 			for (auto* xList : *entry->extraLists) {
@@ -966,7 +892,12 @@ namespace CalamityAffixes
 
 				auto* uid = xList->GetByType<RE::ExtraUniqueID>();
 				if (uid && uid->baseID == a_baseObj && uid->uniqueID == a_uniqueID) {
-					ApplyMultipleAffixes(changes, entry, xList, itemType, a_allowRunewordFragmentRoll);
+					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
+					std::optional<InstanceAffixSlots> forcedSlots = std::nullopt;
+					if (!_instanceAffixes.contains(key) && !IsLootEvaluatedInstance(key)) {
+						forcedSlots = ConsumeLootPreviewClaim(a_oldContainer, a_baseObj, nowMs);
+					}
+					ApplyMultipleAffixes(changes, entry, xList, itemType, a_allowRunewordFragmentRoll, forcedSlots);
 					return;
 				}
 			}
@@ -1013,70 +944,10 @@ namespace CalamityAffixes
 			unevaluatedCandidates.push_back(xList);
 		}
 
-		if (!unevaluatedCandidates.empty()) {
-			const auto nowMs = static_cast<std::uint64_t>(
-				std::chrono::duration_cast<std::chrono::milliseconds>(
-					std::chrono::steady_clock::now().time_since_epoch())
-					.count());
-			const auto selectedPreviewKey = FindSelectedLootPreviewKey(a_baseObj, nowMs);
-			RE::ExtraDataList* preferredCandidate = nullptr;
-			std::uint64_t preferredSourcePreviewKey = 0u;
-			if (selectedPreviewKey != 0u) {
-				for (auto* xList : unevaluatedCandidates) {
-					if (!xList) {
-						continue;
-					}
-					auto* uid = xList->GetByType<RE::ExtraUniqueID>();
-					if (!uid) {
-						continue;
-					}
-					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-					if (key == selectedPreviewKey) {
-						preferredCandidate = xList;
-						preferredSourcePreviewKey = key;
-						break;
-					}
-				}
-			}
-			if (!preferredCandidate) {
-				for (auto* xList : unevaluatedCandidates) {
-					if (!xList) {
-						continue;
-					}
-					auto* uid = xList->GetByType<RE::ExtraUniqueID>();
-					if (!uid) {
-						continue;
-					}
-					const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-					if (FindLootPreviewSlots(key) != nullptr) {
-						preferredCandidate = xList;
-						preferredSourcePreviewKey = key;
-						break;
-					}
-				}
-			}
-			if (preferredCandidate &&
-				unevaluatedCandidates.back() != preferredCandidate) {
-				auto preferredIt = std::find(
-					unevaluatedCandidates.begin(),
-					unevaluatedCandidates.end(),
-					preferredCandidate);
-				if (preferredIt != unevaluatedCandidates.end()) {
-					std::iter_swap(preferredIt, unevaluatedCandidates.end() - 1);
-				}
-			}
-
-			(void)RebindPendingLootPreviewForFallbackCandidate(
-				a_baseObj,
-				a_uniqueID,
-				changes,
-				unevaluatedCandidates.back(),
-				preferredSourcePreviewKey);
-		}
-
 		std::int32_t processed = 0;
 		for (auto it = unevaluatedCandidates.rbegin(); it != unevaluatedCandidates.rend() && processed < a_count; ++it) {
-			ApplyMultipleAffixes(changes, entry, *it, itemType, a_allowRunewordFragmentRoll);
+			const auto forcedSlots = ConsumeLootPreviewClaim(a_oldContainer, a_baseObj, nowMs);
+			ApplyMultipleAffixes(changes, entry, *it, itemType, a_allowRunewordFragmentRoll, forcedSlots);
 			processed += 1;
 		}
 

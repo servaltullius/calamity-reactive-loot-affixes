@@ -9,7 +9,6 @@
 #include <random>
 #include <string>
 #include <string_view>
-#include <unordered_set>
 #include <vector>
 
 #include <spdlog/spdlog.h>
@@ -26,8 +25,9 @@ namespace CalamityAffixes
 					.count());
 		}
 
-		static constexpr std::uint64_t kSelectedPreviewHintTtlMs = 120000u;
-		static constexpr std::size_t kSelectedPreviewHintMaxPerBaseObj = 12u;
+		static constexpr std::uint64_t kLootPreviewClaimTtlMs = 120000u;
+		static constexpr std::size_t kLootPreviewClaimMaxPerSourceBase = 32u;
+		static constexpr std::size_t kLootPreviewClaimMaxSourceKeys = 4096u;
 
 		[[nodiscard]] bool IsPreviewItemSource(std::string_view a_source) noexcept
 		{
@@ -213,81 +213,171 @@ namespace CalamityAffixes
 		return std::addressof(it->second);
 	}
 
-	std::uint64_t EventBridge::FindSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_nowMs)
+	std::uint64_t EventBridge::MakeLootPreviewClaimKey(RE::FormID a_sourceContainer, RE::FormID a_baseObj) noexcept
 	{
-		if (a_baseObj == 0u) {
-			return 0u;
-		}
-
-		const auto it = _lootPreviewSelectedByBaseObj.find(a_baseObj);
-		if (it == _lootPreviewSelectedByBaseObj.end()) {
-			return 0u;
-		}
-
-		auto& hints = it->second;
-		for (auto hintIt = hints.begin(); hintIt != hints.end();) {
-			const auto key = hintIt->instanceKey;
-			const bool keyMatchesBaseObj = key != 0u && static_cast<RE::FormID>(key >> 16u) == a_baseObj;
-			const bool hintFresh = IsSelectedLootPreviewHintFresh(a_nowMs, hintIt->recordedAtMs, kSelectedPreviewHintTtlMs);
-			const bool previewTracked = keyMatchesBaseObj && FindLootPreviewSlots(key) != nullptr;
-			if (!previewTracked || !hintFresh) {
-				hintIt = hints.erase(hintIt);
-			} else {
-				++hintIt;
-			}
-		}
-
-		if (hints.empty()) {
-			_lootPreviewSelectedByBaseObj.erase(it);
-			return 0u;
-		}
-
-		return hints.back().instanceKey;
+		return (static_cast<std::uint64_t>(a_sourceContainer) << 32u) | static_cast<std::uint64_t>(a_baseObj);
 	}
 
-	void EventBridge::RememberSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_instanceKey, std::uint64_t a_nowMs)
+	void EventBridge::RememberLootPreviewClaim(
+		RE::FormID a_sourceContainer,
+		RE::FormID a_baseObj,
+		const InstanceAffixSlots& a_slots,
+		std::uint64_t a_nowMs)
 	{
-		if (a_baseObj == 0u || a_instanceKey == 0u) {
-			return;
-		}
-		if (static_cast<RE::FormID>(a_instanceKey >> 16u) != a_baseObj) {
+		if (a_sourceContainer == 0u || a_baseObj == 0u) {
 			return;
 		}
 
-		auto& hints = _lootPreviewSelectedByBaseObj[a_baseObj];
-		std::erase_if(
-			hints,
-			[=](const SelectedLootPreviewHint& a_hint) {
-				return a_hint.instanceKey == a_instanceKey;
-			});
-		hints.push_back(SelectedLootPreviewHint{
-			.instanceKey = a_instanceKey,
+		const auto key = MakeLootPreviewClaimKey(a_sourceContainer, a_baseObj);
+		auto& queue = _lootPreviewClaimsBySourceBase[key];
+		queue.push_back(LootPreviewClaim{
+			.slots = a_slots,
 			.recordedAtMs = a_nowMs
 		});
-		while (hints.size() > kSelectedPreviewHintMaxPerBaseObj) {
-			hints.pop_front();
+		while (queue.size() > kLootPreviewClaimMaxPerSourceBase) {
+			queue.pop_front();
+		}
+
+		if (_lootPreviewClaimsBySourceBase.size() > kLootPreviewClaimMaxSourceKeys) {
+			for (auto it = _lootPreviewClaimsBySourceBase.begin();
+				 it != _lootPreviewClaimsBySourceBase.end();) {
+				auto& pruneQueue = it->second;
+				while (!pruneQueue.empty() &&
+					   !IsSelectedLootPreviewHintFresh(
+						   a_nowMs,
+						   pruneQueue.front().recordedAtMs,
+						   kLootPreviewClaimTtlMs)) {
+					pruneQueue.pop_front();
+				}
+				if (pruneQueue.empty()) {
+					it = _lootPreviewClaimsBySourceBase.erase(it);
+				} else {
+					++it;
+				}
+			}
+		}
+
+		while (_lootPreviewClaimsBySourceBase.size() > kLootPreviewClaimMaxSourceKeys) {
+			_lootPreviewClaimsBySourceBase.erase(_lootPreviewClaimsBySourceBase.begin());
 		}
 	}
 
-	void EventBridge::ForgetSelectedLootPreviewKeyForInstance(std::uint64_t a_instanceKey)
+	std::optional<InstanceAffixSlots> EventBridge::ConsumeLootPreviewClaim(
+		RE::FormID a_sourceContainer,
+		RE::FormID a_baseObj,
+		std::uint64_t a_nowMs)
 	{
-		if (a_instanceKey == 0u || _lootPreviewSelectedByBaseObj.empty()) {
-			return;
+		if (a_baseObj == 0u) {
+			return std::nullopt;
 		}
 
-		for (auto it = _lootPreviewSelectedByBaseObj.begin(); it != _lootPreviewSelectedByBaseObj.end();) {
-			auto& hints = it->second;
-			std::erase_if(
-				hints,
-				[=](const SelectedLootPreviewHint& a_hint) {
-					return a_hint.instanceKey == a_instanceKey;
-				});
-			if (hints.empty()) {
-				it = _lootPreviewSelectedByBaseObj.erase(it);
-			} else {
-				++it;
+		auto popFreshClaim = [&](std::unordered_map<std::uint64_t, std::deque<LootPreviewClaim>>::iterator a_it)
+			-> std::optional<InstanceAffixSlots> {
+			auto& queue = a_it->second;
+			while (!queue.empty()) {
+				const auto claim = queue.front();
+				queue.pop_front();
+				if (!IsSelectedLootPreviewHintFresh(a_nowMs, claim.recordedAtMs, kLootPreviewClaimTtlMs)) {
+					continue;
+				}
+				if (queue.empty()) {
+					_lootPreviewClaimsBySourceBase.erase(a_it);
+				}
+				return claim.slots;
+			}
+
+			_lootPreviewClaimsBySourceBase.erase(a_it);
+			return std::nullopt;
+		};
+
+		if (a_sourceContainer != 0u) {
+			const auto key = MakeLootPreviewClaimKey(a_sourceContainer, a_baseObj);
+			if (const auto it = _lootPreviewClaimsBySourceBase.find(key);
+				it != _lootPreviewClaimsBySourceBase.end()) {
+				if (const auto exact = popFreshClaim(it); exact.has_value()) {
+					if (_loot.debugLog) {
+						spdlog::debug(
+							"CalamityAffixes: claim consume exact (source={:08X}, baseObj={:08X}).",
+							a_sourceContainer,
+							a_baseObj);
+					}
+					return exact;
+				}
 			}
 		}
+
+		// Safety fallback:
+		// Some UI contexts can report a source handle that differs from TESContainerChanged oldContainer.
+		// If there is exactly one fresh claim queue for this base object, consume it.
+		std::unordered_map<std::uint64_t, std::deque<LootPreviewClaim>>::iterator fallbackIt =
+			_lootPreviewClaimsBySourceBase.end();
+		std::size_t fallbackCount = 0u;
+		for (auto it = _lootPreviewClaimsBySourceBase.begin();
+			 it != _lootPreviewClaimsBySourceBase.end();) {
+			const auto baseObj = static_cast<RE::FormID>(it->first & 0xFFFFFFFFu);
+			if (baseObj != a_baseObj) {
+				++it;
+				continue;
+			}
+
+			auto& queue = it->second;
+			while (!queue.empty() &&
+				   !IsSelectedLootPreviewHintFresh(
+					   a_nowMs,
+					   queue.front().recordedAtMs,
+					   kLootPreviewClaimTtlMs)) {
+				queue.pop_front();
+			}
+
+			if (queue.empty()) {
+				it = _lootPreviewClaimsBySourceBase.erase(it);
+				continue;
+			}
+
+			fallbackIt = it;
+			++fallbackCount;
+			++it;
+		}
+
+		if (fallbackCount == 1u && fallbackIt != _lootPreviewClaimsBySourceBase.end()) {
+			const auto fallbackKey = fallbackIt->first;
+			const auto fallbackSource = static_cast<RE::FormID>(fallbackKey >> 32u);
+			const auto fallback = popFreshClaim(fallbackIt);
+			if (fallback.has_value() && _loot.debugLog) {
+				spdlog::debug(
+					"CalamityAffixes: claim consume fallback-single (requestedSource={:08X}, claimSource={:08X}, baseObj={:08X}).",
+					a_sourceContainer,
+					fallbackSource,
+					a_baseObj);
+			}
+			return fallback;
+		}
+
+		if (_loot.debugLog) {
+			if (fallbackCount > 1u) {
+				spdlog::debug(
+					"CalamityAffixes: claim consume skipped ambiguous fallback (requestedSource={:08X}, baseObj={:08X}, candidates={}).",
+					a_sourceContainer,
+					a_baseObj,
+					fallbackCount);
+			} else {
+				spdlog::debug(
+					"CalamityAffixes: claim consume miss (requestedSource={:08X}, baseObj={:08X}).",
+					a_sourceContainer,
+					a_baseObj);
+			}
+		}
+
+		return std::nullopt;
+	}
+
+	void EventBridge::ForgetLootPreviewClaims(RE::FormID a_sourceContainer, RE::FormID a_baseObj)
+	{
+		if (a_sourceContainer == 0u || a_baseObj == 0u) {
+			return;
+		}
+		const auto key = MakeLootPreviewClaimKey(a_sourceContainer, a_baseObj);
+		_lootPreviewClaimsBySourceBase.erase(key);
 	}
 
 	void EventBridge::RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots)
@@ -318,7 +408,6 @@ namespace CalamityAffixes
 		}
 		_lootPreviewAffixes.erase(a_instanceKey);
 		std::erase(_lootPreviewRecent, a_instanceKey);
-		ForgetSelectedLootPreviewKeyForInstance(a_instanceKey);
 	}
 
 	std::uint64_t EventBridge::HashLootPreviewSeed(std::uint64_t a_instanceKey, std::uint64_t a_salt)
@@ -487,7 +576,8 @@ namespace CalamityAffixes
 		const RE::InventoryEntryData* a_item,
 		std::string_view a_selectedDisplayName,
 		int a_uiLanguageMode,
-		std::string_view a_itemSource)
+		std::string_view a_itemSource,
+		RE::FormID a_sourceContainerFormID)
 	{
 		if (!_configLoaded) {
 			return std::nullopt;
@@ -583,7 +673,14 @@ namespace CalamityAffixes
 			candidates.push_back(std::move(candidate));
 		}
 
+		const bool hasClaimContext =
+			allowPreview &&
+			itemBaseObj != 0u &&
+			a_sourceContainerFormID != 0u;
 		if (candidates.empty()) {
+			if (hasClaimContext) {
+				ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
+			}
 			return std::nullopt;
 		}
 
@@ -695,50 +792,84 @@ namespace CalamityAffixes
 			});
 		}
 
+		std::vector<std::size_t> previewCandidateIndices;
+		if (hasClaimContext) {
+			for (std::size_t index = 0; index < candidates.size(); ++index) {
+				if (candidates[index].preview) {
+					previewCandidateIndices.push_back(index);
+				}
+			}
+		}
+
 		const auto resolution = ResolveTooltipCandidateSelection(resolutionCandidates, a_selectedDisplayName);
 		if (resolution.matchedIndex &&
 			*resolution.matchedIndex < candidates.size() &&
 			!resolution.ambiguous) {
 			const auto& matched = candidates[*resolution.matchedIndex];
-			if (allowPreview && itemBaseObj != 0u) {
+			if (hasClaimContext) {
 				if (matched.preview) {
+					if (previewCandidateIndices.size() != 1u) {
+						ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
+						return std::nullopt;
+					}
+					const auto previewIndex = previewCandidateIndices.front();
+					if (*resolution.matchedIndex != previewIndex) {
+						ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
+						return std::nullopt;
+					}
 					const auto nowMs = NowSteadyMilliseconds();
-					RememberSelectedLootPreviewKey(itemBaseObj, matched.instanceKey, nowMs);
+					RememberLootPreviewClaim(
+						a_sourceContainerFormID,
+						itemBaseObj,
+						matched.slots,
+						nowMs);
 				} else {
-					_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
+					ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
 				}
 			}
 			const auto formatted = formatTooltip(matched);
 			if (formatted.empty()) {
+				if (hasClaimContext) {
+					ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
+				}
 				return std::nullopt;
 			}
 			return formatted;
 		}
 
-		if (allowPreview && itemBaseObj != 0u) {
-			std::vector<std::uint64_t> previewCandidateKeys;
-			std::unordered_set<std::uint64_t> seenPreviewKeys;
-			previewCandidateKeys.reserve(candidates.size());
-			for (const auto& candidate : candidates) {
-				if (!candidate.preview || candidate.instanceKey == 0u) {
-					continue;
-				}
-				if (seenPreviewKeys.insert(candidate.instanceKey).second) {
-					previewCandidateKeys.push_back(candidate.instanceKey);
-				}
-			}
-
-			if (previewCandidateKeys.size() == 1u) {
+		if (!a_selectedDisplayName.empty()) {
+			if (hasClaimContext && previewCandidateIndices.size() == 1u) {
+				const auto& singlePreview = candidates[previewCandidateIndices.front()];
 				const auto nowMs = NowSteadyMilliseconds();
-				RememberSelectedLootPreviewKey(itemBaseObj, previewCandidateKeys.front(), nowMs);
-			} else if (previewCandidateKeys.size() > 1u) {
-				_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
-			} else if (previewCandidateKeys.empty()) {
-				_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
+				RememberLootPreviewClaim(
+					a_sourceContainerFormID,
+					itemBaseObj,
+					singlePreview.slots,
+					nowMs);
+				const auto singleTooltip = formatTooltip(singlePreview);
+				if (!singleTooltip.empty()) {
+					return singleTooltip;
+				}
 			}
+			if (hasClaimContext) {
+				ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
+			}
+			return std::nullopt;
 		}
 
-		if (!a_selectedDisplayName.empty()) {
+		if (hasClaimContext && previewCandidateIndices.size() == 1u) {
+			const auto& singlePreview = candidates[previewCandidateIndices.front()];
+			const auto nowMs = NowSteadyMilliseconds();
+			RememberLootPreviewClaim(
+				a_sourceContainerFormID,
+				itemBaseObj,
+				singlePreview.slots,
+				nowMs);
+			const auto singleTooltip = formatTooltip(singlePreview);
+			if (!singleTooltip.empty()) {
+				return singleTooltip;
+			}
+			ForgetLootPreviewClaims(a_sourceContainerFormID, itemBaseObj);
 			return std::nullopt;
 		}
 

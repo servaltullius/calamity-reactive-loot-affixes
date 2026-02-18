@@ -147,7 +147,8 @@ namespace CalamityAffixes
 			const RE::InventoryEntryData* a_item,
 			std::string_view a_selectedDisplayName = {},
 			int a_uiLanguageMode = 2,
-			std::string_view a_itemSource = {});
+			std::string_view a_itemSource = {},
+			RE::FormID a_sourceContainerFormID = 0u);
 
 		// UI helper: enumerate runeword-base candidates from player's inventory.
 		[[nodiscard]] std::vector<RunewordBaseInventoryEntry> GetRunewordBaseInventoryEntries();
@@ -524,9 +525,9 @@ namespace CalamityAffixes
 			std::size_t cursor{ 0 };
 		};
 
-		struct SelectedLootPreviewHint
+		struct LootPreviewClaim
 		{
-			std::uint64_t instanceKey{ 0u };
+			InstanceAffixSlots slots{};
 			std::uint64_t recordedAtMs{ 0u };
 		};
 
@@ -578,7 +579,7 @@ namespace CalamityAffixes
 		std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;
 		std::unordered_map<std::uint64_t, InstanceAffixSlots> _lootPreviewAffixes;
 		std::deque<std::uint64_t> _lootPreviewRecent;
-		std::unordered_map<RE::FormID, std::deque<SelectedLootPreviewHint>> _lootPreviewSelectedByBaseObj;
+		std::unordered_map<std::uint64_t, std::deque<LootPreviewClaim>> _lootPreviewClaimsBySourceBase;
 		std::unordered_set<std::uint64_t> _lootEvaluatedInstances;
 		std::deque<std::uint64_t> _lootEvaluatedRecent;
 		std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
@@ -698,18 +699,20 @@ namespace CalamityAffixes
 		void RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey);
 		void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
 		void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
+		[[nodiscard]] static std::uint64_t MakeLootPreviewClaimKey(RE::FormID a_sourceContainer, RE::FormID a_baseObj) noexcept;
 		[[nodiscard]] const InstanceAffixSlots* FindLootPreviewSlots(std::uint64_t a_instanceKey) const;
-		[[nodiscard]] std::uint64_t FindSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_nowMs);
-		void RememberSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_instanceKey, std::uint64_t a_nowMs);
-		void ForgetSelectedLootPreviewKeyForInstance(std::uint64_t a_instanceKey);
+		void RememberLootPreviewClaim(
+			RE::FormID a_sourceContainer,
+			RE::FormID a_baseObj,
+			const InstanceAffixSlots& a_slots,
+			std::uint64_t a_nowMs);
+		[[nodiscard]] std::optional<InstanceAffixSlots> ConsumeLootPreviewClaim(
+			RE::FormID a_sourceContainer,
+			RE::FormID a_baseObj,
+			std::uint64_t a_nowMs);
+		void ForgetLootPreviewClaims(RE::FormID a_sourceContainer, RE::FormID a_baseObj);
 		void RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots);
 		void ForgetLootPreviewSlots(std::uint64_t a_instanceKey);
-		[[nodiscard]] bool RebindPendingLootPreviewForFallbackCandidate(
-			RE::FormID a_baseObj,
-			std::uint16_t a_uniqueID,
-			RE::InventoryChanges* a_changes,
-			RE::ExtraDataList* a_targetXList,
-			std::uint64_t a_preferredSourcePreviewKey = 0u);
 		[[nodiscard]] std::optional<InstanceAffixSlots> BuildLootPreviewAffixSlots(
 			std::uint64_t a_instanceKey,
 			LootItemType a_itemType) const;
@@ -760,7 +763,12 @@ namespace CalamityAffixes
 		void CycleManualModeForEquippedAffixes(std::int32_t a_direction, std::string_view a_affixIdFilter = {});
 
 		// Loot processing path.
-		void ProcessLootAcquired(RE::FormID a_baseObj, std::int32_t a_count, std::uint16_t a_uniqueID, bool a_allowRunewordFragmentRoll);
+		void ProcessLootAcquired(
+			RE::FormID a_baseObj,
+			std::int32_t a_count,
+			std::uint16_t a_uniqueID,
+			RE::FormID a_oldContainer,
+			bool a_allowRunewordFragmentRoll);
 		[[nodiscard]] std::optional<std::size_t> RollLootAffixIndex(
 			LootItemType a_itemType,
 			const std::vector<std::size_t>* a_exclude = nullptr,
@@ -775,7 +783,8 @@ namespace CalamityAffixes
 			RE::InventoryEntryData* a_entry,
 			RE::ExtraDataList* a_xList,
 			LootItemType a_itemType,
-			bool a_allowRunewordFragmentRoll);
+			bool a_allowRunewordFragmentRoll,
+			const std::optional<InstanceAffixSlots>& a_forcedSlots = std::nullopt);
 		void EnsureMultiAffixDisplayName(
 			RE::InventoryEntryData* a_entry,
 			RE::ExtraDataList* a_xList,

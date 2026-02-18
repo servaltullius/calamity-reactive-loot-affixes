@@ -616,7 +616,17 @@ namespace CalamityAffixes::PrismaTooltip
 				return result;
 			}
 
-			auto readItem = [&](RE::ItemList* a_itemList, std::string_view a_source) -> bool {
+			auto resolveRefHandleToFormID = [](RE::RefHandle a_handle) -> RE::FormID {
+				if (a_handle == 0) {
+					return 0u;
+				}
+				if (auto ref = RE::TESObjectREFR::LookupByHandle(a_handle); ref) {
+					return ref->GetFormID();
+				}
+				return 0u;
+			};
+
+			auto readItem = [&](RE::ItemList* a_itemList, std::string_view a_source, RE::FormID a_sourceContainerFormID) -> bool {
 				if (!a_itemList) {
 					return false;
 				}
@@ -637,14 +647,15 @@ namespace CalamityAffixes::PrismaTooltip
 					item->data.objDesc,
 					result.itemName,
 					g_uiLanguageMode.load(),
-					result.itemSource);
+					result.itemSource,
+					a_sourceContainerFormID);
 				return true;
 			};
 
 			if (auto menu = ui->GetMenu<RE::InventoryMenu>(); menu) {
 				if (ui->IsMenuOpen(kMenuInventory)) {
 					auto& data = menu->GetRuntimeData();
-					if (readItem(data.itemList, kItemSourceInventory)) {
+					if (readItem(data.itemList, kItemSourceInventory, 0u)) {
 						return result;
 					}
 				}
@@ -652,7 +663,8 @@ namespace CalamityAffixes::PrismaTooltip
 			if (auto menu = ui->GetMenu<RE::BarterMenu>(); menu) {
 				if (ui->IsMenuOpen(kMenuBarter)) {
 					auto& data = menu->GetRuntimeData();
-					if (readItem(data.itemList, kItemSourceBarter)) {
+					const auto sourceContainer = resolveRefHandleToFormID(RE::BarterMenu::GetTargetRefHandle());
+					if (readItem(data.itemList, kItemSourceBarter, sourceContainer)) {
 						return result;
 					}
 				}
@@ -660,7 +672,8 @@ namespace CalamityAffixes::PrismaTooltip
 			if (auto menu = ui->GetMenu<RE::ContainerMenu>(); menu) {
 				if (ui->IsMenuOpen(kMenuContainer)) {
 					auto& data = menu->GetRuntimeData();
-					if (readItem(data.itemList, kItemSourceContainer)) {
+					const auto sourceContainer = resolveRefHandleToFormID(RE::ContainerMenu::GetTargetRefHandle());
+					if (readItem(data.itemList, kItemSourceContainer, sourceContainer)) {
 						return result;
 					}
 				}
@@ -668,7 +681,8 @@ namespace CalamityAffixes::PrismaTooltip
 			if (auto menu = ui->GetMenu<RE::GiftMenu>(); menu) {
 				if (ui->IsMenuOpen(kMenuGift)) {
 					auto& data = menu->GetRuntimeData();
-					if (readItem(data.itemList, kItemSourceGift)) {
+					const auto sourceContainer = resolveRefHandleToFormID(RE::GiftMenu::GetTargetRefHandle());
+					if (readItem(data.itemList, kItemSourceGift, sourceContainer)) {
 						return result;
 					}
 				}

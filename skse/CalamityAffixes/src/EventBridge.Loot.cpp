@@ -490,11 +490,12 @@ namespace CalamityAffixes
 			uid);
 
 			if (auto* task = SKSE::GetTaskInterface()) {
-				task->AddTask([baseObj, count, uid, allowRunewordFragmentRoll]() {
-					EventBridge::GetSingleton()->ProcessLootAcquired(baseObj, count, uid, allowRunewordFragmentRoll);
+				const auto oldContainer = a_event->oldContainer;
+				task->AddTask([baseObj, count, uid, oldContainer, allowRunewordFragmentRoll]() {
+					EventBridge::GetSingleton()->ProcessLootAcquired(baseObj, count, uid, oldContainer, allowRunewordFragmentRoll);
 				});
 			} else {
-				ProcessLootAcquired(baseObj, count, uid, allowRunewordFragmentRoll);
+				ProcessLootAcquired(baseObj, count, uid, a_event->oldContainer, allowRunewordFragmentRoll);
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -568,32 +569,6 @@ namespace CalamityAffixes
 			const auto preview = *previewSlots;
 			ForgetLootPreviewSlots(a_oldKey);
 			RememberLootPreviewSlots(a_newKey, preview);
-		}
-
-		for (auto it = _lootPreviewSelectedByBaseObj.begin(); it != _lootPreviewSelectedByBaseObj.end();) {
-			auto& hints = it->second;
-			for (auto& hint : hints) {
-				if (hint.instanceKey == a_oldKey) {
-					hint.instanceKey = a_newKey;
-				}
-			}
-
-			std::unordered_set<std::uint64_t> seenKeys;
-			std::erase_if(
-				hints,
-				[&seenKeys](const SelectedLootPreviewHint& a_hint) {
-					if (a_hint.instanceKey == 0u || seenKeys.contains(a_hint.instanceKey)) {
-						return true;
-					}
-					seenKeys.insert(a_hint.instanceKey);
-					return false;
-				});
-
-			if (hints.empty()) {
-				it = _lootPreviewSelectedByBaseObj.erase(it);
-			} else {
-				++it;
-			}
 		}
 
 		if (auto affixNode = _instanceAffixes.extract(a_oldKey); !affixNode.empty()) {

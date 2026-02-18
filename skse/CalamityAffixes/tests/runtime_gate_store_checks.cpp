@@ -712,29 +712,14 @@ namespace
 			std::cerr << "loot_preview_policy: preview consumption path must update pity streak outcomes\n";
 			return false;
 		}
-		if (assignText->find("bool EventBridge::RebindPendingLootPreviewForFallbackCandidate(") == std::string::npos ||
-			assignText->find("(void)RebindPendingLootPreviewForFallbackCandidate(") == std::string::npos) {
-			std::cerr << "loot_preview_policy: fallback path must rebind pending preview cache before reroll\n";
-			return false;
-		}
-		if (assignText->find("a_preferredSourcePreviewKey") == std::string::npos ||
-			assignText->find("preferredSourcePreviewKey") == std::string::npos) {
-			std::cerr << "loot_preview_policy: fallback rebind must carry selected candidate preview key explicitly\n";
+		if (assignText->find("RE::FormID a_oldContainer") == std::string::npos ||
+			assignText->find("ConsumeLootPreviewClaim(a_oldContainer, a_baseObj, nowMs)") == std::string::npos) {
+			std::cerr << "loot_preview_policy: pickup path must consume preview claims by source container and base object\n";
 			return false;
 		}
 		if (assignText->find("StripLootStarMarkers(") == std::string::npos ||
 			assignText->find("_loot.nameMarkerPosition == LootNameMarkerPosition::kTrailing") == std::string::npos) {
 			std::cerr << "loot_preview_policy: rename path must support marker normalization and trailing marker mode\n";
-			return false;
-		}
-		if (assignText->find("FindSelectedLootPreviewKey(a_baseObj, nowMs)") == std::string::npos ||
-			assignText->find("RememberSelectedLootPreviewKey(a_baseObj, targetPreviewKey, nowMs)") == std::string::npos) {
-			std::cerr << "loot_preview_policy: fallback rebind must prioritize selected preview key hint\n";
-			return false;
-		}
-		if (assignText->find("ShouldUseSelectedLootPreviewHint(") == std::string::npos ||
-			assignText->find("selectedPreviewFresh") == std::string::npos) {
-			std::cerr << "loot_preview_policy: selected preview hint must be gated by explicit freshness checks\n";
 			return false;
 		}
 		if (assignText->find("MaybeGrantRandomRunewordFragment();") == std::string::npos ||
@@ -757,15 +742,15 @@ namespace
 			std::cerr << "loot_preview_policy: preview cache forget path must prune recent-key deque entries\n";
 			return false;
 		}
-		if (runtimeText->find("RememberSelectedLootPreviewKey(itemBaseObj, matched.instanceKey, nowMs)") == std::string::npos ||
-			runtimeText->find("ForgetSelectedLootPreviewKeyForInstance(a_instanceKey);") == std::string::npos ||
-			runtimeText->find("kSelectedPreviewHintTtlMs") == std::string::npos) {
-			std::cerr << "loot_preview_policy: preview selection hint lifecycle must be maintained\n";
+		if (runtimeText->find("RememberLootPreviewClaim(") == std::string::npos ||
+			runtimeText->find("ConsumeLootPreviewClaim(") == std::string::npos ||
+			runtimeText->find("kLootPreviewClaimTtlMs") == std::string::npos) {
+			std::cerr << "loot_preview_policy: source-container claim lifecycle must be maintained\n";
 			return false;
 		}
-		if (runtimeText->find("previewCandidateKeys") == std::string::npos ||
-			runtimeText->find("previewCandidateKeys.size() > 1u") == std::string::npos) {
-			std::cerr << "loot_preview_policy: preview mismatch path must sanitize selected hint by current preview candidates\n";
+		if (runtimeText->find("a_sourceContainerFormID") == std::string::npos ||
+			runtimeText->find("previewCandidateIndices.size() != 1u") == std::string::npos) {
+			std::cerr << "loot_preview_policy: preview path must hide ambiguous candidates and use source container claims\n";
 			return false;
 		}
 		if (runtimeText->find("BSExtraData::Create<RE::ExtraUniqueID>()") == std::string::npos ||
@@ -782,8 +767,9 @@ namespace
 		if (lootText->find("const bool trackedPreview = FindLootPreviewSlots(oldKey) != nullptr;") == std::string::npos ||
 			lootText->find("trackedPreview ||") == std::string::npos ||
 			lootText->find("const bool previewMenuContextOpen = IsPreviewRemapMenuContextOpen();") == std::string::npos ||
-			lootText->find("ShouldAllowPreviewUniqueIdRemap(playerOwnsEither, trackedPreview, previewMenuContextOpen)") == std::string::npos) {
-			std::cerr << "loot_preview_policy: unique-id remap path must preserve preview cache across key changes\n";
+			lootText->find("ShouldAllowPreviewUniqueIdRemap(playerOwnsEither, trackedPreview, previewMenuContextOpen)") == std::string::npos ||
+			lootText->find("ProcessLootAcquired(baseObj, count, uid, oldContainer, allowRunewordFragmentRoll)") == std::string::npos) {
+			std::cerr << "loot_preview_policy: unique-id remap and pickup task path must preserve preview cache and source-container context\n";
 			return false;
 		}
 
@@ -802,7 +788,8 @@ namespace
 			return false;
 		}
 		if (configText->find("_lootPreviewAffixes.clear();") == std::string::npos ||
-			configText->find("_lootPreviewRecent.clear();") == std::string::npos) {
+			configText->find("_lootPreviewRecent.clear();") == std::string::npos ||
+			configText->find("_lootPreviewClaimsBySourceBase.clear();") == std::string::npos) {
 			std::cerr << "loot_preview_policy: config reload reset must clear preview caches\n";
 			return false;
 		}
@@ -813,7 +800,8 @@ namespace
 			return false;
 		}
 		if (serializationText->find("_lootPreviewAffixes.clear();") == std::string::npos ||
-			serializationText->find("_lootPreviewRecent.clear();") == std::string::npos) {
+			serializationText->find("_lootPreviewRecent.clear();") == std::string::npos ||
+			serializationText->find("_lootPreviewClaimsBySourceBase.clear();") == std::string::npos) {
 			std::cerr << "loot_preview_policy: load/revert must clear preview caches\n";
 			return false;
 		}
