@@ -570,9 +570,29 @@ namespace CalamityAffixes
 			RememberLootPreviewSlots(a_newKey, preview);
 		}
 
-		for (auto& [baseObj, previewKey] : _lootPreviewSelectedByBaseObj) {
-			if (previewKey == a_oldKey) {
-				previewKey = a_newKey;
+		for (auto it = _lootPreviewSelectedByBaseObj.begin(); it != _lootPreviewSelectedByBaseObj.end();) {
+			auto& hints = it->second;
+			for (auto& hint : hints) {
+				if (hint.instanceKey == a_oldKey) {
+					hint.instanceKey = a_newKey;
+				}
+			}
+
+			std::unordered_set<std::uint64_t> seenKeys;
+			std::erase_if(
+				hints,
+				[&seenKeys](const SelectedLootPreviewHint& a_hint) {
+					if (a_hint.instanceKey == 0u || seenKeys.contains(a_hint.instanceKey)) {
+						return true;
+					}
+					seenKeys.insert(a_hint.instanceKey);
+					return false;
+				});
+
+			if (hints.empty()) {
+				it = _lootPreviewSelectedByBaseObj.erase(it);
+			} else {
+				++it;
 			}
 		}
 

@@ -103,17 +103,27 @@ static_assert([] {
 static_assert([] {
 	return CalamityAffixes::ShouldUseSelectedLootPreviewHint(true, true);
 }(),
-	"ShouldUseSelectedLootPreviewHint: allow selected preview hint only while preview menus are open");
+	"ShouldUseSelectedLootPreviewHint: allow selected preview hint when tracked and fresh");
 
 static_assert([] {
 	return !CalamityAffixes::ShouldUseSelectedLootPreviewHint(false, true);
 }(),
-	"ShouldUseSelectedLootPreviewHint: reject stale selected preview hint when preview menus are closed");
+	"ShouldUseSelectedLootPreviewHint: reject untracked selected preview hint");
 
 static_assert([] {
 	return !CalamityAffixes::ShouldUseSelectedLootPreviewHint(true, false);
 }(),
-	"ShouldUseSelectedLootPreviewHint: requires tracked selected preview key");
+	"ShouldUseSelectedLootPreviewHint: reject stale selected preview hint");
+
+static_assert([] {
+	return CalamityAffixes::IsSelectedLootPreviewHintFresh(15000u, 0u, 15000u);
+}(),
+	"IsSelectedLootPreviewHintFresh: keep hint until ttl boundary");
+
+static_assert([] {
+	return !CalamityAffixes::IsSelectedLootPreviewHintFresh(15001u, 0u, 15000u);
+}(),
+	"IsSelectedLootPreviewHintFresh: expire hint immediately after ttl");
 
 static_assert([] {
 	return CalamityAffixes::IsRunewordOverlayTooltipLine("Runeword: Nadir (0/2) / Next: Nef (owned 0)");

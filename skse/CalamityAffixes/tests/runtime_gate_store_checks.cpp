@@ -722,14 +722,14 @@ namespace
 			std::cerr << "loot_preview_policy: rename path must support marker normalization and trailing marker mode\n";
 			return false;
 		}
-		if (assignText->find("FindSelectedLootPreviewKey(a_baseObj)") == std::string::npos ||
-			assignText->find("RememberSelectedLootPreviewKey(a_baseObj, targetPreviewKey)") == std::string::npos) {
+		if (assignText->find("FindSelectedLootPreviewKey(a_baseObj, nowMs)") == std::string::npos ||
+			assignText->find("RememberSelectedLootPreviewKey(a_baseObj, targetPreviewKey, nowMs)") == std::string::npos) {
 			std::cerr << "loot_preview_policy: fallback rebind must prioritize selected preview key hint\n";
 			return false;
 		}
 		if (assignText->find("ShouldUseSelectedLootPreviewHint(") == std::string::npos ||
-			assignText->find("_lootPreviewSelectedByBaseObj.erase(a_baseObj);") == std::string::npos) {
-			std::cerr << "loot_preview_policy: selected preview hint must be guarded by preview-menu context and stale-hint cleanup\n";
+			assignText->find("selectedPreviewFresh") == std::string::npos) {
+			std::cerr << "loot_preview_policy: selected preview hint must be gated by explicit freshness checks\n";
 			return false;
 		}
 		if (assignText->find("TryClearStaleLootDisplayName(a_entry, a_xList, false)") == std::string::npos ||
@@ -747,8 +747,9 @@ namespace
 			std::cerr << "loot_preview_policy: preview cache forget path must prune recent-key deque entries\n";
 			return false;
 		}
-		if (runtimeText->find("RememberSelectedLootPreviewKey(itemBaseObj, matched.instanceKey)") == std::string::npos ||
-			runtimeText->find("ForgetSelectedLootPreviewKeyForInstance(a_instanceKey);") == std::string::npos) {
+		if (runtimeText->find("RememberSelectedLootPreviewKey(itemBaseObj, matched.instanceKey, nowMs)") == std::string::npos ||
+			runtimeText->find("ForgetSelectedLootPreviewKeyForInstance(a_instanceKey);") == std::string::npos ||
+			runtimeText->find("kSelectedPreviewHintTtlMs") == std::string::npos) {
 			std::cerr << "loot_preview_policy: preview selection hint lifecycle must be maintained\n";
 			return false;
 		}

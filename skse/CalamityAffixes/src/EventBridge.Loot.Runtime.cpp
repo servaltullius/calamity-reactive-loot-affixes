@@ -17,6 +17,17 @@ namespace CalamityAffixes
 {
 	namespace
 	{
+		[[nodiscard]] std::uint64_t NowSteadyMilliseconds() noexcept
+		{
+			return static_cast<std::uint64_t>(
+				std::chrono::duration_cast<std::chrono::milliseconds>(
+					std::chrono::steady_clock::now().time_since_epoch())
+					.count());
+		}
+
+		static constexpr std::uint64_t kSelectedPreviewHintTtlMs = 120000u;
+		static constexpr std::size_t kSelectedPreviewHintMaxPerBaseObj = 12u;
+
 		[[nodiscard]] bool IsPreviewItemSource(std::string_view a_source) noexcept
 		{
 			return a_source == "barter" || a_source == "container" || a_source == "gift";
@@ -201,7 +212,7 @@ namespace CalamityAffixes
 		return std::addressof(it->second);
 	}
 
-	std::uint64_t EventBridge::FindSelectedLootPreviewKey(RE::FormID a_baseObj) const
+	std::uint64_t EventBridge::FindSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_nowMs)
 	{
 		if (a_baseObj == 0u) {
 			return 0u;
@@ -212,15 +223,28 @@ namespace CalamityAffixes
 			return 0u;
 		}
 
-		const auto key = it->second;
-		if (key == 0u || static_cast<RE::FormID>(key >> 16u) != a_baseObj) {
+		auto& hints = it->second;
+		for (auto hintIt = hints.begin(); hintIt != hints.end();) {
+			const auto key = hintIt->instanceKey;
+			const bool keyMatchesBaseObj = key != 0u && static_cast<RE::FormID>(key >> 16u) == a_baseObj;
+			const bool hintFresh = IsSelectedLootPreviewHintFresh(a_nowMs, hintIt->recordedAtMs, kSelectedPreviewHintTtlMs);
+			const bool previewTracked = keyMatchesBaseObj && FindLootPreviewSlots(key) != nullptr;
+			if (!previewTracked || !hintFresh) {
+				hintIt = hints.erase(hintIt);
+			} else {
+				++hintIt;
+			}
+		}
+
+		if (hints.empty()) {
+			_lootPreviewSelectedByBaseObj.erase(it);
 			return 0u;
 		}
 
-		return key;
+		return hints.back().instanceKey;
 	}
 
-	void EventBridge::RememberSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_instanceKey)
+	void EventBridge::RememberSelectedLootPreviewKey(RE::FormID a_baseObj, std::uint64_t a_instanceKey, std::uint64_t a_nowMs)
 	{
 		if (a_baseObj == 0u || a_instanceKey == 0u) {
 			return;
@@ -229,7 +253,19 @@ namespace CalamityAffixes
 			return;
 		}
 
-		_lootPreviewSelectedByBaseObj[a_baseObj] = a_instanceKey;
+		auto& hints = _lootPreviewSelectedByBaseObj[a_baseObj];
+		std::erase_if(
+			hints,
+			[=](const SelectedLootPreviewHint& a_hint) {
+				return a_hint.instanceKey == a_instanceKey;
+			});
+		hints.push_back(SelectedLootPreviewHint{
+			.instanceKey = a_instanceKey,
+			.recordedAtMs = a_nowMs
+		});
+		while (hints.size() > kSelectedPreviewHintMaxPerBaseObj) {
+			hints.pop_front();
+		}
 	}
 
 	void EventBridge::ForgetSelectedLootPreviewKeyForInstance(std::uint64_t a_instanceKey)
@@ -239,7 +275,13 @@ namespace CalamityAffixes
 		}
 
 		for (auto it = _lootPreviewSelectedByBaseObj.begin(); it != _lootPreviewSelectedByBaseObj.end();) {
-			if (it->second == a_instanceKey) {
+			auto& hints = it->second;
+			std::erase_if(
+				hints,
+				[=](const SelectedLootPreviewHint& a_hint) {
+					return a_hint.instanceKey == a_instanceKey;
+				});
+			if (hints.empty()) {
 				it = _lootPreviewSelectedByBaseObj.erase(it);
 			} else {
 				++it;
@@ -469,9 +511,6 @@ namespace CalamityAffixes
 			IsPreviewItemSource(a_itemSource) &&
 			IsLootObjectEligibleForAffixes(a_item->object);
 		const RE::FormID itemBaseObj = (a_item->object ? a_item->object->GetFormID() : 0u);
-		if (!allowPreview && itemBaseObj != 0u) {
-			_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
-		}
 
 		struct TooltipCandidate
 		{
@@ -662,7 +701,8 @@ namespace CalamityAffixes
 			const auto& matched = candidates[*resolution.matchedIndex];
 			if (allowPreview && itemBaseObj != 0u) {
 				if (matched.preview) {
-					RememberSelectedLootPreviewKey(itemBaseObj, matched.instanceKey);
+					const auto nowMs = NowSteadyMilliseconds();
+					RememberSelectedLootPreviewKey(itemBaseObj, matched.instanceKey, nowMs);
 				} else {
 					_lootPreviewSelectedByBaseObj.erase(itemBaseObj);
 				}

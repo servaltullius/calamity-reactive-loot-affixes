@@ -234,10 +234,18 @@ namespace CalamityAffixes
 	}
 
 	[[nodiscard]] constexpr bool ShouldUseSelectedLootPreviewHint(
-		bool a_previewMenuContextOpen,
-		bool a_selectedPreviewTracked) noexcept
+		bool a_selectedPreviewTracked,
+		bool a_selectedPreviewFresh) noexcept
 	{
-		return a_previewMenuContextOpen && a_selectedPreviewTracked;
+		return a_selectedPreviewTracked && a_selectedPreviewFresh;
+	}
+
+	[[nodiscard]] constexpr bool IsSelectedLootPreviewHintFresh(
+		std::uint64_t a_nowMs,
+		std::uint64_t a_recordedAtMs,
+		std::uint64_t a_ttlMs) noexcept
+	{
+		return a_nowMs >= a_recordedAtMs && (a_nowMs - a_recordedAtMs) <= a_ttlMs;
 	}
 
 	[[nodiscard]] constexpr bool IsRunewordOverlayTooltipLine(std::string_view a_line) noexcept
