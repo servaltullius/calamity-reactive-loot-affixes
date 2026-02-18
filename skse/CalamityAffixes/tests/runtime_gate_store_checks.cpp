@@ -799,6 +799,35 @@ namespace
 			return true;
 		}
 
+		bool CheckRunewordRecipeEntriesMappingPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
+
+			std::ifstream recipeEntriesIn(recipeEntriesFile);
+			if (!recipeEntriesIn.is_open()) {
+				std::cerr << "runeword_recipe_entries_mapping: failed to open source file: " << recipeEntriesFile << "\n";
+				return false;
+			}
+
+			std::string source(
+				(std::istreambuf_iterator<char>(recipeEntriesIn)),
+				std::istreambuf_iterator<char>());
+
+			if (source.find("kRecommendedBaseOverrides") == std::string::npos ||
+				source.find("kEffectSummaryOverrides") == std::string::npos ||
+				source.find("FindKeyOverride(id, kRecommendedBaseOverrides)") == std::string::npos ||
+				source.find("FindKeyOverride(id, kEffectSummaryOverrides)") == std::string::npos ||
+				source.find("{ \"rw_spirit\", \"sword_shield\" }") == std::string::npos ||
+				source.find("{ \"rw_spirit\", \"self_meditation\" }") == std::string::npos) {
+				std::cerr << "runeword_recipe_entries_mapping: recipe-entry table mapping guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
 		bool CheckRunewordTransmuteSafetyPolicy()
 		{
 			namespace fs = std::filesystem;
@@ -915,11 +944,13 @@ int main()
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	const bool lootChanceMcmSyncOk = CheckLootChanceMcmSyncPolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
+	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
-	        lootChanceMcmSyncOk && runewordCompletedSelectionOk && runewordTransmuteSafetyOk &&
+	        lootChanceMcmSyncOk && runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
+	        runewordTransmuteSafetyOk &&
 	        runewordReforgeSafetyOk) ? 0 :
 	                                                             1;
 }
