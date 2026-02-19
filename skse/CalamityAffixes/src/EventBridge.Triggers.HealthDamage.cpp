@@ -114,11 +114,12 @@ namespace CalamityAffixes
 		const RE::HitData* a_hitData,
 		float a_damage)
 	{
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
 		if (!_configLoaded || !_runtimeEnabled || !a_target) {
 			return;
 		}
-
-		const auto now = std::chrono::steady_clock::now();
 		MaybeResyncEquippedAffixes(now);
 
 		_healthDamageHookSeen = true;

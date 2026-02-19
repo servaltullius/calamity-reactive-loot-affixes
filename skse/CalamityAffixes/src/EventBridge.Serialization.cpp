@@ -16,6 +16,7 @@ namespace CalamityAffixes
 			return;
 		}
 
+		MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::now(), true);
 		PruneLootEvaluatedInstances();
 
 		// --- IAXF v7: fixed 4-token slots ---

@@ -327,6 +327,9 @@ namespace CalamityAffixes
 		const RE::TESContainerChangedEvent* a_event,
 		RE::BSTEventSource<RE::TESContainerChangedEvent>*)
 	{
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
 		if (!_configLoaded || !_runtimeEnabled) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -500,6 +503,9 @@ namespace CalamityAffixes
 		const RE::TESUniqueIDChangeEvent* a_event,
 		RE::BSTEventSource<RE::TESUniqueIDChangeEvent>*)
 	{
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
 		if (!a_event) {
 			return RE::BSEventNotifyControl::kContinue;
 		}

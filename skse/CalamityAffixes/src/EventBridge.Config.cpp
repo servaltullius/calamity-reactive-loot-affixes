@@ -178,9 +178,10 @@ namespace CalamityAffixes
 			_lootChanceEligibleFailStreak = 0;
 			_runewordFragmentFailStreak = 0;
 			_reforgeOrbFailStreak = 0;
-			_runtimeEnabled = true;
+		_runtimeEnabled = true;
 		_runtimeProcChanceMult = 1.0f;
 		_allowNonHostilePlayerOwnedOutgoingProcs.store(false, std::memory_order_relaxed);
+		_runtimeUserSettingsPersist = {};
 		_lootRerollGuard.Reset();
 		_playerContainerStash.clear();
 		_configLoaded = false;
@@ -1122,6 +1123,9 @@ namespace CalamityAffixes
 
 	void EventBridge::ApplyRuntimeUserSettingsOverrides()
 	{
+		_runtimeUserSettingsPersist = {};
+		_runtimeUserSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
+
 		nlohmann::json root;
 		if (!UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)) {
 			return;
@@ -1189,9 +1193,71 @@ namespace CalamityAffixes
 			_runtimeProcChanceMult,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent);
+
+		_runtimeUserSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
 	}
 
-	void EventBridge::PersistRuntimeUserSettings() const
+	std::string EventBridge::BuildRuntimeUserSettingsPayload() const
+	{
+		nlohmann::json runtime = nlohmann::json::object();
+		runtime["enabled"] = _runtimeEnabled;
+		runtime["debugNotifications"] = _loot.debugLog;
+		runtime["validationIntervalSeconds"] = static_cast<double>(_equipResync.intervalMs) / 1000.0;
+		runtime["procChanceMultiplier"] = _runtimeProcChanceMult;
+		runtime["runewordFragmentChancePercent"] = _loot.runewordFragmentChancePercent;
+		runtime["reforgeOrbChancePercent"] = _loot.reforgeOrbChancePercent;
+		runtime["dotSafetyAutoDisable"] = _loot.dotTagSafetyAutoDisable;
+		runtime["allowNonHostileFirstHitProc"] =
+			_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
+		return runtime.dump();
+	}
+
+	void EventBridge::MarkRuntimeUserSettingsDirty()
+	{
+		const std::string payload = BuildRuntimeUserSettingsPayload();
+		if (payload == _runtimeUserSettingsPersist.lastPersistedPayload) {
+			_runtimeUserSettingsPersist.dirty = false;
+			_runtimeUserSettingsPersist.pendingPayload.clear();
+			_runtimeUserSettingsPersist.nextFlushAt = {};
+			return;
+		}
+
+		_runtimeUserSettingsPersist.dirty = true;
+		_runtimeUserSettingsPersist.pendingPayload = payload;
+		_runtimeUserSettingsPersist.nextFlushAt = std::chrono::steady_clock::now() + kRuntimeUserSettingsPersistDebounce;
+	}
+
+	void EventBridge::MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::time_point a_now, bool a_force)
+	{
+		if (!_runtimeUserSettingsPersist.dirty) {
+			return;
+		}
+
+		if (!a_force && a_now < _runtimeUserSettingsPersist.nextFlushAt) {
+			return;
+		}
+
+		if (_runtimeUserSettingsPersist.pendingPayload.empty()) {
+			_runtimeUserSettingsPersist.pendingPayload = BuildRuntimeUserSettingsPayload();
+		}
+		if (_runtimeUserSettingsPersist.pendingPayload == _runtimeUserSettingsPersist.lastPersistedPayload) {
+			_runtimeUserSettingsPersist.dirty = false;
+			_runtimeUserSettingsPersist.pendingPayload.clear();
+			_runtimeUserSettingsPersist.nextFlushAt = {};
+			return;
+		}
+
+		if (PersistRuntimeUserSettings()) {
+			_runtimeUserSettingsPersist.lastPersistedPayload = _runtimeUserSettingsPersist.pendingPayload;
+			_runtimeUserSettingsPersist.dirty = false;
+			_runtimeUserSettingsPersist.pendingPayload.clear();
+			_runtimeUserSettingsPersist.nextFlushAt = {};
+		} else {
+			_runtimeUserSettingsPersist.nextFlushAt = a_now + kRuntimeUserSettingsPersistDebounce;
+		}
+	}
+
+	bool EventBridge::PersistRuntimeUserSettings()
 	{
 		const bool updated = UserSettingsPersistence::UpdateJsonObject(
 			kUserSettingsRelativePath,
@@ -1218,6 +1284,7 @@ namespace CalamityAffixes
 				"CalamityAffixes: failed to persist runtime user settings to {}.",
 				std::string(kUserSettingsRelativePath));
 		}
+		return updated;
 	}
 
 	const nlohmann::json* EventBridge::ResolveAffixArray(const nlohmann::json& a_configRoot) const

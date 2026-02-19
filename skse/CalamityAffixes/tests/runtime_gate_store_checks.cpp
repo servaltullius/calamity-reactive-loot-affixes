@@ -1348,14 +1348,19 @@ namespace
 
 			if (headerText->find("kUserSettingsRelativePath = \"Data/SKSE/Plugins/CalamityAffixes/user_settings.json\"") == std::string::npos ||
 				headerText->find("void ApplyRuntimeUserSettingsOverrides();") == std::string::npos ||
-				headerText->find("void PersistRuntimeUserSettings() const;") == std::string::npos) {
+				headerText->find("bool PersistRuntimeUserSettings();") == std::string::npos ||
+				headerText->find("void MarkRuntimeUserSettingsDirty();") == std::string::npos ||
+				headerText->find("void MaybeFlushRuntimeUserSettings(") == std::string::npos) {
 				std::cerr << "external_user_settings_persistence: EventBridge user-settings declarations are missing\n";
 				return false;
 			}
 
 			if (configText->find("ApplyRuntimeUserSettingsOverrides();") == std::string::npos ||
 				configText->find("void EventBridge::ApplyRuntimeUserSettingsOverrides()") == std::string::npos ||
-				configText->find("void EventBridge::PersistRuntimeUserSettings() const") == std::string::npos ||
+				configText->find("std::string EventBridge::BuildRuntimeUserSettingsPayload() const") == std::string::npos ||
+				configText->find("void EventBridge::MarkRuntimeUserSettingsDirty()") == std::string::npos ||
+				configText->find("void EventBridge::MaybeFlushRuntimeUserSettings(") == std::string::npos ||
+				configText->find("bool EventBridge::PersistRuntimeUserSettings()") == std::string::npos ||
 				configText->find("UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)") == std::string::npos ||
 				configText->find("UserSettingsPersistence::UpdateJsonObject(") == std::string::npos) {
 				std::cerr << "external_user_settings_persistence: EventBridge runtime load/save wiring is missing\n";
@@ -1371,7 +1376,7 @@ namespace
 				if (blockReturnPos == std::string::npos) {
 					return false;
 				}
-				const auto persistPos = triggerText->find("PersistRuntimeUserSettings();", eventPos);
+				const auto persistPos = triggerText->find("queueRuntimeUserSettingsPersist();", eventPos);
 				return persistPos != std::string::npos && persistPos < blockReturnPos;
 			};
 
@@ -1391,6 +1396,11 @@ namespace
 					return false;
 				}
 			}
+			if (triggerText->find("MarkRuntimeUserSettingsDirty();") == std::string::npos ||
+				triggerText->find("MaybeFlushRuntimeUserSettings(now, false);") == std::string::npos) {
+				std::cerr << "external_user_settings_persistence: runtime settings debounce flush wiring is missing\n";
+				return false;
+			}
 
 			if (prismaText->find("LoadPanelHotkeyFromUserSettings()") == std::string::npos ||
 				prismaText->find("std::numeric_limits<std::uint32_t>::max()") == std::string::npos ||
@@ -1407,7 +1417,10 @@ namespace
 				persistenceHeaderText->find("LoadJsonObject(") == std::string::npos ||
 				persistenceHeaderText->find("UpdateJsonObject(") == std::string::npos ||
 				persistenceSourceText->find("GetModuleFileNameW") == std::string::npos ||
-				persistenceSourceText->find("std::scoped_lock lk{ g_userSettingsIoLock };") == std::string::npos) {
+				persistenceSourceText->find("std::scoped_lock lk{ g_userSettingsIoLock };") == std::string::npos ||
+				persistenceSourceText->find("FlushFileBuffers") == std::string::npos ||
+				persistenceSourceText->find("MoveFileExW") == std::string::npos ||
+				persistenceSourceText->find("refusing to overwrite unreadable user settings file") == std::string::npos) {
 				std::cerr << "external_user_settings_persistence: shared persistence module is missing\n";
 				return false;
 			}

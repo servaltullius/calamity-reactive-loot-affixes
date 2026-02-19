@@ -48,6 +48,9 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		if (!a_event || !a_event->cause || !a_event->target) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
 		if (!_runtimeEnabled) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -58,7 +61,6 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		const auto now = std::chrono::steady_clock::now();
 		const auto relation = BuildCombatTriggerContext(target, aggressor);
 
 		if (_loot.debugLog) {
@@ -219,11 +221,12 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		const RE::TESDeathEvent* a_event,
 		RE::BSTEventSource<RE::TESDeathEvent>*)
 	{
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
 		if (!_configLoaded || !_runtimeEnabled || !a_event || !a_event->dead) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-
-		const auto now = std::chrono::steady_clock::now();
 
 		// Keep event references alive for the entire handler. Using raw pointers directly from
 		// TESDeathEvent can race with reference release under heavy combat churn.
@@ -329,6 +332,9 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		const RE::TESEquipEvent* a_event,
 		RE::BSTEventSource<RE::TESEquipEvent>*)
 	{
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
 		if (!_configLoaded || !_runtimeEnabled || _affixes.empty()) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -355,6 +361,9 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		const RE::TESMagicEffectApplyEvent* a_event,
 		RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*)
 	{
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
 		if (!a_event || !a_event->caster || !a_event->target || !a_event->magicEffect) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -424,7 +433,6 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		const auto now = std::chrono::steady_clock::now();
 		const std::uint64_t key =
 			(static_cast<std::uint64_t>(target->GetFormID()) << 32) |
 			static_cast<std::uint64_t>(mgef->GetFormID());
@@ -466,6 +474,9 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		const SKSE::ModCallbackEvent* a_event,
 		RE::BSTEventSource<SKSE::ModCallbackEvent>*)
 	{
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
 		if (!a_event) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -495,10 +506,14 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 		const char* filterRaw = a_event->strArg.c_str();
 		const std::string_view affixFilter = (filterRaw && *filterRaw) ? std::string_view(filterRaw) : std::string_view{};
+		const auto queueRuntimeUserSettingsPersist = [&]() {
+			MarkRuntimeUserSettingsDirty();
+			MaybeFlushRuntimeUserSettings(now, false);
+		};
 
 			if (eventName == kMcmSetEnabledEvent) {
 				_runtimeEnabled = (a_event->numArg > 0.5f);
-				PersistRuntimeUserSettings();
+				queueRuntimeUserSettingsPersist();
 				RE::DebugNotification(_runtimeEnabled ? "Calamity: enabled" : "Calamity: disabled");
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -507,7 +522,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				_loot.debugLog = (a_event->numArg > 0.5f);
 				spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
 				spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
-				PersistRuntimeUserSettings();
+				queueRuntimeUserSettingsPersist();
 				RE::DebugNotification(_loot.debugLog ? "Calamity: debug notifications ON" : "Calamity: debug notifications OFF");
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -516,7 +531,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				const float seconds = std::clamp(a_event->numArg, 0.0f, 30.0f);
 				_equipResync.intervalMs = (seconds <= 0.0f) ? 0u : static_cast<std::uint64_t>(seconds * 1000.0f);
 				_equipResync.nextAtMs = 0;
-				PersistRuntimeUserSettings();
+				queueRuntimeUserSettingsPersist();
 				if (seconds <= 0.0f) {
 					RE::DebugNotification("Calamity: periodic validation OFF");
 				} else {
@@ -530,7 +545,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetProcChanceMultEvent) {
 				_runtimeProcChanceMult = std::clamp(a_event->numArg, 0.0f, 3.0f);
-				PersistRuntimeUserSettings();
+				queueRuntimeUserSettingsPersist();
 				std::string note = "Calamity: proc x";
 				note += std::to_string(_runtimeProcChanceMult);
 				RE::DebugNotification(note.c_str());
@@ -539,7 +554,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetRunewordFragmentChanceEvent) {
 				_loot.runewordFragmentChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);
-				PersistRuntimeUserSettings();
+				queueRuntimeUserSettingsPersist();
 				std::string note = "Calamity: runeword fragment chance ";
 				note += std::to_string(_loot.runewordFragmentChancePercent);
 				note += "%";
@@ -549,7 +564,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetReforgeOrbChanceEvent) {
 				_loot.reforgeOrbChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);
-				PersistRuntimeUserSettings();
+				queueRuntimeUserSettingsPersist();
 				std::string note = "Calamity: reforge orb chance ";
 				note += std::to_string(_loot.reforgeOrbChancePercent);
 				note += "%";
@@ -559,7 +574,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetDotSafetyAutoDisableEvent) {
 				_loot.dotTagSafetyAutoDisable = (a_event->numArg > 0.5f);
-				PersistRuntimeUserSettings();
+				queueRuntimeUserSettingsPersist();
 				if (!_loot.dotTagSafetyAutoDisable) {
 					_dotTagSafetySuppressed = false;
 					RE::DebugNotification("Calamity: DotApply auto-disable OFF (warn only)");
@@ -579,7 +594,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				const bool enabled = (a_event->numArg > 0.5f);
 				_allowNonHostilePlayerOwnedOutgoingProcs.store(enabled, std::memory_order_relaxed);
 				_nonHostileFirstHitGate.Clear();
-				PersistRuntimeUserSettings();
+				queueRuntimeUserSettingsPersist();
 				RE::DebugNotification(enabled ?
 					"Calamity: non-hostile first-hit proc ON" :
 					"Calamity: non-hostile first-hit proc OFF");

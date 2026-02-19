@@ -1,7 +1,10 @@
 #include "CalamityAffixes/UserSettingsPersistence.h"
 
+#include <algorithm>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -40,27 +43,48 @@ namespace CalamityAffixes::UserSettingsPersistence
 			return std::filesystem::current_path() / std::filesystem::path(a_relativePath);
 		}
 
-		[[nodiscard]] bool LoadJsonObjectUnlocked(const std::filesystem::path& a_path, nlohmann::json& a_outRoot)
+		enum class LoadJsonStatus : std::uint8_t
+		{
+			kLoaded = 0,
+			kMissing,
+			kIoError,
+			kParseError,
+		};
+
+		[[nodiscard]] LoadJsonStatus LoadJsonObjectUnlocked(const std::filesystem::path& a_path, nlohmann::json& a_outRoot)
 		{
 			std::error_code ec;
 			const bool exists = std::filesystem::exists(a_path, ec);
-			if (ec || !exists) {
-				return false;
+			if (ec) {
+				SKSE::log::warn(
+					"CalamityAffixes: failed to inspect user settings file {} ({})",
+					a_path.string(),
+					ec.message());
+				return LoadJsonStatus::kIoError;
+			}
+			if (!exists) {
+				return LoadJsonStatus::kMissing;
 			}
 
-			std::ifstream in(a_path);
-			if (!in.good()) {
-				return false;
+			std::ifstream in(a_path, std::ios::binary);
+			if (!in.is_open()) {
+				SKSE::log::warn("CalamityAffixes: failed to open user settings file {}", a_path.string());
+				return LoadJsonStatus::kIoError;
 			}
 
 			try {
 				in >> a_outRoot;
 			} catch (const std::exception& e) {
 				SKSE::log::warn("CalamityAffixes: failed to parse user settings file {} ({})", a_path.string(), e.what());
-				return false;
+				return LoadJsonStatus::kParseError;
 			}
 
-			return true;
+			if (!in.good() && !in.eof()) {
+				SKSE::log::warn("CalamityAffixes: failed while reading user settings file {}", a_path.string());
+				return LoadJsonStatus::kIoError;
+			}
+
+			return LoadJsonStatus::kLoaded;
 		}
 
 		[[nodiscard]] bool SaveJsonObjectUnlocked(const std::filesystem::path& a_path, const nlohmann::json& a_root)
@@ -75,13 +99,78 @@ namespace CalamityAffixes::UserSettingsPersistence
 				return false;
 			}
 
-			std::ofstream out(a_path, std::ios::trunc);
-			if (!out.good()) {
+			const std::string payload = a_root.dump(2);
+			std::filesystem::path tempPath = a_path;
+			tempPath += ".tmp";
+
+			HANDLE tempFileHandle = ::CreateFileW(
+				tempPath.c_str(),
+				GENERIC_WRITE,
+				0,
+				nullptr,
+				CREATE_ALWAYS,
+				FILE_ATTRIBUTE_NORMAL,
+				nullptr);
+			if (tempFileHandle == INVALID_HANDLE_VALUE) {
+				SKSE::log::warn(
+					"CalamityAffixes: failed to create temp user settings file {} (err={}).",
+					tempPath.string(),
+					::GetLastError());
 				return false;
 			}
 
-			out << a_root.dump(2);
-			return out.good();
+			const char* cursor = payload.data();
+			std::size_t remaining = payload.size();
+			bool writeOk = true;
+			DWORD writeError = ERROR_SUCCESS;
+			while (remaining > 0) {
+				const DWORD chunkSize = static_cast<DWORD>(std::min<std::size_t>(
+					remaining,
+					static_cast<std::size_t>(std::numeric_limits<DWORD>::max())));
+				DWORD written = 0;
+				if (!::WriteFile(tempFileHandle, cursor, chunkSize, &written, nullptr) || written != chunkSize) {
+					writeOk = false;
+					writeError = ::GetLastError();
+					break;
+				}
+				cursor += written;
+				remaining -= written;
+			}
+
+			if (writeOk && !::FlushFileBuffers(tempFileHandle)) {
+				writeOk = false;
+				writeError = ::GetLastError();
+			}
+
+			::CloseHandle(tempFileHandle);
+
+			if (!writeOk) {
+				SKSE::log::warn(
+					"CalamityAffixes: failed to write temp user settings file {} (err={}).",
+					tempPath.string(),
+					writeError);
+				std::error_code removeEc;
+				std::filesystem::remove(tempPath, removeEc);
+				return false;
+			}
+
+			const DWORD moveError = ::MoveFileExW(
+				tempPath.c_str(),
+				a_path.c_str(),
+				MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) ?
+					ERROR_SUCCESS :
+					::GetLastError();
+			if (moveError != ERROR_SUCCESS) {
+				SKSE::log::warn(
+					"CalamityAffixes: failed to atomically replace user settings file {} (err={}).",
+					a_path.string(),
+					moveError);
+				std::error_code removeEc;
+				std::filesystem::remove(tempPath, removeEc);
+				return false;
+			}
+
+			return true;
 		}
 	}
 
@@ -89,7 +178,7 @@ namespace CalamityAffixes::UserSettingsPersistence
 	{
 		const auto path = ResolveRuntimeRelativePath(a_relativePath);
 		std::scoped_lock lk{ g_userSettingsIoLock };
-		return LoadJsonObjectUnlocked(path, a_outRoot);
+		return LoadJsonObjectUnlocked(path, a_outRoot) == LoadJsonStatus::kLoaded;
 	}
 
 	bool SaveJsonObject(std::string_view a_relativePath, const nlohmann::json& a_root)
@@ -107,10 +196,16 @@ namespace CalamityAffixes::UserSettingsPersistence
 		std::scoped_lock lk{ g_userSettingsIoLock };
 
 		nlohmann::json root = nlohmann::json::object();
-		if (LoadJsonObjectUnlocked(path, root)) {
+		const auto loadStatus = LoadJsonObjectUnlocked(path, root);
+		if (loadStatus == LoadJsonStatus::kLoaded) {
 			if (!root.is_object()) {
 				root = nlohmann::json::object();
 			}
+		} else if (loadStatus == LoadJsonStatus::kParseError || loadStatus == LoadJsonStatus::kIoError) {
+			SKSE::log::warn(
+				"CalamityAffixes: refusing to overwrite unreadable user settings file {}.",
+				path.string());
+			return false;
 		}
 
 		a_mutator(root);

@@ -615,6 +615,15 @@ namespace CalamityAffixes
 		bool _runtimeEnabled{ true };
 		float _runtimeProcChanceMult{ 1.0f };
 		std::atomic_bool _allowNonHostilePlayerOwnedOutgoingProcs{ false };
+		struct RuntimeUserSettingsPersistState
+		{
+			bool dirty{ false };
+			std::string pendingPayload{};
+			std::string lastPersistedPayload{};
+			std::chrono::steady_clock::time_point nextFlushAt{};
+		};
+		static constexpr std::chrono::milliseconds kRuntimeUserSettingsPersistDebounce{ 250 };
+		RuntimeUserSettingsPersistState _runtimeUserSettingsPersist{};
 		LootRerollGuard _lootRerollGuard{};
 		std::map<std::pair<RE::FormID, RE::FormID>, std::int32_t> _playerContainerStash;  // {containerID, baseObj} -> count
 		bool _configLoaded{ false };
@@ -738,7 +747,10 @@ namespace CalamityAffixes
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		void ApplyRuntimeUserSettingsOverrides();
-		void PersistRuntimeUserSettings() const;
+		[[nodiscard]] bool PersistRuntimeUserSettings();
+		void MarkRuntimeUserSettingsDirty();
+		void MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::time_point a_now, bool a_force = false);
+		[[nodiscard]] std::string BuildRuntimeUserSettingsPayload() const;
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
 		void IndexConfiguredAffixes();
 		void IndexAffixLookupKeys(
