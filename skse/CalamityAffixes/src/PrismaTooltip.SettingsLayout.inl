@@ -235,6 +235,128 @@
 			}
 		}
 
+		[[nodiscard]] std::optional<nlohmann::json> LoadUserUiSettingsSection()
+		{
+			nlohmann::json root;
+			if (!UserSettingsPersistence::LoadJsonObject(kUserSettingsPath, root) || !root.is_object()) {
+				return std::nullopt;
+			}
+
+			const auto uiIt = root.find("ui");
+			if (uiIt == root.end() || !uiIt->is_object()) {
+				return std::nullopt;
+			}
+			return *uiIt;
+		}
+
+		[[nodiscard]] std::optional<std::uint32_t> LoadPanelHotkeyFromUserSettings()
+		{
+			const auto ui = LoadUserUiSettingsSection();
+			if (!ui) {
+				return std::nullopt;
+			}
+
+			const auto hotkeyIt = ui->find("panelHotkey");
+			if (hotkeyIt == ui->end()) {
+				return std::nullopt;
+			}
+
+			if (hotkeyIt->is_number_unsigned()) {
+				const auto rawKeyCode = hotkeyIt->get<std::uint64_t>();
+				const auto maxKeyCode = static_cast<std::uint64_t>(std::numeric_limits<std::uint32_t>::max());
+				if (rawKeyCode <= maxKeyCode) {
+					return static_cast<std::uint32_t>(rawKeyCode);
+				}
+				return std::nullopt;
+			}
+			if (hotkeyIt->is_number_integer()) {
+				const int keyCode = hotkeyIt->get<int>();
+				if (keyCode >= 0) {
+					return static_cast<std::uint32_t>(keyCode);
+				}
+			}
+
+			return std::nullopt;
+		}
+
+		void PersistPanelHotkeyToUserSettings(std::uint32_t a_keyCode)
+		{
+			const bool ok = UserSettingsPersistence::UpdateJsonObject(
+				kUserSettingsPath,
+				[&](nlohmann::json& root) {
+					root["version"] = 1;
+					auto& ui = root["ui"];
+					if (!ui.is_object()) {
+						ui = nlohmann::json::object();
+					}
+					ui["panelHotkey"] = a_keyCode;
+				});
+
+			if (!ok) {
+				SKSE::log::warn("CalamityAffixes: failed to persist panel hotkey to {}.", kUserSettingsPath);
+			}
+		}
+
+		void RestorePanelHotkeyFromUserSettings()
+		{
+			const auto persistedHotkey = LoadPanelHotkeyFromUserSettings();
+			const std::uint32_t resolvedKey = persistedHotkey.value_or(0u);
+			const auto previous = g_controlPanelHotkey.exchange(resolvedKey);
+			if (previous != resolvedKey && persistedHotkey.has_value()) {
+				SKSE::log::info("CalamityAffixes: Prisma panel hotkey restored from {} (keycode={}).", kUserSettingsPath, resolvedKey);
+			}
+		}
+
+		[[nodiscard]] std::optional<int> LoadUiLanguageModeFromUserSettings()
+		{
+			const auto ui = LoadUserUiSettingsSection();
+			if (!ui) {
+				return std::nullopt;
+			}
+
+			const auto languageIt = ui->find("uiLanguageMode");
+			if (languageIt == ui->end()) {
+				return std::nullopt;
+			}
+			if (languageIt->is_number_integer()) {
+				return NormalizeUiLanguageMode(languageIt->get<int>());
+			}
+			if (languageIt->is_string()) {
+				return ParseUiLanguageMode(languageIt->get<std::string>());
+			}
+
+			return std::nullopt;
+		}
+
+		void PersistUiLanguageModeToUserSettings(int a_mode)
+		{
+			const int normalizedMode = NormalizeUiLanguageMode(a_mode);
+			const bool ok = UserSettingsPersistence::UpdateJsonObject(
+				kUserSettingsPath,
+				[&](nlohmann::json& root) {
+					root["version"] = 1;
+					auto& ui = root["ui"];
+					if (!ui.is_object()) {
+						ui = nlohmann::json::object();
+					}
+					ui["uiLanguageMode"] = normalizedMode;
+				});
+
+			if (!ok) {
+				SKSE::log::warn("CalamityAffixes: failed to persist UI language mode to {}.", kUserSettingsPath);
+			}
+		}
+
+		void RestoreUiLanguageModeFromUserSettings()
+		{
+			const auto persistedMode = LoadUiLanguageModeFromUserSettings();
+			const int resolvedMode = NormalizeUiLanguageMode(persistedMode.value_or(kDefaultUiLanguageMode));
+			const auto previous = g_uiLanguageMode.exchange(resolvedMode);
+			if (previous != resolvedMode && persistedMode.has_value()) {
+				SKSE::log::info("CalamityAffixes: UI language restored from {} (mode={}).", kUserSettingsPath, resolvedMode);
+			}
+		}
+
 		void PushPanelHotkeyToJs()
 		{
 			if (!IsViewReady()) {
@@ -286,10 +408,8 @@
 			std::error_code ec;
 			const bool exists = std::filesystem::exists(settingsPath, ec);
 			if (ec || !exists) {
-				if (g_hotkeySettingsKnown) {
-					g_hotkeySettingsKnown = false;
-					g_controlPanelHotkey.store(0u);
-				}
+				g_hotkeySettingsKnown = false;
+				RestorePanelHotkeyFromUserSettings();
 				return;
 			}
 
@@ -338,6 +458,7 @@
 				SKSE::log::warn("CalamityAffixes: failed to parse {} ({})",
 					kMcmKeybindSettingsPath,
 					e.what());
+				RestorePanelHotkeyFromUserSettings();
 				return;
 			}
 
@@ -346,6 +467,7 @@
 			g_hotkeySettingsMtime = mtime;
 
 			if (previous != resolvedKey) {
+				PersistPanelHotkeyToUserSettings(resolvedKey);
 				SKSE::log::info("CalamityAffixes: Prisma panel hotkey updated (keycode={}).", resolvedKey);
 			}
 		}
@@ -377,12 +499,9 @@
 			}
 
 			if (activePath.empty()) {
-				const auto previous = g_uiLanguageMode.exchange(kDefaultUiLanguageMode);
+				RestoreUiLanguageModeFromUserSettings();
 				g_uiLanguageSettingsKnown = false;
 				g_uiLanguageSettingsPath.clear();
-				if (previous != kDefaultUiLanguageMode) {
-					SKSE::log::info("CalamityAffixes: UI language reset to default (both).");
-				}
 				return;
 			}
 
@@ -453,6 +572,7 @@
 			g_uiLanguageSettingsMtime = mtime;
 
 			if (previous != resolvedMode) {
+				PersistUiLanguageModeToUserSettings(resolvedMode);
 				SKSE::log::info("CalamityAffixes: UI language updated (mode={}).", resolvedMode);
 			}
 		}

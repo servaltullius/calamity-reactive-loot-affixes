@@ -450,6 +450,7 @@ namespace CalamityAffixes
 		static constexpr std::chrono::milliseconds kDuplicateHitWindow{ 100 };
 		static constexpr std::chrono::milliseconds kHealthDamageHookStaleWindow{ 5000 };
 		static constexpr std::string_view kRuntimeConfigRelativePath = "Data/SKSE/Plugins/CalamityAffixes/affixes.json";
+		static constexpr std::string_view kUserSettingsRelativePath = "Data/SKSE/Plugins/CalamityAffixes/user_settings.json";
 		static constexpr std::string_view kManualModeCycleNextEvent = "CalamityAffixes_ModeCycle_Next";
 		static constexpr std::string_view kManualModeCyclePrevEvent = "CalamityAffixes_ModeCycle_Prev";
 		static constexpr std::string_view kRunewordBaseNextEvent = "CalamityAffixes_Runeword_Base_Next";
@@ -736,6 +737,8 @@ namespace CalamityAffixes
 		void InitializeRunewordCatalog();
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
+		void ApplyRuntimeUserSettingsOverrides();
+		void PersistRuntimeUserSettings() const;
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
 		void IndexConfiguredAffixes();
 		void IndexAffixLookupKeys(

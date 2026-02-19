@@ -1309,7 +1309,118 @@ namespace
 
 			return true;
 		}
-}
+
+		bool CheckExternalUserSettingsPersistencePolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path eventBridgeHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "EventBridge.h";
+			const fs::path eventBridgeConfigFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.cpp";
+			const fs::path triggerEventsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.Events.cpp";
+			const fs::path prismaSettingsFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SettingsLayout.inl";
+			const fs::path persistenceHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "UserSettingsPersistence.h";
+			const fs::path persistenceSourceFile = testFile.parent_path().parent_path() / "src" / "UserSettingsPersistence.cpp";
+			const fs::path cmakeFile = testFile.parent_path().parent_path() / "CMakeLists.txt";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto headerText = loadText(eventBridgeHeaderFile);
+			const auto configText = loadText(eventBridgeConfigFile);
+			const auto triggerText = loadText(triggerEventsFile);
+			const auto prismaText = loadText(prismaSettingsFile);
+			const auto persistenceHeaderText = loadText(persistenceHeaderFile);
+			const auto persistenceSourceText = loadText(persistenceSourceFile);
+			const auto cmakeText = loadText(cmakeFile);
+			if (!headerText.has_value() || !configText.has_value() || !triggerText.has_value() ||
+				!prismaText.has_value() || !persistenceHeaderText.has_value() ||
+				!persistenceSourceText.has_value() || !cmakeText.has_value()) {
+				std::cerr << "external_user_settings_persistence: required source file missing\n";
+				return false;
+			}
+
+			if (headerText->find("kUserSettingsRelativePath = \"Data/SKSE/Plugins/CalamityAffixes/user_settings.json\"") == std::string::npos ||
+				headerText->find("void ApplyRuntimeUserSettingsOverrides();") == std::string::npos ||
+				headerText->find("void PersistRuntimeUserSettings() const;") == std::string::npos) {
+				std::cerr << "external_user_settings_persistence: EventBridge user-settings declarations are missing\n";
+				return false;
+			}
+
+			if (configText->find("ApplyRuntimeUserSettingsOverrides();") == std::string::npos ||
+				configText->find("void EventBridge::ApplyRuntimeUserSettingsOverrides()") == std::string::npos ||
+				configText->find("void EventBridge::PersistRuntimeUserSettings() const") == std::string::npos ||
+				configText->find("UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)") == std::string::npos ||
+				configText->find("UserSettingsPersistence::UpdateJsonObject(") == std::string::npos) {
+				std::cerr << "external_user_settings_persistence: EventBridge runtime load/save wiring is missing\n";
+				return false;
+			}
+
+			const auto hasPersistenceCallWithinEventBlock = [&](std::string_view a_eventToken) {
+				const auto eventPos = triggerText->find(std::string("eventName == ") + std::string(a_eventToken));
+				if (eventPos == std::string::npos) {
+					return false;
+				}
+				const auto blockReturnPos = triggerText->find("return RE::BSEventNotifyControl::kContinue;", eventPos);
+				if (blockReturnPos == std::string::npos) {
+					return false;
+				}
+				const auto persistPos = triggerText->find("PersistRuntimeUserSettings();", eventPos);
+				return persistPos != std::string::npos && persistPos < blockReturnPos;
+			};
+
+			const std::array<std::string_view, 8> requiredPersistedEvents{
+				"kMcmSetEnabledEvent",
+				"kMcmSetDebugNotificationsEvent",
+				"kMcmSetValidationIntervalEvent",
+				"kMcmSetProcChanceMultEvent",
+				"kMcmSetRunewordFragmentChanceEvent",
+				"kMcmSetReforgeOrbChanceEvent",
+				"kMcmSetDotSafetyAutoDisableEvent",
+				"kMcmSetAllowNonHostileFirstHitProcEvent"
+			};
+			for (const auto eventToken : requiredPersistedEvents) {
+				if (!hasPersistenceCallWithinEventBlock(eventToken)) {
+					std::cerr << "external_user_settings_persistence: missing persistence call in " << eventToken << " block\n";
+					return false;
+				}
+			}
+
+			if (prismaText->find("LoadPanelHotkeyFromUserSettings()") == std::string::npos ||
+				prismaText->find("std::numeric_limits<std::uint32_t>::max()") == std::string::npos ||
+				prismaText->find("PersistPanelHotkeyToUserSettings(resolvedKey);") == std::string::npos ||
+				prismaText->find("RestorePanelHotkeyFromUserSettings();") == std::string::npos ||
+				prismaText->find("LoadUiLanguageModeFromUserSettings()") == std::string::npos ||
+				prismaText->find("PersistUiLanguageModeToUserSettings(resolvedMode);") == std::string::npos ||
+				prismaText->find("RestoreUiLanguageModeFromUserSettings();") == std::string::npos) {
+				std::cerr << "external_user_settings_persistence: Prisma user-settings fallback/persist wiring is missing\n";
+				return false;
+			}
+
+			if (persistenceHeaderText->find("namespace CalamityAffixes::UserSettingsPersistence") == std::string::npos ||
+				persistenceHeaderText->find("LoadJsonObject(") == std::string::npos ||
+				persistenceHeaderText->find("UpdateJsonObject(") == std::string::npos ||
+				persistenceSourceText->find("GetModuleFileNameW") == std::string::npos ||
+				persistenceSourceText->find("std::scoped_lock lk{ g_userSettingsIoLock };") == std::string::npos) {
+				std::cerr << "external_user_settings_persistence: shared persistence module is missing\n";
+				return false;
+			}
+
+			if (cmakeText->find("include/CalamityAffixes/UserSettingsPersistence.h") == std::string::npos ||
+				cmakeText->find("src/UserSettingsPersistence.cpp") == std::string::npos) {
+				std::cerr << "external_user_settings_persistence: build integration is missing\n";
+				return false;
+			}
+
+			return true;
+		}
+	}
 
 int main()
 {
@@ -1335,6 +1446,7 @@ int main()
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
 	const bool prismaTooltipImmediateRefreshOk = CheckPrismaTooltipImmediateRefreshPolicy();
+	const bool externalUserSettingsPersistenceOk = CheckExternalUserSettingsPersistencePolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
@@ -1347,6 +1459,7 @@ int main()
 	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&
 	        runewordReforgeSafetyOk &&
-	        prismaTooltipImmediateRefreshOk) ? 0 :
+	        prismaTooltipImmediateRefreshOk &&
+	        externalUserSettingsPersistenceOk) ? 0 :
 	                                                             1;
 }

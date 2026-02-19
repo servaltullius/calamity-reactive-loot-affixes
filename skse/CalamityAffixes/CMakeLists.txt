@@ -28,6 +28,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/RunewordUiPolicy.h
 	    include/CalamityAffixes/TriggerGuards.h
 	    include/CalamityAffixes/TrapSystem.h
+	    include/CalamityAffixes/UserSettingsPersistence.h
 	)
 
 	set(sources
@@ -72,6 +73,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/PrismaLayoutPersistence.cpp
 	    src/PrismaTooltip.cpp
 	    src/TrapSystem.cpp
+	    src/UserSettingsPersistence.cpp
 	)
 
 add_library(

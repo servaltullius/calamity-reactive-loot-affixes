@@ -498,6 +498,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetEnabledEvent) {
 				_runtimeEnabled = (a_event->numArg > 0.5f);
+				PersistRuntimeUserSettings();
 				RE::DebugNotification(_runtimeEnabled ? "Calamity: enabled" : "Calamity: disabled");
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -506,6 +507,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				_loot.debugLog = (a_event->numArg > 0.5f);
 				spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
 				spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+				PersistRuntimeUserSettings();
 				RE::DebugNotification(_loot.debugLog ? "Calamity: debug notifications ON" : "Calamity: debug notifications OFF");
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -514,6 +516,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				const float seconds = std::clamp(a_event->numArg, 0.0f, 30.0f);
 				_equipResync.intervalMs = (seconds <= 0.0f) ? 0u : static_cast<std::uint64_t>(seconds * 1000.0f);
 				_equipResync.nextAtMs = 0;
+				PersistRuntimeUserSettings();
 				if (seconds <= 0.0f) {
 					RE::DebugNotification("Calamity: periodic validation OFF");
 				} else {
@@ -527,6 +530,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetProcChanceMultEvent) {
 				_runtimeProcChanceMult = std::clamp(a_event->numArg, 0.0f, 3.0f);
+				PersistRuntimeUserSettings();
 				std::string note = "Calamity: proc x";
 				note += std::to_string(_runtimeProcChanceMult);
 				RE::DebugNotification(note.c_str());
@@ -535,6 +539,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetRunewordFragmentChanceEvent) {
 				_loot.runewordFragmentChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);
+				PersistRuntimeUserSettings();
 				std::string note = "Calamity: runeword fragment chance ";
 				note += std::to_string(_loot.runewordFragmentChancePercent);
 				note += "%";
@@ -544,6 +549,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetReforgeOrbChanceEvent) {
 				_loot.reforgeOrbChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);
+				PersistRuntimeUserSettings();
 				std::string note = "Calamity: reforge orb chance ";
 				note += std::to_string(_loot.reforgeOrbChancePercent);
 				note += "%";
@@ -553,6 +559,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 			if (eventName == kMcmSetDotSafetyAutoDisableEvent) {
 				_loot.dotTagSafetyAutoDisable = (a_event->numArg > 0.5f);
+				PersistRuntimeUserSettings();
 				if (!_loot.dotTagSafetyAutoDisable) {
 					_dotTagSafetySuppressed = false;
 					RE::DebugNotification("Calamity: DotApply auto-disable OFF (warn only)");
@@ -572,6 +579,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 				const bool enabled = (a_event->numArg > 0.5f);
 				_allowNonHostilePlayerOwnedOutgoingProcs.store(enabled, std::memory_order_relaxed);
 				_nonHostileFirstHitGate.Clear();
+				PersistRuntimeUserSettings();
 				RE::DebugNotification(enabled ?
 					"Calamity: non-hostile first-hit proc ON" :
 					"Calamity: non-hostile first-hit proc OFF");

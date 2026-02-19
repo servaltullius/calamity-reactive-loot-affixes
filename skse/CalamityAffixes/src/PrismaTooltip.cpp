@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <limits>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -21,6 +22,7 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/PrismaLayoutPersistence.h"
+#include "CalamityAffixes/UserSettingsPersistence.h"
 
 #include "PrismaUI_API.h"
 
@@ -57,6 +59,7 @@ namespace CalamityAffixes::PrismaTooltip
 		constexpr std::string_view kItemSourceGift = "gift";
 		constexpr std::string_view kPanelLayoutPath = "Data/SKSE/Plugins/CalamityAffixes/prisma_panel_layout.json";
 		constexpr std::string_view kTooltipLayoutPath = "Data/SKSE/Plugins/CalamityAffixes/prisma_tooltip_layout.json";
+		constexpr std::string_view kUserSettingsPath = "Data/SKSE/Plugins/CalamityAffixes/user_settings.json";
 		constexpr int kDefaultTooltipRight = 70;
 		constexpr int kDefaultTooltipTop = 255;
 		constexpr int kDefaultTooltipFontPermille = 1000;

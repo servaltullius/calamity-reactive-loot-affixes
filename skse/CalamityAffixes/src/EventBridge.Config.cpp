@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootEligibility.h"
+#include "CalamityAffixes/UserSettingsPersistence.h"
 #include "EventBridge.Config.Shared.h"
 
 #include <algorithm>
@@ -205,6 +206,7 @@ namespace CalamityAffixes
 		}
 
 		ApplyLootConfigFromJson(j);
+		ApplyRuntimeUserSettingsOverrides();
 
 		const auto* affixes = ResolveAffixArray(j);
 		if (!affixes) {
@@ -1116,6 +1118,106 @@ namespace CalamityAffixes
 
 		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
 		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+	}
+
+	void EventBridge::ApplyRuntimeUserSettingsOverrides()
+	{
+		nlohmann::json root;
+		if (!UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)) {
+			return;
+		}
+
+		if (!root.is_object()) {
+			SKSE::log::warn(
+				"CalamityAffixes: user settings root is not an object ({}).",
+				std::string(kUserSettingsRelativePath));
+			return;
+		}
+
+		const auto runtimeIt = root.find("runtime");
+		if (runtimeIt == root.end()) {
+			return;
+		}
+		if (!runtimeIt->is_object()) {
+			SKSE::log::warn(
+				"CalamityAffixes: user settings runtime section is invalid ({}).",
+				std::string(kUserSettingsRelativePath));
+			return;
+		}
+
+		const auto& runtime = *runtimeIt;
+		_runtimeEnabled = runtime.value("enabled", _runtimeEnabled);
+		_loot.debugLog = runtime.value("debugNotifications", _loot.debugLog);
+		_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
+
+		const double validationIntervalSeconds =
+			runtime.value("validationIntervalSeconds", static_cast<double>(_equipResync.intervalMs) / 1000.0);
+		const double procChanceMultiplier =
+			runtime.value("procChanceMultiplier", static_cast<double>(_runtimeProcChanceMult));
+		const double runewordFragmentChancePercent =
+			runtime.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent));
+		const double reforgeOrbChancePercent =
+			runtime.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent));
+		const bool allowNonHostileFirstHitProc = runtime.value(
+			"allowNonHostileFirstHitProc",
+			_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed));
+
+		const float clampedValidationIntervalSeconds =
+			std::clamp(static_cast<float>(validationIntervalSeconds), 0.0f, 30.0f);
+		_equipResync.intervalMs =
+			(clampedValidationIntervalSeconds <= 0.0f)
+				? 0u
+				: static_cast<std::uint64_t>(clampedValidationIntervalSeconds * 1000.0f);
+		_equipResync.nextAtMs = 0;
+
+		_runtimeProcChanceMult = std::clamp(static_cast<float>(procChanceMultiplier), 0.0f, 3.0f);
+		_loot.runewordFragmentChancePercent = std::clamp(static_cast<float>(runewordFragmentChancePercent), 0.0f, 100.0f);
+		_loot.reforgeOrbChancePercent = std::clamp(static_cast<float>(reforgeOrbChancePercent), 0.0f, 100.0f);
+		_allowNonHostilePlayerOwnedOutgoingProcs.store(allowNonHostileFirstHitProc, std::memory_order_relaxed);
+
+		if (!_loot.dotTagSafetyAutoDisable) {
+			_dotTagSafetySuppressed = false;
+		}
+
+		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+
+		SKSE::log::info(
+			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%).",
+			std::string(kUserSettingsRelativePath),
+			_runtimeEnabled,
+			_runtimeProcChanceMult,
+			_loot.runewordFragmentChancePercent,
+			_loot.reforgeOrbChancePercent);
+	}
+
+	void EventBridge::PersistRuntimeUserSettings() const
+	{
+		const bool updated = UserSettingsPersistence::UpdateJsonObject(
+			kUserSettingsRelativePath,
+			[&](nlohmann::json& root) {
+				root["version"] = 1;
+				auto& runtime = root["runtime"];
+				if (!runtime.is_object()) {
+					runtime = nlohmann::json::object();
+				}
+
+				runtime["enabled"] = _runtimeEnabled;
+				runtime["debugNotifications"] = _loot.debugLog;
+				runtime["validationIntervalSeconds"] = static_cast<double>(_equipResync.intervalMs) / 1000.0;
+				runtime["procChanceMultiplier"] = _runtimeProcChanceMult;
+				runtime["runewordFragmentChancePercent"] = _loot.runewordFragmentChancePercent;
+				runtime["reforgeOrbChancePercent"] = _loot.reforgeOrbChancePercent;
+				runtime["dotSafetyAutoDisable"] = _loot.dotTagSafetyAutoDisable;
+				runtime["allowNonHostileFirstHitProc"] =
+					_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
+			});
+
+		if (!updated) {
+			SKSE::log::warn(
+				"CalamityAffixes: failed to persist runtime user settings to {}.",
+				std::string(kUserSettingsRelativePath));
+		}
 	}
 
 	const nlohmann::json* EventBridge::ResolveAffixArray(const nlohmann::json& a_configRoot) const

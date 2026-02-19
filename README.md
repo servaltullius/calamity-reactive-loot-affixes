@@ -36,6 +36,7 @@
 - 설정 변경:
   - MCM Helper가 있으면 MCM에서 조정
   - 없으면 `Data/MCM/Config/CalamityAffixes/settings.ini`를 `Data/MCM/Settings/CalamityAffixes.ini`로 복사해서 오버라이드
+  - 런타임/MCM UI 값은 `Data/SKSE/Plugins/CalamityAffixes/user_settings.json`에도 저장되어, 새 게임/재시작 후에도 마지막 설정을 복원합니다.
 
 ## 이 레포는 무엇인가요?
 
@@ -129,6 +130,7 @@
   - 메인 조작 UI(수동 모드/룬워드/디버그)도 Prisma 패널에서 처리
   - 인벤토리에서는 기본적으로 “툴팁은 클릭-스루(비상호작용)”입니다. 패널은 **단일 단축키**(`prisma_panel_toggle`, MCM에서 설정)로 열고/닫습니다. 키가 미설정이면 기본 `F11`로 토글됩니다(인벤 밖에서도 가능).
   - 패널 표시 언어는 MCM `Panel Language / 패널 언어` 옵션에서 즉시 변경할 수 있습니다.
+  - 패널 단축키/언어 값은 `Data/SKSE/Plugins/CalamityAffixes/user_settings.json`에 동기화되며, MCM 설정 파일이 없는 상태에서도 해당 값으로 복원됩니다.
   - 패널이 열리면 입력/커서는 패널이 잡아 “클릭-스루”로 인벤이 함께 눌리는 현상을 방지합니다(ESC 또는 Close로 닫기).
   - 패널이 열리면 툴팁은 패널 안으로 이동합니다(중복 표시 방지).
 
@@ -278,6 +280,9 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 - `Data/SKSE/Plugins/CalamityAffixes/affixes.json` (SKSE 런타임 설정)
 - `Data/SKSE/Plugins/InventoryInjector/CalamityAffixes.json` (InventoryInjector placeholder: `rules: []`)
 - `Data/CalamityAffixes.esp` (키워드 + **옵션: records 기반 Spell/MGEF 자동 생성** + MCM Quest + `CalamityAffixes_MCMConfig` 바인딩)
+
+런타임에서 생성/유지되는 사용자 설정 파일:
+- `Data/SKSE/Plugins/CalamityAffixes/user_settings.json` (MCM 런타임 값 + Prisma 패널 단축키/언어)
 
 ### MO2 배포 ZIP 생성
 
