@@ -21,9 +21,13 @@ namespace CalamityAffixes
 
 		[[nodiscard]] bool IsSynthesizedRunewordAffixId(std::string_view a_affixId) noexcept
 		{
-			return a_affixId.rfind("runeword_", 0) == 0 &&
-			       a_affixId.size() >= 5 &&
-			       a_affixId.substr(a_affixId.size() - 5) == "_auto";
+			if (a_affixId.size() < 5 || a_affixId.substr(a_affixId.size() - 5) != "_auto") {
+				return false;
+			}
+
+			// Synthesized runtime runewords are currently emitted as rw_*_auto.
+			// Keep runeword_*_auto for backward compatibility with legacy/generated ids.
+			return a_affixId.rfind("rw_", 0) == 0 || a_affixId.rfind("runeword_", 0) == 0;
 		}
 	}
 

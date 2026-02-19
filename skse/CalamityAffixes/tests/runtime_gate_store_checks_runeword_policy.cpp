@@ -514,6 +514,9 @@ namespace RuntimeGateStoreChecks
 
 			if (tooltipSource.find("IsSynthesizedRunewordAffixId(") == std::string::npos ||
 				tooltipSource.find("buildRunewordAutoSummary") == std::string::npos ||
+				tooltipSource.find("a_affixId.rfind(\"rw_\", 0) == 0") == std::string::npos ||
+				tooltipSource.find("a_affixId.rfind(\"runeword_\", 0) == 0") == std::string::npos ||
+				tooltipSource.find("a_affixId.substr(a_affixId.size() - 5) != \"_auto\"") == std::string::npos ||
 				tooltipSource.find("headerEn = \"On \"") == std::string::npos ||
 				tooltipSource.find("발동 ") == std::string::npos ||
 				tooltipSource.find("Adaptive elemental cast") == std::string::npos ||
