@@ -36,6 +36,7 @@ namespace CalamityAffixes
 		public RE::BSTEventSink<RE::TESHitEvent>,
 		public RE::BSTEventSink<RE::TESDeathEvent>,
 		public RE::BSTEventSink<RE::TESEquipEvent>,
+		public RE::BSTEventSink<RE::TESActivateEvent>,
 		public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>,
 		public RE::BSTEventSink<RE::TESContainerChangedEvent>,
 		public RE::BSTEventSink<RE::TESUniqueIDChangeEvent>,
@@ -207,6 +208,10 @@ namespace CalamityAffixes
 		RE::BSEventNotifyControl ProcessEvent(
 			const RE::TESEquipEvent* a_event,
 			RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override;
+
+		RE::BSEventNotifyControl ProcessEvent(
+			const RE::TESActivateEvent* a_event,
+			RE::BSTEventSource<RE::TESActivateEvent>* a_eventSource) override;
 
 		RE::BSEventNotifyControl ProcessEvent(
 			const RE::TESMagicEffectApplyEvent* a_event,
@@ -489,6 +494,8 @@ namespace CalamityAffixes
 		static constexpr std::size_t kLootEvaluatedRecentKeep = 2048;
 		static constexpr std::size_t kLootEvaluatedPruneEveryInserts = 128;
 		static constexpr std::size_t kLootPreviewCacheMax = 1024;
+		static constexpr std::size_t kLootCurrencyLedgerMaxEntries = 8192;
+		static constexpr std::uint32_t kLootCurrencyLedgerTtlDays = 30u;
 
 		static constexpr std::uint32_t kSerializationVersion = 7;
 		static constexpr std::uint32_t kSerializationVersionV6 = 6;
@@ -501,11 +508,14 @@ namespace CalamityAffixes
 		static constexpr std::uint32_t kSerializationRecordInstanceRuntimeStates = 'IRST';
 		static constexpr std::uint32_t kSerializationRecordRunewordState = 'RWRD';
 		static constexpr std::uint32_t kSerializationRecordLootEvaluated = 'LRLD';
-			static constexpr std::uint32_t kSerializationRecordLootShuffleBags = 'LSBG';
-			static constexpr std::uint32_t kRunewordSerializationVersion = 1;
-			static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
-			static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
-			static constexpr std::uint32_t kLootShuffleBagSerializationVersion = 2;
+		static constexpr std::uint32_t kSerializationRecordLootCurrencyLedger = 'LCLD';
+		static constexpr std::uint32_t kSerializationRecordLootShuffleBags = 'LSBG';
+		static constexpr std::uint32_t kRunewordSerializationVersion = 1;
+		static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
+		static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
+		static constexpr std::uint32_t kLootCurrencyLedgerSerializationVersion = 2;
+		static constexpr std::uint32_t kLootCurrencyLedgerSerializationVersionV1 = 1;
+		static constexpr std::uint32_t kLootShuffleBagSerializationVersion = 2;
 
 		// Runtime config/state PODs.
 		enum class LootNameMarkerPosition : std::uint8_t
@@ -517,8 +527,8 @@ namespace CalamityAffixes
 		struct LootConfig
 		{
 			float chancePercent{ 0.0f };
-			float runewordFragmentChancePercent{ 1.0f };
-			float reforgeOrbChancePercent{ 4.0f };
+			float runewordFragmentChancePercent{ 6.0f };
+			float reforgeOrbChancePercent{ 2.0f };
 			float lootSourceChanceMultCorpse{ 0.80f };
 			float lootSourceChanceMultContainer{ 1.00f };
 			float lootSourceChanceMultBossContainer{ 1.15f };
@@ -619,6 +629,8 @@ namespace CalamityAffixes
 		std::unordered_set<std::uint64_t> _lootEvaluatedInstances;
 		std::deque<std::uint64_t> _lootEvaluatedRecent;
 		std::size_t _lootEvaluatedInsertionsSincePrune{ 0 };
+		std::unordered_map<std::uint64_t, std::uint32_t> _lootCurrencyRollLedger;
+		std::deque<std::uint64_t> _lootCurrencyRollLedgerRecent;
 		std::uint32_t _lootChanceEligibleFailStreak{ 0 };
 		std::uint32_t _runewordFragmentFailStreak{ 0 };
 		std::uint32_t _reforgeOrbFailStreak{ 0 };
@@ -791,9 +803,20 @@ namespace CalamityAffixes
 		void InsertRunewordRuneIntoSelectedBase();
 		void GrantNextRequiredRuneFragment(std::uint32_t a_amount = 1u);
 		void GrantCurrentRecipeRuneSet(std::uint32_t a_amount = 1u);
-		void GrantReforgeOrbs(std::uint32_t a_amount = 1u);
-		void MaybeGrantRandomRunewordFragment(float a_sourceChanceMultiplier = 1.0f);
-		void MaybeGrantRandomReforgeOrb(float a_sourceChanceMultiplier = 1.0f);
+		std::uint32_t GrantReforgeOrbs(std::uint32_t a_amount = 1u);
+		[[nodiscard]] bool TryRollRunewordFragmentToken(
+			float a_sourceChanceMultiplier,
+			std::uint64_t& a_outRuneToken,
+			bool& a_outPityTriggered);
+		void CommitRunewordFragmentGrant(bool a_success);
+		[[nodiscard]] bool TryRollReforgeOrbGrant(
+			float a_sourceChanceMultiplier,
+			bool& a_outPityTriggered);
+		void CommitReforgeOrbGrant(bool a_success);
+		[[nodiscard]] bool TryPlaceLootCurrencyItem(
+			RE::TESBoundObject* a_dropItem,
+			RE::TESObjectREFR* a_sourceContainerRef,
+			bool a_forceWorldPlacement) const;
 		void ApplyRunewordResult(std::uint64_t a_instanceKey, const RunewordRecipe& a_recipe);
 		void LogRunewordStatus() const;
 		InstanceRuntimeState& EnsureInstanceRuntimeState(std::uint64_t a_instanceKey, std::uint64_t a_affixToken);
@@ -819,13 +842,6 @@ namespace CalamityAffixes
 			const std::vector<std::string>* a_excludeFamilies = nullptr);
 		[[nodiscard]] std::uint8_t RollAffixCount();
 		[[nodiscard]] bool RollLootChanceGateForEligibleInstance();
-		void ApplyMultipleAffixes(
-			RE::InventoryChanges* a_changes,
-			RE::InventoryEntryData* a_entry,
-			RE::ExtraDataList* a_xList,
-			LootItemType a_itemType,
-			bool a_allowRunewordFragmentRoll,
-			const std::optional<InstanceAffixSlots>& a_forcedSlots = std::nullopt);
 		void EnsureMultiAffixDisplayName(
 			RE::InventoryEntryData* a_entry,
 			RE::ExtraDataList* a_xList,

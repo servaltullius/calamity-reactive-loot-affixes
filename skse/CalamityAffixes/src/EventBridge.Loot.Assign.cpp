@@ -1,12 +1,15 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootCurrencyLedger.h"
 #include "CalamityAffixes/LootEligibility.h"
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/LootUiGuards.h"
+#include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
 #include <limits>
 #include <random>
 #include <string>
@@ -18,15 +21,7 @@ namespace CalamityAffixes
 	namespace
 	{
 		static constexpr std::size_t kArmorTemplateScanDepth = 8;
-
-		enum class LootCurrencySourceTier : std::uint8_t
-		{
-			kUnknown = 0,
-			kCorpse,
-			kContainer,
-			kBossContainer,
-			kWorld
-		};
+		using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 
 		[[nodiscard]] bool ContainsAsciiNoCase(std::string_view a_text, std::string_view a_needle)
 		{
@@ -143,6 +138,50 @@ namespace CalamityAffixes
 
 			const std::string_view editorId(editorIdRaw);
 			return editorId == "CAFF_Misc_ReforgeOrb" || editorId.starts_with("CAFF_RuneFrag_");
+		}
+
+		[[nodiscard]] RE::TESObjectREFR* ResolveLootCurrencySourceContainerRef(RE::FormID a_oldContainer)
+		{
+			if (a_oldContainer == 0u || a_oldContainer == LootRerollGuard::kWorldContainer) {
+				return nullptr;
+			}
+
+			auto* sourceForm = RE::TESForm::LookupByID<RE::TESForm>(a_oldContainer);
+			if (!sourceForm) {
+				return nullptr;
+			}
+
+			if (auto* sourceActor = sourceForm->As<RE::Actor>(); sourceActor && sourceActor->IsDead()) {
+				return sourceActor;
+			}
+
+			if (auto* sourceRef = sourceForm->As<RE::TESObjectREFR>()) {
+				if (auto* sourceBase = sourceRef->GetBaseObject(); sourceBase && sourceBase->As<RE::TESObjectCONT>()) {
+					return sourceRef;
+				}
+			}
+
+			return nullptr;
+		}
+
+		[[nodiscard]] std::uint32_t GetInGameDayStamp() noexcept
+		{
+			auto* calendar = RE::Calendar::GetSingleton();
+			if (!calendar) {
+				return 0u;
+			}
+
+			const float daysPassed = calendar->GetDaysPassed();
+			if (!std::isfinite(daysPassed) || daysPassed <= 0.0f) {
+				return 0u;
+			}
+
+			const auto dayFloor = std::floor(daysPassed);
+			if (dayFloor >= static_cast<double>(std::numeric_limits<std::uint32_t>::max())) {
+				return std::numeric_limits<std::uint32_t>::max();
+			}
+
+			return static_cast<std::uint32_t>(dayFloor);
 		}
 	}
 
@@ -546,269 +585,6 @@ namespace CalamityAffixes
 		}
 	}
 
-	void EventBridge::ApplyMultipleAffixes(
-		RE::InventoryChanges* a_changes,
-		RE::InventoryEntryData* a_entry,
-		RE::ExtraDataList* a_xList,
-		LootItemType a_itemType,
-		bool a_allowRunewordFragmentRoll,
-		const std::optional<InstanceAffixSlots>& a_forcedSlots)
-	{
-		if (!a_changes || !a_entry || !a_entry->object || !a_xList) {
-			return;
-		}
-
-		auto* uid = a_xList->GetByType<RE::ExtraUniqueID>();
-		if (!uid) {
-			auto* created = RE::BSExtraData::Create<RE::ExtraUniqueID>();
-			created->baseID = a_entry->object->GetFormID();
-			created->uniqueID = a_changes->GetNextUniqueID();
-			a_xList->Add(created);
-			uid = created;
-		}
-
-		const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-		bool skipStaleMarkerShortCircuit = false;
-
-		if (!IsLootObjectEligibleForAffixes(a_entry->object)) {
-			if (_loot.cleanupInvalidLegacyAffixes) {
-				CleanupInvalidLootInstance(a_entry, a_xList, key, "ApplyMultipleAffixes.ineligible");
-			} else {
-					(void)TryClearStaleLootDisplayName(a_entry, a_xList, false);
-			}
-			return;
-		}
-
-		// If already assigned, just ensure display name and return.
-		if (auto existingIt = _instanceAffixes.find(key); existingIt != _instanceAffixes.end()) {
-			auto& existingSlots = existingIt->second;
-			(void)SanitizeInstanceAffixSlotsForCurrentLootRules(
-				key,
-				existingSlots,
-				"ApplyMultipleAffixes.existing");
-
-			if (existingSlots.count == 0) {
-				_instanceAffixes.erase(existingIt);
-				ForgetLootEvaluatedInstance(key);
-					(void)TryClearStaleLootDisplayName(a_entry, a_xList, true);
-				skipStaleMarkerShortCircuit = true;
-			} else {
-				MarkLootEvaluatedInstance(key);
-				for (std::uint8_t s = 0; s < existingSlots.count; ++s) {
-					EnsureInstanceRuntimeState(key, existingSlots.tokens[s]);
-				}
-				EnsureMultiAffixDisplayName(a_entry, a_xList, existingSlots);
-				return;
-			}
-		}
-
-		// 1) Hard guard: any instance evaluated once is never rolled again.
-		if (IsLootEvaluatedInstance(key)) {
-			(void)TryClearStaleLootDisplayName(a_entry, a_xList, false);
-			return;
-		}
-
-		auto applyPreviewPityOutcome = [&](bool a_success) {
-			const float chancePct = std::clamp(_loot.chancePercent, 0.0f, 100.0f);
-			if (chancePct <= 0.0f) {
-				_lootChanceEligibleFailStreak = 0;
-				return;
-			}
-
-			if (a_success) {
-				_lootChanceEligibleFailStreak = 0;
-				return;
-			}
-
-			if (_lootChanceEligibleFailStreak < std::numeric_limits<std::uint32_t>::max()) {
-				++_lootChanceEligibleFailStreak;
-			}
-		};
-
-		if (a_forcedSlots.has_value()) {
-			auto slots = *a_forcedSlots;
-			ForgetLootPreviewSlots(key);
-			MarkLootEvaluatedInstance(key);
-
-			if (slots.count == 0) {
-				applyPreviewPityOutcome(false);
-				return;
-			}
-
-			(void)SanitizeInstanceAffixSlotsForCurrentLootRules(
-				key,
-				slots,
-				"ApplyMultipleAffixes.claim");
-			if (slots.count == 0) {
-				applyPreviewPityOutcome(false);
-				return;
-			}
-
-			_instanceAffixes[key] = slots;
-			for (std::uint8_t s = 0; s < slots.count; ++s) {
-				EnsureInstanceRuntimeState(key, slots.tokens[s]);
-			}
-			EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
-			if (a_allowRunewordFragmentRoll) {
-				MaybeGrantRandomRunewordFragment();
-				MaybeGrantRandomReforgeOrb();
-			}
-			applyPreviewPityOutcome(true);
-			return;
-		}
-
-		// Preview path: container/barter tooltip can pre-roll and cache this instance.
-		// On pickup, consume cached preview so the observed result matches what the player inspected.
-		if (const auto* previewSlots = FindLootPreviewSlots(key)) {
-			const auto preview = *previewSlots;
-			ForgetLootPreviewSlots(key);
-			MarkLootEvaluatedInstance(key);
-
-			if (preview.count == 0) {
-				applyPreviewPityOutcome(false);
-				return;
-			}
-
-			auto slots = preview;
-			(void)SanitizeInstanceAffixSlotsForCurrentLootRules(
-				key,
-				slots,
-				"ApplyMultipleAffixes.preview");
-			if (slots.count == 0) {
-				applyPreviewPityOutcome(false);
-				return;
-			}
-
-			_instanceAffixes[key] = slots;
-			for (std::uint8_t s = 0; s < slots.count; ++s) {
-				EnsureInstanceRuntimeState(key, slots.tokens[s]);
-			}
-			EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
-			if (a_allowRunewordFragmentRoll) {
-				MaybeGrantRandomRunewordFragment();
-				MaybeGrantRandomReforgeOrb();
-			}
-			applyPreviewPityOutcome(true);
-			return;
-		}
-
-		// 2) Legacy cleanup path:
-		// If stale old data left only the star marker, treat as already evaluated and strip marker.
-		if (!skipStaleMarkerShortCircuit && TryClearStaleLootDisplayName(a_entry, a_xList, false)) {
-			MarkLootEvaluatedInstance(key);
-			if (_loot.debugLog) {
-				SKSE::log::debug(
-					"CalamityAffixes: stripped stale star marker without affix mapping (baseObj={:08X}, uniqueID={}).",
-					uid->baseID,
-					uid->uniqueID);
-			}
-			return;
-		}
-
-		// Mark before rolling so "failed/no-affix" outcomes are also one-shot.
-		MarkLootEvaluatedInstance(key);
-
-		// Global per-item loot chance gate (applies once regardless of P/S composition).
-		// Includes pity: after N consecutive eligible failures, next eligible roll is guaranteed.
-		if (!RollLootChanceGateForEligibleInstance()) {
-			return;
-		}
-
-		// Roll how many affixes this item gets (1-4)
-		const std::uint8_t targetCount = RollAffixCount();
-
-		// Determine prefix/suffix composition
-		const auto targets = detail::DetermineLootPrefixSuffixTargets(targetCount);
-		std::uint8_t prefixTarget = targets.prefixTarget;
-		std::uint8_t suffixTarget = targets.suffixTarget;
-		if (_loot.stripTrackedSuffixSlots) {
-			prefixTarget = targetCount;
-			suffixTarget = 0u;
-		}
-
-		InstanceAffixSlots slots;
-		std::vector<std::size_t> chosenIndices;
-		chosenIndices.reserve(targetCount);
-
-		// Roll prefixes
-		std::vector<std::size_t> chosenPrefixIndices;
-		for (std::uint8_t p = 0; p < prefixTarget; ++p) {
-			static constexpr std::uint8_t kMaxRetries = 3;
-			bool found = false;
-			for (std::uint8_t retry = 0; retry < kMaxRetries; ++retry) {
-				const auto idx = RollLootAffixIndex(a_itemType, &chosenPrefixIndices, /*a_skipChanceCheck=*/true);
-				if (!idx) {
-					break;
-				}
-				if (std::find(chosenPrefixIndices.begin(), chosenPrefixIndices.end(), *idx) != chosenPrefixIndices.end()) {
-					continue;
-				}
-				if (*idx >= _affixes.size() || _affixes[*idx].id.empty()) {
-					continue;
-				}
-				chosenPrefixIndices.push_back(*idx);
-				chosenIndices.push_back(*idx);
-				slots.AddToken(_affixes[*idx].token);
-				found = true;
-				break;
-			}
-			if (!found) {
-				break;
-			}
-		}
-
-		// Roll suffixes (family-based dedup)
-		std::vector<std::string> chosenFamilies;
-		for (std::uint8_t s = 0; s < suffixTarget; ++s) {
-			if (!detail::ShouldConsumeSuffixRollForSingleAffixTarget(targetCount, slots.count)) {
-				break;
-			}
-
-			const auto idx = RollSuffixIndex(a_itemType, &chosenFamilies);
-			if (!idx) {
-				break;
-			}
-			if (*idx >= _affixes.size() || _affixes[*idx].id.empty()) {
-				continue;
-			}
-			if (!_affixes[*idx].family.empty()) {
-				chosenFamilies.push_back(_affixes[*idx].family);
-			}
-			chosenIndices.push_back(*idx);
-			slots.AddToken(_affixes[*idx].token);
-		}
-
-		if (slots.count == 0) {
-			if (_lootChanceEligibleFailStreak < std::numeric_limits<std::uint32_t>::max()) {
-				++_lootChanceEligibleFailStreak;
-			}
-			return;
-		}
-
-		_lootChanceEligibleFailStreak = 0;
-
-		_instanceAffixes.emplace(key, slots);
-
-		for (std::uint8_t s = 0; s < slots.count; ++s) {
-			EnsureInstanceRuntimeState(key, slots.tokens[s]);
-			if (s < chosenIndices.size() && chosenIndices[s] < _affixes.size()) {
-				SKSE::log::debug(
-					"CalamityAffixes: loot affix '{}' applied to {:08X}:{} (slot {}/{}).",
-					_affixes[chosenIndices[s]].id,
-					uid->baseID,
-					uid->uniqueID,
-					s + 1,
-					slots.count);
-			}
-		}
-
-		EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
-		if (a_allowRunewordFragmentRoll) {
-			MaybeGrantRandomRunewordFragment();
-			MaybeGrantRandomReforgeOrb();
-		}
-	}
-
 	void EventBridge::EnsureMultiAffixDisplayName(
 		RE::InventoryEntryData* a_entry,
 		RE::ExtraDataList* a_xList,
@@ -930,29 +706,29 @@ namespace CalamityAffixes
 			return;
 		}
 
-			// Loot policy:
-			// - no random affix assignment on pickup
-			// - pickup only rolls auxiliary currencies (runeword fragment / reforge orb)
-			//   for eligible source pickups (corpse/chest/world)
-			if (!a_allowRunewordFragmentRoll || a_count <= 0) {
-				return;
-			}
+		// Loot policy:
+		// - no random affix assignment on pickup
+		// - pickup only rolls auxiliary currencies (runeword fragment / reforge orb)
+		//   for eligible source pickups (corpse/chest/world)
+		if (!a_allowRunewordFragmentRoll || a_count <= 0) {
+			return;
+		}
 
-			auto* baseForm = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
-			auto* baseObj = baseForm ? baseForm->As<RE::TESBoundObject>() : nullptr;
-			if (!baseObj) {
-				return;
-			}
+		auto* baseForm = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
+		auto* baseObj = baseForm ? baseForm->As<RE::TESBoundObject>() : nullptr;
+		if (!baseObj) {
+			return;
+		}
 
-			// Guard against recursive self-feedback on Calamity resource currencies.
+		// Guard against recursive self-feedback on Calamity resource currencies.
 		if (IsCalamityResourceCurrencyItem(baseObj)) {
-				if (_loot.debugLog) {
-					SKSE::log::debug(
-						"CalamityAffixes: pickup loot roll skipped for resource currency item (baseObj={:08X}, uniqueID={}, oldContainer={:08X}).",
-						a_baseObj,
-						a_uniqueID,
-						a_oldContainer);
-				}
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: pickup loot roll skipped for resource currency item (baseObj={:08X}, uniqueID={}, oldContainer={:08X}).",
+					a_baseObj,
+					a_uniqueID,
+					a_oldContainer);
+			}
 			return;
 		}
 
@@ -979,25 +755,125 @@ namespace CalamityAffixes
 			break;
 		}
 		sourceChanceMultiplier = std::clamp(sourceChanceMultiplier, 0.0f, 5.0f);
+		const auto dayStamp = GetInGameDayStamp();
+		const auto ledgerKey = detail::BuildLootCurrencyLedgerKey(
+			sourceTier,
+			a_oldContainer,
+			a_baseObj,
+			a_uniqueID,
+			dayStamp);
+		if (ledgerKey != 0u) {
+			if (auto ledgerIt = _lootCurrencyRollLedger.find(ledgerKey);
+				ledgerIt != _lootCurrencyRollLedger.end()) {
+				if (detail::IsLootCurrencyLedgerExpired(
+						ledgerIt->second,
+						dayStamp,
+						kLootCurrencyLedgerTtlDays)) {
+					_lootCurrencyRollLedger.erase(ledgerIt);
+				} else {
+					if (_loot.debugLog) {
+						SKSE::log::debug(
+							"CalamityAffixes: pickup loot roll skipped (ledger consumed) (baseObj={:08X}, uniqueID={}, oldContainer={:08X}, sourceTier={}, ledgerKey={:016X}, dayStamp={}).",
+							a_baseObj,
+							a_uniqueID,
+							a_oldContainer,
+							LootCurrencySourceTierLabel(sourceTier),
+							ledgerKey,
+							dayStamp);
+					}
+					return;
+				}
+			}
+		}
+
+		if (sourceTier != LootCurrencySourceTier::kWorld) {
+			// Corpse/container sources are rolled at activation time to avoid
+			// "first looting then extra drop appears" UX.
+			return;
+		}
+
+		auto* sourceContainerRef = ResolveLootCurrencySourceContainerRef(a_oldContainer);
+		const bool forceWorldPlacement = (sourceTier == LootCurrencySourceTier::kWorld);
+
+		bool runewordDropGranted = false;
+		bool reforgeDropGranted = false;
 		// OnItemAdded.itemCount is the stack size for this pickup event.
 		// Rolling per stack count causes burst grants (e.g., arrows/gold/stacked misc).
 		// Keep currency roll strictly once per pickup event for stable economy pacing.
 		const std::uint32_t rollCount = 1u;
 		for (std::uint32_t i = 0; i < rollCount; ++i) {
-			MaybeGrantRandomRunewordFragment(sourceChanceMultiplier);
-			MaybeGrantRandomReforgeOrb(sourceChanceMultiplier);
+			bool runewordPityTriggered = false;
+			std::uint64_t runeToken = 0u;
+			if (TryRollRunewordFragmentToken(sourceChanceMultiplier, runeToken, runewordPityTriggered)) {
+				auto* fragmentItem = RunewordDetail::LookupRunewordFragmentItem(
+					_runewordRuneNameByToken,
+					runeToken);
+				if (!fragmentItem) {
+					SKSE::log::error(
+						"CalamityAffixes: runeword fragment item missing (runeToken={:016X}).",
+						runeToken);
+				} else if (TryPlaceLootCurrencyItem(fragmentItem, sourceContainerRef, forceWorldPlacement)) {
+					CommitRunewordFragmentGrant(true);
+					runewordDropGranted = true;
+					std::string runeName = "Rune";
+					if (const auto nameIt = _runewordRuneNameByToken.find(runeToken);
+						nameIt != _runewordRuneNameByToken.end()) {
+						runeName = nameIt->second;
+					}
+					std::string note = "Runeword Fragment Drop: ";
+					note.append(runeName);
+					if (runewordPityTriggered) {
+						note.append(" [Pity]");
+					}
+					RE::DebugNotification(note.c_str());
+				}
+			}
+
+			bool reforgePityTriggered = false;
+			if (TryRollReforgeOrbGrant(sourceChanceMultiplier, reforgePityTriggered)) {
+				auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+				if (!orb) {
+					SKSE::log::error(
+						"CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
+				} else if (TryPlaceLootCurrencyItem(orb, sourceContainerRef, forceWorldPlacement)) {
+					CommitReforgeOrbGrant(true);
+					reforgeDropGranted = true;
+					RE::DebugNotification("Reforge Orb Drop");
+					if (reforgePityTriggered && _loot.debugLog) {
+						SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");
+					}
+				}
+			}
+		}
+
+		if (ledgerKey != 0u) {
+			const auto [it, inserted] = _lootCurrencyRollLedger.emplace(ledgerKey, dayStamp);
+			if (!inserted) {
+				it->second = dayStamp;
+			}
+			if (inserted) {
+				_lootCurrencyRollLedgerRecent.push_back(ledgerKey);
+				while (_lootCurrencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
+					const auto oldest = _lootCurrencyRollLedgerRecent.front();
+					_lootCurrencyRollLedgerRecent.pop_front();
+					_lootCurrencyRollLedger.erase(oldest);
+				}
+			}
 		}
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
-				"CalamityAffixes: pickup loot rolls applied (baseObj={:08X}, count={}, rolls={}, uniqueID={}, oldContainer={:08X}, sourceTier={}, sourceChanceMult={:.2f}).",
+				"CalamityAffixes: pickup loot rolls applied (baseObj={:08X}, count={}, rolls={}, uniqueID={}, oldContainer={:08X}, sourceTier={}, sourceChanceMult={:.2f}, runewordDropped={}, reforgeDropped={}, ledgerKey={:016X}).",
 				a_baseObj,
 				a_count,
 				rollCount,
 				a_uniqueID,
 				a_oldContainer,
 				LootCurrencySourceTierLabel(sourceTier),
-				sourceChanceMultiplier);
+				sourceChanceMultiplier,
+				runewordDropGranted,
+				reforgeDropGranted,
+				ledgerKey);
 		}
 	}
 }

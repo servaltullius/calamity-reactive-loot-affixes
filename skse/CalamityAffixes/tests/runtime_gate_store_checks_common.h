@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/LootCurrencyLedger.h"
 #include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
@@ -36,6 +37,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckRunewordTooltipOverlayPolicy();
 	bool CheckLootPreviewRuntimePolicy();
 	bool CheckLootRerollExploitGuardPolicy();
+	bool CheckLootCurrencyLedgerSerializationPolicy();
 	bool CheckLootChanceMcmCleanupPolicy();
 	bool CheckMcmDropChanceRuntimeBridgePolicy();
 

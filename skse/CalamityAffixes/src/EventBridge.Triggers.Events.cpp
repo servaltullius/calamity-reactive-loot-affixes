@@ -3,12 +3,17 @@
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
+#include "CalamityAffixes/LootCurrencyLedger.h"
+#include "CalamityAffixes/LootEligibility.h"
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "CalamityAffixes/PrismaTooltip.h"
 #include "CalamityAffixes/TriggerGuards.h"
+#include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
+#include <cmath>
 #include <limits>
 #include <string>
 #include <string_view>
@@ -24,6 +29,7 @@ namespace
 constexpr std::size_t kDotCooldownMaxEntries = 4096;
 constexpr auto kDotCooldownTtl = std::chrono::seconds(30);
 constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
+using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 
 [[nodiscard]] bool IsInternalProcSpellSource(RE::FormID a_sourceFormID)
 {
@@ -39,6 +45,120 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 
 	const auto editorId = std::string_view(sourceSpell->GetFormEditorID());
 	return !editorId.empty() && editorId.starts_with("CAFF_");
+}
+
+[[nodiscard]] bool ContainsAsciiNoCase(std::string_view a_text, std::string_view a_needle)
+{
+	if (a_text.empty() || a_needle.empty() || a_needle.size() > a_text.size()) {
+		return false;
+	}
+
+	for (std::size_t i = 0; i + a_needle.size() <= a_text.size(); ++i) {
+		bool match = true;
+		for (std::size_t j = 0; j < a_needle.size(); ++j) {
+			const auto lhs = static_cast<char>(std::tolower(static_cast<unsigned char>(a_text[i + j])));
+			const auto rhs = static_cast<char>(std::tolower(static_cast<unsigned char>(a_needle[j])));
+			if (lhs != rhs) {
+				match = false;
+				break;
+			}
+		}
+		if (match) {
+			return true;
+		}
+	}
+	return false;
+}
+
+[[nodiscard]] bool IsBossContainerEditorId(
+	std::string_view a_editorId,
+	const std::vector<std::string>& a_allowContains,
+	const std::vector<std::string>& a_denyContains)
+{
+	if (a_editorId.empty()) {
+		return false;
+	}
+
+	if (CalamityAffixes::detail::MatchesAnyCaseInsensitiveMarker(a_editorId, a_denyContains)) {
+		return false;
+	}
+
+	if (!a_allowContains.empty()) {
+		return CalamityAffixes::detail::MatchesAnyCaseInsensitiveMarker(a_editorId, a_allowContains);
+	}
+
+	return ContainsAsciiNoCase(a_editorId, "boss");
+}
+
+[[nodiscard]] LootCurrencySourceTier ResolveActivatedLootCurrencySourceTier(
+	const RE::TESObjectREFR* a_ref,
+	const std::vector<std::string>& a_bossAllowContains,
+	const std::vector<std::string>& a_bossDenyContains)
+{
+	if (!a_ref) {
+		return LootCurrencySourceTier::kUnknown;
+	}
+
+	if (const auto* actor = a_ref->As<RE::Actor>(); actor && actor->IsDead()) {
+		return LootCurrencySourceTier::kCorpse;
+	}
+
+	const RE::TESForm* sourceForm = a_ref;
+	const RE::TESForm* sourceBase = a_ref->GetBaseObject();
+	if (!sourceBase || !sourceBase->As<RE::TESObjectCONT>()) {
+		return LootCurrencySourceTier::kUnknown;
+	}
+
+	const char* sourceEditorIdRaw = sourceForm->GetFormEditorID();
+	const char* baseEditorIdRaw = sourceBase->GetFormEditorID();
+	if (IsBossContainerEditorId(
+			sourceEditorIdRaw ? std::string_view(sourceEditorIdRaw) : std::string_view{},
+			a_bossAllowContains,
+			a_bossDenyContains) ||
+		IsBossContainerEditorId(
+			baseEditorIdRaw ? std::string_view(baseEditorIdRaw) : std::string_view{},
+			a_bossAllowContains,
+			a_bossDenyContains)) {
+		return LootCurrencySourceTier::kBossContainer;
+	}
+
+	return LootCurrencySourceTier::kContainer;
+}
+
+[[nodiscard]] std::string_view LootCurrencySourceTierLabel(LootCurrencySourceTier a_tier)
+{
+	switch (a_tier) {
+	case LootCurrencySourceTier::kCorpse:
+		return "corpse";
+	case LootCurrencySourceTier::kContainer:
+		return "container";
+	case LootCurrencySourceTier::kBossContainer:
+		return "boss_container";
+	case LootCurrencySourceTier::kWorld:
+		return "world";
+	default:
+		return "unknown";
+	}
+}
+
+[[nodiscard]] std::uint32_t GetInGameDayStamp() noexcept
+{
+	auto* calendar = RE::Calendar::GetSingleton();
+	if (!calendar) {
+		return 0u;
+	}
+
+	const float daysPassed = calendar->GetDaysPassed();
+	if (!std::isfinite(daysPassed) || daysPassed <= 0.0f) {
+		return 0u;
+	}
+
+	const auto dayFloor = std::floor(daysPassed);
+	if (dayFloor >= static_cast<double>(std::numeric_limits<std::uint32_t>::max())) {
+		return std::numeric_limits<std::uint32_t>::max();
+	}
+
+	return static_cast<std::uint32_t>(dayFloor);
 }
 }
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
@@ -359,6 +479,142 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 	}
 
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+		const RE::TESActivateEvent* a_event,
+		RE::BSTEventSource<RE::TESActivateEvent>*)
+	{
+		const auto now = std::chrono::steady_clock::now();
+		MaybeFlushRuntimeUserSettings(now, false);
+
+		if (!_configLoaded || !_runtimeEnabled || !a_event || !a_event->actionRef || !a_event->objectActivated) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		auto* actionRef = a_event->actionRef.get();
+		auto* sourceRef = a_event->objectActivated.get();
+		auto* actionActor = actionRef ? actionRef->As<RE::Actor>() : nullptr;
+		if (!actionActor || !actionActor->IsPlayerRef() || !sourceRef) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		const auto sourceTier = ResolveActivatedLootCurrencySourceTier(
+			sourceRef,
+			_loot.bossContainerEditorIdAllowContains,
+			_loot.bossContainerEditorIdDenyContains);
+		if (sourceTier == LootCurrencySourceTier::kUnknown || sourceTier == LootCurrencySourceTier::kWorld) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		float sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
+		switch (sourceTier) {
+		case LootCurrencySourceTier::kCorpse:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultCorpse;
+			break;
+		case LootCurrencySourceTier::kBossContainer:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultBossContainer;
+			break;
+		case LootCurrencySourceTier::kContainer:
+		default:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
+			break;
+		}
+		sourceChanceMultiplier = std::clamp(sourceChanceMultiplier, 0.0f, 5.0f);
+
+		const auto dayStamp = GetInGameDayStamp();
+		const auto sourceFormId = sourceRef->GetFormID();
+		const auto ledgerKey = detail::BuildLootCurrencyLedgerKey(
+			sourceTier,
+			sourceFormId,
+			0u,
+			0u,
+			dayStamp);
+		if (ledgerKey != 0u) {
+			if (auto ledgerIt = _lootCurrencyRollLedger.find(ledgerKey);
+				ledgerIt != _lootCurrencyRollLedger.end()) {
+				if (detail::IsLootCurrencyLedgerExpired(
+						ledgerIt->second,
+						dayStamp,
+						kLootCurrencyLedgerTtlDays)) {
+					_lootCurrencyRollLedger.erase(ledgerIt);
+				} else {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+			}
+		}
+
+		bool runewordDropGranted = false;
+		bool reforgeDropGranted = false;
+
+		bool runewordPityTriggered = false;
+		std::uint64_t runeToken = 0u;
+		if (TryRollRunewordFragmentToken(sourceChanceMultiplier, runeToken, runewordPityTriggered)) {
+			auto* fragmentItem = RunewordDetail::LookupRunewordFragmentItem(_runewordRuneNameByToken, runeToken);
+			if (!fragmentItem) {
+				SKSE::log::error(
+					"CalamityAffixes: runeword fragment item missing (runeToken={:016X}).",
+					runeToken);
+			} else if (TryPlaceLootCurrencyItem(fragmentItem, sourceRef, false)) {
+				CommitRunewordFragmentGrant(true);
+				runewordDropGranted = true;
+				std::string runeName = "Rune";
+				if (const auto nameIt = _runewordRuneNameByToken.find(runeToken);
+					nameIt != _runewordRuneNameByToken.end()) {
+					runeName = nameIt->second;
+				}
+				std::string note = "Runeword Fragment Drop: ";
+				note.append(runeName);
+				if (runewordPityTriggered) {
+					note.append(" [Pity]");
+				}
+				RE::DebugNotification(note.c_str());
+			}
+		}
+
+		bool reforgePityTriggered = false;
+		if (TryRollReforgeOrbGrant(sourceChanceMultiplier, reforgePityTriggered)) {
+			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+			if (!orb) {
+				SKSE::log::error("CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
+			} else if (TryPlaceLootCurrencyItem(orb, sourceRef, false)) {
+				CommitReforgeOrbGrant(true);
+				reforgeDropGranted = true;
+				RE::DebugNotification("Reforge Orb Drop");
+				if (reforgePityTriggered && _loot.debugLog) {
+					SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");
+				}
+			}
+		}
+
+		if (ledgerKey != 0u) {
+			const auto [it, inserted] = _lootCurrencyRollLedger.emplace(ledgerKey, dayStamp);
+			if (!inserted) {
+				it->second = dayStamp;
+			}
+			if (inserted) {
+				_lootCurrencyRollLedgerRecent.push_back(ledgerKey);
+				while (_lootCurrencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
+					const auto oldest = _lootCurrencyRollLedgerRecent.front();
+					_lootCurrencyRollLedgerRecent.pop_front();
+					_lootCurrencyRollLedger.erase(oldest);
+				}
+			}
+		}
+
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: activation loot rolls applied (sourceRef={:08X}, sourceTier={}, sourceChanceMult={:.2f}, runewordDropped={}, reforgeDropped={}, ledgerKey={:016X}, dayStamp={}).",
+				sourceFormId,
+				LootCurrencySourceTierLabel(sourceTier),
+				sourceChanceMultiplier,
+				runewordDropGranted,
+				reforgeDropGranted,
+				ledgerKey,
+				dayStamp);
+		}
+
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	RE::BSEventNotifyControl EventBridge::ProcessEvent(
 		const RE::TESMagicEffectApplyEvent* a_event,
 		RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*)
 	{
@@ -511,6 +767,21 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			MarkRuntimeUserSettingsDirty();
 			MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::now(), true);
 		};
+		constexpr auto kMcmChanceNotificationCooldown = std::chrono::milliseconds(1500);
+		static auto s_lastRunewordChanceNotificationAt = std::chrono::steady_clock::time_point{};
+		static auto s_lastReforgeChanceNotificationAt = std::chrono::steady_clock::time_point{};
+		const auto shouldEmitChanceNotification =
+			[&](std::chrono::steady_clock::time_point& a_lastNotificationAt) {
+				if (a_lastNotificationAt.time_since_epoch().count() == 0) {
+					a_lastNotificationAt = now;
+					return true;
+				}
+				if ((now - a_lastNotificationAt) < kMcmChanceNotificationCooldown) {
+					return false;
+				}
+				a_lastNotificationAt = now;
+				return true;
+			};
 
 			if (eventName == kMcmSetEnabledEvent) {
 				_runtimeEnabled = (a_event->numArg > 0.5f);
@@ -554,22 +825,36 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 			}
 
 			if (eventName == kMcmSetRunewordFragmentChanceEvent) {
+				const float previousRunewordChance = _loot.runewordFragmentChancePercent;
 				_loot.runewordFragmentChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);
-				queueRuntimeUserSettingsPersist();
-				std::string note = "Calamity: runeword fragment chance ";
-				note += std::to_string(_loot.runewordFragmentChancePercent);
-				note += "%";
-				RE::DebugNotification(note.c_str());
+				const float runewordChanceDelta = _loot.runewordFragmentChancePercent - previousRunewordChance;
+				const bool runewordChanceChanged = runewordChanceDelta > 0.001f || runewordChanceDelta < -0.001f;
+				if (runewordChanceChanged) {
+					queueRuntimeUserSettingsPersist();
+					if (shouldEmitChanceNotification(s_lastRunewordChanceNotificationAt)) {
+						std::string note = "Calamity: runeword fragment chance ";
+						note += std::to_string(_loot.runewordFragmentChancePercent);
+						note += "%";
+						RE::DebugNotification(note.c_str());
+					}
+				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
 			if (eventName == kMcmSetReforgeOrbChanceEvent) {
+				const float previousReforgeChance = _loot.reforgeOrbChancePercent;
 				_loot.reforgeOrbChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);
-				queueRuntimeUserSettingsPersist();
-				std::string note = "Calamity: reforge orb chance ";
-				note += std::to_string(_loot.reforgeOrbChancePercent);
-				note += "%";
-				RE::DebugNotification(note.c_str());
+				const float reforgeChanceDelta = _loot.reforgeOrbChancePercent - previousReforgeChance;
+				const bool reforgeChanceChanged = reforgeChanceDelta > 0.001f || reforgeChanceDelta < -0.001f;
+				if (reforgeChanceChanged) {
+					queueRuntimeUserSettingsPersist();
+					if (shouldEmitChanceNotification(s_lastReforgeChanceNotificationAt)) {
+						std::string note = "Calamity: reforge orb chance ";
+						note += std::to_string(_loot.reforgeOrbChancePercent);
+						note += "%";
+						RE::DebugNotification(note.c_str());
+					}
+				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
 

@@ -15,6 +15,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/HitDataUtil.h
 	    include/CalamityAffixes/Hooks.h
 	    include/CalamityAffixes/InstanceStateKey.h
+	    include/CalamityAffixes/LootCurrencyLedger.h
 	    include/CalamityAffixes/LootRerollGuard.h
 	    include/CalamityAffixes/LootUiGuards.h
 	    include/CalamityAffixes/NonHostileFirstHitGate.h

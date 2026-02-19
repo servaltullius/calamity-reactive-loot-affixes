@@ -488,14 +488,7 @@ namespace CalamityAffixes
 			count,
 			uid);
 
-			if (auto* task = SKSE::GetTaskInterface()) {
-				const auto oldContainer = a_event->oldContainer;
-				task->AddTask([baseObj, count, uid, oldContainer, allowRunewordFragmentRoll]() {
-					EventBridge::GetSingleton()->ProcessLootAcquired(baseObj, count, uid, oldContainer, allowRunewordFragmentRoll);
-				});
-			} else {
-				ProcessLootAcquired(baseObj, count, uid, a_event->oldContainer, allowRunewordFragmentRoll);
-			}
+			ProcessLootAcquired(baseObj, count, uid, a_event->oldContainer, allowRunewordFragmentRoll);
 			return RE::BSEventNotifyControl::kContinue;
 		}
 

@@ -100,21 +100,21 @@ namespace CalamityAffixes
 				RE::DebugNotification(note.c_str());
 			}
 
-		void EventBridge::GrantReforgeOrbs(std::uint32_t a_amount)
+		std::uint32_t EventBridge::GrantReforgeOrbs(std::uint32_t a_amount)
 		{
 			if (!_configLoaded || a_amount == 0u) {
-				return;
+				return 0u;
 			}
 
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			if (!player) {
-				return;
+				return 0u;
 			}
 
 			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
 			if (!orb) {
 				SKSE::log::error("CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
-				return;
+				return 0u;
 			}
 
 			const auto maxGive = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
@@ -128,27 +128,34 @@ namespace CalamityAffixes
 			note.append(std::to_string(owned));
 			note.push_back(')');
 			RE::DebugNotification(note.c_str());
+			return give;
 		}
 
-		void EventBridge::MaybeGrantRandomRunewordFragment(float a_sourceChanceMultiplier)
+		bool EventBridge::TryRollRunewordFragmentToken(
+			float a_sourceChanceMultiplier,
+			std::uint64_t& a_outRuneToken,
+			bool& a_outPityTriggered)
 		{
+			a_outRuneToken = 0u;
+			a_outPityTriggered = false;
 			if (_runewordRuneTokenPool.empty()) {
-				return;
+				return false;
 			}
 
 			const float chance = std::clamp(_loot.runewordFragmentChancePercent, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
 				_runewordFragmentFailStreak = 0;
-				return;
+				return false;
 			}
+
 			const float sourceChanceMultiplier = std::max(0.0f, a_sourceChanceMultiplier);
 			const float effectiveChance = std::clamp(chance * sourceChanceMultiplier, 0.0f, 100.0f);
 			if (effectiveChance <= 0.0f) {
-				return;
+				return false;
 			}
 
-			const bool pityTriggered = (_runewordFragmentFailStreak >= kRunewordFragmentPityFailThreshold);
-			bool grant = pityTriggered;
+			a_outPityTriggered = (_runewordFragmentFailStreak >= kRunewordFragmentPityFailThreshold);
+			bool grant = a_outPityTriggered;
 			if (!grant) {
 				std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
 				grant = (chanceDist(_rng) < effectiveChance);
@@ -158,66 +165,49 @@ namespace CalamityAffixes
 				if (_runewordFragmentFailStreak < std::numeric_limits<std::uint32_t>::max()) {
 					++_runewordFragmentFailStreak;
 				}
-				return;
+				return false;
 			}
 
-				std::uint64_t runeToken = 0u;
-				if (!_runewordRuneTokenWeights.empty() && _runewordRuneTokenWeights.size() == _runewordRuneTokenPool.size()) {
-					std::discrete_distribution<std::size_t> pick(_runewordRuneTokenWeights.begin(), _runewordRuneTokenWeights.end());
-					runeToken = _runewordRuneTokenPool[pick(_rng)];
-				} else {
-					std::uniform_int_distribution<std::size_t> pick(0, _runewordRuneTokenPool.size() - 1u);
-					runeToken = _runewordRuneTokenPool[pick(_rng)];
-				}
-
-				std::string runeName = "Rune";
-				if (const auto nameIt = _runewordRuneNameByToken.find(runeToken); nameIt != _runewordRuneNameByToken.end()) {
-					runeName = nameIt->second;
-				}
-
-				auto* player = RE::PlayerCharacter::GetSingleton();
-				if (!player) {
-					return;
-				}
-
-				const auto given = GrantRunewordFragments(player, _runewordRuneNameByToken, runeToken, 1u);
-				if (given == 0u) {
-					SKSE::log::error(
-						"CalamityAffixes: runeword fragment item missing (runeToken={:016X}, runeName={}).",
-						runeToken,
-						runeName);
-					return;
-				}
-				_runewordFragmentFailStreak = 0;
-
-				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, runeToken);
-
-				std::string note = "Runeword Fragment: ";
-				note.append(runeName);
-				if (pityTriggered) {
-					note.append(" [Pity]");
-				}
-				note.append(" (");
-				note.append(std::to_string(owned));
-				note.push_back(')');
-				RE::DebugNotification(note.c_str());
+			if (!_runewordRuneTokenWeights.empty() &&
+				_runewordRuneTokenWeights.size() == _runewordRuneTokenPool.size()) {
+				std::discrete_distribution<std::size_t> pick(
+					_runewordRuneTokenWeights.begin(),
+					_runewordRuneTokenWeights.end());
+				a_outRuneToken = _runewordRuneTokenPool[pick(_rng)];
+			} else {
+				std::uniform_int_distribution<std::size_t> pick(0, _runewordRuneTokenPool.size() - 1u);
+				a_outRuneToken = _runewordRuneTokenPool[pick(_rng)];
 			}
 
-		void EventBridge::MaybeGrantRandomReforgeOrb(float a_sourceChanceMultiplier)
+			return a_outRuneToken != 0u;
+		}
+
+		void EventBridge::CommitRunewordFragmentGrant(bool a_success)
 		{
+			if (a_success) {
+				_runewordFragmentFailStreak = 0;
+			}
+		}
+
+		bool EventBridge::TryRollReforgeOrbGrant(
+			float a_sourceChanceMultiplier,
+			bool& a_outPityTriggered)
+		{
+			a_outPityTriggered = false;
 			const float chance = std::clamp(_loot.reforgeOrbChancePercent, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
 				_reforgeOrbFailStreak = 0;
-				return;
+				return false;
 			}
+
 			const float sourceChanceMultiplier = std::max(0.0f, a_sourceChanceMultiplier);
 			const float effectiveChance = std::clamp(chance * sourceChanceMultiplier, 0.0f, 100.0f);
 			if (effectiveChance <= 0.0f) {
-				return;
+				return false;
 			}
 
-			const bool pityTriggered = (_reforgeOrbFailStreak >= kReforgeOrbPityFailThreshold);
-			bool grant = pityTriggered;
+			a_outPityTriggered = (_reforgeOrbFailStreak >= kReforgeOrbPityFailThreshold);
+			bool grant = a_outPityTriggered;
 			if (!grant) {
 				std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
 				grant = (chanceDist(_rng) < effectiveChance);
@@ -227,14 +217,39 @@ namespace CalamityAffixes
 				if (_reforgeOrbFailStreak < std::numeric_limits<std::uint32_t>::max()) {
 					++_reforgeOrbFailStreak;
 				}
-				return;
+				return false;
 			}
 
-			GrantReforgeOrbs(1u);
-			_reforgeOrbFailStreak = 0;
-			if (pityTriggered && _loot.debugLog) {
-				SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");
+			return true;
+		}
+
+		void EventBridge::CommitReforgeOrbGrant(bool a_success)
+		{
+			if (a_success) {
+				_reforgeOrbFailStreak = 0;
 			}
+		}
+
+		bool EventBridge::TryPlaceLootCurrencyItem(
+			RE::TESBoundObject* a_dropItem,
+			RE::TESObjectREFR* a_sourceContainerRef,
+			bool a_forceWorldPlacement) const
+		{
+			if (!a_dropItem) {
+				return false;
+			}
+
+			if (!a_forceWorldPlacement && a_sourceContainerRef) {
+				a_sourceContainerRef->AddObjectToContainer(a_dropItem, nullptr, 1, nullptr);
+				return true;
+			}
+
+			auto* anchor = a_sourceContainerRef ? a_sourceContainerRef : RE::PlayerCharacter::GetSingleton();
+			if (!anchor) {
+				return false;
+			}
+
+			return static_cast<bool>(anchor->PlaceObjectAtMe(a_dropItem, false));
 		}
 
 		void EventBridge::LogRunewordStatus() const

@@ -16,6 +16,7 @@ int main()
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
 	const bool lootRerollExploitGuardOk = CheckLootRerollExploitGuardPolicy();
+	const bool lootCurrencyLedgerPolicyOk = CheckLootCurrencyLedgerSerializationPolicy();
 	const bool lootChanceMcmCleanupOk = CheckLootChanceMcmCleanupPolicy();
 	const bool mcmDropChanceBridgeOk = CheckMcmDropChanceRuntimeBridgePolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
@@ -36,6 +37,7 @@ int main()
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
 	        lootRerollExploitGuardOk &&
+	        lootCurrencyLedgerPolicyOk &&
 	        lootChanceMcmCleanupOk &&
 		        mcmDropChanceBridgeOk &&
 		        runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&

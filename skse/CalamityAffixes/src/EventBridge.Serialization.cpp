@@ -161,6 +161,26 @@ namespace CalamityAffixes
 			}
 		}
 
+		// --- LCLD ---
+		if (!a_intfc->OpenRecord(
+				kSerializationRecordLootCurrencyLedger,
+				kLootCurrencyLedgerSerializationVersion)) {
+			return;
+		}
+
+		const std::uint32_t lootCurrencyLedgerCount = static_cast<std::uint32_t>(_lootCurrencyRollLedger.size());
+		if (!a_intfc->WriteRecordData(lootCurrencyLedgerCount)) {
+			return;
+		}
+		for (const auto& [key, dayStamp] : _lootCurrencyRollLedger) {
+			if (!a_intfc->WriteRecordData(key)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(dayStamp)) {
+				return;
+			}
+		}
+
 		// --- LSBG ---
 		if (!a_intfc->OpenRecord(kSerializationRecordLootShuffleBags, kLootShuffleBagSerializationVersion)) {
 			return;
@@ -206,56 +226,58 @@ namespace CalamityAffixes
 		}
 	}
 
-		void EventBridge::Load(SKSE::SerializationInterface* a_intfc)
-		{
-			if (!a_intfc) {
-				return;
-			}
+	void EventBridge::Load(SKSE::SerializationInterface* a_intfc)
+	{
+		if (!a_intfc) {
+			return;
+		}
 
-			_instanceAffixes.clear();
-			_equippedInstanceKeysByToken.clear();
-			_equippedTokenCacheReady = false;
-			_lootPrefixSharedBag = {};
-			_lootPrefixWeaponBag = {};
-			_lootPrefixArmorBag = {};
-			_lootSuffixSharedBag = {};
-			_lootSuffixWeaponBag = {};
-			_lootSuffixArmorBag = {};
-			_lootPreviewAffixes.clear();
-			_lootPreviewRecent.clear();
-				_lootEvaluatedInstances.clear();
-				_lootEvaluatedRecent.clear();
-				_lootEvaluatedInsertionsSincePrune = 0;
-				_lootChanceEligibleFailStreak = 0;
-				_runewordFragmentFailStreak = 0;
-				_reforgeOrbFailStreak = 0;
-				_instanceStates.clear();
-			_dotObservedMagicEffects.clear();
-			_dotTagSafetyWarned = false;
-			_dotTagSafetySuppressed = false;
-			_runewordRuneFragments.clear();
-			_runewordInstanceStates.clear();
-			_runewordSelectedBaseKey.reset();
-			_runewordBaseCycleCursor = 0;
-			_runewordRecipeCycleCursor = 0;
-			_corpseExplosionSeenCorpses.clear();
-			_corpseExplosionState = {};
-			_summonCorpseExplosionSeenCorpses.clear();
-			_summonCorpseExplosionState = {};
+		_instanceAffixes.clear();
+		_equippedInstanceKeysByToken.clear();
+		_equippedTokenCacheReady = false;
+		_lootPrefixSharedBag = {};
+		_lootPrefixWeaponBag = {};
+		_lootPrefixArmorBag = {};
+		_lootSuffixSharedBag = {};
+		_lootSuffixWeaponBag = {};
+		_lootSuffixArmorBag = {};
+		_lootPreviewAffixes.clear();
+		_lootPreviewRecent.clear();
+		_lootEvaluatedInstances.clear();
+		_lootEvaluatedRecent.clear();
+		_lootEvaluatedInsertionsSincePrune = 0;
+		_lootCurrencyRollLedger.clear();
+		_lootCurrencyRollLedgerRecent.clear();
+		_lootChanceEligibleFailStreak = 0;
+		_runewordFragmentFailStreak = 0;
+		_reforgeOrbFailStreak = 0;
+		_instanceStates.clear();
+		_dotObservedMagicEffects.clear();
+		_dotTagSafetyWarned = false;
+		_dotTagSafetySuppressed = false;
+		_runewordRuneFragments.clear();
+		_runewordInstanceStates.clear();
+		_runewordSelectedBaseKey.reset();
+		_runewordBaseCycleCursor = 0;
+		_runewordRecipeCycleCursor = 0;
+		_corpseExplosionSeenCorpses.clear();
+		_corpseExplosionState = {};
+		_summonCorpseExplosionSeenCorpses.clear();
+		_summonCorpseExplosionState = {};
 
-			std::uint32_t type = 0;
-			std::uint32_t version = 0;
-			std::uint32_t length = 0;
+		std::uint32_t type = 0;
+		std::uint32_t version = 0;
+		std::uint32_t length = 0;
 
-			while (a_intfc->GetNextRecordInfo(type, version, length)) {
-				if (type == kSerializationRecordInstanceAffixes) {
-					if (version != kSerializationVersion &&
-						version != kSerializationVersionV6 &&
-						version != kSerializationVersionV5 &&
-						version != kSerializationVersionV4 &&
-						version != kSerializationVersionV3 &&
-						version != kSerializationVersionV2 &&
-						version != kSerializationVersionV1) {
+		while (a_intfc->GetNextRecordInfo(type, version, length)) {
+			if (type == kSerializationRecordInstanceAffixes) {
+				if (version != kSerializationVersion &&
+					version != kSerializationVersionV6 &&
+					version != kSerializationVersionV5 &&
+					version != kSerializationVersionV4 &&
+					version != kSerializationVersionV3 &&
+					version != kSerializationVersionV2 &&
+					version != kSerializationVersionV1) {
 						// Drain unsupported version.
 						std::vector<std::uint8_t> sink(length);
 						if (length > 0) {
@@ -608,6 +630,40 @@ namespace CalamityAffixes
 					continue;
 				}
 
+				if (type == kSerializationRecordLootCurrencyLedger) {
+					if (version != kLootCurrencyLedgerSerializationVersion &&
+						version != kLootCurrencyLedgerSerializationVersionV1) {
+						std::vector<std::uint8_t> sink(length);
+						if (length > 0) {
+							a_intfc->ReadRecordData(sink.data(), length);
+						}
+						continue;
+					}
+
+					std::uint32_t count = 0;
+					if (a_intfc->ReadRecordData(count) != sizeof(count)) {
+						return;
+					}
+
+					for (std::uint32_t i = 0; i < count; ++i) {
+						std::uint64_t key = 0;
+						if (a_intfc->ReadRecordData(key) != sizeof(key)) {
+							return;
+						}
+						std::uint32_t dayStamp = 0u;
+						if (version == kLootCurrencyLedgerSerializationVersion) {
+							if (a_intfc->ReadRecordData(dayStamp) != sizeof(dayStamp)) {
+								return;
+							}
+						}
+						if (key != 0u) {
+							_lootCurrencyRollLedger.emplace(key, dayStamp);
+						}
+					}
+
+					continue;
+				}
+
 				if (type == kSerializationRecordLootShuffleBags) {
 					if (version != kLootShuffleBagSerializationVersion) {
 						std::vector<std::uint8_t> sink(length);
@@ -703,6 +759,18 @@ namespace CalamityAffixes
 			}
 			_lootEvaluatedInsertionsSincePrune = 0;
 
+			_lootCurrencyRollLedgerRecent.clear();
+			for (const auto& [key, _] : _lootCurrencyRollLedger) {
+				if (key != 0u) {
+					_lootCurrencyRollLedgerRecent.push_back(key);
+				}
+			}
+			while (_lootCurrencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
+				const auto oldest = _lootCurrencyRollLedgerRecent.front();
+				_lootCurrencyRollLedgerRecent.pop_front();
+				_lootCurrencyRollLedger.erase(oldest);
+			}
+
 			detail::SanitizeLootShuffleBagOrder(_lootSharedAffixes, _lootPrefixSharedBag.order, _lootPrefixSharedBag.cursor);
 			detail::SanitizeLootShuffleBagOrder(_lootWeaponAffixes, _lootPrefixWeaponBag.order, _lootPrefixWeaponBag.cursor);
 			detail::SanitizeLootShuffleBagOrder(_lootArmorAffixes, _lootPrefixArmorBag.order, _lootPrefixArmorBag.cursor);
@@ -713,61 +781,63 @@ namespace CalamityAffixes
 			SanitizeRunewordState();
 		}
 
-		void EventBridge::Revert(SKSE::SerializationInterface*)
-		{
-			// Remove any active passive suffix spells before clearing
-			auto* player = RE::PlayerCharacter::GetSingleton();
-			if (player) {
-				for (auto* spell : _appliedPassiveSpells) {
-					player->RemoveSpell(spell);
-				}
+	void EventBridge::Revert(SKSE::SerializationInterface*)
+	{
+		// Remove any active passive suffix spells before clearing
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (player) {
+			for (auto* spell : _appliedPassiveSpells) {
+				player->RemoveSpell(spell);
 			}
-			_appliedPassiveSpells.clear();
-			_instanceAffixes.clear();
-			_equippedInstanceKeysByToken.clear();
-			_equippedTokenCacheReady = false;
-			_lootPrefixSharedBag = {};
-			_lootPrefixWeaponBag = {};
-			_lootPrefixArmorBag = {};
-			_lootSuffixSharedBag = {};
-			_lootSuffixWeaponBag = {};
-			_lootSuffixArmorBag = {};
-			_lootPreviewAffixes.clear();
-			_lootPreviewRecent.clear();
-				_lootEvaluatedInstances.clear();
-				_lootEvaluatedRecent.clear();
-				_lootEvaluatedInsertionsSincePrune = 0;
-				_lootChanceEligibleFailStreak = 0;
-				_runewordFragmentFailStreak = 0;
-				_reforgeOrbFailStreak = 0;
-				_activeSlotPenalty.clear();
-			_instanceStates.clear();
-			_runewordRuneFragments.clear();
-			_runewordInstanceStates.clear();
-			_runewordSelectedBaseKey.reset();
-			_runewordBaseCycleCursor = 0;
-			_runewordRecipeCycleCursor = 0;
-			_traps.clear();
-			_hasActiveTraps.store(false, std::memory_order_relaxed);
-			_dotCooldowns.clear();
-			_dotCooldownsLastPruneAt = {};
-			_dotObservedMagicEffects.clear();
-			_dotTagSafetyWarned = false;
-			_dotTagSafetySuppressed = false;
-			_perTargetCooldownStore.Clear();
-			_nonHostileFirstHitGate.Clear();
-			_corpseExplosionSeenCorpses.clear();
-			_summonCorpseExplosionSeenCorpses.clear();
-			_lootRerollGuard.Reset();
-			_corpseExplosionState = {};
-			_summonCorpseExplosionState = {};
-			_procDepth = 0;
-			_healthDamageHookSeen = false;
-			_healthDamageHookLastAt = {};
-			_castOnCritNextAllowed = {};
-			_castOnCritCycleCursor = 0;
-			_lastHitAt = {};
-			_lastHit = {};
+		}
+		_appliedPassiveSpells.clear();
+		_instanceAffixes.clear();
+		_equippedInstanceKeysByToken.clear();
+		_equippedTokenCacheReady = false;
+		_lootPrefixSharedBag = {};
+		_lootPrefixWeaponBag = {};
+		_lootPrefixArmorBag = {};
+		_lootSuffixSharedBag = {};
+		_lootSuffixWeaponBag = {};
+		_lootSuffixArmorBag = {};
+		_lootPreviewAffixes.clear();
+		_lootPreviewRecent.clear();
+		_lootEvaluatedInstances.clear();
+		_lootEvaluatedRecent.clear();
+		_lootEvaluatedInsertionsSincePrune = 0;
+		_lootCurrencyRollLedger.clear();
+		_lootCurrencyRollLedgerRecent.clear();
+		_lootChanceEligibleFailStreak = 0;
+		_runewordFragmentFailStreak = 0;
+		_reforgeOrbFailStreak = 0;
+		_activeSlotPenalty.clear();
+		_instanceStates.clear();
+		_runewordRuneFragments.clear();
+		_runewordInstanceStates.clear();
+		_runewordSelectedBaseKey.reset();
+		_runewordBaseCycleCursor = 0;
+		_runewordRecipeCycleCursor = 0;
+		_traps.clear();
+		_hasActiveTraps.store(false, std::memory_order_relaxed);
+		_dotCooldowns.clear();
+		_dotCooldownsLastPruneAt = {};
+		_dotObservedMagicEffects.clear();
+		_dotTagSafetyWarned = false;
+		_dotTagSafetySuppressed = false;
+		_perTargetCooldownStore.Clear();
+		_nonHostileFirstHitGate.Clear();
+		_corpseExplosionSeenCorpses.clear();
+		_summonCorpseExplosionSeenCorpses.clear();
+		_lootRerollGuard.Reset();
+		_corpseExplosionState = {};
+		_summonCorpseExplosionState = {};
+		_procDepth = 0;
+		_healthDamageHookSeen = false;
+		_healthDamageHookLastAt = {};
+		_castOnCritNextAllowed = {};
+		_castOnCritCycleCursor = 0;
+		_lastHitAt = {};
+		_lastHit = {};
 			_recentOwnerHitAt.clear();
 			_recentOwnerKillAt.clear();
 			_recentOwnerIncomingHitAt.clear();
