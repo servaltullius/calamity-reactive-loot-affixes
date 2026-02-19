@@ -40,6 +40,66 @@ data_dir="${repo_root}/Data"
 dist_dir="${repo_root}/dist"
 data_dll="${data_dir}/SKSE/Plugins/CalamityAffixes.dll"
 linux_cross_dll="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll"
+default_scripts_zip="/mnt/c/Program Files (x86)/Steam/steamapps/content/app_1946180/depot_1946183/Data/Scripts.zip"
+scripts_zip_for_masters="${PAPYRUS_SCRIPTS_ZIP:-${default_scripts_zip}}"
+masters_dir="${CALAMITY_MASTERS_DIR:-}"
+
+# Generator leveled-list mode needs access to game masters (Skyrim.esm, etc.).
+# Resolve once here so packaging stays reproducible on WSL/Windows hybrid setups.
+dir_has_plugins() {
+  local dir="$1"
+  [[ -d "${dir}" ]] || return 1
+  compgen -G "${dir}/*.esm" >/dev/null || \
+    compgen -G "${dir}/*.esp" >/dev/null || \
+    compgen -G "${dir}/*.esl" >/dev/null
+}
+
+if [[ -z "${masters_dir}" && -f "${scripts_zip_for_masters}" ]]; then
+  scripts_zip_parent="$(dirname "${scripts_zip_for_masters}")"
+  if dir_has_plugins "${scripts_zip_parent}"; then
+    masters_dir="${scripts_zip_parent}"
+  fi
+fi
+
+if [[ -z "${masters_dir}" ]]; then
+  for candidate in \
+    "/mnt/c/Program Files (x86)/Steam/steamapps/common/Skyrim Special Edition/Data" \
+    "/mnt/c/Program Files (x86)/Steam/steamapps/common/The Elder Scrolls V Skyrim Special Edition/Data" \
+    "/mnt/c/SteamLibrary/steamapps/common/Skyrim Special Edition/Data" \
+    "/mnt/c/SteamLibrary/steamapps/common/The Elder Scrolls V Skyrim Special Edition/Data" \
+    "/mnt/c/Program Files (x86)/Steam/steamapps/content/app_1946180/depot_1946183/Data"
+  do
+    if dir_has_plugins "${candidate}"; then
+      masters_dir="${candidate}"
+      break
+    fi
+  done
+fi
+
+if [[ -z "${masters_dir}" ]]; then
+  shopt -s nullglob
+  for drive_root in /mnt/c /mnt/d /mnt/e /mnt/f /mnt/g; do
+    for candidate in \
+      "${drive_root}"/SteamLibrary/steamapps/common/*Skyrim*/Data \
+      "${drive_root}"/Program\ Files\ \(x86\)/Steam/steamapps/common/*Skyrim*/Data \
+      "${drive_root}"/Modding/Stock\ Game/Data
+    do
+      if dir_has_plugins "${candidate}"; then
+        masters_dir="${candidate}"
+        break 2
+      fi
+    done
+  done
+  shopt -u nullglob
+fi
+
+# dotnet can be Windows-hosted inside WSL. In that case, pass Windows-style path.
+dotnet_info="$(dotnet --info 2>/dev/null || true)"
+dotnet_os_platform="$(printf '%s\n' "${dotnet_info}" | awk -F: '/OS Platform/ { gsub(/^[[:space:]]+/, "", $2); print $2; exit }')"
+dotnet_os_platform="${dotnet_os_platform//$'\r'/}"
+if [[ -n "${masters_dir}" && "${dotnet_os_platform}" == "Windows" && "${masters_dir}" == /mnt/* ]] && command -v wslpath >/dev/null 2>&1; then
+  masters_dir="$(wslpath -w "${masters_dir}")"
+fi
 
 # Keep Data/SKSE/Plugins DLL in sync with latest Linux cross-build output when present.
 # (Windows/VS builds can still overwrite Data directly; this only helps avoid stale MO2 zips on WSL.)
@@ -52,11 +112,22 @@ if [[ -f "${linux_cross_dll}" ]]; then
 fi
 
 # Regenerate data-driven outputs (keywords/MCM plugin/runtime json) from spec.
+generator_args=(
+  --spec affixes/affixes.json
+  --data Data
+)
+
+if [[ -n "${masters_dir}" ]]; then
+  generator_args+=(--masters "${masters_dir}")
+  echo "Generator masters dir: ${masters_dir}"
+else
+  echo "WARN: masters path was not detected; running generator without --masters." >&2
+  echo "      leveledList/hybrid currencyDropMode will fail. Set CALAMITY_MASTERS_DIR." >&2
+fi
+
 (
   cd "${repo_run_root}"
-  dotnet run --project tools/CalamityAffixes.Generator -- \
-    --spec affixes/affixes.json \
-    --data Data
+  dotnet run --project tools/CalamityAffixes.Generator -- "${generator_args[@]}"
 )
 
 # Compile required Papyrus scripts into Data/Scripts/*.pex.
