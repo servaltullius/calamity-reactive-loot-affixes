@@ -199,11 +199,12 @@ namespace CalamityAffixes
 		_activeCritDamageBonusPct = 0.0f;
 		_affixIndexById.clear();
 		_affixIndexByToken.clear();
-		_hitTriggerAffixIndices.clear();
-		_incomingHitTriggerAffixIndices.clear();
-		_dotApplyTriggerAffixIndices.clear();
-		_killTriggerAffixIndices.clear();
-		_castOnCritAffixIndices.clear();
+			_hitTriggerAffixIndices.clear();
+			_incomingHitTriggerAffixIndices.clear();
+			_dotApplyTriggerAffixIndices.clear();
+			_killTriggerAffixIndices.clear();
+			_lowHealthTriggerAffixIndices.clear();
+			_castOnCritAffixIndices.clear();
 		_convertAffixIndices.clear();
 		_mindOverMatterAffixIndices.clear();
 		_archmageAffixIndices.clear();
@@ -260,10 +261,12 @@ namespace CalamityAffixes
 		_triggerProcBudgetConsumed = 0u;
 		_lastHitAt = {};
 		_lastHit = {};
-		_recentOwnerHitAt.clear();
-		_recentOwnerKillAt.clear();
-		_recentOwnerIncomingHitAt.clear();
-	}
+			_recentOwnerHitAt.clear();
+			_recentOwnerKillAt.clear();
+			_recentOwnerIncomingHitAt.clear();
+			_lowHealthTriggerConsumed.clear();
+			_lowHealthLastObservedPct.clear();
+		}
 
 		void EventBridge::LoadConfig()
 		{
@@ -287,21 +290,24 @@ namespace CalamityAffixes
 
 		auto* handler = RE::TESDataHandler::GetSingleton();
 
-		auto parseTrigger = [](std::string_view a_trigger) -> std::optional<Trigger> {
-			if (a_trigger == RuntimeContract::kTriggerHit) {
-				return Trigger::kHit;
-			}
+			auto parseTrigger = [](std::string_view a_trigger) -> std::optional<Trigger> {
+				if (a_trigger == RuntimeContract::kTriggerHit) {
+					return Trigger::kHit;
+				}
 			if (a_trigger == RuntimeContract::kTriggerIncomingHit) {
 				return Trigger::kIncomingHit;
 			}
 			if (a_trigger == RuntimeContract::kTriggerDotApply) {
 				return Trigger::kDotApply;
 			}
-			if (a_trigger == RuntimeContract::kTriggerKill) {
-				return Trigger::kKill;
-			}
-			return std::nullopt;
-		};
+				if (a_trigger == RuntimeContract::kTriggerKill) {
+					return Trigger::kKill;
+				}
+				if (a_trigger == RuntimeContract::kTriggerLowHealth) {
+					return Trigger::kLowHealth;
+				}
+				return std::nullopt;
+			};
 
 		auto parseSpell = [&](const nlohmann::json& a_action) -> RE::SpellItem* {
 			const auto editorId = a_action.value("spellEditorId", std::string{});
@@ -545,13 +551,21 @@ namespace CalamityAffixes
 					out.requireRecentlyKill = std::chrono::milliseconds(static_cast<std::int64_t>(requireRecentlyKillSeconds * 1000.0));
 				}
 
-				const double requireNotHitRecentlySeconds = std::clamp(readRuntimeNumber("requireNotHitRecentlySeconds"), 0.0, 600.0);
-				if (requireNotHitRecentlySeconds > 0.0) {
-					out.requireNotHitRecently = std::chrono::milliseconds(static_cast<std::int64_t>(requireNotHitRecentlySeconds * 1000.0));
-				}
+					const double requireNotHitRecentlySeconds = std::clamp(readRuntimeNumber("requireNotHitRecentlySeconds"), 0.0, 600.0);
+					if (requireNotHitRecentlySeconds > 0.0) {
+						out.requireNotHitRecently = std::chrono::milliseconds(static_cast<std::int64_t>(requireNotHitRecentlySeconds * 1000.0));
+					}
 
-				out.luckyHitChancePct = static_cast<float>(std::clamp(readRuntimeNumber("luckyHitChancePercent"), 0.0, 100.0));
-				out.luckyHitProcCoefficient = static_cast<float>(std::clamp(readRuntimeNumber("luckyHitProcCoefficient", 1.0), 0.0, 5.0));
+					const float lowHealthThresholdPct = static_cast<float>(std::clamp(readRuntimeNumber("lowHealthThresholdPercent", 35.0), 1.0, 95.0));
+					const float lowHealthRearmPct = static_cast<float>(std::clamp(
+						readRuntimeNumber("lowHealthRearmPercent", static_cast<double>(lowHealthThresholdPct + 10.0f)),
+						static_cast<double>(lowHealthThresholdPct + 1.0f),
+						100.0));
+					out.lowHealthThresholdPct = lowHealthThresholdPct;
+					out.lowHealthRearmPct = lowHealthRearmPct;
+
+					out.luckyHitChancePct = static_cast<float>(std::clamp(readRuntimeNumber("luckyHitChancePercent"), 0.0, 100.0));
+					out.luckyHitProcCoefficient = static_cast<float>(std::clamp(readRuntimeNumber("luckyHitProcCoefficient", 1.0), 0.0, 5.0));
 				}
 
 			if (action.is_object()) {
@@ -936,22 +950,25 @@ namespace CalamityAffixes
 				_affixes[idx].action.type == ActionType::kCastSpellAdaptiveElement ||
 				_affixes[idx].action.type == ActionType::kSpawnTrap;
 
-			if (isTriggerAction) {
-				switch (_affixes[idx].trigger) {
-				case Trigger::kHit:
-					_hitTriggerAffixIndices.push_back(idx);
-					break;
-				case Trigger::kIncomingHit:
-					_incomingHitTriggerAffixIndices.push_back(idx);
-					break;
-				case Trigger::kDotApply:
-					_dotApplyTriggerAffixIndices.push_back(idx);
-					break;
-				case Trigger::kKill:
-					_killTriggerAffixIndices.push_back(idx);
-					break;
+				if (isTriggerAction) {
+					switch (_affixes[idx].trigger) {
+					case Trigger::kHit:
+						_hitTriggerAffixIndices.push_back(idx);
+						break;
+					case Trigger::kIncomingHit:
+						_incomingHitTriggerAffixIndices.push_back(idx);
+						break;
+					case Trigger::kDotApply:
+						_dotApplyTriggerAffixIndices.push_back(idx);
+						break;
+					case Trigger::kKill:
+						_killTriggerAffixIndices.push_back(idx);
+						break;
+					case Trigger::kLowHealth:
+						_lowHealthTriggerAffixIndices.push_back(idx);
+						break;
+					}
 				}
-			}
 
 			if (_affixes[idx].action.type == ActionType::kCastOnCrit) {
 				_castOnCritAffixIndices.push_back(idx);

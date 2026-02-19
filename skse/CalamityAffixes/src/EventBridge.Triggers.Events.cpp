@@ -189,10 +189,11 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 							}
 						}
 
-						ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
+							ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
+							ProcessTrigger(Trigger::kLowHealth, target, aggressor, hitData);
+						}
 					}
 				}
-			}
 		}
 
 		const bool allowNeutralOutgoing =

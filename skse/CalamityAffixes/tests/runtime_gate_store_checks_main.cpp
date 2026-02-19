@@ -20,6 +20,8 @@ int main()
 	const bool mcmDropChanceBridgeOk = CheckMcmDropChanceRuntimeBridgePolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
+	const bool runewordCoverageConsistencyOk = CheckRunewordCoverageConsistencyPolicy();
+	const bool lowHealthTriggerSnapshotOk = CheckLowHealthTriggerSnapshotPolicy();
 	const bool runewordRecipeRuntimeEligibilityOk = CheckRunewordRecipeRuntimeEligibilityPolicy();
 	const bool runewordContractSnapshotOk = CheckRunewordContractSnapshotPolicy();
 	const bool synthesizedAffixDisplayNameFallbackOk = CheckSynthesizedAffixDisplayNameFallbackPolicy();
@@ -35,9 +37,11 @@ int main()
 	        lootPreviewPolicyOk &&
 	        lootRerollExploitGuardOk &&
 	        lootChanceMcmCleanupOk &&
-	        mcmDropChanceBridgeOk &&
-	        runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
-	        runewordRecipeRuntimeEligibilityOk &&
+		        mcmDropChanceBridgeOk &&
+		        runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
+		        runewordCoverageConsistencyOk &&
+		        lowHealthTriggerSnapshotOk &&
+		        runewordRecipeRuntimeEligibilityOk &&
 	        runewordContractSnapshotOk &&
 	        synthesizedAffixDisplayNameFallbackOk &&
 	        synthesizedRunewordTooltipSummaryOk &&

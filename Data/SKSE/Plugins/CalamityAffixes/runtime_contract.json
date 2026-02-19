@@ -3,7 +3,8 @@
     "DotApply",
     "Hit",
     "IncomingHit",
-    "Kill"
+    "Kill",
+    "LowHealth"
   ],
   "supportedActionTypes": [
     "Archmage",

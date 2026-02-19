@@ -3,7 +3,8 @@
     "Hit",
     "IncomingHit",
     "DotApply",
-    "Kill"
+    "Kill",
+    "LowHealth"
   ],
   "supportedActionTypes": [
     "DebugNotify",

@@ -27,22 +27,25 @@ namespace CalamityAffixes
 			affix.action.type == ActionType::kCastSpell ||
 			affix.action.type == ActionType::kCastSpellAdaptiveElement ||
 			affix.action.type == ActionType::kSpawnTrap;
-		if (isTriggerAction) {
-			switch (affix.trigger) {
-			case Trigger::kHit:
-				_hitTriggerAffixIndices.push_back(idx);
-				break;
-			case Trigger::kIncomingHit:
-				_incomingHitTriggerAffixIndices.push_back(idx);
-				break;
-			case Trigger::kDotApply:
-				_dotApplyTriggerAffixIndices.push_back(idx);
-				break;
-			case Trigger::kKill:
-				_killTriggerAffixIndices.push_back(idx);
-				break;
+			if (isTriggerAction) {
+				switch (affix.trigger) {
+				case Trigger::kHit:
+					_hitTriggerAffixIndices.push_back(idx);
+					break;
+				case Trigger::kIncomingHit:
+					_incomingHitTriggerAffixIndices.push_back(idx);
+					break;
+				case Trigger::kDotApply:
+					_dotApplyTriggerAffixIndices.push_back(idx);
+					break;
+				case Trigger::kKill:
+					_killTriggerAffixIndices.push_back(idx);
+					break;
+				case Trigger::kLowHealth:
+					_lowHealthTriggerAffixIndices.push_back(idx);
+					break;
+				}
 			}
-		}
 
 		IndexAffixLookupKeys(affix, idx, true, a_warnOnDuplicate);
 		IndexAffixLootPool(affix, idx);

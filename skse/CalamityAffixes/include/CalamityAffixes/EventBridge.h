@@ -234,6 +234,7 @@ namespace CalamityAffixes
 			kIncomingHit,
 			kDotApply,
 			kKill,
+			kLowHealth,
 		};
 
 		enum class ActionType : std::uint8_t
@@ -419,6 +420,8 @@ namespace CalamityAffixes
 			std::chrono::milliseconds requireRecentlyHit{ 0 };
 			std::chrono::milliseconds requireRecentlyKill{ 0 };
 			std::chrono::milliseconds requireNotHitRecently{ 0 };
+			float lowHealthThresholdPct{ 35.0f };
+			float lowHealthRearmPct{ 45.0f };
 			float luckyHitChancePct{ 0.0f };
 			float luckyHitProcCoefficient{ 1.0f };
 			Action action{};
@@ -550,6 +553,26 @@ namespace CalamityAffixes
 			RE::FormID target{ 0 };
 		};
 
+		struct LowHealthTriggerKey
+		{
+			std::uint64_t token{ 0 };
+			RE::FormID owner{ 0 };
+
+			[[nodiscard]] bool operator==(const LowHealthTriggerKey& a_rhs) const noexcept
+			{
+				return token == a_rhs.token && owner == a_rhs.owner;
+			}
+		};
+
+		struct LowHealthTriggerKeyHash
+		{
+			[[nodiscard]] std::size_t operator()(const LowHealthTriggerKey& a_key) const noexcept
+			{
+				const auto owner64 = static_cast<std::uint64_t>(a_key.owner);
+				return static_cast<std::size_t>((a_key.token << 1) ^ (owner64 * 0x9E3779B185EBCA87ull));
+			}
+		};
+
 		// Runtime state storage.
 		// key = (targetFormID << 32) | magicEffectFormID
 		std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> _dotCooldowns;
@@ -570,6 +593,7 @@ namespace CalamityAffixes
 		std::vector<std::size_t> _incomingHitTriggerAffixIndices;
 		std::vector<std::size_t> _dotApplyTriggerAffixIndices;
 		std::vector<std::size_t> _killTriggerAffixIndices;
+		std::vector<std::size_t> _lowHealthTriggerAffixIndices;
 		std::vector<std::size_t> _castOnCritAffixIndices;
 		std::vector<std::size_t> _convertAffixIndices;
 		std::vector<std::size_t> _mindOverMatterAffixIndices;
@@ -635,6 +659,8 @@ namespace CalamityAffixes
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerHitAt;
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerKillAt;
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerIncomingHitAt;
+		std::unordered_map<LowHealthTriggerKey, bool, LowHealthTriggerKeyHash> _lowHealthTriggerConsumed;
+		std::unordered_map<RE::FormID, float> _lowHealthLastObservedPct;
 
 		std::uint64_t _lastHealthDamageSignature{ 0 };
 		std::chrono::steady_clock::time_point _lastHealthDamageSignatureAt{};
@@ -850,6 +876,10 @@ namespace CalamityAffixes
 			const RE::HitData* a_hitData,
 			RE::FormID a_sourceFormID,
 			std::chrono::steady_clock::time_point a_now);
+		void ProcessLowHealthTriggerFromHealthDamage(
+			RE::Actor* a_target,
+			RE::Actor* a_attacker,
+			const RE::HitData* a_hitData);
 		[[nodiscard]] bool IsPerTargetCooldownBlocked(
 			const AffixRuntime& a_affix,
 			RE::Actor* a_target,
@@ -873,6 +903,14 @@ namespace CalamityAffixes
 			Trigger a_trigger,
 			const RE::HitData* a_hitData,
 			std::chrono::steady_clock::time_point a_now);
+		[[nodiscard]] bool PassesLowHealthTriggerGate(
+			const AffixRuntime& a_affix,
+			RE::Actor* a_owner,
+			float a_previousHealthPct,
+			float a_currentHealthPct);
+		void MarkLowHealthTriggerConsumed(
+			const AffixRuntime& a_affix,
+			RE::Actor* a_owner);
 
 		// Corpse-explosion helpers.
 		void ProcessCorpseExplosionKill(RE::Actor* a_owner, RE::Actor* a_corpse);

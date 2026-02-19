@@ -24,6 +24,7 @@ namespace CalamityAffixes::RuntimeContract
 	inline constexpr std::string_view kTriggerIncomingHit = "IncomingHit";
 	inline constexpr std::string_view kTriggerDotApply = "DotApply";
 	inline constexpr std::string_view kTriggerKill = "Kill";
+	inline constexpr std::string_view kTriggerLowHealth = "LowHealth";
 
 	inline constexpr std::string_view kActionDebugNotify = "DebugNotify";
 	inline constexpr std::string_view kActionCastSpell = "CastSpell";
@@ -36,11 +37,12 @@ namespace CalamityAffixes::RuntimeContract
 	inline constexpr std::string_view kActionSummonCorpseExplosion = "SummonCorpseExplosion";
 	inline constexpr std::string_view kActionSpawnTrap = "SpawnTrap";
 
-	inline constexpr std::array<std::string_view, 4> kSupportedTriggers{
+	inline constexpr std::array<std::string_view, 5> kSupportedTriggers{
 		kTriggerHit,
 		kTriggerIncomingHit,
 		kTriggerDotApply,
-		kTriggerKill
+		kTriggerKill,
+		kTriggerLowHealth
 	};
 
 	inline constexpr std::array<std::string_view, 10> kSupportedActionTypes{

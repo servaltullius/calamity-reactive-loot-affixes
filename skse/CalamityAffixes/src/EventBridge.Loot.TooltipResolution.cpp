@@ -173,6 +173,8 @@ namespace CalamityAffixes
 					return "DoT apply";
 				case Trigger::kKill:
 					return "kill";
+				case Trigger::kLowHealth:
+					return "low health";
 				}
 				return "trigger";
 			};
@@ -187,6 +189,8 @@ namespace CalamityAffixes
 					return "지속피해 적용";
 				case Trigger::kKill:
 					return "처치";
+				case Trigger::kLowHealth:
+					return "저체력";
 				}
 				return "트리거";
 			};

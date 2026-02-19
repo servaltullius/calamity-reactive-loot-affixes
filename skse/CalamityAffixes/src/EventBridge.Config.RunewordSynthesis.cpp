@@ -2,6 +2,7 @@
 #include "EventBridge.Config.Shared.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <initializer_list>
 #include <string_view>
 
@@ -60,6 +61,10 @@ namespace CalamityAffixes
 			{
 				kAdaptiveStrike,
 				kAdaptiveExposure,
+				kSignatureGrief,
+				kSignatureInfinity,
+				kSignatureEnigma,
+				kSignatureCallToArms,
 				kFireStrike,
 				kFrostStrike,
 				kShockStrike,
@@ -100,6 +105,14 @@ namespace CalamityAffixes
 					return "AdaptiveStrike";
 				case SyntheticRunewordStyle::kAdaptiveExposure:
 					return "AdaptiveExposure";
+				case SyntheticRunewordStyle::kSignatureGrief:
+					return "SignatureGrief";
+				case SyntheticRunewordStyle::kSignatureInfinity:
+					return "SignatureInfinity";
+				case SyntheticRunewordStyle::kSignatureEnigma:
+					return "SignatureEnigma";
+				case SyntheticRunewordStyle::kSignatureCallToArms:
+					return "SignatureCallToArms";
 				case SyntheticRunewordStyle::kFireStrike:
 					return "FireStrike";
 				case SyntheticRunewordStyle::kFrostStrike:
@@ -190,11 +203,56 @@ namespace CalamityAffixes
 				return false;
 			};
 
-			auto resolveRunewordStyle = [&](const RunewordRecipe& a_recipe) -> SyntheticRunewordStyle {
-				const std::string_view id = a_recipe.id;
-				if (idIsOneOf(id, { "rw_dragon", "rw_hand_of_justice", "rw_flickering_flame", "rw_temper" })) {
-					return SyntheticRunewordStyle::kSelfFlameCloak;
+				auto resolveRunewordStyle = [&](const RunewordRecipe& a_recipe) -> SyntheticRunewordStyle {
+					const std::string_view id = a_recipe.id;
+					if (id == "rw_grief") {
+						return SyntheticRunewordStyle::kSignatureGrief;
 				}
+				if (id == "rw_infinity") {
+					return SyntheticRunewordStyle::kSignatureInfinity;
+				}
+				if (id == "rw_enigma") {
+					return SyntheticRunewordStyle::kSignatureEnigma;
+				}
+					if (id == "rw_call_to_arms") {
+						return SyntheticRunewordStyle::kSignatureCallToArms;
+					}
+					if (idIsOneOf(id, { "rw_breath_of_the_dying" })) {
+						return SyntheticRunewordStyle::kAdaptiveStrike;
+					}
+					if (idIsOneOf(id, { "rw_heart_of_the_oak", "rw_last_wish" })) {
+						return SyntheticRunewordStyle::kAdaptiveExposure;
+					}
+					if (idIsOneOf(id, { "rw_fortitude" })) {
+						return SyntheticRunewordStyle::kSelfWard;
+					}
+					if (idIsOneOf(id, { "rw_exile" })) {
+						return SyntheticRunewordStyle::kSelfBarrier;
+					}
+					if (idIsOneOf(id, { "rw_spirit", "rw_insight" })) {
+						return SyntheticRunewordStyle::kSelfMeditation;
+					}
+					if (idIsOneOf(id, { "rw_chains_of_honor" })) {
+						return SyntheticRunewordStyle::kSelfPhase;
+					}
+					if (idIsOneOf(id, { "rw_phoenix" })) {
+						return SyntheticRunewordStyle::kSelfPhoenix;
+					}
+					if (idIsOneOf(id, { "rw_faith" })) {
+						return SyntheticRunewordStyle::kSelfHaste;
+					}
+					if (idIsOneOf(id, { "rw_doom" })) {
+						return SyntheticRunewordStyle::kFrostStrike;
+					}
+					if (idIsOneOf(id, { "rw_dream" })) {
+						return SyntheticRunewordStyle::kShockStrike;
+					}
+					if (idIsOneOf(id, { "rw_bone" })) {
+						return SyntheticRunewordStyle::kSummonFamiliar;
+					}
+					if (idIsOneOf(id, { "rw_dragon", "rw_hand_of_justice", "rw_flickering_flame", "rw_temper" })) {
+						return SyntheticRunewordStyle::kSelfFlameCloak;
+					}
 				if (idIsOneOf(id, { "rw_ice", "rw_voice_of_reason", "rw_hearth" })) {
 					return SyntheticRunewordStyle::kSelfFrostCloak;
 				}
@@ -255,7 +313,7 @@ namespace CalamityAffixes
 				if (idIsOneOf(id, { "rw_memory", "rw_wisdom", "rw_lore", "rw_melody", "rw_enlightenment" })) {
 					return SyntheticRunewordStyle::kSelfMeditation;
 				}
-				if (idIsOneOf(id, { "rw_pattern", "rw_strength", "rw_kings_grace", "rw_edge", "rw_oath" })) {
+				if (idIsOneOf(id, { "rw_steel", "rw_pattern", "rw_strength", "rw_kings_grace", "rw_edge", "rw_oath" })) {
 					return SyntheticRunewordStyle::kAdaptiveStrike;
 				}
 				if (idIsOneOf(id, { "rw_silence", "rw_brand" })) {
@@ -590,6 +648,68 @@ namespace CalamityAffixes
 						0.0f,
 						0.0f,
 						8.0f);
+					break;
+				case SyntheticRunewordStyle::kSignatureGrief:
+					ready = configureAdaptiveSpell(
+						AdaptiveElementMode::kWeakestResist,
+						dynamicFire,
+						dynamicFrost,
+						dynamicShock,
+						26.0f,
+						2.4f,
+						26.0f,
+						40.0f,
+						0.95f,
+						0.10f,
+						0.30f,
+						0.95f,
+						0.11f,
+						0.015f,
+						0.0f);
+					break;
+				case SyntheticRunewordStyle::kSignatureInfinity:
+					ready = configureAdaptiveSpell(
+						AdaptiveElementMode::kStrongestResist,
+						shredFire,
+						shredFrost,
+						shredShock,
+						22.0f,
+						1.8f,
+						22.0f,
+						34.0f,
+						2.4f,
+						0.24f,
+						0.85f,
+						2.4f,
+						0.0f,
+						0.0f,
+						4.5f);
+					break;
+				case SyntheticRunewordStyle::kSignatureEnigma:
+					ready = configureSelfBuff(
+						spellPhase ? spellPhase : (spellCustomInvisibility ? spellCustomInvisibility : spellWard),
+						Trigger::kIncomingHit,
+						20.0f,
+						1.8f,
+						20.0f,
+						34.0f,
+						10.0f,
+						0.65f,
+						4.0f,
+						10.0f);
+					break;
+				case SyntheticRunewordStyle::kSignatureCallToArms:
+					ready = configureSelfBuff(
+						spellHaste ? spellHaste : (spellWard ? spellWard : spellPhase),
+						Trigger::kHit,
+						24.0f,
+						1.7f,
+						24.0f,
+						36.0f,
+						9.0f,
+						0.55f,
+						3.0f,
+						9.0f);
 					break;
 				case SyntheticRunewordStyle::kFireStrike:
 					ready = configureSingleTargetSpell(
@@ -969,54 +1089,115 @@ namespace CalamityAffixes
 					}
 				}
 
-				constexpr float kUnsetValue = -1.0f;
-				struct RecipeTuning
-				{
-					std::string_view id;
-					float procPct;
-					float icdSec;
-					float perTargetIcdSec;
-					float magnitudeMult;
-				};
-				static constexpr RecipeTuning kRecipeTunings[] = {
-					{ "rw_lawbringer", 13.0f, 3.8f, 10.0f, kUnsetValue },
-					{ "rw_wrath", 16.0f, 3.2f, 8.0f, kUnsetValue },
-					{ "rw_kingslayer", 18.0f, 2.6f, 7.0f, kUnsetValue },
-					{ "rw_principle", 14.0f, 4.2f, 9.0f, kUnsetValue },
-					{ "rw_black", 14.0f, 2.4f, 3.5f, kUnsetValue },
-					{ "rw_rift", 15.0f, 2.0f, 3.0f, kUnsetValue },
-					{ "rw_malice", 14.0f, 2.3f, 4.0f, kUnsetValue },
-					{ "rw_plague", 14.0f, 2.2f, 4.0f, kUnsetValue },
-					{ "rw_wealth", 24.0f, 4.8f, 5.0f, kUnsetValue },
-					{ "rw_obedience", 22.0f, 5.2f, 5.0f, kUnsetValue },
-					{ "rw_honor", 20.0f, 5.6f, 6.0f, kUnsetValue },
-					{ "rw_eternity", 24.0f, 4.4f, 4.5f, kUnsetValue },
-					{ "rw_stealth", 15.0f, 16.0f, kUnsetValue, kUnsetValue },
-					{ "rw_smoke", 15.0f, 15.0f, kUnsetValue, kUnsetValue },
-					{ "rw_treachery", 18.0f, 12.0f, kUnsetValue, kUnsetValue },
-					{ "rw_gloom", 7.0f, 24.0f, kUnsetValue, kUnsetValue },
-					{ "rw_delirium", 11.0f, 8.5f, 11.0f, kUnsetValue },
-					{ "rw_nadir", 14.0f, 6.5f, 10.0f, kUnsetValue },
-					{ "rw_beast", 26.0f, 3.0f, kUnsetValue, kUnsetValue },
-					{ "rw_dragon", 16.0f, 10.0f, kUnsetValue, kUnsetValue },
-					{ "rw_hand_of_justice", 18.0f, 8.5f, kUnsetValue, kUnsetValue },
-					{ "rw_flickering_flame", 14.0f, 11.0f, kUnsetValue, kUnsetValue },
-					{ "rw_temper", 17.0f, 8.8f, kUnsetValue, kUnsetValue },
-					{ "rw_voice_of_reason", 16.0f, 9.5f, kUnsetValue, kUnsetValue },
-					{ "rw_ice", 14.0f, 11.0f, kUnsetValue, kUnsetValue },
-					{ "rw_pride", 14.0f, 12.5f, kUnsetValue, kUnsetValue },
-					{ "rw_metamorphosis", 13.0f, 16.0f, kUnsetValue, kUnsetValue },
-					{ "rw_destruction", 22.0f, 1.1f, kUnsetValue, 0.17f },
-					{ "rw_hustle_w", 24.0f, 2.8f, kUnsetValue, kUnsetValue },
-					{ "rw_harmony", 21.0f, 3.8f, kUnsetValue, kUnsetValue },
-					{ "rw_unbending_will", 25.0f, 2.6f, kUnsetValue, kUnsetValue },
-					{ "rw_stone", 18.0f, 13.0f, kUnsetValue, kUnsetValue },
-					{ "rw_sanctuary", 17.0f, 13.0f, kUnsetValue, kUnsetValue },
-					{ "rw_memory", 18.0f, 12.0f, kUnsetValue, kUnsetValue },
-					{ "rw_wisdom", 17.0f, 13.0f, kUnsetValue, kUnsetValue },
-					{ "rw_holy_thunder", 17.0f, 9.0f, kUnsetValue, kUnsetValue },
-					{ "rw_mist", 15.0f, 11.5f, kUnsetValue, kUnsetValue }
-				};
+					constexpr float kUnsetValue = -1.0f;
+					constexpr std::int32_t kUnsetTrigger = -1;
+					struct RecipeTuning
+					{
+						std::string_view id;
+						float procPct;
+						float icdSec;
+						float perTargetIcdSec;
+						float magnitudeMult;
+						std::int32_t triggerOverride{ kUnsetTrigger };
+						float lowHealthThresholdPct{ kUnsetValue };
+						float lowHealthRearmPct{ kUnsetValue };
+					};
+					static constexpr RecipeTuning kRecipeTunings[] = {
+						{ "rw_grief", 34.0f, 0.55f, kUnsetValue, 0.20f },
+						{ "rw_infinity", 26.0f, 1.8f, 4.5f, kUnsetValue },
+						{ "rw_enigma", 24.0f, 8.0f, kUnsetValue, kUnsetValue },
+						{ "rw_call_to_arms", 28.0f, 7.0f, kUnsetValue, kUnsetValue },
+						{ "rw_nadir", 18.0f, 10.0f, 12.0f, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 38.0f, 50.0f },
+						{ "rw_steel", 30.0f, 0.85f, kUnsetValue, 0.16f },
+						{ "rw_malice", 18.0f, 1.9f, 3.5f, kUnsetValue },
+						{ "rw_stealth", 22.0f, 14.0f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 40.0f, 55.0f },
+						{ "rw_leaf", 24.0f, 1.0f, kUnsetValue, 0.16f },
+						{ "rw_ancients_pledge", 20.0f, 11.0f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 35.0f, 48.0f },
+						{ "rw_holy_thunder", 22.0f, 7.8f, kUnsetValue, kUnsetValue },
+						{ "rw_zephyr", 24.0f, 6.9f, kUnsetValue, kUnsetValue },
+						{ "rw_pattern", 29.0f, 1.0f, kUnsetValue, 0.17f },
+						{ "rw_kings_grace", 28.0f, 1.05f, kUnsetValue, 0.16f },
+						{ "rw_strength", 27.0f, 0.95f, kUnsetValue, 0.15f },
+						{ "rw_edge", 24.0f, 1.2f, kUnsetValue, 0.14f },
+						{ "rw_lawbringer", 13.0f, 3.8f, 10.0f, kUnsetValue },
+						{ "rw_wrath", 16.0f, 3.2f, 8.0f, kUnsetValue },
+						{ "rw_kingslayer", 18.0f, 2.6f, 7.0f, kUnsetValue },
+						{ "rw_principle", 14.0f, 4.2f, 9.0f, kUnsetValue },
+						{ "rw_black", 14.0f, 2.4f, 3.5f, kUnsetValue },
+						{ "rw_rift", 15.0f, 2.0f, 3.0f, kUnsetValue },
+						{ "rw_plague", 14.0f, 2.2f, 4.0f, kUnsetValue },
+						{ "rw_wealth", 24.0f, 4.8f, 5.0f, kUnsetValue },
+						{ "rw_obedience", 22.0f, 5.2f, 5.0f, kUnsetValue },
+						{ "rw_honor", 20.0f, 5.6f, 6.0f, kUnsetValue },
+						{ "rw_eternity", 24.0f, 4.4f, 4.5f, kUnsetValue },
+						{ "rw_smoke", 15.0f, 15.0f, kUnsetValue, kUnsetValue },
+						{ "rw_treachery", 18.0f, 12.0f, kUnsetValue, kUnsetValue },
+						{ "rw_gloom", 7.0f, 24.0f, kUnsetValue, kUnsetValue },
+						{ "rw_delirium", 11.0f, 8.5f, 11.0f, kUnsetValue },
+						{ "rw_beast", 26.0f, 3.0f, kUnsetValue, kUnsetValue },
+						{ "rw_dragon", 16.0f, 10.0f, kUnsetValue, kUnsetValue },
+						{ "rw_hand_of_justice", 18.0f, 8.5f, kUnsetValue, kUnsetValue },
+						{ "rw_flickering_flame", 14.0f, 11.0f, kUnsetValue, kUnsetValue },
+						{ "rw_temper", 17.0f, 8.8f, kUnsetValue, kUnsetValue },
+						{ "rw_voice_of_reason", 16.0f, 9.5f, kUnsetValue, kUnsetValue },
+						{ "rw_ice", 14.0f, 11.0f, kUnsetValue, kUnsetValue },
+						{ "rw_pride", 14.0f, 12.5f, kUnsetValue, kUnsetValue },
+						{ "rw_metamorphosis", 13.0f, 16.0f, kUnsetValue, kUnsetValue },
+						{ "rw_destruction", 22.0f, 1.1f, kUnsetValue, 0.17f },
+						{ "rw_hustle_w", 24.0f, 2.8f, kUnsetValue, kUnsetValue },
+						{ "rw_harmony", 21.0f, 3.8f, kUnsetValue, kUnsetValue },
+						{ "rw_unbending_will", 25.0f, 2.6f, kUnsetValue, kUnsetValue },
+						{ "rw_stone", 18.0f, 13.0f, kUnsetValue, kUnsetValue },
+						{ "rw_sanctuary", 17.0f, 13.0f, kUnsetValue, kUnsetValue },
+						{ "rw_memory", 18.0f, 12.0f, kUnsetValue, kUnsetValue },
+						{ "rw_wisdom", 17.0f, 13.0f, kUnsetValue, kUnsetValue },
+						{ "rw_mist", 15.0f, 11.5f, kUnsetValue, kUnsetValue },
+						{ "rw_myth", 19.0f, 11.5f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 37.0f, 50.0f },
+						{ "rw_spirit", 22.0f, 9.5f, kUnsetValue, kUnsetValue },
+						{ "rw_lore", 19.0f, 10.7f, kUnsetValue, kUnsetValue },
+						{ "rw_radiance", 20.0f, 10.2f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 35.0f, 49.0f },
+						{ "rw_insight", 23.0f, 8.5f, kUnsetValue, kUnsetValue },
+						{ "rw_rhyme", 20.0f, 9.8f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 38.0f, 52.0f },
+						{ "rw_peace", 16.0f, 10.5f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 39.0f, 53.0f },
+						{ "rw_bulwark", 18.0f, 10.5f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 39.0f, 53.0f },
+						{ "rw_cure", 18.0f, 10.0f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 40.0f, 54.0f },
+						{ "rw_ground", 17.0f, 9.8f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 36.0f, 50.0f },
+						{ "rw_hearth", 17.0f, 9.2f, kUnsetValue, kUnsetValue },
+						{ "rw_white", 15.0f, 2.6f, 5.0f, kUnsetValue },
+						{ "rw_melody", 20.0f, 9.8f, kUnsetValue, kUnsetValue },
+						{ "rw_hustle_a", 21.0f, 8.8f, kUnsetValue, kUnsetValue },
+						{ "rw_lionheart", 19.0f, 10.8f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 36.0f, 49.0f },
+						{ "rw_passion", 26.0f, 2.6f, kUnsetValue, kUnsetValue },
+						{ "rw_enlightenment", 18.0f, 11.0f, kUnsetValue, kUnsetValue },
+						{ "rw_crescent_moon", 25.0f, 1.0f, kUnsetValue, 0.17f },
+						{ "rw_duress", 18.0f, 11.0f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 37.0f, 50.0f },
+						{ "rw_bone", 10.0f, 22.0f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 35.0f, 48.0f },
+						{ "rw_venom", 16.0f, 1.9f, 3.8f, kUnsetValue },
+						{ "rw_prudence", 17.0f, 12.0f, kUnsetValue, kUnsetValue },
+						{ "rw_oath", 31.0f, 0.88f, kUnsetValue, 0.18f },
+						{ "rw_rain", 16.0f, 9.5f, kUnsetValue, kUnsetValue },
+						{ "rw_death", 19.0f, 2.2f, 6.0f, kUnsetValue },
+						{ "rw_heart_of_the_oak", 24.0f, 2.2f, 4.2f, kUnsetValue },
+						{ "rw_fortitude", 21.0f, 9.2f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 34.0f, 48.0f },
+						{ "rw_bramble", 16.0f, 2.0f, 4.0f, kUnsetValue },
+						{ "rw_chains_of_honor", 19.0f, 10.0f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 36.0f, 49.0f },
+						{ "rw_fury", 27.0f, 2.2f, kUnsetValue, kUnsetValue },
+						{ "rw_famine", 19.0f, 2.4f, 6.0f, kUnsetValue },
+						{ "rw_wind", 20.0f, 6.6f, kUnsetValue, kUnsetValue },
+						{ "rw_brand", 22.0f, 2.1f, 5.0f, kUnsetValue },
+						{ "rw_dream", 23.0f, 1.0f, kUnsetValue, 0.17f },
+						{ "rw_faith", 28.0f, 2.4f, kUnsetValue, kUnsetValue },
+						{ "rw_last_wish", 17.0f, 2.9f, 6.0f, kUnsetValue },
+						{ "rw_phoenix", 18.0f, 8.2f, kUnsetValue, kUnsetValue },
+						{ "rw_doom", 21.0f, 1.2f, kUnsetValue, 0.16f },
+						{ "rw_exile", 20.0f, 8.8f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 33.0f, 46.0f },
+						{ "rw_chaos", 14.0f, 6.4f, 8.0f, kUnsetValue },
+						{ "rw_mosaic", 14.0f, 2.4f, 4.8f, kUnsetValue },
+						{ "rw_obsession", 13.0f, 2.8f, 5.5f, kUnsetValue },
+						{ "rw_silence", 20.0f, 2.9f, 7.0f, kUnsetValue },
+						{ "rw_splendor", 20.0f, 9.0f, kUnsetValue, kUnsetValue },
+						{ "rw_breath_of_the_dying", 31.0f, 0.8f, kUnsetValue, 0.19f }
+					};
 				struct StyleTuning
 				{
 					SyntheticRunewordStyle style;
@@ -1031,33 +1212,50 @@ namespace CalamityAffixes
 					{ SyntheticRunewordStyle::kSummonFamiliar, 10.0f, 22.0f }
 				};
 
-				auto applyRunewordIndividualTuning = [&](std::string_view a_recipeId, SyntheticRunewordStyle a_style) {
-					auto setProcIcd = [&](float a_procPct, float a_icdSec) {
-						out.procChancePct = a_procPct;
-						out.icd = toDurationMs(a_icdSec);
-					};
+					auto applyRunewordIndividualTuning = [&](std::string_view a_recipeId, SyntheticRunewordStyle a_style) {
+						auto setProcIcd = [&](float a_procPct, float a_icdSec) {
+							out.procChancePct = a_procPct;
+							out.icd = toDurationMs(a_icdSec);
+						};
 					auto setPerTargetIcd = [&](float a_seconds) {
 						out.perTargetIcd = toDurationMs(a_seconds);
 					};
-					auto setMagnitudeMult = [&](float a_mult) {
-						if (out.action.magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
-							out.action.magnitudeScaling.mult = a_mult;
-						}
-					};
+						auto setMagnitudeMult = [&](float a_mult) {
+							if (out.action.magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
+								out.action.magnitudeScaling.mult = a_mult;
+							}
+						};
+						auto setTrigger = [&](Trigger a_trigger) {
+							out.trigger = a_trigger;
+						};
+						auto setLowHealthWindow = [&](float a_thresholdPct, float a_rearmPct) {
+							out.lowHealthThresholdPct = std::clamp(a_thresholdPct, 1.0f, 95.0f);
+							out.lowHealthRearmPct = std::clamp(a_rearmPct, out.lowHealthThresholdPct + 1.0f, 100.0f);
+						};
 
-					for (const auto& tuning : kRecipeTunings) {
-						if (tuning.id != a_recipeId) {
-							continue;
-						}
+						for (const auto& tuning : kRecipeTunings) {
+							if (tuning.id != a_recipeId) {
+								continue;
+							}
 						setProcIcd(tuning.procPct, tuning.icdSec);
 						if (tuning.perTargetIcdSec > 0.0f) {
 							setPerTargetIcd(tuning.perTargetIcdSec);
 						}
-						if (tuning.magnitudeMult > 0.0f) {
-							setMagnitudeMult(tuning.magnitudeMult);
+							if (tuning.magnitudeMult > 0.0f) {
+								setMagnitudeMult(tuning.magnitudeMult);
+							}
+							if (tuning.triggerOverride != kUnsetTrigger) {
+								setTrigger(static_cast<Trigger>(tuning.triggerOverride));
+							}
+							if (tuning.lowHealthThresholdPct > 0.0f) {
+								const float rearmPct =
+									tuning.lowHealthRearmPct > 0.0f ?
+									tuning.lowHealthRearmPct :
+									(tuning.lowHealthThresholdPct + 10.0f);
+								setLowHealthWindow(tuning.lowHealthThresholdPct, rearmPct);
+							}
+							break;
 						}
-						break;
-					}
 
 					for (const auto& tuning : kSummonStyleTunings) {
 						if (tuning.style != a_style) {

@@ -151,15 +151,16 @@ namespace CalamityAffixes
 			}
 		}
 
-		const auto sourceFormID = HitDataUtil::GetHitSourceFormID(a_hitData);
-		if (!RouteHealthDamageAsHit(a_target, a_attacker, a_hitData, sourceFormID, a_damage, now)) {
-			return;
-		}
+			const auto sourceFormID = HitDataUtil::GetHitSourceFormID(a_hitData);
+			const bool routedAsHit = RouteHealthDamageAsHit(a_target, a_attacker, a_hitData, sourceFormID, a_damage, now);
+			if (routedAsHit) {
+				ProcessOutgoingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
+				ProcessIncomingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
+				ProcessImmediateCorpseExplosionFromLethalHit(a_target, a_attacker);
+			}
 
-		ProcessOutgoingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
-		ProcessIncomingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
-		ProcessImmediateCorpseExplosionFromLethalHit(a_target, a_attacker);
-	}
+			ProcessLowHealthTriggerFromHealthDamage(a_target, a_attacker, a_hitData);
+		}
 
 	bool EventBridge::RouteHealthDamageAsHit(
 		RE::Actor* a_target,
@@ -283,9 +284,9 @@ namespace CalamityAffixes
 		}
 	}
 
-	void EventBridge::ProcessImmediateCorpseExplosionFromLethalHit(
-		RE::Actor* a_target,
-		RE::Actor* a_attacker)
+		void EventBridge::ProcessImmediateCorpseExplosionFromLethalHit(
+			RE::Actor* a_target,
+			RE::Actor* a_attacker)
 	{
 		// For hit-like lethal damage, fire corpse explosion immediately instead of waiting for TESDeathEvent dispatch.
 		// Duplicate explosions are still blocked by corpse-budget dedupe in ProcessCorpseExplosionKill.
@@ -305,7 +306,22 @@ namespace CalamityAffixes
 				"CalamityAffixes: immediate corpse explosion path (target={}, attacker={}).",
 				a_target->GetName(),
 				a_attacker->GetName());
+			}
+			ProcessCorpseExplosionKill(context.playerOwner, a_target);
 		}
-		ProcessCorpseExplosionKill(context.playerOwner, a_target);
+
+		void EventBridge::ProcessLowHealthTriggerFromHealthDamage(
+			RE::Actor* a_target,
+			RE::Actor* a_attacker,
+			const RE::HitData* a_hitData)
+		{
+			if (!_configLoaded || !_runtimeEnabled || !a_target || _lowHealthTriggerAffixIndices.empty()) {
+				return;
+			}
+			if (!a_target->IsPlayerRef()) {
+				return;
+			}
+
+			ProcessTrigger(Trigger::kLowHealth, a_target, a_attacker, a_hitData);
+		}
 	}
-}

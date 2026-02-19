@@ -327,6 +327,7 @@ public static class AffixSpecLoader
                 "IncomingHit",
                 "DotApply",
                 "Kill",
+                "LowHealth",
             },
             new HashSet<string>(StringComparer.Ordinal)
             {

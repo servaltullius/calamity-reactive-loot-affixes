@@ -41,6 +41,8 @@ namespace RuntimeGateStoreChecks
 
 	bool CheckRunewordCompletedSelectionPolicy();
 	bool CheckRunewordRecipeEntriesMappingPolicy();
+	bool CheckRunewordCoverageConsistencyPolicy();
+	bool CheckLowHealthTriggerSnapshotPolicy();
 	bool CheckRunewordRecipeRuntimeEligibilityPolicy();
 	bool CheckRunewordContractSnapshotPolicy();
 	bool CheckSynthesizedAffixDisplayNameFallbackPolicy();

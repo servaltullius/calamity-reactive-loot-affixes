@@ -54,7 +54,27 @@ namespace CalamityAffixes
 			}
 
 			constexpr auto kZeroIcdProcSafetyGuard = std::chrono::milliseconds(120);
-	}
+
+			[[nodiscard]] float ResolveActorHealthPercent(RE::Actor* a_actor) noexcept
+			{
+				if (!a_actor) {
+					return 100.0f;
+				}
+
+				auto* avOwner = a_actor->AsActorValueOwner();
+				if (!avOwner) {
+					return 100.0f;
+				}
+
+				const float maxHealth = std::max(0.0f, avOwner->GetPermanentActorValue(RE::ActorValue::kHealth));
+				if (maxHealth <= 0.0f) {
+					return 100.0f;
+				}
+
+				const float currentHealth = std::clamp(avOwner->GetActorValue(RE::ActorValue::kHealth), 0.0f, maxHealth);
+				return (currentHealth / maxHealth) * 100.0f;
+			}
+		}
 
 		bool EventBridge::IsPerTargetCooldownBlocked(
 			const AffixRuntime& a_affix,
@@ -122,10 +142,10 @@ namespace CalamityAffixes
 			_triggerProcBudgetConsumed);
 	}
 
-	void EventBridge::RecordRecentCombatEvent(
-		Trigger a_trigger,
-		RE::Actor* a_owner,
-		std::chrono::steady_clock::time_point a_now)
+		void EventBridge::RecordRecentCombatEvent(
+			Trigger a_trigger,
+			RE::Actor* a_owner,
+			std::chrono::steady_clock::time_point a_now)
 	{
 		if (!a_owner) {
 			return;
@@ -142,11 +162,12 @@ namespace CalamityAffixes
 		case Trigger::kIncomingHit:
 			RecordRecentEventTimestamp(_recentOwnerIncomingHitAt, ownerFormId, a_now);
 			break;
-		case Trigger::kDotApply:
-		default:
-			break;
+			case Trigger::kDotApply:
+			case Trigger::kLowHealth:
+			default:
+				break;
+			}
 		}
-	}
 
 	bool EventBridge::PassesRecentlyGates(
 		const AffixRuntime& a_affix,
@@ -188,8 +209,8 @@ namespace CalamityAffixes
 		return true;
 	}
 
-	bool EventBridge::PassesLuckyHitGate(
-		const AffixRuntime& a_affix,
+		bool EventBridge::PassesLuckyHitGate(
+			const AffixRuntime& a_affix,
 		Trigger a_trigger,
 		const RE::HitData* a_hitData,
 		std::chrono::steady_clock::time_point)
@@ -217,9 +238,74 @@ namespace CalamityAffixes
 			return true;
 		}
 
-		std::uniform_real_distribution<float> dist(0.0f, 100.0f);
-		return dist(_rng) < luckyChancePct;
-	}
+			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+			return dist(_rng) < luckyChancePct;
+		}
+
+		bool EventBridge::PassesLowHealthTriggerGate(
+			const AffixRuntime& a_affix,
+			RE::Actor* a_owner,
+			float a_previousHealthPct,
+			float a_currentHealthPct)
+		{
+			if (a_affix.trigger != Trigger::kLowHealth) {
+				return true;
+			}
+			if (!a_owner || a_affix.token == 0u) {
+				return false;
+			}
+
+			const RE::FormID ownerFormID = a_owner->GetFormID();
+			if (ownerFormID == 0u) {
+				return false;
+			}
+
+			const float thresholdPct = std::clamp(a_affix.lowHealthThresholdPct, 1.0f, 95.0f);
+			const float rearmPct = std::clamp(a_affix.lowHealthRearmPct, thresholdPct + 1.0f, 100.0f);
+			const float healthPct = std::clamp(a_currentHealthPct, 0.0f, 100.0f);
+			const float previousHealthPct = std::clamp(a_previousHealthPct, 0.0f, 100.0f);
+
+			LowHealthTriggerKey key{};
+			key.token = a_affix.token;
+			key.owner = ownerFormID;
+			bool consumed = false;
+				if (const auto it = _lowHealthTriggerConsumed.find(key); it != _lowHealthTriggerConsumed.end()) {
+					consumed = it->second;
+				}
+
+				if (previousHealthPct >= rearmPct && healthPct <= thresholdPct) {
+					// If HP dropped across the rearm band in one hit, allow this fresh low-health window.
+					consumed = false;
+					_lowHealthTriggerConsumed[key] = false;
+				}
+
+				if (healthPct >= rearmPct) {
+					_lowHealthTriggerConsumed[key] = false;
+					return false;
+				}
+			if (healthPct > thresholdPct) {
+				return false;
+			}
+
+			return !consumed;
+		}
+
+		void EventBridge::MarkLowHealthTriggerConsumed(
+			const AffixRuntime& a_affix,
+			RE::Actor* a_owner)
+		{
+			if (a_affix.trigger != Trigger::kLowHealth || !a_owner || a_affix.token == 0u) {
+				return;
+			}
+			const RE::FormID ownerFormID = a_owner->GetFormID();
+			if (ownerFormID == 0u) {
+				return;
+			}
+			LowHealthTriggerKey key{};
+			key.token = a_affix.token;
+			key.owner = ownerFormID;
+			_lowHealthTriggerConsumed[key] = true;
+		}
 
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
@@ -233,22 +319,38 @@ namespace CalamityAffixes
 
 		const auto now = std::chrono::steady_clock::now();
 		std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+		const RE::FormID lowHealthOwnerFormID =
+			(a_trigger == Trigger::kLowHealth && a_owner) ? a_owner->GetFormID() : 0u;
+		const bool hasLowHealthSnapshot = lowHealthOwnerFormID != 0u;
+		const float lowHealthCurrentPct = hasLowHealthSnapshot ? ResolveActorHealthPercent(a_owner) : 100.0f;
+		const float lowHealthPreviousPct = [&]() {
+			if (!hasLowHealthSnapshot) {
+				return 100.0f;
+			}
+			if (const auto it = _lowHealthLastObservedPct.find(lowHealthOwnerFormID); it != _lowHealthLastObservedPct.end()) {
+				return it->second;
+			}
+			return 100.0f;
+		}();
 
 		const std::vector<std::size_t>* indices = nullptr;
-		switch (a_trigger) {
-		case Trigger::kHit:
-			indices = &_hitTriggerAffixIndices;
-			break;
+			switch (a_trigger) {
+			case Trigger::kHit:
+				indices = &_hitTriggerAffixIndices;
+				break;
 		case Trigger::kIncomingHit:
 			indices = &_incomingHitTriggerAffixIndices;
 			break;
 		case Trigger::kDotApply:
 			indices = &_dotApplyTriggerAffixIndices;
 			break;
-		case Trigger::kKill:
-			indices = &_killTriggerAffixIndices;
-			break;
-		}
+			case Trigger::kKill:
+				indices = &_killTriggerAffixIndices;
+				break;
+			case Trigger::kLowHealth:
+				indices = &_lowHealthTriggerAffixIndices;
+				break;
+			}
 
 		if (!indices || indices->empty()) {
 			RecordRecentCombatEvent(a_trigger, a_owner, now);
@@ -270,9 +372,13 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			if (!PassesLuckyHitGate(affix, a_trigger, a_hitData, now)) {
-				continue;
-			}
+				if (!PassesLuckyHitGate(affix, a_trigger, a_hitData, now)) {
+					continue;
+				}
+
+				if (!PassesLowHealthTriggerGate(affix, a_owner, lowHealthPreviousPct, lowHealthCurrentPct)) {
+					continue;
+				}
 
 				PerTargetCooldownKey perTargetKey{};
 				const bool usesPerTargetIcd = (affix.perTargetIcd.count() > 0 && a_target && affix.token != 0u);
@@ -330,9 +436,15 @@ namespace CalamityAffixes
 				RE::DebugNotification(note.c_str());
 			}
 
-				AdvanceRuntimeStateForAffixProc(affix);
-				ExecuteActionWithProcDepthGuard(affix, a_owner, a_target, a_hitData);
-			}
+					AdvanceRuntimeStateForAffixProc(affix);
+					ExecuteActionWithProcDepthGuard(affix, a_owner, a_target, a_hitData);
+					MarkLowHealthTriggerConsumed(affix, a_owner);
+				}
+
+		if (hasLowHealthSnapshot) {
+			// Update once per trigger pass so all low-health affixes evaluate against the same health snapshot.
+			_lowHealthLastObservedPct[lowHealthOwnerFormID] = lowHealthCurrentPct;
+		}
 
 		RecordRecentCombatEvent(a_trigger, a_owner, now);
 		}

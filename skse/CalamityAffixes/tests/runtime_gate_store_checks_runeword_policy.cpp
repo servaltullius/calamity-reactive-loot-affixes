@@ -1,6 +1,7 @@
 #include "runtime_gate_store_checks_common.h"
 
 #include <cstdlib>
+#include <string_view>
 #include <unordered_set>
 
 #include <nlohmann/json.hpp>
@@ -96,8 +97,182 @@ namespace RuntimeGateStoreChecks
 				source.find("static_assert(!HasDuplicateOverrideIds(kRecommendedBaseOverrides)") == std::string::npos ||
 				source.find("static_assert(!HasDuplicateOverrideIds(kEffectSummaryOverrides)") == std::string::npos ||
 				source.find("{ \"rw_spirit\", \"sword_shield\" }") == std::string::npos ||
-				source.find("{ \"rw_spirit\", \"self_meditation\" }") == std::string::npos) {
+				source.find("{ \"rw_spirit\", \"signature_spirit\" }") == std::string::npos) {
 				std::cerr << "runeword_recipe_entries_mapping: recipe-entry table mapping guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckRunewordCoverageConsistencyPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
+			const fs::path synthesisFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RunewordSynthesis.cpp";
+			const fs::path defaultContractFile = testFile.parent_path().parent_path().parent_path().parent_path() /
+				"Data" / "SKSE" / "Plugins" / "CalamityAffixes" / "runtime_contract.json";
+			const char* overridePath = std::getenv("CAFF_RUNTIME_CONTRACT_PATH");
+			const fs::path contractFile =
+				(overridePath && *overridePath) ? fs::path(overridePath) : defaultContractFile;
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto recipeEntriesText = loadText(recipeEntriesFile);
+			if (!recipeEntriesText.has_value()) {
+				std::cerr << "runeword_coverage_consistency: failed to open source file: " << recipeEntriesFile << "\n";
+				return false;
+			}
+			const auto synthesisText = loadText(synthesisFile);
+			if (!synthesisText.has_value()) {
+				std::cerr << "runeword_coverage_consistency: failed to open source file: " << synthesisFile << "\n";
+				return false;
+			}
+			const auto contractText = loadText(contractFile);
+			if (!contractText.has_value()) {
+				std::cerr << "runeword_coverage_consistency: failed to open contract file: " << contractFile << "\n";
+				return false;
+			}
+
+			nlohmann::json contract = nlohmann::json::object();
+			try {
+				contract = nlohmann::json::parse(*contractText);
+			} catch (const std::exception& e) {
+				std::cerr << "runeword_coverage_consistency: contract parse failed: " << e.what() << "\n";
+				return false;
+			}
+
+			const auto catalogIt = contract.find("runewordCatalog");
+			if (catalogIt == contract.end() || !catalogIt->is_array() || catalogIt->empty()) {
+				std::cerr << "runeword_coverage_consistency: runewordCatalog missing or empty\n";
+				return false;
+			}
+
+			std::vector<std::string> recipeIds;
+			recipeIds.reserve(catalogIt->size());
+			for (const auto& entry : *catalogIt) {
+				if (!entry.is_object()) {
+					continue;
+				}
+				const auto idIt = entry.find("id");
+				if (idIt == entry.end() || !idIt->is_string()) {
+					continue;
+				}
+				recipeIds.push_back(idIt->get<std::string>());
+			}
+			if (recipeIds.empty()) {
+				std::cerr << "runeword_coverage_consistency: no runeword ids parsed from contract\n";
+				return false;
+			}
+
+			auto extractSection = [](const std::string& source, std::string_view start, std::string_view end) -> std::optional<std::string> {
+				const auto begin = source.find(start);
+				if (begin == std::string::npos) {
+					return std::nullopt;
+				}
+				const auto finish = source.find(end, begin);
+				if (finish == std::string::npos || finish <= begin) {
+					return std::nullopt;
+				}
+				return source.substr(begin, finish - begin);
+			};
+
+			const auto styleSection = extractSection(
+				*synthesisText,
+				"auto resolveRunewordStyle = [&](const RunewordRecipe& a_recipe)",
+				"auto toDurationMs = [](float a_seconds)");
+			if (!styleSection.has_value()) {
+				std::cerr << "runeword_coverage_consistency: style section not found\n";
+				return false;
+			}
+			const auto tuningSection = extractSection(
+				*synthesisText,
+				"static constexpr RecipeTuning kRecipeTunings[] = {",
+				"};");
+			if (!tuningSection.has_value()) {
+				std::cerr << "runeword_coverage_consistency: tuning section not found\n";
+				return false;
+			}
+			const auto summarySection = extractSection(
+				*recipeEntriesText,
+				"static constexpr RecipeKeyOverride kEffectSummaryOverrides[] = {",
+				"};");
+			if (!summarySection.has_value()) {
+				std::cerr << "runeword_coverage_consistency: summary section not found\n";
+				return false;
+			}
+
+			auto collectMissing = [&](const std::string& section) {
+				std::vector<std::string> missing;
+				for (const auto& id : recipeIds) {
+					const std::string needle = "\"" + id + "\"";
+					if (section.find(needle) == std::string::npos) {
+						missing.push_back(id);
+					}
+				}
+				return missing;
+			};
+
+			const auto missingStyle = collectMissing(*styleSection);
+			const auto missingTuning = collectMissing(*tuningSection);
+			const auto missingSummary = collectMissing(*summarySection);
+			if (missingStyle.empty() && missingTuning.empty() && missingSummary.empty()) {
+				return true;
+			}
+
+			auto printMissing = [](std::string_view label, const std::vector<std::string>& missing) {
+				if (missing.empty()) {
+					return;
+				}
+				std::cerr << "runeword_coverage_consistency: missing " << label << " ids:";
+				for (const auto& id : missing) {
+					std::cerr << ' ' << id;
+				}
+				std::cerr << "\n";
+			};
+
+			printMissing("style", missingStyle);
+			printMissing("tuning", missingTuning);
+			printMissing("summary", missingSummary);
+			return false;
+		}
+
+		bool CheckLowHealthTriggerSnapshotPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path triggersFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.cpp";
+
+			std::ifstream in(triggersFile);
+			if (!in.is_open()) {
+				std::cerr << "low_health_trigger_snapshot: failed to open source file: " << triggersFile << "\n";
+				return false;
+			}
+
+			std::string source(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+
+			const auto snapshotDeclPos = source.find("const RE::FormID lowHealthOwnerFormID =");
+			const auto previousDeclPos = source.find("const float lowHealthPreviousPct = [&]() {");
+			const auto gateCallPos = source.find("PassesLowHealthTriggerGate(affix, a_owner, lowHealthPreviousPct, lowHealthCurrentPct)");
+			const auto mapUpdatePos = source.find("_lowHealthLastObservedPct[lowHealthOwnerFormID] = lowHealthCurrentPct;");
+
+			if (snapshotDeclPos == std::string::npos ||
+				previousDeclPos == std::string::npos ||
+				gateCallPos == std::string::npos ||
+				mapUpdatePos == std::string::npos ||
+				mapUpdatePos < gateCallPos) {
+				std::cerr << "low_health_trigger_snapshot: single-snapshot low-health gate guard is missing\n";
 				return false;
 			}
 
