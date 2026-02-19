@@ -303,6 +303,70 @@ namespace RuntimeGateStoreChecks
 			return true;
 		}
 
+		bool CheckSynthesizedRunewordTooltipSummaryPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path tooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.TooltipResolution.cpp";
+			const fs::path synthesisFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RunewordSynthesis.cpp";
+			const fs::path catalogFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Catalog.cpp";
+
+			std::ifstream tooltipIn(tooltipFile);
+			if (!tooltipIn.is_open()) {
+				std::cerr << "synthesized_runeword_tooltip_summary: failed to open source file: " << tooltipFile << "\n";
+				return false;
+			}
+			std::ifstream synthesisIn(synthesisFile);
+			if (!synthesisIn.is_open()) {
+				std::cerr << "synthesized_runeword_tooltip_summary: failed to open source file: " << synthesisFile << "\n";
+				return false;
+			}
+			std::ifstream catalogIn(catalogFile);
+			if (!catalogIn.is_open()) {
+				std::cerr << "synthesized_runeword_tooltip_summary: failed to open source file: " << catalogFile << "\n";
+				return false;
+			}
+
+			std::string tooltipSource(
+				(std::istreambuf_iterator<char>(tooltipIn)),
+				std::istreambuf_iterator<char>());
+			std::string synthesisSource(
+				(std::istreambuf_iterator<char>(synthesisIn)),
+				std::istreambuf_iterator<char>());
+			std::string catalogSource(
+				(std::istreambuf_iterator<char>(catalogIn)),
+				std::istreambuf_iterator<char>());
+
+			if (tooltipSource.find("IsSynthesizedRunewordAffixId(") == std::string::npos ||
+				tooltipSource.find("buildRunewordAutoSummary") == std::string::npos ||
+				tooltipSource.find("headerEn = \"On \"") == std::string::npos ||
+				tooltipSource.find("발동 ") == std::string::npos ||
+				tooltipSource.find("Adaptive elemental cast") == std::string::npos ||
+				tooltipSource.find("적응형 원소 시전") == std::string::npos ||
+				tooltipSource.find("Self-cast ") == std::string::npos ||
+				tooltipSource.find("자신에게 ") == std::string::npos) {
+				std::cerr << "synthesized_runeword_tooltip_summary: synthesized runeword tooltip-summary guard is missing\n";
+				return false;
+			}
+			if (synthesisSource.find("const std::string recipeNameEn = recipe.displayNameEn.empty() ? recipe.displayName : recipe.displayNameEn;") == std::string::npos ||
+				synthesisSource.find("const std::string recipeNameKo = recipe.displayNameKo.empty() ? recipe.displayName : recipe.displayNameKo;") == std::string::npos ||
+				synthesisSource.find("out.displayNameEn = \"Runeword \" + recipeNameEn + \" \" + suffix;") == std::string::npos ||
+				synthesisSource.find("out.displayNameKo = \"룬워드 \" + recipeNameKo + \" \" + suffix;") == std::string::npos ||
+				synthesisSource.find("out.displayName = out.displayNameKo;") == std::string::npos) {
+				std::cerr << "synthesized_runeword_tooltip_summary: synthesized runeword display-name localization guard is missing\n";
+				return false;
+			}
+			if (catalogSource.find("ResolveRunewordDisplayNameKo(") == std::string::npos ||
+				catalogSource.find("{ \"rw_metamorphosis\", \"메타모포시스\" }") == std::string::npos ||
+				catalogSource.find("{ \"rw_enigma\", \"수수께끼\" }") == std::string::npos ||
+				catalogSource.find("recipe.displayName = recipe.displayNameKo;") == std::string::npos) {
+				std::cerr << "synthesized_runeword_tooltip_summary: runeword recipe-name localization table guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
 		bool CheckRunewordTransmuteSafetyPolicy()
 		{
 			namespace fs = std::filesystem;

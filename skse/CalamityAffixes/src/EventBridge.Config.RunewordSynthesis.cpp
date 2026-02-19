@@ -416,10 +416,13 @@ namespace CalamityAffixes
 			out.id = recipe.id + "_auto";
 			out.token = recipe.resultAffixToken;
 			out.action.sourceToken = out.token;
-			out.displayName = runeSequence.empty() ?
-				("Runeword " + recipe.displayName + " (Auto)") :
-				("Runeword " + recipe.displayName + " [" + runeSequence + "]");
-			out.label = recipe.displayName;
+			const std::string suffix = runeSequence.empty() ? "(Auto)" : ("[" + runeSequence + "]");
+			const std::string recipeNameEn = recipe.displayNameEn.empty() ? recipe.displayName : recipe.displayNameEn;
+			const std::string recipeNameKo = recipe.displayNameKo.empty() ? recipe.displayName : recipe.displayNameKo;
+			out.displayNameEn = "Runeword " + recipeNameEn + " " + suffix;
+			out.displayNameKo = "룬워드 " + recipeNameKo + " " + suffix;
+			out.displayName = out.displayNameKo;
+			out.label = recipeNameKo;
 			if (runewordTemplateKeyword) {
 				out.keywordEditorId = runewordTemplateKeywordEditorId;
 				out.keyword = runewordTemplateKeyword;

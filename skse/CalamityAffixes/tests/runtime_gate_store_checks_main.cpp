@@ -23,6 +23,7 @@ int main()
 	const bool runewordRecipeRuntimeEligibilityOk = CheckRunewordRecipeRuntimeEligibilityPolicy();
 	const bool runewordContractSnapshotOk = CheckRunewordContractSnapshotPolicy();
 	const bool synthesizedAffixDisplayNameFallbackOk = CheckSynthesizedAffixDisplayNameFallbackPolicy();
+	const bool synthesizedRunewordTooltipSummaryOk = CheckSynthesizedRunewordTooltipSummaryPolicy();
 	const bool runewordUiPolicyHelpersOk = CheckRunewordUiPolicyHelpers();
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
@@ -39,6 +40,7 @@ int main()
 	        runewordRecipeRuntimeEligibilityOk &&
 	        runewordContractSnapshotOk &&
 	        synthesizedAffixDisplayNameFallbackOk &&
+	        synthesizedRunewordTooltipSummaryOk &&
 	        runewordUiPolicyHelpersOk &&
 	        runewordTransmuteSafetyOk &&
 	        runewordReforgeSafetyOk &&

@@ -2,6 +2,7 @@
 #include "CalamityAffixes/LootUiGuards.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -16,6 +17,13 @@ namespace CalamityAffixes
 		[[nodiscard]] bool IsPreviewItemSource(std::string_view a_source) noexcept
 		{
 			return a_source == "barter" || a_source == "container" || a_source == "gift";
+		}
+
+		[[nodiscard]] bool IsSynthesizedRunewordAffixId(std::string_view a_affixId) noexcept
+		{
+			return a_affixId.rfind("runeword_", 0) == 0 &&
+			       a_affixId.size() >= 5 &&
+			       a_affixId.substr(a_affixId.size() - 5) == "_auto";
 		}
 	}
 
@@ -147,6 +155,178 @@ namespace CalamityAffixes
 				if (action.modeCycleManualOnly) {
 					detail.append(" (Manual)");
 				}
+			}
+
+			auto formatFloat1 = [](float a_value) {
+				char buf[32]{};
+				std::snprintf(buf, sizeof(buf), "%.1f", static_cast<double>(a_value));
+				return std::string(buf);
+			};
+
+			auto triggerTextEn = [](Trigger a_trigger) -> std::string_view {
+				switch (a_trigger) {
+				case Trigger::kHit:
+					return "hit";
+				case Trigger::kIncomingHit:
+					return "incoming hit";
+				case Trigger::kDotApply:
+					return "DoT apply";
+				case Trigger::kKill:
+					return "kill";
+				}
+				return "trigger";
+			};
+
+			auto triggerTextKo = [](Trigger a_trigger) -> std::string_view {
+				switch (a_trigger) {
+				case Trigger::kHit:
+					return "적중";
+				case Trigger::kIncomingHit:
+					return "피격";
+				case Trigger::kDotApply:
+					return "지속피해 적용";
+				case Trigger::kKill:
+					return "처치";
+				}
+				return "트리거";
+			};
+
+			auto spellNameOr = [](RE::SpellItem* a_spell, std::string_view a_fallback) {
+				if (!a_spell) {
+					return std::string(a_fallback);
+				}
+				const char* rawName = a_spell->GetName();
+				if (!rawName || rawName[0] == '\0') {
+					return std::string(a_fallback);
+				}
+				return std::string(rawName);
+			};
+
+			auto buildRunewordAutoSummary = [&](const AffixRuntime& a_autoAffix) -> std::string {
+				if (!IsSynthesizedRunewordAffixId(a_autoAffix.id)) {
+					return {};
+				}
+
+				const auto chancePct = std::clamp(a_autoAffix.procChancePct, 0.0f, 100.0f);
+				const auto icdSec = static_cast<float>(a_autoAffix.icd.count()) / 1000.0f;
+				const auto perTargetIcdSec = static_cast<float>(a_autoAffix.perTargetIcd.count()) / 1000.0f;
+
+				std::string effectEn;
+				std::string effectKo;
+				switch (a_autoAffix.action.type) {
+				case ActionType::kCastSpell: {
+					const auto spellName = spellNameOr(a_autoAffix.action.spell, "Spell");
+					if (a_autoAffix.action.applyToSelf) {
+						effectEn = "Self-cast " + spellName;
+						effectKo = "자신에게 " + spellName + " 시전";
+					} else {
+						effectEn = "Cast " + spellName;
+						effectKo = "대상에게 " + spellName + " 시전";
+					}
+					break;
+				}
+				case ActionType::kCastSpellAdaptiveElement: {
+					std::vector<std::string_view> elemsEn;
+					std::vector<std::string_view> elemsKo;
+					if (a_autoAffix.action.adaptiveFire) {
+						elemsEn.push_back("Fire");
+						elemsKo.push_back("화염");
+					}
+					if (a_autoAffix.action.adaptiveFrost) {
+						elemsEn.push_back("Frost");
+						elemsKo.push_back("냉기");
+					}
+					if (a_autoAffix.action.adaptiveShock) {
+						elemsEn.push_back("Shock");
+						elemsKo.push_back("번개");
+					}
+
+					auto joinElems = [](const std::vector<std::string_view>& a_values) {
+						std::string out;
+						for (std::size_t i = 0; i < a_values.size(); ++i) {
+							if (i > 0) {
+								out.append("/");
+							}
+							out.append(a_values[i]);
+						}
+						return out;
+					};
+
+					const auto elemEn = joinElems(elemsEn);
+					const auto elemKo = joinElems(elemsKo);
+					effectEn = elemEn.empty() ? "Adaptive elemental cast" : ("Adaptive elemental cast (" + elemEn + ")");
+					effectKo = elemKo.empty() ? "적응형 원소 시전" : ("적응형 원소 시전 (" + elemKo + ")");
+					break;
+				}
+				case ActionType::kSpawnTrap: {
+					const auto spellName = spellNameOr(a_autoAffix.action.spell, "Trap");
+					effectEn = "Deploy trap: " + spellName;
+					effectKo = "함정 설치: " + spellName;
+					break;
+				}
+				default:
+					effectEn = "Auto-generated runeword effect";
+					effectKo = "자동 생성된 룬워드 효과";
+					break;
+				}
+
+				std::string headerEn = "On ";
+				headerEn.append(triggerTextEn(a_autoAffix.trigger));
+				headerEn.append(": ");
+				headerEn.append(formatFloat1(chancePct));
+				headerEn.append("%");
+				if (icdSec > 0.0f) {
+					headerEn.append(" (ICD ");
+					headerEn.append(formatFloat1(icdSec));
+					headerEn.append("s)");
+				}
+				if (perTargetIcdSec > 0.0f) {
+					headerEn.append(" (per-target ");
+					headerEn.append(formatFloat1(perTargetIcdSec));
+					headerEn.append("s)");
+				}
+				if (!effectEn.empty()) {
+					headerEn.append(" | ");
+					headerEn.append(effectEn);
+				}
+
+				std::string headerKo = "발동 ";
+				headerKo.append(triggerTextKo(a_autoAffix.trigger));
+				headerKo.append(": ");
+				headerKo.append(formatFloat1(chancePct));
+				headerKo.append("%");
+				if (icdSec > 0.0f) {
+					headerKo.append(" (내부쿨 ");
+					headerKo.append(formatFloat1(icdSec));
+					headerKo.append("초)");
+				}
+				if (perTargetIcdSec > 0.0f) {
+					headerKo.append(" (대상별 ");
+					headerKo.append(formatFloat1(perTargetIcdSec));
+					headerKo.append("초)");
+				}
+				if (!effectKo.empty()) {
+					headerKo.append(" | ");
+					headerKo.append(effectKo);
+				}
+
+				switch (a_uiLanguageMode) {
+				case 0:
+					return headerEn;
+				case 1:
+					return headerKo;
+				case 2:
+				default:
+					return headerKo + " / " + headerEn;
+				}
+			};
+
+			const auto autoSummary = buildRunewordAutoSummary(a_affix);
+			if (!autoSummary.empty()) {
+				if (!detail.empty()) {
+					detail.push_back('\n');
+				}
+				detail.append(autoSummary);
 			}
 
 			return detail;

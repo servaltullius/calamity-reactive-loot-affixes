@@ -381,6 +381,8 @@ namespace CalamityAffixes
 				std::string id{};
 				std::uint64_t token{ 0 };
 				std::string displayName{};
+				std::string displayNameEn{};
+				std::string displayNameKo{};
 				std::vector<std::string> runeIds{};
 				std::vector<std::uint64_t> runeTokens{};
 				std::uint64_t resultAffixToken{ 0 };
