@@ -185,6 +185,84 @@ namespace CalamityAffixes
 		}
 	}
 
+	bool EventBridge::IsRuntimeCurrencyDropRollEnabled(std::string_view a_contextTag) const
+	{
+		if (_loot.runtimeCurrencyDropsEnabled) {
+			return true;
+		}
+
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: {} currency roll skipped (runtime currency disabled by loot.currencyDropMode).",
+				a_contextTag);
+		}
+		return false;
+	}
+
+	float EventBridge::ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier a_sourceTier) const noexcept
+	{
+		float sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
+		switch (a_sourceTier) {
+		case detail::LootCurrencySourceTier::kCorpse:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultCorpse;
+			break;
+		case detail::LootCurrencySourceTier::kContainer:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
+			break;
+		case detail::LootCurrencySourceTier::kBossContainer:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultBossContainer;
+			break;
+		case detail::LootCurrencySourceTier::kWorld:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultWorld;
+			break;
+		default:
+			sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
+			break;
+		}
+		return std::clamp(sourceChanceMultiplier, 0.0f, 5.0f);
+	}
+
+	bool EventBridge::TryBeginLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp)
+	{
+		if (a_ledgerKey == 0u) {
+			return true;
+		}
+
+		if (auto ledgerIt = _lootCurrencyRollLedger.find(a_ledgerKey);
+			ledgerIt != _lootCurrencyRollLedger.end()) {
+			if (detail::IsLootCurrencyLedgerExpired(
+					ledgerIt->second,
+					a_dayStamp,
+					kLootCurrencyLedgerTtlDays)) {
+				_lootCurrencyRollLedger.erase(ledgerIt);
+			} else {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	void EventBridge::FinalizeLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp)
+	{
+		if (a_ledgerKey == 0u) {
+			return;
+		}
+
+		const auto [it, inserted] = _lootCurrencyRollLedger.emplace(a_ledgerKey, a_dayStamp);
+		if (!inserted) {
+			it->second = a_dayStamp;
+		}
+		if (inserted) {
+			_lootCurrencyRollLedgerRecent.push_back(a_ledgerKey);
+			while (_lootCurrencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
+				const auto oldest = _lootCurrencyRollLedgerRecent.front();
+				_lootCurrencyRollLedgerRecent.pop_front();
+				_lootCurrencyRollLedger.erase(oldest);
+			}
+		}
+	}
+
 	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
 	{
 		return (static_cast<std::uint64_t>(a_baseID) << 16) | static_cast<std::uint64_t>(a_uniqueID);
@@ -713,6 +791,16 @@ namespace CalamityAffixes
 		if (!a_allowRunewordFragmentRoll || a_count <= 0) {
 			return;
 		}
+		if (!IsRuntimeCurrencyDropRollEnabled("pickup")) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: pickup currency roll context (baseObj={:08X}, uniqueID={}, oldContainer={:08X}).",
+					a_baseObj,
+					a_uniqueID,
+					a_oldContainer);
+			}
+			return;
+		}
 
 		auto* baseForm = RE::TESForm::LookupByID<RE::TESForm>(a_baseObj);
 		auto* baseObj = baseForm ? baseForm->As<RE::TESBoundObject>() : nullptr;
@@ -736,25 +824,7 @@ namespace CalamityAffixes
 			a_oldContainer,
 			_loot.bossContainerEditorIdAllowContains,
 			_loot.bossContainerEditorIdDenyContains);
-		float sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
-		switch (sourceTier) {
-		case LootCurrencySourceTier::kCorpse:
-			sourceChanceMultiplier = _loot.lootSourceChanceMultCorpse;
-			break;
-		case LootCurrencySourceTier::kContainer:
-			sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
-			break;
-		case LootCurrencySourceTier::kBossContainer:
-			sourceChanceMultiplier = _loot.lootSourceChanceMultBossContainer;
-			break;
-		case LootCurrencySourceTier::kWorld:
-			sourceChanceMultiplier = _loot.lootSourceChanceMultWorld;
-			break;
-		default:
-			sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
-			break;
-		}
-		sourceChanceMultiplier = std::clamp(sourceChanceMultiplier, 0.0f, 5.0f);
+		const float sourceChanceMultiplier = ResolveLootCurrencySourceChanceMultiplier(sourceTier);
 		const auto dayStamp = GetInGameDayStamp();
 		const auto ledgerKey = detail::BuildLootCurrencyLedgerKey(
 			sourceTier,
@@ -762,28 +832,18 @@ namespace CalamityAffixes
 			a_baseObj,
 			a_uniqueID,
 			dayStamp);
-		if (ledgerKey != 0u) {
-			if (auto ledgerIt = _lootCurrencyRollLedger.find(ledgerKey);
-				ledgerIt != _lootCurrencyRollLedger.end()) {
-				if (detail::IsLootCurrencyLedgerExpired(
-						ledgerIt->second,
-						dayStamp,
-						kLootCurrencyLedgerTtlDays)) {
-					_lootCurrencyRollLedger.erase(ledgerIt);
-				} else {
-					if (_loot.debugLog) {
-						SKSE::log::debug(
-							"CalamityAffixes: pickup loot roll skipped (ledger consumed) (baseObj={:08X}, uniqueID={}, oldContainer={:08X}, sourceTier={}, ledgerKey={:016X}, dayStamp={}).",
-							a_baseObj,
-							a_uniqueID,
-							a_oldContainer,
-							LootCurrencySourceTierLabel(sourceTier),
-							ledgerKey,
-							dayStamp);
-					}
-					return;
-				}
+		if (!TryBeginLootCurrencyLedgerRoll(ledgerKey, dayStamp)) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: pickup loot roll skipped (ledger consumed) (baseObj={:08X}, uniqueID={}, oldContainer={:08X}, sourceTier={}, ledgerKey={:016X}, dayStamp={}).",
+					a_baseObj,
+					a_uniqueID,
+					a_oldContainer,
+					LootCurrencySourceTierLabel(sourceTier),
+					ledgerKey,
+					dayStamp);
 			}
+			return;
 		}
 
 		if (sourceTier != LootCurrencySourceTier::kWorld) {
@@ -846,20 +906,7 @@ namespace CalamityAffixes
 			}
 		}
 
-		if (ledgerKey != 0u) {
-			const auto [it, inserted] = _lootCurrencyRollLedger.emplace(ledgerKey, dayStamp);
-			if (!inserted) {
-				it->second = dayStamp;
-			}
-			if (inserted) {
-				_lootCurrencyRollLedgerRecent.push_back(ledgerKey);
-				while (_lootCurrencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
-					const auto oldest = _lootCurrencyRollLedgerRecent.front();
-					_lootCurrencyRollLedgerRecent.pop_front();
-					_lootCurrencyRollLedger.erase(oldest);
-				}
-			}
-		}
+		FinalizeLootCurrencyLedgerRoll(ledgerKey, dayStamp);
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(

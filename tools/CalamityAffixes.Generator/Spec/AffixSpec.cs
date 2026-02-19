@@ -32,6 +32,18 @@ public sealed class LootSpec
     [JsonPropertyName("reforgeOrbChancePercent")]
     public double ReforgeOrbChancePercent { get; init; } = 6.0;
 
+    // Currency drop policy:
+    // - runtime: SKSE runtime injection only
+    // - leveledList: inject into vanilla LVLI only
+    // - hybrid: both runtime + leveledList
+    [JsonPropertyName("currencyDropMode")]
+    public string CurrencyDropMode { get; init; } = "runtime";
+
+    // Optional explicit LVLI targets ("ModName.esm|00ABCDEF").
+    // If omitted/empty while currencyDropMode is leveledList/hybrid, generator uses curated defaults.
+    [JsonPropertyName("currencyLeveledListTargets")]
+    public List<string>? CurrencyLeveledListTargets { get; init; }
+
     [JsonPropertyName("lootSourceChanceMultCorpse")]
     public double LootSourceChanceMultCorpse { get; init; } = 0.8;
 

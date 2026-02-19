@@ -1,7 +1,9 @@
 using CalamityAffixes.Generator.Spec;
 using CalamityAffixes.Generator.Writers;
+using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 
 namespace CalamityAffixes.Generator.Tests;
 
@@ -140,6 +142,132 @@ public sealed class KeywordPluginBuilderTests
         Assert.Equal("Reforge Orb", orb.Name?.String);
         Assert.NotNull(orb.Model);
         Assert.Equal(@"Meshes\Clutter\SoulGem\SoulGemPiece01.nif", orb.Model!.File.ToString());
+    }
+
+    [Fact]
+    public void BuildKeywordPlugin_WhenCurrencyDropModeIsLeveledList_CreatesAndInjectsLeveledLists()
+    {
+        var lItemGemsFormKey = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x00068525);
+        var deathItemBanditFormKey = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000C3C9B);
+        var resolver = CreateLeveledListResolver(
+            (lItemGemsFormKey, LeveledItem.Flag.CalculateForEachItemInCount, new Percent(0.0)),
+            (deathItemBanditFormKey, LeveledItem.Flag.UseAll, new Percent(0.0)));
+
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Loot = new LootSpec
+            {
+                RunewordFragmentChancePercent = 6.0,
+                ReforgeOrbChancePercent = 2.0,
+                CurrencyDropMode = "leveledList",
+                CurrencyLeveledListTargets =
+                [
+                    "Skyrim.esm|00068525",
+                    "Skyrim.esm|000C3C9B",
+                ],
+            },
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec, resolver);
+
+        var runewordDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_RunewordFragmentDrops");
+        var reforgeDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_ReforgeOrbDrops");
+        Assert.Equal(new Percent(0.94), runewordDropList.ChanceNone);
+        Assert.Equal(new Percent(0.98), reforgeDropList.ChanceNone);
+
+        var lItemGemsOverride = Assert.Single(mod.LeveledItems, list => list.FormKey == lItemGemsFormKey);
+        Assert.NotNull(lItemGemsOverride.Entries);
+        Assert.True(lItemGemsOverride.Flags.HasFlag(LeveledItem.Flag.CalculateForEachItemInCount));
+        Assert.Equal(3, lItemGemsOverride.Entries!.Count);
+        Assert.Contains(lItemGemsOverride.Entries, entry => entry.Data?.Reference.FormKey == new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x00000800));
+        Assert.Contains(
+            lItemGemsOverride.Entries,
+            entry => entry.Data?.Reference.FormKey == runewordDropList.FormKey);
+        Assert.Contains(
+            lItemGemsOverride.Entries,
+            entry => entry.Data?.Reference.FormKey == reforgeDropList.FormKey);
+
+        // Curated defaults should include hostile death-item routing for true world-drop feel.
+        var deathItemBanditOverride = Assert.Single(mod.LeveledItems, list => list.FormKey == deathItemBanditFormKey);
+        Assert.NotNull(deathItemBanditOverride.Entries);
+        Assert.True(deathItemBanditOverride.Flags.HasFlag(LeveledItem.Flag.UseAll));
+        Assert.Equal(3, deathItemBanditOverride.Entries!.Count);
+        Assert.Contains(deathItemBanditOverride.Entries, entry => entry.Data?.Reference.FormKey == new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x00000800));
+        Assert.Contains(
+            deathItemBanditOverride.Entries,
+            entry => entry.Data?.Reference.FormKey == runewordDropList.FormKey);
+        Assert.Contains(
+            deathItemBanditOverride.Entries,
+            entry => entry.Data?.Reference.FormKey == reforgeDropList.FormKey);
+    }
+
+    [Fact]
+    public void BuildKeywordPlugin_WhenCurrencyTargetsProvided_UsesCustomTargetOnly()
+    {
+        var customTarget = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x0009AF0A);
+        var resolver = CreateLeveledListResolver((customTarget, LeveledItem.Flag.UseAll, new Percent(0.0)));
+
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Loot = new LootSpec
+            {
+                CurrencyDropMode = "leveledList",
+                CurrencyLeveledListTargets = ["Skyrim.esm|0009AF0A"],
+            },
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec, resolver);
+
+        var defaultTarget = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x00068525);
+
+        Assert.Contains(mod.LeveledItems, list => list.FormKey == customTarget);
+        Assert.DoesNotContain(mod.LeveledItems, list => list.FormKey == defaultTarget);
+    }
+
+    [Fact]
+    public void BuildKeywordPlugin_WhenLeveledListModeAndResolverMissing_Throws()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Loot = new LootSpec
+            {
+                CurrencyDropMode = "leveledList",
+                CurrencyLeveledListTargets = ["Skyrim.esm|00068525"],
+            },
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var ex = Assert.Throws<InvalidDataException>(() => KeywordPluginBuilder.Build(spec));
+        Assert.Contains("requires a leveled-list resolver", ex.Message);
     }
 
     [Fact]
@@ -578,5 +706,36 @@ public sealed class KeywordPluginBuilderTests
 
         Assert.Equal("Calamity Suffix: Critical Damage +10%", mgef.Name?.String);
         Assert.Equal("Calamity Suffix: Critical Damage +10%", spell.Name?.String);
+    }
+
+    private static Func<FormKey, ILeveledItemGetter?> CreateLeveledListResolver(
+        params (FormKey target, LeveledItem.Flag flags, Percent chanceNone)[] targets)
+    {
+        var baseMod = new SkyrimMod(ModKey.FromNameAndExtension("Skyrim.esm"), SkyrimRelease.SkyrimSE);
+        var dummyItem = baseMod.MiscItems.AddNew(new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x00000800));
+        dummyItem.EditorID = "Gold001";
+        dummyItem.Name = "Gold";
+
+        var map = new Dictionary<FormKey, ILeveledItemGetter>();
+        foreach (var (target, flags, chanceNone) in targets)
+        {
+            var record = baseMod.LeveledItems.AddNew(target);
+            record.EditorID = $"BASE_{target.ID:X8}";
+            record.Flags = flags;
+            record.ChanceNone = chanceNone;
+            record.Entries = [];
+            record.Entries.Add(new LeveledItemEntry
+            {
+                Data = new LeveledItemEntryData
+                {
+                    Level = 1,
+                    Count = 1,
+                    Reference = dummyItem.ToLink<IItemGetter>(),
+                },
+            });
+            map[target] = record;
+        }
+
+        return key => map.TryGetValue(key, out var value) ? value : null;
     }
 }

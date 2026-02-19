@@ -1,14 +1,54 @@
 using CalamityAffixes.Generator.Spec;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace CalamityAffixes.Generator.Writers;
 
 public static class KeywordPluginBuilder
 {
+    private static readonly ModKey SkyrimModKey = ModKey.FromNameAndExtension("Skyrim.esm");
+    private const string CurrencyDropModeRuntime = "runtime";
+    private const string CurrencyDropModeLeveledList = "leveledlist";
+    private const string CurrencyDropModeHybrid = "hybrid";
+
+    // Curated Skyrim.esm LVLI targets for world-drop style currency:
+    // - generic loot pools (gems/special loot)
+    // - hostile humanoid/undead death items (corpse loot)
+    // Keep this list conservative to avoid touching equipment-only pools.
+    private static readonly IReadOnlyList<FormKey> DefaultCurrencyLeveledListTargets =
+    [
+        new FormKey(SkyrimModKey, 0x00068525), // LItemGems
+        new FormKey(SkyrimModKey, 0x000F961D), // LItemGemsSmall
+        new FormKey(SkyrimModKey, 0x001046E2), // LItemGemsSmall25
+        new FormKey(SkyrimModKey, 0x0010E0E0), // LItemGemsSmall10
+        new FormKey(SkyrimModKey, 0x001046E3), // LItemGems75
+        new FormKey(SkyrimModKey, 0x00087138), // LItemLootIMineralsProcessed
+        new FormKey(SkyrimModKey, 0x0010B2C0), // LItemSpecialLoot10
+        new FormKey(SkyrimModKey, 0x001031D0), // LItemSpecialLoot100
+        new FormKey(SkyrimModKey, 0x000C3C9B), // DeathItemBandit
+        new FormKey(SkyrimModKey, 0x000C3C9E), // DeathItemBanditWizard
+        new FormKey(SkyrimModKey, 0x0003AD7F), // DeathItemDraugr
+        new FormKey(SkyrimModKey, 0x0010FACC), // DeathItemDraugrMage
+        new FormKey(SkyrimModKey, 0x0003AD84), // DeathItemFalmer
+        new FormKey(SkyrimModKey, 0x0003ADA0), // DeathItemVampire
+        new FormKey(SkyrimModKey, 0x0003AD7E), // DeathItemDragonPriest
+        new FormKey(SkyrimModKey, 0x0003ADA5), // DeathItemDragon01
+    ];
+
+    private enum CurrencyDropMode
+    {
+        Runtime = 0,
+        LeveledList = 1,
+        Hybrid = 2,
+    }
+
     // Non-localized ESP records cannot safely carry Hangul in all Skyrim UI paths.
     // For ESP-facing display names, keep a printable ASCII variant (usually English side of "EN / KO").
     private static string ToPluginSafeName(string rawName, string editorId)
@@ -72,7 +112,9 @@ public static class KeywordPluginBuilder
         return sb.ToString().Trim();
     }
 
-    public static SkyrimMod Build(AffixSpec spec)
+    public static SkyrimMod Build(
+        AffixSpec spec,
+        Func<FormKey, ILeveledItemGetter?>? leveledListResolver = null)
     {
         var mod = new SkyrimMod(ModKey.FromFileName(spec.ModKey), SkyrimRelease.SkyrimSE);
 
@@ -117,6 +159,12 @@ public static class KeywordPluginBuilder
         AddRunewordRuneFragments(mod);
         AddReforgeOrb(mod);
 
+        var currencyDropMode = ResolveCurrencyDropMode(spec.Loot);
+        if (currencyDropMode is CurrencyDropMode.LeveledList or CurrencyDropMode.Hybrid && spec.Loot is not null)
+        {
+            AddCurrencyLeveledListDrops(mod, spec.Loot, leveledListResolver);
+        }
+
         return mod;
     }
 
@@ -150,6 +198,167 @@ public static class KeywordPluginBuilder
         item.Weight = 0.0f;
         item.Value = 0;
         item.Model = new Model { File = sharedFragmentModel };
+    }
+
+    private static CurrencyDropMode ResolveCurrencyDropMode(LootSpec? loot)
+    {
+        var modeRaw = loot?.CurrencyDropMode ?? "runtime";
+        var mode = modeRaw.Trim().ToLowerInvariant();
+        return mode switch
+        {
+            CurrencyDropModeLeveledList => CurrencyDropMode.LeveledList,
+            CurrencyDropModeHybrid => CurrencyDropMode.Hybrid,
+            _ => CurrencyDropMode.Runtime,
+        };
+    }
+
+    private static void AddCurrencyLeveledListDrops(
+        SkyrimMod mod,
+        LootSpec lootSpec,
+        Func<FormKey, ILeveledItemGetter?>? leveledListResolver)
+    {
+        if (leveledListResolver is null)
+        {
+            throw new InvalidDataException(
+                "currencyDropMode=leveledList/hybrid requires a leveled-list resolver loaded from masters. " +
+                "Provide --masters <GameDataPath> when running the generator.");
+        }
+
+        var runewordFragmentItems = mod.MiscItems
+            .Where(item => item.EditorID?.StartsWith("CAFF_RuneFrag_", StringComparison.Ordinal) == true)
+            .OrderBy(item => item.EditorID, StringComparer.Ordinal)
+            .ToArray();
+        if (runewordFragmentItems.Length == 0)
+        {
+            throw new InvalidDataException("No runeword fragment misc items generated before leveled-list injection.");
+        }
+
+        var runewordFragmentDropList = mod.LeveledItems.AddNew();
+        runewordFragmentDropList.EditorID = "CAFF_LItem_RunewordFragmentDrops";
+        runewordFragmentDropList.ChanceNone = ToChanceNonePercent(lootSpec.RunewordFragmentChancePercent);
+        foreach (var fragmentItem in runewordFragmentItems)
+        {
+            AddLeveledItemEntryIfMissing(runewordFragmentDropList, fragmentItem.ToLink<IItemGetter>(), level: 1, count: 1);
+        }
+
+        var reforgeOrbItem = mod.MiscItems.SingleOrDefault(item => item.EditorID == "CAFF_Misc_ReforgeOrb");
+        if (reforgeOrbItem is null)
+        {
+            throw new InvalidDataException("Reforge orb misc item is missing before leveled-list injection.");
+        }
+
+        var reforgeOrbDropList = mod.LeveledItems.AddNew();
+        reforgeOrbDropList.EditorID = "CAFF_LItem_ReforgeOrbDrops";
+        reforgeOrbDropList.ChanceNone = ToChanceNonePercent(lootSpec.ReforgeOrbChancePercent);
+        AddLeveledItemEntryIfMissing(reforgeOrbDropList, reforgeOrbItem.ToLink<IItemGetter>(), level: 1, count: 1);
+
+        var targetLists = ResolveCurrencyLeveledListTargets(lootSpec);
+        foreach (var targetListKey in targetLists)
+        {
+            var targetList = GetOrAddLeveledListOverride(mod, targetListKey, leveledListResolver);
+            AddLeveledItemEntryIfMissing(targetList, runewordFragmentDropList.ToLink<IItemGetter>(), level: 1, count: 1);
+            AddLeveledItemEntryIfMissing(targetList, reforgeOrbDropList.ToLink<IItemGetter>(), level: 1, count: 1);
+        }
+    }
+
+    private static IReadOnlyList<FormKey> ResolveCurrencyLeveledListTargets(LootSpec lootSpec)
+    {
+        if (lootSpec.CurrencyLeveledListTargets is null || lootSpec.CurrencyLeveledListTargets.Count == 0)
+        {
+            return DefaultCurrencyLeveledListTargets;
+        }
+
+        var targets = new List<FormKey>(lootSpec.CurrencyLeveledListTargets.Count);
+        var seen = new HashSet<FormKey>();
+        foreach (var raw in lootSpec.CurrencyLeveledListTargets)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                continue;
+            }
+
+            var parsed = ParseFormKey(raw.Trim(), "loot.currencyLeveledListTargets");
+            if (seen.Add(parsed))
+            {
+                targets.Add(parsed);
+            }
+        }
+
+        return targets.Count == 0 ? DefaultCurrencyLeveledListTargets : targets;
+    }
+
+    private static FormKey ParseFormKey(string value, string fieldName)
+    {
+        var split = value.Split('|', 2, StringSplitOptions.TrimEntries);
+        if (split.Length != 2 || string.IsNullOrWhiteSpace(split[0]) || string.IsNullOrWhiteSpace(split[1]))
+        {
+            throw new InvalidDataException($"{fieldName} entry must be 'ModName.esm|00ABCDEF' (got: {value}).");
+        }
+
+        var modKey = ModKey.FromNameAndExtension(split[0]);
+        var formIdText = split[1].StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+            ? split[1][2..]
+            : split[1];
+        if (!uint.TryParse(formIdText, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var formId))
+        {
+            throw new InvalidDataException($"{fieldName} entry has invalid FormID hex value: {value}");
+        }
+
+        return new FormKey(modKey, formId);
+    }
+
+    private static LeveledItem GetOrAddLeveledListOverride(
+        SkyrimMod mod,
+        FormKey targetListFormKey,
+        Func<FormKey, ILeveledItemGetter?> leveledListResolver)
+    {
+        var existing = mod.LeveledItems.FirstOrDefault(record => record.FormKey == targetListFormKey);
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var baseRecord = leveledListResolver(targetListFormKey);
+        if (baseRecord is null)
+        {
+            throw new InvalidDataException(
+                $"Failed to resolve target leveled list from masters: {targetListFormKey}. " +
+                "Ensure --masters points to game Data containing required plugins.");
+        }
+
+        // Create a true override that preserves original entries/flags/chanceNone.
+        return mod.LeveledItems.GetOrAddAsOverride(baseRecord);
+    }
+
+    private static Percent ToChanceNonePercent(double dropChancePercent)
+    {
+        var clampedChance = Math.Clamp(dropChancePercent, 0.0, 100.0);
+        var chanceNoneFraction = (100.0 - clampedChance) / 100.0;
+        return new Percent(chanceNoneFraction);
+    }
+
+    private static void AddLeveledItemEntryIfMissing(
+        LeveledItem target,
+        IFormLink<IItemGetter> reference,
+        short level,
+        short count)
+    {
+        target.Entries ??= [];
+        var hasEntry = target.Entries.Any(entry => entry.Data?.Reference.FormKey == reference.FormKey);
+        if (hasEntry)
+        {
+            return;
+        }
+
+        target.Entries.Add(new LeveledItemEntry
+        {
+            Data = new LeveledItemEntryData
+            {
+                Level = level,
+                Count = count,
+                Reference = reference,
+            },
+        });
     }
 
     private static void AddKeyword(SkyrimMod mod, string editorId)

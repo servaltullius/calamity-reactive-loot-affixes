@@ -495,6 +495,9 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 		if (!actionActor || !actionActor->IsPlayerRef() || !sourceRef) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
+		if (!IsRuntimeCurrencyDropRollEnabled("activation")) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
 
 		const auto sourceTier = ResolveActivatedLootCurrencySourceTier(
 			sourceRef,
@@ -504,20 +507,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		float sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
-		switch (sourceTier) {
-		case LootCurrencySourceTier::kCorpse:
-			sourceChanceMultiplier = _loot.lootSourceChanceMultCorpse;
-			break;
-		case LootCurrencySourceTier::kBossContainer:
-			sourceChanceMultiplier = _loot.lootSourceChanceMultBossContainer;
-			break;
-		case LootCurrencySourceTier::kContainer:
-		default:
-			sourceChanceMultiplier = _loot.lootSourceChanceMultContainer;
-			break;
-		}
-		sourceChanceMultiplier = std::clamp(sourceChanceMultiplier, 0.0f, 5.0f);
+		const float sourceChanceMultiplier = ResolveLootCurrencySourceChanceMultiplier(sourceTier);
 
 		const auto dayStamp = GetInGameDayStamp();
 		const auto sourceFormId = sourceRef->GetFormID();
@@ -527,18 +517,8 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			0u,
 			0u,
 			dayStamp);
-		if (ledgerKey != 0u) {
-			if (auto ledgerIt = _lootCurrencyRollLedger.find(ledgerKey);
-				ledgerIt != _lootCurrencyRollLedger.end()) {
-				if (detail::IsLootCurrencyLedgerExpired(
-						ledgerIt->second,
-						dayStamp,
-						kLootCurrencyLedgerTtlDays)) {
-					_lootCurrencyRollLedger.erase(ledgerIt);
-				} else {
-					return RE::BSEventNotifyControl::kContinue;
-				}
-			}
+		if (!TryBeginLootCurrencyLedgerRoll(ledgerKey, dayStamp)) {
+			return RE::BSEventNotifyControl::kContinue;
 		}
 
 		bool runewordDropGranted = false;
@@ -584,20 +564,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			}
 		}
 
-		if (ledgerKey != 0u) {
-			const auto [it, inserted] = _lootCurrencyRollLedger.emplace(ledgerKey, dayStamp);
-			if (!inserted) {
-				it->second = dayStamp;
-			}
-			if (inserted) {
-				_lootCurrencyRollLedgerRecent.push_back(ledgerKey);
-				while (_lootCurrencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
-					const auto oldest = _lootCurrencyRollLedgerRecent.front();
-					_lootCurrencyRollLedgerRecent.pop_front();
-					_lootCurrencyRollLedger.erase(oldest);
-				}
-			}
-		}
+		FinalizeLootCurrencyLedgerRoll(ledgerKey, dayStamp);
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(

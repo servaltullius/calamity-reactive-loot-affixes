@@ -23,6 +23,7 @@
 #include "CalamityAffixes/AffixToken.h"
 #include "CalamityAffixes/InstanceAffixSlots.h"
 #include "CalamityAffixes/InstanceStateKey.h"
+#include "CalamityAffixes/LootCurrencyLedger.h"
 #include "CalamityAffixes/LootRerollGuard.h"
 #include "CalamityAffixes/MagnitudeScaling.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
@@ -529,6 +530,7 @@ namespace CalamityAffixes
 			float chancePercent{ 0.0f };
 			float runewordFragmentChancePercent{ 6.0f };
 			float reforgeOrbChancePercent{ 2.0f };
+			bool runtimeCurrencyDropsEnabled{ true };
 			float lootSourceChanceMultCorpse{ 0.80f };
 			float lootSourceChanceMultContainer{ 1.00f };
 			float lootSourceChanceMultBossContainer{ 1.15f };
@@ -817,6 +819,10 @@ namespace CalamityAffixes
 			RE::TESBoundObject* a_dropItem,
 			RE::TESObjectREFR* a_sourceContainerRef,
 			bool a_forceWorldPlacement) const;
+		[[nodiscard]] bool IsRuntimeCurrencyDropRollEnabled(std::string_view a_contextTag) const;
+		[[nodiscard]] float ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier a_sourceTier) const noexcept;
+		[[nodiscard]] bool TryBeginLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp);
+		void FinalizeLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp);
 		void ApplyRunewordResult(std::uint64_t a_instanceKey, const RunewordRecipe& a_recipe);
 		void LogRunewordStatus() const;
 		InstanceRuntimeState& EnsureInstanceRuntimeState(std::uint64_t a_instanceKey, std::uint64_t a_affixToken);

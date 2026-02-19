@@ -6,15 +6,17 @@ static void PrintUsage()
     Console.WriteLine("CalamityAffixes.Generator");
     Console.WriteLine();
     Console.WriteLine("Usage:");
-    Console.WriteLine("  dotnet run --project tools/CalamityAffixes.Generator -- [--spec <path>] [--data <path>]");
+    Console.WriteLine("  dotnet run --project tools/CalamityAffixes.Generator -- [--spec <path>] [--data <path>] [--masters <path>]");
     Console.WriteLine();
     Console.WriteLine("Defaults:");
     Console.WriteLine("  --spec affixes/affixes.json");
     Console.WriteLine("  --data Data");
+    Console.WriteLine("  --masters (optional, or env CALAMITY_MASTERS_DIR)");
 }
 
 string specPath = "affixes/affixes.json";
 string dataDir = "Data";
+string? mastersDir = Environment.GetEnvironmentVariable("CALAMITY_MASTERS_DIR");
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -26,6 +28,9 @@ for (var i = 0; i < args.Length; i++)
             break;
         case "--data" when i + 1 < args.Length:
             dataDir = args[++i];
+            break;
+        case "--masters" when i + 1 < args.Length:
+            mastersDir = args[++i];
             break;
         case "-h":
         case "--help":
@@ -41,13 +46,15 @@ for (var i = 0; i < args.Length; i++)
 
 specPath = Path.GetFullPath(specPath);
 dataDir = Path.GetFullPath(dataDir);
+mastersDir = string.IsNullOrWhiteSpace(mastersDir) ? null : Path.GetFullPath(mastersDir);
 
 var spec = AffixSpecLoader.Load(specPath);
-GeneratorRunner.Generate(spec, dataDir);
+GeneratorRunner.Generate(spec, dataDir, mastersDir);
 
 Console.WriteLine("Generation complete:");
 Console.WriteLine($"- Spec: {specPath}");
 Console.WriteLine($"- Data: {dataDir}");
+Console.WriteLine($"- Masters: {mastersDir ?? "(none)"}");
 Console.WriteLine($"- Wrote: {Path.Combine(dataDir, "CalamityAffixes_KID.ini")}");
 Console.WriteLine($"- Wrote: {Path.Combine(dataDir, "CalamityAffixes_DISTR.ini")}");
 Console.WriteLine($"- Wrote: {Path.Combine(dataDir, spec.ModKey)}");

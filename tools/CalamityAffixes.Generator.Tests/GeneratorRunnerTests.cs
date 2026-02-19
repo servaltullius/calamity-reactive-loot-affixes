@@ -1,5 +1,10 @@
 using CalamityAffixes.Generator.Spec;
 using CalamityAffixes.Generator.Writers;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Skyrim;
+using Noggog;
 using System.Text;
 using System.Text.Json;
 
@@ -191,6 +196,8 @@ public sealed class GeneratorRunnerTests
                 ChancePercent = 30.0,
                 RunewordFragmentChancePercent = 40.0,
                 ReforgeOrbChancePercent = 7.0,
+                CurrencyDropMode = "leveledList",
+                CurrencyLeveledListTargets = ["Skyrim.esm|0009AF0A"],
                 LootSourceChanceMultCorpse = 0.75,
                 LootSourceChanceMultContainer = 1.1,
                 LootSourceChanceMultBossContainer = 1.5,
@@ -221,11 +228,14 @@ public sealed class GeneratorRunnerTests
 
         var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
         var dataDir = Path.Combine(tempRoot, "Data");
+        var mastersDir = Path.Combine(tempRoot, "Masters");
         Directory.CreateDirectory(dataDir);
+        Directory.CreateDirectory(mastersDir);
+        WriteTestSkyrimMasterWithLeveledList(mastersDir, 0x0009AF0A);
 
         try
         {
-            GeneratorRunner.Generate(spec, dataDir);
+            GeneratorRunner.Generate(spec, dataDir, mastersDir);
 
             var runtimeJsonPath = Path.Combine(dataDir, "SKSE", "Plugins", "CalamityAffixes", "affixes.json");
             Assert.True(File.Exists(runtimeJsonPath));
@@ -233,6 +243,8 @@ public sealed class GeneratorRunnerTests
             using var doc = JsonDocument.Parse(File.ReadAllText(runtimeJsonPath, Encoding.UTF8));
             var loot = doc.RootElement.GetProperty("loot");
             Assert.Equal(7.0, loot.GetProperty("reforgeOrbChancePercent").GetDouble());
+            Assert.Equal("leveledList", loot.GetProperty("currencyDropMode").GetString());
+            Assert.Equal("Skyrim.esm|0009AF0A", loot.GetProperty("currencyLeveledListTargets")[0].GetString());
             Assert.Equal(0.75, loot.GetProperty("lootSourceChanceMultCorpse").GetDouble());
             Assert.Equal(1.1, loot.GetProperty("lootSourceChanceMultContainer").GetDouble());
             Assert.Equal(1.5, loot.GetProperty("lootSourceChanceMultBossContainer").GetDouble());
@@ -250,5 +262,30 @@ public sealed class GeneratorRunnerTests
                 Directory.Delete(tempRoot, recursive: true);
             }
         }
+    }
+
+    private static void WriteTestSkyrimMasterWithLeveledList(string mastersDir, uint formId)
+    {
+        var skyrimMaster = new SkyrimMod(ModKey.FromNameAndExtension("Skyrim.esm"), SkyrimRelease.SkyrimSE);
+        var gold = skyrimMaster.MiscItems.AddNew(new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x00000800));
+        gold.EditorID = "Gold001";
+        gold.Name = "Gold";
+
+        var leveledList = skyrimMaster.LeveledItems.AddNew(new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), formId));
+        leveledList.EditorID = $"TEST_LVLI_{formId:X8}";
+        leveledList.ChanceNone = new Percent(0.0);
+        leveledList.Flags = LeveledItem.Flag.UseAll;
+        leveledList.Entries = [];
+        leveledList.Entries.Add(new LeveledItemEntry
+        {
+            Data = new LeveledItemEntryData
+            {
+                Level = 1,
+                Count = 1,
+                Reference = gold.ToLink<IItemGetter>(),
+            },
+        });
+
+        ((IModGetter)skyrimMaster).WriteToBinary(new FilePath(Path.Combine(mastersDir, "Skyrim.esm")));
     }
 }

@@ -275,7 +275,7 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 ### 생성기(키워드/ini 자동 생성)
 
 ```bash
-dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data
+dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data --masters /path/to/SkyrimData
 ```
 
 생성기는 아래도 함께 갱신합니다:

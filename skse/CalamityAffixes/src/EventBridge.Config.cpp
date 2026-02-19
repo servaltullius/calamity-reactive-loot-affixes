@@ -103,6 +103,18 @@ namespace CalamityAffixes
 			return std::nullopt;
 		}
 
+		[[nodiscard]] std::optional<bool> ParseRuntimeCurrencyDropEnabled(std::string_view a_text)
+		{
+			const auto normalized = ToLowerAscii(Trim(a_text));
+			if (normalized.empty() || normalized == "runtime" || normalized == "hybrid") {
+				return true;
+			}
+			if (normalized == "leveledlist" || normalized == "leveled_list" || normalized == "leveled-list") {
+				return false;
+			}
+			return std::nullopt;
+		}
+
 		void ValidateRuntimeContractSnapshot()
 		{
 			const auto contractPath = RuntimePaths::ResolveRuntimeRelativePath(RuntimeContract::kRuntimeContractRelativePath);
@@ -998,13 +1010,14 @@ namespace CalamityAffixes
 		RebuildActiveCounts();
 
 			SKSE::log::info(
-				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, sourceMult(corpse/container/boss/world)={:.2f}/{:.2f}/{:.2f}/{:.2f}, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
+				"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, runtimeCurrencyDropsEnabled={}, sourceMult(corpse/container/boss/world)={:.2f}/{:.2f}/{:.2f}/{:.2f}, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
 				_affixes.size(),
 				_lootWeaponAffixes.size(), _lootArmorAffixes.size(),
 				_lootWeaponSuffixes.size(), _lootArmorSuffixes.size(),
 				_loot.chancePercent,
 				_loot.runewordFragmentChancePercent,
 				_loot.reforgeOrbChancePercent,
+				_loot.runtimeCurrencyDropsEnabled,
 				_loot.lootSourceChanceMultCorpse,
 				_loot.lootSourceChanceMultContainer,
 				_loot.lootSourceChanceMultBossContainer,
@@ -1046,6 +1059,7 @@ namespace CalamityAffixes
 		_loot.bossContainerEditorIdAllowContains = detail::MakeDefaultBossContainerEditorIdAllowContains();
 		_loot.bossContainerEditorIdDenyContains.clear();
 		_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
+		_loot.runtimeCurrencyDropsEnabled = true;
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
 			_loot.chancePercent = loot.value("chancePercent", 0.0f);
@@ -1053,6 +1067,23 @@ namespace CalamityAffixes
 				static_cast<float>(loot.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent)));
 			_loot.reforgeOrbChancePercent =
 				static_cast<float>(loot.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent)));
+			if (const auto modeIt = loot.find("currencyDropMode"); modeIt != loot.end()) {
+				if (modeIt->is_string()) {
+					if (const auto runtimeCurrencyEnabled = ParseRuntimeCurrencyDropEnabled(modeIt->get<std::string>());
+						runtimeCurrencyEnabled.has_value()) {
+						_loot.runtimeCurrencyDropsEnabled = *runtimeCurrencyEnabled;
+					} else {
+						SKSE::log::warn(
+							"CalamityAffixes: invalid loot.currencyDropMode '{}'; expected runtime/leveledList/hybrid. Falling back to runtime.",
+							modeIt->get<std::string>());
+						_loot.runtimeCurrencyDropsEnabled = true;
+					}
+				} else {
+					SKSE::log::warn(
+						"CalamityAffixes: loot.currencyDropMode must be a string (runtime/leveledList/hybrid). Falling back to runtime.");
+					_loot.runtimeCurrencyDropsEnabled = true;
+				}
+			}
 			_loot.lootSourceChanceMultCorpse =
 				static_cast<float>(loot.value("lootSourceChanceMultCorpse", static_cast<double>(_loot.lootSourceChanceMultCorpse)));
 			_loot.lootSourceChanceMultContainer =
@@ -1274,12 +1305,13 @@ namespace CalamityAffixes
 		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
 
 		SKSE::log::info(
-			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%).",
+			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}).",
 			std::string(kUserSettingsRelativePath),
 			_runtimeEnabled,
 			_runtimeProcChanceMult,
 			_loot.runewordFragmentChancePercent,
-			_loot.reforgeOrbChancePercent);
+			_loot.reforgeOrbChancePercent,
+			_loot.runtimeCurrencyDropsEnabled);
 
 		_runtimeUserSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
 	}

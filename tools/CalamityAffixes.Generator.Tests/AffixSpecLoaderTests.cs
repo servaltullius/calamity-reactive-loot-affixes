@@ -104,7 +104,9 @@ public sealed class AffixSpecLoaderTests
           "eslFlag": true,
           "loot": {
             "cleanupInvalidLegacyAffixes": true,
-            "armorEditorIdDenyContains": ["rewardbox", "lootbox"]
+            "armorEditorIdDenyContains": ["rewardbox", "lootbox"],
+            "currencyDropMode": "leveledList",
+            "currencyLeveledListTargets": ["Skyrim.esm|0009AF0A"]
           },
           "keywords": {
             "tags": [{"editorId":"CAFF_TAG_DOT","name":"dot"}],
@@ -121,6 +123,8 @@ public sealed class AffixSpecLoaderTests
             Assert.NotNull(spec.Loot);
             Assert.True(spec.Loot!.CleanupInvalidLegacyAffixes);
             Assert.Equal(new[] { "rewardbox", "lootbox" }, spec.Loot.ArmorEditorIdDenyContains);
+            Assert.Equal("leveledList", spec.Loot.CurrencyDropMode);
+            Assert.Equal(new[] { "Skyrim.esm|0009AF0A" }, spec.Loot.CurrencyLeveledListTargets);
         }
         finally
         {
