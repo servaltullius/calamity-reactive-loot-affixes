@@ -1,4 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/RunewordContractSnapshot.h"
+#include "CalamityAffixes/RuntimeContract.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
@@ -167,47 +169,104 @@ namespace CalamityAffixes
 				_runewordRecipes.push_back(std::move(recipe));
 			};
 
-			struct RunewordCatalogRow
-			{
-				std::string_view recipeId{};
-				std::string_view displayName{};
-				std::string_view runeCsv{};
-				std::string_view resultAffixId{};
-				std::optional<LootItemType> recommendedBaseType{};
+			const auto parseRecommendedBaseType = [](const std::optional<bool>& a_recommendedBaseIsWeapon) {
+				if (!a_recommendedBaseIsWeapon.has_value()) {
+					return std::optional<LootItemType>{};
+				}
+				return *a_recommendedBaseIsWeapon ?
+					std::optional<LootItemType>{ LootItemType::kWeapon } :
+					std::optional<LootItemType>{ LootItemType::kArmor };
 			};
 
-			constexpr std::array<RunewordCatalogRow, 94> kRunewordCatalogRows{ {
+			auto loadCompiledFallbackCatalog = [&]() {
+				struct RunewordCatalogRow
+				{
+					std::string_view recipeId{};
+					std::string_view displayName{};
+					std::string_view runeCsv{};
+					std::string_view resultAffixId{};
+					std::optional<LootItemType> recommendedBaseType{};
+				};
+
+				constexpr std::array<RunewordCatalogRow, 94> kRunewordCatalogRows{ {
 #include "RunewordCatalogRows.inl"
-			} };
+				} };
 
-			auto splitRunes = [](std::string_view a_csv) {
-				std::vector<std::string_view> runes;
-				while (!a_csv.empty()) {
-					const auto pos = a_csv.find(',');
-					const auto token = (pos == std::string_view::npos) ? a_csv : a_csv.substr(0, pos);
-					if (!token.empty()) {
-						runes.push_back(token);
+				auto splitRunes = [](std::string_view a_csv) {
+					std::vector<std::string_view> runes;
+					while (!a_csv.empty()) {
+						const auto pos = a_csv.find(',');
+						const auto token = (pos == std::string_view::npos) ? a_csv : a_csv.substr(0, pos);
+						if (!token.empty()) {
+							runes.push_back(token);
+						}
+						if (pos == std::string_view::npos) {
+							break;
+						}
+						a_csv.remove_prefix(pos + 1);
 					}
-					if (pos == std::string_view::npos) {
-						break;
+					return runes;
+				};
+
+				// Extended D2/D2R runeword catalog (94 recipes).
+				for (const auto& row : kRunewordCatalogRows) {
+					const auto runes = splitRunes(row.runeCsv);
+					if (runes.empty()) {
+						continue;
 					}
-					a_csv.remove_prefix(pos + 1);
+					addRecipe(
+						row.recipeId,
+						row.displayName,
+						runes,
+						row.resultAffixId,
+						row.recommendedBaseType);
 				}
-				return runes;
 			};
 
-			// Extended D2/D2R runeword catalog (94 recipes).
-			for (const auto& row : kRunewordCatalogRows) {
-				const auto runes = splitRunes(row.runeCsv);
-				if (runes.empty()) {
-					continue;
+			RunewordContractSnapshot contractSnapshot{};
+			bool loadedFromContract = LoadRunewordContractSnapshotFromRuntime(
+				RuntimeContract::kRuntimeContractRelativePath,
+				contractSnapshot);
+
+			if (loadedFromContract) {
+				for (const auto& row : contractSnapshot.recipes) {
+					std::vector<std::string_view> runeViews;
+					runeViews.reserve(row.runeNames.size());
+					for (const auto& runeName : row.runeNames) {
+						runeViews.push_back(runeName);
+					}
+
+					addRecipe(
+						row.id,
+						row.displayName,
+						runeViews,
+						row.resultAffixId,
+						parseRecommendedBaseType(row.recommendedBaseIsWeapon));
 				}
-				addRecipe(
-					row.recipeId,
-					row.displayName,
-					runes,
-					row.resultAffixId,
-					row.recommendedBaseType);
+
+				if (_runewordRecipes.empty()) {
+					SKSE::log::warn(
+						"CalamityAffixes: runtime contract snapshot produced zero usable runeword recipes; falling back to compiled catalog.");
+					loadCompiledFallbackCatalog();
+					loadedFromContract = false;
+				} else {
+					SKSE::log::info(
+						"CalamityAffixes: loaded {} runeword recipes from runtime contract snapshot.",
+						_runewordRecipes.size());
+				}
+			} else {
+				loadCompiledFallbackCatalog();
+			}
+
+			if (!_runewordRecipes.empty()) {
+				if (!loadedFromContract) {
+					SKSE::log::info(
+						"CalamityAffixes: loaded {} runeword recipes from compiled fallback catalog.",
+						_runewordRecipes.size());
+				}
+			} else {
+				SKSE::log::info(
+					"CalamityAffixes: runeword catalog is empty after contract/fallback load.");
 			}
 
 				if (_runewordRecipeCycleCursor >= _runewordRecipes.size()) {
@@ -218,7 +277,16 @@ namespace CalamityAffixes
 				for (const auto token : _runewordRuneTokenPool) {
 					double weight = 1.0;
 					if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
-						weight = ResolveRunewordFragmentWeight(nameIt->second);
+						if (loadedFromContract) {
+							if (const auto weightIt = contractSnapshot.runeWeightsByName.find(nameIt->second);
+								weightIt != contractSnapshot.runeWeightsByName.end() && weightIt->second > 0.0) {
+								weight = weightIt->second;
+							} else {
+								weight = ResolveRunewordFragmentWeight(nameIt->second);
+							}
+						} else {
+							weight = ResolveRunewordFragmentWeight(nameIt->second);
+						}
 					}
 					_runewordRuneTokenWeights.push_back(weight);
 				}

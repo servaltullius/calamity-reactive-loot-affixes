@@ -508,7 +508,7 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 		const std::string_view affixFilter = (filterRaw && *filterRaw) ? std::string_view(filterRaw) : std::string_view{};
 		const auto queueRuntimeUserSettingsPersist = [&]() {
 			MarkRuntimeUserSettingsDirty();
-			MaybeFlushRuntimeUserSettings(now, false);
+			MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::now(), true);
 		};
 
 			if (eventName == kMcmSetEnabledEvent) {

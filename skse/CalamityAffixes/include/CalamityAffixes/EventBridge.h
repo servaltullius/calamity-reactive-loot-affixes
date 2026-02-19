@@ -27,6 +27,7 @@
 #include "CalamityAffixes/MagnitudeScaling.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
+#include "CalamityAffixes/RuntimeUserSettingsDebounce.h"
 #include "CalamityAffixes/ResyncScheduler.h"
 
 namespace CalamityAffixes
@@ -450,6 +451,7 @@ namespace CalamityAffixes
 		static constexpr std::chrono::milliseconds kDuplicateHitWindow{ 100 };
 		static constexpr std::chrono::milliseconds kHealthDamageHookStaleWindow{ 5000 };
 		static constexpr std::string_view kRuntimeConfigRelativePath = "Data/SKSE/Plugins/CalamityAffixes/affixes.json";
+		static constexpr std::string_view kRuntimeContractRelativePath = "Data/SKSE/Plugins/CalamityAffixes/runtime_contract.json";
 		static constexpr std::string_view kUserSettingsRelativePath = "Data/SKSE/Plugins/CalamityAffixes/user_settings.json";
 		static constexpr std::string_view kManualModeCycleNextEvent = "CalamityAffixes_ModeCycle_Next";
 		static constexpr std::string_view kManualModeCyclePrevEvent = "CalamityAffixes_ModeCycle_Prev";
@@ -615,15 +617,8 @@ namespace CalamityAffixes
 		bool _runtimeEnabled{ true };
 		float _runtimeProcChanceMult{ 1.0f };
 		std::atomic_bool _allowNonHostilePlayerOwnedOutgoingProcs{ false };
-		struct RuntimeUserSettingsPersistState
-		{
-			bool dirty{ false };
-			std::string pendingPayload{};
-			std::string lastPersistedPayload{};
-			std::chrono::steady_clock::time_point nextFlushAt{};
-		};
 		static constexpr std::chrono::milliseconds kRuntimeUserSettingsPersistDebounce{ 250 };
-		RuntimeUserSettingsPersistState _runtimeUserSettingsPersist{};
+		RuntimeUserSettingsDebounce::State _runtimeUserSettingsPersist{};
 		LootRerollGuard _lootRerollGuard{};
 		std::map<std::pair<RE::FormID, RE::FormID>, std::int32_t> _playerContainerStash;  // {containerID, baseObj} -> count
 		bool _configLoaded{ false };

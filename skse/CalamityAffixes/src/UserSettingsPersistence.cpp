@@ -1,16 +1,15 @@
 #include "CalamityAffixes/UserSettingsPersistence.h"
+#include "CalamityAffixes/RuntimePaths.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <limits>
 #include <mutex>
-#include <optional>
 #include <string>
-#include <vector>
-
-#include <Windows.h>
+#include <system_error>
 
 #include <nlohmann/json.hpp>
 
@@ -21,27 +20,6 @@ namespace CalamityAffixes::UserSettingsPersistence
 	namespace
 	{
 		std::mutex g_userSettingsIoLock;
-
-		std::optional<std::filesystem::path> GetRuntimeDirectory()
-		{
-			std::vector<wchar_t> buffer(0x4000);
-			const DWORD len = ::GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
-			if (len == 0 || len >= buffer.size()) {
-				return std::nullopt;
-			}
-
-			std::filesystem::path path(buffer.data());
-			path = path.remove_filename();
-			return path;
-		}
-
-		[[nodiscard]] std::filesystem::path ResolveRuntimeRelativePath(std::string_view a_relativePath)
-		{
-			if (const auto runtimeDir = GetRuntimeDirectory(); runtimeDir) {
-				return *runtimeDir / std::filesystem::path(a_relativePath);
-			}
-			return std::filesystem::current_path() / std::filesystem::path(a_relativePath);
-		}
 
 		enum class LoadJsonStatus : std::uint8_t
 		{
@@ -85,6 +63,61 @@ namespace CalamityAffixes::UserSettingsPersistence
 			}
 
 			return LoadJsonStatus::kLoaded;
+		}
+
+		[[nodiscard]] bool QuarantineUnreadableJsonFileUnlocked(const std::filesystem::path& a_path)
+		{
+			std::error_code existsEc;
+			const bool exists = std::filesystem::exists(a_path, existsEc);
+			if (existsEc) {
+				SKSE::log::warn(
+					"CalamityAffixes: failed to inspect unreadable user settings file {} before quarantine ({}).",
+					a_path.string(),
+					existsEc.message());
+				return false;
+			}
+			if (!exists) {
+				return true;
+			}
+
+			const auto now = std::chrono::system_clock::now();
+			const auto unixSeconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+			const auto pid = static_cast<unsigned long>(::GetCurrentProcessId());
+			std::filesystem::path quarantinedPath = a_path;
+			quarantinedPath += ".corrupt.";
+			quarantinedPath += std::to_string(unixSeconds);
+			quarantinedPath += ".";
+			quarantinedPath += std::to_string(pid);
+
+			for (std::uint32_t attempt = 0; attempt < 32u; ++attempt) {
+				std::filesystem::path candidate = quarantinedPath;
+				if (attempt > 0u) {
+					candidate += ".";
+					candidate += std::to_string(attempt);
+				}
+
+				std::error_code renameEc;
+				std::filesystem::rename(a_path, candidate, renameEc);
+				if (!renameEc) {
+					SKSE::log::warn(
+						"CalamityAffixes: quarantined unreadable user settings file {} -> {}.",
+						a_path.string(),
+						candidate.string());
+					return true;
+				}
+				if (renameEc != std::errc::file_exists) {
+					SKSE::log::warn(
+						"CalamityAffixes: failed to quarantine unreadable user settings file {} ({}).",
+						a_path.string(),
+						renameEc.message());
+					return false;
+				}
+			}
+
+			SKSE::log::warn(
+				"CalamityAffixes: failed to quarantine unreadable user settings file {} (name collision limit reached).",
+				a_path.string());
+			return false;
 		}
 
 		[[nodiscard]] bool SaveJsonObjectUnlocked(const std::filesystem::path& a_path, const nlohmann::json& a_root)
@@ -176,14 +209,14 @@ namespace CalamityAffixes::UserSettingsPersistence
 
 	bool LoadJsonObject(std::string_view a_relativePath, nlohmann::json& a_outRoot)
 	{
-		const auto path = ResolveRuntimeRelativePath(a_relativePath);
+		const auto path = RuntimePaths::ResolveRuntimeRelativePath(a_relativePath);
 		std::scoped_lock lk{ g_userSettingsIoLock };
 		return LoadJsonObjectUnlocked(path, a_outRoot) == LoadJsonStatus::kLoaded;
 	}
 
 	bool SaveJsonObject(std::string_view a_relativePath, const nlohmann::json& a_root)
 	{
-		const auto path = ResolveRuntimeRelativePath(a_relativePath);
+		const auto path = RuntimePaths::ResolveRuntimeRelativePath(a_relativePath);
 		std::scoped_lock lk{ g_userSettingsIoLock };
 		return SaveJsonObjectUnlocked(path, a_root);
 	}
@@ -192,7 +225,7 @@ namespace CalamityAffixes::UserSettingsPersistence
 		std::string_view a_relativePath,
 		const std::function<void(nlohmann::json&)>& a_mutator)
 	{
-		const auto path = ResolveRuntimeRelativePath(a_relativePath);
+		const auto path = RuntimePaths::ResolveRuntimeRelativePath(a_relativePath);
 		std::scoped_lock lk{ g_userSettingsIoLock };
 
 		nlohmann::json root = nlohmann::json::object();
@@ -202,10 +235,10 @@ namespace CalamityAffixes::UserSettingsPersistence
 				root = nlohmann::json::object();
 			}
 		} else if (loadStatus == LoadJsonStatus::kParseError || loadStatus == LoadJsonStatus::kIoError) {
-			SKSE::log::warn(
-				"CalamityAffixes: refusing to overwrite unreadable user settings file {}.",
-				path.string());
-			return false;
+			if (!QuarantineUnreadableJsonFileUnlocked(path)) {
+				return false;
+			}
+			root = nlohmann::json::object();
 		}
 
 		a_mutator(root);

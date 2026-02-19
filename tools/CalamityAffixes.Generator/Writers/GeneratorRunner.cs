@@ -35,6 +35,7 @@ public static class GeneratorRunner
 
         var json = JsonSerializer.Serialize(spec, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(Path.Combine(configDir, "affixes.json"), json);
+        File.WriteAllText(Path.Combine(configDir, "runtime_contract.json"), AffixSpecLoader.BuildValidationContractJson());
 
         var inventoryInjectorDir = Path.Combine(dataDir, "SKSE", "Plugins", "InventoryInjector");
         Directory.CreateDirectory(inventoryInjectorDir);

@@ -37,6 +37,8 @@
   - MCM Helper가 있으면 MCM에서 조정
   - 없으면 `Data/MCM/Config/CalamityAffixes/settings.ini`를 `Data/MCM/Settings/CalamityAffixes.ini`로 복사해서 오버라이드
   - 런타임/MCM UI 값은 `Data/SKSE/Plugins/CalamityAffixes/user_settings.json`에도 저장되어, 새 게임/재시작 후에도 마지막 설정을 복원합니다.
+  - 런타임(MCM) 값 저장은 짧은 디바운스(약 250ms)로 묶어 디스크 쓰기 빈도를 줄입니다.
+  - `user_settings.json` 파싱/IO 실패 시 기존 파일을 빈 값으로 덮어쓰지 않고 보존합니다.
 
 ## 이 레포는 무엇인가요?
 
@@ -278,11 +280,13 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 
 생성기는 아래도 함께 갱신합니다:
 - `Data/SKSE/Plugins/CalamityAffixes/affixes.json` (SKSE 런타임 설정)
+- `Data/SKSE/Plugins/CalamityAffixes/runtime_contract.json` (Generator↔SKSE 트리거/액션 + 런워드 카탈로그/룬 가중치 계약 스냅샷)
 - `Data/SKSE/Plugins/InventoryInjector/CalamityAffixes.json` (InventoryInjector placeholder: `rules: []`)
 - `Data/CalamityAffixes.esp` (키워드 + **옵션: records 기반 Spell/MGEF 자동 생성** + MCM Quest + `CalamityAffixes_MCMConfig` 바인딩)
 
 런타임에서 생성/유지되는 사용자 설정 파일:
 - `Data/SKSE/Plugins/CalamityAffixes/user_settings.json` (MCM 런타임 값 + Prisma 패널 단축키/언어)
+  - 저장 방식: 임시 파일 기록 + flush + 원자적 교체(중간 손상 위험 완화)
 
 ### MO2 배포 ZIP 생성
 

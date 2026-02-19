@@ -122,46 +122,10 @@ public static class KeywordPluginBuilder
 
     private static void AddRunewordRuneFragments(SkyrimMod mod)
     {
-        // Keep this list in sync with the hardcoded runeword recipes in the SKSE plugin.
-        // Include the full D2 rune ladder so future recipe expansion does not require another plugin format change.
-        // These are physical inventory items so players can "see and collect" rune materials.
+        // Rune fragment records are generated from the shared runeword contract data.
+        // This keeps generator output in sync with runtime contract snapshots.
         const string sharedFragmentModel = @"Meshes\Clutter\SoulGem\SoulGemPiece01.nif";
-        var runes = new[]
-        {
-            "El",
-            "Eld",
-            "Tir",
-            "Nef",
-            "Eth",
-            "Ith",
-            "Tal",
-            "Ral",
-            "Ort",
-            "Thul",
-            "Amn",
-            "Sol",
-            "Shael",
-            "Dol",
-            "Hel",
-            "Io",
-            "Lum",
-            "Ko",
-            "Fal",
-            "Lem",
-            "Pul",
-            "Um",
-            "Mal",
-            "Ist",
-            "Gul",
-            "Vex",
-            "Ohm",
-            "Lo",
-            "Sur",
-            "Ber",
-            "Jah",
-            "Cham",
-            "Zod",
-        };
+        var runes = AffixSpecLoader.GetRunewordRuneLadder();
 
         foreach (var rune in runes)
         {

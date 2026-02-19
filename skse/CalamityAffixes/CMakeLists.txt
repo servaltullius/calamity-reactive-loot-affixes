@@ -24,6 +24,10 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/PlayerOwnership.h
 	    include/CalamityAffixes/PrismaLayoutPersistence.h
 	    include/CalamityAffixes/PrismaTooltip.h
+	    include/CalamityAffixes/RuntimeContract.h
+	    include/CalamityAffixes/RuntimePaths.h
+	    include/CalamityAffixes/RuntimeUserSettingsDebounce.h
+	    include/CalamityAffixes/RunewordContractSnapshot.h
 	    include/CalamityAffixes/RunewordUtil.h
 	    include/CalamityAffixes/RunewordUiPolicy.h
 	    include/CalamityAffixes/TriggerGuards.h
@@ -72,6 +76,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/Papyrus.cpp
 	    src/PrismaLayoutPersistence.cpp
 	    src/PrismaTooltip.cpp
+	    src/RuntimePaths.cpp
+	    src/RunewordContractSnapshot.cpp
 	    src/TrapSystem.cpp
 	    src/UserSettingsPersistence.cpp
 	)

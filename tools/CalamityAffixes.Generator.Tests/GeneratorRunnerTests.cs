@@ -56,8 +56,21 @@ public sealed class GeneratorRunnerTests
             Assert.True(File.Exists(Path.Combine(dataDir, spec.ModKey)));
             Assert.False(File.Exists(Path.Combine(dataDir, "CalamityAffixes_Keywords.esp")));
             Assert.True(File.Exists(Path.Combine(dataDir, "SKSE", "Plugins", "CalamityAffixes", "affixes.json")));
+            Assert.True(File.Exists(Path.Combine(dataDir, "SKSE", "Plugins", "CalamityAffixes", "runtime_contract.json")));
             Assert.True(File.Exists(Path.Combine(dataDir, "SKSE", "Plugins", "InventoryInjector", "CalamityAffixes.json")));
             Assert.False(Directory.Exists(Path.Combine(dataDir, "Interface")));
+
+            var runtimeContractPath = Path.Combine(dataDir, "SKSE", "Plugins", "CalamityAffixes", "runtime_contract.json");
+            using var runtimeContract = JsonDocument.Parse(File.ReadAllText(runtimeContractPath, Encoding.UTF8));
+            var root = runtimeContract.RootElement;
+
+            var runewordCatalog = root.GetProperty("runewordCatalog");
+            Assert.True(runewordCatalog.ValueKind == JsonValueKind.Array);
+            Assert.True(runewordCatalog.GetArrayLength() > 0);
+
+            var runewordRuneWeights = root.GetProperty("runewordRuneWeights");
+            Assert.True(runewordRuneWeights.ValueKind == JsonValueKind.Array);
+            Assert.True(runewordRuneWeights.GetArrayLength() > 0);
         }
         finally
         {

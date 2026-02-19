@@ -1,5 +1,8 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootEligibility.h"
+#include "CalamityAffixes/RunewordContractSnapshot.h"
+#include "CalamityAffixes/RuntimeContract.h"
+#include "CalamityAffixes/RuntimePaths.h"
 #include "CalamityAffixes/UserSettingsPersistence.h"
 #include "EventBridge.Config.Shared.h"
 
@@ -15,9 +18,8 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <unordered_set>
 #include <vector>
-
-#include <Windows.h>
 
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
@@ -79,27 +81,6 @@ namespace CalamityAffixes
 			return label;
 		}
 
-		std::optional<std::filesystem::path> GetRuntimeDirectory()
-		{
-			std::vector<wchar_t> buffer(0x4000);
-			const DWORD len = ::GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
-			if (len == 0 || len >= buffer.size()) {
-				return std::nullopt;
-			}
-
-			std::filesystem::path path(buffer.data());
-			path = path.remove_filename();
-			return path;
-		}
-
-		[[nodiscard]] std::filesystem::path ResolveRuntimeRelativePath(std::string_view a_relativePath)
-		{
-			if (const auto runtimeDir = GetRuntimeDirectory(); runtimeDir) {
-				return *runtimeDir / std::filesystem::path(a_relativePath);
-			}
-			return std::filesystem::current_path() / std::filesystem::path(a_relativePath);
-		}
-
 		[[nodiscard]] std::string ToLowerAscii(std::string_view a_text)
 		{
 			std::string out;
@@ -120,6 +101,94 @@ namespace CalamityAffixes
 				return true;
 			}
 			return std::nullopt;
+		}
+
+		void ValidateRuntimeContractSnapshot()
+		{
+			const auto contractPath = RuntimePaths::ResolveRuntimeRelativePath(RuntimeContract::kRuntimeContractRelativePath);
+
+			std::ifstream in(contractPath, std::ios::binary);
+			if (!in.is_open()) {
+				SKSE::log::warn(
+					"CalamityAffixes: runtime contract snapshot missing at {}. Re-run generator to refresh contract artifacts.",
+					contractPath.string());
+				return;
+			}
+
+			nlohmann::json contract = nlohmann::json::object();
+			try {
+				in >> contract;
+			} catch (const std::exception& e) {
+				SKSE::log::warn(
+					"CalamityAffixes: failed to parse runtime contract snapshot {} ({}).",
+					contractPath.string(),
+					e.what());
+				return;
+			}
+
+			auto validateArray = [&](std::string_view a_key, const auto& a_expected, const auto& a_isSupported) {
+				const auto it = contract.find(std::string(a_key));
+				if (it == contract.end() || !it->is_array()) {
+					SKSE::log::warn(
+						"CalamityAffixes: runtime contract snapshot field '{}' is missing/invalid in {}.",
+						a_key,
+						contractPath.string());
+					return false;
+				}
+
+				std::unordered_set<std::string> actual{};
+				for (const auto& entry : *it) {
+					if (!entry.is_string()) {
+						SKSE::log::warn(
+							"CalamityAffixes: runtime contract snapshot field '{}' contains non-string entries in {}.",
+							a_key,
+							contractPath.string());
+						return false;
+					}
+					const auto value = entry.get<std::string>();
+					if (!a_isSupported(value)) {
+						SKSE::log::warn(
+							"CalamityAffixes: runtime contract snapshot field '{}' contains unsupported value '{}' in {}.",
+							a_key,
+							value,
+							contractPath.string());
+						return false;
+					}
+					actual.insert(value);
+				}
+
+				for (const auto expected : a_expected) {
+					if (actual.find(std::string(expected)) == actual.end()) {
+						SKSE::log::warn(
+							"CalamityAffixes: runtime contract snapshot field '{}' is missing expected value '{}' in {}.",
+							a_key,
+							expected,
+							contractPath.string());
+						return false;
+					}
+				}
+				return true;
+			};
+
+			const bool triggersOk = validateArray(
+				RuntimeContract::kFieldSupportedTriggers,
+				RuntimeContract::kSupportedTriggers,
+				[](std::string_view value) { return RuntimeContract::IsSupportedTrigger(value); });
+			const bool actionsOk = validateArray(
+				RuntimeContract::kFieldSupportedActionTypes,
+				RuntimeContract::kSupportedActionTypes,
+				[](std::string_view value) { return RuntimeContract::IsSupportedActionType(value); });
+
+			RunewordContractSnapshot runewordContractSnapshot{};
+			const bool runewordOk = LoadRunewordContractSnapshotFromRuntime(
+				RuntimeContract::kRuntimeContractRelativePath,
+				runewordContractSnapshot);
+
+			if (triggersOk && actionsOk && runewordOk) {
+				SKSE::log::info(
+					"CalamityAffixes: runtime contract snapshot validated at {}.",
+					contractPath.string());
+			}
 		}
 	}
 
@@ -205,6 +274,7 @@ namespace CalamityAffixes
 		if (!LoadRuntimeConfigJson(j)) {
 			return;
 		}
+		ValidateRuntimeContractSnapshot();
 
 		ApplyLootConfigFromJson(j);
 		ApplyRuntimeUserSettingsOverrides();
@@ -218,16 +288,16 @@ namespace CalamityAffixes
 		auto* handler = RE::TESDataHandler::GetSingleton();
 
 		auto parseTrigger = [](std::string_view a_trigger) -> std::optional<Trigger> {
-			if (a_trigger == "Hit") {
+			if (a_trigger == RuntimeContract::kTriggerHit) {
 				return Trigger::kHit;
 			}
-			if (a_trigger == "IncomingHit") {
+			if (a_trigger == RuntimeContract::kTriggerIncomingHit) {
 				return Trigger::kIncomingHit;
 			}
-			if (a_trigger == "DotApply") {
+			if (a_trigger == RuntimeContract::kTriggerDotApply) {
 				return Trigger::kDotApply;
 			}
-			if (a_trigger == "Kill") {
+			if (a_trigger == RuntimeContract::kTriggerKill) {
 				return Trigger::kKill;
 			}
 			return std::nullopt;
@@ -319,12 +389,12 @@ namespace CalamityAffixes
 		};
 
 		auto isSpecialActionType = [](std::string_view a_type) -> bool {
-			return a_type == "CastOnCrit" ||
-			       a_type == "ConvertDamage" ||
-			       a_type == "MindOverMatter" ||
-			       a_type == "Archmage" ||
-			       a_type == "CorpseExplosion" ||
-			       a_type == "SummonCorpseExplosion";
+			return a_type == RuntimeContract::kActionCastOnCrit ||
+			       a_type == RuntimeContract::kActionConvertDamage ||
+			       a_type == RuntimeContract::kActionMindOverMatter ||
+			       a_type == RuntimeContract::kActionArchmage ||
+			       a_type == RuntimeContract::kActionCorpseExplosion ||
+			       a_type == RuntimeContract::kActionSummonCorpseExplosion;
 		};
 
 		for (const auto& a : *affixes) {
@@ -933,7 +1003,7 @@ namespace CalamityAffixes
 
 	bool EventBridge::LoadRuntimeConfigJson(nlohmann::json& a_outJson) const
 	{
-		const auto configPath = ResolveRuntimeRelativePath(kRuntimeConfigRelativePath);
+		const auto configPath = RuntimePaths::ResolveRuntimeRelativePath(kRuntimeConfigRelativePath);
 
 		SKSE::log::info("CalamityAffixes: loading runtime config from: {}", configPath.string());
 
@@ -1214,26 +1284,16 @@ namespace CalamityAffixes
 
 	void EventBridge::MarkRuntimeUserSettingsDirty()
 	{
-		const std::string payload = BuildRuntimeUserSettingsPayload();
-		if (payload == _runtimeUserSettingsPersist.lastPersistedPayload) {
-			_runtimeUserSettingsPersist.dirty = false;
-			_runtimeUserSettingsPersist.pendingPayload.clear();
-			_runtimeUserSettingsPersist.nextFlushAt = {};
-			return;
-		}
-
-		_runtimeUserSettingsPersist.dirty = true;
-		_runtimeUserSettingsPersist.pendingPayload = payload;
-		_runtimeUserSettingsPersist.nextFlushAt = std::chrono::steady_clock::now() + kRuntimeUserSettingsPersistDebounce;
+		(void)RuntimeUserSettingsDebounce::MarkDirty(
+			_runtimeUserSettingsPersist,
+			BuildRuntimeUserSettingsPayload(),
+			std::chrono::steady_clock::now(),
+			kRuntimeUserSettingsPersistDebounce);
 	}
 
 	void EventBridge::MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::time_point a_now, bool a_force)
 	{
-		if (!_runtimeUserSettingsPersist.dirty) {
-			return;
-		}
-
-		if (!a_force && a_now < _runtimeUserSettingsPersist.nextFlushAt) {
+		if (!RuntimeUserSettingsDebounce::ShouldFlush(_runtimeUserSettingsPersist, a_now, a_force)) {
 			return;
 		}
 
@@ -1241,19 +1301,18 @@ namespace CalamityAffixes
 			_runtimeUserSettingsPersist.pendingPayload = BuildRuntimeUserSettingsPayload();
 		}
 		if (_runtimeUserSettingsPersist.pendingPayload == _runtimeUserSettingsPersist.lastPersistedPayload) {
-			_runtimeUserSettingsPersist.dirty = false;
-			_runtimeUserSettingsPersist.pendingPayload.clear();
-			_runtimeUserSettingsPersist.nextFlushAt = {};
+			RuntimeUserSettingsDebounce::MarkPersistSuccess(_runtimeUserSettingsPersist);
 			return;
 		}
 
 		if (PersistRuntimeUserSettings()) {
 			_runtimeUserSettingsPersist.lastPersistedPayload = _runtimeUserSettingsPersist.pendingPayload;
-			_runtimeUserSettingsPersist.dirty = false;
-			_runtimeUserSettingsPersist.pendingPayload.clear();
-			_runtimeUserSettingsPersist.nextFlushAt = {};
+			RuntimeUserSettingsDebounce::MarkPersistSuccess(_runtimeUserSettingsPersist);
 		} else {
-			_runtimeUserSettingsPersist.nextFlushAt = a_now + kRuntimeUserSettingsPersistDebounce;
+			RuntimeUserSettingsDebounce::MarkPersistFailure(
+				_runtimeUserSettingsPersist,
+				a_now,
+				kRuntimeUserSettingsPersistDebounce);
 		}
 	}
 

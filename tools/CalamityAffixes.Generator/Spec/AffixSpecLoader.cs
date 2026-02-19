@@ -8,6 +8,7 @@ public static class AffixSpecLoader
     private const string ValidationContractRelativePath = "tools/affix_validation_contract.json";
     private static readonly char[] InvalidModKeyFileNameChars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
     private static readonly ValidationContract Contract = LoadValidationContract();
+    private static readonly RunewordContractCatalog.Snapshot RunewordContract = RunewordContractCatalog.Load();
     private static readonly HashSet<string> SupportedTriggers = Contract.SupportedTriggers;
     private static readonly HashSet<string> SupportedActionTypes = Contract.SupportedActionTypes;
 
@@ -27,6 +28,55 @@ public static class AffixSpecLoader
 
         Validate(spec);
         return spec;
+    }
+
+    public static string BuildValidationContractJson(bool indented = true)
+    {
+        var supportedTriggers = SupportedTriggers.ToArray();
+        var supportedActionTypes = SupportedActionTypes.ToArray();
+        Array.Sort(supportedTriggers, StringComparer.Ordinal);
+        Array.Sort(supportedActionTypes, StringComparer.Ordinal);
+
+        var runewordCatalog = RunewordContract.Recipes
+            .Select(recipe => new
+            {
+                id = recipe.Id,
+                name = recipe.DisplayName,
+                runes = recipe.Runes,
+                resultAffixId = recipe.ResultAffixId,
+                recommendedBase = recipe.RecommendedBase,
+            })
+            .ToArray();
+
+        var runewordRuneWeights = RunewordContract.RuneWeights
+            .Select(weight => new
+            {
+                rune = weight.Rune,
+                weight = weight.Weight,
+            })
+            .ToArray();
+
+        var payload = new
+        {
+            supportedTriggers,
+            supportedActionTypes,
+            runewordCatalog,
+            runewordRuneWeights,
+        };
+
+        return JsonSerializer.Serialize(
+            payload,
+            new JsonSerializerOptions
+            {
+                WriteIndented = indented,
+            });
+    }
+
+    public static IReadOnlyList<string> GetRunewordRuneLadder()
+    {
+        return RunewordContract.RuneWeights
+            .Select(weight => weight.Rune)
+            .ToArray();
     }
 
     private static void Validate(AffixSpec spec)

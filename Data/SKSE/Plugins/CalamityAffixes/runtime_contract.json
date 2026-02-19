@@ -1,0 +1,1237 @@
+{
+  "supportedTriggers": [
+    "DotApply",
+    "Hit",
+    "IncomingHit",
+    "Kill"
+  ],
+  "supportedActionTypes": [
+    "Archmage",
+    "CastOnCrit",
+    "CastSpell",
+    "CastSpellAdaptiveElement",
+    "ConvertDamage",
+    "CorpseExplosion",
+    "DebugNotify",
+    "MindOverMatter",
+    "SpawnTrap",
+    "SummonCorpseExplosion"
+  ],
+  "runewordCatalog": [
+    {
+      "id": "rw_nadir",
+      "name": "Nadir",
+      "runes": [
+        "Nef",
+        "Tir"
+      ],
+      "resultAffixId": "runeword_nadir_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_steel",
+      "name": "Steel",
+      "runes": [
+        "Tir",
+        "El"
+      ],
+      "resultAffixId": "runeword_steel_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_malice",
+      "name": "Malice",
+      "runes": [
+        "Ith",
+        "El",
+        "Eth"
+      ],
+      "resultAffixId": "runeword_malice_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_stealth",
+      "name": "Stealth",
+      "runes": [
+        "Tal",
+        "Eth"
+      ],
+      "resultAffixId": "runeword_stealth_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_leaf",
+      "name": "Leaf",
+      "runes": [
+        "Tir",
+        "Ral"
+      ],
+      "resultAffixId": "runeword_leaf_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_ancients_pledge",
+      "name": "Ancient\u0027s Pledge",
+      "runes": [
+        "Ral",
+        "Ort",
+        "Tal"
+      ],
+      "resultAffixId": "runeword_ancients_pledge_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_holy_thunder",
+      "name": "Holy Thunder",
+      "runes": [
+        "Eth",
+        "Ral",
+        "Ort",
+        "Tal"
+      ],
+      "resultAffixId": "runeword_holy_thunder_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_zephyr",
+      "name": "Zephyr",
+      "runes": [
+        "Ort",
+        "Eth"
+      ],
+      "resultAffixId": "runeword_zephyr_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_pattern",
+      "name": "Pattern",
+      "runes": [
+        "Tal",
+        "Ort",
+        "Thul"
+      ],
+      "resultAffixId": "runeword_pattern_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_kings_grace",
+      "name": "King\u0027s Grace",
+      "runes": [
+        "Amn",
+        "Ral",
+        "Thul"
+      ],
+      "resultAffixId": "runeword_kings_grace_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_strength",
+      "name": "Strength",
+      "runes": [
+        "Amn",
+        "Tir"
+      ],
+      "resultAffixId": "runeword_strength_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_edge",
+      "name": "Edge",
+      "runes": [
+        "Tir",
+        "Tal",
+        "Amn"
+      ],
+      "resultAffixId": "runeword_edge_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_myth",
+      "name": "Myth",
+      "runes": [
+        "Hel",
+        "Amn",
+        "Nef"
+      ],
+      "resultAffixId": "runeword_myth_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_spirit",
+      "name": "Spirit",
+      "runes": [
+        "Tal",
+        "Thul",
+        "Ort",
+        "Amn"
+      ],
+      "resultAffixId": "runeword_spirit_final",
+      "recommendedBase": null
+    },
+    {
+      "id": "rw_honor",
+      "name": "Honor",
+      "runes": [
+        "Amn",
+        "El",
+        "Ith",
+        "Tir",
+        "Sol"
+      ],
+      "resultAffixId": "runeword_honor_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_lore",
+      "name": "Lore",
+      "runes": [
+        "Ort",
+        "Sol"
+      ],
+      "resultAffixId": "runeword_lore_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_radiance",
+      "name": "Radiance",
+      "runes": [
+        "Nef",
+        "Sol",
+        "Ith"
+      ],
+      "resultAffixId": "runeword_radiance_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_insight",
+      "name": "Insight",
+      "runes": [
+        "Ral",
+        "Tir",
+        "Tal",
+        "Sol"
+      ],
+      "resultAffixId": "runeword_insight_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_rhyme",
+      "name": "Rhyme",
+      "runes": [
+        "Shael",
+        "Eth"
+      ],
+      "resultAffixId": "runeword_rhyme_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_peace",
+      "name": "Peace",
+      "runes": [
+        "Shael",
+        "Thul",
+        "Amn"
+      ],
+      "resultAffixId": "runeword_peace_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_black",
+      "name": "Black",
+      "runes": [
+        "Thul",
+        "Io",
+        "Nef"
+      ],
+      "resultAffixId": "runeword_black_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_bulwark",
+      "name": "Bulwark",
+      "runes": [
+        "Shael",
+        "Io",
+        "Sol"
+      ],
+      "resultAffixId": "runeword_bulwark_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_cure",
+      "name": "Cure",
+      "runes": [
+        "Shael",
+        "Io",
+        "Tal"
+      ],
+      "resultAffixId": "runeword_cure_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_ground",
+      "name": "Ground",
+      "runes": [
+        "Shael",
+        "Io",
+        "Ort"
+      ],
+      "resultAffixId": "runeword_ground_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_hearth",
+      "name": "Hearth",
+      "runes": [
+        "Shael",
+        "Io",
+        "Thul"
+      ],
+      "resultAffixId": "runeword_hearth_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_temper",
+      "name": "Temper",
+      "runes": [
+        "Shael",
+        "Io",
+        "Ral"
+      ],
+      "resultAffixId": "runeword_temper_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_white",
+      "name": "White",
+      "runes": [
+        "Dol",
+        "Io"
+      ],
+      "resultAffixId": "runeword_white_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_memory",
+      "name": "Memory",
+      "runes": [
+        "Lum",
+        "Io",
+        "Sol",
+        "Eth"
+      ],
+      "resultAffixId": "runeword_memory_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_smoke",
+      "name": "Smoke",
+      "runes": [
+        "Nef",
+        "Lum"
+      ],
+      "resultAffixId": "runeword_smoke_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_splendor",
+      "name": "Splendor",
+      "runes": [
+        "Eth",
+        "Lum"
+      ],
+      "resultAffixId": "runeword_splendor_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_melody",
+      "name": "Melody",
+      "runes": [
+        "Shael",
+        "Ko",
+        "Nef"
+      ],
+      "resultAffixId": "runeword_melody_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_harmony",
+      "name": "Harmony",
+      "runes": [
+        "Tir",
+        "Ith",
+        "Sol",
+        "Ko"
+      ],
+      "resultAffixId": "runeword_harmony_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_hustle_w",
+      "name": "Hustle-W",
+      "runes": [
+        "Shael",
+        "Ko",
+        "Eld"
+      ],
+      "resultAffixId": "runeword_hustle_w_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_hustle_a",
+      "name": "Hustle-A",
+      "runes": [
+        "Shael",
+        "Ko",
+        "Eld"
+      ],
+      "resultAffixId": "runeword_hustle_a_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_lionheart",
+      "name": "Lionheart",
+      "runes": [
+        "Hel",
+        "Lum",
+        "Fal"
+      ],
+      "resultAffixId": "runeword_lionheart_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_obedience",
+      "name": "Obedience",
+      "runes": [
+        "Hel",
+        "Ko",
+        "Thul",
+        "Eth",
+        "Fal"
+      ],
+      "resultAffixId": "runeword_obedience_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_unbending_will",
+      "name": "Unbending Will",
+      "runes": [
+        "Fal",
+        "Io",
+        "Ith",
+        "Eld",
+        "El",
+        "Hel"
+      ],
+      "resultAffixId": "runeword_unbending_will_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_wealth",
+      "name": "Wealth",
+      "runes": [
+        "Lem",
+        "Ko",
+        "Tir"
+      ],
+      "resultAffixId": "runeword_wealth_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_passion",
+      "name": "Passion",
+      "runes": [
+        "Dol",
+        "Ort",
+        "Eld",
+        "Lem"
+      ],
+      "resultAffixId": "runeword_passion_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_lawbringer",
+      "name": "Lawbringer",
+      "runes": [
+        "Amn",
+        "Lem",
+        "Ko"
+      ],
+      "resultAffixId": "runeword_lawbringer_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_voice_of_reason",
+      "name": "Voice of Reason",
+      "runes": [
+        "Lem",
+        "Ko",
+        "El",
+        "Eld"
+      ],
+      "resultAffixId": "runeword_voice_of_reason_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_treachery",
+      "name": "Treachery",
+      "runes": [
+        "Shael",
+        "Thul",
+        "Lem"
+      ],
+      "resultAffixId": "runeword_treachery_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_enlightenment",
+      "name": "Enlightenment",
+      "runes": [
+        "Pul",
+        "Ral",
+        "Sol"
+      ],
+      "resultAffixId": "runeword_enlightenment_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_wisdom",
+      "name": "Wisdom",
+      "runes": [
+        "Pul",
+        "Ith",
+        "Eld"
+      ],
+      "resultAffixId": "runeword_wisdom_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_crescent_moon",
+      "name": "Crescent Moon",
+      "runes": [
+        "Shael",
+        "Um",
+        "Tir"
+      ],
+      "resultAffixId": "runeword_crescent_moon_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_duress",
+      "name": "Duress",
+      "runes": [
+        "Shael",
+        "Um",
+        "Thul"
+      ],
+      "resultAffixId": "runeword_duress_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_gloom",
+      "name": "Gloom",
+      "runes": [
+        "Fal",
+        "Um",
+        "Pul"
+      ],
+      "resultAffixId": "runeword_gloom_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_stone",
+      "name": "Stone",
+      "runes": [
+        "Shael",
+        "Um",
+        "Pul",
+        "Lum"
+      ],
+      "resultAffixId": "runeword_stone_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_bone",
+      "name": "Bone",
+      "runes": [
+        "Sol",
+        "Um",
+        "Um"
+      ],
+      "resultAffixId": "runeword_bone_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_venom",
+      "name": "Venom",
+      "runes": [
+        "Tal",
+        "Dol",
+        "Mal"
+      ],
+      "resultAffixId": "runeword_venom_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_prudence",
+      "name": "Prudence",
+      "runes": [
+        "Mal",
+        "Tir"
+      ],
+      "resultAffixId": "runeword_prudence_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_sanctuary",
+      "name": "Sanctuary",
+      "runes": [
+        "Ko",
+        "Ko",
+        "Mal"
+      ],
+      "resultAffixId": "runeword_sanctuary_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_oath",
+      "name": "Oath",
+      "runes": [
+        "Shael",
+        "Pul",
+        "Mal",
+        "Lum"
+      ],
+      "resultAffixId": "runeword_oath_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_rain",
+      "name": "Rain",
+      "runes": [
+        "Ort",
+        "Mal",
+        "Ith"
+      ],
+      "resultAffixId": "runeword_rain_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_call_to_arms",
+      "name": "Call to Arms",
+      "runes": [
+        "Amn",
+        "Ral",
+        "Mal",
+        "Ist",
+        "Ohm"
+      ],
+      "resultAffixId": "runeword_call_to_arms_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_delirium",
+      "name": "Delirium",
+      "runes": [
+        "Lem",
+        "Ist",
+        "Io"
+      ],
+      "resultAffixId": "runeword_delirium_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_kingslayer",
+      "name": "Kingslayer",
+      "runes": [
+        "Mal",
+        "Um",
+        "Gul",
+        "Fal"
+      ],
+      "resultAffixId": "runeword_kingslayer_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_rift",
+      "name": "Rift",
+      "runes": [
+        "Hel",
+        "Ko",
+        "Lem",
+        "Gul"
+      ],
+      "resultAffixId": "runeword_rift_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_principle",
+      "name": "Principle",
+      "runes": [
+        "Ral",
+        "Gul",
+        "Eld"
+      ],
+      "resultAffixId": "runeword_principle_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_mosaic",
+      "name": "Mosaic",
+      "runes": [
+        "Mal",
+        "Gul",
+        "Amn"
+      ],
+      "resultAffixId": "runeword_mosaic_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_silence",
+      "name": "Silence",
+      "runes": [
+        "Dol",
+        "Eld",
+        "Hel",
+        "Ist",
+        "Tir",
+        "Vex"
+      ],
+      "resultAffixId": "runeword_silence_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_heart_of_the_oak",
+      "name": "Heart of the Oak",
+      "runes": [
+        "Ko",
+        "Vex",
+        "Pul",
+        "Thul"
+      ],
+      "resultAffixId": "runeword_heart_of_the_oak_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_death",
+      "name": "Death",
+      "runes": [
+        "Hel",
+        "El",
+        "Vex",
+        "Ort",
+        "Gul"
+      ],
+      "resultAffixId": "runeword_death_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_flickering_flame",
+      "name": "Flickering Flame",
+      "runes": [
+        "Nef",
+        "Pul",
+        "Vex"
+      ],
+      "resultAffixId": "runeword_flickering_flame_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_chaos",
+      "name": "Chaos",
+      "runes": [
+        "Fal",
+        "Ohm",
+        "Um"
+      ],
+      "resultAffixId": "runeword_chaos_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_exile",
+      "name": "Exile",
+      "runes": [
+        "Vex",
+        "Ohm",
+        "Ist",
+        "Dol"
+      ],
+      "resultAffixId": "runeword_exile_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_fortitude",
+      "name": "Fortitude",
+      "runes": [
+        "El",
+        "Sol",
+        "Dol",
+        "Lo"
+      ],
+      "resultAffixId": "runeword_fortitude_final",
+      "recommendedBase": null
+    },
+    {
+      "id": "rw_grief",
+      "name": "Grief",
+      "runes": [
+        "Eth",
+        "Tir",
+        "Lo",
+        "Mal",
+        "Ral"
+      ],
+      "resultAffixId": "runeword_grief_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_bramble",
+      "name": "Bramble",
+      "runes": [
+        "Ral",
+        "Ohm",
+        "Sur",
+        "Eth"
+      ],
+      "resultAffixId": "runeword_bramble_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_wind",
+      "name": "Wind",
+      "runes": [
+        "Sur",
+        "El"
+      ],
+      "resultAffixId": "runeword_wind_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_dragon",
+      "name": "Dragon",
+      "runes": [
+        "Sur",
+        "Lo",
+        "Sol"
+      ],
+      "resultAffixId": "runeword_dragon_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_beast",
+      "name": "Beast",
+      "runes": [
+        "Ber",
+        "Tir",
+        "Um",
+        "Mal",
+        "Lum"
+      ],
+      "resultAffixId": "runeword_beast_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_chains_of_honor",
+      "name": "Chains of Honor",
+      "runes": [
+        "Dol",
+        "Um",
+        "Ber",
+        "Ist"
+      ],
+      "resultAffixId": "runeword_chains_of_honor_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_eternity",
+      "name": "Eternity",
+      "runes": [
+        "Amn",
+        "Ber",
+        "Ist",
+        "Sol",
+        "Sur"
+      ],
+      "resultAffixId": "runeword_eternity_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_infinity",
+      "name": "Infinity",
+      "runes": [
+        "Ber",
+        "Mal",
+        "Ber",
+        "Ist"
+      ],
+      "resultAffixId": "runeword_infinity_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_wrath",
+      "name": "Wrath",
+      "runes": [
+        "Pul",
+        "Lum",
+        "Ber",
+        "Mal"
+      ],
+      "resultAffixId": "runeword_wrath_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_fury",
+      "name": "Fury",
+      "runes": [
+        "Jah",
+        "Gul",
+        "Eth"
+      ],
+      "resultAffixId": "runeword_fury_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_enigma",
+      "name": "Enigma",
+      "runes": [
+        "Jah",
+        "Ith",
+        "Ber"
+      ],
+      "resultAffixId": "runeword_enigma_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_famine",
+      "name": "Famine",
+      "runes": [
+        "Fal",
+        "Ohm",
+        "Ort",
+        "Jah"
+      ],
+      "resultAffixId": "runeword_famine_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_brand",
+      "name": "Brand",
+      "runes": [
+        "Jah",
+        "Lo",
+        "Mal",
+        "Gul"
+      ],
+      "resultAffixId": "runeword_brand_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_destruction",
+      "name": "Destruction",
+      "runes": [
+        "Vex",
+        "Lo",
+        "Ber",
+        "Jah",
+        "Ko"
+      ],
+      "resultAffixId": "runeword_destruction_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_dream",
+      "name": "Dream",
+      "runes": [
+        "Io",
+        "Jah",
+        "Pul"
+      ],
+      "resultAffixId": "runeword_dream_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_faith",
+      "name": "Faith",
+      "runes": [
+        "Ohm",
+        "Jah",
+        "Lem",
+        "Eld"
+      ],
+      "resultAffixId": "runeword_faith_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_ice",
+      "name": "Ice",
+      "runes": [
+        "Amn",
+        "Shael",
+        "Jah",
+        "Lo"
+      ],
+      "resultAffixId": "runeword_ice_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_last_wish",
+      "name": "Last Wish",
+      "runes": [
+        "Jah",
+        "Mal",
+        "Jah",
+        "Sur",
+        "Jah",
+        "Ber"
+      ],
+      "resultAffixId": "runeword_last_wish_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_phoenix",
+      "name": "Phoenix",
+      "runes": [
+        "Vex",
+        "Vex",
+        "Lo",
+        "Jah"
+      ],
+      "resultAffixId": "runeword_phoenix_final",
+      "recommendedBase": null
+    },
+    {
+      "id": "rw_doom",
+      "name": "Doom",
+      "runes": [
+        "Hel",
+        "Ohm",
+        "Um",
+        "Lo",
+        "Cham"
+      ],
+      "resultAffixId": "runeword_doom_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_hand_of_justice",
+      "name": "Hand of Justice",
+      "runes": [
+        "Sur",
+        "Cham",
+        "Amn",
+        "Lo"
+      ],
+      "resultAffixId": "runeword_hand_of_justice_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_pride",
+      "name": "Pride",
+      "runes": [
+        "Cham",
+        "Sur",
+        "Io",
+        "Lo"
+      ],
+      "resultAffixId": "runeword_pride_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_plague",
+      "name": "Plague",
+      "runes": [
+        "Cham",
+        "Shael",
+        "Um"
+      ],
+      "resultAffixId": "runeword_plague_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_metamorphosis",
+      "name": "Metamorphosis",
+      "runes": [
+        "Io",
+        "Cham",
+        "Fal"
+      ],
+      "resultAffixId": "runeword_metamorphosis_final",
+      "recommendedBase": "Armor"
+    },
+    {
+      "id": "rw_obsession",
+      "name": "Obsession",
+      "runes": [
+        "Zod",
+        "Ist",
+        "Lem",
+        "Lum",
+        "Io",
+        "Nef"
+      ],
+      "resultAffixId": "runeword_obsession_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_mist",
+      "name": "Mist",
+      "runes": [
+        "Cham",
+        "Shael",
+        "Gul",
+        "Thul",
+        "Ith"
+      ],
+      "resultAffixId": "runeword_mist_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_breath_of_the_dying",
+      "name": "Breath of the Dying",
+      "runes": [
+        "Vex",
+        "Hel",
+        "El",
+        "Eld",
+        "Zod",
+        "Eth"
+      ],
+      "resultAffixId": "runeword_breath_of_the_dying_final",
+      "recommendedBase": "Weapon"
+    }
+  ],
+  "runewordRuneWeights": [
+    {
+      "rune": "El",
+      "weight": 1200
+    },
+    {
+      "rune": "Eld",
+      "weight": 1100
+    },
+    {
+      "rune": "Tir",
+      "weight": 1000
+    },
+    {
+      "rune": "Nef",
+      "weight": 900
+    },
+    {
+      "rune": "Eth",
+      "weight": 800
+    },
+    {
+      "rune": "Ith",
+      "weight": 700
+    },
+    {
+      "rune": "Tal",
+      "weight": 620
+    },
+    {
+      "rune": "Ral",
+      "weight": 560
+    },
+    {
+      "rune": "Ort",
+      "weight": 500
+    },
+    {
+      "rune": "Thul",
+      "weight": 450
+    },
+    {
+      "rune": "Amn",
+      "weight": 400
+    },
+    {
+      "rune": "Sol",
+      "weight": 340
+    },
+    {
+      "rune": "Shael",
+      "weight": 280
+    },
+    {
+      "rune": "Dol",
+      "weight": 230
+    },
+    {
+      "rune": "Hel",
+      "weight": 190
+    },
+    {
+      "rune": "Io",
+      "weight": 155
+    },
+    {
+      "rune": "Lum",
+      "weight": 125
+    },
+    {
+      "rune": "Ko",
+      "weight": 100
+    },
+    {
+      "rune": "Fal",
+      "weight": 80
+    },
+    {
+      "rune": "Lem",
+      "weight": 64
+    },
+    {
+      "rune": "Pul",
+      "weight": 50
+    },
+    {
+      "rune": "Um",
+      "weight": 39
+    },
+    {
+      "rune": "Mal",
+      "weight": 30
+    },
+    {
+      "rune": "Ist",
+      "weight": 23
+    },
+    {
+      "rune": "Gul",
+      "weight": 17
+    },
+    {
+      "rune": "Vex",
+      "weight": 14
+    },
+    {
+      "rune": "Ohm",
+      "weight": 11
+    },
+    {
+      "rune": "Lo",
+      "weight": 8
+    },
+    {
+      "rune": "Sur",
+      "weight": 6
+    },
+    {
+      "rune": "Ber",
+      "weight": 5
+    },
+    {
+      "rune": "Jah",
+      "weight": 4
+    },
+    {
+      "rune": "Cham",
+      "weight": 3
+    },
+    {
+      "rune": "Zod",
+      "weight": 2
+    }
+  ]
+}
