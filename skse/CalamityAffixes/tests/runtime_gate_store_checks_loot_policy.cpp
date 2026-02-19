@@ -220,6 +220,20 @@ namespace RuntimeGateStoreChecks
 			std::cerr << "mcm_drop_chance_bridge: MCM slider/action wiring is missing\n";
 			return false;
 		}
+		const auto countOccurrences = [](std::string_view haystack, std::string_view needle) -> std::size_t {
+			std::size_t count = 0;
+			std::size_t pos = 0;
+			while ((pos = haystack.find(needle, pos)) != std::string_view::npos) {
+				++count;
+				pos += needle.size();
+			}
+			return count;
+		};
+		if (countOccurrences(*configJsonText, "\"formatString\": \"{1}%\"") < 2 ||
+			configJsonText->find("\"formatString\": \"%.1f%%\"") != std::string::npos) {
+			std::cerr << "mcm_drop_chance_bridge: chance slider formatString must use MCM Helper token syntax ({1}%).\n";
+			return false;
+		}
 
 		const auto mcmConfigText = loadText(mcmConfigScriptFile);
 		if (!mcmConfigText.has_value()) {
