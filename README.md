@@ -327,6 +327,16 @@ Synthesis CLI 호환 인자도 지원합니다:
 - `-l` / `--LoadOrderFilePath`
 - `-o` / `--OutputPath`
 
+#### UserPatch 트러블슈팅
+
+- `No arguments were provided` 메시지:
+  - `CalamityAffixes.UserPatch.exe`를 직접 실행한 경우입니다. `build_user_patch_wizard.cmd`를 실행하세요.
+- `MSB1009: 프로젝트 파일이 없습니다`:
+  - 구버전 패키지이거나 소스 경로 전제 실행일 때 발생합니다. `v1.2.17-rc59+` 이상 ZIP으로 업데이트하세요.
+- 특정 모드만 반영되거나 대상이 적게 나옴:
+  - 위저드에서 **현재 MO2 프로필의** `loadorder.txt`/`plugins.txt`를 선택했는지 확인하세요.
+  - 생성 완료 콘솔의 `TargetsByMod` 줄에서 모드별 적용 개수를 확인할 수 있습니다.
+
 ### MO2 배포 ZIP 생성
 
 ```bash

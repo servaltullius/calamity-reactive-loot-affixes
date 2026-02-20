@@ -86,6 +86,15 @@ dotnet run --project tools/CalamityAffixes.UserPatch -- \
 
 - Synthesis 호환 인자: `-d`(DataFolderPath), `-l`(LoadOrderFilePath), `-o`(OutputPath)
 
+#### UserPatch 트러블슈팅
+- `No arguments were provided`:
+  - `CalamityAffixes.UserPatch.exe`를 직접 실행한 상태입니다. `build_user_patch_wizard.cmd`로 실행하세요.
+- `MSB1009: Project file does not exist`:
+  - 구버전 패키지 또는 소스 경로 전제 실행일 때 주로 발생합니다. `v1.2.17-rc59+` ZIP으로 업데이트하세요.
+- 특정 모드만 반영되거나 대상이 적게 나옴:
+  - 위저드에서 **현재 MO2 프로필**의 `loadorder.txt`/`plugins.txt`를 선택했는지 확인하세요.
+  - 완료 로그의 `TargetsByMod`에서 모드별 적용 개수를 확인할 수 있습니다.
+
 ### 주의사항
 
 - Prisma UI가 없으면 툴팁/패널 UI가 표시되지 않습니다.
@@ -174,6 +183,15 @@ dotnet run --project tools/CalamityAffixes.UserPatch -- \
 ```
 
 - Synthesis-compatible aliases: `-d` (DataFolderPath), `-l` (LoadOrderFilePath), `-o` (OutputPath)
+
+#### UserPatch Troubleshooting
+- `No arguments were provided`:
+  - You launched `CalamityAffixes.UserPatch.exe` directly. Start from `build_user_patch_wizard.cmd`.
+- `MSB1009: Project file does not exist`:
+  - Usually an old package or source-path-based launch. Update to `v1.2.17-rc59+` ZIP.
+- Patch seems to include only one mod / too few targets:
+  - Ensure the wizard selected the **active MO2 profile** `loadorder.txt`/`plugins.txt`.
+  - Check the completion log line `TargetsByMod` for per-mod counts.
 
 ### Notes
 
