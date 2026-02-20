@@ -300,6 +300,7 @@ tools\build_user_patch_wizard.cmd
 ```
 
 - 폴더/파일 선택 창이 열리며, `Data` 폴더 / `plugins.txt`(또는 `loadorder.txt`) / 출력 경로를 순서대로 고르면 됩니다.
+- 위저드는 기본값으로 경로를 자동 탐지합니다. MO2가 잡히면 `ModOrganizer.ini`의 `selected_profile` 기준으로 해당 프로필의 `loadorder.txt`(또는 `plugins.txt`)를 우선 선택합니다.
 - CLI를 몰라도 됩니다.
 
 ```bash

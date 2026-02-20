@@ -9,7 +9,186 @@ $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-function Find-DefaultDataPath {
+function Decode-Mo2IniValue([string]$value) {
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $null
+    }
+
+    $trimmed = $value.Trim()
+    if (
+        ($trimmed.StartsWith("'") -and $trimmed.EndsWith("'")) -or
+        ($trimmed.StartsWith('"') -and $trimmed.EndsWith('"'))
+    ) {
+        $trimmed = $trimmed.Substring(1, $trimmed.Length - 2)
+    }
+
+    $byteArrayMatch = [regex]::Match(
+        $trimmed,
+        '^@bytearray\((?<value>.*)\)$',
+        [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+    if ($byteArrayMatch.Success) {
+        return $byteArrayMatch.Groups["value"].Value.Trim()
+    }
+
+    return $trimmed
+}
+
+function Resolve-Mo2Path([string]$rawValue, [string]$mo2Root) {
+    $decoded = Decode-Mo2IniValue $rawValue
+    if ([string]::IsNullOrWhiteSpace($decoded)) {
+        return $null
+    }
+
+    $withBase = $decoded.Replace("%BASE_DIR%", $mo2Root).Replace("%base_dir%", $mo2Root)
+    $expanded = [Environment]::ExpandEnvironmentVariables($withBase).Replace("/", "\")
+
+    if ([System.IO.Path]::IsPathRooted($expanded)) {
+        return $expanded
+    }
+
+    return Join-Path $mo2Root $expanded
+}
+
+function Get-IniValue([string]$iniPath, [string]$section, [string]$key) {
+    if (-not (Test-Path $iniPath)) {
+        return $null
+    }
+
+    $currentSection = ""
+    foreach ($rawLine in Get-Content -Path $iniPath -ErrorAction SilentlyContinue) {
+        $line = $rawLine.Trim()
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+        if ($line.StartsWith(";") -or $line.StartsWith("#")) {
+            continue
+        }
+
+        $sectionMatch = [regex]::Match($line, '^\[(?<section>[^\]]+)\]$')
+        if ($sectionMatch.Success) {
+            $currentSection = $sectionMatch.Groups["section"].Value.Trim()
+            continue
+        }
+
+        if (-not $currentSection.Equals($section, [System.StringComparison]::OrdinalIgnoreCase)) {
+            continue
+        }
+
+        $entryMatch = [regex]::Match($line, '^(?<name>[^=]+?)\s*=\s*(?<value>.*)$')
+        if (-not $entryMatch.Success) {
+            continue
+        }
+
+        if ($entryMatch.Groups["name"].Value.Trim().Equals($key, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $entryMatch.Groups["value"].Value
+        }
+    }
+
+    return $null
+}
+
+function Get-Mo2RootCandidates {
+    return @(
+        "$env:LOCALAPPDATA\ModOrganizer",
+        "$env:LOCALAPPDATA\ModOrganizer2",
+        "$env:USERPROFILE\AppData\Local\ModOrganizer",
+        "$env:USERPROFILE\AppData\Local\ModOrganizer2"
+    ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
+}
+
+function Get-Mo2Context {
+    $roots = Get-Mo2RootCandidates
+    $iniCandidates = @()
+    foreach ($root in $roots) {
+        if (-not (Test-Path $root)) {
+            continue
+        }
+
+        $iniPath = Join-Path $root "ModOrganizer.ini"
+        if (Test-Path $iniPath) {
+            $iniCandidates += $iniPath
+        }
+
+        $nestedInis = Get-ChildItem -Path $root -Filter "ModOrganizer.ini" -Recurse -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty FullName
+        if ($null -ne $nestedInis) {
+            $iniCandidates += $nestedInis
+        }
+    }
+
+    $iniCandidates = $iniCandidates | Select-Object -Unique
+    $bestContext = $null
+    $bestScore = -1
+    foreach ($iniPath in $iniCandidates) {
+        $root = Split-Path -Parent $iniPath
+        $selectedProfile = Decode-Mo2IniValue (Get-IniValue -iniPath $iniPath -section "General" -key "selected_profile")
+        $gamePath = Resolve-Mo2Path -rawValue (Get-IniValue -iniPath $iniPath -section "General" -key "gamePath") -mo2Root $root
+
+        $loadOrderPath = $null
+        if (-not [string]::IsNullOrWhiteSpace($selectedProfile)) {
+            $profileRoot = Join-Path $root (Join-Path "profiles" $selectedProfile)
+            $profileCandidates = @(
+                (Join-Path $profileRoot "loadorder.txt"),
+                (Join-Path $profileRoot "plugins.txt")
+            )
+
+            foreach ($candidate in $profileCandidates) {
+                if (Test-Path $candidate) {
+                    $loadOrderPath = $candidate
+                    break
+                }
+            }
+        }
+
+        $score = 0
+        if (-not [string]::IsNullOrWhiteSpace($loadOrderPath)) {
+            $score += 2
+        }
+        if (-not [string]::IsNullOrWhiteSpace($gamePath)) {
+            $score += 1
+        }
+        if (-not [string]::IsNullOrWhiteSpace($selectedProfile)) {
+            $score += 1
+        }
+
+        if ($score -gt $bestScore) {
+            $bestScore = $score
+            $bestContext = [PSCustomObject]@{
+                RootPath = $root
+                IniPath = $iniPath
+                SelectedProfile = $selectedProfile
+                GamePath = $gamePath
+                LoadOrderPath = $loadOrderPath
+            }
+        }
+    }
+
+    if ($bestScore -gt 0) {
+        return $bestContext
+    }
+
+    return $null
+}
+
+function Find-DefaultDataPath([object]$mo2Context) {
+    if ($null -ne $mo2Context -and -not [string]::IsNullOrWhiteSpace($mo2Context.GamePath)) {
+        $mo2Candidates = @(
+            (Join-Path $mo2Context.GamePath "Data"),
+            $mo2Context.GamePath
+        )
+
+        foreach ($path in $mo2Candidates) {
+            if ([string]::IsNullOrWhiteSpace($path)) {
+                continue
+            }
+
+            if (Test-Path (Join-Path $path "Skyrim.esm")) {
+                return $path
+            }
+        }
+    }
+
     $candidates = @(
         "$env:ProgramFiles(x86)\Steam\steamapps\common\Skyrim Special Edition\Data",
         "$env:ProgramFiles(x86)\Steam\steamapps\common\The Elder Scrolls V Skyrim Special Edition\Data",
@@ -33,8 +212,9 @@ function Find-DefaultDataPath {
     return $null
 }
 
-function Find-DefaultLoadOrderPath {
+function Find-DefaultLoadOrderPath([object]$mo2Context) {
     $candidates = @(
+        $mo2Context.LoadOrderPath,
         "$env:LOCALAPPDATA\Skyrim Special Edition\plugins.txt",
         "$env:LOCALAPPDATA\Skyrim Special Edition\loadorder.txt"
     )
@@ -49,22 +229,20 @@ function Find-DefaultLoadOrderPath {
         }
     }
 
-    $mo2Roots = @(
-        "$env:LOCALAPPDATA\ModOrganizer",
-        "$env:LOCALAPPDATA\ModOrganizer2",
-        "$env:USERPROFILE\AppData\Local\ModOrganizer",
-        "$env:USERPROFILE\AppData\Local\ModOrganizer2"
-    )
+    $mo2Roots = Get-Mo2RootCandidates
+    $searchPatterns = @("loadorder.txt", "plugins.txt")
 
     foreach ($root in $mo2Roots) {
         if (-not (Test-Path $root)) {
             continue
         }
 
-        $found = Get-ChildItem -Path $root -Filter "loadorder.txt" -Recurse -ErrorAction SilentlyContinue |
-            Select-Object -First 1
-        if ($null -ne $found) {
-            return $found.FullName
+        foreach ($pattern in $searchPatterns) {
+            $found = Get-ChildItem -Path $root -Filter $pattern -Recurse -ErrorAction SilentlyContinue |
+                Select-Object -First 1
+            if ($null -ne $found) {
+                return $found.FullName
+            }
         }
     }
 
@@ -144,8 +322,9 @@ if ($null -eq $dotnet) {
 }
 
 try {
-    $defaultDataPath = Find-DefaultDataPath
-    $defaultLoadOrder = Find-DefaultLoadOrderPath
+    $mo2Context = Get-Mo2Context
+    $defaultDataPath = Find-DefaultDataPath -mo2Context $mo2Context
+    $defaultLoadOrder = Find-DefaultLoadOrderPath -mo2Context $mo2Context
 
     $dataPath = Select-FolderPath `
         "Select Skyrim Data Folder" `
