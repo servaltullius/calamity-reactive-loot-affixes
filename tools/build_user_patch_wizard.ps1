@@ -9,6 +9,59 @@ $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+function Find-DevRepoRoot([string]$startPath) {
+    $cursor = Resolve-Path $startPath
+    for ($i = 0; $i -lt 6; $i++) {
+        $candidate = Join-Path $cursor "tools/CalamityAffixes.UserPatch/CalamityAffixes.UserPatch.csproj"
+        if (Test-Path $candidate) {
+            return $cursor
+        }
+
+        $parent = Split-Path -Parent $cursor
+        if ([string]::IsNullOrWhiteSpace($parent) -or $parent -eq $cursor) {
+            break
+        }
+
+        $cursor = $parent
+    }
+
+    return $null
+}
+
+function Resolve-SpecPath([string]$requestedSpecPath, [string]$scriptRoot, [string]$repoRoot) {
+    if (-not [string]::IsNullOrWhiteSpace($requestedSpecPath) -and [System.IO.Path]::IsPathRooted($requestedSpecPath)) {
+        return $requestedSpecPath
+    }
+
+    $candidates = @()
+    if (-not [string]::IsNullOrWhiteSpace($repoRoot) -and -not [string]::IsNullOrWhiteSpace($requestedSpecPath)) {
+        $candidates += (Join-Path $repoRoot $requestedSpecPath)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($requestedSpecPath)) {
+        $candidates += (Join-Path $scriptRoot $requestedSpecPath)
+    }
+    $candidates += (Join-Path $scriptRoot "affixes/affixes.json")
+    if (-not [string]::IsNullOrWhiteSpace($repoRoot)) {
+        $candidates += (Join-Path $repoRoot "affixes/affixes.json")
+    }
+
+    foreach ($candidate in ($candidates | Select-Object -Unique)) {
+        if ([string]::IsNullOrWhiteSpace($candidate)) {
+            continue
+        }
+
+        if (Test-Path $candidate) {
+            return $candidate
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($requestedSpecPath)) {
+        return $null
+    }
+
+    return $requestedSpecPath
+}
+
 function Decode-Mo2IniValue([string]$value) {
     if ([string]::IsNullOrWhiteSpace($value)) {
         return $null
@@ -309,19 +362,39 @@ function Select-SaveFilePath([string]$title, [string]$initialDirectory, [string]
     return $dialog.FileName
 }
 
-$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
-if ($null -eq $dotnet) {
-    [System.Windows.Forms.MessageBox]::Show(
-        "dotnet runtime/sdk was not found. Install .NET 8+ and try again.",
-        "Calamity UserPatch Wizard",
-        [System.Windows.Forms.MessageBoxButtons]::OK,
-        [System.Windows.Forms.MessageBoxIcon]::Error
-    ) | Out-Null
-    exit 1
+$repoRoot = Find-DevRepoRoot -startPath $PSScriptRoot
+$bundledExe = Join-Path $PSScriptRoot "CalamityAffixes.UserPatch.exe"
+$useBundledExe = Test-Path $bundledExe
+$resolvedSpecPath = Resolve-SpecPath -requestedSpecPath $SpecPath -scriptRoot $PSScriptRoot -repoRoot $repoRoot
+$dotnet = $null
+if (-not $useBundledExe) {
+    $dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
+    if ($null -eq $dotnet) {
+        [System.Windows.Forms.MessageBox]::Show(
+            "dotnet runtime/sdk was not found. Install .NET 8+ and try again.",
+            "Calamity UserPatch Wizard",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Error
+        ) | Out-Null
+        exit 1
+    }
+
+    if ([string]::IsNullOrWhiteSpace($repoRoot)) {
+        [System.Windows.Forms.MessageBox]::Show(
+            "Dev project root was not found and bundled UserPatch EXE is missing.`nUse the full MO2 ZIP package or run inside the source repository.",
+            "Calamity UserPatch Wizard",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Error
+        ) | Out-Null
+        exit 1
+    }
 }
 
 try {
+    if ([string]::IsNullOrWhiteSpace($resolvedSpecPath) -or -not (Test-Path $resolvedSpecPath)) {
+        throw "Spec file was not found. Expected affixes/affixes.json near the wizard or in source repo."
+    }
+
     $mo2Context = Get-Mo2Context
     $defaultDataPath = Find-DefaultDataPath -mo2Context $mo2Context
     $defaultLoadOrder = Find-DefaultLoadOrderPath -mo2Context $mo2Context
@@ -362,10 +435,9 @@ try {
         $outputDirectory `
         $DefaultOutputFileName
 
-    Push-Location $repoRoot
-    try {
-        & dotnet run --project "tools/CalamityAffixes.UserPatch" -- `
-            --spec $SpecPath `
+    if ($useBundledExe) {
+        & $bundledExe `
+            --spec $resolvedSpecPath `
             --masters $dataPath `
             --loadorder $loadOrderPath `
             --output $outputPath
@@ -373,8 +445,21 @@ try {
             throw "UserPatch generation failed. Check console output."
         }
     }
-    finally {
-        Pop-Location
+    else {
+        Push-Location $repoRoot
+        try {
+            & dotnet run --project "tools/CalamityAffixes.UserPatch" -- `
+                --spec $resolvedSpecPath `
+                --masters $dataPath `
+                --loadorder $loadOrderPath `
+                --output $outputPath
+            if ($LASTEXITCODE -ne 0) {
+                throw "UserPatch generation failed. Check console output."
+            }
+        }
+        finally {
+            Pop-Location
+        }
     }
 
     [System.Windows.Forms.MessageBox]::Show(

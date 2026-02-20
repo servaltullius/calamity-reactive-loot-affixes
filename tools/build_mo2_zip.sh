@@ -186,9 +186,11 @@ cp -a "${repo_root}/doc/3.B_데이터주도_생성기_워크플로우.md" "${tmp
 
 # Include end-user patch builder tools (double-click wizard + standalone EXE).
 mkdir -p "${tmp_dir}/${mod_name}/Tools/UserPatch"
+mkdir -p "${tmp_dir}/${mod_name}/Tools/UserPatch/affixes"
 cp -a "${repo_root}/tools/build_user_patch_wizard.cmd" "${tmp_dir}/${mod_name}/Tools/UserPatch/build_user_patch_wizard.cmd"
 cp -a "${repo_root}/tools/build_user_patch_wizard.ps1" "${tmp_dir}/${mod_name}/Tools/UserPatch/build_user_patch_wizard.ps1"
 cp -a "${userpatch_exe}" "${tmp_dir}/${mod_name}/Tools/UserPatch/CalamityAffixes.UserPatch.exe"
+cp -a "${repo_root}/affixes/affixes.json" "${tmp_dir}/${mod_name}/Tools/UserPatch/affixes/affixes.json"
 
 (
   cd "${tmp_dir}"
