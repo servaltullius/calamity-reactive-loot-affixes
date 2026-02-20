@@ -17,6 +17,10 @@ public static class KeywordPluginBuilder
     private const string CurrencyDropModeRuntime = "runtime";
     private const string CurrencyDropModeLeveledList = "leveledlist";
     private const string CurrencyDropModeHybrid = "hybrid";
+    private const string RunewordFragmentEditorIdPrefix = "CAFF_RuneFrag_";
+    private const double DefaultRunewordFragmentWeight = 25.0;
+    private const int MaxRunewordFragmentWeightTickets = 64;
+    private const double TargetMaxRunewordFragmentWeightTickets = 48.0;
 
     // Curated Skyrim.esm LVLI targets for world-drop style currency:
     // - generic loot pools (gems/special loot)
@@ -227,8 +231,9 @@ public static class KeywordPluginBuilder
         SkyrimMod mod,
         LootSpec lootSpec)
     {
+        var runewordRuneWeightByName = BuildRunewordRuneWeightMap();
         var runewordFragmentItems = mod.MiscItems
-            .Where(item => item.EditorID?.StartsWith("CAFF_RuneFrag_", StringComparison.Ordinal) == true)
+            .Where(item => item.EditorID?.StartsWith(RunewordFragmentEditorIdPrefix, StringComparison.Ordinal) == true)
             .OrderBy(item => item.EditorID, StringComparer.Ordinal)
             .ToArray();
         if (runewordFragmentItems.Length == 0)
@@ -239,9 +244,21 @@ public static class KeywordPluginBuilder
         var runewordFragmentDropList = mod.LeveledItems.AddNew();
         runewordFragmentDropList.EditorID = "CAFF_LItem_RunewordFragmentDrops";
         runewordFragmentDropList.ChanceNone = ToChanceNonePercent(lootSpec.RunewordFragmentChancePercent);
+        var maxConfiguredWeight = runewordFragmentItems
+            .Select(item => ResolveRunewordFragmentWeight(item.EditorID, runewordRuneWeightByName))
+            .DefaultIfEmpty(DefaultRunewordFragmentWeight)
+            .Max();
+        var weightScale = Math.Max(1.0, maxConfiguredWeight / TargetMaxRunewordFragmentWeightTickets);
         foreach (var fragmentItem in runewordFragmentItems)
         {
-            AddLeveledItemEntryIfMissing(runewordFragmentDropList, fragmentItem.ToLink<IItemGetter>(), level: 1, count: 1);
+            var tickets = ResolveRunewordFragmentWeightTickets(
+                fragmentItem.EditorID,
+                runewordRuneWeightByName,
+                weightScale);
+            for (var ticket = 0; ticket < tickets; ++ticket)
+            {
+                AddLeveledItemEntry(runewordFragmentDropList, fragmentItem.ToLink<IItemGetter>(), level: 1, count: 1);
+            }
         }
 
         var reforgeOrbItem = mod.MiscItems.SingleOrDefault(item => item.EditorID == "CAFF_Misc_ReforgeOrb");
@@ -359,6 +376,64 @@ public static class KeywordPluginBuilder
         return new FormKey(modKey, formId);
     }
 
+    private static IReadOnlyDictionary<string, double> BuildRunewordRuneWeightMap()
+    {
+        var entries = RunewordContractCatalog.Load().RuneWeights;
+        var map = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in entries)
+        {
+            if (string.IsNullOrWhiteSpace(entry.Rune))
+            {
+                continue;
+            }
+
+            var normalizedWeight = entry.Weight > 0.0
+                ? entry.Weight
+                : DefaultRunewordFragmentWeight;
+            map[entry.Rune.Trim()] = normalizedWeight;
+        }
+
+        return map;
+    }
+
+    private static double ResolveRunewordFragmentWeight(
+        string? fragmentEditorId,
+        IReadOnlyDictionary<string, double> runeWeightByName)
+    {
+        var runeName = TryExtractRuneName(fragmentEditorId);
+        if (runeName is null)
+        {
+            return DefaultRunewordFragmentWeight;
+        }
+
+        return runeWeightByName.TryGetValue(runeName, out var configuredWeight)
+            ? configuredWeight
+            : DefaultRunewordFragmentWeight;
+    }
+
+    private static int ResolveRunewordFragmentWeightTickets(
+        string? fragmentEditorId,
+        IReadOnlyDictionary<string, double> runeWeightByName,
+        double weightScale)
+    {
+        var weight = ResolveRunewordFragmentWeight(fragmentEditorId, runeWeightByName);
+        var normalizedScale = weightScale > 0.0 ? weightScale : 1.0;
+        var tickets = (int)Math.Round(weight / normalizedScale, MidpointRounding.AwayFromZero);
+        return Math.Clamp(tickets, 1, MaxRunewordFragmentWeightTickets);
+    }
+
+    private static string? TryExtractRuneName(string? fragmentEditorId)
+    {
+        if (string.IsNullOrWhiteSpace(fragmentEditorId) ||
+            !fragmentEditorId.StartsWith(RunewordFragmentEditorIdPrefix, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var runeName = fragmentEditorId[RunewordFragmentEditorIdPrefix.Length..].Trim();
+        return runeName.Length == 0 ? null : runeName;
+    }
+
     private static LeveledItem GetOrAddLeveledListOverride(
         SkyrimMod mod,
         FormKey targetListFormKey,
@@ -402,6 +477,24 @@ public static class KeywordPluginBuilder
             return;
         }
 
+        target.Entries.Add(new LeveledItemEntry
+        {
+            Data = new LeveledItemEntryData
+            {
+                Level = level,
+                Count = count,
+                Reference = reference,
+            },
+        });
+    }
+
+    private static void AddLeveledItemEntry(
+        LeveledItem target,
+        IFormLink<IItemGetter> reference,
+        short level,
+        short count)
+    {
+        target.Entries ??= [];
         target.Entries.Add(new LeveledItemEntry
         {
             Data = new LeveledItemEntryData

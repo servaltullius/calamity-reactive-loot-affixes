@@ -245,6 +245,46 @@ public sealed class KeywordPluginBuilderTests
     }
 
     [Fact]
+    public void BuildKeywordPlugin_RunewordDropList_UsesWeightedRuneEntryTickets()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Loot = new LootSpec
+            {
+                RunewordFragmentChancePercent = 16.0,
+                ReforgeOrbChancePercent = 10.0,
+                CurrencyDropMode = "runtime",
+            },
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var runewordDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_RunewordFragmentDrops");
+        Assert.NotNull(runewordDropList.Entries);
+        Assert.NotEmpty(runewordDropList.Entries!);
+
+        var elFragment = Assert.Single(mod.MiscItems, item => item.EditorID == "CAFF_RuneFrag_El");
+        var zodFragment = Assert.Single(mod.MiscItems, item => item.EditorID == "CAFF_RuneFrag_Zod");
+
+        var elTickets = runewordDropList.Entries!.Count(entry => entry.Data?.Reference.FormKey == elFragment.FormKey);
+        var zodTickets = runewordDropList.Entries.Count(entry => entry.Data?.Reference.FormKey == zodFragment.FormKey);
+
+        Assert.True(elTickets > zodTickets);
+        Assert.True(zodTickets >= 1);
+        Assert.True(runewordDropList.Entries.Count > mod.MiscItems.Count(item => item.EditorID?.StartsWith("CAFF_RuneFrag_", StringComparison.Ordinal) == true));
+    }
+
+    [Fact]
     public void BuildKeywordPlugin_WhenCurrencyTargetsProvided_UsesCustomTargetOnly()
     {
         var customTarget = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x0009AF0A);
