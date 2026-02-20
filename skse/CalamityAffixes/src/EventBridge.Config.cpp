@@ -103,28 +103,6 @@ namespace CalamityAffixes
 			return std::nullopt;
 		}
 
-		enum class ParsedCurrencyDropMode : std::uint8_t
-		{
-			kRuntime = 0,
-			kLeveledList = 1,
-			kHybrid = 2,
-		};
-
-		[[nodiscard]] std::optional<ParsedCurrencyDropMode> ParseCurrencyDropMode(std::string_view a_text)
-		{
-			const auto normalized = ToLowerAscii(Trim(a_text));
-			if (normalized.empty() || normalized == "runtime") {
-				return ParsedCurrencyDropMode::kRuntime;
-			}
-			if (normalized == "hybrid") {
-				return ParsedCurrencyDropMode::kHybrid;
-			}
-			if (normalized == "leveledlist" || normalized == "leveled_list" || normalized == "leveled-list") {
-				return ParsedCurrencyDropMode::kLeveledList;
-			}
-			return std::nullopt;
-		}
-
 		void ValidateRuntimeContractSnapshot()
 		{
 			const auto contractPath = RuntimePaths::ResolveRuntimeRelativePath(RuntimeContract::kRuntimeContractRelativePath);
@@ -1069,7 +1047,7 @@ namespace CalamityAffixes
 		_loot.bossContainerEditorIdAllowContains = detail::MakeDefaultBossContainerEditorIdAllowContains();
 		_loot.bossContainerEditorIdDenyContains.clear();
 		_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
-		_loot.currencyDropMode = CurrencyDropMode::kRuntime;
+		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
 		_loot.runtimeCurrencyDropsEnabled = true;
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
@@ -1080,33 +1058,20 @@ namespace CalamityAffixes
 				static_cast<float>(loot.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent)));
 			if (const auto modeIt = loot.find("currencyDropMode"); modeIt != loot.end()) {
 				if (modeIt->is_string()) {
-					if (const auto currencyDropMode = ParseCurrencyDropMode(modeIt->get<std::string>());
-						currencyDropMode.has_value()) {
-						switch (*currencyDropMode) {
-						case ParsedCurrencyDropMode::kRuntime:
-							_loot.currencyDropMode = CurrencyDropMode::kRuntime;
-							break;
-						case ParsedCurrencyDropMode::kLeveledList:
-							_loot.currencyDropMode = CurrencyDropMode::kLeveledList;
-							break;
-						case ParsedCurrencyDropMode::kHybrid:
-							_loot.currencyDropMode = CurrencyDropMode::kHybrid;
-							break;
-						}
-					} else {
+					const auto modeText = modeIt->get<std::string>();
+					const auto normalized = ToLowerAscii(Trim(modeText));
+					if (normalized != "hybrid") {
 						SKSE::log::warn(
-							"CalamityAffixes: invalid loot.currencyDropMode '{}'; expected runtime/leveledList/hybrid. Falling back to runtime.",
-							modeIt->get<std::string>());
-						_loot.currencyDropMode = CurrencyDropMode::kRuntime;
-						_loot.runtimeCurrencyDropsEnabled = true;
+							"CalamityAffixes: loot.currencyDropMode='{}' is deprecated. Hybrid-only drop mode is enforced.",
+							modeText);
 					}
 				} else {
 					SKSE::log::warn(
-						"CalamityAffixes: loot.currencyDropMode must be a string (runtime/leveledList/hybrid). Falling back to runtime.");
-					_loot.currencyDropMode = CurrencyDropMode::kRuntime;
-					_loot.runtimeCurrencyDropsEnabled = true;
+						"CalamityAffixes: loot.currencyDropMode must be string 'hybrid'. Hybrid-only drop mode is enforced.");
 				}
 			}
+			_loot.currencyDropMode = CurrencyDropMode::kHybrid;
+			_loot.runtimeCurrencyDropsEnabled = true;
 			_loot.lootSourceChanceMultCorpse =
 				static_cast<float>(loot.value("lootSourceChanceMultCorpse", static_cast<double>(_loot.lootSourceChanceMultCorpse)));
 			_loot.lootSourceChanceMultContainer =
@@ -1385,43 +1350,19 @@ namespace CalamityAffixes
 
 	void EventBridge::SyncCurrencyDropModeState(std::string_view a_contextTag)
 	{
-		bool runtimeCurrencyEnabled = true;
-		switch (_loot.currencyDropMode) {
-		case CurrencyDropMode::kRuntime:
-			runtimeCurrencyEnabled = true;
-			break;
-		case CurrencyDropMode::kHybrid:
-			runtimeCurrencyEnabled = true;
-			break;
-		case CurrencyDropMode::kLeveledList:
-			// Pure leveled-list mode: never fall back to runtime rolls.
-			// MCM chance sliders are reflected by updating CAFF_LItem_* chanceNone in memory.
-			runtimeCurrencyEnabled = false;
-			break;
-		}
-		_loot.runtimeCurrencyDropsEnabled = runtimeCurrencyEnabled;
+		// Currency drop mode is intentionally fixed to hybrid.
+		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
+		_loot.runtimeCurrencyDropsEnabled = true;
 
 		// Keep CAFF_LItem_* drop chances in sync for both classic leveled-list injection
 		// and SPID DeathItem distribution paths.
 		SyncLeveledListCurrencyDropChances(a_contextTag);
 
 		if (_loot.debugLog) {
-			const char* modeLabel = "runtime";
-			switch (_loot.currencyDropMode) {
-			case CurrencyDropMode::kRuntime:
-				modeLabel = "runtime";
-				break;
-			case CurrencyDropMode::kLeveledList:
-				modeLabel = "leveledList";
-				break;
-			case CurrencyDropMode::kHybrid:
-				modeLabel = "hybrid";
-				break;
-			}
 			SKSE::log::debug(
 				"CalamityAffixes: {} currency mode synced (mode={}, runtimeEnabled={}, configuredRune={}%, configuredReforge={}%, currentRune={}%, currentReforge={}%).",
 				a_contextTag,
-				modeLabel,
+				"hybrid",
 				_loot.runtimeCurrencyDropsEnabled,
 				_loot.configuredRunewordFragmentChancePercent,
 				_loot.configuredReforgeOrbChancePercent,

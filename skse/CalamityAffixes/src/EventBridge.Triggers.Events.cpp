@@ -503,23 +503,14 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 		if (sourceTier == LootCurrencySourceTier::kCorpse) {
 			const bool hasCurrencyDeathDistTag = HasCurrencyDeathDistributionTag(sourceRef);
 			if (hasCurrencyDeathDistTag) {
-				if (_loot.currencyDropMode == CurrencyDropMode::kRuntime) {
-					// Runtime mode must remain independent from SPID corpse delivery tags.
-					if (_loot.debugLog) {
-						SKSE::log::debug(
-							"CalamityAffixes: activation corpse currency roll continues (runtime mode ignores SPID death-distribution tag) (sourceRef={:08X}).",
-							sourceRef->GetFormID());
-					}
-				} else {
-					// Hybrid contract: tagged corpses are SPID-owned to avoid duplicate/over-frequent runtime rolls.
-					if (_loot.debugLog) {
-						SKSE::log::debug(
-							"CalamityAffixes: activation corpse currency roll skipped (SPID-tagged corpse in hybrid mode) (sourceRef={:08X}).",
-							sourceRef->GetFormID());
-					}
-					return RE::BSEventNotifyControl::kContinue;
+				// Hybrid contract: tagged corpses are SPID-owned to avoid duplicate runtime rolls.
+				if (_loot.debugLog) {
+					SKSE::log::debug(
+						"CalamityAffixes: activation corpse currency roll skipped (SPID-tagged corpse in hybrid mode) (sourceRef={:08X}).",
+						sourceRef->GetFormID());
 				}
-			} else if (_loot.currencyDropMode == CurrencyDropMode::kHybrid && _loot.debugLog) {
+				return RE::BSEventNotifyControl::kContinue;
+			} else if (_loot.debugLog) {
 				// Hybrid safety net: only untagged corpses can use runtime fallback.
 				SKSE::log::debug(
 					"CalamityAffixes: activation corpse currency roll fallback (untagged corpse in hybrid mode) (sourceRef={:08X}).",

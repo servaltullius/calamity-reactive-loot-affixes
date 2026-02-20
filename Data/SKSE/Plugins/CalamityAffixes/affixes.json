@@ -4,8 +4,8 @@
   "eslFlag": true,
   "loot": {
     "chancePercent": 50,
-    "runewordFragmentChancePercent": 16,
-    "reforgeOrbChancePercent": 10,
+    "runewordFragmentChancePercent": 5,
+    "reforgeOrbChancePercent": 3,
     "currencyDropMode": "hybrid",
     "currencyLeveledListTargets": [
       "Skyrim.esm|00068525",

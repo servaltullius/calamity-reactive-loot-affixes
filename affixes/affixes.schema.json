@@ -42,7 +42,7 @@
         "chancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
         "runewordFragmentChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
         "reforgeOrbChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
-        "currencyDropMode": { "type": "string", "enum": ["runtime", "leveledList", "hybrid"] },
+        "currencyDropMode": { "type": "string", "enum": ["hybrid"] },
         "currencyLeveledListTargets": {
           "type": "array",
           "items": { "type": "string", "pattern": "^[^|]+\\|[0-9A-Fa-f]{6,8}$" }

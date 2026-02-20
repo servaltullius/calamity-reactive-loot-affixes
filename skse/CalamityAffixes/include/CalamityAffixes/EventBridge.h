@@ -527,19 +527,17 @@ namespace CalamityAffixes
 
 		enum class CurrencyDropMode : std::uint8_t
 		{
-			kRuntime = 0,
-			kLeveledList = 1,
 			kHybrid = 2,
 		};
 
 		struct LootConfig
 		{
 			float chancePercent{ 0.0f };
-			float runewordFragmentChancePercent{ 16.0f };
-			float reforgeOrbChancePercent{ 10.0f };
-			float configuredRunewordFragmentChancePercent{ 16.0f };
-			float configuredReforgeOrbChancePercent{ 10.0f };
-			CurrencyDropMode currencyDropMode{ CurrencyDropMode::kRuntime };
+			float runewordFragmentChancePercent{ 5.0f };
+			float reforgeOrbChancePercent{ 3.0f };
+			float configuredRunewordFragmentChancePercent{ 5.0f };
+			float configuredReforgeOrbChancePercent{ 3.0f };
+			CurrencyDropMode currencyDropMode{ CurrencyDropMode::kHybrid };
 			bool runtimeCurrencyDropsEnabled{ true };
 			float lootSourceChanceMultCorpse{ 0.80f };
 			float lootSourceChanceMultContainer{ 1.00f };

@@ -170,7 +170,7 @@ namespace CalamityAffixes
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
-				"CalamityAffixes: {} currency roll skipped (runtime currency disabled by loot.currencyDropMode).",
+				"CalamityAffixes: {} currency roll skipped (runtime currency gate disabled).",
 				a_contextTag);
 		}
 		return false;
