@@ -81,7 +81,7 @@
 - (기본값) `loot.renameItem=true` : 아이템 이름에 **짧은 어픽스 라벨**을 붙여(좌측 리스트) 빠르게 식별합니다.
   - `loot.nameMarkerPosition=trailing`이면 이름 마커를 뒤에 붙입니다. 예: `철검*` (정렬 안정화)
 
-기본값: `loot.runewordFragmentChancePercent=40`, `loot.reforgeOrbChancePercent=6`, `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
+기본값: `loot.runewordFragmentChancePercent=16`, `loot.reforgeOrbChancePercent=10`, `loot.currencyDropMode=runtime`, `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
 참고: `loot.chancePercent`는 현재 기본 정책에서 실질적으로 사용되지 않는 레거시 호환 필드입니다.
 추가 안전장치(권장): `loot.trapGlobalMaxActive=64` (전역 트랩 하드캡, 0=무제한)
 
@@ -166,7 +166,7 @@
   - C++ 플러그인에서 `TESMagicEffectApplyEvent`를 받고
   - `CAFF_TAG_DOT` 키워드가 붙은 MGEF만 선별하여
   - 대상+이펙트 단위로 강한 ICD(기본 1.5초)로 레이트리밋 후 Papyrus로 전달
-- `CAFF_TAG_DOT`은 `DotApply` 트리거용 DoT 태그입니다. 기본 배포본에서는 **비활성(chance=0)** 이며, 필요하면 `Data/CalamityAffixes_KID.ini`에서 바닐라 독 규칙(`*Alch*|H`)의 chance를 `100`으로 바꿔 활성화하세요. 다른 DoT(모드/커스텀 MGEF)에 반응시키려면 `affixes/affixes.json`의 `keywords.kidRules`에 **좁은 필터 규칙**을 추가해 생성기로 다시 빌드하세요.
+- `CAFF_TAG_DOT`은 `DotApply` 트리거용 DoT 태그입니다. 기본 배포본에서는 **비활성(chance=0)** 이며, 필요하면 `Data/CalamityAffixes_KID.ini`에서 바닐라 독 규칙(`*Alch*|H`)의 chance를 `100`으로 바꿔 활성화하세요. 다른 DoT(모드/커스텀 MGEF)에 반응시키려면 `affixes/modules/*.json`(조합 결과는 `affixes/affixes.json`)의 `keywords.kidRules`에 **좁은 필터 규칙**을 추가해 생성기로 다시 빌드하세요.
 
 관련 명세는 `doc/1.개발명세서.md`의 `5.4` 참고.
 
@@ -222,7 +222,8 @@ sha256sum build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/Ca
 ### 최소 스모크 체크(레포 내에서 가능한 것)
 
 ```bash
-python3 tools/lint_affixes.py --spec affixes/affixes.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json
+python3 tools/compose_affixes.py --check
+python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json
 python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null
 python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 ```
@@ -251,13 +252,18 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 
 - 현재는 **유저 자유 베이스 지정**을 지원합니다. (장착 중 무기/방어구를 순환 선택)
 - 레시피는 D2/D2R 기준 **94개 룬워드 카탈로그**(2차 확장)를 제공합니다. 레시피별 **권장 베이스 타입(무기/방어구)**은 안내만 하고 강제하지 않습니다.
-- `affixes/affixes.json`에 정의되지 않은 룬워드 최종 어픽스는 SKSE 런타임에서 **ID 기반 스타일 매핑 + 개별 튜닝 + 베이스 타입 분산 + 레거시 폴백**으로 자동 합성됩니다. (D2 오라 감성은 Flame/Frost/Shock Cloak, Oak/Stone/Iron/Ebonyflesh, Fear/Frenzy 등 바닐라 주문 치환)
+- `affixes/affixes.json`(모듈 조합 결과)에 정의되지 않은 룬워드 최종 어픽스는 SKSE 런타임에서 **ID 기반 스타일 매핑 + 개별 튜닝 + 베이스 타입 분산 + 레거시 폴백**으로 자동 합성됩니다. (D2 오라 감성은 Flame/Frost/Shock Cloak, Oak/Stone/Iron/Ebonyflesh, Fear/Frenzy 등 바닐라 주문 치환)
 - Prisma 룬워드 패널은 레시피가 많아진 것을 반영해 **검색 + 총/검색결과 카운트**를 표시합니다.
 - 조각 수급:
-  - 기본: 시체/상자/월드 파밍 경로의 적격 장비 픽업 시 확률적으로 룬 조각을 얻음 (`loot.runewordFragmentChancePercent`)
+  - 기본 하이브리드:
+    - 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`) 경로
+    - 상자/월드: SKSE 런타임 롤 경로
+  - SPID 태그가 없는 시체(모드 추가 적 등)는 런타임 활성화 시점 롤이 폴백으로 동작합니다.
+  - 확률은 `loot.runewordFragmentChancePercent` (MCM 슬라이더 포함)로 제어합니다.
   - Prisma 디버그 버튼: `+1 next fragment`, `+1 recipe set`
 - 재련 오브(리포지):
-  - 시체/상자/월드 파밍 경로에서 확률적으로 획득합니다. (`loot.reforgeOrbChancePercent`)
+  - 룬 조각과 동일한 하이브리드 경로(시체 SPID + 상자/월드 런타임)로 획득합니다.
+  - 확률은 `loot.reforgeOrbChancePercent` (MCM 슬라이더 포함)로 제어합니다.
   - 룬워드 패널 `Reforge / 재련` 버튼으로 **선택된 장착 장비**에 1개를 소모해 재련합니다.
   - 일반 장비 재련: 일반 어픽스를 재굴림합니다.
   - 완성 룬워드 장비 재련: **전체 유효 룬워드 풀에서 1개 랜덤 + 일반 어픽스 최대 3개**를 함께 재롤합니다.
@@ -265,7 +271,7 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 
 ## 다음 단계(구현 시작 체크리스트)
 
-1) (권장) `affixes/affixes.json` → 생성기 실행으로 플러그인/ini/런타임 설정 생성  
+1) (권장) `affixes/modules/*.json` 편집 후 `python3 tools/compose_affixes.py`로 `affixes/affixes.json` 조합 → 생성기 실행  
 2) 두 가지 시작 방식 중 선택
    - **CK 0 (SKSE 런타임만 사용)**: 생성기 + KID + SKSE DLL만으로 동작(Quest/Alias 없음)
    - **CK 최소 (Papyrus 매니저 사용)**: Quest + PlayerAlias 세팅 후 스크립트 부착/프로퍼티 연결
@@ -275,6 +281,7 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 ### 생성기(키워드/ini 자동 생성)
 
 ```bash
+python3 tools/compose_affixes.py
 dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data --masters /path/to/SkyrimData
 ```
 
@@ -288,10 +295,13 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 - `Data/SKSE/Plugins/CalamityAffixes/user_settings.json` (MCM 런타임 값 + Prisma 패널 단축키/언어)
   - 저장 방식: 임시 파일 기록 + flush + 원자적 교체(중간 손상 위험 완화)
 
-### 유저 로드오더 기반 UserPatch 생성 (권장)
+### 유저 로드오더 기반 UserPatch 생성 (선택)
 
-Nexus 배포본의 기본 `CalamityAffixes.esp`는 바닐라/DLC 대상을 커버합니다.  
-`CalamityAffixes_UserPatch.esp`는 유저 로드오더 기준으로 다음을 다시 주입해 충돌/덮어쓰기 상황을 보완합니다:
+기본 드랍 모드는 `loot.currencyDropMode=runtime`이며, 별도 UserPatch 없이도 다음 하이브리드 경로로 동작합니다.  
+- 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
+- 상자/월드: SKSE 런타임 롤
+- SPID 태그가 없는 시체는 런타임 활성화 롤로 폴백
+`CalamityAffixes_UserPatch.esp`는 **leveledList/hybrid 모드로 운영할 때** 유저 로드오더 기준으로 다음을 재주입해 충돌/덮어쓰기 상황을 보완하는 선택 도구입니다:
 - `affixes.json`에 명시된 leveled-list 대상(바닐라 FormKey 포함)
 - 모드 추가 적 드랍 리스트(`DeathItem*` + NPC `DeathItem` 참조)
 

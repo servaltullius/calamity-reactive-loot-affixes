@@ -217,6 +217,7 @@ namespace RuntimeGateStoreChecks
 		}
 		if (triggerText->find("const RE::TESActivateEvent* a_event") == std::string::npos ||
 			triggerText->find("ResolveActivatedLootCurrencySourceTier(") == std::string::npos ||
+			triggerText->find("HasCurrencyDeathDistributionTag(") == std::string::npos ||
 			triggerText->find("TryRollRunewordFragmentToken(") == std::string::npos ||
 			triggerText->find("TryRollReforgeOrbGrant(") == std::string::npos ||
 			triggerText->find("TryPlaceLootCurrencyItem(") == std::string::npos ||

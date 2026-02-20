@@ -1402,10 +1402,9 @@ namespace CalamityAffixes
 		}
 		_loot.runtimeCurrencyDropsEnabled = runtimeCurrencyEnabled;
 
-		if (_loot.currencyDropMode == CurrencyDropMode::kLeveledList ||
-			_loot.currencyDropMode == CurrencyDropMode::kHybrid) {
-			SyncLeveledListCurrencyDropChances(false, a_contextTag);
-		}
+		// Keep CAFF_LItem_* drop chances in sync for both classic leveled-list injection
+		// and SPID DeathItem distribution paths.
+		SyncLeveledListCurrencyDropChances(false, a_contextTag);
 
 		if (_loot.debugLog) {
 			const char* modeLabel = "runtime";

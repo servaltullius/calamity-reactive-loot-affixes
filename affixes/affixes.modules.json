@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "root": "modules/spec.root.json",
+  "keywords": {
+    "tags": [
+      "modules/keywords.tags.json"
+    ],
+    "affixes": [
+      "modules/keywords.affixes.core.json",
+      "modules/keywords.affixes.runewords.json",
+      "modules/keywords.affixes.suffixes.json"
+    ],
+    "kidRules": [
+      "modules/keywords.kidRules.json"
+    ],
+    "spidRules": [
+      "modules/keywords.spidRules.json"
+    ]
+  }
+}

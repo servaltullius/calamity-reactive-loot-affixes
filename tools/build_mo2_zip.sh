@@ -41,6 +41,8 @@ dist_dir="${repo_root}/dist"
 data_dll="${data_dir}/SKSE/Plugins/CalamityAffixes.dll"
 linux_cross_dll="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll"
 userpatch_publish_dir="${dist_dir}/.userpatch_publish"
+spec_manifest="${repo_root}/affixes/affixes.modules.json"
+spec_json="${repo_root}/affixes/affixes.json"
 default_scripts_zip="/mnt/c/Program Files (x86)/Steam/steamapps/content/app_1946180/depot_1946183/Data/Scripts.zip"
 scripts_zip_for_masters="${PAPYRUS_SCRIPTS_ZIP:-${default_scripts_zip}}"
 masters_dir="${CALAMITY_MASTERS_DIR:-}"
@@ -112,6 +114,13 @@ if [[ -f "${linux_cross_dll}" ]]; then
   fi
 fi
 
+# Compose modular affix spec (if present) into affixes/affixes.json before generation.
+if [[ -f "${spec_manifest}" ]]; then
+  python3 "${repo_root}/tools/compose_affixes.py" \
+    --manifest "${spec_manifest}" \
+    --output "${spec_json}"
+fi
+
 # Regenerate data-driven outputs (keywords/MCM plugin/runtime json) from spec.
 generator_args=(
   --spec affixes/affixes.json
@@ -137,6 +146,7 @@ fi
 # Lint spec + ensure generated runtime config is up to date (prevents shipping stale Data/*).
 python3 "${repo_root}/tools/lint_affixes.py" \
   --spec "${repo_root}/affixes/affixes.json" \
+  --manifest "${repo_root}/affixes/affixes.modules.json" \
   --generated "${data_dir}/SKSE/Plugins/CalamityAffixes/affixes.json"
 
 # Publish a standalone Windows UserPatch EXE for non-CLI users.

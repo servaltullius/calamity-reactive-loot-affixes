@@ -160,14 +160,20 @@ public static class KeywordPluginBuilder
         AddRunewordRuneFragments(mod);
         AddReforgeOrb(mod);
 
-        var currencyDropMode = ResolveCurrencyDropMode(spec.Loot);
-        if (currencyDropMode is CurrencyDropMode.LeveledList or CurrencyDropMode.Hybrid && spec.Loot is not null)
+        if (spec.Loot is not null)
         {
-            AddCurrencyLeveledListDrops(
-                mod,
-                spec.Loot,
-                leveledListResolver,
-                autoDiscoveredCurrencyLeveledListTargets);
+            var (runewordFragmentDropList, reforgeOrbDropList) = EnsureCurrencyDropLists(mod, spec.Loot);
+            var currencyDropMode = ResolveCurrencyDropMode(spec.Loot);
+            if (currencyDropMode is CurrencyDropMode.LeveledList or CurrencyDropMode.Hybrid)
+            {
+                AddCurrencyLeveledListDrops(
+                    mod,
+                    spec.Loot,
+                    runewordFragmentDropList,
+                    reforgeOrbDropList,
+                    leveledListResolver,
+                    autoDiscoveredCurrencyLeveledListTargets);
+            }
         }
 
         return mod;
@@ -217,26 +223,17 @@ public static class KeywordPluginBuilder
         };
     }
 
-    private static void AddCurrencyLeveledListDrops(
+    private static (LeveledItem RunewordFragmentDropList, LeveledItem ReforgeOrbDropList) EnsureCurrencyDropLists(
         SkyrimMod mod,
-        LootSpec lootSpec,
-        Func<FormKey, ILeveledItemGetter?>? leveledListResolver,
-        IReadOnlyList<FormKey>? autoDiscoveredCurrencyLeveledListTargets)
+        LootSpec lootSpec)
     {
-        if (leveledListResolver is null)
-        {
-            throw new InvalidDataException(
-                "currencyDropMode=leveledList/hybrid requires a leveled-list resolver loaded from masters. " +
-                "Provide --masters <GameDataPath> when running the generator.");
-        }
-
         var runewordFragmentItems = mod.MiscItems
             .Where(item => item.EditorID?.StartsWith("CAFF_RuneFrag_", StringComparison.Ordinal) == true)
             .OrderBy(item => item.EditorID, StringComparer.Ordinal)
             .ToArray();
         if (runewordFragmentItems.Length == 0)
         {
-            throw new InvalidDataException("No runeword fragment misc items generated before leveled-list injection.");
+            throw new InvalidDataException("No runeword fragment misc items generated before currency list setup.");
         }
 
         var runewordFragmentDropList = mod.LeveledItems.AddNew();
@@ -250,13 +247,31 @@ public static class KeywordPluginBuilder
         var reforgeOrbItem = mod.MiscItems.SingleOrDefault(item => item.EditorID == "CAFF_Misc_ReforgeOrb");
         if (reforgeOrbItem is null)
         {
-            throw new InvalidDataException("Reforge orb misc item is missing before leveled-list injection.");
+            throw new InvalidDataException("Reforge orb misc item is missing before currency list setup.");
         }
 
         var reforgeOrbDropList = mod.LeveledItems.AddNew();
         reforgeOrbDropList.EditorID = "CAFF_LItem_ReforgeOrbDrops";
         reforgeOrbDropList.ChanceNone = ToChanceNonePercent(lootSpec.ReforgeOrbChancePercent);
         AddLeveledItemEntryIfMissing(reforgeOrbDropList, reforgeOrbItem.ToLink<IItemGetter>(), level: 1, count: 1);
+
+        return (runewordFragmentDropList, reforgeOrbDropList);
+    }
+
+    private static void AddCurrencyLeveledListDrops(
+        SkyrimMod mod,
+        LootSpec lootSpec,
+        LeveledItem runewordFragmentDropList,
+        LeveledItem reforgeOrbDropList,
+        Func<FormKey, ILeveledItemGetter?>? leveledListResolver,
+        IReadOnlyList<FormKey>? autoDiscoveredCurrencyLeveledListTargets)
+    {
+        if (leveledListResolver is null)
+        {
+            throw new InvalidDataException(
+                "currencyDropMode=leveledList/hybrid requires a leveled-list resolver loaded from masters. " +
+                "Provide --masters <GameDataPath> when running the generator.");
+        }
 
         var targetLists = ResolveCurrencyLeveledListTargets(lootSpec, autoDiscoveredCurrencyLeveledListTargets);
         foreach (var targetListKey in targetLists)

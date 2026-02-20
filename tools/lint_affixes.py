@@ -449,9 +449,94 @@ def _check_generated_sync(
         )
 
 
+def _collect_manifest_module_paths(manifest_path: Path) -> List[Path]:
+    manifest = _read_json(manifest_path)
+    if not isinstance(manifest, dict):
+        raise RuntimeError(f"Modules manifest must be an object: {manifest_path}")
+
+    root = manifest.get("root")
+    keywords = _as_dict(manifest.get("keywords"))
+    if not isinstance(root, str) or not root.strip():
+        raise RuntimeError(f"Modules manifest requires a non-empty string 'root': {manifest_path}")
+    if not keywords:
+        raise RuntimeError(f"Modules manifest requires object 'keywords': {manifest_path}")
+
+    def read_module_array(key: str) -> List[str]:
+        raw = _as_list(keywords.get(key))
+        if raw is None:
+            raise RuntimeError(f"Modules manifest requires keywords.{key} array: {manifest_path}")
+        out: List[str] = []
+        for idx, value in enumerate(raw):
+            if not isinstance(value, str) or not value.strip():
+                raise RuntimeError(f"Modules manifest invalid path at keywords.{key}[{idx}]: {manifest_path}")
+            out.append(value.strip())
+        return out
+
+    module_rel_paths: List[str] = [root.strip()]
+    module_rel_paths.extend(read_module_array("tags"))
+    module_rel_paths.extend(read_module_array("affixes"))
+    module_rel_paths.extend(read_module_array("kidRules"))
+    module_rel_paths.extend(read_module_array("spidRules"))
+
+    resolved: List[Path] = []
+    for rel in module_rel_paths:
+        resolved.append((manifest_path.parent / rel).resolve())
+    return resolved
+
+
+def _check_module_manifest_sync(
+    *,
+    spec_path: Path,
+    manifest_path: Path,
+    errors: List[str],
+    warnings: List[str],
+) -> None:
+    try:
+        module_paths = _collect_manifest_module_paths(manifest_path)
+    except RuntimeError as e:
+        errors.append(str(e))
+        return
+
+    missing_paths = [p for p in module_paths if not p.exists()]
+    if missing_paths:
+        preview = ", ".join(str(p) for p in missing_paths[:3])
+        suffix = "" if len(missing_paths) <= 3 else ", ..."
+        errors.append(
+            f"Modules manifest references missing files: {preview}{suffix}. "
+            "Run: python3 tools/compose_affixes.py"
+        )
+        return
+
+    try:
+        spec_mtime = spec_path.stat().st_mtime_ns
+    except OSError as e:
+        warnings.append(f"Unable to stat spec file for modules staleness check: {e}")
+        return
+
+    latest_module_mtime = 0
+    for module_path in module_paths:
+        try:
+            module_mtime = module_path.stat().st_mtime_ns
+        except OSError as e:
+            warnings.append(f"Unable to stat module file for staleness check: {module_path} ({e})")
+            continue
+        latest_module_mtime = max(latest_module_mtime, module_mtime)
+
+    if latest_module_mtime and latest_module_mtime > spec_mtime:
+        errors.append(
+            f"Spec file is older than modular sources ({spec_path} is stale vs {manifest_path}). "
+            "Run: python3 tools/compose_affixes.py"
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Lint Calamity affix spec for common authoring mistakes.")
     parser.add_argument("--spec", default="affixes/affixes.json", help="Path to affix spec JSON.")
+    parser.add_argument(
+        "--manifest",
+        default=None,
+        help="Optional modules manifest path (defaults to sibling affixes.modules.json when present).",
+    )
     parser.add_argument(
         "--generated",
         default=None,
@@ -469,6 +554,27 @@ def main() -> int:
     except RuntimeError as e:
         print(f"[ERROR] {e}", file=sys.stderr)
         return 2
+
+    if args.manifest:
+        manifest_path = Path(args.manifest)
+        if not manifest_path.exists():
+            errors.append(f"Modules manifest file not found: {manifest_path}")
+        else:
+            _check_module_manifest_sync(
+                spec_path=spec_path,
+                manifest_path=manifest_path,
+                errors=errors,
+                warnings=warnings,
+            )
+    else:
+        inferred_manifest_path = spec_path.with_name("affixes.modules.json")
+        if inferred_manifest_path.exists():
+            _check_module_manifest_sync(
+                spec_path=spec_path,
+                manifest_path=inferred_manifest_path,
+                errors=errors,
+                warnings=warnings,
+            )
 
     try:
         supported_triggers, supported_action_types = _load_validation_contract()

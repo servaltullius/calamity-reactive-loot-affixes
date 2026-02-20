@@ -15,6 +15,18 @@ spec_path="${CAFF_SPEC_PATH:-affixes/affixes.json}"
 output_path="${CAFF_USERPATCH_OUTPUT:-Data/CalamityAffixes_UserPatch.esp}"
 masters_dir="${CALAMITY_MASTERS_DIR:-}"
 loadorder_path="${CALAMITY_LOADORDER_PATH:-}"
+spec_manifest_path="${CAFF_SPEC_MANIFEST:-affixes/affixes.modules.json}"
+if [[ "${spec_manifest_path}" = /* ]]; then
+  spec_manifest_abs="${spec_manifest_path}"
+else
+  spec_manifest_abs="${repo_root}/${spec_manifest_path}"
+fi
+
+if [[ -f "${spec_manifest_abs}" ]]; then
+  python3 "${repo_root}/tools/compose_affixes.py" \
+    --manifest "${spec_manifest_abs}" \
+    --output "${repo_root}/affixes/affixes.json"
+fi
 
 if [[ -z "${masters_dir}" ]]; then
   echo "ERROR: CALAMITY_MASTERS_DIR is required." >&2

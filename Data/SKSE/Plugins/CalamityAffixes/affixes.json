@@ -4,9 +4,9 @@
   "eslFlag": true,
   "loot": {
     "chancePercent": 50,
-    "runewordFragmentChancePercent": 6,
-    "reforgeOrbChancePercent": 2,
-    "currencyDropMode": "leveledList",
+    "runewordFragmentChancePercent": 16,
+    "reforgeOrbChancePercent": 10,
+    "currencyDropMode": "runtime",
     "currencyLeveledListTargets": [
       "Skyrim.esm|00068525",
       "Skyrim.esm|000F961D",
@@ -96,6 +96,10 @@
       {
         "editorId": "CAFF_TAG_DOT",
         "name": "Calamity: DoT Tag"
+      },
+      {
+        "editorId": "CAFF_TAG_CURRENCY_DEATH_DIST",
+        "name": "Calamity: Currency Death Distribution Tag"
       }
     ],
     "affixes": [
@@ -7257,6 +7261,19 @@
         "chance": 0
       }
     ],
-    "spidRules": []
+    "spidRules": [
+      {
+        "comment": "Mark hostile actor families for Calamity currency death distribution.",
+        "line": "Keyword = CAFF_TAG_CURRENCY_DEATH_DIST|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|NONE|NONE|NONE|1|100"
+      },
+      {
+        "comment": "Runeword fragments on death via SPID (drop chance is controlled by CAFF_LItem_RunewordFragmentDrops ChanceNone).",
+        "line": "DeathItem = CAFF_LItem_RunewordFragmentDrops|CAFF_TAG_CURRENCY_DEATH_DIST|NONE|NONE|NONE|1|100"
+      },
+      {
+        "comment": "Reforge orb on death via SPID (drop chance is controlled by CAFF_LItem_ReforgeOrbDrops ChanceNone).",
+        "line": "DeathItem = CAFF_LItem_ReforgeOrbDrops|CAFF_TAG_CURRENCY_DEATH_DIST|NONE|NONE|NONE|1|100"
+      }
+    ]
   }
 }

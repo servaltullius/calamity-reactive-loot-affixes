@@ -212,6 +212,39 @@ public sealed class KeywordPluginBuilderTests
     }
 
     [Fact]
+    public void BuildKeywordPlugin_WhenCurrencyDropModeIsRuntime_CreatesCurrencyDropListsWithoutMasterInjection()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Loot = new LootSpec
+            {
+                RunewordFragmentChancePercent = 16.0,
+                ReforgeOrbChancePercent = 10.0,
+                CurrencyDropMode = "runtime",
+            },
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var runewordDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_RunewordFragmentDrops");
+        var reforgeDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_ReforgeOrbDrops");
+
+        Assert.Equal(new Percent(0.84), runewordDropList.ChanceNone);
+        Assert.Equal(new Percent(0.90), reforgeDropList.ChanceNone);
+        Assert.Equal(2, mod.LeveledItems.Count);
+    }
+
+    [Fact]
     public void BuildKeywordPlugin_WhenCurrencyTargetsProvided_UsesCustomTargetOnly()
     {
         var customTarget = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x0009AF0A);

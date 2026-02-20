@@ -79,6 +79,15 @@ if [[ "${repo_run_root}" != "${repo_root}" ]]; then
   step "Using no-space path for dotnet: ${repo_run_root}"
 fi
 
+spec_manifest="${repo_root}/affixes/affixes.modules.json"
+spec_json="${repo_root}/affixes/affixes.json"
+if [[ -f "${spec_manifest}" ]]; then
+  step "Compose modular affix spec"
+  python3 "${repo_root}/tools/compose_affixes.py" \
+    --manifest "${spec_manifest}" \
+    --output "${spec_json}"
+fi
+
 step "vibe-kit doctor (optional)"
 if [[ "${fast}" -eq 1 ]]; then
   echo "(skipped: --fast)"
@@ -89,6 +98,7 @@ fi
 step "Spec lint + generated runtime config sync"
 python3 "${repo_root}/tools/lint_affixes.py" \
   --spec "${repo_root}/affixes/affixes.json" \
+  --manifest "${repo_root}/affixes/affixes.modules.json" \
   --generated "${repo_root}/Data/SKSE/Plugins/CalamityAffixes/affixes.json"
 
 step "MCM JSON sanity"

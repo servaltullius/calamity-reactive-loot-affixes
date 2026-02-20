@@ -15,10 +15,19 @@ This section is generated. Re-run pinning to update.
 - 최신 컨텍스트: `.vibe/context/LATEST_CONTEXT.md`
 - (선택) SKSE 컨텍스트 팩: `python3 scripts/vibe.py pack --scope path --path skse/CalamityAffixes --out .vibe/context/PACK_SKSE.md --max-kb 256`
 
+## Required fields (repo-local AGENTS.md)
+
+- Install command: `dotnet restore tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj`
+- Dev server command: `N/A (게임 모드 프로젝트 특성상 상시 dev server 없음)`
+- Unit test command: `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release && ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --output-on-failure`
+- Lint/format command: `python3 tools/compose_affixes.py --check && python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json && python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null && python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null`
+- Typecheck/build command: `cmake --build skse/CalamityAffixes/build.linux-clangcl-rel --target CalamityAffixes`
+- Primary entrypoint path: `skse/CalamityAffixes/src/main.cpp`
+
 ## 프로젝트 목표 (요약)
 
 - Skyrim SE/AE용 “Diablo/PoE 스타일 어픽스 + 프로크 + ICD” 시스템
-- CK 작업을 **최소화(가능하면 0)** 하고, 데이터(= `affixes/affixes.json`) 중심으로 생성/빌드/패키징 반복
+- CK 작업을 **최소화(가능하면 0)** 하고, 데이터(= `affixes/modules/*.json` + 조합 결과 `affixes/affixes.json`) 중심으로 생성/빌드/패키징 반복
 
 ## 중요 경로
 
@@ -28,8 +37,8 @@ This section is generated. Re-run pinning to update.
 
 ## “데이터 → 생성 → 패키징” 워크플로우
 
-- 스펙 편집: `affixes/affixes.json`
-- 생성(esp/ini/runtime/i4): `dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data`
+- 스펙 편집: `affixes/modules/*.json` (조합: `python3 tools/compose_affixes.py`)
+- 생성(esp/ini/runtime/i4): `dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data --masters /path/to/SkyrimData`
 - 생성기 테스트: `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release`
 - MO2 배포 ZIP: `tools/build_mo2_zip.sh` → `dist/CalamityAffixes_MO2_vX.Y.Z_<YYYY-MM-DD>.zip`
 

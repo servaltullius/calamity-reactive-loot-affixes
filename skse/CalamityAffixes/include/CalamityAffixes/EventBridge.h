@@ -535,10 +535,10 @@ namespace CalamityAffixes
 		struct LootConfig
 		{
 			float chancePercent{ 0.0f };
-			float runewordFragmentChancePercent{ 6.0f };
-			float reforgeOrbChancePercent{ 2.0f };
-			float configuredRunewordFragmentChancePercent{ 6.0f };
-			float configuredReforgeOrbChancePercent{ 2.0f };
+			float runewordFragmentChancePercent{ 16.0f };
+			float reforgeOrbChancePercent{ 10.0f };
+			float configuredRunewordFragmentChancePercent{ 16.0f };
+			float configuredReforgeOrbChancePercent{ 10.0f };
 			CurrencyDropMode currencyDropMode{ CurrencyDropMode::kRuntime };
 			bool runtimeCurrencyDropsEnabled{ true };
 			float lootSourceChanceMultCorpse{ 0.80f };

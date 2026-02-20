@@ -1,0 +1,11 @@
+[
+  {
+    "comment": "Optional (DISABLED): tag hostile alchemy magic effects for DotApply.",
+    "keywordEditorId": "CAFF_TAG_DOT",
+    "type": "Magic Effect",
+    "strings": "*Alch*",
+    "formFilters": "NONE",
+    "traits": "H",
+    "chance": 0.0
+  }
+]

@@ -11,8 +11,8 @@ string Property PluginFileName = "CalamityAffixes.esp" AutoReadOnly Hidden
 string Property LeaderTokenSettingName = "iMcmLeaderToken:General" AutoReadOnly Hidden
 string Property RunewordFragmentChanceSettingName = "fRunewordFragmentChancePercent:General" AutoReadOnly Hidden
 string Property ReforgeOrbChanceSettingName = "fReforgeOrbChancePercent:General" AutoReadOnly Hidden
-float Property RunewordFragmentChanceDefault = 6.0 AutoReadOnly Hidden
-float Property ReforgeOrbChanceDefault = 2.0 AutoReadOnly Hidden
+float Property RunewordFragmentChanceDefault = 16.0 AutoReadOnly Hidden
+float Property ReforgeOrbChanceDefault = 10.0 AutoReadOnly Hidden
 
 bool _didLeaderElection = false
 bool _isSessionLeader = false

@@ -1,0 +1,2885 @@
+[
+  {
+    "id": "suffix_max_health_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T1",
+    "name": "약간의 활력: 최대 체력 +25",
+    "nameEn": "of Minor Vitality: Max Health +25",
+    "nameKo": "약간의 활력: 최대 체력 +25",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T1",
+        "name": "Calamity Suffix: Max Health +25 / 최대 체력 +25",
+        "actorValue": "Health",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T1",
+        "name": "Calamity Suffix: Max Health +25 / 최대 체력 +25",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T1",
+          "magnitude": 25,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "max_health",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_max_health_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T2",
+    "name": "활력: 최대 체력 +50",
+    "nameEn": "of Vitality: Max Health +50",
+    "nameKo": "활력: 최대 체력 +50",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T2",
+        "name": "Calamity Suffix: Max Health +50 / 최대 체력 +50",
+        "actorValue": "Health",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T2",
+        "name": "Calamity Suffix: Max Health +50 / 최대 체력 +50",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T2",
+          "magnitude": 50,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "max_health",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_max_health_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T3",
+    "name": "위대한 활력: 최대 체력 +75",
+    "nameEn": "of Grand Vitality: Max Health +75",
+    "nameKo": "위대한 활력: 최대 체력 +75",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T3",
+        "name": "Calamity Suffix: Max Health +75 / 최대 체력 +75",
+        "actorValue": "Health",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T3",
+        "name": "Calamity Suffix: Max Health +75 / 최대 체력 +75",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_HEALTH_T3",
+          "magnitude": 75,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "max_health",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_HEALTH_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_max_stamina_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T1",
+    "name": "약간의 지구력: 최대 스태미나 +20",
+    "nameEn": "of Minor Endurance: Max Stamina +20",
+    "nameKo": "약간의 지구력: 최대 스태미나 +20",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T1",
+        "name": "Calamity Suffix: Max Stamina +20 / 최대 스태미나 +20",
+        "actorValue": "Stamina",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T1",
+        "name": "Calamity Suffix: Max Stamina +20 / 최대 스태미나 +20",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T1",
+          "magnitude": 20,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "max_stamina",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_max_stamina_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T2",
+    "name": "지구력: 최대 스태미나 +40",
+    "nameEn": "of Endurance: Max Stamina +40",
+    "nameKo": "지구력: 최대 스태미나 +40",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T2",
+        "name": "Calamity Suffix: Max Stamina +40 / 최대 스태미나 +40",
+        "actorValue": "Stamina",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T2",
+        "name": "Calamity Suffix: Max Stamina +40 / 최대 스태미나 +40",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T2",
+          "magnitude": 40,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "max_stamina",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_max_stamina_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_STAMINA_T3",
+    "name": "위대한 지구력: 최대 스태미나 +60",
+    "nameEn": "of Grand Endurance: Max Stamina +60",
+    "nameKo": "위대한 지구력: 최대 스태미나 +60",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T3",
+        "name": "Calamity Suffix: Max Stamina +60 / 최대 스태미나 +60",
+        "actorValue": "Stamina",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T3",
+        "name": "Calamity Suffix: Max Stamina +60 / 최대 스태미나 +60",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_STAMINA_T3",
+          "magnitude": 60,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "max_stamina",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_STAMINA_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_max_magicka_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T1",
+    "name": "약간의 마력: 최대 매지카 +20",
+    "nameEn": "of Minor Sorcery: Max Magicka +20",
+    "nameKo": "약간의 마력: 최대 매지카 +20",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T1",
+        "name": "Calamity Suffix: Max Magicka +20 / 최대 매지카 +20",
+        "actorValue": "Magicka",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T1",
+        "name": "Calamity Suffix: Max Magicka +20 / 최대 매지카 +20",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T1",
+          "magnitude": 20,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "max_magicka",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_max_magicka_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T2",
+    "name": "마력: 최대 매지카 +40",
+    "nameEn": "of Sorcery: Max Magicka +40",
+    "nameKo": "마력: 최대 매지카 +40",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T2",
+        "name": "Calamity Suffix: Max Magicka +40 / 최대 매지카 +40",
+        "actorValue": "Magicka",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T2",
+        "name": "Calamity Suffix: Max Magicka +40 / 최대 매지카 +40",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T2",
+          "magnitude": 40,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "max_magicka",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_max_magicka_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_MAX_MAGICKA_T3",
+    "name": "위대한 마력: 최대 매지카 +60",
+    "nameEn": "of Grand Sorcery: Max Magicka +60",
+    "nameKo": "위대한 마력: 최대 매지카 +60",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T3",
+        "name": "Calamity Suffix: Max Magicka +60 / 최대 매지카 +60",
+        "actorValue": "Magicka",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T3",
+        "name": "Calamity Suffix: Max Magicka +60 / 최대 매지카 +60",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAX_MAGICKA_T3",
+          "magnitude": 60,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "max_magicka",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAX_MAGICKA_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_health_regen_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T1",
+    "name": "약간의 치유: 체력 재생 +25%",
+    "nameEn": "of Minor Mending: Health Regen +25%",
+    "nameKo": "약간의 치유: 체력 재생 +25%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T1",
+        "name": "Calamity Suffix: Health Regen +25% / 체력 재생 +25%",
+        "actorValue": "HealRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T1",
+        "name": "Calamity Suffix: Health Regen +25% / 체력 재생 +25%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T1",
+          "magnitude": 25,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "health_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_health_regen_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T2",
+    "name": "치유: 체력 재생 +50%",
+    "nameEn": "of Mending: Health Regen +50%",
+    "nameKo": "치유: 체력 재생 +50%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T2",
+        "name": "Calamity Suffix: Health Regen +50% / 체력 재생 +50%",
+        "actorValue": "HealRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T2",
+        "name": "Calamity Suffix: Health Regen +50% / 체력 재생 +50%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T2",
+          "magnitude": 50,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "health_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_health_regen_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_HEALTH_REGEN_T3",
+    "name": "위대한 치유: 체력 재생 +75%",
+    "nameEn": "of Grand Mending: Health Regen +75%",
+    "nameKo": "위대한 치유: 체력 재생 +75%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T3",
+        "name": "Calamity Suffix: Health Regen +75% / 체력 재생 +75%",
+        "actorValue": "HealRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T3",
+        "name": "Calamity Suffix: Health Regen +75% / 체력 재생 +75%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T3",
+          "magnitude": 75,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "health_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_HEALTH_REGEN_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_stamina_regen_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T1",
+    "name": "약간의 회복: 스태미나 재생 +25%",
+    "nameEn": "of Minor Recovery: Stamina Regen +25%",
+    "nameKo": "약간의 회복: 스태미나 재생 +25%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T1",
+        "name": "Calamity Suffix: Stamina Regen +25% / 스태미나 재생 +25%",
+        "actorValue": "StaminaRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T1",
+        "name": "Calamity Suffix: Stamina Regen +25% / 스태미나 재생 +25%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T1",
+          "magnitude": 25,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "stamina_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_stamina_regen_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T2",
+    "name": "회복: 스태미나 재생 +50%",
+    "nameEn": "of Recovery: Stamina Regen +50%",
+    "nameKo": "회복: 스태미나 재생 +50%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T2",
+        "name": "Calamity Suffix: Stamina Regen +50% / 스태미나 재생 +50%",
+        "actorValue": "StaminaRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T2",
+        "name": "Calamity Suffix: Stamina Regen +50% / 스태미나 재생 +50%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T2",
+          "magnitude": 50,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "stamina_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_stamina_regen_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_STAMINA_REGEN_T3",
+    "name": "위대한 회복: 스태미나 재생 +75%",
+    "nameEn": "of Grand Recovery: Stamina Regen +75%",
+    "nameKo": "위대한 회복: 스태미나 재생 +75%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T3",
+        "name": "Calamity Suffix: Stamina Regen +75% / 스태미나 재생 +75%",
+        "actorValue": "StaminaRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T3",
+        "name": "Calamity Suffix: Stamina Regen +75% / 스태미나 재생 +75%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T3",
+          "magnitude": 75,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "stamina_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_STAMINA_REGEN_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_magicka_regen_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T1",
+    "name": "약간의 통찰: 매지카 재생 +25%",
+    "nameEn": "of Minor Insight: Magicka Regen +25%",
+    "nameKo": "약간의 통찰: 매지카 재생 +25%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T1",
+        "name": "Calamity Suffix: Magicka Regen +25% / 매지카 재생 +25%",
+        "actorValue": "MagickaRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T1",
+        "name": "Calamity Suffix: Magicka Regen +25% / 매지카 재생 +25%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T1",
+          "magnitude": 25,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "magicka_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_magicka_regen_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T2",
+    "name": "통찰: 매지카 재생 +50%",
+    "nameEn": "of Insight: Magicka Regen +50%",
+    "nameKo": "통찰: 매지카 재생 +50%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T2",
+        "name": "Calamity Suffix: Magicka Regen +50% / 매지카 재생 +50%",
+        "actorValue": "MagickaRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T2",
+        "name": "Calamity Suffix: Magicka Regen +50% / 매지카 재생 +50%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T2",
+          "magnitude": 50,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "magicka_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_magicka_regen_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_MAGICKA_REGEN_T3",
+    "name": "위대한 통찰: 매지카 재생 +75%",
+    "nameEn": "of Grand Insight: Magicka Regen +75%",
+    "nameKo": "위대한 통찰: 매지카 재생 +75%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T3",
+        "name": "Calamity Suffix: Magicka Regen +75% / 매지카 재생 +75%",
+        "actorValue": "MagickaRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T3",
+        "name": "Calamity Suffix: Magicka Regen +75% / 매지카 재생 +75%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T3",
+          "magnitude": 75,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "magicka_regen",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGICKA_REGEN_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_armor_rating_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T1",
+    "name": "약간의 수호: 방어력 +25",
+    "nameEn": "of Minor Warding: Armor +25",
+    "nameKo": "약간의 수호: 방어력 +25",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T1",
+        "name": "Calamity Suffix: Armor +25 / 방어력 +25",
+        "actorValue": "DamageResist",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T1",
+        "name": "Calamity Suffix: Armor +25 / 방어력 +25",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T1",
+          "magnitude": 25,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "armor_rating",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_armor_rating_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T2",
+    "name": "수호: 방어력 +50",
+    "nameEn": "of Warding: Armor +50",
+    "nameKo": "수호: 방어력 +50",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T2",
+        "name": "Calamity Suffix: Armor +50 / 방어력 +50",
+        "actorValue": "DamageResist",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T2",
+        "name": "Calamity Suffix: Armor +50 / 방어력 +50",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T2",
+          "magnitude": 50,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "armor_rating",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_armor_rating_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_ARMOR_RATING_T3",
+    "name": "위대한 수호: 방어력 +80",
+    "nameEn": "of Grand Warding: Armor +80",
+    "nameKo": "위대한 수호: 방어력 +80",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T3",
+        "name": "Calamity Suffix: Armor +80 / 방어력 +80",
+        "actorValue": "DamageResist",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T3",
+        "name": "Calamity Suffix: Armor +80 / 방어력 +80",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ARMOR_RATING_T3",
+          "magnitude": 80,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "armor_rating",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ARMOR_RATING_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_fire_resist_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T1",
+    "name": "약간의 화염 보호: 화염 저항 +5%",
+    "nameEn": "of Minor Flame Guard: Fire Resist +5%",
+    "nameKo": "약간의 화염 보호: 화염 저항 +5%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T1",
+        "name": "Calamity Suffix: Fire Resist +5% / 화염 저항 +5%",
+        "actorValue": "ResistFire",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T1",
+        "name": "Calamity Suffix: Fire Resist +5% / 화염 저항 +5%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T1",
+          "magnitude": 5,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "fire_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_fire_resist_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T2",
+    "name": "화염 보호: 화염 저항 +10%",
+    "nameEn": "of Flame Guard: Fire Resist +10%",
+    "nameKo": "화염 보호: 화염 저항 +10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T2",
+        "name": "Calamity Suffix: Fire Resist +10% / 화염 저항 +10%",
+        "actorValue": "ResistFire",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T2",
+        "name": "Calamity Suffix: Fire Resist +10% / 화염 저항 +10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T2",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "fire_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_fire_resist_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T3",
+    "name": "위대한 화염 보호: 화염 저항 +15%",
+    "nameEn": "of Grand Flame Guard: Fire Resist +15%",
+    "nameKo": "위대한 화염 보호: 화염 저항 +15%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T3",
+        "name": "Calamity Suffix: Fire Resist +15% / 화염 저항 +15%",
+        "actorValue": "ResistFire",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T3",
+        "name": "Calamity Suffix: Fire Resist +15% / 화염 저항 +15%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T3",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "fire_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_frost_resist_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T1",
+    "name": "약간의 냉기 보호: 냉기 저항 +5%",
+    "nameEn": "of Minor Frost Guard: Frost Resist +5%",
+    "nameKo": "약간의 냉기 보호: 냉기 저항 +5%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T1",
+        "name": "Calamity Suffix: Frost Resist +5% / 냉기 저항 +5%",
+        "actorValue": "ResistFrost",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T1",
+        "name": "Calamity Suffix: Frost Resist +5% / 냉기 저항 +5%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T1",
+          "magnitude": 5,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "frost_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_frost_resist_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T2",
+    "name": "냉기 보호: 냉기 저항 +10%",
+    "nameEn": "of Frost Guard: Frost Resist +10%",
+    "nameKo": "냉기 보호: 냉기 저항 +10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T2",
+        "name": "Calamity Suffix: Frost Resist +10% / 냉기 저항 +10%",
+        "actorValue": "ResistFrost",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T2",
+        "name": "Calamity Suffix: Frost Resist +10% / 냉기 저항 +10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T2",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "frost_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_frost_resist_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T3",
+    "name": "위대한 냉기 보호: 냉기 저항 +15%",
+    "nameEn": "of Grand Frost Guard: Frost Resist +15%",
+    "nameKo": "위대한 냉기 보호: 냉기 저항 +15%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T3",
+        "name": "Calamity Suffix: Frost Resist +15% / 냉기 저항 +15%",
+        "actorValue": "ResistFrost",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T3",
+        "name": "Calamity Suffix: Frost Resist +15% / 냉기 저항 +15%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T3",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "frost_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_shock_resist_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T1",
+    "name": "약간의 전격 보호: 전격 저항 +5%",
+    "nameEn": "of Minor Shock Guard: Shock Resist +5%",
+    "nameKo": "약간의 전격 보호: 전격 저항 +5%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T1",
+        "name": "Calamity Suffix: Shock Resist +5% / 전격 저항 +5%",
+        "actorValue": "ResistShock",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T1",
+        "name": "Calamity Suffix: Shock Resist +5% / 전격 저항 +5%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T1",
+          "magnitude": 5,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "shock_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_shock_resist_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T2",
+    "name": "전격 보호: 전격 저항 +10%",
+    "nameEn": "of Shock Guard: Shock Resist +10%",
+    "nameKo": "전격 보호: 전격 저항 +10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T2",
+        "name": "Calamity Suffix: Shock Resist +10% / 전격 저항 +10%",
+        "actorValue": "ResistShock",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T2",
+        "name": "Calamity Suffix: Shock Resist +10% / 전격 저항 +10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T2",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "shock_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_shock_resist_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T3",
+    "name": "위대한 전격 보호: 전격 저항 +15%",
+    "nameEn": "of Grand Shock Guard: Shock Resist +15%",
+    "nameKo": "위대한 전격 보호: 전격 저항 +15%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T3",
+        "name": "Calamity Suffix: Shock Resist +15% / 전격 저항 +15%",
+        "actorValue": "ResistShock",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T3",
+        "name": "Calamity Suffix: Shock Resist +15% / 전격 저항 +15%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T3",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "shock_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_magic_resist_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T1",
+    "name": "약간의 마법 보호: 마법 저항 +3%",
+    "nameEn": "of Minor Spell Guard: Magic Resist +3%",
+    "nameKo": "약간의 마법 보호: 마법 저항 +3%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T1",
+        "name": "Calamity Suffix: Magic Resist +3% / 마법 저항 +3%",
+        "actorValue": "ResistMagic",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T1",
+        "name": "Calamity Suffix: Magic Resist +3% / 마법 저항 +3%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T1",
+          "magnitude": 3,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "magic_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_magic_resist_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T2",
+    "name": "마법 보호: 마법 저항 +8%",
+    "nameEn": "of Spell Guard: Magic Resist +8%",
+    "nameKo": "마법 보호: 마법 저항 +8%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T2",
+        "name": "Calamity Suffix: Magic Resist +8% / 마법 저항 +8%",
+        "actorValue": "ResistMagic",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T2",
+        "name": "Calamity Suffix: Magic Resist +8% / 마법 저항 +8%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T2",
+          "magnitude": 8,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "magic_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_magic_resist_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_MAGIC_RESIST_T3",
+    "name": "위대한 마법 보호: 마법 저항 +12%",
+    "nameEn": "of Grand Spell Guard: Magic Resist +12%",
+    "nameKo": "위대한 마법 보호: 마법 저항 +12%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T3",
+        "name": "Calamity Suffix: Magic Resist +12% / 마법 저항 +12%",
+        "actorValue": "ResistMagic",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T3",
+        "name": "Calamity Suffix: Magic Resist +12% / 마법 저항 +12%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MAGIC_RESIST_T3",
+          "magnitude": 12,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "magic_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MAGIC_RESIST_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_poison_resist_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T1",
+    "name": "약간의 해독: 독 저항 +5%",
+    "nameEn": "of Minor Antivenom: Poison Resist +5%",
+    "nameKo": "약간의 해독: 독 저항 +5%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T1",
+        "name": "Calamity Suffix: Poison Resist +5% / 독 저항 +5%",
+        "actorValue": "PoisonResist",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T1",
+        "name": "Calamity Suffix: Poison Resist +5% / 독 저항 +5%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T1",
+          "magnitude": 5,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "poison_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_poison_resist_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T2",
+    "name": "해독: 독 저항 +10%",
+    "nameEn": "of Antivenom: Poison Resist +10%",
+    "nameKo": "해독: 독 저항 +10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T2",
+        "name": "Calamity Suffix: Poison Resist +10% / 독 저항 +10%",
+        "actorValue": "PoisonResist",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T2",
+        "name": "Calamity Suffix: Poison Resist +10% / 독 저항 +10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T2",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "poison_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_poison_resist_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T3",
+    "name": "위대한 해독: 독 저항 +15%",
+    "nameEn": "of Grand Antivenom: Poison Resist +15%",
+    "nameKo": "위대한 해독: 독 저항 +15%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T3",
+        "name": "Calamity Suffix: Poison Resist +15% / 독 저항 +15%",
+        "actorValue": "PoisonResist",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T3",
+        "name": "Calamity Suffix: Poison Resist +15% / 독 저항 +15%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T3",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "poison_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_disease_resist_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T1",
+    "name": "약간의 정화: 질병 저항 +25%",
+    "nameEn": "of Minor Purity: Disease Resist +25%",
+    "nameKo": "약간의 정화: 질병 저항 +25%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T1",
+        "name": "Calamity Suffix: Disease Resist +25% / 질병 저항 +25%",
+        "actorValue": "ResistDisease",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T1",
+        "name": "Calamity Suffix: Disease Resist +25% / 질병 저항 +25%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T1",
+          "magnitude": 25,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "disease_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_disease_resist_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T2",
+    "name": "정화: 질병 저항 +50%",
+    "nameEn": "of Purity: Disease Resist +50%",
+    "nameKo": "정화: 질병 저항 +50%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T2",
+        "name": "Calamity Suffix: Disease Resist +50% / 질병 저항 +50%",
+        "actorValue": "ResistDisease",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T2",
+        "name": "Calamity Suffix: Disease Resist +50% / 질병 저항 +50%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T2",
+          "magnitude": 50,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "disease_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_disease_resist_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T3",
+    "name": "위대한 정화: 질병 저항 +100%",
+    "nameEn": "of Grand Purity: Disease Resist +100%",
+    "nameKo": "위대한 정화: 질병 저항 +100%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T3",
+        "name": "Calamity Suffix: Disease Resist +100% / 질병 저항 +100%",
+        "actorValue": "ResistDisease",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T3",
+        "name": "Calamity Suffix: Disease Resist +100% / 질병 저항 +100%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T3",
+          "magnitude": 100,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "disease_resist",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_attack_speed_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T1",
+    "name": "약간의 민첩: 공격 속도 +5%",
+    "nameEn": "of Minor Alacrity: Attack Speed +5%",
+    "nameKo": "약간의 민첩: 공격 속도 +5%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
+        "name": "Calamity Suffix: Attack Speed +5% / 공격 속도 +5%",
+        "actorValue": "WeaponSpeedMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T1",
+        "name": "Calamity Suffix: Attack Speed +5% / 공격 속도 +5%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
+          "magnitude": 5,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "attack_speed",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_attack_speed_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T2",
+    "name": "민첩: 공격 속도 +10%",
+    "nameEn": "of Alacrity: Attack Speed +10%",
+    "nameKo": "민첩: 공격 속도 +10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
+        "name": "Calamity Suffix: Attack Speed +10% / 공격 속도 +10%",
+        "actorValue": "WeaponSpeedMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T2",
+        "name": "Calamity Suffix: Attack Speed +10% / 공격 속도 +10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "attack_speed",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_attack_speed_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T3",
+    "name": "위대한 민첩: 공격 속도 +15%",
+    "nameEn": "of Grand Alacrity: Attack Speed +15%",
+    "nameKo": "위대한 민첩: 공격 속도 +15%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
+        "name": "Calamity Suffix: Attack Speed +15% / 공격 속도 +15%",
+        "actorValue": "WeaponSpeedMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T3",
+        "name": "Calamity Suffix: Attack Speed +15% / 공격 속도 +15%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "attack_speed",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_critical_damage_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T1",
+    "name": "약간의 정밀: 치명타 피해 +10%",
+    "nameEn": "of Minor Precision: Critical Damage +10%",
+    "nameKo": "약간의 정밀: 치명타 피해 +10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T1",
+        "name": "Calamity Suffix: Critical Damage +10% / 치명타 피해 +10%",
+        "actorValue": "CriticalChance",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T1",
+        "name": "Calamity Suffix: Critical Damage +10% / 치명타 피해 +10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T1",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "critical_damage",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T1",
+        "critDamageBonusPct": 10
+      }
+    }
+  },
+  {
+    "id": "suffix_critical_damage_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T2",
+    "name": "정밀: 치명타 피해 +20%",
+    "nameEn": "of Precision: Critical Damage +20%",
+    "nameKo": "정밀: 치명타 피해 +20%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T2",
+        "name": "Calamity Suffix: Critical Damage +20% / 치명타 피해 +20%",
+        "actorValue": "CriticalChance",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T2",
+        "name": "Calamity Suffix: Critical Damage +20% / 치명타 피해 +20%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T2",
+          "magnitude": 20,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "critical_damage",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T2",
+        "critDamageBonusPct": 20
+      }
+    }
+  },
+  {
+    "id": "suffix_critical_damage_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T3",
+    "name": "위대한 정밀: 치명타 피해 +30%",
+    "nameEn": "of Grand Precision: Critical Damage +30%",
+    "nameKo": "위대한 정밀: 치명타 피해 +30%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T3",
+        "name": "Calamity Suffix: Critical Damage +30% / 치명타 피해 +30%",
+        "actorValue": "CriticalChance",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T3",
+        "name": "Calamity Suffix: Critical Damage +30% / 치명타 피해 +30%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T3",
+          "magnitude": 30,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "critical_damage",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CRITICAL_DAMAGE_T3",
+        "critDamageBonusPct": 30
+      }
+    }
+  },
+  {
+    "id": "suffix_destruction_cost_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T1",
+    "name": "약간의 효율: 파괴 마법 비용 -5%",
+    "nameEn": "of Minor Efficiency: Destruction Cost -5%",
+    "nameKo": "약간의 효율: 파괴 마법 비용 -5%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T1",
+        "name": "Calamity Suffix: Destruction Cost -5% / 파괴 마법 비용 -5%",
+        "actorValue": "DestructionModifier",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T1",
+        "name": "Calamity Suffix: Destruction Cost -5% / 파괴 마법 비용 -5%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T1",
+          "magnitude": 5,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "destruction_cost",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_destruction_cost_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T2",
+    "name": "효율: 파괴 마법 비용 -10%",
+    "nameEn": "of Efficiency: Destruction Cost -10%",
+    "nameKo": "효율: 파괴 마법 비용 -10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T2",
+        "name": "Calamity Suffix: Destruction Cost -10% / 파괴 마법 비용 -10%",
+        "actorValue": "DestructionModifier",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T2",
+        "name": "Calamity Suffix: Destruction Cost -10% / 파괴 마법 비용 -10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T2",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "destruction_cost",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_destruction_cost_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T3",
+    "name": "위대한 효율: 파괴 마법 비용 -15%",
+    "nameEn": "of Grand Efficiency: Destruction Cost -15%",
+    "nameKo": "위대한 효율: 파괴 마법 비용 -15%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T3",
+        "name": "Calamity Suffix: Destruction Cost -15% / 파괴 마법 비용 -15%",
+        "actorValue": "DestructionModifier",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T3",
+        "name": "Calamity Suffix: Destruction Cost -15% / 파괴 마법 비용 -15%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T3",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "destruction_cost",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_move_speed_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T1",
+    "name": "약간의 신속: 이동 속도 +4%",
+    "nameEn": "of Minor Swiftness: Move Speed +4%",
+    "nameKo": "약간의 신속: 이동 속도 +4%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T1",
+        "name": "Calamity Suffix: Move Speed +4% / 이동 속도 +4%",
+        "actorValue": "SpeedMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T1",
+        "name": "Calamity Suffix: Move Speed +4% / 이동 속도 +4%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T1",
+          "magnitude": 4,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "move_speed",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_move_speed_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T2",
+    "name": "신속: 이동 속도 +7%",
+    "nameEn": "of Swiftness: Move Speed +7%",
+    "nameKo": "신속: 이동 속도 +7%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T2",
+        "name": "Calamity Suffix: Move Speed +7% / 이동 속도 +7%",
+        "actorValue": "SpeedMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T2",
+        "name": "Calamity Suffix: Move Speed +7% / 이동 속도 +7%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T2",
+          "magnitude": 7,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "move_speed",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_move_speed_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_MOVE_SPEED_T3",
+    "name": "위대한 신속: 이동 속도 +10%",
+    "nameEn": "of Grand Swiftness: Move Speed +10%",
+    "nameKo": "위대한 신속: 이동 속도 +10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T3",
+        "name": "Calamity Suffix: Move Speed +10% / 이동 속도 +10%",
+        "actorValue": "SpeedMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T3",
+        "name": "Calamity Suffix: Move Speed +10% / 이동 속도 +10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_MOVE_SPEED_T3",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "move_speed",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_MOVE_SPEED_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_carry_weight_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T1",
+    "name": "약간의 운반: 소지 무게 +20",
+    "nameEn": "of Minor Burden: Carry Weight +20",
+    "nameKo": "약간의 운반: 소지 무게 +20",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T1",
+        "name": "Calamity Suffix: Carry Weight +20 / 소지 무게 +20",
+        "actorValue": "CarryWeight",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T1",
+        "name": "Calamity Suffix: Carry Weight +20 / 소지 무게 +20",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T1",
+          "magnitude": 20,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "carry_weight",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_carry_weight_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T2",
+    "name": "운반: 소지 무게 +40",
+    "nameEn": "of Burden: Carry Weight +40",
+    "nameKo": "운반: 소지 무게 +40",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T2",
+        "name": "Calamity Suffix: Carry Weight +40 / 소지 무게 +40",
+        "actorValue": "CarryWeight",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T2",
+        "name": "Calamity Suffix: Carry Weight +40 / 소지 무게 +40",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T2",
+          "magnitude": 40,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "carry_weight",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_carry_weight_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T3",
+    "name": "위대한 운반: 소지 무게 +60",
+    "nameEn": "of Grand Burden: Carry Weight +60",
+    "nameKo": "위대한 운반: 소지 무게 +60",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T3",
+        "name": "Calamity Suffix: Carry Weight +60 / 소지 무게 +60",
+        "actorValue": "CarryWeight",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T3",
+        "name": "Calamity Suffix: Carry Weight +60 / 소지 무게 +60",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T3",
+          "magnitude": 60,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "carry_weight",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_shout_cooldown_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T1",
+    "name": "약간의 음성: 쇼우트 쿨다운 -5%",
+    "nameEn": "of Minor Voice: Shout Cooldown -5%",
+    "nameKo": "약간의 음성: 쇼우트 쿨다운 -5%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T1",
+        "name": "Calamity Suffix: Shout Cooldown -5% / 쇼우트 쿨다운 -5%",
+        "actorValue": "ShoutRecoveryMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T1",
+        "name": "Calamity Suffix: Shout Cooldown -5% / 쇼우트 쿨다운 -5%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T1",
+          "magnitude": 5,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "shout_cooldown",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_shout_cooldown_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T2",
+    "name": "음성: 쇼우트 쿨다운 -10%",
+    "nameEn": "of the Voice: Shout Cooldown -10%",
+    "nameKo": "음성: 쇼우트 쿨다운 -10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T2",
+        "name": "Calamity Suffix: Shout Cooldown -10% / 쇼우트 쿨다운 -10%",
+        "actorValue": "ShoutRecoveryMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T2",
+        "name": "Calamity Suffix: Shout Cooldown -10% / 쇼우트 쿨다운 -10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T2",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "shout_cooldown",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_shout_cooldown_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T3",
+    "name": "위대한 음성: 쇼우트 쿨다운 -15%",
+    "nameEn": "of Grand Voice: Shout Cooldown -15%",
+    "nameKo": "위대한 음성: 쇼우트 쿨다운 -15%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3",
+        "name": "Calamity Suffix: Shout Cooldown -15% / 쇼우트 쿨다운 -15%",
+        "actorValue": "ShoutRecoveryMult",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T3",
+        "name": "Calamity Suffix: Shout Cooldown -15% / 쇼우트 쿨다운 -15%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "shout_cooldown",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T3"
+      }
+    }
+  },
+  {
+    "id": "suffix_experience_gain_t1",
+    "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T1",
+    "name": "약간의 지혜: 경험치 +5%",
+    "nameEn": "of Minor Wisdom: Experience +5%",
+    "nameKo": "약간의 지혜: 경험치 +5%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T1",
+        "name": "Calamity Suffix: Experience +5% / 경험치 +5%",
+        "actorValue": "VoiceRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T1",
+        "name": "Calamity Suffix: Experience +5% / 경험치 +5%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T1",
+          "magnitude": 5,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 6
+    },
+    "slot": "suffix",
+    "family": "experience_gain",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T1"
+      }
+    }
+  },
+  {
+    "id": "suffix_experience_gain_t2",
+    "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T2",
+    "name": "지혜: 경험치 +10%",
+    "nameEn": "of Wisdom: Experience +10%",
+    "nameKo": "지혜: 경험치 +10%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T2",
+        "name": "Calamity Suffix: Experience +10% / 경험치 +10%",
+        "actorValue": "VoiceRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T2",
+        "name": "Calamity Suffix: Experience +10% / 경험치 +10%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T2",
+          "magnitude": 10,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 3
+    },
+    "slot": "suffix",
+    "family": "experience_gain",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T2"
+      }
+    }
+  },
+  {
+    "id": "suffix_experience_gain_t3",
+    "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T3",
+    "name": "위대한 지혜: 경험치 +15%",
+    "nameEn": "of Grand Wisdom: Experience +15%",
+    "nameKo": "위대한 지혜: 경험치 +15%",
+    "records": {
+      "magicEffect": {
+        "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T3",
+        "name": "Calamity Suffix: Experience +15% / 경험치 +15%",
+        "actorValue": "VoiceRate",
+        "resistValue": null,
+        "magicSkill": null,
+        "hostile": false,
+        "recover": true
+      },
+      "spell": {
+        "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T3",
+        "name": "Calamity Suffix: Experience +15% / 경험치 +15%",
+        "delivery": "Self",
+        "spellType": "Ability",
+        "castType": "ConstantEffect",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T3",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
+      }
+    },
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1
+    },
+    "slot": "suffix",
+    "family": "experience_gain",
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 0,
+      "action": {
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T3"
+      }
+    }
+  }
+]

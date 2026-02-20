@@ -141,6 +141,25 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 	}
 }
 
+[[nodiscard]] bool HasCurrencyDeathDistributionTag(const RE::TESObjectREFR* a_ref)
+{
+	if (!a_ref) {
+		return false;
+	}
+
+	const auto* actor = a_ref->As<RE::Actor>();
+	if (!actor) {
+		return false;
+	}
+
+	static RE::BGSKeyword* currencyDeathDistKeyword = nullptr;
+	if (!currencyDeathDistKeyword) {
+		currencyDeathDistKeyword = RE::TESForm::LookupByEditorID<RE::BGSKeyword>("CAFF_TAG_CURRENCY_DEATH_DIST");
+	}
+
+	return currencyDeathDistKeyword && actor->HasKeyword(currencyDeathDistKeyword);
+}
+
 [[nodiscard]] std::uint32_t GetInGameDayStamp() noexcept
 {
 	auto* calendar = RE::Calendar::GetSingleton();
@@ -504,6 +523,14 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			_loot.bossContainerEditorIdAllowContains,
 			_loot.bossContainerEditorIdDenyContains);
 		if (sourceTier == LootCurrencySourceTier::kUnknown || sourceTier == LootCurrencySourceTier::kWorld) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+		if (sourceTier == LootCurrencySourceTier::kCorpse && HasCurrencyDeathDistributionTag(sourceRef)) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: activation corpse currency roll skipped (SPID death-distribution tag present) (sourceRef={:08X}).",
+					sourceRef->GetFormID());
+			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
