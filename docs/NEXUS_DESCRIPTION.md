@@ -71,6 +71,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - 목적: 각 유저의 실제 로드오더에 맞춰 **모드 추가 적 DeathItem\*** 드랍 리스트에 룬워드 조각/재련 오브 드랍을 주입
 - 가장 쉬운 방법(Windows): `tools\build_user_patch_wizard.cmd` 실행 후 선택 창에서 경로만 지정
 - 위저드는 기본 경로를 자동 탐지하며, MO2가 감지되면 `ModOrganizer.ini`의 `selected_profile` 기준 프로필의 `loadorder.txt`(또는 `plugins.txt`)를 우선 선택
+- `CalamityAffixes.UserPatch.exe`는 CLI 인자 기반이므로, 일반 사용자는 `build_user_patch_wizard.cmd` 실행 권장
 - 생성 명령(예시):
 
 ```bash
@@ -157,6 +158,7 @@ Current runtime scope is **player-centric**.
 - Goal: inject runeword fragment/reforge orb drops into **mod-added DeathItem\*** leveled lists based on each user's active load order.
 - Easiest (Windows): run `tools\build_user_patch_wizard.cmd` and choose paths in the dialogs.
 - The wizard auto-fills defaults and, when MO2 is detected, prioritizes the selected profile from `ModOrganizer.ini` (`profiles/<selected_profile>/loadorder.txt` or `plugins.txt`).
+- `CalamityAffixes.UserPatch.exe` is a CLI-argument tool; most users should start from `build_user_patch_wizard.cmd`.
 - Example:
 
 ```bash

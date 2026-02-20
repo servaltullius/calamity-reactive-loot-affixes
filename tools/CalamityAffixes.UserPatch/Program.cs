@@ -33,8 +33,23 @@ static class Program
 
     public static int Main(string[] args)
     {
+        var launchedWithoutArgs = args.Length == 0;
         try
         {
+            // Double-clicking the published EXE without args is a common user mistake.
+            // In that case, show clear guidance instead of failing silently and closing.
+            if (launchedWithoutArgs && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("CALAMITY_MASTERS_DIR")))
+            {
+                Console.WriteLine("CalamityAffixes.UserPatch");
+                Console.WriteLine();
+                Console.WriteLine("No arguments were provided.");
+                Console.WriteLine("For most users, run 'build_user_patch_wizard.cmd' instead of the EXE directly.");
+                Console.WriteLine();
+                PrintUsage();
+                PauseForInteractiveNoArgsLaunch();
+                return 2;
+            }
+
             var options = ParseArgs(args);
             var specPath = Path.GetFullPath(options.SpecPath);
             var outputPath = Path.GetFullPath(options.OutputPath);
@@ -94,8 +109,29 @@ static class Program
         catch (Exception ex)
         {
             Console.Error.WriteLine($"ERROR: {ex.Message}");
+            if (launchedWithoutArgs)
+            {
+                Console.Error.WriteLine("Tip: launch build_user_patch_wizard.cmd for guided mode.");
+                PauseForInteractiveNoArgsLaunch();
+            }
             return 1;
         }
+    }
+
+    private static void PauseForInteractiveNoArgsLaunch()
+    {
+        if (
+            !OperatingSystem.IsWindows() ||
+            !Environment.UserInteractive ||
+            Console.IsInputRedirected ||
+            Console.IsOutputRedirected)
+        {
+            return;
+        }
+
+        Console.WriteLine();
+        Console.Write("Press Enter to close...");
+        _ = Console.ReadLine();
     }
 
     private static Options ParseArgs(string[] args)
