@@ -72,6 +72,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - 가장 쉬운 방법(Windows): `tools\build_user_patch_wizard.cmd` 실행 후 선택 창에서 경로만 지정
 - 위저드는 기본 경로를 자동 탐지하며, MO2가 감지되면 `ModOrganizer.ini`의 `selected_profile` 기준 프로필의 `loadorder.txt`(또는 `plugins.txt`)를 우선 선택
 - 배포 ZIP 위저드는 동봉된 `CalamityAffixes.UserPatch.exe` + `affixes/affixes.json`을 자동 사용 (소스 프로젝트 경로 불필요)
+- 생성되는 `CalamityAffixes_UserPatch.esp`는 ESL 플래그(ESPFE)로 기록되어 풀 ESP 슬롯 소모를 줄임
 - `CalamityAffixes.UserPatch.exe`는 CLI 인자 기반이므로, 일반 사용자는 `build_user_patch_wizard.cmd` 실행 권장
 - 생성 명령(예시):
 
@@ -160,6 +161,7 @@ Current runtime scope is **player-centric**.
 - Easiest (Windows): run `tools\build_user_patch_wizard.cmd` and choose paths in the dialogs.
 - The wizard auto-fills defaults and, when MO2 is detected, prioritizes the selected profile from `ModOrganizer.ini` (`profiles/<selected_profile>/loadorder.txt` or `plugins.txt`).
 - In the release ZIP, the wizard automatically uses bundled `CalamityAffixes.UserPatch.exe` + `affixes/affixes.json` (no source project path needed).
+- The generated `CalamityAffixes_UserPatch.esp` is written as ESL-flagged (ESPFE) to reduce full ESP slot usage.
 - `CalamityAffixes.UserPatch.exe` is a CLI-argument tool; most users should start from `build_user_patch_wizard.cmd`.
 - Example:
 

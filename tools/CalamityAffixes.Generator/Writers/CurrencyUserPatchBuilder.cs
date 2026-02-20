@@ -31,6 +31,9 @@ public static class CurrencyUserPatchBuilder
         }
 
         var mod = new SkyrimMod(ModKey.FromFileName(patchModKey), SkyrimRelease.SkyrimSE);
+        // UserPatch only writes leveled-list overrides, so keep it light-plugin flagged (ESPFE)
+        // to avoid consuming a full plugin slot.
+        mod.ModHeader.Flags |= SkyrimModHeader.HeaderFlag.Small;
         var runewordDropListLink = new FormLink<IItemGetter>(runewordDropListKey);
         var reforgeDropListLink = new FormLink<IItemGetter>(reforgeDropListKey);
 

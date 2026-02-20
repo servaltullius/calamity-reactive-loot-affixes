@@ -27,6 +27,8 @@ public sealed class CurrencyUserPatchBuilderTests
             [targetOne, targetTwo],
             resolver);
 
+        Assert.True(patch.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
+
         var one = Assert.Single(patch.LeveledItems, list => list.FormKey == targetOne);
         var two = Assert.Single(patch.LeveledItems, list => list.FormKey == targetTwo);
 
