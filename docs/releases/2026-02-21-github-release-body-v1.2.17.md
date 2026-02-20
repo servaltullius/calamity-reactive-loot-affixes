@@ -33,3 +33,7 @@
 
 ### 산출물
 - `CalamityAffixes_MO2_v1.2.17_2026-02-21.zip`
+
+### RC 구간 상세 변경점
+- `v1.2.17-rc01`부터 `v1.2.17-rc70`까지의 상세 타임라인:
+  - `docs/releases/2026-02-21-v1.2.17-rc01-rc70-consolidated-notes.md`
