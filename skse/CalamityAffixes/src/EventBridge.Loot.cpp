@@ -467,30 +467,32 @@ namespace CalamityAffixes
 			}
 		}
 
-			const auto baseObj = a_event->baseObj;
-			const auto count = a_event->itemCount;
-			const auto uid = a_event->uniqueID;
-			const auto allowRunewordFragmentRoll = IsLootSourceCorpseChestOrWorld(a_event->oldContainer, playerId);
+		const auto baseObj = a_event->baseObj;
+		const auto count = a_event->itemCount;
+		const auto uid = a_event->uniqueID;
+		const auto allowRunewordFragmentRoll = IsLootSourceCorpseChestOrWorld(a_event->oldContainer, playerId);
 
-			if (!allowRunewordFragmentRoll) {
-				if (_loot.debugLog) {
-					SKSE::log::debug(
-						"CalamityAffixes: runeword fragment roll skipped (source filter) (oldContainer={:08X}, baseObj={:08X}, uniqueID={}).",
-						a_event->oldContainer,
-						baseObj,
-						uid);
-				}
+		if (!allowRunewordFragmentRoll) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: runeword fragment roll skipped (source filter) (oldContainer={:08X}, baseObj={:08X}, uniqueID={}).",
+					a_event->oldContainer,
+					baseObj,
+					uid);
 			}
+		}
 
+		if (_loot.debugLog) {
 			SKSE::log::debug(
 				"CalamityAffixes: loot event queued (baseObj={:08X}, count={}, uniqueID={}).",
-			baseObj,
-			count,
-			uid);
-
-			ProcessLootAcquired(baseObj, count, uid, a_event->oldContainer, allowRunewordFragmentRoll);
-			return RE::BSEventNotifyControl::kContinue;
+				baseObj,
+				count,
+				uid);
 		}
+
+		ProcessLootAcquired(baseObj, count, uid, a_event->oldContainer, allowRunewordFragmentRoll);
+		return RE::BSEventNotifyControl::kContinue;
+	}
 
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
 		const RE::TESUniqueIDChangeEvent* a_event,

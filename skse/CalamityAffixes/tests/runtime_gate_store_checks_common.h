@@ -56,4 +56,5 @@ namespace RuntimeGateStoreChecks
 
 	bool CheckRuntimeUserSettingsDebounceBehavior();
 	bool CheckExternalUserSettingsPersistencePolicy();
+	bool CheckRuntimeUserSettingsRoundTripFieldPolicy();
 }

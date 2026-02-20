@@ -605,6 +605,7 @@ namespace CalamityAffixes
 		std::chrono::steady_clock::time_point _dotCooldownsLastPruneAt{};
 		std::unordered_set<RE::FormID> _dotObservedMagicEffects;
 		bool _dotTagSafetyWarned{ false };
+		bool _dotObservedMagicEffectsCapWarned{ false };
 		bool _dotTagSafetySuppressed{ false };
 
 		PerTargetCooldownStore _perTargetCooldownStore{};

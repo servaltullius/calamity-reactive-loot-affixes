@@ -33,6 +33,7 @@ int main()
 	const bool prismaTooltipImmediateRefreshOk = CheckPrismaTooltipImmediateRefreshPolicy();
 	const bool runtimeUserSettingsDebounceOk = CheckRuntimeUserSettingsDebounceBehavior();
 	const bool externalUserSettingsPersistenceOk = CheckExternalUserSettingsPersistencePolicy();
+	const bool runtimeUserSettingsRoundTripFieldsOk = CheckRuntimeUserSettingsRoundTripFieldPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
@@ -52,6 +53,7 @@ int main()
 	        runewordReforgeSafetyOk &&
 	        prismaTooltipImmediateRefreshOk &&
 	        runtimeUserSettingsDebounceOk &&
-	        externalUserSettingsPersistenceOk) ? 0 :
-	                                                     1;
+	        externalUserSettingsPersistenceOk &&
+	        runtimeUserSettingsRoundTripFieldsOk) ? 0 :
+		                                                     1;
 }

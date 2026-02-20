@@ -25,6 +25,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install Python lint dependencies
+        run: python3 -m pip install --upgrade pip jsonschema
+
       - name: Lint affix spec and generated snapshot
         run: python3 tools/lint_affixes.py --spec affixes/affixes.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json
 

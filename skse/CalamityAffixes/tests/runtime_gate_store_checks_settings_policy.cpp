@@ -229,4 +229,73 @@ namespace RuntimeGateStoreChecks
 
 			return true;
 		}
+
+		bool CheckRuntimeUserSettingsRoundTripFieldPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path eventBridgeConfigFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.cpp";
+
+			std::ifstream in(eventBridgeConfigFile);
+			if (!in.is_open()) {
+				std::cerr << "runtime_user_settings_round_trip: missing EventBridge.Config.cpp\n";
+				return false;
+			}
+			const std::string configText(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+
+			if (configText.find("std::string EventBridge::BuildRuntimeUserSettingsPayload() const") == std::string::npos ||
+				configText.find("bool EventBridge::PersistRuntimeUserSettings()") == std::string::npos ||
+				configText.find("void EventBridge::ApplyRuntimeUserSettingsOverrides()") == std::string::npos) {
+				std::cerr << "runtime_user_settings_round_trip: runtime user-settings functions missing\n";
+				return false;
+			}
+
+			const std::array<std::string_view, 8> runtimeKeys{
+				"enabled",
+				"debugNotifications",
+				"validationIntervalSeconds",
+				"procChanceMultiplier",
+				"runewordFragmentChancePercent",
+				"reforgeOrbChancePercent",
+				"dotSafetyAutoDisable",
+				"allowNonHostileFirstHitProc"
+			};
+
+			const auto hasNearAnchor = [&configText](std::size_t a_pos, std::string_view a_anchor, std::size_t a_window) {
+				if (a_pos == std::string::npos) {
+					return false;
+				}
+				const auto windowStart = (a_pos > a_window) ? (a_pos - a_window) : 0;
+				const auto anchorPos = configText.rfind(a_anchor, a_pos);
+				return anchorPos != std::string::npos && anchorPos >= windowStart;
+			};
+
+			for (const auto key : runtimeKeys) {
+				const std::string persistPattern = std::string("runtime[\"") + std::string(key) + "\"] =";
+				if (configText.find(persistPattern) == std::string::npos) {
+					std::cerr << "runtime_user_settings_round_trip: missing persist payload field '" << key << "'\n";
+					return false;
+				}
+
+				const std::string quotedKey = std::string("\"") + std::string(key) + "\"";
+				bool loadFieldFound = false;
+				std::size_t keyPos = configText.find(quotedKey);
+				while (keyPos != std::string::npos) {
+					if (hasNearAnchor(keyPos, "runtime.value(", 256)) {
+						loadFieldFound = true;
+						break;
+					}
+					keyPos = configText.find(quotedKey, keyPos + quotedKey.size());
+				}
+
+				if (!loadFieldFound) {
+					std::cerr << "runtime_user_settings_round_trip: missing load override field '" << key << "'\n";
+					return false;
+				}
+			}
+
+			return true;
+		}
 }

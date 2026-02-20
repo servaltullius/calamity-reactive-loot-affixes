@@ -93,6 +93,49 @@ def _load_validation_contract() -> Tuple[Set[str], Set[str]]:
     return read_set("supportedTriggers"), read_set("supportedActionTypes")
 
 
+def _format_json_path(path_tokens: Iterable[Any]) -> str:
+    path = "$"
+    for token in path_tokens:
+        if isinstance(token, int):
+            path += f"[{token}]"
+        else:
+            escaped = str(token).replace('"', '\\"')
+            path += f'.{escaped}'
+    return path
+
+
+def _validate_schema(
+    *,
+    instance: Dict[str, Any],
+    schema: Dict[str, Any],
+    label: str,
+    errors: List[str],
+    max_errors: int = 20,
+) -> None:
+    try:
+        from jsonschema import Draft202012Validator  # type: ignore
+    except ImportError:
+        errors.append(
+            "Schema validation requires Python package 'jsonschema'. "
+            "Install: python3 -m pip install --user jsonschema"
+        )
+        return
+
+    validator = Draft202012Validator(schema)
+    violation_count = 0
+    for violation in sorted(
+        validator.iter_errors(instance),
+        key=lambda item: (len(list(item.absolute_path)), _format_json_path(item.absolute_path), item.message),
+    ):
+        errors.append(
+            f"{label}: schema violation at {_format_json_path(violation.absolute_path)}: {violation.message}"
+        )
+        violation_count += 1
+        if violation_count >= max_errors:
+            errors.append(f"{label}: schema validation truncated after {max_errors} error(s).")
+            break
+
+
 def _lint_spec(
     spec: Dict[str, Any],
     *,
@@ -532,6 +575,7 @@ def _check_module_manifest_sync(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Lint Calamity affix spec for common authoring mistakes.")
     parser.add_argument("--spec", default="affixes/affixes.json", help="Path to affix spec JSON.")
+    parser.add_argument("--schema", default="affixes/affixes.schema.json", help="Path to JSON schema for affix spec.")
     parser.add_argument(
         "--manifest",
         default=None,
@@ -546,11 +590,18 @@ def main() -> int:
     args = parser.parse_args()
 
     spec_path = Path(args.spec)
+    schema_path = Path(args.schema)
     errors: List[str] = []
     warnings: List[str] = []
 
     try:
         spec = _read_json(spec_path)
+    except RuntimeError as e:
+        print(f"[ERROR] {e}", file=sys.stderr)
+        return 2
+
+    try:
+        schema = _read_json(schema_path)
     except RuntimeError as e:
         print(f"[ERROR] {e}", file=sys.stderr)
         return 2
@@ -585,6 +636,16 @@ def main() -> int:
     if not isinstance(spec, dict):
         print("[ERROR] Spec JSON must be an object at top-level.", file=sys.stderr)
         return 2
+    if not isinstance(schema, dict):
+        print("[ERROR] Schema JSON must be an object at top-level.", file=sys.stderr)
+        return 2
+
+    _validate_schema(
+        instance=spec,
+        schema=schema,
+        label=f"spec({spec_path})",
+        errors=errors,
+    )
 
     _lint_spec(
         spec,
@@ -602,6 +663,12 @@ def main() -> int:
             errors.append(str(e))
         else:
             if isinstance(gen, dict):
+                _validate_schema(
+                    instance=gen,
+                    schema=schema,
+                    label=f"generated({gen_path})",
+                    errors=errors,
+                )
                 _check_generated_sync(
                     spec,
                     gen,

@@ -27,6 +27,7 @@ namespace
 constexpr std::size_t kDotCooldownMaxEntries = 4096;
 constexpr auto kDotCooldownTtl = std::chrono::seconds(30);
 constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
+constexpr std::size_t kDotObservedMagicEffectsMaxEntries = 4096;
 using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 
 [[nodiscard]] bool IsInternalProcSpellSource(RE::FormID a_sourceFormID)
@@ -596,7 +597,16 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		_dotObservedMagicEffects.insert(mgef->GetFormID());
+		const RE::FormID observedMgefFormId = mgef->GetFormID();
+		if (_dotObservedMagicEffects.size() < kDotObservedMagicEffectsMaxEntries ||
+			_dotObservedMagicEffects.contains(observedMgefFormId)) {
+			_dotObservedMagicEffects.insert(observedMgefFormId);
+		} else if (!_dotObservedMagicEffectsCapWarned) {
+			_dotObservedMagicEffectsCapWarned = true;
+			SKSE::log::warn(
+				"CalamityAffixes: DotApply observed-magic-effect set reached hard cap ({}). Additional IDs will be ignored until reset.",
+				kDotObservedMagicEffectsMaxEntries);
+		}
 		const auto observedDotEffectCount = _dotObservedMagicEffects.size();
 		if (_loot.dotTagSafetyUniqueEffectThreshold > 0u &&
 			observedDotEffectCount > _loot.dotTagSafetyUniqueEffectThreshold) {

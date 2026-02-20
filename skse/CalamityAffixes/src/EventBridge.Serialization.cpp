@@ -254,6 +254,7 @@ namespace CalamityAffixes
 		_instanceStates.clear();
 		_dotObservedMagicEffects.clear();
 		_dotTagSafetyWarned = false;
+		_dotObservedMagicEffectsCapWarned = false;
 		_dotTagSafetySuppressed = false;
 		_runewordRuneFragments.clear();
 		_runewordInstanceStates.clear();
@@ -823,6 +824,7 @@ namespace CalamityAffixes
 		_dotCooldownsLastPruneAt = {};
 		_dotObservedMagicEffects.clear();
 		_dotTagSafetyWarned = false;
+		_dotObservedMagicEffectsCapWarned = false;
 		_dotTagSafetySuppressed = false;
 		_perTargetCooldownStore.Clear();
 		_nonHostileFirstHitGate.Clear();

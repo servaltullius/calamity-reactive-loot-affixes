@@ -802,6 +802,13 @@ namespace CalamityAffixes
 			_loot.bossContainerEditorIdAllowContains,
 			_loot.bossContainerEditorIdDenyContains);
 		const float sourceChanceMultiplier = ResolveLootCurrencySourceChanceMultiplier(sourceTier);
+
+		if (sourceTier != LootCurrencySourceTier::kWorld) {
+			// Corpse/container sources are rolled at activation time to avoid
+			// "first looting then extra drop appears" UX.
+			return;
+		}
+
 		const auto dayStamp = GetInGameDayStamp();
 		const auto ledgerKey = detail::BuildLootCurrencyLedgerKey(
 			sourceTier,
@@ -820,12 +827,6 @@ namespace CalamityAffixes
 					ledgerKey,
 					dayStamp);
 			}
-			return;
-		}
-
-		if (sourceTier != LootCurrencySourceTier::kWorld) {
-			// Corpse/container sources are rolled at activation time to avoid
-			// "first looting then extra drop appears" UX.
 			return;
 		}
 

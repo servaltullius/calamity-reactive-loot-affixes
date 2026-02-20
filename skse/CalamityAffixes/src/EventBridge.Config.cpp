@@ -231,9 +231,10 @@ namespace CalamityAffixes
 		_hasActiveTraps.store(false, std::memory_order_relaxed);
 			_dotCooldowns.clear();
 			_dotCooldownsLastPruneAt = {};
-				_dotObservedMagicEffects.clear();
-					_dotTagSafetyWarned = false;
-					_dotTagSafetySuppressed = false;
+					_dotObservedMagicEffects.clear();
+						_dotTagSafetyWarned = false;
+						_dotObservedMagicEffectsCapWarned = false;
+						_dotTagSafetySuppressed = false;
 					_perTargetCooldownStore.Clear();
 					_nonHostileFirstHitGate.Clear();
 			_corpseExplosionSeenCorpses.clear();
