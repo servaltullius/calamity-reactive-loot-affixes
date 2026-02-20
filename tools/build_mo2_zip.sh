@@ -40,6 +40,7 @@ data_dir="${repo_root}/Data"
 dist_dir="${repo_root}/dist"
 data_dll="${data_dir}/SKSE/Plugins/CalamityAffixes.dll"
 linux_cross_dll="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll"
+userpatch_publish_dir="${dist_dir}/.userpatch_publish"
 default_scripts_zip="/mnt/c/Program Files (x86)/Steam/steamapps/content/app_1946180/depot_1946183/Data/Scripts.zip"
 scripts_zip_for_masters="${PAPYRUS_SCRIPTS_ZIP:-${default_scripts_zip}}"
 masters_dir="${CALAMITY_MASTERS_DIR:-}"
@@ -138,6 +139,29 @@ python3 "${repo_root}/tools/lint_affixes.py" \
   --spec "${repo_root}/affixes/affixes.json" \
   --generated "${data_dir}/SKSE/Plugins/CalamityAffixes/affixes.json"
 
+# Publish a standalone Windows UserPatch EXE for non-CLI users.
+# Official .NET single-file guidance:
+# https://learn.microsoft.com/en-us/dotnet/core/deploying/single-file/overview
+rm -rf "${userpatch_publish_dir}"
+(
+  cd "${repo_run_root}"
+  dotnet publish tools/CalamityAffixes.UserPatch/CalamityAffixes.UserPatch.csproj \
+    -c Release \
+    -r win-x64 \
+    --self-contained true \
+    -p:PublishSingleFile=true \
+    -p:IncludeNativeLibrariesForSelfExtract=true \
+    -p:DebugType=None \
+    -p:DebugSymbols=false \
+    -o dist/.userpatch_publish
+)
+
+userpatch_exe="${userpatch_publish_dir}/CalamityAffixes.UserPatch.exe"
+if [[ ! -f "${userpatch_exe}" ]]; then
+  echo "ERROR: UserPatch EXE publish failed (missing ${userpatch_exe})." >&2
+  exit 1
+fi
+
 date_tag="$(date +%Y-%m-%d)"
 out_zip="${dist_dir}/${mod_name}_MO2_v${version}_${date_tag}.zip"
 
@@ -160,9 +184,17 @@ cp -a "${repo_root}/doc/1.개발명세서.md" "${tmp_dir}/${mod_name}/Docs/1.개
 cp -a "${repo_root}/doc/2.CK_MVP_셋업_체크리스트.md" "${tmp_dir}/${mod_name}/Docs/2.CK_MVP_셋업_체크리스트.md"
 cp -a "${repo_root}/doc/3.B_데이터주도_생성기_워크플로우.md" "${tmp_dir}/${mod_name}/Docs/3.B_데이터주도_생성기_워크플로우.md"
 
+# Include end-user patch builder tools (double-click wizard + standalone EXE).
+mkdir -p "${tmp_dir}/${mod_name}/Tools/UserPatch"
+cp -a "${repo_root}/tools/build_user_patch_wizard.cmd" "${tmp_dir}/${mod_name}/Tools/UserPatch/build_user_patch_wizard.cmd"
+cp -a "${repo_root}/tools/build_user_patch_wizard.ps1" "${tmp_dir}/${mod_name}/Tools/UserPatch/build_user_patch_wizard.ps1"
+cp -a "${userpatch_exe}" "${tmp_dir}/${mod_name}/Tools/UserPatch/CalamityAffixes.UserPatch.exe"
+
 (
   cd "${tmp_dir}"
   zip -r "${out_zip}" "${mod_name}" >/dev/null
 )
+
+rm -rf "${userpatch_publish_dir}"
 
 echo "Wrote: ${out_zip}"
