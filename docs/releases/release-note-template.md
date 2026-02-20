@@ -45,7 +45,8 @@
   - `sha256sum skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll Data/SKSE/Plugins/CalamityAffixes.dll`
 - 데이터/생성기:
   - `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release`
-  - `python3 tools/lint_affixes.py --spec affixes/affixes.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json`
+  - `python3 -m pip install --user jsonschema`
+  - `python3 tools/lint_affixes.py --spec affixes/affixes.json --schema affixes/affixes.schema.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json`
 
 결과:
 - [예: all pass]

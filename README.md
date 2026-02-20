@@ -223,7 +223,8 @@ sha256sum build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/Ca
 
 ```bash
 python3 tools/compose_affixes.py --check
-python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json
+python3 -m pip install --user jsonschema
+python3 tools/lint_affixes.py --spec affixes/affixes.json --schema affixes/affixes.schema.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json
 python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null
 python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 ```
