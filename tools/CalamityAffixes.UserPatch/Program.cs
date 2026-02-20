@@ -82,8 +82,8 @@ static class Program
             if (targetLists.Count == 0)
             {
                 throw new InvalidDataException(
-                    "No non-vanilla death-item targets were discovered. " +
-                    "If you expect mod-added enemies, verify loadorder/plugins and rerun.");
+                    "No leveled-list targets were resolved from spec/load order. " +
+                    "Verify loot.currencyLeveledListTargets and mod death-item discovery inputs, then rerun.");
             }
 
             var patch = CurrencyUserPatchBuilder.Build(
@@ -199,7 +199,9 @@ static class Program
         Console.WriteLine("CalamityAffixes.UserPatch");
         Console.WriteLine();
         Console.WriteLine("Creates CalamityAffixes_UserPatch.esp from active load order.");
-        Console.WriteLine("The patch injects currency drop lists into mod-added death-item leveled lists.");
+        Console.WriteLine("The patch injects currency drop lists into:");
+        Console.WriteLine("- explicit leveled-list targets from spec (including vanilla FormKeys)");
+        Console.WriteLine("- mod-added death-item leveled lists (DeathItem* + NPC DeathItem references)");
         Console.WriteLine();
         Console.WriteLine("Usage:");
         Console.WriteLine("  dotnet run --project tools/CalamityAffixes.UserPatch -- [options]");
@@ -388,9 +390,12 @@ static class Program
         var targets = new List<FormKey>();
         var seen = new HashSet<FormKey>();
 
+        // Always include explicit targets from spec, even when FormKey owner is an official master.
+        // This ensures UserPatch can re-apply currency injection to winning overrides when other mods
+        // overwrite vanilla Skyrim.esm leveled lists after the base Calamity plugin.
         foreach (var explicitTarget in ParseExplicitTargets(spec.Loot))
         {
-            if (ShouldIncludeForUserPatch(explicitTarget, baseModKey) && seen.Add(explicitTarget))
+            if (seen.Add(explicitTarget))
             {
                 targets.Add(explicitTarget);
             }

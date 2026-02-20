@@ -65,10 +65,12 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 2. MO2로 설치
 3. CalamityAffixes.esp 활성화
 4. SKSE로 실행
-5. (선택, 권장) 모드 추가 적 드랍까지 반영하려면 `CalamityAffixes_UserPatch.esp`를 생성해 함께 활성화
+5. (선택, 권장) 로드오더 충돌 보정 + 모드 추가 적 드랍 반영을 위해 `CalamityAffixes_UserPatch.esp`를 생성해 함께 활성화
 
 #### 사용자 환경별 드랍 패치(UserPatch)
-- 목적: 각 유저의 실제 로드오더에 맞춰 **모드 추가 적 드랍 리스트(DeathItem\* + NPC DeathItem 참조)**에 룬워드 조각/재련 오브 드랍을 주입
+- 목적: 각 유저의 실제 로드오더에 맞춰 룬워드 조각/재련 오브 드랍을 다음 대상에 재주입
+- 대상 1: `affixes.json`에 명시된 leveled-list 타깃(바닐라 FormKey 포함)
+- 대상 2: 모드 추가 적 드랍 리스트(DeathItem\* + NPC DeathItem 참조)
 - 가장 쉬운 방법(Windows): `tools\build_user_patch_wizard.cmd` 실행 후 선택 창에서 경로만 지정
 - 위저드는 기본 경로를 자동 탐지하며, MO2가 감지되면 `ModOrganizer.ini`의 `selected_profile` 기준 프로필의 `loadorder.txt`(또는 `plugins.txt`)를 우선 선택
 - 배포 ZIP 위저드는 동봉된 `CalamityAffixes.UserPatch.exe` + `affixes/affixes.json`을 자동 사용 (소스 프로젝트 경로 불필요)
@@ -163,10 +165,12 @@ Current runtime scope is **player-centric**.
 2. Install with MO2
 3. Enable CalamityAffixes.esp
 4. Launch via SKSE
-5. (Optional, recommended) generate and enable `CalamityAffixes_UserPatch.esp` for mod-added enemy drops
+5. (Optional, recommended) generate and enable `CalamityAffixes_UserPatch.esp` for load-order conflict recovery + mod-added enemy drops
 
 #### Per-user drop patch (UserPatch)
-- Goal: inject runeword fragment/reforge orb drops into **mod-added enemy drop lists (DeathItem\* + NPC DeathItem references)** based on each user's active load order.
+- Goal: re-inject runeword fragment/reforge orb drops based on each user's active load order:
+- Target 1: explicit leveled-list targets from `affixes.json` (including vanilla FormKeys)
+- Target 2: mod-added enemy drop lists (DeathItem\* + NPC DeathItem references)
 - Easiest (Windows): run `tools\build_user_patch_wizard.cmd` and choose paths in the dialogs.
 - The wizard auto-fills defaults and, when MO2 is detected, prioritizes the selected profile from `ModOrganizer.ini` (`profiles/<selected_profile>/loadorder.txt` or `plugins.txt`).
 - In the release ZIP, the wizard automatically uses bundled `CalamityAffixes.UserPatch.exe` + `affixes/affixes.json` (no source project path needed).

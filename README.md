@@ -290,8 +290,10 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 
 ### 유저 로드오더 기반 UserPatch 생성 (권장)
 
-Nexus 배포본의 기본 `CalamityAffixes.esp`는 바닐라/DLC 대상을 안정적으로 커버합니다.  
-모드로 추가된 적의 드랍 리스트(`DeathItem*` + NPC `DeathItem` 참조)까지 사용자 환경별로 정확히 반영하려면, 각 유저 로드오더에서 `CalamityAffixes_UserPatch.esp`를 생성하세요.
+Nexus 배포본의 기본 `CalamityAffixes.esp`는 바닐라/DLC 대상을 커버합니다.  
+`CalamityAffixes_UserPatch.esp`는 유저 로드오더 기준으로 다음을 다시 주입해 충돌/덮어쓰기 상황을 보완합니다:
+- `affixes.json`에 명시된 leveled-list 대상(바닐라 FormKey 포함)
+- 모드 추가 적 드랍 리스트(`DeathItem*` + NPC `DeathItem` 참조)
 
 가장 쉬운 방법(Windows):
 
