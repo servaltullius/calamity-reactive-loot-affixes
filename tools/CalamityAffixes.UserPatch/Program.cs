@@ -82,7 +82,7 @@ static class Program
             if (targetLists.Count == 0)
             {
                 throw new InvalidDataException(
-                    "No non-vanilla DeathItem* targets were discovered. " +
+                    "No non-vanilla death-item targets were discovered. " +
                     "If you expect mod-added enemies, verify loadorder/plugins and rerun.");
             }
 
@@ -103,6 +103,7 @@ static class Program
             Console.WriteLine($"- BaseMod: {baseModKey}");
             Console.WriteLine($"- PatchMod: {patchModKey}");
             Console.WriteLine($"- Targets: {targetLists.Count}");
+            Console.WriteLine($"- TargetsByMod: {FormatTargetCounts(targetLists)}");
             Console.WriteLine($"- Output: {outputPath}");
             return 0;
         }
@@ -198,7 +199,7 @@ static class Program
         Console.WriteLine("CalamityAffixes.UserPatch");
         Console.WriteLine();
         Console.WriteLine("Creates CalamityAffixes_UserPatch.esp from active load order.");
-        Console.WriteLine("The patch injects currency drop lists into mod-added DeathItem* leveled lists.");
+        Console.WriteLine("The patch injects currency drop lists into mod-added death-item leveled lists.");
         Console.WriteLine();
         Console.WriteLine("Usage:");
         Console.WriteLine("  dotnet run --project tools/CalamityAffixes.UserPatch -- [options]");
@@ -489,6 +490,15 @@ static class Program
         IReadOnlyList<ISkyrimModGetter> loadedMods,
         string baseModKey)
     {
+        var knownLeveledItemFormKeys = new HashSet<FormKey>();
+        foreach (var loaded in loadedMods)
+        {
+            foreach (var leveled in loaded.LeveledItems)
+            {
+                knownLeveledItemFormKeys.Add(leveled.FormKey);
+            }
+        }
+
         foreach (var mod in loadedMods)
         {
             if (IsOfficialMaster(mod.ModKey.FileName.String) ||
@@ -510,6 +520,27 @@ static class Program
                     yield return leveledItem.FormKey;
                 }
             }
+
+            foreach (var npc in mod.Npcs)
+            {
+                var deathItem = npc.DeathItem.FormKey;
+                if (deathItem.IsNull)
+                {
+                    continue;
+                }
+
+                if (!knownLeveledItemFormKeys.Contains(deathItem))
+                {
+                    continue;
+                }
+
+                if (!ShouldIncludeForUserPatch(deathItem, baseModKey))
+                {
+                    continue;
+                }
+
+                yield return deathItem;
+            }
         }
     }
 
@@ -527,5 +558,22 @@ static class Program
     private static bool IsOfficialMaster(string fileName)
     {
         return OfficialMasterFileNames.Contains(fileName, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static string FormatTargetCounts(IReadOnlyList<FormKey> targets)
+    {
+        if (targets.Count == 0)
+        {
+            return "none";
+        }
+
+        var counts = targets
+            .GroupBy(target => target.ModKey.FileName.String, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new { Mod = group.Key, Count = group.Count() })
+            .OrderByDescending(entry => entry.Count)
+            .ThenBy(entry => entry.Mod, StringComparer.OrdinalIgnoreCase)
+            .Select(entry => $"{entry.Mod}:{entry.Count}");
+
+        return string.Join(", ", counts);
     }
 }

@@ -44,7 +44,8 @@ public sealed class LootSpec
     [JsonPropertyName("currencyLeveledListTargets")]
     public List<string>? CurrencyLeveledListTargets { get; init; }
 
-    // If true, merge auto-discovered mod DeathItem* leveled lists from --masters into currency targets.
+    // If true, merge auto-discovered mod death-item lists from --masters into currency targets.
+    // Discovery includes both leveled lists named DeathItem* and lists referenced by mod NPC DeathItem links.
     [JsonPropertyName("currencyLeveledListAutoDiscoverDeathItems")]
     public bool CurrencyLeveledListAutoDiscoverDeathItems { get; init; } = true;
 
