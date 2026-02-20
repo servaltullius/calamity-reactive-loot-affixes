@@ -569,6 +569,12 @@ namespace CalamityAffixes
 			std::size_t cursor{ 0 };
 		};
 
+		struct CurrencyRollExecutionResult
+		{
+			bool runewordDropGranted{ false };
+			bool reforgeDropGranted{ false };
+		};
+
 		struct PerTargetCooldownKey
 		{
 			std::uint64_t token{ 0 };
@@ -795,7 +801,7 @@ namespace CalamityAffixes
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		void ApplyRuntimeUserSettingsOverrides();
 		void SyncCurrencyDropModeState(std::string_view a_contextTag);
-		void SyncLeveledListCurrencyDropChances(bool a_disableLeveledListDrops, std::string_view a_contextTag) const;
+		void SyncLeveledListCurrencyDropChances(std::string_view a_contextTag) const;
 		[[nodiscard]] static std::int8_t ToLeveledListChanceNonePercent(float a_dropChancePercent);
 		[[nodiscard]] bool PersistRuntimeUserSettings();
 		void MarkRuntimeUserSettingsDirty();
@@ -832,6 +838,11 @@ namespace CalamityAffixes
 			RE::TESBoundObject* a_dropItem,
 			RE::TESObjectREFR* a_sourceContainerRef,
 			bool a_forceWorldPlacement) const;
+		[[nodiscard]] CurrencyRollExecutionResult ExecuteCurrencyDropRolls(
+			float a_sourceChanceMultiplier,
+			RE::TESObjectREFR* a_sourceContainerRef,
+			bool a_forceWorldPlacement,
+			std::uint32_t a_rollCount);
 		[[nodiscard]] bool IsRuntimeCurrencyDropRollEnabled(std::string_view a_contextTag) const;
 		[[nodiscard]] float ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier a_sourceTier) const noexcept;
 		[[nodiscard]] bool TryBeginLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp);

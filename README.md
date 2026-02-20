@@ -291,6 +291,10 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 - `Data/SKSE/Plugins/InventoryInjector/CalamityAffixes.json` (InventoryInjector placeholder: `rules: []`)
 - `Data/CalamityAffixes.esp` (키워드 + **옵션: records 기반 Spell/MGEF 자동 생성** + MCM Quest + `CalamityAffixes_MCMConfig` 바인딩)
 
+런워드 계약 데이터 SSOT:
+- `affixes/runeword.contract.json` (런워드 카탈로그 + 룬 가중치)
+- Generator는 이 파일을 우선 로드하고, 결과를 `runtime_contract.json`으로 스냅샷 배포합니다.
+
 런타임에서 생성/유지되는 사용자 설정 파일:
 - `Data/SKSE/Plugins/CalamityAffixes/user_settings.json` (MCM 런타임 값 + Prisma 패널 단축키/언어)
   - 저장 방식: 임시 파일 기록 + flush + 원자적 교체(중간 손상 위험 완화)

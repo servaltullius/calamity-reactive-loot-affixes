@@ -56,6 +56,12 @@ namespace RuntimeGateStoreChecks
 			std::cerr << "loot_preview_policy: failed to open assign source: " << assignFile << "\n";
 			return false;
 		}
+		const bool hasDirectCurrencyRollCalls =
+			assignText->find("TryRollRunewordFragmentToken(sourceChanceMultiplier, runeToken, runewordPityTriggered)") != std::string::npos &&
+			assignText->find("TryRollReforgeOrbGrant(sourceChanceMultiplier, reforgePityTriggered)") != std::string::npos;
+		const bool hasSharedCurrencyRollHelper =
+			assignText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") != std::string::npos &&
+			assignText->find("ExecuteCurrencyDropRolls(") != std::string::npos;
 		if (assignText->find("no random affix assignment on pickup") == std::string::npos ||
 			assignText->find("!a_allowRunewordFragmentRoll || a_count <= 0") == std::string::npos ||
 			assignText->find("ResolveLootCurrencySourceTier(") == std::string::npos ||
@@ -63,8 +69,7 @@ namespace RuntimeGateStoreChecks
 			(assignText->find("_loot.lootSourceChanceMultBossContainer") == std::string::npos &&
 				assignText->find("ResolveLootCurrencySourceChanceMultiplier(") == std::string::npos) ||
 			assignText->find("sourceTier != LootCurrencySourceTier::kWorld") == std::string::npos ||
-			assignText->find("TryRollRunewordFragmentToken(sourceChanceMultiplier, runeToken, runewordPityTriggered)") == std::string::npos ||
-			assignText->find("TryRollReforgeOrbGrant(sourceChanceMultiplier, reforgePityTriggered)") == std::string::npos ||
+			(!hasDirectCurrencyRollCalls && !hasSharedCurrencyRollHelper) ||
 			assignText->find("TryPlaceLootCurrencyItem(") == std::string::npos ||
 			assignText->find("RunewordDetail::LookupRunewordFragmentItem(") == std::string::npos ||
 			assignText->find("RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(\"CAFF_Misc_ReforgeOrb\")") == std::string::npos ||
@@ -215,12 +220,16 @@ namespace RuntimeGateStoreChecks
 			std::cerr << "loot_currency_ledger_policy: failed to open trigger-events source: " << triggerEventsFile << "\n";
 			return false;
 		}
+		const bool hasDirectActivationRollPath =
+			triggerText->find("TryRollRunewordFragmentToken(") != std::string::npos &&
+			triggerText->find("TryRollReforgeOrbGrant(") != std::string::npos &&
+			triggerText->find("TryPlaceLootCurrencyItem(") != std::string::npos;
+		const bool hasSharedActivationRollHelper =
+			triggerText->find("ExecuteCurrencyDropRolls(") != std::string::npos;
 		if (triggerText->find("const RE::TESActivateEvent* a_event") == std::string::npos ||
 			triggerText->find("ResolveActivatedLootCurrencySourceTier(") == std::string::npos ||
 			triggerText->find("HasCurrencyDeathDistributionTag(") == std::string::npos ||
-			triggerText->find("TryRollRunewordFragmentToken(") == std::string::npos ||
-			triggerText->find("TryRollReforgeOrbGrant(") == std::string::npos ||
-			triggerText->find("TryPlaceLootCurrencyItem(") == std::string::npos ||
+			(!hasDirectActivationRollPath && !hasSharedActivationRollHelper) ||
 			(triggerText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos &&
 				triggerText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos)) {
 			std::cerr << "loot_currency_ledger_policy: activation-time corpse/container currency roll path missing in EventBridge.Triggers.Events.cpp\n";

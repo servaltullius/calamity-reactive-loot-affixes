@@ -262,7 +262,6 @@ public static class AffixSpecLoader
 
         AddStart(Directory.GetCurrentDirectory());
         AddStart(AppContext.BaseDirectory);
-        AddStart(Path.GetDirectoryName(typeof(AffixSpecLoader).Assembly.Location));
 
         foreach (var start in starts)
         {

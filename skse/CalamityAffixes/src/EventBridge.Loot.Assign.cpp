@@ -23,29 +23,6 @@ namespace CalamityAffixes
 		static constexpr std::size_t kArmorTemplateScanDepth = 8;
 		using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 
-		[[nodiscard]] bool ContainsAsciiNoCase(std::string_view a_text, std::string_view a_needle)
-		{
-			if (a_text.empty() || a_needle.empty() || a_needle.size() > a_text.size()) {
-				return false;
-			}
-
-			for (std::size_t i = 0; i + a_needle.size() <= a_text.size(); ++i) {
-				bool match = true;
-				for (std::size_t j = 0; j < a_needle.size(); ++j) {
-					const auto lhs = static_cast<char>(std::tolower(static_cast<unsigned char>(a_text[i + j])));
-					const auto rhs = static_cast<char>(std::tolower(static_cast<unsigned char>(a_needle[j])));
-					if (lhs != rhs) {
-						match = false;
-						break;
-					}
-				}
-				if (match) {
-					return true;
-				}
-			}
-			return false;
-		}
-
 		[[nodiscard]] bool IsBossContainerEditorId(
 			std::string_view a_editorId,
 			const std::vector<std::string>& a_allowContains,
@@ -64,7 +41,7 @@ namespace CalamityAffixes
 			}
 
 			// Fallback heuristic when allow-list is intentionally empty.
-			return ContainsAsciiNoCase(a_editorId, "boss");
+			return detail::ContainsCaseInsensitiveAscii(a_editorId, "boss");
 		}
 
 		[[nodiscard]] LootCurrencySourceTier ResolveLootCurrencySourceTier(
@@ -855,56 +832,17 @@ namespace CalamityAffixes
 		auto* sourceContainerRef = ResolveLootCurrencySourceContainerRef(a_oldContainer);
 		const bool forceWorldPlacement = (sourceTier == LootCurrencySourceTier::kWorld);
 
-		bool runewordDropGranted = false;
-		bool reforgeDropGranted = false;
 		// OnItemAdded.itemCount is the stack size for this pickup event.
 		// Rolling per stack count causes burst grants (e.g., arrows/gold/stacked misc).
 		// Keep currency roll strictly once per pickup event for stable economy pacing.
 		const std::uint32_t rollCount = 1u;
-		for (std::uint32_t i = 0; i < rollCount; ++i) {
-			bool runewordPityTriggered = false;
-			std::uint64_t runeToken = 0u;
-			if (TryRollRunewordFragmentToken(sourceChanceMultiplier, runeToken, runewordPityTriggered)) {
-				auto* fragmentItem = RunewordDetail::LookupRunewordFragmentItem(
-					_runewordRuneNameByToken,
-					runeToken);
-				if (!fragmentItem) {
-					SKSE::log::error(
-						"CalamityAffixes: runeword fragment item missing (runeToken={:016X}).",
-						runeToken);
-				} else if (TryPlaceLootCurrencyItem(fragmentItem, sourceContainerRef, forceWorldPlacement)) {
-					CommitRunewordFragmentGrant(true);
-					runewordDropGranted = true;
-					std::string runeName = "Rune";
-					if (const auto nameIt = _runewordRuneNameByToken.find(runeToken);
-						nameIt != _runewordRuneNameByToken.end()) {
-						runeName = nameIt->second;
-					}
-					std::string note = "Runeword Fragment Drop: ";
-					note.append(runeName);
-					if (runewordPityTriggered) {
-						note.append(" [Pity]");
-					}
-					RE::DebugNotification(note.c_str());
-				}
-			}
-
-			bool reforgePityTriggered = false;
-			if (TryRollReforgeOrbGrant(sourceChanceMultiplier, reforgePityTriggered)) {
-				auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
-				if (!orb) {
-					SKSE::log::error(
-						"CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
-				} else if (TryPlaceLootCurrencyItem(orb, sourceContainerRef, forceWorldPlacement)) {
-					CommitReforgeOrbGrant(true);
-					reforgeDropGranted = true;
-					RE::DebugNotification("Reforge Orb Drop");
-					if (reforgePityTriggered && _loot.debugLog) {
-						SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");
-					}
-				}
-			}
-		}
+		const auto dropResult = ExecuteCurrencyDropRolls(
+			sourceChanceMultiplier,
+			sourceContainerRef,
+			forceWorldPlacement,
+			rollCount);
+		const bool runewordDropGranted = dropResult.runewordDropGranted;
+		const bool reforgeDropGranted = dropResult.reforgeDropGranted;
 
 		FinalizeLootCurrencyLedgerRoll(ledgerKey, dayStamp);
 
@@ -922,5 +860,61 @@ namespace CalamityAffixes
 				reforgeDropGranted,
 				ledgerKey);
 		}
+	}
+
+	EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(
+		float a_sourceChanceMultiplier,
+		RE::TESObjectREFR* a_sourceContainerRef,
+		bool a_forceWorldPlacement,
+		std::uint32_t a_rollCount)
+	{
+		CurrencyRollExecutionResult result{};
+		const auto rollCount = std::max<std::uint32_t>(1u, a_rollCount);
+		for (std::uint32_t i = 0; i < rollCount; ++i) {
+			bool runewordPityTriggered = false;
+			std::uint64_t runeToken = 0u;
+			if (TryRollRunewordFragmentToken(a_sourceChanceMultiplier, runeToken, runewordPityTriggered)) {
+				auto* fragmentItem = RunewordDetail::LookupRunewordFragmentItem(
+					_runewordRuneNameByToken,
+					runeToken);
+				if (!fragmentItem) {
+					SKSE::log::error(
+						"CalamityAffixes: runeword fragment item missing (runeToken={:016X}).",
+						runeToken);
+				} else if (TryPlaceLootCurrencyItem(fragmentItem, a_sourceContainerRef, a_forceWorldPlacement)) {
+					CommitRunewordFragmentGrant(true);
+					result.runewordDropGranted = true;
+					std::string runeName = "Rune";
+					if (const auto nameIt = _runewordRuneNameByToken.find(runeToken);
+						nameIt != _runewordRuneNameByToken.end()) {
+						runeName = nameIt->second;
+					}
+					std::string note = "Runeword Fragment Drop: ";
+					note.append(runeName);
+					if (runewordPityTriggered) {
+						note.append(" [Pity]");
+					}
+					RE::DebugNotification(note.c_str());
+				}
+			}
+
+			bool reforgePityTriggered = false;
+			if (TryRollReforgeOrbGrant(a_sourceChanceMultiplier, reforgePityTriggered)) {
+				auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+				if (!orb) {
+					SKSE::log::error(
+						"CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
+				} else if (TryPlaceLootCurrencyItem(orb, a_sourceContainerRef, a_forceWorldPlacement)) {
+					CommitReforgeOrbGrant(true);
+					result.reforgeDropGranted = true;
+					RE::DebugNotification("Reforge Orb Drop");
+					if (reforgePityTriggered && _loot.debugLog) {
+						SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 }

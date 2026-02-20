@@ -8,10 +8,8 @@
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "CalamityAffixes/PrismaTooltip.h"
 #include "CalamityAffixes/TriggerGuards.h"
-#include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
-#include <cctype>
 #include <chrono>
 #include <cmath>
 #include <limits>
@@ -47,29 +45,6 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 	return !editorId.empty() && editorId.starts_with("CAFF_");
 }
 
-[[nodiscard]] bool ContainsAsciiNoCase(std::string_view a_text, std::string_view a_needle)
-{
-	if (a_text.empty() || a_needle.empty() || a_needle.size() > a_text.size()) {
-		return false;
-	}
-
-	for (std::size_t i = 0; i + a_needle.size() <= a_text.size(); ++i) {
-		bool match = true;
-		for (std::size_t j = 0; j < a_needle.size(); ++j) {
-			const auto lhs = static_cast<char>(std::tolower(static_cast<unsigned char>(a_text[i + j])));
-			const auto rhs = static_cast<char>(std::tolower(static_cast<unsigned char>(a_needle[j])));
-			if (lhs != rhs) {
-				match = false;
-				break;
-			}
-		}
-		if (match) {
-			return true;
-		}
-	}
-	return false;
-}
-
 [[nodiscard]] bool IsBossContainerEditorId(
 	std::string_view a_editorId,
 	const std::vector<std::string>& a_allowContains,
@@ -87,7 +62,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 		return CalamityAffixes::detail::MatchesAnyCaseInsensitiveMarker(a_editorId, a_allowContains);
 	}
 
-	return ContainsAsciiNoCase(a_editorId, "boss");
+	return CalamityAffixes::detail::ContainsCaseInsensitiveAscii(a_editorId, "boss");
 }
 
 [[nodiscard]] LootCurrencySourceTier ResolveActivatedLootCurrencySourceTier(
@@ -548,48 +523,13 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		bool runewordDropGranted = false;
-		bool reforgeDropGranted = false;
-
-		bool runewordPityTriggered = false;
-		std::uint64_t runeToken = 0u;
-		if (TryRollRunewordFragmentToken(sourceChanceMultiplier, runeToken, runewordPityTriggered)) {
-			auto* fragmentItem = RunewordDetail::LookupRunewordFragmentItem(_runewordRuneNameByToken, runeToken);
-			if (!fragmentItem) {
-				SKSE::log::error(
-					"CalamityAffixes: runeword fragment item missing (runeToken={:016X}).",
-					runeToken);
-			} else if (TryPlaceLootCurrencyItem(fragmentItem, sourceRef, false)) {
-				CommitRunewordFragmentGrant(true);
-				runewordDropGranted = true;
-				std::string runeName = "Rune";
-				if (const auto nameIt = _runewordRuneNameByToken.find(runeToken);
-					nameIt != _runewordRuneNameByToken.end()) {
-					runeName = nameIt->second;
-				}
-				std::string note = "Runeword Fragment Drop: ";
-				note.append(runeName);
-				if (runewordPityTriggered) {
-					note.append(" [Pity]");
-				}
-				RE::DebugNotification(note.c_str());
-			}
-		}
-
-		bool reforgePityTriggered = false;
-		if (TryRollReforgeOrbGrant(sourceChanceMultiplier, reforgePityTriggered)) {
-			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
-			if (!orb) {
-				SKSE::log::error("CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
-			} else if (TryPlaceLootCurrencyItem(orb, sourceRef, false)) {
-				CommitReforgeOrbGrant(true);
-				reforgeDropGranted = true;
-				RE::DebugNotification("Reforge Orb Drop");
-				if (reforgePityTriggered && _loot.debugLog) {
-					SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");
-				}
-			}
-		}
+		const auto dropResult = ExecuteCurrencyDropRolls(
+			sourceChanceMultiplier,
+			sourceRef,
+			false,
+			1u);
+		const bool runewordDropGranted = dropResult.runewordDropGranted;
+		const bool reforgeDropGranted = dropResult.reforgeDropGranted;
 
 		FinalizeLootCurrencyLedgerRoll(ledgerKey, dayStamp);
 

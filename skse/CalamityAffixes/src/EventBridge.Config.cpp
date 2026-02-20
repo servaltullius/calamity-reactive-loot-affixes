@@ -1353,7 +1353,7 @@ namespace CalamityAffixes
 		return static_cast<std::int8_t>(clampedChanceNone);
 	}
 
-	void EventBridge::SyncLeveledListCurrencyDropChances(bool a_disableLeveledListDrops, std::string_view a_contextTag) const
+	void EventBridge::SyncLeveledListCurrencyDropChances(std::string_view a_contextTag) const
 	{
 		auto* runewordDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>("CAFF_LItem_RunewordFragmentDrops");
 		auto* reforgeDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>("CAFF_LItem_ReforgeOrbDrops");
@@ -1368,19 +1368,18 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const float runewordDropChance = a_disableLeveledListDrops ? 0.0f : _loot.runewordFragmentChancePercent;
-		const float reforgeDropChance = a_disableLeveledListDrops ? 0.0f : _loot.reforgeOrbChancePercent;
+		const float runewordDropChance = _loot.runewordFragmentChancePercent;
+		const float reforgeDropChance = _loot.reforgeOrbChancePercent;
 
 		runewordDropList->chanceNone = ToLeveledListChanceNonePercent(runewordDropChance);
 		reforgeDropList->chanceNone = ToLeveledListChanceNonePercent(reforgeDropChance);
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
-				"CalamityAffixes: {} leveled-list currency chances synced (runewordDrop={}%, reforgeDrop={}%, disableLeveledListDrops={}).",
+				"CalamityAffixes: {} leveled-list currency chances synced (runewordDrop={}%, reforgeDrop={}%).",
 				a_contextTag,
 				runewordDropChance,
-				reforgeDropChance,
-				a_disableLeveledListDrops);
+				reforgeDropChance);
 		}
 	}
 
@@ -1404,7 +1403,7 @@ namespace CalamityAffixes
 
 		// Keep CAFF_LItem_* drop chances in sync for both classic leveled-list injection
 		// and SPID DeathItem distribution paths.
-		SyncLeveledListCurrencyDropChances(false, a_contextTag);
+		SyncLeveledListCurrencyDropChances(a_contextTag);
 
 		if (_loot.debugLog) {
 			const char* modeLabel = "runtime";

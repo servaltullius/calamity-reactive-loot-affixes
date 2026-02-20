@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using CalamityAffixes.Generator.Spec;
 
 namespace CalamityAffixes.Generator.Tests;
@@ -456,5 +457,63 @@ public sealed class AffixSpecLoaderTests
         {
             Directory.Delete(tempRoot, recursive: true);
         }
+    }
+
+    [Fact]
+    public void GetRunewordRuneLadder_ReturnsExpectedEndpointsAndUniqueRunes()
+    {
+        var ladder = AffixSpecLoader.GetRunewordRuneLadder();
+
+        Assert.NotNull(ladder);
+        Assert.True(ladder.Count >= 33, "Rune ladder should include full D2-style rune tiers.");
+        Assert.Equal("El", ladder[0]);
+        Assert.Equal("Zod", ladder[^1]);
+
+        var unique = new HashSet<string>(ladder, StringComparer.OrdinalIgnoreCase);
+        Assert.Equal(ladder.Count, unique.Count);
+    }
+
+    [Fact]
+    public void BuildValidationContractJson_IncludesRunewordCatalogAndRuneWeights()
+    {
+        using var doc = JsonDocument.Parse(AffixSpecLoader.BuildValidationContractJson(indented: false));
+        var root = doc.RootElement;
+
+        Assert.True(root.TryGetProperty("runewordCatalog", out var runewordCatalog));
+        Assert.Equal(JsonValueKind.Array, runewordCatalog.ValueKind);
+        Assert.True(runewordCatalog.GetArrayLength() >= 90);
+
+        Assert.True(root.TryGetProperty("runewordRuneWeights", out var runewordRuneWeights));
+        Assert.Equal(JsonValueKind.Array, runewordRuneWeights.ValueKind);
+
+        var seenRunes = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in runewordRuneWeights.EnumerateArray())
+        {
+            if (entry.ValueKind != JsonValueKind.Object)
+            {
+                continue;
+            }
+
+            if (!entry.TryGetProperty("rune", out var runeElement) ||
+                runeElement.ValueKind != JsonValueKind.String ||
+                !entry.TryGetProperty("weight", out var weightElement) ||
+                weightElement.ValueKind != JsonValueKind.Number ||
+                !weightElement.TryGetDouble(out var weight))
+            {
+                continue;
+            }
+
+            var rune = runeElement.GetString();
+            if (string.IsNullOrWhiteSpace(rune))
+            {
+                continue;
+            }
+
+            seenRunes[rune] = weight;
+        }
+
+        Assert.True(seenRunes.TryGetValue("El", out var elWeight));
+        Assert.True(seenRunes.TryGetValue("Zod", out var zodWeight));
+        Assert.True(elWeight > zodWeight, "Low-tier rune weight should be higher than high-tier rune weight.");
     }
 }

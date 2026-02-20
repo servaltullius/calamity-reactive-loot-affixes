@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace CalamityAffixes.Generator.Spec;
 
@@ -20,6 +21,7 @@ internal static class RunewordContractCatalog
         IReadOnlyList<RecipeEntry> Recipes,
         IReadOnlyList<RuneWeightEntry> RuneWeights);
 
+    private const string RunewordContractRelativePath = "affixes/runeword.contract.json";
     private const string RunewordCatalogRowsRelativePath = "skse/CalamityAffixes/src/RunewordCatalogRows.inl";
     private const string RunewordWeightsRelativePath = "skse/CalamityAffixes/src/EventBridge.Loot.Runeword.Detail.cpp";
 
@@ -70,8 +72,13 @@ internal static class RunewordContractCatalog
 
     internal static Snapshot Load()
     {
-        var recipes = ParseCatalogRows(FindByWalkingParents(RunewordCatalogRowsRelativePath));
-        var runeWeights = ParseRuneWeights(FindByWalkingParents(RunewordWeightsRelativePath));
+        var contractSnapshot = ParseContractSnapshot(FindByWalkingParents(RunewordContractRelativePath));
+        var recipes = contractSnapshot.Recipes.Count > 0
+            ? contractSnapshot.Recipes.ToList()
+            : ParseCatalogRows(FindByWalkingParents(RunewordCatalogRowsRelativePath));
+        var runeWeights = contractSnapshot.RuneWeights.Count > 0
+            ? contractSnapshot.RuneWeights.ToList()
+            : ParseRuneWeights(FindByWalkingParents(RunewordWeightsRelativePath));
 
         if (runeWeights.Count == 0)
         {
@@ -96,6 +103,160 @@ internal static class RunewordContractCatalog
         }
 
         return new Snapshot(recipes, runeWeights);
+    }
+
+    private static Snapshot ParseContractSnapshot(string? sourcePath)
+    {
+        if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
+        {
+            return new Snapshot([], []);
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(sourcePath));
+            var root = doc.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                return new Snapshot([], []);
+            }
+
+            var recipes = ParseContractRecipes(root);
+            var runeWeights = ParseContractRuneWeights(root);
+            return new Snapshot(recipes, runeWeights);
+        }
+        catch
+        {
+            return new Snapshot([], []);
+        }
+    }
+
+    private static List<RecipeEntry> ParseContractRecipes(JsonElement root)
+    {
+        if (!root.TryGetProperty("runewordCatalog", out var catalogElement) ||
+            catalogElement.ValueKind != JsonValueKind.Array)
+        {
+            return [];
+        }
+
+        var output = new List<RecipeEntry>(catalogElement.GetArrayLength());
+        foreach (var recipeElement in catalogElement.EnumerateArray())
+        {
+            if (recipeElement.ValueKind != JsonValueKind.Object)
+            {
+                continue;
+            }
+
+            if (!TryGetRequiredString(recipeElement, "id", out var recipeId) ||
+                !TryGetRequiredString(recipeElement, "name", out var displayName) ||
+                !TryGetRequiredString(recipeElement, "resultAffixId", out var resultAffixId))
+            {
+                continue;
+            }
+
+            if (!recipeElement.TryGetProperty("runes", out var runesElement) ||
+                runesElement.ValueKind != JsonValueKind.Array)
+            {
+                continue;
+            }
+
+            var runes = new List<string>(runesElement.GetArrayLength());
+            foreach (var runeElement in runesElement.EnumerateArray())
+            {
+                if (runeElement.ValueKind != JsonValueKind.String)
+                {
+                    continue;
+                }
+
+                var rune = runeElement.GetString()?.Trim();
+                if (string.IsNullOrWhiteSpace(rune))
+                {
+                    continue;
+                }
+
+                runes.Add(rune);
+            }
+
+            if (runes.Count == 0)
+            {
+                continue;
+            }
+
+            string? recommendedBase = null;
+            if (recipeElement.TryGetProperty("recommendedBase", out var baseElement) &&
+                baseElement.ValueKind == JsonValueKind.String)
+            {
+                var baseToken = baseElement.GetString()?.Trim();
+                if (string.Equals(baseToken, "Weapon", StringComparison.OrdinalIgnoreCase))
+                {
+                    recommendedBase = "Weapon";
+                }
+                else if (string.Equals(baseToken, "Armor", StringComparison.OrdinalIgnoreCase))
+                {
+                    recommendedBase = "Armor";
+                }
+            }
+
+            output.Add(new RecipeEntry(
+                recipeId,
+                displayName,
+                runes,
+                resultAffixId,
+                recommendedBase));
+        }
+
+        return output;
+    }
+
+    private static List<RuneWeightEntry> ParseContractRuneWeights(JsonElement root)
+    {
+        if (!root.TryGetProperty("runewordRuneWeights", out var weightsElement) ||
+            weightsElement.ValueKind != JsonValueKind.Array)
+        {
+            return [];
+        }
+
+        var output = new List<RuneWeightEntry>(weightsElement.GetArrayLength());
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entryElement in weightsElement.EnumerateArray())
+        {
+            if (entryElement.ValueKind != JsonValueKind.Object)
+            {
+                continue;
+            }
+
+            if (!TryGetRequiredString(entryElement, "rune", out var rune) ||
+                !entryElement.TryGetProperty("weight", out var weightElement) ||
+                weightElement.ValueKind != JsonValueKind.Number ||
+                !weightElement.TryGetDouble(out var weight) ||
+                weight <= 0.0 ||
+                !seen.Add(rune))
+            {
+                continue;
+            }
+
+            output.Add(new RuneWeightEntry(rune, weight));
+        }
+
+        return output;
+    }
+
+    private static bool TryGetRequiredString(JsonElement parent, string key, out string value)
+    {
+        value = string.Empty;
+        if (!parent.TryGetProperty(key, out var property) || property.ValueKind != JsonValueKind.String)
+        {
+            return false;
+        }
+
+        var raw = property.GetString()?.Trim();
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return false;
+        }
+
+        value = raw;
+        return true;
     }
 
     private static List<RecipeEntry> ParseCatalogRows(string? sourcePath)
@@ -207,7 +368,6 @@ internal static class RunewordContractCatalog
 
         AddStart(Directory.GetCurrentDirectory());
         AddStart(AppContext.BaseDirectory);
-        AddStart(Path.GetDirectoryName(typeof(RunewordContractCatalog).Assembly.Location));
 
         foreach (var start in starts)
         {

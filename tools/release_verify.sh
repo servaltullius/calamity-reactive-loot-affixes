@@ -101,6 +101,9 @@ python3 "${repo_root}/tools/lint_affixes.py" \
   --manifest "${repo_root}/affixes/affixes.modules.json" \
   --generated "${repo_root}/Data/SKSE/Plugins/CalamityAffixes/affixes.json"
 
+step "compose_affixes workflow tests"
+python3 "${repo_root}/tools/tests/test_compose_affixes.py"
+
 step "MCM JSON sanity"
 python3 -m json.tool "${repo_root}/Data/MCM/Config/CalamityAffixes/config.json" >/dev/null
 python3 -m json.tool "${repo_root}/Data/MCM/Config/CalamityAffixes/keybinds.json" >/dev/null

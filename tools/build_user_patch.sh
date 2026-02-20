@@ -16,6 +16,22 @@ output_path="${CAFF_USERPATCH_OUTPUT:-Data/CalamityAffixes_UserPatch.esp}"
 masters_dir="${CALAMITY_MASTERS_DIR:-}"
 loadorder_path="${CALAMITY_LOADORDER_PATH:-}"
 spec_manifest_path="${CAFF_SPEC_MANIFEST:-affixes/affixes.modules.json}"
+
+is_windows_path() {
+  [[ "$1" =~ ^[A-Za-z]:\\\\ ]]
+}
+
+spec_path_cli="${spec_path}"
+spec_path_abs=""
+if ! is_windows_path "${spec_path}"; then
+  if [[ "${spec_path}" = /* ]]; then
+    spec_path_abs="${spec_path}"
+  else
+    spec_path_abs="${repo_root}/${spec_path}"
+  fi
+  spec_path_cli="${spec_path_abs}"
+fi
+
 if [[ "${spec_manifest_path}" = /* ]]; then
   spec_manifest_abs="${spec_manifest_path}"
 else
@@ -23,9 +39,14 @@ else
 fi
 
 if [[ -f "${spec_manifest_abs}" ]]; then
+  compose_output_path="${repo_root}/affixes/affixes.json"
+  if [[ -n "${spec_path_abs}" ]]; then
+    compose_output_path="${spec_path_abs}"
+  fi
   python3 "${repo_root}/tools/compose_affixes.py" \
     --manifest "${spec_manifest_abs}" \
-    --output "${repo_root}/affixes/affixes.json"
+    --output "${compose_output_path}"
+  spec_path_cli="${compose_output_path}"
 fi
 
 if [[ -z "${masters_dir}" ]]; then
@@ -54,8 +75,8 @@ if [[ "${dotnet_os_platform}" == "Windows" ]]; then
     if [[ "${output_path}" == /mnt/* ]]; then
       output_path="$(wslpath -w "${output_path}")"
     fi
-    if [[ "${spec_path}" == /mnt/* ]]; then
-      spec_path="$(wslpath -w "${spec_path}")"
+    if [[ "${spec_path_cli}" == /mnt/* ]]; then
+      spec_path_cli="$(wslpath -w "${spec_path_cli}")"
     fi
   fi
 fi
@@ -63,7 +84,7 @@ fi
 (
   cd "${repo_run_root}"
   dotnet run --project tools/CalamityAffixes.UserPatch -- \
-    --spec "${spec_path}" \
+    --spec "${spec_path_cli}" \
     --masters "${masters_dir}" \
     --loadorder "${loadorder_path}" \
     --output "${output_path}" \
