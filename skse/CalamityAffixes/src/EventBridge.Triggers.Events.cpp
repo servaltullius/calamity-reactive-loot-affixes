@@ -797,6 +797,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 				const float runewordChanceDelta = _loot.runewordFragmentChancePercent - previousRunewordChance;
 				const bool runewordChanceChanged = runewordChanceDelta > 0.001f || runewordChanceDelta < -0.001f;
 				if (runewordChanceChanged) {
+					SyncCurrencyDropModeState("MCM.SetRunewordFragmentChance");
 					queueRuntimeUserSettingsPersist();
 					if (shouldEmitChanceNotification(s_lastRunewordChanceNotificationAt)) {
 						std::string note = "Calamity: runeword fragment chance ";
@@ -814,6 +815,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 				const float reforgeChanceDelta = _loot.reforgeOrbChancePercent - previousReforgeChance;
 				const bool reforgeChanceChanged = reforgeChanceDelta > 0.001f || reforgeChanceDelta < -0.001f;
 				if (reforgeChanceChanged) {
+					SyncCurrencyDropModeState("MCM.SetReforgeOrbChance");
 					queueRuntimeUserSettingsPersist();
 					if (shouldEmitChanceNotification(s_lastReforgeChanceNotificationAt)) {
 						std::string note = "Calamity: reforge orb chance ";

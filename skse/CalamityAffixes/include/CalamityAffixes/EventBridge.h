@@ -525,11 +525,21 @@ namespace CalamityAffixes
 			kTrailing = 1,
 		};
 
+		enum class CurrencyDropMode : std::uint8_t
+		{
+			kRuntime = 0,
+			kLeveledList = 1,
+			kHybrid = 2,
+		};
+
 		struct LootConfig
 		{
 			float chancePercent{ 0.0f };
 			float runewordFragmentChancePercent{ 6.0f };
 			float reforgeOrbChancePercent{ 2.0f };
+			float configuredRunewordFragmentChancePercent{ 6.0f };
+			float configuredReforgeOrbChancePercent{ 2.0f };
+			CurrencyDropMode currencyDropMode{ CurrencyDropMode::kRuntime };
 			bool runtimeCurrencyDropsEnabled{ true };
 			float lootSourceChanceMultCorpse{ 0.80f };
 			float lootSourceChanceMultContainer{ 1.00f };
@@ -784,6 +794,9 @@ namespace CalamityAffixes
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		void ApplyRuntimeUserSettingsOverrides();
+		void SyncCurrencyDropModeState(std::string_view a_contextTag);
+		void SyncLeveledListCurrencyDropChances(bool a_disableLeveledListDrops, std::string_view a_contextTag) const;
+		[[nodiscard]] static std::int8_t ToLeveledListChanceNonePercent(float a_dropChancePercent);
 		[[nodiscard]] bool PersistRuntimeUserSettings();
 		void MarkRuntimeUserSettingsDirty();
 		void MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::time_point a_now, bool a_force = false);

@@ -103,14 +103,24 @@ namespace CalamityAffixes
 			return std::nullopt;
 		}
 
-		[[nodiscard]] std::optional<bool> ParseRuntimeCurrencyDropEnabled(std::string_view a_text)
+		enum class ParsedCurrencyDropMode : std::uint8_t
+		{
+			kRuntime = 0,
+			kLeveledList = 1,
+			kHybrid = 2,
+		};
+
+		[[nodiscard]] std::optional<ParsedCurrencyDropMode> ParseCurrencyDropMode(std::string_view a_text)
 		{
 			const auto normalized = ToLowerAscii(Trim(a_text));
-			if (normalized.empty() || normalized == "runtime" || normalized == "hybrid") {
-				return true;
+			if (normalized.empty() || normalized == "runtime") {
+				return ParsedCurrencyDropMode::kRuntime;
+			}
+			if (normalized == "hybrid") {
+				return ParsedCurrencyDropMode::kHybrid;
 			}
 			if (normalized == "leveledlist" || normalized == "leveled_list" || normalized == "leveled-list") {
-				return false;
+				return ParsedCurrencyDropMode::kLeveledList;
 			}
 			return std::nullopt;
 		}
@@ -1059,6 +1069,7 @@ namespace CalamityAffixes
 		_loot.bossContainerEditorIdAllowContains = detail::MakeDefaultBossContainerEditorIdAllowContains();
 		_loot.bossContainerEditorIdDenyContains.clear();
 		_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
+		_loot.currencyDropMode = CurrencyDropMode::kRuntime;
 		_loot.runtimeCurrencyDropsEnabled = true;
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
@@ -1069,18 +1080,30 @@ namespace CalamityAffixes
 				static_cast<float>(loot.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent)));
 			if (const auto modeIt = loot.find("currencyDropMode"); modeIt != loot.end()) {
 				if (modeIt->is_string()) {
-					if (const auto runtimeCurrencyEnabled = ParseRuntimeCurrencyDropEnabled(modeIt->get<std::string>());
-						runtimeCurrencyEnabled.has_value()) {
-						_loot.runtimeCurrencyDropsEnabled = *runtimeCurrencyEnabled;
+					if (const auto currencyDropMode = ParseCurrencyDropMode(modeIt->get<std::string>());
+						currencyDropMode.has_value()) {
+						switch (*currencyDropMode) {
+						case ParsedCurrencyDropMode::kRuntime:
+							_loot.currencyDropMode = CurrencyDropMode::kRuntime;
+							break;
+						case ParsedCurrencyDropMode::kLeveledList:
+							_loot.currencyDropMode = CurrencyDropMode::kLeveledList;
+							break;
+						case ParsedCurrencyDropMode::kHybrid:
+							_loot.currencyDropMode = CurrencyDropMode::kHybrid;
+							break;
+						}
 					} else {
 						SKSE::log::warn(
 							"CalamityAffixes: invalid loot.currencyDropMode '{}'; expected runtime/leveledList/hybrid. Falling back to runtime.",
 							modeIt->get<std::string>());
+						_loot.currencyDropMode = CurrencyDropMode::kRuntime;
 						_loot.runtimeCurrencyDropsEnabled = true;
 					}
 				} else {
 					SKSE::log::warn(
 						"CalamityAffixes: loot.currencyDropMode must be a string (runtime/leveledList/hybrid). Falling back to runtime.");
+					_loot.currencyDropMode = CurrencyDropMode::kRuntime;
 					_loot.runtimeCurrencyDropsEnabled = true;
 				}
 			}
@@ -1194,6 +1217,9 @@ namespace CalamityAffixes
 				_loot.reforgeOrbChancePercent = 100.0f;
 			}
 
+			_loot.configuredRunewordFragmentChancePercent = _loot.runewordFragmentChancePercent;
+			_loot.configuredReforgeOrbChancePercent = _loot.reforgeOrbChancePercent;
+
 			_loot.lootSourceChanceMultCorpse = std::clamp(_loot.lootSourceChanceMultCorpse, 0.0f, 5.0f);
 			_loot.lootSourceChanceMultContainer = std::clamp(_loot.lootSourceChanceMultContainer, 0.0f, 5.0f);
 			_loot.lootSourceChanceMultBossContainer = std::clamp(_loot.lootSourceChanceMultBossContainer, 0.0f, 5.0f);
@@ -1234,6 +1260,8 @@ namespace CalamityAffixes
 					_loot.triggerProcBudgetWindowMs = static_cast<std::uint32_t>(clamped);
 				}
 			}
+
+		SyncCurrencyDropModeState("ApplyLootConfigFromJson");
 
 		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
 		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
@@ -1296,6 +1324,7 @@ namespace CalamityAffixes
 		_loot.runewordFragmentChancePercent = std::clamp(static_cast<float>(runewordFragmentChancePercent), 0.0f, 100.0f);
 		_loot.reforgeOrbChancePercent = std::clamp(static_cast<float>(reforgeOrbChancePercent), 0.0f, 100.0f);
 		_allowNonHostilePlayerOwnedOutgoingProcs.store(allowNonHostileFirstHitProc, std::memory_order_relaxed);
+		SyncCurrencyDropModeState("ApplyRuntimeUserSettingsOverrides");
 
 		if (!_loot.dotTagSafetyAutoDisable) {
 			_dotTagSafetySuppressed = false;
@@ -1314,6 +1343,102 @@ namespace CalamityAffixes
 			_loot.runtimeCurrencyDropsEnabled);
 
 		_runtimeUserSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
+	}
+
+	std::int8_t EventBridge::ToLeveledListChanceNonePercent(float a_dropChancePercent)
+	{
+		const auto clampedDrop = std::clamp(a_dropChancePercent, 0.0f, 100.0f);
+		const auto chanceNoneRounded = static_cast<long>(std::lround(100.0 - static_cast<double>(clampedDrop)));
+		const auto clampedChanceNone = std::clamp(chanceNoneRounded, 0l, 100l);
+		return static_cast<std::int8_t>(clampedChanceNone);
+	}
+
+	void EventBridge::SyncLeveledListCurrencyDropChances(bool a_disableLeveledListDrops, std::string_view a_contextTag) const
+	{
+		auto* runewordDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>("CAFF_LItem_RunewordFragmentDrops");
+		auto* reforgeDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>("CAFF_LItem_ReforgeOrbDrops");
+		if (!runewordDropList || !reforgeDropList) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: {} leveled-list currency sync skipped (runewordList={}, reforgeList={}).",
+					a_contextTag,
+					runewordDropList != nullptr,
+					reforgeDropList != nullptr);
+			}
+			return;
+		}
+
+		const float runewordDropChance = a_disableLeveledListDrops ? 0.0f : _loot.runewordFragmentChancePercent;
+		const float reforgeDropChance = a_disableLeveledListDrops ? 0.0f : _loot.reforgeOrbChancePercent;
+
+		runewordDropList->chanceNone = ToLeveledListChanceNonePercent(runewordDropChance);
+		reforgeDropList->chanceNone = ToLeveledListChanceNonePercent(reforgeDropChance);
+
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: {} leveled-list currency chances synced (runewordDrop={}%, reforgeDrop={}%, disableLeveledListDrops={}).",
+				a_contextTag,
+				runewordDropChance,
+				reforgeDropChance,
+				a_disableLeveledListDrops);
+		}
+	}
+
+	void EventBridge::SyncCurrencyDropModeState(std::string_view a_contextTag)
+	{
+		const bool runewordChanceOverridden =
+			std::fabs(_loot.runewordFragmentChancePercent - _loot.configuredRunewordFragmentChancePercent) > 0.001f;
+		const bool reforgeChanceOverridden =
+			std::fabs(_loot.reforgeOrbChancePercent - _loot.configuredReforgeOrbChancePercent) > 0.001f;
+		const bool userChanceOverrideActive = runewordChanceOverridden || reforgeChanceOverridden;
+
+		bool runtimeCurrencyEnabled = true;
+		bool disableLeveledListDrops = false;
+		switch (_loot.currencyDropMode) {
+		case CurrencyDropMode::kRuntime:
+			runtimeCurrencyEnabled = true;
+			break;
+		case CurrencyDropMode::kHybrid:
+			runtimeCurrencyEnabled = true;
+			break;
+		case CurrencyDropMode::kLeveledList:
+			runtimeCurrencyEnabled = userChanceOverrideActive;
+			// If user overrides chance in leveled-list mode, switch effective drop authority to runtime
+			// to honor MCM slider semantics and avoid duplicate grants.
+			disableLeveledListDrops = userChanceOverrideActive;
+			break;
+		}
+		_loot.runtimeCurrencyDropsEnabled = runtimeCurrencyEnabled;
+
+		if (_loot.currencyDropMode == CurrencyDropMode::kLeveledList ||
+			_loot.currencyDropMode == CurrencyDropMode::kHybrid) {
+			SyncLeveledListCurrencyDropChances(disableLeveledListDrops, a_contextTag);
+		}
+
+		if (_loot.debugLog) {
+			const char* modeLabel = "runtime";
+			switch (_loot.currencyDropMode) {
+			case CurrencyDropMode::kRuntime:
+				modeLabel = "runtime";
+				break;
+			case CurrencyDropMode::kLeveledList:
+				modeLabel = "leveledList";
+				break;
+			case CurrencyDropMode::kHybrid:
+				modeLabel = "hybrid";
+				break;
+			}
+			SKSE::log::debug(
+				"CalamityAffixes: {} currency mode synced (mode={}, runtimeEnabled={}, userChanceOverrideActive={}, configuredRune={}%, configuredReforge={}%, currentRune={}%, currentReforge={}%).",
+				a_contextTag,
+				modeLabel,
+				_loot.runtimeCurrencyDropsEnabled,
+				userChanceOverrideActive,
+				_loot.configuredRunewordFragmentChancePercent,
+				_loot.configuredReforgeOrbChancePercent,
+				_loot.runewordFragmentChancePercent,
+				_loot.reforgeOrbChancePercent);
+		}
 	}
 
 	std::string EventBridge::BuildRuntimeUserSettingsPayload() const
