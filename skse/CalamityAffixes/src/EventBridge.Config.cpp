@@ -1386,14 +1386,7 @@ namespace CalamityAffixes
 
 	void EventBridge::SyncCurrencyDropModeState(std::string_view a_contextTag)
 	{
-		const bool runewordChanceOverridden =
-			std::fabs(_loot.runewordFragmentChancePercent - _loot.configuredRunewordFragmentChancePercent) > 0.001f;
-		const bool reforgeChanceOverridden =
-			std::fabs(_loot.reforgeOrbChancePercent - _loot.configuredReforgeOrbChancePercent) > 0.001f;
-		const bool userChanceOverrideActive = runewordChanceOverridden || reforgeChanceOverridden;
-
 		bool runtimeCurrencyEnabled = true;
-		bool disableLeveledListDrops = false;
 		switch (_loot.currencyDropMode) {
 		case CurrencyDropMode::kRuntime:
 			runtimeCurrencyEnabled = true;
@@ -1402,17 +1395,16 @@ namespace CalamityAffixes
 			runtimeCurrencyEnabled = true;
 			break;
 		case CurrencyDropMode::kLeveledList:
-			runtimeCurrencyEnabled = userChanceOverrideActive;
-			// If user overrides chance in leveled-list mode, switch effective drop authority to runtime
-			// to honor MCM slider semantics and avoid duplicate grants.
-			disableLeveledListDrops = userChanceOverrideActive;
+			// Pure leveled-list mode: never fall back to runtime rolls.
+			// MCM chance sliders are reflected by updating CAFF_LItem_* chanceNone in memory.
+			runtimeCurrencyEnabled = false;
 			break;
 		}
 		_loot.runtimeCurrencyDropsEnabled = runtimeCurrencyEnabled;
 
 		if (_loot.currencyDropMode == CurrencyDropMode::kLeveledList ||
 			_loot.currencyDropMode == CurrencyDropMode::kHybrid) {
-			SyncLeveledListCurrencyDropChances(disableLeveledListDrops, a_contextTag);
+			SyncLeveledListCurrencyDropChances(false, a_contextTag);
 		}
 
 		if (_loot.debugLog) {
@@ -1429,11 +1421,10 @@ namespace CalamityAffixes
 				break;
 			}
 			SKSE::log::debug(
-				"CalamityAffixes: {} currency mode synced (mode={}, runtimeEnabled={}, userChanceOverrideActive={}, configuredRune={}%, configuredReforge={}%, currentRune={}%, currentReforge={}%).",
+				"CalamityAffixes: {} currency mode synced (mode={}, runtimeEnabled={}, configuredRune={}%, configuredReforge={}%, currentRune={}%, currentReforge={}%).",
 				a_contextTag,
 				modeLabel,
 				_loot.runtimeCurrencyDropsEnabled,
-				userChanceOverrideActive,
 				_loot.configuredRunewordFragmentChancePercent,
 				_loot.configuredReforgeOrbChancePercent,
 				_loot.runewordFragmentChancePercent,
