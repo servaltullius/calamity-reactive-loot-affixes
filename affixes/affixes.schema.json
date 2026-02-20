@@ -47,6 +47,7 @@
           "type": "array",
           "items": { "type": "string", "pattern": "^[^|]+\\|[0-9A-Fa-f]{6,8}$" }
         },
+        "currencyLeveledListAutoDiscoverDeathItems": { "type": "boolean" },
         "lootSourceChanceMultCorpse": { "type": "number", "minimum": 0.0, "maximum": 5.0 },
         "lootSourceChanceMultContainer": { "type": "number", "minimum": 0.0, "maximum": 5.0 },
         "lootSourceChanceMultBossContainer": { "type": "number", "minimum": 0.0, "maximum": 5.0 },

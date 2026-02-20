@@ -245,6 +245,40 @@ public sealed class KeywordPluginBuilderTests
     }
 
     [Fact]
+    public void BuildKeywordPlugin_WhenAutoDiscoveredTargetsProvided_MergesWithConfiguredTargets()
+    {
+        var configuredTarget = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x0009AF0A);
+        var autoTarget = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000C3C9B);
+        var resolver = CreateLeveledListResolver(
+            (configuredTarget, LeveledItem.Flag.UseAll, new Percent(0.0)),
+            (autoTarget, LeveledItem.Flag.UseAll, new Percent(0.0)));
+
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Loot = new LootSpec
+            {
+                CurrencyDropMode = "leveledList",
+                CurrencyLeveledListTargets = ["Skyrim.esm|0009AF0A"],
+            },
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec, resolver, [autoTarget]);
+
+        Assert.Contains(mod.LeveledItems, list => list.FormKey == configuredTarget);
+        Assert.Contains(mod.LeveledItems, list => list.FormKey == autoTarget);
+    }
+
+    [Fact]
     public void BuildKeywordPlugin_WhenLeveledListModeAndResolverMissing_Throws()
     {
         var spec = new AffixSpec

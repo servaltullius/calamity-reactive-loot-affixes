@@ -106,6 +106,7 @@ public sealed class AffixSpecLoaderTests
             "cleanupInvalidLegacyAffixes": true,
             "armorEditorIdDenyContains": ["rewardbox", "lootbox"],
             "currencyDropMode": "leveledList",
+            "currencyLeveledListAutoDiscoverDeathItems": false,
             "currencyLeveledListTargets": ["Skyrim.esm|0009AF0A"]
           },
           "keywords": {
@@ -124,6 +125,7 @@ public sealed class AffixSpecLoaderTests
             Assert.True(spec.Loot!.CleanupInvalidLegacyAffixes);
             Assert.Equal(new[] { "rewardbox", "lootbox" }, spec.Loot.ArmorEditorIdDenyContains);
             Assert.Equal("leveledList", spec.Loot.CurrencyDropMode);
+            Assert.False(spec.Loot.CurrencyLeveledListAutoDiscoverDeathItems);
             Assert.Equal(new[] { "Skyrim.esm|0009AF0A" }, spec.Loot.CurrencyLeveledListTargets);
         }
         finally

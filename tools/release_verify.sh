@@ -102,6 +102,12 @@ step "Generator tests"
   dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release
 )
 
+step "UserPatch CLI build"
+(
+  cd "${repo_run_root}"
+  dotnet build tools/CalamityAffixes.UserPatch/CalamityAffixes.UserPatch.csproj -c Release
+)
+
 skse_build_dir="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel"
 if [[ -d "${skse_build_dir}" ]]; then
   step "SKSE static checks (cmake + ctest)"
@@ -130,4 +136,3 @@ fi
 
 echo ""
 echo "All selected verification steps completed successfully."
-

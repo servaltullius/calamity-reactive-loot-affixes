@@ -13,6 +13,19 @@ public static class GeneratorRunner
     private const string LegacySplitPluginName = "CalamityAffixes_Keywords.esp";
     private const string LegacyMcmOnlyPluginName = "CalamityAffixes.esp";
     private const string LegacySplitInventoryInjectorFileName = "CalamityAffixes_Keywords.json";
+    private static readonly string[] OfficialMasterFileNames =
+    [
+        "Skyrim.esm",
+        "Update.esm",
+        "Dawnguard.esm",
+        "HearthFires.esm",
+        "Dragonborn.esm",
+    ];
+    private static readonly string[] SupportedPluginExtensions = [".esm", ".esp", ".esl"];
+
+    private sealed record LeveledListContext(
+        Func<FormKey, ILeveledItemGetter?> Resolver,
+        IReadOnlyList<FormKey> AutoDiscoveredCurrencyTargets);
 
     public static void Generate(AffixSpec spec, string dataDir, string? mastersDir = null)
     {
@@ -27,8 +40,11 @@ public static class GeneratorRunner
             SpidIniWriter.Render(spec));
 
         var pluginPath = Path.Combine(dataDir, spec.ModKey);
-        var leveledListResolver = CreateLeveledListResolver(spec, mastersDir);
-        var mod = KeywordPluginBuilder.Build(spec, leveledListResolver);
+        var leveledListContext = CreateLeveledListContext(spec, mastersDir);
+        var mod = KeywordPluginBuilder.Build(
+            spec,
+            leveledListContext?.Resolver,
+            leveledListContext?.AutoDiscoveredCurrencyTargets);
         ((IModGetter)mod).WriteToBinary(new FilePath(pluginPath));
 
         DeleteLegacyPluginIfDifferent(dataDir, spec.ModKey, LegacySplitPluginName);
@@ -50,8 +66,13 @@ public static class GeneratorRunner
         DeleteLegacyInventoryInjectorIfDifferent(inventoryInjectorPath, LegacySplitInventoryInjectorFileName);
     }
 
-    private static Func<FormKey, ILeveledItemGetter?>? CreateLeveledListResolver(AffixSpec spec, string? mastersDir)
+    private static LeveledListContext? CreateLeveledListContext(AffixSpec spec, string? mastersDir)
     {
+        if (spec.Loot is not { } loot || !RequiresLeveledListResolver(loot))
+        {
+            return null;
+        }
+
         if (string.IsNullOrWhiteSpace(mastersDir))
         {
             return null;
@@ -63,23 +84,7 @@ public static class GeneratorRunner
             throw new DirectoryNotFoundException($"Masters directory not found: {resolvedMastersDir}");
         }
 
-        var officialMasters = new[]
-        {
-            "Skyrim.esm",
-            "Update.esm",
-            "Dawnguard.esm",
-            "HearthFires.esm",
-            "Dragonborn.esm",
-        };
-
-        var requiredFromTargets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (spec.Loot is { } loot && RequiresLeveledListResolver(loot))
-        {
-            foreach (var modFileName in ExtractTargetModFileNames(loot))
-            {
-                requiredFromTargets.Add(modFileName);
-            }
-        }
+        var requiredFromTargets = new HashSet<string>(ExtractTargetModFileNames(loot), StringComparer.OrdinalIgnoreCase);
 
         foreach (var requiredMod in requiredFromTargets)
         {
@@ -91,14 +96,22 @@ public static class GeneratorRunner
             }
         }
 
-        var candidates = new HashSet<string>(officialMasters, StringComparer.OrdinalIgnoreCase);
+        var candidates = new HashSet<string>(OfficialMasterFileNames, StringComparer.OrdinalIgnoreCase);
         foreach (var requiredMod in requiredFromTargets)
         {
             candidates.Add(requiredMod);
         }
 
+        if (loot.CurrencyLeveledListAutoDiscoverDeathItems)
+        {
+            foreach (var pluginFileName in EnumeratePluginFileNames(resolvedMastersDir))
+            {
+                candidates.Add(pluginFileName);
+            }
+        }
+
         var loadOrder = new List<string>();
-        foreach (var master in officialMasters)
+        foreach (var master in OfficialMasterFileNames)
         {
             if (candidates.Contains(master))
             {
@@ -106,7 +119,7 @@ public static class GeneratorRunner
             }
         }
         foreach (var extra in candidates
-                     .Except(officialMasters, StringComparer.OrdinalIgnoreCase)
+                     .Except(OfficialMasterFileNames, StringComparer.OrdinalIgnoreCase)
                      .OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
         {
             loadOrder.Add(extra);
@@ -121,7 +134,22 @@ public static class GeneratorRunner
                 continue;
             }
 
-            loadedMasters.Add(SkyrimMod.CreateFromBinary(pluginPath, SkyrimRelease.SkyrimSE));
+            try
+            {
+                loadedMasters.Add(SkyrimMod.CreateFromBinary(pluginPath, SkyrimRelease.SkyrimSE));
+            }
+            catch (Exception ex)
+            {
+                if (requiredFromTargets.Contains(pluginFileName) || IsOfficialMaster(pluginFileName))
+                {
+                    throw new InvalidDataException(
+                        $"Failed to load required plugin '{pluginFileName}' from masters dir '{resolvedMastersDir}'.",
+                        ex);
+                }
+
+                Console.Error.WriteLine(
+                    $"WARN: skipping plugin '{pluginFileName}' for leveled-list discovery ({ex.Message}).");
+            }
         }
 
         if (loadedMasters.Count == 0)
@@ -132,7 +160,14 @@ public static class GeneratorRunner
         }
 
         var cache = loadedMasters.ToImmutableLinkCache();
-        return formKey => cache.TryResolve<ILeveledItemGetter>(formKey, out var record) ? record : null;
+        var resolver = new Func<FormKey, ILeveledItemGetter?>(
+            formKey => cache.TryResolve<ILeveledItemGetter>(formKey, out var record) ? record : null);
+
+        var autoDiscoveredTargets = loot.CurrencyLeveledListAutoDiscoverDeathItems
+            ? DiscoverModDeathItemTargets(loadedMasters)
+            : Array.Empty<FormKey>();
+
+        return new LeveledListContext(resolver, autoDiscoveredTargets);
     }
 
     private static bool RequiresLeveledListResolver(LootSpec loot)
@@ -161,6 +196,73 @@ public static class GeneratorRunner
                 yield return parts[0];
             }
         }
+    }
+
+    private static IEnumerable<string> EnumeratePluginFileNames(string mastersDir)
+    {
+        foreach (var path in Directory.EnumerateFiles(mastersDir, "*", SearchOption.TopDirectoryOnly))
+        {
+            var fileName = Path.GetFileName(path);
+            if (HasSupportedPluginExtension(fileName))
+            {
+                yield return fileName;
+            }
+        }
+    }
+
+    private static bool HasSupportedPluginExtension(string fileName)
+    {
+        var extension = Path.GetExtension(fileName);
+        return SupportedPluginExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static bool IsOfficialMaster(string fileName)
+    {
+        return OfficialMasterFileNames.Contains(fileName, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static IReadOnlyList<FormKey> DiscoverModDeathItemTargets(IEnumerable<ISkyrimModGetter> loadedMods)
+    {
+        var discovered = new List<FormKey>();
+        var seen = new HashSet<FormKey>();
+
+        foreach (var mod in loadedMods)
+        {
+            var modFileName = mod.ModKey.FileName.String;
+            if (IsOfficialMaster(modFileName))
+            {
+                continue;
+            }
+
+            foreach (var leveledItem in mod.LeveledItems)
+            {
+                if (leveledItem.FormKey.ModKey != mod.ModKey)
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(leveledItem.EditorID) ||
+                    !leveledItem.EditorID.StartsWith("DeathItem", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (seen.Add(leveledItem.FormKey))
+                {
+                    discovered.Add(leveledItem.FormKey);
+                }
+            }
+        }
+
+        discovered.Sort((left, right) =>
+        {
+            var byMod = StringComparer.OrdinalIgnoreCase.Compare(
+                left.ModKey.FileName.String,
+                right.ModKey.FileName.String);
+            return byMod != 0 ? byMod : left.ID.CompareTo(right.ID);
+        });
+
+        return discovered;
     }
 
     private static void DeleteLegacyPluginIfDifferent(string dataDir, string generatedModKey, string legacyFileName)

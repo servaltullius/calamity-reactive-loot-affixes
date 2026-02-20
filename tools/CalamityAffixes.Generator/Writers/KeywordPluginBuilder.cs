@@ -114,7 +114,8 @@ public static class KeywordPluginBuilder
 
     public static SkyrimMod Build(
         AffixSpec spec,
-        Func<FormKey, ILeveledItemGetter?>? leveledListResolver = null)
+        Func<FormKey, ILeveledItemGetter?>? leveledListResolver = null,
+        IReadOnlyList<FormKey>? autoDiscoveredCurrencyLeveledListTargets = null)
     {
         var mod = new SkyrimMod(ModKey.FromFileName(spec.ModKey), SkyrimRelease.SkyrimSE);
 
@@ -162,7 +163,11 @@ public static class KeywordPluginBuilder
         var currencyDropMode = ResolveCurrencyDropMode(spec.Loot);
         if (currencyDropMode is CurrencyDropMode.LeveledList or CurrencyDropMode.Hybrid && spec.Loot is not null)
         {
-            AddCurrencyLeveledListDrops(mod, spec.Loot, leveledListResolver);
+            AddCurrencyLeveledListDrops(
+                mod,
+                spec.Loot,
+                leveledListResolver,
+                autoDiscoveredCurrencyLeveledListTargets);
         }
 
         return mod;
@@ -215,7 +220,8 @@ public static class KeywordPluginBuilder
     private static void AddCurrencyLeveledListDrops(
         SkyrimMod mod,
         LootSpec lootSpec,
-        Func<FormKey, ILeveledItemGetter?>? leveledListResolver)
+        Func<FormKey, ILeveledItemGetter?>? leveledListResolver,
+        IReadOnlyList<FormKey>? autoDiscoveredCurrencyLeveledListTargets)
     {
         if (leveledListResolver is null)
         {
@@ -252,7 +258,7 @@ public static class KeywordPluginBuilder
         reforgeOrbDropList.ChanceNone = ToChanceNonePercent(lootSpec.ReforgeOrbChancePercent);
         AddLeveledItemEntryIfMissing(reforgeOrbDropList, reforgeOrbItem.ToLink<IItemGetter>(), level: 1, count: 1);
 
-        var targetLists = ResolveCurrencyLeveledListTargets(lootSpec);
+        var targetLists = ResolveCurrencyLeveledListTargets(lootSpec, autoDiscoveredCurrencyLeveledListTargets);
         foreach (var targetListKey in targetLists)
         {
             var targetList = GetOrAddLeveledListOverride(mod, targetListKey, leveledListResolver);
@@ -261,30 +267,61 @@ public static class KeywordPluginBuilder
         }
     }
 
-    private static IReadOnlyList<FormKey> ResolveCurrencyLeveledListTargets(LootSpec lootSpec)
+    private static IReadOnlyList<FormKey> ResolveCurrencyLeveledListTargets(
+        LootSpec lootSpec,
+        IReadOnlyList<FormKey>? autoDiscoveredTargets)
     {
+        IReadOnlyList<FormKey> configuredTargets;
         if (lootSpec.CurrencyLeveledListTargets is null || lootSpec.CurrencyLeveledListTargets.Count == 0)
         {
-            return DefaultCurrencyLeveledListTargets;
+            configuredTargets = DefaultCurrencyLeveledListTargets;
         }
-
-        var targets = new List<FormKey>(lootSpec.CurrencyLeveledListTargets.Count);
-        var seen = new HashSet<FormKey>();
-        foreach (var raw in lootSpec.CurrencyLeveledListTargets)
+        else
         {
-            if (string.IsNullOrWhiteSpace(raw))
+            var targets = new List<FormKey>(lootSpec.CurrencyLeveledListTargets.Count);
+            var seen = new HashSet<FormKey>();
+            foreach (var raw in lootSpec.CurrencyLeveledListTargets)
             {
-                continue;
+                if (string.IsNullOrWhiteSpace(raw))
+                {
+                    continue;
+                }
+
+                var parsed = ParseFormKey(raw.Trim(), "loot.currencyLeveledListTargets");
+                if (seen.Add(parsed))
+                {
+                    targets.Add(parsed);
+                }
             }
 
-            var parsed = ParseFormKey(raw.Trim(), "loot.currencyLeveledListTargets");
-            if (seen.Add(parsed))
+            configuredTargets = targets.Count == 0 ? DefaultCurrencyLeveledListTargets : targets;
+        }
+
+        if (autoDiscoveredTargets is null || autoDiscoveredTargets.Count == 0)
+        {
+            return configuredTargets;
+        }
+
+        var merged = new List<FormKey>(configuredTargets.Count + autoDiscoveredTargets.Count);
+        var mergedSeen = new HashSet<FormKey>();
+
+        foreach (var target in configuredTargets)
+        {
+            if (mergedSeen.Add(target))
             {
-                targets.Add(parsed);
+                merged.Add(target);
             }
         }
 
-        return targets.Count == 0 ? DefaultCurrencyLeveledListTargets : targets;
+        foreach (var target in autoDiscoveredTargets)
+        {
+            if (mergedSeen.Add(target))
+            {
+                merged.Add(target);
+            }
+        }
+
+        return merged;
     }
 
     private static FormKey ParseFormKey(string value, string fieldName)

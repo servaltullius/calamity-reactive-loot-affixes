@@ -65,6 +65,22 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 2. MO2로 설치
 3. CalamityAffixes.esp 활성화
 4. SKSE로 실행
+5. (선택, 권장) 모드 추가 적 드랍까지 반영하려면 `CalamityAffixes_UserPatch.esp`를 생성해 함께 활성화
+
+#### 사용자 환경별 드랍 패치(UserPatch)
+- 목적: 각 유저의 실제 로드오더에 맞춰 **모드 추가 적 DeathItem\*** 드랍 리스트에 룬워드 조각/재련 오브 드랍을 주입
+- 가장 쉬운 방법(Windows): `tools\build_user_patch_wizard.cmd` 실행 후 선택 창에서 경로만 지정
+- 생성 명령(예시):
+
+```bash
+dotnet run --project tools/CalamityAffixes.UserPatch -- \
+  --spec affixes/affixes.json \
+  --masters "C:\Path\To\Skyrim Data" \
+  --loadorder "C:\Users\<User>\AppData\Local\Skyrim Special Edition\plugins.txt" \
+  --output Data/CalamityAffixes_UserPatch.esp
+```
+
+- Synthesis 호환 인자: `-d`(DataFolderPath), `-l`(LoadOrderFilePath), `-o`(OutputPath)
 
 ### 주의사항
 
@@ -134,6 +150,22 @@ Current runtime scope is **player-centric**.
 2. Install with MO2
 3. Enable CalamityAffixes.esp
 4. Launch via SKSE
+5. (Optional, recommended) generate and enable `CalamityAffixes_UserPatch.esp` for mod-added enemy drops
+
+#### Per-user drop patch (UserPatch)
+- Goal: inject runeword fragment/reforge orb drops into **mod-added DeathItem\*** leveled lists based on each user's active load order.
+- Easiest (Windows): run `tools\build_user_patch_wizard.cmd` and choose paths in the dialogs.
+- Example:
+
+```bash
+dotnet run --project tools/CalamityAffixes.UserPatch -- \
+  --spec affixes/affixes.json \
+  --masters "C:\Path\To\Skyrim Data" \
+  --loadorder "C:\Users\<User>\AppData\Local\Skyrim Special Edition\plugins.txt" \
+  --output Data/CalamityAffixes_UserPatch.esp
+```
+
+- Synthesis-compatible aliases: `-d` (DataFolderPath), `-l` (LoadOrderFilePath), `-o` (OutputPath)
 
 ### Notes
 

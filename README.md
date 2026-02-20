@@ -288,6 +288,41 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 - `Data/SKSE/Plugins/CalamityAffixes/user_settings.json` (MCM 런타임 값 + Prisma 패널 단축키/언어)
   - 저장 방식: 임시 파일 기록 + flush + 원자적 교체(중간 손상 위험 완화)
 
+### 유저 로드오더 기반 UserPatch 생성 (권장)
+
+Nexus 배포본의 기본 `CalamityAffixes.esp`는 바닐라/DLC 대상을 안정적으로 커버합니다.  
+모드로 추가된 적(`DeathItem*`)까지 사용자 환경별로 정확히 반영하려면, 각 유저 로드오더에서 `CalamityAffixes_UserPatch.esp`를 생성하세요.
+
+가장 쉬운 방법(Windows):
+
+```bat
+tools\build_user_patch_wizard.cmd
+```
+
+- 폴더/파일 선택 창이 열리며, `Data` 폴더 / `plugins.txt`(또는 `loadorder.txt`) / 출력 경로를 순서대로 고르면 됩니다.
+- CLI를 몰라도 됩니다.
+
+```bash
+dotnet run --project tools/CalamityAffixes.UserPatch -- \
+  --spec affixes/affixes.json \
+  --masters "C:\Path\To\Skyrim Data" \
+  --loadorder "C:\Users\<User>\AppData\Local\Skyrim Special Edition\plugins.txt" \
+  --output Data/CalamityAffixes_UserPatch.esp
+```
+
+또는 래퍼 스크립트:
+
+```bash
+export CALAMITY_MASTERS_DIR="C:\Path\To\Skyrim Data"
+export CALAMITY_LOADORDER_PATH="C:\Users\<User>\AppData\Local\Skyrim Special Edition\plugins.txt"
+tools/build_user_patch.sh
+```
+
+Synthesis CLI 호환 인자도 지원합니다:
+- `-d` / `--DataFolderPath` (masters)
+- `-l` / `--LoadOrderFilePath`
+- `-o` / `--OutputPath`
+
 ### MO2 배포 ZIP 생성
 
 ```bash
