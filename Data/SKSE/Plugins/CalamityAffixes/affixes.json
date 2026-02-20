@@ -6,7 +6,7 @@
     "chancePercent": 50,
     "runewordFragmentChancePercent": 16,
     "reforgeOrbChancePercent": 10,
-    "currencyDropMode": "runtime",
+    "currencyDropMode": "hybrid",
     "currencyLeveledListTargets": [
       "Skyrim.esm|00068525",
       "Skyrim.esm|000F961D",

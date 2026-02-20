@@ -135,6 +135,42 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 	return currencyDeathDistKeyword && actor->HasKeyword(currencyDeathDistKeyword);
 }
 
+[[nodiscard]] bool CorpseHasCalamityCurrency(RE::TESObjectREFR* a_ref)
+{
+	auto* actor = a_ref ? a_ref->As<RE::Actor>() : nullptr;
+	if (!actor) {
+		return false;
+	}
+
+	const auto* changes = actor->GetInventoryChanges();
+	if (!changes || !changes->entryList) {
+		return false;
+	}
+
+	for (const auto* entry : *changes->entryList) {
+		if (!entry || !entry->object) {
+			continue;
+		}
+
+		const auto* misc = entry->object->As<RE::TESObjectMISC>();
+		if (!misc) {
+			continue;
+		}
+
+		const char* editorIdRaw = misc->GetFormEditorID();
+		if (!editorIdRaw || editorIdRaw[0] == '\0') {
+			continue;
+		}
+
+		const std::string_view editorId(editorIdRaw);
+		if (editorId == "CAFF_Misc_ReforgeOrb" || editorId.starts_with("CAFF_RuneFrag_")) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 [[nodiscard]] std::uint32_t GetInGameDayStamp() noexcept
 {
 	auto* calendar = RE::Calendar::GetSingleton();
@@ -501,12 +537,31 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			return RE::BSEventNotifyControl::kContinue;
 		}
 		if (sourceTier == LootCurrencySourceTier::kCorpse && HasCurrencyDeathDistributionTag(sourceRef)) {
-			if (_loot.debugLog) {
-				SKSE::log::debug(
-					"CalamityAffixes: activation corpse currency roll skipped (SPID death-distribution tag present) (sourceRef={:08X}).",
-					sourceRef->GetFormID());
+			if (_loot.currencyDropMode == CurrencyDropMode::kRuntime) {
+				// Runtime mode must remain independent from SPID corpse delivery tags.
+				if (_loot.debugLog) {
+					SKSE::log::debug(
+						"CalamityAffixes: activation corpse currency roll continues (runtime mode ignores SPID death-distribution tag) (sourceRef={:08X}).",
+						sourceRef->GetFormID());
+				}
+			} else {
+				if (CorpseHasCalamityCurrency(sourceRef)) {
+					if (_loot.debugLog) {
+						SKSE::log::debug(
+							"CalamityAffixes: activation corpse currency roll skipped (SPID currency already present) (sourceRef={:08X}).",
+							sourceRef->GetFormID());
+					}
+					return RE::BSEventNotifyControl::kContinue;
+				}
+
+				// Hybrid safety net: if SPID tagging exists but the corpse has no injected
+				// Calamity currency, allow one runtime roll instead of producing a dry corpse.
+				if (_loot.debugLog) {
+					SKSE::log::debug(
+						"CalamityAffixes: activation corpse currency roll fallback (SPID tag present but no injected currency found) (sourceRef={:08X}, mode=hybrid).",
+						sourceRef->GetFormID());
+				}
 			}
-			return RE::BSEventNotifyControl::kContinue;
 		}
 
 		const float sourceChanceMultiplier = ResolveLootCurrencySourceChanceMultiplier(sourceTier);

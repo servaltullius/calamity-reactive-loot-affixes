@@ -65,14 +65,14 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 2. MO2로 설치
 3. CalamityAffixes.esp 활성화
 4. SKSE로 실행
-5. (선택) `loot.currencyDropMode`를 `leveledList`/`hybrid`로 운영할 경우, 로드오더 충돌 보정 + 모드 추가 적 드랍 반영을 위해 `CalamityAffixes_UserPatch.esp`를 생성해 함께 활성화
+5. (선택) 기본값은 `loot.currencyDropMode=hybrid`이며 보통 UserPatch 없이 동작합니다. `leveledList` 고정 운영 또는 특정 로드오더 충돌 보정이 필요할 때 `CalamityAffixes_UserPatch.esp`를 생성해 함께 활성화
 
 #### 사용자 환경별 드랍 패치(UserPatch)
 - 기본 드랍 경로는 UserPatch 없이 동작:
   - 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
   - 상자/월드: SKSE 런타임 롤
   - SPID 태그가 없는 시체는 런타임 활성화 롤이 폴백
-- 목적: `leveledList`/`hybrid` 모드 사용 시, 각 유저의 실제 로드오더에 맞춰 룬워드 조각/재련 오브 드랍을 다음 대상에 재주입
+- 목적: `leveledList` 고정 운영 또는 로드오더 충돌 보정이 필요한 환경에서, 각 유저의 실제 로드오더에 맞춰 룬워드 조각/재련 오브 드랍을 다음 대상에 재주입
 - 대상 1: `affixes.json`에 명시된 leveled-list 타깃(바닐라 FormKey 포함)
 - 대상 2: 모드 추가 적 드랍 리스트(DeathItem\* + NPC DeathItem 참조)
 - 가장 쉬운 방법(Windows): `tools\build_user_patch_wizard.cmd` 실행 후 선택 창에서 경로만 지정
@@ -169,14 +169,14 @@ Current runtime scope is **player-centric**.
 2. Install with MO2
 3. Enable CalamityAffixes.esp
 4. Launch via SKSE
-5. (Optional) If you run `loot.currencyDropMode=leveledList`/`hybrid`, generate and enable `CalamityAffixes_UserPatch.esp` for load-order conflict recovery + mod-added enemy drops
+5. (Optional) Default is `loot.currencyDropMode=hybrid`, which usually works without UserPatch. Generate and enable `CalamityAffixes_UserPatch.esp` when you run strict `leveledList` mode or need load-order conflict recovery.
 
 #### Per-user drop patch (UserPatch)
 - Default drop flow works without UserPatch:
   - Corpses: SPID `DeathItem` distribution (tag `CAFF_TAG_CURRENCY_DEATH_DIST`)
   - Containers/world pickups: SKSE runtime roll
   - Untagged corpses fall back to runtime activation roll
-- Goal: when using `leveledList`/`hybrid`, re-inject runeword fragment/reforge orb drops based on each user's active load order:
+- Goal: for strict `leveledList` mode or conflict-recovery setups, re-inject runeword fragment/reforge orb drops based on each user's active load order:
 - Target 1: explicit leveled-list targets from `affixes.json` (including vanilla FormKeys)
 - Target 2: mod-added enemy drop lists (DeathItem\* + NPC DeathItem references)
 - Easiest (Windows): run `tools\build_user_patch_wizard.cmd` and choose paths in the dialogs.

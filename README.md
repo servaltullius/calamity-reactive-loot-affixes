@@ -81,7 +81,7 @@
 - (기본값) `loot.renameItem=true` : 아이템 이름에 **짧은 어픽스 라벨**을 붙여(좌측 리스트) 빠르게 식별합니다.
   - `loot.nameMarkerPosition=trailing`이면 이름 마커를 뒤에 붙입니다. 예: `철검*` (정렬 안정화)
 
-기본값: `loot.runewordFragmentChancePercent=16`, `loot.reforgeOrbChancePercent=10`, `loot.currencyDropMode=runtime`, `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
+기본값: `loot.runewordFragmentChancePercent=16`, `loot.reforgeOrbChancePercent=10`, `loot.currencyDropMode=hybrid`, `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
 참고: `loot.chancePercent`는 현재 기본 정책에서 실질적으로 사용되지 않는 레거시 호환 필드입니다.
 추가 안전장치(권장): `loot.trapGlobalMaxActive=64` (전역 트랩 하드캡, 0=무제한)
 
@@ -301,11 +301,11 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 
 ### 유저 로드오더 기반 UserPatch 생성 (선택)
 
-기본 드랍 모드는 `loot.currencyDropMode=runtime`이며, 별도 UserPatch 없이도 다음 하이브리드 경로로 동작합니다.  
+기본 드랍 모드는 `loot.currencyDropMode=hybrid`이며, 별도 UserPatch 없이도 다음 하이브리드 경로로 동작합니다.  
 - 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
 - 상자/월드: SKSE 런타임 롤
 - SPID 태그가 없는 시체는 런타임 활성화 롤로 폴백
-`CalamityAffixes_UserPatch.esp`는 **leveledList/hybrid 모드로 운영할 때** 유저 로드오더 기준으로 다음을 재주입해 충돌/덮어쓰기 상황을 보완하는 선택 도구입니다:
+`CalamityAffixes_UserPatch.esp`는 **기본 hybrid 경로에서는 보통 불필요**하며, `leveledList` 고정 운영 또는 특정 로드오더 충돌 보정이 필요할 때 유저 로드오더 기준으로 다음을 재주입하는 선택 도구입니다:
 - `affixes.json`에 명시된 leveled-list 대상(바닐라 FormKey 포함)
 - 모드 추가 적 드랍 리스트(`DeathItem*` + NPC `DeathItem` 참조)
 
