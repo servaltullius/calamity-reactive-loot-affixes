@@ -65,41 +65,17 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 2. MO2로 설치
 3. CalamityAffixes.esp 활성화
 4. SKSE로 실행
-5. (선택) 드랍 모드는 `hybrid` 고정이며 보통 UserPatch 없이 동작합니다. SPID 분배 누락 또는 특정 로드오더 충돌 보정이 필요할 때 `CalamityAffixes_UserPatch.esp`를 생성해 함께 활성화
+5. 드랍 모드는 `hybrid` 고정입니다. 기본 설치만으로 동작합니다.
 
-#### 사용자 환경별 드랍 패치(UserPatch)
-- 기본 드랍 경로는 UserPatch 없이 동작:
-  - 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
-  - 상자/월드: SKSE 런타임 롤
-  - SPID 태그가 없는 시체는 런타임 활성화 롤이 폴백
-- 목적: SPID 분배 누락 또는 로드오더 충돌 보정이 필요한 환경에서, 각 유저의 실제 로드오더에 맞춰 룬워드 조각/재련 오브 드랍을 다음 대상에 재주입
-- 대상 1: `affixes.json`에 명시된 leveled-list 타깃(바닐라 FormKey 포함)
-- 대상 2: 모드 추가 적 드랍 리스트(DeathItem\* + NPC DeathItem 참조)
-- 가장 쉬운 방법(Windows): `tools\build_user_patch_wizard.cmd` 실행 후 선택 창에서 경로만 지정
-- 위저드는 기본 경로를 자동 탐지하며, MO2가 감지되면 `ModOrganizer.ini`의 `selected_profile` 기준 프로필의 `loadorder.txt`(또는 `plugins.txt`)를 우선 선택
-- 배포 ZIP 위저드는 동봉된 `CalamityAffixes.UserPatch.exe` + `affixes/affixes.json`을 자동 사용 (소스 프로젝트 경로 불필요)
-- 생성되는 `CalamityAffixes_UserPatch.esp`는 ESL 플래그(ESPFE)로 기록되어 풀 ESP 슬롯 소모를 줄임
-- `CalamityAffixes.UserPatch.exe`는 CLI 인자 기반이므로, 일반 사용자는 `build_user_patch_wizard.cmd` 실행 권장
-- 생성 명령(예시):
+#### 드랍 동작(기본)
+- 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
+- 상자/월드: SKSE 런타임 롤
+- SPID 태그가 없는 시체: 런타임 활성화 롤 폴백
 
-```bash
-dotnet run --project tools/CalamityAffixes.UserPatch -- \
-  --spec affixes/affixes.json \
-  --masters "C:\Path\To\Skyrim Data" \
-  --loadorder "C:\Users\<User>\AppData\Local\Skyrim Special Edition\plugins.txt" \
-  --output Data/CalamityAffixes_UserPatch.esp
-```
-
-- Synthesis 호환 인자: `-d`(DataFolderPath), `-l`(LoadOrderFilePath), `-o`(OutputPath)
-
-#### UserPatch 트러블슈팅
-- `No arguments were provided`:
-  - `CalamityAffixes.UserPatch.exe`를 직접 실행한 상태입니다. `build_user_patch_wizard.cmd`로 실행하세요.
-- `MSB1009: Project file does not exist`:
-  - 구버전 패키지 또는 소스 경로 전제 실행일 때 주로 발생합니다. `v1.2.17-rc59+` ZIP으로 업데이트하세요.
-- 특정 모드만 반영되거나 대상이 적게 나옴:
-  - 위저드에서 **현재 MO2 프로필**의 `loadorder.txt`/`plugins.txt`를 선택했는지 확인하세요.
-  - 완료 로그의 `TargetsByMod`에서 모드별 적용 개수를 확인할 수 있습니다.
+#### UserPatch 안내
+- 현재 기본 배포 산출물(MO2 ZIP)에는 UserPatch 도구를 포함하지 않습니다.
+- 일반 사용자 기준으로 UserPatch는 사용하지 않는 경로입니다.
+- 고급 사용자만 소스 레포 환경에서 `tools/build_user_patch.sh` 또는 `tools/CalamityAffixes.UserPatch`를 직접 사용하세요.
 
 ### 주의사항
 
@@ -169,41 +145,17 @@ Current runtime scope is **player-centric**.
 2. Install with MO2
 3. Enable CalamityAffixes.esp
 4. Launch via SKSE
-5. (Optional) Drop mode is fixed to `hybrid`, which usually works without UserPatch. Generate and enable `CalamityAffixes_UserPatch.esp` when you need SPID coverage recovery or load-order conflict recovery.
+5. Drop mode is fixed to `hybrid` and works out of the box.
 
-#### Per-user drop patch (UserPatch)
-- Default drop flow works without UserPatch:
-  - Corpses: SPID `DeathItem` distribution (tag `CAFF_TAG_CURRENCY_DEATH_DIST`)
-  - Containers/world pickups: SKSE runtime roll
-  - Untagged corpses fall back to runtime activation roll
-- Goal: for SPID coverage recovery or conflict-recovery setups, re-inject runeword fragment/reforge orb drops based on each user's active load order:
-- Target 1: explicit leveled-list targets from `affixes.json` (including vanilla FormKeys)
-- Target 2: mod-added enemy drop lists (DeathItem\* + NPC DeathItem references)
-- Easiest (Windows): run `tools\build_user_patch_wizard.cmd` and choose paths in the dialogs.
-- The wizard auto-fills defaults and, when MO2 is detected, prioritizes the selected profile from `ModOrganizer.ini` (`profiles/<selected_profile>/loadorder.txt` or `plugins.txt`).
-- In the release ZIP, the wizard automatically uses bundled `CalamityAffixes.UserPatch.exe` + `affixes/affixes.json` (no source project path needed).
-- The generated `CalamityAffixes_UserPatch.esp` is written as ESL-flagged (ESPFE) to reduce full ESP slot usage.
-- `CalamityAffixes.UserPatch.exe` is a CLI-argument tool; most users should start from `build_user_patch_wizard.cmd`.
-- Example:
+#### Drop behavior (default)
+- Corpses: SPID `DeathItem` distribution (tag `CAFF_TAG_CURRENCY_DEATH_DIST`)
+- Containers/world pickups: SKSE runtime roll
+- Untagged corpses: runtime activation fallback
 
-```bash
-dotnet run --project tools/CalamityAffixes.UserPatch -- \
-  --spec affixes/affixes.json \
-  --masters "C:\Path\To\Skyrim Data" \
-  --loadorder "C:\Users\<User>\AppData\Local\Skyrim Special Edition\plugins.txt" \
-  --output Data/CalamityAffixes_UserPatch.esp
-```
-
-- Synthesis-compatible aliases: `-d` (DataFolderPath), `-l` (LoadOrderFilePath), `-o` (OutputPath)
-
-#### UserPatch Troubleshooting
-- `No arguments were provided`:
-  - You launched `CalamityAffixes.UserPatch.exe` directly. Start from `build_user_patch_wizard.cmd`.
-- `MSB1009: Project file does not exist`:
-  - Usually an old package or source-path-based launch. Update to `v1.2.17-rc59+` ZIP.
-- Patch seems to include only one mod / too few targets:
-  - Ensure the wizard selected the **active MO2 profile** `loadorder.txt`/`plugins.txt`.
-  - Check the completion log line `TargetsByMod` for per-mod counts.
+#### UserPatch note
+- The default MO2 release artifact no longer bundles UserPatch tools.
+- For normal users, UserPatch is not part of the recommended flow.
+- Advanced users can still run `tools/build_user_patch.sh` or `tools/CalamityAffixes.UserPatch` from the source repository.
 
 ### Notes
 

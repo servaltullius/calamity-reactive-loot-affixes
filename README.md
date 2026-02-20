@@ -300,59 +300,14 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 - `Data/SKSE/Plugins/CalamityAffixes/user_settings.json` (MCM 런타임 값 + Prisma 패널 단축키/언어)
   - 저장 방식: 임시 파일 기록 + flush + 원자적 교체(중간 손상 위험 완화)
 
-### 유저 로드오더 기반 UserPatch 생성 (선택)
+### 유저 로드오더 기반 UserPatch
 
-드랍 모드는 `hybrid`로 고정이며, 별도 UserPatch 없이도 다음 하이브리드 경로로 동작합니다.  
-- 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
-- 상자/월드: SKSE 런타임 롤
-- SPID 태그가 없는 시체는 런타임 활성화 롤로 폴백
-`CalamityAffixes_UserPatch.esp`는 **기본 hybrid 경로에서는 보통 불필요**하며, SPID 분배 누락/로드오더 충돌 보정이 필요할 때 유저 로드오더 기준으로 다음을 재주입하는 선택 도구입니다:
-- `affixes.json`에 명시된 leveled-list 대상(바닐라 FormKey 포함)
-- 모드 추가 적 드랍 리스트(`DeathItem*` + NPC `DeathItem` 참조)
-
-가장 쉬운 방법(Windows):
-
-```bat
-tools\build_user_patch_wizard.cmd
-```
-
-- 폴더/파일 선택 창이 열리며, `Data` 폴더 / `plugins.txt`(또는 `loadorder.txt`) / 출력 경로를 순서대로 고르면 됩니다.
-- 위저드는 기본값으로 경로를 자동 탐지합니다. MO2가 잡히면 `ModOrganizer.ini`의 `selected_profile` 기준으로 해당 프로필의 `loadorder.txt`(또는 `plugins.txt`)를 우선 선택합니다.
-- 배포 ZIP 위저드는 동봉된 `CalamityAffixes.UserPatch.exe`와 `affixes/affixes.json`을 자동 사용합니다. (별도 소스 프로젝트 경로 불필요)
-- 생성되는 `CalamityAffixes_UserPatch.esp`는 기본적으로 ESL 플래그(ESPFE)로 기록되어, 일반 ESP 슬롯 소모를 줄입니다.
-- `CalamityAffixes.UserPatch.exe`는 CLI 인자 기반 도구입니다. 일반 사용자는 `build_user_patch_wizard.cmd` 실행을 권장합니다.
-- CLI를 몰라도 됩니다.
-
-```bash
-dotnet run --project tools/CalamityAffixes.UserPatch -- \
-  --spec affixes/affixes.json \
-  --masters "C:\Path\To\Skyrim Data" \
-  --loadorder "C:\Users\<User>\AppData\Local\Skyrim Special Edition\plugins.txt" \
-  --output Data/CalamityAffixes_UserPatch.esp
-```
-
-또는 래퍼 스크립트:
-
-```bash
-export CALAMITY_MASTERS_DIR="C:\Path\To\Skyrim Data"
-export CALAMITY_LOADORDER_PATH="C:\Users\<User>\AppData\Local\Skyrim Special Edition\plugins.txt"
-tools/build_user_patch.sh
-```
-
-Synthesis CLI 호환 인자도 지원합니다:
-- `-d` / `--DataFolderPath` (masters)
-- `-l` / `--LoadOrderFilePath`
-- `-o` / `--OutputPath`
-
-#### UserPatch 트러블슈팅
-
-- `No arguments were provided` 메시지:
-  - `CalamityAffixes.UserPatch.exe`를 직접 실행한 경우입니다. `build_user_patch_wizard.cmd`를 실행하세요.
-- `MSB1009: 프로젝트 파일이 없습니다`:
-  - 구버전 패키지이거나 소스 경로 전제 실행일 때 발생합니다. `v1.2.17-rc59+` 이상 ZIP으로 업데이트하세요.
-- 특정 모드만 반영되거나 대상이 적게 나옴:
-  - 위저드에서 **현재 MO2 프로필의** `loadorder.txt`/`plugins.txt`를 선택했는지 확인하세요.
-  - 생성 완료 콘솔의 `TargetsByMod` 줄에서 모드별 적용 개수를 확인할 수 있습니다.
+- 현재 기본 배포 산출물(MO2 ZIP)에는 UserPatch 도구를 포함하지 않습니다.
+- 드랍 정책은 `hybrid` 단일 경로를 기본으로 사용합니다.
+  - 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
+  - 상자/월드: SKSE 런타임 롤
+  - SPID 태그가 없는 시체: 런타임 활성화 롤 폴백
+- 고급 사용자가 UserPatch를 수동 생성하려면 레포 소스 기준으로 `tools/build_user_patch.sh` 또는 `tools/CalamityAffixes.UserPatch`를 직접 실행하세요.
 
 ### MO2 배포 ZIP 생성
 
