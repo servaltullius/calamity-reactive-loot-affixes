@@ -59,6 +59,7 @@
       "Skyrim.esm|0003AD79",
       "Skyrim.esm|0003AD9A"
     ],
+    "currencyLeveledListAutoDiscoverDeathItems": true,
     "lootSourceChanceMultCorpse": 0.8,
     "lootSourceChanceMultContainer": 1,
     "lootSourceChanceMultBossContainer": 1.15,
