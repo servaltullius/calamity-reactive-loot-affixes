@@ -229,14 +229,20 @@ namespace RuntimeGateStoreChecks
 			const bool hasSourceTierResolverCall =
 				triggerText->find("ResolveActivatedLootCurrencySourceTier(") != std::string::npos ||
 				triggerText->find("detail::ResolveLootCurrencySourceTier(") != std::string::npos;
+			const bool hasSpidOnlyCorpseSkipLog =
+				triggerText->find("activation corpse currency roll skipped (untagged corpse in hybrid mode; SPID-only corpse policy)") != std::string::npos;
+			const bool hasLegacyCorpseFallbackLog =
+				triggerText->find("activation corpse currency roll fallback (untagged corpse in hybrid mode)") != std::string::npos;
 			if (triggerText->find("const RE::TESActivateEvent* a_event") == std::string::npos ||
 				!hasSourceTierResolverCall ||
 				triggerText->find("HasCurrencyDeathDistributionTag(") == std::string::npos ||
+				!hasSpidOnlyCorpseSkipLog ||
+				hasLegacyCorpseFallbackLog ||
 				(!hasDirectActivationRollPath && !hasSharedActivationRollHelper) ||
 				(triggerText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos &&
 					triggerText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos)) {
-			std::cerr << "loot_currency_ledger_policy: activation-time corpse/container currency roll path missing in EventBridge.Triggers.Events.cpp\n";
-			return false;
+				std::cerr << "loot_currency_ledger_policy: activation-time corpse/container currency roll path missing in EventBridge.Triggers.Events.cpp\n";
+				return false;
 		}
 
 		return true;

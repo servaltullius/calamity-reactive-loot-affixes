@@ -428,12 +428,15 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 						sourceRef->GetFormID());
 				}
 				return RE::BSEventNotifyControl::kContinue;
-			} else if (_loot.debugLog) {
-				// Hybrid safety net: only untagged corpses can use runtime fallback.
+			}
+			// Hybrid contract (SPID corpse authority):
+			// untagged corpses are skipped to avoid runtime corpse fallback behavior.
+			if (_loot.debugLog) {
 				SKSE::log::debug(
-					"CalamityAffixes: activation corpse currency roll fallback (untagged corpse in hybrid mode) (sourceRef={:08X}).",
+					"CalamityAffixes: activation corpse currency roll skipped (untagged corpse in hybrid mode; SPID-only corpse policy) (sourceRef={:08X}).",
 					sourceRef->GetFormID());
 			}
+			return RE::BSEventNotifyControl::kContinue;
 		}
 
 		const float sourceChanceMultiplier = ResolveLootCurrencySourceChanceMultiplier(sourceTier);
