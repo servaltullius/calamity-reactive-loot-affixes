@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 namespace CalamityAffixes
@@ -332,6 +333,76 @@ namespace CalamityAffixes
 			return std::string(rawName);
 		};
 
+		auto buildSpellProfileText = [&](RE::SpellItem* a_spell, std::string_view a_prefix) -> std::string {
+			if (!a_spell) {
+				return {};
+			}
+
+			const auto spellName = spellNameOr(a_spell, "Spell");
+			std::vector<std::string> effectProfiles;
+			effectProfiles.reserve(3);
+			std::size_t totalEffects = 0u;
+
+			for (const auto* effect : a_spell->effects) {
+				if (!effect || !effect->baseEffect) {
+					continue;
+				}
+
+				++totalEffects;
+				if (effectProfiles.size() >= 3u) {
+					continue;
+				}
+
+				std::string effectProfile;
+				const char* effectNameRaw = effect->baseEffect->GetName();
+				if (effectNameRaw && effectNameRaw[0] != '\0') {
+					effectProfile.append(effectNameRaw);
+				} else {
+					effectProfile.append("Effect");
+				}
+
+				std::string metrics;
+				if (std::abs(effect->effectItem.magnitude) >= 0.01f) {
+					appendDelimited(metrics, "위력 " + formatFloat1(effect->effectItem.magnitude));
+				}
+				if (effect->effectItem.duration > 0u) {
+					appendDelimited(metrics, "지속 " + std::to_string(effect->effectItem.duration) + "초");
+				}
+				if (effect->effectItem.area > 0u) {
+					appendDelimited(metrics, "범위 " + std::to_string(effect->effectItem.area));
+				}
+
+				if (!metrics.empty()) {
+					effectProfile.append(" (");
+					effectProfile.append(metrics);
+					effectProfile.push_back(')');
+				}
+				effectProfiles.push_back(std::move(effectProfile));
+			}
+
+			std::string profile;
+			if (!a_prefix.empty()) {
+				profile.append(a_prefix);
+				profile.append(": ");
+			}
+			profile.append(spellName);
+			if (!effectProfiles.empty()) {
+				profile.append(" -> ");
+				for (std::size_t i = 0; i < effectProfiles.size(); ++i) {
+					if (i > 0u) {
+						profile.append("; ");
+					}
+					profile.append(effectProfiles[i]);
+				}
+				if (totalEffects > effectProfiles.size()) {
+					profile.append(" 외 ");
+					profile.append(std::to_string(totalEffects - effectProfiles.size()));
+					profile.append("개 효과");
+				}
+			}
+			return profile;
+		};
+
 		auto actionSummaryText = [&](const Action& a_action) -> std::string {
 			switch (a_action.type) {
 			case ActionType::kCastSpell: {
@@ -433,6 +504,39 @@ namespace CalamityAffixes
 
 		auto buildEffectDetailText = [&](const AffixRuntime& a_affix) {
 			std::string detail;
+
+			auto appendSpellProfile = [&](std::string_view a_prefix, RE::SpellItem* a_spell) {
+				const auto spellProfile = buildSpellProfileText(a_spell, a_prefix);
+				if (!spellProfile.empty()) {
+					appendDelimited(detail, spellProfile);
+				}
+			};
+
+			switch (a_affix.action.type) {
+			case ActionType::kCastSpell:
+				appendSpellProfile(
+					a_affix.action.applyToSelf ? "버프 효과 (Self Buff)" : "공격/디버프 효과 (Hit Effect)",
+					a_affix.action.spell);
+				break;
+			case ActionType::kCastSpellAdaptiveElement: {
+				std::unordered_set<RE::SpellItem*> seenSpells;
+				if (a_affix.action.adaptiveFire && seenSpells.insert(a_affix.action.adaptiveFire).second) {
+					appendSpellProfile("화염 효과 (Fire)", a_affix.action.adaptiveFire);
+				}
+				if (a_affix.action.adaptiveFrost && seenSpells.insert(a_affix.action.adaptiveFrost).second) {
+					appendSpellProfile("냉기 효과 (Frost)", a_affix.action.adaptiveFrost);
+				}
+				if (a_affix.action.adaptiveShock && seenSpells.insert(a_affix.action.adaptiveShock).second) {
+					appendSpellProfile("번개 효과 (Shock)", a_affix.action.adaptiveShock);
+				}
+				break;
+			}
+			case ActionType::kSpawnTrap:
+				appendSpellProfile("함정 발동 효과 (Trap Trigger)", a_affix.action.spell);
+				break;
+			default:
+				break;
+			}
 
 			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
 			if (icdSeconds > 0.0f) {

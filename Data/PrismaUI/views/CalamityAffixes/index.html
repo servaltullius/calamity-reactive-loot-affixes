@@ -2103,6 +2103,9 @@
       function resolveRecipeSummaryText(item) {
         const fallbackSummary = typeof item?.summary === "string" ? item.summary.trim() : "";
         const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
+        if (fallbackSummary) {
+          return fallbackSummary;
+        }
         switch (key) {
           case "adaptive_strike":
             return t("Adaptive elemental strike", "적응형 원소 참격");
