@@ -296,6 +296,14 @@ namespace CalamityAffixes
 			return std::string(buffer);
 		};
 
+		auto formatNumberCompact = [&](float a_value) {
+			std::string text = formatFloat1(a_value);
+			if (text.size() >= 2 && text.compare(text.size() - 2, 2, ".0") == 0) {
+				text.erase(text.size() - 2);
+			}
+			return text;
+		};
+
 		auto appendDelimited = [](std::string& a_out, std::string_view a_part) {
 			if (a_part.empty()) {
 				return;
@@ -309,17 +317,17 @@ namespace CalamityAffixes
 		auto triggerText = [](Trigger a_trigger) -> std::string_view {
 			switch (a_trigger) {
 			case Trigger::kHit:
-				return "적중 (On Hit)";
+				return "적중 시";
 			case Trigger::kIncomingHit:
-				return "피격 (On Incoming Hit)";
+				return "피격 시";
 			case Trigger::kDotApply:
-				return "지속 피해 적용 (On DoT Apply)";
+				return "지속 피해 적용 시";
 			case Trigger::kKill:
-				return "처치 (On Kill)";
+				return "처치 시";
 			case Trigger::kLowHealth:
-				return "저체력 (On Low Health)";
+				return "저체력 시";
 			}
-			return "트리거 (On Trigger)";
+			return "트리거 시";
 		};
 
 		auto spellNameOr = [](RE::SpellItem* a_spell, std::string_view a_fallback) {
@@ -408,61 +416,61 @@ namespace CalamityAffixes
 			case ActionType::kCastSpell: {
 				const auto spellName = spellNameOr(a_action.spell, "Spell");
 				return a_action.applyToSelf ?
-					       ("자가 시전 (Self-cast): " + spellName) :
-					       ("시전 (Cast): " + spellName);
+					       ("자신에게 " + spellName + " 시전") :
+					       ("적에게 " + spellName + " 시전");
 			}
 			case ActionType::kCastSpellAdaptiveElement: {
 				std::string elements;
 				if (a_action.adaptiveFire) {
-					elements.append("화염/Fire");
+					elements.append("화염");
 				}
 				if (a_action.adaptiveFrost) {
-					appendDelimited(elements, "냉기/Frost");
+					appendDelimited(elements, "냉기");
 				}
 				if (a_action.adaptiveShock) {
-					appendDelimited(elements, "번개/Shock");
+					appendDelimited(elements, "번개");
 				}
 				if (!elements.empty()) {
-					return "적응형 원소 시전 (Adaptive Cast): " + elements;
+					return "적에게 적응형 원소 주문 시전 (" + elements + ")";
 				}
-				return "적응형 원소 시전 (Adaptive Cast)";
+				return "적에게 적응형 원소 주문 시전";
 			}
 			case ActionType::kConvertDamage: {
-				std::string_view element = "Element";
+				std::string_view element = "원소";
 				switch (a_action.element) {
 				case Element::kFire:
-					element = "화염/Fire";
+					element = "화염";
 					break;
 				case Element::kFrost:
-					element = "냉기/Frost";
+					element = "냉기";
 					break;
 				case Element::kShock:
-					element = "번개/Shock";
+					element = "번개";
 					break;
 				case Element::kNone:
 				default:
 					break;
 				}
-				return "피해 전환 (Convert): " + formatFloat1(std::max(0.0f, a_action.convertPct)) + "% -> " + std::string(element);
+				return formatNumberCompact(std::max(0.0f, a_action.convertPct)) + "%를 " + std::string(element) + " 피해로 전환";
 			}
 			case ActionType::kMindOverMatter:
-				return "마인드 오버 매터 (Mind Over Matter)";
+				return "피해 일부를 마나로 전환";
 			case ActionType::kArchmage:
-				return "아크메이지 폭주 (Archmage Burst)";
+				return "아크메이지 추가 피해 발동";
 			case ActionType::kSpawnTrap: {
 				const auto spellName = spellNameOr(a_action.spell, "Trap");
-				return "함정 설치 (Spawn Trap): " + spellName;
+				return spellName + " 함정 설치";
 			}
 			case ActionType::kCorpseExplosion:
-				return "시체 폭발 (Corpse Explosion)";
+				return "시체 폭발";
 			case ActionType::kSummonCorpseExplosion:
-				return "소환수 시체 폭발 (Summon Corpse Explosion)";
+				return "소환수 시체 폭발";
 			case ActionType::kCastOnCrit: {
 				const auto spellName = spellNameOr(a_action.spell, "Spell");
-				return "치명타 시전 (Cast On Crit): " + spellName;
+				return "치명타 시 " + spellName + " 시전";
 			}
 			case ActionType::kDebugNotify:
-				return "디버그 알림 (Debug Notify)";
+				return "디버그 알림";
 			default:
 				break;
 			}
@@ -470,7 +478,51 @@ namespace CalamityAffixes
 			if (!a_action.text.empty()) {
 				return a_action.text;
 			}
-			return "런타임 효과 (Runtime Effect)";
+			return "효과 발동";
+		};
+
+		auto maxSpellDurationSeconds = [](RE::SpellItem* a_spell) {
+			if (!a_spell) {
+				return 0.0f;
+			}
+			float maxDuration = 0.0f;
+			for (const auto* effect : a_spell->effects) {
+				if (!effect || effect->effectItem.duration == 0u) {
+					continue;
+				}
+				maxDuration = std::max(maxDuration, static_cast<float>(effect->effectItem.duration));
+			}
+			return maxDuration;
+		};
+
+		auto actionDurationSeconds = [&](const Action& a_action) {
+			switch (a_action.type) {
+			case ActionType::kCastSpell:
+				return maxSpellDurationSeconds(a_action.spell);
+			case ActionType::kCastOnCrit:
+				return maxSpellDurationSeconds(a_action.spell);
+			case ActionType::kCastSpellAdaptiveElement: {
+				float maxDuration = 0.0f;
+				std::unordered_set<RE::SpellItem*> seenSpells;
+				if (a_action.adaptiveFire && seenSpells.insert(a_action.adaptiveFire).second) {
+					maxDuration = std::max(maxDuration, maxSpellDurationSeconds(a_action.adaptiveFire));
+				}
+				if (a_action.adaptiveFrost && seenSpells.insert(a_action.adaptiveFrost).second) {
+					maxDuration = std::max(maxDuration, maxSpellDurationSeconds(a_action.adaptiveFrost));
+				}
+				if (a_action.adaptiveShock && seenSpells.insert(a_action.adaptiveShock).second) {
+					maxDuration = std::max(maxDuration, maxSpellDurationSeconds(a_action.adaptiveShock));
+				}
+				return maxDuration;
+			}
+			case ActionType::kSpawnTrap:
+				if (a_action.trapTtl > std::chrono::milliseconds::zero()) {
+					return static_cast<float>(a_action.trapTtl.count()) / 1000.0f;
+				}
+				return maxSpellDurationSeconds(a_action.spell);
+			default:
+				return 0.0f;
+			}
 		};
 
 		auto magnitudeScalingSourceText = [](MagnitudeScaling::Source a_source) -> std::string_view {
@@ -487,18 +539,37 @@ namespace CalamityAffixes
 
 		auto buildEffectSummaryText = [&](const AffixRuntime& a_affix) {
 			std::string summary;
-			summary.append("발동 조건: ");
 			summary.append(triggerText(a_affix.trigger));
-			summary.append(" · ");
+			summary.push_back(' ');
 			const auto chancePct = std::clamp(a_affix.procChancePct, 0.0f, 100.0f);
 			if (chancePct > 0.0f) {
-				summary.append("발동 확률: ");
-				summary.append(formatFloat1(chancePct));
-				summary.push_back('%');
+				summary.append(formatNumberCompact(chancePct));
+				summary.append("% 확률로 ");
 			} else {
-				summary.append("상시 효과 (Always On)");
+				summary.append("항상 ");
 			}
-			appendDelimited(summary, actionSummaryText(a_affix.action));
+			summary.append(actionSummaryText(a_affix.action));
+
+			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
+			if (icdSeconds > 0.0f) {
+				summary.append(" (쿨타임 ");
+				summary.append(formatNumberCompact(icdSeconds));
+				summary.append("초)");
+			}
+
+			const float perTargetIcdSeconds = static_cast<float>(a_affix.perTargetIcd.count()) / 1000.0f;
+			if (perTargetIcdSeconds > 0.0f) {
+				summary.append(" (대상별 쿨타임 ");
+				summary.append(formatNumberCompact(perTargetIcdSeconds));
+				summary.append("초)");
+			}
+
+			const float durationSeconds = actionDurationSeconds(a_affix.action);
+			if (durationSeconds > 0.0f) {
+				summary.append(" (지속 ");
+				summary.append(formatNumberCompact(durationSeconds));
+				summary.append("초)");
+			}
 			return summary;
 		};
 

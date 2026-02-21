@@ -2231,93 +2231,6 @@
         return resolveRecipeSummaryText(item);
       }
 
-      function resolveRecipeHeadlineText(item) {
-        const mappedSummary = resolveRecipeSummaryText(item);
-        const fallbackSummary = typeof item?.summary === "string" ? item.summary.trim() : "";
-        if (!fallbackSummary) {
-          return mappedSummary;
-        }
-        if (mappedSummary && mappedSummary !== fallbackSummary) {
-          return mappedSummary;
-        }
-
-        const parts = fallbackSummary
-          .split("·")
-          .map((part) => part.trim())
-          .filter(Boolean);
-        if (parts.length >= 2) {
-          return parts[parts.length - 1];
-        }
-        return fallbackSummary;
-      }
-
-      function resolveRecipeRoleMeta(item) {
-        const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
-        const role = (tagEn, tagKo, descEn, descKo) => ({
-          tag: t(tagEn, tagKo),
-          description: t(descEn, descKo)
-        });
-
-        switch (key) {
-          case "adaptive_strike":
-          case "signature_grief":
-          case "signature_breath_of_the_dying":
-          case "signature_doom":
-          case "signature_kings_grace":
-          case "signature_strength":
-          case "signature_edge":
-          case "fire_strike":
-          case "frost_strike":
-          case "shock_strike":
-          case "poison_bloom":
-            return role("Offense", "공격형", "Direct damage / burst oriented profile.", "직접 피해/폭딜 중심 프로파일입니다.");
-          case "adaptive_exposure":
-          case "signature_infinity":
-          case "signature_heart_of_the_oak":
-          case "signature_last_wish":
-          case "tar_bloom":
-          case "siphon_bloom":
-          case "curse_fragile":
-          case "curse_slow_attack":
-          case "curse_fear":
-          case "curse_frenzy":
-            return role("Debuff/Control", "디버프/제어", "Resistance shred or crowd-control oriented profile.", "저항 파쇄/군중제어 중심 프로파일입니다.");
-          case "self_ward":
-          case "self_barrier":
-          case "self_oakflesh":
-          case "self_stoneflesh":
-          case "self_ironflesh":
-          case "self_ebonyflesh":
-          case "self_phoenix":
-          case "signature_fortitude":
-          case "signature_exile":
-          case "signature_chains_of_honor":
-          case "signature_ancients_pledge":
-            return role("Defense", "방어형", "Survivability and mitigation oriented profile.", "생존력/피해 완화 중심 프로파일입니다.");
-          case "self_haste":
-          case "self_meditation":
-          case "self_phase":
-          case "self_muffle":
-          case "self_invisibility":
-          case "self_flame_cloak":
-          case "self_frost_cloak":
-          case "self_shock_cloak":
-          case "soul_trap":
-          case "signature_spirit":
-          case "signature_insight":
-          case "signature_call_to_arms":
-          case "signature_enigma":
-          case "signature_stealth":
-          case "signature_zephyr":
-          case "signature_faith":
-            return role("Utility/Sustain", "유틸/지속", "Mobility, sustain, or tactical utility oriented profile.", "기동/유지력/전술 유틸 중심 프로파일입니다.");
-          case "signature_bone":
-            return role("Summon/Special", "소환/특수", "Summon or special mechanic oriented profile.", "소환 또는 특수 기믹 중심 프로파일입니다.");
-          default:
-            return null;
-        }
-      }
-
       function resolveRecipeDetailText(item) {
         const fallbackDetail = typeof item?.detail === "string" ? item.detail.trim() : "";
         const mergeDetail = (mappedDetail) => {
@@ -2435,28 +2348,12 @@
 
       function buildRecipePreviewTooltipText(item) {
         if (!item) return "";
-        const headlineText = resolveRecipeHeadlineText(item);
         const summaryText = resolveRecipeNumericSummaryText(item);
-        const detailText = resolveRecipeDetailText(item);
-        const roleMeta = resolveRecipeRoleMeta(item);
-        if (!headlineText && !summaryText && !detailText && !roleMeta) {
+        if (!summaryText) {
           return "";
         }
 
-        const lines = [];
-        if (roleMeta) {
-          lines.push(`${t("Role", "역할")}: ${roleMeta.tag} - ${roleMeta.description}`);
-        }
-        if (headlineText) {
-          lines.push(`${t("Core Effect", "핵심 효과")}: ${headlineText}`);
-        }
-        if (summaryText && summaryText !== headlineText) {
-          lines.push(`${t("Proc Rule", "발동 규칙")}: ${summaryText}`);
-        }
-        if (detailText) {
-          lines.push(`${t("Detail", "상세")}: ${detailText}`);
-        }
-        return lines.join("\n");
+        return `${t("Effect", "효과")}: ${summaryText}`;
       }
 
       function resolveRecipeBaseBadge(item) {
@@ -2526,19 +2423,14 @@
           const name = typeof item?.name === "string" ? item.name.toLowerCase() : "";
           const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
           const base = resolveRecipeBaseBadge(item).text.toLowerCase();
-          const headline = resolveRecipeHeadlineText(item).toLowerCase();
           const summary = resolveRecipeNumericSummaryText(item).toLowerCase();
           const detail = resolveRecipeDetailText(item).toLowerCase();
-          const roleMeta = resolveRecipeRoleMeta(item);
-          const roleText = roleMeta ? `${roleMeta.tag} ${roleMeta.description}`.toLowerCase() : "";
           return (
             name.includes(query) ||
             runes.includes(query) ||
             base.includes(query) ||
-            headline.includes(query) ||
             summary.includes(query) ||
-            detail.includes(query) ||
-            roleText.includes(query)
+            detail.includes(query)
           );
         });
 
@@ -2581,10 +2473,8 @@
           const name = typeof item?.name === "string" ? item.name : "";
           const runes = typeof item?.runes === "string" ? item.runes : "";
           const baseBadge = resolveRecipeBaseBadge(item);
-          const headlineText = resolveRecipeHeadlineText(item);
           const summaryText = resolveRecipeNumericSummaryText(item);
           const detailText = resolveRecipeDetailText(item);
-          const roleMeta = resolveRecipeRoleMeta(item);
           const selected = Boolean(item?.selected);
           if (!token || !name) {
             continue;
@@ -2606,33 +2496,16 @@
           head.appendChild(badge);
           button.appendChild(head);
 
-          const listSummaryParts = [];
-          if (roleMeta) {
-            listSummaryParts.push(`[${roleMeta.tag}]`);
-          }
-          if (headlineText) {
-            listSummaryParts.push(headlineText);
-          } else if (summaryText) {
-            listSummaryParts.push(summaryText);
-          }
-          const listSummaryText = listSummaryParts.join(" ");
-
-          if (listSummaryText) {
+          if (summaryText) {
             const summary = document.createElement("div");
             summary.className = "rwRecipeSummary";
-            summary.textContent = listSummaryText;
+            summary.textContent = summaryText;
             button.appendChild(summary);
           }
 
           const hoverParts = [];
-          if (roleMeta) {
-            hoverParts.push(`${t("Role", "역할")}: ${roleMeta.tag} - ${roleMeta.description}`);
-          }
-          if (headlineText) {
-            hoverParts.push(`${t("Core Effect", "핵심 효과")}: ${headlineText}`);
-          }
           if (summaryText) {
-            hoverParts.push(`${t("Proc Rule", "발동 규칙")}: ${summaryText}`);
+            hoverParts.push(`${t("Effect", "효과")}: ${summaryText}`);
           }
           if (detailText) {
             hoverParts.push(`${t("Detail", "상세")}: ${detailText}`);
@@ -2793,31 +2666,14 @@
           }
 
           if (selectedRecipe) {
-            const effectHeadline = resolveRecipeHeadlineText(selectedRecipe);
             const effectSummary = resolveRecipeNumericSummaryText(selectedRecipe);
-            const effectDetail = resolveRecipeDetailText(selectedRecipe);
-            const effectRole = resolveRecipeRoleMeta(selectedRecipe);
             const baseBadge = resolveRecipeBaseBadge(selectedRecipe);
             const effectLine = document.createElement("div");
             effectLine.className = "rwRecipeEffectLine";
-            effectLine.textContent = effectHeadline
-              ? `${t("Core Effect", "핵심 효과")}: ${effectHeadline}`
+            effectLine.textContent = effectSummary
+              ? `${t("Effect", "효과")}: ${effectSummary}`
               : `${t("Effect", "효과")}: ${t("No summary available", "요약 정보 없음")}`;
             runewordPanelStatus.appendChild(effectLine);
-
-            if (effectRole) {
-              const roleLine = document.createElement("div");
-              roleLine.className = "rwMetaLine";
-              roleLine.textContent = `${t("Role", "역할")}: ${effectRole.tag} · ${effectRole.description}`;
-              runewordPanelStatus.appendChild(roleLine);
-            }
-
-            if (effectSummary && effectSummary !== effectHeadline) {
-              const summaryLine = document.createElement("div");
-              summaryLine.className = "rwMetaLine";
-              summaryLine.textContent = `${t("Proc Rule", "발동 규칙")}: ${effectSummary}`;
-              runewordPanelStatus.appendChild(summaryLine);
-            }
 
             const baseLine = document.createElement("div");
             baseLine.className = "rwMetaLine";
@@ -2832,12 +2688,6 @@
               runewordPanelStatus.appendChild(runeLine);
             }
 
-            if (effectDetail) {
-              const detailLine = document.createElement("div");
-              detailLine.className = "rwMetaLine rwRecipeDetailLine";
-              detailLine.textContent = `${t("Detail", "상세")}: ${effectDetail}`;
-              runewordPanelStatus.appendChild(detailLine);
-            }
           }
 
           if (total > 0 && !isComplete) {
