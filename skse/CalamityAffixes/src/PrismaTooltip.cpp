@@ -307,6 +307,8 @@ namespace CalamityAffixes::PrismaTooltip
 					{ "name", entry.displayName },
 					{ "runes", entry.runeSequence },
 					{ "summaryKey", entry.effectSummaryKey },
+					{ "summary", entry.effectSummaryText },
+					{ "detail", entry.effectDetailText },
 					{ "baseKey", entry.recommendedBaseKey },
 					{ "selected", entry.selected }
 				});

@@ -458,6 +458,7 @@
         color: rgba(255, 255, 255, 0.9);
         font-size: calc(12px * var(--panel-ui-scale));
         line-height: 1.3;
+        overflow-wrap: anywhere;
       }
 
       .rwStatusHeader {
@@ -501,6 +502,9 @@
       .rwMetaLine {
         margin-top: calc(6px * var(--panel-ui-scale));
         color: rgba(255, 255, 255, 0.74);
+        line-height: 1.4;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
       }
 
       .rwRecipeEffectLine {
@@ -511,7 +515,14 @@
         background: rgba(0, 255, 153, 0.08);
         color: rgba(215, 255, 236, 0.98);
         font-size: calc(12px * var(--panel-ui-scale));
-        line-height: 1.35;
+        line-height: 1.45;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+      }
+
+      .rwRecipeDetailLine {
+        border-left: 2px solid rgba(0, 255, 153, 0.22);
+        padding-left: calc(8px * var(--panel-ui-scale));
       }
 
       .rwLayout {
@@ -743,8 +754,13 @@
       .rwRecipeSummary {
         margin-top: calc(2px * var(--panel-ui-scale));
         font-size: calc(11px * var(--panel-ui-scale));
-        line-height: 1.25;
+        line-height: 1.35;
         color: rgba(255, 255, 255, 0.72);
+        white-space: normal;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
       }
 
       .cpListItem.selected .rwRecipeSummary {
@@ -762,6 +778,10 @@
 
         .rwCubeGrid {
           --rwCell: calc(56px * var(--panel-ui-scale));
+        }
+
+        .rwRecipeSummary {
+          -webkit-line-clamp: 3;
         }
       }
 
@@ -1591,6 +1611,9 @@
       function applyTooltipPlacement() {
         const hasTooltip = Boolean(tooltipTextState);
         const hasRunewordAffix = Boolean(runewordAffixTextState);
+        const recipePreviewText = buildRecipePreviewTooltipText(getSelectedRecipeItem());
+        const effectiveRunewordAffixText = hasRunewordAffix ? runewordAffixTextState : recipePreviewText;
+        const hasEffectiveRunewordAffix = Boolean(effectiveRunewordAffixText);
 
         if (panelTooltipText) {
           panelTooltipText.textContent = hasTooltip
@@ -1603,15 +1626,15 @@
         }
 
         if (runewordAffixText) {
-          runewordAffixText.textContent = hasRunewordAffix
-            ? runewordAffixTextState
+          runewordAffixText.textContent = hasEffectiveRunewordAffix
+            ? effectiveRunewordAffixText
             : runewordAffixPendingState
               ? t("Refreshing affix preview...", "어픽스 미리보기를 갱신 중입니다.")
               : t("No affix tooltip available.", "어픽스 툴팁이 없습니다.");
         }
 
         if (runewordAffixHint) {
-          runewordAffixHint.style.display = hasRunewordAffix ? "none" : "block";
+          runewordAffixHint.style.display = hasEffectiveRunewordAffix ? "none" : "block";
         }
 
         if (!hasTooltip) {
@@ -2078,6 +2101,7 @@
       }
 
       function resolveRecipeSummaryText(item) {
+        const fallbackSummary = typeof item?.summary === "string" ? item.summary.trim() : "";
         const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
         switch (key) {
           case "adaptive_strike":
@@ -2195,90 +2219,113 @@
           case "soul_trap":
             return t("Soul Trap utility", "소울트랩 유틸");
           default:
-            if (typeof item?.summary === "string" && item.summary.trim().length > 0) {
-              return item.summary.trim();
-            }
-            return "";
+            return fallbackSummary;
         }
       }
 
       function resolveRecipeDetailText(item) {
+        const fallbackDetail = typeof item?.detail === "string" ? item.detail.trim() : "";
+        const mergeDetail = (mappedDetail) => {
+          const mapped = typeof mappedDetail === "string" ? mappedDetail.trim() : "";
+          if (fallbackDetail && mapped) {
+            return `${fallbackDetail}\n${mapped}`;
+          }
+          return fallbackDetail || mapped;
+        };
         const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
         switch (key) {
           case "adaptive_strike":
-            return t(
+            return mergeDetail(t(
               "On hit, converts to the target's weakest elemental resistance lane for stable damage.",
               "적중 시 대상의 가장 낮은 원소 저항 축을 따라 피해가 결정됩니다."
-            );
+            ));
           case "adaptive_exposure":
-            return t(
+            return mergeDetail(t(
               "On hit, applies exposure/shred to the target's strongest resistance lane.",
               "적중 시 대상의 가장 높은 원소 저항 축에 노출/파쇄를 적용합니다."
-            );
+            ));
           case "signature_infinity":
-            return t(
+            return mergeDetail(t(
               "Default is adaptive exposure. Manual mode can lock Fire/Frost/Shock exposure.",
               "기본은 적응형 노출이며, 수동 모드에서 화염/냉기/번개 노출 고정이 가능합니다."
-            );
+            ));
           case "signature_last_wish":
-            return t(
+            return mergeDetail(t(
               "Default is adaptive exposure. Manual mode can lock Inferno/Frost/Lightning variants.",
               "기본은 적응형 노출이며, 수동 모드에서 열화/빙결/전격 변형을 고정할 수 있습니다."
-            );
+            ));
           case "signature_heart_of_the_oak":
-            return t(
+            return mergeDetail(t(
               "Uses StrongestResist logic to prioritize breaking the highest elemental resist lane.",
               "StrongestResist 로직으로 대상의 가장 높은 원소 저항 축을 우선 파쇄합니다."
-            );
+            ));
           case "signature_call_to_arms":
-            return t(
+            return mergeDetail(t(
               "Proc trigger is on hit. Applies a short defensive warcry buff.",
               "발동 트리거는 적중이며, 짧은 방어형 전투 함성 버프를 부여합니다."
-            );
+            ));
           case "signature_faith":
-            return t(
+            return mergeDetail(t(
               "Fanatic Surge: Move Speed +35 and Damage Resist +60 for 6 seconds.",
               "광신의 돌격: 6초 동안 이동속도 +35, 피해저항 +60."
-            );
+            ));
           case "signature_doom":
           case "signature_dream":
-            return t(
+            return mergeDetail(t(
               "Uses dedicated runeword strike spells instead of generic dynamic spell payloads.",
               "범용 동적 스펠 대신 전용 룬워드 타격 스펠을 사용합니다."
-            );
+            ));
           case "poison_bloom":
           case "tar_bloom":
           case "siphon_bloom":
-            return t(
+            return mergeDetail(t(
               "Bloom-style DoT profile. Practical value scales with repeated on-hit uptime.",
               "블룸형 DoT 프로파일입니다. 적중 누적으로 유지시간 체감이 올라갑니다."
-            );
+            ));
           case "curse_fragile":
           case "curse_slow_attack":
           case "curse_fear":
           case "curse_frenzy":
-            return t(
+            return mergeDetail(t(
               "Curse profile with control/debuff focus. Uses cooldown and per-target guards.",
               "군중제어/디버프 중심 저주 프로파일이며 쿨다운과 대상별 가드가 적용됩니다."
-            );
+            ));
           case "self_flame_cloak":
           case "self_frost_cloak":
           case "self_shock_cloak":
-            return t(
+            return mergeDetail(t(
               "Aura-like self cloak profile for close-range pressure.",
               "근접 압박용 오라 감성의 자가 망토 프로파일입니다."
-            );
+            ));
           case "self_oakflesh":
           case "self_stoneflesh":
           case "self_ironflesh":
           case "self_ebonyflesh":
-            return t(
+            return mergeDetail(t(
               "Defensive flesh profile that prioritizes survivability uptime.",
               "생존 유지에 초점을 둔 방어형 플레시 프로파일입니다."
-            );
+            ));
           default:
-            return "";
+            return fallbackDetail;
         }
+      }
+
+      function buildRecipePreviewTooltipText(item) {
+        if (!item) return "";
+        const summaryText = resolveRecipeSummaryText(item);
+        const detailText = resolveRecipeDetailText(item);
+        if (!summaryText && !detailText) {
+          return "";
+        }
+
+        const lines = [];
+        if (summaryText) {
+          lines.push(`${t("Effect", "효과")}: ${summaryText}`);
+        }
+        if (detailText) {
+          lines.push(`${t("Detail", "상세")}: ${detailText}`);
+        }
+        return lines.join("\n");
       }
 
       function resolveRecipeBaseBadge(item) {
@@ -2349,7 +2396,14 @@
           const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
           const base = resolveRecipeBaseBadge(item).text.toLowerCase();
           const summary = resolveRecipeSummaryText(item).toLowerCase();
-          return name.includes(query) || runes.includes(query) || base.includes(query) || summary.includes(query);
+          const detail = resolveRecipeDetailText(item).toLowerCase();
+          return (
+            name.includes(query) ||
+            runes.includes(query) ||
+            base.includes(query) ||
+            summary.includes(query) ||
+            detail.includes(query)
+          );
         });
 
         if (runewordRecipeListTitle) {
@@ -2609,7 +2663,7 @@
 
             if (effectDetail) {
               const detailLine = document.createElement("div");
-              detailLine.className = "rwMetaLine";
+              detailLine.className = "rwMetaLine rwRecipeDetailLine";
               detailLine.textContent = `${t("Detail", "상세")}: ${effectDetail}`;
               runewordPanelStatus.appendChild(detailLine);
             }

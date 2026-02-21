@@ -105,6 +105,64 @@ namespace RuntimeGateStoreChecks
 			return true;
 		}
 
+		bool CheckRunewordRecipeTooltipTextPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path eventBridgeHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "EventBridge.h";
+			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
+			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
+				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto headerText = loadText(eventBridgeHeaderFile);
+			if (!headerText.has_value()) {
+				std::cerr << "runeword_recipe_tooltip_text: failed to open header file: " << eventBridgeHeaderFile << "\n";
+				return false;
+			}
+			const auto recipeEntriesText = loadText(recipeEntriesFile);
+			if (!recipeEntriesText.has_value()) {
+				std::cerr << "runeword_recipe_tooltip_text: failed to open recipe entries file: " << recipeEntriesFile << "\n";
+				return false;
+			}
+			const auto prismaCoreText = loadText(prismaCoreFile);
+			if (!prismaCoreText.has_value()) {
+				std::cerr << "runeword_recipe_tooltip_text: failed to open prisma core file: " << prismaCoreFile << "\n";
+				return false;
+			}
+			const auto prismaUiText = loadText(prismaUiFile);
+			if (!prismaUiText.has_value()) {
+				std::cerr << "runeword_recipe_tooltip_text: failed to open prisma ui file: " << prismaUiFile << "\n";
+				return false;
+			}
+
+			if (headerText->find("std::string effectSummaryText{};") == std::string::npos ||
+				headerText->find("std::string effectDetailText{};") == std::string::npos ||
+				recipeEntriesText->find(".effectSummaryText =") == std::string::npos ||
+				recipeEntriesText->find(".effectDetailText =") == std::string::npos ||
+				prismaCoreText->find("{ \"summary\", entry.effectSummaryText }") == std::string::npos ||
+				prismaCoreText->find("{ \"detail\", entry.effectDetailText }") == std::string::npos ||
+				prismaUiText->find("const fallbackSummary = typeof item?.summary === \"string\"") == std::string::npos ||
+				prismaUiText->find("const fallbackDetail = typeof item?.detail === \"string\"") == std::string::npos ||
+				prismaUiText->find("function buildRecipePreviewTooltipText(item)") == std::string::npos ||
+				prismaUiText->find("const recipePreviewText = buildRecipePreviewTooltipText(getSelectedRecipeItem());") == std::string::npos) {
+				std::cerr << "runeword_recipe_tooltip_text: recipe tooltip text enrichment guard is missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
 		bool CheckRunewordCoverageConsistencyPolicy()
 		{
 			namespace fs = std::filesystem;

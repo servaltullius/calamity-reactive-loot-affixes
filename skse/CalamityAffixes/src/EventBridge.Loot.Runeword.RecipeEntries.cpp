@@ -1,8 +1,11 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -286,6 +289,253 @@ namespace CalamityAffixes
 			return RecipeBucket(id, 2u) == 0u ? "adaptive_exposure" : "adaptive_strike";
 		};
 
+		auto formatFloat1 = [](float a_value) {
+			char buffer[32]{};
+			std::snprintf(buffer, sizeof(buffer), "%.1f", static_cast<double>(a_value));
+			return std::string(buffer);
+		};
+
+		auto appendDelimited = [](std::string& a_out, std::string_view a_part) {
+			if (a_part.empty()) {
+				return;
+			}
+			if (!a_out.empty()) {
+				a_out.append(" · ");
+			}
+			a_out.append(a_part);
+		};
+
+		auto triggerText = [](Trigger a_trigger) -> std::string_view {
+			switch (a_trigger) {
+			case Trigger::kHit:
+				return "적중 (On Hit)";
+			case Trigger::kIncomingHit:
+				return "피격 (On Incoming Hit)";
+			case Trigger::kDotApply:
+				return "지속 피해 적용 (On DoT Apply)";
+			case Trigger::kKill:
+				return "처치 (On Kill)";
+			case Trigger::kLowHealth:
+				return "저체력 (On Low Health)";
+			}
+			return "트리거 (On Trigger)";
+		};
+
+		auto spellNameOr = [](RE::SpellItem* a_spell, std::string_view a_fallback) {
+			if (!a_spell) {
+				return std::string(a_fallback);
+			}
+			const char* rawName = a_spell->GetName();
+			if (!rawName || rawName[0] == '\0') {
+				return std::string(a_fallback);
+			}
+			return std::string(rawName);
+		};
+
+		auto actionSummaryText = [&](const Action& a_action) -> std::string {
+			switch (a_action.type) {
+			case ActionType::kCastSpell: {
+				const auto spellName = spellNameOr(a_action.spell, "Spell");
+				return a_action.applyToSelf ?
+					       ("자가 시전 (Self-cast): " + spellName) :
+					       ("시전 (Cast): " + spellName);
+			}
+			case ActionType::kCastSpellAdaptiveElement: {
+				std::string elements;
+				if (a_action.adaptiveFire) {
+					elements.append("화염/Fire");
+				}
+				if (a_action.adaptiveFrost) {
+					appendDelimited(elements, "냉기/Frost");
+				}
+				if (a_action.adaptiveShock) {
+					appendDelimited(elements, "번개/Shock");
+				}
+				if (!elements.empty()) {
+					return "적응형 원소 시전 (Adaptive Cast): " + elements;
+				}
+				return "적응형 원소 시전 (Adaptive Cast)";
+			}
+			case ActionType::kConvertDamage: {
+				std::string_view element = "Element";
+				switch (a_action.element) {
+				case Element::kFire:
+					element = "화염/Fire";
+					break;
+				case Element::kFrost:
+					element = "냉기/Frost";
+					break;
+				case Element::kShock:
+					element = "번개/Shock";
+					break;
+				case Element::kNone:
+				default:
+					break;
+				}
+				return "피해 전환 (Convert): " + formatFloat1(std::max(0.0f, a_action.convertPct)) + "% -> " + std::string(element);
+			}
+			case ActionType::kMindOverMatter:
+				return "마인드 오버 매터 (Mind Over Matter)";
+			case ActionType::kArchmage:
+				return "아크메이지 폭주 (Archmage Burst)";
+			case ActionType::kSpawnTrap: {
+				const auto spellName = spellNameOr(a_action.spell, "Trap");
+				return "함정 설치 (Spawn Trap): " + spellName;
+			}
+			case ActionType::kCorpseExplosion:
+				return "시체 폭발 (Corpse Explosion)";
+			case ActionType::kSummonCorpseExplosion:
+				return "소환수 시체 폭발 (Summon Corpse Explosion)";
+			case ActionType::kCastOnCrit: {
+				const auto spellName = spellNameOr(a_action.spell, "Spell");
+				return "치명타 시전 (Cast On Crit): " + spellName;
+			}
+			case ActionType::kDebugNotify:
+				return "디버그 알림 (Debug Notify)";
+			default:
+				break;
+			}
+
+			if (!a_action.text.empty()) {
+				return a_action.text;
+			}
+			return "런타임 효과 (Runtime Effect)";
+		};
+
+		auto magnitudeScalingSourceText = [](MagnitudeScaling::Source a_source) -> std::string_view {
+			switch (a_source) {
+			case MagnitudeScaling::Source::kHitPhysicalDealt:
+				return "가한 물리 피해 (HitPhysicalDealt)";
+			case MagnitudeScaling::Source::kHitTotalDealt:
+				return "가한 총 피해 (HitTotalDealt)";
+			case MagnitudeScaling::Source::kNone:
+			default:
+				return "";
+			}
+		};
+
+		auto buildEffectSummaryText = [&](const AffixRuntime& a_affix) {
+			std::string summary;
+			summary.append("발동 조건: ");
+			summary.append(triggerText(a_affix.trigger));
+			summary.append(" · ");
+			const auto chancePct = std::clamp(a_affix.procChancePct, 0.0f, 100.0f);
+			if (chancePct > 0.0f) {
+				summary.append("발동 확률: ");
+				summary.append(formatFloat1(chancePct));
+				summary.push_back('%');
+			} else {
+				summary.append("상시 효과 (Always On)");
+			}
+			appendDelimited(summary, actionSummaryText(a_affix.action));
+			return summary;
+		};
+
+		auto buildEffectDetailText = [&](const AffixRuntime& a_affix) {
+			std::string detail;
+
+			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
+			if (icdSeconds > 0.0f) {
+				appendDelimited(detail, "내부 쿨다운 (ICD): " + formatFloat1(icdSeconds) + "초");
+			}
+
+			const float perTargetIcdSeconds = static_cast<float>(a_affix.perTargetIcd.count()) / 1000.0f;
+			if (perTargetIcdSeconds > 0.0f) {
+				appendDelimited(detail, "대상별 쿨다운 (Per-target): " + formatFloat1(perTargetIcdSeconds) + "초");
+			}
+
+			if (a_affix.luckyHitChancePct > 0.0f) {
+				appendDelimited(detail, "행운 적중 (Lucky Hit): " + formatFloat1(a_affix.luckyHitChancePct) + "%");
+			}
+
+			if (std::abs(a_affix.action.effectiveness - 1.0f) >= 0.01f) {
+				appendDelimited(detail, "효과 배율 (Effectiveness): x" + formatFloat1(a_affix.action.effectiveness));
+			}
+
+			if (std::abs(a_affix.action.magnitudeOverride) >= 0.01f) {
+				appendDelimited(detail, "고정 위력 (Magnitude): " + formatFloat1(a_affix.action.magnitudeOverride));
+			}
+
+			if (a_affix.action.type == ActionType::kMindOverMatter &&
+				a_affix.action.mindOverMatterDamageToMagickaPct > 0.0f) {
+				std::string moMText = "피해-마나 전환 (Damage->Magicka): " +
+				                      formatFloat1(a_affix.action.mindOverMatterDamageToMagickaPct) + "%";
+				if (a_affix.action.mindOverMatterMaxRedirectPerHit > 0.0f) {
+					moMText.append(", 최대 (max) ");
+					moMText.append(formatFloat1(a_affix.action.mindOverMatterMaxRedirectPerHit));
+				}
+				appendDelimited(detail, moMText);
+			}
+
+			if (a_affix.action.type == ActionType::kArchmage) {
+				if (a_affix.action.archmageDamagePctOfMaxMagicka > 0.0f) {
+					appendDelimited(
+						detail,
+						"추가 피해 (Damage): + " + formatFloat1(a_affix.action.archmageDamagePctOfMaxMagicka) + "% 최대 마력 (Max Magicka)");
+				}
+				if (a_affix.action.archmageCostPctOfMaxMagicka > 0.0f) {
+					appendDelimited(
+						detail,
+						"추가 소모 (Cost): + " + formatFloat1(a_affix.action.archmageCostPctOfMaxMagicka) + "% 최대 마력 (Max Magicka)");
+				}
+			}
+
+			if (a_affix.action.type == ActionType::kCorpseExplosion ||
+				a_affix.action.type == ActionType::kSummonCorpseExplosion) {
+				if (a_affix.action.corpseExplosionFlatDamage > 0.0f) {
+					appendDelimited(detail, "고정 피해 (Flat): " + formatFloat1(a_affix.action.corpseExplosionFlatDamage));
+				}
+				if (a_affix.action.corpseExplosionPctOfCorpseMaxHealth > 0.0f) {
+					appendDelimited(detail, "시체 최대 체력 비례 (CorpseMaxHP): " +
+					                        formatFloat1(a_affix.action.corpseExplosionPctOfCorpseMaxHealth) + "%");
+				}
+				if (a_affix.action.corpseExplosionRadius > 0.0f) {
+					appendDelimited(detail, "범위 (Radius): " + formatFloat1(a_affix.action.corpseExplosionRadius));
+				}
+			}
+
+			if (a_affix.action.type == ActionType::kSpawnTrap) {
+				if (a_affix.action.trapRadius > 0.0f) {
+					appendDelimited(detail, "함정 범위 (Trap Radius): " + formatFloat1(a_affix.action.trapRadius));
+				}
+				if (a_affix.action.trapTtl > std::chrono::milliseconds::zero()) {
+					const float ttlSeconds = static_cast<float>(a_affix.action.trapTtl.count()) / 1000.0f;
+					appendDelimited(detail, "함정 지속시간 (Trap TTL): " + formatFloat1(ttlSeconds) + "초");
+				}
+			}
+
+			if (a_affix.action.magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
+				std::string scalingText = "스케일링 (Scaling): ";
+				const auto sourceText = magnitudeScalingSourceText(a_affix.action.magnitudeScaling.source);
+				if (!sourceText.empty()) {
+					scalingText.append(sourceText);
+					scalingText.push_back(' ');
+				}
+				scalingText.append("x");
+				scalingText.append(formatFloat1(a_affix.action.magnitudeScaling.mult));
+				if (std::abs(a_affix.action.magnitudeScaling.add) >= 0.01f) {
+					scalingText.append(" + ");
+					scalingText.append(formatFloat1(a_affix.action.magnitudeScaling.add));
+				}
+				if (a_affix.action.magnitudeScaling.min > 0.0f) {
+					scalingText.append(" (최소 min ");
+					scalingText.append(formatFloat1(a_affix.action.magnitudeScaling.min));
+					scalingText.push_back(')');
+				}
+				if (a_affix.action.magnitudeScaling.max > 0.0f) {
+					scalingText.append(" (최대 max ");
+					scalingText.append(formatFloat1(a_affix.action.magnitudeScaling.max));
+					scalingText.push_back(')');
+				}
+				if (a_affix.action.magnitudeScaling.spellBaseAsMin) {
+					scalingText.append(" (스펠 기본값 이상 보장 / spell-base min)");
+				}
+				appendDelimited(detail, scalingText);
+			}
+
+			return detail;
+		};
+
 		std::uint64_t selectedToken = 0u;
 		if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
 			selectedToken = currentRecipe->token;
@@ -311,6 +561,11 @@ namespace CalamityAffixes
 				affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
 				continue;
 			}
+			const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
+			if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+				continue;
+			}
+			const auto& affix = _affixes[affixIt->second];
 
 			std::string runes;
 			for (std::size_t i = 0; i < recipe.runeIds.size(); ++i) {
@@ -325,6 +580,8 @@ namespace CalamityAffixes
 				.displayName = recipe.displayName,
 				.runeSequence = std::move(runes),
 				.effectSummaryKey = std::string(resolveRecipeEffectSummaryKey(recipe)),
+				.effectSummaryText = buildEffectSummaryText(affix),
+				.effectDetailText = buildEffectDetailText(affix),
 				.recommendedBaseKey = std::string(resolveRecommendedBaseKey(recipe)),
 				.selected = (selectedToken != 0u && selectedToken == recipe.token)
 			});

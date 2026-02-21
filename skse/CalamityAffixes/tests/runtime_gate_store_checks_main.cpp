@@ -21,6 +21,7 @@ int main()
 	const bool mcmDropChanceBridgeOk = CheckMcmDropChanceRuntimeBridgePolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
+	const bool runewordRecipeTooltipTextOk = CheckRunewordRecipeTooltipTextPolicy();
 	const bool runewordCoverageConsistencyOk = CheckRunewordCoverageConsistencyPolicy();
 	const bool lowHealthTriggerSnapshotOk = CheckLowHealthTriggerSnapshotPolicy();
 	const bool runewordRecipeRuntimeEligibilityOk = CheckRunewordRecipeRuntimeEligibilityPolicy();
@@ -42,6 +43,7 @@ int main()
 	        lootChanceMcmCleanupOk &&
 		        mcmDropChanceBridgeOk &&
 		        runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
+		        runewordRecipeTooltipTextOk &&
 		        runewordCoverageConsistencyOk &&
 		        lowHealthTriggerSnapshotOk &&
 		        runewordRecipeRuntimeEligibilityOk &&
