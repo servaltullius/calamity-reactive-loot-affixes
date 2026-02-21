@@ -79,6 +79,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/PrismaTooltip.cpp
 	    src/RuntimePaths.cpp
 	    src/RunewordContractSnapshot.cpp
+	    src/RunewordIdentityOverrides.cpp
 	    src/TrapSystem.cpp
 	    src/UserSettingsPersistence.cpp
 	)

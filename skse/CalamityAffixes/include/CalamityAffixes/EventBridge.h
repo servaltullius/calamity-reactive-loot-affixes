@@ -824,6 +824,8 @@ namespace CalamityAffixes
 			std::size_t a_index,
 			bool a_useSynthesizedDuplicateLogFormat,
 			bool a_warnOnDuplicate);
+		void IndexAffixTriggerBucket(const AffixRuntime& a_affix, std::size_t a_index);
+		void IndexAffixSpecialActionBucket(const AffixRuntime& a_affix, std::size_t a_index);
 		void IndexAffixLootPool(const AffixRuntime& a_affix, std::size_t a_index);
 		void RebuildSharedLootPools();
 		void RegisterSynthesizedAffix(AffixRuntime&& a_affix, bool a_warnOnDuplicate);
@@ -1056,7 +1058,7 @@ namespace CalamityAffixes
 			RE::TESObjectREFR* a_castTarget,
 			float a_magnitudeOverride) const;
 		void ExecuteCastSpellAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
-		void ExecuteCastSpellAdaptiveElementAction(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
+		void ExecuteCastSpellAdaptiveElementAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
 		[[nodiscard]] bool SelectSpawnTrapTarget(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData, RE::Actor*& a_outSpawnTarget);
 		[[nodiscard]] float ResolveSpawnTrapMagnitudeOverride(const Action& a_action, const RE::HitData* a_hitData) const;
 		void EnforcePerAffixTrapCap(const Action& a_action);

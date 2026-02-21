@@ -250,8 +250,9 @@ namespace CalamityAffixes
 			caster);
 	}
 
-	void EventBridge::ExecuteCastSpellAdaptiveElementAction(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
+	void EventBridge::ExecuteCastSpellAdaptiveElementAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
+		const auto& a_action = a_affix.action;
 		auto* caster = a_owner;
 		auto* magicCaster = caster->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant);
 		if (!magicCaster) {
@@ -259,22 +260,73 @@ namespace CalamityAffixes
 			return;
 		}
 
+		const auto primaryKey = ResolvePrimaryEquippedInstanceKey(a_affix.token);
+		const InstanceRuntimeState* state = nullptr;
+		if (primaryKey) {
+			state = FindInstanceRuntimeState(*primaryKey, a_affix.token);
+		}
+
 		auto* analysisTarget = ResolveAdaptiveAnalysisTarget(a_action, a_owner, a_target);
 		if (!analysisTarget) {
 			return;
 		}
 
-		const auto selection = SelectAdaptiveSpellForTarget(a_action, analysisTarget);
-		if (!selection.spell) {
+		AdaptiveCastSelection selection = SelectAdaptiveSpellForTarget(a_action, analysisTarget);
+		RE::SpellItem* spell = selection.spell;
+		std::uint32_t modeIndex = 0u;
+		bool manualModeOverride = false;
+		if (a_action.modeCycleEnabled && a_action.modeCycleManualOnly && !a_action.modeCycleSpells.empty()) {
+			const auto manualModeCount = static_cast<std::uint32_t>(a_action.modeCycleSpells.size());
+			const auto modeCountWithAuto = manualModeCount + 1u;  // index 0 = adaptive auto
+			modeIndex = (modeCountWithAuto > 0u) ? ((state ? state->modeIndex : 0u) % modeCountWithAuto) : 0u;
+			if (modeIndex > 0u) {
+				const auto spellIdx = modeIndex - 1u;
+				if (spellIdx < manualModeCount) {
+					spell = a_action.modeCycleSpells[spellIdx];
+					manualModeOverride = (spell != nullptr);
+				}
+			}
+		}
+
+		if (!spell) {
 			return;
 		}
 
 		RE::TESObjectREFR* castTarget = ResolveSpellCastTarget(a_action, a_target);
-		const float magnitudeOverride = ResolveSpellMagnitudeOverride(a_action, selection.spell, a_hitData, false);
-		LogAdaptiveCastSpell(selection, castTarget, magnitudeOverride);
+		float magnitudeOverride = ResolveSpellMagnitudeOverride(a_action, spell, a_hitData, false);
+		float evolutionMultiplier = 1.0f;
+		std::size_t evolutionStage = 0;
+		if (a_action.evolutionEnabled) {
+			evolutionMultiplier = ResolveEvolutionMultiplier(a_action, state);
+			evolutionStage = ResolveEvolutionStageIndex(a_action, state);
+			if (magnitudeOverride > 0.0f) {
+				magnitudeOverride *= evolutionMultiplier;
+			} else if (evolutionMultiplier != 1.0f) {
+				const float baseMagnitude = GetSpellBaseMagnitude(spell);
+				if (baseMagnitude > 0.0f) {
+					magnitudeOverride = baseMagnitude * evolutionMultiplier;
+				}
+			}
+		}
+
+		if (!manualModeOverride) {
+			LogAdaptiveCastSpell(selection, castTarget, magnitudeOverride);
+		} else if (_loot.debugLog) {
+			const std::uint32_t xp = state ? state->evolutionXp : 0u;
+			spdlog::debug(
+				"CalamityAffixes: CastSpellAdaptiveElementManualOverride (affix={}, spell={}, manualModeIndex={}, magnitudeOverride={}, target={}, evolutionStage={}, evolutionXP={}, evolutionMult={}).",
+				a_affix.id,
+				spell->GetName(),
+				modeIndex,
+				magnitudeOverride,
+				castTarget ? castTarget->GetName() : "<none>",
+				evolutionStage,
+				xp,
+				evolutionMultiplier);
+		}
 
 		magicCaster->CastSpellImmediate(
-			selection.spell,
+			spell,
 			a_action.noHitEffectArt,
 			castTarget,
 			a_action.effectiveness,

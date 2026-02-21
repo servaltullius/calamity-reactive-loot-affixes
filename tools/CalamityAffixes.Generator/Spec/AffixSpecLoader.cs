@@ -115,7 +115,8 @@ public static class AffixSpecLoader
             ValidateRuntimeShape(affix);
 
             var records = affix.Records;
-            if (records?.MagicEffect is { } magicEffect)
+            var magicEffects = records?.ResolveMagicEffects() ?? [];
+            foreach (var magicEffect in magicEffects)
             {
                 if (!seenMagicEffects.Add(magicEffect.EditorId))
                 {
@@ -128,7 +129,8 @@ public static class AffixSpecLoader
                 }
             }
 
-            if (records?.Spell is { } spell)
+            var spells = records?.ResolveSpells() ?? [];
+            foreach (var spell in spells)
             {
                 if (!seenSpells.Add(spell.EditorId))
                 {
@@ -140,9 +142,20 @@ public static class AffixSpecLoader
                     throw new InvalidDataException($"Unknown Spell delivery: {spell.Delivery} (Spell: {spell.EditorId})");
                 }
 
-                if (string.IsNullOrWhiteSpace(spell.Effect.MagicEffectEditorId))
+                var effects = spell.ResolveEffects();
+                if (effects.Count == 0)
                 {
-                    throw new InvalidDataException($"Spell {spell.EditorId} requires effect.magicEffectEditorId");
+                    throw new InvalidDataException(
+                        $"Spell {spell.EditorId} requires at least one effect via effect or effects[].");
+                }
+
+                for (var i = 0; i < effects.Count; i += 1)
+                {
+                    if (string.IsNullOrWhiteSpace(effects[i].MagicEffectEditorId))
+                    {
+                        throw new InvalidDataException(
+                            $"Spell {spell.EditorId} has an empty magicEffectEditorId at effect index {i}.");
+                    }
                 }
             }
         }

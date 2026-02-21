@@ -64,7 +64,7 @@ def _collect_spell_refs_from_action(
         for idx, entry in enumerate(extra_spells):
             add(_extract_spell_editor_id(entry), f"{affix_id}:action.extraSpells[{idx}]")
 
-    if action_type == "CastSpell":
+    if action_type in {"CastSpell", "CastSpellAdaptiveElement"}:
         mode_cycle = _as_dict(action.get("modeCycle")) or {}
         mode_spells = _as_list(mode_cycle.get("spells")) or []
         for idx, entry in enumerate(mode_spells):
@@ -228,6 +228,17 @@ def _lint_spec(
                 if isinstance(spell_edid, str) and spell_edid.strip():
                     generated_spells.add(spell_edid.strip())
 
+            spells = _as_list(records.get("spells")) or []
+            for s_idx, raw_spell in enumerate(spells):
+                spell_entry = _as_dict(raw_spell)
+                if not spell_entry:
+                    errors.append(f"{affix_id}: records.spells[{s_idx}] must be an object.")
+                    continue
+
+                spell_edid = spell_entry.get("editorId")
+                if isinstance(spell_edid, str) and spell_edid.strip():
+                    generated_spells.add(spell_edid.strip())
+
         runtime = _as_dict(affix.get("runtime"))
         if not runtime:
             errors.append(f"{affix_id}: missing runtime object.")
@@ -316,10 +327,7 @@ def _lint_spec(
                     f"(action.type={action_type}, trigger={trigger})."
                 )
 
-        if action_type == "CastSpell":
-            if not isinstance(action.get("spellEditorId"), str) and not isinstance(action.get("spellForm"), str):
-                errors.append(f"{affix_id}: CastSpell requires spellEditorId or spellForm.")
-
+        if action_type in {"CastSpell", "CastSpellAdaptiveElement"}:
             evolution = action.get("evolution")
             if evolution is not None:
                 evolution_obj = _as_dict(evolution)
@@ -379,10 +387,20 @@ def _lint_spec(
                     if manual_only is not None and not isinstance(manual_only, bool):
                         errors.append(f"{affix_id}: action.modeCycle.manualOnly must be a boolean.")
 
+        if action_type == "CastSpell":
+            if not isinstance(action.get("spellEditorId"), str) and not isinstance(action.get("spellForm"), str):
+                errors.append(f"{affix_id}: CastSpell requires spellEditorId or spellForm.")
+
         if action_type == "CastSpellAdaptiveElement":
             spells = _as_dict(action.get("spells"))
             if not spells:
                 errors.append(f"{affix_id}: CastSpellAdaptiveElement requires action.spells object.")
+
+            mode_cycle = _as_dict(action.get("modeCycle"))
+            if mode_cycle is not None and mode_cycle.get("manualOnly") is not True:
+                warnings.append(
+                    f"{affix_id}: CastSpellAdaptiveElement modeCycle is coerced to manualOnly=true at runtime."
+                )
 
         if action_type == "SpawnTrap":
             ttl = action.get("ttlSeconds")
@@ -426,7 +444,10 @@ def _lint_spec(
     # Validate spell editorId references that should exist in our generated plugin.
     for ref, ctx in spell_refs:
         if ref.startswith("CAFF_") and ref not in generated_spells:
-            errors.append(f"Missing generated spell for reference '{ref}' ({ctx}). Define it under records.spell somewhere.")
+            errors.append(
+                f"Missing generated spell for reference '{ref}' ({ctx}). "
+                "Define it under records.spell or records.spells[]."
+            )
 
 
 def _check_generated_sync(

@@ -92,6 +92,308 @@ public sealed class AffixSpecLoaderTests
     }
 
     [Fact]
+    public void Load_WhenSpellUsesEffectsArray_DoesNotThrow()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_affix",
+                "editorId": "CAFF_AFFIX_TEST_MULTI",
+                "name": "Affix: Test Multi",
+                "records": {
+                  "magicEffect": {
+                    "editorId": "CAFF_MGEF_TEST_MULTI",
+                    "actorValue": "Health",
+                    "hostile": false
+                  },
+                  "spell": {
+                    "editorId": "CAFF_SPEL_TEST_MULTI",
+                    "delivery": "Self",
+                    "effects": [
+                      {
+                        "magicEffectEditorId": "CAFF_MGEF_TEST_MULTI",
+                        "magnitude": 10,
+                        "duration": 5,
+                        "area": 0
+                      },
+                      {
+                        "magicEffectEditorId": "CAFF_MGEF_TEST_MULTI",
+                        "magnitude": 5,
+                        "duration": 1,
+                        "area": 0
+                      }
+                    ]
+                  }
+                },
+                "kid": {
+                  "type": "Weapon",
+                  "strings": "NONE",
+                  "formFilters": "NONE",
+                  "traits": "-E",
+                  "chance": 100.0
+                },
+                "runtime": {
+                  "trigger": "Hit",
+                  "action": {
+                    "type": "DebugNotify"
+                  }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var spec = AffixSpecLoader.Load(specPath);
+            var spell = spec.Keywords.Affixes[0].Records!.Spell!;
+            Assert.Equal(2, spell.ResolveEffects().Count);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenSpellHasNoEffectDefinitions_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_affix",
+                "editorId": "CAFF_AFFIX_TEST_NO_EFFECT",
+                "name": "Affix: Test No Effect",
+                "records": {
+                  "magicEffect": {
+                    "editorId": "CAFF_MGEF_TEST_NO_EFFECT",
+                    "actorValue": "Health",
+                    "hostile": false
+                  },
+                  "spell": {
+                    "editorId": "CAFF_SPEL_TEST_NO_EFFECT",
+                    "delivery": "Self"
+                  }
+                },
+                "kid": {
+                  "type": "Weapon",
+                  "strings": "NONE",
+                  "formFilters": "NONE",
+                  "traits": "-E",
+                  "chance": 100.0
+                },
+                "runtime": {
+                  "trigger": "Hit",
+                  "action": {
+                    "type": "DebugNotify"
+                  }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("requires at least one effect", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenRecordsUseMagicEffectsArray_DoesNotThrow()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_affix",
+                "editorId": "CAFF_AFFIX_TEST_MULTI_MGEF",
+                "name": "Affix: Test Multi MGEF",
+                "records": {
+                  "magicEffects": [
+                    {
+                      "editorId": "CAFF_MGEF_TEST_MULTI_MGEF_A",
+                      "actorValue": "SpeedMult",
+                      "hostile": false
+                    },
+                    {
+                      "editorId": "CAFF_MGEF_TEST_MULTI_MGEF_B",
+                      "actorValue": "DamageResist",
+                      "hostile": false
+                    }
+                  ],
+                  "spell": {
+                    "editorId": "CAFF_SPEL_TEST_MULTI_MGEF",
+                    "delivery": "Self",
+                    "effects": [
+                      {
+                        "magicEffectEditorId": "CAFF_MGEF_TEST_MULTI_MGEF_A",
+                        "magnitude": 10,
+                        "duration": 5,
+                        "area": 0
+                      },
+                      {
+                        "magicEffectEditorId": "CAFF_MGEF_TEST_MULTI_MGEF_B",
+                        "magnitude": 15,
+                        "duration": 5,
+                        "area": 0
+                      }
+                    ]
+                  }
+                },
+                "kid": {
+                  "type": "Weapon",
+                  "strings": "NONE",
+                  "formFilters": "NONE",
+                  "traits": "-E",
+                  "chance": 100.0
+                },
+                "runtime": {
+                  "trigger": "Hit",
+                  "action": {
+                    "type": "DebugNotify"
+                  }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var spec = AffixSpecLoader.Load(specPath);
+            Assert.Equal(2, spec.Keywords.Affixes[0].Records!.ResolveMagicEffects().Count);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenRecordsUseSpellsArray_DoesNotThrow()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_affix",
+                "editorId": "CAFF_AFFIX_TEST_MULTI_SPELL",
+                "name": "Affix: Test Multi Spell",
+                "records": {
+                  "magicEffect": {
+                    "editorId": "CAFF_MGEF_TEST_MULTI_SPELL",
+                    "actorValue": "Health",
+                    "hostile": true
+                  },
+                  "spells": [
+                    {
+                      "editorId": "CAFF_SPEL_TEST_MULTI_SPELL_A",
+                      "delivery": "TargetActor",
+                      "effect": {
+                        "magicEffectEditorId": "CAFF_MGEF_TEST_MULTI_SPELL",
+                        "magnitude": 10,
+                        "duration": 0,
+                        "area": 0
+                      }
+                    },
+                    {
+                      "editorId": "CAFF_SPEL_TEST_MULTI_SPELL_B",
+                      "delivery": "TargetActor",
+                      "effect": {
+                        "magicEffectEditorId": "CAFF_MGEF_TEST_MULTI_SPELL",
+                        "magnitude": 12,
+                        "duration": 0,
+                        "area": 0
+                      }
+                    }
+                  ]
+                },
+                "kid": {
+                  "type": "Weapon",
+                  "strings": "NONE",
+                  "formFilters": "NONE",
+                  "traits": "-E",
+                  "chance": 100.0
+                },
+                "runtime": {
+                  "trigger": "Hit",
+                  "action": {
+                    "type": "DebugNotify"
+                  }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var spec = AffixSpecLoader.Load(specPath);
+            Assert.Equal(2, spec.Keywords.Affixes[0].Records!.ResolveSpells().Count);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Load_ReadsLootArmorEligibilityOverrides()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));

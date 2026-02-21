@@ -71,4 +71,51 @@ namespace CalamityAffixes
 			}
 		}
 	}
+
+	void EventBridge::IndexAffixTriggerBucket(const AffixRuntime& a_affix, std::size_t a_index)
+	{
+		const bool isTriggerAction =
+			a_affix.action.type == ActionType::kDebugNotify ||
+			a_affix.action.type == ActionType::kCastSpell ||
+			a_affix.action.type == ActionType::kCastSpellAdaptiveElement ||
+			a_affix.action.type == ActionType::kSpawnTrap;
+		if (!isTriggerAction) {
+			return;
+		}
+
+		switch (a_affix.trigger) {
+		case Trigger::kHit:
+			_hitTriggerAffixIndices.push_back(a_index);
+			break;
+		case Trigger::kIncomingHit:
+			_incomingHitTriggerAffixIndices.push_back(a_index);
+			break;
+		case Trigger::kDotApply:
+			_dotApplyTriggerAffixIndices.push_back(a_index);
+			break;
+		case Trigger::kKill:
+			_killTriggerAffixIndices.push_back(a_index);
+			break;
+		case Trigger::kLowHealth:
+			_lowHealthTriggerAffixIndices.push_back(a_index);
+			break;
+		}
+	}
+
+	void EventBridge::IndexAffixSpecialActionBucket(const AffixRuntime& a_affix, std::size_t a_index)
+	{
+		if (a_affix.action.type == ActionType::kCastOnCrit) {
+			_castOnCritAffixIndices.push_back(a_index);
+		} else if (a_affix.action.type == ActionType::kConvertDamage) {
+			_convertAffixIndices.push_back(a_index);
+		} else if (a_affix.action.type == ActionType::kMindOverMatter) {
+			_mindOverMatterAffixIndices.push_back(a_index);
+		} else if (a_affix.action.type == ActionType::kArchmage) {
+			_archmageAffixIndices.push_back(a_index);
+		} else if (a_affix.action.type == ActionType::kCorpseExplosion) {
+			_corpseExplosionAffixIndices.push_back(a_index);
+		} else if (a_affix.action.type == ActionType::kSummonCorpseExplosion) {
+			_summonCorpseExplosionAffixIndices.push_back(a_index);
+		}
+	}
 }

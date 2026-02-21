@@ -145,16 +145,31 @@ namespace CalamityAffixes
 			const auto& action = a_affix.action;
 
 			if (action.modeCycleEnabled && !action.modeCycleSpells.empty()) {
-				const auto modeCount = static_cast<std::uint32_t>(action.modeCycleSpells.size());
+				const bool adaptiveManualMode =
+					(action.type == ActionType::kCastSpellAdaptiveElement) && action.modeCycleManualOnly;
+				const auto modeCount = adaptiveManualMode ?
+					static_cast<std::uint32_t>(action.modeCycleSpells.size() + 1u) :
+					static_cast<std::uint32_t>(action.modeCycleSpells.size());
 				const std::uint32_t idx = modeCount > 0u ? ((state ? state->modeIndex : 0u) % modeCount) : 0u;
 
 				detail.append("Mode ");
-				if (idx < action.modeCycleLabels.size() && !action.modeCycleLabels[idx].empty()) {
-					detail.append(action.modeCycleLabels[idx]);
+				if (adaptiveManualMode && idx == 0u) {
+					detail.append("Auto");
 				} else {
-					detail.append(std::to_string(idx + 1));
-					detail.push_back('/');
-					detail.append(std::to_string(modeCount));
+					const std::size_t labelIdx = adaptiveManualMode ?
+						static_cast<std::size_t>(idx - 1u) :
+						static_cast<std::size_t>(idx);
+					if (labelIdx < action.modeCycleLabels.size() && !action.modeCycleLabels[labelIdx].empty()) {
+						detail.append(action.modeCycleLabels[labelIdx]);
+					} else {
+						const auto displayIndex = adaptiveManualMode ? idx : (idx + 1u);
+						const auto displayCount = adaptiveManualMode ?
+							static_cast<std::uint32_t>(action.modeCycleSpells.size()) :
+							modeCount;
+						detail.append(std::to_string(displayIndex));
+						detail.push_back('/');
+						detail.append(std::to_string(displayCount));
+					}
 				}
 				if (action.modeCycleManualOnly) {
 					detail.append(" (Manual)");

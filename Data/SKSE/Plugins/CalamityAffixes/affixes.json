@@ -72,7 +72,6 @@
             "name": "Calamity: Arc Lightning / \uC544\uD06C \uBC88\uAC1C",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_ARC_LIGHTNING",
               "magnitude": 10,
@@ -133,7 +132,6 @@
             "name": "Calamity: Fire Damage / \uD654\uC5FC \uD53C\uD574",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_FIRE_DAMAGE",
               "magnitude": 6,
@@ -193,7 +191,6 @@
             "name": "Calamity: Frost Damage / \uB0C9\uAE30 \uD53C\uD574",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_FROST_DAMAGE",
               "magnitude": 6,
@@ -253,7 +250,6 @@
             "name": "Calamity: Shock Damage / \uBC88\uAC1C \uD53C\uD574",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SHOCK_DAMAGE",
               "magnitude": 6,
@@ -313,7 +309,6 @@
             "name": "Calamity: Fire Exposure / \uD654\uC5FC \uB178\uCD9C",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_FIRE_SHRED",
               "magnitude": 15,
@@ -366,7 +361,6 @@
             "name": "Calamity: Frost Exposure / \uB0C9\uAE30 \uB178\uCD9C",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_FROST_SHRED",
               "magnitude": 15,
@@ -418,7 +412,6 @@
             "name": "Calamity: Shock Exposure / \uBC88\uAC1C \uB178\uCD9C",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SHOCK_SHRED",
               "magnitude": 15,
@@ -670,7 +663,6 @@
             "name": "Calamity: Invisibility / \uD22C\uBA85\uD654",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_INVISIBILITY",
               "magnitude": 1,
@@ -722,7 +714,6 @@
             "name": "Calamity: Warden Shell / \uC218\uD638 \uAECD\uC9C8",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_INCOMING_WARDEN_SHELL",
               "magnitude": 120,
@@ -774,7 +765,6 @@
             "name": "Calamity: Resolve Barrier / \uACB0\uC758 \uC7A5\uB9C9",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_INCOMING_RESOLVE_BARRIER",
               "magnitude": 25,
@@ -826,7 +816,6 @@
             "name": "Calamity: Vital Rebound / \uC7AC\uAE30 \uBC18\uB3D9",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_INCOMING_VITAL_REBOUND",
               "magnitude": 140,
@@ -1036,7 +1025,6 @@
             "name": "Calamity: Emberbrand Ignite / \uBD88\uC528 \uAC01\uC778 \uC810\uD654",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_HIT_EMBERBRAND_IGNITE",
               "magnitude": 4,
@@ -1131,7 +1119,6 @@
             "name": "Calamity: Frostlock Snare / \uC11C\uB9AC \uC871\uC1C4",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_HIT_FROSTLOCK_SNARE",
               "magnitude": -35,
@@ -1182,7 +1169,6 @@
             "name": "Calamity: Shock Overload / \uACFC\uC804\uB958",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
               "magnitude": 60,
@@ -1235,7 +1221,6 @@
             "name": "Calamity: Blood Siphon / \uD608\uB958 \uD761\uC218",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_HIT_BLOOD_SIPHON",
               "magnitude": 4,
@@ -1297,7 +1282,6 @@
             "name": "Calamity: Soul Surge / \uC601\uD63C \uC1C4\uB3C4",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_KILL_SOUL_SURGE",
               "magnitude": 35,
@@ -1349,7 +1333,6 @@
             "name": "Calamity: Shadowstep Burst / \uADF8\uB9BC\uC790 \uC9C8\uC8FC",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
               "magnitude": 20,
@@ -1430,7 +1413,6 @@
             "name": "Calamity: Ironjaw Trap / \uCCA0\uD131 \uB36B",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
               "magnitude": -100,
@@ -1507,7 +1489,6 @@
             "name": "Calamity: Dragon\u0027s Teeth (Poison)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
               "magnitude": 4,
@@ -1556,7 +1537,6 @@
             "name": "Calamity: Dragon\u0027s Teeth (Drain Magicka)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
               "magnitude": 50,
@@ -1605,7 +1585,6 @@
             "name": "Calamity: Dragon\u0027s Teeth (Drain Stamina)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
               "magnitude": 50,
@@ -1654,7 +1633,6 @@
             "name": "Calamity: Physical-\u003EFire Conversion / \uBB3C\uB9AC\u2192\uD654\uC5FC \uC804\uD658",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
               "magnitude": 0,
@@ -1790,7 +1768,6 @@
             "name": "Calamity: Physical-\u003EFrost Conversion / \uBB3C\uB9AC\u2192\uB0C9\uAE30 \uC804\uD658",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
               "magnitude": 0,
@@ -1926,7 +1903,6 @@
             "name": "Calamity: Physical-\u003EShock Conversion / \uBB3C\uB9AC\u2192\uBC88\uAC1C \uC804\uD658",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
               "magnitude": 0,
@@ -2714,7 +2690,6 @@
             "name": "Calamity: Minefield / \uC9C0\uB8B0 \uBC2D",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_MINEFIELD_SNARE",
               "magnitude": -40,
@@ -2805,7 +2780,6 @@
             "name": "Calamity: DoT Bloom / DoT \uBE14\uB8F8",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_POISON",
               "magnitude": 3,
@@ -2864,7 +2838,6 @@
             "name": "Calamity: DoT Tar Bloom / DoT \uD0C0\uB974 \uBE14\uB8F8",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
               "magnitude": -35,
@@ -2928,7 +2901,6 @@
             "name": "Calamity: DoT Tar Bloom (Sunder Armor)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
               "magnitude": -150,
@@ -2977,7 +2949,6 @@
             "name": "Calamity: DoT Siphon Bloom / DoT \uD761\uC218 \uBE14\uB8F8",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
               "magnitude": -60,
@@ -3041,7 +3012,6 @@
             "name": "Calamity: DoT Siphon Bloom (Stamina Regen Down)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
               "magnitude": -60,
@@ -3090,7 +3060,6 @@
             "name": "Calamity: Chaos Mine / \uCE74\uC624\uC2A4 \uC9C0\uB8B0",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
               "magnitude": -30,
@@ -3166,7 +3135,6 @@
             "name": "Calamity: Chaos Curse (Sunder Armor)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
               "magnitude": -150,
@@ -3215,7 +3183,6 @@
             "name": "Calamity: Chaos Curse (Magicka Regen Down)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
               "magnitude": -60,
@@ -3264,7 +3231,6 @@
             "name": "Calamity: Chaos Curse (Stamina Regen Down)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
               "magnitude": -60,
@@ -3313,7 +3279,6 @@
             "name": "Calamity: Chaos Curse (Slow Attack Speed)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
               "magnitude": -20,
@@ -3362,7 +3327,6 @@
             "name": "Calamity: Chaos Curse (Fragile Magic Resist)",
             "delivery": "TargetActor",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
               "magnitude": -20,
@@ -3411,7 +3375,6 @@
             "name": "Calamity: Swap Jackpot / \uC2A4\uC651 \uC7AD\uD31F",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
               "magnitude": 15,
@@ -3578,7 +3541,6 @@
             "name": "Calamity: Runeword Enigma / \uB8EC\uC6CC\uB4DC \uC218\uC218\uAED8\uB07C",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
               "magnitude": 45,
@@ -3614,7 +3576,78 @@
         "name": "\uB8EC\uC6CC\uB4DC \uBB34\uD55C (Ber-Mal-Ber-Ist): \uC801\uC911 35% / ICD 0.5\uCD08 - \uC57D\uC810 \uC6D0\uC18C \uB178\uCD9C(\uC801 \uC800\uD56D \uAC10\uC18C)",
         "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 35% on hit / ICD 0.5s - Weakness Exposure (Enemy resist reduction)",
         "nameKo": "\uB8EC\uC6CC\uB4DC \uBB34\uD55C (Ber-Mal-Ber-Ist): \uC801\uC911 35% / ICD 0.5\uCD08 - \uC57D\uC810 \uC6D0\uC18C \uB178\uCD9C(\uC801 \uC800\uD56D \uAC10\uC18C)",
-        "records": null,
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_INFINITY_FIRE_SHRED",
+              "name": "Calamity: Runeword Infinity Fire Exposure / \uB8EC\uC6CC\uB4DC \uBB34\uD55C \uD654\uC5FC \uB178\uCD9C",
+              "actorValue": "ResistFire",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_INFINITY_FROST_SHRED",
+              "name": "Calamity: Runeword Infinity Frost Exposure / \uB8EC\uC6CC\uB4DC \uBB34\uD55C \uB0C9\uAE30 \uB178\uCD9C",
+              "actorValue": "ResistFrost",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_INFINITY_SHOCK_SHRED",
+              "name": "Calamity: Runeword Infinity Shock Exposure / \uB8EC\uC6CC\uB4DC \uBB34\uD55C \uBC88\uAC1C \uB178\uCD9C",
+              "actorValue": "ResistShock",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_INFINITY_FIRE_SHRED",
+              "name": "Calamity: Runeword Infinity Fire Exposure / \uB8EC\uC6CC\uB4DC \uBB34\uD55C \uD654\uC5FC \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_INFINITY_FIRE_SHRED",
+                "magnitude": 20,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_INFINITY_FROST_SHRED",
+              "name": "Calamity: Runeword Infinity Frost Exposure / \uB8EC\uC6CC\uB4DC \uBB34\uD55C \uB0C9\uAE30 \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_INFINITY_FROST_SHRED",
+                "magnitude": 20,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_INFINITY_SHOCK_SHRED",
+              "name": "Calamity: Runeword Infinity Shock Exposure / \uB8EC\uC6CC\uB4DC \uBB34\uD55C \uBC88\uAC1C \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_INFINITY_SHOCK_SHRED",
+                "magnitude": 20,
+                "duration": 5,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3632,9 +3665,23 @@
             "type": "CastSpellAdaptiveElement",
             "mode": "WeakestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_FIRE_SHRED",
-              "Frost": "CAFF_SPEL_FROST_SHRED",
-              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+              "Fire": "CAFF_SPEL_RW_INFINITY_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_RW_INFINITY_FROST_SHRED",
+              "Shock": "CAFF_SPEL_RW_INFINITY_SHOCK_SHRED"
+            },
+            "modeCycle": {
+              "spells": [
+                "CAFF_SPEL_RW_INFINITY_FIRE_SHRED",
+                "CAFF_SPEL_RW_INFINITY_FROST_SHRED",
+                "CAFF_SPEL_RW_INFINITY_SHOCK_SHRED"
+              ],
+              "labels": [
+                "\uD654\uC5FC \uB178\uCD9C",
+                "\uB0C9\uAE30 \uB178\uCD9C",
+                "\uBC88\uAC1C \uB178\uCD9C"
+              ],
+              "switchEveryProcs": 1,
+              "manualOnly": true
             },
             "applyTo": "Target",
             "noHitEffectArt": false
@@ -3663,7 +3710,6 @@
             "name": "Calamity: Runeword Fortitude / \uB8EC\uC6CC\uB4DC \uC778\uB0B4",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
               "magnitude": 120,
@@ -3715,7 +3761,6 @@
             "name": "Calamity: Runeword Insight / \uB8EC\uC6CC\uB4DC \uD1B5\uCC30",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
               "magnitude": 150,
@@ -3767,7 +3812,6 @@
             "name": "Calamity: Runeword Spirit / \uB8EC\uC6CC\uB4DC \uC2A4\uD53C\uB9BF",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
               "magnitude": 120,
@@ -3803,7 +3847,78 @@
         "name": "\uB8EC\uC6CC\uB4DC \uC2AC\uD514 (Eth-Tir-Lo-Mal-Ral): \uC801\uC911 30% / ICD 0.4\uCD08 - \uC6D0\uC18C \uCC38\uACA9(\uC801\uC751\uD615 \uC6D0\uC18C \uD53C\uD574)",
         "nameEn": "Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on hit / ICD 0.4s - Elemental Slash (Adaptive elemental damage)",
         "nameKo": "\uB8EC\uC6CC\uB4DC \uC2AC\uD514 (Eth-Tir-Lo-Mal-Ral): \uC801\uC911 30% / ICD 0.4\uCD08 - \uC6D0\uC18C \uCC38\uACA9(\uC801\uC751\uD615 \uC6D0\uC18C \uD53C\uD574)",
-        "records": null,
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_GRIEF_FIRE_SLASH",
+              "name": "Calamity: Runeword Grief Fire Slash / \uB8EC\uC6CC\uB4DC \uC2AC\uD514 \uD654\uC5FC \uCC38\uACA9",
+              "actorValue": "Health",
+              "resistValue": "ResistFire",
+              "magicSkill": "Destruction",
+              "hostile": true,
+              "recover": false,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_GRIEF_FROST_SLASH",
+              "name": "Calamity: Runeword Grief Frost Slash / \uB8EC\uC6CC\uB4DC \uC2AC\uD514 \uB0C9\uAE30 \uCC38\uACA9",
+              "actorValue": "Health",
+              "resistValue": "ResistFrost",
+              "magicSkill": "Destruction",
+              "hostile": true,
+              "recover": false,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_GRIEF_SHOCK_SLASH",
+              "name": "Calamity: Runeword Grief Shock Slash / \uB8EC\uC6CC\uB4DC \uC2AC\uD514 \uBC88\uAC1C \uCC38\uACA9",
+              "actorValue": "Health",
+              "resistValue": "ResistShock",
+              "magicSkill": "Destruction",
+              "hostile": true,
+              "recover": false,
+              "archetype": null
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_GRIEF_FIRE_SLASH",
+              "name": "Calamity: Runeword Grief Fire Slash / \uB8EC\uC6CC\uB4DC \uC2AC\uD514 \uD654\uC5FC \uCC38\uACA9",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_FIRE_SLASH",
+                "magnitude": 8,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_GRIEF_FROST_SLASH",
+              "name": "Calamity: Runeword Grief Frost Slash / \uB8EC\uC6CC\uB4DC \uC2AC\uD514 \uB0C9\uAE30 \uCC38\uACA9",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_FROST_SLASH",
+                "magnitude": 8,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_GRIEF_SHOCK_SLASH",
+              "name": "Calamity: Runeword Grief Shock Slash / \uB8EC\uC6CC\uB4DC \uC2AC\uD514 \uBC88\uAC1C \uCC38\uACA9",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_SHOCK_SLASH",
+                "magnitude": 8,
+                "duration": 0,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3821,9 +3936,22 @@
             "type": "CastSpellAdaptiveElement",
             "mode": "WeakestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-              "Frost": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-              "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
+              "Fire": "CAFF_SPEL_RW_GRIEF_FIRE_SLASH",
+              "Frost": "CAFF_SPEL_RW_GRIEF_FROST_SLASH",
+              "Shock": "CAFF_SPEL_RW_GRIEF_SHOCK_SLASH"
+            },
+            "evolution": {
+              "xpPerProc": 1,
+              "thresholds": [
+                0,
+                12,
+                28
+              ],
+              "multipliers": [
+                1.0,
+                1.2,
+                1.4
+              ]
             },
             "applyTo": "Target",
             "noHitEffectArt": false,
@@ -3841,9 +3969,9 @@
       {
         "id": "runeword_call_to_arms_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CALL_TO_ARMS",
-        "name": "\uB8EC\uC6CC\uB4DC \uCF5C \uD22C \uC554\uC2A4 (Amn-Ral-Mal-Ist-Ohm): \uD53C\uACA9 24% / ICD 18\uCD08 - \uC804\uD22C \uD568\uC131(\uBC29\uC5B4\uB3C4 \u002B150, 8\uCD08)",
-        "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on hit taken / ICD 18s - Warcry (Armor \u002B150, 8s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uCF5C \uD22C \uC554\uC2A4 (Amn-Ral-Mal-Ist-Ohm): \uD53C\uACA9 24% / ICD 18\uCD08 - \uC804\uD22C \uD568\uC131(\uBC29\uC5B4\uB3C4 \u002B150, 8\uCD08)",
+        "name": "\uB8EC\uC6CC\uB4DC \uCF5C \uD22C \uC554\uC2A4 (Amn-Ral-Mal-Ist-Ohm): \uC801\uC911 24% / ICD 18\uCD08 - \uC804\uD22C \uD568\uC131(\uBC29\uC5B4\uB3C4 \u002B150, 8\uCD08)",
+        "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on hit / ICD 18s - Warcry (Armor \u002B150, 8s)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uCF5C \uD22C \uC554\uC2A4 (Amn-Ral-Mal-Ist-Ohm): \uC801\uC911 24% / ICD 18\uCD08 - \uC804\uD22C \uD568\uC131(\uBC29\uC5B4\uB3C4 \u002B150, 8\uCD08)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_CTA_WARCRY",
@@ -3860,7 +3988,6 @@
             "name": "Calamity: Runeword Call to Arms / \uB8EC\uC6CC\uB4DC \uCF5C \uD22C \uC554\uC2A4",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_CTA_WARCRY",
               "magnitude": 150,
@@ -3879,7 +4006,7 @@
         "slot": "prefix",
         "family": null,
         "runtime": {
-          "trigger": "IncomingHit",
+          "trigger": "Hit",
           "procChancePercent": 24.0,
           "icdSeconds": 18.0,
           "action": {
@@ -3912,7 +4039,6 @@
             "name": "Calamity: Runeword Chains of Honor / \uB8EC\uC6CC\uB4DC \uBA85\uC608\uC758 \uC0AC\uC2AC",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_COH_PHASE",
               "magnitude": 35,
@@ -3948,7 +4074,78 @@
         "name": "\uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 (Ko-Vex-Pul-Thul): \uC801\uC911 32% / ICD 8\uCD08 - \uBE44\uC804 \uADE0\uC5F4(\uC801\uC751\uD615 \uC6D0\uC18C \uB178\uCD9C)",
         "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental exposure)",
         "nameKo": "\uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 (Ko-Vex-Pul-Thul): \uC801\uC911 32% / ICD 8\uCD08 - \uBE44\uC804 \uADE0\uC5F4(\uC801\uC751\uD615 \uC6D0\uC18C \uB178\uCD9C)",
-        "records": null,
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_HOTO_FIRE_SHRED",
+              "name": "Calamity: Runeword HOTO Fire Exposure / \uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 \uD654\uC5FC \uB178\uCD9C",
+              "actorValue": "ResistFire",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_HOTO_FROST_SHRED",
+              "name": "Calamity: Runeword HOTO Frost Exposure / \uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 \uB0C9\uAE30 \uB178\uCD9C",
+              "actorValue": "ResistFrost",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_HOTO_SHOCK_SHRED",
+              "name": "Calamity: Runeword HOTO Shock Exposure / \uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 \uBC88\uAC1C \uB178\uCD9C",
+              "actorValue": "ResistShock",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_HOTO_FIRE_SHRED",
+              "name": "Calamity: Runeword HOTO Fire Exposure / \uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 \uD654\uC5FC \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HOTO_FIRE_SHRED",
+                "magnitude": 18,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_HOTO_FROST_SHRED",
+              "name": "Calamity: Runeword HOTO Frost Exposure / \uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 \uB0C9\uAE30 \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HOTO_FROST_SHRED",
+                "magnitude": 18,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_HOTO_SHOCK_SHRED",
+              "name": "Calamity: Runeword HOTO Shock Exposure / \uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 \uBC88\uAC1C \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HOTO_SHOCK_SHRED",
+                "magnitude": 18,
+                "duration": 5,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3964,11 +4161,11 @@
           "icdSeconds": 8.0,
           "action": {
             "type": "CastSpellAdaptiveElement",
-            "mode": "WeakestResist",
+            "mode": "StrongestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_FIRE_SHRED",
-              "Frost": "CAFF_SPEL_FROST_SHRED",
-              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+              "Fire": "CAFF_SPEL_RW_HOTO_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_RW_HOTO_FROST_SHRED",
+              "Shock": "CAFF_SPEL_RW_HOTO_SHOCK_SHRED"
             },
             "applyTo": "Target",
             "noHitEffectArt": false
@@ -3978,10 +4175,53 @@
       {
         "id": "runeword_faith_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAITH",
-        "name": "\uB8EC\uC6CC\uB4DC \uC2E0\uB150 (Ohm-Jah-Lem-Eld): \uC801\uC911 22% / ICD 12\uCD08 - \uC704\uC0C1 \uC0AC\uB0E5\uAFBC(\uC774\uB3D9\uC18D\uB3C4 \u002B45%, 6\uCD08)",
-        "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on hit / ICD 12s - Phase Hunter (Move Speed \u002B45%, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC2E0\uB150 (Ohm-Jah-Lem-Eld): \uC801\uC911 22% / ICD 12\uCD08 - \uC704\uC0C1 \uC0AC\uB0E5\uAFBC(\uC774\uB3D9\uC18D\uB3C4 \u002B45%, 6\uCD08)",
-        "records": null,
+        "name": "\uB8EC\uC6CC\uB4DC \uC2E0\uB150 (Ohm-Jah-Lem-Eld): \uC801\uC911 22% / ICD 12\uCD08 - \uAD11\uC2E0\uC758 \uB3CC\uACA9(\uC774\uC18D \u002B35%, \uD53C\uD574\uC800\uD56D \u002B60, 6\uCD08)",
+        "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on hit / ICD 12s - Fanatic Surge (Move Speed \u002B35%, Damage Resist \u002B60, 6s)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC2E0\uB150 (Ohm-Jah-Lem-Eld): \uC801\uC911 22% / ICD 12\uCD08 - \uAD11\uC2E0\uC758 \uB3CC\uACA9(\uC774\uC18D \u002B35%, \uD53C\uD574\uC800\uD56D \u002B60, 6\uCD08)",
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_FAITH_FANATIC_SPEED",
+              "name": "Calamity: Runeword Faith Surge Speed / \uB8EC\uC6CC\uB4DC \uC2E0\uB150 \uB3CC\uACA9(\uC774\uC18D)",
+              "actorValue": "SpeedMult",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": false,
+              "recover": true,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_FAITH_FANATIC_WARD",
+              "name": "Calamity: Runeword Faith Surge Ward / \uB8EC\uC6CC\uB4DC \uC2E0\uB150 \uB3CC\uACA9(\uC800\uD56D)",
+              "actorValue": "DamageResist",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": false,
+              "recover": true,
+              "archetype": null
+            }
+          ],
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_FAITH_FANATIC",
+            "name": "Calamity: Runeword Faith Surge / \uB8EC\uC6CC\uB4DC \uC2E0\uB150 \uB3CC\uACA9",
+            "delivery": "Self",
+            "spellType": null,
+            "effects": [
+              {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_FANATIC_SPEED",
+                "magnitude": 35,
+                "duration": 6,
+                "area": 0
+              },
+              {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_FANATIC_WARD",
+                "magnitude": 60,
+                "duration": 6,
+                "area": 0
+              }
+            ]
+          }
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3997,7 +4237,7 @@
           "icdSeconds": 12.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+            "spellEditorId": "CAFF_SPEL_RW_FAITH_FANATIC",
             "applyTo": "Self",
             "noHitEffectArt": true
           }
@@ -4025,7 +4265,6 @@
             "name": "Calamity: Runeword Exile / \uB8EC\uC6CC\uB4DC \uC5D1\uC790\uC77C",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_EXILE_BARRIER",
               "magnitude": 180,
@@ -4061,7 +4300,78 @@
         "name": "\uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 (Vex-Hel-El-Eld-Zod-Eth): \uC801\uC911 34% / ICD 0.35\uCD08 - \uBA78\uC808 \uCC38\uACA9(\uC801\uC751\uD615 \uC6D0\uC18C \uD53C\uD574)",
         "nameEn": "Runeword Breath of the Dying (Vex-Hel-El-Eld-Zod-Eth): 34% on hit / ICD 0.35s - Annihilation Slash (Adaptive elemental damage)",
         "nameKo": "\uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 (Vex-Hel-El-Eld-Zod-Eth): \uC801\uC911 34% / ICD 0.35\uCD08 - \uBA78\uC808 \uCC38\uACA9(\uC801\uC751\uD615 \uC6D0\uC18C \uD53C\uD574)",
-        "records": null,
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_BOTD_FIRE_SLASH",
+              "name": "Calamity: Runeword BotD Fire Slash / \uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 \uD654\uC5FC \uCC38\uACA9",
+              "actorValue": "Health",
+              "resistValue": "ResistFire",
+              "magicSkill": "Destruction",
+              "hostile": true,
+              "recover": false,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_BOTD_FROST_SLASH",
+              "name": "Calamity: Runeword BotD Frost Slash / \uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 \uB0C9\uAE30 \uCC38\uACA9",
+              "actorValue": "Health",
+              "resistValue": "ResistFrost",
+              "magicSkill": "Destruction",
+              "hostile": true,
+              "recover": false,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_BOTD_SHOCK_SLASH",
+              "name": "Calamity: Runeword BotD Shock Slash / \uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 \uBC88\uAC1C \uCC38\uACA9",
+              "actorValue": "Health",
+              "resistValue": "ResistShock",
+              "magicSkill": "Destruction",
+              "hostile": true,
+              "recover": false,
+              "archetype": null
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_BOTD_FIRE_SLASH",
+              "name": "Calamity: Runeword BotD Fire Slash / \uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 \uD654\uC5FC \uCC38\uACA9",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_FIRE_SLASH",
+                "magnitude": 12,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_BOTD_FROST_SLASH",
+              "name": "Calamity: Runeword BotD Frost Slash / \uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 \uB0C9\uAE30 \uCC38\uACA9",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_FROST_SLASH",
+                "magnitude": 12,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_BOTD_SHOCK_SLASH",
+              "name": "Calamity: Runeword BotD Shock Slash / \uB8EC\uC6CC\uB4DC \uC8FD\uC74C\uC758 \uC228\uACB0 \uBC88\uAC1C \uCC38\uACA9",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_SHOCK_SLASH",
+                "magnitude": 12,
+                "duration": 0,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -4079,9 +4389,22 @@
             "type": "CastSpellAdaptiveElement",
             "mode": "WeakestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-              "Frost": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-              "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
+              "Fire": "CAFF_SPEL_RW_BOTD_FIRE_SLASH",
+              "Frost": "CAFF_SPEL_RW_BOTD_FROST_SLASH",
+              "Shock": "CAFF_SPEL_RW_BOTD_SHOCK_SLASH"
+            },
+            "evolution": {
+              "xpPerProc": 1,
+              "thresholds": [
+                0,
+                10,
+                24
+              ],
+              "multipliers": [
+                1.0,
+                1.18,
+                1.36
+              ]
             },
             "applyTo": "Target",
             "noHitEffectArt": false,
@@ -4102,7 +4425,78 @@
         "name": "\uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC (Jah-Mal-Jah-Sur-Jah-Ber): \uC801\uC911 18% / ICD 3\uCD08 - \uC18C\uC6D0 \uBD95\uAD34(\uC801\uC751\uD615 \uC6D0\uC18C \uB178\uCD9C)",
         "nameEn": "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): 18% on hit / ICD 3s - Wish Collapse (Adaptive elemental exposure)",
         "nameKo": "\uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC (Jah-Mal-Jah-Sur-Jah-Ber): \uC801\uC911 18% / ICD 3\uCD08 - \uC18C\uC6D0 \uBD95\uAD34(\uC801\uC751\uD615 \uC6D0\uC18C \uB178\uCD9C)",
-        "records": null,
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_LASTWISH_FIRE_SHRED",
+              "name": "Calamity: Runeword Last Wish Fire Exposure / \uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC \uD654\uC5FC \uB178\uCD9C",
+              "actorValue": "ResistFire",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_LASTWISH_FROST_SHRED",
+              "name": "Calamity: Runeword Last Wish Frost Exposure / \uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC \uB0C9\uAE30 \uB178\uCD9C",
+              "actorValue": "ResistFrost",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_LASTWISH_SHOCK_SHRED",
+              "name": "Calamity: Runeword Last Wish Shock Exposure / \uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC \uBC88\uAC1C \uB178\uCD9C",
+              "actorValue": "ResistShock",
+              "resistValue": null,
+              "magicSkill": null,
+              "hostile": true,
+              "recover": true,
+              "archetype": null
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
+              "name": "Calamity: Runeword Last Wish Fire Exposure / \uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC \uD654\uC5FC \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_FIRE_SHRED",
+                "magnitude": 24,
+                "duration": 6,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
+              "name": "Calamity: Runeword Last Wish Frost Exposure / \uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC \uB0C9\uAE30 \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_FROST_SHRED",
+                "magnitude": 24,
+                "duration": 6,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED",
+              "name": "Calamity: Runeword Last Wish Shock Exposure / \uB8EC\uC6CC\uB4DC \uB77C\uC2A4\uD2B8 \uC704\uC2DC \uBC88\uAC1C \uB178\uCD9C",
+              "delivery": "TargetActor",
+              "spellType": null,
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_SHOCK_SHRED",
+                "magnitude": 24,
+                "duration": 6,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -4120,9 +4514,23 @@
             "type": "CastSpellAdaptiveElement",
             "mode": "StrongestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_FIRE_SHRED",
-              "Frost": "CAFF_SPEL_FROST_SHRED",
-              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+              "Fire": "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
+              "Shock": "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED"
+            },
+            "modeCycle": {
+              "spells": [
+                "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
+                "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
+                "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED"
+              ],
+              "labels": [
+                "\uC5F4\uD654",
+                "\uBE59\uACB0",
+                "\uC804\uACA9"
+              ],
+              "switchEveryProcs": 2,
+              "manualOnly": true
             },
             "applyTo": "Target",
             "noHitEffectArt": false
@@ -4151,7 +4559,6 @@
             "name": "Calamity: Runeword Phoenix / \uB8EC\uC6CC\uB4DC \uD53C\uB2C9\uC2A4",
             "delivery": "Self",
             "spellType": null,
-            "castType": null,
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
               "magnitude": 50,
@@ -4187,7 +4594,30 @@
         "name": "\uB8EC\uC6CC\uB4DC \uB460 (Hel-Ohm-Um-Lo-Cham): \uC801\uC911 30% / ICD 0.8\uCD08 - \uC808\uB9DD\uC758 \uB0C9\uAE30 \uC77C\uACA9",
         "nameEn": "Runeword Doom (Hel-Ohm-Um-Lo-Cham): 30% on hit / ICD 0.8s - Doom Frost Strike",
         "nameKo": "\uB8EC\uC6CC\uB4DC \uB460 (Hel-Ohm-Um-Lo-Cham): \uC801\uC911 30% / ICD 0.8\uCD08 - \uC808\uB9DD\uC758 \uB0C9\uAE30 \uC77C\uACA9",
-        "records": null,
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_DOOM_FROST_STRIKE",
+            "name": "Calamity: Runeword Doom Frost Strike / \uB8EC\uC6CC\uB4DC \uB460 \uB0C9\uAE30 \uC77C\uACA9",
+            "actorValue": "Health",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_DOOM_FROST_STRIKE",
+            "name": "Calamity: Runeword Doom Frost Strike / \uB8EC\uC6CC\uB4DC \uB460 \uB0C9\uAE30 \uC77C\uACA9",
+            "delivery": "TargetActor",
+            "spellType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_DOOM_FROST_STRIKE",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -4203,7 +4633,7 @@
           "icdSeconds": 0.8,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "spellEditorId": "CAFF_SPEL_RW_DOOM_FROST_STRIKE",
             "applyTo": "Target",
             "noHitEffectArt": false,
             "magnitudeScaling": {
@@ -4223,7 +4653,30 @@
         "name": "\uB8EC\uC6CC\uB4DC \uB4DC\uB9BC (Io-Jah-Pul): \uC801\uC911 30% / ICD 0.8\uCD08 - \uBC88\uAC1C\uC758 \uAFC8 \uC77C\uACA9",
         "nameEn": "Runeword Dream (Io-Jah-Pul): 30% on hit / ICD 0.8s - Lightning Dream Strike",
         "nameKo": "\uB8EC\uC6CC\uB4DC \uB4DC\uB9BC (Io-Jah-Pul): \uC801\uC911 30% / ICD 0.8\uCD08 - \uBC88\uAC1C\uC758 \uAFC8 \uC77C\uACA9",
-        "records": null,
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_DREAM_SHOCK_STRIKE",
+            "name": "Calamity: Runeword Dream Shock Strike / \uB8EC\uC6CC\uB4DC \uB4DC\uB9BC \uBC88\uAC1C \uC77C\uACA9",
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false,
+            "archetype": null
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_DREAM_SHOCK_STRIKE",
+            "name": "Calamity: Runeword Dream Shock Strike / \uB8EC\uC6CC\uB4DC \uB4DC\uB9BC \uBC88\uAC1C \uC77C\uACA9",
+            "delivery": "TargetActor",
+            "spellType": null,
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_DREAM_SHOCK_STRIKE",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -4239,7 +4692,7 @@
           "icdSeconds": 0.8,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "spellEditorId": "CAFF_SPEL_RW_DREAM_SHOCK_STRIKE",
             "applyTo": "Target",
             "noHitEffectArt": false,
             "magnitudeScaling": {

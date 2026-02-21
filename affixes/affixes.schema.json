@@ -136,8 +136,24 @@
       "additionalProperties": false,
       "properties": {
         "magicEffect": { "$ref": "#/$defs/magicEffectRecord" },
-        "spell": { "$ref": "#/$defs/spellRecord" }
-      }
+        "magicEffects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/magicEffectRecord" },
+          "minItems": 1
+        },
+        "spell": { "$ref": "#/$defs/spellRecord" },
+        "spells": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/spellRecord" },
+          "minItems": 1
+        }
+      },
+      "anyOf": [
+        { "required": ["magicEffect"] },
+        { "required": ["magicEffects"] },
+        { "required": ["spell"] },
+        { "required": ["spells"] }
+      ]
     },
     "magicEffectRecord": {
       "type": "object",
@@ -156,7 +172,7 @@
     },
     "spellRecord": {
       "type": "object",
-      "required": ["editorId", "delivery", "effect"],
+      "required": ["editorId", "delivery"],
       "additionalProperties": false,
       "properties": {
         "editorId": { "type": "string", "minLength": 1 },
@@ -164,8 +180,17 @@
         "delivery": { "type": "string", "enum": ["Self", "TargetActor"] },
         "spellType": { "type": ["string", "null"] },
         "castType": { "type": ["string", "null"] },
-        "effect": { "$ref": "#/$defs/spellEffectRecord" }
-      }
+        "effect": { "$ref": "#/$defs/spellEffectRecord" },
+        "effects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/spellEffectRecord" },
+          "minItems": 1
+        }
+      },
+      "anyOf": [
+        { "required": ["effect"] },
+        { "required": ["effects"] }
+      ]
     },
     "spellEffectRecord": {
       "type": "object",

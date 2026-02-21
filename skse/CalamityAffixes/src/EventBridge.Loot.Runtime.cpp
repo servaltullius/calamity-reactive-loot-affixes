@@ -119,7 +119,8 @@ namespace CalamityAffixes
 		std::uint32_t switched = 0u;
 		for (const auto& affix : _affixes) {
 			const auto& action = affix.action;
-			if (action.type != ActionType::kCastSpell ||
+			if ((action.type != ActionType::kCastSpell &&
+				 action.type != ActionType::kCastSpellAdaptiveElement) ||
 				!action.modeCycleEnabled ||
 				!action.modeCycleManualOnly ||
 				action.modeCycleSpells.empty()) {
@@ -130,7 +131,11 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const auto modeCount = static_cast<std::int32_t>(action.modeCycleSpells.size());
+			// Adaptive manual mode keeps index 0 as "auto resist-based" and 1..N as overrides.
+			const bool adaptiveManualMode = (action.type == ActionType::kCastSpellAdaptiveElement);
+			const auto modeCount = adaptiveManualMode ?
+				static_cast<std::int32_t>(action.modeCycleSpells.size() + 1u) :
+				static_cast<std::int32_t>(action.modeCycleSpells.size());
 			if (modeCount <= 0) {
 				continue;
 			}

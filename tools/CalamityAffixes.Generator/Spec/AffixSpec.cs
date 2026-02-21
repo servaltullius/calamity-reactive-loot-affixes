@@ -168,10 +168,60 @@ public sealed class AffixDefinition
 public sealed class AffixRecordSpec
 {
     [JsonPropertyName("magicEffect")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public MagicEffectRecordSpec? MagicEffect { get; init; }
 
+    [JsonPropertyName("magicEffects")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<MagicEffectRecordSpec>? MagicEffects { get; init; }
+
     [JsonPropertyName("spell")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public SpellRecordSpec? Spell { get; init; }
+
+    [JsonPropertyName("spells")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<SpellRecordSpec>? Spells { get; init; }
+
+    public IReadOnlyList<MagicEffectRecordSpec> ResolveMagicEffects()
+    {
+        if (MagicEffect is null)
+        {
+            return MagicEffects ?? [];
+        }
+
+        if (MagicEffects is null || MagicEffects.Count == 0)
+        {
+            return [MagicEffect];
+        }
+
+        var merged = new List<MagicEffectRecordSpec>(MagicEffects.Count + 1)
+        {
+            MagicEffect,
+        };
+        merged.AddRange(MagicEffects);
+        return merged;
+    }
+
+    public IReadOnlyList<SpellRecordSpec> ResolveSpells()
+    {
+        if (Spell is null)
+        {
+            return Spells ?? [];
+        }
+
+        if (Spells is null || Spells.Count == 0)
+        {
+            return [Spell];
+        }
+
+        var merged = new List<SpellRecordSpec>(Spells.Count + 1)
+        {
+            Spell,
+        };
+        merged.AddRange(Spells);
+        return merged;
+    }
 }
 
 public sealed class MagicEffectRecordSpec
@@ -216,10 +266,36 @@ public sealed class SpellRecordSpec
     public string? SpellType { get; init; }
 
     [JsonPropertyName("castType")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? CastType { get; init; }
 
     [JsonPropertyName("effect")]
-    public required SpellEffectRecordSpec Effect { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SpellEffectRecordSpec? Effect { get; init; }
+
+    [JsonPropertyName("effects")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<SpellEffectRecordSpec>? Effects { get; init; }
+
+    public IReadOnlyList<SpellEffectRecordSpec> ResolveEffects()
+    {
+        if (Effect is null)
+        {
+            return Effects ?? [];
+        }
+
+        if (Effects is null || Effects.Count == 0)
+        {
+            return [Effect];
+        }
+
+        var merged = new List<SpellEffectRecordSpec>(Effects.Count + 1)
+        {
+            Effect,
+        };
+        merged.AddRange(Effects);
+        return merged;
+    }
 }
 
 public sealed class SpellEffectRecordSpec

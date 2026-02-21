@@ -574,29 +574,7 @@ namespace CalamityAffixes
 				out.scrollNoConsumeChancePct = std::clamp(rawScrollNoConsumeChancePct, 0.0f, 100.0f);
 			}
 
-			if (type == "DebugNotify") {
-				out.action.type = ActionType::kDebugNotify;
-				out.action.text = action.value("text", std::string{});
-			} else if (type == "CastSpell") {
-				out.action.type = ActionType::kCastSpell;
-				out.action.spell = parseSpell(action);
-				out.action.effectiveness = action.value("effectiveness", 1.0f);
-				out.action.magnitudeOverride = action.value("magnitudeOverride", 0.0f);
-				out.action.noHitEffectArt = action.value("noHitEffectArt", false);
-
-				if (!out.action.spell) {
-					SKSE::log::error(
-						"CalamityAffixes: CastSpell action missing spell (affixId={}, spellEditorId={}, spellForm={}).",
-						out.id,
-						action.value("spellEditorId", std::string{}),
-						action.value("spellForm", std::string{}));
-				}
-
-				parseMagnitudeScaling(action, out.action.magnitudeScaling);
-
-				const auto applyTo = action.value("applyTo", std::string{});
-				out.action.applyToSelf = (applyTo == "Self");
-
+			auto parseActionEvolutionAndModeCycle = [&]() {
 				const auto& evolution = action.value("evolution", nlohmann::json::object());
 				if (evolution.is_object()) {
 					const int xpPerProc = evolution.value("xpPerProc", 1);
@@ -681,6 +659,31 @@ namespace CalamityAffixes
 						out.action.modeCycleEnabled = true;
 					}
 				}
+			};
+
+			if (type == "DebugNotify") {
+				out.action.type = ActionType::kDebugNotify;
+				out.action.text = action.value("text", std::string{});
+			} else if (type == "CastSpell") {
+				out.action.type = ActionType::kCastSpell;
+				out.action.spell = parseSpell(action);
+				out.action.effectiveness = action.value("effectiveness", 1.0f);
+				out.action.magnitudeOverride = action.value("magnitudeOverride", 0.0f);
+				out.action.noHitEffectArt = action.value("noHitEffectArt", false);
+
+				if (!out.action.spell) {
+					SKSE::log::error(
+						"CalamityAffixes: CastSpell action missing spell (affixId={}, spellEditorId={}, spellForm={}).",
+						out.id,
+						action.value("spellEditorId", std::string{}),
+						action.value("spellForm", std::string{}));
+				}
+
+				parseMagnitudeScaling(action, out.action.magnitudeScaling);
+
+				const auto applyTo = action.value("applyTo", std::string{});
+				out.action.applyToSelf = (applyTo == "Self");
+				parseActionEvolutionAndModeCycle();
 			} else if (type == "CastSpellAdaptiveElement") {
 				out.action.type = ActionType::kCastSpellAdaptiveElement;
 				out.action.effectiveness = action.value("effectiveness", 1.0f);
@@ -705,6 +708,13 @@ namespace CalamityAffixes
 
 				const auto applyTo = action.value("applyTo", std::string{});
 				out.action.applyToSelf = (applyTo == "Self");
+				parseActionEvolutionAndModeCycle();
+				if (out.action.modeCycleEnabled && !out.action.modeCycleManualOnly) {
+					out.action.modeCycleManualOnly = true;
+					SKSE::log::warn(
+						"CalamityAffixes: CastSpellAdaptiveElement modeCycle coerced to manualOnly=true (affixId={}).",
+						out.id);
+				}
 			} else if (type == "CastOnCrit") {
 				out.action.type = ActionType::kCastOnCrit;
 				out.action.spell = parseSpell(action);
@@ -945,45 +955,8 @@ namespace CalamityAffixes
 			_affixes.push_back(std::move(out));
 			const auto idx = _affixes.size() - 1;
 
-			const bool isTriggerAction =
-				_affixes[idx].action.type == ActionType::kDebugNotify ||
-				_affixes[idx].action.type == ActionType::kCastSpell ||
-				_affixes[idx].action.type == ActionType::kCastSpellAdaptiveElement ||
-				_affixes[idx].action.type == ActionType::kSpawnTrap;
-
-				if (isTriggerAction) {
-					switch (_affixes[idx].trigger) {
-					case Trigger::kHit:
-						_hitTriggerAffixIndices.push_back(idx);
-						break;
-					case Trigger::kIncomingHit:
-						_incomingHitTriggerAffixIndices.push_back(idx);
-						break;
-					case Trigger::kDotApply:
-						_dotApplyTriggerAffixIndices.push_back(idx);
-						break;
-					case Trigger::kKill:
-						_killTriggerAffixIndices.push_back(idx);
-						break;
-					case Trigger::kLowHealth:
-						_lowHealthTriggerAffixIndices.push_back(idx);
-						break;
-					}
-				}
-
-			if (_affixes[idx].action.type == ActionType::kCastOnCrit) {
-				_castOnCritAffixIndices.push_back(idx);
-			} else if (_affixes[idx].action.type == ActionType::kConvertDamage) {
-				_convertAffixIndices.push_back(idx);
-			} else if (_affixes[idx].action.type == ActionType::kMindOverMatter) {
-				_mindOverMatterAffixIndices.push_back(idx);
-			} else if (_affixes[idx].action.type == ActionType::kArchmage) {
-				_archmageAffixIndices.push_back(idx);
-			} else if (_affixes[idx].action.type == ActionType::kCorpseExplosion) {
-				_corpseExplosionAffixIndices.push_back(idx);
-			} else if (_affixes[idx].action.type == ActionType::kSummonCorpseExplosion) {
-				_summonCorpseExplosionAffixIndices.push_back(idx);
-			}
+			IndexAffixTriggerBucket(_affixes[idx], idx);
+			IndexAffixSpecialActionBucket(_affixes[idx], idx);
 		}
 
 		IndexConfiguredAffixes();

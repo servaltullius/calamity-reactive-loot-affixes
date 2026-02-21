@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "EventBridge.Config.Shared.h"
+#include "RunewordIdentityOverrides.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -52,10 +53,49 @@ namespace CalamityAffixes
 			auto* spellVanillaFear = parseSpellFromString("Skyrim.esm|0004DEEA");
 			auto* spellVanillaFrenzy = parseSpellFromString("Skyrim.esm|0004DEEE");
 			auto* spellSummonFamiliar = parseSpellFromString("Skyrim.esm|000640B6");
-			auto* spellSummonFlameAtronach = parseSpellFromString("Skyrim.esm|000204C3");
-			auto* spellSummonFrostAtronach = parseSpellFromString("Skyrim.esm|000204C4");
-			auto* spellSummonStormAtronach = parseSpellFromString("Skyrim.esm|000204C5");
-			auto* spellSummonDremoraLord = parseSpellFromString("Skyrim.esm|0010DDEC");
+		auto* spellSummonFlameAtronach = parseSpellFromString("Skyrim.esm|000204C3");
+		auto* spellSummonFrostAtronach = parseSpellFromString("Skyrim.esm|000204C4");
+		auto* spellSummonStormAtronach = parseSpellFromString("Skyrim.esm|000204C5");
+		auto* spellSummonDremoraLord = parseSpellFromString("Skyrim.esm|0010DDEC");
+
+		auto resolveIdentitySpell = [&](detail::RunewordIdentitySpellRole a_role) -> RE::SpellItem* {
+			switch (a_role) {
+			case detail::RunewordIdentitySpellRole::kDynamicFire:
+				return dynamicFire;
+			case detail::RunewordIdentitySpellRole::kDynamicFrost:
+				return dynamicFrost;
+			case detail::RunewordIdentitySpellRole::kDynamicShock:
+				return dynamicShock;
+			case detail::RunewordIdentitySpellRole::kArcLightning:
+				return spellArcLightning ? spellArcLightning : dynamicShock;
+			case detail::RunewordIdentitySpellRole::kHaste:
+				return spellHaste;
+			case detail::RunewordIdentitySpellRole::kMeditation:
+				return spellMeditation;
+			case detail::RunewordIdentitySpellRole::kWard:
+				return spellWard;
+			case detail::RunewordIdentitySpellRole::kPhase:
+				return spellPhase;
+			case detail::RunewordIdentitySpellRole::kDotPoison:
+				return spellDotPoison;
+			case detail::RunewordIdentitySpellRole::kDotTar:
+				return spellDotTar;
+			case detail::RunewordIdentitySpellRole::kDotSiphon:
+				return spellDotSiphon;
+			case detail::RunewordIdentitySpellRole::kChaosSunder:
+				return spellChaosSunder;
+			case detail::RunewordIdentitySpellRole::kChaosFragile:
+				return spellChaosFragile;
+			case detail::RunewordIdentitySpellRole::kChaosSlowAttack:
+				return spellChaosSlowAttack;
+			case detail::RunewordIdentitySpellRole::kFear:
+				return spellVanillaFear ? spellVanillaFear : spellChaosSlowAttack;
+			case detail::RunewordIdentitySpellRole::kSoulTrap:
+				return spellVanillaSoulTrap ? spellVanillaSoulTrap : spellChaosFragile;
+			default:
+				return nullptr;
+			}
+		};
 
 			enum class SyntheticRunewordStyle : std::uint8_t
 			{
@@ -1267,6 +1307,24 @@ namespace CalamityAffixes
 				};
 
 				if (ready) {
+					if (const auto identityOverride = detail::ResolveRunewordIdentityOverride(recipe.id)) {
+						if (identityOverride->actionKind == detail::RunewordIdentityActionKind::kCastSpellAdaptiveElement) {
+							out.action.type = ActionType::kCastSpellAdaptiveElement;
+							out.action.adaptiveMode = identityOverride->adaptiveMode;
+							out.action.adaptiveFire = resolveIdentitySpell(identityOverride->adaptiveFire);
+							out.action.adaptiveFrost = resolveIdentitySpell(identityOverride->adaptiveFrost);
+							out.action.adaptiveShock = resolveIdentitySpell(identityOverride->adaptiveShock);
+							out.action.applyToSelf = false;
+							out.action.noHitEffectArt = identityOverride->noHitEffectArt;
+						} else {
+							if (auto* overrideSpell = resolveIdentitySpell(identityOverride->spell)) {
+								out.action.type = ActionType::kCastSpell;
+								out.action.spell = overrideSpell;
+								out.action.applyToSelf = identityOverride->applyToSelf;
+								out.action.noHitEffectArt = identityOverride->noHitEffectArt;
+							}
+						}
+					}
 					applyRunewordIndividualTuning(recipe.id, style);
 				}
 

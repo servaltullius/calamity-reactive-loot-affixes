@@ -13,7 +13,7 @@ namespace CalamityAffixes
 			ExecuteCastSpellAction(a_affix, a_owner, a_target, a_hitData);
 			break;
 		case ActionType::kCastSpellAdaptiveElement:
-			ExecuteCastSpellAdaptiveElementAction(a_action, a_owner, a_target, a_hitData);
+			ExecuteCastSpellAdaptiveElementAction(a_affix, a_owner, a_target, a_hitData);
 			break;
 		case ActionType::kSpawnTrap:
 			ExecuteSpawnTrapAction(a_action, a_owner, a_target, a_hitData);

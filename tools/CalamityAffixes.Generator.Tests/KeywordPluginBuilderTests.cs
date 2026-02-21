@@ -338,6 +338,163 @@ public sealed class KeywordPluginBuilderTests
     }
 
     [Fact]
+    public void BuildKeywordPlugin_WhenSpellUsesEffectsArray_AddsAllEffects()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes =
+                [
+                    new AffixDefinition
+                    {
+                        Id = "test_affix_multi",
+                        EditorId = "LoreBox_CAFF_AFFIX_TEST_MULTI",
+                        Name = "Affix: Test Multi",
+                        Records = new AffixRecordSpec
+                        {
+                            MagicEffect = new MagicEffectRecordSpec
+                            {
+                                EditorId = "CAFF_MGEF_TEST_MULTI",
+                                Name = "Calamity: Test Multi Effect",
+                                ActorValue = "Health",
+                            },
+                            Spell = new SpellRecordSpec
+                            {
+                                EditorId = "CAFF_SPEL_TEST_MULTI",
+                                Name = "Calamity: Test Multi Spell",
+                                Delivery = "Self",
+                                Effects =
+                                [
+                                    new SpellEffectRecordSpec
+                                    {
+                                        MagicEffectEditorId = "CAFF_MGEF_TEST_MULTI",
+                                        Magnitude = 25,
+                                        Duration = 5,
+                                        Area = 0,
+                                    },
+                                    new SpellEffectRecordSpec
+                                    {
+                                        MagicEffectEditorId = "CAFF_MGEF_TEST_MULTI",
+                                        Magnitude = 10,
+                                        Duration = 1,
+                                        Area = 0,
+                                    },
+                                ],
+                            },
+                        },
+                        Kid = new KidRule
+                        {
+                            Type = "Weapon",
+                            Strings = "NONE",
+                            FormFilters = "NONE",
+                            Traits = "-E",
+                            Chance = 100.0,
+                        },
+                        Runtime = new Dictionary<string, object?>(),
+                    },
+                ],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var spell = Assert.Single(mod.Spells, s => s.EditorID == "CAFF_SPEL_TEST_MULTI");
+        Assert.Equal(2, spell.Effects.Count);
+        Assert.Equal(25f, spell.Effects[0].Data!.Magnitude);
+        Assert.Equal(10f, spell.Effects[1].Data!.Magnitude);
+    }
+
+    [Fact]
+    public void BuildKeywordPlugin_WhenRecordsUseMagicEffectsArray_ResolvesDistinctEffects()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes =
+                [
+                    new AffixDefinition
+                    {
+                        Id = "test_affix_multi_mgef",
+                        EditorId = "LoreBox_CAFF_AFFIX_TEST_MULTI_MGEF",
+                        Name = "Affix: Test Multi MGEF",
+                        Records = new AffixRecordSpec
+                        {
+                            MagicEffects =
+                            [
+                                new MagicEffectRecordSpec
+                                {
+                                    EditorId = "CAFF_MGEF_TEST_MULTI_SPEED",
+                                    Name = "Calamity: Test Multi Speed",
+                                    ActorValue = "SpeedMult",
+                                },
+                                new MagicEffectRecordSpec
+                                {
+                                    EditorId = "CAFF_MGEF_TEST_MULTI_WARD",
+                                    Name = "Calamity: Test Multi Ward",
+                                    ActorValue = "DamageResist",
+                                },
+                            ],
+                            Spell = new SpellRecordSpec
+                            {
+                                EditorId = "CAFF_SPEL_TEST_MULTI_MGEF",
+                                Name = "Calamity: Test Multi MGEF Spell",
+                                Delivery = "Self",
+                                Effects =
+                                [
+                                    new SpellEffectRecordSpec
+                                    {
+                                        MagicEffectEditorId = "CAFF_MGEF_TEST_MULTI_SPEED",
+                                        Magnitude = 30,
+                                        Duration = 6,
+                                        Area = 0,
+                                    },
+                                    new SpellEffectRecordSpec
+                                    {
+                                        MagicEffectEditorId = "CAFF_MGEF_TEST_MULTI_WARD",
+                                        Magnitude = 60,
+                                        Duration = 6,
+                                        Area = 0,
+                                    },
+                                ],
+                            },
+                        },
+                        Kid = new KidRule
+                        {
+                            Type = "Weapon",
+                            Strings = "NONE",
+                            FormFilters = "NONE",
+                            Traits = "-E",
+                            Chance = 100.0,
+                        },
+                        Runtime = new Dictionary<string, object?>(),
+                    },
+                ],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var spell = Assert.Single(mod.Spells, s => s.EditorID == "CAFF_SPEL_TEST_MULTI_MGEF");
+        Assert.Equal(2, spell.Effects.Count);
+        Assert.Equal("CAFF_MGEF_TEST_MULTI_SPEED", mod.MagicEffects.Single(m => m.FormKey == spell.Effects[0].BaseEffect.FormKey).EditorID);
+        Assert.Equal("CAFF_MGEF_TEST_MULTI_WARD", mod.MagicEffects.Single(m => m.FormKey == spell.Effects[1].BaseEffect.FormKey).EditorID);
+    }
+
+    [Fact]
     public void BuildKeywordPlugin_WhenMagicEffectRecoverTrue_SetsRecoverFlag()
     {
         var json = """

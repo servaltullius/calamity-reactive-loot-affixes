@@ -3307,6 +3307,66 @@
         "name": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 35% / ICD 0.5초 - 약점 원소 노출(적 저항 감소)",
         "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 35% on hit / ICD 0.5s - Weakness Exposure (Enemy resist reduction)",
         "nameKo": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 35% / ICD 0.5초 - 약점 원소 노출(적 저항 감소)",
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_INFINITY_FIRE_SHRED",
+              "name": "Calamity: Runeword Infinity Fire Exposure / 룬워드 무한 화염 노출",
+              "actorValue": "ResistFire",
+              "hostile": true,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_INFINITY_FROST_SHRED",
+              "name": "Calamity: Runeword Infinity Frost Exposure / 룬워드 무한 냉기 노출",
+              "actorValue": "ResistFrost",
+              "hostile": true,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_INFINITY_SHOCK_SHRED",
+              "name": "Calamity: Runeword Infinity Shock Exposure / 룬워드 무한 번개 노출",
+              "actorValue": "ResistShock",
+              "hostile": true,
+              "recover": true
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_INFINITY_FIRE_SHRED",
+              "name": "Calamity: Runeword Infinity Fire Exposure / 룬워드 무한 화염 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_INFINITY_FIRE_SHRED",
+                "magnitude": 20,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_INFINITY_FROST_SHRED",
+              "name": "Calamity: Runeword Infinity Frost Exposure / 룬워드 무한 냉기 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_INFINITY_FROST_SHRED",
+                "magnitude": 20,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_INFINITY_SHOCK_SHRED",
+              "name": "Calamity: Runeword Infinity Shock Exposure / 룬워드 무한 번개 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_INFINITY_SHOCK_SHRED",
+                "magnitude": 20,
+                "duration": 5,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3322,9 +3382,23 @@
             "type": "CastSpellAdaptiveElement",
             "mode": "WeakestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_FIRE_SHRED",
-              "Frost": "CAFF_SPEL_FROST_SHRED",
-              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+              "Fire": "CAFF_SPEL_RW_INFINITY_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_RW_INFINITY_FROST_SHRED",
+              "Shock": "CAFF_SPEL_RW_INFINITY_SHOCK_SHRED"
+            },
+            "modeCycle": {
+              "spells": [
+                "CAFF_SPEL_RW_INFINITY_FIRE_SHRED",
+                "CAFF_SPEL_RW_INFINITY_FROST_SHRED",
+                "CAFF_SPEL_RW_INFINITY_SHOCK_SHRED"
+              ],
+              "labels": [
+                "화염 노출",
+                "냉기 노출",
+                "번개 노출"
+              ],
+              "switchEveryProcs": 1,
+              "manualOnly": true
             },
             "applyTo": "Target",
             "noHitEffectArt": false
@@ -3476,6 +3550,69 @@
         "name": "룬워드 슬픔 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.4초 - 원소 참격(적응형 원소 피해)",
         "nameEn": "Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on hit / ICD 0.4s - Elemental Slash (Adaptive elemental damage)",
         "nameKo": "룬워드 슬픔 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.4초 - 원소 참격(적응형 원소 피해)",
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_GRIEF_FIRE_SLASH",
+              "name": "Calamity: Runeword Grief Fire Slash / 룬워드 슬픔 화염 참격",
+              "actorValue": "Health",
+              "resistValue": "ResistFire",
+              "magicSkill": "Destruction",
+              "hostile": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_GRIEF_FROST_SLASH",
+              "name": "Calamity: Runeword Grief Frost Slash / 룬워드 슬픔 냉기 참격",
+              "actorValue": "Health",
+              "resistValue": "ResistFrost",
+              "magicSkill": "Destruction",
+              "hostile": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_GRIEF_SHOCK_SLASH",
+              "name": "Calamity: Runeword Grief Shock Slash / 룬워드 슬픔 번개 참격",
+              "actorValue": "Health",
+              "resistValue": "ResistShock",
+              "magicSkill": "Destruction",
+              "hostile": true
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_GRIEF_FIRE_SLASH",
+              "name": "Calamity: Runeword Grief Fire Slash / 룬워드 슬픔 화염 참격",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_FIRE_SLASH",
+                "magnitude": 8,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_GRIEF_FROST_SLASH",
+              "name": "Calamity: Runeword Grief Frost Slash / 룬워드 슬픔 냉기 참격",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_FROST_SLASH",
+                "magnitude": 8,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_GRIEF_SHOCK_SLASH",
+              "name": "Calamity: Runeword Grief Shock Slash / 룬워드 슬픔 번개 참격",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_SHOCK_SLASH",
+                "magnitude": 8,
+                "duration": 0,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3491,9 +3628,22 @@
             "type": "CastSpellAdaptiveElement",
             "mode": "WeakestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-              "Frost": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-              "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
+              "Fire": "CAFF_SPEL_RW_GRIEF_FIRE_SLASH",
+              "Frost": "CAFF_SPEL_RW_GRIEF_FROST_SLASH",
+              "Shock": "CAFF_SPEL_RW_GRIEF_SHOCK_SLASH"
+            },
+            "evolution": {
+              "xpPerProc": 1,
+              "thresholds": [
+                0,
+                12,
+                28
+              ],
+              "multipliers": [
+                1.0,
+                1.2,
+                1.4
+              ]
             },
             "applyTo": "Target",
             "noHitEffectArt": false,
@@ -3512,9 +3662,9 @@
       {
         "id": "runeword_call_to_arms_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CALL_TO_ARMS",
-        "name": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 피격 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
-        "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on hit taken / ICD 18s - Warcry (Armor +150, 8s)",
-        "nameKo": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 피격 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
+        "name": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
+        "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on hit / ICD 18s - Warcry (Armor +150, 8s)",
+        "nameKo": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_CTA_WARCRY",
@@ -3543,7 +3693,7 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "IncomingHit",
+          "trigger": "Hit",
           "procChancePercent": 24.0,
           "icdSeconds": 18.0,
           "action": {
@@ -3607,6 +3757,66 @@
         "name": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 노출)",
         "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental exposure)",
         "nameKo": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 노출)",
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_HOTO_FIRE_SHRED",
+              "name": "Calamity: Runeword HOTO Fire Exposure / 룬워드 참나무의 심장 화염 노출",
+              "actorValue": "ResistFire",
+              "hostile": true,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_HOTO_FROST_SHRED",
+              "name": "Calamity: Runeword HOTO Frost Exposure / 룬워드 참나무의 심장 냉기 노출",
+              "actorValue": "ResistFrost",
+              "hostile": true,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_HOTO_SHOCK_SHRED",
+              "name": "Calamity: Runeword HOTO Shock Exposure / 룬워드 참나무의 심장 번개 노출",
+              "actorValue": "ResistShock",
+              "hostile": true,
+              "recover": true
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_HOTO_FIRE_SHRED",
+              "name": "Calamity: Runeword HOTO Fire Exposure / 룬워드 참나무의 심장 화염 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HOTO_FIRE_SHRED",
+                "magnitude": 18,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_HOTO_FROST_SHRED",
+              "name": "Calamity: Runeword HOTO Frost Exposure / 룬워드 참나무의 심장 냉기 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HOTO_FROST_SHRED",
+                "magnitude": 18,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_HOTO_SHOCK_SHRED",
+              "name": "Calamity: Runeword HOTO Shock Exposure / 룬워드 참나무의 심장 번개 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HOTO_SHOCK_SHRED",
+                "magnitude": 18,
+                "duration": 5,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3620,11 +3830,11 @@
           "icdSeconds": 8.0,
           "action": {
             "type": "CastSpellAdaptiveElement",
-            "mode": "WeakestResist",
+            "mode": "StrongestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_FIRE_SHRED",
-              "Frost": "CAFF_SPEL_FROST_SHRED",
-              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+              "Fire": "CAFF_SPEL_RW_HOTO_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_RW_HOTO_FROST_SHRED",
+              "Shock": "CAFF_SPEL_RW_HOTO_SHOCK_SHRED"
             },
             "applyTo": "Target",
             "noHitEffectArt": false
@@ -3635,9 +3845,46 @@
       {
         "id": "runeword_faith_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAITH",
-        "name": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 위상 사냥꾼(이동속도 +45%, 6초)",
-        "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on hit / ICD 12s - Phase Hunter (Move Speed +45%, 6s)",
-        "nameKo": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 위상 사냥꾼(이동속도 +45%, 6초)",
+        "name": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 광신의 돌격(이속 +35%, 피해저항 +60, 6초)",
+        "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on hit / ICD 12s - Fanatic Surge (Move Speed +35%, Damage Resist +60, 6s)",
+        "nameKo": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 광신의 돌격(이속 +35%, 피해저항 +60, 6초)",
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_FAITH_FANATIC_SPEED",
+              "name": "Calamity: Runeword Faith Surge Speed / 룬워드 신념 돌격(이속)",
+              "actorValue": "SpeedMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_FAITH_FANATIC_WARD",
+              "name": "Calamity: Runeword Faith Surge Ward / 룬워드 신념 돌격(저항)",
+              "actorValue": "DamageResist",
+              "hostile": false,
+              "recover": true
+            }
+          ],
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_FAITH_FANATIC",
+            "name": "Calamity: Runeword Faith Surge / 룬워드 신념 돌격",
+            "delivery": "Self",
+            "effects": [
+              {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_FANATIC_SPEED",
+                "magnitude": 35,
+                "duration": 6,
+                "area": 0
+              },
+              {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_FANATIC_WARD",
+                "magnitude": 60,
+                "duration": 6,
+                "area": 0
+              }
+            ]
+          }
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3651,7 +3898,7 @@
           "icdSeconds": 12.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+            "spellEditorId": "CAFF_SPEL_RW_FAITH_FANATIC",
             "applyTo": "Self",
             "noHitEffectArt": true
           }
@@ -3710,6 +3957,69 @@
         "name": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적중 34% / ICD 0.35초 - 멸절 참격(적응형 원소 피해)",
         "nameEn": "Runeword Breath of the Dying (Vex-Hel-El-Eld-Zod-Eth): 34% on hit / ICD 0.35s - Annihilation Slash (Adaptive elemental damage)",
         "nameKo": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적중 34% / ICD 0.35초 - 멸절 참격(적응형 원소 피해)",
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_BOTD_FIRE_SLASH",
+              "name": "Calamity: Runeword BotD Fire Slash / 룬워드 죽음의 숨결 화염 참격",
+              "actorValue": "Health",
+              "resistValue": "ResistFire",
+              "magicSkill": "Destruction",
+              "hostile": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_BOTD_FROST_SLASH",
+              "name": "Calamity: Runeword BotD Frost Slash / 룬워드 죽음의 숨결 냉기 참격",
+              "actorValue": "Health",
+              "resistValue": "ResistFrost",
+              "magicSkill": "Destruction",
+              "hostile": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_BOTD_SHOCK_SLASH",
+              "name": "Calamity: Runeword BotD Shock Slash / 룬워드 죽음의 숨결 번개 참격",
+              "actorValue": "Health",
+              "resistValue": "ResistShock",
+              "magicSkill": "Destruction",
+              "hostile": true
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_BOTD_FIRE_SLASH",
+              "name": "Calamity: Runeword BotD Fire Slash / 룬워드 죽음의 숨결 화염 참격",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_FIRE_SLASH",
+                "magnitude": 12,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_BOTD_FROST_SLASH",
+              "name": "Calamity: Runeword BotD Frost Slash / 룬워드 죽음의 숨결 냉기 참격",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_FROST_SLASH",
+                "magnitude": 12,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_BOTD_SHOCK_SLASH",
+              "name": "Calamity: Runeword BotD Shock Slash / 룬워드 죽음의 숨결 번개 참격",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_SHOCK_SLASH",
+                "magnitude": 12,
+                "duration": 0,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3725,9 +4035,22 @@
             "type": "CastSpellAdaptiveElement",
             "mode": "WeakestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
-              "Frost": "CAFF_SPEL_DMG_FROST_DYNAMIC",
-              "Shock": "CAFF_SPEL_DMG_SHOCK_DYNAMIC"
+              "Fire": "CAFF_SPEL_RW_BOTD_FIRE_SLASH",
+              "Frost": "CAFF_SPEL_RW_BOTD_FROST_SLASH",
+              "Shock": "CAFF_SPEL_RW_BOTD_SHOCK_SLASH"
+            },
+            "evolution": {
+              "xpPerProc": 1,
+              "thresholds": [
+                0,
+                10,
+                24
+              ],
+              "multipliers": [
+                1.0,
+                1.18,
+                1.36
+              ]
             },
             "applyTo": "Target",
             "noHitEffectArt": false,
@@ -3749,6 +4072,66 @@
         "name": "룬워드 라스트 위시 (Jah-Mal-Jah-Sur-Jah-Ber): 적중 18% / ICD 3초 - 소원 붕괴(적응형 원소 노출)",
         "nameEn": "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): 18% on hit / ICD 3s - Wish Collapse (Adaptive elemental exposure)",
         "nameKo": "룬워드 라스트 위시 (Jah-Mal-Jah-Sur-Jah-Ber): 적중 18% / ICD 3초 - 소원 붕괴(적응형 원소 노출)",
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_LASTWISH_FIRE_SHRED",
+              "name": "Calamity: Runeword Last Wish Fire Exposure / 룬워드 라스트 위시 화염 노출",
+              "actorValue": "ResistFire",
+              "hostile": true,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_LASTWISH_FROST_SHRED",
+              "name": "Calamity: Runeword Last Wish Frost Exposure / 룬워드 라스트 위시 냉기 노출",
+              "actorValue": "ResistFrost",
+              "hostile": true,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_LASTWISH_SHOCK_SHRED",
+              "name": "Calamity: Runeword Last Wish Shock Exposure / 룬워드 라스트 위시 번개 노출",
+              "actorValue": "ResistShock",
+              "hostile": true,
+              "recover": true
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
+              "name": "Calamity: Runeword Last Wish Fire Exposure / 룬워드 라스트 위시 화염 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_FIRE_SHRED",
+                "magnitude": 24,
+                "duration": 6,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
+              "name": "Calamity: Runeword Last Wish Frost Exposure / 룬워드 라스트 위시 냉기 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_FROST_SHRED",
+                "magnitude": 24,
+                "duration": 6,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED",
+              "name": "Calamity: Runeword Last Wish Shock Exposure / 룬워드 라스트 위시 번개 노출",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_SHOCK_SHRED",
+                "magnitude": 24,
+                "duration": 6,
+                "area": 0
+              }
+            }
+          ]
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3764,9 +4147,23 @@
             "type": "CastSpellAdaptiveElement",
             "mode": "StrongestResist",
             "spells": {
-              "Fire": "CAFF_SPEL_FIRE_SHRED",
-              "Frost": "CAFF_SPEL_FROST_SHRED",
-              "Shock": "CAFF_SPEL_SHOCK_SHRED"
+              "Fire": "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
+              "Frost": "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
+              "Shock": "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED"
+            },
+            "modeCycle": {
+              "spells": [
+                "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
+                "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
+                "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED"
+              ],
+              "labels": [
+                "열화",
+                "빙결",
+                "전격"
+              ],
+              "switchEveryProcs": 2,
+              "manualOnly": true
             },
             "applyTo": "Target",
             "noHitEffectArt": false
@@ -3826,6 +4223,27 @@
         "name": "룬워드 둠 (Hel-Ohm-Um-Lo-Cham): 적중 30% / ICD 0.8초 - 절망의 냉기 일격",
         "nameEn": "Runeword Doom (Hel-Ohm-Um-Lo-Cham): 30% on hit / ICD 0.8s - Doom Frost Strike",
         "nameKo": "룬워드 둠 (Hel-Ohm-Um-Lo-Cham): 적중 30% / ICD 0.8초 - 절망의 냉기 일격",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_DOOM_FROST_STRIKE",
+            "name": "Calamity: Runeword Doom Frost Strike / 룬워드 둠 냉기 일격",
+            "actorValue": "Health",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_DOOM_FROST_STRIKE",
+            "name": "Calamity: Runeword Doom Frost Strike / 룬워드 둠 냉기 일격",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_DOOM_FROST_STRIKE",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3839,7 +4257,7 @@
           "icdSeconds": 0.8,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
+            "spellEditorId": "CAFF_SPEL_RW_DOOM_FROST_STRIKE",
             "applyTo": "Target",
             "noHitEffectArt": false,
             "magnitudeScaling": {
@@ -3860,6 +4278,27 @@
         "name": "룬워드 드림 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개의 꿈 일격",
         "nameEn": "Runeword Dream (Io-Jah-Pul): 30% on hit / ICD 0.8s - Lightning Dream Strike",
         "nameKo": "룬워드 드림 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개의 꿈 일격",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_DREAM_SHOCK_STRIKE",
+            "name": "Calamity: Runeword Dream Shock Strike / 룬워드 드림 번개 일격",
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_DREAM_SHOCK_STRIKE",
+            "name": "Calamity: Runeword Dream Shock Strike / 룬워드 드림 번개 일격",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_DREAM_SHOCK_STRIKE",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -3873,7 +4312,7 @@
           "icdSeconds": 0.8,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
+            "spellEditorId": "CAFF_SPEL_RW_DREAM_SHOCK_STRIKE",
             "applyTo": "Target",
             "noHitEffectArt": false,
             "magnitudeScaling": {

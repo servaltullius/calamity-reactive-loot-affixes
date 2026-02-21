@@ -106,17 +106,28 @@ public static class KeywordPluginBuilder
         {
             AddKeyword(mod, affix.EditorId);
 
-            if (affix.Records?.MagicEffect is { } magicEffect &&
-                !seenMagicEffects.Contains(magicEffect.EditorId))
+            var recordSpec = affix.Records;
+            var magicEffects = recordSpec?.ResolveMagicEffects() ?? [];
+            foreach (var magicEffect in magicEffects)
             {
+                if (seenMagicEffects.Contains(magicEffect.EditorId))
+                {
+                    continue;
+                }
+
                 var created = AddMagicEffect(mod, magicEffect);
                 seenMagicEffects.Add(magicEffect.EditorId);
                 magicEffectsByEditorId[magicEffect.EditorId] = created;
             }
 
-            if (affix.Records?.Spell is { } spell &&
-                !seenSpells.Contains(spell.EditorId))
+            var spells = recordSpec?.ResolveSpells() ?? [];
+            foreach (var spell in spells)
             {
+                if (seenSpells.Contains(spell.EditorId))
+                {
+                    continue;
+                }
+
                 AddSpell(mod, spell, magicEffectsByEditorId);
                 seenSpells.Add(spell.EditorId);
             }
@@ -446,28 +457,38 @@ public static class KeywordPluginBuilder
         spell.Range = (spell.TargetType == TargetType.TargetActor && spell.CastType != Mutagen.Bethesda.Skyrim.CastType.ConstantEffect) ? 4096.0f : 0.0f;
         spell.Flags = (SpellDataFlag)0;
 
-        if (!magicEffectsByEditorId.TryGetValue(spec.Effect.MagicEffectEditorId, out var magicEffect))
+        var effectSpecs = spec.ResolveEffects();
+        if (effectSpecs.Count == 0)
         {
             throw new InvalidDataException(
-                $"Spell {spec.EditorId} references missing MagicEffect {spec.Effect.MagicEffectEditorId}. " +
-                "Define it in records.magicEffect (or generate it in another affix).");
+                $"Spell {spec.EditorId} requires at least one effect via effect or effects[].");
         }
 
-        // MagicEffects are validated (and used for various runtime behaviors) by their own cast/target types.
-        // If we leave defaults here, the spell can be cast but silently fail to apply to the intended target.
-        magicEffect.CastType = spell.CastType;
-        magicEffect.TargetType = spell.TargetType;
-
-        var effect = new Effect
+        foreach (var effectSpec in effectSpecs)
         {
-            Data = new EffectData
+            if (!magicEffectsByEditorId.TryGetValue(effectSpec.MagicEffectEditorId, out var magicEffect))
             {
-                Magnitude = (float)spec.Effect.Magnitude,
-                Duration = spec.Effect.Duration,
-                Area = spec.Effect.Area,
-            },
-        };
-        effect.BaseEffect.SetTo(magicEffect);
-        spell.Effects.Add(effect);
+                throw new InvalidDataException(
+                    $"Spell {spec.EditorId} references missing MagicEffect {effectSpec.MagicEffectEditorId}. " +
+                    "Define it in records.magicEffect (or generate it in another affix).");
+            }
+
+            // MagicEffects are validated (and used for various runtime behaviors) by their own cast/target types.
+            // If we leave defaults here, the spell can be cast but silently fail to apply to the intended target.
+            magicEffect.CastType = spell.CastType;
+            magicEffect.TargetType = spell.TargetType;
+
+            var effect = new Effect
+            {
+                Data = new EffectData
+                {
+                    Magnitude = (float)effectSpec.Magnitude,
+                    Duration = effectSpec.Duration,
+                    Area = effectSpec.Area,
+                },
+            };
+            effect.BaseEffect.SetTo(magicEffect);
+            spell.Effects.Add(effect);
+        }
     }
 }
