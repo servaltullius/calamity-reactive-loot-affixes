@@ -7,9 +7,9 @@ Player-centric ARPG-style instance affix mod for Skyrim SE/AE[/center]
 
 [b]모드 소개[/b]
 Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG 스타일 어픽스 모드입니다.
-아이템 인스턴스(ExtraUniqueID) 단위로 상태를 추적하며, 현재 버전(v1.2.17) 기본 정책은 [b]재련(Reforge) 중심[/b]입니다.
+아이템 인스턴스(ExtraUniqueID) 단위로 상태를 추적하며, 현재 빌드 기본 정책은 [b]재련(Reforge) 중심[/b]입니다.
 
-[b]현재 버전 핵심 정책 (v1.2.17)[/b]
+[b]현재 빌드 핵심 정책[/b]
 [list]
 [*]아이템 획득/제작 시 [b]자동 어픽스 부여 없음[/b]
 [*][b]재련 오브(Reforge Orb)[/b] 사용 시 선택 장비에 어픽스를 부여/재롤
@@ -22,6 +22,8 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 [*]Diablo 2 스타일 [b]94개 레시피[/b]
 [*]룬워드 조각 수집 -> 레시피 완성 -> 장비 적용
 [*]완성 룬워드 장비도 재련 가능 (룬워드 + 일반 어픽스 동시 재롤)
+[*]효과 구성: [b]직접 정의형 16개 + 자동 합성형 78개[/b]
+[*]Adaptive 계열은 자동 선택 기본 유지, [code]modeCycle[/code] 효과는 [b]수동 오버라이드 모드[/b] 지원
 [/list]
 
 [b]드랍 정책 (현재)[/b]
@@ -30,7 +32,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 [*]시체: [b]SPID DeathItem 분배 우선[/b]
 [*]월드/컨테이너: [b]SKSE 런타임 롤[/b]
 [*]기본 확률: 룬워드 조각 [b]5%[/b], 재련 오브 [b]3%[/b]
-[*]MCM에서 확률 조정 가능 (런타임 적용)
+[*]MCM에서 확률 조정 가능 (런타임 즉시 반영)
 [/list]
 
 [b]전투 시스템[/b]
@@ -92,9 +94,9 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 [b]Overview[/b]
 Calamity - Reactive Loot & Affixes is a player-centric ARPG-style affix mod for Skyrim SE/AE.
-It tracks item instances via ExtraUniqueID, and the current stable version (v1.2.17) is [b]Reforge-centric[/b].
+It tracks item instances via ExtraUniqueID, and the current build is [b]Reforge-centric[/b].
 
-[b]Current Core Policy (v1.2.17)[/b]
+[b]Current Core Policy[/b]
 [list]
 [*][b]No automatic affix assignment[/b] on loot/craft
 [*]Use [b]Reforge Orb[/b] to grant/reroll affixes on selected gear
@@ -107,6 +109,8 @@ It tracks item instances via ExtraUniqueID, and the current stable version (v1.2
 [*][b]94 Diablo 2-style recipes[/b]
 [*]Collect runeword fragments -> complete recipe -> apply to equipment
 [*]Completed runeword gear can also be reforged (runeword + regular affixes reroll together)
+[*]Effect composition: [b]16 hand-authored runewords + 78 runtime-synthesized runewords[/b]
+[*]Adaptive effects keep auto element selection by default, and [code]modeCycle[/code] entries support [b]manual override mode[/b]
 [/list]
 
 [b]Drop Policy (Current)[/b]
@@ -115,7 +119,7 @@ It tracks item instances via ExtraUniqueID, and the current stable version (v1.2
 [*]Corpses: [b]SPID DeathItem distribution first[/b]
 [*]Containers/world pickups: [b]SKSE runtime roll[/b]
 [*]Default rates: runeword fragment [b]5%[/b], reforge orb [b]3%[/b]
-[*]Rates are adjustable via MCM (applies at runtime)
+[*]Rates are adjustable via MCM (applies immediately at runtime)
 [/list]
 
 [b]Combat System[/b]

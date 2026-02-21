@@ -8,9 +8,9 @@ Player-centric ARPG-style instance affix mod for Skyrim SE/AE
 
 ### 모드 소개
 Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG 스타일 어픽스 모드입니다.
-아이템 인스턴스(ExtraUniqueID) 단위로 상태를 추적하며, 현재 버전(v1.2.17) 기본 정책은 **재련(Reforge) 중심**입니다.
+아이템 인스턴스(ExtraUniqueID) 단위로 상태를 추적하며, 현재 빌드 기본 정책은 **재련(Reforge) 중심**입니다.
 
-### 현재 버전 핵심 정책 (v1.2.17)
+### 현재 빌드 핵심 정책
 - 아이템 획득/제작 시 **자동 어픽스 부여 없음**
 - **재련 오브(Reforge Orb)** 사용 시 선택 장비에 어픽스를 부여/재롤
 - 슬롯 모델: **룬워드 1 + 일반 어픽스 최대 3**
@@ -20,13 +20,15 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - Diablo 2 스타일 **94개 레시피**
 - 룬워드 조각 수집 -> 레시피 완성 -> 장비 적용
 - 완성 룬워드 장비도 재련 가능 (룬워드 + 일반 어픽스 동시 재롤)
+- 효과 구성: **직접 정의형 16개 + 자동 합성형 78개**
+- Adaptive 계열은 기본 자동 선택을 유지하고, `modeCycle`이 있는 효과는 **수동 오버라이드 모드**를 지원
 
 ### 드랍 정책 (현재)
 - 드랍 모드: **`hybrid` 고정**
 - 시체: **SPID DeathItem 분배 우선**
 - 월드/컨테이너: **SKSE 런타임 롤**
 - 기본 확률: 룬워드 조각 `5%`, 재련 오브 `3%`
-- MCM에서 확률 조정 가능 (런타임 적용)
+- MCM에서 확률 조정 가능 (런타임 즉시 반영)
 
 ### 전투 시스템
 - Proc 발동 + ICD(내부 쿨다운) + 중복 히트 방지
@@ -74,9 +76,9 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 ### Overview
 Calamity - Reactive Loot & Affixes is a player-centric ARPG-style affix mod for Skyrim SE/AE.
-It tracks item instances via ExtraUniqueID, and the current stable version (v1.2.17) is **Reforge-centric**.
+It tracks item instances via ExtraUniqueID, and the current build is **Reforge-centric**.
 
-### Current Core Policy (v1.2.17)
+### Current Core Policy
 - **No automatic affix assignment** on loot/craft
 - Use **Reforge Orb** to grant/reroll affixes on selected gear
 - Slot model: **1 runeword + up to 3 regular affixes**
@@ -86,13 +88,15 @@ It tracks item instances via ExtraUniqueID, and the current stable version (v1.2
 - **94 Diablo 2-style recipes**
 - Collect runeword fragments -> complete recipe -> apply to equipment
 - Completed runeword gear can also be reforged (runeword + regular affixes reroll together)
+- Effect composition: **16 hand-authored runewords + 78 runtime-synthesized runewords**
+- Adaptive effects keep auto element selection by default, and `modeCycle` entries support **manual override mode**
 
 ### Drop Policy (Current)
 - Drop mode: **`hybrid` only**
 - Corpses: **SPID DeathItem distribution first**
 - Containers/world pickups: **SKSE runtime roll**
 - Default rates: runeword fragment `5%`, reforge orb `3%`
-- Rates are adjustable via MCM (applies at runtime)
+- Rates are adjustable via MCM (applies immediately at runtime)
 
 ### Combat System
 - Proc chance + ICD (internal cooldown) + duplicate-hit protection
