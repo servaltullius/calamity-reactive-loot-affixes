@@ -503,6 +503,17 @@
         color: rgba(255, 255, 255, 0.74);
       }
 
+      .rwRecipeEffectLine {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        padding: calc(7px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
+        border-radius: 8px;
+        border: 1px solid rgba(0, 255, 153, 0.28);
+        background: rgba(0, 255, 153, 0.08);
+        color: rgba(215, 255, 236, 0.98);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.35;
+      }
+
       .rwLayout {
         height: 100%;
         display: grid;
@@ -2191,6 +2202,85 @@
         }
       }
 
+      function resolveRecipeDetailText(item) {
+        const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
+        switch (key) {
+          case "adaptive_strike":
+            return t(
+              "On hit, converts to the target's weakest elemental resistance lane for stable damage.",
+              "적중 시 대상의 가장 낮은 원소 저항 축을 따라 피해가 결정됩니다."
+            );
+          case "adaptive_exposure":
+            return t(
+              "On hit, applies exposure/shred to the target's strongest resistance lane.",
+              "적중 시 대상의 가장 높은 원소 저항 축에 노출/파쇄를 적용합니다."
+            );
+          case "signature_infinity":
+            return t(
+              "Default is adaptive exposure. Manual mode can lock Fire/Frost/Shock exposure.",
+              "기본은 적응형 노출이며, 수동 모드에서 화염/냉기/번개 노출 고정이 가능합니다."
+            );
+          case "signature_last_wish":
+            return t(
+              "Default is adaptive exposure. Manual mode can lock Inferno/Frost/Lightning variants.",
+              "기본은 적응형 노출이며, 수동 모드에서 열화/빙결/전격 변형을 고정할 수 있습니다."
+            );
+          case "signature_heart_of_the_oak":
+            return t(
+              "Uses StrongestResist logic to prioritize breaking the highest elemental resist lane.",
+              "StrongestResist 로직으로 대상의 가장 높은 원소 저항 축을 우선 파쇄합니다."
+            );
+          case "signature_call_to_arms":
+            return t(
+              "Proc trigger is on hit. Applies a short defensive warcry buff.",
+              "발동 트리거는 적중이며, 짧은 방어형 전투 함성 버프를 부여합니다."
+            );
+          case "signature_faith":
+            return t(
+              "Fanatic Surge: Move Speed +35 and Damage Resist +60 for 6 seconds.",
+              "광신의 돌격: 6초 동안 이동속도 +35, 피해저항 +60."
+            );
+          case "signature_doom":
+          case "signature_dream":
+            return t(
+              "Uses dedicated runeword strike spells instead of generic dynamic spell payloads.",
+              "범용 동적 스펠 대신 전용 룬워드 타격 스펠을 사용합니다."
+            );
+          case "poison_bloom":
+          case "tar_bloom":
+          case "siphon_bloom":
+            return t(
+              "Bloom-style DoT profile. Practical value scales with repeated on-hit uptime.",
+              "블룸형 DoT 프로파일입니다. 적중 누적으로 유지시간 체감이 올라갑니다."
+            );
+          case "curse_fragile":
+          case "curse_slow_attack":
+          case "curse_fear":
+          case "curse_frenzy":
+            return t(
+              "Curse profile with control/debuff focus. Uses cooldown and per-target guards.",
+              "군중제어/디버프 중심 저주 프로파일이며 쿨다운과 대상별 가드가 적용됩니다."
+            );
+          case "self_flame_cloak":
+          case "self_frost_cloak":
+          case "self_shock_cloak":
+            return t(
+              "Aura-like self cloak profile for close-range pressure.",
+              "근접 압박용 오라 감성의 자가 망토 프로파일입니다."
+            );
+          case "self_oakflesh":
+          case "self_stoneflesh":
+          case "self_ironflesh":
+          case "self_ebonyflesh":
+            return t(
+              "Defensive flesh profile that prioritizes survivability uptime.",
+              "생존 유지에 초점을 둔 방어형 플레시 프로파일입니다."
+            );
+          default:
+            return "";
+        }
+      }
+
       function resolveRecipeBaseBadge(item) {
         const key = typeof item?.baseKey === "string" ? item.baseKey : "";
         switch (key) {
@@ -2227,6 +2317,26 @@
           default:
             return { className: "mixed", text: t("Base: Mixed", "베이스: 혼합") };
         }
+      }
+
+      function getSelectedRecipeItem() {
+        const items = Array.isArray(recipeItemsState) ? recipeItemsState : [];
+        const selected = items.find((item) => Boolean(item?.selected));
+        if (selected) {
+          return selected;
+        }
+
+        const targetName = typeof runewordPanelState?.recipeName === "string"
+          ? runewordPanelState.recipeName.trim().toLowerCase()
+          : "";
+        if (!targetName) {
+          return null;
+        }
+
+        const byName = items.find((item) =>
+          typeof item?.name === "string" && item.name.trim().toLowerCase() === targetName
+        );
+        return byName || null;
       }
 
       function renderRecipeItems() {
@@ -2282,6 +2392,7 @@
           const runes = typeof item?.runes === "string" ? item.runes : "";
           const baseBadge = resolveRecipeBaseBadge(item);
           const summaryText = resolveRecipeSummaryText(item);
+          const detailText = resolveRecipeDetailText(item);
           const selected = Boolean(item?.selected);
           if (!token || !name) {
             continue;
@@ -2308,6 +2419,20 @@
             summary.className = "rwRecipeSummary";
             summary.textContent = summaryText;
             button.appendChild(summary);
+          }
+
+          const hoverParts = [];
+          if (summaryText) {
+            hoverParts.push(`${t("Effect", "효과")}: ${summaryText}`);
+          }
+          if (detailText) {
+            hoverParts.push(`${t("Detail", "상세")}: ${detailText}`);
+          }
+          hoverParts.push(baseBadge.text);
+          const hoverText = hoverParts.filter((entry) => entry && entry.trim()).join("\n");
+          if (hoverText) {
+            button.title = hoverText;
+            button.setAttribute("aria-label", `${name}. ${hoverText.replace(/\n/g, ". ")}`);
           }
 
           button.addEventListener("click", () => {
@@ -2409,6 +2534,7 @@
           const recipeName = state.recipeName || t("Unknown", "알 수 없음");
           const inserted = Number(state.insertedRunes) || 0;
           const total = Number(state.totalRunes) || 0;
+          const selectedRecipe = getSelectedRecipeItem();
 
           const header = document.createElement("div");
           header.className = "rwStatusHeader";
@@ -2455,6 +2581,38 @@
 
           if (meta.textContent) {
             runewordPanelStatus.appendChild(meta);
+          }
+
+          if (selectedRecipe) {
+            const effectSummary = resolveRecipeSummaryText(selectedRecipe);
+            const effectDetail = resolveRecipeDetailText(selectedRecipe);
+            const baseBadge = resolveRecipeBaseBadge(selectedRecipe);
+            const effectLine = document.createElement("div");
+            effectLine.className = "rwRecipeEffectLine";
+            effectLine.textContent = effectSummary
+              ? `${t("Effect", "효과")}: ${effectSummary}`
+              : `${t("Effect", "효과")}: ${t("No summary available", "요약 정보 없음")}`;
+            runewordPanelStatus.appendChild(effectLine);
+
+            const baseLine = document.createElement("div");
+            baseLine.className = "rwMetaLine";
+            baseLine.textContent = `${t("Recommended Base", "권장 베이스")}: ${baseBadge.text}`;
+            runewordPanelStatus.appendChild(baseLine);
+
+            const runeSequence = typeof selectedRecipe?.runes === "string" ? selectedRecipe.runes : "";
+            if (runeSequence.trim()) {
+              const runeLine = document.createElement("div");
+              runeLine.className = "rwMetaLine";
+              runeLine.textContent = `${t("Rune Order", "룬 순서")}: ${runeSequence}`;
+              runewordPanelStatus.appendChild(runeLine);
+            }
+
+            if (effectDetail) {
+              const detailLine = document.createElement("div");
+              detailLine.className = "rwMetaLine";
+              detailLine.textContent = `${t("Detail", "상세")}: ${effectDetail}`;
+              runewordPanelStatus.appendChild(detailLine);
+            }
           }
 
           if (total > 0 && !isComplete) {
@@ -2571,6 +2729,7 @@
 
         recipeItemsState = items;
         renderRecipeItems();
+        renderRunewordPanelState();
       }
 
       function setRunewordPanelState(raw) {
