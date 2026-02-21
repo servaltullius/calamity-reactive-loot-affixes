@@ -290,10 +290,10 @@ namespace CalamityAffixes
 			return !consumed;
 		}
 
-		void EventBridge::MarkLowHealthTriggerConsumed(
-			const AffixRuntime& a_affix,
-			RE::Actor* a_owner)
-		{
+	void EventBridge::MarkLowHealthTriggerConsumed(
+		const AffixRuntime& a_affix,
+		RE::Actor* a_owner)
+	{
 			if (a_affix.trigger != Trigger::kLowHealth || !a_owner || a_affix.token == 0u) {
 				return;
 			}
@@ -304,8 +304,46 @@ namespace CalamityAffixes
 			LowHealthTriggerKey key{};
 			key.token = a_affix.token;
 			key.owner = ownerFormID;
-			_lowHealthTriggerConsumed[key] = true;
+		_lowHealthTriggerConsumed[key] = true;
+	}
+
+	void EventBridge::RebuildActiveTriggerIndexCaches()
+	{
+		const auto rebuildFor = [&](const std::vector<std::size_t>& a_source, std::vector<std::size_t>& a_out) {
+			a_out.clear();
+			a_out.reserve(a_source.size());
+			for (const auto idx : a_source) {
+				if (idx >= _activeCounts.size() || _activeCounts[idx] == 0) {
+					continue;
+				}
+				a_out.push_back(idx);
+			}
+		};
+
+		rebuildFor(_hitTriggerAffixIndices, _activeHitTriggerAffixIndices);
+		rebuildFor(_incomingHitTriggerAffixIndices, _activeIncomingHitTriggerAffixIndices);
+		rebuildFor(_dotApplyTriggerAffixIndices, _activeDotApplyTriggerAffixIndices);
+		rebuildFor(_killTriggerAffixIndices, _activeKillTriggerAffixIndices);
+		rebuildFor(_lowHealthTriggerAffixIndices, _activeLowHealthTriggerAffixIndices);
+	}
+
+	const std::vector<std::size_t>* EventBridge::ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept
+	{
+		switch (a_trigger) {
+		case Trigger::kHit:
+			return &_activeHitTriggerAffixIndices;
+		case Trigger::kIncomingHit:
+			return &_activeIncomingHitTriggerAffixIndices;
+		case Trigger::kDotApply:
+			return &_activeDotApplyTriggerAffixIndices;
+		case Trigger::kKill:
+			return &_activeKillTriggerAffixIndices;
+		case Trigger::kLowHealth:
+			return &_activeLowHealthTriggerAffixIndices;
+		default:
+			return nullptr;
 		}
+	}
 
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
@@ -333,24 +371,7 @@ namespace CalamityAffixes
 			return 100.0f;
 		}();
 
-		const std::vector<std::size_t>* indices = nullptr;
-			switch (a_trigger) {
-			case Trigger::kHit:
-				indices = &_hitTriggerAffixIndices;
-				break;
-		case Trigger::kIncomingHit:
-			indices = &_incomingHitTriggerAffixIndices;
-			break;
-		case Trigger::kDotApply:
-			indices = &_dotApplyTriggerAffixIndices;
-			break;
-			case Trigger::kKill:
-				indices = &_killTriggerAffixIndices;
-				break;
-			case Trigger::kLowHealth:
-				indices = &_lowHealthTriggerAffixIndices;
-				break;
-			}
+		const auto* indices = ResolveActiveTriggerIndices(a_trigger);
 
 		if (!indices || indices->empty()) {
 			RecordRecentCombatEvent(a_trigger, a_owner, now);
@@ -474,6 +495,34 @@ namespace CalamityAffixes
 
 		_lastHitAt = a_now;
 		_lastHit = a_key;
+		return false;
+	}
+
+	bool EventBridge::ShouldSuppressPapyrusHitEvent(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept
+	{
+		const DuplicateHitKey current{
+			.outgoing = a_key.outgoing,
+			.aggressor = a_key.aggressor,
+			.target = a_key.target,
+			.source = a_key.source
+		};
+		const DuplicateHitKey last{
+			.outgoing = _lastPapyrusHit.outgoing,
+			.aggressor = _lastPapyrusHit.aggressor,
+			.target = _lastPapyrusHit.target,
+			.source = _lastPapyrusHit.source
+		};
+		if (ShouldSuppressDuplicateHitWindow(
+				current,
+				last,
+				ToNonNegativeMilliseconds(a_now),
+				ToNonNegativeMilliseconds(_lastPapyrusHitEventAt),
+				static_cast<std::uint64_t>(kPapyrusHitEventWindow.count()))) {
+			return true;
+		}
+
+		_lastPapyrusHitEventAt = a_now;
+		_lastPapyrusHit = a_key;
 		return false;
 	}
 }

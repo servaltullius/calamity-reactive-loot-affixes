@@ -460,6 +460,7 @@ namespace CalamityAffixes
 		static constexpr std::chrono::milliseconds kDotApplyICD{ 1500 };
 		static constexpr std::chrono::milliseconds kCastOnCritICD{ 150 };
 		static constexpr std::chrono::milliseconds kDuplicateHitWindow{ 100 };
+		static constexpr std::chrono::milliseconds kPapyrusHitEventWindow{ 80 };
 		static constexpr std::chrono::milliseconds kHealthDamageHookStaleWindow{ 5000 };
 		static constexpr std::string_view kRuntimeConfigRelativePath = "Data/SKSE/Plugins/CalamityAffixes/affixes.json";
 		static constexpr std::string_view kRuntimeContractRelativePath = "Data/SKSE/Plugins/CalamityAffixes/runtime_contract.json";
@@ -548,8 +549,8 @@ namespace CalamityAffixes
 			bool debugLog{ false };
 			bool dotTagSafetyAutoDisable{ false };
 			std::uint32_t dotTagSafetyUniqueEffectThreshold{ 96 };
-			std::uint32_t trapGlobalMaxActive{ 64 };
-			std::uint32_t trapCastBudgetPerTick{ 8 };
+			std::uint32_t trapGlobalMaxActive{ 48 };
+			std::uint32_t trapCastBudgetPerTick{ 6 };
 			std::uint32_t triggerProcBudgetPerWindow{ 12 };
 			std::uint32_t triggerProcBudgetWindowMs{ 100 };
 			bool cleanupInvalidLegacyAffixes{ true };
@@ -621,6 +622,11 @@ namespace CalamityAffixes
 		std::vector<std::size_t> _dotApplyTriggerAffixIndices;
 		std::vector<std::size_t> _killTriggerAffixIndices;
 		std::vector<std::size_t> _lowHealthTriggerAffixIndices;
+		std::vector<std::size_t> _activeHitTriggerAffixIndices;
+		std::vector<std::size_t> _activeIncomingHitTriggerAffixIndices;
+		std::vector<std::size_t> _activeDotApplyTriggerAffixIndices;
+		std::vector<std::size_t> _activeKillTriggerAffixIndices;
+		std::vector<std::size_t> _activeLowHealthTriggerAffixIndices;
 		std::vector<std::size_t> _castOnCritAffixIndices;
 		std::vector<std::size_t> _convertAffixIndices;
 		std::vector<std::size_t> _mindOverMatterAffixIndices;
@@ -667,6 +673,7 @@ namespace CalamityAffixes
 		std::uint32_t _runewordBaseCycleCursor{ 0 };
 		std::uint32_t _runewordRecipeCycleCursor{ 0 };
 		std::vector<TrapInstance> _traps;
+		std::size_t _trapTickCursor{ 0 };
 		std::atomic_bool _hasActiveTraps{ false };
 		LootConfig _loot{};
 		bool _runtimeEnabled{ true };
@@ -685,6 +692,8 @@ namespace CalamityAffixes
 
 		std::chrono::steady_clock::time_point _lastHitAt{};
 		LastHitKey _lastHit{};
+		std::chrono::steady_clock::time_point _lastPapyrusHitEventAt{};
+		LastHitKey _lastPapyrusHit{};
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerHitAt;
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerKillAt;
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerIncomingHitAt;
@@ -699,7 +708,7 @@ namespace CalamityAffixes
 
 		std::mt19937 _rng{ std::random_device{}() };
 
-		static constexpr std::chrono::milliseconds kEquipResyncInterval{ 5000 };
+		static constexpr std::chrono::milliseconds kEquipResyncInterval{ 8000 };
 		ResyncScheduler _equipResync{ .nextAtMs = 0, .intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count()) };
 
 		// Special-action selection/runtime structs.
@@ -763,6 +772,7 @@ namespace CalamityAffixes
 		void ResetRuntimeStateForConfigReload();
 		void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);
 		void RebuildActiveCounts();
+		void RebuildActiveTriggerIndexCaches();
 		void MarkLootEvaluatedInstance(std::uint64_t a_instanceKey);
 		void ForgetLootEvaluatedInstance(std::uint64_t a_instanceKey);
 		void PruneLootEvaluatedInstances();
@@ -937,6 +947,7 @@ namespace CalamityAffixes
 		void ProcessImmediateCorpseExplosionFromLethalHit(
 			RE::Actor* a_target,
 			RE::Actor* a_attacker);
+		[[nodiscard]] const std::vector<std::size_t>* ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept;
 		void ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);
 		void RecordRecentCombatEvent(Trigger a_trigger, RE::Actor* a_owner, std::chrono::steady_clock::time_point a_now);
 		[[nodiscard]] bool PassesRecentlyGates(
@@ -1023,6 +1034,7 @@ namespace CalamityAffixes
 			float a_extraDamage);
 		void ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell, const RE::HitData* a_hitData = nullptr);
 		bool ShouldSuppressDuplicateHit(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept;
+		bool ShouldSuppressPapyrusHitEvent(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept;
 		[[nodiscard]] bool TryConsumeTriggerProcBudget(std::chrono::steady_clock::time_point a_now) noexcept;
 
 		// Action execution helpers (dispatch + typed executors).

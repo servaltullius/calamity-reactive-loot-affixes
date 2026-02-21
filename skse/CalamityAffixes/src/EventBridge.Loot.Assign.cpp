@@ -771,6 +771,23 @@ namespace CalamityAffixes
 		std::uint32_t a_rollCount)
 	{
 		CurrencyRollExecutionResult result{};
+		constexpr auto kDropNotificationCooldown = std::chrono::milliseconds(2500);
+		static auto s_lastRunewordDropNotificationAt = std::chrono::steady_clock::time_point{};
+		static auto s_lastReforgeDropNotificationAt = std::chrono::steady_clock::time_point{};
+		const auto now = std::chrono::steady_clock::now();
+		const auto shouldEmitDropNotification =
+			[&](std::chrono::steady_clock::time_point& a_lastNotificationAt) {
+				if (a_lastNotificationAt.time_since_epoch().count() == 0) {
+					a_lastNotificationAt = now;
+					return true;
+				}
+				if ((now - a_lastNotificationAt) < kDropNotificationCooldown) {
+					return false;
+				}
+				a_lastNotificationAt = now;
+				return true;
+			};
+
 		const auto rollCount = std::max<std::uint32_t>(1u, a_rollCount);
 		for (std::uint32_t i = 0; i < rollCount; ++i) {
 			bool runewordPityTriggered = false;
@@ -796,7 +813,9 @@ namespace CalamityAffixes
 					if (runewordPityTriggered) {
 						note.append(" [Pity]");
 					}
-					RE::DebugNotification(note.c_str());
+					if (shouldEmitDropNotification(s_lastRunewordDropNotificationAt)) {
+						RE::DebugNotification(note.c_str());
+					}
 				}
 			}
 
@@ -809,7 +828,9 @@ namespace CalamityAffixes
 				} else if (TryPlaceLootCurrencyItem(orb, a_sourceContainerRef, a_forceWorldPlacement)) {
 					CommitReforgeOrbGrant(true);
 					result.reforgeDropGranted = true;
-					RE::DebugNotification("Reforge Orb Drop");
+					if (shouldEmitDropNotification(s_lastReforgeDropNotificationAt)) {
+						RE::DebugNotification("Reforge Orb Drop");
+					}
 					if (reforgePityTriggered && _loot.debugLog) {
 						SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");
 					}

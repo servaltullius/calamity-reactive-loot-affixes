@@ -30,8 +30,8 @@ namespace CalamityAffixes::PrismaTooltip
 {
 	namespace
 	{
-		constexpr auto kPollInterval = std::chrono::milliseconds(200);
-		constexpr auto kHotkeyRefreshInterval = std::chrono::seconds(1);
+			constexpr auto kPollInterval = std::chrono::milliseconds(300);
+			constexpr auto kHotkeyRefreshInterval = std::chrono::seconds(2);
 		constexpr auto kViewPath = "CalamityAffixes/index.html";
 		constexpr auto kViewOrder = 5000;
 		constexpr auto kMouseButtonOffset = 256u;
@@ -480,8 +480,6 @@ namespace CalamityAffixes::PrismaTooltip
 				const Event* a_event,
 				RE::BSTEventSource<Event>*) override
 			{
-				RefreshControlPanelHotkeyFromMcm(false);
-
 				auto configuredHotkey = g_controlPanelHotkey.load();
 				if (configuredHotkey == 0u) {
 					// Fallback: allow opening the panel even if the user hasn't configured a keybind yet.

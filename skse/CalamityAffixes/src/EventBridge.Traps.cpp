@@ -42,7 +42,17 @@ namespace CalamityAffixes
 			return trapCastBudgetPerTick == 0u || (trapCastsConsumed + a_cost) <= trapCastBudgetPerTick;
 		};
 
-		for (std::size_t i = 0; i < _traps.size();) {
+		if (_trapTickCursor >= _traps.size()) {
+			_trapTickCursor = 0;
+		}
+		const std::size_t trapVisitBudgetPerTick = std::min<std::size_t>(
+			_traps.size(),
+			(trapCastBudgetPerTick == 0u)
+				? static_cast<std::size_t>(8u)
+				: std::max<std::size_t>(1u, trapCastBudgetPerTick * 2u));
+		std::size_t visitedTraps = 0u;
+
+		while (!_traps.empty() && visitedTraps < trapVisitBudgetPerTick) {
 			if (!hasTrapCastBudget()) {
 				if (_loot.debugLog && !loggedBudgetExhausted) {
 					spdlog::debug(
@@ -53,22 +63,34 @@ namespace CalamityAffixes
 				break;
 			}
 
-			auto& trap = _traps[i];
+			if (_trapTickCursor >= _traps.size()) {
+				_trapTickCursor = 0;
+			}
+			const auto trapIndex = _trapTickCursor;
+			++visitedTraps;
+			auto& trap = _traps[trapIndex];
 			if (now < trap.armedAt) {
-				++i;
+				if (!_traps.empty()) {
+					_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
+				}
 				continue;
 			}
 
 			auto* ownerForm = RE::TESForm::LookupByID<RE::TESForm>(trap.ownerFormID);
 			auto* owner = ownerForm ? ownerForm->As<RE::Actor>() : nullptr;
 			if (!owner) {
-				_traps.erase(_traps.begin() + static_cast<std::ptrdiff_t>(i));
+				_traps.erase(_traps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
+				if (_trapTickCursor >= _traps.size()) {
+					_trapTickCursor = 0;
+				}
 				continue;
 			}
 
 			auto* magicCaster = owner->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant);
 			if (!magicCaster) {
-				++i;
+				if (!_traps.empty()) {
+					_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
+				}
 				continue;
 			}
 
@@ -162,16 +184,27 @@ namespace CalamityAffixes
 				const bool canRearm = (trap.rearmDelay.count() > 0);
 
 				if (!canRearm || outOfTriggers) {
-					_traps.erase(_traps.begin() + static_cast<std::ptrdiff_t>(i));
+					_traps.erase(_traps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
+					if (_trapTickCursor >= _traps.size()) {
+						_trapTickCursor = 0;
+					}
 					continue;
 				}
 
 				trap.armedAt = now + trap.rearmDelay;
-				++i;
+				if (!_traps.empty()) {
+					_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
+				}
 				continue;
 			}
 
-			++i;
+			if (!_traps.empty()) {
+				_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
+			}
 		}
+
+	if (_traps.empty()) {
+		_hasActiveTraps.store(false, std::memory_order_relaxed);
 	}
+}
 }

@@ -1230,7 +1230,7 @@ namespace CalamityAffixes
 		SyncCurrencyDropModeState("ApplyLootConfigFromJson");
 
 		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
-		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+		spdlog::flush_on(spdlog::level::warn);
 	}
 
 	void EventBridge::ApplyRuntimeUserSettingsOverrides()
@@ -1297,7 +1297,7 @@ namespace CalamityAffixes
 		}
 
 		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
-		spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+		spdlog::flush_on(spdlog::level::warn);
 
 		SKSE::log::info(
 			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}).",

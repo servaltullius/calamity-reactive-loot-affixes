@@ -446,6 +446,11 @@ namespace CalamityAffixes
 		const auto origin = a_corpse->GetPosition();
 		const float radius = a_action.corpseExplosionRadius;
 		const float radiusSq = radius * radius;
+		const auto configuredMaxTargets = static_cast<std::size_t>(a_action.corpseExplosionMaxTargets);
+		const std::size_t targetCap = (configuredMaxTargets > 0u) ? configuredMaxTargets : static_cast<std::size_t>(48u);
+		if (targetCap == 0u) {
+			return 0;
+		}
 
 		if (auto* shader = GetInstantCorpseExplosionShader()) {
 			a_corpse->InstantiateHitShader(
@@ -465,7 +470,7 @@ namespace CalamityAffixes
 		};
 
 		std::vector<Target> targets;
-		targets.reserve(32);
+		targets.reserve(std::min<std::size_t>(targetCap, 48u));
 		processLists->ForEachHighActor([&](RE::Actor& a) {
 			if (&a == a_owner || &a == a_corpse) {
 				return RE::BSContainer::ForEachResult::kContinue;
@@ -488,24 +493,26 @@ namespace CalamityAffixes
 				return RE::BSContainer::ForEachResult::kContinue;
 			}
 
-			targets.push_back(Target{ std::addressof(a), distSq });
+			if (targets.size() < targetCap) {
+				targets.push_back(Target{ std::addressof(a), distSq });
+				return RE::BSContainer::ForEachResult::kContinue;
+			}
+
+			// Keep the closest N actors only to avoid sort pressure in crowded fights.
+			auto farthestIt = std::max_element(
+				targets.begin(),
+				targets.end(),
+				[](const Target& lhs, const Target& rhs) {
+					return lhs.distanceSq < rhs.distanceSq;
+				});
+			if (farthestIt != targets.end() && distSq < farthestIt->distanceSq) {
+				*farthestIt = Target{ std::addressof(a), distSq };
+			}
 			return RE::BSContainer::ForEachResult::kContinue;
 		});
 
 		if (targets.empty()) {
 			return 0;
-		}
-
-		const auto maxTargets = static_cast<std::size_t>(a_action.corpseExplosionMaxTargets);
-		if (maxTargets > 0 && targets.size() > maxTargets) {
-			std::nth_element(
-				targets.begin(),
-				targets.begin() + static_cast<std::ptrdiff_t>(maxTargets),
-				targets.end(),
-				[](const Target& a, const Target& b) {
-					return a.distanceSq < b.distanceSq;
-				});
-			targets.resize(maxTargets);
 		}
 		std::sort(targets.begin(), targets.end(), [](const Target& a, const Target& b) {
 			return a.distanceSq < b.distanceSq;

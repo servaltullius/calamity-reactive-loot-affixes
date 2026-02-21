@@ -112,12 +112,13 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			}
 		}
 
-		// KID can patch keywords after kDataLoaded; re-sync equipped counts occasionally so procs become active.
-		MaybeResyncEquippedAffixes(now);
-
 		// NOTE: Some modlists can override vfunc hooks. If HandleHealthDamage is not routed through our hook
 		// for this actor, fall back to TESHitEvent-driven procs so affixes still work.
 		const bool hookRouted = CalamityAffixes::Hooks::IsHandleHealthDamageHooked(target);
+		if (!hookRouted) {
+			// KID can patch keywords after kDataLoaded; re-sync equipped counts occasionally so procs become active.
+			MaybeResyncEquippedAffixes(now);
+		}
 
 		if (!hookRouted) {
 			if (_loot.debugLog) {
@@ -229,14 +230,22 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 				target,
 				relation.hostileEitherDirection,
 				now);
-		if (ShouldSendPlayerOwnedHitEvent(
-				relation.attackerIsPlayerOwned,
-				relation.hasPlayerOwner,
-				relation.hostileEitherDirection,
-				allowNeutralOutgoing,
-				relation.targetIsPlayer)) {
-			SendModEvent("CalamityAffixes_Hit", target);
-		}
+			if (ShouldSendPlayerOwnedHitEvent(
+					relation.attackerIsPlayerOwned,
+					relation.hasPlayerOwner,
+					relation.hostileEitherDirection,
+					allowNeutralOutgoing,
+					relation.targetIsPlayer)) {
+				const LastHitKey key{
+					.outgoing = true,
+					.aggressor = aggressor->GetFormID(),
+					.target = target->GetFormID(),
+					.source = a_event->source
+				};
+				if (!ShouldSuppressPapyrusHitEvent(key, now)) {
+					SendModEvent("CalamityAffixes_Hit", target);
+				}
+			}
 
 		return RE::BSEventNotifyControl::kContinue;
 	}
@@ -651,14 +660,14 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
-			if (eventName == kMcmSetDebugNotificationsEvent) {
-				_loot.debugLog = (a_event->numArg > 0.5f);
-				spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
-				spdlog::flush_on(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
-				queueRuntimeUserSettingsPersist();
-				RE::DebugNotification(_loot.debugLog ? "Calamity: debug notifications ON" : "Calamity: debug notifications OFF");
-				return RE::BSEventNotifyControl::kContinue;
-			}
+				if (eventName == kMcmSetDebugNotificationsEvent) {
+					_loot.debugLog = (a_event->numArg > 0.5f);
+					spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+					spdlog::flush_on(spdlog::level::warn);
+					queueRuntimeUserSettingsPersist();
+					RE::DebugNotification(_loot.debugLog ? "Calamity: debug notifications ON" : "Calamity: debug notifications OFF");
+					return RE::BSEventNotifyControl::kContinue;
+				}
 
 			if (eventName == kMcmSetValidationIntervalEvent) {
 				const float seconds = std::clamp(a_event->numArg, 0.0f, 30.0f);
@@ -853,6 +862,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 		_activeCounts.assign(_affixes.size(), 0);
 		_activeSlotPenalty.assign(_affixes.size(), 0.0f);
 		_activeCritDamageBonusPct = 0.0f;
+		RebuildActiveTriggerIndexCaches();
 		_equippedInstanceKeysByToken.clear();
 		_equippedTokenCacheReady = false;
 		_equippedInstanceKeysByToken.reserve(_affixIndexByToken.size());
@@ -959,6 +969,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			std::sort(keys.begin(), keys.end());
 			keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
 		}
+		RebuildActiveTriggerIndexCaches();
 		_equippedTokenCacheReady = true;
 
 		if (_loot.debugLog) {
