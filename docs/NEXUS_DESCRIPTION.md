@@ -22,6 +22,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - 완성 룬워드 장비도 재련 가능 (룬워드 + 일반 어픽스 동시 재롤)
 - 효과 구성: **직접 정의형 16개 + 자동 합성형 78개**
 - Adaptive 계열은 기본 자동 선택을 유지하고, `modeCycle`이 있는 효과는 **수동 오버라이드 모드**를 지원
+- 룬워드 패널에서 선택 레시피의 **효과/권장 베이스/룬 순서/상세**를 상태 영역에서 확인 가능
 
 ### 드랍 정책 (현재)
 - 드랍 모드: **`hybrid` 고정**
@@ -90,6 +91,7 @@ It tracks item instances via ExtraUniqueID, and the current build is **Reforge-c
 - Completed runeword gear can also be reforged (runeword + regular affixes reroll together)
 - Effect composition: **16 hand-authored runewords + 78 runtime-synthesized runewords**
 - Adaptive effects keep auto element selection by default, and `modeCycle` entries support **manual override mode**
+- The runeword panel now shows selected recipe **effect/base/rune-order/detail** directly in the status area
 
 ### Drop Policy (Current)
 - Drop mode: **`hybrid` only**
