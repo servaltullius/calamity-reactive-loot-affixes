@@ -6,15 +6,24 @@
 #include <cstdint>
 #include <span>
 #include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace CalamityAffixes
 {
 	using namespace RunewordDetail;
 
-	void EventBridge::ApplyRunewordResult(std::uint64_t a_instanceKey, const RunewordRecipe& a_recipe)
+	bool EventBridge::ApplyRunewordResult(
+		std::uint64_t a_instanceKey,
+		const RunewordRecipe& a_recipe,
+		std::string* a_outFailureReason)
 	{
 		const auto blockReason = ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe);
 		if (blockReason == RunewordApplyBlockReason::kMissingResultAffix) {
+			if (a_outFailureReason) {
+				*a_outFailureReason = "missing-result-affix";
+			}
 			std::string note = "Runeword failed: missing affix ";
 			note.append(a_recipe.displayName);
 			RE::DebugNotification(note.c_str());
@@ -22,9 +31,12 @@ namespace CalamityAffixes
 				"CalamityAffixes: runeword result affix missing (recipe={}, resultToken={:016X}).",
 				a_recipe.id,
 				a_recipe.resultAffixToken);
-			return;
+			return false;
 		}
 		if (blockReason == RunewordApplyBlockReason::kAffixSlotsFull) {
+			if (a_outFailureReason) {
+				*a_outFailureReason = "affix-slots-full";
+			}
 			std::string note = "Runeword failed: base has max affixes";
 			RE::DebugNotification(note.c_str());
 			SKSE::log::warn(
@@ -32,26 +44,32 @@ namespace CalamityAffixes
 				a_instanceKey,
 				a_recipe.id,
 				kMaxAffixesPerItem);
-			return;
+			return false;
 		}
 
 		const auto affixIt = _affixIndexByToken.find(a_recipe.resultAffixToken);
 		if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+			if (a_outFailureReason) {
+				*a_outFailureReason = "result-affix-invalidated";
+			}
 			SKSE::log::error(
 				"CalamityAffixes: runeword result affix became invalid after policy check (recipe={}, resultToken={:016X}).",
 				a_recipe.id,
 				a_recipe.resultAffixToken);
-			return;
+			return false;
 		}
 
 		auto& slots = _instanceAffixes[a_instanceKey];
 		if (!slots.PromoteTokenToPrimary(a_recipe.resultAffixToken)) {
+			if (a_outFailureReason) {
+				*a_outFailureReason = "promote-to-primary-failed";
+			}
 			SKSE::log::error(
 				"CalamityAffixes: runeword promote-to-primary failed after policy check (instance={:016X}, recipe={}, resultToken={:016X}).",
 				a_instanceKey,
 				a_recipe.id,
 				a_recipe.resultAffixToken);
-			return;
+			return false;
 		}
 
 		EnsureInstanceRuntimeState(a_instanceKey, a_recipe.resultAffixToken);
@@ -72,6 +90,7 @@ namespace CalamityAffixes
 			"CalamityAffixes: runeword completed (recipe={}, resultAffix={}).",
 			a_recipe.id,
 			_affixes[affixIt->second].id);
+		return true;
 	}
 
 	void EventBridge::InsertRunewordRuneIntoSelectedBase()
@@ -143,7 +162,7 @@ namespace CalamityAffixes
 		const auto totalRunes = recipe->runeTokens.size();
 		if (state.insertedRunes >= totalRunes) {
 			// Legacy finalize path.
-			ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe);
+			(void)ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe);
 			return;
 		}
 
@@ -192,6 +211,41 @@ namespace CalamityAffixes
 			return;
 		}
 
+		struct ConsumedRune
+		{
+			std::uint64_t token = 0u;
+			std::uint32_t count = 0u;
+			std::string runeName;
+		};
+		std::vector<ConsumedRune> consumedRunes;
+		consumedRunes.reserve(requiredCounts.size);
+
+		auto rollbackConsumedRunes = [&](std::string_view a_reasonTag) {
+			bool rollbackFullySucceeded = true;
+			for (const auto& consumed : consumedRunes) {
+				if (consumed.count == 0u) {
+					continue;
+				}
+
+				const auto restored = GrantRunewordFragments(
+					player,
+					_runewordRuneNameByToken,
+					consumed.token,
+					consumed.count);
+				if (restored != consumed.count) {
+					rollbackFullySucceeded = false;
+					SKSE::log::error(
+						"CalamityAffixes: runeword rollback partial (reason={}, runeToken={:016X}, runeName={}, restored={}, expected={}).",
+						a_reasonTag,
+						consumed.token,
+						consumed.runeName,
+						restored,
+						consumed.count);
+				}
+			}
+			return rollbackFullySucceeded;
+		};
+
 		// Consume all required fragments.
 		for (std::size_t i = 0; i < requiredCounts.size; ++i) {
 			const auto token = requiredCounts.entries[i].token;
@@ -207,31 +261,65 @@ namespace CalamityAffixes
 
 			auto* fragmentItem = LookupRunewordFragmentItem(_runewordRuneNameByToken, token);
 			if (!fragmentItem) {
+				const bool rollbackOk = rollbackConsumedRunes("fragment-item-missing");
 				std::string note = "Runeword fragment item missing: ";
 				note.append(runeName);
+				if (rollbackOk) {
+					note.append(" (rollback restored)");
+				}
 				RE::DebugNotification(note.c_str());
 				SKSE::log::error(
-					"CalamityAffixes: runeword fragment item missing (requiredRuneToken={:016X}, runeName={}).",
+					"CalamityAffixes: runeword fragment item missing (requiredRuneToken={:016X}, runeName={}, rollbackOk={}).",
 					token,
-					runeName);
+					runeName,
+					rollbackOk);
 				return;
 			}
 
+			ConsumedRune consumed{};
+			consumed.token = token;
+			consumed.runeName = runeName;
 			for (std::uint32_t n = 0; n < required; ++n) {
 				if (!TryConsumeRunewordFragment(player, _runewordRuneNameByToken, token)) {
+					if (consumed.count > 0u) {
+						consumedRunes.push_back(consumed);
+					}
+					const bool rollbackOk = rollbackConsumedRunes("consume-fragment-failed");
 					std::string note = "Runeword failed to consume fragment: ";
 					note.append(runeName);
+					if (rollbackOk) {
+						note.append(" (rollback restored)");
+					}
 					RE::DebugNotification(note.c_str());
 					SKSE::log::warn(
-						"CalamityAffixes: runeword failed to consume fragment (runeToken={:016X}, runeName={}).",
+						"CalamityAffixes: runeword failed to consume fragment (runeToken={:016X}, runeName={}, rollbackOk={}).",
 						token,
-						runeName);
+						runeName,
+						rollbackOk);
 					return;
 				}
+				++consumed.count;
+			}
+			if (consumed.count > 0u) {
+				consumedRunes.push_back(std::move(consumed));
 			}
 		}
 
-		ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe);
+		std::string applyFailureReason;
+		if (!ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe, &applyFailureReason)) {
+			const bool rollbackOk = rollbackConsumedRunes("apply-failed");
+			if (rollbackOk) {
+				RE::DebugNotification("Runeword failed after consume: fragments restored.");
+			} else {
+				RE::DebugNotification("Runeword failed after consume: fragment rollback partial.");
+			}
+			SKSE::log::error(
+				"CalamityAffixes: runeword apply failed after fragment consume (recipe={}, reason={}, rollbackOk={}).",
+				recipe->id,
+				applyFailureReason.empty() ? "unknown" : applyFailureReason,
+				rollbackOk);
+			return;
+		}
 	}
 
 }
