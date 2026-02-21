@@ -525,6 +525,67 @@ namespace CalamityAffixes
 			}
 		};
 
+		auto actionSummaryTextByKey = [](std::string_view a_key) -> std::string_view {
+			if (a_key == "adaptive_strike") return "적의 약한 원소 저항을 노려 적응형 원소 공격";
+			if (a_key == "adaptive_exposure") return "적의 강한 원소 저항을 파쇄해 받는 원소 피해 증가";
+			if (a_key == "signature_nadir") return "적을 공포에 빠뜨려 전열 붕괴 유도";
+			if (a_key == "signature_steel") return "근접 선제타 강화 일격";
+			if (a_key == "signature_malice") return "지속 독상처 누적";
+			if (a_key == "signature_stealth") return "위기 시 은신/재배치";
+			if (a_key == "signature_leaf") return "화염 점화 폭발";
+			if (a_key == "signature_ancients_pledge") return "생존형 수호 결계";
+			if (a_key == "signature_holy_thunder") return "성전 번개 충격파";
+			if (a_key == "signature_zephyr") return "기동력 상승과 질풍 타격";
+			if (a_key == "signature_pattern") return "연계 공격 리듬 강화";
+			if (a_key == "signature_kings_grace") return "성스러운 검격으로 추가 타격";
+			if (a_key == "signature_strength") return "강타형 물리 충격";
+			if (a_key == "signature_edge") return "관통 사격 보조";
+			if (a_key == "signature_grief") return "초고속 연타 원소 참격";
+			if (a_key == "signature_infinity") return "고저항 축 노출/파쇄";
+			if (a_key == "signature_enigma") return "피격 시 위상 이동으로 생존";
+			if (a_key == "signature_call_to_arms") return "전투 함성 버프로 공방 강화";
+			if (a_key == "signature_spirit") return "전투 집중과 자원 회복";
+			if (a_key == "signature_insight") return "명상형 자원 회복";
+			if (a_key == "signature_fortitude") return "강철 수호 방어 버프";
+			if (a_key == "signature_heart_of_the_oak") return "강저항 축 파쇄";
+			if (a_key == "signature_last_wish") return "지속 심판형 디버프";
+			if (a_key == "signature_exile") return "긴급 장벽 전개";
+			if (a_key == "signature_breath_of_the_dying") return "종말 참격 폭주";
+			if (a_key == "signature_chains_of_honor") return "성역형 피해 완화";
+			if (a_key == "signature_dream") return "번개 공명 타격";
+			if (a_key == "signature_faith") return "광신의 돌격 버프";
+			if (a_key == "signature_phoenix") return "피닉스 반격 폭주";
+			if (a_key == "signature_doom") return "빙결 심판 일격";
+			if (a_key == "signature_bone") return "사역마/소환 보조";
+			if (a_key == "fire_strike") return "화염 추가타";
+			if (a_key == "frost_strike") return "냉기 추가타";
+			if (a_key == "shock_strike") return "번개 추가타";
+			if (a_key == "poison_bloom") return "독 지속 피해 누적";
+			if (a_key == "tar_bloom") return "둔화 타르 지대 생성";
+			if (a_key == "siphon_bloom") return "자원 흡수와 약화";
+			if (a_key == "curse_fragile") return "취약 저주 부여";
+			if (a_key == "curse_slow_attack") return "공속 저하 저주 부여";
+			if (a_key == "curse_fear") return "공포 저주 부여";
+			if (a_key == "curse_frenzy") return "광란 저주 부여";
+			if (a_key == "self_haste") return "자신에게 가속 버프";
+			if (a_key == "self_ward") return "자신에게 수호막 버프";
+			if (a_key == "self_barrier") return "자신에게 장벽 버프";
+			if (a_key == "self_meditation") return "자신에게 명상 회복 버프";
+			if (a_key == "self_phase") return "자신에게 위상 이동 버프";
+			if (a_key == "self_phoenix") return "자신에게 피닉스 재점화 버프";
+			if (a_key == "self_flame_cloak") return "자신에게 화염 망토";
+			if (a_key == "self_frost_cloak") return "자신에게 냉기 망토";
+			if (a_key == "self_shock_cloak") return "자신에게 번개 망토";
+			if (a_key == "self_oakflesh") return "자신에게 오크플레시 방어 버프";
+			if (a_key == "self_stoneflesh") return "자신에게 스톤플레시 방어 버프";
+			if (a_key == "self_ironflesh") return "자신에게 아이언플레시 방어 버프";
+			if (a_key == "self_ebonyflesh") return "자신에게 에보니플레시 방어 버프";
+			if (a_key == "self_muffle") return "자신에게 머플 은신 버프";
+			if (a_key == "self_invisibility") return "자신에게 투명화 버프";
+			if (a_key == "soul_trap") return "적에게 소울트랩 시전";
+			return {};
+		};
+
 		auto magnitudeScalingSourceText = [](MagnitudeScaling::Source a_source) -> std::string_view {
 			switch (a_source) {
 			case MagnitudeScaling::Source::kHitPhysicalDealt:
@@ -537,7 +598,7 @@ namespace CalamityAffixes
 			}
 		};
 
-		auto buildEffectSummaryText = [&](const AffixRuntime& a_affix) {
+		auto buildEffectSummaryText = [&](const AffixRuntime& a_affix, std::string_view a_summaryKey) {
 			std::string summary;
 			summary.append(triggerText(a_affix.trigger));
 			summary.push_back(' ');
@@ -548,7 +609,12 @@ namespace CalamityAffixes
 			} else {
 				summary.append("항상 ");
 			}
-			summary.append(actionSummaryText(a_affix.action));
+			const auto mappedActionText = actionSummaryTextByKey(a_summaryKey);
+			if (!mappedActionText.empty()) {
+				summary.append(mappedActionText);
+			} else {
+				summary.append(actionSummaryText(a_affix.action));
+			}
 
 			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
 			if (icdSeconds > 0.0f) {
@@ -741,6 +807,7 @@ namespace CalamityAffixes
 				continue;
 			}
 			const auto& affix = _affixes[affixIt->second];
+			const auto effectSummaryKey = resolveRecipeEffectSummaryKey(recipe);
 
 			std::string runes;
 			for (std::size_t i = 0; i < recipe.runeIds.size(); ++i) {
@@ -754,8 +821,8 @@ namespace CalamityAffixes
 				.recipeToken = recipe.token,
 				.displayName = recipe.displayName,
 				.runeSequence = std::move(runes),
-				.effectSummaryKey = std::string(resolveRecipeEffectSummaryKey(recipe)),
-				.effectSummaryText = buildEffectSummaryText(affix),
+				.effectSummaryKey = std::string(effectSummaryKey),
+				.effectSummaryText = buildEffectSummaryText(affix, effectSummaryKey),
 				.effectDetailText = buildEffectDetailText(affix),
 				.recommendedBaseKey = std::string(resolveRecommendedBaseKey(recipe)),
 				.selected = (selectedToken != 0u && selectedToken == recipe.token)
