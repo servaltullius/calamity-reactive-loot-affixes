@@ -616,6 +616,9 @@ namespace RuntimeGateStoreChecks
 				transmuteSource.find("runeword result affix missing before transmute") == std::string::npos ||
 				transmuteSource.find("note.append(BuildRunewordApplyBlockMessage(blockReason));") == std::string::npos ||
 				transmuteSource.find("rollbackConsumedRunes") == std::string::npos ||
+				transmuteSource.find("_runewordTransmuteInProgress") == std::string::npos ||
+				transmuteSource.find("Runeword: transmute already in progress.") == std::string::npos ||
+				transmuteSource.find("consume-postcheck-partial") == std::string::npos ||
 				transmuteSource.find("ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe, &applyFailureReason)") == std::string::npos ||
 				transmuteSource.find("Runeword failed after consume: fragments restored.") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: transmute pre-consume safety guard is missing\n";

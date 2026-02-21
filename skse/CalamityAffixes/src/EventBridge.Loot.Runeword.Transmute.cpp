@@ -2,8 +2,10 @@
 #include "CalamityAffixes/RunewordUtil.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <span>
 #include <string>
 #include <string_view>
@@ -98,6 +100,27 @@ namespace CalamityAffixes
 		if (!_configLoaded) {
 			return;
 		}
+		if (_runewordTransmuteInProgress) {
+			RE::DebugNotification("Runeword: transmute already in progress.");
+			return;
+		}
+
+		struct ScopedTransmuteInFlight
+		{
+			bool& flag;
+
+			explicit ScopedTransmuteInFlight(bool& a_flag) :
+				flag(a_flag)
+			{
+				flag = true;
+			}
+
+			~ScopedTransmuteInFlight()
+			{
+				flag = false;
+			}
+		};
+		ScopedTransmuteInFlight transmuteGuard(_runewordTransmuteInProgress);
 
 		SanitizeRunewordState();
 		if (!_runewordSelectedBaseKey) {
@@ -168,6 +191,23 @@ namespace CalamityAffixes
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (!player) {
+			return;
+		}
+
+		// Final preflight right before consumption to minimize "consume then fail" cases.
+		if (!ResolvePlayerInventoryInstance(*_runewordSelectedBaseKey, entry, xList) || !entry || !entry->object || !xList) {
+			RE::DebugNotification("Runeword: selected base became unavailable.");
+			return;
+		}
+		if (!IsLootObjectEligibleForAffixes(entry->object)) {
+			RE::DebugNotification("Runeword blocked: selected base is no longer eligible.");
+			return;
+		}
+		const auto preflightBlockReason = ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe);
+		if (preflightBlockReason != RunewordApplyBlockReason::kNone) {
+			std::string note = "Runeword blocked: ";
+			note.append(BuildRunewordApplyBlockMessage(preflightBlockReason));
+			RE::DebugNotification(note.c_str());
 			return;
 		}
 
@@ -276,32 +316,60 @@ namespace CalamityAffixes
 				return;
 			}
 
-			ConsumedRune consumed{};
-			consumed.token = token;
-			consumed.runeName = runeName;
-			for (std::uint32_t n = 0; n < required; ++n) {
-				if (!TryConsumeRunewordFragment(player, _runewordRuneNameByToken, token)) {
-					if (consumed.count > 0u) {
-						consumedRunes.push_back(consumed);
-					}
-					const bool rollbackOk = rollbackConsumedRunes("consume-fragment-failed");
-					std::string note = "Runeword failed to consume fragment: ";
-					note.append(runeName);
-					if (rollbackOk) {
-						note.append(" (rollback restored)");
-					}
-					RE::DebugNotification(note.c_str());
-					SKSE::log::warn(
-						"CalamityAffixes: runeword failed to consume fragment (runeToken={:016X}, runeName={}, rollbackOk={}).",
-						token,
-						runeName,
-						rollbackOk);
-					return;
+			const auto ownedBeforeSigned = std::max(0, player->GetItemCount(fragmentItem));
+			const auto ownedBefore = static_cast<std::uint32_t>(ownedBeforeSigned);
+			if (ownedBefore < required) {
+				const bool rollbackOk = rollbackConsumedRunes("consume-precheck-owned-too-low");
+				std::string note = "Runeword failed to consume fragment: ";
+				note.append(runeName);
+				if (rollbackOk) {
+					note.append(" (rollback restored)");
 				}
-				++consumed.count;
+				RE::DebugNotification(note.c_str());
+				SKSE::log::warn(
+					"CalamityAffixes: runeword consume precheck failed (runeToken={:016X}, runeName={}, owned={}, required={}, rollbackOk={}).",
+					token,
+					runeName,
+					ownedBefore,
+					required,
+					rollbackOk);
+				return;
 			}
-			if (consumed.count > 0u) {
-				consumedRunes.push_back(std::move(consumed));
+
+			const auto maxRemoveChunk = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
+			std::uint32_t remaining = required;
+			while (remaining > 0u) {
+				const auto removeChunk = std::min(remaining, maxRemoveChunk);
+				player->RemoveItem(fragmentItem, static_cast<std::int32_t>(removeChunk), RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+				remaining -= removeChunk;
+			}
+
+			const auto ownedAfterSigned = std::max(0, player->GetItemCount(fragmentItem));
+			const auto ownedAfter = static_cast<std::uint32_t>(ownedAfterSigned);
+			const auto consumedCount = (ownedBefore > ownedAfter) ? (ownedBefore - ownedAfter) : 0u;
+			if (consumedCount > 0u) {
+				consumedRunes.push_back(ConsumedRune{
+					.token = token,
+					.count = consumedCount,
+					.runeName = runeName
+				});
+			}
+			if (consumedCount != required) {
+				const bool rollbackOk = rollbackConsumedRunes("consume-postcheck-partial");
+				std::string note = "Runeword failed to consume fragment: ";
+				note.append(runeName);
+				if (rollbackOk) {
+					note.append(" (rollback restored)");
+				}
+				RE::DebugNotification(note.c_str());
+				SKSE::log::warn(
+					"CalamityAffixes: runeword consume postcheck failed (runeToken={:016X}, runeName={}, consumed={}, required={}, rollbackOk={}).",
+					token,
+					runeName,
+					consumedCount,
+					required,
+					rollbackOk);
+				return;
 			}
 		}
 

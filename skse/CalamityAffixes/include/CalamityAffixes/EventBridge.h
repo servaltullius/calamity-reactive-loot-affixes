@@ -672,6 +672,7 @@ namespace CalamityAffixes
 		std::optional<std::uint64_t> _runewordSelectedBaseKey{};
 		std::uint32_t _runewordBaseCycleCursor{ 0 };
 		std::uint32_t _runewordRecipeCycleCursor{ 0 };
+		bool _runewordTransmuteInProgress{ false };
 		std::vector<TrapInstance> _traps;
 		std::size_t _trapTickCursor{ 0 };
 		std::atomic_bool _hasActiveTraps{ false };
