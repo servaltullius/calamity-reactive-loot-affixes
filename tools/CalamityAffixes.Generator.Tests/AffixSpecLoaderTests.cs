@@ -106,9 +106,7 @@ public sealed class AffixSpecLoaderTests
           "loot": {
             "cleanupInvalidLegacyAffixes": true,
             "armorEditorIdDenyContains": ["rewardbox", "lootbox"],
-            "currencyDropMode": "leveledList",
-            "currencyLeveledListAutoDiscoverDeathItems": false,
-            "currencyLeveledListTargets": ["Skyrim.esm|0009AF0A"]
+            "currencyDropMode": "hybrid"
           },
           "keywords": {
             "tags": [{"editorId":"CAFF_TAG_DOT","name":"dot"}],
@@ -125,9 +123,79 @@ public sealed class AffixSpecLoaderTests
             Assert.NotNull(spec.Loot);
             Assert.True(spec.Loot!.CleanupInvalidLegacyAffixes);
             Assert.Equal(new[] { "rewardbox", "lootbox" }, spec.Loot.ArmorEditorIdDenyContains);
-            Assert.Equal("leveledList", spec.Loot.CurrencyDropMode);
-            Assert.False(spec.Loot.CurrencyLeveledListAutoDiscoverDeathItems);
-            Assert.Equal(new[] { "Skyrim.esm|0009AF0A" }, spec.Loot.CurrencyLeveledListTargets);
+            Assert.Equal("hybrid", spec.Loot.CurrencyDropMode);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenLegacyLeveledListFieldsProvided_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "loot": {
+            "currencyDropMode": "hybrid",
+            "currencyLeveledListAutoDiscoverDeathItems": true,
+            "currencyLeveledListTargets": ["Skyrim.esm|0009AF0A"]
+          },
+          "keywords": {
+            "tags": [{"editorId":"CAFF_TAG_DOT","name":"dot"}],
+            "affixes": [],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("currencyLeveledListTargets was removed", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenCurrencyDropModeIsNotHybrid_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "loot": {
+            "currencyDropMode": "runtime"
+          },
+          "keywords": {
+            "tags": [{"editorId":"CAFF_TAG_DOT","name":"dot"}],
+            "affixes": [],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("currencyDropMode supports only 'hybrid'", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
         finally
         {

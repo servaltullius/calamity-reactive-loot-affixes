@@ -37,17 +37,6 @@ public sealed class LootSpec
     [JsonPropertyName("currencyDropMode")]
     public string CurrencyDropMode { get; init; } = "hybrid";
 
-    // Optional explicit LVLI targets used by hybrid distribution path.
-    // Format: "ModName.esm|00ABCDEF".
-    // If omitted/empty, generator uses curated defaults.
-    [JsonPropertyName("currencyLeveledListTargets")]
-    public List<string>? CurrencyLeveledListTargets { get; init; }
-
-    // If true, merge auto-discovered mod death-item lists from --masters into currency targets.
-    // Discovery includes both leveled lists named DeathItem* and lists referenced by mod NPC DeathItem links.
-    [JsonPropertyName("currencyLeveledListAutoDiscoverDeathItems")]
-    public bool CurrencyLeveledListAutoDiscoverDeathItems { get; init; } = true;
-
     [JsonPropertyName("lootSourceChanceMultCorpse")]
     public double LootSourceChanceMultCorpse { get; init; } = 0.8;
 

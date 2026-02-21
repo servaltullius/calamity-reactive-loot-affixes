@@ -66,7 +66,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 ### 주의사항
 - Prisma UI가 없으면 툴팁/패널 UI가 표시되지 않습니다.
 - KID DoT 태그를 과도하게 넓게 분배하면 부작용이 발생할 수 있습니다.
-- 기본 배포 ZIP에는 UserPatch 도구를 포함하지 않습니다.
+- 레벨리스트(LVLI) 주입/오버라이드는 사용하지 않습니다.
 
 ---
 
@@ -132,4 +132,4 @@ Current runtime scope is player-centric.
 ### Notes
 - Without Prisma UI, tooltip/control panel UI will not be shown.
 - Overly broad KID DoT tagging may cause side effects.
-- UserPatch tools are not bundled in the default release ZIP.
+- Leveled-list (LVLI) injection/override is not used.

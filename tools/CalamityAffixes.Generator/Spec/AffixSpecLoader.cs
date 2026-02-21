@@ -15,6 +15,9 @@ public static class AffixSpecLoader
     public static AffixSpec Load(string path)
     {
         var json = File.ReadAllText(path);
+        using var rootDoc = JsonDocument.Parse(json);
+        ValidateRemovedLegacyLootFields(rootDoc.RootElement);
+
         var options = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
@@ -82,6 +85,7 @@ public static class AffixSpecLoader
     private static void Validate(AffixSpec spec)
     {
         ValidateModKey(spec.ModKey);
+        ValidateLootPolicy(spec.Loot);
 
         if (!spec.ModKey.EndsWith(".esp", StringComparison.OrdinalIgnoreCase) &&
             !spec.ModKey.EndsWith(".esm", StringComparison.OrdinalIgnoreCase) &&
@@ -141,6 +145,44 @@ public static class AffixSpecLoader
                     throw new InvalidDataException($"Spell {spell.EditorId} requires effect.magicEffectEditorId");
                 }
             }
+        }
+    }
+
+    private static void ValidateLootPolicy(LootSpec? loot)
+    {
+        if (loot is null)
+        {
+            return;
+        }
+
+        var dropMode = loot.CurrencyDropMode?.Trim();
+        if (!string.IsNullOrEmpty(dropMode) &&
+            !string.Equals(dropMode, "hybrid", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException(
+                $"loot.currencyDropMode supports only 'hybrid' (got: {dropMode}).");
+        }
+    }
+
+    private static void ValidateRemovedLegacyLootFields(JsonElement root)
+    {
+        if (!root.TryGetProperty("loot", out var loot) || loot.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        if (loot.TryGetProperty("currencyLeveledListTargets", out _))
+        {
+            throw new InvalidDataException(
+                "loot.currencyLeveledListTargets was removed. " +
+                "Use hybrid policy only (corpse=SPID, container/world=runtime).");
+        }
+
+        if (loot.TryGetProperty("currencyLeveledListAutoDiscoverDeathItems", out _))
+        {
+            throw new InvalidDataException(
+                "loot.currencyLeveledListAutoDiscoverDeathItems was removed. " +
+                "Use hybrid policy only (corpse=SPID, container/world=runtime).");
         }
     }
 

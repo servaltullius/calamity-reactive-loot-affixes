@@ -283,7 +283,7 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 
 ```bash
 python3 tools/compose_affixes.py
-dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data --masters /path/to/SkyrimData
+dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data
 ```
 
 생성기는 아래도 함께 갱신합니다:
@@ -300,14 +300,13 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 - `Data/SKSE/Plugins/CalamityAffixes/user_settings.json` (MCM 런타임 값 + Prisma 패널 단축키/언어)
   - 저장 방식: 임시 파일 기록 + flush + 원자적 교체(중간 손상 위험 완화)
 
-### 유저 로드오더 기반 UserPatch
+### 드랍 경로 정책
 
-- 현재 기본 배포 산출물(MO2 ZIP)에는 UserPatch 도구를 포함하지 않습니다.
 - 드랍 정책은 `hybrid` 단일 경로를 기본으로 사용합니다.
   - 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
   - 상자/월드: SKSE 런타임 롤
   - SPID 태그가 없는 시체: 런타임 활성화 롤 폴백
-- 고급 사용자가 UserPatch를 수동 생성하려면 레포 소스 기준으로 `tools/build_user_patch.sh` 또는 `tools/CalamityAffixes.UserPatch`를 직접 실행하세요.
+- 레벨리스트(LVLI) 주입/오버라이드는 더 이상 사용하지 않습니다.
 
 ### MO2 배포 ZIP 생성
 

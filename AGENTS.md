@@ -38,7 +38,7 @@ This section is generated. Re-run pinning to update.
 ## “데이터 → 생성 → 패키징” 워크플로우
 
 - 스펙 편집: `affixes/modules/*.json` (조합: `python3 tools/compose_affixes.py`)
-- 생성(esp/ini/runtime/i4): `dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data --masters /path/to/SkyrimData`
+- 생성(esp/ini/runtime/i4): `dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data`
 - 생성기 테스트: `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release`
 - MO2 배포 ZIP: `tools/build_mo2_zip.sh` → `dist/CalamityAffixes_MO2_vX.Y.Z_<YYYY-MM-DD>.zip`
 
