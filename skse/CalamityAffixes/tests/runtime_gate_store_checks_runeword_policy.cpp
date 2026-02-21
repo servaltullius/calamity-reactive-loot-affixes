@@ -78,6 +78,7 @@ namespace RuntimeGateStoreChecks
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
 			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
+			const fs::path summaryHeaderFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.SummaryText.h";
 
 			std::ifstream recipeEntriesIn(recipeEntriesFile);
 			if (!recipeEntriesIn.is_open()) {
@@ -85,19 +86,28 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
+			std::ifstream summaryHeaderIn(summaryHeaderFile);
+			if (!summaryHeaderIn.is_open()) {
+				std::cerr << "runeword_recipe_entries_mapping: failed to open summary header file: " << summaryHeaderFile << "\n";
+				return false;
+			}
+
 			std::string source(
 				(std::istreambuf_iterator<char>(recipeEntriesIn)),
 				std::istreambuf_iterator<char>());
+			std::string summaryHeader(
+				(std::istreambuf_iterator<char>(summaryHeaderIn)),
+				std::istreambuf_iterator<char>());
 
 			if (source.find("kRecommendedBaseOverrides") == std::string::npos ||
-				source.find("kEffectSummaryOverrides") == std::string::npos ||
 				source.find("FindKeyOverride(id, kRecommendedBaseOverrides)") == std::string::npos ||
-				source.find("FindKeyOverride(id, kEffectSummaryOverrides)") == std::string::npos ||
 				source.find("HasDuplicateOverrideIds(") == std::string::npos ||
 				source.find("static_assert(!HasDuplicateOverrideIds(kRecommendedBaseOverrides)") == std::string::npos ||
-				source.find("static_assert(!HasDuplicateOverrideIds(kEffectSummaryOverrides)") == std::string::npos ||
 				source.find("{ \"rw_spirit\", \"sword_shield\" }") == std::string::npos ||
-				source.find("{ \"rw_spirit\", \"signature_spirit\" }") == std::string::npos) {
+				source.find("RunewordSummary::ResolveEffectSummaryKey") == std::string::npos ||
+				summaryHeader.find("kEffectSummaryOverrides") == std::string::npos ||
+				summaryHeader.find("static_assert(!HasDuplicateOverrideIds(kEffectSummaryOverrides)") == std::string::npos ||
+				summaryHeader.find("{ \"rw_spirit\", \"signature_spirit\" }") == std::string::npos) {
 				std::cerr << "runeword_recipe_entries_mapping: recipe-entry table mapping guard is missing\n";
 				return false;
 			}
@@ -167,7 +177,7 @@ namespace RuntimeGateStoreChecks
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
-			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
+			const fs::path summaryHeaderFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.SummaryText.h";
 			const fs::path synthesisFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RunewordSynthesis.cpp";
 			const fs::path defaultContractFile = testFile.parent_path().parent_path().parent_path().parent_path() /
 				"Data" / "SKSE" / "Plugins" / "CalamityAffixes" / "runtime_contract.json";
@@ -185,9 +195,9 @@ namespace RuntimeGateStoreChecks
 					std::istreambuf_iterator<char>());
 			};
 
-			const auto recipeEntriesText = loadText(recipeEntriesFile);
-			if (!recipeEntriesText.has_value()) {
-				std::cerr << "runeword_coverage_consistency: failed to open source file: " << recipeEntriesFile << "\n";
+			const auto summaryHeaderText = loadText(summaryHeaderFile);
+			if (!summaryHeaderText.has_value()) {
+				std::cerr << "runeword_coverage_consistency: failed to open summary header file: " << summaryHeaderFile << "\n";
 				return false;
 			}
 			const auto synthesisText = loadText(synthesisFile);
@@ -261,8 +271,8 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 			const auto summarySection = extractSection(
-				*recipeEntriesText,
-				"static constexpr RecipeKeyOverride kEffectSummaryOverrides[] = {",
+				*summaryHeaderText,
+				"inline constexpr RecipeKeyOverride kEffectSummaryOverrides[] = {",
 				"};");
 			if (!summarySection.has_value()) {
 				std::cerr << "runeword_coverage_consistency: summary section not found\n";
@@ -572,11 +582,16 @@ namespace RuntimeGateStoreChecks
 
 			if (tooltipSource.find("IsSynthesizedRunewordAffixId(") == std::string::npos ||
 				tooltipSource.find("buildRunewordAutoSummary") == std::string::npos ||
+				tooltipSource.find("RunewordSummary::ResolveEffectSummaryKey") == std::string::npos ||
+				tooltipSource.find("RunewordSummary::ActionSummaryTextByKey") == std::string::npos ||
 				tooltipSource.find("a_affixId.rfind(\"rw_\", 0) == 0") == std::string::npos ||
 				tooltipSource.find("a_affixId.rfind(\"runeword_\", 0) == 0") == std::string::npos ||
 				tooltipSource.find("a_affixId.substr(a_affixId.size() - 5) != \"_auto\"") == std::string::npos ||
-				tooltipSource.find("headerEn = \"On \"") == std::string::npos ||
-				tooltipSource.find("발동 ") == std::string::npos ||
+				tooltipSource.find("% chance to ") == std::string::npos ||
+				tooltipSource.find("% 확률로 ") == std::string::npos ||
+				tooltipSource.find("(Cooldown ") == std::string::npos ||
+				tooltipSource.find("(쿨타임 ") == std::string::npos ||
+				tooltipSource.find("(지속 ") == std::string::npos ||
 				tooltipSource.find("Adaptive elemental cast") == std::string::npos ||
 				tooltipSource.find("적응형 원소 시전") == std::string::npos ||
 				tooltipSource.find("Self-cast ") == std::string::npos ||

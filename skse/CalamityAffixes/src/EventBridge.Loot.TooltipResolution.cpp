@@ -1,7 +1,9 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootUiGuards.h"
+#include "EventBridge.Loot.Runeword.SummaryText.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstdint>
 #include <memory>
@@ -185,33 +187,84 @@ namespace CalamityAffixes
 			auto triggerTextEn = [](Trigger a_trigger) -> std::string_view {
 				switch (a_trigger) {
 				case Trigger::kHit:
-					return "hit";
+					return "On hit";
 				case Trigger::kIncomingHit:
-					return "incoming hit";
+					return "On taking a hit";
 				case Trigger::kDotApply:
-					return "DoT apply";
+					return "On DoT apply";
 				case Trigger::kKill:
-					return "kill";
+					return "On kill";
 				case Trigger::kLowHealth:
-					return "low health";
+					return "On low health";
 				}
-				return "trigger";
+				return "On trigger";
 			};
 
 			auto triggerTextKo = [](Trigger a_trigger) -> std::string_view {
 				switch (a_trigger) {
 				case Trigger::kHit:
-					return "적중";
+					return "적중 시";
 				case Trigger::kIncomingHit:
-					return "피격";
+					return "피격 시";
 				case Trigger::kDotApply:
-					return "지속피해 적용";
+					return "지속 피해 적용 시";
 				case Trigger::kKill:
-					return "처치";
+					return "처치 시";
 				case Trigger::kLowHealth:
-					return "저체력";
+					return "저체력 시";
 				}
-				return "트리거";
+				return "트리거 시";
+			};
+
+			auto formatNumberCompact = [&](float a_value) {
+				std::string text = formatFloat1(a_value);
+				if (text.size() >= 2 && text.compare(text.size() - 2, 2, ".0") == 0) {
+					text.erase(text.size() - 2);
+				}
+				return text;
+			};
+
+			auto maxSpellDurationSeconds = [](RE::SpellItem* a_spell) {
+				if (!a_spell) {
+					return 0.0f;
+				}
+				float maxDuration = 0.0f;
+				for (const auto* effect : a_spell->effects) {
+					if (!effect || effect->effectItem.duration == 0u) {
+						continue;
+					}
+					maxDuration = std::max(maxDuration, static_cast<float>(effect->effectItem.duration));
+				}
+				return maxDuration;
+			};
+
+			auto actionDurationSeconds = [&](const Action& a_action) {
+				switch (a_action.type) {
+				case ActionType::kCastSpell:
+					return maxSpellDurationSeconds(a_action.spell);
+				case ActionType::kCastOnCrit:
+					return maxSpellDurationSeconds(a_action.spell);
+				case ActionType::kCastSpellAdaptiveElement: {
+					float maxDuration = 0.0f;
+					if (a_action.adaptiveFire) {
+						maxDuration = std::max(maxDuration, maxSpellDurationSeconds(a_action.adaptiveFire));
+					}
+					if (a_action.adaptiveFrost) {
+						maxDuration = std::max(maxDuration, maxSpellDurationSeconds(a_action.adaptiveFrost));
+					}
+					if (a_action.adaptiveShock) {
+						maxDuration = std::max(maxDuration, maxSpellDurationSeconds(a_action.adaptiveShock));
+					}
+					return maxDuration;
+				}
+				case ActionType::kSpawnTrap:
+					if (a_action.trapTtl > std::chrono::milliseconds::zero()) {
+						return static_cast<float>(a_action.trapTtl.count()) / 1000.0f;
+					}
+					return maxSpellDurationSeconds(a_action.spell);
+				default:
+					return 0.0f;
+				}
 			};
 
 			auto spellNameOr = [](RE::SpellItem* a_spell, std::string_view a_fallback) {
@@ -230,9 +283,23 @@ namespace CalamityAffixes
 					return {};
 				}
 
+				RunewordSummary::BaseType baseType = RunewordSummary::BaseType::kUnknown;
+				if (itemType.has_value()) {
+					baseType = (*itemType == LootItemType::kWeapon) ?
+					               RunewordSummary::BaseType::kWeapon :
+					               RunewordSummary::BaseType::kArmor;
+				}
+
+				std::string_view recipeId = a_autoAffix.id;
+				if (recipeId.size() > 5 && recipeId.substr(recipeId.size() - 5) == "_auto") {
+					recipeId = recipeId.substr(0, recipeId.size() - 5);
+				}
+				const auto summaryKey = RunewordSummary::ResolveEffectSummaryKey(recipeId, baseType);
+
 				const auto chancePct = std::clamp(a_autoAffix.procChancePct, 0.0f, 100.0f);
 				const auto icdSec = static_cast<float>(a_autoAffix.icd.count()) / 1000.0f;
 				const auto perTargetIcdSec = static_cast<float>(a_autoAffix.perTargetIcd.count()) / 1000.0f;
+				const auto durationSec = actionDurationSeconds(a_autoAffix.action);
 
 				std::string effectEn;
 				std::string effectKo;
@@ -293,44 +360,67 @@ namespace CalamityAffixes
 					break;
 				}
 
-				std::string headerEn = "On ";
+				std::string headerEn;
 				headerEn.append(triggerTextEn(a_autoAffix.trigger));
-				headerEn.append(": ");
-				headerEn.append(formatFloat1(chancePct));
-				headerEn.append("%");
-				if (icdSec > 0.0f) {
-					headerEn.append(" (ICD ");
-					headerEn.append(formatFloat1(icdSec));
-					headerEn.append("s)");
-				}
-				if (perTargetIcdSec > 0.0f) {
-					headerEn.append(" (per-target ");
-					headerEn.append(formatFloat1(perTargetIcdSec));
-					headerEn.append("s)");
+				headerEn.push_back(' ');
+				if (chancePct > 0.0f) {
+					headerEn.append(formatNumberCompact(chancePct));
+					headerEn.append("% chance to ");
+				} else {
+					headerEn.append("Always ");
 				}
 				if (!effectEn.empty()) {
-					headerEn.append(" | ");
 					headerEn.append(effectEn);
+				} else {
+					headerEn.append("trigger an effect");
+				}
+				if (icdSec > 0.0f) {
+					headerEn.append(" (Cooldown ");
+					headerEn.append(formatNumberCompact(icdSec));
+					headerEn.append("s)");
+				}
+				if (perTargetIcdSec > 0.0f) {
+					headerEn.append(" (Per-target cooldown ");
+					headerEn.append(formatNumberCompact(perTargetIcdSec));
+					headerEn.append("s)");
+				}
+				if (durationSec > 0.0f) {
+					headerEn.append(" (Duration ");
+					headerEn.append(formatNumberCompact(durationSec));
+					headerEn.append("s)");
 				}
 
-				std::string headerKo = "발동 ";
+				std::string headerKo;
 				headerKo.append(triggerTextKo(a_autoAffix.trigger));
-				headerKo.append(": ");
-				headerKo.append(formatFloat1(chancePct));
-				headerKo.append("%");
+				headerKo.push_back(' ');
+				if (chancePct > 0.0f) {
+					headerKo.append(formatNumberCompact(chancePct));
+					headerKo.append("% 확률로 ");
+				} else {
+					headerKo.append("항상 ");
+				}
+				const auto mappedKo = RunewordSummary::ActionSummaryTextByKey(summaryKey);
+				if (!mappedKo.empty()) {
+					headerKo.append(mappedKo);
+				} else if (!effectKo.empty()) {
+					headerKo.append(effectKo);
+				} else {
+					headerKo.append("효과 발동");
+				}
 				if (icdSec > 0.0f) {
-					headerKo.append(" (내부쿨 ");
-					headerKo.append(formatFloat1(icdSec));
+					headerKo.append(" (쿨타임 ");
+					headerKo.append(formatNumberCompact(icdSec));
 					headerKo.append("초)");
 				}
 				if (perTargetIcdSec > 0.0f) {
-					headerKo.append(" (대상별 ");
-					headerKo.append(formatFloat1(perTargetIcdSec));
+					headerKo.append(" (대상별 쿨타임 ");
+					headerKo.append(formatNumberCompact(perTargetIcdSec));
 					headerKo.append("초)");
 				}
-				if (!effectKo.empty()) {
-					headerKo.append(" | ");
-					headerKo.append(effectKo);
+				if (durationSec > 0.0f) {
+					headerKo.append(" (지속 ");
+					headerKo.append(formatNumberCompact(durationSec));
+					headerKo.append("초)");
 				}
 
 				switch (a_uiLanguageMode) {
