@@ -526,18 +526,19 @@ namespace CalamityAffixes
 		};
 
 		auto actionSummaryTextByKey = [](std::string_view a_key) -> std::string_view {
-			if (a_key == "adaptive_strike") return "적의 약한 원소 저항을 노려 적응형 원소 공격";
-			if (a_key == "adaptive_exposure") return "적의 강한 원소 저항을 파쇄해 받는 원소 피해 증가";
-			if (a_key == "signature_nadir") return "적을 공포에 빠뜨려 전열 붕괴 유도";
-			if (a_key == "signature_steel") return "근접 선제타 강화 일격";
-			if (a_key == "signature_malice") return "지속 독상처 누적";
-			if (a_key == "signature_stealth") return "위기 시 은신/재배치";
-			if (a_key == "signature_leaf") return "화염 점화 폭발";
-			if (a_key == "signature_ancients_pledge") return "생존형 수호 결계";
-			if (a_key == "signature_holy_thunder") return "성전 번개 충격파";
-			if (a_key == "signature_zephyr") return "기동력 상승과 질풍 타격";
-			if (a_key == "signature_pattern") return "연계 공격 리듬 강화";
-			if (a_key == "signature_kings_grace") return "성스러운 검격으로 추가 타격";
+			// Batch 1 (12 keys): handcrafted flavor lines to avoid one-size-fits-all template tone.
+			if (a_key == "adaptive_strike") return "적의 가장 약한 원소 저항 축을 자동 추적해 관통 타격";
+			if (a_key == "adaptive_exposure") return "적의 가장 높은 저항 축을 벗겨내 후속 원소 피해 창출";
+			if (a_key == "signature_nadir") return "대상을 공포에 몰아넣어 전열을 무너뜨림";
+			if (a_key == "signature_steel") return "단련된 강철 참격으로 교전 초반 주도권 확보";
+			if (a_key == "signature_malice") return "상처를 찢어 독성 손상을 길게 누적";
+			if (a_key == "signature_stealth") return "위기 순간 시야에서 이탈해 재배치 각 확보";
+			if (a_key == "signature_leaf") return "타격 지점에 불씨를 심어 점화 폭발 유도";
+			if (a_key == "signature_ancients_pledge") return "고대의 서약 결계로 급사 구간 완충";
+			if (a_key == "signature_holy_thunder") return "성전 번개를 떨궈 즉시 충격 피해 전개";
+			if (a_key == "signature_zephyr") return "질풍 흐름을 타고 기동 연계 타격";
+			if (a_key == "signature_pattern") return "연계 리듬을 살려 콤보 압박 유지";
+			if (a_key == "signature_kings_grace") return "성스러운 검격으로 결투형 마무리 일격";
 			if (a_key == "signature_strength") return "강타형 물리 충격";
 			if (a_key == "signature_edge") return "관통 사격 보조";
 			if (a_key == "signature_grief") return "초고속 연타 원소 참격";
