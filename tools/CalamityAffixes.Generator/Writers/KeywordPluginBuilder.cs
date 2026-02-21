@@ -217,13 +217,14 @@ public static class KeywordPluginBuilder
 
     private static CurrencyDropMode ResolveCurrencyDropMode(LootSpec? loot)
     {
-        var modeRaw = loot?.CurrencyDropMode ?? "runtime";
+        var modeRaw = loot?.CurrencyDropMode ?? "hybrid";
         var mode = modeRaw.Trim().ToLowerInvariant();
         return mode switch
         {
             CurrencyDropModeLeveledList => CurrencyDropMode.LeveledList,
             CurrencyDropModeHybrid => CurrencyDropMode.Hybrid,
-            _ => CurrencyDropMode.Runtime,
+            CurrencyDropModeRuntime => CurrencyDropMode.Runtime,
+            _ => CurrencyDropMode.Hybrid,
         };
     }
 

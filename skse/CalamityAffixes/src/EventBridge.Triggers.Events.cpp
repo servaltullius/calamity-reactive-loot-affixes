@@ -4,6 +4,7 @@
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/LootCurrencyLedger.h"
+#include "CalamityAffixes/LootCurrencySourceHelpers.h"
 #include "CalamityAffixes/LootEligibility.h"
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "CalamityAffixes/PrismaTooltip.h"
@@ -11,8 +12,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cmath>
-#include <limits>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -46,77 +45,6 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 	return !editorId.empty() && editorId.starts_with("CAFF_");
 }
 
-[[nodiscard]] bool IsBossContainerEditorId(
-	std::string_view a_editorId,
-	const std::vector<std::string>& a_allowContains,
-	const std::vector<std::string>& a_denyContains)
-{
-	if (a_editorId.empty()) {
-		return false;
-	}
-
-	if (CalamityAffixes::detail::MatchesAnyCaseInsensitiveMarker(a_editorId, a_denyContains)) {
-		return false;
-	}
-
-	if (!a_allowContains.empty()) {
-		return CalamityAffixes::detail::MatchesAnyCaseInsensitiveMarker(a_editorId, a_allowContains);
-	}
-
-	return CalamityAffixes::detail::ContainsCaseInsensitiveAscii(a_editorId, "boss");
-}
-
-[[nodiscard]] LootCurrencySourceTier ResolveActivatedLootCurrencySourceTier(
-	const RE::TESObjectREFR* a_ref,
-	const std::vector<std::string>& a_bossAllowContains,
-	const std::vector<std::string>& a_bossDenyContains)
-{
-	if (!a_ref) {
-		return LootCurrencySourceTier::kUnknown;
-	}
-
-	if (const auto* actor = a_ref->As<RE::Actor>(); actor && actor->IsDead()) {
-		return LootCurrencySourceTier::kCorpse;
-	}
-
-	const RE::TESForm* sourceForm = a_ref;
-	const RE::TESForm* sourceBase = a_ref->GetBaseObject();
-	if (!sourceBase || !sourceBase->As<RE::TESObjectCONT>()) {
-		return LootCurrencySourceTier::kUnknown;
-	}
-
-	const char* sourceEditorIdRaw = sourceForm->GetFormEditorID();
-	const char* baseEditorIdRaw = sourceBase->GetFormEditorID();
-	if (IsBossContainerEditorId(
-			sourceEditorIdRaw ? std::string_view(sourceEditorIdRaw) : std::string_view{},
-			a_bossAllowContains,
-			a_bossDenyContains) ||
-		IsBossContainerEditorId(
-			baseEditorIdRaw ? std::string_view(baseEditorIdRaw) : std::string_view{},
-			a_bossAllowContains,
-			a_bossDenyContains)) {
-		return LootCurrencySourceTier::kBossContainer;
-	}
-
-	return LootCurrencySourceTier::kContainer;
-}
-
-[[nodiscard]] std::string_view LootCurrencySourceTierLabel(LootCurrencySourceTier a_tier)
-{
-	switch (a_tier) {
-	case LootCurrencySourceTier::kCorpse:
-		return "corpse";
-	case LootCurrencySourceTier::kContainer:
-		return "container";
-	case LootCurrencySourceTier::kBossContainer:
-		return "boss_container";
-	case LootCurrencySourceTier::kWorld:
-		return "world";
-	default:
-		return "unknown";
-	}
-}
-
 [[nodiscard]] bool HasCurrencyDeathDistributionTag(const RE::TESObjectREFR* a_ref)
 {
 	if (!a_ref) {
@@ -134,26 +62,6 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 	}
 
 	return currencyDeathDistKeyword && actor->HasKeyword(currencyDeathDistKeyword);
-}
-
-[[nodiscard]] std::uint32_t GetInGameDayStamp() noexcept
-{
-	auto* calendar = RE::Calendar::GetSingleton();
-	if (!calendar) {
-		return 0u;
-	}
-
-	const float daysPassed = calendar->GetDaysPassed();
-	if (!std::isfinite(daysPassed) || daysPassed <= 0.0f) {
-		return 0u;
-	}
-
-	const auto dayFloor = std::floor(daysPassed);
-	if (dayFloor >= static_cast<double>(std::numeric_limits<std::uint32_t>::max())) {
-		return std::numeric_limits<std::uint32_t>::max();
-	}
-
-	return static_cast<std::uint32_t>(dayFloor);
 }
 }
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
@@ -494,7 +402,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		const auto sourceTier = ResolveActivatedLootCurrencySourceTier(
+		const auto sourceTier = detail::ResolveLootCurrencySourceTier(
 			sourceRef,
 			_loot.bossContainerEditorIdAllowContains,
 			_loot.bossContainerEditorIdDenyContains);
@@ -521,7 +429,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 
 		const float sourceChanceMultiplier = ResolveLootCurrencySourceChanceMultiplier(sourceTier);
 
-		const auto dayStamp = GetInGameDayStamp();
+		const auto dayStamp = detail::GetInGameDayStamp();
 		const auto sourceFormId = sourceRef->GetFormID();
 		const auto ledgerKey = detail::BuildLootCurrencyLedgerKey(
 			sourceTier,
@@ -547,7 +455,7 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			SKSE::log::debug(
 				"CalamityAffixes: activation loot rolls applied (sourceRef={:08X}, sourceTier={}, sourceChanceMult={:.2f}, runewordDropped={}, reforgeDropped={}, ledgerKey={:016X}, dayStamp={}).",
 				sourceFormId,
-				LootCurrencySourceTierLabel(sourceTier),
+				detail::LootCurrencySourceTierLabel(sourceTier),
 				sourceChanceMultiplier,
 				runewordDropGranted,
 				reforgeDropGranted,

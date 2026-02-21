@@ -25,22 +25,21 @@ public sealed class LootSpec
     [JsonPropertyName("chancePercent")]
     public double ChancePercent { get; init; }
 
-    // Chance (0-100) to grant a random runeword fragment when an affix is applied to a new item instance.
+    // Chance (0-100) to grant a random runeword fragment on eligible loot-roll events.
     [JsonPropertyName("runewordFragmentChancePercent")]
-    public double RunewordFragmentChancePercent { get; init; } = 1.0;
+    public double RunewordFragmentChancePercent { get; init; } = 5.0;
 
     [JsonPropertyName("reforgeOrbChancePercent")]
-    public double ReforgeOrbChancePercent { get; init; } = 6.0;
+    public double ReforgeOrbChancePercent { get; init; } = 3.0;
 
-    // Currency drop policy:
-    // - runtime: SKSE runtime injection only
-    // - leveledList: inject into vanilla LVLI only
-    // - hybrid: both runtime + leveledList
+    // Currency drop policy is now hybrid-only.
+    // Runtime enforces 'hybrid' even if legacy values are supplied for backward compatibility.
     [JsonPropertyName("currencyDropMode")]
-    public string CurrencyDropMode { get; init; } = "runtime";
+    public string CurrencyDropMode { get; init; } = "hybrid";
 
-    // Optional explicit LVLI targets ("ModName.esm|00ABCDEF").
-    // If omitted/empty while currencyDropMode is leveledList/hybrid, generator uses curated defaults.
+    // Optional explicit LVLI targets used by hybrid distribution path.
+    // Format: "ModName.esm|00ABCDEF".
+    // If omitted/empty, generator uses curated defaults.
     [JsonPropertyName("currencyLeveledListTargets")]
     public List<string>? CurrencyLeveledListTargets { get; init; }
 

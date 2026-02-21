@@ -172,7 +172,7 @@ public static class GeneratorRunner
 
     private static bool RequiresLeveledListResolver(LootSpec loot)
     {
-        var mode = loot.CurrencyDropMode?.Trim().ToLowerInvariant() ?? "runtime";
+        var mode = loot.CurrencyDropMode?.Trim().ToLowerInvariant() ?? "hybrid";
         return mode is "leveledlist" or "hybrid";
     }
 
