@@ -164,8 +164,11 @@ namespace RuntimeGateStoreChecks
 				prismaCoreText->find("{ \"detail\", entry.effectDetailText }") == std::string::npos ||
 				prismaUiText->find("const fallbackSummary = typeof item?.summary === \"string\"") == std::string::npos ||
 				prismaUiText->find("const fallbackDetail = typeof item?.detail === \"string\"") == std::string::npos ||
+				prismaUiText->find("function resolveRecipeFlavorDetailText(item)") == std::string::npos ||
+				prismaUiText->find("function buildRunewordTooltipLikeText(item") == std::string::npos ||
 				prismaUiText->find("function buildRecipePreviewTooltipText(item)") == std::string::npos ||
-				prismaUiText->find("const recipePreviewText = buildRecipePreviewTooltipText(getSelectedRecipeItem());") == std::string::npos) {
+				prismaUiText->find("buildRunewordTooltipLikeText(getSelectedRecipeItem()") == std::string::npos ||
+				prismaUiText->find("const effectTooltipText = buildRunewordTooltipLikeText(selectedRecipe") == std::string::npos) {
 				std::cerr << "runeword_recipe_tooltip_text: recipe tooltip text enrichment guard is missing\n";
 				return false;
 			}

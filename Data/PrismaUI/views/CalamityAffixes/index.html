@@ -1611,7 +1611,10 @@
       function applyTooltipPlacement() {
         const hasTooltip = Boolean(tooltipTextState);
         const hasRunewordAffix = Boolean(runewordAffixTextState);
-        const recipePreviewText = buildRecipePreviewTooltipText(getSelectedRecipeItem());
+        const recipePreviewText = buildRunewordTooltipLikeText(getSelectedRecipeItem(), {
+          includeName: true,
+          includeDetail: true
+        });
         const effectiveRunewordAffixText = hasRunewordAffix ? runewordAffixTextState : recipePreviewText;
         const hasEffectiveRunewordAffix = Boolean(effectiveRunewordAffixText);
 
@@ -2231,6 +2234,113 @@
         return resolveRecipeSummaryText(item);
       }
 
+      function resolveRecipeFlavorDetailText(item) {
+        const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
+        switch (key) {
+          case "adaptive_strike":
+            return t(
+              "On hit, follows the target's lowest resistance lane for stable damage.",
+              "적중 시 대상의 가장 낮은 저항 축을 따라 안정적으로 피해를 넣습니다."
+            );
+          case "adaptive_exposure":
+            return t(
+              "On hit, breaks the target's highest resistance first to open follow-up damage.",
+              "적중 시 대상의 가장 높은 저항을 먼저 깎아 후속 피해 창을 엽니다."
+            );
+          case "signature_infinity":
+            return t(
+              "Adaptive shred is default. In manual mode, you can lock Fire/Frost/Shock.",
+              "기본은 적응형 파쇄이며, 수동 모드에서 화염/냉기/번개를 고정할 수 있습니다."
+            );
+          case "signature_last_wish":
+            return t(
+              "Adaptive shred is default. In manual mode, lock Inferno/Frost/Lightning variants.",
+              "기본은 적응형 파쇄이며, 수동 모드에서 열화/빙결/전격 변형을 고정할 수 있습니다."
+            );
+          case "signature_heart_of_the_oak":
+            return t(
+              "In boss phases, it prioritizes breaking the highest resistance first (StrongestResist).",
+              "보스 구간에서 가장 높은 저항 축(StrongestResist)부터 먼저 파쇄합니다."
+            );
+          case "signature_call_to_arms":
+            return t(
+              "Triggers on hit and grants a short defensive warcry buff.",
+              "적중 시 발동해 짧은 방어형 전투 함성 버프를 부여합니다."
+            );
+          case "signature_faith":
+            return t(
+              "Fanatic Surge: +35 Move Speed, +60 Damage Resist for 6s.",
+              "광신의 돌격: 6초 동안 이동속도 +35, 피해저항 +60."
+            );
+          case "signature_doom":
+          case "signature_dream":
+            return t(
+              "Uses dedicated runeword strike spells instead of generic dynamic spells.",
+              "범용 동적 스펠 대신 룬워드 전용 타격 스펠을 사용합니다."
+            );
+          case "poison_bloom":
+          case "tar_bloom":
+          case "siphon_bloom":
+            return t(
+              "Bloom-style damage-over-time effect. Faster hit rate improves uptime value.",
+              "블룸형 지속 피해 효과입니다. 적중 속도가 빠를수록 유지 효율이 좋아집니다."
+            );
+          case "curse_fragile":
+          case "curse_slow_attack":
+          case "curse_fear":
+          case "curse_frenzy":
+            return t(
+              "Control/debuff curse effect with cooldown and per-target safeguards.",
+              "쿨다운과 대상별 가드가 있는 제어/디버프 저주 효과입니다."
+            );
+          case "self_flame_cloak":
+          case "self_frost_cloak":
+          case "self_shock_cloak":
+            return t(
+              "Self-cloak aura effect for close-range pressure.",
+              "근접 압박에 유리한 자가 망토 오라 효과입니다."
+            );
+          case "self_oakflesh":
+          case "self_stoneflesh":
+          case "self_ironflesh":
+          case "self_ebonyflesh":
+            return t(
+              "Flesh armor effect that improves frontline survivability uptime.",
+              "전선에서 버티는 시간을 늘려주는 플레시 방어 효과입니다."
+            );
+          case "self_meditation":
+            return t(
+              "Sustain effect for keeping resources up during long boss phases.",
+              "장기 보스전에서 자원 유지를 돕는 지속 효과입니다."
+            );
+          case "self_phase":
+            return t(
+              "Mobility effect for emergency repositioning and reset timing.",
+              "긴급 재배치와 리셋 타이밍 확보용 기동 효과입니다."
+            );
+          case "self_haste":
+            return t(
+              "Haste effect that raises action speed and clear tempo.",
+              "행동 속도와 클리어 템포를 올리는 가속 효과입니다."
+            );
+          case "self_ward":
+          case "self_barrier":
+          case "self_phoenix":
+            return t(
+              "Mitigation effect for surviving danger windows.",
+              "위험 구간을 버티기 위한 피해 완화 효과입니다."
+            );
+          case "signature_spirit":
+          case "signature_insight":
+            return t(
+              "Hybrid sustain effect supporting both combat flow and resource recovery.",
+              "전투 흐름과 자원 회복을 함께 챙기는 하이브리드 유지 효과입니다."
+            );
+          default:
+            return "";
+        }
+      }
+
       function resolveRecipeDetailText(item) {
         const fallbackDetail = typeof item?.detail === "string" ? item.detail.trim() : "";
         const mergeDetail = (mappedDetail) => {
@@ -2240,120 +2350,47 @@
           }
           return fallbackDetail || mapped;
         };
-        const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
-        switch (key) {
-          case "adaptive_strike":
-            return mergeDetail(t(
-              "On hit, converts to the target's weakest elemental resistance lane for stable damage.",
-              "적중 시 대상의 가장 낮은 원소 저항 축을 따라 피해가 결정됩니다."
-            ));
-          case "adaptive_exposure":
-            return mergeDetail(t(
-              "On hit, applies exposure/shred to the target's strongest resistance lane.",
-              "적중 시 대상의 가장 높은 원소 저항 축에 노출/파쇄를 적용합니다."
-            ));
-          case "signature_infinity":
-            return mergeDetail(t(
-              "Default is adaptive exposure. Manual mode can lock Fire/Frost/Shock exposure.",
-              "기본은 적응형 노출이며, 수동 모드에서 화염/냉기/번개 노출 고정이 가능합니다."
-            ));
-          case "signature_last_wish":
-            return mergeDetail(t(
-              "Default is adaptive exposure. Manual mode can lock Inferno/Frost/Lightning variants.",
-              "기본은 적응형 노출이며, 수동 모드에서 열화/빙결/전격 변형을 고정할 수 있습니다."
-            ));
-          case "signature_heart_of_the_oak":
-            return mergeDetail(t(
-              "Uses StrongestResist logic to prioritize breaking the highest elemental resist lane.",
-              "StrongestResist 로직으로 대상의 가장 높은 원소 저항 축을 우선 파쇄합니다."
-            ));
-          case "signature_call_to_arms":
-            return mergeDetail(t(
-              "Proc trigger is on hit. Applies a short defensive warcry buff.",
-              "발동 트리거는 적중이며, 짧은 방어형 전투 함성 버프를 부여합니다."
-            ));
-          case "signature_faith":
-            return mergeDetail(t(
-              "Fanatic Surge: Move Speed +35 and Damage Resist +60 for 6 seconds.",
-              "광신의 돌격: 6초 동안 이동속도 +35, 피해저항 +60."
-            ));
-          case "signature_doom":
-          case "signature_dream":
-            return mergeDetail(t(
-              "Uses dedicated runeword strike spells instead of generic dynamic spell payloads.",
-              "범용 동적 스펠 대신 전용 룬워드 타격 스펠을 사용합니다."
-            ));
-          case "poison_bloom":
-          case "tar_bloom":
-          case "siphon_bloom":
-            return mergeDetail(t(
-              "Bloom-style DoT profile. Practical value scales with repeated on-hit uptime.",
-              "블룸형 DoT 프로파일입니다. 적중 누적으로 유지시간 체감이 올라갑니다."
-            ));
-          case "curse_fragile":
-          case "curse_slow_attack":
-          case "curse_fear":
-          case "curse_frenzy":
-            return mergeDetail(t(
-              "Curse profile with control/debuff focus. Uses cooldown and per-target guards.",
-              "군중제어/디버프 중심 저주 프로파일이며 쿨다운과 대상별 가드가 적용됩니다."
-            ));
-          case "self_flame_cloak":
-          case "self_frost_cloak":
-          case "self_shock_cloak":
-            return mergeDetail(t(
-              "Aura-like self cloak profile for close-range pressure.",
-              "근접 압박용 오라 감성의 자가 망토 프로파일입니다."
-            ));
-          case "self_oakflesh":
-          case "self_stoneflesh":
-          case "self_ironflesh":
-          case "self_ebonyflesh":
-            return mergeDetail(t(
-              "Defensive flesh profile that prioritizes survivability uptime.",
-              "생존 유지에 초점을 둔 방어형 플레시 프로파일입니다."
-            ));
-          case "self_meditation":
-            return mergeDetail(t(
-              "Sustain profile focused on magicka/resource uptime during prolonged fights.",
-              "장기전에서 마력/자원 유지력을 높이는 지속형 프로파일입니다."
-            ));
-          case "self_phase":
-            return mergeDetail(t(
-              "Phase/mobility profile for emergency reposition and survivability windows.",
-              "긴급 재배치와 생존 창 확보에 유리한 위상/기동 프로파일입니다."
-            ));
-          case "self_haste":
-            return mergeDetail(t(
-              "Tempo profile that boosts combat pace and action frequency.",
-              "전투 템포와 행동 빈도를 끌어올리는 가속 프로파일입니다."
-            ));
-          case "self_ward":
-          case "self_barrier":
-          case "self_phoenix":
-            return mergeDetail(t(
-              "Defensive uptime profile with mitigation-oriented self buffs.",
-              "피해 완화 중심 자가 버프로 생존 시간을 늘리는 방어 프로파일입니다."
-            ));
-          case "signature_spirit":
-          case "signature_insight":
-            return mergeDetail(t(
-              "Hybrid sustain profile balancing offense flow and resource recovery.",
-              "공격 흐름과 자원 회복을 함께 챙기는 하이브리드 유지 프로파일입니다."
-            ));
-          default:
-            return fallbackDetail;
+        return mergeDetail(resolveRecipeFlavorDetailText(item));
+      }
+
+      function buildRunewordTooltipLikeText(item, a_options = {}) {
+        if (!item) return "";
+        const includeName = a_options?.includeName !== false;
+        const includeDetail = a_options?.includeDetail !== false;
+        const lines = [];
+
+        if (includeName) {
+          const name = typeof item?.name === "string" ? item.name.trim() : "";
+          const runes = typeof item?.runes === "string" ? item.runes.trim() : "";
+          if (name && runes) {
+            lines.push(`${name} [${runes}]`);
+          } else if (name) {
+            lines.push(name);
+          } else if (runes) {
+            lines.push(runes);
+          }
         }
+
+        const summaryText = resolveRecipeNumericSummaryText(item);
+        if (summaryText) {
+          lines.push(summaryText);
+        }
+
+        if (includeDetail) {
+          const detailText = resolveRecipeFlavorDetailText(item);
+          if (detailText) {
+            lines.push(detailText);
+          }
+        }
+
+        return lines.join("\n");
       }
 
       function buildRecipePreviewTooltipText(item) {
-        if (!item) return "";
-        const summaryText = resolveRecipeNumericSummaryText(item);
-        if (!summaryText) {
-          return "";
-        }
-
-        return `${t("Effect", "효과")}: ${summaryText}`;
+        return buildRunewordTooltipLikeText(item, {
+          includeName: true,
+          includeDetail: true
+        });
       }
 
       function resolveRecipeBaseBadge(item) {
@@ -2424,13 +2461,18 @@
           const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
           const base = resolveRecipeBaseBadge(item).text.toLowerCase();
           const summary = resolveRecipeNumericSummaryText(item).toLowerCase();
-          const detail = resolveRecipeDetailText(item).toLowerCase();
+          const detail = resolveRecipeFlavorDetailText(item).toLowerCase();
+          const tooltipText = buildRunewordTooltipLikeText(item, {
+            includeName: true,
+            includeDetail: true
+          }).toLowerCase();
           return (
             name.includes(query) ||
             runes.includes(query) ||
             base.includes(query) ||
             summary.includes(query) ||
-            detail.includes(query)
+            detail.includes(query) ||
+            tooltipText.includes(query)
           );
         });
 
@@ -2474,7 +2516,10 @@
           const runes = typeof item?.runes === "string" ? item.runes : "";
           const baseBadge = resolveRecipeBaseBadge(item);
           const summaryText = resolveRecipeNumericSummaryText(item);
-          const detailText = resolveRecipeDetailText(item);
+          const tooltipLikeText = buildRunewordTooltipLikeText(item, {
+            includeName: true,
+            includeDetail: true
+          });
           const selected = Boolean(item?.selected);
           if (!token || !name) {
             continue;
@@ -2503,18 +2548,13 @@
             button.appendChild(summary);
           }
 
-          const hoverParts = [];
-          if (summaryText) {
-            hoverParts.push(`${t("Effect", "효과")}: ${summaryText}`);
-          }
-          if (detailText) {
-            hoverParts.push(`${t("Detail", "상세")}: ${detailText}`);
-          }
-          hoverParts.push(baseBadge.text);
-          const hoverText = hoverParts.filter((entry) => entry && entry.trim()).join("\n");
+          const hoverText = tooltipLikeText.trim();
           if (hoverText) {
             button.title = hoverText;
-            button.setAttribute("aria-label", `${name}. ${hoverText.replace(/\n/g, ". ")}`);
+            button.setAttribute("aria-label", hoverText.replace(/\n/g, ". "));
+          } else {
+            button.removeAttribute("title");
+            button.setAttribute("aria-label", name);
           }
 
           button.addEventListener("click", () => {
@@ -2666,13 +2706,16 @@
           }
 
           if (selectedRecipe) {
-            const effectSummary = resolveRecipeNumericSummaryText(selectedRecipe);
+            const effectTooltipText = buildRunewordTooltipLikeText(selectedRecipe, {
+              includeName: true,
+              includeDetail: true
+            });
             const baseBadge = resolveRecipeBaseBadge(selectedRecipe);
             const effectLine = document.createElement("div");
             effectLine.className = "rwRecipeEffectLine";
-            effectLine.textContent = effectSummary
-              ? `${t("Effect", "효과")}: ${effectSummary}`
-              : `${t("Effect", "효과")}: ${t("No summary available", "요약 정보 없음")}`;
+            effectLine.textContent = effectTooltipText
+              ? effectTooltipText
+              : t("No runeword tooltip available.", "룬워드 툴팁이 없습니다.");
             runewordPanelStatus.appendChild(effectLine);
 
             const baseLine = document.createElement("div");
