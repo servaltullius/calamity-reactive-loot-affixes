@@ -16,6 +16,18 @@
   - Adaptive 수동 모드의 `Auto` 상태를 툴팁에 명확히 표시합니다.
   - 린트가 `records.spells[]`와 Adaptive `modeCycle` 정책을 인식하도록 보강했습니다.
 
+### 추가 업데이트 (문서/가이드)
+- **룬워드 효과 설명 문서 갱신**
+  - `doc/5.룬워드_94개_효과_정리.md`를 최신 런타임 기준으로 교정했습니다.
+  - `Call to Arms` 트리거 표기(피격 -> 적중), `Faith` 효과 설명(광신의 돌격) 등 최신 상태 반영.
+- **Nexus 상세 설명 동기화**
+  - `docs/NEXUS_DESCRIPTION.md`
+  - `docs/NEXUS_DESCRIPTION_BBCODE.txt`
+  - 현재 빌드 기준 정책(직접 정의 16 + 자동 합성 78, Adaptive 수동 오버라이드)을 반영했습니다.
+- **94개 룬워드 변경 비교표 추가**
+  - `docs/reviews/2026-02-21-runeword-94-diff-rc2-to-rc6.md`
+  - 기준: `v1.2.18-rc2 -> v1.2.18-rc6`, 결과: 변경 29 / 유지 65.
+
 ### 검증
 - `python3 tools/compose_affixes.py --check` 통과
 - `dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data` 통과
