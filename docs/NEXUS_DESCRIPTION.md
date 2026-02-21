@@ -15,10 +15,9 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 #### 다중 어픽스 시스템
 - 아이템당 1~3개 어픽스 부여 (70% / 25% / 5%)
 - 아이템 이름에 ★ / ★★ / ★★★ 표시로 어픽스 수 구분
-- Prefix (57개): 전투 중 확률 발동(Proc) 효과 — Firestorm, Thunderbolt, Soul Trap 등
-- Suffix (60개): 장비 착용 시 상시 적용되는 패시브 스탯 보너스 — 체력 +50, 화염 저항 +10% 등
+- 전투/유틸 중심 어픽스 효과 구성 (Proc, 트리거 기반 효과 등)
 - 3단계 티어: Minor (60%) / Major (30%) / Grand (10%)
-- 20개 패밀리 (Health, Magicka, Stamina, 각종 저항, 크리티컬 데미지 등)
+- 빌드/레시피/룬워드 흐름에 맞춰 어픽스가 동작하도록 설계
 
 #### 전투 시스템
 - Proc 발동 + ICD(내부 쿨다운) + 중복 히트 방지
@@ -79,10 +78,9 @@ When an item is looted or crafted and enters the player inventory, 1 to 3 affixe
 #### Multi-Affix System
 - 1 to 3 affixes per item (70% / 25% / 5%)
 - Items display ★ / ★★ / ★★★ prefix to indicate affix count
-- Prefix (57): Combat proc effects — Firestorm, Thunderbolt, Soul Trap, etc.
-- Suffix (60): Passive stat bonuses while equipped — Health +50, Fire Resist +10%, etc.
+- Combat/utility-focused affix effects (proc and trigger-based behavior)
 - 3 tiers: Minor (60%) / Major (30%) / Grand (10%)
-- 20 families (Health, Magicka, Stamina, Resistances, Critical Damage, etc.)
+- Designed to align with build, recipe, and runeword progression flow
 
 #### Combat System
 - Proc chance + ICD (internal cooldown) + duplicate-hit protection
