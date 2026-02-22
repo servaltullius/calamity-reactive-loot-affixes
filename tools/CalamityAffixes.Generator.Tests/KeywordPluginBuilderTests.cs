@@ -212,7 +212,7 @@ public sealed class KeywordPluginBuilderTests
     }
 
     [Fact]
-    public void BuildKeywordPlugin_WhenHybridDropConfigured_CreatesDeathDropPerks()
+    public void BuildKeywordPlugin_WhenHybridDropConfigured_CreatesDeathDropPerksForBackwardCompatibility()
     {
         var spec = new AffixSpec
         {

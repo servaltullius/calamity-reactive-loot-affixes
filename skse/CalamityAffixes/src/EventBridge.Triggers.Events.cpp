@@ -31,8 +31,6 @@ constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 constexpr std::size_t kDotObservedMagicEffectsMaxEntries = 4096;
 constexpr std::string_view kRunewordFragmentEditorIdPrefix = "CAFF_RuneFrag_";
 constexpr std::string_view kReforgeOrbEditorId = "CAFF_Misc_ReforgeOrb";
-constexpr std::string_view kDeathDropRunewordPerkEditorId = "CAFF_Perk_DeathDropRunewordFragment";
-constexpr std::string_view kDeathDropReforgePerkEditorId = "CAFF_Perk_DeathDropReforgeOrb";
 constexpr std::string_view kRunewordDropListEditorId = "CAFF_LItem_RunewordFragmentDrops";
 constexpr std::string_view kReforgeDropListEditorId = "CAFF_LItem_ReforgeOrbDrops";
 using LootCurrencySourceTier = detail::LootCurrencySourceTier;
@@ -45,10 +43,8 @@ struct CorpseCurrencyInventorySnapshot
 
 struct CorpseCurrencyDropProbe
 {
-	bool runewordPerkFound{ false };
-	bool reforgePerkFound{ false };
-	bool runewordPerkDistributed{ false };
-	bool reforgePerkDistributed{ false };
+	bool runewordFragmentRecordFound{ false };
+	bool reforgeOrbRecordFound{ false };
 	bool runewordDropListFound{ false };
 	bool reforgeDropListFound{ false };
 	std::int32_t runewordChanceNone{ -1 };
@@ -103,20 +99,11 @@ struct CorpseCurrencyDropProbe
 [[nodiscard]] CorpseCurrencyDropProbe BuildCorpseCurrencyDropProbe(RE::Actor* a_actor)
 {
 	CorpseCurrencyDropProbe probe{};
-
-	auto* runewordPerk = RE::TESForm::LookupByEditorID<RE::BGSPerk>(kDeathDropRunewordPerkEditorId.data());
-	auto* reforgePerk = RE::TESForm::LookupByEditorID<RE::BGSPerk>(kDeathDropReforgePerkEditorId.data());
-	probe.runewordPerkFound = runewordPerk != nullptr;
-	probe.reforgePerkFound = reforgePerk != nullptr;
-
-	if (a_actor) {
-		if (runewordPerk) {
-			probe.runewordPerkDistributed = a_actor->HasPerk(runewordPerk);
-		}
-		if (reforgePerk) {
-			probe.reforgePerkDistributed = a_actor->HasPerk(reforgePerk);
-		}
-	}
+	(void)a_actor;
+	probe.runewordFragmentRecordFound =
+		RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_RuneFrag_El") != nullptr;
+	probe.reforgeOrbRecordFound =
+		RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(kReforgeOrbEditorId.data()) != nullptr;
 
 	auto* runewordDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>(kRunewordDropListEditorId.data());
 	auto* reforgeDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>(kReforgeDropListEditorId.data());
@@ -438,12 +425,10 @@ struct CorpseCurrencyDropProbe
 			const auto probe = BuildCorpseCurrencyDropProbe(dying);
 			const auto snapshot = SnapshotCorpseCurrencyInventory(dying);
 			spdlog::info(
-				"CalamityAffixes: corpse-drop probe (dying={}, runewordPerkFound={}, reforgePerkFound={}, runewordPerkDistributed={}, reforgePerkDistributed={}, runewordDropListFound={}, reforgeDropListFound={}, chanceNone(runeword/reforge)={}/{}, corpseCurrencySnapshotAtDeathEvent(runewordFragments/reforgeOrbs)={}/{}).",
+				"CalamityAffixes: corpse-drop probe (dying={}, runewordFragmentRecordFound={}, reforgeOrbRecordFound={}, runewordDropListFound={}, reforgeDropListFound={}, chanceNone(runeword/reforge)={}/{}, corpseCurrencySnapshotAtDeathEvent(runewordFragments/reforgeOrbs)={}/{}).",
 				dying->GetName(),
-				probe.runewordPerkFound,
-				probe.reforgePerkFound,
-				probe.runewordPerkDistributed,
-				probe.reforgePerkDistributed,
+				probe.runewordFragmentRecordFound,
+				probe.reforgeOrbRecordFound,
 				probe.runewordDropListFound,
 				probe.reforgeDropListFound,
 				probe.runewordChanceNone,
@@ -522,7 +507,7 @@ struct CorpseCurrencyDropProbe
 		}
 		if (sourceTier == LootCurrencySourceTier::kCorpse) {
 			// Hybrid contract (SPID corpse authority):
-			// corpse currency drops are handled by SPID Perk distribution + AddLeveledListOnDeath,
+			// corpse currency drops are handled by SPID Item distribution on actor inventory,
 			// so activation-time runtime rolls are skipped.
 			if (_loot.debugLog) {
 				SKSE::log::debug(

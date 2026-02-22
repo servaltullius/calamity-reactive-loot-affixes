@@ -185,6 +185,16 @@ def _lint_spec(
 
     spid_rules = _as_list(keywords.get("spidRules"))
     if spid_rules is not None:
+        def is_legacy_corpse_drop_perk_line(raw_line: str) -> bool:
+            line_trimmed = raw_line.lstrip()
+            if not line_trimmed.lower().startswith("perk"):
+                return False
+            lowered = line_trimmed.lower()
+            return (
+                "caff_perk_deathdroprunewordfragment" in lowered
+                or "caff_perk_deathdropreforgeorb" in lowered
+            )
+
         for idx, raw_rule in enumerate(spid_rules):
             rule = _as_dict(raw_rule)
             if not rule:
@@ -198,7 +208,12 @@ def _lint_spec(
             if line.lstrip().lower().startswith("deathitem"):
                 errors.append(
                     f"keywords.spidRules[{idx}].line uses DeathItem distribution. "
-                    "Hybrid policy requires Perk distribution + AddLeveledListOnDeath."
+                    "Hybrid policy requires SPID Item distribution."
+                )
+            elif is_legacy_corpse_drop_perk_line(line):
+                errors.append(
+                    f"keywords.spidRules[{idx}].line uses legacy corpse-drop Perk distribution. "
+                    "Hybrid policy requires SPID Item distribution."
                 )
 
     seen_ids: Dict[str, int] = {}

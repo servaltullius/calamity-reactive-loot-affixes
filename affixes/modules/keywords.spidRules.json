@@ -1,10 +1,10 @@
 [
   {
-    "comment": "Runeword fragments on death via SPID-distributed perk (compatibility-safe; does not rely on SPID DeathItem pipeline).",
-    "line": "Perk = CAFF_Perk_DeathDropRunewordFragment|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal,-PlayerKeyword|NONE|NONE|NONE|1|100"
+    "comment": "Runeword fragments via SPID Item distribution (actor inventory -> corpse loot on death).",
+    "line": "Item = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal,-PlayerKeyword|NONE|NONE|NONE|1|100"
   },
   {
-    "comment": "Reforge orb on death via SPID-distributed perk (compatibility-safe; does not rely on SPID DeathItem pipeline).",
-    "line": "Perk = CAFF_Perk_DeathDropReforgeOrb|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal,-PlayerKeyword|NONE|NONE|NONE|1|100"
+    "comment": "Reforge orb via SPID Item distribution (actor inventory -> corpse loot on death).",
+    "line": "Item = CAFF_LItem_ReforgeOrbDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal,-PlayerKeyword|NONE|NONE|NONE|1|100"
   }
 ]

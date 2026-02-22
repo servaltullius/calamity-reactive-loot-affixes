@@ -20,18 +20,18 @@
 |---|---|---|---|---|---|
 | NPC `Death Item(DEAT/INAM)` 직접 편집 | 중 | 낮음(필드 충돌) | 높음 | 다른 모드와 레코드 충돌 쉬움 | 낮음 |
 | `DeathItem_DISTR.ini` (SPID DeathItem) | 낮음 | 중 | 높음 | On-Death 분배 이슈/버전 민감 사례 존재 | 중 |
-| `Perk_DISTR.ini` + `AddLeveledListOnDeath` | 중 | 높음 | 높음 | 설정 복잡도 증가 | **높음(채택)** |
+| `Item_DISTR.ini` (SPID Item) | 낮음 | 높음 | 높음 | 분배 시점(로드 기준) 특성 이해 필요 | **높음(채택)** |
 | Papyrus `OnDeath` + `AddItem` | 중~높음 | 중 | 낮음(즉시지급으로 오해 가능) | 스크립트 의존/디버깅 비용 증가 | 중~낮음 |
 
 ## 최종 채택안 (고정)
 
 ### 1) 시체 드랍 경로
 
-- SPID는 **DeathItem 직접 분배를 사용하지 않고**, 대상 액터에 **Perk를 분배**한다.
-- 해당 Perk는 EntryPoint `AddLeveledListOnDeath`로 LVLI를 시체 인벤토리에 주입한다.
-- 현재 생성 대상 Perk:
-  - `CAFF_Perk_DeathDropRunewordFragment`
-  - `CAFF_Perk_DeathDropReforgeOrb`
+- SPID는 **DeathItem 직접 분배를 사용하지 않고**, 대상 액터에 **Item**을 직접 분배한다.
+- 분배 아이템은 LVLI를 사용한다.
+  - `CAFF_LItem_RunewordFragmentDrops`
+  - `CAFF_LItem_ReforgeOrbDrops`
+- 액터 인벤토리 선지급 -> 사망 시 시체 루팅으로 획득하는 경로를 사용한다.
 
 ### 2) 상자/월드 경로
 
@@ -42,7 +42,7 @@
 
 - SPID 규칙 소스: `affixes/modules/keywords.spidRules.json`
 - SPID 생성물: `Data/CalamityAffixes_DISTR.ini`
-- Perk/LVLI 생성 코드: `tools/CalamityAffixes.Generator/Writers/KeywordPluginBuilder.cs`
+- LVLI 생성 코드: `tools/CalamityAffixes.Generator/Writers/KeywordPluginBuilder.cs`
 - 정책 문서 링크(README): `README.md`의 “드랍 경로 정책” 섹션
 
 ## 안티-회귀 체크리스트
@@ -50,23 +50,23 @@
 드랍 경로를 수정한 PR/릴리즈 전, 아래를 반드시 점검합니다.
 
 1. `_DISTR.ini`에 `DeathItem = ...` 라인이 재유입되지 않았는가
-2. ESP에 아래 체인이 유지되는가
-   - `CAFF_Perk_DeathDropRunewordFragment` -> `AddLeveledListOnDeath` -> `CAFF_LItem_RunewordFragmentDrops`
-   - `CAFF_Perk_DeathDropReforgeOrb` -> `AddLeveledListOnDeath` -> `CAFF_LItem_ReforgeOrbDrops`
+2. `_DISTR.ini`에 아래 Item 라인이 유지되는가
+   - `Item = CAFF_LItem_RunewordFragmentDrops|...`
+   - `Item = CAFF_LItem_ReforgeOrbDrops|...`
 3. 실플레이 루팅에서 타 모드 드랍 회귀가 없는가
 4. 바닥 월드스폰 경로가 재활성화되지 않았는가
 
 ## 운영 메모
 
 - MCM 슬라이더(`loot.runewordFragmentChancePercent`, `loot.reforgeOrbChancePercent`)는
-  하이브리드 정책에서도 동일한 드랍 체계에 반영된다.
-- 시체 루팅 결과가 “0개”일 때는 먼저 **분배(Perk 배포)**와 **사망 실행(EntryPoint 실행)**을 분리해 진단한다.
+  실시간 SPID 재분배를 트리거하지 않습니다. (SPID Item 경로는 생성기/배포 시점 값 기준)
+- 시체 루팅 결과가 “0개”일 때는 먼저 **분배(Item 배포)**와 **ActorType 필터 매칭**을 확인한다.
 
 ## 참고 근거(외부)
 
 - SPID 최신 릴리스(7.2.0 계열):  
   https://api.github.com/repos/powerof3/Spell-Perk-Item-Distributor/releases/latest
-- SPID On-Death 분배 이슈 사례 및 해결 코멘트:  
+- SPID On-Death 관련 이슈 사례(비교 참고):  
   https://api.github.com/repos/powerof3/Spell-Perk-Item-Distributor/issues/80  
   https://api.github.com/repos/powerof3/Spell-Perk-Item-Distributor/issues/80/comments
 - UESP 레코드 포맷 참고(NPC/PERK/LVLI):  

@@ -545,6 +545,45 @@ public sealed class AffixSpecLoaderTests
     }
 
     [Fact]
+    public void Load_WhenSpidRuleUsesLegacyCorpseDropPerk_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "loot": {
+            "currencyDropMode": "hybrid"
+          },
+          "keywords": {
+            "tags": [{"editorId":"CAFF_TAG_DOT","name":"dot"}],
+            "affixes": [],
+            "kidRules": [],
+            "spidRules": [
+              {
+                "line": "Perk = CAFF_Perk_DeathDropRunewordFragment|ActorTypeNPC|NONE|NONE|NONE|1|100"
+              }
+            ]
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("legacy corpse-drop Perk distribution", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Load_WhenModKeyContainsPathSegments_Throws()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));

@@ -180,6 +180,17 @@ public static class AffixSpecLoader
 
     private static void ValidateSpidRulePolicy(KeywordSpec keywords)
     {
+        static bool IsLegacyCorpseDropPerkLine(string line)
+        {
+            if (!line.TrimStart().StartsWith("Perk", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return line.Contains("CAFF_Perk_DeathDropRunewordFragment", StringComparison.OrdinalIgnoreCase) ||
+                   line.Contains("CAFF_Perk_DeathDropReforgeOrb", StringComparison.OrdinalIgnoreCase);
+        }
+
         for (var i = 0; i < keywords.SpidRules.Count; i += 1)
         {
             var rule = keywords.SpidRules[i];
@@ -204,7 +215,14 @@ public static class AffixSpecLoader
             {
                 throw new InvalidDataException(
                     $"keywords.spidRules[{i}] uses DeathItem distribution, which is disallowed in hybrid policy. " +
-                    "Use Perk distribution + AddLeveledListOnDeath.");
+                    "Use SPID Item distribution.");
+            }
+
+            if (IsLegacyCorpseDropPerkLine(line))
+            {
+                throw new InvalidDataException(
+                    $"keywords.spidRules[{i}] uses legacy corpse-drop Perk distribution, which is disallowed in hybrid policy. " +
+                    "Use SPID Item distribution.");
             }
         }
     }

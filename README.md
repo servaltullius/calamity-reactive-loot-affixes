@@ -258,15 +258,17 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 - Prisma 룬워드 패널은 레시피가 많아진 것을 반영해 **검색 + 총/검색결과 카운트**를 표시합니다.
 - 조각 수급:
   - 기본 하이브리드:
-    - 시체: SPID `Perk` 분배 + Perk EntryPoint `AddLeveledListOnDeath` 경로
+    - 시체: SPID `Item` 분배 (액터 인벤토리 선지급 -> 사망 시 시체 루팅)
     - 상자/월드: SKSE 런타임 롤 경로
-  - 시체 루팅 호환성을 위해 `DeathItem` 직접 분배는 사용하지 않습니다. (다른 모드 시체 드랍과 충돌 완화)
-  - SPID ActorType 필터 미매칭 시체(일부 모드 추가 적 등)는 현재 정책상 시체 통화 드랍이 발생하지 않습니다. (하이브리드: 시체 SPID-only)
-  - 확률은 `loot.runewordFragmentChancePercent` (MCM 슬라이더 포함)로 제어합니다.
+  - 시체 루팅 호환성을 위해 `DeathItem` 직접 분배와 `Perk` 기반 On-Death 분배는 사용하지 않습니다.
+  - SPID ActorType 필터 미매칭 시체(일부 모드 추가 적 등)는 현재 정책상 시체 통화 드랍이 발생하지 않습니다.
+  - 확률은 기본적으로 생성기 단계(`loot.runewordFragmentChancePercent`)에 반영됩니다.
+    (MCM 슬라이더는 런타임 상자/월드 롤에는 즉시 반영되지만, 이미 분배된 SPID 시체 인벤토리에는 즉시 재분배되지 않습니다.)
   - Prisma 디버그 버튼: `+1 next fragment`, `+1 recipe set`
 - 재련 오브(리포지):
-  - 룬 조각과 동일한 하이브리드 경로(시체 SPID Perk + 상자/월드 런타임)로 획득합니다.
-  - 확률은 `loot.reforgeOrbChancePercent` (MCM 슬라이더 포함)로 제어합니다.
+  - 룬 조각과 동일한 하이브리드 경로(시체 SPID Item + 상자/월드 런타임)로 획득합니다.
+  - 확률은 `loot.reforgeOrbChancePercent`로 제어합니다.
+    (MCM 슬라이더는 런타임 상자/월드 롤에는 즉시 반영되지만, 이미 분배된 SPID 시체 인벤토리에는 즉시 재분배되지 않습니다.)
   - 룬워드 패널 `Reforge / 재련` 버튼으로 **선택된 장착 장비**에 1개를 소모해 재련합니다.
   - 일반 장비 재련: 일반 어픽스를 재굴림합니다.
   - 완성 룬워드 장비 재련: **전체 유효 룬워드 풀에서 1개 랜덤 + 일반 어픽스 최대 3개**를 함께 재롤합니다.
@@ -306,10 +308,11 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 
 - 정책 메모: `docs/references/2026-02-22-corpse-drop-compat-policy.md`
 - 드랍 정책은 `hybrid` 단일 경로를 기본으로 사용합니다.
-  - 시체: SPID `Perk` 분배 + Perk EntryPoint `AddLeveledListOnDeath` (ActorType 직접 필터)
+  - 시체: SPID `Item` 분배 (ActorType 직접 필터)
   - 상자/월드: SKSE 런타임 롤
-  - SPID ActorType 필터 미매칭 시체: 드랍 없음 (시체 SPID-only)
+  - SPID ActorType 필터 미매칭 시체: 드랍 없음
 - `DeathItem` 직접 분배는 다른 모드 시체 루팅 충돌 가능성 때문에 사용하지 않습니다.
+- 레거시 `Perk + AddLeveledListOnDeath` 시체 경로는 사용하지 않습니다.
 - 레벨리스트(LVLI) 주입/오버라이드는 더 이상 사용하지 않습니다.
 
 ### MO2 배포 ZIP 생성
