@@ -154,26 +154,32 @@ namespace CalamityAffixes::RunewordDetail
 					return owned > 0 ? static_cast<std::uint32_t>(owned) : 0u;
 				}
 
-				std::uint32_t GrantRunewordFragments(
-					RE::PlayerCharacter* a_player,
-					const std::unordered_map<std::uint64_t, std::string>& a_runeNameByToken,
-					std::uint64_t a_runeToken,
-					std::uint32_t a_amount)
-				{
-					if (!a_player || a_amount == 0u) {
-						return 0u;
-					}
+					std::uint32_t GrantRunewordFragments(
+						RE::PlayerCharacter* a_player,
+						const std::unordered_map<std::uint64_t, std::string>& a_runeNameByToken,
+						std::uint64_t a_runeToken,
+						std::uint32_t a_amount)
+					{
+						if (!a_player || a_amount == 0u) {
+							return 0u;
+						}
 
-					auto* item = LookupRunewordFragmentItem(a_runeNameByToken, a_runeToken);
-					if (!item) {
-						return 0u;
-					}
+						auto* item = LookupRunewordFragmentItem(a_runeNameByToken, a_runeToken);
+						if (!item) {
+							return 0u;
+						}
 
-					const auto maxGive = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
-					const auto give = (a_amount > maxGive) ? maxGive : a_amount;
-					a_player->AddObjectToContainer(item, nullptr, static_cast<std::int32_t>(give), nullptr);
-					return give;
-				}
+						const auto ownedBeforeSigned = std::max(0, a_player->GetItemCount(item));
+						const auto ownedBefore = static_cast<std::uint32_t>(ownedBeforeSigned);
+
+						const auto maxGive = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
+						const auto give = (a_amount > maxGive) ? maxGive : a_amount;
+						a_player->AddObjectToContainer(item, nullptr, static_cast<std::int32_t>(give), nullptr);
+
+						const auto ownedAfterSigned = std::max(0, a_player->GetItemCount(item));
+						const auto ownedAfter = static_cast<std::uint32_t>(ownedAfterSigned);
+						return (ownedAfter > ownedBefore) ? (ownedAfter - ownedBefore) : 0u;
+					}
 
 				bool TryConsumeRunewordFragment(
 					RE::PlayerCharacter* a_player,

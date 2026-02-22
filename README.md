@@ -260,7 +260,7 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
   - 기본 하이브리드:
     - 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`) 경로
     - 상자/월드: SKSE 런타임 롤 경로
-  - SPID 태그가 없는 시체(모드 추가 적 등)는 런타임 활성화 시점 롤이 폴백으로 동작합니다.
+  - SPID 태그가 없는 시체(일부 모드 추가 적 등)는 현재 정책상 시체 통화 드랍이 발생하지 않습니다. (하이브리드: 시체 SPID-only)
   - 확률은 `loot.runewordFragmentChancePercent` (MCM 슬라이더 포함)로 제어합니다.
   - Prisma 디버그 버튼: `+1 next fragment`, `+1 recipe set`
 - 재련 오브(리포지):
@@ -306,7 +306,7 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 - 드랍 정책은 `hybrid` 단일 경로를 기본으로 사용합니다.
   - 시체: SPID `DeathItem` 분배(태그 `CAFF_TAG_CURRENCY_DEATH_DIST`)
   - 상자/월드: SKSE 런타임 롤
-  - SPID 태그가 없는 시체: 런타임 활성화 롤 폴백
+  - SPID 태그가 없는 시체: 드랍 없음 (시체 SPID-only)
 - 레벨리스트(LVLI) 주입/오버라이드는 더 이상 사용하지 않습니다.
 
 ### MO2 배포 ZIP 생성
