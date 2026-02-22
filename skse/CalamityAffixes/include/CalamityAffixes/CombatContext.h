@@ -18,12 +18,47 @@ namespace CalamityAffixes
 		bool hostileEitherDirection{ false };
 	};
 
+	[[nodiscard]] inline bool IsCombatTargetEitherDirection(RE::Actor* a_lhs, RE::Actor* a_rhs) noexcept
+	{
+		a_lhs = SanitizeObjectPointer(a_lhs);
+		a_rhs = SanitizeObjectPointer(a_rhs);
+		if (!a_lhs || !a_rhs) {
+			return false;
+		}
+
+		const auto lhsTargetAny = a_lhs->GetActorRuntimeData().currentCombatTarget.get();
+		const auto rhsTargetAny = a_rhs->GetActorRuntimeData().currentCombatTarget.get();
+		auto* lhsTarget = SanitizeObjectPointer(lhsTargetAny.get());
+		auto* rhsTarget = SanitizeObjectPointer(rhsTargetAny.get());
+		return lhsTarget == a_rhs || rhsTarget == a_lhs;
+	}
+
 	[[nodiscard]] inline bool IsHostileEitherDirection(RE::Actor* a_lhs, RE::Actor* a_rhs) noexcept
 	{
 		a_lhs = SanitizeObjectPointer(a_lhs);
 		a_rhs = SanitizeObjectPointer(a_rhs);
-		return a_lhs && a_rhs &&
-		       (a_lhs->IsHostileToActor(a_rhs) || a_rhs->IsHostileToActor(a_lhs));
+		if (!a_lhs || !a_rhs) {
+			return false;
+		}
+
+		// Primary signal: faction/relationship hostility.
+		if (a_lhs->IsHostileToActor(a_rhs) || a_rhs->IsHostileToActor(a_lhs)) {
+			return true;
+		}
+
+		// Fallback: some actors (notably certain undead setups) can remain "non-hostile" while still being engaged
+		// in combat. Treat mutual combat targeting as hostile for proc gating, but keep a conservative filter to
+		// avoid enabling procs for brawls/training with non-combatant NPCs.
+		if (!a_lhs->IsInCombat() || !a_rhs->IsInCombat()) {
+			return false;
+		}
+		if (!IsCombatTargetEitherDirection(a_lhs, a_rhs)) {
+			return false;
+		}
+		return a_lhs->CalculateCachedOwnerIsUndead() ||
+		       a_rhs->CalculateCachedOwnerIsUndead() ||
+		       a_lhs->CalculateCachedOwnerIsInCombatantFaction() ||
+		       a_rhs->CalculateCachedOwnerIsInCombatantFaction();
 	}
 
 	[[nodiscard]] inline CombatTriggerContext BuildCombatTriggerContext(
