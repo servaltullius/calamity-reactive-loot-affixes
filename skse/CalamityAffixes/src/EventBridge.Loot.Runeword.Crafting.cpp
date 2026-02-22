@@ -249,7 +249,20 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			return static_cast<bool>(anchor->PlaceObjectAtMe(a_dropItem, false));
+			auto placed = anchor->PlaceObjectAtMe(a_dropItem, false);
+			if (!placed) {
+				return false;
+			}
+
+			// Avoid "Steal" prompts when currency drops are spawned in owned cells (e.g., Jarl's house).
+			// The engine can apply cell ownership to loose references; explicitly mark these as player-owned.
+			if (auto* player = RE::PlayerCharacter::GetSingleton(); player) {
+				if (auto* playerBase = player->GetActorBase(); playerBase) {
+					placed->extraList.SetOwner(playerBase);
+				}
+			}
+
+			return true;
 		}
 
 		void EventBridge::LogRunewordStatus() const
