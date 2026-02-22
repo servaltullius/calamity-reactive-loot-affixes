@@ -28,7 +28,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - 드랍 모드: **`hybrid` 고정**
 - 시체: **SPID DeathItem 분배 우선**
 - 월드/컨테이너: **SKSE 런타임 롤**
-- 기본 확률: 룬워드 조각 `5%`, 재련 오브 `3%`
+- 기본 확률: 룬워드 조각 `8%`, 재련 오브 `5%`
 - MCM에서 확률 조정 가능 (런타임 즉시 반영)
 
 ### 전투 시스템
@@ -97,7 +97,7 @@ It tracks item instances via ExtraUniqueID, and the current build is **Reforge-c
 - Drop mode: **`hybrid` only**
 - Corpses: **SPID DeathItem distribution first**
 - Containers/world pickups: **SKSE runtime roll**
-- Default rates: runeword fragment `5%`, reforge orb `3%`
+- Default rates: runeword fragment `8%`, reforge orb `5%`
 - Rates are adjustable via MCM (applies immediately at runtime)
 
 ### Combat System

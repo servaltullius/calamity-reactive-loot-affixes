@@ -533,36 +533,36 @@ namespace CalamityAffixes
 			kHybrid = 2,
 		};
 
-		struct LootConfig
-		{
-			float chancePercent{ 0.0f };
-			float runewordFragmentChancePercent{ 5.0f };
-			float reforgeOrbChancePercent{ 3.0f };
-			float configuredRunewordFragmentChancePercent{ 5.0f };
-			float configuredReforgeOrbChancePercent{ 3.0f };
-			CurrencyDropMode currencyDropMode{ CurrencyDropMode::kHybrid };
-			bool runtimeCurrencyDropsEnabled{ true };
-			float lootSourceChanceMultCorpse{ 0.80f };
-			float lootSourceChanceMultContainer{ 1.00f };
-			float lootSourceChanceMultBossContainer{ 1.15f };
-			float lootSourceChanceMultWorld{ 1.00f };
-			bool renameItem{ false };
-			bool sharedPool{ false };
-			bool debugLog{ false };
-			bool dotTagSafetyAutoDisable{ false };
-			std::uint32_t dotTagSafetyUniqueEffectThreshold{ 96 };
-			std::uint32_t trapGlobalMaxActive{ 48 };
-			std::uint32_t trapCastBudgetPerTick{ 6 };
-			std::uint32_t triggerProcBudgetPerWindow{ 12 };
-			std::uint32_t triggerProcBudgetWindowMs{ 100 };
-			bool cleanupInvalidLegacyAffixes{ true };
-			bool stripTrackedSuffixSlots{ true };
-			std::vector<std::string> armorEditorIdDenyContains{};
-			std::vector<std::string> bossContainerEditorIdAllowContains{};
-			std::vector<std::string> bossContainerEditorIdDenyContains{};
-			std::string nameFormat{ "{base} [{affix}]" };
-			LootNameMarkerPosition nameMarkerPosition{ LootNameMarkerPosition::kTrailing };
-		};
+			struct LootConfig
+			{
+				float chancePercent{ 0.0f };
+				float runewordFragmentChancePercent{ 8.0f };
+				float reforgeOrbChancePercent{ 5.0f };
+				float configuredRunewordFragmentChancePercent{ 8.0f };
+				float configuredReforgeOrbChancePercent{ 5.0f };
+				CurrencyDropMode currencyDropMode{ CurrencyDropMode::kHybrid };
+				bool runtimeCurrencyDropsEnabled{ true };
+				float lootSourceChanceMultCorpse{ 0.80f };
+				float lootSourceChanceMultContainer{ 1.00f };
+				float lootSourceChanceMultBossContainer{ 1.15f };
+				float lootSourceChanceMultWorld{ 1.00f };
+				bool renameItem{ false };
+				bool sharedPool{ false };
+				bool debugLog{ false };
+				bool dotTagSafetyAutoDisable{ false };
+				std::uint32_t dotTagSafetyUniqueEffectThreshold{ 96 };
+				std::uint32_t trapGlobalMaxActive{ 48 };
+				std::uint32_t trapCastBudgetPerTick{ 6 };
+				std::uint32_t triggerProcBudgetPerWindow{ 12 };
+				std::uint32_t triggerProcBudgetWindowMs{ 100 };
+				bool cleanupInvalidLegacyAffixes{ true };
+				bool stripTrackedSuffixSlots{ true };
+				std::vector<std::string> armorEditorIdDenyContains{};
+				std::vector<std::string> bossContainerEditorIdAllowContains{};
+				std::vector<std::string> bossContainerEditorIdDenyContains{};
+				std::string nameFormat{ "{base} [{affix}]" };
+				LootNameMarkerPosition nameMarkerPosition{ LootNameMarkerPosition::kTrailing };
+			};
 
 		struct LootShuffleBagState
 		{

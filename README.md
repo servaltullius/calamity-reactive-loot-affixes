@@ -82,7 +82,7 @@
 - (기본값) `loot.renameItem=true` : 아이템 이름에 **짧은 어픽스 라벨**을 붙여(좌측 리스트) 빠르게 식별합니다.
   - `loot.nameMarkerPosition=trailing`이면 이름 마커를 뒤에 붙입니다. 예: `철검*` (정렬 안정화)
 
-기본값: `loot.runewordFragmentChancePercent=5`, `loot.reforgeOrbChancePercent=3`, `loot.currencyDropMode=hybrid(고정)`, `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
+기본값: `loot.runewordFragmentChancePercent=8`, `loot.reforgeOrbChancePercent=5`, `loot.currencyDropMode=hybrid(고정)`, `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
 참고: `loot.chancePercent`는 현재 기본 정책에서 실질적으로 사용되지 않는 레거시 호환 필드입니다.
 추가 안전장치(권장): `loot.trapGlobalMaxActive=64` (전역 트랩 하드캡, 0=무제한)
 
