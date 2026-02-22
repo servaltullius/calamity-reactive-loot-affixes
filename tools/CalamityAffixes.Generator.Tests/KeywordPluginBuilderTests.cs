@@ -212,7 +212,7 @@ public sealed class KeywordPluginBuilderTests
     }
 
     [Fact]
-    public void BuildKeywordPlugin_WhenHybridDropConfigured_CreatesDeathDropPerksForBackwardCompatibility()
+    public void BuildKeywordPlugin_WhenHybridDropConfigured_DoesNotCreateLegacyDeathDropPerks()
     {
         var spec = new AffixSpec
         {
@@ -239,15 +239,10 @@ public sealed class KeywordPluginBuilderTests
         var runewordDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_RunewordFragmentDrops");
         var reforgeDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_ReforgeOrbDrops");
 
-        var runewordPerk = Assert.Single(mod.Perks, perk => perk.EditorID == "CAFF_Perk_DeathDropRunewordFragment");
-        var runewordEffect = Assert.Single(runewordPerk.Effects.OfType<PerkEntryPointAddLeveledItem>());
-        Assert.Equal(APerkEntryPointEffect.EntryType.AddLeveledListOnDeath, runewordEffect.EntryPoint);
-        Assert.Equal(runewordDropList.FormKey, runewordEffect.Item.FormKey);
-
-        var reforgePerk = Assert.Single(mod.Perks, perk => perk.EditorID == "CAFF_Perk_DeathDropReforgeOrb");
-        var reforgeEffect = Assert.Single(reforgePerk.Effects.OfType<PerkEntryPointAddLeveledItem>());
-        Assert.Equal(APerkEntryPointEffect.EntryType.AddLeveledListOnDeath, reforgeEffect.EntryPoint);
-        Assert.Equal(reforgeDropList.FormKey, reforgeEffect.Item.FormKey);
+        Assert.NotNull(runewordDropList);
+        Assert.NotNull(reforgeDropList);
+        Assert.DoesNotContain(mod.Perks, perk => perk.EditorID == "CAFF_Perk_DeathDropRunewordFragment");
+        Assert.DoesNotContain(mod.Perks, perk => perk.EditorID == "CAFF_Perk_DeathDropReforgeOrb");
     }
 
     [Fact]
