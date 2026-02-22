@@ -229,13 +229,19 @@ namespace RuntimeGateStoreChecks
 				triggerText->find("ResolveActivatedLootCurrencySourceTier(") != std::string::npos ||
 				triggerText->find("detail::ResolveLootCurrencySourceTier(") != std::string::npos;
 			const bool hasSpidOnlyCorpseSkipLog =
-				triggerText->find("activation corpse currency roll skipped (untagged corpse in hybrid mode; SPID-only corpse policy)") != std::string::npos;
+				triggerText->find("activation corpse currency roll skipped (SPID-owned corpse policy in hybrid mode)") != std::string::npos;
+			const bool hasLegacyTaggedCorpseSkipLog =
+				triggerText->find("SPID-tagged corpse in hybrid mode") != std::string::npos;
+			const bool hasLegacyUntaggedCorpseSkipLog =
+				triggerText->find("untagged corpse in hybrid mode; SPID-only corpse policy") != std::string::npos;
 			const bool hasLegacyCorpseFallbackLog =
 				triggerText->find("activation corpse currency roll fallback (untagged corpse in hybrid mode)") != std::string::npos;
 			if (triggerText->find("const RE::TESActivateEvent* a_event") == std::string::npos ||
 				!hasSourceTierResolverCall ||
-				triggerText->find("HasCurrencyDeathDistributionTag(") == std::string::npos ||
+				triggerText->find("HasCurrencyDeathDistributionTag(") != std::string::npos ||
 				!hasSpidOnlyCorpseSkipLog ||
+				hasLegacyTaggedCorpseSkipLog ||
+				hasLegacyUntaggedCorpseSkipLog ||
 				hasLegacyCorpseFallbackLog ||
 				(!hasDirectActivationRollPath && !hasSharedActivationRollHelper) ||
 				(triggerText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos &&

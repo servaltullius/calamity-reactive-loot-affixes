@@ -44,25 +44,6 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 	const auto editorId = std::string_view(sourceSpell->GetFormEditorID());
 	return !editorId.empty() && editorId.starts_with("CAFF_");
 }
-
-[[nodiscard]] bool HasCurrencyDeathDistributionTag(const RE::TESObjectREFR* a_ref)
-{
-	if (!a_ref) {
-		return false;
-	}
-
-	const auto* actor = a_ref->As<RE::Actor>();
-	if (!actor) {
-		return false;
-	}
-
-	static RE::BGSKeyword* currencyDeathDistKeyword = nullptr;
-	if (!currencyDeathDistKeyword) {
-		currencyDeathDistKeyword = RE::TESForm::LookupByEditorID<RE::BGSKeyword>("CAFF_TAG_CURRENCY_DEATH_DIST");
-	}
-
-	return currencyDeathDistKeyword && actor->HasKeyword(currencyDeathDistKeyword);
-}
 }
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
 		const RE::TESHitEvent* a_event,
@@ -419,21 +400,11 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			return RE::BSEventNotifyControl::kContinue;
 		}
 		if (sourceTier == LootCurrencySourceTier::kCorpse) {
-			const bool hasCurrencyDeathDistTag = HasCurrencyDeathDistributionTag(sourceRef);
-			if (hasCurrencyDeathDistTag) {
-				// Hybrid contract: tagged corpses are SPID-owned to avoid duplicate runtime rolls.
-				if (_loot.debugLog) {
-					SKSE::log::debug(
-						"CalamityAffixes: activation corpse currency roll skipped (SPID-tagged corpse in hybrid mode) (sourceRef={:08X}).",
-						sourceRef->GetFormID());
-				}
-				return RE::BSEventNotifyControl::kContinue;
-			}
 			// Hybrid contract (SPID corpse authority):
-			// untagged corpses are skipped to avoid runtime corpse fallback behavior.
+			// corpse currency drops are handled by SPID DeathItem rules, so activation-time runtime rolls are skipped.
 			if (_loot.debugLog) {
 				SKSE::log::debug(
-					"CalamityAffixes: activation corpse currency roll skipped (untagged corpse in hybrid mode; SPID-only corpse policy) (sourceRef={:08X}).",
+					"CalamityAffixes: activation corpse currency roll skipped (SPID-owned corpse policy in hybrid mode) (sourceRef={:08X}).",
 					sourceRef->GetFormID());
 			}
 			return RE::BSEventNotifyControl::kContinue;

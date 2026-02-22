@@ -7224,16 +7224,12 @@
     ],
     "spidRules": [
       {
-        "comment": "Mark hostile actor families for Calamity currency death distribution.",
-        "line": "Keyword = CAFF_TAG_CURRENCY_DEATH_DIST|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|NONE|NONE|NONE|1|100"
+        "comment": "Runeword fragments on death via SPID (direct ActorType filters; drop chance is controlled by CAFF_LItem_RunewordFragmentDrops ChanceNone).",
+        "line": "DeathItem = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|NONE|NONE|NONE|1|100"
       },
       {
-        "comment": "Runeword fragments on death via SPID (drop chance is controlled by CAFF_LItem_RunewordFragmentDrops ChanceNone).",
-        "line": "DeathItem = CAFF_LItem_RunewordFragmentDrops|CAFF_TAG_CURRENCY_DEATH_DIST|NONE|NONE|NONE|1|100"
-      },
-      {
-        "comment": "Reforge orb on death via SPID (drop chance is controlled by CAFF_LItem_ReforgeOrbDrops ChanceNone).",
-        "line": "DeathItem = CAFF_LItem_ReforgeOrbDrops|CAFF_TAG_CURRENCY_DEATH_DIST|NONE|NONE|NONE|1|100"
+        "comment": "Reforge orb on death via SPID (direct ActorType filters; drop chance is controlled by CAFF_LItem_ReforgeOrbDrops ChanceNone).",
+        "line": "DeathItem = CAFF_LItem_ReforgeOrbDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|NONE|NONE|NONE|1|100"
       }
     ]
   }
