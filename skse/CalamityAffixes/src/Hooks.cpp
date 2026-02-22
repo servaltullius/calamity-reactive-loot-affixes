@@ -29,6 +29,10 @@ namespace CalamityAffixes::Hooks
 					continue;
 				}
 
+				if (effect->baseEffect->data.resistVariable == RE::ActorValue::kResistShock) {
+					continue;
+				}
+
 				auto* hitEffectArt = effect->baseEffect->data.hitEffectArt;
 				if (hitEffectArt) {
 					return hitEffectArt;

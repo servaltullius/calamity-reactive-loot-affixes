@@ -183,6 +183,21 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
+    public void RuntimeHook_CastOnCrit_SkipsFeedbackVfxForShockSpells()
+    {
+        var repoRoot = FindRepoRoot();
+        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
+
+        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
+
+        var hooksSource = File.ReadAllText(hooksPath);
+        Assert.Contains(
+            "resistVariable == RE::ActorValue::kResistShock",
+            hooksSource,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RepoSpec_IncludesSummonCorpseExplosionAffix()
     {
         var repoRoot = FindRepoRoot();
