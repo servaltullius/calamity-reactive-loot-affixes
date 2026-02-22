@@ -2154,7 +2154,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00012FD0",
-            "noHitEffectArt": false,
+            "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -2189,7 +2189,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0002B96C",
-            "noHitEffectArt": false,
+            "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -2224,7 +2224,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0002DD29",
-            "noHitEffectArt": false,
+            "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -2259,7 +2259,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0010F7EE",
-            "noHitEffectArt": false,
+            "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -2294,7 +2294,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0010F7EC",
-            "noHitEffectArt": false,
+            "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -2329,7 +2329,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00045F9D",
-            "noHitEffectArt": false,
+            "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,
@@ -2364,7 +2364,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00045F9C",
-            "noHitEffectArt": false,
+            "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.3,

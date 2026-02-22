@@ -77,6 +77,59 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
+    public void RepoSpec_CastOnCritVanillaSpells_SuppressHitEffectArt()
+    {
+        var repoRoot = FindRepoRoot();
+        var specPath = Path.Combine(repoRoot, "affixes", "affixes.json");
+
+        var spec = AffixSpecLoader.Load(specPath);
+
+        var offenders = spec.Keywords.Affixes
+            .Where(affix =>
+            {
+                if (!TryGetActionType(affix.Runtime, out var actionType) || actionType != "CastOnCrit")
+                {
+                    return false;
+                }
+
+                if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
+                {
+                    return false;
+                }
+
+                if (actionEl.ValueKind != JsonValueKind.Object)
+                {
+                    return false;
+                }
+
+                if (!actionEl.TryGetProperty("spellForm", out var spellFormEl) || spellFormEl.ValueKind != JsonValueKind.String)
+                {
+                    return false;
+                }
+
+                var spellForm = spellFormEl.GetString();
+                if (spellForm is null || !spellForm.StartsWith("Skyrim.esm|", StringComparison.Ordinal))
+                {
+                    return false;
+                }
+
+                if (!actionEl.TryGetProperty("noHitEffectArt", out var noHitEffectArtEl))
+                {
+                    return true;
+                }
+
+                return noHitEffectArtEl.ValueKind != JsonValueKind.True;
+            })
+            .Select(affix => affix.Id)
+            .ToList();
+
+        Assert.True(
+            offenders.Count == 0,
+            "Expected CastOnCrit vanilla spell procs to set runtime.action.noHitEffectArt == true " +
+            $"to avoid lingering hit effect art; offenders: {string.Join(", ", offenders)}");
+    }
+
+    [Fact]
     public void RepoSpec_IncludesSummonCorpseExplosionAffix()
     {
         var repoRoot = FindRepoRoot();
