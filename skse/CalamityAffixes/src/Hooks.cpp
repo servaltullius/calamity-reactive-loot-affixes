@@ -17,6 +17,60 @@ namespace CalamityAffixes::Hooks
 {
 	namespace
 	{
+		[[nodiscard]] RE::TESEffectShader* GetEnchantmentHitShader(RE::ActorValue a_resistValue) noexcept
+		{
+			switch (a_resistValue) {
+			case RE::ActorValue::kResistFire: {
+				static RE::TESEffectShader* shader = RE::TESForm::LookupByID<RE::TESEffectShader>(0x0001B212);
+				return shader;
+			}
+			case RE::ActorValue::kResistFrost: {
+				static RE::TESEffectShader* shader = RE::TESForm::LookupByID<RE::TESEffectShader>(0x000435A3);
+				return shader;
+			}
+			case RE::ActorValue::kResistShock: {
+				static RE::TESEffectShader* shader = RE::TESForm::LookupByID<RE::TESEffectShader>(0x00057C67);
+				return shader;
+			}
+			default:
+				return nullptr;
+			}
+		}
+
+		[[nodiscard]] RE::TESEffectShader* ResolveCastOnCritProcFeedbackShader(const RE::SpellItem* a_spell) noexcept
+		{
+			if (!a_spell) {
+				return nullptr;
+			}
+
+			for (const auto* effect : a_spell->effects) {
+				if (!effect || !effect->baseEffect) {
+					continue;
+				}
+
+				const auto resist = effect->baseEffect->data.resistVariable;
+				if (auto* shader = GetEnchantmentHitShader(resist)) {
+					return shader;
+				}
+			}
+
+			return nullptr;
+		}
+
+		void PlayCastOnCritProcFeedbackVfx(RE::Actor* a_target, const RE::SpellItem* a_spell) noexcept
+		{
+			if (!a_target || a_target->IsDead()) {
+				return;
+			}
+
+			auto* shader = ResolveCastOnCritProcFeedbackShader(a_spell);
+			if (!shader) {
+				return;
+			}
+
+			a_target->InstantiateHitShader(shader, 0.18f, nullptr, false, false, nullptr, false);
+		}
+
 		class ActorHandleHealthDamageHook
 		{
 		public:
@@ -157,25 +211,30 @@ namespace CalamityAffixes::Hooks
 					}
 				}
 
-				const auto coc = bridge->EvaluateCastOnCrit(
-					safeAttacker,
-					safeTarget,
-					hitData);
-				if (coc.spell && safeAttacker && safeTarget) {
-					if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-						magicCaster->CastSpellImmediate(
-							coc.spell,
-							coc.noHitEffectArt,
-							safeTarget,
-							coc.effectiveness,
-							false,
-							coc.magnitudeOverride,
-							safeAttacker);
+					const auto coc = bridge->EvaluateCastOnCrit(
+						safeAttacker,
+						safeTarget,
+						hitData);
+					if (coc.spell && safeAttacker && safeTarget) {
+						bool casted = false;
+						if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+							magicCaster->CastSpellImmediate(
+								coc.spell,
+								coc.noHitEffectArt,
+								safeTarget,
+								coc.effectiveness,
+								false,
+								coc.magnitudeOverride,
+								safeAttacker);
+							casted = true;
+						}
+						if (casted && coc.noHitEffectArt) {
+							PlayCastOnCritProcFeedbackVfx(safeTarget, coc.spell);
+						}
 					}
-				}
 
-				bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, a_damage);
-			}
+					bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, a_damage);
+				}
 
 			static void ThunkActor(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{
