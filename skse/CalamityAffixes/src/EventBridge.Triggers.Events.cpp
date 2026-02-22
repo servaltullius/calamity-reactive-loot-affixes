@@ -12,6 +12,8 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
+#include <limits>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -27,7 +29,108 @@ constexpr std::size_t kDotCooldownMaxEntries = 4096;
 constexpr auto kDotCooldownTtl = std::chrono::seconds(30);
 constexpr auto kDotCooldownPruneInterval = std::chrono::seconds(10);
 constexpr std::size_t kDotObservedMagicEffectsMaxEntries = 4096;
+constexpr std::string_view kRunewordFragmentEditorIdPrefix = "CAFF_RuneFrag_";
+constexpr std::string_view kReforgeOrbEditorId = "CAFF_Misc_ReforgeOrb";
+constexpr std::string_view kDeathDropRunewordPerkEditorId = "CAFF_Perk_DeathDropRunewordFragment";
+constexpr std::string_view kDeathDropReforgePerkEditorId = "CAFF_Perk_DeathDropReforgeOrb";
+constexpr std::string_view kRunewordDropListEditorId = "CAFF_LItem_RunewordFragmentDrops";
+constexpr std::string_view kReforgeDropListEditorId = "CAFF_LItem_ReforgeOrbDrops";
 using LootCurrencySourceTier = detail::LootCurrencySourceTier;
+
+struct CorpseCurrencyInventorySnapshot
+{
+	std::uint32_t runewordFragments{ 0u };
+	std::uint32_t reforgeOrbs{ 0u };
+};
+
+struct CorpseCurrencyDropProbe
+{
+	bool runewordPerkFound{ false };
+	bool reforgePerkFound{ false };
+	bool runewordPerkDistributed{ false };
+	bool reforgePerkDistributed{ false };
+	bool runewordDropListFound{ false };
+	bool reforgeDropListFound{ false };
+	std::int32_t runewordChanceNone{ -1 };
+	std::int32_t reforgeChanceNone{ -1 };
+};
+
+[[nodiscard]] std::uint32_t SaturatingAdd(std::uint32_t a_lhs, std::uint32_t a_rhs)
+{
+	if (a_rhs > (std::numeric_limits<std::uint32_t>::max)() - a_lhs) {
+		return (std::numeric_limits<std::uint32_t>::max)();
+	}
+	return a_lhs + a_rhs;
+}
+
+[[nodiscard]] CorpseCurrencyInventorySnapshot SnapshotCorpseCurrencyInventory(RE::Actor* a_actor)
+{
+	CorpseCurrencyInventorySnapshot snapshot{};
+	if (!a_actor) {
+		return snapshot;
+	}
+
+	auto inventory = a_actor->GetInventory();
+	for (const auto& [baseObject, entry] : inventory) {
+		if (!baseObject) {
+			continue;
+		}
+
+		const auto count = entry.first;
+		if (count <= 0) {
+			continue;
+		}
+
+		const auto editorId = std::string_view(baseObject->GetFormEditorID());
+		if (editorId.empty()) {
+			continue;
+		}
+
+		const auto itemCount = static_cast<std::uint32_t>(count);
+		if (editorId == kReforgeOrbEditorId) {
+			snapshot.reforgeOrbs = SaturatingAdd(snapshot.reforgeOrbs, itemCount);
+			continue;
+		}
+
+		if (editorId.starts_with(kRunewordFragmentEditorIdPrefix)) {
+			snapshot.runewordFragments = SaturatingAdd(snapshot.runewordFragments, itemCount);
+		}
+	}
+
+	return snapshot;
+}
+
+[[nodiscard]] CorpseCurrencyDropProbe BuildCorpseCurrencyDropProbe(RE::Actor* a_actor)
+{
+	CorpseCurrencyDropProbe probe{};
+
+	auto* runewordPerk = RE::TESForm::LookupByEditorID<RE::BGSPerk>(kDeathDropRunewordPerkEditorId.data());
+	auto* reforgePerk = RE::TESForm::LookupByEditorID<RE::BGSPerk>(kDeathDropReforgePerkEditorId.data());
+	probe.runewordPerkFound = runewordPerk != nullptr;
+	probe.reforgePerkFound = reforgePerk != nullptr;
+
+	if (a_actor) {
+		if (runewordPerk) {
+			probe.runewordPerkDistributed = a_actor->HasPerk(runewordPerk);
+		}
+		if (reforgePerk) {
+			probe.reforgePerkDistributed = a_actor->HasPerk(reforgePerk);
+		}
+	}
+
+	auto* runewordDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>(kRunewordDropListEditorId.data());
+	auto* reforgeDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>(kReforgeDropListEditorId.data());
+	probe.runewordDropListFound = runewordDropList != nullptr;
+	probe.reforgeDropListFound = reforgeDropList != nullptr;
+	if (runewordDropList) {
+		probe.runewordChanceNone = static_cast<std::int32_t>(runewordDropList->GetChanceNone());
+	}
+	if (reforgeDropList) {
+		probe.reforgeChanceNone = static_cast<std::int32_t>(reforgeDropList->GetChanceNone());
+	}
+
+	return probe;
+}
 
 [[nodiscard]] bool IsInternalProcSpellSource(RE::FormID a_sourceFormID)
 {
@@ -331,6 +434,24 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		if (_loot.debugLog) {
+			const auto probe = BuildCorpseCurrencyDropProbe(dying);
+			const auto snapshot = SnapshotCorpseCurrencyInventory(dying);
+			spdlog::info(
+				"CalamityAffixes: corpse-drop probe (dying={}, runewordPerkFound={}, reforgePerkFound={}, runewordPerkDistributed={}, reforgePerkDistributed={}, runewordDropListFound={}, reforgeDropListFound={}, chanceNone(runeword/reforge)={}/{}, corpseCurrencySnapshotAtDeathEvent(runewordFragments/reforgeOrbs)={}/{}).",
+				dying->GetName(),
+				probe.runewordPerkFound,
+				probe.reforgePerkFound,
+				probe.runewordPerkDistributed,
+				probe.reforgePerkDistributed,
+				probe.runewordDropListFound,
+				probe.reforgeDropListFound,
+				probe.runewordChanceNone,
+				probe.reforgeChanceNone,
+				snapshot.runewordFragments,
+				snapshot.reforgeOrbs);
+		}
+
 		ProcessTrigger(Trigger::kKill, owner, dying, nullptr);
 
 		if (!_corpseExplosionAffixIndices.empty()) {
@@ -401,7 +522,8 @@ using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 		}
 		if (sourceTier == LootCurrencySourceTier::kCorpse) {
 			// Hybrid contract (SPID corpse authority):
-			// corpse currency drops are handled by SPID DeathItem rules, so activation-time runtime rolls are skipped.
+			// corpse currency drops are handled by SPID Perk distribution + AddLeveledListOnDeath,
+			// so activation-time runtime rolls are skipped.
 			if (_loot.debugLog) {
 				SKSE::log::debug(
 					"CalamityAffixes: activation corpse currency roll skipped (SPID-owned corpse policy in hybrid mode) (sourceRef={:08X}).",

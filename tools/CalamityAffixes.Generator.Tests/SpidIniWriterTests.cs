@@ -25,7 +25,7 @@ public sealed class SpidIniWriterTests
             "spidRules": [
               {
                 "comment": "Test SPID rule from JSON",
-                "line": "DeathItem = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC|NONE|NONE|NONE|1|100"
+                "line": "Perk = CAFF_Perk_DeathDropRunewordFragment|ActorTypeNPC|NONE|NONE|NONE|1|100"
               }
             ]
           }
@@ -38,7 +38,7 @@ public sealed class SpidIniWriterTests
             var ini = SpidIniWriter.Render(spec);
 
             Assert.Contains("; Test SPID rule from JSON", ini);
-            Assert.Contains("DeathItem = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC|NONE|NONE|NONE|1|100", ini);
+            Assert.Contains("Perk = CAFF_Perk_DeathDropRunewordFragment|ActorTypeNPC|NONE|NONE|NONE|1|100", ini);
         }
         finally
         {

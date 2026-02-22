@@ -183,6 +183,24 @@ def _lint_spec(
         errors.append("Missing array: keywords.affixes")
         return
 
+    spid_rules = _as_list(keywords.get("spidRules"))
+    if spid_rules is not None:
+        for idx, raw_rule in enumerate(spid_rules):
+            rule = _as_dict(raw_rule)
+            if not rule:
+                errors.append(f"keywords.spidRules[{idx}] must be an object.")
+                continue
+
+            line = rule.get("line")
+            if not isinstance(line, str):
+                continue
+
+            if line.lstrip().lower().startswith("deathitem"):
+                errors.append(
+                    f"keywords.spidRules[{idx}].line uses DeathItem distribution. "
+                    "Hybrid policy requires Perk distribution + AddLeveledListOnDeath."
+                )
+
     seen_ids: Dict[str, int] = {}
     seen_editor_ids: Dict[str, int] = {}
     generated_spells: Set[str] = set()

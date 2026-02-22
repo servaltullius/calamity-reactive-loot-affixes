@@ -130,6 +130,59 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
+    public void RuntimeHook_CastOnCrit_DoesNotInjectFeedbackHitShader()
+    {
+        var repoRoot = FindRepoRoot();
+        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
+
+        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
+
+        var hooksSource = File.ReadAllText(hooksPath);
+        Assert.DoesNotContain(
+            "PlayCastOnCritProcFeedbackVfx(safeTarget, coc.spell);",
+            hooksSource,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RuntimeHook_CastOnCrit_InjectsFeedbackSfxWhenHitEffectSuppressed()
+    {
+        var repoRoot = FindRepoRoot();
+        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
+
+        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
+
+        var hooksSource = File.ReadAllText(hooksPath);
+        Assert.Contains(
+            "PlayCastOnCritProcFeedbackSfx(coc.spell);",
+            hooksSource,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RuntimeHook_CastOnCrit_InjectsSafeShortFeedbackVfx()
+    {
+        var repoRoot = FindRepoRoot();
+        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
+
+        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
+
+        var hooksSource = File.ReadAllText(hooksPath);
+        Assert.Contains(
+            "PlayCastOnCritProcFeedbackVfxSafe(safeTarget, coc.spell, now);",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "InstantiateHitArt(",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "InstantiateHitShader(",
+            hooksSource,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RepoSpec_IncludesSummonCorpseExplosionAffix()
     {
         var repoRoot = FindRepoRoot();

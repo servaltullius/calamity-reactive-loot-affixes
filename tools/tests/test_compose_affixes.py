@@ -54,7 +54,7 @@ class ComposeAffixesWorkflowTests(unittest.TestCase):
         )
         self._write_json(
             modules_dir / "keywords.spidRules.json",
-            [{"line": "DeathItem = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC|NONE|NONE|NONE|1|100"}],
+            [{"line": "Perk = CAFF_Perk_DeathDropRunewordFragment|ActorTypeNPC|NONE|NONE|NONE|1|100"}],
         )
 
         self._write_json(

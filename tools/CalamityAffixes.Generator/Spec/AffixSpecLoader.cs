@@ -86,6 +86,7 @@ public static class AffixSpecLoader
     {
         ValidateModKey(spec.ModKey);
         ValidateLootPolicy(spec.Loot);
+        ValidateSpidRulePolicy(spec.Keywords);
 
         if (!spec.ModKey.EndsWith(".esp", StringComparison.OrdinalIgnoreCase) &&
             !spec.ModKey.EndsWith(".esm", StringComparison.OrdinalIgnoreCase) &&
@@ -174,6 +175,37 @@ public static class AffixSpecLoader
         {
             throw new InvalidDataException(
                 $"loot.currencyDropMode supports only 'hybrid' (got: {dropMode}).");
+        }
+    }
+
+    private static void ValidateSpidRulePolicy(KeywordSpec keywords)
+    {
+        for (var i = 0; i < keywords.SpidRules.Count; i += 1)
+        {
+            var rule = keywords.SpidRules[i];
+            if (!rule.TryGetValue("line", out var rawLine) || rawLine is null)
+            {
+                continue;
+            }
+
+            string? line = rawLine switch
+            {
+                string s => s,
+                JsonElement element when element.ValueKind == JsonValueKind.String => element.GetString(),
+                _ => null,
+            };
+
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            if (line.TrimStart().StartsWith("DeathItem", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException(
+                    $"keywords.spidRules[{i}] uses DeathItem distribution, which is disallowed in hybrid policy. " +
+                    "Use Perk distribution + AddLeveledListOnDeath.");
+            }
         }
     }
 

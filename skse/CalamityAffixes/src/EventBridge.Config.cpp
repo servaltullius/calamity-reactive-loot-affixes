@@ -1329,7 +1329,7 @@ namespace CalamityAffixes
 		_loot.runtimeCurrencyDropsEnabled = true;
 
 		// Keep CAFF_LItem_* drop chances in sync for both classic leveled-list injection
-		// and SPID DeathItem distribution paths.
+		// and SPID Perk + AddLeveledListOnDeath corpse-drop paths.
 		SyncLeveledListCurrencyDropChances(a_contextTag);
 
 		if (_loot.debugLog) {

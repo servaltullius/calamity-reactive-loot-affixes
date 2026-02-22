@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <unordered_map>
 
 #include <RE/Skyrim.h>
 #include <REL/Relocation.h>
@@ -17,27 +18,7 @@ namespace CalamityAffixes::Hooks
 {
 	namespace
 	{
-		[[nodiscard]] RE::TESEffectShader* GetEnchantmentHitShader(RE::ActorValue a_resistValue) noexcept
-		{
-			switch (a_resistValue) {
-			case RE::ActorValue::kResistFire: {
-				static RE::TESEffectShader* shader = RE::TESForm::LookupByID<RE::TESEffectShader>(0x0001B212);
-				return shader;
-			}
-			case RE::ActorValue::kResistFrost: {
-				static RE::TESEffectShader* shader = RE::TESForm::LookupByID<RE::TESEffectShader>(0x000435A3);
-				return shader;
-			}
-			case RE::ActorValue::kResistShock: {
-				static RE::TESEffectShader* shader = RE::TESForm::LookupByID<RE::TESEffectShader>(0x00057C67);
-				return shader;
-			}
-			default:
-				return nullptr;
-			}
-		}
-
-		[[nodiscard]] RE::TESEffectShader* ResolveCastOnCritProcFeedbackShader(const RE::SpellItem* a_spell) noexcept
+		[[nodiscard]] RE::BGSArtObject* ResolveCastOnCritProcFeedbackArt(const RE::SpellItem* a_spell) noexcept
 		{
 			if (!a_spell) {
 				return nullptr;
@@ -48,27 +29,124 @@ namespace CalamityAffixes::Hooks
 					continue;
 				}
 
-				const auto resist = effect->baseEffect->data.resistVariable;
-				if (auto* shader = GetEnchantmentHitShader(resist)) {
-					return shader;
+				auto* hitEffectArt = effect->baseEffect->data.hitEffectArt;
+				if (hitEffectArt) {
+					return hitEffectArt;
+				}
+
+				auto* enchantEffectArt = effect->baseEffect->data.enchantEffectArt;
+				if (enchantEffectArt) {
+					return enchantEffectArt;
 				}
 			}
 
 			return nullptr;
 		}
 
-		void PlayCastOnCritProcFeedbackVfx(RE::Actor* a_target, const RE::SpellItem* a_spell) noexcept
+		[[nodiscard]] bool ShouldPlayCastOnCritProcFeedbackVfx(
+			RE::Actor* a_target,
+			std::chrono::steady_clock::time_point a_now) noexcept
 		{
 			if (!a_target || a_target->IsDead()) {
+				return false;
+			}
+
+			static std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> nextAllowedByTarget;
+			constexpr auto kPerTargetIcd = std::chrono::milliseconds(120);
+			constexpr std::size_t kMaxEntries = 512u;
+
+			const auto targetFormID = a_target->GetFormID();
+			if (const auto it = nextAllowedByTarget.find(targetFormID); it != nextAllowedByTarget.end() && a_now < it->second) {
+				return false;
+			}
+
+			nextAllowedByTarget[targetFormID] = a_now + kPerTargetIcd;
+
+			if (nextAllowedByTarget.size() > kMaxEntries) {
+				for (auto it = nextAllowedByTarget.begin(); it != nextAllowedByTarget.end();) {
+					if (a_now >= it->second) {
+						it = nextAllowedByTarget.erase(it);
+					} else {
+						++it;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		void PlayCastOnCritProcFeedbackVfxSafe(
+			RE::Actor* a_target,
+			const RE::SpellItem* a_spell,
+			std::chrono::steady_clock::time_point a_now) noexcept
+		{
+			if (!ShouldPlayCastOnCritProcFeedbackVfx(a_target, a_now)) {
 				return;
 			}
 
-			auto* shader = ResolveCastOnCritProcFeedbackShader(a_spell);
-			if (!shader) {
+			auto* art = ResolveCastOnCritProcFeedbackArt(a_spell);
+			if (!art) {
 				return;
 			}
 
-			a_target->InstantiateHitShader(shader, 0.18f, nullptr, false, false, nullptr, false);
+			constexpr float kFeedbackDurationSec = 0.10f;
+			a_target->InstantiateHitArt(
+				art,
+				kFeedbackDurationSec,
+				nullptr,
+				false,
+				false,
+				nullptr,
+				false);
+		}
+
+		[[nodiscard]] RE::FormID ResolveCastOnCritProcFeedbackSoundFormID(
+			const RE::SpellItem* a_spell,
+			RE::MagicSystem::SoundID a_soundID) noexcept
+		{
+			if (!a_spell) {
+				return 0;
+			}
+
+			for (const auto* effect : a_spell->effects) {
+				if (!effect || !effect->baseEffect) {
+					continue;
+				}
+
+				for (const auto& soundPair : effect->baseEffect->effectSounds) {
+					if (soundPair.id != a_soundID || !soundPair.sound) {
+						continue;
+					}
+
+					return soundPair.sound->GetFormID();
+				}
+			}
+
+			return 0;
+		}
+
+		[[nodiscard]] RE::FormID ResolveCastOnCritProcFeedbackSoundFormID(const RE::SpellItem* a_spell) noexcept
+		{
+			const auto hitSoundFormID = ResolveCastOnCritProcFeedbackSoundFormID(a_spell, RE::MagicSystem::SoundID::kHit);
+			if (hitSoundFormID != 0) {
+				return hitSoundFormID;
+			}
+			return ResolveCastOnCritProcFeedbackSoundFormID(a_spell, RE::MagicSystem::SoundID::kRelease);
+		}
+
+		void PlayCastOnCritProcFeedbackSfx(const RE::SpellItem* a_spell) noexcept
+		{
+			auto* audioManager = RE::BSAudioManager::GetSingleton();
+			if (!audioManager) {
+				return;
+			}
+
+			const auto soundFormID = ResolveCastOnCritProcFeedbackSoundFormID(a_spell);
+			if (soundFormID == 0) {
+				return;
+			}
+
+			audioManager->Play(soundFormID);
 		}
 
 		class ActorHandleHealthDamageHook
@@ -229,7 +307,8 @@ namespace CalamityAffixes::Hooks
 							casted = true;
 						}
 						if (casted && coc.noHitEffectArt) {
-							PlayCastOnCritProcFeedbackVfx(safeTarget, coc.spell);
+							PlayCastOnCritProcFeedbackSfx(coc.spell);
+							PlayCastOnCritProcFeedbackVfxSafe(safeTarget, coc.spell, now);
 						}
 					}
 
