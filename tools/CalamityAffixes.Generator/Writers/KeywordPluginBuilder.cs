@@ -138,7 +138,8 @@ public static class KeywordPluginBuilder
 
         if (spec.Loot is not null)
         {
-            EnsureCurrencyDropLists(mod, spec.Loot);
+            var (runewordFragmentDropList, reforgeOrbDropList) = EnsureCurrencyDropLists(mod, spec.Loot);
+            EnsureCurrencyDeathDropPerks(mod, runewordFragmentDropList, reforgeOrbDropList);
         }
 
         return mod;
@@ -222,6 +223,52 @@ public static class KeywordPluginBuilder
         AddLeveledItemEntryIfMissing(reforgeOrbDropList, reforgeOrbItem.ToLink<IItemGetter>(), level: 1, count: 1);
 
         return (runewordFragmentDropList, reforgeOrbDropList);
+    }
+
+    private static void EnsureCurrencyDeathDropPerks(
+        SkyrimMod mod,
+        LeveledItem runewordFragmentDropList,
+        LeveledItem reforgeOrbDropList)
+    {
+        AddDeathAddLeveledItemPerk(
+            mod,
+            editorId: "CAFF_Perk_DeathDropRunewordFragment",
+            name: "Calamity Death Drop: Runeword Fragment",
+            dropList: runewordFragmentDropList,
+            priority: 0);
+
+        AddDeathAddLeveledItemPerk(
+            mod,
+            editorId: "CAFF_Perk_DeathDropReforgeOrb",
+            name: "Calamity Death Drop: Reforge Orb",
+            dropList: reforgeOrbDropList,
+            priority: 1);
+    }
+
+    private static void AddDeathAddLeveledItemPerk(
+        SkyrimMod mod,
+        string editorId,
+        string name,
+        LeveledItem dropList,
+        byte priority)
+    {
+        var perk = mod.Perks.AddNew();
+        perk.EditorID = editorId;
+        perk.Name = name;
+        perk.Trait = false;
+        perk.Level = 0;
+        perk.NumRanks = 1;
+        perk.Playable = false;
+        perk.Hidden = true;
+
+        perk.Effects.Add(new PerkEntryPointAddLeveledItem
+        {
+            EntryPoint = APerkEntryPointEffect.EntryType.AddLeveledListOnDeath,
+            PerkConditionTabCount = 0,
+            Rank = 0,
+            Priority = priority,
+            Item = dropList.ToLink<ILeveledItemGetter>(),
+        });
     }
 
     private static IReadOnlyDictionary<string, double> BuildRunewordRuneWeightMap()

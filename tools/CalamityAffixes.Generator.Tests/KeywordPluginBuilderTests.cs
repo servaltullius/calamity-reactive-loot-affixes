@@ -212,6 +212,45 @@ public sealed class KeywordPluginBuilderTests
     }
 
     [Fact]
+    public void BuildKeywordPlugin_WhenHybridDropConfigured_CreatesDeathDropPerks()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes_Keywords.esp",
+            EslFlag = true,
+            Loot = new LootSpec
+            {
+                RunewordFragmentChancePercent = 16.0,
+                ReforgeOrbChancePercent = 10.0,
+                CurrencyDropMode = "hybrid",
+            },
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        var runewordDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_RunewordFragmentDrops");
+        var reforgeDropList = Assert.Single(mod.LeveledItems, list => list.EditorID == "CAFF_LItem_ReforgeOrbDrops");
+
+        var runewordPerk = Assert.Single(mod.Perks, perk => perk.EditorID == "CAFF_Perk_DeathDropRunewordFragment");
+        var runewordEffect = Assert.Single(runewordPerk.Effects.OfType<PerkEntryPointAddLeveledItem>());
+        Assert.Equal(APerkEntryPointEffect.EntryType.AddLeveledListOnDeath, runewordEffect.EntryPoint);
+        Assert.Equal(runewordDropList.FormKey, runewordEffect.Item.FormKey);
+
+        var reforgePerk = Assert.Single(mod.Perks, perk => perk.EditorID == "CAFF_Perk_DeathDropReforgeOrb");
+        var reforgeEffect = Assert.Single(reforgePerk.Effects.OfType<PerkEntryPointAddLeveledItem>());
+        Assert.Equal(APerkEntryPointEffect.EntryType.AddLeveledListOnDeath, reforgeEffect.EntryPoint);
+        Assert.Equal(reforgeDropList.FormKey, reforgeEffect.Item.FormKey);
+    }
+
+    [Fact]
     public void BuildKeywordPlugin_RunewordDropList_UsesWeightedRuneEntryTickets()
     {
         var spec = new AffixSpec
