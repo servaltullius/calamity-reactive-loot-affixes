@@ -59,28 +59,28 @@ namespace RuntimeGateStoreChecks
 		const bool hasDirectCurrencyRollCalls =
 			assignText->find("TryRollRunewordFragmentToken(sourceChanceMultiplier, runeToken, runewordPityTriggered)") != std::string::npos &&
 			assignText->find("TryRollReforgeOrbGrant(sourceChanceMultiplier, reforgePityTriggered)") != std::string::npos;
-		const bool hasSharedCurrencyRollHelper =
-			assignText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") != std::string::npos &&
-			assignText->find("ExecuteCurrencyDropRolls(") != std::string::npos;
-		if (assignText->find("no random affix assignment on pickup") == std::string::npos ||
-			assignText->find("!a_allowRunewordFragmentRoll || a_count <= 0") == std::string::npos ||
-			assignText->find("ResolveLootCurrencySourceTier(") == std::string::npos ||
-			assignText->find("_loot.bossContainerEditorIdAllowContains") == std::string::npos ||
-			(assignText->find("_loot.lootSourceChanceMultBossContainer") == std::string::npos &&
-				assignText->find("ResolveLootCurrencySourceChanceMultiplier(") == std::string::npos) ||
-			assignText->find("sourceTier != LootCurrencySourceTier::kWorld") == std::string::npos ||
-			(!hasDirectCurrencyRollCalls && !hasSharedCurrencyRollHelper) ||
-			assignText->find("TryPlaceLootCurrencyItem(") == std::string::npos ||
-			assignText->find("RunewordDetail::LookupRunewordFragmentItem(") == std::string::npos ||
-			assignText->find("RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(\"CAFF_Misc_ReforgeOrb\")") == std::string::npos ||
-			assignText->find("detail::BuildLootCurrencyLedgerKey(") == std::string::npos ||
-			(assignText->find("_lootCurrencyRollLedger.find(ledgerKey)") == std::string::npos &&
-				assignText->find("TryBeginLootCurrencyLedgerRoll(ledgerKey, dayStamp)") == std::string::npos) ||
-			assignText->find("const std::uint32_t rollCount = 1u;") == std::string::npos ||
-			assignText->find("allowLegacyPickupAffixRoll") != std::string::npos) {
-			std::cerr << "loot_preview_policy: pickup flow must remain orb/fragment-only with source weighting, world-only pickup rolls, source-ledger guarding, and no legacy affix roll branch\n";
-			return false;
-		}
+			const bool hasSharedCurrencyRollHelper =
+				assignText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") != std::string::npos &&
+				assignText->find("ExecuteCurrencyDropRolls(") != std::string::npos;
+			const bool hasWorldPickupDisabled =
+				assignText->find("world pickup disabled") != std::string::npos ||
+				assignText->find("World pickups") != std::string::npos;
+			if (assignText->find("no random affix assignment on pickup") == std::string::npos ||
+				assignText->find("!a_allowRunewordFragmentRoll || a_count <= 0") == std::string::npos ||
+				assignText->find("ResolveLootCurrencySourceTier(") == std::string::npos ||
+				assignText->find("_loot.bossContainerEditorIdAllowContains") == std::string::npos ||
+				(assignText->find("_loot.lootSourceChanceMultBossContainer") == std::string::npos &&
+					assignText->find("ResolveLootCurrencySourceChanceMultiplier(") == std::string::npos) ||
+				!hasWorldPickupDisabled ||
+				(!hasDirectCurrencyRollCalls && !hasSharedCurrencyRollHelper) ||
+				assignText->find("TryPlaceLootCurrencyItem(") == std::string::npos ||
+				assignText->find("RunewordDetail::LookupRunewordFragmentItem(") == std::string::npos ||
+				assignText->find("RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(\"CAFF_Misc_ReforgeOrb\")") == std::string::npos ||
+				assignText->find("detail::BuildLootCurrencyLedgerKey(") != std::string::npos ||
+				assignText->find("allowLegacyPickupAffixRoll") != std::string::npos) {
+				std::cerr << "loot_preview_policy: pickup flow must remain orb/fragment-only, world pickups disabled, and no legacy affix roll branch\n";
+				return false;
+			}
 
 		if (CalamityAffixes::ShouldEnableSyntheticLootPreviewTooltip()) {
 			std::cerr << "loot_preview_policy: synthetic preview rollout must remain disabled by policy helper\n";
@@ -185,20 +185,19 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
-		const auto assignText = loadText(assignFile);
-		if (!assignText.has_value()) {
-			std::cerr << "loot_currency_ledger_policy: failed to open assign source: " << assignFile << "\n";
-			return false;
-		}
-		if (assignText->find("if (sourceTier != LootCurrencySourceTier::kWorld)") == std::string::npos ||
-			assignText->find("GetInGameDayStamp()") == std::string::npos ||
-			assignText->find("detail::BuildLootCurrencyLedgerKey(") == std::string::npos ||
-			assignText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos ||
-			assignText->find("_lootCurrencyRollLedger.emplace(") == std::string::npos ||
-			assignText->find("_lootCurrencyRollLedger.erase(oldest)") == std::string::npos) {
-			std::cerr << "loot_currency_ledger_policy: source-keyed ledger behavior missing in EventBridge.Loot.Assign.cpp\n";
-			return false;
-		}
+			const auto assignText = loadText(assignFile);
+			if (!assignText.has_value()) {
+				std::cerr << "loot_currency_ledger_policy: failed to open assign source: " << assignFile << "\n";
+				return false;
+			}
+			if (assignText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos ||
+				assignText->find("FinalizeLootCurrencyLedgerRoll(") == std::string::npos ||
+				assignText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos ||
+				assignText->find("_lootCurrencyRollLedger.emplace(") == std::string::npos ||
+				assignText->find("_lootCurrencyRollLedger.erase(oldest)") == std::string::npos) {
+				std::cerr << "loot_currency_ledger_policy: source-keyed ledger behavior missing in EventBridge.Loot.Assign.cpp\n";
+				return false;
+			}
 
 		const auto serializationText = loadText(serializationFile);
 		if (!serializationText.has_value()) {

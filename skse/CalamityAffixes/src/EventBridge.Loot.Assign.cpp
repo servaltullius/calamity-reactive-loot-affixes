@@ -37,29 +37,6 @@ namespace CalamityAffixes
 			return editorId == "CAFF_Misc_ReforgeOrb" || editorId.starts_with("CAFF_RuneFrag_");
 		}
 
-		[[nodiscard]] RE::TESObjectREFR* ResolveLootCurrencySourceContainerRef(RE::FormID a_oldContainer)
-		{
-			if (a_oldContainer == 0u || a_oldContainer == LootRerollGuard::kWorldContainer) {
-				return nullptr;
-			}
-
-			auto* sourceForm = RE::TESForm::LookupByID<RE::TESForm>(a_oldContainer);
-			if (!sourceForm) {
-				return nullptr;
-			}
-
-			if (auto* sourceActor = sourceForm->As<RE::Actor>(); sourceActor && sourceActor->IsDead()) {
-				return sourceActor;
-			}
-
-			if (auto* sourceRef = sourceForm->As<RE::TESObjectREFR>()) {
-				if (auto* sourceBase = sourceRef->GetBaseObject(); sourceBase && sourceBase->As<RE::TESObjectCONT>()) {
-					return sourceRef;
-				}
-			}
-
-			return nullptr;
-		}
 	}
 
 	bool EventBridge::IsRuntimeCurrencyDropRollEnabled(std::string_view a_contextTag) const
@@ -697,72 +674,27 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const auto sourceTier = detail::ResolveLootCurrencySourceTier(
-			a_oldContainer,
-			_loot.bossContainerEditorIdAllowContains,
-			_loot.bossContainerEditorIdDenyContains,
-			LootRerollGuard::kWorldContainer);
-		const float sourceChanceMultiplier = ResolveLootCurrencySourceChanceMultiplier(sourceTier);
+			const auto sourceTier = detail::ResolveLootCurrencySourceTier(
+				a_oldContainer,
+				_loot.bossContainerEditorIdAllowContains,
+				_loot.bossContainerEditorIdDenyContains,
+				LootRerollGuard::kWorldContainer);
 
-		if (sourceTier != LootCurrencySourceTier::kWorld) {
+			// Runtime currency rolls are container-only by policy.
+			// World pickups would require spawning a loose reference near the player, which can feel detached from
+			// the source and may show up as "Steal" in owned cells. Skip them entirely.
+			if (sourceTier == LootCurrencySourceTier::kWorld && _loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: pickup currency roll skipped (world pickup disabled) (baseObj={:08X}, uniqueID={}, oldContainer={:08X}).",
+					a_baseObj,
+					a_uniqueID,
+					a_oldContainer);
+			}
+
 			// Corpse/container sources are rolled at activation time to avoid
 			// "first looting then extra drop appears" UX.
 			return;
 		}
-
-		const auto dayStamp = detail::GetInGameDayStamp();
-		const auto ledgerKey = detail::BuildLootCurrencyLedgerKey(
-			sourceTier,
-			a_oldContainer,
-			a_baseObj,
-			a_uniqueID,
-			dayStamp);
-		if (!TryBeginLootCurrencyLedgerRoll(ledgerKey, dayStamp)) {
-			if (_loot.debugLog) {
-				SKSE::log::debug(
-					"CalamityAffixes: pickup loot roll skipped (ledger consumed) (baseObj={:08X}, uniqueID={}, oldContainer={:08X}, sourceTier={}, ledgerKey={:016X}, dayStamp={}).",
-					a_baseObj,
-					a_uniqueID,
-					a_oldContainer,
-					detail::LootCurrencySourceTierLabel(sourceTier),
-					ledgerKey,
-					dayStamp);
-			}
-			return;
-		}
-
-		auto* sourceContainerRef = ResolveLootCurrencySourceContainerRef(a_oldContainer);
-		const bool forceWorldPlacement = (sourceTier == LootCurrencySourceTier::kWorld);
-
-		// OnItemAdded.itemCount is the stack size for this pickup event.
-		// Rolling per stack count causes burst grants (e.g., arrows/gold/stacked misc).
-		// Keep currency roll strictly once per pickup event for stable economy pacing.
-		const std::uint32_t rollCount = 1u;
-		const auto dropResult = ExecuteCurrencyDropRolls(
-			sourceChanceMultiplier,
-			sourceContainerRef,
-			forceWorldPlacement,
-			rollCount);
-		const bool runewordDropGranted = dropResult.runewordDropGranted;
-		const bool reforgeDropGranted = dropResult.reforgeDropGranted;
-
-		FinalizeLootCurrencyLedgerRoll(ledgerKey, dayStamp);
-
-		if (_loot.debugLog) {
-			SKSE::log::debug(
-				"CalamityAffixes: pickup loot rolls applied (baseObj={:08X}, count={}, rolls={}, uniqueID={}, oldContainer={:08X}, sourceTier={}, sourceChanceMult={:.2f}, runewordDropped={}, reforgeDropped={}, ledgerKey={:016X}).",
-				a_baseObj,
-				a_count,
-				rollCount,
-				a_uniqueID,
-				a_oldContainer,
-				detail::LootCurrencySourceTierLabel(sourceTier),
-				sourceChanceMultiplier,
-				runewordDropGranted,
-				reforgeDropGranted,
-				ledgerKey);
-		}
-	}
 
 	EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(
 		float a_sourceChanceMultiplier,
