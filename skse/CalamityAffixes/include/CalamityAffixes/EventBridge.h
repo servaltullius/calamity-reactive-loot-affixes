@@ -29,6 +29,7 @@
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/RuntimeUserSettingsDebounce.h"
+#include "CalamityAffixes/RuntimePolicy.h"
 #include "CalamityAffixes/ResyncScheduler.h"
 
 namespace CalamityAffixes
@@ -511,9 +512,9 @@ namespace CalamityAffixes
 		static constexpr std::chrono::milliseconds kDuplicateHitWindow{ 100 };
 		static constexpr std::chrono::milliseconds kPapyrusHitEventWindow{ 80 };
 		static constexpr std::chrono::milliseconds kHealthDamageHookStaleWindow{ 5000 };
-		static constexpr std::string_view kRuntimeConfigRelativePath = "Data/SKSE/Plugins/CalamityAffixes/affixes.json";
-		static constexpr std::string_view kRuntimeContractRelativePath = "Data/SKSE/Plugins/CalamityAffixes/runtime_contract.json";
-		static constexpr std::string_view kUserSettingsRelativePath = "Data/SKSE/Plugins/CalamityAffixes/user_settings.json";
+		static constexpr std::string_view kRuntimeConfigRelativePath = RuntimePolicy::kRuntimeConfigRelativePath;
+		static constexpr std::string_view kRuntimeContractRelativePath = RuntimePolicy::kRuntimeContractRelativePath;
+		static constexpr std::string_view kUserSettingsRelativePath = RuntimePolicy::kUserSettingsRelativePath;
 		static constexpr std::string_view kManualModeCycleNextEvent = "CalamityAffixes_ModeCycle_Next";
 		static constexpr std::string_view kManualModeCyclePrevEvent = "CalamityAffixes_ModeCycle_Prev";
 		static constexpr std::string_view kRunewordBaseNextEvent = "CalamityAffixes_Runeword_Base_Next";
@@ -527,14 +528,14 @@ namespace CalamityAffixes
 		static constexpr std::string_view kRunewordGrantStarterOrbsEvent = "CalamityAffixes_Runeword_GrantStarterOrbs";
 		static constexpr std::string_view kUiSetPanelEvent = "CalamityAffixes_UI_SetPanel";
 		static constexpr std::string_view kUiTogglePanelEvent = "CalamityAffixes_UI_TogglePanel";
-		static constexpr std::string_view kMcmSetEnabledEvent = "CalamityAffixes_MCM_SetEnabled";
-		static constexpr std::string_view kMcmSetDebugNotificationsEvent = "CalamityAffixes_MCM_SetDebugNotifications";
-		static constexpr std::string_view kMcmSetValidationIntervalEvent = "CalamityAffixes_MCM_SetValidationInterval";
-		static constexpr std::string_view kMcmSetProcChanceMultEvent = "CalamityAffixes_MCM_SetProcChanceMult";
-		static constexpr std::string_view kMcmSetRunewordFragmentChanceEvent = "CalamityAffixes_MCM_SetRunewordFragmentChance";
-		static constexpr std::string_view kMcmSetReforgeOrbChanceEvent = "CalamityAffixes_MCM_SetReforgeOrbChance";
-		static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
-		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = "CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc";
+		static constexpr std::string_view kMcmSetEnabledEvent = RuntimePolicy::kMcmSetEnabledEvent;
+		static constexpr std::string_view kMcmSetDebugNotificationsEvent = RuntimePolicy::kMcmSetDebugNotificationsEvent;
+		static constexpr std::string_view kMcmSetValidationIntervalEvent = RuntimePolicy::kMcmSetValidationIntervalEvent;
+		static constexpr std::string_view kMcmSetProcChanceMultEvent = RuntimePolicy::kMcmSetProcChanceMultEvent;
+		static constexpr std::string_view kMcmSetRunewordFragmentChanceEvent = RuntimePolicy::kMcmSetRunewordFragmentChanceEvent;
+		static constexpr std::string_view kMcmSetReforgeOrbChanceEvent = RuntimePolicy::kMcmSetReforgeOrbChanceEvent;
+		static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = RuntimePolicy::kMcmSetDotSafetyAutoDisableEvent;
+		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = RuntimePolicy::kMcmSetAllowNonHostileFirstHitProcEvent;
 		static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 
 		static constexpr std::array<float, kMaxRegularAffixesPerItem> kAffixCountWeights = { 70.0f, 22.0f, 8.0f };

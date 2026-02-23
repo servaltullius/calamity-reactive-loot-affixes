@@ -34,6 +34,7 @@ constexpr std::string_view kReforgeOrbEditorId = "CAFF_Misc_ReforgeOrb";
 constexpr std::string_view kRunewordDropListEditorId = "CAFF_LItem_RunewordFragmentDrops";
 constexpr std::string_view kReforgeDropListEditorId = "CAFF_LItem_ReforgeOrbDrops";
 using LootCurrencySourceTier = detail::LootCurrencySourceTier;
+static_assert(!RuntimePolicy::kAllowCorpseActivationRuntimeCurrencyRollInHybridMode);
 
 struct CorpseCurrencyInventorySnapshot
 {
@@ -505,7 +506,8 @@ struct CorpseCurrencyDropProbe
 		if (sourceTier == LootCurrencySourceTier::kUnknown || sourceTier == LootCurrencySourceTier::kWorld) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		if (sourceTier == LootCurrencySourceTier::kCorpse) {
+		if (sourceTier == LootCurrencySourceTier::kCorpse &&
+			!RuntimePolicy::kAllowCorpseActivationRuntimeCurrencyRollInHybridMode) {
 			// Hybrid contract (SPID corpse authority):
 			// corpse currency drops are handled by SPID Item distribution on actor inventory,
 			// so activation-time runtime rolls are skipped.

@@ -111,7 +111,7 @@ namespace CalamityAffixes
 
 				RegisterSynthesizedAffix(std::move(out), false);
 				synthesizedRunewordAffixes += 1u;
-				SKSE::log::warn(
+				SKSE::log::info(
 					"CalamityAffixes: synthesized runeword runtime affix (recipe={}, style={}, resultToken={:016X}).",
 					recipe.id,
 					styleName(style),

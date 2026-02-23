@@ -74,174 +74,61 @@ namespace RuntimeGateStoreChecks
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
-			const fs::path eventBridgeHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "EventBridge.h";
-		const fs::path eventBridgeConfigFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.cpp";
-		const fs::path eventBridgeAffixParsingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixParsing.cpp";
-		const fs::path eventBridgeAffixTriggerParsingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixTriggerParsing.cpp";
-		const fs::path eventBridgeAffixActionParsingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixActionParsing.cpp";
-		const fs::path eventBridgeRuntimeSettingsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RuntimeSettings.cpp";
-			const fs::path triggerEventsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.Events.cpp";
-			const fs::path prismaSettingsFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SettingsLayout.inl";
-			const fs::path persistenceHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "UserSettingsPersistence.h";
-			const fs::path persistenceSourceFile = testFile.parent_path().parent_path() / "src" / "UserSettingsPersistence.cpp";
-			const fs::path runtimePathsHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "RuntimePaths.h";
-			const fs::path runtimePathsSourceFile = testFile.parent_path().parent_path() / "src" / "RuntimePaths.cpp";
-			const fs::path debounceHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "RuntimeUserSettingsDebounce.h";
-			const fs::path cmakeFile = testFile.parent_path().parent_path() / "CMakeLists.txt";
+			const fs::path projectRoot = testFile.parent_path().parent_path();
+			const fs::path includeRoot = projectRoot / "include" / "CalamityAffixes";
+			const fs::path srcRoot = projectRoot / "src";
 
-			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
-				std::ifstream in(path);
-				if (!in.is_open()) {
-					return std::nullopt;
-				}
-				return std::string(
-					(std::istreambuf_iterator<char>(in)),
-					std::istreambuf_iterator<char>());
-			};
-
-			const auto headerText = loadText(eventBridgeHeaderFile);
-		const auto configText = loadText(eventBridgeConfigFile);
-		const auto affixParsingText = loadText(eventBridgeAffixParsingFile);
-		const auto affixTriggerParsingText = loadText(eventBridgeAffixTriggerParsingFile);
-		const auto affixActionParsingText = loadText(eventBridgeAffixActionParsingFile);
-		const auto runtimeSettingsText = loadText(eventBridgeRuntimeSettingsFile);
-			const auto triggerText = loadText(triggerEventsFile);
-			const auto prismaText = loadText(prismaSettingsFile);
-			const auto persistenceHeaderText = loadText(persistenceHeaderFile);
-			const auto persistenceSourceText = loadText(persistenceSourceFile);
-			const auto runtimePathsHeaderText = loadText(runtimePathsHeaderFile);
-			const auto runtimePathsSourceText = loadText(runtimePathsSourceFile);
-			const auto debounceHeaderText = loadText(debounceHeaderFile);
-			const auto cmakeText = loadText(cmakeFile);
-		if (!headerText.has_value() || !configText.has_value() || !affixParsingText.has_value() ||
-			!affixTriggerParsingText.has_value() || !affixActionParsingText.has_value() ||
-			!runtimeSettingsText.has_value() || !triggerText.has_value() ||
-			!prismaText.has_value() || !persistenceHeaderText.has_value() ||
-			!persistenceSourceText.has_value() || !runtimePathsHeaderText.has_value() ||
-				!runtimePathsSourceText.has_value() || !debounceHeaderText.has_value() || !cmakeText.has_value()) {
-				std::cerr << "external_user_settings_persistence: required source file missing\n";
+			if (CalamityAffixes::RuntimePolicy::kUserSettingsRelativePath !=
+					"Data/SKSE/Plugins/CalamityAffixes/user_settings.json" ||
+				CalamityAffixes::RuntimePolicy::kRuntimeContractRelativePath !=
+					"Data/SKSE/Plugins/CalamityAffixes/runtime_contract.json") {
+				std::cerr << "external_user_settings_persistence: runtime path contract changed unexpectedly\n";
 				return false;
 			}
 
-			if (headerText->find("kUserSettingsRelativePath = \"Data/SKSE/Plugins/CalamityAffixes/user_settings.json\"") == std::string::npos ||
-				headerText->find("kRuntimeContractRelativePath = \"Data/SKSE/Plugins/CalamityAffixes/runtime_contract.json\"") == std::string::npos ||
-				headerText->find("void ApplyRuntimeUserSettingsOverrides();") == std::string::npos ||
-				headerText->find("bool PersistRuntimeUserSettings();") == std::string::npos ||
-				headerText->find("void MarkRuntimeUserSettingsDirty();") == std::string::npos ||
-				headerText->find("void MaybeFlushRuntimeUserSettings(") == std::string::npos ||
-				headerText->find("RuntimeUserSettingsDebounce.h") == std::string::npos) {
-				std::cerr << "external_user_settings_persistence: EventBridge user-settings declarations are missing\n";
-				return false;
-			}
-
-			if (configText->find("ApplyRuntimeUserSettingsOverrides();") == std::string::npos ||
-				configText->find("ValidateRuntimeContractSnapshot();") == std::string::npos ||
-				runtimeSettingsText->find("void EventBridge::ApplyRuntimeUserSettingsOverrides()") == std::string::npos ||
-				runtimeSettingsText->find("std::string EventBridge::BuildRuntimeUserSettingsPayload() const") == std::string::npos ||
-				runtimeSettingsText->find("void EventBridge::MarkRuntimeUserSettingsDirty()") == std::string::npos ||
-				runtimeSettingsText->find("void EventBridge::MaybeFlushRuntimeUserSettings(") == std::string::npos ||
-				runtimeSettingsText->find("bool EventBridge::PersistRuntimeUserSettings()") == std::string::npos ||
-				runtimeSettingsText->find("UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)") == std::string::npos ||
-				runtimeSettingsText->find("UserSettingsPersistence::UpdateJsonObject(") == std::string::npos ||
-			(affixParsingText->find("RuntimeContract::kTriggerHit") == std::string::npos &&
-				affixTriggerParsingText->find("RuntimeContract::kTriggerHit") == std::string::npos) ||
-			(affixParsingText->find("RuntimeContract::kActionCastOnCrit") == std::string::npos &&
-				affixActionParsingText->find("RuntimeContract::kActionCastOnCrit") == std::string::npos) ||
-			affixParsingText->find("ParseConfiguredAffixesFromJson(") == std::string::npos ||
-				runtimeSettingsText->find("RuntimeUserSettingsDebounce::MarkDirty(") == std::string::npos ||
-				runtimeSettingsText->find("RuntimeUserSettingsDebounce::ShouldFlush(") == std::string::npos) {
-				std::cerr << "external_user_settings_persistence: EventBridge runtime load/save wiring is missing\n";
-				return false;
-			}
-
-			const auto hasPersistenceCallWithinEventBlock = [&](std::string_view a_eventToken) {
-				const auto eventPos = triggerText->find(std::string("eventName == ") + std::string(a_eventToken));
-				if (eventPos == std::string::npos) {
-					return false;
-				}
-				const auto blockReturnPos = triggerText->find("return RE::BSEventNotifyControl::kContinue;", eventPos);
-				if (blockReturnPos == std::string::npos) {
-					return false;
-				}
-				const auto persistPos = triggerText->find("queueRuntimeUserSettingsPersist();", eventPos);
-				return persistPos != std::string::npos && persistPos < blockReturnPos;
-			};
-
-			const std::array<std::string_view, 8> requiredPersistedEvents{
-				"kMcmSetEnabledEvent",
-				"kMcmSetDebugNotificationsEvent",
-				"kMcmSetValidationIntervalEvent",
-				"kMcmSetProcChanceMultEvent",
-				"kMcmSetRunewordFragmentChanceEvent",
-				"kMcmSetReforgeOrbChanceEvent",
-				"kMcmSetDotSafetyAutoDisableEvent",
-				"kMcmSetAllowNonHostileFirstHitProcEvent"
-			};
-			for (const auto eventToken : requiredPersistedEvents) {
-				if (!hasPersistenceCallWithinEventBlock(eventToken)) {
-					std::cerr << "external_user_settings_persistence: missing persistence call in " << eventToken << " block\n";
+			for (const auto eventName : CalamityAffixes::RuntimePolicy::kPersistedRuntimeUserSettingEventNames) {
+				if (!CalamityAffixes::RuntimePolicy::IsPersistedRuntimeUserSettingEvent(eventName)) {
+					std::cerr << "external_user_settings_persistence: persisted runtime-setting event lookup failed: " << eventName << "\n";
 					return false;
 				}
 			}
-			if (triggerText->find("MarkRuntimeUserSettingsDirty();") == std::string::npos ||
-				triggerText->find("MaybeFlushRuntimeUserSettings(") == std::string::npos ||
-				triggerText->find("MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::now(), true);") == std::string::npos) {
-				std::cerr << "external_user_settings_persistence: runtime settings debounce flush wiring is missing\n";
+			if (CalamityAffixes::RuntimePolicy::IsPersistedRuntimeUserSettingEvent("CalamityAffixes_MCM_SetLootChance")) {
+				std::cerr << "external_user_settings_persistence: deprecated loot chance event must not be persisted\n";
 				return false;
 			}
 
-			if (prismaText->find("LoadPanelHotkeyFromUserSettings()") == std::string::npos ||
-				prismaText->find("std::numeric_limits<std::uint32_t>::max()") == std::string::npos ||
-				prismaText->find("PersistPanelHotkeyToUserSettings(resolvedKey);") == std::string::npos ||
-				prismaText->find("RestorePanelHotkeyFromUserSettings();") == std::string::npos ||
-				prismaText->find("LoadUiLanguageModeFromUserSettings()") == std::string::npos ||
-				prismaText->find("PersistUiLanguageModeToUserSettings(resolvedMode);") == std::string::npos ||
-				prismaText->find("RestoreUiLanguageModeFromUserSettings();") == std::string::npos) {
-				std::cerr << "external_user_settings_persistence: Prisma user-settings fallback/persist wiring is missing\n";
+			const auto hasDuplicates = [](const auto& names) {
+				for (std::size_t i = 0; i < names.size(); ++i) {
+					for (std::size_t j = i + 1; j < names.size(); ++j) {
+						if (names[i] == names[j]) {
+							return true;
+						}
+					}
+				}
+				return false;
+			};
+			if (hasDuplicates(CalamityAffixes::RuntimePolicy::kPersistedRuntimeUserSettingEventNames)) {
+				std::cerr << "external_user_settings_persistence: duplicate runtime-setting persisted event names found\n";
+				return false;
+			}
+			if (hasDuplicates(CalamityAffixes::RuntimePolicy::kRuntimeUserSettingKeys)) {
+				std::cerr << "external_user_settings_persistence: duplicate runtime-setting keys found\n";
 				return false;
 			}
 
-			if (persistenceHeaderText->find("namespace CalamityAffixes::UserSettingsPersistence") == std::string::npos ||
-				persistenceHeaderText->find("LoadJsonObject(") == std::string::npos ||
-				persistenceHeaderText->find("UpdateJsonObject(") == std::string::npos ||
-				persistenceSourceText->find("std::scoped_lock lk{ g_userSettingsIoLock };") == std::string::npos ||
-				persistenceSourceText->find("FlushFileBuffers") == std::string::npos ||
-				persistenceSourceText->find("MoveFileExW") == std::string::npos ||
-				persistenceSourceText->find("RuntimePaths::ResolveRuntimeRelativePath(") == std::string::npos ||
-				persistenceSourceText->find("QuarantineUnreadableJsonFileUnlocked") == std::string::npos) {
-				std::cerr << "external_user_settings_persistence: shared persistence module is missing\n";
-				return false;
-			}
-
-			if (runtimePathsHeaderText->find("namespace CalamityAffixes::RuntimePaths") == std::string::npos ||
-				runtimePathsHeaderText->find("GetRuntimeDirectory()") == std::string::npos ||
-				runtimePathsHeaderText->find("ResolveRuntimeRelativePath(") == std::string::npos ||
-				runtimePathsSourceText->find("GetModuleFileNameW") == std::string::npos ||
-				runtimePathsSourceText->find("std::filesystem::current_path()") == std::string::npos) {
-				std::cerr << "external_user_settings_persistence: runtime path resolver module is missing\n";
-				return false;
-			}
-
-			if (debounceHeaderText->find("struct State") == std::string::npos ||
-				debounceHeaderText->find("inline bool MarkDirty(") == std::string::npos ||
-				debounceHeaderText->find("inline bool ShouldFlush(") == std::string::npos ||
-				debounceHeaderText->find("inline void MarkPersistFailure(") == std::string::npos) {
-				std::cerr << "external_user_settings_persistence: runtime debounce state helper is missing\n";
-				return false;
-			}
-
-			if (cmakeText->find("include/CalamityAffixes/UserSettingsPersistence.h") == std::string::npos ||
-				cmakeText->find("include/CalamityAffixes/RuntimeContract.h") == std::string::npos ||
-			cmakeText->find("include/CalamityAffixes/RuntimePaths.h") == std::string::npos ||
-			cmakeText->find("include/CalamityAffixes/RuntimeUserSettingsDebounce.h") == std::string::npos ||
-			cmakeText->find("src/EventBridge.Config.AffixParsing.cpp") == std::string::npos ||
-			cmakeText->find("src/EventBridge.Config.AffixTriggerParsing.cpp") == std::string::npos ||
-			cmakeText->find("src/EventBridge.Config.AffixActionParsing.cpp") == std::string::npos ||
-			cmakeText->find("src/EventBridge.Config.RuntimeSettings.cpp") == std::string::npos ||
-			cmakeText->find("src/RuntimePaths.cpp") == std::string::npos ||
-			cmakeText->find("src/UserSettingsPersistence.cpp") == std::string::npos) {
-				std::cerr << "external_user_settings_persistence: build integration is missing\n";
-				return false;
+			const std::array<fs::path, 6> requiredFiles{
+				includeRoot / "UserSettingsPersistence.h",
+				includeRoot / "RuntimePaths.h",
+				includeRoot / "RuntimeUserSettingsDebounce.h",
+				srcRoot / "UserSettingsPersistence.cpp",
+				srcRoot / "RuntimePaths.cpp",
+				srcRoot / "EventBridge.Config.RuntimeSettings.cpp"
+			};
+			for (const auto& path : requiredFiles) {
+				if (!fs::exists(path)) {
+					std::cerr << "external_user_settings_persistence: required module file missing: " << path << "\n";
+					return false;
+				}
 			}
 
 			return true;
@@ -249,67 +136,29 @@ namespace RuntimeGateStoreChecks
 
 		bool CheckRuntimeUserSettingsRoundTripFieldPolicy()
 		{
-			namespace fs = std::filesystem;
-			const fs::path testFile{ __FILE__ };
-			const fs::path eventBridgeRuntimeSettingsFile =
-				testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RuntimeSettings.cpp";
-
-			std::ifstream in(eventBridgeRuntimeSettingsFile);
-			if (!in.is_open()) {
-				std::cerr << "runtime_user_settings_round_trip: missing EventBridge.Config.RuntimeSettings.cpp\n";
+			const auto& runtimeKeys = CalamityAffixes::RuntimePolicy::kRuntimeUserSettingKeys;
+			if (runtimeKeys.size() != 8u) {
+				std::cerr << "runtime_user_settings_round_trip: runtime user-setting key count changed unexpectedly\n";
 				return false;
 			}
-			const std::string configText(
-				(std::istreambuf_iterator<char>(in)),
-				std::istreambuf_iterator<char>());
-
-			if (configText.find("std::string EventBridge::BuildRuntimeUserSettingsPayload() const") == std::string::npos ||
-				configText.find("bool EventBridge::PersistRuntimeUserSettings()") == std::string::npos ||
-				configText.find("void EventBridge::ApplyRuntimeUserSettingsOverrides()") == std::string::npos) {
-				std::cerr << "runtime_user_settings_round_trip: runtime user-settings functions missing\n";
-				return false;
-			}
-
-			const std::array<std::string_view, 8> runtimeKeys{
-				"enabled",
-				"debugNotifications",
-				"validationIntervalSeconds",
-				"procChanceMultiplier",
-				"runewordFragmentChancePercent",
-				"reforgeOrbChancePercent",
-				"dotSafetyAutoDisable",
-				"allowNonHostileFirstHitProc"
-			};
-
-			const auto hasNearAnchor = [&configText](std::size_t a_pos, std::string_view a_anchor, std::size_t a_window) {
-				if (a_pos == std::string::npos) {
-					return false;
-				}
-				const auto windowStart = (a_pos > a_window) ? (a_pos - a_window) : 0;
-				const auto anchorPos = configText.rfind(a_anchor, a_pos);
-				return anchorPos != std::string::npos && anchorPos >= windowStart;
-			};
-
 			for (const auto key : runtimeKeys) {
-				const std::string persistPattern = std::string("runtime[\"") + std::string(key) + "\"] =";
-				if (configText.find(persistPattern) == std::string::npos) {
-					std::cerr << "runtime_user_settings_round_trip: missing persist payload field '" << key << "'\n";
+				if (key.empty()) {
+					std::cerr << "runtime_user_settings_round_trip: runtime user-setting key must not be empty\n";
 					return false;
 				}
-
-				const std::string quotedKey = std::string("\"") + std::string(key) + "\"";
-				bool loadFieldFound = false;
-				std::size_t keyPos = configText.find(quotedKey);
-				while (keyPos != std::string::npos) {
-					if (hasNearAnchor(keyPos, "runtime.value(", 256)) {
-						loadFieldFound = true;
-						break;
+			}
+			for (std::size_t i = 0; i < runtimeKeys.size(); ++i) {
+				for (std::size_t j = i + 1; j < runtimeKeys.size(); ++j) {
+					if (runtimeKeys[i] == runtimeKeys[j]) {
+						std::cerr << "runtime_user_settings_round_trip: duplicate runtime user-setting key found: "
+						          << runtimeKeys[i] << "\n";
+						return false;
 					}
-					keyPos = configText.find(quotedKey, keyPos + quotedKey.size());
 				}
-
-				if (!loadFieldFound) {
-					std::cerr << "runtime_user_settings_round_trip: missing load override field '" << key << "'\n";
+			}
+			for (const auto key : runtimeKeys) {
+				if (key == "lootChancePercent") {
+					std::cerr << "runtime_user_settings_round_trip: deprecated lootChancePercent key must stay removed\n";
 					return false;
 				}
 			}

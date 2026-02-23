@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CalamityAffixes/EventBridge.h"
+#include <RE/Skyrim.h>
 
 #include <charconv>
 #include <cstdint>

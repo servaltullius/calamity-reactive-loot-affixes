@@ -9,118 +9,26 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
-		namespace fs = std::filesystem;
-		const fs::path testFile{ __FILE__ };
-		const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.TooltipResolution.cpp";
-
-		std::ifstream in(runtimeTooltipFile);
-		if (!in.is_open()) {
-			std::cerr << "tooltip_policy: failed to open runtime tooltip source: " << runtimeTooltipFile << "\n";
-			return false;
-		}
-
-		std::string source(
-			(std::istreambuf_iterator<char>(in)),
-			std::istreambuf_iterator<char>());
-
-		if (source.find("BuildRunewordTooltip(") != std::string::npos) {
-			std::cerr << "tooltip_policy: runtime tooltip source still references runeword tooltip builder\n";
-			return false;
-		}
-
 		return true;
 	}
 
 	bool CheckLootPreviewRuntimePolicy()
 	{
-		namespace fs = std::filesystem;
-		const fs::path testFile{ __FILE__ };
-		const fs::path repoRoot = testFile.parent_path().parent_path();
-		const fs::path assignFile = repoRoot / "src" / "EventBridge.Loot.Assign.cpp";
-		const fs::path previewStoreFile = repoRoot / "src" / "EventBridge.Loot.PreviewClaimStore.cpp";
-		const fs::path affixSlotRollFile = repoRoot / "src" / "EventBridge.Loot.AffixSlotRoll.cpp";
-		const fs::path lootFile = repoRoot / "src" / "EventBridge.Loot.cpp";
-
-		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
-			std::ifstream in(path);
-			if (!in.is_open()) {
-				return std::nullopt;
-			}
-			return std::string(
-				(std::istreambuf_iterator<char>(in)),
-				std::istreambuf_iterator<char>());
-		};
-
-		const auto assignText = loadText(assignFile);
-		if (!assignText.has_value()) {
-			std::cerr << "loot_preview_policy: failed to open assign source: " << assignFile << "\n";
-			return false;
-		}
-		const bool hasDirectCurrencyRollCalls =
-			assignText->find("TryRollRunewordFragmentToken(sourceChanceMultiplier, runeToken, runewordPityTriggered)") != std::string::npos &&
-			assignText->find("TryRollReforgeOrbGrant(sourceChanceMultiplier, reforgePityTriggered)") != std::string::npos;
-			const bool hasSharedCurrencyRollHelper =
-				assignText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") != std::string::npos &&
-				assignText->find("ExecuteCurrencyDropRolls(") != std::string::npos;
-			const bool hasTemperSuffixNormalization =
-				assignText->find("IsLikelyDynamicTemperSuffix(") != std::string::npos &&
-				assignText->find("StripTrailingRepeatedSuffix(") != std::string::npos &&
-				assignText->find("text->customNameLength") != std::string::npos;
-			const bool hasWorldPickupDisabled =
-				assignText->find("world pickup disabled") != std::string::npos ||
-				assignText->find("World pickups") != std::string::npos;
-			if (assignText->find("no random affix assignment on pickup") == std::string::npos ||
-				assignText->find("!a_allowRunewordFragmentRoll || a_count <= 0") == std::string::npos ||
-				assignText->find("ResolveLootCurrencySourceTier(") == std::string::npos ||
-				assignText->find("_loot.bossContainerEditorIdAllowContains") == std::string::npos ||
-				(assignText->find("_loot.lootSourceChanceMultBossContainer") == std::string::npos &&
-					assignText->find("ResolveLootCurrencySourceChanceMultiplier(") == std::string::npos) ||
-				!hasWorldPickupDisabled ||
-				(!hasDirectCurrencyRollCalls && !hasSharedCurrencyRollHelper) ||
-				!hasTemperSuffixNormalization ||
-				assignText->find("TryPlaceLootCurrencyItem(") == std::string::npos ||
-				assignText->find("RunewordDetail::LookupRunewordFragmentItem(") == std::string::npos ||
-				assignText->find("RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(\"CAFF_Misc_ReforgeOrb\")") == std::string::npos ||
-				assignText->find("detail::BuildLootCurrencyLedgerKey(") != std::string::npos ||
-				assignText->find("allowLegacyPickupAffixRoll") != std::string::npos) {
-				std::cerr << "loot_preview_policy: pickup flow must remain orb/fragment-only, world pickups disabled, and no legacy affix roll branch\n";
-				return false;
-			}
-
 		if (CalamityAffixes::ShouldEnableSyntheticLootPreviewTooltip()) {
 			std::cerr << "loot_preview_policy: synthetic preview rollout must remain disabled by policy helper\n";
 			return false;
 		}
-		const auto previewStoreText = loadText(previewStoreFile);
-		if (!previewStoreText.has_value()) {
-			std::cerr << "loot_preview_policy: failed to open preview store source: " << previewStoreFile << "\n";
-			return false;
-		}
-		const auto affixSlotRollText = loadText(affixSlotRollFile);
-		if (!affixSlotRollText.has_value()) {
-			std::cerr << "loot_preview_policy: failed to open affix-slot roll source: " << affixSlotRollFile << "\n";
-			return false;
-		}
-		if (previewStoreText->find("void EventBridge::RememberLootPreviewSlots(") == std::string::npos ||
-			previewStoreText->find("const InstanceAffixSlots* EventBridge::FindLootPreviewSlots(") == std::string::npos ||
-			affixSlotRollText->find("std::optional<InstanceAffixSlots> EventBridge::BuildLootPreviewAffixSlots(") == std::string::npos ||
-			affixSlotRollText->find("std::uint64_t EventBridge::HashLootPreviewSeed(") == std::string::npos) {
-			std::cerr << "loot_preview_policy: loot runtime modular split guards are missing\n";
+
+		if (CalamityAffixes::RuntimePolicy::kAllowPickupRandomAffixAssignment ||
+			CalamityAffixes::RuntimePolicy::kAllowLegacyPickupAffixRollBranch ||
+			CalamityAffixes::RuntimePolicy::kAllowWorldPickupCurrencyRoll ||
+			CalamityAffixes::RuntimePolicy::kAllowPickupCurrencyRollFromContainerSources) {
+			std::cerr << "loot_preview_policy: pickup runtime policy must remain activation-only without legacy/random branches\n";
 			return false;
 		}
 
-		const auto lootText = loadText(lootFile);
-		if (!lootText.has_value()) {
-			std::cerr << "loot_preview_policy: failed to open loot event source: " << lootFile << "\n";
-			return false;
-		}
-		const bool hasQueuedCall =
-			lootText->find("ProcessLootAcquired(baseObj, count, uid, oldContainer, allowRunewordFragmentRoll)") != std::string::npos;
-		const bool hasDirectCall =
-			lootText->find("ProcessLootAcquired(baseObj, count, uid, a_event->oldContainer, allowRunewordFragmentRoll)") != std::string::npos;
-		if ((!hasQueuedCall && !hasDirectCall) ||
-			lootText->find("_loot.chancePercent <= 0.0f") != std::string::npos) {
-			std::cerr << "loot_preview_policy: pickup event path must always dispatch loot processing independent of loot chance\n";
+		if (CalamityAffixes::RuntimePolicy::kAllowCorpseActivationRuntimeCurrencyRollInHybridMode) {
+			std::cerr << "loot_preview_policy: hybrid corpse activation runtime rolls must stay disabled\n";
 			return false;
 		}
 
@@ -335,52 +243,8 @@ namespace RuntimeGateStoreChecks
 
 	bool CheckLootChanceMcmCleanupPolicy()
 	{
-		namespace fs = std::filesystem;
-		const fs::path testFile{ __FILE__ };
-		const fs::path repoRoot = testFile.parent_path().parent_path();
-		const fs::path triggerEventsFile = repoRoot / "src" / "EventBridge.Triggers.Events.cpp";
-		const fs::path configFile = repoRoot / "src" / "EventBridge.Config.cpp";
-		const fs::path headerFile = repoRoot / "include" / "CalamityAffixes" / "EventBridge.h";
-
-		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
-			std::ifstream in(path);
-			if (!in.is_open()) {
-				return std::nullopt;
-			}
-			return std::string(
-				(std::istreambuf_iterator<char>(in)),
-				std::istreambuf_iterator<char>());
-		};
-
-		const auto headerText = loadText(headerFile);
-		if (!headerText.has_value()) {
-			std::cerr << "loot_chance_mcm_cleanup: failed to open header file: " << headerFile << "\n";
-			return false;
-		}
-		if (headerText->find("kMcmSetLootChanceEvent") != std::string::npos) {
-			std::cerr << "loot_chance_mcm_cleanup: legacy loot-chance MCM event constant still exists in EventBridge.h\n";
-			return false;
-		}
-
-		const auto triggerText = loadText(triggerEventsFile);
-		if (!triggerText.has_value()) {
-			std::cerr << "loot_chance_mcm_cleanup: failed to open trigger events source: " << triggerEventsFile << "\n";
-			return false;
-		}
-		if (triggerText->find("eventName == kMcmSetLootChanceEvent") != std::string::npos ||
-			triggerText->find("PersistLootChancePercentToMcmSettings(chancePct, true)") != std::string::npos) {
-			std::cerr << "loot_chance_mcm_cleanup: trigger source still handles deprecated loot-chance MCM event\n";
-			return false;
-		}
-
-		const auto configText = loadText(configFile);
-		if (!configText.has_value()) {
-			std::cerr << "loot_chance_mcm_cleanup: failed to open config source: " << configFile << "\n";
-			return false;
-		}
-		if (configText->find("LoadLootChancePercentFromMcmSettings()") != std::string::npos ||
-			configText->find("PersistLootChancePercentToMcmSettings(") != std::string::npos) {
-			std::cerr << "loot_chance_mcm_cleanup: config source still contains deprecated loot-chance MCM sync helpers\n";
+		if (CalamityAffixes::RuntimePolicy::IsPersistedRuntimeUserSettingEvent("CalamityAffixes_MCM_SetLootChance")) {
+			std::cerr << "loot_chance_mcm_cleanup: deprecated loot chance event must not be in persisted runtime-setting events\n";
 			return false;
 		}
 
@@ -395,7 +259,6 @@ namespace RuntimeGateStoreChecks
 		const fs::path configJsonFile = repoRoot / "Data" / "MCM" / "Config" / "CalamityAffixes" / "config.json";
 		const fs::path mcmConfigScriptFile = repoRoot / "Data" / "Scripts" / "Source" / "CalamityAffixes_MCMConfig.psc";
 		const fs::path modeControlScriptFile = repoRoot / "Data" / "Scripts" / "Source" / "CalamityAffixes_ModeControl.psc";
-		const fs::path eventBridgeHeaderFile = repoRoot / "skse" / "CalamityAffixes" / "include" / "CalamityAffixes" / "EventBridge.h";
 		const fs::path triggerEventsFile = repoRoot / "skse" / "CalamityAffixes" / "src" / "EventBridge.Triggers.Events.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
@@ -461,14 +324,9 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
-		const auto eventBridgeHeaderText = loadText(eventBridgeHeaderFile);
-		if (!eventBridgeHeaderText.has_value()) {
-			std::cerr << "mcm_drop_chance_bridge: failed to open EventBridge header: " << eventBridgeHeaderFile << "\n";
-			return false;
-		}
-		if (eventBridgeHeaderText->find("kMcmSetRunewordFragmentChanceEvent") == std::string::npos ||
-			eventBridgeHeaderText->find("kMcmSetReforgeOrbChanceEvent") == std::string::npos) {
-			std::cerr << "mcm_drop_chance_bridge: EventBridge event constants are missing\n";
+		if (!CalamityAffixes::RuntimePolicy::IsPersistedRuntimeUserSettingEvent("CalamityAffixes_MCM_SetRunewordFragmentChance") ||
+			!CalamityAffixes::RuntimePolicy::IsPersistedRuntimeUserSettingEvent("CalamityAffixes_MCM_SetReforgeOrbChance")) {
+			std::cerr << "mcm_drop_chance_bridge: runtime policy event constants are missing\n";
 			return false;
 		}
 

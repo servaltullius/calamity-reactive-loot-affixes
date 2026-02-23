@@ -22,12 +22,13 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/Papyrus.h
 	    include/CalamityAffixes/PerTargetCooldownStore.h
 	    include/CalamityAffixes/PointerSafety.h
-	    include/CalamityAffixes/PlayerOwnership.h
-	    include/CalamityAffixes/PrismaLayoutPersistence.h
-	    include/CalamityAffixes/PrismaTooltip.h
-	    include/CalamityAffixes/RuntimeContract.h
-	    include/CalamityAffixes/RuntimePaths.h
-	    include/CalamityAffixes/RuntimeUserSettingsDebounce.h
+		    include/CalamityAffixes/PlayerOwnership.h
+		    include/CalamityAffixes/PrismaLayoutPersistence.h
+		    include/CalamityAffixes/PrismaTooltip.h
+		    include/CalamityAffixes/RuntimeContract.h
+		    include/CalamityAffixes/RuntimePolicy.h
+		    include/CalamityAffixes/RuntimePaths.h
+		    include/CalamityAffixes/RuntimeUserSettingsDebounce.h
 	    include/CalamityAffixes/RunewordContractSnapshot.h
 	    include/CalamityAffixes/RunewordUtil.h
 	    include/CalamityAffixes/RunewordUiPolicy.h

@@ -38,20 +38,16 @@ fi
 
 data_dir="${repo_root}/Data"
 dist_dir="${repo_root}/dist"
-data_dll="${data_dir}/SKSE/Plugins/CalamityAffixes.dll"
 linux_cross_dll="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll"
 spec_manifest="${repo_root}/affixes/affixes.modules.json"
 spec_json="${repo_root}/affixes/affixes.json"
+tmp_dir="$(mktemp -d)"
+cleanup() { rm -rf "${tmp_dir}"; }
+trap cleanup EXIT
 
-# Keep Data/SKSE/Plugins DLL in sync with latest Linux cross-build output when present.
-# (Windows/VS builds can still overwrite Data directly; this only helps avoid stale MO2 zips on WSL.)
-if [[ -f "${linux_cross_dll}" ]]; then
-  mkdir -p "$(dirname "${data_dll}")"
-  if [[ ! -f "${data_dll}" || "${linux_cross_dll}" -nt "${data_dll}" ]]; then
-    cp -f "${linux_cross_dll}" "${data_dll}"
-    echo "Synced DLL: ${linux_cross_dll} -> ${data_dll}"
-  fi
-fi
+stage_root="${tmp_dir}/stage"
+stage_data_dir="${stage_root}/Data"
+stage_dll="${stage_data_dir}/SKSE/Plugins/CalamityAffixes.dll"
 
 # Compose modular affix spec (if present) into affixes/affixes.json before generation.
 if [[ -f "${spec_manifest}" ]]; then
@@ -60,10 +56,21 @@ if [[ -f "${spec_manifest}" ]]; then
     --output "${spec_json}"
 fi
 
-# Regenerate data-driven outputs (keywords/MCM plugin/runtime json) from spec.
+# Stage Data/* first so packaging never mutates tracked repository outputs.
+mkdir -p "${stage_data_dir}"
+cp -a "${data_dir}/." "${stage_data_dir}/"
+
+# Keep staged DLL in sync with latest Linux cross-build output when present.
+if [[ -f "${linux_cross_dll}" ]]; then
+  mkdir -p "$(dirname "${stage_dll}")"
+  cp -f "${linux_cross_dll}" "${stage_dll}"
+  echo "Staged DLL: ${linux_cross_dll} -> ${stage_dll}"
+fi
+
+# Regenerate data-driven outputs (keywords/MCM plugin/runtime json) into staged Data.
 generator_args=(
   --spec affixes/affixes.json
-  --data Data
+  --data "${stage_data_dir}"
 )
 
 (
@@ -71,14 +78,14 @@ generator_args=(
   dotnet run --project tools/CalamityAffixes.Generator -- "${generator_args[@]}"
 )
 
-# Compile required Papyrus scripts into Data/Scripts/*.pex.
-"${repo_root}/tools/compile_papyrus.sh" --data "${data_dir}"
+# Compile required Papyrus scripts into staged Data/Scripts/*.pex.
+"${repo_root}/tools/compile_papyrus.sh" --data "${stage_data_dir}"
 
 # Lint spec + ensure generated runtime config is up to date (prevents shipping stale Data/*).
 python3 "${repo_root}/tools/lint_affixes.py" \
   --spec "${repo_root}/affixes/affixes.json" \
   --manifest "${repo_root}/affixes/affixes.modules.json" \
-  --generated "${data_dir}/SKSE/Plugins/CalamityAffixes/affixes.json"
+  --generated "${stage_data_dir}/SKSE/Plugins/CalamityAffixes/affixes.json"
 
 date_tag="$(date +%Y-%m-%d)"
 out_zip="${dist_dir}/${mod_name}_MO2_v${version}_${date_tag}.zip"
@@ -86,14 +93,10 @@ out_zip="${dist_dir}/${mod_name}_MO2_v${version}_${date_tag}.zip"
 mkdir -p "${dist_dir}"
 rm -f "${out_zip}"
 
-tmp_dir="$(mktemp -d)"
-cleanup() { rm -rf "${tmp_dir}"; }
-trap cleanup EXIT
-
 mkdir -p "${tmp_dir}/${mod_name}"
 
 # Copy Data/* into the MO2 mod root (do NOT nest under a Data/ folder).
-cp -a "${data_dir}/." "${tmp_dir}/${mod_name}/"
+cp -a "${stage_data_dir}/." "${tmp_dir}/${mod_name}/"
 
 # Include docs for CK setup / debugging.
 mkdir -p "${tmp_dir}/${mod_name}/Docs"

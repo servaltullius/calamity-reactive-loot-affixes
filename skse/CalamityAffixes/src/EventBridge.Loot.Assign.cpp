@@ -21,6 +21,8 @@ namespace CalamityAffixes
 	{
 		static constexpr std::size_t kArmorTemplateScanDepth = 8;
 		using LootCurrencySourceTier = detail::LootCurrencySourceTier;
+		static_assert(!RuntimePolicy::kAllowPickupRandomAffixAssignment);
+		static_assert(!RuntimePolicy::kAllowLegacyPickupAffixRollBranch);
 
 		[[nodiscard]] std::string_view TrimLeadingAsciiWhitespaceView(std::string_view a_text) noexcept
 		{
@@ -735,8 +737,7 @@ namespace CalamityAffixes
 
 		// Loot policy:
 		// - no random affix assignment on pickup
-		// - pickup only rolls auxiliary currencies (runeword fragment / reforge orb)
-		//   for eligible source pickups (corpse/chest/world)
+		// - pickup-only currency rolls are disabled; corpses/containers are rolled at activation time
 		if (!a_allowRunewordFragmentRoll || a_count <= 0) {
 			return;
 		}
@@ -769,27 +770,36 @@ namespace CalamityAffixes
 			return;
 		}
 
-			const auto sourceTier = detail::ResolveLootCurrencySourceTier(
-				a_oldContainer,
-				_loot.bossContainerEditorIdAllowContains,
-				_loot.bossContainerEditorIdDenyContains,
-				LootRerollGuard::kWorldContainer);
+		const auto sourceTier = detail::ResolveLootCurrencySourceTier(
+			a_oldContainer,
+			_loot.bossContainerEditorIdAllowContains,
+			_loot.bossContainerEditorIdDenyContains,
+			LootRerollGuard::kWorldContainer);
 
-			// Runtime currency rolls are container-only by policy.
-			// World pickups would require spawning a loose reference near the player, which can feel detached from
-			// the source and may show up as "Steal" in owned cells. Skip them entirely.
-			if (sourceTier == LootCurrencySourceTier::kWorld && _loot.debugLog) {
+		if (sourceTier == LootCurrencySourceTier::kWorld &&
+			!RuntimePolicy::kAllowWorldPickupCurrencyRoll) {
+			if (_loot.debugLog) {
 				SKSE::log::debug(
 					"CalamityAffixes: pickup currency roll skipped (world pickup disabled) (baseObj={:08X}, uniqueID={}, oldContainer={:08X}).",
 					a_baseObj,
 					a_uniqueID,
 					a_oldContainer);
 			}
-
-			// Corpse/container sources are rolled at activation time to avoid
-			// "first looting then extra drop appears" UX.
 			return;
 		}
+
+		if (!RuntimePolicy::kAllowPickupCurrencyRollFromContainerSources) {
+			if (_loot.debugLog && sourceTier != LootCurrencySourceTier::kUnknown) {
+				SKSE::log::debug(
+					"CalamityAffixes: pickup currency roll skipped (activation-only source policy) (baseObj={:08X}, sourceTier={}, uniqueID={}, oldContainer={:08X}).",
+					a_baseObj,
+					detail::LootCurrencySourceTierLabel(sourceTier),
+					a_uniqueID,
+					a_oldContainer);
+			}
+			return;
+		}
+	}
 
 	EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(
 		float a_sourceChanceMultiplier,

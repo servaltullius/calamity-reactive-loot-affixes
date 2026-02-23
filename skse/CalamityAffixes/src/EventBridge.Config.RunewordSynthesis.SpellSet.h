@@ -1,7 +1,8 @@
 #pragma once
 
-#include "CalamityAffixes/EventBridge.h"
 #include "RunewordIdentityOverrides.h"
+
+#include <RE/Skyrim.h>
 
 namespace CalamityAffixes::RunewordSynthesis
 {
