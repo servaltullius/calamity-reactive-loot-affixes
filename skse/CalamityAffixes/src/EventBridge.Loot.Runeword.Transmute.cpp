@@ -129,17 +129,20 @@ namespace CalamityAffixes
 			RE::DebugNotification("Runeword: select a base first.");
 			return;
 		}
+		const auto instanceKey = *_runewordSelectedBaseKey;
 
 		RE::InventoryEntryData* entry = nullptr;
 		RE::ExtraDataList* xList = nullptr;
-		if (!ResolvePlayerInventoryInstance(*_runewordSelectedBaseKey, entry, xList)) {
+		if (!ResolvePlayerInventoryInstance(instanceKey, entry, xList)) {
 			RE::DebugNotification("Runeword: selected base is no longer available.");
-			_runewordSelectedBaseKey.reset();
+			if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == instanceKey) {
+				_runewordSelectedBaseKey.reset();
+			}
 			return;
 		}
 
 		// If base already has a completed runeword, block further crafting.
-		if (const auto* completed = ResolveCompletedRunewordRecipe(*_runewordSelectedBaseKey)) {
+		if (const auto* completed = ResolveCompletedRunewordRecipe(instanceKey)) {
 			std::string note = "Runeword: already complete (";
 			note.append(completed->displayName);
 			note.push_back(')');
@@ -147,7 +150,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		auto& state = _runewordInstanceStates[*_runewordSelectedBaseKey];
+		auto& state = _runewordInstanceStates[instanceKey];
 		if (state.recipeToken == 0u) {
 			if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
 				state.recipeToken = currentRecipe->token;
@@ -166,7 +169,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const auto blockReason = ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe);
+		const auto blockReason = ResolveRunewordApplyBlockReason(instanceKey, *recipe);
 		if (blockReason == RunewordApplyBlockReason::kMissingResultAffix) {
 			std::string note = "Runeword failed: missing affix ";
 			note.append(recipe->displayName);
@@ -187,7 +190,7 @@ namespace CalamityAffixes
 		const auto totalRunes = recipe->runeTokens.size();
 		if (state.insertedRunes >= totalRunes) {
 			// Legacy finalize path.
-			(void)ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe);
+			(void)ApplyRunewordResult(instanceKey, *recipe);
 			return;
 		}
 
@@ -197,7 +200,7 @@ namespace CalamityAffixes
 		}
 
 		// Final preflight right before consumption to minimize "consume then fail" cases.
-		if (!ResolvePlayerInventoryInstance(*_runewordSelectedBaseKey, entry, xList) || !entry || !entry->object || !xList) {
+		if (!ResolvePlayerInventoryInstance(instanceKey, entry, xList) || !entry || !entry->object || !xList) {
 			RE::DebugNotification("Runeword: selected base became unavailable.");
 			return;
 		}
@@ -205,7 +208,7 @@ namespace CalamityAffixes
 			RE::DebugNotification("Runeword blocked: selected base is no longer eligible.");
 			return;
 		}
-		const auto preflightBlockReason = ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe);
+		const auto preflightBlockReason = ResolveRunewordApplyBlockReason(instanceKey, *recipe);
 		if (preflightBlockReason != RunewordApplyBlockReason::kNone) {
 			std::string note = "Runeword blocked: ";
 			note.append(BuildRunewordApplyBlockMessage(preflightBlockReason));
@@ -397,8 +400,24 @@ namespace CalamityAffixes
 			}
 		}
 
+		if (!PlayerHasInstanceKey(instanceKey)) {
+			const bool rollbackOk = rollbackConsumedRunes("base-unavailable-after-consume");
+			std::string note = "Runeword failed (base-unavailable)";
+			note.append(rollbackOk ? ": fragments restored." : ": fragment rollback partial.");
+			RE::DebugNotification(note.c_str());
+			if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == instanceKey) {
+				_runewordSelectedBaseKey.reset();
+			}
+			SKSE::log::error(
+				"CalamityAffixes: runeword apply aborted after consume (reason=base-unavailable, instance={:016X}, recipe={}, rollbackOk={}).",
+				instanceKey,
+				recipe->id,
+				rollbackOk);
+			return;
+		}
+
 		std::string applyFailureReason;
-		if (!ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe, &applyFailureReason)) {
+		if (!ApplyRunewordResult(instanceKey, *recipe, &applyFailureReason)) {
 			const bool rollbackOk = rollbackConsumedRunes("apply-failed");
 			std::string note = "Runeword failed";
 			if (!applyFailureReason.empty()) {

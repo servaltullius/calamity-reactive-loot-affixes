@@ -694,14 +694,16 @@ namespace RuntimeGateStoreChecks
 				std::istreambuf_iterator<char>());
 
 			if (transmuteSource.find("ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe)") == std::string::npos ||
-				transmuteSource.find("ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe)") == std::string::npos ||
+				transmuteSource.find("const auto instanceKey = *_runewordSelectedBaseKey;") == std::string::npos ||
+				transmuteSource.find("ResolveRunewordApplyBlockReason(instanceKey, *recipe)") == std::string::npos ||
 				transmuteSource.find("runeword result affix missing before transmute") == std::string::npos ||
 				transmuteSource.find("note.append(BuildRunewordApplyBlockMessage(blockReason));") == std::string::npos ||
 				transmuteSource.find("rollbackConsumedRunes") == std::string::npos ||
 				transmuteSource.find("_runewordTransmuteInProgress") == std::string::npos ||
 				transmuteSource.find("Runeword: transmute already in progress.") == std::string::npos ||
+				transmuteSource.find("if (!PlayerHasInstanceKey(instanceKey))") == std::string::npos ||
 				transmuteSource.find("consume-postcheck-partial") == std::string::npos ||
-				transmuteSource.find("ApplyRunewordResult(*_runewordSelectedBaseKey, *recipe, &applyFailureReason)") == std::string::npos ||
+				transmuteSource.find("ApplyRunewordResult(instanceKey, *recipe, &applyFailureReason)") == std::string::npos ||
 				transmuteSource.find(": fragments restored.") == std::string::npos ||
 				transmuteSource.find(": fragment rollback partial.") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: transmute pre-consume safety guard is missing\n";
