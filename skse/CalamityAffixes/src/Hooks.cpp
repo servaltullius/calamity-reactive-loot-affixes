@@ -3,6 +3,7 @@
 #include <array>
 #include <chrono>
 #include <cstddef>
+#include <mutex>
 #include <unordered_map>
 
 #include <RE/Skyrim.h>
@@ -81,8 +82,10 @@ namespace CalamityAffixes::Hooks
 			}
 
 			static std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> nextAllowedByTarget;
+			static std::mutex nextAllowedByTargetMutex;
 			constexpr auto kPerTargetIcd = std::chrono::milliseconds(120);
 			constexpr std::size_t kMaxEntries = 512u;
+			const std::scoped_lock lock(nextAllowedByTargetMutex);
 
 			const auto targetFormID = a_target->GetFormID();
 			if (const auto it = nextAllowedByTarget.find(targetFormID); it != nextAllowedByTarget.end() && a_now < it->second) {
@@ -341,7 +344,7 @@ namespace CalamityAffixes::Hooks
 						}
 					}
 
-					bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, a_damage);
+					bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, adjustedDamage);
 				}
 
 			static void ThunkActor(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)

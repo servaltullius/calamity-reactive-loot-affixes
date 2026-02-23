@@ -143,6 +143,7 @@ struct CorpseCurrencyDropProbe
 		if (!a_event || !a_event->cause || !a_event->target) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
+		const std::scoped_lock lock(_stateMutex);
 		const auto now = std::chrono::steady_clock::now();
 		MaybeFlushRuntimeUserSettings(now, false);
 
@@ -329,6 +330,7 @@ struct CorpseCurrencyDropProbe
 		RE::BSTEventSource<RE::TESDeathEvent>*)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!_configLoaded || !_runtimeEnabled || !a_event || !a_event->dead) {
@@ -456,6 +458,7 @@ struct CorpseCurrencyDropProbe
 		RE::BSTEventSource<RE::TESEquipEvent>*)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!_configLoaded || !_runtimeEnabled || _affixes.empty()) {
@@ -485,6 +488,7 @@ struct CorpseCurrencyDropProbe
 		RE::BSTEventSource<RE::TESActivateEvent>*)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!_configLoaded || !_runtimeEnabled || !a_event || !a_event->actionRef || !a_event->objectActivated) {
@@ -565,6 +569,7 @@ struct CorpseCurrencyDropProbe
 		RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!a_event || !a_event->caster || !a_event->target || !a_event->magicEffect) {
@@ -687,6 +692,7 @@ struct CorpseCurrencyDropProbe
 		RE::BSTEventSource<SKSE::ModCallbackEvent>*)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!a_event) {

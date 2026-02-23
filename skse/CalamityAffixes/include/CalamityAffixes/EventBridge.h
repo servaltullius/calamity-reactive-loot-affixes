@@ -760,6 +760,7 @@ namespace CalamityAffixes
 
 		std::mt19937 _rng{ std::random_device{}() };
 		mutable std::mutex _rngMutex;
+		mutable std::mutex _stateMutex;
 
 		static constexpr std::chrono::milliseconds kEquipResyncInterval{ 8000 };
 		ResyncScheduler _equipResync{ .nextAtMs = 0, .intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count()) };

@@ -206,6 +206,25 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
+    public void RuntimeHook_OnHealthDamage_ForwardsAdjustedDamage()
+    {
+        var repoRoot = FindRepoRoot();
+        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
+
+        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
+
+        var hooksSource = File.ReadAllText(hooksPath);
+        Assert.Contains(
+            "bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, adjustedDamage);",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, a_damage);",
+            hooksSource,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RepoSpec_IncludesSummonCorpseExplosionAffix()
     {
         var repoRoot = FindRepoRoot();

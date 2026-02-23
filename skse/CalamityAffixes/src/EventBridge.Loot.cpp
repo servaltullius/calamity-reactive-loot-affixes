@@ -328,6 +328,7 @@ namespace CalamityAffixes
 		RE::BSTEventSource<RE::TESContainerChangedEvent>*)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!_configLoaded || !_runtimeEnabled) {
@@ -499,6 +500,7 @@ namespace CalamityAffixes
 		RE::BSTEventSource<RE::TESUniqueIDChangeEvent>*)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!a_event) {

@@ -15,12 +15,49 @@ namespace CalamityAffixes
 		constexpr std::uint32_t kMaxDrainBytes = 10'000'000u;
 		constexpr std::uint32_t kMaxV1AffixIdLength = 1024u;
 		constexpr std::uint32_t kMaxShuffleBagSize = 100'000u;
+
+		bool DrainRecordBytes(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_length,
+			const char* a_context)
+		{
+			if (!a_intfc || a_length == 0u) {
+				return true;
+			}
+
+			if (a_length > kMaxDrainBytes) {
+				SKSE::log::warn(
+					"CalamityAffixes: draining unusually large serialization record segment (context={}, bytes={}).",
+					a_context,
+					a_length);
+			}
+
+			std::array<std::uint8_t, 4096> sink{};
+			std::uint32_t remaining = a_length;
+			while (remaining > 0u) {
+				const auto chunk = std::min<std::uint32_t>(remaining, static_cast<std::uint32_t>(sink.size()));
+				const auto read = a_intfc->ReadRecordData(sink.data(), chunk);
+				if (read != chunk) {
+					SKSE::log::warn(
+						"CalamityAffixes: truncated serialization drain (context={}, requested={}, read={}).",
+						a_context,
+						chunk,
+						read);
+					return false;
+				}
+				remaining -= chunk;
+			}
+
+			return true;
+		}
 	}
 	void EventBridge::Save(SKSE::SerializationInterface* a_intfc)
 	{
 		if (!a_intfc) {
 			return;
 		}
+
+		const std::scoped_lock lock(_stateMutex);
 
 		MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::now(), true);
 		PruneLootEvaluatedInstances();
@@ -238,6 +275,8 @@ namespace CalamityAffixes
 			return;
 		}
 
+		const std::scoped_lock lock(_stateMutex);
+
 		_instanceAffixes.clear();
 		_equippedInstanceKeysByToken.clear();
 		_equippedTokenCacheReady = false;
@@ -332,11 +371,7 @@ namespace CalamityAffixes
 			auto drainRemaining = [&]() {
 				if (bytesRead < length) {
 					const auto remaining = length - bytesRead;
-					if (remaining > kMaxDrainBytes) {
-						return; // Record length looks corrupt; skip drain to avoid OOM.
-					}
-					std::vector<std::uint8_t> sink(remaining);
-					a_intfc->ReadRecordData(sink.data(), remaining);
+					DrainRecordBytes(a_intfc, remaining, "partial-record-recovery");
 				}
 			};
 
@@ -348,11 +383,7 @@ namespace CalamityAffixes
 					version != kSerializationVersionV3 &&
 					version != kSerializationVersionV2 &&
 					version != kSerializationVersionV1) {
-						// Drain unsupported version.
-						std::vector<std::uint8_t> sink(length);
-						if (length > 0) {
-							a_intfc->ReadRecordData(sink.data(), length);
-						}
+						DrainRecordBytes(a_intfc, length, "unsupported-iaxf-version");
 						continue;
 					}
 
@@ -527,10 +558,7 @@ namespace CalamityAffixes
 
 				if (type == kSerializationRecordInstanceRuntimeStates) {
 					if (version != kInstanceRuntimeStateSerializationVersion) {
-						std::vector<std::uint8_t> sink(length);
-						if (length > 0) {
-							a_intfc->ReadRecordData(sink.data(), length);
-						}
+						DrainRecordBytes(a_intfc, length, "unsupported-irst-version");
 						continue;
 					}
 
@@ -571,10 +599,7 @@ namespace CalamityAffixes
 
 				if (type == kSerializationRecordRunewordState) {
 					if (version != kRunewordSerializationVersion) {
-						std::vector<std::uint8_t> sink(length);
-						if (length > 0) {
-							a_intfc->ReadRecordData(sink.data(), length);
-						}
+						DrainRecordBytes(a_intfc, length, "unsupported-rwrd-version");
 						continue;
 					}
 
@@ -650,10 +675,7 @@ namespace CalamityAffixes
 
 				if (type == kSerializationRecordLootEvaluated) {
 					if (version != kLootEvaluatedSerializationVersion) {
-						std::vector<std::uint8_t> sink(length);
-						if (length > 0) {
-							a_intfc->ReadRecordData(sink.data(), length);
-						}
+						DrainRecordBytes(a_intfc, length, "unsupported-lrld-version");
 						continue;
 					}
 
@@ -692,10 +714,7 @@ namespace CalamityAffixes
 				if (type == kSerializationRecordLootCurrencyLedger) {
 					if (version != kLootCurrencyLedgerSerializationVersion &&
 						version != kLootCurrencyLedgerSerializationVersionV1) {
-						std::vector<std::uint8_t> sink(length);
-						if (length > 0) {
-							a_intfc->ReadRecordData(sink.data(), length);
-						}
+						DrainRecordBytes(a_intfc, length, "unsupported-lcld-version");
 						continue;
 					}
 
@@ -727,10 +746,7 @@ namespace CalamityAffixes
 
 				if (type == kSerializationRecordLootShuffleBags) {
 					if (version != kLootShuffleBagSerializationVersion) {
-						std::vector<std::uint8_t> sink(length);
-						if (length > 0) {
-							a_intfc->ReadRecordData(sink.data(), length);
-						}
+						DrainRecordBytes(a_intfc, length, "unsupported-lsbg-version");
 						continue;
 					}
 
@@ -798,10 +814,7 @@ namespace CalamityAffixes
 
 				{
 					// Drain unknown record.
-					std::vector<std::uint8_t> sink(length);
-					if (length > 0) {
-						a_intfc->ReadRecordData(sink.data(), length);
-					}
+					DrainRecordBytes(a_intfc, length, "unknown-record");
 				}
 			}
 
@@ -853,6 +866,8 @@ namespace CalamityAffixes
 
 	void EventBridge::Revert(SKSE::SerializationInterface*)
 	{
+		const std::scoped_lock lock(_stateMutex);
+
 		// Remove any active passive suffix spells before clearing
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (player) {
@@ -982,6 +997,8 @@ namespace CalamityAffixes
 
 		void EventBridge::ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle)
 		{
+			const std::scoped_lock lock(_stateMutex);
+
 			const auto keyOpt = _lootRerollGuard.ConsumeIfPlayerDropDeleted(a_refHandle);
 			if (!keyOpt) {
 				return;

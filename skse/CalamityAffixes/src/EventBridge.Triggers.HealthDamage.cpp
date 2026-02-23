@@ -115,6 +115,7 @@ namespace CalamityAffixes
 		float a_damage)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!_configLoaded || !_runtimeEnabled || !a_target) {

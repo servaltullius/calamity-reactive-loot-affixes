@@ -9,6 +9,8 @@ namespace CalamityAffixes
 {
 	void EventBridge::TickTraps()
 	{
+		const std::scoped_lock lock(_stateMutex);
+
 		if (_traps.empty()) {
 			_hasActiveTraps.store(false, std::memory_order_relaxed);
 			return;
