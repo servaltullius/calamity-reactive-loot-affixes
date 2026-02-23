@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <mutex>
 #include <random>
 #include <string>
 #include <string_view>
@@ -238,8 +239,13 @@ namespace CalamityAffixes
 			return true;
 		}
 
-			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
-			return dist(_rng) < luckyChancePct;
+			float roll;
+			{
+				std::lock_guard<std::mutex> lock(_rngMutex);
+				std::uniform_real_distribution<float> dist(0.0f, 100.0f);
+				roll = dist(_rng);
+			}
+			return roll < luckyChancePct;
 		}
 
 		bool EventBridge::PassesLowHealthTriggerGate(
@@ -414,7 +420,11 @@ namespace CalamityAffixes
 			}
 
 			if (chance < 100.0f) {
-				const float roll = dist(_rng);
+				float roll;
+				{
+					std::lock_guard<std::mutex> lock(_rngMutex);
+					roll = dist(_rng);
+				}
 				if (roll >= chance) {
 					continue;
 				}

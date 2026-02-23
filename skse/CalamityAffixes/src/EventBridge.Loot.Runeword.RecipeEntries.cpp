@@ -605,10 +605,6 @@ namespace CalamityAffixes
 		}
 
 		for (const auto& recipe : _runewordRecipes) {
-			if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
-				affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
-				continue;
-			}
 			const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
 			if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
 				continue;

@@ -226,7 +226,7 @@ public static class KeywordPluginBuilder
 
     private static IReadOnlyDictionary<string, double> BuildRunewordRuneWeightMap()
     {
-        var entries = RunewordContractCatalog.Load().RuneWeights;
+        var entries = AffixSpecLoader.GetRunewordRuneWeights();
         var map = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
         foreach (var entry in entries)
         {
@@ -475,6 +475,24 @@ public static class KeywordPluginBuilder
 
             // MagicEffects are validated (and used for various runtime behaviors) by their own cast/target types.
             // If we leave defaults here, the spell can be cast but silently fail to apply to the intended target.
+            // Detect conflicting overwrites: if a previous spell already set different values, the last
+            // writer wins silently — warn so the spec author can split the MagicEffect.
+            if (magicEffect.CastType != spell.CastType &&
+                magicEffect.CastType != default)
+            {
+                Console.Error.WriteLine(
+                    $"WARNING: MagicEffect {effectSpec.MagicEffectEditorId} CastType overwritten " +
+                    $"({magicEffect.CastType} → {spell.CastType}) by Spell {spec.EditorId}. " +
+                    "Consider using separate MagicEffects per spell.");
+            }
+            if (magicEffect.TargetType != spell.TargetType &&
+                magicEffect.TargetType != default)
+            {
+                Console.Error.WriteLine(
+                    $"WARNING: MagicEffect {effectSpec.MagicEffectEditorId} TargetType overwritten " +
+                    $"({magicEffect.TargetType} → {spell.TargetType}) by Spell {spec.EditorId}. " +
+                    "Consider using separate MagicEffects per spell.");
+            }
             magicEffect.CastType = spell.CastType;
             magicEffect.TargetType = spell.TargetType;
 

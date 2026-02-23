@@ -82,6 +82,8 @@ internal static class RunewordContractCatalog
 
         if (runeWeights.Count == 0)
         {
+            Console.Error.WriteLine(
+                "WARNING: No rune weights loaded from contract or source. Using hardcoded fallback (may be outdated).");
             runeWeights = FallbackRuneWeights.ToList();
         }
 
@@ -125,8 +127,10 @@ internal static class RunewordContractCatalog
             var runeWeights = ParseContractRuneWeights(root);
             return new Snapshot(recipes, runeWeights);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.Error.WriteLine(
+                $"WARNING: Failed to parse runeword contract ({ex.Message}). Using fallback sources.");
             return new Snapshot([], []);
         }
     }
@@ -179,6 +183,8 @@ internal static class RunewordContractCatalog
 
             if (runes.Count == 0)
             {
+                Console.Error.WriteLine(
+                    $"WARNING: Runeword recipe '{recipeId}' has empty runes array, skipping.");
                 continue;
             }
 
@@ -229,8 +235,12 @@ internal static class RunewordContractCatalog
                 !entryElement.TryGetProperty("weight", out var weightElement) ||
                 weightElement.ValueKind != JsonValueKind.Number ||
                 !weightElement.TryGetDouble(out var weight) ||
-                weight <= 0.0 ||
-                !seen.Add(rune))
+                weight <= 0.0)
+            {
+                continue;
+            }
+
+            if (!seen.Add(rune))
             {
                 continue;
             }

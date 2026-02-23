@@ -82,6 +82,11 @@ public static class AffixSpecLoader
             .ToArray();
     }
 
+    internal static IReadOnlyList<RunewordContractCatalog.RuneWeightEntry> GetRunewordRuneWeights()
+    {
+        return RunewordContract.RuneWeights;
+    }
+
     private static void Validate(AffixSpec spec)
     {
         ValidateModKey(spec.ModKey);
@@ -141,6 +146,18 @@ public static class AffixSpecLoader
                 if (spell.Delivery is not ("Self" or "TargetActor"))
                 {
                     throw new InvalidDataException($"Unknown Spell delivery: {spell.Delivery} (Spell: {spell.EditorId})");
+                }
+
+                if (spell.SpellType is not (null or "Spell" or "Ability"))
+                {
+                    throw new InvalidDataException(
+                        $"Unknown Spell spellType: {spell.SpellType} (Spell: {spell.EditorId}). Valid: Spell, Ability.");
+                }
+
+                if (spell.CastType is not (null or "FireAndForget" or "ConstantEffect"))
+                {
+                    throw new InvalidDataException(
+                        $"Unknown Spell castType: {spell.CastType} (Spell: {spell.EditorId}). Valid: FireAndForget, ConstantEffect.");
                 }
 
                 var effects = spell.ResolveEffects();
@@ -348,8 +365,10 @@ public static class AffixSpecLoader
             var actionTypes = ReadStringSet(root, "supportedActionTypes");
             return new ValidationContract(triggers, actionTypes);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.Error.WriteLine(
+                $"WARNING: Failed to load validation contract ({ex.Message}). Using hardcoded fallback.");
             return GetFallbackContract();
         }
     }

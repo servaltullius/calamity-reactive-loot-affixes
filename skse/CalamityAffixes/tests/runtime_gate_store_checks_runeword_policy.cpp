@@ -399,7 +399,7 @@ namespace RuntimeGateStoreChecks
 			const auto recipeUiGuardPos = recipeUiText->find("Runeword Recipe: runtime effect not available.");
 			const auto recipeUiCursorUpdatePos = recipeUiText->find("_runewordRecipeCycleCursor = static_cast<std::uint32_t>(idx);");
 
-			if (recipeEntriesText->find("if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);") == std::string::npos ||
+			if (recipeEntriesText->find("const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);") == std::string::npos ||
 				recipeEntriesText->find("affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size())") == std::string::npos ||
 				recipeUiText->find("Runeword Recipe: runtime effect not available.") == std::string::npos ||
 				recipeUiGuardPos == std::string::npos ||

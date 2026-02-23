@@ -45,7 +45,7 @@ namespace CalamityAffixes
 			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
 		}
 
-		bool RollProcChance(std::mt19937& a_rng, float a_chancePct)
+		bool RollProcChance(std::mt19937& a_rng, std::mutex& a_rngMutex, float a_chancePct)
 		{
 			if (a_chancePct >= 100.0f) {
 				return true;
@@ -54,6 +54,7 @@ namespace CalamityAffixes
 				return false;
 			}
 
+			std::lock_guard<std::mutex> lock(a_rngMutex);
 			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
 			return dist(a_rng) < a_chancePct;
 		}
@@ -268,7 +269,7 @@ namespace CalamityAffixes
 		}
 
 		const float chancePct = ResolveSpecialActionProcChancePct(bestAffix.procChancePct * _runtimeProcChanceMult);
-		if (!RollProcChance(_rng, chancePct)) {
+		if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 			return;
 		}
 
@@ -447,7 +448,8 @@ namespace CalamityAffixes
 		const float radius = a_action.corpseExplosionRadius;
 		const float radiusSq = radius * radius;
 		const auto configuredMaxTargets = static_cast<std::size_t>(a_action.corpseExplosionMaxTargets);
-		const std::size_t targetCap = (configuredMaxTargets > 0u) ? configuredMaxTargets : static_cast<std::size_t>(48u);
+		constexpr std::size_t kCorpseExplosionDefaultMaxTargets = 48u;
+		const std::size_t targetCap = (configuredMaxTargets > 0u) ? configuredMaxTargets : kCorpseExplosionDefaultMaxTargets;
 		if (targetCap == 0u) {
 			return 0;
 		}

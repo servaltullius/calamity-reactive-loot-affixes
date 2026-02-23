@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <deque>
 #include <map>
+#include <mutex>
 #include <optional>
 #include <random>
 #include <string>
@@ -735,7 +736,7 @@ namespace CalamityAffixes
 		LootRerollGuard _lootRerollGuard{};
 		std::map<std::pair<RE::FormID, RE::FormID>, std::int32_t> _playerContainerStash;  // {containerID, baseObj} -> count
 		bool _configLoaded{ false };
-		std::uint32_t _procDepth{ 0 };
+		std::atomic<std::uint32_t> _procDepth{ 0 };
 		bool _healthDamageHookSeen{ false };
 		std::chrono::steady_clock::time_point _healthDamageHookLastAt{};
 		std::uint64_t _triggerProcBudgetWindowStartMs{ 0u };
@@ -758,6 +759,7 @@ namespace CalamityAffixes
 		std::size_t _castOnCritCycleCursor{ 0 };
 
 		std::mt19937 _rng{ std::random_device{}() };
+		mutable std::mutex _rngMutex;
 
 		static constexpr std::chrono::milliseconds kEquipResyncInterval{ 8000 };
 		ResyncScheduler _equipResync{ .nextAtMs = 0, .intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count()) };

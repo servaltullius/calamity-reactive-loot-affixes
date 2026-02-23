@@ -19,6 +19,7 @@ namespace CalamityAffixes
 			ExecuteSpawnTrapAction(a_action, a_owner, a_target, a_hitData);
 			break;
 		default:
+			SKSE::log::warn("CalamityAffixes: DispatchActionByType unhandled ActionType {}.", static_cast<int>(a_action.type));
 			break;
 		}
 	}

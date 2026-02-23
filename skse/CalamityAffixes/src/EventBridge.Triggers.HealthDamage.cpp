@@ -120,7 +120,8 @@ namespace CalamityAffixes
 		if (!_configLoaded || !_runtimeEnabled || !a_target) {
 			return;
 		}
-		MaybeResyncEquippedAffixes(now);
+		// H2: MaybeResyncEquippedAffixes removed — the main-thread ProcessEvent handlers
+		// already drive resync; calling it from the hook thread risks data races.
 
 		_healthDamageHookSeen = true;
 		_healthDamageHookLastAt = now;
@@ -183,7 +184,7 @@ namespace CalamityAffixes
 			0.0f,
 			a_hitData->totalDamage - a_hitData->resistedPhysicalDamage - a_hitData->resistedTypedDamage);
 
-		// If the incoming damage is far smaller than the last-hit snapshot, treat it as periodic and ignore it.
+		// If the incoming damage is < 25% of the last-hit snapshot, treat it as periodic/DoT leakage and skip.
 		if (expectedDealt >= 5.0f && a_damage > 0.0f && (a_damage < (expectedDealt * 0.25f))) {
 			routeAsHit = false;
 		}

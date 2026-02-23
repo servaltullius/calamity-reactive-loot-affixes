@@ -151,6 +151,8 @@ namespace CalamityAffixes
 			const float sourceChanceMultiplier = std::max(0.0f, a_sourceChanceMultiplier);
 			const float effectiveChance = std::clamp(chance * sourceChanceMultiplier, 0.0f, 100.0f);
 			if (effectiveChance <= 0.0f) {
+				// Source has zero multiplier — skip without touching fail streak.
+				// Intentional: the player wasn't "unlucky", this source simply doesn't drop fragments.
 				return false;
 			}
 
@@ -203,6 +205,7 @@ namespace CalamityAffixes
 			const float sourceChanceMultiplier = std::max(0.0f, a_sourceChanceMultiplier);
 			const float effectiveChance = std::clamp(chance * sourceChanceMultiplier, 0.0f, 100.0f);
 			if (effectiveChance <= 0.0f) {
+				// Source has zero multiplier — skip without touching fail streak.
 				return false;
 			}
 

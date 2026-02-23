@@ -285,8 +285,10 @@ struct CorpseCurrencyDropProbe
 							}
 						}
 
+						if (hitData && !target->IsDead()) {
 							ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
 							ProcessTrigger(Trigger::kLowHealth, target, aggressor, hitData);
+						}
 						}
 					}
 				}

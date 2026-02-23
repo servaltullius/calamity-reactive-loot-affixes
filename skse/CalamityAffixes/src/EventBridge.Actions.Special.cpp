@@ -39,7 +39,7 @@ namespace CalamityAffixes
 			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
 		}
 
-		bool RollProcChance(std::mt19937& a_rng, float a_chancePct)
+		bool RollProcChance(std::mt19937& a_rng, std::mutex& a_rngMutex, float a_chancePct)
 		{
 			if (a_chancePct >= 100.0f) {
 				return true;
@@ -48,6 +48,7 @@ namespace CalamityAffixes
 				return false;
 			}
 
+			std::lock_guard<std::mutex> lock(a_rngMutex);
 			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
 			return dist(a_rng) < a_chancePct;
 		}
@@ -135,7 +136,7 @@ namespace CalamityAffixes
 			}
 
 			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult);
-			if (!RollProcChance(_rng, chancePct)) {
+			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
 
@@ -275,7 +276,7 @@ namespace CalamityAffixes
 			}
 
 			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult);
-			if (!RollProcChance(_rng, chancePct)) {
+			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
 
@@ -428,7 +429,7 @@ namespace CalamityAffixes
 			}
 
 			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult);
-			if (!RollProcChance(_rng, chancePct)) {
+			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
 
@@ -539,7 +540,7 @@ namespace CalamityAffixes
 			}
 
 			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult);
-			if (!RollProcChance(_rng, chancePct)) {
+			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
 

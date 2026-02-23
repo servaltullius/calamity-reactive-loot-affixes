@@ -227,48 +227,54 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			AffixRuntime out{};
-			if (!InitializeAffixFromJson(a, out)) {
-				continue;
+			try {
+				AffixRuntime out{};
+				if (!InitializeAffixFromJson(a, out)) {
+					continue;
+				}
+
+				ApplyAffixSlotAndFamilyFromJson(a, out);
+
+				float kidChancePct = 0.0f;
+				ApplyAffixKidLootFromJson(a, out, kidChancePct);
+
+				const auto& runtime = a.value("runtime", nlohmann::json::object());
+				if (!runtime.is_object()) {
+					continue;
+				}
+
+				const auto& action = runtime.value("action", nlohmann::json::object());
+				if (!action.is_object()) {
+					SKSE::log::warn(
+						"CalamityAffixes: runtime.action must be an object (affixId={}); skipping affix.",
+						out.id);
+					continue;
+				}
+				out.action.debugNotify = action.value("debugNotify", false);
+				const auto type = action.value("type", std::string{});
+
+				if (!ApplyAffixRuntimeGateFromJson(runtime, action, kidChancePct, type, out)) {
+					continue;
+				}
+
+				ApplyScrollNoConsumeChanceFromJson(action, out);
+
+				if (!ParseRuntimeActionFromJson(action, type, a_handler, out)) {
+					continue;
+				}
+
+				NormalizeParsedAffixRuntimePolicy(out, type);
+
+				_affixes.push_back(std::move(out));
+				const auto idx = _affixes.size() - 1;
+
+				IndexAffixTriggerBucket(_affixes[idx], idx);
+				IndexAffixSpecialActionBucket(_affixes[idx], idx);
+			} catch (const nlohmann::json::exception& e) {
+				SKSE::log::error(
+					"CalamityAffixes: JSON error while parsing affix entry; skipping. ({})",
+					e.what());
 			}
-
-			ApplyAffixSlotAndFamilyFromJson(a, out);
-
-			float kidChancePct = 0.0f;
-			ApplyAffixKidLootFromJson(a, out, kidChancePct);
-
-			const auto& runtime = a.value("runtime", nlohmann::json::object());
-			if (!runtime.is_object()) {
-				continue;
-			}
-
-			const auto& action = runtime.value("action", nlohmann::json::object());
-			if (!action.is_object()) {
-				SKSE::log::warn(
-					"CalamityAffixes: runtime.action must be an object (affixId={}); skipping affix.",
-					out.id);
-				continue;
-			}
-			out.action.debugNotify = action.value("debugNotify", false);
-			const auto type = action.value("type", std::string{});
-
-			if (!ApplyAffixRuntimeGateFromJson(runtime, action, kidChancePct, type, out)) {
-				continue;
-			}
-
-			ApplyScrollNoConsumeChanceFromJson(action, out);
-
-			if (!ParseRuntimeActionFromJson(action, type, a_handler, out)) {
-				continue;
-			}
-
-			NormalizeParsedAffixRuntimePolicy(out, type);
-
-			_affixes.push_back(std::move(out));
-			const auto idx = _affixes.size() - 1;
-
-			IndexAffixTriggerBucket(_affixes[idx], idx);
-			IndexAffixSpecialActionBucket(_affixes[idx], idx);
 		}
 	}
 }

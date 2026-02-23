@@ -8,6 +8,7 @@
 #include <string_view>
 
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes::PrismaLayoutPersistence
 {
@@ -121,20 +122,25 @@ namespace CalamityAffixes::PrismaLayoutPersistence
 			return std::nullopt;
 		}
 
-		nlohmann::json j;
-		in >> j;
+		try {
+			nlohmann::json j;
+			in >> j;
 
-		PanelLayout loaded{};
-		loaded.left = j.value("left", 0);
-		loaded.top = j.value("top", 0);
-		loaded.width = j.value("width", 0);
-		loaded.height = j.value("height", 0);
-		loaded.valid = loaded.width > 0 && loaded.height > 0;
-		if (!loaded.valid) {
+			PanelLayout loaded{};
+			loaded.left = j.value("left", 0);
+			loaded.top = j.value("top", 0);
+			loaded.width = j.value("width", 0);
+			loaded.height = j.value("height", 0);
+			loaded.valid = loaded.width > 0 && loaded.height > 0;
+			if (!loaded.valid) {
+				return std::nullopt;
+			}
+
+			return loaded;
+		} catch (const std::exception& e) {
+			spdlog::warn("CalamityAffixes: failed to parse panel layout JSON: {}", e.what());
 			return std::nullopt;
 		}
-
-		return loaded;
 	}
 
 	std::optional<TooltipLayout> LoadTooltipLayoutFile(
@@ -156,22 +162,27 @@ namespace CalamityAffixes::PrismaLayoutPersistence
 			return std::nullopt;
 		}
 
-		nlohmann::json j;
-		in >> j;
+		try {
+			nlohmann::json j;
+			in >> j;
 
-		TooltipLayout loaded{};
-		loaded.right = j.value("right", a_defaultRight);
-		loaded.top = j.value("top", a_defaultTop);
-		loaded.fontPermille = j.value("fontPermille", a_defaultFontPermille);
-		loaded.valid = loaded.right >= 0 &&
-			loaded.top >= 0 &&
-			loaded.fontPermille >= a_minFontPermille &&
-			loaded.fontPermille <= a_maxFontPermille;
-		if (!loaded.valid) {
+			TooltipLayout loaded{};
+			loaded.right = j.value("right", a_defaultRight);
+			loaded.top = j.value("top", a_defaultTop);
+			loaded.fontPermille = j.value("fontPermille", a_defaultFontPermille);
+			loaded.valid = loaded.right >= 0 &&
+				loaded.top >= 0 &&
+				loaded.fontPermille >= a_minFontPermille &&
+				loaded.fontPermille <= a_maxFontPermille;
+			if (!loaded.valid) {
+				return std::nullopt;
+			}
+
+			return loaded;
+		} catch (const std::exception& e) {
+			spdlog::warn("CalamityAffixes: failed to parse tooltip layout JSON: {}", e.what());
 			return std::nullopt;
 		}
-
-		return loaded;
 	}
 
 	bool SavePanelLayoutFile(std::string_view a_path, const PanelLayout& a_layout)
@@ -187,7 +198,10 @@ namespace CalamityAffixes::PrismaLayoutPersistence
 			return false;
 		}
 
-		std::ofstream out(path, std::ios::trunc);
+		auto temp = path;
+		temp += ".tmp";
+
+		std::ofstream out(temp, std::ios::trunc);
 		if (!out.good()) {
 			return false;
 		}
@@ -199,7 +213,13 @@ namespace CalamityAffixes::PrismaLayoutPersistence
 			{ "height", a_layout.height }
 		};
 		out << j.dump(2);
-		return out.good();
+		out.close();
+		if (!out.good()) {
+			return false;
+		}
+
+		std::filesystem::rename(temp, path, ec);
+		return !ec;
 	}
 
 	bool SaveTooltipLayoutFile(std::string_view a_path, const TooltipLayout& a_layout)
@@ -215,7 +235,10 @@ namespace CalamityAffixes::PrismaLayoutPersistence
 			return false;
 		}
 
-		std::ofstream out(path, std::ios::trunc);
+		auto temp = path;
+		temp += ".tmp";
+
+		std::ofstream out(temp, std::ios::trunc);
 		if (!out.good()) {
 			return false;
 		}
@@ -226,7 +249,13 @@ namespace CalamityAffixes::PrismaLayoutPersistence
 			{ "fontPermille", a_layout.fontPermille }
 		};
 		out << j.dump(2);
-		return out.good();
+		out.close();
+		if (!out.good()) {
+			return false;
+		}
+
+		std::filesystem::rename(temp, path, ec);
+		return !ec;
 	}
 
 	std::string EncodePanelLayoutJson(const PanelLayout& a_layout)

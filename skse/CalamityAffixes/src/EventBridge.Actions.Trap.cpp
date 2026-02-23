@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 
 #include <algorithm>
+#include <mutex>
 #include <random>
 
 #include <spdlog/spdlog.h>
@@ -171,7 +172,10 @@ namespace CalamityAffixes
 		trap.noHitEffectArt = a_action.noHitEffectArt;
 		if (!a_action.trapExtraSpells.empty()) {
 			std::uniform_int_distribution<std::size_t> pick(0, a_action.trapExtraSpells.size() - 1);
-			trap.extraSpell = a_action.trapExtraSpells[pick(_rng)];
+			{
+				std::lock_guard<std::mutex> lock(_rngMutex);
+				trap.extraSpell = a_action.trapExtraSpells[pick(_rng)];
+			}
 		}
 		trap.armedAt = a_now + a_action.trapArmDelay;
 		trap.expiresAt = a_now + a_action.trapTtl;

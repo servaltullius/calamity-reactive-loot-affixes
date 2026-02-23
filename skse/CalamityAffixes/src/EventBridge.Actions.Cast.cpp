@@ -192,7 +192,7 @@ namespace CalamityAffixes
 		}
 
 		if (!spell) {
-			SKSE::log::error("CalamityAffixes: ExecuteAction CastSpell skipped (spell is null).");
+			SKSE::log::error("CalamityAffixes: ExecuteAction CastSpell skipped (spell is null, affix={}).", a_affix.id);
 			return;
 		}
 
@@ -256,7 +256,7 @@ namespace CalamityAffixes
 		auto* caster = a_owner;
 		auto* magicCaster = caster->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant);
 		if (!magicCaster) {
-			SKSE::log::error("CalamityAffixes: ExecuteAction CastSpellAdaptiveElement skipped (magicCaster is null).");
+			SKSE::log::error("CalamityAffixes: ExecuteAction CastSpellAdaptiveElement skipped (magicCaster is null, affix={}).", a_affix.id);
 			return;
 		}
 

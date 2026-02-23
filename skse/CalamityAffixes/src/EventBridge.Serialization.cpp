@@ -10,6 +10,12 @@
 
 namespace CalamityAffixes
 {
+	namespace
+	{
+		constexpr std::uint32_t kMaxDrainBytes = 10'000'000u;
+		constexpr std::uint32_t kMaxV1AffixIdLength = 1024u;
+		constexpr std::uint32_t kMaxShuffleBagSize = 100'000u;
+	}
 	void EventBridge::Save(SKSE::SerializationInterface* a_intfc)
 	{
 		if (!a_intfc) {
@@ -292,6 +298,8 @@ namespace CalamityAffixes
 		_runewordSelectedBaseKey.reset();
 		_runewordBaseCycleCursor = 0;
 		_runewordRecipeCycleCursor = 0;
+		_runewordTransmuteInProgress = false;
+		_playerContainerStash.clear();
 		_corpseExplosionSeenCorpses.clear();
 		_corpseExplosionState = {};
 		_summonCorpseExplosionSeenCorpses.clear();
@@ -302,6 +310,36 @@ namespace CalamityAffixes
 		std::uint32_t length = 0;
 
 		while (a_intfc->GetNextRecordInfo(type, version, length)) {
+			// Per-record read tracker for partial-failure recovery.
+			// On read failure, drain remaining bytes and continue to next record
+			// instead of abandoning the entire Load.
+			std::uint32_t bytesRead = 0;
+			bool recordOk = true;
+			auto rd = [&](auto& val) -> bool {
+				if (!recordOk) return false;
+				auto sz = a_intfc->ReadRecordData(val);
+				bytesRead += sz;
+				if (sz != sizeof(val)) { recordOk = false; return false; }
+				return true;
+			};
+			auto rdBuf = [&](void* buf, std::uint32_t len) -> bool {
+				if (!recordOk) return false;
+				auto sz = a_intfc->ReadRecordData(buf, len);
+				bytesRead += sz;
+				if (sz != len) { recordOk = false; return false; }
+				return true;
+			};
+			auto drainRemaining = [&]() {
+				if (bytesRead < length) {
+					const auto remaining = length - bytesRead;
+					if (remaining > kMaxDrainBytes) {
+						return; // Record length looks corrupt; skip drain to avoid OOM.
+					}
+					std::vector<std::uint8_t> sink(remaining);
+					a_intfc->ReadRecordData(sink.data(), remaining);
+				}
+			};
+
 			if (type == kSerializationRecordInstanceAffixes) {
 				if (version != kSerializationVersion &&
 					version != kSerializationVersionV6 &&
@@ -321,8 +359,10 @@ namespace CalamityAffixes
 					if (version == kSerializationVersion) {
 						// --- v7 load: fixed 4-token slots ---
 						std::uint32_t count = 0;
-						if (a_intfc->ReadRecordData(count) != sizeof(count)) {
-							return;
+						if (!rd(count)) {
+							SKSE::log::warn("CalamityAffixes: truncated IAXF v7 record header; skipping.");
+							drainRemaining();
+							continue;
 						}
 
 						for (std::uint32_t i = 0; i < count; ++i) {
@@ -331,20 +371,14 @@ namespace CalamityAffixes
 							std::uint8_t affixCount = 0;
 							std::array<std::uint64_t, kMaxAffixesPerItem> tokens{};
 
-							if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
-								return;
+							if (!rd(baseID) || !rd(uniqueID) || !rd(affixCount)) {
+								break;
 							}
-							if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
-								return;
-							}
-							if (a_intfc->ReadRecordData(affixCount) != sizeof(affixCount)) {
-								return;
-							}
+							bool tokensOk = true;
 							for (std::size_t s = 0; s < kMaxAffixesPerItem; ++s) {
-								if (a_intfc->ReadRecordData(tokens[s]) != sizeof(tokens[s])) {
-									return;
-								}
+								if (!rd(tokens[s])) { tokensOk = false; break; }
 							}
+							if (!tokensOk) break;
 
 							RE::FormID resolvedBaseID = 0;
 							if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
@@ -357,6 +391,10 @@ namespace CalamityAffixes
 							slots.tokens = tokens;
 							_instanceAffixes.emplace(key, slots);
 						}
+						if (!recordOk) {
+							SKSE::log::warn("CalamityAffixes: truncated IAXF v7 record; recovered {} entries.", _instanceAffixes.size());
+							drainRemaining();
+						}
 
 						continue;
 					}
@@ -364,8 +402,10 @@ namespace CalamityAffixes
 					if (version == kSerializationVersionV6) {
 						// --- v6 load: fixed 3-token slots ---
 						std::uint32_t count = 0;
-						if (a_intfc->ReadRecordData(count) != sizeof(count)) {
-							return;
+						if (!rd(count)) {
+							SKSE::log::warn("CalamityAffixes: truncated IAXF v6 record header; skipping.");
+							drainRemaining();
+							continue;
 						}
 
 						for (std::uint32_t i = 0; i < count; ++i) {
@@ -374,20 +414,14 @@ namespace CalamityAffixes
 							std::uint8_t affixCount = 0;
 							std::array<std::uint64_t, 3> legacyTokens{};
 
-							if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
-								return;
+							if (!rd(baseID) || !rd(uniqueID) || !rd(affixCount)) {
+								break;
 							}
-							if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
-								return;
-							}
-							if (a_intfc->ReadRecordData(affixCount) != sizeof(affixCount)) {
-								return;
-							}
+							bool tokensOk = true;
 							for (std::size_t s = 0; s < legacyTokens.size(); ++s) {
-								if (a_intfc->ReadRecordData(legacyTokens[s]) != sizeof(legacyTokens[s])) {
-									return;
-								}
+								if (!rd(legacyTokens[s])) { tokensOk = false; break; }
 							}
+							if (!tokensOk) break;
 
 							RE::FormID resolvedBaseID = 0;
 							if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
@@ -402,25 +436,28 @@ namespace CalamityAffixes
 							}
 							_instanceAffixes.emplace(key, slots);
 						}
+						if (!recordOk) {
+							SKSE::log::warn("CalamityAffixes: truncated IAXF v6 record; recovered {} entries.", _instanceAffixes.size());
+							drainRemaining();
+						}
 
 						continue;
 					}
 
 					// --- v1~v5 legacy load ---
 					std::uint32_t count = 0;
-					if (a_intfc->ReadRecordData(count) != sizeof(count)) {
-						return;
+					if (!rd(count)) {
+						SKSE::log::warn("CalamityAffixes: truncated IAXF v1-v5 record header; skipping.");
+						drainRemaining();
+						continue;
 					}
 
 					for (std::uint32_t i = 0; i < count; i++) {
 						RE::FormID baseID = 0;
 						std::uint16_t uniqueID = 0;
 
-						if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
-							return;
+						if (!rd(baseID) || !rd(uniqueID)) {
+							break;
 						}
 
 							std::uint64_t token = 0;
@@ -428,39 +465,31 @@ namespace CalamityAffixes
 							InstanceRuntimeState state{};
 						if (version == kSerializationVersionV1) {
 							std::uint32_t len = 0;
-							if (a_intfc->ReadRecordData(len) != sizeof(len)) {
-								return;
-							}
+							if (!rd(len)) break;
 
 							std::string affixId;
+							if (len > kMaxV1AffixIdLength) {
+								SKSE::log::error("CalamityAffixes: corrupt v1 save — affixId length {} exceeds limit.", len);
+								break;
+							}
 							affixId.resize(len);
-							if (len > 0 && a_intfc->ReadRecordData(affixId.data(), len) != len) {
-								return;
+							if (len > 0 && !rdBuf(affixId.data(), len)) {
+								break;
 							}
 
 							token = affixId.empty() ? 0u : MakeAffixToken(affixId);
 							} else {
-								if (a_intfc->ReadRecordData(token) != sizeof(token)) {
-									return;
-								}
+								if (!rd(token)) break;
 								if (version == kSerializationVersionV5 || version == kSerializationVersionV4) {
-									if (a_intfc->ReadRecordData(supplementalToken) != sizeof(supplementalToken)) {
-										return;
-									}
+									if (!rd(supplementalToken)) break;
 								}
 
 								if (version == kSerializationVersionV5 ||
 									version == kSerializationVersionV4 ||
 									version == kSerializationVersionV3) {
-									if (a_intfc->ReadRecordData(state.evolutionXp) != sizeof(state.evolutionXp)) {
-										return;
-									}
-								if (a_intfc->ReadRecordData(state.modeCycleCounter) != sizeof(state.modeCycleCounter)) {
-									return;
-								}
-								if (a_intfc->ReadRecordData(state.modeIndex) != sizeof(state.modeIndex)) {
-									return;
-								}
+									if (!rd(state.evolutionXp)) break;
+								if (!rd(state.modeCycleCounter)) break;
+								if (!rd(state.modeIndex)) break;
 							}
 						}
 
@@ -488,6 +517,10 @@ namespace CalamityAffixes
 								}
 							}
 						}
+					if (!recordOk) {
+						SKSE::log::warn("CalamityAffixes: truncated IAXF v1-v5 record; recovered {} entries.", _instanceAffixes.size());
+						drainRemaining();
+					}
 
 					continue;
 				}
@@ -502,8 +535,10 @@ namespace CalamityAffixes
 					}
 
 					std::uint32_t count = 0;
-					if (a_intfc->ReadRecordData(count) != sizeof(count)) {
-						return;
+					if (!rd(count)) {
+						SKSE::log::warn("CalamityAffixes: truncated IRST record header; skipping.");
+						drainRemaining();
+						continue;
 					}
 
 					for (std::uint32_t i = 0; i < count; ++i) {
@@ -511,23 +546,11 @@ namespace CalamityAffixes
 						std::uint16_t uniqueID = 0;
 						std::uint64_t affixToken = 0;
 						InstanceRuntimeState state{};
-						if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
-							return;
+						if (!rd(baseID) || !rd(uniqueID) || !rd(affixToken)) {
+							break;
 						}
-						if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(affixToken) != sizeof(affixToken)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(state.evolutionXp) != sizeof(state.evolutionXp)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(state.modeCycleCounter) != sizeof(state.modeCycleCounter)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(state.modeIndex) != sizeof(state.modeIndex)) {
-							return;
+						if (!rd(state.evolutionXp) || !rd(state.modeCycleCounter) || !rd(state.modeIndex)) {
+							break;
 						}
 
 						RE::FormID resolvedBaseID = 0;
@@ -537,6 +560,10 @@ namespace CalamityAffixes
 
 						const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
 						_instanceStates[MakeInstanceStateKey(key, affixToken)] = state;
+					}
+					if (!recordOk) {
+						SKSE::log::warn("CalamityAffixes: truncated IRST record; recovered {} entries.", _instanceStates.size());
+						drainRemaining();
 					}
 
 					continue;
@@ -553,56 +580,48 @@ namespace CalamityAffixes
 
 					RE::FormID selectedBaseID = 0;
 					std::uint16_t selectedUniqueID = 0;
-					if (a_intfc->ReadRecordData(selectedBaseID) != sizeof(selectedBaseID)) {
-						return;
-					}
-					if (a_intfc->ReadRecordData(selectedUniqueID) != sizeof(selectedUniqueID)) {
-						return;
-					}
-					if (a_intfc->ReadRecordData(_runewordRecipeCycleCursor) != sizeof(_runewordRecipeCycleCursor)) {
-						return;
-					}
-					if (a_intfc->ReadRecordData(_runewordBaseCycleCursor) != sizeof(_runewordBaseCycleCursor)) {
-						return;
+					if (!rd(selectedBaseID) || !rd(selectedUniqueID) ||
+						!rd(_runewordRecipeCycleCursor) || !rd(_runewordBaseCycleCursor)) {
+						SKSE::log::warn("CalamityAffixes: truncated RWRD record header; skipping.");
+						drainRemaining();
+						continue;
 					}
 
 					std::uint32_t fragmentCount = 0;
-					if (a_intfc->ReadRecordData(fragmentCount) != sizeof(fragmentCount)) {
-						return;
+					if (!rd(fragmentCount)) {
+						SKSE::log::warn("CalamityAffixes: truncated RWRD fragment count; skipping remainder.");
+						drainRemaining();
+						continue;
 					}
 					for (std::uint32_t i = 0; i < fragmentCount; ++i) {
 						std::uint64_t runeToken = 0;
 						std::uint32_t amount = 0;
-						if (a_intfc->ReadRecordData(runeToken) != sizeof(runeToken)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(amount) != sizeof(amount)) {
-							return;
+						if (!rd(runeToken) || !rd(amount)) {
+							break;
 						}
 						if (runeToken != 0u && amount > 0u) {
 							_runewordRuneFragments[runeToken] = amount;
 						}
 					}
+					if (!recordOk) {
+						SKSE::log::warn("CalamityAffixes: truncated RWRD fragments; recovered {} entries.", _runewordRuneFragments.size());
+						drainRemaining();
+						continue;
+					}
 
 					std::uint32_t runewordStateCount = 0;
-					if (a_intfc->ReadRecordData(runewordStateCount) != sizeof(runewordStateCount)) {
-						return;
+					if (!rd(runewordStateCount)) {
+						SKSE::log::warn("CalamityAffixes: truncated RWRD state count; skipping remainder.");
+						drainRemaining();
+						continue;
 					}
 					for (std::uint32_t i = 0; i < runewordStateCount; ++i) {
 						RE::FormID baseID = 0;
 						std::uint16_t uniqueID = 0;
 						RunewordInstanceState state{};
-						if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(state.recipeToken) != sizeof(state.recipeToken)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(state.insertedRunes) != sizeof(state.insertedRunes)) {
-							return;
+						if (!rd(baseID) || !rd(uniqueID) ||
+							!rd(state.recipeToken) || !rd(state.insertedRunes)) {
+							break;
 						}
 
 						RE::FormID resolvedBaseID = 0;
@@ -612,6 +631,11 @@ namespace CalamityAffixes
 
 						const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
 						_runewordInstanceStates[key] = state;
+					}
+					if (!recordOk) {
+						SKSE::log::warn("CalamityAffixes: truncated RWRD states; recovered {} entries.", _runewordInstanceStates.size());
+						drainRemaining();
+						// Fall through to resolve selectedBase with whatever was read.
 					}
 
 					if (selectedBaseID != 0 && selectedUniqueID != 0) {
@@ -634,18 +658,17 @@ namespace CalamityAffixes
 					}
 
 					std::uint32_t count = 0;
-					if (a_intfc->ReadRecordData(count) != sizeof(count)) {
-						return;
+					if (!rd(count)) {
+						SKSE::log::warn("CalamityAffixes: truncated LRLD record header; skipping.");
+						drainRemaining();
+						continue;
 					}
 
 					for (std::uint32_t i = 0; i < count; ++i) {
 						RE::FormID baseID = 0;
 						std::uint16_t uniqueID = 0;
-						if (a_intfc->ReadRecordData(baseID) != sizeof(baseID)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(uniqueID) != sizeof(uniqueID)) {
-							return;
+						if (!rd(baseID) || !rd(uniqueID)) {
+							break;
 						}
 
 						RE::FormID resolvedBaseID = 0;
@@ -657,6 +680,10 @@ namespace CalamityAffixes
 						if (key != 0) {
 							_lootEvaluatedInstances.insert(key);
 						}
+					}
+					if (!recordOk) {
+						SKSE::log::warn("CalamityAffixes: truncated LRLD record; recovered {} entries.", _lootEvaluatedInstances.size());
+						drainRemaining();
 					}
 
 					continue;
@@ -673,24 +700,26 @@ namespace CalamityAffixes
 					}
 
 					std::uint32_t count = 0;
-					if (a_intfc->ReadRecordData(count) != sizeof(count)) {
-						return;
+					if (!rd(count)) {
+						SKSE::log::warn("CalamityAffixes: truncated LCLD record header; skipping.");
+						drainRemaining();
+						continue;
 					}
 
 					for (std::uint32_t i = 0; i < count; ++i) {
 						std::uint64_t key = 0;
-						if (a_intfc->ReadRecordData(key) != sizeof(key)) {
-							return;
-						}
+						if (!rd(key)) break;
 						std::uint32_t dayStamp = 0u;
 						if (version == kLootCurrencyLedgerSerializationVersion) {
-							if (a_intfc->ReadRecordData(dayStamp) != sizeof(dayStamp)) {
-								return;
-							}
+							if (!rd(dayStamp)) break;
 						}
 						if (key != 0u) {
 							_lootCurrencyRollLedger.emplace(key, dayStamp);
 						}
+					}
+					if (!recordOk) {
+						SKSE::log::warn("CalamityAffixes: truncated LCLD record; recovered {} entries.", _lootCurrencyRollLedger.size());
+						drainRemaining();
 					}
 
 					continue;
@@ -706,8 +735,10 @@ namespace CalamityAffixes
 					}
 
 					std::uint8_t bagCount = 0;
-					if (a_intfc->ReadRecordData(bagCount) != sizeof(bagCount)) {
-						return;
+					if (!rd(bagCount)) {
+						SKSE::log::warn("CalamityAffixes: truncated LSBG record header; skipping.");
+						drainRemaining();
+						continue;
 					}
 
 					auto resolveBag = [&](std::uint8_t a_id) -> LootShuffleBagState* {
@@ -733,30 +764,33 @@ namespace CalamityAffixes
 						std::uint8_t id = 0;
 						std::uint32_t cursor = 0;
 						std::uint32_t size = 0;
-						if (a_intfc->ReadRecordData(id) != sizeof(id)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(cursor) != sizeof(cursor)) {
-							return;
-						}
-						if (a_intfc->ReadRecordData(size) != sizeof(size)) {
-							return;
+						if (!rd(id) || !rd(cursor) || !rd(size)) {
+							break;
 						}
 
 						std::vector<std::size_t> order;
+						if (size > kMaxShuffleBagSize) {
+							SKSE::log::error("CalamityAffixes: corrupt save — shuffle bag size {} exceeds limit.", size);
+							recordOk = false;
+							break;
+						}
 						order.reserve(size);
+						bool orderOk = true;
 						for (std::uint32_t n = 0; n < size; ++n) {
 							std::uint32_t rawIdx = 0;
-							if (a_intfc->ReadRecordData(rawIdx) != sizeof(rawIdx)) {
-								return;
-							}
+							if (!rd(rawIdx)) { orderOk = false; break; }
 							order.push_back(static_cast<std::size_t>(rawIdx));
 						}
+						if (!orderOk) break;
 
 						if (auto* bag = resolveBag(id)) {
 							bag->order = std::move(order);
 							bag->cursor = std::min<std::size_t>(cursor, bag->order.size());
 						}
+					}
+					if (!recordOk) {
+						SKSE::log::warn("CalamityAffixes: truncated LSBG record; recovered partial shuffle bags.");
+						drainRemaining();
 					}
 
 					continue;
@@ -811,6 +845,10 @@ namespace CalamityAffixes
 			detail::SanitizeLootShuffleBagOrder(_lootArmorSuffixes, _lootSuffixArmorBag.order, _lootSuffixArmorBag.cursor);
 
 			SanitizeRunewordState();
+
+			// Rebuild active affix counts to restore passive suffix spells
+			// that Revert() cleared before this Load() ran.
+			RebuildActiveCounts();
 		}
 
 	void EventBridge::Revert(SKSE::SerializationInterface*)
@@ -856,6 +894,8 @@ namespace CalamityAffixes
 		_runewordSelectedBaseKey.reset();
 		_runewordBaseCycleCursor = 0;
 		_runewordRecipeCycleCursor = 0;
+		_runewordTransmuteInProgress = false;
+		_playerContainerStash.clear();
 		_traps.clear();
 		_hasActiveTraps.store(false, std::memory_order_relaxed);
 		_dotCooldowns.clear();
@@ -878,6 +918,8 @@ namespace CalamityAffixes
 		_castOnCritCycleCursor = 0;
 		_lastHitAt = {};
 		_lastHit = {};
+		_lastPapyrusHitEventAt = {};
+		_lastPapyrusHit = {};
 		_recentOwnerHitAt.clear();
 		_recentOwnerKillAt.clear();
 		_recentOwnerIncomingHitAt.clear();

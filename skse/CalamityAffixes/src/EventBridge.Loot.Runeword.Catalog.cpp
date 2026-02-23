@@ -285,7 +285,11 @@ namespace CalamityAffixes
 
 				const auto idx = _runewordRecipes.size();
 				_runewordRecipeIndexByToken.emplace(recipe.token, idx);
-				_runewordRecipeIndexByResultAffixToken.emplace(recipe.resultAffixToken, idx);
+				if (const auto [it, inserted] = _runewordRecipeIndexByResultAffixToken.emplace(recipe.resultAffixToken, idx); !inserted) {
+					SKSE::log::warn(
+						"CalamityAffixes: duplicate resultAffixToken {:016X} — recipe #{} collides with recipe #{}.",
+						recipe.resultAffixToken, idx, it->second);
+				}
 				_runewordRecipes.push_back(std::move(recipe));
 			};
 

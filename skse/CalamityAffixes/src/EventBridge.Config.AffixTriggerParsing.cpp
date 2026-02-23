@@ -68,7 +68,7 @@ namespace CalamityAffixes
 			a_out.trigger = *trigger;
 		}
 
-		a_out.procChancePct = a_runtime.value("procChancePercent", 0.0f);
+		a_out.procChancePct = std::clamp(a_runtime.value("procChancePercent", 0.0f), 0.0f, 100.0f);
 		if (const auto lwIt = a_runtime.find("lootWeight"); lwIt != a_runtime.end() && lwIt->is_number()) {
 			a_out.lootWeight = lwIt->get<float>();
 		}

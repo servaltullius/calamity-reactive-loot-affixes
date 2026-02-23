@@ -37,35 +37,41 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const auto& runtime = *runtimeIt;
-		_runtimeEnabled = runtime.value("enabled", _runtimeEnabled);
-		_loot.debugLog = runtime.value("debugNotifications", _loot.debugLog);
-		_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
+		try {
+			const auto& runtime = *runtimeIt;
+			_runtimeEnabled = runtime.value("enabled", _runtimeEnabled);
+			_loot.debugLog = runtime.value("debugNotifications", _loot.debugLog);
+			_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
 
-		const double validationIntervalSeconds =
-			runtime.value("validationIntervalSeconds", static_cast<double>(_equipResync.intervalMs) / 1000.0);
-		const double procChanceMultiplier =
-			runtime.value("procChanceMultiplier", static_cast<double>(_runtimeProcChanceMult));
-		const double runewordFragmentChancePercent =
-			runtime.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent));
-		const double reforgeOrbChancePercent =
-			runtime.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent));
-		const bool allowNonHostileFirstHitProc = runtime.value(
-			"allowNonHostileFirstHitProc",
-			_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed));
+			const double validationIntervalSeconds =
+				runtime.value("validationIntervalSeconds", static_cast<double>(_equipResync.intervalMs) / 1000.0);
+			const double procChanceMultiplier =
+				runtime.value("procChanceMultiplier", static_cast<double>(_runtimeProcChanceMult));
+			const double runewordFragmentChancePercent =
+				runtime.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent));
+			const double reforgeOrbChancePercent =
+				runtime.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent));
+			const bool allowNonHostileFirstHitProc = runtime.value(
+				"allowNonHostileFirstHitProc",
+				_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed));
 
-		const float clampedValidationIntervalSeconds =
-			std::clamp(static_cast<float>(validationIntervalSeconds), 0.0f, 30.0f);
-		_equipResync.intervalMs =
-			(clampedValidationIntervalSeconds <= 0.0f)
-				? 0u
-				: static_cast<std::uint64_t>(clampedValidationIntervalSeconds * 1000.0f);
-		_equipResync.nextAtMs = 0;
+			const float clampedValidationIntervalSeconds =
+				std::clamp(static_cast<float>(validationIntervalSeconds), 0.0f, 30.0f);
+			_equipResync.intervalMs =
+				(clampedValidationIntervalSeconds <= 0.0f)
+					? 0u
+					: static_cast<std::uint64_t>(clampedValidationIntervalSeconds * 1000.0f);
+			_equipResync.nextAtMs = 0;
 
-		_runtimeProcChanceMult = std::clamp(static_cast<float>(procChanceMultiplier), 0.0f, 3.0f);
-		_loot.runewordFragmentChancePercent = std::clamp(static_cast<float>(runewordFragmentChancePercent), 0.0f, 100.0f);
-		_loot.reforgeOrbChancePercent = std::clamp(static_cast<float>(reforgeOrbChancePercent), 0.0f, 100.0f);
-		_allowNonHostilePlayerOwnedOutgoingProcs.store(allowNonHostileFirstHitProc, std::memory_order_relaxed);
+			_runtimeProcChanceMult = std::clamp(static_cast<float>(procChanceMultiplier), 0.0f, 3.0f);
+			_loot.runewordFragmentChancePercent = std::clamp(static_cast<float>(runewordFragmentChancePercent), 0.0f, 100.0f);
+			_loot.reforgeOrbChancePercent = std::clamp(static_cast<float>(reforgeOrbChancePercent), 0.0f, 100.0f);
+			_allowNonHostilePlayerOwnedOutgoingProcs.store(allowNonHostileFirstHitProc, std::memory_order_relaxed);
+		} catch (const nlohmann::json::exception& e) {
+			SKSE::log::warn(
+				"CalamityAffixes: JSON error reading user runtime settings; using defaults. ({})",
+				e.what());
+		}
 		SyncCurrencyDropModeState("ApplyRuntimeUserSettingsOverrides");
 
 		if (!_loot.dotTagSafetyAutoDisable) {

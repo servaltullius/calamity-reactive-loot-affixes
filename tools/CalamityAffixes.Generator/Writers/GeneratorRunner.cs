@@ -70,7 +70,13 @@ public static class GeneratorRunner
             return;
         }
 
-        var legacyPath = Path.Combine(Path.GetDirectoryName(generatedPath)!, legacyFileName);
+        var dir = Path.GetDirectoryName(generatedPath);
+        if (string.IsNullOrEmpty(dir))
+        {
+            return;
+        }
+
+        var legacyPath = Path.Combine(dir, legacyFileName);
         if (File.Exists(legacyPath))
         {
             File.Delete(legacyPath);

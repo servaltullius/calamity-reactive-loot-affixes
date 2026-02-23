@@ -39,6 +39,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckLootPreviewRuntimePolicy();
 	bool CheckLootRerollExploitGuardPolicy();
 	bool CheckLootCurrencyLedgerSerializationPolicy();
+	bool CheckLootEligibilityCleanupSafetyPolicy();
 	bool CheckSerializationTransientRuntimeResetPolicy();
 	bool CheckLootChanceMcmCleanupPolicy();
 	bool CheckMcmDropChanceRuntimeBridgePolicy();

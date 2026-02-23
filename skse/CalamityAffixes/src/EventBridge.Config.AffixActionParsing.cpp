@@ -183,6 +183,7 @@ namespace CalamityAffixes
 					a_out.id,
 					a_action.value("spellEditorId", std::string{}),
 					a_action.value("spellForm", std::string{}));
+				return false;
 			}
 
 			ParseMagnitudeScaling(a_action, a_out.action.magnitudeScaling);
