@@ -33,6 +33,11 @@
 
 namespace CalamityAffixes
 {
+	namespace RunewordSynthesis
+	{
+		struct SpellSet;
+	}
+
 	class EventBridge final :
 		public RE::BSTEventSink<RE::TESHitEvent>,
 		public RE::BSTEventSink<RE::TESDeathEvent>,
@@ -396,6 +401,48 @@ namespace CalamityAffixes
 				std::vector<std::uint64_t> runeTokens{};
 				std::uint64_t resultAffixToken{ 0 };
 				std::optional<LootItemType> recommendedBaseType{};
+			};
+
+			enum class SyntheticRunewordStyle : std::uint8_t
+			{
+				kAdaptiveStrike,
+				kAdaptiveExposure,
+				kSignatureGrief,
+				kSignatureInfinity,
+				kSignatureEnigma,
+				kSignatureCallToArms,
+				kFireStrike,
+				kFrostStrike,
+				kShockStrike,
+				kPoisonBloom,
+				kTarBloom,
+				kSiphonBloom,
+				kCurseFragile,
+				kCurseSlowAttack,
+				kCurseFear,
+				kCurseFrenzy,
+				kSelfHaste,
+				kSelfWard,
+				kSelfBarrier,
+				kSelfMeditation,
+				kSelfPhase,
+				kSelfPhoenix,
+				kSelfFlameCloak,
+				kSelfFrostCloak,
+				kSelfShockCloak,
+				kSelfOakflesh,
+				kSelfStoneflesh,
+				kSelfIronflesh,
+				kSelfEbonyflesh,
+				kSelfMuffle,
+				kSelfInvisibility,
+				kSoulTrap,
+				kSummonFamiliar,
+				kSummonFlameAtronach,
+				kSummonFrostAtronach,
+				kSummonStormAtronach,
+				kSummonDremoraLord,
+				kLegacyFallback
 			};
 
 			struct RunewordInstanceState
@@ -818,8 +865,45 @@ namespace CalamityAffixes
 		[[nodiscard]] bool PersistRuntimeUserSettings();
 		void MarkRuntimeUserSettingsDirty();
 		void MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::time_point a_now, bool a_force = false);
+		[[nodiscard]] nlohmann::json BuildRuntimeUserSettingsJson() const;
 		[[nodiscard]] std::string BuildRuntimeUserSettingsPayload() const;
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
+		[[nodiscard]] bool InitializeAffixFromJson(const nlohmann::json& a_affix, AffixRuntime& a_out) const;
+		void ApplyAffixSlotAndFamilyFromJson(const nlohmann::json& a_affix, AffixRuntime& a_out) const;
+		void ApplyAffixKidLootFromJson(const nlohmann::json& a_affix, AffixRuntime& a_out, float& a_outKidChancePct) const;
+		[[nodiscard]] bool ApplyAffixRuntimeGateFromJson(
+			const nlohmann::json& a_runtime,
+			const nlohmann::json& a_action,
+			float a_kidChancePct,
+			std::string_view a_actionType,
+			AffixRuntime& a_out) const;
+		void ApplyScrollNoConsumeChanceFromJson(const nlohmann::json& a_action, AffixRuntime& a_out) const;
+		void NormalizeParsedAffixRuntimePolicy(AffixRuntime& a_out, std::string_view a_actionType) const;
+		void ParseConfiguredAffixesFromJson(const nlohmann::json& a_affixes, RE::TESDataHandler* a_handler);
+		[[nodiscard]] bool ApplyRuntimeTriggerConfigFromJson(
+			const nlohmann::json& a_runtime,
+			std::string_view a_actionType,
+			AffixRuntime& a_out) const;
+		[[nodiscard]] bool ParseRuntimeActionFromJson(
+			const nlohmann::json& a_action,
+			std::string_view a_type,
+			RE::TESDataHandler* a_handler,
+			AffixRuntime& a_out) const;
+		[[nodiscard]] bool ParseRuntimeSpellActionFromJson(
+			const nlohmann::json& a_action,
+			std::string_view a_type,
+			RE::TESDataHandler* a_handler,
+			AffixRuntime& a_out) const;
+		[[nodiscard]] bool ParseRuntimeSpecialActionFromJson(
+			const nlohmann::json& a_action,
+			std::string_view a_type,
+			RE::TESDataHandler* a_handler,
+			AffixRuntime& a_out) const;
+		[[nodiscard]] bool ParseRuntimeAreaActionFromJson(
+			const nlohmann::json& a_action,
+			std::string_view a_type,
+			RE::TESDataHandler* a_handler,
+			AffixRuntime& a_out) const;
 		void IndexConfiguredAffixes();
 		void IndexAffixLookupKeys(
 			const AffixRuntime& a_affix,
@@ -831,6 +915,84 @@ namespace CalamityAffixes
 		void IndexAffixLootPool(const AffixRuntime& a_affix, std::size_t a_index);
 		void RebuildSharedLootPools();
 		void RegisterSynthesizedAffix(AffixRuntime&& a_affix, bool a_warnOnDuplicate);
+		[[nodiscard]] static SyntheticRunewordStyle ResolveSyntheticRunewordStyle(const RunewordRecipe& a_recipe);
+		[[nodiscard]] static std::string_view DescribeSyntheticRunewordStyle(SyntheticRunewordStyle a_style);
+		static void ApplyRunewordIndividualTuning(
+			AffixRuntime& a_out,
+			std::string_view a_recipeId,
+			SyntheticRunewordStyle a_style);
+		[[nodiscard]] bool ConfigureSyntheticRunewordStyle(
+			AffixRuntime& a_out,
+			SyntheticRunewordStyle& a_inOutStyle,
+			const RunewordRecipe& a_recipe,
+			std::uint32_t a_runeCount,
+			const RunewordSynthesis::SpellSet& a_spellSet) const;
+		[[nodiscard]] bool ConfigureSyntheticAdaptiveSpell(
+			AffixRuntime& a_out,
+			float a_runeScale,
+			AdaptiveElementMode a_mode,
+			RE::SpellItem* a_fire,
+			RE::SpellItem* a_frost,
+			RE::SpellItem* a_shock,
+			float a_procBase,
+			float a_procPerRune,
+			float a_procMin,
+			float a_procMax,
+			float a_icdBase,
+			float a_icdPerRune,
+			float a_icdMin,
+			float a_icdMax,
+			float a_scaleBase,
+			float a_scalePerRune,
+			float a_perTargetIcdSeconds,
+			Trigger a_trigger = Trigger::kHit) const;
+		[[nodiscard]] bool ConfigureSyntheticSingleTargetSpell(
+			AffixRuntime& a_out,
+			float a_runeScale,
+			RE::SpellItem* a_spell,
+			float a_procBase,
+			float a_procPerRune,
+			float a_procMin,
+			float a_procMax,
+			float a_icdBase,
+			float a_icdPerRune,
+			float a_icdMin,
+			float a_icdMax,
+			float a_scaleBase,
+			float a_scalePerRune,
+			float a_perTargetIcdSeconds,
+			Trigger a_trigger = Trigger::kHit) const;
+		[[nodiscard]] bool ConfigureSyntheticSelfBuff(
+			AffixRuntime& a_out,
+			float a_runeScale,
+			RE::SpellItem* a_spell,
+			Trigger a_trigger,
+			float a_procBase,
+			float a_procPerRune,
+			float a_procMin,
+			float a_procMax,
+			float a_icdBase,
+			float a_icdPerRune,
+			float a_icdMin,
+			float a_icdMax) const;
+		[[nodiscard]] bool ConfigureSyntheticSummonSpell(
+			AffixRuntime& a_out,
+			float a_runeScale,
+			RE::SpellItem* a_spell,
+			Trigger a_trigger,
+			float a_procBase,
+			float a_procPerRune,
+			float a_procMin,
+			float a_procMax,
+			float a_icdBase,
+			float a_icdPerRune,
+			float a_icdMin,
+			float a_icdMax) const;
+		[[nodiscard]] bool ApplyLegacySyntheticRunewordFallback(
+			AffixRuntime& a_out,
+			const RunewordRecipe& a_recipe,
+			std::uint32_t a_runeCount,
+			const RunewordSynthesis::SpellSet& a_spellSet) const;
 		void SynthesizeRunewordRuntimeAffixes();
 		void SanitizeRunewordState();
 		void CycleRunewordBase(std::int32_t a_direction);

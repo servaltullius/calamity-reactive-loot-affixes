@@ -62,6 +62,10 @@ namespace RuntimeGateStoreChecks
 			const bool hasSharedCurrencyRollHelper =
 				assignText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") != std::string::npos &&
 				assignText->find("ExecuteCurrencyDropRolls(") != std::string::npos;
+			const bool hasTemperSuffixNormalization =
+				assignText->find("IsLikelyDynamicTemperSuffix(") != std::string::npos &&
+				assignText->find("StripTrailingRepeatedSuffix(") != std::string::npos &&
+				assignText->find("text->customNameLength") != std::string::npos;
 			const bool hasWorldPickupDisabled =
 				assignText->find("world pickup disabled") != std::string::npos ||
 				assignText->find("World pickups") != std::string::npos;
@@ -73,6 +77,7 @@ namespace RuntimeGateStoreChecks
 					assignText->find("ResolveLootCurrencySourceChanceMultiplier(") == std::string::npos) ||
 				!hasWorldPickupDisabled ||
 				(!hasDirectCurrencyRollCalls && !hasSharedCurrencyRollHelper) ||
+				!hasTemperSuffixNormalization ||
 				assignText->find("TryPlaceLootCurrencyItem(") == std::string::npos ||
 				assignText->find("RunewordDetail::LookupRunewordFragmentItem(") == std::string::npos ||
 				assignText->find("RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(\"CAFF_Misc_ReforgeOrb\")") == std::string::npos ||

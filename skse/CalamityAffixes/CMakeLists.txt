@@ -41,12 +41,20 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.cpp
 	    src/EventBridge.Config.cpp
 	    src/EventBridge.Config.Reset.cpp
+	    src/EventBridge.Config.LootRuntime.cpp
 	    src/EventBridge.Config.RuntimeSettings.cpp
+	    src/EventBridge.Config.AffixParsing.cpp
+	    src/EventBridge.Config.AffixTriggerParsing.cpp
+	    src/EventBridge.Config.AffixActionParsing.cpp
 	    src/EventBridge.Config.Indexing.cpp
 	    src/EventBridge.Config.IndexingShared.cpp
 	    src/EventBridge.Config.AffixRegistry.cpp
 	    src/EventBridge.Config.LootPools.cpp
 	    src/EventBridge.Config.RunewordSynthesis.cpp
+	    src/EventBridge.Config.RunewordSynthesis.StyleSelection.cpp
+	    src/EventBridge.Config.RunewordSynthesis.Style.cpp
+	    src/EventBridge.Config.RunewordSynthesis.StyleExecution.cpp
+	    src/EventBridge.Config.RunewordSynthesis.SpellSet.cpp
 	    src/EventBridge.Loot.cpp
 	    src/EventBridge.Loot.Runeword.Detail.cpp
 	    src/EventBridge.Loot.Runeword.Selection.cpp

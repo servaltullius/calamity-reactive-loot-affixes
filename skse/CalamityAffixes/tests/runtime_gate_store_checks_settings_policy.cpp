@@ -75,8 +75,11 @@ namespace RuntimeGateStoreChecks
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
 			const fs::path eventBridgeHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "EventBridge.h";
-			const fs::path eventBridgeConfigFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.cpp";
-			const fs::path eventBridgeRuntimeSettingsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RuntimeSettings.cpp";
+		const fs::path eventBridgeConfigFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.cpp";
+		const fs::path eventBridgeAffixParsingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixParsing.cpp";
+		const fs::path eventBridgeAffixTriggerParsingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixTriggerParsing.cpp";
+		const fs::path eventBridgeAffixActionParsingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixActionParsing.cpp";
+		const fs::path eventBridgeRuntimeSettingsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RuntimeSettings.cpp";
 			const fs::path triggerEventsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.Events.cpp";
 			const fs::path prismaSettingsFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SettingsLayout.inl";
 			const fs::path persistenceHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "UserSettingsPersistence.h";
@@ -97,8 +100,11 @@ namespace RuntimeGateStoreChecks
 			};
 
 			const auto headerText = loadText(eventBridgeHeaderFile);
-			const auto configText = loadText(eventBridgeConfigFile);
-			const auto runtimeSettingsText = loadText(eventBridgeRuntimeSettingsFile);
+		const auto configText = loadText(eventBridgeConfigFile);
+		const auto affixParsingText = loadText(eventBridgeAffixParsingFile);
+		const auto affixTriggerParsingText = loadText(eventBridgeAffixTriggerParsingFile);
+		const auto affixActionParsingText = loadText(eventBridgeAffixActionParsingFile);
+		const auto runtimeSettingsText = loadText(eventBridgeRuntimeSettingsFile);
 			const auto triggerText = loadText(triggerEventsFile);
 			const auto prismaText = loadText(prismaSettingsFile);
 			const auto persistenceHeaderText = loadText(persistenceHeaderFile);
@@ -107,9 +113,11 @@ namespace RuntimeGateStoreChecks
 			const auto runtimePathsSourceText = loadText(runtimePathsSourceFile);
 			const auto debounceHeaderText = loadText(debounceHeaderFile);
 			const auto cmakeText = loadText(cmakeFile);
-			if (!headerText.has_value() || !configText.has_value() || !runtimeSettingsText.has_value() || !triggerText.has_value() ||
-				!prismaText.has_value() || !persistenceHeaderText.has_value() ||
-				!persistenceSourceText.has_value() || !runtimePathsHeaderText.has_value() ||
+		if (!headerText.has_value() || !configText.has_value() || !affixParsingText.has_value() ||
+			!affixTriggerParsingText.has_value() || !affixActionParsingText.has_value() ||
+			!runtimeSettingsText.has_value() || !triggerText.has_value() ||
+			!prismaText.has_value() || !persistenceHeaderText.has_value() ||
+			!persistenceSourceText.has_value() || !runtimePathsHeaderText.has_value() ||
 				!runtimePathsSourceText.has_value() || !debounceHeaderText.has_value() || !cmakeText.has_value()) {
 				std::cerr << "external_user_settings_persistence: required source file missing\n";
 				return false;
@@ -135,8 +143,11 @@ namespace RuntimeGateStoreChecks
 				runtimeSettingsText->find("bool EventBridge::PersistRuntimeUserSettings()") == std::string::npos ||
 				runtimeSettingsText->find("UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)") == std::string::npos ||
 				runtimeSettingsText->find("UserSettingsPersistence::UpdateJsonObject(") == std::string::npos ||
-				configText->find("RuntimeContract::kTriggerHit") == std::string::npos ||
-				configText->find("RuntimeContract::kActionCastOnCrit") == std::string::npos ||
+			(affixParsingText->find("RuntimeContract::kTriggerHit") == std::string::npos &&
+				affixTriggerParsingText->find("RuntimeContract::kTriggerHit") == std::string::npos) ||
+			(affixParsingText->find("RuntimeContract::kActionCastOnCrit") == std::string::npos &&
+				affixActionParsingText->find("RuntimeContract::kActionCastOnCrit") == std::string::npos) ||
+			affixParsingText->find("ParseConfiguredAffixesFromJson(") == std::string::npos ||
 				runtimeSettingsText->find("RuntimeUserSettingsDebounce::MarkDirty(") == std::string::npos ||
 				runtimeSettingsText->find("RuntimeUserSettingsDebounce::ShouldFlush(") == std::string::npos) {
 				std::cerr << "external_user_settings_persistence: EventBridge runtime load/save wiring is missing\n";
@@ -221,11 +232,14 @@ namespace RuntimeGateStoreChecks
 
 			if (cmakeText->find("include/CalamityAffixes/UserSettingsPersistence.h") == std::string::npos ||
 				cmakeText->find("include/CalamityAffixes/RuntimeContract.h") == std::string::npos ||
-				cmakeText->find("include/CalamityAffixes/RuntimePaths.h") == std::string::npos ||
-				cmakeText->find("include/CalamityAffixes/RuntimeUserSettingsDebounce.h") == std::string::npos ||
-				cmakeText->find("src/EventBridge.Config.RuntimeSettings.cpp") == std::string::npos ||
-				cmakeText->find("src/RuntimePaths.cpp") == std::string::npos ||
-				cmakeText->find("src/UserSettingsPersistence.cpp") == std::string::npos) {
+			cmakeText->find("include/CalamityAffixes/RuntimePaths.h") == std::string::npos ||
+			cmakeText->find("include/CalamityAffixes/RuntimeUserSettingsDebounce.h") == std::string::npos ||
+			cmakeText->find("src/EventBridge.Config.AffixParsing.cpp") == std::string::npos ||
+			cmakeText->find("src/EventBridge.Config.AffixTriggerParsing.cpp") == std::string::npos ||
+			cmakeText->find("src/EventBridge.Config.AffixActionParsing.cpp") == std::string::npos ||
+			cmakeText->find("src/EventBridge.Config.RuntimeSettings.cpp") == std::string::npos ||
+			cmakeText->find("src/RuntimePaths.cpp") == std::string::npos ||
+			cmakeText->find("src/UserSettingsPersistence.cpp") == std::string::npos) {
 				std::cerr << "external_user_settings_persistence: build integration is missing\n";
 				return false;
 			}

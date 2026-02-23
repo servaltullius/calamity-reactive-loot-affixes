@@ -22,6 +22,74 @@ namespace CalamityAffixes
 		static constexpr std::size_t kArmorTemplateScanDepth = 8;
 		using LootCurrencySourceTier = detail::LootCurrencySourceTier;
 
+		[[nodiscard]] std::string_view TrimLeadingAsciiWhitespaceView(std::string_view a_text) noexcept
+		{
+			std::size_t pos = 0;
+			while (pos < a_text.size()) {
+				const unsigned char ch = static_cast<unsigned char>(a_text[pos]);
+				if (!std::isspace(ch)) {
+					break;
+				}
+				++pos;
+			}
+			return a_text.substr(pos);
+		}
+
+		void TrimTrailingAsciiWhitespaceInPlace(std::string& a_text)
+		{
+			while (!a_text.empty()) {
+				const unsigned char ch = static_cast<unsigned char>(a_text.back());
+				if (!std::isspace(ch)) {
+					break;
+				}
+				a_text.pop_back();
+			}
+		}
+
+		[[nodiscard]] bool IsLikelyDynamicTemperSuffix(std::string_view a_suffix) noexcept
+		{
+			const auto trimmed = TrimLeadingAsciiWhitespaceView(a_suffix);
+			if (trimmed.size() < 3 || trimmed.front() != '(' || trimmed.back() != ')') {
+				return false;
+			}
+			if (trimmed.find('(', 1) != std::string_view::npos) {
+				return false;
+			}
+			if (trimmed.rfind(')') != trimmed.size() - 1) {
+				return false;
+			}
+			return true;
+		}
+
+		void StripTrailingRepeatedSuffix(std::string& a_text, std::string_view a_suffix)
+		{
+			if (a_text.empty() || a_suffix.empty()) {
+				return;
+			}
+
+			auto eraseIfEndsWith = [&](std::string_view a_candidate) {
+				if (a_candidate.empty() || a_text.size() < a_candidate.size()) {
+					return false;
+				}
+				const std::string_view tail(a_text.data() + (a_text.size() - a_candidate.size()), a_candidate.size());
+				if (tail != a_candidate) {
+					return false;
+				}
+				a_text.erase(a_text.size() - a_candidate.size());
+				return true;
+			};
+
+			const auto trimmedSuffix = TrimLeadingAsciiWhitespaceView(a_suffix);
+			bool changed = false;
+			while (eraseIfEndsWith(a_suffix) || eraseIfEndsWith(trimmedSuffix)) {
+				changed = true;
+			}
+
+			if (changed) {
+				TrimTrailingAsciiWhitespaceInPlace(a_text);
+			}
+		}
+
 		[[nodiscard]] bool IsCalamityResourceCurrencyItem(const RE::TESBoundObject* a_object) noexcept
 		{
 			if (!a_object || !a_object->As<RE::TESObjectMISC>()) {
@@ -532,6 +600,33 @@ namespace CalamityAffixes
 
 		const char* currentRaw = a_xList->GetDisplayName(a_entry->object);
 		const std::string currentName = currentRaw ? currentRaw : "";
+		auto* text = a_xList->GetExtraTextDisplayData();
+
+		std::string storedCustomName = currentName;
+		std::size_t storedCustomNameLength = 0;
+		if (text && text->IsPlayerSet()) {
+			const char* storedRaw = text->displayName.c_str();
+			storedCustomName = storedRaw ? storedRaw : "";
+			storedCustomNameLength = static_cast<std::size_t>(text->customNameLength);
+			if (storedCustomNameLength > 0 && storedCustomNameLength <= storedCustomName.size()) {
+				storedCustomName.resize(storedCustomNameLength);
+			}
+
+			if (storedCustomNameLength > 0 && storedCustomNameLength <= currentName.size()) {
+				const std::string_view temperSuffix(
+					currentName.data() + storedCustomNameLength,
+					currentName.size() - storedCustomNameLength);
+				if (IsLikelyDynamicTemperSuffix(temperSuffix)) {
+					StripTrailingRepeatedSuffix(storedCustomName, temperSuffix);
+				}
+			}
+		} else {
+			const char* objectNameRaw = a_entry->object->GetName();
+			storedCustomName = objectNameRaw ? objectNameRaw : "";
+			if (storedCustomName.empty()) {
+				storedCustomName = currentName;
+			}
+		}
 
 		auto isKnownAffixLabel = [&](std::string_view a_label) {
 			if (a_label.empty()) {
@@ -581,7 +676,7 @@ namespace CalamityAffixes
 			return cleaned.substr(first, last - first + 1);
 		};
 
-		std::string baseName = stripKnownAffixTags(StripLootStarMarkers(currentName));
+		std::string baseName = stripKnownAffixTags(StripLootStarMarkers(storedCustomName));
 
 		if (baseName.empty()) {
 			const char* objectNameRaw = a_entry->object->GetName();
@@ -614,11 +709,11 @@ namespace CalamityAffixes
 		if (newName.empty()) {
 			return;
 		}
-		if (newName == currentName) {
+		if (newName == storedCustomName) {
 			return;
 		}
 
-		if (auto* text = a_xList->GetExtraTextDisplayData()) {
+		if (text) {
 			text->SetName(newName.c_str());
 		} else {
 			auto* created = RE::BSExtraData::Create<RE::ExtraTextDisplayData>();

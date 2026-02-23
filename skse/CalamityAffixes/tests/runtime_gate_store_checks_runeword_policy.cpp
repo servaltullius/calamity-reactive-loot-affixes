@@ -181,7 +181,8 @@ namespace RuntimeGateStoreChecks
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
 			const fs::path summaryHeaderFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.SummaryText.h";
-			const fs::path synthesisFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RunewordSynthesis.cpp";
+			const fs::path styleSelectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RunewordSynthesis.StyleSelection.cpp";
+			const fs::path tuningFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RunewordSynthesis.Style.cpp";
 			const fs::path defaultContractFile = testFile.parent_path().parent_path().parent_path().parent_path() /
 				"Data" / "SKSE" / "Plugins" / "CalamityAffixes" / "runtime_contract.json";
 			const char* overridePath = std::getenv("CAFF_RUNTIME_CONTRACT_PATH");
@@ -203,9 +204,14 @@ namespace RuntimeGateStoreChecks
 				std::cerr << "runeword_coverage_consistency: failed to open summary header file: " << summaryHeaderFile << "\n";
 				return false;
 			}
-			const auto synthesisText = loadText(synthesisFile);
-			if (!synthesisText.has_value()) {
-				std::cerr << "runeword_coverage_consistency: failed to open source file: " << synthesisFile << "\n";
+			const auto styleSelectionText = loadText(styleSelectionFile);
+			if (!styleSelectionText.has_value()) {
+				std::cerr << "runeword_coverage_consistency: failed to open source file: " << styleSelectionFile << "\n";
+				return false;
+			}
+			const auto tuningText = loadText(tuningFile);
+			if (!tuningText.has_value()) {
+				std::cerr << "runeword_coverage_consistency: failed to open source file: " << tuningFile << "\n";
 				return false;
 			}
 			const auto contractText = loadText(contractFile);
@@ -258,16 +264,16 @@ namespace RuntimeGateStoreChecks
 			};
 
 			const auto styleSection = extractSection(
-				*synthesisText,
-				"auto resolveRunewordStyle = [&](const RunewordRecipe& a_recipe)",
-				"auto toDurationMs = [](float a_seconds)");
+				*styleSelectionText,
+				"EventBridge::SyntheticRunewordStyle EventBridge::ResolveSyntheticRunewordStyle(const RunewordRecipe& a_recipe)",
+				"std::string_view EventBridge::DescribeSyntheticRunewordStyle(");
 			if (!styleSection.has_value()) {
 				std::cerr << "runeword_coverage_consistency: style section not found\n";
 				return false;
 			}
 			const auto tuningSection = extractSection(
-				*synthesisText,
-				"static constexpr RecipeTuning kRecipeTunings[] = {",
+				*tuningText,
+				"static constexpr std::array kRecipeTunings = {",
 				"};");
 			if (!tuningSection.has_value()) {
 				std::cerr << "runeword_coverage_consistency: tuning section not found\n";
