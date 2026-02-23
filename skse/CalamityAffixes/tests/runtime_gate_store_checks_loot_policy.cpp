@@ -253,6 +253,53 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckSerializationTransientRuntimeResetPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path serializationFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Serialization.cpp";
+
+		std::ifstream in(serializationFile);
+		if (!in.is_open()) {
+			std::cerr << "serialization_transient_reset: failed to open source file: " << serializationFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		const auto countOccurrences = [&](std::string_view needle) -> std::size_t {
+			std::size_t count = 0;
+			std::size_t pos = 0;
+			while ((pos = source.find(needle, pos)) != std::string::npos) {
+				++count;
+				pos += needle.size();
+			}
+			return count;
+		};
+
+		const std::array<std::string_view, 8> requiredBothLoadAndRevert{
+			"_activeCounts.clear();",
+			"_activeHitTriggerAffixIndices.clear();",
+			"_dotCooldowns.clear();",
+			"_perTargetCooldownStore.Clear();",
+			"_nonHostileFirstHitGate.Clear();",
+			"_recentOwnerHitAt.clear();",
+			"_lowHealthTriggerConsumed.clear();",
+			"_triggerProcBudgetWindowStartMs = 0u;"
+		};
+
+		for (const auto needle : requiredBothLoadAndRevert) {
+			if (countOccurrences(needle) < 2) {
+				std::cerr << "serialization_transient_reset: expected Load/Revert reset guard missing for pattern: " << needle << "\n";
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	bool CheckLootRerollExploitGuardPolicy()
 	{
 		namespace fs = std::filesystem;

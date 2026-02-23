@@ -17,6 +17,7 @@ int main()
 	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
 	const bool lootRerollExploitGuardOk = CheckLootRerollExploitGuardPolicy();
 	const bool lootCurrencyLedgerPolicyOk = CheckLootCurrencyLedgerSerializationPolicy();
+	const bool serializationTransientResetOk = CheckSerializationTransientRuntimeResetPolicy();
 	const bool lootChanceMcmCleanupOk = CheckLootChanceMcmCleanupPolicy();
 	const bool mcmDropChanceBridgeOk = CheckMcmDropChanceRuntimeBridgePolicy();
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
@@ -40,6 +41,7 @@ int main()
 	        lootPreviewPolicyOk &&
 	        lootRerollExploitGuardOk &&
 	        lootCurrencyLedgerPolicyOk &&
+	        serializationTransientResetOk &&
 	        lootChanceMcmCleanupOk &&
 		        mcmDropChanceBridgeOk &&
 		        runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
