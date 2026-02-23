@@ -76,6 +76,7 @@ namespace RuntimeGateStoreChecks
 			const fs::path testFile{ __FILE__ };
 			const fs::path eventBridgeHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "EventBridge.h";
 			const fs::path eventBridgeConfigFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.cpp";
+			const fs::path eventBridgeRuntimeSettingsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RuntimeSettings.cpp";
 			const fs::path triggerEventsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.Events.cpp";
 			const fs::path prismaSettingsFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SettingsLayout.inl";
 			const fs::path persistenceHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "UserSettingsPersistence.h";
@@ -97,6 +98,7 @@ namespace RuntimeGateStoreChecks
 
 			const auto headerText = loadText(eventBridgeHeaderFile);
 			const auto configText = loadText(eventBridgeConfigFile);
+			const auto runtimeSettingsText = loadText(eventBridgeRuntimeSettingsFile);
 			const auto triggerText = loadText(triggerEventsFile);
 			const auto prismaText = loadText(prismaSettingsFile);
 			const auto persistenceHeaderText = loadText(persistenceHeaderFile);
@@ -105,7 +107,7 @@ namespace RuntimeGateStoreChecks
 			const auto runtimePathsSourceText = loadText(runtimePathsSourceFile);
 			const auto debounceHeaderText = loadText(debounceHeaderFile);
 			const auto cmakeText = loadText(cmakeFile);
-			if (!headerText.has_value() || !configText.has_value() || !triggerText.has_value() ||
+			if (!headerText.has_value() || !configText.has_value() || !runtimeSettingsText.has_value() || !triggerText.has_value() ||
 				!prismaText.has_value() || !persistenceHeaderText.has_value() ||
 				!persistenceSourceText.has_value() || !runtimePathsHeaderText.has_value() ||
 				!runtimePathsSourceText.has_value() || !debounceHeaderText.has_value() || !cmakeText.has_value()) {
@@ -126,17 +128,17 @@ namespace RuntimeGateStoreChecks
 
 			if (configText->find("ApplyRuntimeUserSettingsOverrides();") == std::string::npos ||
 				configText->find("ValidateRuntimeContractSnapshot();") == std::string::npos ||
-				configText->find("void EventBridge::ApplyRuntimeUserSettingsOverrides()") == std::string::npos ||
-				configText->find("std::string EventBridge::BuildRuntimeUserSettingsPayload() const") == std::string::npos ||
-				configText->find("void EventBridge::MarkRuntimeUserSettingsDirty()") == std::string::npos ||
-				configText->find("void EventBridge::MaybeFlushRuntimeUserSettings(") == std::string::npos ||
-				configText->find("bool EventBridge::PersistRuntimeUserSettings()") == std::string::npos ||
-				configText->find("UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)") == std::string::npos ||
-				configText->find("UserSettingsPersistence::UpdateJsonObject(") == std::string::npos ||
+				runtimeSettingsText->find("void EventBridge::ApplyRuntimeUserSettingsOverrides()") == std::string::npos ||
+				runtimeSettingsText->find("std::string EventBridge::BuildRuntimeUserSettingsPayload() const") == std::string::npos ||
+				runtimeSettingsText->find("void EventBridge::MarkRuntimeUserSettingsDirty()") == std::string::npos ||
+				runtimeSettingsText->find("void EventBridge::MaybeFlushRuntimeUserSettings(") == std::string::npos ||
+				runtimeSettingsText->find("bool EventBridge::PersistRuntimeUserSettings()") == std::string::npos ||
+				runtimeSettingsText->find("UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)") == std::string::npos ||
+				runtimeSettingsText->find("UserSettingsPersistence::UpdateJsonObject(") == std::string::npos ||
 				configText->find("RuntimeContract::kTriggerHit") == std::string::npos ||
 				configText->find("RuntimeContract::kActionCastOnCrit") == std::string::npos ||
-				configText->find("RuntimeUserSettingsDebounce::MarkDirty(") == std::string::npos ||
-				configText->find("RuntimeUserSettingsDebounce::ShouldFlush(") == std::string::npos) {
+				runtimeSettingsText->find("RuntimeUserSettingsDebounce::MarkDirty(") == std::string::npos ||
+				runtimeSettingsText->find("RuntimeUserSettingsDebounce::ShouldFlush(") == std::string::npos) {
 				std::cerr << "external_user_settings_persistence: EventBridge runtime load/save wiring is missing\n";
 				return false;
 			}
@@ -221,6 +223,7 @@ namespace RuntimeGateStoreChecks
 				cmakeText->find("include/CalamityAffixes/RuntimeContract.h") == std::string::npos ||
 				cmakeText->find("include/CalamityAffixes/RuntimePaths.h") == std::string::npos ||
 				cmakeText->find("include/CalamityAffixes/RuntimeUserSettingsDebounce.h") == std::string::npos ||
+				cmakeText->find("src/EventBridge.Config.RuntimeSettings.cpp") == std::string::npos ||
 				cmakeText->find("src/RuntimePaths.cpp") == std::string::npos ||
 				cmakeText->find("src/UserSettingsPersistence.cpp") == std::string::npos) {
 				std::cerr << "external_user_settings_persistence: build integration is missing\n";
@@ -234,11 +237,12 @@ namespace RuntimeGateStoreChecks
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
-			const fs::path eventBridgeConfigFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.cpp";
+			const fs::path eventBridgeRuntimeSettingsFile =
+				testFile.parent_path().parent_path() / "src" / "EventBridge.Config.RuntimeSettings.cpp";
 
-			std::ifstream in(eventBridgeConfigFile);
+			std::ifstream in(eventBridgeRuntimeSettingsFile);
 			if (!in.is_open()) {
-				std::cerr << "runtime_user_settings_round_trip: missing EventBridge.Config.cpp\n";
+				std::cerr << "runtime_user_settings_round_trip: missing EventBridge.Config.RuntimeSettings.cpp\n";
 				return false;
 			}
 			const std::string configText(

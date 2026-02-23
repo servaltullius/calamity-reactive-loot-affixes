@@ -40,6 +40,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/main.cpp
 	    src/EventBridge.cpp
 	    src/EventBridge.Config.cpp
+	    src/EventBridge.Config.Reset.cpp
+	    src/EventBridge.Config.RuntimeSettings.cpp
 	    src/EventBridge.Config.Indexing.cpp
 	    src/EventBridge.Config.IndexingShared.cpp
 	    src/EventBridge.Config.AffixRegistry.cpp
