@@ -57,8 +57,8 @@ namespace CalamityAffixes
 
 		try {
 			in >> a_outJson;
-		} catch (const std::exception&) {
-			SKSE::log::error("CalamityAffixes: failed to parse runtime config (affixes.json).");
+		} catch (const std::exception& e) {
+			SKSE::log::error("CalamityAffixes: failed to parse runtime config (affixes.json): {}", e.what());
 			return false;
 		}
 

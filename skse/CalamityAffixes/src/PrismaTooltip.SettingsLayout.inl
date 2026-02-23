@@ -542,7 +542,7 @@
 					continue;
 				}
 
-				if (text.front() == '[' && text.back() == ']') {
+				if (text.size() >= 2 && text.front() == '[' && text.back() == ']') {
 					sectionLower = ToLowerAscii(TrimAscii(text.substr(1, text.size() - 2)));
 					continue;
 				}

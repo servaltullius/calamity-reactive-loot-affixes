@@ -504,6 +504,9 @@ namespace CalamityAffixes
 			[&](std::uint64_t a_token) {
 				const auto idxIt = _affixIndexByToken.find(a_token);
 				if (idxIt == _affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
+					if (_loot.debugLog) {
+						SKSE::log::warn("CalamityAffixes: cleanup skipping unknown affix token {:016X}.", a_token);
+					}
 					return false;
 				}
 				if (_loot.stripTrackedSuffixSlots && _affixes[idxIt->second].slot == AffixSlot::kSuffix) {
