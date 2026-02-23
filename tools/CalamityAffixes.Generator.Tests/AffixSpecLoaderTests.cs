@@ -964,4 +964,259 @@ public sealed class AffixSpecLoaderTests
         Assert.True(seenRunes.TryGetValue("Zod", out var zodWeight));
         Assert.True(elWeight > zodWeight, "Low-tier rune weight should be higher than high-tier rune weight.");
     }
+
+    [Fact]
+    public void Load_MinimalValidSpec_ZeroAffixesZeroTags_Succeeds()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var spec = AffixSpecLoader.Load(specPath);
+            Assert.Empty(spec.Keywords.Tags);
+            Assert.Empty(spec.Keywords.Affixes);
+            Assert.Empty(spec.Keywords.KidRules);
+            Assert.Empty(spec.Keywords.SpidRules);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenProcChancePercentExactlyZero_DoesNotThrow()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_zero_proc",
+                "editorId": "CAFF_AFFIX_ZERO_PROC",
+                "name": "Affix: Zero Proc",
+                "kid": { "type": "Weapon", "strings": "NONE", "formFilters": "NONE", "traits": "-E", "chance": 1.0 },
+                "runtime": {
+                  "trigger": "Hit",
+                  "procChancePercent": 0.0,
+                  "action": { "type": "DebugNotify" }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var spec = AffixSpecLoader.Load(specPath);
+            Assert.Single(spec.Keywords.Affixes);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenProcChancePercentExactly100_DoesNotThrow()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_full_proc",
+                "editorId": "CAFF_AFFIX_FULL_PROC",
+                "name": "Affix: Full Proc",
+                "kid": { "type": "Weapon", "strings": "NONE", "formFilters": "NONE", "traits": "-E", "chance": 1.0 },
+                "runtime": {
+                  "trigger": "Hit",
+                  "procChancePercent": 100.0,
+                  "action": { "type": "DebugNotify" }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var spec = AffixSpecLoader.Load(specPath);
+            Assert.Single(spec.Keywords.Affixes);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenIcdSecondsExactlyZero_DoesNotThrow()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_zero_icd",
+                "editorId": "CAFF_AFFIX_ZERO_ICD",
+                "name": "Affix: Zero ICD",
+                "kid": { "type": "Weapon", "strings": "NONE", "formFilters": "NONE", "traits": "-E", "chance": 1.0 },
+                "runtime": {
+                  "trigger": "Hit",
+                  "icdSeconds": 0.0,
+                  "perTargetICDSeconds": 0.0,
+                  "action": { "type": "DebugNotify" }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var spec = AffixSpecLoader.Load(specPath);
+            Assert.Single(spec.Keywords.Affixes);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenProcChancePercentNegative_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_neg_proc",
+                "editorId": "CAFF_AFFIX_NEG_PROC",
+                "name": "Affix: Negative Proc",
+                "kid": { "type": "Weapon", "strings": "NONE", "formFilters": "NONE", "traits": "-E", "chance": 1.0 },
+                "runtime": {
+                  "trigger": "Hit",
+                  "procChancePercent": -0.1,
+                  "action": { "type": "DebugNotify" }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("procChancePercent", ex.Message);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Load_WhenRuntimeActionIsBooleanInsteadOfObject_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_bad_action",
+                "editorId": "CAFF_AFFIX_BAD_ACTION",
+                "name": "Affix: Bad Action",
+                "kid": { "type": "Weapon", "strings": "NONE", "formFilters": "NONE", "traits": "-E", "chance": 1.0 },
+                "runtime": {
+                  "trigger": "Hit",
+                  "action": true
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("action must be an object", ex.Message);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
 }

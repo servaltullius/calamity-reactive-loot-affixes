@@ -367,6 +367,26 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
+		// Budget=1 allows exactly one consume, then blocks.
+		windowStartMs = 0u;
+		consumed = 0u;
+		if (!CalamityAffixes::TryConsumeFixedWindowBudget(100u, 50u, 1u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected single-budget first consume to pass\n";
+			return false;
+		}
+		if (CalamityAffixes::TryConsumeFixedWindowBudget(110u, 50u, 1u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected single-budget second consume to fail\n";
+			return false;
+		}
+
+		// Both windowMs=0 and maxPerWindow=0 at the same time still passes.
+		windowStartMs = 0u;
+		consumed = 0u;
+		if (!CalamityAffixes::TryConsumeFixedWindowBudget(100u, 0u, 0u, windowStartMs, consumed)) {
+			std::cerr << "budget: expected both-zero settings to pass\n";
+			return false;
+		}
+
 		return true;
 	}
 

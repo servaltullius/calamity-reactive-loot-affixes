@@ -253,4 +253,166 @@ public sealed class GeneratorRunnerTests
             }
         }
     }
+
+    [Fact]
+    public void Generate_RuntimeContractJson_ContainsRequiredSections()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        var dataDir = Path.Combine(tempRoot, "Data");
+        Directory.CreateDirectory(dataDir);
+
+        try
+        {
+            GeneratorRunner.Generate(spec, dataDir);
+
+            var contractPath = Path.Combine(dataDir, "SKSE", "Plugins", "CalamityAffixes", "runtime_contract.json");
+            Assert.True(File.Exists(contractPath));
+
+            using var doc = JsonDocument.Parse(File.ReadAllText(contractPath, Encoding.UTF8));
+            var root = doc.RootElement;
+
+            // supportedTriggers must be a non-empty array of strings
+            var triggers = root.GetProperty("supportedTriggers");
+            Assert.Equal(JsonValueKind.Array, triggers.ValueKind);
+            Assert.True(triggers.GetArrayLength() > 0, "supportedTriggers must not be empty");
+            foreach (var t in triggers.EnumerateArray())
+            {
+                Assert.Equal(JsonValueKind.String, t.ValueKind);
+                Assert.False(string.IsNullOrWhiteSpace(t.GetString()));
+            }
+
+            // supportedActionTypes must be a non-empty array of strings
+            var actions = root.GetProperty("supportedActionTypes");
+            Assert.Equal(JsonValueKind.Array, actions.ValueKind);
+            Assert.True(actions.GetArrayLength() > 0, "supportedActionTypes must not be empty");
+
+            // runewordCatalog must be an array (may be empty if no contract file found)
+            var catalog = root.GetProperty("runewordCatalog");
+            Assert.Equal(JsonValueKind.Array, catalog.ValueKind);
+
+            // runewordRuneWeights must be an array
+            var weights = root.GetProperty("runewordRuneWeights");
+            Assert.Equal(JsonValueKind.Array, weights.ValueKind);
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void Generate_KidIni_ContainsValidContent()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags =
+                [
+                    new KeywordDefinition { EditorId = "CAFF_TAG_DOT", Name = "Calamity: DoT Tag" },
+                ],
+                Affixes = [],
+                KidRules =
+                [
+                    new KidRuleEntry
+                    {
+                        KeywordEditorId = "CAFF_TAG_DOT",
+                        Type = "Weapon",
+                        Strings = "NONE",
+                        FormFilters = "NONE",
+                        Traits = "-E",
+                        Chance = 100.0,
+                    },
+                ],
+                SpidRules = [],
+            },
+        };
+
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        var dataDir = Path.Combine(tempRoot, "Data");
+        Directory.CreateDirectory(dataDir);
+
+        try
+        {
+            GeneratorRunner.Generate(spec, dataDir);
+
+            var kidIniPath = Path.Combine(dataDir, "CalamityAffixes_KID.ini");
+            Assert.True(File.Exists(kidIniPath));
+
+            var content = File.ReadAllText(kidIniPath);
+            Assert.Contains("CAFF_TAG_DOT", content);
+            Assert.Contains("Weapon", content);
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void Generate_AffixesJson_IsValidJsonWithModKey()
+    {
+        var spec = new AffixSpec
+        {
+            Version = 1,
+            ModKey = "CalamityAffixes.esp",
+            EslFlag = true,
+            Keywords = new KeywordSpec
+            {
+                Tags = [],
+                Affixes = [],
+                KidRules = [],
+                SpidRules = [],
+            },
+        };
+
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        var dataDir = Path.Combine(tempRoot, "Data");
+        Directory.CreateDirectory(dataDir);
+
+        try
+        {
+            GeneratorRunner.Generate(spec, dataDir);
+
+            var affixesJsonPath = Path.Combine(dataDir, "SKSE", "Plugins", "CalamityAffixes", "affixes.json");
+            Assert.True(File.Exists(affixesJsonPath));
+
+            // Must be valid JSON
+            using var doc = JsonDocument.Parse(File.ReadAllText(affixesJsonPath, Encoding.UTF8));
+            var root = doc.RootElement;
+
+            Assert.Equal(JsonValueKind.Object, root.ValueKind);
+            Assert.Equal("CalamityAffixes.esp", root.GetProperty("modKey").GetString());
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
+    }
 }
