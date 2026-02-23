@@ -183,7 +183,7 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RuntimeHook_CastOnCrit_SkipsFeedbackVfxForShockSpells()
+    public void RuntimeHook_CastOnCrit_UsesUnifiedSafeFeedbackVfxArt()
     {
         var repoRoot = FindRepoRoot();
         var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
@@ -192,7 +192,15 @@ public sealed class RepoSpecRegressionTests
 
         var hooksSource = File.ReadAllText(hooksPath);
         Assert.Contains(
-            "resistVariable == RE::ActorValue::kResistShock",
+            "ResolveSafeCastOnCritProcFeedbackArt",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "0x00012FD0",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "return ResolveSafeCastOnCritProcFeedbackArt();",
             hooksSource,
             StringComparison.Ordinal);
     }

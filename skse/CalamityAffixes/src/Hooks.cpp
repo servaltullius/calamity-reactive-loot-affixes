@@ -1,5 +1,6 @@
 #include "CalamityAffixes/Hooks.h"
 
+#include <array>
 #include <chrono>
 #include <cstddef>
 #include <unordered_map>
@@ -18,7 +19,7 @@ namespace CalamityAffixes::Hooks
 {
 	namespace
 	{
-		[[nodiscard]] RE::BGSArtObject* ResolveCastOnCritProcFeedbackArt(const RE::SpellItem* a_spell) noexcept
+		[[nodiscard]] RE::BGSArtObject* ResolveFirstHitOrEnchantArt(const RE::SpellItem* a_spell) noexcept
 		{
 			if (!a_spell) {
 				return nullptr;
@@ -26,10 +27,6 @@ namespace CalamityAffixes::Hooks
 
 			for (const auto* effect : a_spell->effects) {
 				if (!effect || !effect->baseEffect) {
-					continue;
-				}
-
-				if (effect->baseEffect->data.resistVariable == RE::ActorValue::kResistShock) {
 					continue;
 				}
 
@@ -45,6 +42,34 @@ namespace CalamityAffixes::Hooks
 			}
 
 			return nullptr;
+		}
+
+		[[nodiscard]] RE::BGSArtObject* ResolveSafeCastOnCritProcFeedbackArt() noexcept
+		{
+			static RE::BGSArtObject* cached = []() noexcept -> RE::BGSArtObject* {
+				constexpr std::array<RE::FormID, 2> kFallbackSpellFormIDs{
+					0x00012FD0,
+					0x0002B96C
+				};
+				for (const auto formID : kFallbackSpellFormIDs) {
+					auto* spell = RE::TESForm::LookupByID<RE::SpellItem>(formID);
+					if (!spell) {
+						continue;
+					}
+					if (auto* art = ResolveFirstHitOrEnchantArt(spell); art) {
+						return art;
+					}
+				}
+				return nullptr;
+			}();
+
+			return cached;
+		}
+
+		[[nodiscard]] RE::BGSArtObject* ResolveCastOnCritProcFeedbackArt(const RE::SpellItem* a_spell) noexcept
+		{
+			(void)a_spell;
+			return ResolveSafeCastOnCritProcFeedbackArt();
 		}
 
 		[[nodiscard]] bool ShouldPlayCastOnCritProcFeedbackVfx(
@@ -93,7 +118,7 @@ namespace CalamityAffixes::Hooks
 				return;
 			}
 
-			constexpr float kFeedbackDurationSec = 0.10f;
+			constexpr float kFeedbackDurationSec = 0.06f;
 			a_target->InstantiateHitArt(
 				art,
 				kFeedbackDurationSec,
