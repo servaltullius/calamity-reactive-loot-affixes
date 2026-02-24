@@ -36,3 +36,7 @@ CTestTestfile.cmake
 .vibe/context/LATEST_CONTEXT.md
 .vibe/context/PACK_*.md
 .vibe/context/typecheck_baseline.json
+
+# OMC session/runtime artifacts
+.omc/
+**/.omc/
