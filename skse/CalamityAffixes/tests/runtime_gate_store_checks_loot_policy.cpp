@@ -213,6 +213,136 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckSuffixProcChanceParsingPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path parsingFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixParsing.cpp";
+
+		std::ifstream in(parsingFile);
+		if (!in.is_open()) {
+			std::cerr << "suffix_proc_chance_parsing: failed to open parsing source: " << parsingFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("a_out.procChancePct = 0.0f;") == std::string::npos) {
+			std::cerr << "suffix_proc_chance_parsing: suffix proc chance must stay fixed at 0.0f\n";
+			return false;
+		}
+
+		if (source.find("a_out.procChancePct = (a_kidChancePct > 0.0f) ? a_kidChancePct : 1.0f;") != std::string::npos) {
+			std::cerr << "suffix_proc_chance_parsing: legacy kid.chance -> procChancePct coupling must remain removed\n";
+			return false;
+		}
+
+		if (source.find("a_out.lootWeight = a_outKidChancePct;") == std::string::npos) {
+			std::cerr << "suffix_proc_chance_parsing: kid chance -> lootWeight mapping must remain present\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckSerializationDrainSafetyPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path serializationFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Serialization.cpp";
+
+		std::ifstream in(serializationFile);
+		if (!in.is_open()) {
+			std::cerr << "serialization_drain_safety: failed to open serialization source: " << serializationFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("constexpr std::uint32_t kMaxDrainBytes = 10'000'000u;") == std::string::npos ||
+			source.find("bool DrainRecordBytes(") == std::string::npos ||
+			source.find("std::array<std::uint8_t, 4096> sink{};") == std::string::npos ||
+			source.find("DrainRecordBytes(a_intfc, remaining, \"partial-record-recovery\");") == std::string::npos ||
+			source.find("DrainRecordBytes(a_intfc, length, \"unsupported-iaxf-version\");") == std::string::npos ||
+			source.find("DrainRecordBytes(a_intfc, length, \"unknown-record\");") == std::string::npos) {
+			std::cerr << "serialization_drain_safety: bounded drain path guards are missing\n";
+			return false;
+		}
+
+		if (source.find("std::vector<std::uint8_t> sink(length);") != std::string::npos ||
+			source.find("std::vector<std::uint8_t> sink(remaining);") != std::string::npos) {
+			std::cerr << "serialization_drain_safety: legacy length-sized drain allocation must not exist\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckSpecialActionProcSafetyPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path specialFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Actions.Special.cpp";
+
+		std::ifstream in(specialFile);
+		if (!in.is_open()) {
+			std::cerr << "special_action_proc_safety: failed to open special-actions source: " << specialFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("ResolveSpecialActionProcChancePct(float a_configuredChancePct)") == std::string::npos ||
+			source.find("ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult)") == std::string::npos ||
+			source.find("RollProcChance(_rng, _rngMutex, chancePct)") == std::string::npos ||
+			source.find("PassesLuckyHitGate(affix, Trigger::kHit, a_hitData, now)") == std::string::npos ||
+			source.find("if (_procDepth > 0)") == std::string::npos ||
+			source.find("sourceEditorId.starts_with(\"CAFF_\")") == std::string::npos ||
+			source.find("ResolveArchmageResourceUsage(") == std::string::npos ||
+			source.find("ExecuteArchmageCast(") == std::string::npos) {
+			std::cerr << "special_action_proc_safety: special-action proc/lucky-hit/recursion guards are missing\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckCorpseExplosionBudgetSafetyPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path corpseFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Actions.Corpse.cpp";
+
+		std::ifstream in(corpseFile);
+		if (!in.is_open()) {
+			std::cerr << "corpse_explosion_budget_safety: failed to open corpse-actions source: " << corpseFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("if (!TryConsumeCorpseExplosionBudget(") == std::string::npos ||
+			source.find("CorpseExplosionBudgetDenyReason::kDuplicateCorpse") == std::string::npos ||
+			source.find("CorpseExplosionBudgetDenyReason::kRateLimited") == std::string::npos ||
+			source.find("CorpseExplosionBudgetDenyReason::kChainDepthExceeded") == std::string::npos ||
+			source.find("seenCorpses.size() > 512u") == std::string::npos ||
+			source.find("kCorpseExplosionDefaultMaxTargets = 48u") == std::string::npos ||
+			source.find("if (usesPerTargetIcd && targetsHit > 0u)") == std::string::npos) {
+			std::cerr << "corpse_explosion_budget_safety: corpse budget/rate-limit/target-cap guards are missing\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckLootRerollExploitGuardPolicy()
 	{
 		namespace fs = std::filesystem;

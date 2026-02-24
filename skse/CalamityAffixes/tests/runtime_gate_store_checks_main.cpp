@@ -17,6 +17,10 @@ int main()
 	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
 	const bool lootRerollExploitGuardOk = CheckLootRerollExploitGuardPolicy();
 	const bool lootCurrencyLedgerPolicyOk = CheckLootCurrencyLedgerSerializationPolicy();
+	const bool suffixProcChanceParsingPolicyOk = CheckSuffixProcChanceParsingPolicy();
+	const bool serializationDrainSafetyPolicyOk = CheckSerializationDrainSafetyPolicy();
+	const bool specialActionProcSafetyPolicyOk = CheckSpecialActionProcSafetyPolicy();
+	const bool corpseExplosionBudgetSafetyPolicyOk = CheckCorpseExplosionBudgetSafetyPolicy();
 	const bool serializationTransientResetOk = CheckSerializationTransientRuntimeResetPolicy();
 	const bool lootChanceMcmCleanupOk = CheckLootChanceMcmCleanupPolicy();
 	const bool mcmDropChanceBridgeOk = CheckMcmDropChanceRuntimeBridgePolicy();
@@ -33,6 +37,7 @@ int main()
 	const bool runewordTransmuteSafetyOk = CheckRunewordTransmuteSafetyPolicy();
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
 	const bool prismaTooltipImmediateRefreshOk = CheckPrismaTooltipImmediateRefreshPolicy();
+	const bool prismaTooltipWorkerSchedulingPolicyOk = CheckPrismaTooltipWorkerSchedulingPolicy();
 	const bool runtimeUserSettingsDebounceOk = CheckRuntimeUserSettingsDebounceBehavior();
 	const bool externalUserSettingsPersistenceOk = CheckExternalUserSettingsPersistencePolicy();
 	const bool runtimeUserSettingsRoundTripFieldsOk = CheckRuntimeUserSettingsRoundTripFieldPolicy();
@@ -41,6 +46,10 @@ int main()
 	        lootPreviewPolicyOk &&
 	        lootRerollExploitGuardOk &&
 	        lootCurrencyLedgerPolicyOk &&
+	        suffixProcChanceParsingPolicyOk &&
+	        serializationDrainSafetyPolicyOk &&
+	        specialActionProcSafetyPolicyOk &&
+	        corpseExplosionBudgetSafetyPolicyOk &&
 	        serializationTransientResetOk &&
 	        lootChanceMcmCleanupOk &&
 		        mcmDropChanceBridgeOk &&
@@ -56,6 +65,7 @@ int main()
 	        runewordTransmuteSafetyOk &&
 	        runewordReforgeSafetyOk &&
 	        prismaTooltipImmediateRefreshOk &&
+	        prismaTooltipWorkerSchedulingPolicyOk &&
 	        runtimeUserSettingsDebounceOk &&
 	        externalUserSettingsPersistenceOk &&
 	        runtimeUserSettingsRoundTripFieldsOk) ? 0 :

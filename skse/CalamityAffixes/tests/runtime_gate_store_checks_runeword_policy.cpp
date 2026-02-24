@@ -835,4 +835,43 @@ namespace RuntimeGateStoreChecks
 			return true;
 		}
 
+		bool CheckPrismaTooltipWorkerSchedulingPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto coreText = loadText(prismaCoreFile);
+			if (!coreText.has_value()) {
+				std::cerr << "prisma_worker_scheduling: failed to open prisma source: " << prismaCoreFile << "\n";
+				return false;
+			}
+
+			if (coreText->find("g_worker = std::jthread([](std::stop_token stopToken) {") == std::string::npos ||
+				coreText->find("std::this_thread::sleep_for(kPollInterval);") == std::string::npos ||
+				coreText->find("if (g_gatePollingOnMenus.load() &&") == std::string::npos ||
+				coreText->find("g_relevantMenusOpen.load() <= 0") == std::string::npos ||
+				coreText->find("!g_controlPanelOpen.load())") == std::string::npos ||
+				coreText->find("if (auto* tasks = SKSE::GetTaskInterface()) {") == std::string::npos ||
+				coreText->find("tasks->AddTask([]() {") == std::string::npos ||
+				coreText->find("Tick();") == std::string::npos ||
+				coreText->find("const auto clearTooltip = [&]() {") == std::string::npos ||
+				coreText->find("StripRunewordOverlayTooltipLines(*selected.tooltip)") == std::string::npos) {
+				std::cerr << "prisma_worker_scheduling: worker tick scheduling or tooltip-strip guards are missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
 }

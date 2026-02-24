@@ -40,6 +40,10 @@ namespace RuntimeGateStoreChecks
 	bool CheckLootRerollExploitGuardPolicy();
 	bool CheckLootCurrencyLedgerSerializationPolicy();
 	bool CheckLootEligibilityCleanupSafetyPolicy();
+	bool CheckSuffixProcChanceParsingPolicy();
+	bool CheckSerializationDrainSafetyPolicy();
+	bool CheckSpecialActionProcSafetyPolicy();
+	bool CheckCorpseExplosionBudgetSafetyPolicy();
 	bool CheckSerializationTransientRuntimeResetPolicy();
 	bool CheckLootChanceMcmCleanupPolicy();
 	bool CheckMcmDropChanceRuntimeBridgePolicy();
@@ -57,6 +61,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckRunewordUiPolicyHelpers();
 	bool CheckRunewordReforgeSafetyPolicy();
 	bool CheckPrismaTooltipImmediateRefreshPolicy();
+	bool CheckPrismaTooltipWorkerSchedulingPolicy();
 
 	bool CheckRuntimeUserSettingsDebounceBehavior();
 	bool CheckExternalUserSettingsPersistencePolicy();
