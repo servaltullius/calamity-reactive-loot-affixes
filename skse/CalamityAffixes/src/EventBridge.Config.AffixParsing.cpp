@@ -149,7 +149,7 @@ namespace CalamityAffixes
 	{
 		if (a_out.slot == AffixSlot::kSuffix) {
 			a_out.trigger = Trigger::kHit;
-			a_out.procChancePct = (a_kidChancePct > 0.0f) ? a_kidChancePct : 1.0f;
+			a_out.procChancePct = 0.0f;
 
 			const auto passiveSpellId = a_action.value("passiveSpellEditorId", std::string{});
 			if (!passiveSpellId.empty()) {
