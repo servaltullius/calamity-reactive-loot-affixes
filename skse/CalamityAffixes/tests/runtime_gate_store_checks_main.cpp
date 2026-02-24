@@ -41,6 +41,7 @@ int main()
 	const bool runtimeUserSettingsDebounceOk = CheckRuntimeUserSettingsDebounceBehavior();
 	const bool externalUserSettingsPersistenceOk = CheckExternalUserSettingsPersistencePolicy();
 	const bool runtimeUserSettingsRoundTripFieldsOk = CheckRuntimeUserSettingsRoundTripFieldPolicy();
+	const bool eventBridgeStateMutexReentrancyOk = CheckEventBridgeStateMutexReentrancyPolicy();
 	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
@@ -68,6 +69,7 @@ int main()
 	        prismaTooltipWorkerSchedulingPolicyOk &&
 	        runtimeUserSettingsDebounceOk &&
 	        externalUserSettingsPersistenceOk &&
-	        runtimeUserSettingsRoundTripFieldsOk) ? 0 :
+	        runtimeUserSettingsRoundTripFieldsOk &&
+	        eventBridgeStateMutexReentrancyOk) ? 0 :
 		                                                     1;
 }

@@ -165,4 +165,28 @@ namespace RuntimeGateStoreChecks
 
 			return true;
 		}
+
+		bool CheckEventBridgeStateMutexReentrancyPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path eventBridgeHeader = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "EventBridge.h";
+
+			std::ifstream in(eventBridgeHeader);
+			if (!in.is_open()) {
+				std::cerr << "eventbridge_state_mutex_reentrancy: failed to open header: " << eventBridgeHeader << "\n";
+				return false;
+			}
+
+			const std::string source(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+
+			if (source.find("std::recursive_mutex _stateMutex;") == std::string::npos) {
+				std::cerr << "eventbridge_state_mutex_reentrancy: EventBridge state mutex must remain recursive for re-entrant mod callback dispatch\n";
+				return false;
+			}
+
+			return true;
+		}
 }
