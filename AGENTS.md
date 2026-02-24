@@ -103,3 +103,20 @@ sha256sum build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/Ca
   - Papyrus 이벤트 패턴/ICD 가드
   - SPID·KID 템플릿
   - MCM Helper 설정/디버그 툴링
+
+## Hierarchical AGENTS map
+
+- 하위 디렉터리 전용 규칙은 아래 파일을 우선 참고합니다.
+- 루트 문서(이 파일)는 저장소 공통 규칙/빌드 경로/릴리즈 규칙만 다룹니다.
+
+| 영역 | 로컬 가이드 | 용도 |
+|---|---|---|
+| SKSE 런타임(C++) | `skse/CalamityAffixes/AGENTS.md` | EventBridge/Hooks/Serialization/ctest 워크플로우 |
+| Generator/검증 도구 | `tools/AGENTS.md` | compose/lint/generator/release_verify 파이프라인 |
+| 어픽스 데이터 스펙 | `affixes/AGENTS.md` | modules 조합 규칙, 스키마/런타임 계약 검증 |
+
+## Scope boundaries (중요)
+
+- `skse/CalamityAffixes/extern/**`, `skse/CalamityAffixes/.xwin/**`: 서드파티/툴체인 자산. 수정 대상 아님.
+- `skse/CalamityAffixes/build*/**`, `tools/**/bin/**`, `tools/**/obj/**`, `dist/**`: 생성 산출물. 소스 수정으로 재생성.
+- `Data/SKSE/Plugins/CalamityAffixes/affixes.json` 등 generated 파일은 직접 편집하지 않고 `affixes/modules/*.json` + 생성기로 갱신합니다.
