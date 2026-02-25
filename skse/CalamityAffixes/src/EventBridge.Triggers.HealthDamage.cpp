@@ -160,6 +160,7 @@ namespace CalamityAffixes
 				(context.attackerIsPlayerOwned && context.hasPlayerOwner);
 			if (routedAsHit) {
 				if (playerRelevantCombatSignal) {
+					MarkPlayerCombatEvidence(now);
 					_healthDamageHookLastAt = now;
 				}
 				ProcessOutgoingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
