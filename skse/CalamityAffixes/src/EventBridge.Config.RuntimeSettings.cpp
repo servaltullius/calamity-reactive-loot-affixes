@@ -45,6 +45,7 @@ namespace CalamityAffixes
 			_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
 			_disableCombatEvidenceLease = runtime.value("disableCombatEvidenceLease", _disableCombatEvidenceLease);
 			_disableHealthDamageRouting = runtime.value("disableHealthDamageRouting", _disableHealthDamageRouting);
+			_allowPlayerHealthDamageHook = runtime.value("allowPlayerHealthDamageHook", _allowPlayerHealthDamageHook);
 			_disablePassiveSuffixSpells = runtime.value("disablePassiveSuffixSpells", _disablePassiveSuffixSpells);
 			_disableTrapSystemTick = runtime.value("disableTrapSystemTick", _disableTrapSystemTick);
 			_disableTrapCasts = runtime.value("disableTrapCasts", _disableTrapCasts);
@@ -89,7 +90,7 @@ namespace CalamityAffixes
 		spdlog::flush_on(spdlog::level::warn);
 
 		SKSE::log::info(
-			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
+			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
 			std::string(kUserSettingsRelativePath),
 			_runtimeEnabled,
 			_runtimeProcChanceMult,
@@ -99,6 +100,7 @@ namespace CalamityAffixes
 			_combatDebugLog,
 			_disableCombatEvidenceLease,
 			_disableHealthDamageRouting,
+			_allowPlayerHealthDamageHook,
 			_disablePassiveSuffixSpells,
 			_disableTrapSystemTick,
 			_disableTrapCasts,
@@ -122,6 +124,7 @@ namespace CalamityAffixes
 			_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
 		runtime["disableCombatEvidenceLease"] = _disableCombatEvidenceLease;
 		runtime["disableHealthDamageRouting"] = _disableHealthDamageRouting;
+		runtime["allowPlayerHealthDamageHook"] = _allowPlayerHealthDamageHook;
 		runtime["disablePassiveSuffixSpells"] = _disablePassiveSuffixSpells;
 		runtime["disableTrapSystemTick"] = _disableTrapSystemTick;
 		runtime["disableTrapCasts"] = _disableTrapCasts;

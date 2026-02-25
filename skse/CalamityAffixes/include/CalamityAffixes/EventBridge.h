@@ -145,6 +145,7 @@ namespace CalamityAffixes
 		[[nodiscard]] bool IsRuntimeEnabled() const noexcept { return _runtimeEnabled; }
 		[[nodiscard]] bool IsHealthDamageRoutingDisabled() const noexcept { return _disableHealthDamageRouting; }
 		[[nodiscard]] bool IsTrapSystemTickDisabled() const noexcept { return _disableTrapSystemTick; }
+		[[nodiscard]] bool AllowsPlayerHealthDamageHook() const noexcept { return _allowPlayerHealthDamageHook; }
 		[[nodiscard]] bool AllowsNonHostilePlayerOwnedOutgoingProcs() const noexcept
 		{
 			return _allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
@@ -745,6 +746,7 @@ namespace CalamityAffixes
 		bool _combatDebugLog{ false };
 		bool _disableCombatEvidenceLease{ false };
 		bool _disableHealthDamageRouting{ true };
+		bool _allowPlayerHealthDamageHook{ false };
 		bool _disablePassiveSuffixSpells{ false };
 		bool _disableTrapSystemTick{ false };
 		bool _disableTrapCasts{ false };
