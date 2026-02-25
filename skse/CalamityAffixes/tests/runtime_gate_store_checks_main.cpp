@@ -6,6 +6,7 @@ int main()
 
 	const bool gateOk = CheckNonHostileFirstHitGate();
 	const bool storeOk = CheckPerTargetCooldownStore();
+	const bool hookIndexPolicyOk = CheckHandleHealthDamageVfuncIndexPolicy();
 	const bool lootSelectionOk = CheckUniformLootRollSelection();
 	const bool shuffleBagSelectionOk = CheckShuffleBagLootRollSelection();
 	const bool weightedShuffleBagSelectionOk = CheckWeightedShuffleBagLootRollSelection();
@@ -42,7 +43,7 @@ int main()
 	const bool externalUserSettingsPersistenceOk = CheckExternalUserSettingsPersistencePolicy();
 	const bool runtimeUserSettingsRoundTripFieldsOk = CheckRuntimeUserSettingsRoundTripFieldPolicy();
 	const bool eventBridgeStateMutexReentrancyOk = CheckEventBridgeStateMutexReentrancyPolicy();
-	return (gateOk && storeOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
+	return (gateOk && storeOk && hookIndexPolicyOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
 	        lootRerollExploitGuardOk &&

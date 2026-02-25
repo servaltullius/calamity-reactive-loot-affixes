@@ -194,18 +194,21 @@ namespace CalamityAffixes
 			RE::Actor* a_attacker,
 			RE::Actor* a_target,
 			const RE::HitData* a_hitData,
-			float& a_inOutDamage);
+			float& a_inOutDamage,
+			bool a_allowResync = true);
 
 		[[nodiscard]] MindOverMatterResult EvaluateMindOverMatter(
 			RE::Actor* a_target,
 			RE::Actor* a_attacker,
 			const RE::HitData* a_hitData,
-			float& a_inOutDamage);
+			float& a_inOutDamage,
+			bool a_allowResync = true);
 
 		[[nodiscard]] CastOnCritResult EvaluateCastOnCrit(
 			RE::Actor* a_attacker,
 			RE::Actor* a_target,
-			const RE::HitData* a_hitData);
+			const RE::HitData* a_hitData,
+			bool a_allowResync = true);
 
 		[[nodiscard]] float GetCritDamageMultiplier(
 			RE::Actor* a_attacker,
@@ -1043,7 +1046,9 @@ namespace CalamityAffixes
 			float a_sourceChanceMultiplier,
 			RE::TESObjectREFR* a_sourceContainerRef,
 			bool a_forceWorldPlacement,
-			std::uint32_t a_rollCount);
+			std::uint32_t a_rollCount,
+			bool a_allowRunewordRoll = true,
+			bool a_allowReforgeRoll = true);
 		[[nodiscard]] bool IsRuntimeCurrencyDropRollEnabled(std::string_view a_contextTag) const;
 		[[nodiscard]] float ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier a_sourceTier) const noexcept;
 		[[nodiscard]] bool TryBeginLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp);

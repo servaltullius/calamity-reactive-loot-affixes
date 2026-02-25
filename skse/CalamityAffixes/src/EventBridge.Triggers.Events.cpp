@@ -41,6 +41,8 @@ struct CorpseCurrencyInventorySnapshot
 {
 	std::uint32_t runewordFragments{ 0u };
 	std::uint32_t reforgeOrbs{ 0u };
+	std::uint32_t runewordDropLists{ 0u };
+	std::uint32_t reforgeDropLists{ 0u };
 };
 
 struct CorpseCurrencyDropProbe
@@ -61,14 +63,14 @@ struct CorpseCurrencyDropProbe
 	return a_lhs + a_rhs;
 }
 
-[[nodiscard]] CorpseCurrencyInventorySnapshot SnapshotCorpseCurrencyInventory(RE::Actor* a_actor)
+[[nodiscard]] CorpseCurrencyInventorySnapshot SnapshotCorpseCurrencyInventory(RE::TESObjectREFR* a_source)
 {
 	CorpseCurrencyInventorySnapshot snapshot{};
-	if (!a_actor) {
+	if (!a_source) {
 		return snapshot;
 	}
 
-	auto inventory = a_actor->GetInventory();
+	auto inventory = a_source->GetInventory();
 	for (const auto& [baseObject, entry] : inventory) {
 		if (!baseObject) {
 			continue;
@@ -85,6 +87,16 @@ struct CorpseCurrencyDropProbe
 		}
 
 		const auto itemCount = static_cast<std::uint32_t>(count);
+		if (editorId == kRunewordDropListEditorId) {
+			snapshot.runewordDropLists = SaturatingAdd(snapshot.runewordDropLists, itemCount);
+			continue;
+		}
+
+		if (editorId == kReforgeDropListEditorId) {
+			snapshot.reforgeDropLists = SaturatingAdd(snapshot.reforgeDropLists, itemCount);
+			continue;
+		}
+
 		if (editorId == kReforgeOrbEditorId) {
 			snapshot.reforgeOrbs = SaturatingAdd(snapshot.reforgeOrbs, itemCount);
 			continue;
@@ -442,7 +454,7 @@ struct CorpseCurrencyDropProbe
 			const auto probe = BuildCorpseCurrencyDropProbe(dying);
 			const auto snapshot = SnapshotCorpseCurrencyInventory(dying);
 			spdlog::info(
-				"CalamityAffixes: corpse-drop probe (dying={}, runewordFragmentRecordFound={}, reforgeOrbRecordFound={}, runewordDropListFound={}, reforgeDropListFound={}, chanceNone(runeword/reforge)={}/{}, corpseCurrencySnapshotAtDeathEvent(runewordFragments/reforgeOrbs)={}/{}).",
+				"CalamityAffixes: corpse-drop probe (dying={}, runewordFragmentRecordFound={}, reforgeOrbRecordFound={}, runewordDropListFound={}, reforgeDropListFound={}, chanceNone(runeword/reforge)={}/{}, corpseCurrencySnapshotAtDeathEvent(runewordFragments/reforgeOrbs/runewordLists/reforgeLists)={}/{}/{}/{}).",
 				dying->GetName(),
 				probe.runewordFragmentRecordFound,
 				probe.reforgeOrbRecordFound,
@@ -451,7 +463,9 @@ struct CorpseCurrencyDropProbe
 				probe.runewordChanceNone,
 				probe.reforgeChanceNone,
 				snapshot.runewordFragments,
-				snapshot.reforgeOrbs);
+				snapshot.reforgeOrbs,
+				snapshot.runewordDropLists,
+				snapshot.reforgeDropLists);
 		}
 
 		ProcessTrigger(Trigger::kKill, owner, dying, nullptr);
@@ -580,11 +594,38 @@ struct CorpseCurrencyDropProbe
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		const auto preActivationSnapshot = SnapshotCorpseCurrencyInventory(sourceRef);
+		const bool sourceHasRunewordCurrency =
+			preActivationSnapshot.runewordFragments > 0u || preActivationSnapshot.runewordDropLists > 0u;
+		const bool sourceHasReforgeCurrency =
+			preActivationSnapshot.reforgeOrbs > 0u || preActivationSnapshot.reforgeDropLists > 0u;
+		const bool allowRunewordRoll = !sourceHasRunewordCurrency;
+		const bool allowReforgeRoll = !sourceHasReforgeCurrency;
+		if (!allowRunewordRoll && !allowReforgeRoll) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: activation currency roll skipped (source already has runeword/reforge currency) (sourceRef={:08X}, sourceTier={}, runewordFragments={}, reforgeOrbs={}, runewordLists={}, reforgeLists={}, ledgerKey={:016X}, dayStamp={}).",
+					sourceFormId,
+					detail::LootCurrencySourceTierLabel(sourceTier),
+					preActivationSnapshot.runewordFragments,
+					preActivationSnapshot.reforgeOrbs,
+					preActivationSnapshot.runewordDropLists,
+					preActivationSnapshot.reforgeDropLists,
+					ledgerKey,
+					dayStamp);
+			}
+
+			FinalizeLootCurrencyLedgerRoll(ledgerKey, dayStamp);
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
 		const auto dropResult = ExecuteCurrencyDropRolls(
 			sourceChanceMultiplier,
 			sourceRef,
 			false,
-			1u);
+			1u,
+			allowRunewordRoll,
+			allowReforgeRoll);
 		const bool runewordDropGranted = dropResult.runewordDropGranted;
 		const bool reforgeDropGranted = dropResult.reforgeDropGranted;
 
@@ -592,10 +633,12 @@ struct CorpseCurrencyDropProbe
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
-				"CalamityAffixes: activation loot rolls applied (sourceRef={:08X}, sourceTier={}, sourceChanceMult={:.2f}, runewordDropped={}, reforgeDropped={}, ledgerKey={:016X}, dayStamp={}).",
+				"CalamityAffixes: activation loot rolls applied (sourceRef={:08X}, sourceTier={}, sourceChanceMult={:.2f}, allowRunewordRoll={}, allowReforgeRoll={}, runewordDropped={}, reforgeDropped={}, ledgerKey={:016X}, dayStamp={}).",
 				sourceFormId,
 				detail::LootCurrencySourceTierLabel(sourceTier),
 				sourceChanceMultiplier,
+				allowRunewordRoll,
+				allowReforgeRoll,
 				runewordDropGranted,
 				reforgeDropGranted,
 				ledgerKey,

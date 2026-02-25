@@ -7,6 +7,7 @@
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/RuntimeUserSettingsDebounce.h"
+#include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/RuntimePolicy.h"
 #include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/TriggerGuards.h"
@@ -27,6 +28,7 @@ namespace RuntimeGateStoreChecks
 {
 	bool CheckNonHostileFirstHitGate();
 	bool CheckPerTargetCooldownStore();
+	bool CheckHandleHealthDamageVfuncIndexPolicy();
 	bool CheckUniformLootRollSelection();
 	bool CheckShuffleBagLootRollSelection();
 	bool CheckWeightedShuffleBagLootRollSelection();

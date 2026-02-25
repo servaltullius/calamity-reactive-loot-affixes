@@ -2,6 +2,7 @@
 
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <mutex>
 #include <unordered_map>
@@ -181,6 +182,64 @@ namespace CalamityAffixes::Hooks
 			audioManager->Play(soundFormID);
 		}
 
+		[[nodiscard]] bool HitDataMatchesCurrentActors(
+			const RE::HitData* a_hitData,
+			const RE::Actor* a_target,
+			const RE::Actor* a_attacker) noexcept
+		{
+			if (!a_hitData || !a_target) {
+				return false;
+			}
+
+			const auto hitTarget = a_hitData->target.get().get();
+			if (hitTarget && hitTarget != a_target) {
+				return false;
+			}
+
+			const auto hitAggressor = a_hitData->aggressor.get().get();
+			if (a_attacker) {
+				if (hitAggressor && hitAggressor != a_attacker) {
+					return false;
+				}
+			} else if (hitAggressor) {
+				return false;
+			}
+
+			return true;
+		}
+
+		[[nodiscard]] bool HasHitLikeSource(const RE::HitData* a_hitData) noexcept
+		{
+			if (!a_hitData) {
+				return false;
+			}
+
+			return a_hitData->weapon != nullptr ||
+			       a_hitData->attackDataSpell != nullptr ||
+			       a_hitData->flags.any(RE::HitData::Flag::kMeleeAttack) ||
+			       a_hitData->flags.any(RE::HitData::Flag::kExplosion);
+		}
+
+		[[nodiscard]] const RE::HitData* ResolveStableHitDataForSpecialActions(
+			const RE::HitData* a_hitData,
+			const RE::Actor* a_target,
+			const RE::Actor* a_attacker) noexcept
+		{
+			if (!a_hitData) {
+				return nullptr;
+			}
+
+			if (!HitDataMatchesCurrentActors(a_hitData, a_target, a_attacker)) {
+				return nullptr;
+			}
+
+			if (!HasHitLikeSource(a_hitData)) {
+				return nullptr;
+			}
+
+			return a_hitData;
+		}
+
 		class ActorHandleHealthDamageHook
 		{
 		public:
@@ -190,7 +249,7 @@ namespace CalamityAffixes::Hooks
 					return;
 				}
 
-				const std::size_t idx = REL::Module::IsAE() ? 0x106 : 0x104;
+				const std::size_t idx = HandleHealthDamageVfuncIndexForRuntime(REL::Module::IsVR());
 				_vfuncIndex = idx;
 
 				_hookedActor = false;
@@ -372,20 +431,20 @@ namespace CalamityAffixes::Hooks
 				}
 
 				if (inHook) {
-					CallOriginal(a_original, a_this, a_attacker, a_damage, a_hookLabel);
+					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
 				}
 
 				ScopedFlag guard(inHook);
 
 				if (!ShouldProcessHealthDamageHookPointers(safeTarget, safeAttacker)) {
-					CallOriginal(a_original, a_this, a_attacker, a_damage, a_hookLabel);
+					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
 				}
 
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 				if (!bridge) {
-					CallOriginal(a_original, a_this, a_attacker, a_damage, a_hookLabel);
+					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
 				}
 
@@ -400,30 +459,44 @@ namespace CalamityAffixes::Hooks
 						context.hasPlayerOwner,
 						context.hostileEitherDirection,
 						false)) {
-					CallOriginal(a_original, a_this, a_attacker, a_damage, a_hookLabel);
+					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
 				}
 
-				const auto* hitData = HitDataUtil::GetLastHitData(safeTarget);
+				const auto* preHitData = ResolveStableHitDataForSpecialActions(
+					HitDataUtil::GetLastHitData(safeTarget),
+					safeTarget,
+					safeAttacker);
 				float adjustedDamage = a_damage;
 				const float critMult = bridge->GetCritDamageMultiplier(
-					safeAttacker, hitData);
-				if (critMult > 1.0f) {
+					safeAttacker,
+					preHitData);
+				if (std::isfinite(critMult) && critMult > 1.0f) {
 					adjustedDamage *= critMult;
+				}
+				if (!std::isfinite(adjustedDamage) || adjustedDamage < 0.0f) {
+					adjustedDamage = a_damage;
 				}
 				const auto conversion = bridge->EvaluateConversion(
 					safeAttacker,
 					safeTarget,
-					hitData,
-					adjustedDamage);
+					preHitData,
+					adjustedDamage,
+					false);
 				const auto mindOverMatter = bridge->EvaluateMindOverMatter(
 					safeTarget,
 					safeAttacker,
-					hitData,
-					adjustedDamage);
+					preHitData,
+					adjustedDamage,
+					false);
 				(void)mindOverMatter;
 
-				CallOriginal(a_original, a_this, a_attacker, adjustedDamage, a_hookLabel);
+				CallOriginal(a_original, safeTarget, safeAttacker, adjustedDamage, a_hookLabel);
+
+				const auto* hitData = ResolveStableHitDataForSpecialActions(
+					HitDataUtil::GetLastHitData(safeTarget),
+					safeTarget,
+					safeAttacker);
 
 				if (conversion.spell && conversion.convertedDamage > 0.0f && safeAttacker && safeTarget) {
 					if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
@@ -441,7 +514,8 @@ namespace CalamityAffixes::Hooks
 					const auto coc = bridge->EvaluateCastOnCrit(
 						safeAttacker,
 						safeTarget,
-						hitData);
+						hitData,
+						false);
 					if (coc.spell && safeAttacker && safeTarget) {
 						bool casted = false;
 						if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {

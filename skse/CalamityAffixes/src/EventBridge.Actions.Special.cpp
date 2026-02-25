@@ -3,6 +3,7 @@
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
+#include <mutex>
 #include <string_view>
 #include <vector>
 
@@ -57,8 +58,11 @@ namespace CalamityAffixes
 		RE::Actor* a_attacker,
 		RE::Actor* a_target,
 		const RE::HitData* a_hitData,
-		float& a_inOutDamage)
+		float& a_inOutDamage,
+		bool a_allowResync)
 	{
+		const std::scoped_lock lock(_stateMutex);
+
 		if (!_configLoaded || !_runtimeEnabled || _convertAffixIndices.empty()) {
 			return {};
 		}
@@ -85,7 +89,9 @@ namespace CalamityAffixes
 				return {};
 		}
 
-		MaybeResyncEquippedAffixes(std::chrono::steady_clock::now());
+		if (a_allowResync) {
+			MaybeResyncEquippedAffixes(now);
+		}
 
 		bool hasAnyConversion = false;
 		for (const auto idx : _convertAffixIndices) {
@@ -204,8 +210,11 @@ namespace CalamityAffixes
 		RE::Actor* a_target,
 		RE::Actor* a_attacker,
 		const RE::HitData* a_hitData,
-		float& a_inOutDamage)
+		float& a_inOutDamage,
+		bool a_allowResync)
 	{
+		const std::scoped_lock lock(_stateMutex);
+
 		MindOverMatterResult result{};
 		if (!_configLoaded || !_runtimeEnabled || _mindOverMatterAffixIndices.empty()) {
 			return result;
@@ -225,7 +234,9 @@ namespace CalamityAffixes
 			return result;
 		}
 
-		MaybeResyncEquippedAffixes(std::chrono::steady_clock::now());
+		if (a_allowResync) {
+			MaybeResyncEquippedAffixes(std::chrono::steady_clock::now());
+		}
 
 		bool hasAnyMindOverMatter = false;
 		for (const auto idx : _mindOverMatterAffixIndices) {
@@ -348,8 +359,11 @@ namespace CalamityAffixes
 	EventBridge::CastOnCritResult EventBridge::EvaluateCastOnCrit(
 		RE::Actor* a_attacker,
 		RE::Actor* a_target,
-		const RE::HitData* a_hitData)
+		const RE::HitData* a_hitData,
+		bool a_allowResync)
 	{
+		const std::scoped_lock lock(_stateMutex);
+
 		if (!_configLoaded || !_runtimeEnabled || _castOnCritAffixIndices.empty()) {
 			return {};
 		}
@@ -362,7 +376,9 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		MaybeResyncEquippedAffixes(std::chrono::steady_clock::now());
+		if (a_allowResync) {
+			MaybeResyncEquippedAffixes(std::chrono::steady_clock::now());
+		}
 
 		// CoC is attack-triggered (not spell hit).
 		if (!a_hitData->weapon) {
@@ -490,6 +506,8 @@ namespace CalamityAffixes
 		RE::Actor* a_attacker,
 		const RE::HitData* a_hitData) const
 	{
+		const std::scoped_lock lock(_stateMutex);
+
 		if (!_configLoaded || !_runtimeEnabled || _activeCritDamageBonusPct <= 0.0f) {
 			return 1.0f;
 		}

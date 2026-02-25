@@ -93,6 +93,21 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckHandleHealthDamageVfuncIndexPolicy()
+	{
+		if (CalamityAffixes::Hooks::HandleHealthDamageVfuncIndexForRuntime(false) != 0x104u) {
+			std::cerr << "hooks: expected non-VR HandleHealthDamage index to be 0x104\n";
+			return false;
+		}
+
+		if (CalamityAffixes::Hooks::HandleHealthDamageVfuncIndexForRuntime(true) != 0x106u) {
+			std::cerr << "hooks: expected VR HandleHealthDamage index to be 0x106\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckUniformLootRollSelection()
 	{
 		std::mt19937 rng{ 0xCAFFu };
