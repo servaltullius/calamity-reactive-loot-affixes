@@ -186,22 +186,55 @@ namespace CalamityAffixes::Hooks
 		public:
 			static void Install()
 			{
+				if (_installed) {
+					return;
+				}
+
 				const std::size_t idx = REL::Module::IsAE() ? 0x106 : 0x104;
 				_vfuncIndex = idx;
 
-				// In practice, most in-world actors are Character / PlayerCharacter, not a bare Actor.
-				// Hook the relevant vtables so we reliably observe health damage across actor types.
+				_hookedActor = false;
+				_hookedCharacter = false;
+				_hookedPlayerCharacter = false;
+
 				REL::Relocation<std::uintptr_t> actorVtbl{ RE::VTABLE_Actor[0] };
-				_originalActor = actorVtbl.write_vfunc(idx, ThunkActor);
+				_hookedActor = TryInstallVfuncHook(actorVtbl, idx, ThunkActor, _originalActor, "Actor");
 
 				REL::Relocation<std::uintptr_t> characterVtbl{ RE::VTABLE_Character[0] };
-				_originalCharacter = characterVtbl.write_vfunc(idx, ThunkCharacter);
+				_hookedCharacter = TryInstallVfuncHook(characterVtbl, idx, ThunkCharacter, _originalCharacter, "Character");
 
-				REL::Relocation<std::uintptr_t> playerVtbl{ RE::VTABLE_PlayerCharacter[0] };
-				_originalPlayerCharacter = playerVtbl.write_vfunc(idx, ThunkPlayerCharacter);
+				bool allowPlayerHook = false;
+				if (auto* bridge = CalamityAffixes::EventBridge::GetSingleton(); bridge) {
+					allowPlayerHook = bridge->AllowsPlayerHealthDamageHook();
+				}
 
-				_installed = true;
-				SKSE::log::info("CalamityAffixes: installed HandleHealthDamage vfunc hooks (idx=0x{:X}).", idx);
+				if (allowPlayerHook) {
+					REL::Relocation<std::uintptr_t> playerVtbl{ RE::VTABLE_PlayerCharacter[0] };
+					_hookedPlayerCharacter = TryInstallVfuncHook(
+						playerVtbl,
+						idx,
+						ThunkPlayerCharacter,
+						_originalPlayerCharacter,
+						"PlayerCharacter");
+				} else {
+					SKSE::log::info(
+						"CalamityAffixes: allowPlayerHealthDamageHook=false; skipping PlayerCharacter HandleHealthDamage hook.");
+				}
+
+				_installed = _hookedActor || _hookedCharacter || _hookedPlayerCharacter;
+				if (!_installed) {
+					SKSE::log::warn(
+						"CalamityAffixes: HandleHealthDamage hooks were skipped (idx=0x{:X}); using TESHitEvent fallback only.",
+						idx);
+					return;
+				}
+
+				SKSE::log::info(
+					"CalamityAffixes: installed HandleHealthDamage hooks (idx=0x{:X}, actor={}, character={}, player={}).",
+					idx,
+					_hookedActor,
+					_hookedCharacter,
+					_hookedPlayerCharacter);
 			}
 
 			[[nodiscard]] static bool IsHooked(const RE::Actor* a_actor) noexcept
@@ -216,13 +249,69 @@ namespace CalamityAffixes::Hooks
 				}
 
 				const auto* current = vtbl[_vfuncIndex];
-				return current == reinterpret_cast<const void*>(ThunkActor) ||
-				       current == reinterpret_cast<const void*>(ThunkCharacter) ||
-				       current == reinterpret_cast<const void*>(ThunkPlayerCharacter);
+				if (_hookedActor && current == reinterpret_cast<const void*>(ThunkActor)) {
+					return true;
+				}
+				if (_hookedCharacter && current == reinterpret_cast<const void*>(ThunkCharacter)) {
+					return true;
+				}
+				if (_hookedPlayerCharacter && current == reinterpret_cast<const void*>(ThunkPlayerCharacter)) {
+					return true;
+				}
+				return false;
 			}
 
 		private:
 			using ThunkFn = void(RE::Actor*, RE::Actor*, float);
+
+			[[nodiscard]] static bool IsLikelySkyrimTextAddress(std::uintptr_t a_address) noexcept
+			{
+				if (a_address == 0u) {
+					return false;
+				}
+
+				const auto& module = REL::Module::get();
+				auto inSegment = [a_address](const REL::Segment& a_segment) {
+					const auto segmentBase = a_segment.address();
+					const auto segmentSize = a_segment.size();
+					if (segmentBase == 0u || segmentSize == 0u) {
+						return false;
+					}
+					const auto segmentEnd = segmentBase + segmentSize;
+					return a_address >= segmentBase && a_address < segmentEnd;
+				};
+
+				return inSegment(module.segment(REL::Segment::textx)) ||
+				       inSegment(module.segment(REL::Segment::textw));
+			}
+
+			[[nodiscard]] static bool TryInstallVfuncHook(
+				REL::Relocation<std::uintptr_t> a_vtbl,
+				std::size_t a_index,
+				ThunkFn* a_thunk,
+				REL::Relocation<ThunkFn>& a_original,
+				const char* a_label)
+			{
+				auto* entries = reinterpret_cast<std::uintptr_t*>(a_vtbl.address());
+				if (!entries) {
+					SKSE::log::warn(
+						"CalamityAffixes: {} vtable unavailable; skipping HandleHealthDamage hook.",
+						a_label ? a_label : "<unknown>");
+					return false;
+				}
+
+				const auto current = entries[a_index];
+				if (!IsLikelySkyrimTextAddress(current)) {
+					SKSE::log::warn(
+						"CalamityAffixes: {} HandleHealthDamage slot already patched (addr=0x{:X}); skipping to avoid hook-chain conflicts.",
+						a_label ? a_label : "<unknown>",
+						current);
+					return false;
+				}
+
+				a_original = a_vtbl.write_vfunc(a_index, a_thunk);
+				return true;
+			}
 
 			struct ScopedFlag
 			{
@@ -360,6 +449,9 @@ namespace CalamityAffixes::Hooks
 			static inline REL::Relocation<ThunkFn> _originalPlayerCharacter;
 			static inline std::size_t _vfuncIndex{ 0 };
 			static inline bool _installed{ false };
+			static inline bool _hookedActor{ false };
+			static inline bool _hookedCharacter{ false };
+			static inline bool _hookedPlayerCharacter{ false };
 		};
 	}
 
