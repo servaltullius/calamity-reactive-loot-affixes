@@ -28,7 +28,7 @@ SKSEPluginInfo(
 
 	namespace
 	{
-		constexpr std::uint32_t kBuildSeq = 33;
+	constexpr std::uint32_t kBuildSeq = 36;
 
 	void SetupLogging()
 	{
@@ -78,9 +78,22 @@ SKSEPluginInfo(
 			auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 				bridge->LoadConfig();
 				bridge->Register();
-				CalamityAffixes::Hooks::Install();
+				if (bridge->IsRuntimeEnabled()) {
+					if (!bridge->IsHealthDamageRoutingDisabled()) {
+						CalamityAffixes::Hooks::Install();
+					} else {
+						SKSE::log::info("CalamityAffixes: disableHealthDamageRouting=true; skipping HandleHealthDamage hooks install.");
+					}
+
+					if (!bridge->IsTrapSystemTickDisabled()) {
+						CalamityAffixes::TrapSystem::Install();
+					} else {
+						SKSE::log::info("CalamityAffixes: disableTrapSystemTick=true; skipping TrapSystem install.");
+					}
+				} else {
+					SKSE::log::info("CalamityAffixes: runtime disabled; skipping hooks and TrapSystem install.");
+				}
 				CalamityAffixes::PrismaTooltip::Install();
-				CalamityAffixes::TrapSystem::Install();
 
 				if (auto* console = RE::ConsoleLog::GetSingleton()) {
 					console->Print("CalamityAffixes: EventBridge registered.");
