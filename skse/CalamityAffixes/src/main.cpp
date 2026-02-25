@@ -28,7 +28,7 @@ SKSEPluginInfo(
 
 	namespace
 	{
-	constexpr std::uint32_t kBuildSeq = 37;
+	constexpr std::uint32_t kBuildSeq = 38;
 
 	void SetupLogging()
 	{
@@ -79,11 +79,8 @@ SKSEPluginInfo(
 				bridge->LoadConfig();
 				bridge->Register();
 				if (bridge->IsRuntimeEnabled()) {
-					if (!bridge->IsHealthDamageRoutingDisabled()) {
-						CalamityAffixes::Hooks::Install();
-					} else {
-						SKSE::log::info("CalamityAffixes: disableHealthDamageRouting=true; skipping HandleHealthDamage hooks install.");
-					}
+					SKSE::log::info(
+						"CalamityAffixes: HandleHealthDamage hooks are forcibly disabled (temporary stability mode); using TESHitEvent fallback.");
 
 					if (!bridge->IsTrapSystemTickDisabled()) {
 						CalamityAffixes::TrapSystem::Install();

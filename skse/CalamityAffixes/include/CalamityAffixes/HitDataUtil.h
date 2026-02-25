@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CalamityAffixes/PointerSafety.h"
+
 #include <RE/Skyrim.h>
 
 namespace CalamityAffixes::HitDataUtil
@@ -11,12 +13,17 @@ namespace CalamityAffixes::HitDataUtil
 		}
 
 		const auto& runtime = a_target->GetActorRuntimeData();
-		auto* process = runtime.currentProcess;
-		if (!process || !process->middleHigh) {
+		auto* process = SanitizeObjectPointer(runtime.currentProcess);
+		if (!process) {
 			return nullptr;
 		}
 
-		return process->middleHigh->lastHitData;
+		auto* middleHigh = SanitizeObjectPointer(process->middleHigh);
+		if (!middleHigh) {
+			return nullptr;
+		}
+
+		return SanitizeObjectPointer(middleHigh->lastHitData);
 	}
 
 	[[nodiscard]] inline RE::FormID GetHitSourceFormID(const RE::HitData* a_hitData) noexcept
@@ -33,4 +40,3 @@ namespace CalamityAffixes::HitDataUtil
 		return 0;
 	}
 }
-

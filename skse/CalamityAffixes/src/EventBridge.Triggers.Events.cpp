@@ -240,6 +240,22 @@ struct CorpseCurrencyDropProbe
 						const auto* hitData = HitDataUtil::GetLastHitData(target);
 						ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
 
+						if (hitData && aggressor->IsPlayerRef()) {
+							const auto coc = EvaluateCastOnCrit(aggressor, target, hitData);
+							if (coc.spell) {
+								if (auto* magicCaster = aggressor->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+									magicCaster->CastSpellImmediate(
+										coc.spell,
+										coc.noHitEffectArt,
+										target,
+										coc.effectiveness,
+										false,
+										coc.magnitudeOverride,
+										aggressor);
+								}
+							}
+						}
+
 						if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
 							auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
 							auto* spell = source ? source->As<RE::SpellItem>() : nullptr;

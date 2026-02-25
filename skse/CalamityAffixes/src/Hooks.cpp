@@ -289,7 +289,7 @@ namespace CalamityAffixes::Hooks
 				REL::Relocation<std::uintptr_t> a_vtbl,
 				std::size_t a_index,
 				ThunkFn* a_thunk,
-				REL::Relocation<ThunkFn>& a_original,
+				ThunkFn*& a_original,
 				const char* a_label)
 			{
 				auto* entries = reinterpret_cast<std::uintptr_t*>(a_vtbl.address());
@@ -309,7 +309,8 @@ namespace CalamityAffixes::Hooks
 					return false;
 				}
 
-				a_original = a_vtbl.write_vfunc(a_index, a_thunk);
+				a_original = reinterpret_cast<ThunkFn*>(current);
+				a_vtbl.write_vfunc(a_index, a_thunk);
 				return true;
 			}
 
@@ -327,30 +328,64 @@ namespace CalamityAffixes::Hooks
 				}
 			};
 
+			static void CallOriginal(
+				ThunkFn* a_original,
+				RE::Actor* a_this,
+				RE::Actor* a_attacker,
+				float a_damage,
+				const char* a_hookLabel)
+			{
+				if (!a_original) {
+					SKSE::log::warn(
+						"CalamityAffixes: {} original HandleHealthDamage pointer is null; skipping call.",
+						a_hookLabel ? a_hookLabel : "<unknown>");
+					return;
+				}
+
+				a_original(a_this, a_attacker, a_damage);
+			}
+
 				static void ThunkImpl(
-					const REL::Relocation<ThunkFn>& a_original,
+					ThunkFn* a_original,
 					RE::Actor* a_this,
 					RE::Actor* a_attacker,
-					float a_damage)
+					float a_damage,
+					const char* a_hookLabel)
 			{
 				static thread_local bool inHook = false;
+				auto* safeTarget = SanitizeObjectPointer(a_this);
+				auto* safeAttacker = SanitizeObjectPointer(a_attacker);
+
+				if (!safeTarget) {
+					SKSE::log::warn(
+						"CalamityAffixes: {} HandleHealthDamage received invalid target pointer (target=0x{:X}, attacker=0x{:X}); dropping callback.",
+						a_hookLabel ? a_hookLabel : "<unknown>",
+						reinterpret_cast<std::uintptr_t>(a_this),
+						reinterpret_cast<std::uintptr_t>(a_attacker));
+					return;
+				}
+				if (a_attacker && !safeAttacker) {
+					SKSE::log::warn(
+						"CalamityAffixes: {} HandleHealthDamage sanitized invalid attacker pointer (attacker=0x{:X}); forwarding as null.",
+						a_hookLabel ? a_hookLabel : "<unknown>",
+						reinterpret_cast<std::uintptr_t>(a_attacker));
+				}
+
 				if (inHook) {
-					a_original(a_this, a_attacker, a_damage);
+					CallOriginal(a_original, a_this, a_attacker, a_damage, a_hookLabel);
 					return;
 				}
 
 				ScopedFlag guard(inHook);
 
-				if (!ShouldProcessHealthDamageHookPointers(a_this, a_attacker)) {
-					a_original(a_this, a_attacker, a_damage);
+				if (!ShouldProcessHealthDamageHookPointers(safeTarget, safeAttacker)) {
+					CallOriginal(a_original, a_this, a_attacker, a_damage, a_hookLabel);
 					return;
 				}
 
-				auto* safeTarget = SanitizeObjectPointer(a_this);
-				auto* safeAttacker = SanitizeObjectPointer(a_attacker);
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 				if (!bridge) {
-					a_original(a_this, a_attacker, a_damage);
+					CallOriginal(a_original, a_this, a_attacker, a_damage, a_hookLabel);
 					return;
 				}
 
@@ -365,7 +400,7 @@ namespace CalamityAffixes::Hooks
 						context.hasPlayerOwner,
 						context.hostileEitherDirection,
 						false)) {
-					a_original(a_this, a_attacker, a_damage);
+					CallOriginal(a_original, a_this, a_attacker, a_damage, a_hookLabel);
 					return;
 				}
 
@@ -388,7 +423,7 @@ namespace CalamityAffixes::Hooks
 					adjustedDamage);
 				(void)mindOverMatter;
 
-				a_original(a_this, a_attacker, adjustedDamage);
+				CallOriginal(a_original, a_this, a_attacker, adjustedDamage, a_hookLabel);
 
 				if (conversion.spell && conversion.convertedDamage > 0.0f && safeAttacker && safeTarget) {
 					if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
@@ -431,22 +466,22 @@ namespace CalamityAffixes::Hooks
 
 			static void ThunkActor(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{
-				ThunkImpl(_originalActor, a_this, a_attacker, a_damage);
+				ThunkImpl(_originalActor, a_this, a_attacker, a_damage, "Actor");
 			}
 
 			static void ThunkCharacter(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{
-				ThunkImpl(_originalCharacter, a_this, a_attacker, a_damage);
+				ThunkImpl(_originalCharacter, a_this, a_attacker, a_damage, "Character");
 			}
 
 			static void ThunkPlayerCharacter(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{
-				ThunkImpl(_originalPlayerCharacter, a_this, a_attacker, a_damage);
+				ThunkImpl(_originalPlayerCharacter, a_this, a_attacker, a_damage, "PlayerCharacter");
 			}
 
-			static inline REL::Relocation<ThunkFn> _originalActor;
-			static inline REL::Relocation<ThunkFn> _originalCharacter;
-			static inline REL::Relocation<ThunkFn> _originalPlayerCharacter;
+			static inline ThunkFn* _originalActor{ nullptr };
+			static inline ThunkFn* _originalCharacter{ nullptr };
+			static inline ThunkFn* _originalPlayerCharacter{ nullptr };
 			static inline std::size_t _vfuncIndex{ 0 };
 			static inline bool _installed{ false };
 			static inline bool _hookedActor{ false };
