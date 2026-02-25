@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/CombatContext.h"
 
 #include <algorithm>
 
@@ -12,8 +13,15 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		const auto now = std::chrono::steady_clock::now();
 		auto tryResolveStalePlayerCombat = [&]() {
+			static auto lastClearAt = std::chrono::steady_clock::time_point{};
+			static std::uint32_t clearConfidence = 0u;
+			constexpr auto kStaleSignalWindow = std::chrono::seconds(30);
+			constexpr auto kClearCooldown = std::chrono::seconds(5);
+			constexpr std::uint32_t kRequiredConfidence = 8u;
+
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			if (!player || !player->IsInCombat()) {
+				clearConfidence = 0u;
 				return;
 			}
 
@@ -35,16 +43,19 @@ namespace CalamityAffixes
 			considerMap(_recentOwnerKillAt);
 			considerMap(_recentOwnerIncomingHitAt);
 			if (_healthDamageHookSeen &&
+				_healthDamageHookLastAt.time_since_epoch().count() != 0 &&
 				(latestSignal.time_since_epoch().count() == 0 || _healthDamageHookLastAt > latestSignal)) {
 				latestSignal = _healthDamageHookLastAt;
 			}
 
-			if (latestSignal.time_since_epoch().count() == 0 || (now - latestSignal) <= std::chrono::seconds(15)) {
+			if (latestSignal.time_since_epoch().count() == 0 || (now - latestSignal) <= kStaleSignalWindow) {
+				clearConfidence = 0u;
 				return;
 			}
 
 			auto* processLists = RE::ProcessLists::GetSingleton();
 			if (!processLists) {
+				clearConfidence = 0u;
 				return;
 			}
 
@@ -57,6 +68,10 @@ namespace CalamityAffixes
 				}
 
 				if (!a_actor.IsHostileToActor(player) && !player->IsHostileToActor(&a_actor)) {
+					return RE::BSContainer::ForEachResult::kContinue;
+				}
+
+				if (!IsCombatTargetEitherDirection(player, &a_actor)) {
 					return RE::BSContainer::ForEachResult::kContinue;
 				}
 
@@ -74,10 +89,22 @@ namespace CalamityAffixes
 			});
 
 			if (hostileNearby) {
+				clearConfidence = 0u;
 				return;
 			}
 
-			processLists->StopCombatAndAlarmOnActor(player, true);
+			if (lastClearAt.time_since_epoch().count() != 0 && (now - lastClearAt) < kClearCooldown) {
+				return;
+			}
+
+			clearConfidence += 1u;
+			if (clearConfidence < kRequiredConfidence) {
+				return;
+			}
+			clearConfidence = 0u;
+			lastClearAt = now;
+
+			player->StopCombat();
 			_recentOwnerHitAt.erase(playerFormID);
 			_recentOwnerKillAt.erase(playerFormID);
 			_recentOwnerIncomingHitAt.erase(playerFormID);

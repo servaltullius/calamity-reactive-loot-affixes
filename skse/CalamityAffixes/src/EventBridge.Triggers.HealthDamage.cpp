@@ -125,7 +125,6 @@ namespace CalamityAffixes
 		// already drive resync; calling it from the hook thread risks data races.
 
 		_healthDamageHookSeen = true;
-		_healthDamageHookLastAt = now;
 
 		static bool loggedHookIsActive = false;
 		if (!loggedHookIsActive) {
@@ -156,6 +155,7 @@ namespace CalamityAffixes
 			const auto sourceFormID = HitDataUtil::GetHitSourceFormID(a_hitData);
 			const bool routedAsHit = RouteHealthDamageAsHit(a_target, a_attacker, a_hitData, sourceFormID, a_damage, now);
 			if (routedAsHit) {
+				_healthDamageHookLastAt = now;
 				ProcessOutgoingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
 				ProcessIncomingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
 				ProcessImmediateCorpseExplosionFromLethalHit(a_target, a_attacker);
