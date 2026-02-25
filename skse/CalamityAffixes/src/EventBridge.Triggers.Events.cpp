@@ -6,6 +6,7 @@
 #include "CalamityAffixes/LootCurrencyLedger.h"
 #include "CalamityAffixes/LootCurrencySourceHelpers.h"
 #include "CalamityAffixes/LootEligibility.h"
+#include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "CalamityAffixes/PrismaTooltip.h"
 #include "CalamityAffixes/TriggerGuards.h"
@@ -143,6 +144,12 @@ struct CorpseCurrencyDropProbe
 		if (!a_event || !a_event->cause || !a_event->target) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
+
+		auto* causeRef = SanitizeObjectPointer(a_event->cause.get());
+		auto* targetRef = SanitizeObjectPointer(a_event->target.get());
+		if (!causeRef || !targetRef) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
 		const std::scoped_lock lock(_stateMutex);
 		const auto now = std::chrono::steady_clock::now();
 		MaybeFlushRuntimeUserSettings(now, false);
@@ -151,8 +158,8 @@ struct CorpseCurrencyDropProbe
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		auto* aggressor = a_event->cause->As<RE::Actor>();
-		auto* target = a_event->target->As<RE::Actor>();
+		auto* aggressor = causeRef->As<RE::Actor>();
+		auto* target = targetRef->As<RE::Actor>();
 		if (!aggressor || !target) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -342,8 +349,8 @@ struct CorpseCurrencyDropProbe
 		const auto dyingRefHolder = a_event->actorDying;
 		const auto killerRefHolder = a_event->actorKiller;
 
-		auto* dyingRef = dyingRefHolder.get();
-		auto* killerRef = killerRefHolder.get();
+		auto* dyingRef = SanitizeObjectPointer(dyingRefHolder.get());
+		auto* killerRef = SanitizeObjectPointer(killerRefHolder.get());
 		auto* dying = dyingRef ? dyingRef->As<RE::Actor>() : nullptr;
 		if (!dying) {
 			return RE::BSEventNotifyControl::kContinue;
@@ -371,18 +378,21 @@ struct CorpseCurrencyDropProbe
 		if (!killer) {
 			if (auto* cause = killerRef->GetActorCause()) {
 				auto actorAny = cause->actor.get();
-				killer = actorAny.get();
+				auto* actorRef = actorAny ? SanitizeObjectPointer(actorAny.get()) : nullptr;
+				killer = actorRef;
 			}
 		}
 		if (!killer) {
 			if (auto* proj = killerRef->As<RE::Projectile>()) {
 				const auto& rt = proj->GetProjectileRuntimeData();
 				if (auto shooterAny = rt.shooter.get(); shooterAny) {
-					killer = shooterAny.get()->As<RE::Actor>();
+					auto* shooterRef = SanitizeObjectPointer(shooterAny.get());
+					killer = shooterRef ? shooterRef->As<RE::Actor>() : nullptr;
 				}
 				if (!killer && rt.actorCause) {
 					auto actorAny = rt.actorCause->actor.get();
-					killer = actorAny.get();
+					auto* actorRef = actorAny ? SanitizeObjectPointer(actorAny.get()) : nullptr;
+					killer = actorRef;
 				}
 			}
 		}
@@ -469,7 +479,9 @@ struct CorpseCurrencyDropProbe
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		auto* actor = a_event->actor.get() ? a_event->actor.get()->As<RE::Actor>() : nullptr;
+		auto actorHolder = a_event->actor;
+		auto* actorRef = actorHolder ? SanitizeObjectPointer(actorHolder.get()) : nullptr;
+		auto* actor = actorRef ? actorRef->As<RE::Actor>() : nullptr;
 		if (!actor || !actor->IsPlayerRef()) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -495,8 +507,8 @@ struct CorpseCurrencyDropProbe
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		auto* actionRef = a_event->actionRef.get();
-		auto* sourceRef = a_event->objectActivated.get();
+		auto* actionRef = SanitizeObjectPointer(a_event->actionRef.get());
+		auto* sourceRef = SanitizeObjectPointer(a_event->objectActivated.get());
 		auto* actionActor = actionRef ? actionRef->As<RE::Actor>() : nullptr;
 		if (!actionActor || !actionActor->IsPlayerRef() || !sourceRef) {
 			return RE::BSEventNotifyControl::kContinue;

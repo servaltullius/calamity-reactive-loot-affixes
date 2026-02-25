@@ -353,7 +353,7 @@ namespace CalamityAffixes
 
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
-		if (!_configLoaded || !_runtimeEnabled || !a_owner) {
+		if (!_configLoaded || !_runtimeEnabled || !a_owner || !a_target) {
 			return;
 		}
 
