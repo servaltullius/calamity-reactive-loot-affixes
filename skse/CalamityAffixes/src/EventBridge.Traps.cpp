@@ -14,9 +14,11 @@ namespace CalamityAffixes
 		const auto now = std::chrono::steady_clock::now();
 		auto tryResolveStalePlayerCombat = [&]() {
 			static auto lastClearAt = std::chrono::steady_clock::time_point{};
+			static auto lastHardClearAt = std::chrono::steady_clock::time_point{};
 			static std::uint32_t clearConfidence = 0u;
 			constexpr auto kStaleSignalWindow = std::chrono::seconds(30);
 			constexpr auto kClearCooldown = std::chrono::seconds(5);
+			constexpr auto kHardClearCooldown = std::chrono::seconds(20);
 			constexpr std::uint32_t kRequiredConfidence = 8u;
 
 			auto* player = RE::PlayerCharacter::GetSingleton();
@@ -61,7 +63,7 @@ namespace CalamityAffixes
 
 			bool hostileNearby = false;
 			const auto playerPos = player->GetPosition();
-			constexpr float kCombatHoldRadiusSq = 6000.0f * 6000.0f;
+			constexpr float kCombatHoldRadiusSq = 2000.0f * 2000.0f;
 			processLists->ForEachHighActor([&](RE::Actor& a_actor) {
 				if (&a_actor == player || a_actor.IsDead() || !a_actor.IsInCombat()) {
 					return RE::BSContainer::ForEachResult::kContinue;
@@ -105,6 +107,14 @@ namespace CalamityAffixes
 			lastClearAt = now;
 
 			player->StopCombat();
+			if (player->IsInCombat()) {
+				if (lastHardClearAt.time_since_epoch().count() == 0 ||
+					(now - lastHardClearAt) >= kHardClearCooldown) {
+					processLists->StopCombatAndAlarmOnActor(player, true);
+					lastHardClearAt = now;
+					spdlog::info("CalamityAffixes: escalated stale combat clear with StopCombatAndAlarmOnActor.");
+				}
+			}
 			_recentOwnerHitAt.erase(playerFormID);
 			_recentOwnerKillAt.erase(playerFormID);
 			_recentOwnerIncomingHitAt.erase(playerFormID);
