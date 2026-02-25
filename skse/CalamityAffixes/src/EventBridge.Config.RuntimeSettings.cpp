@@ -41,7 +41,14 @@ namespace CalamityAffixes
 			const auto& runtime = *runtimeIt;
 			_runtimeEnabled = runtime.value("enabled", _runtimeEnabled);
 			_loot.debugLog = runtime.value("debugNotifications", _loot.debugLog);
+			_combatDebugLog = runtime.value("debugCombat", _combatDebugLog);
 			_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
+			_disableCombatEvidenceLease = runtime.value("disableCombatEvidenceLease", _disableCombatEvidenceLease);
+			_disableHealthDamageRouting = runtime.value("disableHealthDamageRouting", _disableHealthDamageRouting);
+			_disablePassiveSuffixSpells = runtime.value("disablePassiveSuffixSpells", _disablePassiveSuffixSpells);
+			_disableTrapSystemTick = runtime.value("disableTrapSystemTick", _disableTrapSystemTick);
+			_disableTrapCasts = runtime.value("disableTrapCasts", _disableTrapCasts);
+			_forceStopAlarmPulse = runtime.value("forceStopAlarmPulse", _forceStopAlarmPulse);
 
 			const double validationIntervalSeconds =
 				runtime.value("validationIntervalSeconds", static_cast<double>(_equipResync.intervalMs) / 1000.0);
@@ -82,13 +89,20 @@ namespace CalamityAffixes
 		spdlog::flush_on(spdlog::level::warn);
 
 		SKSE::log::info(
-			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}).",
+			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
 			std::string(kUserSettingsRelativePath),
 			_runtimeEnabled,
 			_runtimeProcChanceMult,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
-			_loot.runtimeCurrencyDropsEnabled);
+			_loot.runtimeCurrencyDropsEnabled,
+			_combatDebugLog,
+			_disableCombatEvidenceLease,
+			_disableHealthDamageRouting,
+			_disablePassiveSuffixSpells,
+			_disableTrapSystemTick,
+			_disableTrapCasts,
+			_forceStopAlarmPulse);
 
 		_runtimeUserSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
 	}
@@ -98,6 +112,7 @@ namespace CalamityAffixes
 		nlohmann::json runtime = nlohmann::json::object();
 		runtime["enabled"] = _runtimeEnabled;
 		runtime["debugNotifications"] = _loot.debugLog;
+		runtime["debugCombat"] = _combatDebugLog;
 		runtime["validationIntervalSeconds"] = static_cast<double>(_equipResync.intervalMs) / 1000.0;
 		runtime["procChanceMultiplier"] = _runtimeProcChanceMult;
 		runtime["runewordFragmentChancePercent"] = _loot.runewordFragmentChancePercent;
@@ -105,6 +120,12 @@ namespace CalamityAffixes
 		runtime["dotSafetyAutoDisable"] = _loot.dotTagSafetyAutoDisable;
 		runtime["allowNonHostileFirstHitProc"] =
 			_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
+		runtime["disableCombatEvidenceLease"] = _disableCombatEvidenceLease;
+		runtime["disableHealthDamageRouting"] = _disableHealthDamageRouting;
+		runtime["disablePassiveSuffixSpells"] = _disablePassiveSuffixSpells;
+		runtime["disableTrapSystemTick"] = _disableTrapSystemTick;
+		runtime["disableTrapCasts"] = _disableTrapCasts;
+		runtime["forceStopAlarmPulse"] = _forceStopAlarmPulse;
 		return runtime;
 	}
 

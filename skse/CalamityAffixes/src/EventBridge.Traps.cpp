@@ -12,6 +12,18 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 		const auto now = std::chrono::steady_clock::now();
+		if (_disableTrapSystemTick) {
+			_hasActiveTraps.store(false, std::memory_order_relaxed);
+			if (_combatDebugLog) {
+				static auto nextLogAt = std::chrono::steady_clock::time_point{};
+				if (nextLogAt.time_since_epoch().count() == 0 || now >= nextLogAt) {
+					nextLogAt = now + std::chrono::seconds(2);
+					spdlog::info("CalamityAffixes: TickTraps disabled by runtime setting.");
+				}
+			}
+			return;
+		}
+
 		auto tryResolveStalePlayerCombat = [&]() {
 			static auto lastClearAt = std::chrono::steady_clock::time_point{};
 			static auto lastHardClearAt = std::chrono::steady_clock::time_point{};
@@ -20,8 +32,94 @@ namespace CalamityAffixes
 			constexpr auto kHardClearCooldown = std::chrono::seconds(20);
 			constexpr std::uint32_t kRequiredConfidence = 8u;
 
+			auto logStaleCombat = [&](const char* a_message) {
+				if (!_combatDebugLog) {
+					return;
+				}
+				static auto nextLogAt = std::chrono::steady_clock::time_point{};
+				if (nextLogAt.time_since_epoch().count() != 0 && now < nextLogAt) {
+					return;
+				}
+				nextLogAt = now + std::chrono::seconds(2);
+				const bool hasLease = _playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0;
+				const bool leaseActive = hasLease && now <= _playerCombatEvidenceExpiresAt;
+				const auto leaseRemainingMs = leaseActive
+					? static_cast<std::int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(_playerCombatEvidenceExpiresAt - now).count())
+					: 0;
+				auto* player = RE::PlayerCharacter::GetSingleton();
+				spdlog::info(
+					"CalamityAffixes: stale combat check: {} (inCombat={}, leaseActive={}, leaseRemainingMs={}, confidence={}, traps={}).",
+					a_message,
+					player ? player->IsInCombat() : false,
+					leaseActive,
+					leaseRemainingMs,
+					clearConfidence,
+					_traps.size());
+			};
+
 			auto* player = RE::PlayerCharacter::GetSingleton();
-			if (!player || !player->IsInCombat()) {
+			auto* processLists = RE::ProcessLists::GetSingleton();
+			const auto runtimeCombatTargetHandle =
+				player ? player->GetActorRuntimeData().currentCombatTarget.native_handle() : 0u;
+			auto* combatController = player ? player->GetActorRuntimeData().combatController : nullptr;
+			const auto controllerTargetHandle =
+				combatController ? combatController->targetHandle.native_handle() : 0u;
+			const bool murderAlarmBit =
+				player ? player->GetActorRuntimeData().boolBits.any(RE::Actor::BOOL_BITS::kMurderAlarm) : false;
+			const bool controllerStarted = combatController ? combatController->startedCombat : false;
+			const bool controllerStopped = combatController ? combatController->stoppedCombat : false;
+			if (_combatDebugLog) {
+				static auto nextHeartbeatLogAt = std::chrono::steady_clock::time_point{};
+				if (nextHeartbeatLogAt.time_since_epoch().count() == 0 || now >= nextHeartbeatLogAt) {
+					nextHeartbeatLogAt = now + std::chrono::seconds(2);
+					const bool hasLease = _playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0;
+					const bool leaseActive = hasLease && now <= _playerCombatEvidenceExpiresAt;
+					const auto leaseRemainingMs = leaseActive
+						? static_cast<std::int64_t>(
+							std::chrono::duration_cast<std::chrono::milliseconds>(_playerCombatEvidenceExpiresAt - now).count())
+						: 0;
+					spdlog::info(
+						"CalamityAffixes: stale combat heartbeat (hasPlayer={}, inCombat={}, leaseActive={}, leaseRemainingMs={}, traps={}, runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}).",
+						player != nullptr,
+						player ? player->IsInCombat() : false,
+						leaseActive,
+						leaseRemainingMs,
+						_traps.size(),
+						runtimeCombatTargetHandle,
+						controllerTargetHandle,
+						murderAlarmBit,
+						controllerStarted,
+						controllerStopped);
+				}
+			}
+
+			if (_forceStopAlarmPulse && player && processLists) {
+				static auto lastPulseAt = std::chrono::steady_clock::time_point{};
+				constexpr auto kPulseCooldown = std::chrono::milliseconds(300);
+				if (lastPulseAt.time_since_epoch().count() == 0 || (now - lastPulseAt) >= kPulseCooldown) {
+					lastPulseAt = now;
+					player->StopAlarmOnActor();
+					player->StopCombat();
+					processLists->StopCombatAndAlarmOnActor(player, true);
+					processLists->ClearCachedFactionFightReactions();
+					if (_combatDebugLog) {
+						spdlog::info(
+							"CalamityAffixes: forceStopAlarmPulse fired (runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}, inCombat={}).",
+							runtimeCombatTargetHandle,
+							controllerTargetHandle,
+							murderAlarmBit,
+							controllerStarted,
+							controllerStopped,
+							player->IsInCombat());
+					}
+				}
+			}
+			if (!player) {
+				clearConfidence = 0u;
+				return;
+			}
+
+			if (!player->IsInCombat()) {
 				clearConfidence = 0u;
 				return;
 			}
@@ -34,16 +132,20 @@ namespace CalamityAffixes
 			if (_playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0 &&
 				now <= _playerCombatEvidenceExpiresAt) {
 				clearConfidence = 0u;
+				logStaleCombat("skip: combat evidence lease active");
 				return;
 			}
 
-			auto* processLists = RE::ProcessLists::GetSingleton();
 			if (!processLists) {
 				clearConfidence = 0u;
+				logStaleCombat("skip: ProcessLists unavailable");
 				return;
 			}
 
 			bool hostileNearby = false;
+			RE::FormID hostileFormID = 0u;
+			std::string hostileName{};
+			float hostileDistSq = 0.0f;
 			const auto playerPos = player->GetPosition();
 			constexpr float kCombatHoldRadiusSq = 2000.0f * 2000.0f;
 			processLists->ForEachHighActor([&](RE::Actor& a_actor) {
@@ -67,27 +169,43 @@ namespace CalamityAffixes
 				if (distSq > kCombatHoldRadiusSq) {
 					return RE::BSContainer::ForEachResult::kContinue;
 				}
-
+				
 				hostileNearby = true;
+				hostileFormID = a_actor.GetFormID();
+				hostileName = a_actor.GetName();
+				hostileDistSq = distSq;
 				return RE::BSContainer::ForEachResult::kStop;
 			});
 
 			if (hostileNearby) {
 				clearConfidence = 0u;
+				if (_combatDebugLog && hostileFormID != 0u) {
+					spdlog::info(
+						"CalamityAffixes: stale combat check: skip: hostile nearby (actor={}({:08X}), distSq={:.1f}).",
+						hostileName.empty() ? "<unnamed>" : hostileName,
+						hostileFormID,
+						hostileDistSq);
+				} else {
+					logStaleCombat("skip: hostile nearby");
+				}
 				return;
 			}
 
 			if (lastClearAt.time_since_epoch().count() != 0 && (now - lastClearAt) < kClearCooldown) {
+				logStaleCombat("skip: clear cooldown");
 				return;
 			}
 
 			clearConfidence += 1u;
 			if (clearConfidence < kRequiredConfidence) {
+				logStaleCombat("accumulating confidence");
 				return;
 			}
 			clearConfidence = 0u;
 			lastClearAt = now;
+			logStaleCombat("attempting StopCombat");
 
+			player->StopAlarmOnActor();
 			player->StopCombat();
 			if (player->IsInCombat()) {
 				if (lastHardClearAt.time_since_epoch().count() == 0 ||
@@ -124,6 +242,21 @@ namespace CalamityAffixes
 
 		if (_traps.empty()) {
 			_hasActiveTraps.store(false, std::memory_order_relaxed);
+			tryResolveStalePlayerCombat();
+			return;
+		}
+
+		if (_disableTrapCasts) {
+			_hasActiveTraps.store(!_traps.empty(), std::memory_order_relaxed);
+			if (_combatDebugLog) {
+				static auto nextLogAt = std::chrono::steady_clock::time_point{};
+				if (nextLogAt.time_since_epoch().count() == 0 || now >= nextLogAt) {
+					nextLogAt = now + std::chrono::seconds(2);
+					spdlog::info(
+						"CalamityAffixes: trap casts disabled by runtime setting (activeTraps={}).",
+						_traps.size());
+				}
+			}
 			tryResolveStalePlayerCombat();
 			return;
 		}
