@@ -38,19 +38,18 @@ namespace CalamityAffixes
 
 				a_store[a_ownerFormId] = a_now;
 
-				// Player-owned actor population is tiny, but keep this bounded for long sessions.
 				static constexpr auto kTtl = std::chrono::seconds(90);
 				static constexpr std::size_t kHardCap = 256;
-				if (a_store.size() <= kHardCap) {
-					return;
-				}
-
 				for (auto it = a_store.begin(); it != a_store.end();) {
 					if ((a_now - it->second) > kTtl) {
 						it = a_store.erase(it);
 					} else {
 						++it;
 					}
+				}
+
+				while (a_store.size() > kHardCap) {
+					a_store.erase(a_store.begin());
 				}
 			}
 

@@ -268,13 +268,6 @@ namespace CalamityAffixes::Hooks
 				const auto context = BuildCombatTriggerContext(safeTarget, safeAttacker);
 				const auto now = std::chrono::steady_clock::now();
 
-				const bool allowNeutralOutgoing =
-					ShouldResolveNonHostileOutgoingFirstHitAllowance(
-						context.hasPlayerOwner,
-						context.targetIsPlayer,
-						bridge->AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
-					bridge->ResolveNonHostileOutgoingFirstHitAllowance(context.playerOwner, safeTarget, context.hostileEitherDirection, now);
-
 				if (!ShouldProcessHealthDamageProcPath(
 						context.hasTarget,
 						context.hasAttacker,
@@ -282,7 +275,7 @@ namespace CalamityAffixes::Hooks
 						context.attackerIsPlayerOwned,
 						context.hasPlayerOwner,
 						context.hostileEitherDirection,
-						allowNeutralOutgoing)) {
+						false)) {
 					a_original(a_this, a_attacker, a_damage);
 					return;
 				}
