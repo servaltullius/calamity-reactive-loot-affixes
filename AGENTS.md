@@ -1,5 +1,5 @@
 # Repo Agent Instructions
-
+사용자와 한국어로 대화합니다.
 <!-- skills-scout:start -->
 ## Skills (Auto-Pinned by skills-scout)
 
