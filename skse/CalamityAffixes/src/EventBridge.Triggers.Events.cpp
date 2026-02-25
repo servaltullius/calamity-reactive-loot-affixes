@@ -223,17 +223,7 @@ struct CorpseCurrencyDropProbe
 			} else {
 				// Outgoing (player-owned).
 				if (_configLoaded && relation.attackerIsPlayerOwned && relation.playerOwner) {
-					const bool allowNeutralOutgoing =
-						ShouldResolveNonHostileOutgoingFirstHitAllowance(
-							relation.hasPlayerOwner,
-							relation.targetIsPlayer,
-							AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
-						ResolveNonHostileOutgoingFirstHitAllowance(
-							relation.playerOwner,
-							target,
-							relation.hostileEitherDirection,
-							now);
-					if (relation.hostileEitherDirection || allowNeutralOutgoing) {
+				if (relation.hostileEitherDirection) {
 						const LastHitKey key{
 							.outgoing = true,
 							.aggressor = aggressor->GetFormID(),
@@ -302,21 +292,11 @@ struct CorpseCurrencyDropProbe
 				}
 		}
 
-		const bool allowNeutralOutgoing =
-			ShouldResolveNonHostileOutgoingFirstHitAllowance(
-				relation.hasPlayerOwner,
-				relation.targetIsPlayer,
-				AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
-			ResolveNonHostileOutgoingFirstHitAllowance(
-				relation.playerOwner,
-				target,
-				relation.hostileEitherDirection,
-				now);
 			if (ShouldSendPlayerOwnedHitEvent(
 					relation.attackerIsPlayerOwned,
 					relation.hasPlayerOwner,
 					relation.hostileEitherDirection,
-					allowNeutralOutgoing,
+					false,
 					relation.targetIsPlayer)) {
 				const LastHitKey key{
 					.outgoing = true,
@@ -376,13 +356,6 @@ struct CorpseCurrencyDropProbe
 		// Attribute kills through ActorCause / shooter so Kill-triggered affixes work for ranged/magic too.
 		RE::Actor* killer = killerRef->As<RE::Actor>();
 		if (!killer) {
-			if (auto* cause = killerRef->GetActorCause()) {
-				auto actorAny = cause->actor.get();
-				auto* actorRef = actorAny ? SanitizeObjectPointer(actorAny.get()) : nullptr;
-				killer = actorRef;
-			}
-		}
-		if (!killer) {
 			if (auto* proj = killerRef->As<RE::Projectile>()) {
 				const auto& rt = proj->GetProjectileRuntimeData();
 				if (auto shooterAny = rt.shooter.get(); shooterAny) {
@@ -390,9 +363,12 @@ struct CorpseCurrencyDropProbe
 					killer = shooterRef ? shooterRef->As<RE::Actor>() : nullptr;
 				}
 				if (!killer && rt.actorCause) {
-					auto actorAny = rt.actorCause->actor.get();
-					auto* actorRef = actorAny ? SanitizeObjectPointer(actorAny.get()) : nullptr;
-					killer = actorRef;
+					auto* actorCause = SanitizeObjectPointer(rt.actorCause.get());
+					if (actorCause) {
+						auto actorAny = actorCause->actor.get();
+						auto* actorRef = actorAny ? SanitizeObjectPointer(actorAny.get()) : nullptr;
+						killer = actorRef;
+					}
 				}
 			}
 		}
@@ -403,9 +379,9 @@ struct CorpseCurrencyDropProbe
 				lastWarnAt = now;
 				if (_loot.debugLog) {
 					spdlog::info(
-						"CalamityAffixes: TESDeathEvent killer attribution failed (dying={}, killerRef=0x{:X}); skipping Kill triggers.",
+						"CalamityAffixes: TESDeathEvent killer attribution failed (dying={}, killerRefPtr=0x{:X}); skipping Kill triggers.",
 						dying->GetName(),
-						killerRef->GetFormID());
+						reinterpret_cast<std::uintptr_t>(killerRef));
 				}
 			}
 			return RE::BSEventNotifyControl::kContinue;
