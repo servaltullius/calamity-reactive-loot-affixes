@@ -41,7 +41,7 @@ namespace CalamityAffixes::TrapSystem
 				std::this_thread::sleep_for(kPollInterval);
 
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-				if (!bridge || !bridge->HasActiveTraps()) {
+				if (!bridge) {
 					continue;
 				}
 

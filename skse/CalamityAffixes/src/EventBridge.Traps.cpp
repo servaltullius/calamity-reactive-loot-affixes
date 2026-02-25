@@ -10,13 +10,88 @@ namespace CalamityAffixes
 	void EventBridge::TickTraps()
 	{
 		const std::scoped_lock lock(_stateMutex);
+		const auto now = std::chrono::steady_clock::now();
+		auto tryResolveStalePlayerCombat = [&]() {
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!player || !player->IsInCombat()) {
+				return;
+			}
+
+			const auto playerFormID = player->GetFormID();
+			if (playerFormID == 0u) {
+				return;
+			}
+
+			auto latestSignal = std::chrono::steady_clock::time_point{};
+			auto considerMap = [&](const auto& a_store) {
+				const auto it = a_store.find(playerFormID);
+				if (it != a_store.end() &&
+					(latestSignal.time_since_epoch().count() == 0 || it->second > latestSignal)) {
+					latestSignal = it->second;
+				}
+			};
+
+			considerMap(_recentOwnerHitAt);
+			considerMap(_recentOwnerKillAt);
+			considerMap(_recentOwnerIncomingHitAt);
+			if (_healthDamageHookSeen &&
+				(latestSignal.time_since_epoch().count() == 0 || _healthDamageHookLastAt > latestSignal)) {
+				latestSignal = _healthDamageHookLastAt;
+			}
+
+			if (latestSignal.time_since_epoch().count() == 0 || (now - latestSignal) <= std::chrono::seconds(15)) {
+				return;
+			}
+
+			auto* processLists = RE::ProcessLists::GetSingleton();
+			if (!processLists) {
+				return;
+			}
+
+			bool hostileNearby = false;
+			const auto playerPos = player->GetPosition();
+			constexpr float kCombatHoldRadiusSq = 6000.0f * 6000.0f;
+			processLists->ForEachHighActor([&](RE::Actor& a_actor) {
+				if (&a_actor == player || a_actor.IsDead() || !a_actor.IsInCombat()) {
+					return RE::BSContainer::ForEachResult::kContinue;
+				}
+
+				if (!a_actor.IsHostileToActor(player) && !player->IsHostileToActor(&a_actor)) {
+					return RE::BSContainer::ForEachResult::kContinue;
+				}
+
+				const auto actorPos = a_actor.GetPosition();
+				const float dx = actorPos.x - playerPos.x;
+				const float dy = actorPos.y - playerPos.y;
+				const float dz = actorPos.z - playerPos.z;
+				const float distSq = (dx * dx) + (dy * dy) + (dz * dz);
+				if (distSq > kCombatHoldRadiusSq) {
+					return RE::BSContainer::ForEachResult::kContinue;
+				}
+
+				hostileNearby = true;
+				return RE::BSContainer::ForEachResult::kStop;
+			});
+
+			if (hostileNearby) {
+				return;
+			}
+
+			processLists->StopCombatAndAlarmOnActor(player, true);
+			_recentOwnerHitAt.erase(playerFormID);
+			_recentOwnerKillAt.erase(playerFormID);
+			_recentOwnerIncomingHitAt.erase(playerFormID);
+			_nonHostileFirstHitGate.Clear();
+			if (_loot.debugLog) {
+				spdlog::info("CalamityAffixes: cleared stale player combat state (no hostile actor nearby).");
+			}
+		};
 
 		if (_traps.empty()) {
 			_hasActiveTraps.store(false, std::memory_order_relaxed);
+			tryResolveStalePlayerCombat();
 			return;
 		}
-
-		const auto now = std::chrono::steady_clock::now();
 
 		// Prune expired/invalid traps.
 		for (auto it = _traps.begin(); it != _traps.end();) {
@@ -29,11 +104,13 @@ namespace CalamityAffixes
 
 		if (_traps.empty()) {
 			_hasActiveTraps.store(false, std::memory_order_relaxed);
+			tryResolveStalePlayerCombat();
 			return;
 		}
 
 		auto* processLists = RE::ProcessLists::GetSingleton();
 		if (!processLists) {
+			tryResolveStalePlayerCombat();
 			return;
 		}
 
@@ -208,5 +285,7 @@ namespace CalamityAffixes
 	if (_traps.empty()) {
 		_hasActiveTraps.store(false, std::memory_order_relaxed);
 	}
+
+	tryResolveStalePlayerCombat();
 }
 }
