@@ -221,39 +221,41 @@ struct CorpseCurrencyDropProbe
 					}
 				}
 			} else {
-				// Outgoing (player-owned).
-				if (_configLoaded && relation.attackerIsPlayerOwned && relation.playerOwner) {
+			// Outgoing (player-owned).
+			if (_configLoaded && relation.attackerIsPlayerOwned && relation.playerOwner) {
 				if (relation.hostileEitherDirection) {
-						const LastHitKey key{
-							.outgoing = true,
-							.aggressor = aggressor->GetFormID(),
-							.target = target->GetFormID(),
-							.source = a_event->source
-						};
-
-						if (!ShouldSuppressDuplicateHit(key, now)) {
-							const auto* hitData = HitDataUtil::GetLastHitData(target);
-							ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
-
-							if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
-								auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
-								auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
-								if (spell) {
-									ProcessArchmageSpellHit(aggressor, target, spell, hitData);
-								}
-							}
-						}
-					}
-				}
-
-				// Incoming (player hit).
-				if (_configLoaded && relation.targetIsPlayer && relation.hostileEitherDirection) {
+					MarkPlayerCombatEvidence(now);
 					const LastHitKey key{
-						.outgoing = false,
+						.outgoing = true,
 						.aggressor = aggressor->GetFormID(),
 						.target = target->GetFormID(),
 						.source = a_event->source
 					};
+
+					if (!ShouldSuppressDuplicateHit(key, now)) {
+						const auto* hitData = HitDataUtil::GetLastHitData(target);
+						ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
+
+						if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
+							auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
+							auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
+							if (spell) {
+								ProcessArchmageSpellHit(aggressor, target, spell, hitData);
+							}
+						}
+					}
+				}
+			}
+
+			// Incoming (player hit).
+			if (_configLoaded && relation.targetIsPlayer && relation.hostileEitherDirection) {
+				MarkPlayerCombatEvidence(now);
+				const LastHitKey key{
+					.outgoing = false,
+					.aggressor = aggressor->GetFormID(),
+					.target = target->GetFormID(),
+					.source = a_event->source
+				};
 
 					if (!ShouldSuppressDuplicateHit(key, now)) {
 						const auto* hitData = HitDataUtil::GetLastHitData(target);
