@@ -350,10 +350,68 @@ namespace CalamityAffixes
 		}
 	}
 
-	void EventBridge::MarkPlayerCombatEvidence(std::chrono::steady_clock::time_point a_now) noexcept
+	void EventBridge::MarkPlayerCombatEvidence(
+		std::chrono::steady_clock::time_point a_now,
+		PlayerCombatEvidenceSource a_source,
+		const RE::Actor* a_player,
+		const RE::Actor* a_other) noexcept
 	{
+		const auto describeSource = [](PlayerCombatEvidenceSource a_value) noexcept -> const char* {
+			switch (a_value) {
+			case PlayerCombatEvidenceSource::kHealthDamageRoutedHit:
+				return "HealthDamage";
+			case PlayerCombatEvidenceSource::kTesHitOutgoing:
+				return "TESHitOutgoing";
+			case PlayerCombatEvidenceSource::kTesHitIncoming:
+				return "TESHitIncoming";
+			default:
+				return "Unknown";
+			}
+		};
+
 		constexpr auto kPlayerCombatEvidenceWindow = std::chrono::seconds(20);
-		_playerCombatEvidenceExpiresAt = a_now + kPlayerCombatEvidenceWindow;
+		const auto newExpiry = a_now + kPlayerCombatEvidenceWindow;
+
+		if (_disableCombatEvidenceLease) {
+			if (_combatDebugLog) {
+				static auto nextLogAt = std::chrono::steady_clock::time_point{};
+				if (nextLogAt.time_since_epoch().count() == 0 || a_now >= nextLogAt) {
+					nextLogAt = a_now + std::chrono::seconds(2);
+					spdlog::info(
+						"CalamityAffixes: combat evidence lease suppressed (source={}, player={}({:08X}), other={}({:08X})).",
+						describeSource(a_source),
+						a_player ? a_player->GetName() : "<none>",
+						a_player ? a_player->GetFormID() : 0u,
+						a_other ? a_other->GetName() : "<none>",
+						a_other ? a_other->GetFormID() : 0u);
+				}
+			}
+			return;
+		}
+
+		_playerCombatEvidenceExpiresAt = newExpiry;
+
+		if (!_combatDebugLog) {
+			return;
+		}
+
+		static auto nextLogAt = std::chrono::steady_clock::time_point{};
+		if (nextLogAt.time_since_epoch().count() != 0 && a_now < nextLogAt) {
+			return;
+		}
+		nextLogAt = a_now + std::chrono::seconds(1);
+
+		const auto expiresInMs = static_cast<std::int64_t>(
+			std::chrono::duration_cast<std::chrono::milliseconds>(newExpiry - a_now).count());
+		spdlog::info(
+			"CalamityAffixes: combat evidence marked (source={}, player={}({:08X}) inCombat={}, other={}({:08X}), expiresIn={}ms).",
+			describeSource(a_source),
+			a_player ? a_player->GetName() : "<none>",
+			a_player ? a_player->GetFormID() : 0u,
+			a_player ? a_player->IsInCombat() : false,
+			a_other ? a_other->GetName() : "<none>",
+			a_other ? a_other->GetFormID() : 0u,
+			expiresInMs);
 	}
 
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)

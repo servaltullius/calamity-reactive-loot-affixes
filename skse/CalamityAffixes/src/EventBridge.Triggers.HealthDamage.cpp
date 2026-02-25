@@ -121,6 +121,17 @@ namespace CalamityAffixes
 		if (!_configLoaded || !_runtimeEnabled || !a_target) {
 			return;
 		}
+
+		if (_disableHealthDamageRouting) {
+			if (_combatDebugLog) {
+				static bool loggedOnce = false;
+				if (!loggedOnce) {
+					loggedOnce = true;
+					spdlog::info("CalamityAffixes: OnHealthDamage routing disabled by runtime setting.");
+				}
+			}
+			return;
+		}
 		// H2: MaybeResyncEquippedAffixes removed — the main-thread ProcessEvent handlers
 		// already drive resync; calling it from the hook thread risks data races.
 
@@ -158,10 +169,27 @@ namespace CalamityAffixes
 			const bool playerRelevantCombatSignal =
 				context.targetIsPlayer ||
 				(context.attackerIsPlayerOwned && context.hasPlayerOwner);
+			const bool shouldMarkCombatEvidence =
+				playerRelevantCombatSignal && context.hostileEitherDirection;
 			if (routedAsHit) {
-				if (playerRelevantCombatSignal) {
-					MarkPlayerCombatEvidence(now);
+				if (shouldMarkCombatEvidence) {
+					const auto* player = context.targetIsPlayer ? a_target : context.playerOwner;
+					const auto* other = context.targetIsPlayer ? a_attacker : a_target;
+					MarkPlayerCombatEvidence(
+						now,
+						PlayerCombatEvidenceSource::kHealthDamageRoutedHit,
+						player,
+						other);
 					_healthDamageHookLastAt = now;
+				} else if (_combatDebugLog && playerRelevantCombatSignal) {
+					static auto nextNonHostileLogAt = std::chrono::steady_clock::time_point{};
+					if (nextNonHostileLogAt.time_since_epoch().count() == 0 || now >= nextNonHostileLogAt) {
+						nextNonHostileLogAt = now + std::chrono::seconds(2);
+						spdlog::info(
+							"CalamityAffixes: skipped HealthDamage combat evidence mark (non-hostile relation, target={}, attacker={}).",
+							a_target ? a_target->GetName() : "<none>",
+							a_attacker ? a_attacker->GetName() : "<none>");
+					}
 				}
 				ProcessOutgoingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
 				ProcessIncomingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);

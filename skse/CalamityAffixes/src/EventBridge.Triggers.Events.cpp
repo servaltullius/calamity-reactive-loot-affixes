@@ -224,7 +224,11 @@ struct CorpseCurrencyDropProbe
 			// Outgoing (player-owned).
 			if (_configLoaded && relation.attackerIsPlayerOwned && relation.playerOwner) {
 				if (relation.hostileEitherDirection) {
-					MarkPlayerCombatEvidence(now);
+					MarkPlayerCombatEvidence(
+						now,
+						PlayerCombatEvidenceSource::kTesHitOutgoing,
+						relation.playerOwner,
+						target);
 					const LastHitKey key{
 						.outgoing = true,
 						.aggressor = aggressor->GetFormID(),
@@ -249,7 +253,11 @@ struct CorpseCurrencyDropProbe
 
 			// Incoming (player hit).
 			if (_configLoaded && relation.targetIsPlayer && relation.hostileEitherDirection) {
-				MarkPlayerCombatEvidence(now);
+				MarkPlayerCombatEvidence(
+					now,
+					PlayerCombatEvidenceSource::kTesHitIncoming,
+					target,
+					aggressor);
 				const LastHitKey key{
 					.outgoing = false,
 					.aggressor = aggressor->GetFormID(),
@@ -490,6 +498,33 @@ struct CorpseCurrencyDropProbe
 		auto* actionActor = actionRef ? actionRef->As<RE::Actor>() : nullptr;
 		if (!actionActor || !actionActor->IsPlayerRef() || !sourceRef) {
 			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		if (_combatDebugLog) {
+			auto* baseObject = sourceRef->GetBaseObject();
+			auto* combatController = actionActor->GetActorRuntimeData().combatController;
+			const auto runtimeTargetHandle = actionActor->GetActorRuntimeData().currentCombatTarget.native_handle();
+			const auto controllerTargetHandle = combatController ? combatController->targetHandle.native_handle() : 0u;
+			const bool murderAlarmBit = actionActor->GetActorRuntimeData().boolBits.any(RE::Actor::BOOL_BITS::kMurderAlarm);
+			const bool controllerStarted = combatController ? combatController->startedCombat : false;
+			const bool controllerStopped = combatController ? combatController->stoppedCombat : false;
+			const std::string_view baseEditorId =
+				(baseObject && baseObject->GetFormEditorID())
+					? std::string_view(baseObject->GetFormEditorID())
+					: std::string_view{};
+			spdlog::info(
+				"CalamityAffixes: activation probe (targetRef={}({:08X}), base={}({:08X}), baseEditorId={}, inCombat={}, runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}).",
+				sourceRef->GetName(),
+				sourceRef->GetFormID(),
+				baseObject ? baseObject->GetName() : "<none>",
+				baseObject ? baseObject->GetFormID() : 0u,
+				baseEditorId,
+				actionActor->IsInCombat(),
+				runtimeTargetHandle,
+				controllerTargetHandle,
+				murderAlarmBit,
+				controllerStarted,
+				controllerStopped);
 		}
 		if (!IsRuntimeCurrencyDropRollEnabled("activation")) {
 			return RE::BSEventNotifyControl::kContinue;
@@ -1025,7 +1060,10 @@ struct CorpseCurrencyDropProbe
 					}
 
 					// Collect passive spells for equipped suffixes
-					if (affixIdx < _affixes.size() && _affixes[affixIdx].slot == AffixSlot::kSuffix && _affixes[affixIdx].passiveSpell) {
+					if (!_disablePassiveSuffixSpells &&
+						affixIdx < _affixes.size() &&
+						_affixes[affixIdx].slot == AffixSlot::kSuffix &&
+						_affixes[affixIdx].passiveSpell) {
 						desiredPassives.insert(_affixes[affixIdx].passiveSpell);
 					}
 
@@ -1072,22 +1110,32 @@ struct CorpseCurrencyDropProbe
 
 		// Apply/remove passive suffix spells
 		if (player) {
-			// Remove spells no longer needed
-			for (auto it = _appliedPassiveSpells.begin(); it != _appliedPassiveSpells.end(); ) {
-				if (desiredPassives.find(*it) == desiredPassives.end()) {
-					player->RemoveSpell(*it);
-					SKSE::log::debug("CalamityAffixes: removed passive suffix spell {:08X}.", (*it)->GetFormID());
-					it = _appliedPassiveSpells.erase(it);
-				} else {
-					++it;
+			if (_disablePassiveSuffixSpells) {
+				for (auto* spell : _appliedPassiveSpells) {
+					player->RemoveSpell(spell);
+					SKSE::log::info(
+						"CalamityAffixes: removed passive suffix spell {:08X} (passives disabled).",
+						spell ? spell->GetFormID() : 0u);
 				}
-			}
-			// Add new spells
-			for (auto* spell : desiredPassives) {
-				if (_appliedPassiveSpells.find(spell) == _appliedPassiveSpells.end()) {
-					player->AddSpell(spell);
-					_appliedPassiveSpells.insert(spell);
-					SKSE::log::debug("CalamityAffixes: applied passive suffix spell {:08X}.", spell->GetFormID());
+				_appliedPassiveSpells.clear();
+			} else {
+				// Remove spells no longer needed
+				for (auto it = _appliedPassiveSpells.begin(); it != _appliedPassiveSpells.end(); ) {
+					if (desiredPassives.find(*it) == desiredPassives.end()) {
+						player->RemoveSpell(*it);
+						SKSE::log::debug("CalamityAffixes: removed passive suffix spell {:08X}.", (*it)->GetFormID());
+						it = _appliedPassiveSpells.erase(it);
+					} else {
+						++it;
+					}
+				}
+				// Add new spells
+				for (auto* spell : desiredPassives) {
+					if (_appliedPassiveSpells.find(spell) == _appliedPassiveSpells.end()) {
+						player->AddSpell(spell);
+						_appliedPassiveSpells.insert(spell);
+						SKSE::log::debug("CalamityAffixes: applied passive suffix spell {:08X}.", spell->GetFormID());
+					}
 				}
 			}
 		}

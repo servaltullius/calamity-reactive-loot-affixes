@@ -142,6 +142,9 @@ namespace CalamityAffixes
 		// Tick lightweight runtime systems that need polling (e.g., ground traps).
 		void TickTraps();
 		[[nodiscard]] bool HasActiveTraps() const noexcept { return _hasActiveTraps.load(std::memory_order_relaxed); }
+		[[nodiscard]] bool IsRuntimeEnabled() const noexcept { return _runtimeEnabled; }
+		[[nodiscard]] bool IsHealthDamageRoutingDisabled() const noexcept { return _disableHealthDamageRouting; }
+		[[nodiscard]] bool IsTrapSystemTickDisabled() const noexcept { return _disableTrapSystemTick; }
 		[[nodiscard]] bool AllowsNonHostilePlayerOwnedOutgoingProcs() const noexcept
 		{
 			return _allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
@@ -250,6 +253,14 @@ namespace CalamityAffixes
 			kDotApply,
 			kKill,
 			kLowHealth,
+		};
+
+		enum class PlayerCombatEvidenceSource : std::uint8_t
+		{
+			kUnknown = 0,
+			kHealthDamageRoutedHit,
+			kTesHitOutgoing,
+			kTesHitIncoming,
 		};
 
 		enum class ActionType : std::uint8_t
@@ -731,6 +742,13 @@ namespace CalamityAffixes
 		bool _runtimeEnabled{ true };
 		float _runtimeProcChanceMult{ 1.0f };
 		std::atomic_bool _allowNonHostilePlayerOwnedOutgoingProcs{ false };
+		bool _combatDebugLog{ false };
+		bool _disableCombatEvidenceLease{ false };
+		bool _disableHealthDamageRouting{ true };
+		bool _disablePassiveSuffixSpells{ false };
+		bool _disableTrapSystemTick{ false };
+		bool _disableTrapCasts{ false };
+		bool _forceStopAlarmPulse{ false };
 		static constexpr std::chrono::milliseconds kRuntimeUserSettingsPersistDebounce{ 250 };
 		RuntimeUserSettingsDebounce::State _runtimeUserSettingsPersist{};
 		LootRerollGuard _lootRerollGuard{};
@@ -1125,7 +1143,11 @@ namespace CalamityAffixes
 		[[nodiscard]] const std::vector<std::size_t>* ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept;
 		void ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);
 		void RecordRecentCombatEvent(Trigger a_trigger, RE::Actor* a_owner, std::chrono::steady_clock::time_point a_now);
-		void MarkPlayerCombatEvidence(std::chrono::steady_clock::time_point a_now) noexcept;
+		void MarkPlayerCombatEvidence(
+			std::chrono::steady_clock::time_point a_now,
+			PlayerCombatEvidenceSource a_source,
+			const RE::Actor* a_player,
+			const RE::Actor* a_other) noexcept;
 		[[nodiscard]] bool PassesRecentlyGates(
 			const AffixRuntime& a_affix,
 			RE::Actor* a_owner,
