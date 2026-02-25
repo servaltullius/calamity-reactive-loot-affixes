@@ -311,6 +311,10 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
   - 시체: SPID `Item` 분배 (ActorType 직접 필터)
   - 상자/월드: SKSE 런타임 롤
   - SPID ActorType 필터 미매칭 시체: 드랍 없음
+- 상자/월드 활성화 롤은 **타입별 중복 가드**를 사용합니다.
+  - runeword 관련 통화/드랍리스트가 이미 있으면 runeword 롤만 스킵
+  - reforge 관련 통화/드랍리스트가 이미 있으면 reforge 롤만 스킵
+  - 양 타입이 모두 비어 있을 때만 양쪽 롤을 동시에 수행
 - `DeathItem` 직접 분배는 다른 모드 시체 루팅 충돌 가능성 때문에 사용하지 않습니다.
 - 레거시 `Perk + AddLeveledListOnDeath` 시체 경로는 사용하지 않습니다.
 - 레벨리스트(LVLI) 주입/오버라이드는 더 이상 사용하지 않습니다.

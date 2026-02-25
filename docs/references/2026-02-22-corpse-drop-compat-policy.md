@@ -38,11 +38,21 @@
 - `loot.currencyDropMode=hybrid`에서 상자/월드는 SKSE 런타임 롤만 사용한다.
 - 시체 경로와 상자/월드 경로를 분리해, 회귀 원인을 빠르게 좁힐 수 있게 유지한다.
 
+### 3) 활성화(루팅) 시 중복 방지 정책
+
+- 상자/월드 활성화 시 통화 롤은 **runeword/reforge 타입별 독립 판정**을 사용한다.
+  - runeword 관련 통화(실제 조각 또는 `CAFF_LItem_RunewordFragmentDrops`)가 이미 있으면 runeword 롤만 스킵한다.
+  - reforge 관련 통화(실제 오브 또는 `CAFF_LItem_ReforgeOrbDrops`)가 이미 있으면 reforge 롤만 스킵한다.
+  - 두 타입 모두 이미 존재할 때만 전체 통화 롤을 스킵한다.
+- 목표는 “중복 과다 드랍”과 “과도한 전체 스킵으로 인한 과소 드랍”을 동시에 줄이는 것이다.
+
 ## 구현 위치(변경 시 필수 확인)
 
 - SPID 규칙 소스: `affixes/modules/keywords.spidRules.json`
 - SPID 생성물: `Data/CalamityAffixes_DISTR.ini`
 - LVLI 생성 코드: `tools/CalamityAffixes.Generator/Writers/KeywordPluginBuilder.cs`
+- 활성화 중복 가드: `skse/CalamityAffixes/src/EventBridge.Triggers.Events.cpp`
+- 통화 롤 실행기: `skse/CalamityAffixes/src/EventBridge.Loot.Assign.cpp`
 - 정책 문서 링크(README): `README.md`의 “드랍 경로 정책” 섹션
 
 ## 안티-회귀 체크리스트
