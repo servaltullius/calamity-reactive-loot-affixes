@@ -142,10 +142,10 @@ namespace CalamityAffixes
 			_triggerProcBudgetConsumed);
 	}
 
-		void EventBridge::RecordRecentCombatEvent(
-			Trigger a_trigger,
-			RE::Actor* a_owner,
-			std::chrono::steady_clock::time_point a_now)
+	void EventBridge::RecordRecentCombatEvent(
+		Trigger a_trigger,
+		RE::Actor* a_owner,
+		std::chrono::steady_clock::time_point a_now)
 	{
 		if (!a_owner) {
 			return;
@@ -348,6 +348,12 @@ namespace CalamityAffixes
 		default:
 			return nullptr;
 		}
+	}
+
+	void EventBridge::MarkPlayerCombatEvidence(std::chrono::steady_clock::time_point a_now) noexcept
+	{
+		constexpr auto kPlayerCombatEvidenceWindow = std::chrono::seconds(20);
+		_playerCombatEvidenceExpiresAt = a_now + kPlayerCombatEvidenceWindow;
 	}
 
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)

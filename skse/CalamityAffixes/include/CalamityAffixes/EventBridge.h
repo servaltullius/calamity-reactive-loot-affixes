@@ -749,6 +749,7 @@ namespace CalamityAffixes
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerHitAt;
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerKillAt;
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerIncomingHitAt;
+		std::chrono::steady_clock::time_point _playerCombatEvidenceExpiresAt{};
 		std::unordered_map<LowHealthTriggerKey, bool, LowHealthTriggerKeyHash> _lowHealthTriggerConsumed;
 		std::unordered_map<RE::FormID, float> _lowHealthLastObservedPct;
 
@@ -1124,6 +1125,7 @@ namespace CalamityAffixes
 		[[nodiscard]] const std::vector<std::size_t>* ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept;
 		void ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);
 		void RecordRecentCombatEvent(Trigger a_trigger, RE::Actor* a_owner, std::chrono::steady_clock::time_point a_now);
+		void MarkPlayerCombatEvidence(std::chrono::steady_clock::time_point a_now) noexcept;
 		[[nodiscard]] bool PassesRecentlyGates(
 			const AffixRuntime& a_affix,
 			RE::Actor* a_owner,

@@ -16,7 +16,6 @@ namespace CalamityAffixes
 			static auto lastClearAt = std::chrono::steady_clock::time_point{};
 			static auto lastHardClearAt = std::chrono::steady_clock::time_point{};
 			static std::uint32_t clearConfidence = 0u;
-			constexpr auto kStaleSignalWindow = std::chrono::seconds(30);
 			constexpr auto kClearCooldown = std::chrono::seconds(5);
 			constexpr auto kHardClearCooldown = std::chrono::seconds(20);
 			constexpr std::uint32_t kRequiredConfidence = 8u;
@@ -32,25 +31,8 @@ namespace CalamityAffixes
 				return;
 			}
 
-			auto latestSignal = std::chrono::steady_clock::time_point{};
-			auto considerMap = [&](const auto& a_store) {
-				const auto it = a_store.find(playerFormID);
-				if (it != a_store.end() &&
-					(latestSignal.time_since_epoch().count() == 0 || it->second > latestSignal)) {
-					latestSignal = it->second;
-				}
-			};
-
-			considerMap(_recentOwnerHitAt);
-			considerMap(_recentOwnerKillAt);
-			considerMap(_recentOwnerIncomingHitAt);
-			if (_healthDamageHookSeen &&
-				_healthDamageHookLastAt.time_since_epoch().count() != 0 &&
-				(latestSignal.time_since_epoch().count() == 0 || _healthDamageHookLastAt > latestSignal)) {
-				latestSignal = _healthDamageHookLastAt;
-			}
-
-			if (latestSignal.time_since_epoch().count() == 0 || (now - latestSignal) <= kStaleSignalWindow) {
+			if (_playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0 &&
+				now <= _playerCombatEvidenceExpiresAt) {
 				clearConfidence = 0u;
 				return;
 			}
@@ -118,6 +100,7 @@ namespace CalamityAffixes
 			_recentOwnerHitAt.erase(playerFormID);
 			_recentOwnerKillAt.erase(playerFormID);
 			_recentOwnerIncomingHitAt.erase(playerFormID);
+			_playerCombatEvidenceExpiresAt = {};
 			_nonHostileFirstHitGate.Clear();
 			if (_loot.debugLog) {
 				spdlog::info("CalamityAffixes: cleared stale player combat state (no hostile actor nearby).");
