@@ -492,6 +492,46 @@ def _check_generated_sync(
     errors: List[str],
     warnings: List[str],
 ) -> None:
+    def compare_subset(expected: Any, actual: Any, *, path_tokens: List[Any], out: List[str], max_mismatches: int = 20) -> None:
+        if len(out) >= max_mismatches:
+            return
+
+        path = _format_json_path(path_tokens)
+
+        if isinstance(expected, dict):
+            if not isinstance(actual, dict):
+                out.append(f"{path} (expected object, got {type(actual).__name__})")
+                return
+            for key, value in expected.items():
+                if key not in actual:
+                    out.append(f"{_format_json_path([*path_tokens, key])} (missing key in generated)")
+                    if len(out) >= max_mismatches:
+                        return
+                    continue
+                compare_subset(value, actual[key], path_tokens=[*path_tokens, key], out=out, max_mismatches=max_mismatches)
+                if len(out) >= max_mismatches:
+                    return
+            return
+
+        if isinstance(expected, list):
+            if not isinstance(actual, list):
+                out.append(f"{path} (expected list, got {type(actual).__name__})")
+                return
+            if len(expected) != len(actual):
+                out.append(f"{path} (list length mismatch: expected {len(expected)}, got {len(actual)})")
+                if len(out) >= max_mismatches:
+                    return
+            for idx, value in enumerate(expected):
+                if idx >= len(actual):
+                    break
+                compare_subset(value, actual[idx], path_tokens=[*path_tokens, idx], out=out, max_mismatches=max_mismatches)
+                if len(out) >= max_mismatches:
+                    return
+            return
+
+        if expected != actual:
+            out.append(f"{path} (value mismatch: expected {expected!r}, got {actual!r})")
+
     # Keep this intentionally simple and robust:
     # - The generator re-serializes the spec into Data/SKSE/Plugins/CalamityAffixes/affixes.json.
     # - The serialized form may include defaulted fields (e.g., bools), so strict JSON equality
@@ -542,6 +582,49 @@ def _check_generated_sync(
             msg += f" Extra ids: {extra[:10]}{'...' if len(extra) > 10 else ''}."
         errors.append(
             msg
+            + " Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
+        )
+
+    generated_by_id: Dict[str, Dict[str, Any]] = {}
+    for entry in gen_affixes:
+        obj = _as_dict(entry)
+        if not obj:
+            continue
+        value = obj.get("id")
+        if isinstance(value, str) and value.strip():
+            generated_by_id[value.strip()] = obj
+
+    subset_mismatches: List[str] = []
+    for idx, entry in enumerate(spec_affixes):
+        spec_affix = _as_dict(entry)
+        if not spec_affix:
+            continue
+
+        value = spec_affix.get("id")
+        if not isinstance(value, str) or not value.strip():
+            continue
+        affix_id = value.strip()
+        generated_affix = generated_by_id.get(affix_id)
+        if not generated_affix:
+            continue
+
+        for key in ("editorId", "runtime", "records", "kid"):
+            if key not in spec_affix:
+                continue
+            compare_subset(spec_affix.get(key), generated_affix.get(key), path_tokens=["keywords", "affixes", idx, key], out=subset_mismatches)
+            if len(subset_mismatches) >= 20:
+                break
+
+        if len(subset_mismatches) >= 20:
+            break
+
+    if "loot" in spec:
+        compare_subset(spec.get("loot"), generated.get("loot"), path_tokens=["loot"], out=subset_mismatches)
+
+    if subset_mismatches:
+        errors.append(
+            "Generated runtime config content mismatch. "
+            + " ; ".join(subset_mismatches)
             + " Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
         )
 
