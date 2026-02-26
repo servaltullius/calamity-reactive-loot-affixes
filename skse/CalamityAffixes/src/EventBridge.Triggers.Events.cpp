@@ -81,7 +81,7 @@ struct CorpseCurrencyDropProbe
 			continue;
 		}
 
-		const auto editorId = std::string_view(baseObject->GetFormEditorID());
+		const auto editorId = SafeCStringView(baseObject->GetFormEditorID());
 		if (editorId.empty()) {
 			continue;
 		}
@@ -145,7 +145,7 @@ struct CorpseCurrencyDropProbe
 		return false;
 	}
 
-	const auto editorId = std::string_view(sourceSpell->GetFormEditorID());
+	const auto editorId = SafeCStringView(sourceSpell->GetFormEditorID());
 	return !editorId.empty() && editorId.starts_with("CAFF_");
 }
 }

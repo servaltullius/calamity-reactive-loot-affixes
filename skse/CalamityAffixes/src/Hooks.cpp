@@ -240,6 +240,78 @@ namespace CalamityAffixes::Hooks
 			return a_hitData;
 		}
 
+		struct DeferredConversionCast
+		{
+			RE::FormID spellFormID{ 0u };
+			float effectiveness{ 1.0f };
+			bool noHitEffectArt{ false };
+			float magnitudeOverride{ 0.0f };
+		};
+
+		void ExecutePostHealthDamageActions(
+			RE::Actor* a_target,
+			RE::Actor* a_attacker,
+			float a_adjustedDamage,
+			DeferredConversionCast a_conversion,
+			std::chrono::steady_clock::time_point a_now) noexcept
+		{
+			if (!a_target) {
+				return;
+			}
+
+			auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+			if (!bridge) {
+				return;
+			}
+
+			const auto* hitData = ResolveStableHitDataForSpecialActions(
+				HitDataUtil::GetLastHitData(a_target),
+				a_target,
+				a_attacker);
+
+			if (a_conversion.spellFormID != 0u && a_conversion.magnitudeOverride > 0.0f && a_attacker) {
+				auto* conversionSpell = RE::TESForm::LookupByID<RE::SpellItem>(a_conversion.spellFormID);
+				if (conversionSpell) {
+					if (auto* magicCaster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+						magicCaster->CastSpellImmediate(
+							conversionSpell,
+							a_conversion.noHitEffectArt,
+							a_target,
+							a_conversion.effectiveness,
+							false,
+							a_conversion.magnitudeOverride,
+							a_attacker);
+					}
+				}
+			}
+
+			const auto coc = bridge->EvaluateCastOnCrit(
+				a_attacker,
+				a_target,
+				hitData,
+				false);
+			if (coc.spell && a_attacker) {
+				bool casted = false;
+				if (auto* magicCaster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+					magicCaster->CastSpellImmediate(
+						coc.spell,
+						coc.noHitEffectArt,
+						a_target,
+						coc.effectiveness,
+						false,
+						coc.magnitudeOverride,
+						a_attacker);
+					casted = true;
+				}
+				if (casted && coc.noHitEffectArt) {
+					PlayCastOnCritProcFeedbackSfx(coc.spell);
+					PlayCastOnCritProcFeedbackVfxSafe(a_target, coc.spell, a_now);
+				}
+			}
+
+			bridge->OnHealthDamage(a_target, a_attacker, hitData, a_adjustedDamage);
+		}
+
 		class ActorHandleHealthDamageHook
 		{
 		public:
@@ -404,12 +476,12 @@ namespace CalamityAffixes::Hooks
 				a_original(a_this, a_attacker, a_damage);
 			}
 
-				static void ThunkImpl(
-					ThunkFn* a_original,
-					RE::Actor* a_this,
-					RE::Actor* a_attacker,
-					float a_damage,
-					const char* a_hookLabel)
+			static void ThunkImpl(
+				ThunkFn* a_original,
+				RE::Actor* a_this,
+				RE::Actor* a_attacker,
+				float a_damage,
+				const char* a_hookLabel)
 			{
 				static thread_local bool inHook = false;
 				auto* safeTarget = SanitizeObjectPointer(a_this);
@@ -490,53 +562,30 @@ namespace CalamityAffixes::Hooks
 					adjustedDamage,
 					false);
 				(void)mindOverMatter;
+				DeferredConversionCast deferredConversion{};
+				if (conversion.spell && conversion.convertedDamage > 0.0f && safeAttacker && safeTarget) {
+					deferredConversion.spellFormID = conversion.spell->GetFormID();
+					deferredConversion.effectiveness = conversion.effectiveness;
+					deferredConversion.noHitEffectArt = conversion.noHitEffectArt;
+					deferredConversion.magnitudeOverride = conversion.convertedDamage;
+				}
 
 				CallOriginal(a_original, safeTarget, safeAttacker, adjustedDamage, a_hookLabel);
 
-				const auto* hitData = ResolveStableHitDataForSpecialActions(
-					HitDataUtil::GetLastHitData(safeTarget),
-					safeTarget,
-					safeAttacker);
-
-				if (conversion.spell && conversion.convertedDamage > 0.0f && safeAttacker && safeTarget) {
-					if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-						magicCaster->CastSpellImmediate(
-							conversion.spell,
-							conversion.noHitEffectArt,
-							safeTarget,
-							conversion.effectiveness,
-							false,
-							conversion.convertedDamage,
-							safeAttacker);
-					}
+				if (auto* tasks = SKSE::GetTaskInterface()) {
+					const RE::FormID targetFormID = safeTarget->GetFormID();
+					const RE::FormID attackerFormID = safeAttacker ? safeAttacker->GetFormID() : 0u;
+					tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, deferredConversion, now]() {
+						auto* target = RE::TESForm::LookupByID<RE::Actor>(targetFormID);
+						auto* attacker = attackerFormID != 0u ?
+							                 RE::TESForm::LookupByID<RE::Actor>(attackerFormID) :
+							                 nullptr;
+						ExecutePostHealthDamageActions(target, attacker, adjustedDamage, deferredConversion, now);
+					});
+				} else {
+					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adjustedDamage, deferredConversion, now);
 				}
-
-					const auto coc = bridge->EvaluateCastOnCrit(
-						safeAttacker,
-						safeTarget,
-						hitData,
-						false);
-					if (coc.spell && safeAttacker && safeTarget) {
-						bool casted = false;
-						if (auto* magicCaster = safeAttacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-							magicCaster->CastSpellImmediate(
-								coc.spell,
-								coc.noHitEffectArt,
-								safeTarget,
-								coc.effectiveness,
-								false,
-								coc.magnitudeOverride,
-								safeAttacker);
-							casted = true;
-						}
-						if (casted && coc.noHitEffectArt) {
-							PlayCastOnCritProcFeedbackSfx(coc.spell);
-							PlayCastOnCritProcFeedbackVfxSafe(safeTarget, coc.spell, now);
-						}
-					}
-
-					bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, adjustedDamage);
-				}
+			}
 
 			static void ThunkActor(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{

@@ -193,6 +193,7 @@ if (BUILD_TESTING)
             tests/test_instance_affix_slots.cpp
             tests/test_effective_loot_weight.cpp
             tests/test_pointer_safety.cpp
+            tests/test_editor_id_safety.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

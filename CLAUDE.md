@@ -1,6 +1,6 @@
 # Calamity — Reactive Loot & Affixes
 
-Skyrim SE/AE SKSE64 플러그인. D2/D3 스타일 어픽스 시스템으로, 드롭 아이템에 1~3개의 Prefix(proc)/Suffix(패시브 스탯) 효과를 부여한다.
+Skyrim SE/AE SKSE64 플러그인. D2/D3 스타일 어픽스 시스템으로, 드롭 아이템에 1~4개의 Prefix(proc)/Suffix(패시브 스탯) 효과를 부여한다 (regular 3 + runeword 1).
 
 ## Quick Start
 
@@ -39,37 +39,37 @@ dotnet test CalamityAffixes.Generator.Tests
 
 ```
 _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
-                                 ^key              ^tokens[3] + count
+                                 ^key              ^tokens[4] + count
                           (FormID<<16|UniqueID)    (FNV-1a 64bit)
 ```
 
-- `InstanceAffixSlots` (max 3 토큰/아이템) — 유일한 진실의 원천
+- `InstanceAffixSlots` (max 4 토큰/아이템: regular 3 + runeword 1) — 유일한 진실의 원천
 - `_instanceSupplementalAffixes` — v1.1.0에서 제거됨 (InstanceAffixSlots로 통합)
 
 ### Prefix/Suffix 시스템 (v1.2.0)
 
 | 구분 | Prefix | Suffix |
 |------|--------|--------|
-| 개수 | 57개 | 60개 (20 패밀리 × 3 티어) |
+| 개수 | 99개 | 60개 (20 패밀리 × 3 티어) |
 | 효과 | proc (발동형) | 패시브 스탯 (Ability Spell) |
 | 예시 | Firestorm, Thunderbolt | Max Health +50, Fire Resist +10% |
 
 **롤링 규칙**:
 - 1 어픽스 (70%): P 또는 S 50/50
-- 2 어픽스 (25%): 1P + 1S 고정
-- 3 어픽스 (5%): 2P+1S 또는 1P+2S 랜덤
+- 2 어픽스 (22%): 1P + 1S 고정
+- 3 어픽스 (8%): 2P+1S 또는 1P+2S 랜덤
 
 **Suffix 티어**: Minor(60%), Major(30%), Grand(10%)
 
 **아이템 네이밍**: `★ 철검`, `★★ 철검`, `★★★ 철검` (어픽스 라벨 없음, 별 개수 = 어픽스 수)
 
-**Proc 패널티** ("Best Slot Wins"): 1어픽스=1.0, 2어픽스=0.8, 3어픽스=0.65
+**Proc 패널티** ("Best Slot Wins"): 1어픽스=1.0, 2어픽스=0.8, 3어픽스=0.65, 4어픽스=0.5
 
 ### 직렬화
 
-- **현재 버전**: v6 (co-save IAXF 레코드)
-- v1~v5 자동 마이그레이션 지원
-- 포맷: `[entryCount] per entry: [baseID(u32) uniqueID(u16) count(u8) tokens[3](u64)]`
+- **현재 버전**: v7 (co-save IAXF 레코드)
+- v1~v6 자동 마이그레이션 지원
+- 포맷: `[entryCount] per entry: [baseID(u32) uniqueID(u16) count(u8) tokens[4](u64)]`
 
 ### 룬워드
 
@@ -82,12 +82,12 @@ _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
 
 | 파일 | 역할 | LOC |
 |------|------|-----|
-| `include/CalamityAffixes/EventBridge.h` | 메인 클래스, 상수, 타입 정의 | 726 |
-| `include/CalamityAffixes/InstanceAffixSlots.h` | 다중 어픽스 구조체 (핵심) | 67 |
+| `include/CalamityAffixes/EventBridge.h` | 메인 클래스, 상수, 타입 정의 | 734 |
+| `include/CalamityAffixes/InstanceAffixSlots.h` | 다중 어픽스 구조체 (핵심) | 109 |
 | `src/EventBridge.Config.cpp` | affixes.json 파싱, 런타임 설정 | 2008 |
 | `src/EventBridge.Loot.Assign.cpp` | 롤링, P/S 분배, 네이밍 | 536 |
 | `src/EventBridge.Triggers.Events.cpp` | RebuildActiveCounts, 패시브 스펠 관리 | 708 |
-| `src/EventBridge.Serialization.cpp` | Save/Load/Revert (v6) | 611 |
+| `src/EventBridge.Serialization.cpp` | Save/Load/Revert (v7) | 1073 |
 | `src/EventBridge.Loot.Runtime.cpp` | 툴팁, 런타임 뮤테이션 | 390 |
 | `src/EventBridge.Loot.Runeword.cpp` | 룬워드 레시피 처리 | 1659 |
 
@@ -191,6 +191,6 @@ gh release upload vX.Y.Z CalamityAffixes_MO2_vX.Y.Z.zip
 | 버전 | 주요 변경 |
 |------|----------|
 | v1.0.0~v1.0.3 | 기본 단일 어픽스 시스템 |
-| v1.1.0 | 다중 어픽스 (1~3개, 70/25/5%) |
+| v1.1.0 | 다중 어픽스 (1~3개, 70/22/8%) |
 | v1.1.1 | 아이템 이름 줄바꿈 버그 수정 |
 | v1.2.0 | Prefix/Suffix 분류, 60개 패시브 Suffix 추가 |

@@ -10,6 +10,8 @@
   인덱싱/합성 책임을 `IndexConfiguredAffixes`, `RegisterSynthesizedAffix`,
   `SynthesizeRunewordRuntimeAffixes`로 분리했다.
 - 분리 후 `PrismaTooltip.cpp`는 약 `1776 -> 1562 LOC`로 감소했다.
+- 라운드 1 개발팀 시정 항목( `Config`, `Loot.Runeword` 디커플링 2건 )의 최신 기술 스펙/기한은
+  `doc/6.아키텍처_분석_리팩터링_디커플링_로드맵.md`의 **4) Review 라운드 1 개발팀 시정 항목 보완 (2026-02-26)** 섹션을 기준으로 한다.
 
 ## 1) 현재 구조 진단 (스냅샷)
 

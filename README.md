@@ -208,7 +208,7 @@
 ```bash
 cd skse/CalamityAffixes
 cmake --build build.linux-clangcl-rel --target CalamityAffixes
-ctest --test-dir build.linux-clangcl-rel --output-on-failure
+ctest --test-dir build.linux-clangcl-rel --no-tests=error --output-on-failure
 cp -f build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
 ```
 

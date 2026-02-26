@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
 
 namespace CalamityAffixes
 {
@@ -50,5 +51,10 @@ namespace CalamityAffixes
 	[[nodiscard]] inline T* SanitizeObjectPointer(T* a_ptr) noexcept
 	{
 		return IsLikelyValidObjectPointer(a_ptr) ? a_ptr : nullptr;
+	}
+
+	[[nodiscard]] constexpr std::string_view SafeCStringView(const char* a_value) noexcept
+	{
+		return a_value ? std::string_view(a_value) : std::string_view{};
 	}
 }

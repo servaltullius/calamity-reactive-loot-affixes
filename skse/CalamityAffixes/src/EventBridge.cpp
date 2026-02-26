@@ -12,6 +12,11 @@ namespace CalamityAffixes
 
 	void EventBridge::Register()
 	{
+		bool expected = false;
+		if (!_eventSinksRegistered.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
+			return;
+		}
+
 		if (auto* holder = RE::ScriptEventSourceHolder::GetSingleton()) {
 			holder->AddEventSink<RE::TESHitEvent>(this);
 			holder->AddEventSink<RE::TESDeathEvent>(this);

@@ -19,7 +19,7 @@ This section is generated. Re-run pinning to update.
 
 - Install command: `dotnet restore tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj`
 - Dev server command: `N/A (게임 모드 프로젝트 특성상 상시 dev server 없음)`
-- Unit test command: `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release && ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --output-on-failure`
+- Unit test command: `dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release && ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --no-tests=error --output-on-failure`
 - Lint/format command: `python3 tools/compose_affixes.py --check && python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json && python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null && python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null`
 - Typecheck/build command: `cmake --build skse/CalamityAffixes/build.linux-clangcl-rel --target CalamityAffixes`
 - Primary entrypoint path: `skse/CalamityAffixes/src/main.cpp`
@@ -74,7 +74,7 @@ This section is generated. Re-run pinning to update.
 ```bash
 cd skse/CalamityAffixes
 cmake --build build.linux-clangcl-rel --target CalamityAffixes
-ctest --test-dir build.linux-clangcl-rel --output-on-failure
+ctest --test-dir build.linux-clangcl-rel --no-tests=error --output-on-failure
 cp -f build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
 sha256sum build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll
 ```

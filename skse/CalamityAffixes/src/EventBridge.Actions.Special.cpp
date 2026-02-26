@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 
 #include "CalamityAffixes/CombatContext.h"
+#include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
 #include <mutex>
@@ -663,7 +664,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const auto sourceEditorId = std::string_view(a_sourceSpell->GetFormEditorID());
+		const auto sourceEditorId = SafeCStringView(a_sourceSpell->GetFormEditorID());
 		if (sourceEditorId.starts_with("CAFF_")) {
 			// Avoid recursive stacking on our own proc spells.
 			return;

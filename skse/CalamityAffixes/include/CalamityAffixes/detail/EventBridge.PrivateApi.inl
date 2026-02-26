@@ -13,6 +13,8 @@
 		[[nodiscard]] bool IsLootEvaluatedInstance(std::uint64_t a_instanceKey) const;
 		void RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey);
 		void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
+		void ScheduleDroppedRefDeleteDrain();
+		void DrainPendingDroppedRefDeletes();
 		void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
 		[[nodiscard]] const InstanceAffixSlots* FindLootPreviewSlots(std::uint64_t a_instanceKey) const;
 		void RememberLootPreviewSlots(std::uint64_t a_instanceKey, const InstanceAffixSlots& a_slots);

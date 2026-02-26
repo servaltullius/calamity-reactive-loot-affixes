@@ -19,7 +19,7 @@
 
 ```bash
 cmake --build skse/CalamityAffixes/build.linux-clangcl-rel --target CalamityAffixes
-ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --output-on-failure
+ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --no-tests=error --output-on-failure
 ```
 
 - 런타임 게이트 테스트 프로젝트: `skse/CalamityAffixes/tests/CMakeLists.txt`

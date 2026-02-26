@@ -2,6 +2,7 @@
 #include "CalamityAffixes/CombatContext.h"
 
 #include <algorithm>
+#include <mutex>
 
 #include <RE/P/ProcessLists.h>
 #include <spdlog/spdlog.h>
@@ -10,7 +11,7 @@ namespace CalamityAffixes
 {
 	void EventBridge::TickTraps()
 	{
-		const std::scoped_lock lock(_stateMutex);
+		std::unique_lock<std::recursive_mutex> lock(_stateMutex);
 		const auto now = std::chrono::steady_clock::now();
 		if (_disableTrapSystemTick) {
 			_hasActiveTraps.store(false, std::memory_order_relaxed);
@@ -300,15 +301,15 @@ namespace CalamityAffixes
 			}
 			const auto trapIndex = _trapTickCursor;
 			++visitedTraps;
-			auto& trap = _traps[trapIndex];
-			if (now < trap.armedAt) {
+			const TrapInstance trapSnapshot = _traps[trapIndex];
+			if (now < trapSnapshot.armedAt) {
 				if (!_traps.empty()) {
 					_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
 				}
 				continue;
 			}
 
-			auto* ownerForm = RE::TESForm::LookupByID<RE::TESForm>(trap.ownerFormID);
+			auto* ownerForm = RE::TESForm::LookupByID<RE::TESForm>(trapSnapshot.ownerFormID);
 			auto* owner = ownerForm ? ownerForm->As<RE::Actor>() : nullptr;
 			if (!owner) {
 				_traps.erase(_traps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
@@ -329,9 +330,10 @@ namespace CalamityAffixes
 			bool triggered = false;
 			RE::Actor* triggeredTarget = nullptr;
 			std::uint32_t triggeredTargets = 0u;
-			const std::uint32_t maxTargetsPerTrigger = std::max(1u, trap.maxTargetsPerTrigger);
-			const float radiusSq = trap.radius * trap.radius;
+			const std::uint32_t maxTargetsPerTrigger = std::max(1u, trapSnapshot.maxTargetsPerTrigger);
+			const float radiusSq = trapSnapshot.radius * trapSnapshot.radius;
 
+			lock.unlock();
 			processLists->ForEachHighActor([&](RE::Actor& a) {
 				if (!hasTrapCastBudget()) {
 					return RE::BSContainer::ForEachResult::kStop;
@@ -350,9 +352,9 @@ namespace CalamityAffixes
 				}
 
 				const auto targetPos = a.GetPosition();
-				const float dx = targetPos.x - trap.position.x;
-				const float dy = targetPos.y - trap.position.y;
-				const float dz = targetPos.z - trap.position.z;
+				const float dx = targetPos.x - trapSnapshot.position.x;
+				const float dy = targetPos.y - trapSnapshot.position.y;
+				const float dz = targetPos.z - trapSnapshot.position.z;
 				const float distSq = (dx * dx) + (dy * dy) + (dz * dz);
 				if (distSq > radiusSq) {
 					return RE::BSContainer::ForEachResult::kContinue;
@@ -362,18 +364,18 @@ namespace CalamityAffixes
 					return RE::BSContainer::ForEachResult::kStop;
 				}
 				magicCaster->CastSpellImmediate(
-					trap.spell,
-					trap.noHitEffectArt,
+					trapSnapshot.spell,
+					trapSnapshot.noHitEffectArt,
 					std::addressof(a),
-					trap.effectiveness,
+					trapSnapshot.effectiveness,
 					false,
-					trap.magnitudeOverride,
+					trapSnapshot.magnitudeOverride,
 					owner);
 				trapCastsConsumed += 1u;
 
-				if (trap.extraSpell && hasTrapCastBudget()) {
+				if (trapSnapshot.extraSpell && hasTrapCastBudget()) {
 					magicCaster->CastSpellImmediate(
-						trap.extraSpell,
+						trapSnapshot.extraSpell,
 						false,
 						std::addressof(a),
 						1.0f,
@@ -397,6 +399,20 @@ namespace CalamityAffixes
 				}
 				return RE::BSContainer::ForEachResult::kContinue;
 			});
+			lock.lock();
+
+			if (trapIndex >= _traps.size()) {
+				_trapTickCursor = _traps.empty() ? 0u : (_trapTickCursor % _traps.size());
+				continue;
+			}
+
+			auto& trap = _traps[trapIndex];
+			if (trap.sourceToken != trapSnapshot.sourceToken ||
+				trap.ownerFormID != trapSnapshot.ownerFormID ||
+				trap.createdAt != trapSnapshot.createdAt) {
+				_trapTickCursor = _traps.empty() ? 0u : (_trapTickCursor % _traps.size());
+				continue;
+			}
 
 			if (triggered) {
 				if (_loot.debugLog) {

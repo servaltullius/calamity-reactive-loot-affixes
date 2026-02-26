@@ -15,6 +15,7 @@ namespace CalamityAffixes
 
 	EventBridge::RunewordPanelState EventBridge::GetRunewordPanelState()
 	{
+		const std::scoped_lock lock(_stateMutex);
 		RunewordPanelState panelState{};
 		if (!_configLoaded) {
 			return panelState;
@@ -134,6 +135,7 @@ namespace CalamityAffixes
 
 	std::optional<std::string> EventBridge::GetSelectedRunewordBaseAffixTooltip(int a_uiLanguageMode)
 	{
+		const std::scoped_lock lock(_stateMutex);
 		if (!_configLoaded) {
 			return std::nullopt;
 		}

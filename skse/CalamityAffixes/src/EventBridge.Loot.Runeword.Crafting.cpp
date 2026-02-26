@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <mutex>
 #include <random>
 #include <string>
 
@@ -160,7 +161,10 @@ namespace CalamityAffixes
 			bool grant = a_outPityTriggered;
 			if (!grant) {
 				std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
-				grant = (chanceDist(_rng) < effectiveChance);
+				{
+					std::lock_guard<std::mutex> rngLock(_rngMutex);
+					grant = (chanceDist(_rng) < effectiveChance);
+				}
 			}
 
 			if (!grant) {
@@ -175,10 +179,16 @@ namespace CalamityAffixes
 				std::discrete_distribution<std::size_t> pick(
 					_runewordRuneTokenWeights.begin(),
 					_runewordRuneTokenWeights.end());
-				a_outRuneToken = _runewordRuneTokenPool[pick(_rng)];
+				{
+					std::lock_guard<std::mutex> rngLock(_rngMutex);
+					a_outRuneToken = _runewordRuneTokenPool[pick(_rng)];
+				}
 			} else {
 				std::uniform_int_distribution<std::size_t> pick(0, _runewordRuneTokenPool.size() - 1u);
-				a_outRuneToken = _runewordRuneTokenPool[pick(_rng)];
+				{
+					std::lock_guard<std::mutex> rngLock(_rngMutex);
+					a_outRuneToken = _runewordRuneTokenPool[pick(_rng)];
+				}
 			}
 
 			return a_outRuneToken != 0u;
@@ -213,7 +223,10 @@ namespace CalamityAffixes
 			bool grant = a_outPityTriggered;
 			if (!grant) {
 				std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
-				grant = (chanceDist(_rng) < effectiveChance);
+				{
+					std::lock_guard<std::mutex> rngLock(_rngMutex);
+					grant = (chanceDist(_rng) < effectiveChance);
+				}
 			}
 
 			if (!grant) {

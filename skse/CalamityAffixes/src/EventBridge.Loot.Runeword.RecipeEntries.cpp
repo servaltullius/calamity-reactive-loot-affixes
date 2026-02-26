@@ -128,6 +128,7 @@ namespace CalamityAffixes
 
 	std::vector<EventBridge::RunewordRecipeEntry> EventBridge::GetRunewordRecipeEntries()
 	{
+		const std::scoped_lock lock(_stateMutex);
 		std::vector<RunewordRecipeEntry> entries;
 		if (!_configLoaded) {
 			return entries;

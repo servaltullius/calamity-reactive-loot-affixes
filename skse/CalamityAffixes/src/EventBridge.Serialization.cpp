@@ -977,14 +977,61 @@ namespace CalamityAffixes
 			return;
 		}
 
-		// Defer pruning to the task queue so that pickup container-changed events can consume
-		// the drop guard first (prevents accidental prune on immediate re-pickup).
+		{
+			const std::scoped_lock lock(_stateMutex);
+			_pendingDroppedRefDeletes.push_back(refHandle);
+		}
+		ScheduleDroppedRefDeleteDrain();
+	}
+
+	void EventBridge::ScheduleDroppedRefDeleteDrain()
+	{
+		{
+			const std::scoped_lock lock(_stateMutex);
+			if (_pendingDroppedRefDeletes.empty()) {
+				return;
+			}
+		}
+
+		bool expected = false;
+		if (!_dropDeleteDrainScheduled.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
+			return;
+		}
+
 		if (auto* task = SKSE::GetTaskInterface()) {
-			task->AddTask([refHandle]() {
-				EventBridge::GetSingleton()->ProcessDroppedRefDeleted(refHandle);
+			task->AddTask([]() {
+				if (auto* bridge = EventBridge::GetSingleton(); bridge) {
+					bridge->DrainPendingDroppedRefDeletes();
+				}
 			});
-		} else {
+			return;
+		}
+
+		// Task interface unavailable: keep pending queue for later safe drain.
+		_dropDeleteDrainScheduled.store(false, std::memory_order_release);
+	}
+
+	void EventBridge::DrainPendingDroppedRefDeletes()
+	{
+		std::vector<LootRerollGuard::RefHandle> pending;
+		{
+			const std::scoped_lock lock(_stateMutex);
+			pending.swap(_pendingDroppedRefDeletes);
+		}
+
+		for (const auto refHandle : pending) {
 			ProcessDroppedRefDeleted(refHandle);
+		}
+
+		_dropDeleteDrainScheduled.store(false, std::memory_order_release);
+
+		bool hasMorePending = false;
+		{
+			const std::scoped_lock lock(_stateMutex);
+			hasMorePending = !_pendingDroppedRefDeletes.empty();
+		}
+		if (hasMorePending) {
+			ScheduleDroppedRefDeleteDrain();
 		}
 	}
 

@@ -169,7 +169,7 @@ public sealed class RepoSpecRegressionTests
 
         var hooksSource = File.ReadAllText(hooksPath);
         Assert.Contains(
-            "PlayCastOnCritProcFeedbackVfxSafe(safeTarget, coc.spell, now);",
+            "PlayCastOnCritProcFeedbackVfxSafe(a_target, coc.spell, a_now);",
             hooksSource,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -215,7 +215,7 @@ public sealed class RepoSpecRegressionTests
 
         var hooksSource = File.ReadAllText(hooksPath);
         Assert.Contains(
-            "bridge->OnHealthDamage(safeTarget, safeAttacker, hitData, adjustedDamage);",
+            "bridge->OnHealthDamage(a_target, a_attacker, hitData, a_adjustedDamage);",
             hooksSource,
             StringComparison.Ordinal);
         Assert.DoesNotContain(

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <mutex>
 #include <random>
 #include <string>
 #include <vector>
@@ -14,6 +15,7 @@ namespace CalamityAffixes
 
 	EventBridge::OperationResult EventBridge::ReforgeSelectedRunewordBaseWithOrb()
 	{
+		const std::scoped_lock lock(_stateMutex);
 		OperationResult result{};
 		if (!_configLoaded) {
 			result.message = "Reforge unavailable: runtime config not loaded.";
@@ -176,7 +178,11 @@ namespace CalamityAffixes
 
 			const auto currentToken = completedRunewordRecipe ? completedRunewordRecipe->resultAffixToken : 0u;
 			std::uniform_int_distribution<std::size_t> pick(0, eligible.size() - 1u);
-			const RunewordRecipe* selected = eligible[pick(_rng)];
+			const RunewordRecipe* selected = nullptr;
+			{
+				std::lock_guard<std::mutex> rngLock(_rngMutex);
+				selected = eligible[pick(_rng)];
+			}
 			if (eligible.size() <= 1u || currentToken == 0u) {
 				return selected;
 			}
@@ -186,7 +192,10 @@ namespace CalamityAffixes
 				if (selected->resultAffixToken != currentToken) {
 					return selected;
 				}
-				selected = eligible[pick(_rng)];
+				{
+					std::lock_guard<std::mutex> rngLock(_rngMutex);
+					selected = eligible[pick(_rng)];
+				}
 			}
 			return selected;
 		};

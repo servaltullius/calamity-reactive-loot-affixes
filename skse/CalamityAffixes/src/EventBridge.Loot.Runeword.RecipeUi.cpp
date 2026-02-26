@@ -12,6 +12,7 @@ namespace CalamityAffixes
 
 	bool EventBridge::SelectRunewordRecipe(std::uint64_t a_recipeToken)
 	{
+		const std::scoped_lock lock(_stateMutex);
 		if (!_configLoaded || a_recipeToken == 0u || _runewordRecipes.empty()) {
 			return false;
 		}

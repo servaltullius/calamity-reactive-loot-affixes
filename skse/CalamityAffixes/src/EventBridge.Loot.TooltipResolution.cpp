@@ -41,6 +41,7 @@ namespace CalamityAffixes
 		RE::FormID a_sourceContainerFormID,
 		std::uint64_t a_preferredInstanceKey)
 	{
+		const std::scoped_lock lock(_stateMutex);
 		if (!_configLoaded) {
 			return std::nullopt;
 		}

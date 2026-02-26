@@ -107,6 +107,7 @@ namespace CalamityAffixes
 
 	bool EventBridge::SelectRunewordBase(std::uint64_t a_instanceKey)
 	{
+		const std::scoped_lock lock(_stateMutex);
 		if (!_configLoaded || a_instanceKey == 0u) {
 			return false;
 		}
@@ -175,6 +176,7 @@ namespace CalamityAffixes
 
 	std::vector<EventBridge::RunewordBaseInventoryEntry> EventBridge::GetRunewordBaseInventoryEntries()
 	{
+		const std::scoped_lock lock(_stateMutex);
 		std::vector<RunewordBaseInventoryEntry> entries;
 		if (!_configLoaded) {
 			return entries;

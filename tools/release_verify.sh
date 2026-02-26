@@ -21,7 +21,8 @@ Runs the "static" verification chain that we expect before shipping a release.
 
 Options:
   --fast          Skip slower steps (vibe doctor, cmake build) but still run core checks.
-  --strict        Fail if SKSE build dir is missing (default: skip SKSE checks when missing).
+  --strict        Fail if SKSE build dir is missing.
+  --no-strict     Allow SKSE checks to be skipped when build dir is missing.
   --with-mo2-zip  Also run tools/build_mo2_zip.sh (requires Papyrus compiler + Scripts.zip paths).
   -h, --help      Show this help.
 
@@ -31,7 +32,7 @@ EOF
 }
 
 fast=0
-strict=0
+strict=1
 with_mo2_zip=0
 
 while [[ $# -gt 0 ]]; do
@@ -42,6 +43,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --strict)
       strict=1
+      shift
+      ;;
+    --no-strict)
+      strict=0
       shift
       ;;
     --with-mo2-zip)
@@ -119,11 +124,11 @@ skse_build_dir="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel"
 if [[ -d "${skse_build_dir}" ]]; then
   step "SKSE static checks (cmake + ctest)"
   if [[ "${fast}" -eq 1 ]]; then
-    echo "(cmake build skipped: --fast)"
+    cmake --build "${skse_build_dir}" --target CalamityAffixesStaticChecks --parallel "${jobs}"
   else
     cmake --build "${skse_build_dir}" --parallel "${jobs}"
   fi
-  ctest --test-dir "${skse_build_dir}" --output-on-failure
+  ctest --test-dir "${skse_build_dir}" --no-tests=error --output-on-failure
 else
   msg="SKSE build dir missing: ${skse_build_dir}"
   if [[ "${strict}" -eq 1 ]]; then
