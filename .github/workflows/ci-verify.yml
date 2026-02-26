@@ -28,6 +28,9 @@ jobs:
       - name: Install Python lint dependencies
         run: python3 -m pip install --upgrade pip jsonschema
 
+      - name: Verify composed spec is up-to-date
+        run: python3 tools/compose_affixes.py --check
+
       - name: Lint affix spec and generated snapshot
         run: python3 tools/lint_affixes.py --spec affixes/affixes.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json
 
@@ -50,6 +53,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure SKSE static checks
+        working-directory: skse/CalamityAffixes
+        run: cmake --preset linux-release-commonlibsse
+
+      - name: Build SKSE static checks
+        working-directory: skse/CalamityAffixes
+        run: cmake --build --preset linux-release-commonlibsse-static-checks --parallel
 
       - name: Configure runtime gate checks
         run: cmake -S skse/CalamityAffixes/tests -B skse/CalamityAffixes/tests/build -DCMAKE_BUILD_TYPE=Release
