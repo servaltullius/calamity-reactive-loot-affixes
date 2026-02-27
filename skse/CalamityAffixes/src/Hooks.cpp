@@ -208,22 +208,29 @@ namespace CalamityAffixes::Hooks
 			return true;
 		}
 
-		[[nodiscard]] bool HasHitLikeSource(const RE::HitData* a_hitData) noexcept
+		[[nodiscard]] bool HasHitLikeSource(const RE::HitData* a_hitData, RE::Actor* a_attacker) noexcept
 		{
 			if (!a_hitData) {
 				return false;
 			}
 
-			return a_hitData->weapon != nullptr ||
-			       a_hitData->attackDataSpell != nullptr ||
-			       a_hitData->flags.any(RE::HitData::Flag::kMeleeAttack) ||
+			if (a_hitData->weapon != nullptr || a_hitData->attackDataSpell != nullptr) {
+				return true;
+			}
+
+			// Bow/crossbow arrows: hitData->weapon may be null — resolve from attacker.
+			if (HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker)) {
+				return true;
+			}
+
+			return a_hitData->flags.any(RE::HitData::Flag::kMeleeAttack) ||
 			       a_hitData->flags.any(RE::HitData::Flag::kExplosion);
 		}
 
 		[[nodiscard]] const RE::HitData* ResolveStableHitDataForSpecialActions(
 			const RE::HitData* a_hitData,
 			const RE::Actor* a_target,
-			const RE::Actor* a_attacker) noexcept
+			RE::Actor* a_attacker) noexcept
 		{
 			if (!a_hitData) {
 				return nullptr;
@@ -233,7 +240,7 @@ namespace CalamityAffixes::Hooks
 				return nullptr;
 			}
 
-			if (!HasHitLikeSource(a_hitData)) {
+			if (!HasHitLikeSource(a_hitData, a_attacker)) {
 				return nullptr;
 			}
 
@@ -530,7 +537,7 @@ namespace CalamityAffixes::Hooks
 						context.attackerIsPlayerOwned,
 						context.hasPlayerOwner,
 						context.hostileEitherDirection,
-						false)) {
+						bridge->AllowsNonHostilePlayerOwnedOutgoingProcs())) {
 					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
 				}

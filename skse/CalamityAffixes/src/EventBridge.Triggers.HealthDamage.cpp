@@ -89,13 +89,18 @@ namespace CalamityAffixes
 			return true;
 		}
 
-		[[nodiscard]] bool HasHitLikeSource(const RE::HitData* a_hitData) noexcept
+		[[nodiscard]] bool HasHitLikeSource(const RE::HitData* a_hitData, RE::Actor* a_attacker) noexcept
 		{
 			if (!a_hitData) {
 				return false;
 			}
 
 			if (a_hitData->weapon || a_hitData->attackDataSpell) {
+				return true;
+			}
+
+			// Bow/crossbow arrows: hitData->weapon may be null — resolve from attacker.
+			if (HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker)) {
 				return true;
 			}
 
@@ -163,7 +168,7 @@ namespace CalamityAffixes
 			}
 		}
 
-			const auto sourceFormID = HitDataUtil::GetHitSourceFormID(a_hitData);
+			const auto sourceFormID = HitDataUtil::GetHitSourceFormID(a_hitData, a_attacker);
 			const bool routedAsHit = RouteHealthDamageAsHit(a_target, a_attacker, a_hitData, sourceFormID, a_damage, now);
 			const auto context = BuildCombatTriggerContext(a_target, a_attacker);
 			const bool playerRelevantCombatSignal =
@@ -208,7 +213,7 @@ namespace CalamityAffixes
 		std::chrono::steady_clock::time_point a_now)
 	{
 		const bool hitDataMatches = HitDataMatchesActors(a_hitData, a_target, a_attacker);
-		const bool hasHitLikeSource = HasHitLikeSource(a_hitData);
+		const bool hasHitLikeSource = HasHitLikeSource(a_hitData, a_attacker);
 
 		bool routeAsHit = (a_hitData != nullptr) && hitDataMatches && hasHitLikeSource;
 		if (!routeAsHit) {
