@@ -285,6 +285,19 @@ namespace CalamityAffixes::Hooks
 				a_target,
 				a_attacker);
 
+			// Evaluate CoC while hitData pointer is still valid (before any spell casts).
+			const auto coc = bridge->EvaluateCastOnCrit(
+				a_attacker,
+				a_target,
+				hitData,
+				false);
+
+			// Route hit procs BEFORE casting Conversion/CoC spells.
+			// CastSpellImmediate can trigger HandleHealthDamage synchronously,
+			// which overwrites the actor's lastHitData and invalidates our hitData pointer.
+			bridge->OnHealthDamage(a_target, a_attacker, hitData, a_adjustedDamage);
+
+			// Cast Conversion spell (hitData pointer may become stale after this).
 			if (a_conversion.spellFormID != 0u && a_conversion.magnitudeOverride > 0.0f && a_attacker) {
 				auto* conversionSpell = RE::TESForm::LookupByID<RE::SpellItem>(a_conversion.spellFormID);
 				if (conversionSpell) {
@@ -301,11 +314,7 @@ namespace CalamityAffixes::Hooks
 				}
 			}
 
-			const auto coc = bridge->EvaluateCastOnCrit(
-				a_attacker,
-				a_target,
-				hitData,
-				false);
+			// Cast CoC spell from pre-evaluated result.
 			if (coc.spell && a_attacker) {
 				bool casted = false;
 				if (auto* magicCaster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
@@ -324,8 +333,6 @@ namespace CalamityAffixes::Hooks
 					PlayCastOnCritProcFeedbackVfxSafe(a_target, coc.spell, a_now);
 				}
 			}
-
-			bridge->OnHealthDamage(a_target, a_attacker, hitData, a_adjustedDamage);
 		}
 
 		class ActorHandleHealthDamageHook
