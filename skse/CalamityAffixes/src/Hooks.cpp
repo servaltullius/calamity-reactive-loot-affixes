@@ -244,6 +244,15 @@ namespace CalamityAffixes::Hooks
 				return nullptr;
 			}
 
+			// Reject internal proc spell damage to prevent chain-reaction loops
+			// (proc spell → damage → CoC/Conversion → more proc spells → ...).
+			if (a_hitData->attackDataSpell) {
+				const auto editorId = SafeCStringView(a_hitData->attackDataSpell->GetFormEditorID());
+				if (!editorId.empty() && editorId.starts_with("CAFF_")) {
+					return nullptr;
+				}
+			}
+
 			return a_hitData;
 		}
 

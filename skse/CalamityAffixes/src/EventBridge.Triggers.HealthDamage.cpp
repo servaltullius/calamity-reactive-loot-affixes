@@ -220,6 +220,15 @@ namespace CalamityAffixes
 			return false;
 		}
 
+		// Reject internal proc spell damage to prevent chain-reaction loops
+		// (proc spell → damage → HandleHealthDamage → ProcessTrigger → more procs → ...).
+		if (a_hitData && a_hitData->attackDataSpell) {
+			const auto editorId = SafeCStringView(a_hitData->attackDataSpell->GetFormEditorID());
+			if (!editorId.empty() && editorId.starts_with("CAFF_")) {
+				return false;
+			}
+		}
+
 		// Guard against stale HitData reuse (common when non-hit damage flows through HandleHealthDamage).
 		const float expectedDealt = std::max(
 			0.0f,
