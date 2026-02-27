@@ -391,8 +391,14 @@ namespace CalamityAffixes
 		const bool isCrit = a_hitData->flags.any(RE::HitData::Flag::kCritical);
 		const bool isPowerAttack = a_hitData->flags.any(RE::HitData::Flag::kPowerAttack);
 
-		// User choice (#3): trigger on Crit OR PowerAttack (do not treat SneakAttack as a trigger).
-		if (!isCrit && !isPowerAttack) {
+		// Bow/crossbow: kPowerAttack is never set and kCritical is rare,
+		// so skip the crit/power gate and let procChancePct control activation.
+		const auto* hitWeapon = HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker);
+		const bool isRangedWeapon = hitWeapon &&
+			(hitWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow ||
+			 hitWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow);
+
+		if (!isRangedWeapon && !isCrit && !isPowerAttack) {
 			return {};
 		}
 
