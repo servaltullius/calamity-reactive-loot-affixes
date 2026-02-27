@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/HitDataUtil.h"
 
 #include <algorithm>
 #include <mutex>
@@ -38,11 +39,11 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		if (a_action.trapRequireWeaponHit) {
-			if (!a_hitData || !a_hitData->weapon) {
-				return false;
+			if (a_action.trapRequireWeaponHit) {
+				if (!HitDataUtil::IsWeaponLikeHit(a_hitData, a_owner)) {
+					return false;
+				}
 			}
-		}
 
 		if (a_action.trapRequireCritOrPowerAttack) {
 			if (!a_hitData) {

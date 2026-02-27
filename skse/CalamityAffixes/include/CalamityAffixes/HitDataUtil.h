@@ -39,4 +39,53 @@ namespace CalamityAffixes::HitDataUtil
 		}
 		return 0;
 	}
+
+	[[nodiscard]] inline RE::TESObjectWEAP* ResolveHitWeapon(const RE::HitData* a_hitData, RE::Actor* a_attacker) noexcept
+	{
+		if (a_hitData) {
+			if (auto* weapon = SanitizeObjectPointer(a_hitData->weapon)) {
+				return weapon;
+			}
+		}
+
+		a_attacker = SanitizeObjectPointer(a_attacker);
+		if (!a_attacker) {
+			return nullptr;
+		}
+
+		if (auto* entry = a_attacker->GetAttackingWeapon(); entry) {
+			auto* object = SanitizeObjectPointer(entry->GetObject());
+			if (auto* weapon = object ? object->As<RE::TESObjectWEAP>() : nullptr) {
+				return weapon;
+			}
+		}
+
+		if (auto* equippedRight = SanitizeObjectPointer(a_attacker->GetEquippedObject(false)); equippedRight) {
+			if (auto* weapon = equippedRight->As<RE::TESObjectWEAP>()) {
+				return weapon;
+			}
+		}
+
+		if (auto* equippedLeft = SanitizeObjectPointer(a_attacker->GetEquippedObject(true)); equippedLeft) {
+			if (auto* weapon = equippedLeft->As<RE::TESObjectWEAP>()) {
+				return weapon;
+			}
+		}
+
+		return nullptr;
+	}
+
+	[[nodiscard]] inline bool IsWeaponLikeHit(const RE::HitData* a_hitData, RE::Actor* a_attacker) noexcept
+	{
+		if (!a_hitData) {
+			return false;
+		}
+
+		if (ResolveHitWeapon(a_hitData, a_attacker)) {
+			return true;
+		}
+
+		return a_hitData->flags.any(RE::HitData::Flag::kMeleeAttack) ||
+		       a_hitData->flags.any(RE::HitData::Flag::kExplosion);
+	}
 }

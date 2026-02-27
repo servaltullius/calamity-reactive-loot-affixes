@@ -148,6 +148,41 @@ struct CorpseCurrencyDropProbe
 	const auto editorId = SafeCStringView(sourceSpell->GetFormEditorID());
 	return !editorId.empty() && editorId.starts_with("CAFF_");
 }
+
+[[nodiscard]] RE::Actor* ResolveActorFromCombatRef(RE::TESObjectREFR* a_ref)
+{
+	a_ref = SanitizeObjectPointer(a_ref);
+	if (!a_ref) {
+		return nullptr;
+	}
+
+	if (auto* actor = a_ref->As<RE::Actor>()) {
+		return actor;
+	}
+
+	if (auto* proj = a_ref->As<RE::Projectile>()) {
+		const auto& rt = proj->GetProjectileRuntimeData();
+		if (auto shooterAny = rt.shooter.get(); shooterAny) {
+			auto* shooterRef = SanitizeObjectPointer(shooterAny.get());
+			if (auto* shooterActor = shooterRef ? shooterRef->As<RE::Actor>() : nullptr) {
+				return shooterActor;
+			}
+		}
+
+		if (rt.actorCause) {
+			auto* actorCause = SanitizeObjectPointer(rt.actorCause.get());
+			if (actorCause) {
+				auto actorAny = actorCause->actor.get();
+				auto* actorRef = actorAny ? SanitizeObjectPointer(actorAny.get()) : nullptr;
+				if (actorRef) {
+					return actorRef;
+				}
+			}
+		}
+	}
+
+	return nullptr;
+}
 }
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
 		const RE::TESHitEvent* a_event,
@@ -170,7 +205,7 @@ struct CorpseCurrencyDropProbe
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		auto* aggressor = causeRef->As<RE::Actor>();
+		auto* aggressor = ResolveActorFromCombatRef(causeRef);
 		auto* target = targetRef->As<RE::Actor>();
 		if (!aggressor || !target) {
 			return RE::BSEventNotifyControl::kContinue;
@@ -389,27 +424,8 @@ struct CorpseCurrencyDropProbe
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		// NOTE:
-		// TESDeathEvent::actorKiller is a TESObjectREFR, which can be a Projectile/Hazard/etc (not always an Actor).
-		// Attribute kills through ActorCause / shooter so Kill-triggered affixes work for ranged/magic too.
-		RE::Actor* killer = killerRef->As<RE::Actor>();
-		if (!killer) {
-			if (auto* proj = killerRef->As<RE::Projectile>()) {
-				const auto& rt = proj->GetProjectileRuntimeData();
-				if (auto shooterAny = rt.shooter.get(); shooterAny) {
-					auto* shooterRef = SanitizeObjectPointer(shooterAny.get());
-					killer = shooterRef ? shooterRef->As<RE::Actor>() : nullptr;
-				}
-				if (!killer && rt.actorCause) {
-					auto* actorCause = SanitizeObjectPointer(rt.actorCause.get());
-					if (actorCause) {
-						auto actorAny = actorCause->actor.get();
-						auto* actorRef = actorAny ? SanitizeObjectPointer(actorAny.get()) : nullptr;
-						killer = actorRef;
-					}
-				}
-			}
-		}
+		// TESDeathEvent::actorKiller can be Projectile/Hazard/etc; resolve shooter/actorCause for ranged/magic kills.
+		RE::Actor* killer = ResolveActorFromCombatRef(killerRef);
 
 		if (!killer) {
 			static auto lastWarnAt = std::chrono::steady_clock::time_point{};

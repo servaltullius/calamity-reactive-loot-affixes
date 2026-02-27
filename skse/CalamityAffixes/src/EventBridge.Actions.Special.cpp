@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 
 #include "CalamityAffixes/CombatContext.h"
+#include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
@@ -86,7 +87,7 @@ namespace CalamityAffixes
 			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
 				return {};
 			}
-			if (!a_hitData || !a_hitData->weapon) {
+			if (!HitDataUtil::IsWeaponLikeHit(a_hitData, a_attacker)) {
 				return {};
 		}
 
@@ -189,15 +190,16 @@ namespace CalamityAffixes
 			CommitPerTargetCooldown(selectedPerTargetKey, selectedAffix->perTargetIcd, now);
 		}
 
-		if (_loot.debugLog) {
-			spdlog::debug(
-				"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={}, convertPct={}%, converted={}, inOutDamage={})",
-				a_hitData->weapon->GetName(),
-				physicalDealt,
-				action->convertPct,
-				converted,
-				a_inOutDamage);
-		}
+			if (_loot.debugLog) {
+				const auto* hitWeapon = HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker);
+				spdlog::debug(
+					"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={}, convertPct={}%, converted={}, inOutDamage={})",
+					hitWeapon ? hitWeapon->GetName() : "<unknown>",
+					physicalDealt,
+					action->convertPct,
+					converted,
+					a_inOutDamage);
+			}
 
 		return ConversionResult{
 			.spell = action->spell,
@@ -382,7 +384,7 @@ namespace CalamityAffixes
 		}
 
 		// CoC is attack-triggered (not spell hit).
-		if (!a_hitData->weapon) {
+		if (!HitDataUtil::IsWeaponLikeHit(a_hitData, a_attacker)) {
 			return {};
 		}
 
