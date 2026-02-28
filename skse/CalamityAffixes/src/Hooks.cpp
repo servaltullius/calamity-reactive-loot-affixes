@@ -544,6 +544,23 @@ namespace CalamityAffixes::Hooks
 						reinterpret_cast<std::uintptr_t>(a_attacker));
 				}
 
+				// Diagnostic: log every ThunkImpl entry (first 5 calls only) to verify hook fires.
+				{
+					static std::uint32_t entryCount = 0;
+					entryCount += 1;
+					if (entryCount <= 5) {
+						spdlog::info(
+							"CalamityAffixes: ThunkImpl ENTRY #{} label={} target={} attacker={} dmg={:.1f} inHook={} inProc={}",
+							entryCount,
+							a_hookLabel ? a_hookLabel : "?",
+							safeTarget ? safeTarget->GetName() : "<null>",
+							safeAttacker ? safeAttacker->GetName() : "<null>",
+							a_damage,
+							(int)inHook, (int)g_inProcDispatch);
+						spdlog::default_logger()->flush();
+					}
+				}
+
 				if (inHook || g_inProcDispatch) {
 					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
@@ -604,6 +621,7 @@ namespace CalamityAffixes::Hooks
 							hitLike,
 							caffFilter,
 							(preHitData != nullptr));
+						spdlog::default_logger()->flush();
 					}
 				}
 

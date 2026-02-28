@@ -28,7 +28,7 @@ SKSEPluginInfo(
 
 	namespace
 	{
-	constexpr std::uint32_t kBuildSeq = 39;
+	constexpr std::uint32_t kBuildSeq = 40;
 
 	void SetupLogging()
 	{

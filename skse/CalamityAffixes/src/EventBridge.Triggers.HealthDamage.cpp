@@ -185,6 +185,7 @@ namespace CalamityAffixes
 						(a_hitData != nullptr),
 						sourceFormID,
 						routedAsHit);
+					spdlog::default_logger()->flush();
 				}
 			}
 
