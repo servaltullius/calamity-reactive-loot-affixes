@@ -266,6 +266,12 @@ namespace CalamityAffixes::Hooks
 			float magnitudeOverride{ 0.0f };
 		};
 
+		// Guards against proc-on-proc chain reactions across deferred SKSE tasks.
+		// Set to true while ExecutePostHealthDamageActions runs; any HandleHealthDamage
+		// triggered synchronously by CastSpellImmediate on the same thread will see
+		// this flag and skip the proc evaluation path.
+		thread_local bool g_inProcDispatch = false;
+
 		void ExecutePostHealthDamageActions(
 			RE::Actor* a_target,
 			RE::Actor* a_attacker,
@@ -282,6 +288,11 @@ namespace CalamityAffixes::Hooks
 			if (!bridge) {
 				return;
 			}
+
+			struct ScopedProcGuard {
+				ScopedProcGuard() { g_inProcDispatch = true; }
+				~ScopedProcGuard() { g_inProcDispatch = false; }
+			} procGuard;
 
 			// Use the pre-captured hitData snapshot from ThunkImpl.
 			// GetLastHitData(target) is unreliable for projectile hits because
@@ -528,7 +539,7 @@ namespace CalamityAffixes::Hooks
 						reinterpret_cast<std::uintptr_t>(a_attacker));
 				}
 
-				if (inHook) {
+				if (inHook || g_inProcDispatch) {
 					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
 				}
