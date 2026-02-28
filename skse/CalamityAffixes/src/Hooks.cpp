@@ -1,7 +1,6 @@
 #include "CalamityAffixes/Hooks.h"
 
 #include <array>
-#include <bit>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
@@ -259,37 +258,8 @@ namespace CalamityAffixes::Hooks
 			return a_hitData;
 		}
 
-		// Lightweight identity hash for hitData — used to detect stale reuse
-		// across frames (the engine often does NOT update lastHitData for proc
-		// spell damage, so the same arrow/weapon hitData persists).
-		[[nodiscard]] std::uint64_t ComputeHitDataIdentity(const RE::HitData* a_hitData) noexcept
-		{
-			if (!a_hitData) {
-				return 0;
-			}
-
-			std::uint64_t hash = 14695981039346656037ull;
-			auto mix = [&](std::uint64_t v) {
-				hash ^= v;
-				hash *= 1099511628211ull;
-			};
-
-			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.x)));
-			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.y)));
-			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.z)));
-			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.x)));
-			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.y)));
-			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.z)));
-			mix(static_cast<std::uint64_t>(a_hitData->flags.underlying()));
-			mix(reinterpret_cast<std::uintptr_t>(a_hitData->weapon));
-			mix(reinterpret_cast<std::uintptr_t>(a_hitData->attackDataSpell));
-
-			return hash;
-		}
-
 		struct ProcDispatchRecord
 		{
-			std::uint64_t hitDataIdentity{ 0 };
 			std::chrono::steady_clock::time_point dispatchTime{};
 		};
 
@@ -612,26 +582,24 @@ namespace CalamityAffixes::Hooks
 					safeTarget,
 					safeAttacker);
 
-				// Dual-layer proc dispatch guard per (target, attacker) pair.
+				// Proc dispatch guard per (target, attacker) pair.
 				//
 				// Layer 1 — Time cooldown (250ms): catches ALL damage in the
 				// initial burst after a hit (explosions, projectiles, stale reuse).
 				//
-				// Layer 2 — HitData identity dedup (2s): catches stale hitData
-				// reuse AFTER the cooldown expires.  The engine often does NOT
-				// update lastHitData for proc spell damage, so GetLastHitData
-				// keeps returning the original weapon hit indefinitely.  Without
-				// this layer, every cooldown expiry restarts the chain.
+				// Layer 2 — Damage consistency check: catches stale hitData
+				// reuse AFTER the cooldown expires.  When the hitData expects
+				// significant damage but HandleHealthDamage received much less,
+				// the hitData is stale (leftover from a previous genuine hit,
+				// now attached to DoT, regen, or proc-spell leakage damage).
 				{
 					static std::unordered_map<std::uint64_t, ProcDispatchRecord> s_procDispatch;
 					static std::mutex s_procDispatchMutex;
 					constexpr auto kTimeCooldown = std::chrono::milliseconds(250);
-					constexpr auto kIdentityWindow = std::chrono::seconds(2);
 
 					const auto pairKey =
 						(static_cast<std::uint64_t>(safeTarget->GetFormID()) << 32) |
 						static_cast<std::uint64_t>(safeAttacker ? safeAttacker->GetFormID() : 0u);
-					const auto identity = ComputeHitDataIdentity(preHitData);
 
 					const std::scoped_lock lock(s_procDispatchMutex);
 					auto& record = s_procDispatch[pairKey];
@@ -645,14 +613,17 @@ namespace CalamityAffixes::Hooks
 						return;
 					}
 
-					// Layer 2: same hitData content within identity window → stale reuse.
-					if (identity != 0 && identity == record.hitDataIdentity &&
-						hasRecord && elapsed < kIdentityWindow) {
-						CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
-						return;
+					// Layer 2: damage consistency — block if HandleHealthDamage
+					// damage is far below what the hitData expects (stale reuse).
+					if (preHitData && hasRecord && elapsed < std::chrono::seconds(5)) {
+						const float expectedDealt = std::max(0.0f,
+							preHitData->totalDamage - preHitData->resistedPhysicalDamage - preHitData->resistedTypedDamage);
+						if (expectedDealt >= 5.0f && a_damage > 0.0f && a_damage < expectedDealt * 0.25f) {
+							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							return;
+						}
 					}
 
-					record.hitDataIdentity = identity;
 					record.dispatchTime = now;
 
 					if (s_procDispatch.size() > 512) {
