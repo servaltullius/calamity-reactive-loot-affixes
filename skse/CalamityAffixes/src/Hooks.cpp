@@ -1,6 +1,7 @@
 #include "CalamityAffixes/Hooks.h"
 
 #include <array>
+#include <bit>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
@@ -257,6 +258,40 @@ namespace CalamityAffixes::Hooks
 
 			return a_hitData;
 		}
+
+		// Lightweight identity hash for hitData — used to detect stale reuse
+		// across frames (the engine often does NOT update lastHitData for proc
+		// spell damage, so the same arrow/weapon hitData persists).
+		[[nodiscard]] std::uint64_t ComputeHitDataIdentity(const RE::HitData* a_hitData) noexcept
+		{
+			if (!a_hitData) {
+				return 0;
+			}
+
+			std::uint64_t hash = 14695981039346656037ull;
+			auto mix = [&](std::uint64_t v) {
+				hash ^= v;
+				hash *= 1099511628211ull;
+			};
+
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.x)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.y)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.z)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.x)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.y)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.z)));
+			mix(static_cast<std::uint64_t>(a_hitData->flags.underlying()));
+			mix(reinterpret_cast<std::uintptr_t>(a_hitData->weapon));
+			mix(reinterpret_cast<std::uintptr_t>(a_hitData->attackDataSpell));
+
+			return hash;
+		}
+
+		struct ProcDispatchRecord
+		{
+			std::uint64_t hitDataIdentity{ 0 };
+			std::chrono::steady_clock::time_point dispatchTime{};
+		};
 
 		struct DeferredConversionCast
 		{
@@ -577,37 +612,53 @@ namespace CalamityAffixes::Hooks
 					safeTarget,
 					safeAttacker);
 
-				// Per-(target, attacker) proc dispatch cooldown.
-				// After dispatching procs for a hit, suppress ALL subsequent proc
-				// evaluations for the same pair within the cooldown window.  This
-				// catches async proc-triggered damage (explosions, projectiles) that
-				// creates new hitData each time, bypassing content-based dedup.
+				// Dual-layer proc dispatch guard per (target, attacker) pair.
+				//
+				// Layer 1 — Time cooldown (250ms): catches ALL damage in the
+				// initial burst after a hit (explosions, projectiles, stale reuse).
+				//
+				// Layer 2 — HitData identity dedup (2s): catches stale hitData
+				// reuse AFTER the cooldown expires.  The engine often does NOT
+				// update lastHitData for proc spell damage, so GetLastHitData
+				// keeps returning the original weapon hit indefinitely.  Without
+				// this layer, every cooldown expiry restarts the chain.
 				{
-					static std::unordered_map<
-						std::uint64_t,
-						std::chrono::steady_clock::time_point> s_lastProcDispatch;
-					static std::mutex s_lastProcDispatchMutex;
-					constexpr auto kProcCooldown = std::chrono::milliseconds(250);
+					static std::unordered_map<std::uint64_t, ProcDispatchRecord> s_procDispatch;
+					static std::mutex s_procDispatchMutex;
+					constexpr auto kTimeCooldown = std::chrono::milliseconds(250);
+					constexpr auto kIdentityWindow = std::chrono::seconds(2);
 
 					const auto pairKey =
 						(static_cast<std::uint64_t>(safeTarget->GetFormID()) << 32) |
 						static_cast<std::uint64_t>(safeAttacker ? safeAttacker->GetFormID() : 0u);
+					const auto identity = ComputeHitDataIdentity(preHitData);
 
-					const std::scoped_lock lock(s_lastProcDispatchMutex);
-					auto& lastTime = s_lastProcDispatch[pairKey];
+					const std::scoped_lock lock(s_procDispatchMutex);
+					auto& record = s_procDispatch[pairKey];
 
-					if (lastTime.time_since_epoch().count() != 0 &&
-						(now - lastTime) < kProcCooldown) {
+					const bool hasRecord = record.dispatchTime.time_since_epoch().count() != 0;
+					const auto elapsed = hasRecord ? (now - record.dispatchTime) : std::chrono::steady_clock::duration::max();
+
+					// Layer 1: time cooldown.
+					if (hasRecord && elapsed < kTimeCooldown) {
 						CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 						return;
 					}
 
-					lastTime = now;
+					// Layer 2: same hitData content within identity window → stale reuse.
+					if (identity != 0 && identity == record.hitDataIdentity &&
+						hasRecord && elapsed < kIdentityWindow) {
+						CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+						return;
+					}
 
-					if (s_lastProcDispatch.size() > 512) {
-						for (auto it = s_lastProcDispatch.begin(); it != s_lastProcDispatch.end();) {
-							if ((now - it->second) >= std::chrono::seconds(10)) {
-								it = s_lastProcDispatch.erase(it);
+					record.hitDataIdentity = identity;
+					record.dispatchTime = now;
+
+					if (s_procDispatch.size() > 512) {
+						for (auto it = s_procDispatch.begin(); it != s_procDispatch.end();) {
+							if ((now - it->second.dispatchTime) >= std::chrono::seconds(10)) {
+								it = s_procDispatch.erase(it);
 							} else {
 								++it;
 							}
