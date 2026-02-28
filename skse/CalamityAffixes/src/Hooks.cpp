@@ -4,7 +4,9 @@
 #include <chrono>
 #include <cmath>
 #include <cstddef>
+#include <memory>
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 
 #include <RE/Skyrim.h>
@@ -269,7 +271,8 @@ namespace CalamityAffixes::Hooks
 			RE::Actor* a_attacker,
 			float a_adjustedDamage,
 			DeferredConversionCast a_conversion,
-			std::chrono::steady_clock::time_point a_now) noexcept
+			std::chrono::steady_clock::time_point a_now,
+			const RE::HitData* a_capturedHitData) noexcept
 		{
 			if (!a_target) {
 				return;
@@ -280,10 +283,10 @@ namespace CalamityAffixes::Hooks
 				return;
 			}
 
-			const auto* hitData = ResolveStableHitDataForSpecialActions(
-				HitDataUtil::GetLastHitData(a_target),
-				a_target,
-				a_attacker);
+			// Use the pre-captured hitData snapshot from ThunkImpl.
+			// GetLastHitData(target) is unreliable for projectile hits because
+			// the engine may clear/overwrite lastHitData before this deferred task runs.
+			const auto* hitData = a_capturedHitData;
 
 			// Evaluate CoC while hitData pointer is still valid (before any spell casts).
 			const auto coc = bridge->EvaluateCastOnCrit(
@@ -593,20 +596,28 @@ namespace CalamityAffixes::Hooks
 					deferredConversion.magnitudeOverride = conversion.convertedDamage;
 				}
 
+				// Snapshot the HitData before CallOriginal — for projectile hits, the engine
+				// may clear/overwrite lastHitData before the deferred SKSE task runs.
+				auto capturedHitData = std::make_shared<std::optional<RE::HitData>>();
+				if (preHitData) {
+					capturedHitData->emplace(*preHitData);
+				}
+
 				CallOriginal(a_original, safeTarget, safeAttacker, adjustedDamage, a_hookLabel);
 
 				if (auto* tasks = SKSE::GetTaskInterface()) {
 					const RE::FormID targetFormID = safeTarget->GetFormID();
 					const RE::FormID attackerFormID = safeAttacker ? safeAttacker->GetFormID() : 0u;
-					tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, deferredConversion, now]() {
+					tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, deferredConversion, now, capturedHitData]() {
 						auto* target = RE::TESForm::LookupByID<RE::Actor>(targetFormID);
 						auto* attacker = attackerFormID != 0u ?
 							                 RE::TESForm::LookupByID<RE::Actor>(attackerFormID) :
 							                 nullptr;
-						ExecutePostHealthDamageActions(target, attacker, adjustedDamage, deferredConversion, now);
+						const RE::HitData* hitDataPtr = capturedHitData->has_value() ? &capturedHitData->value() : nullptr;
+						ExecutePostHealthDamageActions(target, attacker, adjustedDamage, deferredConversion, now, hitDataPtr);
 					});
 				} else {
-					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adjustedDamage, deferredConversion, now);
+					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adjustedDamage, deferredConversion, now, preHitData);
 				}
 			}
 
