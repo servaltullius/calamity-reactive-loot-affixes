@@ -661,7 +661,8 @@ namespace CalamityAffixes::Hooks
 					if (preHitData && hasRecord && elapsed < std::chrono::seconds(5)) {
 						const float expectedDealt = std::max(0.0f,
 							preHitData->totalDamage - preHitData->resistedPhysicalDamage - preHitData->resistedTypedDamage);
-						if (expectedDealt >= 5.0f && a_damage > 0.0f && a_damage < expectedDealt * 0.25f) {
+						const float absDmg = std::abs(a_damage);
+					if (expectedDealt >= 5.0f && absDmg > 0.0f && absDmg < expectedDealt * 0.25f) {
 							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 							return;
 						}
