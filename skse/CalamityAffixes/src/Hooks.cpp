@@ -1,6 +1,7 @@
 #include "CalamityAffixes/Hooks.h"
 
 #include <array>
+#include <bit>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
@@ -256,6 +257,37 @@ namespace CalamityAffixes::Hooks
 			}
 
 			return a_hitData;
+		}
+
+		// Content-based identity hash for hitData deduplication.
+		// Includes spatial + flag + source fields that uniquely identify a specific
+		// hit event.  Excludes damage amounts (which differ between the real hit
+		// and proc-triggered re-entries that reuse stale hitData).
+		[[nodiscard]] std::uint64_t ComputeHitDataIdentity(const RE::HitData* a_hitData) noexcept
+		{
+			if (!a_hitData) {
+				return 0;
+			}
+
+			std::uint64_t hash = 14695981039346656037ull;  // FNV-1a offset basis
+			auto mix = [&](std::uint64_t v) {
+				hash ^= v;
+				hash *= 1099511628211ull;
+			};
+
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.x)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.y)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitPosition.z)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.x)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.y)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->hitDirection.z)));
+			mix(static_cast<std::uint64_t>(a_hitData->flags.underlying()));
+			mix(reinterpret_cast<std::uintptr_t>(a_hitData->weapon));
+			mix(reinterpret_cast<std::uintptr_t>(a_hitData->attackDataSpell));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->totalDamage)));
+			mix(static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_hitData->criticalDamageMult)));
+
+			return hash;
 		}
 
 		struct DeferredConversionCast
@@ -576,6 +608,48 @@ namespace CalamityAffixes::Hooks
 					HitDataUtil::GetLastHitData(safeTarget),
 					safeTarget,
 					safeAttacker);
+
+				// Stale hitData reuse detection — proc spell damage often does NOT
+				// update the actor's lastHitData, so GetLastHitData returns the same
+				// content as the original weapon hit.  If we see identical hitData
+				// content for the same (target, attacker) pair within the dedup
+				// window, treat it as proc-triggered re-entry and skip.
+				if (preHitData) {
+					static std::unordered_map<
+						std::uint64_t,
+						std::pair<std::uint64_t, std::chrono::steady_clock::time_point>> s_recentHits;
+					static std::mutex s_recentHitsMutex;
+					constexpr auto kDedupeWindow = std::chrono::milliseconds(300);
+
+					const auto identity = ComputeHitDataIdentity(preHitData);
+					const auto pairKey =
+						(static_cast<std::uint64_t>(safeTarget->GetFormID()) << 32) |
+						static_cast<std::uint64_t>(safeAttacker ? safeAttacker->GetFormID() : 0u);
+
+					const std::scoped_lock lock(s_recentHitsMutex);
+					auto& [lastIdentity, lastTime] = s_recentHits[pairKey];
+
+					if (identity != 0 && identity == lastIdentity &&
+						lastTime.time_since_epoch().count() != 0 &&
+						(now - lastTime) < kDedupeWindow) {
+						CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+						return;
+					}
+
+					lastIdentity = identity;
+					lastTime = now;
+
+					if (s_recentHits.size() > 512) {
+						for (auto it = s_recentHits.begin(); it != s_recentHits.end();) {
+							if ((now - it->second.second) >= std::chrono::seconds(10)) {
+								it = s_recentHits.erase(it);
+							} else {
+								++it;
+							}
+						}
+					}
+				}
+
 				float adjustedDamage = a_damage;
 				const float critMult = bridge->GetCritDamageMultiplier(
 					safeAttacker,
