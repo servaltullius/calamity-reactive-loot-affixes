@@ -961,6 +961,16 @@ struct CorpseCurrencyDropProbe
 			}
 
 			if (eventName == kRunewordGrantStarterOrbsEvent) {
+				// One-time starter grant: skip if the player already owns any reforge orbs.
+				auto* player = RE::PlayerCharacter::GetSingleton();
+				auto* orb = player
+					? RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")
+					: nullptr;
+				if (player && orb && player->GetItemCount(orb) > 0) {
+					RE::DebugNotification("Reforge Orbs: already owned.");
+					return RE::BSEventNotifyControl::kContinue;
+				}
+
 				const auto amount = (a_event->numArg > 0.0f) ? static_cast<std::uint32_t>(a_event->numArg) : 3u;
 				GrantReforgeOrbs(amount);
 				return RE::BSEventNotifyControl::kContinue;
