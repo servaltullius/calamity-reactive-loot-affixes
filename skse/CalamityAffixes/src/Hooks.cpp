@@ -577,10 +577,35 @@ namespace CalamityAffixes::Hooks
 					return;
 				}
 
+				const auto* rawHitData = HitDataUtil::GetLastHitData(safeTarget);
 				const auto* preHitData = ResolveStableHitDataForSpecialActions(
-					HitDataUtil::GetLastHitData(safeTarget),
+					rawHitData,
 					safeTarget,
 					safeAttacker);
+
+				// Diagnostic: track why bow procs might not fire.
+				{
+					static std::uint32_t diagCount = 0;
+					diagCount += 1;
+					if (diagCount <= 20 || (diagCount % 100 == 0)) {
+						const bool actorsMatch = rawHitData ? HitDataMatchesCurrentActors(rawHitData, safeTarget, safeAttacker) : false;
+						const bool hitLike = rawHitData ? HasHitLikeSource(rawHitData, safeAttacker) : false;
+						const bool caffFilter = rawHitData && rawHitData->attackDataSpell
+							? SafeCStringView(rawHitData->attackDataSpell->GetFormEditorID()).starts_with("CAFF_")
+							: false;
+						spdlog::info(
+							"CalamityAffixes: ThunkImpl diag #{} target={} attacker={} dmg={:.1f} rawHitData={} actorsMatch={} hitLike={} caffFilter={} preHitData={}",
+							diagCount,
+							safeTarget->GetName(),
+							safeAttacker ? safeAttacker->GetName() : "<null>",
+							a_damage,
+							(rawHitData != nullptr),
+							actorsMatch,
+							hitLike,
+							caffFilter,
+							(preHitData != nullptr));
+					}
+				}
 
 				// Proc dispatch guard per (target, attacker) pair.
 				//

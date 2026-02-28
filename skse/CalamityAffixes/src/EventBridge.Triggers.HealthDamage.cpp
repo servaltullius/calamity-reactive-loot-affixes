@@ -170,6 +170,24 @@ namespace CalamityAffixes
 
 			const auto sourceFormID = HitDataUtil::GetHitSourceFormID(a_hitData, a_attacker);
 			const bool routedAsHit = RouteHealthDamageAsHit(a_target, a_attacker, a_hitData, sourceFormID, a_damage, now);
+
+			// Diagnostic: log routing decision for hit procs.
+			{
+				static std::uint32_t diagCount = 0;
+				diagCount += 1;
+				if (diagCount <= 20 || (diagCount % 100 == 0)) {
+					spdlog::info(
+						"CalamityAffixes: OnHealthDamage diag #{} target={} attacker={} dmg={:.1f} hitData={} source=0x{:X} routedAsHit={}",
+						diagCount,
+						a_target->GetName(),
+						a_attacker ? a_attacker->GetName() : "<null>",
+						a_damage,
+						(a_hitData != nullptr),
+						sourceFormID,
+						routedAsHit);
+				}
+			}
+
 			const auto context = BuildCombatTriggerContext(a_target, a_attacker);
 			const bool playerRelevantCombatSignal =
 				context.targetIsPlayer ||
