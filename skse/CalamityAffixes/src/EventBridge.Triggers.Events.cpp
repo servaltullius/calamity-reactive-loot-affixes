@@ -213,6 +213,26 @@ struct CorpseCurrencyDropProbe
 
 		const auto relation = BuildCombatTriggerContext(target, aggressor);
 
+		// Unconditional diagnostic: trace TESHitEvent routing for first N hits.
+		{
+			static std::uint32_t hitEventDiagCount = 0;
+			hitEventDiagCount += 1;
+			if (hitEventDiagCount <= 20 || (hitEventDiagCount % 200 == 0)) {
+				const auto* hitData = HitDataUtil::GetLastHitData(target);
+				spdlog::info(
+					"CalamityAffixes: TESHitEvent diag #{} cause={} target={} source=0x{:X} playerOwned={} hostile={} hitData={} weapon={} spell={}",
+					hitEventDiagCount,
+					aggressor->GetName(),
+					target->GetName(),
+					a_event->source,
+					relation.attackerIsPlayerOwned,
+					relation.hostileEitherDirection,
+					(hitData != nullptr),
+					(hitData && hitData->weapon != nullptr),
+					(hitData && hitData->attackDataSpell != nullptr));
+			}
+		}
+
 		if (_loot.debugLog) {
 			static std::uint32_t windowCount = 0;
 			static auto windowStart = now;
@@ -285,6 +305,23 @@ struct CorpseCurrencyDropProbe
 
 					if (!ShouldSuppressDuplicateHit(key, now)) {
 						const auto* hitData = HitDataUtil::GetLastHitData(target);
+
+						// Diagnostic: trace outgoing hit proc path.
+						{
+							static std::uint32_t outDiag = 0;
+							outDiag += 1;
+							if (outDiag <= 20 || (outDiag % 200 == 0)) {
+								const auto* hitIndices = ResolveActiveTriggerIndices(Trigger::kHit);
+								const std::size_t activeHitCount = hitIndices ? hitIndices->size() : 0u;
+								spdlog::info(
+									"CalamityAffixes: TESHitEvent outgoing proc #{} target={} source=0x{:X} activeHitAffixes={}",
+									outDiag,
+									target->GetName(),
+									a_event->source,
+									activeHitCount);
+							}
+						}
+
 						ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
 
 						if (hitData && aggressor->IsPlayerRef()) {
