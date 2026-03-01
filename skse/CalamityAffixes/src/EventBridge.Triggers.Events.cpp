@@ -322,29 +322,39 @@ struct CorpseCurrencyDropProbe
 							}
 						}
 
-						ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
+						// Some weapon types (especially modded weapons with custom
+						// animations) raise TESHitEvent before HitData is fully
+						// committed to the target actor.  The engine may fire the
+						// first event with stale/incomplete hitData (weapon ptr
+						// still null) and a follow-up event with the real data.
+						// Reset duplicate tracking so the follow-up is processed.
+						if (!hitData || !hitData->weapon) {
+							_lastHitAt = {};
+						} else {
+							ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
 
-						if (hitData && aggressor->IsPlayerRef()) {
-							const auto coc = EvaluateCastOnCrit(aggressor, target, hitData);
-							if (coc.spell) {
-								if (auto* magicCaster = aggressor->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-									magicCaster->CastSpellImmediate(
-										coc.spell,
-										coc.noHitEffectArt,
-										target,
-										coc.effectiveness,
-										false,
-										coc.magnitudeOverride,
-										aggressor);
+							if (aggressor->IsPlayerRef()) {
+								const auto coc = EvaluateCastOnCrit(aggressor, target, hitData);
+								if (coc.spell) {
+									if (auto* magicCaster = aggressor->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+										magicCaster->CastSpellImmediate(
+											coc.spell,
+											coc.noHitEffectArt,
+											target,
+											coc.effectiveness,
+											false,
+											coc.magnitudeOverride,
+											aggressor);
+									}
 								}
 							}
-						}
 
-						if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
-							auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
-							auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
-							if (spell) {
-								ProcessArchmageSpellHit(aggressor, target, spell, hitData);
+							if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
+								auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
+								auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
+								if (spell) {
+									ProcessArchmageSpellHit(aggressor, target, spell, hitData);
+								}
 							}
 						}
 					}
@@ -368,34 +378,44 @@ struct CorpseCurrencyDropProbe
 					if (!ShouldSuppressDuplicateHit(key, now)) {
 						const auto* hitData = HitDataUtil::GetLastHitData(target);
 
-						// Hook-compat fallback:
-						// If HandleHealthDamage hook is not routed, emulate MoM by refunding Health after hit landed.
-						// (Hook path reduces damage pre-hit; TESHitEvent fallback can only correct post-hit.)
-						if (hitData && !target->IsDead()) {
-							float fallbackIncomingDamage = std::max(
-								0.0f,
-								hitData->totalDamage - hitData->resistedPhysicalDamage - hitData->resistedTypedDamage);
-							if (fallbackIncomingDamage > 0.0f) {
-								const auto mom = EvaluateMindOverMatter(target, aggressor, hitData, fallbackIncomingDamage);
-								if (mom.redirectedDamage > 0.0f) {
-									if (auto* avOwner = target->AsActorValueOwner()) {
-										avOwner->RestoreActorValue(
-											RE::ACTOR_VALUE_MODIFIER::kDamage,
-											RE::ActorValue::kHealth,
-											mom.redirectedDamage);
-										if (_loot.debugLog) {
-											spdlog::debug(
-												"CalamityAffixes: TESHitEvent fallback applied MoM heal correction (redirected={}).",
+						// Some weapon types (especially modded weapons with custom
+						// animations) raise TESHitEvent before HitData is fully
+						// committed to the target actor.  The engine may fire the
+						// first event with stale/incomplete hitData (weapon ptr
+						// still null) and a follow-up event with the real data.
+						// Reset duplicate tracking so the follow-up is processed.
+						if (!hitData || !hitData->weapon) {
+							_lastHitAt = {};
+						} else {
+							// Hook-compat fallback:
+							// If HandleHealthDamage hook is not routed, emulate MoM by refunding Health after hit landed.
+							// (Hook path reduces damage pre-hit; TESHitEvent fallback can only correct post-hit.)
+							if (!target->IsDead()) {
+								float fallbackIncomingDamage = std::max(
+									0.0f,
+									hitData->totalDamage - hitData->resistedPhysicalDamage - hitData->resistedTypedDamage);
+								if (fallbackIncomingDamage > 0.0f) {
+									const auto mom = EvaluateMindOverMatter(target, aggressor, hitData, fallbackIncomingDamage);
+									if (mom.redirectedDamage > 0.0f) {
+										if (auto* avOwner = target->AsActorValueOwner()) {
+											avOwner->RestoreActorValue(
+												RE::ACTOR_VALUE_MODIFIER::kDamage,
+												RE::ActorValue::kHealth,
 												mom.redirectedDamage);
+											if (_loot.debugLog) {
+												spdlog::debug(
+													"CalamityAffixes: TESHitEvent fallback applied MoM heal correction (redirected={}).",
+													mom.redirectedDamage);
+											}
 										}
 									}
 								}
 							}
-						}
 
-						if (hitData && !target->IsDead()) {
-							ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
-							ProcessTrigger(Trigger::kLowHealth, target, aggressor, hitData);
+							if (!target->IsDead()) {
+								ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
+								ProcessTrigger(Trigger::kLowHealth, target, aggressor, hitData);
+							}
 						}
 						}
 					}
