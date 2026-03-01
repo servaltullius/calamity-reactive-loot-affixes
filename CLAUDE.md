@@ -75,6 +75,8 @@ _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
 
 - `ReplaceAll()` — 기존 슬롯 전체 교체 (D2 스타일)
 - 94개 레시피 (`RunewordCatalogRows.inl`)
+- 재련(Reforge) 시 룬워드 보존 — 일반 어픽스만 재롤, 룬워드 슬롯 유지
+- 룬워드 재변환 허용 — 기존 룬워드를 제거하고 새 룬워드로 교체 가능
 
 ## 주요 파일
 

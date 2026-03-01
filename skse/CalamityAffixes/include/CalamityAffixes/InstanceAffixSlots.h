@@ -97,6 +97,24 @@ namespace CalamityAffixes
 			count = 0;
 		}
 
+		constexpr bool RemoveToken(std::uint64_t a_token) noexcept
+		{
+			if (a_token == 0u) {
+				return false;
+			}
+			for (std::uint8_t i = 0; i < count; ++i) {
+				if (tokens[i] == a_token) {
+					for (std::uint8_t j = i; j + 1u < count; ++j) {
+						tokens[j] = tokens[j + 1u];
+					}
+					tokens[count - 1u] = 0u;
+					--count;
+					return true;
+				}
+			}
+			return false;
+		}
+
 		constexpr void ReplaceAll(std::uint64_t a_singleToken) noexcept
 		{
 			Clear();

@@ -753,10 +753,9 @@ namespace RuntimeGateStoreChecks
 				(std::istreambuf_iterator<char>(reforgeIn)),
 				std::istreambuf_iterator<char>());
 
-			if (reforgeSource.find("const bool rerollRuneword = completedRunewordRecipe != nullptr;") == std::string::npos ||
-				reforgeSource.find("pickReforgeRunewordRecipe") == std::string::npos ||
-				reforgeSource.find("rolled.AddToken(attemptRunewordRecipe->resultAffixToken);") == std::string::npos ||
-				reforgeSource.find("kMaxRegularAffixesPerItem") == std::string::npos ||
+			if (reforgeSource.find("preservedRunewordToken") == std::string::npos ||
+				reforgeSource.find("previousRegularSlots.RemoveToken(preservedRunewordToken)") == std::string::npos ||
+				reforgeSource.find("rolled.PromoteTokenToPrimary(preservedRunewordToken)") == std::string::npos ||
 				reforgeSource.find("_runewordInstanceStates.erase(instanceKey);") == std::string::npos ||
 				reforgeSource.find("IsLootObjectEligibleForAffixes(entry->object)") == std::string::npos ||
 				reforgeSource.find("Reforge blocked: completed runeword base.") != std::string::npos) {

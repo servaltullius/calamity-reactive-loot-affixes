@@ -141,13 +141,24 @@ namespace CalamityAffixes
 			return;
 		}
 
-		// If base already has a completed runeword, block further crafting.
+		// If base already has a completed runeword, remove it to allow re-transmutation.
 		if (const auto* completed = ResolveCompletedRunewordRecipe(instanceKey)) {
-			std::string note = "Runeword: already complete (";
-			note.append(completed->displayName);
-			note.push_back(')');
-			RE::DebugNotification(note.c_str());
-			return;
+			const auto oldToken = completed->resultAffixToken;
+			auto& slots = _instanceAffixes[instanceKey];
+			slots.RemoveToken(oldToken);
+			_instanceStates.erase(MakeInstanceStateKey(instanceKey, oldToken));
+			_runewordInstanceStates.erase(instanceKey);
+
+			if (ResolvePlayerInventoryInstance(instanceKey, entry, xList) && entry && xList) {
+				EnsureMultiAffixDisplayName(entry, xList, slots);
+			}
+			RebuildActiveCounts();
+
+			SKSE::log::info(
+				"CalamityAffixes: removed existing runeword for re-transmutation (instance={:016X}, oldToken={:016X}, displayName={}).",
+				instanceKey,
+				oldToken,
+				completed->displayName);
 		}
 
 		auto& state = _runewordInstanceStates[instanceKey];
