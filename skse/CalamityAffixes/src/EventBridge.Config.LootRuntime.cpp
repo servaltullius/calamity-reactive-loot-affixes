@@ -256,53 +256,15 @@ namespace CalamityAffixes
 		spdlog::flush_on(spdlog::level::warn);
 	}
 
-	std::int8_t EventBridge::ToLeveledListChanceNonePercent(float a_dropChancePercent)
-	{
-		const auto clampedDrop = std::clamp(a_dropChancePercent, 0.0f, 100.0f);
-		const auto chanceNoneRounded = static_cast<long>(std::lround(100.0 - static_cast<double>(clampedDrop)));
-		const auto clampedChanceNone = std::clamp(chanceNoneRounded, 0l, 100l);
-		return static_cast<std::int8_t>(clampedChanceNone);
-	}
-
-	void EventBridge::SyncLeveledListCurrencyDropChances(std::string_view a_contextTag) const
-	{
-		auto* runewordDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>("CAFF_LItem_RunewordFragmentDrops");
-		auto* reforgeDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>("CAFF_LItem_ReforgeOrbDrops");
-		if (!runewordDropList || !reforgeDropList) {
-			if (_loot.debugLog) {
-				SKSE::log::debug(
-					"CalamityAffixes: {} leveled-list currency sync skipped (runewordList={}, reforgeList={}).",
-					a_contextTag,
-					runewordDropList != nullptr,
-					reforgeDropList != nullptr);
-			}
-			return;
-		}
-
-		const float runewordDropChance = _loot.runewordFragmentChancePercent;
-		const float reforgeDropChance = _loot.reforgeOrbChancePercent;
-
-		runewordDropList->chanceNone = ToLeveledListChanceNonePercent(runewordDropChance);
-		reforgeDropList->chanceNone = ToLeveledListChanceNonePercent(reforgeDropChance);
-
-		if (_loot.debugLog) {
-			SKSE::log::debug(
-				"CalamityAffixes: {} leveled-list currency chances synced (runewordDrop={}%, reforgeDrop={}%).",
-				a_contextTag,
-				runewordDropChance,
-				reforgeDropChance);
-		}
-	}
-
 	void EventBridge::SyncCurrencyDropModeState(std::string_view a_contextTag)
 	{
 		// Currency drop mode is intentionally fixed to hybrid.
 		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
 		_loot.runtimeCurrencyDropsEnabled = true;
 
-		// Keep CAFF_LItem_* drop chances in sync for SPID Item corpse distribution
-		// and any legacy leveled-list consumers.
-		SyncLeveledListCurrencyDropChances(a_contextTag);
+		// SPID-owned corpse authority: leveled-list chanceNone values come from the ESP
+		// (set by Generator) and are NOT modified at runtime. MCM drop-chance settings
+		// only affect container-source runtime rolls.
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(

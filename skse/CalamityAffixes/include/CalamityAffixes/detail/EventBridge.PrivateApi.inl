@@ -46,8 +46,6 @@
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
 		void ApplyRuntimeUserSettingsOverrides();
 		void SyncCurrencyDropModeState(std::string_view a_contextTag);
-		void SyncLeveledListCurrencyDropChances(std::string_view a_contextTag) const;
-		[[nodiscard]] static std::int8_t ToLeveledListChanceNonePercent(float a_dropChancePercent);
 		[[nodiscard]] bool PersistRuntimeUserSettings();
 		void MarkRuntimeUserSettingsDirty();
 		void MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::time_point a_now, bool a_force = false);
