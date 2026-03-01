@@ -655,6 +655,7 @@ namespace CalamityAffixes
 		LastHitKey _lastPapyrusHit{};
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerHitAt;
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerKillAt;
+		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _outgoingHitPerTargetLastAt;
 		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _recentOwnerIncomingHitAt;
 		std::chrono::steady_clock::time_point _playerCombatEvidenceExpiresAt{};
 		std::unordered_map<LowHealthTriggerKey, bool, LowHealthTriggerKeyHash> _lowHealthTriggerConsumed;

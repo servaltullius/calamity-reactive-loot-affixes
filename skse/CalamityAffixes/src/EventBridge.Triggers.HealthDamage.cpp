@@ -303,6 +303,19 @@ namespace CalamityAffixes
 			return;
 		}
 
+		// Per-target outgoing proc suppression — prevents proc spell chain reactions.
+		// When a proc spell (explosion, projectile, hazard) damages the same target,
+		// the secondary damage has a different sourceFormID so the LastHitKey-based
+		// dedup doesn't catch it.  This source-agnostic per-target window does.
+		constexpr auto kOutgoingPerTargetWindow = std::chrono::milliseconds(400);
+		const RE::FormID tgtFid = a_target->GetFormID();
+		if (const auto it = _outgoingHitPerTargetLastAt.find(tgtFid);
+			it != _outgoingHitPerTargetLastAt.end()) {
+			if ((a_now - it->second) < kOutgoingPerTargetWindow) {
+				return;
+			}
+		}
+
 		const LastHitKey key{
 			.outgoing = true,
 			.aggressor = a_attacker->GetFormID(),
@@ -312,6 +325,17 @@ namespace CalamityAffixes
 
 		if (ShouldSuppressDuplicateHit(key, a_now)) {
 			return;
+		}
+
+		_outgoingHitPerTargetLastAt[tgtFid] = a_now;
+		if (_outgoingHitPerTargetLastAt.size() > 256) {
+			for (auto pit = _outgoingHitPerTargetLastAt.begin(); pit != _outgoingHitPerTargetLastAt.end();) {
+				if ((a_now - pit->second) > std::chrono::seconds(5)) {
+					pit = _outgoingHitPerTargetLastAt.erase(pit);
+				} else {
+					++pit;
+				}
+			}
 		}
 
 		ProcessTrigger(Trigger::kHit, context.playerOwner, a_target, a_hitData);
