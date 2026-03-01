@@ -116,6 +116,10 @@ namespace CalamityAffixes
 					if (*idx >= _affixes.size() || _affixes[*idx].id.empty()) {
 						continue;
 					}
+					// Skip the preserved runeword affix — it occupies its own slot.
+					if (preservedRunewordToken != 0u && _affixes[*idx].token == preservedRunewordToken) {
+						continue;
+					}
 					chosenPrefixIndices.push_back(*idx);
 					chosenIndices.push_back(*idx);
 					slots.AddToken(_affixes[*idx].token);
@@ -149,7 +153,8 @@ namespace CalamityAffixes
 
 			if (slots.count == 0) {
 				if (const auto fallback = RollLootAffixIndex(*lootType, nullptr, /*a_skipChanceCheck=*/true);
-					fallback && *fallback < _affixes.size() && !_affixes[*fallback].id.empty()) {
+					fallback && *fallback < _affixes.size() && !_affixes[*fallback].id.empty() &&
+					(preservedRunewordToken == 0u || _affixes[*fallback].token != preservedRunewordToken)) {
 					slots.AddToken(_affixes[*fallback].token);
 				}
 			}
@@ -172,7 +177,25 @@ namespace CalamityAffixes
 
 			// Re-insert preserved runeword token as primary (slot 0).
 			if (preservedRunewordToken != 0u) {
-				(void)rolled.PromoteTokenToPrimary(preservedRunewordToken);
+				if (!rolled.PromoteTokenToPrimary(preservedRunewordToken)) {
+					SKSE::log::error(
+						"CalamityAffixes: reforge runeword preserve failed — PromoteTokenToPrimary returned false "
+						"(instance={:016X}, runewordToken={:016X}, rolledCount={}).",
+						instanceKey,
+						preservedRunewordToken,
+						rolled.count);
+					// Defensive fallback: force the token into the slot structure.
+					if (rolled.count < kMaxAffixesPerItem) {
+						for (std::uint8_t i = rolled.count; i > 0; --i) {
+							rolled.tokens[i] = rolled.tokens[i - 1u];
+						}
+						rolled.tokens[0] = preservedRunewordToken;
+						++rolled.count;
+					} else {
+						// Absolute last resort: overwrite slot 0.
+						rolled.tokens[0] = preservedRunewordToken;
+					}
+				}
 			}
 
 			newSlots = rolled;
@@ -190,6 +213,23 @@ namespace CalamityAffixes
 		if (preservedRunewordToken == 0u) {
 			_runewordInstanceStates.erase(instanceKey);
 		}
+		// Final safety: verify runeword token survived the roll pipeline.
+		if (preservedRunewordToken != 0u && !newSlots.HasToken(preservedRunewordToken)) {
+			SKSE::log::error(
+				"CalamityAffixes: reforge runeword token {:016X} missing from newSlots after roll — forcing re-insertion (instance={:016X}, count={}).",
+				preservedRunewordToken,
+				instanceKey,
+				newSlots.count);
+			if (!newSlots.PromoteTokenToPrimary(preservedRunewordToken)) {
+				// Overflow: displace last regular slot to make room.
+				if (newSlots.count > 0) {
+					newSlots.tokens[newSlots.count - 1u] = 0u;
+					--newSlots.count;
+				}
+				newSlots.PromoteTokenToPrimary(preservedRunewordToken);
+			}
+		}
+
 		_instanceAffixes[instanceKey] = newSlots;
 		MarkLootEvaluatedInstance(instanceKey);
 

@@ -763,6 +763,18 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
+			// Verify runeword token exclusion from regular roll pool.
+			if (reforgeSource.find("_affixes[*idx].token == preservedRunewordToken") == std::string::npos) {
+				std::cerr << "runeword_reforge_safety: runeword token exclusion from regular roll pool is missing\n";
+				return false;
+			}
+
+			// Verify final safety net for runeword token survival.
+			if (reforgeSource.find("newSlots.HasToken(preservedRunewordToken)") == std::string::npos) {
+				std::cerr << "runeword_reforge_safety: post-roll runeword token verification is missing\n";
+				return false;
+			}
+
 			return true;
 		}
 

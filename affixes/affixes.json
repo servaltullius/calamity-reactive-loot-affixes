@@ -103,7 +103,8 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -315,7 +316,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_FIRE_SHRED",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -361,7 +363,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_FROST_SHRED",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -407,7 +410,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -432,7 +436,8 @@
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000640B6",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -459,7 +464,8 @@
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|0009CE26",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -486,7 +492,8 @@
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C3",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -513,7 +520,8 @@
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C4",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -540,7 +548,8 @@
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|000204C5",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -567,7 +576,8 @@
             "type": "CastSpell",
             "spellForm": "Skyrim.esm|0010DDEC",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -685,7 +695,8 @@
             "spellEditorId": "CAFF_SPEL_INCOMING_WARDEN_SHELL",
             "applyTo": "Self",
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -731,7 +742,8 @@
             "spellEditorId": "CAFF_SPEL_INCOMING_RESOLVE_BARRIER",
             "applyTo": "Self",
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -777,7 +789,8 @@
             "spellEditorId": "CAFF_SPEL_INCOMING_VITAL_REBOUND",
             "applyTo": "Self",
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -797,7 +810,7 @@
         "runtime": {
           "trigger": "IncomingHit",
           "procChancePercent": 100.0,
-          "lootWeight": 6.0,
+          "lootWeight": 1.0,
           "action": {
             "type": "MindOverMatter",
             "damageToMagickaPct": 10.0,
@@ -822,7 +835,7 @@
         "runtime": {
           "trigger": "IncomingHit",
           "procChancePercent": 100.0,
-          "lootWeight": 3.5,
+          "lootWeight": 1.0,
           "action": {
             "type": "MindOverMatter",
             "damageToMagickaPct": 15.0,
@@ -847,7 +860,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0.0,
-          "lootWeight": 10.0,
+          "lootWeight": 1.0,
           "action": {
             "type": "DebugNotify",
             "scrollNoConsumeChancePct": 20.0
@@ -871,7 +884,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0.0,
-          "lootWeight": 8.5,
+          "lootWeight": 1.0,
           "action": {
             "type": "DebugNotify",
             "scrollNoConsumeChancePct": 25.0
@@ -895,7 +908,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0.0,
-          "lootWeight": 8.0,
+          "lootWeight": 1.0,
           "action": {
             "type": "DebugNotify",
             "scrollNoConsumeChancePct": 30.0
@@ -919,7 +932,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0.0,
-          "lootWeight": 5.5,
+          "lootWeight": 1.0,
           "action": {
             "type": "DebugNotify",
             "scrollNoConsumeChancePct": 35.0
@@ -977,7 +990,8 @@
               "max": 0.0,
               "spellBaseAsMin": true
             }
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1011,7 +1025,8 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1058,7 +1073,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_HIT_FROSTLOCK_SNARE",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1106,7 +1122,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_HIT_SHOCK_OVERLOAD",
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1163,7 +1180,8 @@
               "max": 24.0,
               "spellBaseAsMin": true
             }
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1209,7 +1227,8 @@
             "spellEditorId": "CAFF_SPEL_KILL_SOUL_SURGE",
             "applyTo": "Self",
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1256,7 +1275,8 @@
             "spellEditorId": "CAFF_SPEL_HIT_SHADOWSTEP_BURST",
             "applyTo": "Self",
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1352,7 +1372,8 @@
               }
             ],
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1529,7 +1550,8 @@
             "percent": 25.0,
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1555,7 +1577,8 @@
             "percent": 50.0,
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1581,7 +1604,8 @@
             "percent": 75.0,
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1607,7 +1631,8 @@
             "percent": 100.0,
             "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1654,7 +1679,8 @@
             "percent": 25.0,
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1680,7 +1706,8 @@
             "percent": 50.0,
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1706,7 +1733,8 @@
             "percent": 75.0,
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1732,7 +1760,8 @@
             "percent": 100.0,
             "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1779,7 +1808,8 @@
             "percent": 25.0,
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1805,7 +1835,8 @@
             "percent": 50.0,
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1831,7 +1862,8 @@
             "percent": 75.0,
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1857,7 +1889,8 @@
             "percent": 100.0,
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1884,7 +1917,7 @@
             "costPctOfMaxMagicka": 5.0,
             "noHitEffectArt": false
           },
-          "lootWeight": 20.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1911,7 +1944,7 @@
             "costPctOfMaxMagicka": 5.0,
             "noHitEffectArt": false
           },
-          "lootWeight": 15.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1938,7 +1971,7 @@
             "costPctOfMaxMagicka": 5.0,
             "noHitEffectArt": false
           },
-          "lootWeight": 10.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1965,7 +1998,7 @@
             "costPctOfMaxMagicka": 5.0,
             "noHitEffectArt": false
           },
-          "lootWeight": 5.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -1998,7 +2031,7 @@
               "spellBaseAsMin": true
             }
           },
-          "lootWeight": 12.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2031,7 +2064,7 @@
               "spellBaseAsMin": true
             }
           },
-          "lootWeight": 10.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2064,7 +2097,7 @@
               "spellBaseAsMin": true
             }
           },
-          "lootWeight": 10.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2097,7 +2130,7 @@
               "spellBaseAsMin": true
             }
           },
-          "lootWeight": 8.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2130,7 +2163,7 @@
               "spellBaseAsMin": true
             }
           },
-          "lootWeight": 8.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2163,7 +2196,7 @@
               "spellBaseAsMin": true
             }
           },
-          "lootWeight": 8.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2196,7 +2229,7 @@
               "spellBaseAsMin": true
             }
           },
-          "lootWeight": 8.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2230,7 +2263,8 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2264,7 +2298,8 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2298,7 +2333,8 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2332,7 +2368,8 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2366,7 +2403,8 @@
             "rateLimitWindowSeconds": 1.0,
             "maxExplosionsPerWindow": 4,
             "noHitEffectArt": false
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2401,7 +2439,7 @@
             "maxExplosionsPerWindow": 3,
             "noHitEffectArt": false
           },
-          "lootWeight": 8.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2436,7 +2474,7 @@
             "maxExplosionsPerWindow": 3,
             "noHitEffectArt": false
           },
-          "lootWeight": 5.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2471,7 +2509,7 @@
             "maxExplosionsPerWindow": 3,
             "noHitEffectArt": false
           },
-          "lootWeight": 3.0
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2523,7 +2561,8 @@
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_MINEFIELD_SNARE",
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2554,7 +2593,8 @@
               "Shock": "CAFF_SPEL_SHOCK_SHRED"
             },
             "applyTo": "Target"
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2608,7 +2648,8 @@
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_POISON",
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2666,7 +2707,8 @@
               }
             ],
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2767,7 +2809,8 @@
               }
             ],
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -2880,7 +2923,8 @@
               }
             ],
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -3141,7 +3185,8 @@
             "spellEditorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
             "applyTo": "Self",
             "noHitEffectArt": true
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -3189,7 +3234,8 @@
                 2.1
               ]
             }
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
@@ -3251,7 +3297,8 @@
                 "CAFF_SPEL_SHOCK_DAMAGE"
               ]
             }
-          }
+          },
+          "lootWeight": 1.0
         },
         "slot": "prefix"
       },
