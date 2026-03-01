@@ -169,8 +169,18 @@ namespace CalamityAffixes
 			}
 		}
 
-			const auto sourceFormID = HitDataUtil::GetHitSourceFormID(a_hitData, a_attacker);
-			const bool routedAsHit = RouteHealthDamageAsHit(a_target, a_attacker, a_hitData, sourceFormID, a_damage, now);
+			// Fallback: if hitData was not captured by ThunkImpl (e.g., filtered
+			// by ResolveStableHitDataForSpecialActions for CoC/Conversion safety),
+			// re-fetch from the target.  OnHealthDamage runs on the main thread
+			// where lastHitData should reflect the current hit.
+			// RouteHealthDamageAsHit will still validate the re-fetched data.
+			const RE::HitData* effectiveHitData = a_hitData;
+			if (!effectiveHitData) {
+				effectiveHitData = HitDataUtil::GetLastHitData(a_target);
+			}
+
+			const auto sourceFormID = HitDataUtil::GetHitSourceFormID(effectiveHitData, a_attacker);
+			const bool routedAsHit = RouteHealthDamageAsHit(a_target, a_attacker, effectiveHitData, sourceFormID, a_damage, now);
 
 			// Diagnostic: log routing decision for hit procs.
 			{
@@ -178,12 +188,13 @@ namespace CalamityAffixes
 				diagCount += 1;
 				if (diagCount <= 20 || (diagCount % 100 == 0)) {
 					spdlog::info(
-						"CalamityAffixes: OnHealthDamage diag #{} target={} attacker={} dmg={:.1f} hitData={} source=0x{:X} routedAsHit={}",
+						"CalamityAffixes: OnHealthDamage diag #{} target={} attacker={} dmg={:.1f} hitData={} refetched={} source=0x{:X} routedAsHit={}",
 						diagCount,
 						a_target->GetName(),
 						a_attacker ? a_attacker->GetName() : "<null>",
 						a_damage,
-						(a_hitData != nullptr),
+						(effectiveHitData != nullptr),
+						(effectiveHitData != a_hitData),
 						sourceFormID,
 						routedAsHit);
 					spdlog::default_logger()->flush();
@@ -216,12 +227,12 @@ namespace CalamityAffixes
 							a_attacker ? a_attacker->GetName() : "<none>");
 					}
 				}
-				ProcessOutgoingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
-				ProcessIncomingHealthDamageHit(a_target, a_attacker, a_hitData, sourceFormID, now);
+				ProcessOutgoingHealthDamageHit(a_target, a_attacker, effectiveHitData, sourceFormID, now);
+				ProcessIncomingHealthDamageHit(a_target, a_attacker, effectiveHitData, sourceFormID, now);
 				ProcessImmediateCorpseExplosionFromLethalHit(a_target, a_attacker);
 			}
 
-			ProcessLowHealthTriggerFromHealthDamage(a_target, a_attacker, a_hitData);
+			ProcessLowHealthTriggerFromHealthDamage(a_target, a_attacker, effectiveHitData);
 		}
 
 	bool EventBridge::RouteHealthDamageAsHit(
