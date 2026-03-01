@@ -434,6 +434,7 @@ namespace CalamityAffixes
 		static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = RuntimePolicy::kMcmSetDotSafetyAutoDisableEvent;
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = RuntimePolicy::kMcmSetAllowNonHostileFirstHitProcEvent;
 		static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
+		static constexpr std::string_view kMcmForceRebuildEvent = "CalamityAffixes_MCM_ForceRebuild";
 
 		static constexpr std::array<float, kMaxRegularAffixesPerItem> kAffixCountWeights = { 70.0f, 22.0f, 8.0f };
 		static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f, 0.5f };
@@ -667,7 +668,17 @@ namespace CalamityAffixes
 		std::chrono::steady_clock::time_point _castOnCritNextAllowed{};
 		std::size_t _castOnCritCycleCursor{ 0 };
 
-		std::mt19937 _rng{ std::random_device{}() };
+		static std::mt19937::result_type MakeRngSeed() noexcept
+		{
+			auto rd = std::random_device{}();
+			auto ts = static_cast<std::mt19937::result_type>(
+				std::chrono::steady_clock::now().time_since_epoch().count());
+			// Mix entropy sources to defend against poor random_device implementations.
+			rd ^= ts;
+			rd ^= static_cast<std::mt19937::result_type>(reinterpret_cast<std::uintptr_t>(&rd) >> 3);
+			return rd;
+		}
+		std::mt19937 _rng{ MakeRngSeed() };
 		mutable std::mutex _rngMutex;
 		mutable std::recursive_mutex _stateMutex;
 

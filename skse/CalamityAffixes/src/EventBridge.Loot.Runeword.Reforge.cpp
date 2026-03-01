@@ -199,6 +199,16 @@ namespace CalamityAffixes
 			}
 
 			newSlots = rolled;
+
+			if (_loot.debugLog) {
+				for (std::uint8_t di = 0; di < rolled.count; ++di) {
+					const auto dit = _affixIndexByToken.find(rolled.tokens[di]);
+					const auto& did = (dit != _affixIndexByToken.end() && dit->second < _affixes.size())
+						? _affixes[dit->second].id : std::string{"?"};
+					SKSE::log::info("CalamityAffixes: reforge rolled slot[{}] = {} (token={:016X}).",
+						di, did, rolled.tokens[di]);
+				}
+			}
 			break;
 		}
 

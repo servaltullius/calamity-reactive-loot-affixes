@@ -202,6 +202,32 @@ namespace CalamityAffixes
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
+			if (eventName == kMcmForceRebuildEvent) {
+				auto* rebuildPlayer = RE::PlayerCharacter::GetSingleton();
+				if (rebuildPlayer) {
+					for (auto* spell : _appliedPassiveSpells) {
+						rebuildPlayer->RemoveSpell(spell);
+					}
+				}
+				_appliedPassiveSpells.clear();
+				RebuildActiveCounts();
+				std::uint32_t activeCount = 0;
+				for (std::size_t i = 0; i < _activeCounts.size(); ++i) {
+					if (_activeCounts[i] > 0) {
+						++activeCount;
+					}
+				}
+				std::string note = "Calamity: rebuilt (";
+				note += std::to_string(activeCount);
+				note += " active, ";
+				note += std::to_string(_appliedPassiveSpells.size());
+				note += " passive)";
+				RE::DebugNotification(note.c_str());
+				SKSE::log::info("CalamityAffixes: force-rebuild — {} active affixes, {} passive spells applied.",
+					activeCount, _appliedPassiveSpells.size());
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
 			if (!_runtimeEnabled) {
 				return RE::BSEventNotifyControl::kContinue;
 			}

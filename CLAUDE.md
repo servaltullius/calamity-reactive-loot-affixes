@@ -48,11 +48,11 @@ _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
 
 ### Prefix/Suffix 시스템 (v1.2.0)
 
-| 구분 | Prefix | Suffix |
-|------|--------|--------|
-| 개수 | 99개 | 60개 (20 패밀리 × 3 티어) |
-| 효과 | proc (발동형) | 패시브 스탯 (Ability Spell) |
-| 예시 | Firestorm, Thunderbolt | Max Health +50, Fire Resist +10% |
+| 구분 | Prefix | Suffix | Runeword |
+|------|--------|--------|----------|
+| 개수 | 99개 | 60개 (20 패밀리 × 3 티어) | 94개 (룬워드 결과) |
+| 효과 | proc (발동형) | 패시브 스탯 (Ability Spell) | proc (발동형) |
+| 예시 | Firestorm, Thunderbolt | Max Health +50, Fire Resist +10% | Enigma, Grief, Spirit |
 
 **롤링 규칙**:
 - 1 어픽스 (70%): P 또는 S 50/50
@@ -74,7 +74,8 @@ _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
 ### 룬워드
 
 - `ReplaceAll()` — 기존 슬롯 전체 교체 (D2 스타일)
-- 94개 레시피 (`RunewordCatalogRows.inl`)
+- 94개 레시피 (`RunewordCatalogRows.inl`) + 94개 결과 어픽스 (`runeword_*_final`)
+- 결과 어픽스 정의: `affixes/modules/keywords.affixes.runewords.json`
 - 재련(Reforge) 시 룬워드 보존 — 일반 어픽스만 재롤, 룬워드 슬롯 유지
 - 룬워드 재변환 허용 — 기존 룬워드를 제거하고 새 룬워드로 교체 가능
 
@@ -98,13 +99,21 @@ _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
 **Mutagen 라이브러리 기반**으로 ESP를 코드에서 직접 생성한다. Creation Kit이나 xEdit 없이 CLI만으로 게임 레코드 생성 가능.
 
 ```bash
-# ESP + INI + JSON 전체 재생성
-cd tools
-dotnet run --project CalamityAffixes.Generator
-# → Data/CalamityAffixes.esp (Keyword, MagicEffect, Spell 레코드)
+# ESP + INI + JSON 전체 재생성 (반드시 리포 루트에서 실행)
+dotnet run --project tools/CalamityAffixes.Generator
+# → Data/CalamityAffixes.esp (Keyword, MagicEffect, Spell, MISC 레코드)
 # → Data/CalamityAffixes_KID.ini, CalamityAffixes_DISTR.ini
 # → Data/SKSE/Plugins/InventoryInjector/CalamityAffixes.json
 ```
+
+**⚠️ ESP FormID 안정성**: Mutagen은 `AddNew()` 호출 순서대로 FormID를 할당한다. 세이브 파일은 인벤토리 아이템을 FormID로 참조하므로, **MISC 아이템(오브, 룬 조각)은 반드시 MGEF/SPEL 앞에 생성**해야 한다. 현재 `KeywordPluginBuilder.Build()` 순서:
+1. MCM Quest (고정)
+2. **MISC 아이템** — 오브, 룬 조각 (고정, 어픽스 추가 영향 없음)
+3. Keywords
+4. MagicEffects / Spells (가변 — 어픽스 추가 시 증가)
+5. LeveledItems
+
+> 이 순서를 변경하면 기존 세이브의 인벤토리 아이템이 소실된다 (v1.2.19-rc34 사고 교훈).
 
 **ESP 레코드 추가 방법**: `affixes.json`의 각 어픽스에 `records` 필드 작성 → Generator가 파싱하여 ESP에 반영.
 
@@ -135,7 +144,7 @@ dotnet run --project CalamityAffixes.Generator
 | 파일 | 역할 |
 |------|------|
 | `Spec/AffixSpec.cs` | 어픽스 오브젝트 모델 (Slot, Family, SpellType 등) |
-| `Writers/KeywordPluginBuilder.cs` | ESP 빌드 (Keyword, MagicEffect, Spell) |
+| `Writers/KeywordPluginBuilder.cs` | ESP 빌드 (MISC, Keyword, MagicEffect, Spell) — **생성 순서 중요** |
 | `Writers/McmPluginBuilder.cs` | MCM Helper Quest 생성 |
 | `Writers/KidIniWriter.cs` | KID 배포 INI |
 
@@ -186,7 +195,8 @@ gh release upload vX.Y.Z CalamityAffixes_MO2_vX.Y.Z.zip
 - **Suffix 동일 스펠 비중첩**: 같은 Suffix가 여러 장비에 있어도 1회만 적용 (RE::SpellItem* 중복 방지). 다른 티어는 다른 스펠이므로 중첩 가능
 - **`procChancePct` 이중 의미**: Prefix=proc 확률, Suffix=드롭 가중치 (리팩터링 후보)
 - **Edit 전 whitespace**: 반드시 `cat -A`로 탭/스페이스 확인 후 편집
-- **ESP 재생성**: affixes.json `records` 필드 수정 시 Generator 재실행 필요
+- **ESP 재생성**: affixes.json `records` 필드 수정 시 Generator 재실행 필요 (리포 루트에서 실행)
+- **ESP FormID 순서 금지 변경**: `KeywordPluginBuilder.Build()`에서 MISC 아이템 생성 순서를 MGEF/SPEL 뒤로 옮기면 세이브 파일의 인벤토리 아이템 소실. 절대 변경 금지
 
 ## 버전 히스토리
 
@@ -196,3 +206,6 @@ gh release upload vX.Y.Z CalamityAffixes_MO2_vX.Y.Z.zip
 | v1.1.0 | 다중 어픽스 (1~3개, 70/22/8%) |
 | v1.1.1 | 아이템 이름 줄바꿈 버그 수정 |
 | v1.2.0 | Prefix/Suffix 분류, 60개 패시브 Suffix 추가 |
+| v1.2.19-rc33 | 재련 롤링 균등 분포 (lootWeight 1.0 통일) |
+| v1.2.19-rc34 | 78개 룬워드 결과 어픽스 추가 (94개 전체 구현) |
+| v1.2.19-rc35 | Generator MISC FormID 안정화 (생성 순서 수정) |

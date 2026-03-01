@@ -177,6 +177,17 @@ namespace CalamityAffixes
 					}
 				}
 			}
+
+			if (_loot.debugLog) {
+				std::uint32_t totalActive = 0;
+				for (std::size_t i = 0; i < _activeCounts.size(); ++i) {
+					if (_activeCounts[i] > 0) {
+						++totalActive;
+					}
+				}
+				spdlog::debug("CalamityAffixes: RebuildActiveCounts complete — {} active affixes, {} desired passives, {} applied passives.",
+					totalActive, desiredPassives.size(), _appliedPassiveSpells.size());
+			}
 		}
 	}
 

@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
 #include <array>
@@ -870,6 +871,10 @@ namespace CalamityAffixes
 			// Rebuild active affix counts to restore passive suffix spells
 			// that Revert() cleared before this Load() ran.
 			RebuildActiveCounts();
+
+			// Restore physical MISC items (rune fragments, reforge orbs) that may have
+			// been lost due to ESP FormID changes between mod versions.
+			MaybeMigrateMiscCurrency();
 		}
 
 	void EventBridge::Revert(SKSE::SerializationInterface*)
@@ -1124,5 +1129,82 @@ namespace CalamityAffixes
 		}
 
 		return false;
+	}
+
+	void EventBridge::MaybeMigrateMiscCurrency()
+	{
+		// Detect and recover physical MISC items (rune fragments, reforge orbs) lost
+		// due to ESP FormID changes between mod versions.  The co-save stores fragment
+		// counts by FNV-1a token (FormID-independent), so we can compare against the
+		// player's actual physical inventory and re-grant any missing items.
+
+		if (_runewordRuneFragments.empty() && _instanceAffixes.empty()) {
+			return;
+		}
+
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return;
+		}
+
+		// --- Rune fragments ---
+		// Check if ALL non-zero co-save fragment entries have 0 physical items.
+		// A partial mismatch (some present, some missing) could be normal gameplay;
+		// ALL missing strongly indicates FormID shift.
+		std::uint32_t coSaveNonZeroEntries = 0u;
+		std::uint32_t physicallyMissingEntries = 0u;
+		for (const auto& [runeToken, amount] : _runewordRuneFragments) {
+			if (amount == 0u) {
+				continue;
+			}
+			++coSaveNonZeroEntries;
+			const auto owned = RunewordDetail::GetOwnedRunewordFragmentCount(
+				player, _runewordRuneNameByToken, runeToken);
+			if (owned == 0u) {
+				++physicallyMissingEntries;
+			}
+		}
+
+		const bool fragmentMigrationNeeded =
+			coSaveNonZeroEntries > 0u && physicallyMissingEntries == coSaveNonZeroEntries;
+
+		if (fragmentMigrationNeeded) {
+			std::uint32_t totalRestored = 0u;
+			for (const auto& [runeToken, amount] : _runewordRuneFragments) {
+				if (amount == 0u) {
+					continue;
+				}
+				const auto owned = RunewordDetail::GetOwnedRunewordFragmentCount(
+					player, _runewordRuneNameByToken, runeToken);
+				if (owned < amount) {
+					const auto deficit = amount - owned;
+					const auto granted = RunewordDetail::GrantRunewordFragments(
+						player, _runewordRuneNameByToken, runeToken, deficit);
+					totalRestored += granted;
+				}
+			}
+			SKSE::log::info(
+				"CalamityAffixes: MISC migration — restored {} rune fragment items across {} entries.",
+				totalRestored, coSaveNonZeroEntries);
+		}
+
+		// --- Reforge orbs ---
+		// No co-save backup for orb count.  If fragment migration fired (clear FormID
+		// loss signal) AND the player has 0 orbs, grant a default starter amount.
+		if (fragmentMigrationNeeded) {
+			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+			if (orb && player->GetItemCount(orb) <= 0) {
+				static constexpr std::uint32_t kMigrationOrbGrant = 3u;
+				player->AddObjectToContainer(orb, nullptr,
+					static_cast<std::int32_t>(kMigrationOrbGrant), nullptr);
+				SKSE::log::info(
+					"CalamityAffixes: MISC migration — granted {} reforge orbs (FormID loss recovery).",
+					kMigrationOrbGrant);
+			}
+		}
+
+		if (fragmentMigrationNeeded) {
+			RE::DebugNotification("Calamity: recovered missing currency items.");
+		}
 	}
 }
