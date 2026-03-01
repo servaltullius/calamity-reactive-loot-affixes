@@ -89,9 +89,15 @@ public static class KeywordPluginBuilder
             mod.ModHeader.Flags |= SkyrimModHeader.HeaderFlag.Small;
         }
 
-        // Keep the MCM quest FormID stable across content expansion by creating it first.
-        // This prevents MCM duplicate/ghost entries caused by shifting generated record order.
+        // ── FormID-stable zone ──────────────────────────────────────────────
+        // Records created here get low, fixed FormIDs regardless of how many
+        // affixes are added later.  Player saves reference MISC items (orbs,
+        // rune fragments) by FormID, so these MUST be allocated before the
+        // variable-length affix record block.
         McmPluginBuilder.AddMcmQuest(mod);
+        AddRunewordRuneFragments(mod);
+        AddReforgeOrb(mod);
+        // ── end FormID-stable zone ─────────────────────────────────────────
 
         var seenMagicEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -132,9 +138,6 @@ public static class KeywordPluginBuilder
                 seenSpells.Add(spell.EditorId);
             }
         }
-
-        AddRunewordRuneFragments(mod);
-        AddReforgeOrb(mod);
 
         if (spec.Loot is not null)
         {
