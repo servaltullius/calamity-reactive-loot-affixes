@@ -253,7 +253,7 @@ namespace CalamityAffixes
 		SyncCurrencyDropModeState("ApplyLootConfigFromJson");
 
 		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
-		spdlog::flush_on(spdlog::level::warn);
+		spdlog::flush_on(spdlog::level::info);
 	}
 
 	void EventBridge::SyncCurrencyDropModeState(std::string_view a_contextTag)
