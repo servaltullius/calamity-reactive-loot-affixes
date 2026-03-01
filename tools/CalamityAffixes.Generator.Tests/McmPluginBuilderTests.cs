@@ -25,7 +25,7 @@ public sealed class McmPluginBuilderTests
                     Traits = "-E",
                     Chance = 1.0,
                 },
-                Runtime = new Dictionary<string, object?>(),
+                Runtime = new RuntimeSpec { Trigger = "Hit", Action = new Dictionary<string, object?>() },
             });
         }
 

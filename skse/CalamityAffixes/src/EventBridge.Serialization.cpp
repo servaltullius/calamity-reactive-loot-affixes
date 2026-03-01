@@ -413,6 +413,7 @@ namespace CalamityAffixes
 
 							RE::FormID resolvedBaseID = 0;
 							if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+								SKSE::log::warn("CalamityAffixes: IAXF v7 — ResolveFormID failed for baseID {:08X}, skipping entry.", baseID);
 								continue;
 							}
 
@@ -456,6 +457,7 @@ namespace CalamityAffixes
 
 							RE::FormID resolvedBaseID = 0;
 							if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+								SKSE::log::warn("CalamityAffixes: IAXF v6 — ResolveFormID failed for baseID {:08X}, skipping entry.", baseID);
 								continue;
 							}
 
@@ -526,6 +528,7 @@ namespace CalamityAffixes
 
 						RE::FormID resolvedBaseID = 0;
 						if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+							SKSE::log::warn("CalamityAffixes: IAXF v1-v5 — ResolveFormID failed for baseID {:08X}, skipping entry.", baseID);
 							continue;
 						}
 
@@ -582,10 +585,13 @@ namespace CalamityAffixes
 						}
 
 						RE::FormID resolvedBaseID = 0;
-						if (!a_intfc->ResolveFormID(baseID, resolvedBaseID) || affixToken == 0u) {
+						if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+							SKSE::log::warn("CalamityAffixes: IRST — ResolveFormID failed for baseID {:08X}, skipping entry.", baseID);
 							continue;
 						}
-
+						if (affixToken == 0u) {
+							continue;
+						}
 						const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
 						_instanceStates[MakeInstanceStateKey(key, affixToken)] = state;
 					}
@@ -651,6 +657,7 @@ namespace CalamityAffixes
 
 						RE::FormID resolvedBaseID = 0;
 						if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+							SKSE::log::warn("CalamityAffixes: RWRD — ResolveFormID failed for baseID {:08X}, skipping entry.", baseID);
 							continue;
 						}
 
@@ -695,6 +702,7 @@ namespace CalamityAffixes
 
 						RE::FormID resolvedBaseID = 0;
 						if (!a_intfc->ResolveFormID(baseID, resolvedBaseID)) {
+							SKSE::log::warn("CalamityAffixes: LRLD — ResolveFormID failed for baseID {:08X}, skipping entry.", baseID);
 							continue;
 						}
 

@@ -34,7 +34,7 @@ public sealed class KidIniRendererTests
                             Traits = "-E",
                             Chance = 2.0,
                         },
-                        Runtime = new Dictionary<string, object?>(),
+                        Runtime = new RuntimeSpec { Trigger = "Hit", Action = new Dictionary<string, object?>() },
                     },
                 ],
                 KidRules =

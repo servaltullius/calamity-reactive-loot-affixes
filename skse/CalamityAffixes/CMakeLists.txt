@@ -75,7 +75,13 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Loot.Assign.cpp
 	    src/EventBridge.Triggers.cpp
 	    src/EventBridge.Triggers.HealthDamage.cpp
-	    src/EventBridge.Triggers.Events.cpp
+	    src/EventBridge.Triggers.HitEvent.cpp
+	    src/EventBridge.Triggers.DeathEvent.cpp
+	    src/EventBridge.Triggers.EquipEvent.cpp
+	    src/EventBridge.Triggers.ActivateEvent.cpp
+	    src/EventBridge.Triggers.MagicEffectApply.cpp
+	    src/EventBridge.Triggers.ModCallback.cpp
+	    src/EventBridge.Triggers.ActiveCounts.cpp
 	    src/EventBridge.Actions.cpp
 	    src/EventBridge.Actions.Dispatch.cpp
 	    src/EventBridge.Actions.Cast.cpp
@@ -222,4 +228,9 @@ if (BUILD_TESTING)
             COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_runtime_gate_store_checks.sh
         )
     endif()
+
+    # Micro-benchmark (manual-run only, not registered with ctest).
+    add_executable(bench_core_ops EXCLUDE_FROM_ALL tests/bench_core_ops.cpp)
+    target_include_directories(bench_core_ops PRIVATE include)
+    calamity_add_xwin_libpaths(bench_core_ops)
 endif()

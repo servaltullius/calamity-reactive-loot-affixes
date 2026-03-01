@@ -162,7 +162,34 @@ public sealed class AffixDefinition
     public string? Family { get; init; }
 
     [JsonPropertyName("runtime")]
-    public required Dictionary<string, object?> Runtime { get; init; }
+    public required RuntimeSpec Runtime { get; init; }
+}
+
+public sealed class RuntimeSpec
+{
+    [JsonPropertyName("trigger")]
+    public required string Trigger { get; init; }
+
+    [JsonPropertyName("procChancePercent")]
+    public double? ProcChancePercent { get; init; }
+
+    [JsonPropertyName("icdSeconds")]
+    public double? IcdSeconds { get; init; }
+
+    [JsonPropertyName("perTargetICDSeconds")]
+    public double? PerTargetICDSeconds { get; init; }
+
+    [JsonPropertyName("lootWeight")]
+    public double? LootWeight { get; init; }
+
+    [JsonPropertyName("action")]
+    public required Dictionary<string, object?> Action { get; init; }
+
+    /// <summary>
+    /// Captures any runtime fields not explicitly modeled (pass-through to C++ runtime).
+    /// </summary>
+    [JsonExtensionData]
+    public Dictionary<string, object?>? ExtensionData { get; set; }
 }
 
 public sealed class AffixRecordSpec

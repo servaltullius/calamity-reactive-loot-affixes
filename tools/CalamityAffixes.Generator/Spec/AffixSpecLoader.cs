@@ -268,34 +268,35 @@ public static class AffixSpecLoader
 
     private static void ValidateRuntimeShape(AffixDefinition affix)
     {
-        var runtime = JsonSerializer.SerializeToElement(affix.Runtime);
-        if (runtime.ValueKind != JsonValueKind.Object)
-        {
-            throw new InvalidDataException($"{affix.Id}: runtime must be an object.");
-        }
+        var rt = affix.Runtime;
 
-        if (!TryGetRequiredString(runtime, "trigger", out var trigger) || !SupportedTriggers.Contains(trigger))
+        if (!SupportedTriggers.Contains(rt.Trigger))
         {
             throw new InvalidDataException($"{affix.Id}: runtime.trigger must be one of [{string.Join(", ", SupportedTriggers)}].");
         }
 
-        if (TryGetOptionalNumber(runtime, "procChancePercent", affix.Id, out var procChancePercent))
+        if (rt.ProcChancePercent.HasValue && rt.ProcChancePercent.Value is < 0.0 or > 100.0)
         {
-            if (procChancePercent is < 0.0 or > 100.0)
-            {
-                throw new InvalidDataException($"{affix.Id}: runtime.procChancePercent must be in range 0..100 (got: {procChancePercent}).");
-            }
+            throw new InvalidDataException($"{affix.Id}: runtime.procChancePercent must be in range 0..100 (got: {rt.ProcChancePercent.Value}).");
         }
 
-        ValidateOptionalNonNegativeNumber(runtime, "icdSeconds", affix.Id);
-        ValidateOptionalNonNegativeNumber(runtime, "perTargetICDSeconds", affix.Id);
+        if (rt.IcdSeconds.HasValue && rt.IcdSeconds.Value < 0.0)
+        {
+            throw new InvalidDataException($"{affix.Id}: runtime.icdSeconds must be >= 0 (got: {rt.IcdSeconds.Value}).");
+        }
 
-        if (!runtime.TryGetProperty("action", out var action) || action.ValueKind != JsonValueKind.Object)
+        if (rt.PerTargetICDSeconds.HasValue && rt.PerTargetICDSeconds.Value < 0.0)
+        {
+            throw new InvalidDataException($"{affix.Id}: runtime.perTargetICDSeconds must be >= 0 (got: {rt.PerTargetICDSeconds.Value}).");
+        }
+
+        var actionElement = JsonSerializer.SerializeToElement(rt.Action);
+        if (actionElement.ValueKind != JsonValueKind.Object)
         {
             throw new InvalidDataException($"{affix.Id}: runtime.action must be an object.");
         }
 
-        if (!TryGetRequiredString(action, "type", out var actionType) || !SupportedActionTypes.Contains(actionType))
+        if (!TryGetRequiredString(actionElement, "type", out var actionType) || !SupportedActionTypes.Contains(actionType))
         {
             throw new InvalidDataException($"{affix.Id}: runtime.action.type must be one of [{string.Join(", ", SupportedActionTypes)}].");
         }

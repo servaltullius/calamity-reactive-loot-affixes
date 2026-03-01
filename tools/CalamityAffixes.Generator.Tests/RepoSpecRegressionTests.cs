@@ -20,10 +20,7 @@ public sealed class RepoSpecRegressionTests
                 return false;
             }
 
-            if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
-            {
-                return false;
-            }
+            var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
 
             if (actionEl.ValueKind != JsonValueKind.Object)
             {
@@ -53,10 +50,7 @@ public sealed class RepoSpecRegressionTests
 
         var castOnCritCount = spec.Keywords.Affixes.Count(affix =>
         {
-            if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
-            {
-                return false;
-            }
+            var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
 
             if (actionEl.ValueKind != JsonValueKind.Object)
             {
@@ -92,10 +86,7 @@ public sealed class RepoSpecRegressionTests
                     return false;
                 }
 
-                if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
-                {
-                    return false;
-                }
+                var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
 
                 if (actionEl.ValueKind != JsonValueKind.Object)
                 {
@@ -234,10 +225,7 @@ public sealed class RepoSpecRegressionTests
 
         var hasSummonCorpseExplosion = spec.Keywords.Affixes.Any(affix =>
         {
-            if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
-            {
-                return false;
-            }
+            var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
 
             if (actionEl.ValueKind != JsonValueKind.Object)
             {
@@ -267,10 +255,7 @@ public sealed class RepoSpecRegressionTests
 
         var hasEvolution = spec.Keywords.Affixes.Any(affix =>
         {
-            if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
-            {
-                return false;
-            }
+            var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
 
             if (actionEl.ValueKind != JsonValueKind.Object)
             {
@@ -300,10 +285,7 @@ public sealed class RepoSpecRegressionTests
 
         var hasModeCycle = spec.Keywords.Affixes.Any(affix =>
         {
-            if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
-            {
-                return false;
-            }
+            var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
 
             if (actionEl.ValueKind != JsonValueKind.Object)
             {
@@ -333,10 +315,7 @@ public sealed class RepoSpecRegressionTests
 
         var hasManualModeCycle = spec.Keywords.Affixes.Any(affix =>
         {
-            if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
-            {
-                return false;
-            }
+            var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
 
             if (actionEl.ValueKind != JsonValueKind.Object)
             {
@@ -371,10 +350,7 @@ public sealed class RepoSpecRegressionTests
 
         var hasCombinedAffix = spec.Keywords.Affixes.Any(affix =>
         {
-            if (!affix.Runtime.TryGetValue("action", out var actionObj) || actionObj is not JsonElement actionEl)
-            {
-                return false;
-            }
+            var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
 
             if (actionEl.ValueKind != JsonValueKind.Object)
             {
@@ -475,10 +451,9 @@ public sealed class RepoSpecRegressionTests
                 TryGetRuntimeString(affix.Runtime, "trigger", out var trigger) && trigger == "IncomingHit",
                 $"MindOverMatter affix {affix.Id} must use runtime.trigger == IncomingHit.");
 
-            Assert.True(affix.Runtime.TryGetValue("action", out var actionObj),
+            Assert.True(affix.Runtime.Action is not null,
                 $"MindOverMatter affix {affix.Id} must have runtime.action.");
-            Assert.True(actionObj is JsonElement, $"MindOverMatter affix {affix.Id} runtime.action must be JSON.");
-            var actionEl = (JsonElement)actionObj!;
+            var actionEl = JsonSerializer.SerializeToElement(affix.Runtime.Action);
             Assert.True(actionEl.ValueKind == JsonValueKind.Object,
                 $"MindOverMatter affix {affix.Id} runtime.action must be object.");
 
@@ -519,11 +494,24 @@ public sealed class RepoSpecRegressionTests
         throw new DirectoryNotFoundException("Failed to locate repo root (affixes/affixes.json not found above test output directory).");
     }
 
-    private static bool TryGetRuntimeString(Dictionary<string, object?> runtime, string key, out string? value)
+    private static bool TryGetRuntimeString(RuntimeSpec? runtime, string key, out string? value)
     {
         value = null;
 
-        if (!runtime.TryGetValue(key, out var obj))
+        if (runtime is null)
+        {
+            return false;
+        }
+
+        // Known typed fields
+        if (key == "trigger")
+        {
+            value = runtime.Trigger;
+            return value is not null;
+        }
+
+        // Fall back to extension data for unknown fields
+        if (runtime.ExtensionData is null || !runtime.ExtensionData.TryGetValue(key, out var obj))
         {
             return false;
         }
@@ -537,11 +525,34 @@ public sealed class RepoSpecRegressionTests
         return value is not null;
     }
 
-    private static bool TryGetRuntimeNumber(Dictionary<string, object?> runtime, string key, out double value)
+    private static bool TryGetRuntimeNumber(RuntimeSpec? runtime, string key, out double value)
     {
         value = 0.0;
 
-        if (!runtime.TryGetValue(key, out var obj))
+        if (runtime is null)
+        {
+            return false;
+        }
+
+        // Known typed fields
+        switch (key)
+        {
+            case "procChancePercent":
+                if (runtime.ProcChancePercent.HasValue) { value = runtime.ProcChancePercent.Value; return true; }
+                return false;
+            case "icdSeconds":
+                if (runtime.IcdSeconds.HasValue) { value = runtime.IcdSeconds.Value; return true; }
+                return false;
+            case "perTargetICDSeconds":
+                if (runtime.PerTargetICDSeconds.HasValue) { value = runtime.PerTargetICDSeconds.Value; return true; }
+                return false;
+            case "lootWeight":
+                if (runtime.LootWeight.HasValue) { value = runtime.LootWeight.Value; return true; }
+                return false;
+        }
+
+        // Fall back to extension data for unknown fields
+        if (runtime.ExtensionData is null || !runtime.ExtensionData.TryGetValue(key, out var obj))
         {
             return false;
         }
@@ -554,11 +565,17 @@ public sealed class RepoSpecRegressionTests
         return el.TryGetDouble(out value);
     }
 
-    private static bool TryGetActionType(Dictionary<string, object?> runtime, out string? value)
+    private static bool TryGetActionType(RuntimeSpec? runtime, out string? value)
     {
         value = null;
 
-        if (!runtime.TryGetValue("action", out var obj) || obj is not JsonElement actionEl || actionEl.ValueKind != JsonValueKind.Object)
+        if (runtime?.Action is null)
+        {
+            return false;
+        }
+
+        var actionEl = JsonSerializer.SerializeToElement(runtime.Action);
+        if (actionEl.ValueKind != JsonValueKind.Object)
         {
             return false;
         }

@@ -43,7 +43,7 @@ namespace RuntimeGateStoreChecks
 		const fs::path headerFile = repoRoot / "include" / "CalamityAffixes" / "EventBridge.h";
 		const fs::path assignFile = repoRoot / "src" / "EventBridge.Loot.Assign.cpp";
 		const fs::path serializationFile = repoRoot / "src" / "EventBridge.Serialization.cpp";
-		const fs::path triggerEventsFile = repoRoot / "src" / "EventBridge.Triggers.Events.cpp";
+		const fs::path triggerEventsFile = repoRoot / "src" / "EventBridge.Triggers.ActivateEvent.cpp";
 
 		const auto worldKeyDay10 = CalamityAffixes::detail::BuildLootCurrencyLedgerKey(
 			CalamityAffixes::detail::LootCurrencySourceTier::kWorld,
@@ -159,7 +159,7 @@ namespace RuntimeGateStoreChecks
 				(!hasDirectActivationRollPath && !hasSharedActivationRollHelper) ||
 				(triggerText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos &&
 					triggerText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos)) {
-				std::cerr << "loot_currency_ledger_policy: activation-time corpse/container currency roll path missing in EventBridge.Triggers.Events.cpp\n";
+				std::cerr << "loot_currency_ledger_policy: activation-time corpse/container currency roll path missing in EventBridge.Triggers.ActivateEvent.cpp\n";
 				return false;
 		}
 
@@ -389,7 +389,7 @@ namespace RuntimeGateStoreChecks
 		const fs::path configJsonFile = repoRoot / "Data" / "MCM" / "Config" / "CalamityAffixes" / "config.json";
 		const fs::path mcmConfigScriptFile = repoRoot / "Data" / "Scripts" / "Source" / "CalamityAffixes_MCMConfig.psc";
 		const fs::path modeControlScriptFile = repoRoot / "Data" / "Scripts" / "Source" / "CalamityAffixes_ModeControl.psc";
-		const fs::path triggerEventsFile = repoRoot / "skse" / "CalamityAffixes" / "src" / "EventBridge.Triggers.Events.cpp";
+		const fs::path triggerEventsFile = repoRoot / "skse" / "CalamityAffixes" / "src" / "EventBridge.Triggers.ModCallback.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);

@@ -38,7 +38,11 @@ public sealed class KeywordPluginBuilderTests
                             Traits = "-E",
                             Chance = 2.0,
                         },
-                        Runtime = new Dictionary<string, object?>(),
+                        Runtime = new RuntimeSpec
+                        {
+                            Trigger = "Hit",
+                            Action = new Dictionary<string, object?> { { "type", "CastSpell" } },
+                        },
                     },
                 ],
                 KidRules = [],
@@ -336,7 +340,11 @@ public sealed class KeywordPluginBuilderTests
                             Traits = "-E",
                             Chance = 100.0,
                         },
-                        Runtime = new Dictionary<string, object?>(),
+                        Runtime = new RuntimeSpec
+                        {
+                            Trigger = "Hit",
+                            Action = new Dictionary<string, object?> { { "type", "CastSpell" } },
+                        },
                     },
                 ],
                 KidRules = [],
@@ -429,7 +437,11 @@ public sealed class KeywordPluginBuilderTests
                             Traits = "-E",
                             Chance = 100.0,
                         },
-                        Runtime = new Dictionary<string, object?>(),
+                        Runtime = new RuntimeSpec
+                        {
+                            Trigger = "Hit",
+                            Action = new Dictionary<string, object?> { { "type", "CastSpell" } },
+                        },
                     },
                 ],
                 KidRules = [],
@@ -512,7 +524,11 @@ public sealed class KeywordPluginBuilderTests
                             Traits = "-E",
                             Chance = 100.0,
                         },
-                        Runtime = new Dictionary<string, object?>(),
+                        Runtime = new RuntimeSpec
+                        {
+                            Trigger = "Hit",
+                            Action = new Dictionary<string, object?> { { "type", "CastSpell" } },
+                        },
                     },
                 ],
                 KidRules = [],
@@ -728,7 +744,11 @@ public sealed class KeywordPluginBuilderTests
                             Traits = "-E",
                             Chance = 100.0,
                         },
-                        Runtime = new Dictionary<string, object?>(),
+                        Runtime = new RuntimeSpec
+                        {
+                            Trigger = "Hit",
+                            Action = new Dictionary<string, object?> { { "type", "CastSpell" } },
+                        },
                     },
                 ],
                 KidRules = [],
@@ -799,7 +819,11 @@ public sealed class KeywordPluginBuilderTests
                             Traits = "-E",
                             Chance = 100.0,
                         },
-                        Runtime = new Dictionary<string, object?>(),
+                        Runtime = new RuntimeSpec
+                        {
+                            Trigger = "Hit",
+                            Action = new Dictionary<string, object?> { { "type", "CastSpell" } },
+                        },
                     },
                 ],
                 KidRules = [],
@@ -864,7 +888,11 @@ public sealed class KeywordPluginBuilderTests
                             Traits = "-E",
                             Chance = 100.0,
                         },
-                        Runtime = new Dictionary<string, object?>(),
+                        Runtime = new RuntimeSpec
+                        {
+                            Trigger = "Hit",
+                            Action = new Dictionary<string, object?> { { "type", "CastSpell" } },
+                        },
                     },
                 ],
                 KidRules = [],
