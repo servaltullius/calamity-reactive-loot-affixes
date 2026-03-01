@@ -365,6 +365,12 @@ struct CorpseCurrencyDropProbe
 				}
 		}
 
+		// Only forward the hit signal to Papyrus when the C++ HandleHealthDamage
+		// hook is NOT active for this target.  When hookRouted is true, all proc
+		// processing is handled in C++ (via the hook → OnHealthDamage path).
+		// Sending the ModEvent unconditionally caused Papyrus AffixManager to
+		// fire a second, duplicate proc spell for every hit.
+		if (!hookRouted) {
 			if (ShouldSendPlayerOwnedHitEvent(
 					relation.attackerIsPlayerOwned,
 					relation.hasPlayerOwner,
@@ -381,6 +387,7 @@ struct CorpseCurrencyDropProbe
 					SendModEvent("CalamityAffixes_Hit", target);
 				}
 			}
+		}
 
 		return RE::BSEventNotifyControl::kContinue;
 	}
@@ -689,7 +696,7 @@ struct CorpseCurrencyDropProbe
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		// Treat DoT as “apply/refresh”, not per-tick. Filter by keyword.
+		// Treat DoT as "apply/refresh", not per-tick. Filter by keyword.
 		auto* mgef = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
 		if (!mgef) {
 			return RE::BSEventNotifyControl::kContinue;
@@ -781,8 +788,13 @@ struct CorpseCurrencyDropProbe
 			ProcessTrigger(Trigger::kDotApply, GetPlayerOwner(caster), target, nullptr);
 		}
 
-		// Forward a lightweight “player-owned DoT apply/refresh” signal to Papyrus.
-		SendModEvent("CalamityAffixes_DotApply", target);
+		// Forward a lightweight "player-owned DoT apply/refresh" signal to Papyrus
+		// only when the C++ config is not loaded (fallback mode).  When _configLoaded
+		// is true, ProcessTrigger above already handled the proc; sending the ModEvent
+		// would cause Papyrus AffixManager to fire a duplicate proc.
+		if (!_configLoaded) {
+			SendModEvent("CalamityAffixes_DotApply", target);
+		}
 
 		return RE::BSEventNotifyControl::kContinue;
 	}
