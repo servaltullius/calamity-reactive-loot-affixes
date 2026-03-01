@@ -435,6 +435,7 @@ namespace CalamityAffixes
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = RuntimePolicy::kMcmSetAllowNonHostileFirstHitProcEvent;
 		static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 		static constexpr std::string_view kMcmForceRebuildEvent = "CalamityAffixes_MCM_ForceRebuild";
+		static constexpr std::string_view kMcmGrantRecoveryPackEvent = "CalamityAffixes_MCM_GrantRecoveryPack";
 
 		static constexpr std::array<float, kMaxRegularAffixesPerItem> kAffixCountWeights = { 70.0f, 22.0f, 8.0f };
 		static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f, 0.5f };

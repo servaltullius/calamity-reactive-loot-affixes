@@ -3,6 +3,7 @@
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/PrismaTooltip.h"
+#include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <chrono>
 #include <cstdint>
@@ -225,6 +226,31 @@ namespace CalamityAffixes
 				RE::DebugNotification(note.c_str());
 				SKSE::log::info("CalamityAffixes: force-rebuild — {} active affixes, {} passive spells applied.",
 					activeCount, _appliedPassiveSpells.size());
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			if (eventName == kMcmGrantRecoveryPackEvent) {
+				auto* recoveryPlayer = RE::PlayerCharacter::GetSingleton();
+				if (recoveryPlayer) {
+					GrantReforgeOrbs(5u);
+					if (_runewordRuneNameByToken.empty()) {
+						InitializeRunewordCatalog();
+					}
+					std::uint32_t fragmentsGranted = 0u;
+					for (const auto& [runeToken, runeName] : _runewordRuneNameByToken) {
+						if (runeToken == 0u || runeName.empty()) {
+							continue;
+						}
+						const auto given = RunewordDetail::GrantRunewordFragments(
+							recoveryPlayer, _runewordRuneNameByToken, runeToken, 1u);
+						fragmentsGranted += given;
+					}
+					std::string note = "Calamity: recovery pack (5 orbs, ";
+					note += std::to_string(fragmentsGranted);
+					note += " fragments)";
+					RE::DebugNotification(note.c_str());
+					SKSE::log::info("CalamityAffixes: granted recovery pack — 5 orbs, {} fragment types.", fragmentsGranted);
+				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
