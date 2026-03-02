@@ -306,6 +306,8 @@ namespace CalamityAffixes
 		const auto ownedOrbs = std::max(0, player->GetItemCount(orb));
 		if (ownedOrbs > 0) {
 			// Player has orbs — no FormID loss detected.
+			// Mark as checked so this never runs again for this save.
+			_miscCurrencyMigrated = true;
 			return;
 		}
 
