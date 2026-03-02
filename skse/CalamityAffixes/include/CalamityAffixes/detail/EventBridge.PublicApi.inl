@@ -13,6 +13,10 @@
 		void Load(SKSE::SerializationInterface* a_intfc);
 		void Revert(SKSE::SerializationInterface* a_intfc);
 
+		// Called from kPostLoadGame messaging callback — game state (player inventory)
+		// is fully loaded at this point, unlike the Serialization Load callback.
+		void OnPostLoadGame();
+
 		// Called from SKSE SerializationInterface form delete callback.
 		// We use this to prune instance-affix entries for player-dropped world refs that are later deleted.
 		void OnFormDelete(RE::VMHandle a_handle);

@@ -674,8 +674,10 @@ namespace CalamityAffixes
 			// that Revert() cleared before this Load() ran.
 			RebuildActiveCounts();
 
-			// Restore physical MISC items (rune fragments, reforge orbs) that may have
-			// been lost due to ESP FormID changes between mod versions.
-			MaybeMigrateMiscCurrency();
+			// NOTE: MaybeMigrateMiscCurrency() is intentionally NOT called here.
+			// During the SKSE Load callback the game engine has not yet restored the
+			// player's inventory, so GetItemCount() returns 0 for all items.
+			// The migration check is deferred to OnPostLoadGame() (kPostLoadGame message),
+			// where the game state is fully loaded.
 		}
 }

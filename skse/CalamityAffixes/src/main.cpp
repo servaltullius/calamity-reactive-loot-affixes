@@ -100,6 +100,9 @@ SKSEPluginInfo(
 				}
 			break;
 		}
+		case SKSE::MessagingInterface::kPostLoadGame:
+			CalamityAffixes::EventBridge::GetSingleton()->OnPostLoadGame();
+			break;
 		default:
 			break;
 		}

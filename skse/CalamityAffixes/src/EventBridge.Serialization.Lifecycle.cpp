@@ -96,6 +96,12 @@ namespace CalamityAffixes
 		Hooks::ClearRuntimeState();
 	}
 
+	void EventBridge::OnPostLoadGame()
+	{
+		const std::scoped_lock lock(_stateMutex);
+		MaybeMigrateMiscCurrency();
+	}
+
 	void EventBridge::OnFormDelete(RE::VMHandle a_handle)
 	{
 		auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
