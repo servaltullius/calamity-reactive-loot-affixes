@@ -163,9 +163,33 @@ dotnet run --project tools/CalamityAffixes.Generator
 
 - **릴리즈 노트/패치노트는 반드시 한국어로 작성**
 - DLL 바이너리를 MO2 zip에 포함했는지 반드시 확인 후 릴리즈
+- **프리릴리즈/정식릴리즈 모두 MO2 zip을 첨부해야 함** — 릴리즈 노트만 올리면 사용자가 적용 불가
+
+### 프리릴리즈 (rc)
+
+```bash
+# 1. 빌드 & 테스트
+cd skse/CalamityAffixes
+cmake --build build.linux-clangcl-rel --config Release
+cd build.linux-clangcl-rel && ctest --output-on-failure
+
+# 2. 커밋 & 푸시
+git add <files> && git commit && git push
+
+# 3. MO2 zip 생성 (release_build.py 또는 수동)
+python3 tools/release_build.py          # 자동: build→test→zip→verify→SHA256
+# 또는 수동: DLL 복사 후 zip 패키징
+
+# 4. 프리릴리즈 생성 + zip 첨부 (반드시 zip 첨부!)
+gh release create vX.Y.Z-rcNN --prerelease --title "..." --notes "..."
+gh release upload vX.Y.Z-rcNN CalamityAffixes_MO2_vX.Y.Z.zip
+```
+
+### 정식 릴리즈
 
 ```bash
 # 1. 빌드 & 테스트 확인
+cd skse/CalamityAffixes
 cmake --build build.linux-clangcl-rel --config Release
 cd build.linux-clangcl-rel && ctest --output-on-failure
 
