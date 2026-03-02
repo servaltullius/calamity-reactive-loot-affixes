@@ -50,7 +50,7 @@ _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
 
 | 구분 | Prefix | Suffix | Runeword |
 |------|--------|--------|----------|
-| 개수 | 99개 | 60개 (20 패밀리 × 3 티어) | 94개 (룬워드 결과) |
+| 개수 | 83개 | 60개 (20 패밀리 × 3 티어) | 94개 (룬워드 결과) |
 | 효과 | proc (발동형) | 패시브 스탯 (Ability Spell) | proc (발동형) |
 | 예시 | Firestorm, Thunderbolt | Max Health +50, Fire Resist +10% | Enigma, Grief, Spirit |
 
@@ -83,16 +83,19 @@ _instanceAffixes: unordered_map<uint64_t, InstanceAffixSlots>
 
 ### C++ 플러그인 (`skse/CalamityAffixes/`)
 
-| 파일 | 역할 | LOC |
-|------|------|-----|
-| `include/CalamityAffixes/EventBridge.h` | 메인 클래스, 상수, 타입 정의 | 734 |
-| `include/CalamityAffixes/InstanceAffixSlots.h` | 다중 어픽스 구조체 (핵심) | 109 |
-| `src/EventBridge.Config.cpp` | affixes.json 파싱, 런타임 설정 | 2008 |
-| `src/EventBridge.Loot.Assign.cpp` | 롤링, P/S 분배, 네이밍 | 536 |
-| `src/EventBridge.Triggers.Events.cpp` | RebuildActiveCounts, 패시브 스펠 관리 | 708 |
-| `src/EventBridge.Serialization.cpp` | Save/Load/Revert (v7) | 1073 |
-| `src/EventBridge.Loot.Runtime.cpp` | 툴팁, 런타임 뮤테이션 | 390 |
-| `src/EventBridge.Loot.Runeword.cpp` | 룬워드 레시피 처리 | 1659 |
+| 파일 | 역할 |
+|------|------|
+| `include/CalamityAffixes/EventBridge.h` | 메인 클래스, 상수, 타입 정의 |
+| `include/CalamityAffixes/InstanceAffixSlots.h` | 다중 어픽스 구조체 (핵심) |
+| `src/EventBridge.Config.*.cpp` | affixes.json 파싱 (AffixParsing/AffixTriggerParsing/AffixActionParsing 등으로 분할) |
+| `src/EventBridge.Config.Shared.h` | JSON 유틸 (Trim, StripNullValues, LookupSpellFromSpec) |
+| `src/EventBridge.Loot.Assign.cpp` | 롤링, P/S 분배, 네이밍 |
+| `src/EventBridge.Triggers.*.cpp` | 트리거 이벤트 (HitEvent/DeathEvent/EquipEvent 등으로 분할) |
+| `src/EventBridge.Triggers.ActiveCounts.cpp` | RebuildActiveCounts, 패시브 스펠 관리 |
+| `src/EventBridge.Serialization.cpp` | Save/Load/Revert (v7) |
+| `src/EventBridge.Loot.Runtime.cpp` | 런타임 뮤테이션 |
+| `src/EventBridge.Loot.TooltipResolution.cpp` | 인벤토리 툴팁 생성 |
+| `src/EventBridge.Loot.Runeword.*.cpp` | 룬워드 (Transmute/Reforge/BaseSelection/Policy 등으로 분할) |
 
 ### C# Generator (`tools/CalamityAffixes.Generator/`) — xEdit/CK 불필요
 
@@ -197,6 +200,8 @@ gh release upload vX.Y.Z CalamityAffixes_MO2_vX.Y.Z.zip
 - **Edit 전 whitespace**: 반드시 `cat -A`로 탭/스페이스 확인 후 편집
 - **ESP 재생성**: affixes.json `records` 필드 수정 시 Generator 재실행 필요 (리포 루트에서 실행)
 - **ESP FormID 순서 금지 변경**: `KeywordPluginBuilder.Build()`에서 MISC 아이템 생성 순서를 MGEF/SPEL 뒤로 옮기면 세이브 파일의 인벤토리 아이템 소실. 절대 변경 금지
+- **JSON null 값**: `nlohmann::json::value(key, default)`는 key가 null이면 default 반환이 아니라 `type_error::302` 발생. `StripNullValues`로 사전 제거 필요
+- **PromoteTokenToPrimary count==0**: count가 0인 아이템에 토큰 추가 시 existingIndex==0으로 오판하는 버그 수정됨 (rc39). 관련 수정 시 count>0 조건 유지 필수
 
 ## 버전 히스토리
 
@@ -209,3 +214,5 @@ gh release upload vX.Y.Z CalamityAffixes_MO2_vX.Y.Z.zip
 | v1.2.19-rc33 | 재련 롤링 균등 분포 (lootWeight 1.0 통일) |
 | v1.2.19-rc34 | 78개 룬워드 결과 어픽스 추가 (94개 전체 구현) |
 | v1.2.19-rc35 | Generator MISC FormID 안정화 (생성 순서 수정) |
+| v1.2.19-rc38 | JSON null 파싱 크래시 수정 (StripNullValues), MISC 자동복구 |
+| v1.2.19-rc39 | PromoteTokenToPrimary count==0 룬워드 적용 실패 수정 |
