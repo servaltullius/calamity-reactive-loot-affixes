@@ -66,32 +66,32 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_fortitude", "signature_fortitude" },
 		{ "rw_heart_of_the_oak", "signature_heart_of_the_oak" },
 		{ "rw_infinity", "signature_infinity" },
-		{ "rw_last_wish", "signature_last_wish" },
-		{ "rw_exile", "signature_exile" },
-		{ "rw_grief", "signature_grief" },
-		{ "rw_breath_of_the_dying", "signature_breath_of_the_dying" },
+		{ "rw_last_wish", "lowhealth_fade" },
+		{ "rw_exile", "lowhealth_ironskin" },
+		{ "rw_grief", "lifesteal" },
+		{ "rw_breath_of_the_dying", "kill_poison_burst" },
 		{ "rw_chains_of_honor", "signature_chains_of_honor" },
 		{ "rw_enigma", "signature_enigma" },
 		{ "rw_dream", "signature_dream" },
 		{ "rw_faith", "signature_faith" },
-		{ "rw_phoenix", "signature_phoenix" },
-		{ "rw_doom", "signature_doom" },
+		{ "rw_phoenix", "kill_restore" },
+		{ "rw_doom", "aura_slow" },
 		{ "rw_dragon", "self_flame_cloak" },
-		{ "rw_hand_of_justice", "self_flame_cloak" },
-		{ "rw_flickering_flame", "self_flame_cloak" },
+		{ "rw_hand_of_justice", "lifesteal" },
+		{ "rw_flickering_flame", "aura_fire_shred" },
 		{ "rw_temper", "self_flame_cloak" },
-		{ "rw_ice", "self_frost_cloak" },
+		{ "rw_ice", "aura_frost_shred" },
 		{ "rw_voice_of_reason", "self_frost_cloak" },
 		{ "rw_hearth", "self_frost_cloak" },
 		{ "rw_holy_thunder", "signature_holy_thunder" },
 		{ "rw_zephyr", "signature_zephyr" },
-		{ "rw_wind", "self_shock_cloak" },
+		{ "rw_wind", "knockback_push" },
 		{ "rw_bulwark", "self_oakflesh" },
 		{ "rw_cure", "self_oakflesh" },
 		{ "rw_ancients_pledge", "signature_ancients_pledge" },
-		{ "rw_lionheart", "self_oakflesh" },
+		{ "rw_lionheart", "lowhealth_emergency" },
 		{ "rw_radiance", "self_oakflesh" },
-		{ "rw_sanctuary", "self_stoneflesh" },
+		{ "rw_sanctuary", "thorns_reflect" },
 		{ "rw_duress", "self_stoneflesh" },
 		{ "rw_peace", "self_stoneflesh" },
 		{ "rw_myth", "self_stoneflesh" },
@@ -102,30 +102,30 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_mist", "self_ironflesh" },
 		{ "rw_metamorphosis", "self_ebonyflesh" },
 		{ "rw_nadir", "signature_nadir" },
-		{ "rw_delirium", "curse_frenzy" },
-		{ "rw_chaos", "curse_frenzy" },
+		{ "rw_delirium", "aura_confuse" },
+		{ "rw_chaos", "bleed_dot" },
 		{ "rw_malice", "signature_malice" },
-		{ "rw_venom", "poison_bloom" },
-		{ "rw_plague", "poison_bloom" },
-		{ "rw_bramble", "poison_bloom" },
+		{ "rw_venom", "poison_dot" },
+		{ "rw_plague", "kill_poison_cloud" },
+		{ "rw_bramble", "thorns_reflect" },
 		{ "rw_black", "tar_bloom" },
 		{ "rw_rift", "tar_bloom" },
 		{ "rw_mosaic", "siphon_bloom" },
 		{ "rw_obsession", "siphon_bloom" },
 		{ "rw_white", "siphon_bloom" },
-		{ "rw_lawbringer", "curse_fragile" },
+		{ "rw_lawbringer", "kill_soul_harvest" },
 		{ "rw_wrath", "curse_fragile" },
-		{ "rw_kingslayer", "curse_fragile" },
+		{ "rw_kingslayer", "bleed_dot" },
 		{ "rw_principle", "curse_fragile" },
-		{ "rw_death", "curse_slow_attack" },
+		{ "rw_death", "lifesteal" },
 		{ "rw_famine", "curse_slow_attack" },
 		{ "rw_leaf", "signature_leaf" },
-		{ "rw_destruction", "fire_strike" },
+		{ "rw_destruction", "bleed_dot" },
 		{ "rw_crescent_moon", "shock_strike" },
-		{ "rw_beast", "self_haste" },
+		{ "rw_beast", "long_cd_beast_rage" },
 		{ "rw_hustle_w", "self_haste" },
 		{ "rw_harmony", "self_haste" },
-		{ "rw_fury", "self_haste" },
+		{ "rw_fury", "lifesteal" },
 		{ "rw_unbending_will", "self_haste" },
 		{ "rw_passion", "self_haste" },
 		{ "rw_stealth", "signature_stealth" },
@@ -133,9 +133,9 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_treachery", "self_muffle" },
 		{ "rw_gloom", "self_invisibility" },
 		{ "rw_wealth", "soul_trap" },
-		{ "rw_obedience", "soul_trap" },
+		{ "rw_obedience", "knockback_crush" },
 		{ "rw_honor", "soul_trap" },
-		{ "rw_eternity", "soul_trap" },
+		{ "rw_eternity", "long_cd_bulwark" },
 		{ "rw_memory", "self_meditation" },
 		{ "rw_wisdom", "self_meditation" },
 		{ "rw_lore", "self_meditation" },
@@ -266,6 +266,26 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "self_muffle") return "머플로 발소리를 지워 은신 진입 보조";
 		if (a_key == "self_invisibility") return "투명화로 전투를 끊고 각 재설정";
 		if (a_key == "soul_trap") return "소울트랩으로 영혼을 묶어 포획";
+		// Batch 3: new mechanic keys added in rc42 runeword rework.
+		if (a_key == "lifesteal") return "타격 피해의 일부를 흡수해 체력으로 전환";
+		if (a_key == "bleed_dot") return "열린 상처에서 피가 흘러 지속 출혈 피해";
+		if (a_key == "poison_dot") return "독이 혈류를 타고 번져 지속 중독 피해";
+		if (a_key == "thorns_reflect") return "받은 피해 일부를 공격자에게 되돌려 보복";
+		if (a_key == "kill_poison_burst") return "처치 시 독성 폭발로 주변 적에게 피해";
+		if (a_key == "kill_restore") return "처치 시 생명력과 마나를 즉시 회복";
+		if (a_key == "kill_soul_harvest") return "처치 시 영혼을 거둬 자신을 치유";
+		if (a_key == "kill_poison_cloud") return "처치 시 독 구름이 퍼져 잔여 적 압박";
+		if (a_key == "lowhealth_fade") return "체력 위급 시 방어·저항 대폭 버프로 생존";
+		if (a_key == "lowhealth_emergency") return "체력 위급 시 긴급 대량 회복으로 사선 탈출";
+		if (a_key == "lowhealth_ironskin") return "체력 위급 시 강철 피부로 추가 피해 차단";
+		if (a_key == "long_cd_bulwark") return "피격 시 대형 방어 결계 발동 (긴 재사용)";
+		if (a_key == "long_cd_beast_rage") return "타격 시 야수의 격노로 폭발적 강화 (긴 재사용)";
+		if (a_key == "aura_slow") return "타격마다 냉기 감속장을 씌워 둔화 유지";
+		if (a_key == "aura_confuse") return "타격마다 혼란 파동으로 적의 판단을 흐림";
+		if (a_key == "aura_fire_shred") return "타격마다 화염 저항을 깎아 후속 화상 극대화";
+		if (a_key == "aura_frost_shred") return "타격마다 냉기 저항을 깎아 후속 동결 극대화";
+		if (a_key == "knockback_push") return "강한 타격으로 적을 밀어내 거리 확보";
+		if (a_key == "knockback_crush") return "묵직한 일격으로 적을 짓눌러 비틀거리게 함";
 		return {};
 	}
 }
