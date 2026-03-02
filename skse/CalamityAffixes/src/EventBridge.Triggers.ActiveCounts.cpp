@@ -90,6 +90,9 @@ namespace CalamityAffixes
 
 					const auto idxIt = _affixIndexByToken.find(token);
 					if (idxIt == _affixIndexByToken.end()) {
+						SKSE::log::warn(
+							"CalamityAffixes: RebuildActiveCounts — worn token {:016X} not found in _affixIndexByToken (instance={:016X}, slot={}).",
+							token, key, slot);
 						continue;
 					}
 					const auto affixIdx = idxIt->second;

@@ -61,7 +61,8 @@ namespace CalamityAffixes
 				}
 			}
 
-			if (existingIndex == 0u) {
+			// Token already at position 0 — only valid when we actually found it (count > 0).
+			if (existingIndex == 0u && count > 0u) {
 				return true;
 			}
 
