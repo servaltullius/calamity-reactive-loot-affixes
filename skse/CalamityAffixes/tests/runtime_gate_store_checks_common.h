@@ -4,6 +4,7 @@
 #include "CalamityAffixes/LootCurrencyLedger.h"
 #include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/LootUiGuards.h"
+#include "CalamityAffixes/LootRerollGuard.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/RuntimeUserSettingsDebounce.h"
@@ -69,4 +70,12 @@ namespace RuntimeGateStoreChecks
 	bool CheckExternalUserSettingsPersistencePolicy();
 	bool CheckRuntimeUserSettingsRoundTripFieldPolicy();
 	bool CheckEventBridgeStateMutexReentrancyPolicy();
+
+	bool CheckPerTargetCooldownStorePruning();
+	bool CheckPerTargetCooldownStoreIndependence();
+	bool CheckNonHostileFirstHitGateTtlExpiry();
+	bool CheckNonHostileFirstHitGateCapacityEviction();
+	bool CheckLootRerollGuardLifecycle();
+	bool CheckLootRerollGuardCircularOverflow();
+	bool CheckLootRerollGuardEdgeCases();
 }

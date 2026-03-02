@@ -43,6 +43,7 @@ sources=(
   "${script_dir}/runtime_gate_store_checks_loot_policy.cpp"
   "${script_dir}/runtime_gate_store_checks_runeword_policy.cpp"
   "${script_dir}/runtime_gate_store_checks_settings_policy.cpp"
+  "${script_dir}/runtime_gate_store_checks_stateful.cpp"
 )
 
 "${cxx}" \

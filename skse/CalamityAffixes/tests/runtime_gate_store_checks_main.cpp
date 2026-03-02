@@ -43,6 +43,13 @@ int main()
 	const bool externalUserSettingsPersistenceOk = CheckExternalUserSettingsPersistencePolicy();
 	const bool runtimeUserSettingsRoundTripFieldsOk = CheckRuntimeUserSettingsRoundTripFieldPolicy();
 	const bool eventBridgeStateMutexReentrancyOk = CheckEventBridgeStateMutexReentrancyPolicy();
+	const bool perTargetPruningOk = CheckPerTargetCooldownStorePruning();
+	const bool perTargetIndependenceOk = CheckPerTargetCooldownStoreIndependence();
+	const bool nonHostileTtlExpiryOk = CheckNonHostileFirstHitGateTtlExpiry();
+	const bool nonHostileCapacityEvictionOk = CheckNonHostileFirstHitGateCapacityEviction();
+	const bool lootRerollLifecycleOk = CheckLootRerollGuardLifecycle();
+	const bool lootRerollCircularOverflowOk = CheckLootRerollGuardCircularOverflow();
+	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
 	return (gateOk && storeOk && hookIndexPolicyOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
@@ -71,6 +78,13 @@ int main()
 	        runtimeUserSettingsDebounceOk &&
 	        externalUserSettingsPersistenceOk &&
 	        runtimeUserSettingsRoundTripFieldsOk &&
-	        eventBridgeStateMutexReentrancyOk) ? 0 :
-		                                                     1;
+	        eventBridgeStateMutexReentrancyOk &&
+	        perTargetPruningOk &&
+	        perTargetIndependenceOk &&
+	        nonHostileTtlExpiryOk &&
+	        nonHostileCapacityEvictionOk &&
+	        lootRerollLifecycleOk &&
+	        lootRerollCircularOverflowOk &&
+	        lootRerollEdgeCasesOk) ? 0 :
+		                                1;
 }
