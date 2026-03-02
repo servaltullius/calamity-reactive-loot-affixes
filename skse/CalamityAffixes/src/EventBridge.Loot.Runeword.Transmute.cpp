@@ -63,8 +63,6 @@ namespace CalamityAffixes
 		}
 
 		auto& slots = _instanceAffixes[a_instanceKey];
-		const auto slotCountBefore = slots.count;
-		const bool hadTokenBefore = slots.HasToken(a_recipe.resultAffixToken);
 
 		if (!slots.PromoteTokenToPrimary(a_recipe.resultAffixToken)) {
 			if (a_outFailureReason) {
@@ -84,24 +82,9 @@ namespace CalamityAffixes
 
 		RE::InventoryEntryData* entry = nullptr;
 		RE::ExtraDataList* xList = nullptr;
-		bool itemFound = ResolvePlayerInventoryInstance(a_instanceKey, entry, xList) && entry && xList;
-		bool itemWorn = false;
-		if (itemFound) {
+		if (ResolvePlayerInventoryInstance(a_instanceKey, entry, xList) && entry && xList) {
 			EnsureMultiAffixDisplayName(entry, xList, slots);
-			itemWorn = xList->HasType<RE::ExtraWorn>() || xList->HasType<RE::ExtraWornLeft>();
 		}
-
-		// Diagnostic: log slot state before/after and equipped status.
-		SKSE::log::info(
-			"CalamityAffixes: runeword apply state (instance={:016X}, recipe={}, hadTokenBefore={}, slotsBefore={}, slotsAfter={}, itemFound={}, itemWorn={}, tokens=[{:016X},{:016X},{:016X},{:016X}]).",
-			a_instanceKey,
-			a_recipe.id,
-			hadTokenBefore,
-			slotCountBefore,
-			slots.count,
-			itemFound,
-			itemWorn,
-			slots.tokens[0], slots.tokens[1], slots.tokens[2], slots.tokens[3]);
 
 		RebuildActiveCounts();
 
