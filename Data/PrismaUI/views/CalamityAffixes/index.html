@@ -37,6 +37,24 @@
         box-sizing: border-box;
       }
 
+      /* ── Smooth scrolling & thin scrollbar ── */
+      * {
+        scroll-behavior: smooth;
+      }
+      ::-webkit-scrollbar {
+        width: calc(5px * var(--panel-ui-scale));
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.32);
+      }
+
       #tooltipPanel {
         position: fixed;
         right: 70px;
@@ -3189,6 +3207,57 @@
           keepPanelInViewport();
         });
       });
+      // ── Smooth inertia scroll for CEF ──
+      (function initSmoothScroll() {
+        const SCROLL_MULT = 1.8;   // wheel amplification
+        const FRICTION    = 0.88;  // per-frame decay (lower = more drag)
+        const MIN_VEL     = 0.5;   // stop threshold
+
+        const state = new WeakMap();
+
+        function getState(el) {
+          if (!state.has(el)) {
+            state.set(el, { velocity: 0, raf: 0 });
+          }
+          return state.get(el);
+        }
+
+        function animate(el) {
+          const s = getState(el);
+          s.velocity *= FRICTION;
+          if (Math.abs(s.velocity) < MIN_VEL) {
+            s.velocity = 0;
+            s.raf = 0;
+            return;
+          }
+          el.scrollTop += s.velocity;
+          s.raf = requestAnimationFrame(() => animate(el));
+        }
+
+        function findScrollParent(target) {
+          let el = target;
+          while (el && el !== document.body) {
+            const ov = getComputedStyle(el).overflowY;
+            if ((ov === "auto" || ov === "scroll") && el.scrollHeight > el.clientHeight) {
+              return el;
+            }
+            el = el.parentElement;
+          }
+          return null;
+        }
+
+        document.addEventListener("wheel", function (e) {
+          const scroller = findScrollParent(e.target);
+          if (!scroller) return;
+
+          e.preventDefault();
+          const s = getState(scroller);
+          s.velocity += e.deltaY * SCROLL_MULT;
+          if (!s.raf) {
+            s.raf = requestAnimationFrame(() => animate(scroller));
+          }
+        }, { passive: false, capture: true });
+      })();
     </script>
   </body>
 </html>
