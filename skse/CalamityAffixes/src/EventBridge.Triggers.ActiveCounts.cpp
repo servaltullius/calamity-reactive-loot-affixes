@@ -101,10 +101,9 @@ namespace CalamityAffixes
 						_activeCounts[affixIdx] += 1;
 					}
 
-					// Collect passive spells for equipped suffixes
+					// Collect passive spells for equipped affixes (any slot)
 					if (!_disablePassiveSuffixSpells &&
 						affixIdx < _affixes.size() &&
-						_affixes[affixIdx].slot == AffixSlot::kSuffix &&
 						_affixes[affixIdx].passiveSpell) {
 						desiredPassives.insert(_affixes[affixIdx].passiveSpell);
 					}

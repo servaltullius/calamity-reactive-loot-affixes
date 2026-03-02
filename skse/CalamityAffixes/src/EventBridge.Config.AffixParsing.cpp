@@ -147,19 +147,20 @@ namespace CalamityAffixes
 		std::string_view a_actionType,
 		AffixRuntime& a_out) const
 	{
+		// Parse passiveSpell for ANY slot (prefix, suffix, runeword).
+		const auto passiveSpellId = a_action.value("passiveSpellEditorId", std::string{});
+		if (!passiveSpellId.empty()) {
+			a_out.passiveSpell = RE::TESForm::LookupByEditorID<RE::SpellItem>(passiveSpellId);
+			if (!a_out.passiveSpell) {
+				SKSE::log::warn(
+					"CalamityAffixes: passive spell not found (affixId={}, spellEditorId={}).",
+					a_out.id, passiveSpellId);
+			}
+		}
+
 		if (a_out.slot == AffixSlot::kSuffix) {
 			a_out.trigger = Trigger::kHit;
 			a_out.procChancePct = 0.0f;
-
-			const auto passiveSpellId = a_action.value("passiveSpellEditorId", std::string{});
-			if (!passiveSpellId.empty()) {
-				a_out.passiveSpell = RE::TESForm::LookupByEditorID<RE::SpellItem>(passiveSpellId);
-				if (!a_out.passiveSpell) {
-					SKSE::log::warn(
-						"CalamityAffixes: suffix passive spell not found (affixId={}, spellEditorId={}).",
-						a_out.id, passiveSpellId);
-				}
-			}
 			a_out.critDamageBonusPct = static_cast<float>(a_action.value("critDamageBonusPct", 0.0));
 			return true;
 		}

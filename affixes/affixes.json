@@ -3305,28 +3305,52 @@
       {
         "id": "runeword_enigma_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ENIGMA",
-        "name": "룬워드 수수께끼 (Jah-Ith-Ber): 피격 18% / ICD 18초 - 차원 위상(이동속도 +45%, 6초)",
-        "nameEn": "Runeword Enigma (Jah-Ith-Ber): 18% on hit taken / ICD 18s - Dimensional Phase (Move Speed +45%, 6s)",
-        "nameKo": "룬워드 수수께끼 (Jah-Ith-Ber): 피격 18% / ICD 18초 - 차원 위상(이동속도 +45%, 6초)",
+        "name": "룬워드 수수께끼 (Jah-Ith-Ber): 피격시 / ICD 90초 - 차원 위상 (이속+45%, 8초) + 이동속도 +10%",
+        "nameEn": "Runeword Enigma (Jah-Ith-Ber): on Hit Taken / ICD 90s - Phase Shift (Move+45%, 8s) + Move Speed +10%",
+        "nameKo": "룬워드 수수께끼 (Jah-Ith-Ber): 피격시 / ICD 90초 - 차원 위상 (이속+45%, 8초) + 이동속도 +10%",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
-            "name": "Calamity: Runeword Enigma / 룬워드 수수께끼",
-            "actorValue": "SpeedMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
-            "name": "Calamity: Runeword Enigma / 룬워드 수수께끼",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
-              "magnitude": 45,
-              "duration": 6,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
+              "name": "Calamity: Runeword Enigma / 룬워드 수수께끼",
+              "actorValue": "SpeedMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_ENIGMA_PASSIVE_SPEED",
+              "name": "Calamity: Runeword Enigma Passive Speed / 룬워드 수수께끼 이동속도",
+              "actorValue": "SpeedMult",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
+              "name": "Calamity: Runeword Enigma / 룬워드 수수께끼",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_ENIGMA_PHASE",
+                "magnitude": 45,
+                "duration": 8,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_ENIGMA_PASSIVE",
+              "name": "Calamity: Runeword Enigma Passive / 룬워드 수수께끼 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_ENIGMA_PASSIVE_SPEED",
+                "magnitude": 10,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -3337,13 +3361,14 @@
         },
         "runtime": {
           "trigger": "IncomingHit",
-          "procChancePercent": 18.0,
-          "icdSeconds": 18.0,
+          "procChancePercent": 100.0,
+          "icdSeconds": 90.0,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_ENIGMA_PHASE",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_ENIGMA_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -3351,9 +3376,9 @@
       {
         "id": "runeword_infinity_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INFINITY",
-        "name": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 35% / ICD 0.5초 - 약점 원소 노출(적 저항 감소)",
-        "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 35% on hit / ICD 0.5s - Weakness Exposure (Enemy resist reduction)",
-        "nameKo": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 35% / ICD 0.5초 - 약점 원소 노출(적 저항 감소)",
+        "name": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 100% / ICD 0.5초 / 대상별 6초 - 약점 원소 노출(적 저항 감소)",
+        "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Exposure",
+        "nameKo": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 100% / ICD 0.5초 / 대상별 6초 - 약점 원소 노출(적 저항 감소)",
         "records": {
           "magicEffects": [
             {
@@ -3423,7 +3448,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 35.0,
+          "procChancePercent": 100.0,
           "icdSeconds": 0.5,
           "action": {
             "type": "CastSpellAdaptiveElement",
@@ -3449,35 +3474,60 @@
             },
             "applyTo": "Target",
             "noHitEffectArt": false
-          }
+          },
+          "perTargetICDSeconds": 6.0
         },
         "slot": "prefix"
       },
       {
         "id": "runeword_fortitude_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FORTITUDE",
-        "name": "룬워드 인내 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 전장의 인내(방어도 +120, 8초)",
-        "nameEn": "Runeword Fortitude (El-Sol-Dol-Lo): 25% on hit taken / ICD 16s - Battlefield Fortitude (Armor +120, 8s)",
-        "nameKo": "룬워드 인내 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 전장의 인내(방어도 +120, 8초)",
+        "name": "룬워드 불굴 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 방어 버프 + 방어도 +80",
+        "nameEn": "Runeword Fortitude (El-Sol-Dol-Lo): 25% on Hit Taken / ICD 16s - Defense buff + Armor +80",
+        "nameKo": "룬워드 불굴 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 방어 버프 + 방어도 +80",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
-            "name": "Calamity: Runeword Fortitude / 룬워드 인내",
-            "actorValue": "DamageResist",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_FORTITUDE_WARD",
-            "name": "Calamity: Runeword Fortitude / 룬워드 인내",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
-              "magnitude": 120,
-              "duration": 8,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
+              "name": "Calamity: Runeword Fortitude / 룬워드 인내",
+              "actorValue": "DamageResist",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_FORTITUDE_PASSIVE_ARMOR",
+              "name": "Calamity: Runeword Fortitude Passive Armor / 룬워드 불굴 방어도",
+              "actorValue": "DamageResist",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_FORTITUDE_WARD",
+              "name": "Calamity: Runeword Fortitude / 룬워드 인내",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FORTITUDE_WARD",
+                "magnitude": 120,
+                "duration": 8,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_FORTITUDE_PASSIVE",
+              "name": "Calamity: Runeword Fortitude Passive / 룬워드 불굴 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FORTITUDE_PASSIVE_ARMOR",
+                "magnitude": 80,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -3494,7 +3544,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_FORTITUDE_WARD",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_FORTITUDE_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -3502,28 +3553,52 @@
       {
         "id": "runeword_insight_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INSIGHT",
-        "name": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 명상(마나 재생 +150%, 12초)",
-        "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on hit / ICD 10s - Meditation (Mana Regen +150%, 12s)",
-        "nameKo": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 명상(마나 재생 +150%, 12초)",
+        "name": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 마나 버프 + 마나 재생 +25",
+        "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Mana buff + Magicka Regen +25",
+        "nameKo": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 마나 버프 + 마나 재생 +25",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
-            "name": "Calamity: Runeword Insight / 룬워드 통찰",
-            "actorValue": "MagickaRateMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_INSIGHT_MEDITATION",
-            "name": "Calamity: Runeword Insight / 룬워드 통찰",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
-              "magnitude": 150,
-              "duration": 12,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
+              "name": "Calamity: Runeword Insight / 룬워드 통찰",
+              "actorValue": "MagickaRateMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_INSIGHT_PASSIVE_MPREGEN",
+              "name": "Calamity: Runeword Insight Passive Magicka Regen / 룬워드 통찰 마나 재생",
+              "actorValue": "MagickaRate",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_INSIGHT_MEDITATION",
+              "name": "Calamity: Runeword Insight / 룬워드 통찰",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_MEDITATION",
+                "magnitude": 150,
+                "duration": 12,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_INSIGHT_PASSIVE",
+              "name": "Calamity: Runeword Insight Passive / 룬워드 통찰 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_PASSIVE_MPREGEN",
+                "magnitude": 25,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -3540,7 +3615,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_INSIGHT_MEDITATION",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_INSIGHT_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -3548,28 +3624,52 @@
       {
         "id": "runeword_spirit_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPIRIT",
-        "name": "룬워드 스피릿 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 영혼의 명상(마나 재생 +120%, 10초)",
-        "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on hit / ICD 9s - Soul Meditation (Mana Regen +120%, 10s)",
-        "nameKo": "룬워드 스피릿 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 영혼의 명상(마나 재생 +120%, 10초)",
+        "name": "룬워드 영혼 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 마나 버프 + 마나 재생 +30",
+        "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 9s - Mana buff + Magicka Regen +30",
+        "nameKo": "룬워드 영혼 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 마나 버프 + 마나 재생 +30",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
-            "name": "Calamity: Runeword Spirit / 룬워드 스피릿",
-            "actorValue": "MagickaRateMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
-            "name": "Calamity: Runeword Spirit / 룬워드 스피릿",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
-              "magnitude": 120,
-              "duration": 10,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
+              "name": "Calamity: Runeword Spirit / 룬워드 스피릿",
+              "actorValue": "MagickaRateMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_SPIRIT_PASSIVE_MPREGEN",
+              "name": "Calamity: Runeword Spirit Passive Magicka Regen / 룬워드 영혼 마나 재생",
+              "actorValue": "MagickaRate",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
+              "name": "Calamity: Runeword Spirit / 룬워드 스피릿",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_MEDITATION",
+                "magnitude": 120,
+                "duration": 10,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_SPIRIT_PASSIVE",
+              "name": "Calamity: Runeword Spirit Passive / 룬워드 영혼 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_PASSIVE_MPREGEN",
+                "magnitude": 30,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -3586,7 +3686,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_SPIRIT_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -3594,69 +3695,50 @@
       {
         "id": "runeword_grief_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_GRIEF",
-        "name": "룬워드 슬픔 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.4초 - 원소 참격(적응형 원소 피해)",
-        "nameEn": "Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on hit / ICD 0.4s - Elemental Slash (Adaptive elemental damage)",
-        "nameKo": "룬워드 슬픔 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.4초 - 원소 참격(적응형 원소 피해)",
+        "name": "룬워드 비탄 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.5초 - 흡혈 (8%) + 공격속도 +10%",
+        "nameEn": "Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on Hit / ICD 0.5s - Life Steal (8%) + IAS +10%",
+        "nameKo": "룬워드 비탄 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.5초 - 흡혈 (8%) + 공격속도 +10%",
         "records": {
           "magicEffects": [
             {
-              "editorId": "CAFF_MGEF_RW_GRIEF_FIRE_SLASH",
-              "name": "Calamity: Runeword Grief Fire Slash / 룬워드 슬픔 화염 참격",
+              "editorId": "CAFF_MGEF_RW_GRIEF_LIFESTEAL",
+              "name": "Calamity: Runeword Grief Life Steal / 룬워드 비탄 흡혈",
               "actorValue": "Health",
-              "resistValue": "ResistFire",
-              "magicSkill": "Destruction",
-              "hostile": true
+              "hostile": false,
+              "recover": true
             },
             {
-              "editorId": "CAFF_MGEF_RW_GRIEF_FROST_SLASH",
-              "name": "Calamity: Runeword Grief Frost Slash / 룬워드 슬픔 냉기 참격",
-              "actorValue": "Health",
-              "resistValue": "ResistFrost",
-              "magicSkill": "Destruction",
-              "hostile": true
-            },
-            {
-              "editorId": "CAFF_MGEF_RW_GRIEF_SHOCK_SLASH",
-              "name": "Calamity: Runeword Grief Shock Slash / 룬워드 슬픔 번개 참격",
-              "actorValue": "Health",
-              "resistValue": "ResistShock",
-              "magicSkill": "Destruction",
-              "hostile": true
+              "editorId": "CAFF_MGEF_RW_GRIEF_PASSIVE_IAS",
+              "name": "Calamity: Runeword Grief Passive IAS / 룬워드 비탄 공격 속도",
+              "actorValue": "WeaponSpeedMult",
+              "hostile": false,
+              "recover": true
             }
           ],
           "spells": [
             {
-              "editorId": "CAFF_SPEL_RW_GRIEF_FIRE_SLASH",
-              "name": "Calamity: Runeword Grief Fire Slash / 룬워드 슬픔 화염 참격",
-              "delivery": "TargetActor",
+              "editorId": "CAFF_SPEL_RW_GRIEF_LIFESTEAL",
+              "name": "Calamity: Runeword Grief Life Steal / 룬워드 비탄 흡혈",
+              "delivery": "Self",
               "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_FIRE_SLASH",
-                "magnitude": 8,
+                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_LIFESTEAL",
+                "magnitude": 5,
                 "duration": 0,
                 "area": 0
               }
             },
             {
-              "editorId": "CAFF_SPEL_RW_GRIEF_FROST_SLASH",
-              "name": "Calamity: Runeword Grief Frost Slash / 룬워드 슬픔 냉기 참격",
-              "delivery": "TargetActor",
+              "editorId": "CAFF_SPEL_RW_GRIEF_PASSIVE",
+              "name": "Calamity: Runeword Grief Passive / 룬워드 비탄 패시브",
+              "delivery": "Self",
               "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_FROST_SLASH",
-                "magnitude": 8,
+                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_PASSIVE_IAS",
+                "magnitude": 0.1,
                 "duration": 0,
                 "area": 0
-              }
-            },
-            {
-              "editorId": "CAFF_SPEL_RW_GRIEF_SHOCK_SLASH",
-              "name": "Calamity: Runeword Grief Shock Slash / 룬워드 슬픔 번개 참격",
-              "delivery": "TargetActor",
-              "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_GRIEF_SHOCK_SLASH",
-                "magnitude": 8,
-                "duration": 0,
-                "area": 0
-              }
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
             }
           ]
         },
@@ -3670,15 +3752,9 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 30.0,
-          "icdSeconds": 0.4,
+          "icdSeconds": 0.5,
           "action": {
-            "type": "CastSpellAdaptiveElement",
-            "mode": "WeakestResist",
-            "spells": {
-              "Fire": "CAFF_SPEL_RW_GRIEF_FIRE_SLASH",
-              "Frost": "CAFF_SPEL_RW_GRIEF_FROST_SLASH",
-              "Shock": "CAFF_SPEL_RW_GRIEF_SHOCK_SLASH"
-            },
+            "type": "CastSpell",
             "evolution": {
               "xpPerProc": 1,
               "thresholds": [
@@ -3692,16 +3768,18 @@
                 1.4
               ]
             },
-            "applyTo": "Target",
-            "noHitEffectArt": false,
+            "applyTo": "Self",
+            "noHitEffectArt": true,
             "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.12,
+              "source": "HitTotalDealt",
+              "mult": 0.08,
               "add": 0.0,
-              "min": 0.0,
+              "min": 5.0,
               "max": 0.0,
               "spellBaseAsMin": true
-            }
+            },
+            "spellEditorId": "CAFF_SPEL_RW_GRIEF_LIFESTEAL",
+            "passiveSpellEditorId": "CAFF_SPEL_RW_GRIEF_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -3709,28 +3787,67 @@
       {
         "id": "runeword_call_to_arms_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CALL_TO_ARMS",
-        "name": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
-        "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on hit / ICD 18s - Warcry (Armor +150, 8s)",
-        "nameKo": "룬워드 콜 투 암스 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 함성(방어도 +150, 8초)",
+        "name": "룬워드 전투 함성 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 버프 + 체력+50 마나+30",
+        "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on Hit / ICD 18s - Buff + HP+50 MP+30",
+        "nameKo": "룬워드 전투 함성 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 버프 + 체력+50 마나+30",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_CTA_WARCRY",
-            "name": "Calamity: Runeword Call to Arms / 룬워드 콜 투 암스",
-            "actorValue": "DamageResist",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_CTA_WARCRY",
-            "name": "Calamity: Runeword Call to Arms / 룬워드 콜 투 암스",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_CTA_WARCRY",
-              "magnitude": 150,
-              "duration": 8,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_CTA_WARCRY",
+              "name": "Calamity: Runeword Call to Arms / 룬워드 콜 투 암스",
+              "actorValue": "DamageResist",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_CTA_PASSIVE_HP",
+              "name": "Calamity: Runeword CTA Passive Health / 룬워드 전투 함성 체력",
+              "actorValue": "Health",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_CTA_PASSIVE_MP",
+              "name": "Calamity: Runeword CTA Passive Magicka / 룬워드 전투 함성 마나",
+              "actorValue": "Magicka",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_CTA_WARCRY",
+              "name": "Calamity: Runeword Call to Arms / 룬워드 콜 투 암스",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_CTA_WARCRY",
+                "magnitude": 150,
+                "duration": 8,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_CTA_PASSIVE",
+              "name": "Calamity: Runeword CTA Passive / 룬워드 전투 함성 패시브",
+              "delivery": "Self",
+              "effects": [
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_CTA_PASSIVE_HP",
+                  "magnitude": 50,
+                  "duration": 0,
+                  "area": 0
+                },
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_CTA_PASSIVE_MP",
+                  "magnitude": 30,
+                  "duration": 0,
+                  "area": 0
+                }
+              ],
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -3747,7 +3864,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_CTA_WARCRY",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_CTA_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -3755,28 +3873,80 @@
       {
         "id": "runeword_chains_of_honor_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAINS_OF_HONOR",
-        "name": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 위상 질주(이동속도 +35%, 5초)",
-        "nameEn": "Runeword Chains of Honor (Dol-Um-Ber-Ist): 20% on hit taken / ICD 16s - Phase Rush (Move Speed +35%, 5s)",
-        "nameKo": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 위상 질주(이동속도 +35%, 5초)",
+        "name": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 방어 버프 + 전 저항 +15",
+        "nameEn": "Runeword Chains of Honor (Dol-Um-Ber-Ist): 20% on Hit Taken / ICD 16s - Buff + All Resist +15",
+        "nameKo": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 방어 버프 + 전 저항 +15",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_COH_PHASE",
-            "name": "Calamity: Runeword Chains of Honor / 룬워드 명예의 사슬",
-            "actorValue": "SpeedMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_COH_PHASE",
-            "name": "Calamity: Runeword Chains of Honor / 룬워드 명예의 사슬",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_COH_PHASE",
-              "magnitude": 35,
-              "duration": 5,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_COH_PHASE",
+              "name": "Calamity: Runeword Chains of Honor / 룬워드 명예의 사슬",
+              "actorValue": "SpeedMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_COH_PASSIVE_FIRE",
+              "name": "Calamity: Runeword CoH Passive Fire Resist / 룬워드 명예의 사슬 화염 저항",
+              "actorValue": "ResistFire",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_COH_PASSIVE_FROST",
+              "name": "Calamity: Runeword CoH Passive Frost Resist / 룬워드 명예의 사슬 냉기 저항",
+              "actorValue": "ResistFrost",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_COH_PASSIVE_SHOCK",
+              "name": "Calamity: Runeword CoH Passive Shock Resist / 룬워드 명예의 사슬 번개 저항",
+              "actorValue": "ResistShock",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_COH_PHASE",
+              "name": "Calamity: Runeword Chains of Honor / 룬워드 명예의 사슬",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_COH_PHASE",
+                "magnitude": 35,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_COH_PASSIVE",
+              "name": "Calamity: Runeword CoH Passive / 룬워드 명예의 사슬 패시브",
+              "delivery": "Self",
+              "effects": [
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_FIRE",
+                  "magnitude": 15,
+                  "duration": 0,
+                  "area": 0
+                },
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_FROST",
+                  "magnitude": 15,
+                  "duration": 0,
+                  "area": 0
+                },
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_SHOCK",
+                  "magnitude": 15,
+                  "duration": 0,
+                  "area": 0
+                }
+              ],
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -3793,7 +3963,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_COH_PHASE",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_COH_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -3892,9 +4063,9 @@
       {
         "id": "runeword_faith_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAITH",
-        "name": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 광신의 돌격(이속 +35%, 피해저항 +60, 6초)",
-        "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on hit / ICD 12s - Fanatic Surge (Move Speed +35%, Damage Resist +60, 6s)",
-        "nameKo": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 광신의 돌격(이속 +35%, 피해저항 +60, 6초)",
+        "name": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 돌격 버프 + 공격속도 +15%",
+        "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on Hit / ICD 12s - Surge buff + Attack Speed +15%",
+        "nameKo": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 돌격 버프 + 공격속도 +15%",
         "records": {
           "magicEffects": [
             {
@@ -3910,27 +4081,49 @@
               "actorValue": "DamageResist",
               "hostile": false,
               "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_FAITH_PASSIVE_IAS",
+              "name": "Calamity: Runeword Faith Passive IAS / 룬워드 신념 공격 속도",
+              "actorValue": "WeaponSpeedMult",
+              "hostile": false,
+              "recover": true
             }
           ],
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_FAITH_FANATIC",
-            "name": "Calamity: Runeword Faith Surge / 룬워드 신념 돌격",
-            "delivery": "Self",
-            "effects": [
-              {
-                "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_FANATIC_SPEED",
-                "magnitude": 35,
-                "duration": 6,
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_FAITH_FANATIC",
+              "name": "Calamity: Runeword Faith Surge / 룬워드 신념 돌격",
+              "delivery": "Self",
+              "effects": [
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_FANATIC_SPEED",
+                  "magnitude": 35,
+                  "duration": 6,
+                  "area": 0
+                },
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_FANATIC_WARD",
+                  "magnitude": 60,
+                  "duration": 6,
+                  "area": 0
+                }
+              ]
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_FAITH_PASSIVE",
+              "name": "Calamity: Runeword Faith Passive / 룬워드 신념 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_PASSIVE_IAS",
+                "magnitude": 0.15,
+                "duration": 0,
                 "area": 0
               },
-              {
-                "magicEffectEditorId": "CAFF_MGEF_RW_FAITH_FANATIC_WARD",
-                "magnitude": 60,
-                "duration": 6,
-                "area": 0
-              }
-            ]
-          }
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -3947,7 +4140,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_FAITH_FANATIC",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_FAITH_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -3955,25 +4149,25 @@
       {
         "id": "runeword_exile_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_EXILE",
-        "name": "룬워드 엑자일 (Vex-Ohm-Ist-Dol): 피격 28% / ICD 14초 - 추방자의 결계(방어도 +180, 9초)",
-        "nameEn": "Runeword Exile (Vex-Ohm-Ist-Dol): 28% on hit taken / ICD 14s - Exile's Barrier (Armor +180, 9s)",
-        "nameKo": "룬워드 엑자일 (Vex-Ohm-Ist-Dol): 피격 28% / ICD 14초 - 추방자의 결계(방어도 +180, 9초)",
+        "name": "룬워드 추방 (Vex-Ohm-Ist-Dol): 체력<40%시 / ICD 50초 - 강철 피부 (방어도+250, 10초)",
+        "nameEn": "Runeword Exile (Vex-Ohm-Ist-Dol): HP<40% / ICD 50s - Iron Skin (Armor+250, 10s)",
+        "nameKo": "룬워드 추방 (Vex-Ohm-Ist-Dol): 체력<40%시 / ICD 50초 - 강철 피부 (방어도+250, 10초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_EXILE_BARRIER",
-            "name": "Calamity: Runeword Exile / 룬워드 엑자일",
+            "editorId": "CAFF_MGEF_RW_EXILE_IRONSKIN",
+            "name": "Calamity: Runeword Exile Iron Skin / 룬워드 추방 강철 피부",
             "actorValue": "DamageResist",
             "hostile": false,
             "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_EXILE_BARRIER",
-            "name": "Calamity: Runeword Exile / 룬워드 엑자일",
+            "editorId": "CAFF_SPEL_RW_EXILE_IRONSKIN",
+            "name": "Calamity: Runeword Exile Iron Skin / 룬워드 추방 강철 피부",
             "delivery": "Self",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_EXILE_BARRIER",
-              "magnitude": 180,
-              "duration": 9,
+              "magicEffectEditorId": "CAFF_MGEF_RW_EXILE_IRONSKIN",
+              "magnitude": 250,
+              "duration": 10,
               "area": 0
             }
           }
@@ -3986,86 +4180,45 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "IncomingHit",
-          "procChancePercent": 28.0,
-          "icdSeconds": 14.0,
+          "trigger": "LowHealth",
+          "procChancePercent": 100.0,
+          "icdSeconds": 50.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_EXILE_BARRIER",
+            "spellEditorId": "CAFF_SPEL_RW_EXILE_IRONSKIN",
             "applyTo": "Self",
             "noHitEffectArt": true
-          }
+          },
+          "lowHealthThresholdPercent": 40.0
         },
         "slot": "prefix"
       },
       {
         "id": "runeword_breath_of_the_dying_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BREATH_OF_THE_DYING",
-        "name": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적중 34% / ICD 0.35초 - 멸절 참격(적응형 원소 피해)",
-        "nameEn": "Runeword Breath of the Dying (Vex-Hel-El-Eld-Zod-Eth): 34% on hit / ICD 0.35s - Annihilation Slash (Adaptive elemental damage)",
-        "nameKo": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적중 34% / ICD 0.35초 - 멸절 참격(적응형 원소 피해)",
+        "name": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적 처치 50% / ICD 3초 - 독 폭발 (광역 15)",
+        "nameEn": "Runeword Breath of the Dying (Vex-Hel-El-Eld-Zod-Eth): 50% on Kill / ICD 3s - Poison Burst (Area 15)",
+        "nameKo": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적 처치 50% / ICD 3초 - 독 폭발 (광역 15)",
         "records": {
-          "magicEffects": [
-            {
-              "editorId": "CAFF_MGEF_RW_BOTD_FIRE_SLASH",
-              "name": "Calamity: Runeword BotD Fire Slash / 룬워드 죽음의 숨결 화염 참격",
-              "actorValue": "Health",
-              "resistValue": "ResistFire",
-              "magicSkill": "Destruction",
-              "hostile": true
-            },
-            {
-              "editorId": "CAFF_MGEF_RW_BOTD_FROST_SLASH",
-              "name": "Calamity: Runeword BotD Frost Slash / 룬워드 죽음의 숨결 냉기 참격",
-              "actorValue": "Health",
-              "resistValue": "ResistFrost",
-              "magicSkill": "Destruction",
-              "hostile": true
-            },
-            {
-              "editorId": "CAFF_MGEF_RW_BOTD_SHOCK_SLASH",
-              "name": "Calamity: Runeword BotD Shock Slash / 룬워드 죽음의 숨결 번개 참격",
-              "actorValue": "Health",
-              "resistValue": "ResistShock",
-              "magicSkill": "Destruction",
-              "hostile": true
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_RW_BOTD_POISON_BURST",
+            "name": "Calamity: Runeword BotD Poison Burst / 룬워드 죽음의 숨결 독 폭발",
+            "actorValue": "Health",
+            "hostile": true,
+            "recover": false,
+            "magicSkill": "Destruction"
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_RW_BOTD_POISON_BURST",
+            "name": "Calamity: Runeword BotD Poison Burst / 룬워드 죽음의 숨결 독 폭발",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_POISON_BURST",
+              "magnitude": 40,
+              "duration": 3,
+              "area": 15
             }
-          ],
-          "spells": [
-            {
-              "editorId": "CAFF_SPEL_RW_BOTD_FIRE_SLASH",
-              "name": "Calamity: Runeword BotD Fire Slash / 룬워드 죽음의 숨결 화염 참격",
-              "delivery": "TargetActor",
-              "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_FIRE_SLASH",
-                "magnitude": 12,
-                "duration": 0,
-                "area": 0
-              }
-            },
-            {
-              "editorId": "CAFF_SPEL_RW_BOTD_FROST_SLASH",
-              "name": "Calamity: Runeword BotD Frost Slash / 룬워드 죽음의 숨결 냉기 참격",
-              "delivery": "TargetActor",
-              "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_FROST_SLASH",
-                "magnitude": 12,
-                "duration": 0,
-                "area": 0
-              }
-            },
-            {
-              "editorId": "CAFF_SPEL_RW_BOTD_SHOCK_SLASH",
-              "name": "Calamity: Runeword BotD Shock Slash / 룬워드 죽음의 숨결 번개 참격",
-              "delivery": "TargetActor",
-              "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_BOTD_SHOCK_SLASH",
-                "magnitude": 12,
-                "duration": 0,
-                "area": 0
-              }
-            }
-          ]
+          }
         },
         "kid": {
           "type": "None",
@@ -4075,17 +4228,11 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "Hit",
-          "procChancePercent": 34.0,
-          "icdSeconds": 0.35,
+          "trigger": "Kill",
+          "procChancePercent": 50.0,
+          "icdSeconds": 3.0,
           "action": {
-            "type": "CastSpellAdaptiveElement",
-            "mode": "WeakestResist",
-            "spells": {
-              "Fire": "CAFF_SPEL_RW_BOTD_FIRE_SLASH",
-              "Frost": "CAFF_SPEL_RW_BOTD_FROST_SLASH",
-              "Shock": "CAFF_SPEL_RW_BOTD_SHOCK_SLASH"
-            },
+            "type": "CastSpell",
             "evolution": {
               "xpPerProc": 1,
               "thresholds": [
@@ -4101,14 +4248,7 @@
             },
             "applyTo": "Target",
             "noHitEffectArt": false,
-            "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.16,
-              "add": 0.0,
-              "min": 0.0,
-              "max": 0.0,
-              "spellBaseAsMin": true
-            }
+            "spellEditorId": "CAFF_SPEL_RW_BOTD_POISON_BURST"
           }
         },
         "slot": "prefix"
@@ -4116,66 +4256,45 @@
       {
         "id": "runeword_last_wish_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAST_WISH",
-        "name": "룬워드 라스트 위시 (Jah-Mal-Jah-Sur-Jah-Ber): 적중 18% / ICD 3초 - 소원 붕괴(적응형 원소 노출)",
-        "nameEn": "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): 18% on hit / ICD 3s - Wish Collapse (Adaptive elemental exposure)",
-        "nameKo": "룬워드 라스트 위시 (Jah-Mal-Jah-Sur-Jah-Ber): 적중 18% / ICD 3초 - 소원 붕괴(적응형 원소 노출)",
+        "name": "룬워드 최후의 소원 (Jah-Mal-Jah-Sur-Jah-Ber): 체력<35%시 / ICD 60초 - 페이드 (방어+저항 대폭 버프 12초)",
+        "nameEn": "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): HP<35% / ICD 60s - Fade (Armor+Resist buff 12s)",
+        "nameKo": "룬워드 최후의 소원 (Jah-Mal-Jah-Sur-Jah-Ber): 체력<35%시 / ICD 60초 - 페이드 (방어+저항 대폭 버프 12초)",
         "records": {
           "magicEffects": [
             {
-              "editorId": "CAFF_MGEF_RW_LASTWISH_FIRE_SHRED",
-              "name": "Calamity: Runeword Last Wish Fire Exposure / 룬워드 라스트 위시 화염 노출",
-              "actorValue": "ResistFire",
-              "hostile": true,
+              "editorId": "CAFF_MGEF_RW_LASTWISH_FADE_ARMOR",
+              "name": "Calamity: Runeword Last Wish Fade Armor / 룬워드 최후의 소원 페이드(방어)",
+              "actorValue": "DamageResist",
+              "hostile": false,
               "recover": true
             },
             {
-              "editorId": "CAFF_MGEF_RW_LASTWISH_FROST_SHRED",
-              "name": "Calamity: Runeword Last Wish Frost Exposure / 룬워드 라스트 위시 냉기 노출",
-              "actorValue": "ResistFrost",
-              "hostile": true,
-              "recover": true
-            },
-            {
-              "editorId": "CAFF_MGEF_RW_LASTWISH_SHOCK_SHRED",
-              "name": "Calamity: Runeword Last Wish Shock Exposure / 룬워드 라스트 위시 번개 노출",
-              "actorValue": "ResistShock",
-              "hostile": true,
+              "editorId": "CAFF_MGEF_RW_LASTWISH_FADE_RESIST",
+              "name": "Calamity: Runeword Last Wish Fade Resist / 룬워드 최후의 소원 페이드(저항)",
+              "actorValue": "ResistMagic",
+              "hostile": false,
               "recover": true
             }
           ],
           "spells": [
             {
-              "editorId": "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
-              "name": "Calamity: Runeword Last Wish Fire Exposure / 룬워드 라스트 위시 화염 노출",
-              "delivery": "TargetActor",
-              "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_FIRE_SHRED",
-                "magnitude": 24,
-                "duration": 6,
-                "area": 0
-              }
-            },
-            {
-              "editorId": "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
-              "name": "Calamity: Runeword Last Wish Frost Exposure / 룬워드 라스트 위시 냉기 노출",
-              "delivery": "TargetActor",
-              "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_FROST_SHRED",
-                "magnitude": 24,
-                "duration": 6,
-                "area": 0
-              }
-            },
-            {
-              "editorId": "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED",
-              "name": "Calamity: Runeword Last Wish Shock Exposure / 룬워드 라스트 위시 번개 노출",
-              "delivery": "TargetActor",
-              "effect": {
-                "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_SHOCK_SHRED",
-                "magnitude": 24,
-                "duration": 6,
-                "area": 0
-              }
+              "editorId": "CAFF_SPEL_RW_LASTWISH_FADE",
+              "name": "Calamity: Runeword Last Wish Fade / 룬워드 최후의 소원 페이드",
+              "delivery": "Self",
+              "effects": [
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_FADE_ARMOR",
+                  "magnitude": 200,
+                  "duration": 12,
+                  "area": 0
+                },
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_LASTWISH_FADE_RESIST",
+                  "magnitude": 40,
+                  "duration": 12,
+                  "area": 0
+                }
+              ]
             }
           ]
         },
@@ -4187,62 +4306,63 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "Hit",
-          "procChancePercent": 18.0,
-          "icdSeconds": 3.0,
+          "trigger": "LowHealth",
+          "procChancePercent": 100.0,
+          "icdSeconds": 60.0,
           "action": {
-            "type": "CastSpellAdaptiveElement",
-            "mode": "StrongestResist",
-            "spells": {
-              "Fire": "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
-              "Frost": "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
-              "Shock": "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED"
-            },
-            "modeCycle": {
-              "spells": [
-                "CAFF_SPEL_RW_LASTWISH_FIRE_SHRED",
-                "CAFF_SPEL_RW_LASTWISH_FROST_SHRED",
-                "CAFF_SPEL_RW_LASTWISH_SHOCK_SHRED"
-              ],
-              "labels": [
-                "열화",
-                "빙결",
-                "전격"
-              ],
-              "switchEveryProcs": 2,
-              "manualOnly": true
-            },
-            "applyTo": "Target",
-            "noHitEffectArt": false
-          }
+            "type": "CastSpell",
+            "applyTo": "Self",
+            "noHitEffectArt": true,
+            "spellEditorId": "CAFF_SPEL_RW_LASTWISH_FADE"
+          },
+          "lowHealthThresholdPercent": 35.0
         },
         "slot": "prefix"
       },
       {
         "id": "runeword_phoenix_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PHOENIX",
-        "name": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 피격 18% / ICD 14초 - 불사 질주(이동속도 +50%, 7초)",
-        "nameEn": "Runeword Phoenix (Vex-Vex-Lo-Jah): 18% on hit taken / ICD 14s - Immortal Rush (Move Speed +50%, 7s)",
-        "nameKo": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 피격 18% / ICD 14초 - 불사 질주(이동속도 +50%, 7초)",
+        "name": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 적 처치 60% / ICD 2초 - 체력+마나 회복",
+        "nameEn": "Runeword Phoenix (Vex-Vex-Lo-Jah): 60% on Kill / ICD 2s - Restore HP+MP",
+        "nameKo": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 적 처치 60% / ICD 2초 - 체력+마나 회복",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
-            "name": "Calamity: Runeword Phoenix / 룬워드 피닉스",
-            "actorValue": "SpeedMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_PHOENIX_SURGE",
-            "name": "Calamity: Runeword Phoenix / 룬워드 피닉스",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_PHOENIX_SURGE",
-              "magnitude": 50,
-              "duration": 7,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_PHOENIX_RESTORE_HP",
+              "name": "Calamity: Runeword Phoenix Restore HP / 룬워드 피닉스 체력 회복",
+              "actorValue": "Health",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_PHOENIX_RESTORE_MP",
+              "name": "Calamity: Runeword Phoenix Restore MP / 룬워드 피닉스 마나 회복",
+              "actorValue": "Magicka",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_PHOENIX_RESTORE",
+              "name": "Calamity: Runeword Phoenix Restore / 룬워드 피닉스 회복",
+              "delivery": "Self",
+              "effects": [
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_PHOENIX_RESTORE_HP",
+                  "magnitude": 80,
+                  "duration": 0,
+                  "area": 0
+                },
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_PHOENIX_RESTORE_MP",
+                  "magnitude": 60,
+                  "duration": 0,
+                  "area": 0
+                }
+              ]
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -4252,12 +4372,12 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "IncomingHit",
-          "procChancePercent": 18.0,
-          "icdSeconds": 14.0,
+          "trigger": "Kill",
+          "procChancePercent": 60.0,
+          "icdSeconds": 2.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_PHOENIX_SURGE",
+            "spellEditorId": "CAFF_SPEL_RW_PHOENIX_RESTORE",
             "applyTo": "Self",
             "noHitEffectArt": true
           }
@@ -4267,26 +4387,25 @@
       {
         "id": "runeword_doom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DOOM",
-        "name": "룬워드 둠 (Hel-Ohm-Um-Lo-Cham): 적중 30% / ICD 0.8초 - 절망의 냉기 일격",
-        "nameEn": "Runeword Doom (Hel-Ohm-Um-Lo-Cham): 30% on hit / ICD 0.8s - Doom Frost Strike",
-        "nameKo": "룬워드 둠 (Hel-Ohm-Um-Lo-Cham): 적중 30% / ICD 0.8초 - 절망의 냉기 일격",
+        "name": "룬워드 파멸 (Hel-Ohm-Um-Lo-Cham): 적중 100% / ICD 0.5초 - 냉기 감속 (이속-30%, 4초)",
+        "nameEn": "Runeword Doom (Hel-Ohm-Um-Lo-Cham): 100% on Hit / ICD 0.5s - Frost Slow (Speed-30%, 4s)",
+        "nameKo": "룬워드 파멸 (Hel-Ohm-Um-Lo-Cham): 적중 100% / ICD 0.5초 - 냉기 감속 (이속-30%, 4초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_DOOM_FROST_STRIKE",
-            "name": "Calamity: Runeword Doom Frost Strike / 룬워드 둠 냉기 일격",
-            "actorValue": "Health",
-            "resistValue": "ResistFrost",
-            "magicSkill": "Destruction",
-            "hostile": true
+            "editorId": "CAFF_MGEF_RW_DOOM_SLOW",
+            "name": "Calamity: Runeword Doom Frost Slow / 룬워드 파멸 냉기 감속",
+            "actorValue": "SpeedMult",
+            "hostile": true,
+            "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_DOOM_FROST_STRIKE",
-            "name": "Calamity: Runeword Doom Frost Strike / 룬워드 둠 냉기 일격",
+            "editorId": "CAFF_SPEL_RW_DOOM_SLOW",
+            "name": "Calamity: Runeword Doom Frost Slow / 룬워드 파멸 냉기 감속",
             "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_DOOM_FROST_STRIKE",
-              "magnitude": 10,
-              "duration": 0,
+              "magicEffectEditorId": "CAFF_MGEF_RW_DOOM_SLOW",
+              "magnitude": 30,
+              "duration": 4,
               "area": 0
             }
           }
@@ -4300,21 +4419,13 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 30.0,
-          "icdSeconds": 0.8,
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_DOOM_FROST_STRIKE",
+            "spellEditorId": "CAFF_SPEL_RW_DOOM_SLOW",
             "applyTo": "Target",
-            "noHitEffectArt": false,
-            "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.14,
-              "add": 0.0,
-              "min": 0.0,
-              "max": 0.0,
-              "spellBaseAsMin": true
-            }
+            "noHitEffectArt": false
           }
         },
         "slot": "prefix"
@@ -4322,29 +4433,53 @@
       {
         "id": "runeword_dream_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DREAM",
-        "name": "룬워드 드림 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개의 꿈 일격",
-        "nameEn": "Runeword Dream (Io-Jah-Pul): 30% on hit / ICD 0.8s - Lightning Dream Strike",
-        "nameKo": "룬워드 드림 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개의 꿈 일격",
+        "name": "룬워드 꿈 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개 타격 + 번개 저항 +20",
+        "nameEn": "Runeword Dream (Io-Jah-Pul): 30% on Hit / ICD 0.8s - Shock Strike + Shock Resist +20",
+        "nameKo": "룬워드 꿈 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개 타격 + 번개 저항 +20",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_DREAM_SHOCK_STRIKE",
-            "name": "Calamity: Runeword Dream Shock Strike / 룬워드 드림 번개 일격",
-            "actorValue": "Health",
-            "resistValue": "ResistShock",
-            "magicSkill": "Destruction",
-            "hostile": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_DREAM_SHOCK_STRIKE",
-            "name": "Calamity: Runeword Dream Shock Strike / 룬워드 드림 번개 일격",
-            "delivery": "TargetActor",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_DREAM_SHOCK_STRIKE",
-              "magnitude": 10,
-              "duration": 0,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_DREAM_SHOCK_STRIKE",
+              "name": "Calamity: Runeword Dream Shock Strike / 룬워드 드림 번개 일격",
+              "actorValue": "Health",
+              "resistValue": "ResistShock",
+              "magicSkill": "Destruction",
+              "hostile": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_DREAM_PASSIVE_SHOCK",
+              "name": "Calamity: Runeword Dream Passive Shock Resist / 룬워드 꿈 번개 저항",
+              "actorValue": "ResistShock",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_DREAM_SHOCK_STRIKE",
+              "name": "Calamity: Runeword Dream Shock Strike / 룬워드 드림 번개 일격",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_DREAM_SHOCK_STRIKE",
+                "magnitude": 10,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_DREAM_PASSIVE",
+              "name": "Calamity: Runeword Dream Passive / 룬워드 꿈 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_DREAM_PASSIVE_SHOCK",
+                "magnitude": 20,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -4369,7 +4504,8 @@
               "min": 0.0,
               "max": 0.0,
               "spellBaseAsMin": true
-            }
+            },
+            "passiveSpellEditorId": "CAFF_SPEL_RW_DREAM_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -4796,28 +4932,52 @@
       {
         "id": "runeword_honor_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HONOR",
-        "name": "룬워드 아너 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 영예의 활력(체력재생 +80%, 7초)",
-        "nameEn": "Runeword Honor (Amn-El-Ith-Tir-Sol): 26% on hit / ICD 8s - Honor's Vigor (Health Regen +80%, 7s)",
-        "nameKo": "룬워드 아너 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 영예의 활력(체력재생 +80%, 7초)",
+        "name": "룬워드 명예 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 강화 버프 + 체력 재생 +20",
+        "nameEn": "Runeword Honor (Amn-El-Ith-Tir-Sol): 26% on Hit / ICD 8s - Buff + HP Regen +20",
+        "nameKo": "룬워드 명예 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 강화 버프 + 체력 재생 +20",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_HONOR_VIGOR",
-            "name": "Calamity: Runeword Honor / 룬워드 아너",
-            "actorValue": "HealRateMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_HONOR_VIGOR",
-            "name": "Calamity: Runeword Honor / 룬워드 아너",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_HONOR_VIGOR",
-              "magnitude": 80,
-              "duration": 7,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_HONOR_VIGOR",
+              "name": "Calamity: Runeword Honor / 룬워드 아너",
+              "actorValue": "HealRateMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_HONOR_PASSIVE_HPREGEN",
+              "name": "Calamity: Runeword Honor Passive HP Regen / 룬워드 명예 체력 재생",
+              "actorValue": "HealRate",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_HONOR_VIGOR",
+              "name": "Calamity: Runeword Honor / 룬워드 아너",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HONOR_VIGOR",
+                "magnitude": 80,
+                "duration": 7,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_HONOR_PASSIVE",
+              "name": "Calamity: Runeword Honor Passive / 룬워드 명예 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HONOR_PASSIVE_HPREGEN",
+                "magnitude": 20,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -4834,7 +4994,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_HONOR_VIGOR",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_HONOR_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -5076,28 +5237,52 @@
       {
         "id": "runeword_hustle_w_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HUSTLE_W",
-        "name": "룬워드 허슬-W (Shael-Ko-Eld): 적중 26% / ICD 7초 - 재촉의 가속(이동속도 +30%, 5초)",
-        "nameEn": "Runeword Hustle-W (Shael-Ko-Eld): 26% on hit / ICD 7s - Hustle Surge (Move Speed +30%, 5s)",
-        "nameKo": "룬워드 허슬-W (Shael-Ko-Eld): 적중 26% / ICD 7초 - 재촉의 가속(이동속도 +30%, 5초)",
+        "name": "룬워드 허슬-무기 (Shael-Ko-Eld): 적중 26% / ICD 7초 - 돌진 버프 + 공격속도 +12%",
+        "nameEn": "Runeword Hustle-W (Shael-Ko-Eld): 26% on Hit / ICD 7s - Rush buff + IAS +12%",
+        "nameKo": "룬워드 허슬-무기 (Shael-Ko-Eld): 적중 26% / ICD 7초 - 돌진 버프 + 공격속도 +12%",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_HUSTLE_W_HASTE",
-            "name": "Calamity: Runeword Hustle-W / 룬워드 허슬-W",
-            "actorValue": "SpeedMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_HUSTLE_W_HASTE",
-            "name": "Calamity: Runeword Hustle-W / 룬워드 허슬-W",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_HUSTLE_W_HASTE",
-              "magnitude": 30,
-              "duration": 5,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_HUSTLE_W_HASTE",
+              "name": "Calamity: Runeword Hustle-W / 룬워드 허슬-W",
+              "actorValue": "SpeedMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_HUSTLEW_PASSIVE_IAS",
+              "name": "Calamity: Runeword Hustle(W) Passive IAS / 룬워드 허슬(무기) 공격 속도",
+              "actorValue": "WeaponSpeedMult",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_HUSTLE_W_HASTE",
+              "name": "Calamity: Runeword Hustle-W / 룬워드 허슬-W",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HUSTLE_W_HASTE",
+                "magnitude": 30,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_HUSTLEW_PASSIVE",
+              "name": "Calamity: Runeword Hustle(W) Passive / 룬워드 허슬(무기) 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HUSTLEW_PASSIVE_IAS",
+                "magnitude": 0.12,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -5114,7 +5299,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_HUSTLE_W_HASTE",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_HUSTLEW_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -5122,27 +5308,25 @@
       {
         "id": "runeword_obedience_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_OBEDIENCE",
-        "name": "룬워드 오비디언스 (Hel-Ko-Thul-Eth-Fal): 적중 28% / ICD 0.7초 - 복종의 강타(냉기 피해)",
-        "nameEn": "Runeword Obedience (Hel-Ko-Thul-Eth-Fal): 28% on hit / ICD 0.7s - Obedient Smite (Frost damage)",
-        "nameKo": "룬워드 오비디언스 (Hel-Ko-Thul-Eth-Fal): 적중 28% / ICD 0.7초 - 복종의 강타(냉기 피해)",
+        "name": "룬워드 복종 (Hel-Ko-Thul-Eth-Fal): 적중 20% / ICD 4초 - 분쇄 (이속-80%, 3초)",
+        "nameEn": "Runeword Obedience (Hel-Ko-Thul-Eth-Fal): 20% on Hit / ICD 4s - Crush (Speed-80%, 3s)",
+        "nameKo": "룬워드 복종 (Hel-Ko-Thul-Eth-Fal): 적중 20% / ICD 4초 - 분쇄 (이속-80%, 3초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_OBEDIENCE_SMITE",
-            "name": "Calamity: Runeword Obedience / 룬워드 오비디언스",
-            "actorValue": "Health",
+            "editorId": "CAFF_MGEF_RW_OBEDIENCE_CRUSH",
+            "name": "Calamity: Runeword Obedience Crush / 룬워드 복종 분쇄",
+            "actorValue": "SpeedMult",
             "hostile": true,
-            "recover": false,
-            "resistValue": "ResistFrost",
-            "magicSkill": "Destruction"
+            "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_OBEDIENCE_SMITE",
-            "name": "Calamity: Runeword Obedience / 룬워드 오비디언스",
+            "editorId": "CAFF_SPEL_RW_OBEDIENCE_CRUSH",
+            "name": "Calamity: Runeword Obedience Crush / 룬워드 복종 분쇄",
             "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_OBEDIENCE_SMITE",
-              "magnitude": 8,
-              "duration": 0,
+              "magicEffectEditorId": "CAFF_MGEF_RW_OBEDIENCE_CRUSH",
+              "magnitude": 80,
+              "duration": 3,
               "area": 0
             }
           }
@@ -5156,11 +5340,11 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 28.0,
-          "icdSeconds": 0.7,
+          "procChancePercent": 20.0,
+          "icdSeconds": 4.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_OBEDIENCE_SMITE",
+            "spellEditorId": "CAFF_SPEL_RW_OBEDIENCE_CRUSH",
             "applyTo": "Target",
             "noHitEffectArt": false,
             "magnitudeScaling": {
@@ -5270,26 +5454,24 @@
       {
         "id": "runeword_lawbringer_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAWBRINGER",
-        "name": "룬워드 로브링어 (Amn-Lem-Ko): 적중 26% / ICD 8초 - 법의 심판(화염 피해)",
-        "nameEn": "Runeword Lawbringer (Amn-Lem-Ko): 26% on hit / ICD 8s - Lawful Judgment (Fire damage)",
-        "nameKo": "룬워드 로브링어 (Amn-Lem-Ko): 적중 26% / ICD 8초 - 법의 심판(화염 피해)",
+        "name": "룬워드 법 집행자 (Amn-Lem-Ko): 적 처치 40% / ICD 4초 - 영혼 수확 (체력 회복)",
+        "nameEn": "Runeword Lawbringer (Amn-Lem-Ko): 40% on Kill / ICD 4s - Soul Harvest (Heal)",
+        "nameKo": "룬워드 법 집행자 (Amn-Lem-Ko): 적 처치 40% / ICD 4초 - 영혼 수확 (체력 회복)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_LAWBRINGER_JUDGE",
-            "name": "Calamity: Runeword Lawbringer / 룬워드 로브링어",
+            "editorId": "CAFF_MGEF_RW_LAWBRINGER_HEAL",
+            "name": "Calamity: Runeword Lawbringer Soul Harvest / 룬워드 법 집행자 영혼 수확",
             "actorValue": "Health",
-            "hostile": true,
-            "recover": false,
-            "resistValue": "ResistFire",
-            "magicSkill": "Destruction"
+            "hostile": false,
+            "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_LAWBRINGER_JUDGE",
-            "name": "Calamity: Runeword Lawbringer / 룬워드 로브링어",
-            "delivery": "TargetActor",
+            "editorId": "CAFF_SPEL_RW_LAWBRINGER_HEAL",
+            "name": "Calamity: Runeword Lawbringer Soul Harvest / 룬워드 법 집행자 영혼 수확",
+            "delivery": "Self",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_LAWBRINGER_JUDGE",
-              "magnitude": 12,
+              "magicEffectEditorId": "CAFF_MGEF_RW_LAWBRINGER_HEAL",
+              "magnitude": 60,
               "duration": 0,
               "area": 0
             }
@@ -5303,14 +5485,14 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "Hit",
-          "procChancePercent": 26.0,
-          "icdSeconds": 8.0,
+          "trigger": "Kill",
+          "procChancePercent": 40.0,
+          "icdSeconds": 4.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_LAWBRINGER_JUDGE",
-            "applyTo": "Target",
-            "noHitEffectArt": false
+            "spellEditorId": "CAFF_SPEL_RW_LAWBRINGER_HEAL",
+            "applyTo": "Self",
+            "noHitEffectArt": true
           }
         },
         "slot": "prefix"
@@ -5414,26 +5596,26 @@
       {
         "id": "runeword_venom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_VENOM",
-        "name": "룬워드 베놈 (Tal-Dol-Mal): 적중 28% / ICD 5초 - 맹독 일격(독 피해)",
-        "nameEn": "Runeword Venom (Tal-Dol-Mal): 28% on hit / ICD 5s - Venom Strike (Poison damage)",
-        "nameKo": "룬워드 베놈 (Tal-Dol-Mal): 적중 28% / ICD 5초 - 맹독 일격(독 피해)",
+        "name": "룬워드 맹독 (Tal-Dol-Mal): 적중 28% / ICD 5초 - 중독 (5/초 × 6초)",
+        "nameEn": "Runeword Venom (Tal-Dol-Mal): 28% on Hit / ICD 5s - Poison (5/s × 6s)",
+        "nameKo": "룬워드 맹독 (Tal-Dol-Mal): 적중 28% / ICD 5초 - 중독 (5/초 × 6초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_VENOM_TOXIN",
-            "name": "Calamity: Runeword Venom / 룬워드 베놈",
+            "editorId": "CAFF_MGEF_RW_VENOM_POISON",
+            "name": "Calamity: Runeword Venom Poison / 룬워드 맹독 중독",
             "actorValue": "Health",
             "hostile": true,
             "recover": false,
             "magicSkill": "Destruction"
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_VENOM_TOXIN",
-            "name": "Calamity: Runeword Venom / 룬워드 베놈",
+            "editorId": "CAFF_SPEL_RW_VENOM_POISON",
+            "name": "Calamity: Runeword Venom Poison / 룬워드 맹독 중독",
             "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_VENOM_TOXIN",
-              "magnitude": 15,
-              "duration": 0,
+              "magicEffectEditorId": "CAFF_MGEF_RW_VENOM_POISON",
+              "magnitude": 5,
+              "duration": 6,
               "area": 0
             }
           }
@@ -5451,7 +5633,7 @@
           "icdSeconds": 5.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_VENOM_TOXIN",
+            "spellEditorId": "CAFF_SPEL_RW_VENOM_POISON",
             "applyTo": "Target",
             "noHitEffectArt": false
           }
@@ -5507,27 +5689,26 @@
       {
         "id": "runeword_kingslayer_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_KINGSLAYER",
-        "name": "룬워드 킹슬레이어 (Mal-Um-Gul-Fal): 적중 30% / ICD 0.6초 - 왕살이의 참격(화염 피해)",
-        "nameEn": "Runeword Kingslayer (Mal-Um-Gul-Fal): 30% on hit / ICD 0.6s - Kingslayer's Cut (Fire damage)",
-        "nameKo": "룬워드 킹슬레이어 (Mal-Um-Gul-Fal): 적중 30% / ICD 0.6초 - 왕살이의 참격(화염 피해)",
+        "name": "룬워드 왕 학살자 (Mal-Um-Gul-Fal): 적중 30% / ICD 0.6초 - 출혈 (3/초 × 8초, 물리 피해 4%)",
+        "nameEn": "Runeword Kingslayer (Mal-Um-Gul-Fal): 30% on Hit / ICD 0.6s - Bleed (3/s × 8s, 4% phys)",
+        "nameKo": "룬워드 왕 학살자 (Mal-Um-Gul-Fal): 적중 30% / ICD 0.6초 - 출혈 (3/초 × 8초, 물리 피해 4%)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_KINGSLAYER_CUT",
-            "name": "Calamity: Runeword Kingslayer / 룬워드 킹슬레이어",
+            "editorId": "CAFF_MGEF_RW_KINGSLAYER_BLEED",
+            "name": "Calamity: Runeword Kingslayer Bleed / 룬워드 왕 학살자 출혈",
             "actorValue": "Health",
             "hostile": true,
             "recover": false,
-            "resistValue": "ResistFire",
             "magicSkill": "Destruction"
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_KINGSLAYER_CUT",
-            "name": "Calamity: Runeword Kingslayer / 룬워드 킹슬레이어",
+            "editorId": "CAFF_SPEL_RW_KINGSLAYER_BLEED",
+            "name": "Calamity: Runeword Kingslayer Bleed / 룬워드 왕 학살자 출혈",
             "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_KINGSLAYER_CUT",
-              "magnitude": 10,
-              "duration": 0,
+              "magicEffectEditorId": "CAFF_MGEF_RW_KINGSLAYER_BLEED",
+              "magnitude": 3,
+              "duration": 8,
               "area": 0
             }
           }
@@ -5545,14 +5726,14 @@
           "icdSeconds": 0.6,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_KINGSLAYER_CUT",
+            "spellEditorId": "CAFF_SPEL_RW_KINGSLAYER_BLEED",
             "applyTo": "Target",
             "noHitEffectArt": false,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
-              "mult": 0.12,
+              "mult": 0.04,
               "add": 0.0,
-              "min": 0.0,
+              "min": 3.0,
               "max": 0.0,
               "spellBaseAsMin": true
             }
@@ -5703,82 +5884,24 @@
       {
         "id": "runeword_death_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DEATH",
-        "name": "룬워드 데스 (Hel-El-Vex-Ort-Gul): 적중 32% / ICD 0.6초 - 죽음의 수확(화염 피해)",
-        "nameEn": "Runeword Death (Hel-El-Vex-Ort-Gul): 32% on hit / ICD 0.6s - Death's Reaping (Fire damage)",
-        "nameKo": "룬워드 데스 (Hel-El-Vex-Ort-Gul): 적중 32% / ICD 0.6초 - 죽음의 수확(화염 피해)",
+        "name": "룬워드 죽음 (Hel-El-Vex-Ort-Gul): 적중 30% / ICD 0.5초 - 흡혈 (피해의 6%)",
+        "nameEn": "Runeword Death (Hel-El-Vex-Ort-Gul): 30% on Hit / ICD 0.5s - Life Steal (6% of damage)",
+        "nameKo": "룬워드 죽음 (Hel-El-Vex-Ort-Gul): 적중 30% / ICD 0.5초 - 흡혈 (피해의 6%)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_DEATH_REAP",
-            "name": "Calamity: Runeword Death / 룬워드 데스",
+            "editorId": "CAFF_MGEF_RW_DEATH_LIFESTEAL",
+            "name": "Calamity: Runeword Death Life Steal / 룬워드 죽음 흡혈",
             "actorValue": "Health",
-            "hostile": true,
-            "recover": false,
-            "resistValue": "ResistFire",
-            "magicSkill": "Destruction"
+            "hostile": false,
+            "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_DEATH_REAP",
-            "name": "Calamity: Runeword Death / 룬워드 데스",
-            "delivery": "TargetActor",
+            "editorId": "CAFF_SPEL_RW_DEATH_LIFESTEAL",
+            "name": "Calamity: Runeword Death Life Steal / 룬워드 죽음 흡혈",
+            "delivery": "Self",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_DEATH_REAP",
-              "magnitude": 10,
-              "duration": 0,
-              "area": 0
-            }
-          }
-        },
-        "kid": {
-          "type": "None",
-          "strings": "NONE",
-          "formFilters": "NONE",
-          "traits": "-E",
-          "chance": 0
-        },
-        "runtime": {
-          "trigger": "Hit",
-          "procChancePercent": 32.0,
-          "icdSeconds": 0.6,
-          "action": {
-            "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_DEATH_REAP",
-            "applyTo": "Target",
-            "noHitEffectArt": false,
-            "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.14,
-              "add": 0.0,
-              "min": 0.0,
-              "max": 0.0,
-              "spellBaseAsMin": true
-            }
-          }
-        },
-        "slot": "prefix"
-      },
-      {
-        "id": "runeword_chaos_final",
-        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAOS",
-        "name": "룬워드 카오스 (Fal-Ohm-Um): 적중 30% / ICD 0.5초 - 혼돈의 화살(번개 피해)",
-        "nameEn": "Runeword Chaos (Fal-Ohm-Um): 30% on hit / ICD 0.5s - Chaos Bolt (Shock damage)",
-        "nameKo": "룬워드 카오스 (Fal-Ohm-Um): 적중 30% / ICD 0.5초 - 혼돈의 화살(번개 피해)",
-        "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_CHAOS_BOLT",
-            "name": "Calamity: Runeword Chaos / 룬워드 카오스",
-            "actorValue": "Health",
-            "hostile": true,
-            "recover": false,
-            "resistValue": "ResistShock",
-            "magicSkill": "Destruction"
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_CHAOS_BOLT",
-            "name": "Calamity: Runeword Chaos / 룬워드 카오스",
-            "delivery": "TargetActor",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_CHAOS_BOLT",
-              "magnitude": 10,
+              "magicEffectEditorId": "CAFF_MGEF_RW_DEATH_LIFESTEAL",
+              "magnitude": 5,
               "duration": 0,
               "area": 0
             }
@@ -5797,14 +5920,14 @@
           "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_CHAOS_BOLT",
-            "applyTo": "Target",
-            "noHitEffectArt": false,
+            "spellEditorId": "CAFF_SPEL_RW_DEATH_LIFESTEAL",
+            "applyTo": "Self",
+            "noHitEffectArt": true,
             "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.12,
+              "source": "HitTotalDealt",
+              "mult": 0.06,
               "add": 0.0,
-              "min": 0.0,
+              "min": 5.0,
               "max": 0.0,
               "spellBaseAsMin": true
             }
@@ -5813,26 +5936,27 @@
         "slot": "prefix"
       },
       {
-        "id": "runeword_wind_final",
-        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WIND",
-        "name": "룬워드 윈드 (Sur-El): 적중 30% / ICD 6초 - 질풍의 가속(이동속도 +40%, 5초)",
-        "nameEn": "Runeword Wind (Sur-El): 30% on hit / ICD 6s - Wind Rush (Move Speed +40%, 5s)",
-        "nameKo": "룬워드 윈드 (Sur-El): 적중 30% / ICD 6초 - 질풍의 가속(이동속도 +40%, 5초)",
+        "id": "runeword_chaos_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAOS",
+        "name": "룬워드 혼돈 (Fal-Ohm-Um): 적중 30% / ICD 0.5초 - 출혈 (4/초 × 5초)",
+        "nameEn": "Runeword Chaos (Fal-Ohm-Um): 30% on Hit / ICD 0.5s - Bleed (4/s × 5s)",
+        "nameKo": "룬워드 혼돈 (Fal-Ohm-Um): 적중 30% / ICD 0.5초 - 출혈 (4/초 × 5초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_WIND_GUST",
-            "name": "Calamity: Runeword Wind / 룬워드 윈드",
-            "actorValue": "SpeedMult",
-            "hostile": false,
-            "recover": true
+            "editorId": "CAFF_MGEF_RW_CHAOS_BLEED",
+            "name": "Calamity: Runeword Chaos Bleed / 룬워드 혼돈 출혈",
+            "actorValue": "Health",
+            "hostile": true,
+            "recover": false,
+            "magicSkill": "Destruction"
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_WIND_GUST",
-            "name": "Calamity: Runeword Wind / 룬워드 윈드",
-            "delivery": "Self",
+            "editorId": "CAFF_SPEL_RW_CHAOS_BLEED",
+            "name": "Calamity: Runeword Chaos Bleed / 룬워드 혼돈 출혈",
+            "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_WIND_GUST",
-              "magnitude": 40,
+              "magicEffectEditorId": "CAFF_MGEF_RW_CHAOS_BLEED",
+              "magnitude": 4,
               "duration": 5,
               "area": 0
             }
@@ -5848,38 +5972,38 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 30.0,
-          "icdSeconds": 6.0,
+          "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_WIND_GUST",
-            "applyTo": "Self",
-            "noHitEffectArt": true
+            "spellEditorId": "CAFF_SPEL_RW_CHAOS_BLEED",
+            "applyTo": "Target",
+            "noHitEffectArt": false
           }
         },
         "slot": "prefix"
       },
       {
-        "id": "runeword_beast_final",
-        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BEAST",
-        "name": "룬워드 비스트 (Ber-Tir-Um-Mal-Lum): 적중 30% / ICD 6초 - 야수의 광기(공격력 +25%, 6초)",
-        "nameEn": "Runeword Beast (Ber-Tir-Um-Mal-Lum): 30% on hit / ICD 6s - Beast's Frenzy (Attack Damage +25%, 6s)",
-        "nameKo": "룬워드 비스트 (Ber-Tir-Um-Mal-Lum): 적중 30% / ICD 6초 - 야수의 광기(공격력 +25%, 6초)",
+        "id": "runeword_wind_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WIND",
+        "name": "룬워드 바람 (Sur-El): 적중 25% / ICD 3초 - 밀쳐내기 (이속-60%, 2초)",
+        "nameEn": "Runeword Wind (Sur-El): 25% on Hit / ICD 3s - Stagger Push (Speed-60%, 2s)",
+        "nameKo": "룬워드 바람 (Sur-El): 적중 25% / ICD 3초 - 밀쳐내기 (이속-60%, 2초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_BEAST_FRENZY",
-            "name": "Calamity: Runeword Beast / 룬워드 비스트",
-            "actorValue": "AttackDamageMult",
-            "hostile": false,
+            "editorId": "CAFF_MGEF_RW_WIND_PUSH",
+            "name": "Calamity: Runeword Wind Stagger / 룬워드 바람 밀쳐내기",
+            "actorValue": "SpeedMult",
+            "hostile": true,
             "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_BEAST_FRENZY",
-            "name": "Calamity: Runeword Beast / 룬워드 비스트",
-            "delivery": "Self",
+            "editorId": "CAFF_SPEL_RW_WIND_PUSH",
+            "name": "Calamity: Runeword Wind Stagger / 룬워드 바람 밀쳐내기",
+            "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_BEAST_FRENZY",
-              "magnitude": 25,
-              "duration": 6,
+              "magicEffectEditorId": "CAFF_MGEF_RW_WIND_PUSH",
+              "magnitude": 60,
+              "duration": 2,
               "area": 0
             }
           }
@@ -5893,11 +6017,76 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 30.0,
-          "icdSeconds": 6.0,
+          "procChancePercent": 25.0,
+          "icdSeconds": 3.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_BEAST_FRENZY",
+            "spellEditorId": "CAFF_SPEL_RW_WIND_PUSH",
+            "applyTo": "Target",
+            "noHitEffectArt": false
+          }
+        },
+        "slot": "prefix"
+      },
+      {
+        "id": "runeword_beast_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BEAST",
+        "name": "룬워드 야수 (Ber-Tir-Um-Mal-Lum): 타격시 / ICD 180초 - 야수 격노 (공격+30, 방어+150, 12초)",
+        "nameEn": "Runeword Beast (Ber-Tir-Um-Mal-Lum): on Hit / ICD 180s - Beast Rage (ATK+30, Armor+150, 12s)",
+        "nameKo": "룬워드 야수 (Ber-Tir-Um-Mal-Lum): 타격시 / ICD 180초 - 야수 격노 (공격+30, 방어+150, 12초)",
+        "records": {
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_BEAST_RAGE_POWER",
+              "name": "Calamity: Runeword Beast Rage Power / 룬워드 야수 격노(공격력)",
+              "actorValue": "AttackDamageMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_BEAST_RAGE_ARMOR",
+              "name": "Calamity: Runeword Beast Rage Armor / 룬워드 야수 격노(방어)",
+              "actorValue": "DamageResist",
+              "hostile": false,
+              "recover": true
+            }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_BEAST_RAGE",
+              "name": "Calamity: Runeword Beast Rage / 룬워드 야수 격노",
+              "delivery": "Self",
+              "effects": [
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_BEAST_RAGE_POWER",
+                  "magnitude": 30,
+                  "duration": 12,
+                  "area": 0
+                },
+                {
+                  "magicEffectEditorId": "CAFF_MGEF_RW_BEAST_RAGE_ARMOR",
+                  "magnitude": 150,
+                  "duration": 12,
+                  "area": 0
+                }
+              ]
+            }
+          ]
+        },
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 180.0,
+          "action": {
+            "type": "CastSpell",
+            "spellEditorId": "CAFF_SPEL_RW_BEAST_RAGE",
             "applyTo": "Self",
             "noHitEffectArt": true
           }
@@ -5907,25 +6096,25 @@
       {
         "id": "runeword_eternity_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ETERNITY",
-        "name": "룬워드 이터니티 (Amn-Ber-Ist-Sol-Sur): 적중 30% / ICD 8초 - 영원의 손길(체력재생 +150%, 8초)",
-        "nameEn": "Runeword Eternity (Amn-Ber-Ist-Sol-Sur): 30% on hit / ICD 8s - Eternity's Touch (Health Regen +150%, 8s)",
-        "nameKo": "룬워드 이터니티 (Amn-Ber-Ist-Sol-Sur): 적중 30% / ICD 8초 - 영원의 손길(체력재생 +150%, 8초)",
+        "name": "룬워드 영원 (Amn-Ber-Ist-Sol-Sur): 피격시 / ICD 120초 - 방벽 (방어도+300, 10초)",
+        "nameEn": "Runeword Eternity (Amn-Ber-Ist-Sol-Sur): on Hit Taken / ICD 120s - Bulwark (Armor+300, 10s)",
+        "nameKo": "룬워드 영원 (Amn-Ber-Ist-Sol-Sur): 피격시 / ICD 120초 - 방벽 (방어도+300, 10초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_ETERNITY_REVIVE",
-            "name": "Calamity: Runeword Eternity / 룬워드 이터니티",
-            "actorValue": "HealRateMult",
+            "editorId": "CAFF_MGEF_RW_ETERNITY_BULWARK",
+            "name": "Calamity: Runeword Eternity Bulwark / 룬워드 영원 방벽",
+            "actorValue": "DamageResist",
             "hostile": false,
             "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_ETERNITY_REVIVE",
-            "name": "Calamity: Runeword Eternity / 룬워드 이터니티",
+            "editorId": "CAFF_SPEL_RW_ETERNITY_BULWARK",
+            "name": "Calamity: Runeword Eternity Bulwark / 룬워드 영원 방벽",
             "delivery": "Self",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_ETERNITY_REVIVE",
-              "magnitude": 150,
-              "duration": 8,
+              "magicEffectEditorId": "CAFF_MGEF_RW_ETERNITY_BULWARK",
+              "magnitude": 300,
+              "duration": 10,
               "area": 0
             }
           }
@@ -5938,12 +6127,12 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "Hit",
-          "procChancePercent": 30.0,
-          "icdSeconds": 8.0,
+          "trigger": "IncomingHit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 120.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_ETERNITY_REVIVE",
+            "spellEditorId": "CAFF_SPEL_RW_ETERNITY_BULWARK",
             "applyTo": "Self",
             "noHitEffectArt": true
           }
@@ -6009,26 +6198,24 @@
       {
         "id": "runeword_fury_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FURY",
-        "name": "룬워드 퓨리 (Jah-Gul-Eth): 적중 32% / ICD 0.5초 - 광란의 참격(화염 피해)",
-        "nameEn": "Runeword Fury (Jah-Gul-Eth): 32% on hit / ICD 0.5s - Fury Slash (Fire damage)",
-        "nameKo": "룬워드 퓨리 (Jah-Gul-Eth): 적중 32% / ICD 0.5초 - 광란의 참격(화염 피해)",
+        "name": "룬워드 분노 (Jah-Gul-Eth): 적중 30% / ICD 0.5초 - 흡혈 (피해의 5%)",
+        "nameEn": "Runeword Fury (Jah-Gul-Eth): 30% on Hit / ICD 0.5s - Life Steal (5% of damage)",
+        "nameKo": "룬워드 분노 (Jah-Gul-Eth): 적중 30% / ICD 0.5초 - 흡혈 (피해의 5%)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_FURY_BLAZE",
-            "name": "Calamity: Runeword Fury / 룬워드 퓨리",
+            "editorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
+            "name": "Calamity: Runeword Fury Life Steal / 룬워드 분노 흡혈",
             "actorValue": "Health",
-            "hostile": true,
-            "recover": false,
-            "resistValue": "ResistFire",
-            "magicSkill": "Destruction"
+            "hostile": false,
+            "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_FURY_BLAZE",
-            "name": "Calamity: Runeword Fury / 룬워드 퓨리",
-            "delivery": "TargetActor",
+            "editorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
+            "name": "Calamity: Runeword Fury Life Steal / 룬워드 분노 흡혈",
+            "delivery": "Self",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_FURY_BLAZE",
-              "magnitude": 10,
+              "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
+              "magnitude": 5,
               "duration": 0,
               "area": 0
             }
@@ -6043,18 +6230,18 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 32.0,
+          "procChancePercent": 30.0,
           "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_FURY_BLAZE",
-            "applyTo": "Target",
-            "noHitEffectArt": false,
+            "spellEditorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
+            "applyTo": "Self",
+            "noHitEffectArt": true,
             "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.14,
+              "source": "HitTotalDealt",
+              "mult": 0.05,
               "add": 0.0,
-              "min": 0.0,
+              "min": 5.0,
               "max": 0.0,
               "spellBaseAsMin": true
             }
@@ -6177,27 +6364,26 @@
       {
         "id": "runeword_destruction_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DESTRUCTION",
-        "name": "룬워드 디스트럭션 (Vex-Lo-Ber-Jah-Ko): 적중 34% / ICD 0.4초 - 파괴의 일격(번개 피해)",
-        "nameEn": "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 34% on hit / ICD 0.4s - Destruction Strike (Shock damage)",
-        "nameKo": "룬워드 디스트럭션 (Vex-Lo-Ber-Jah-Ko): 적중 34% / ICD 0.4초 - 파괴의 일격(번개 피해)",
+        "name": "룬워드 파괴 (Vex-Lo-Ber-Jah-Ko): 적중 34% / ICD 0.4초 - 출혈 (3/초 × 6초)",
+        "nameEn": "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 34% on Hit / ICD 0.4s - Bleed (3/s × 6s)",
+        "nameKo": "룬워드 파괴 (Vex-Lo-Ber-Jah-Ko): 적중 34% / ICD 0.4초 - 출혈 (3/초 × 6초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_DESTRUCTION_RUIN",
-            "name": "Calamity: Runeword Destruction / 룬워드 디스트럭션",
+            "editorId": "CAFF_MGEF_RW_DESTRUCTION_BLEED",
+            "name": "Calamity: Runeword Destruction Bleed / 룬워드 파괴 출혈",
             "actorValue": "Health",
             "hostile": true,
             "recover": false,
-            "resistValue": "ResistShock",
             "magicSkill": "Destruction"
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_DESTRUCTION_RUIN",
-            "name": "Calamity: Runeword Destruction / 룬워드 디스트럭션",
+            "editorId": "CAFF_SPEL_RW_DESTRUCTION_BLEED",
+            "name": "Calamity: Runeword Destruction Bleed / 룬워드 파괴 출혈",
             "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_DESTRUCTION_RUIN",
-              "magnitude": 12,
-              "duration": 0,
+              "magicEffectEditorId": "CAFF_MGEF_RW_DESTRUCTION_BLEED",
+              "magnitude": 3,
+              "duration": 6,
               "area": 0
             }
           }
@@ -6215,17 +6401,9 @@
           "icdSeconds": 0.4,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_DESTRUCTION_RUIN",
+            "spellEditorId": "CAFF_SPEL_RW_DESTRUCTION_BLEED",
             "applyTo": "Target",
-            "noHitEffectArt": false,
-            "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.16,
-              "add": 0.0,
-              "min": 0.0,
-              "max": 0.0,
-              "spellBaseAsMin": true
-            }
+            "noHitEffectArt": false
           }
         },
         "slot": "prefix"
@@ -6233,27 +6411,25 @@
       {
         "id": "runeword_ice_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ICE",
-        "name": "룬워드 아이스 (Amn-Shael-Jah-Lo): 적중 32% / ICD 0.5초 - 빙결의 일격(냉기 피해)",
-        "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 32% on hit / ICD 0.5s - Ice Strike (Frost damage)",
-        "nameKo": "룬워드 아이스 (Amn-Shael-Jah-Lo): 적중 32% / ICD 0.5초 - 빙결의 일격(냉기 피해)",
+        "name": "룬워드 얼음 (Amn-Shael-Jah-Lo): 적중 100% / ICD 0.5초 - 냉기 저항 감소 (-25, 6초)",
+        "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 100% on Hit / ICD 0.5s - Frost Resist Shred (-25, 6s)",
+        "nameKo": "룬워드 얼음 (Amn-Shael-Jah-Lo): 적중 100% / ICD 0.5초 - 냉기 저항 감소 (-25, 6초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_ICE_GLACIAL",
-            "name": "Calamity: Runeword Ice / 룬워드 아이스",
-            "actorValue": "Health",
+            "editorId": "CAFF_MGEF_RW_ICE_FROST_SHRED",
+            "name": "Calamity: Runeword Ice Frost Shred / 룬워드 얼음 냉기 저항 감소",
+            "actorValue": "ResistFrost",
             "hostile": true,
-            "recover": false,
-            "resistValue": "ResistFrost",
-            "magicSkill": "Destruction"
+            "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_ICE_GLACIAL",
-            "name": "Calamity: Runeword Ice / 룬워드 아이스",
+            "editorId": "CAFF_SPEL_RW_ICE_FROST_SHRED",
+            "name": "Calamity: Runeword Ice Frost Shred / 룬워드 얼음 냉기 저항 감소",
             "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_ICE_GLACIAL",
-              "magnitude": 10,
-              "duration": 0,
+              "magicEffectEditorId": "CAFF_MGEF_RW_ICE_FROST_SHRED",
+              "magnitude": 25,
+              "duration": 6,
               "area": 0
             }
           }
@@ -6267,21 +6443,13 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 32.0,
+          "procChancePercent": 100.0,
           "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_ICE_GLACIAL",
+            "spellEditorId": "CAFF_SPEL_RW_ICE_FROST_SHRED",
             "applyTo": "Target",
-            "noHitEffectArt": false,
-            "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.14,
-              "add": 0.0,
-              "min": 0.0,
-              "max": 0.0,
-              "spellBaseAsMin": true
-            }
+            "noHitEffectArt": false
           }
         },
         "slot": "prefix"
@@ -6289,26 +6457,24 @@
       {
         "id": "runeword_hand_of_justice_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HAND_OF_JUSTICE",
-        "name": "룬워드 핸드 오브 저스티스 (Sur-Cham-Amn-Lo): 적중 34% / ICD 0.4초 - 정의의 심판(화염 피해)",
-        "nameEn": "Runeword Hand of Justice (Sur-Cham-Amn-Lo): 34% on hit / ICD 0.4s - Justice's Verdict (Fire damage)",
-        "nameKo": "룬워드 핸드 오브 저스티스 (Sur-Cham-Amn-Lo): 적중 34% / ICD 0.4초 - 정의의 심판(화염 피해)",
+        "name": "룬워드 정의의 손 (Sur-Cham-Amn-Lo): 적중 30% / ICD 0.5초 - 흡혈 (피해의 5%)",
+        "nameEn": "Runeword Hand of Justice (Sur-Cham-Amn-Lo): 30% on Hit / ICD 0.5s - Life Steal (5% of damage)",
+        "nameKo": "룬워드 정의의 손 (Sur-Cham-Amn-Lo): 적중 30% / ICD 0.5초 - 흡혈 (피해의 5%)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_HAND_OF_JUSTICE_VERDICT",
-            "name": "Calamity: Runeword Hand of Justice / 룬워드 핸드 오브 저스티스",
+            "editorId": "CAFF_MGEF_RW_HOJ_LIFESTEAL",
+            "name": "Calamity: Runeword Hand of Justice Life Steal / 룬워드 정의의 손 흡혈",
             "actorValue": "Health",
-            "hostile": true,
-            "recover": false,
-            "resistValue": "ResistFire",
-            "magicSkill": "Destruction"
+            "hostile": false,
+            "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_HAND_OF_JUSTICE_VERDICT",
-            "name": "Calamity: Runeword Hand of Justice / 룬워드 핸드 오브 저스티스",
-            "delivery": "TargetActor",
+            "editorId": "CAFF_SPEL_RW_HOJ_LIFESTEAL",
+            "name": "Calamity: Runeword Hand of Justice Life Steal / 룬워드 정의의 손 흡혈",
+            "delivery": "Self",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_HAND_OF_JUSTICE_VERDICT",
-              "magnitude": 12,
+              "magicEffectEditorId": "CAFF_MGEF_RW_HOJ_LIFESTEAL",
+              "magnitude": 5,
               "duration": 0,
               "area": 0
             }
@@ -6323,18 +6489,18 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 34.0,
-          "icdSeconds": 0.4,
+          "procChancePercent": 30.0,
+          "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_HAND_OF_JUSTICE_VERDICT",
-            "applyTo": "Target",
-            "noHitEffectArt": false,
+            "spellEditorId": "CAFF_SPEL_RW_HOJ_LIFESTEAL",
+            "applyTo": "Self",
+            "noHitEffectArt": true,
             "magnitudeScaling": {
-              "source": "HitPhysicalDealt",
-              "mult": 0.16,
+              "source": "HitTotalDealt",
+              "mult": 0.05,
               "add": 0.0,
-              "min": 0.0,
+              "min": 5.0,
               "max": 0.0,
               "spellBaseAsMin": true
             }
@@ -6401,27 +6567,27 @@
       {
         "id": "runeword_plague_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PLAGUE",
-        "name": "룬워드 플레이그 (Cham-Shael-Um): 적중 32% / ICD 4초 - 역병의 확산(마법 피해)",
-        "nameEn": "Runeword Plague (Cham-Shael-Um): 32% on hit / ICD 4s - Plague Blight (Magic damage)",
-        "nameKo": "룬워드 플레이그 (Cham-Shael-Um): 적중 32% / ICD 4초 - 역병의 확산(마법 피해)",
+        "name": "룬워드 역병 (Cham-Shael-Um): 적 처치 45% / ICD 3초 - 독 구름 (광역 20)",
+        "nameEn": "Runeword Plague (Cham-Shael-Um): 45% on Kill / ICD 3s - Poison Cloud (Area 20)",
+        "nameKo": "룬워드 역병 (Cham-Shael-Um): 적 처치 45% / ICD 3초 - 독 구름 (광역 20)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_PLAGUE_BLIGHT",
-            "name": "Calamity: Runeword Plague / 룬워드 플레이그",
+            "editorId": "CAFF_MGEF_RW_PLAGUE_CLOUD",
+            "name": "Calamity: Runeword Plague Cloud / 룬워드 역병 독 구름",
             "actorValue": "Health",
             "hostile": true,
             "recover": false,
             "magicSkill": "Destruction"
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_PLAGUE_BLIGHT",
-            "name": "Calamity: Runeword Plague / 룬워드 플레이그",
+            "editorId": "CAFF_SPEL_RW_PLAGUE_CLOUD",
+            "name": "Calamity: Runeword Plague Cloud / 룬워드 역병 독 구름",
             "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_PLAGUE_BLIGHT",
-              "magnitude": 18,
-              "duration": 0,
-              "area": 0
+              "magicEffectEditorId": "CAFF_MGEF_RW_PLAGUE_CLOUD",
+              "magnitude": 6,
+              "duration": 5,
+              "area": 20
             }
           }
         },
@@ -6433,12 +6599,12 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "Hit",
-          "procChancePercent": 32.0,
-          "icdSeconds": 4.0,
+          "trigger": "Kill",
+          "procChancePercent": 45.0,
+          "icdSeconds": 3.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_PLAGUE_BLIGHT",
+            "spellEditorId": "CAFF_SPEL_RW_PLAGUE_CLOUD",
             "applyTo": "Target",
             "noHitEffectArt": false
           }
@@ -6448,28 +6614,52 @@
       {
         "id": "runeword_obsession_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_OBSESSION",
-        "name": "룬워드 옵세션 (Zod-Ist-Lem-Lum-Io-Nef): 적중 34% / ICD 5초 - 집착의 광기(마나재생 +200%, 10초)",
-        "nameEn": "Runeword Obsession (Zod-Ist-Lem-Lum-Io-Nef): 34% on hit / ICD 5s - Obsessive Mania (Mana Regen +200%, 10s)",
-        "nameKo": "룬워드 옵세션 (Zod-Ist-Lem-Lum-Io-Nef): 적중 34% / ICD 5초 - 집착의 광기(마나재생 +200%, 10초)",
+        "name": "룬워드 집착 (Zod-Ist-Lem-Lum-Io-Nef): 적중 34% / ICD 5초 - 마법 폭발 + 마나 재생 +25",
+        "nameEn": "Runeword Obsession (Zod-Ist-Lem-Lum-Io-Nef): 34% on Hit / ICD 5s - Magic blast + Magicka Regen +25",
+        "nameKo": "룬워드 집착 (Zod-Ist-Lem-Lum-Io-Nef): 적중 34% / ICD 5초 - 마법 폭발 + 마나 재생 +25",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_OBSESSION_MANIA",
-            "name": "Calamity: Runeword Obsession / 룬워드 옵세션",
-            "actorValue": "MagickaRateMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_OBSESSION_MANIA",
-            "name": "Calamity: Runeword Obsession / 룬워드 옵세션",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_OBSESSION_MANIA",
-              "magnitude": 200,
-              "duration": 10,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_OBSESSION_MANIA",
+              "name": "Calamity: Runeword Obsession / 룬워드 옵세션",
+              "actorValue": "MagickaRateMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_OBSESSION_PASSIVE_MPREGEN",
+              "name": "Calamity: Runeword Obsession Passive Magicka Regen / 룬워드 집착 마나 재생",
+              "actorValue": "MagickaRate",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_OBSESSION_MANIA",
+              "name": "Calamity: Runeword Obsession / 룬워드 옵세션",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_OBSESSION_MANIA",
+                "magnitude": 200,
+                "duration": 10,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_OBSESSION_PASSIVE",
+              "name": "Calamity: Runeword Obsession Passive / 룬워드 집착 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_OBSESSION_PASSIVE_MPREGEN",
+                "magnitude": 25,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -6486,7 +6676,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_OBSESSION_MANIA",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_OBSESSION_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -6826,28 +7017,52 @@
       {
         "id": "runeword_rhyme_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RHYME",
-        "name": "룬워드 라임 (Shael-Eth): 피격 22% / ICD 12초 - 운율의 방패(냉기저항 +30, 6초)",
-        "nameEn": "Runeword Rhyme (Shael-Eth): 22% on hit taken / ICD 12s - Rhyme Shield (Frost Resist +30, 6s)",
-        "nameKo": "룬워드 라임 (Shael-Eth): 피격 22% / ICD 12초 - 운율의 방패(냉기저항 +30, 6초)",
+        "name": "룬워드 운율 (Shael-Eth): 피격 22% / ICD 12초 - 방어 버프 + 냉기 저항 +40",
+        "nameEn": "Runeword Rhyme (Shael-Eth): 22% on Hit Taken / ICD 12s - Buff + Frost Resist +40",
+        "nameKo": "룬워드 운율 (Shael-Eth): 피격 22% / ICD 12초 - 방어 버프 + 냉기 저항 +40",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_RHYME_SHIELD",
-            "name": "Calamity: Runeword Rhyme / 룬워드 라임",
-            "actorValue": "ResistFrost",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_RHYME_SHIELD",
-            "name": "Calamity: Runeword Rhyme / 룬워드 라임",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_RHYME_SHIELD",
-              "magnitude": 30,
-              "duration": 6,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_RHYME_SHIELD",
+              "name": "Calamity: Runeword Rhyme / 룬워드 라임",
+              "actorValue": "ResistFrost",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_RHYME_PASSIVE_FROST",
+              "name": "Calamity: Runeword Rhyme Passive Frost Resist / 룬워드 운율 빙결 면역",
+              "actorValue": "ResistFrost",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_RHYME_SHIELD",
+              "name": "Calamity: Runeword Rhyme / 룬워드 라임",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_RHYME_SHIELD",
+                "magnitude": 30,
+                "duration": 6,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_RHYME_PASSIVE",
+              "name": "Calamity: Runeword Rhyme Passive / 룬워드 운율 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_RHYME_PASSIVE_FROST",
+                "magnitude": 40,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -6864,7 +7079,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_RHYME_SHIELD",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_RHYME_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -7240,28 +7456,52 @@
       {
         "id": "runeword_hustle_a_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HUSTLE_A",
-        "name": "룬워드 허슬-A (Shael-Ko-Eld): 피격 26% / ICD 10초 - 재촉의 질주(이동속도 +30%, 5초)",
-        "nameEn": "Runeword Hustle-A (Shael-Ko-Eld): 26% on hit taken / ICD 10s - Hustle Rush (Move Speed +30%, 5s)",
-        "nameKo": "룬워드 허슬-A (Shael-Ko-Eld): 피격 26% / ICD 10초 - 재촉의 질주(이동속도 +30%, 5초)",
+        "name": "룬워드 허슬-방어구 (Shael-Ko-Eld): 피격 26% / ICD 10초 - 방어 버프 + 이동속도 +8%",
+        "nameEn": "Runeword Hustle-A (Shael-Ko-Eld): 26% on Hit Taken / ICD 10s - Buff + Move Speed +8%",
+        "nameKo": "룬워드 허슬-방어구 (Shael-Ko-Eld): 피격 26% / ICD 10초 - 방어 버프 + 이동속도 +8%",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_HUSTLE_A_RUSH",
-            "name": "Calamity: Runeword Hustle-A / 룬워드 허슬-A",
-            "actorValue": "SpeedMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_HUSTLE_A_RUSH",
-            "name": "Calamity: Runeword Hustle-A / 룬워드 허슬-A",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_HUSTLE_A_RUSH",
-              "magnitude": 30,
-              "duration": 5,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_HUSTLE_A_RUSH",
+              "name": "Calamity: Runeword Hustle-A / 룬워드 허슬-A",
+              "actorValue": "SpeedMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_HUSTLEA_PASSIVE_SPEED",
+              "name": "Calamity: Runeword Hustle(A) Passive Speed / 룬워드 허슬(방어구) 이동속도",
+              "actorValue": "SpeedMult",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_HUSTLE_A_RUSH",
+              "name": "Calamity: Runeword Hustle-A / 룬워드 허슬-A",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HUSTLE_A_RUSH",
+                "magnitude": 30,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_HUSTLEA_PASSIVE",
+              "name": "Calamity: Runeword Hustle(A) Passive / 룬워드 허슬(방어구) 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_HUSTLEA_PASSIVE_SPEED",
+                "magnitude": 8,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -7278,7 +7518,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_HUSTLE_A_RUSH",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_HUSTLEA_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -7286,25 +7527,25 @@
       {
         "id": "runeword_lionheart_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LIONHEART",
-        "name": "룬워드 라이언하트 (Hel-Lum-Fal): 피격 24% / ICD 10초 - 사자의 용기(방어도 +70, 6초)",
-        "nameEn": "Runeword Lionheart (Hel-Lum-Fal): 24% on hit taken / ICD 10s - Lion's Courage (Armor +70, 6s)",
-        "nameKo": "룬워드 라이언하트 (Hel-Lum-Fal): 피격 24% / ICD 10초 - 사자의 용기(방어도 +70, 6초)",
+        "name": "룬워드 사자심장 (Hel-Lum-Fal): 체력<30%시 / ICD 45초 - 긴급 대량 체력 회복",
+        "nameEn": "Runeword Lionheart (Hel-Lum-Fal): HP<30% / ICD 45s - Emergency Massive Heal",
+        "nameKo": "룬워드 사자심장 (Hel-Lum-Fal): 체력<30%시 / ICD 45초 - 긴급 대량 체력 회복",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_LIONHEART_COURAGE",
-            "name": "Calamity: Runeword Lionheart / 룬워드 라이언하트",
-            "actorValue": "DamageResist",
+            "editorId": "CAFF_MGEF_RW_LIONHEART_EMERGENCY",
+            "name": "Calamity: Runeword Lionheart Emergency Heal / 룬워드 사자심장 긴급 치유",
+            "actorValue": "Health",
             "hostile": false,
             "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_LIONHEART_COURAGE",
-            "name": "Calamity: Runeword Lionheart / 룬워드 라이언하트",
+            "editorId": "CAFF_SPEL_RW_LIONHEART_EMERGENCY",
+            "name": "Calamity: Runeword Lionheart Emergency Heal / 룬워드 사자심장 긴급 치유",
             "delivery": "Self",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_LIONHEART_COURAGE",
-              "magnitude": 70,
-              "duration": 6,
+              "magicEffectEditorId": "CAFF_MGEF_RW_LIONHEART_EMERGENCY",
+              "magnitude": 200,
+              "duration": 0,
               "area": 0
             }
           }
@@ -7317,15 +7558,16 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "IncomingHit",
-          "procChancePercent": 24.0,
-          "icdSeconds": 10.0,
+          "trigger": "LowHealth",
+          "procChancePercent": 100.0,
+          "icdSeconds": 45.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_LIONHEART_COURAGE",
+            "spellEditorId": "CAFF_SPEL_RW_LIONHEART_EMERGENCY",
             "applyTo": "Self",
             "noHitEffectArt": true
-          }
+          },
+          "lowHealthThresholdPercent": 30.0
         },
         "slot": "prefix"
       },
@@ -7378,28 +7620,52 @@
       {
         "id": "runeword_treachery_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_TREACHERY",
-        "name": "룬워드 트레쳐리 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 배반의 가속(이동속도 +28%, 5초)",
-        "nameEn": "Runeword Treachery (Shael-Thul-Lem): 26% on hit taken / ICD 10s - Treachery's Haste (Move Speed +28%, 5s)",
-        "nameKo": "룬워드 트레쳐리 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 배반의 가속(이동속도 +28%, 5초)",
+        "name": "룬워드 배신 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 회피 버프 + 공격속도 +10%",
+        "nameEn": "Runeword Treachery (Shael-Thul-Lem): 26% on Hit Taken / ICD 10s - Evasion buff + IAS +10%",
+        "nameKo": "룬워드 배신 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 회피 버프 + 공격속도 +10%",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_TREACHERY_HASTE",
-            "name": "Calamity: Runeword Treachery / 룬워드 트레쳐리",
-            "actorValue": "SpeedMult",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_TREACHERY_HASTE",
-            "name": "Calamity: Runeword Treachery / 룬워드 트레쳐리",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_TREACHERY_HASTE",
-              "magnitude": 28,
-              "duration": 5,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_TREACHERY_HASTE",
+              "name": "Calamity: Runeword Treachery / 룬워드 트레쳐리",
+              "actorValue": "SpeedMult",
+              "hostile": false,
+              "recover": true
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_TREACHERY_PASSIVE_IAS",
+              "name": "Calamity: Runeword Treachery Passive IAS / 룬워드 배신 공격 속도",
+              "actorValue": "WeaponSpeedMult",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_TREACHERY_HASTE",
+              "name": "Calamity: Runeword Treachery / 룬워드 트레쳐리",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_TREACHERY_HASTE",
+                "magnitude": 28,
+                "duration": 5,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_TREACHERY_PASSIVE",
+              "name": "Calamity: Runeword Treachery Passive / 룬워드 배신 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_TREACHERY_PASSIVE_IAS",
+                "magnitude": 0.1,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -7416,7 +7682,8 @@
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_TREACHERY_HASTE",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_TREACHERY_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -7746,28 +8013,53 @@
       {
         "id": "runeword_sanctuary_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SANCTUARY",
-        "name": "룬워드 생추어리 (Ko-Ko-Mal): 피격 28% / ICD 10초 - 성역의 보호(방어도 +100, 8초)",
-        "nameEn": "Runeword Sanctuary (Ko-Ko-Mal): 28% on hit taken / ICD 10s - Sanctuary Ward (Armor +100, 8s)",
-        "nameKo": "룬워드 생추어리 (Ko-Ko-Mal): 피격 28% / ICD 10초 - 성역의 보호(방어도 +100, 8초)",
+        "name": "룬워드 성역 (Ko-Ko-Mal): 피격 100% / ICD 0.5초 - 반사 (받은 피해의 15%) + 마법 저항 +15",
+        "nameEn": "Runeword Sanctuary (Ko-Ko-Mal): 100% on Hit Taken / ICD 0.5s - Reflect (15%) + Magic Resist +15",
+        "nameKo": "룬워드 성역 (Ko-Ko-Mal): 피격 100% / ICD 0.5초 - 반사 (받은 피해의 15%) + 마법 저항 +15",
         "records": {
-          "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_SANCTUARY_HAVEN",
-            "name": "Calamity: Runeword Sanctuary / 룬워드 생추어리",
-            "actorValue": "DamageResist",
-            "hostile": false,
-            "recover": true
-          },
-          "spell": {
-            "editorId": "CAFF_SPEL_RW_SANCTUARY_HAVEN",
-            "name": "Calamity: Runeword Sanctuary / 룬워드 생추어리",
-            "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_SANCTUARY_HAVEN",
-              "magnitude": 100,
-              "duration": 8,
-              "area": 0
+          "magicEffects": [
+            {
+              "editorId": "CAFF_MGEF_RW_SANCTUARY_REFLECT",
+              "name": "Calamity: Runeword Sanctuary Reflect / 룬워드 성역 반사",
+              "actorValue": "Health",
+              "hostile": true,
+              "recover": false,
+              "magicSkill": "Destruction"
+            },
+            {
+              "editorId": "CAFF_MGEF_RW_SANCTUARY_PASSIVE_RESIST",
+              "name": "Calamity: Runeword Sanctuary Passive Resist / 룬워드 성역 저항",
+              "actorValue": "ResistMagic",
+              "hostile": false,
+              "recover": true
             }
-          }
+          ],
+          "spells": [
+            {
+              "editorId": "CAFF_SPEL_RW_SANCTUARY_REFLECT",
+              "name": "Calamity: Runeword Sanctuary Reflect / 룬워드 성역 반사",
+              "delivery": "TargetActor",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_SANCTUARY_REFLECT",
+                "magnitude": 3,
+                "duration": 0,
+                "area": 0
+              }
+            },
+            {
+              "editorId": "CAFF_SPEL_RW_SANCTUARY_PASSIVE",
+              "name": "Calamity: Runeword Sanctuary Passive / 룬워드 성역 패시브",
+              "delivery": "Self",
+              "effect": {
+                "magicEffectEditorId": "CAFF_MGEF_RW_SANCTUARY_PASSIVE_RESIST",
+                "magnitude": 15,
+                "duration": 0,
+                "area": 0
+              },
+              "spellType": "Ability",
+              "castType": "ConstantEffect"
+            }
+          ]
         },
         "kid": {
           "type": "None",
@@ -7778,13 +8070,22 @@
         },
         "runtime": {
           "trigger": "IncomingHit",
-          "procChancePercent": 28.0,
-          "icdSeconds": 10.0,
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_SANCTUARY_HAVEN",
-            "applyTo": "Self",
-            "noHitEffectArt": true
+            "spellEditorId": "CAFF_SPEL_RW_SANCTUARY_REFLECT",
+            "applyTo": "Target",
+            "noHitEffectArt": false,
+            "magnitudeScaling": {
+              "source": "HitTotalDealt",
+              "mult": 0.15,
+              "add": 0.0,
+              "min": 3.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            },
+            "passiveSpellEditorId": "CAFF_SPEL_RW_SANCTUARY_PASSIVE"
           }
         },
         "slot": "prefix"
@@ -7838,24 +8139,24 @@
       {
         "id": "runeword_delirium_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DELIRIUM",
-        "name": "룬워드 딜리리움 (Lem-Ist-Io): 피격 28% / ICD 10초 - 착란의 가속(이동속도 +35%, 5초)",
-        "nameEn": "Runeword Delirium (Lem-Ist-Io): 28% on hit taken / ICD 10s - Delirium Rush (Move Speed +35%, 5s)",
-        "nameKo": "룬워드 딜리리움 (Lem-Ist-Io): 피격 28% / ICD 10초 - 착란의 가속(이동속도 +35%, 5초)",
+        "name": "룬워드 딜리리움 (Lem-Ist-Io): 적중 80% / ICD 1초 - 혼란 (이속-40%, 5초)",
+        "nameEn": "Runeword Delirium (Lem-Ist-Io): 80% on Hit / ICD 1s - Confusion (Speed-40%, 5s)",
+        "nameKo": "룬워드 딜리리움 (Lem-Ist-Io): 적중 80% / ICD 1초 - 혼란 (이속-40%, 5초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_DELIRIUM_WARP",
-            "name": "Calamity: Runeword Delirium / 룬워드 딜리리움",
+            "editorId": "CAFF_MGEF_RW_DELIRIUM_CONFUSE",
+            "name": "Calamity: Runeword Delirium Confusion / 룬워드 딜리리움 혼란",
             "actorValue": "SpeedMult",
-            "hostile": false,
+            "hostile": true,
             "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_DELIRIUM_WARP",
-            "name": "Calamity: Runeword Delirium / 룬워드 딜리리움",
-            "delivery": "Self",
+            "editorId": "CAFF_SPEL_RW_DELIRIUM_CONFUSE",
+            "name": "Calamity: Runeword Delirium Confusion / 룬워드 딜리리움 혼란",
+            "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_DELIRIUM_WARP",
-              "magnitude": 35,
+              "magicEffectEditorId": "CAFF_MGEF_RW_DELIRIUM_CONFUSE",
+              "magnitude": 40,
               "duration": 5,
               "area": 0
             }
@@ -7869,14 +8170,14 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "IncomingHit",
-          "procChancePercent": 28.0,
-          "icdSeconds": 10.0,
+          "trigger": "Hit",
+          "procChancePercent": 80.0,
+          "icdSeconds": 1.0,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_DELIRIUM_WARP",
-            "applyTo": "Self",
-            "noHitEffectArt": true
+            "spellEditorId": "CAFF_SPEL_RW_DELIRIUM_CONFUSE",
+            "applyTo": "Target",
+            "noHitEffectArt": false
           }
         },
         "slot": "prefix"
@@ -7930,25 +8231,25 @@
       {
         "id": "runeword_flickering_flame_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FLICKERING_FLAME",
-        "name": "룬워드 플리커링 플레임 (Nef-Pul-Vex): 피격 28% / ICD 10초 - 깜빡이는 불꽃 방어(화염저항 +55, 7초)",
-        "nameEn": "Runeword Flickering Flame (Nef-Pul-Vex): 28% on hit taken / ICD 10s - Flickering Ward (Fire Resist +55, 7s)",
-        "nameKo": "룬워드 플리커링 플레임 (Nef-Pul-Vex): 피격 28% / ICD 10초 - 깜빡이는 불꽃 방어(화염저항 +55, 7초)",
+        "name": "룬워드 깜박이는 불꽃 (Nef-Pul-Vex): 적중 100% / ICD 0.5초 - 화염 저항 감소 (-25, 6초)",
+        "nameEn": "Runeword Flickering Flame (Nef-Pul-Vex): 100% on Hit / ICD 0.5s - Fire Resist Shred (-25, 6s)",
+        "nameKo": "룬워드 깜박이는 불꽃 (Nef-Pul-Vex): 적중 100% / ICD 0.5초 - 화염 저항 감소 (-25, 6초)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_FLICKERING_FLAME_BLAZE",
-            "name": "Calamity: Runeword Flickering Flame / 룬워드 플리커링 플레임",
+            "editorId": "CAFF_MGEF_RW_FLICKER_FIRE_SHRED",
+            "name": "Calamity: Runeword Flickering Flame Fire Shred / 룬워드 깜박이는 불꽃 화염 저항 감소",
             "actorValue": "ResistFire",
-            "hostile": false,
+            "hostile": true,
             "recover": true
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_FLICKERING_FLAME_BLAZE",
-            "name": "Calamity: Runeword Flickering Flame / 룬워드 플리커링 플레임",
-            "delivery": "Self",
+            "editorId": "CAFF_SPEL_RW_FLICKER_FIRE_SHRED",
+            "name": "Calamity: Runeword Flickering Flame Fire Shred / 룬워드 깜박이는 불꽃 화염 저항 감소",
+            "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_FLICKERING_FLAME_BLAZE",
-              "magnitude": 55,
-              "duration": 7,
+              "magicEffectEditorId": "CAFF_MGEF_RW_FLICKER_FIRE_SHRED",
+              "magnitude": 25,
+              "duration": 6,
               "area": 0
             }
           }
@@ -7961,14 +8262,14 @@
           "chance": 0
         },
         "runtime": {
-          "trigger": "IncomingHit",
-          "procChancePercent": 28.0,
-          "icdSeconds": 10.0,
+          "trigger": "Hit",
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_FLICKERING_FLAME_BLAZE",
-            "applyTo": "Self",
-            "noHitEffectArt": true
+            "spellEditorId": "CAFF_SPEL_RW_FLICKER_FIRE_SHRED",
+            "applyTo": "Target",
+            "noHitEffectArt": false
           }
         },
         "slot": "prefix"
@@ -7976,25 +8277,26 @@
       {
         "id": "runeword_bramble_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BRAMBLE",
-        "name": "룬워드 브램블 (Ral-Ohm-Sur-Eth): 피격 28% / ICD 12초 - 가시덤불 반격(방어도 +130, 8초)",
-        "nameEn": "Runeword Bramble (Ral-Ohm-Sur-Eth): 28% on hit taken / ICD 12s - Bramble Thorns (Armor +130, 8s)",
-        "nameKo": "룬워드 브램블 (Ral-Ohm-Sur-Eth): 피격 28% / ICD 12초 - 가시덤불 반격(방어도 +130, 8초)",
+        "name": "룬워드 브램블 (Ral-Ohm-Sur-Eth): 피격 100% / ICD 0.5초 - 가시 반사 (받은 피해의 25%)",
+        "nameEn": "Runeword Bramble (Ral-Ohm-Sur-Eth): 100% on Hit Taken / ICD 0.5s - Thorns (25% of damage taken)",
+        "nameKo": "룬워드 브램블 (Ral-Ohm-Sur-Eth): 피격 100% / ICD 0.5초 - 가시 반사 (받은 피해의 25%)",
         "records": {
           "magicEffect": {
-            "editorId": "CAFF_MGEF_RW_BRAMBLE_THORNS",
-            "name": "Calamity: Runeword Bramble / 룬워드 브램블",
-            "actorValue": "DamageResist",
-            "hostile": false,
-            "recover": true
+            "editorId": "CAFF_MGEF_RW_BRAMBLE_REFLECT",
+            "name": "Calamity: Runeword Bramble Thorns Reflect / 룬워드 브램블 가시 반사",
+            "actorValue": "Health",
+            "hostile": true,
+            "recover": false,
+            "magicSkill": "Destruction"
           },
           "spell": {
-            "editorId": "CAFF_SPEL_RW_BRAMBLE_THORNS",
-            "name": "Calamity: Runeword Bramble / 룬워드 브램블",
-            "delivery": "Self",
+            "editorId": "CAFF_SPEL_RW_BRAMBLE_REFLECT",
+            "name": "Calamity: Runeword Bramble Thorns Reflect / 룬워드 브램블 가시 반사",
+            "delivery": "TargetActor",
             "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_BRAMBLE_THORNS",
-              "magnitude": 130,
-              "duration": 8,
+              "magicEffectEditorId": "CAFF_MGEF_RW_BRAMBLE_REFLECT",
+              "magnitude": 5,
+              "duration": 0,
               "area": 0
             }
           }
@@ -8008,13 +8310,21 @@
         },
         "runtime": {
           "trigger": "IncomingHit",
-          "procChancePercent": 28.0,
-          "icdSeconds": 12.0,
+          "procChancePercent": 100.0,
+          "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_BRAMBLE_THORNS",
-            "applyTo": "Self",
-            "noHitEffectArt": true
+            "spellEditorId": "CAFF_SPEL_RW_BRAMBLE_REFLECT",
+            "applyTo": "Target",
+            "noHitEffectArt": false,
+            "magnitudeScaling": {
+              "source": "HitTotalDealt",
+              "mult": 0.25,
+              "add": 0.0,
+              "min": 5.0,
+              "max": 0.0,
+              "spellBaseAsMin": true
+            }
           }
         },
         "slot": "prefix"
@@ -11008,11 +11318,11 @@
     ],
     "spidRules": [
       {
-        "comment": "Runeword fragments via SPID Item distribution (actor inventory -> corpse loot on death).",
+        "comment": "Runeword fragments via SPID Item distribution (actor inventory -> corpse loot on death). Exclude player base NPC (0x7~Skyrim.esm) via FormFilter.",
         "line": "Item = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|-0x7~Skyrim.esm|NONE|NONE|1|100"
       },
       {
-        "comment": "Reforge orb via SPID Item distribution (actor inventory -> corpse loot on death).",
+        "comment": "Reforge orb via SPID Item distribution (actor inventory -> corpse loot on death). Exclude player base NPC (0x7~Skyrim.esm) via FormFilter.",
         "line": "Item = CAFF_LItem_ReforgeOrbDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|-0x7~Skyrim.esm|NONE|NONE|1|100"
       }
     ]
