@@ -631,7 +631,7 @@ namespace CalamityAffixes
 		std::atomic_bool _allowNonHostilePlayerOwnedOutgoingProcs{ false };
 		bool _combatDebugLog{ false };
 		bool _disableCombatEvidenceLease{ false };
-		bool _disableHealthDamageRouting{ true };
+		bool _disableHealthDamageRouting{ false };
 		bool _allowPlayerHealthDamageHook{ false };
 		bool _disablePassiveSuffixSpells{ false };
 		bool _disableTrapSystemTick{ false };

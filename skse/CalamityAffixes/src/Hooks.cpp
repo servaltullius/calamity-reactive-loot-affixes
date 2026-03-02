@@ -544,23 +544,6 @@ namespace CalamityAffixes::Hooks
 						reinterpret_cast<std::uintptr_t>(a_attacker));
 				}
 
-				// Diagnostic: log every ThunkImpl entry (first 5 calls only) to verify hook fires.
-				{
-					static std::uint32_t entryCount = 0;
-					entryCount += 1;
-					if (entryCount <= 5) {
-						spdlog::info(
-							"CalamityAffixes: ThunkImpl ENTRY #{} label={} target={} attacker={} dmg={:.1f} inHook={} inProc={}",
-							entryCount,
-							a_hookLabel ? a_hookLabel : "?",
-							safeTarget ? safeTarget->GetName() : "<null>",
-							safeAttacker ? safeAttacker->GetName() : "<null>",
-							a_damage,
-							(int)inHook, (int)g_inProcDispatch);
-						spdlog::default_logger()->flush();
-					}
-				}
-
 				if (inHook || g_inProcDispatch) {
 					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
@@ -599,31 +582,6 @@ namespace CalamityAffixes::Hooks
 					rawHitData,
 					safeTarget,
 					safeAttacker);
-
-				// Diagnostic: track why bow procs might not fire.
-				{
-					static std::uint32_t diagCount = 0;
-					diagCount += 1;
-					if (diagCount <= 20 || (diagCount % 100 == 0)) {
-						const bool actorsMatch = rawHitData ? HitDataMatchesCurrentActors(rawHitData, safeTarget, safeAttacker) : false;
-						const bool hitLike = rawHitData ? HasHitLikeSource(rawHitData, safeAttacker) : false;
-						const bool caffFilter = rawHitData && rawHitData->attackDataSpell
-							? SafeCStringView(rawHitData->attackDataSpell->GetFormEditorID()).starts_with("CAFF_")
-							: false;
-						spdlog::info(
-							"CalamityAffixes: ThunkImpl diag #{} target={} attacker={} dmg={:.1f} rawHitData={} actorsMatch={} hitLike={} caffFilter={} preHitData={}",
-							diagCount,
-							safeTarget->GetName(),
-							safeAttacker ? safeAttacker->GetName() : "<null>",
-							a_damage,
-							(rawHitData != nullptr),
-							actorsMatch,
-							hitLike,
-							caffFilter,
-							(preHitData != nullptr));
-						spdlog::default_logger()->flush();
-					}
-				}
 
 				// Proc dispatch guard per (target, attacker) pair.
 				//
