@@ -1528,8 +1528,8 @@
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
-              "magnitude": 0,
-              "duration": 0,
+              "magnitude": 1,
+              "duration": 1,
               "area": 0
             }
           }
@@ -1657,8 +1657,8 @@
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
-              "magnitude": 0,
-              "duration": 0,
+              "magnitude": 1,
+              "duration": 1,
               "area": 0
             }
           }
@@ -1786,8 +1786,8 @@
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
-              "magnitude": 0,
-              "duration": 0,
+              "magnitude": 1,
+              "duration": 1,
               "area": 0
             }
           }
