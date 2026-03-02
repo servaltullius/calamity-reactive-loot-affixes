@@ -277,6 +277,7 @@ namespace CalamityAffixes
 		}
 
 		const std::scoped_lock lock(_stateMutex);
+		SKSE::log::info("CalamityAffixes: Load() — deserializing co-save records.");
 
 		_instanceAffixes.clear();
 		_equippedInstanceKeysByToken.clear();
@@ -397,6 +398,7 @@ namespace CalamityAffixes
 							continue;
 						}
 
+						SKSE::log::info("CalamityAffixes: IAXF v7 — co-save contains {} instance entries.", count);
 						for (std::uint32_t i = 0; i < count; ++i) {
 							RE::FormID baseID = 0;
 							std::uint16_t uniqueID = 0;
@@ -429,6 +431,7 @@ namespace CalamityAffixes
 							drainRemaining();
 						}
 
+						SKSE::log::info("CalamityAffixes: IAXF v7 — loaded {} instance entries from co-save.", _instanceAffixes.size());
 						continue;
 					}
 
@@ -827,6 +830,7 @@ namespace CalamityAffixes
 				}
 			}
 
+			SKSE::log::info("CalamityAffixes: Load() — deserialized {} instance entries, {} runtime states.", _instanceAffixes.size(), _instanceStates.size());
 			if (!_affixIndexByToken.empty() && !_affixes.empty()) {
 				SanitizeAllTrackedLootInstancesForCurrentLootRules("Serialization.Load");
 			}

@@ -8,6 +8,8 @@
 #include <string_view>
 #include <system_error>
 
+#include <nlohmann/json.hpp>
+
 namespace CalamityAffixes::ConfigShared
 {
 	inline std::string_view Trim(std::string_view a_text) noexcept
@@ -24,6 +26,26 @@ namespace CalamityAffixes::ConfigShared
 		}
 
 		return a_text;
+	}
+
+	// nlohmann::json::value(key, default) throws type_error::302 when the key exists
+	// with a null value.  Strip nulls so .value() safely returns the default instead.
+	inline void StripNullValues(nlohmann::json& j)
+	{
+		if (j.is_object()) {
+			for (auto it = j.begin(); it != j.end(); ) {
+				if (it->is_null()) {
+					it = j.erase(it);
+				} else {
+					StripNullValues(*it);
+					++it;
+				}
+			}
+		} else if (j.is_array()) {
+			for (auto& element : j) {
+				StripNullValues(element);
+			}
+		}
 	}
 
 	inline RE::SpellItem* LookupSpellFromSpec(std::string_view a_spec, RE::TESDataHandler* a_handler)

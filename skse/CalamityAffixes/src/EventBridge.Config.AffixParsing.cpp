@@ -222,7 +222,12 @@ namespace CalamityAffixes
 
 	void EventBridge::ParseConfiguredAffixesFromJson(const nlohmann::json& a_affixes, RE::TESDataHandler* a_handler)
 	{
-		for (const auto& a : a_affixes) {
+		// Strip null values from all affix entries before parsing.
+		// nlohmann::json::value() throws type_error::302 when a key exists with null value.
+		auto affixes = a_affixes;
+		ConfigShared::StripNullValues(affixes);
+
+		for (const auto& a : affixes) {
 			if (!a.is_object()) {
 				continue;
 			}
