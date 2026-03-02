@@ -159,6 +159,14 @@ namespace CalamityAffixes
 			_loot.triggerProcBudgetWindowMs,
 			_loot.trapCastBudgetPerTick);
 
+		SKSE::log::info(
+			"CalamityAffixes: special action indices (convert={}, castOnCrit={}, mindOverMatter={}, archmage={}, corpseExplosion={}).",
+			_convertAffixIndices.size(),
+			_castOnCritAffixIndices.size(),
+			_mindOverMatterAffixIndices.size(),
+			_archmageAffixIndices.size(),
+			_corpseExplosionAffixIndices.size());
+
 		if (_affixes.empty()) {
 			SKSE::log::error("CalamityAffixes: no affixes loaded. Is the generated CalamityAffixes plugin enabled?");
 		}

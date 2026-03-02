@@ -73,22 +73,22 @@ namespace CalamityAffixes
 			return {};
 		}
 
-			if (!a_attacker->IsPlayerRef()) {
-				return {};
-			}
-			const auto now = std::chrono::steady_clock::now();
-			const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
-			const bool allowNeutralOutgoing =
-				ShouldResolveNonHostileOutgoingFirstHitAllowance(
-					true,
-					a_target->IsPlayerRef(),
-					AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
-				ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
-			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
-				return {};
-			}
-			if (!HitDataUtil::IsWeaponLikeHit(a_hitData, a_attacker)) {
-				return {};
+		if (!a_attacker->IsPlayerRef()) {
+			return {};
+		}
+		const auto now = std::chrono::steady_clock::now();
+		const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
+		const bool allowNeutralOutgoing =
+			ShouldResolveNonHostileOutgoingFirstHitAllowance(
+				true,
+				a_target->IsPlayerRef(),
+				AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
+			ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
+		if (!(hostileEitherDirection || allowNeutralOutgoing)) {
+			return {};
+		}
+		if (!HitDataUtil::IsWeaponLikeHit(a_hitData, a_attacker)) {
+			return {};
 		}
 
 		if (a_allowResync) {
@@ -106,7 +106,7 @@ namespace CalamityAffixes
 			return {};
 		}
 
-			AffixRuntime* selectedAffix = nullptr;
+		AffixRuntime* selectedAffix = nullptr;
 		PerTargetCooldownKey selectedPerTargetKey{};
 		bool selectedUsesPerTargetIcd = false;
 		const Action* action = nullptr;
@@ -190,16 +190,16 @@ namespace CalamityAffixes
 			CommitPerTargetCooldown(selectedPerTargetKey, selectedAffix->perTargetIcd, now);
 		}
 
-			if (_loot.debugLog) {
-				const auto* hitWeapon = HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker);
-				spdlog::debug(
-					"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={}, convertPct={}%, converted={}, inOutDamage={})",
-					hitWeapon ? hitWeapon->GetName() : "<unknown>",
-					physicalDealt,
-					action->convertPct,
-					converted,
-					a_inOutDamage);
-			}
+		if (_loot.debugLog) {
+			const auto* hitWeapon = HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker);
+			spdlog::debug(
+				"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={:.1f}, convertPct={:.0f}%, converted={:.1f}, remainingPhys={:.1f})",
+				hitWeapon ? hitWeapon->GetName() : "<unknown>",
+				physicalDealt,
+				action->convertPct,
+				converted,
+				a_inOutDamage);
+		}
 
 		return ConversionResult{
 			.spell = action->spell,

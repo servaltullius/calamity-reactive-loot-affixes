@@ -639,15 +639,19 @@ namespace CalamityAffixes::Hooks
 					}
 				}
 
-				float adjustedDamage = a_damage;
+				// HandleHealthDamage sign convention varies: some engines pass negative
+				// for damage.  Normalize to positive for Conversion/MoM/CritBonus,
+				// then restore original sign for CallOriginal.
+				const bool damageWasNegative = (a_damage < 0.0f);
+				float adjustedDamage = std::abs(a_damage);
 				const float critMult = bridge->GetCritDamageMultiplier(
 					safeAttacker,
 					preHitData);
 				if (std::isfinite(critMult) && critMult > 1.0f) {
 					adjustedDamage *= critMult;
 				}
-				if (!std::isfinite(adjustedDamage) || adjustedDamage < 0.0f) {
-					adjustedDamage = a_damage;
+				if (!std::isfinite(adjustedDamage)) {
+					adjustedDamage = std::abs(a_damage);
 				}
 				const auto conversion = bridge->EvaluateConversion(
 					safeAttacker,
@@ -677,7 +681,9 @@ namespace CalamityAffixes::Hooks
 					capturedHitData->emplace(*preHitData);
 				}
 
-				CallOriginal(a_original, safeTarget, safeAttacker, adjustedDamage, a_hookLabel);
+				// Restore original sign for the engine.
+				const float finalDamage = damageWasNegative ? -adjustedDamage : adjustedDamage;
+				CallOriginal(a_original, safeTarget, safeAttacker, finalDamage, a_hookLabel);
 
 				if (auto* tasks = SKSE::GetTaskInterface()) {
 					const RE::FormID targetFormID = safeTarget->GetFormID();
