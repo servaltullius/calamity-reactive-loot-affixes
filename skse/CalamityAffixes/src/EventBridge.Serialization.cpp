@@ -268,6 +268,15 @@ namespace CalamityAffixes
 				return;
 			}
 		}
+
+		// --- MFLG ---
+		if (!a_intfc->OpenRecord(kSerializationRecordMigrationFlags, kMigrationFlagsVersion)) {
+			return;
+		}
+		const std::uint8_t migrationFlags = (_miscCurrencyMigrated ? 1u : 0u);
+		if (!a_intfc->WriteRecordData(migrationFlags)) {
+			return;
+		}
 	}
 
 	void EventBridge::Load(SKSE::SerializationInterface* a_intfc)
@@ -676,7 +685,7 @@ namespace CalamityAffixes
 
 					if (selectedBaseID != 0 && selectedUniqueID != 0) {
 						RE::FormID resolvedSelectedBaseID = 0;
-						if (a_intfc->ResolveFormID(selectedBaseID, resolvedSelectedBaseID)) {
+						if (a_intfc->ResolveFormID(selectedBaseID, resolvedSelectedBaseID) && resolvedSelectedBaseID != 0) {
 							_runewordSelectedBaseKey = MakeInstanceKey(resolvedSelectedBaseID, selectedUniqueID);
 						}
 					}
@@ -824,6 +833,22 @@ namespace CalamityAffixes
 					continue;
 				}
 
+				if (type == kSerializationRecordMigrationFlags) {
+					if (version != kMigrationFlagsVersion) {
+						DrainRecordBytes(a_intfc, length, "unsupported-mflg-version");
+						continue;
+					}
+
+					std::uint8_t flags = 0;
+					if (!rd(flags)) {
+						SKSE::log::warn("CalamityAffixes: truncated MFLG record; skipping.");
+						drainRemaining();
+						continue;
+					}
+					_miscCurrencyMigrated = (flags & 1u) != 0;
+					continue;
+				}
+
 				{
 					// Drain unknown record.
 					DrainRecordBytes(a_intfc, length, "unknown-record");
@@ -961,6 +986,7 @@ namespace CalamityAffixes
 		_triggerProcBudgetConsumed = 0u;
 		_lastHealthDamageSignature = 0;
 		_lastHealthDamageSignatureAt = {};
+		_miscCurrencyMigrated = false;
 
 		for (auto& affix : _affixes) {
 			affix.nextAllowed = {};
@@ -1137,6 +1163,10 @@ namespace CalamityAffixes
 
 	void EventBridge::MaybeMigrateMiscCurrency()
 	{
+		if (_miscCurrencyMigrated) {
+			return;
+		}
+
 		// Detect and recover physical MISC items (rune fragments, reforge orbs) lost
 		// due to ESP FormID changes between mod versions.
 		//
@@ -1145,8 +1175,8 @@ namespace CalamityAffixes
 		// starter grant gives orbs on first use, having affix data with zero orbs
 		// is a strong signal of FormID loss.
 		//
-		// This runs once per affected load; after granting, subsequent loads see
-		// items > 0 and skip.
+		// This runs once per save file; after granting, the flag persists in the
+		// co-save and prevents repeated grants on subsequent loads.
 
 		if (_instanceAffixes.empty()) {
 			return;
@@ -1197,6 +1227,8 @@ namespace CalamityAffixes
 				fragmentsGranted += given;
 			}
 		}
+
+		_miscCurrencyMigrated = true;
 
 		SKSE::log::info(
 			"CalamityAffixes: MISC migration — granted {} orbs and {} rune fragment types.",

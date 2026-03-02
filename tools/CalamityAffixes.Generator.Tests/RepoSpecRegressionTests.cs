@@ -197,7 +197,7 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RuntimeHook_OnHealthDamage_ForwardsAdjustedDamage()
+    public void RuntimeHook_OnHealthDamage_ForwardsOriginalDamage()
     {
         var repoRoot = FindRepoRoot();
         var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
@@ -205,8 +205,10 @@ public sealed class RepoSpecRegressionTests
         Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
 
         var hooksSource = File.ReadAllText(hooksPath);
+        // OnHealthDamage receives the pre-conversion original damage so the stale
+        // guard's expectedDealt comparison is like-for-like.
         Assert.Contains(
-            "bridge->OnHealthDamage(a_target, a_attacker, hitData, a_adjustedDamage);",
+            "bridge->OnHealthDamage(a_target, a_attacker, hitData, a_originalDamage);",
             hooksSource,
             StringComparison.Ordinal);
         Assert.DoesNotContain(

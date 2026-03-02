@@ -281,6 +281,7 @@ namespace CalamityAffixes::Hooks
 			RE::Actor* a_target,
 			RE::Actor* a_attacker,
 			float a_adjustedDamage,
+			float a_originalDamage,
 			DeferredConversionCast a_conversion,
 			std::chrono::steady_clock::time_point a_now,
 			const RE::HitData* a_capturedHitData) noexcept
@@ -314,7 +315,7 @@ namespace CalamityAffixes::Hooks
 			// Route hit procs BEFORE casting Conversion/CoC spells.
 			// CastSpellImmediate can trigger HandleHealthDamage synchronously,
 			// which overwrites the actor's lastHitData and invalidates our hitData pointer.
-			bridge->OnHealthDamage(a_target, a_attacker, hitData, a_adjustedDamage);
+			bridge->OnHealthDamage(a_target, a_attacker, hitData, a_originalDamage);
 
 			// Cast Conversion spell (hitData pointer may become stale after this).
 			if (a_conversion.spellFormID != 0u && a_conversion.magnitudeOverride > 0.0f && a_attacker) {
@@ -653,7 +654,8 @@ namespace CalamityAffixes::Hooks
 				if (!std::isfinite(adjustedDamage)) {
 					adjustedDamage = std::abs(a_damage);
 				}
-				const auto conversion = bridge->EvaluateConversion(
+				const float originalDamage = adjustedDamage;
+			const auto conversion = bridge->EvaluateConversion(
 					safeAttacker,
 					safeTarget,
 					preHitData,
@@ -688,16 +690,16 @@ namespace CalamityAffixes::Hooks
 				if (auto* tasks = SKSE::GetTaskInterface()) {
 					const RE::FormID targetFormID = safeTarget->GetFormID();
 					const RE::FormID attackerFormID = safeAttacker ? safeAttacker->GetFormID() : 0u;
-					tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, deferredConversion, now, capturedHitData]() {
+					tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, originalDamage, deferredConversion, now, capturedHitData]() {
 						auto* target = RE::TESForm::LookupByID<RE::Actor>(targetFormID);
 						auto* attacker = attackerFormID != 0u ?
 							                 RE::TESForm::LookupByID<RE::Actor>(attackerFormID) :
 							                 nullptr;
 						const RE::HitData* hitDataPtr = capturedHitData->has_value() ? &capturedHitData->value() : nullptr;
-						ExecutePostHealthDamageActions(target, attacker, adjustedDamage, deferredConversion, now, hitDataPtr);
+						ExecutePostHealthDamageActions(target, attacker, adjustedDamage, originalDamage, deferredConversion, now, hitDataPtr);
 					});
 				} else {
-					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adjustedDamage, deferredConversion, now, preHitData);
+					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adjustedDamage, originalDamage, deferredConversion, now, preHitData);
 				}
 			}
 

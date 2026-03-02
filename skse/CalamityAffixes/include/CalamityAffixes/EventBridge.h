@@ -461,7 +461,9 @@ namespace CalamityAffixes
 		static constexpr std::uint32_t kSerializationRecordLootEvaluated = 'LRLD';
 		static constexpr std::uint32_t kSerializationRecordLootCurrencyLedger = 'LCLD';
 		static constexpr std::uint32_t kSerializationRecordLootShuffleBags = 'LSBG';
+		static constexpr std::uint32_t kSerializationRecordMigrationFlags = 'MFLG';
 		static constexpr std::uint32_t kRunewordSerializationVersion = 1;
+		static constexpr std::uint32_t kMigrationFlagsVersion = 1;
 		static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
 		static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
 		static constexpr std::uint32_t kLootCurrencyLedgerSerializationVersion = 2;
@@ -643,6 +645,7 @@ namespace CalamityAffixes
 		std::vector<LootRerollGuard::RefHandle> _pendingDroppedRefDeletes;
 		std::atomic_bool _dropDeleteDrainScheduled{ false };
 		std::map<std::pair<RE::FormID, RE::FormID>, std::int32_t> _playerContainerStash;  // {containerID, baseObj} -> count
+		bool _miscCurrencyMigrated{ false };
 		bool _configLoaded{ false };
 		std::atomic_bool _eventSinksRegistered{ false };
 		std::atomic<std::uint32_t> _procDepth{ 0 };
