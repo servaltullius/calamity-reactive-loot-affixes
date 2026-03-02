@@ -76,6 +76,9 @@ namespace CalamityAffixes::Hooks
 			return ResolveSafeCastOnCritProcFeedbackArt();
 		}
 
+		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> s_nextAllowedByTarget;
+		std::mutex s_nextAllowedByTargetMutex;
+
 		[[nodiscard]] bool ShouldPlayCastOnCritProcFeedbackVfx(
 			RE::Actor* a_target,
 			std::chrono::steady_clock::time_point a_now) noexcept
@@ -84,23 +87,21 @@ namespace CalamityAffixes::Hooks
 				return false;
 			}
 
-			static std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> nextAllowedByTarget;
-			static std::mutex nextAllowedByTargetMutex;
 			constexpr auto kPerTargetIcd = std::chrono::milliseconds(120);
 			constexpr std::size_t kMaxEntries = 512u;
-			const std::scoped_lock lock(nextAllowedByTargetMutex);
+			const std::scoped_lock lock(s_nextAllowedByTargetMutex);
 
 			const auto targetFormID = a_target->GetFormID();
-			if (const auto it = nextAllowedByTarget.find(targetFormID); it != nextAllowedByTarget.end() && a_now < it->second) {
+			if (const auto it = s_nextAllowedByTarget.find(targetFormID); it != s_nextAllowedByTarget.end() && a_now < it->second) {
 				return false;
 			}
 
-			nextAllowedByTarget[targetFormID] = a_now + kPerTargetIcd;
+			s_nextAllowedByTarget[targetFormID] = a_now + kPerTargetIcd;
 
-			if (nextAllowedByTarget.size() > kMaxEntries) {
-				for (auto it = nextAllowedByTarget.begin(); it != nextAllowedByTarget.end();) {
+			if (s_nextAllowedByTarget.size() > kMaxEntries) {
+				for (auto it = s_nextAllowedByTarget.begin(); it != s_nextAllowedByTarget.end();) {
 					if (a_now >= it->second) {
-						it = nextAllowedByTarget.erase(it);
+						it = s_nextAllowedByTarget.erase(it);
 					} else {
 						++it;
 					}
@@ -262,6 +263,15 @@ namespace CalamityAffixes::Hooks
 		{
 			std::chrono::steady_clock::time_point dispatchTime{};
 		};
+
+		constexpr float kStaleDamageMinExpected = 5.0f;
+		constexpr float kStaleDamageRatioThreshold = 0.25f;
+		constexpr auto kStaleDamageElapsedMax = std::chrono::seconds(5);
+		constexpr auto kProcDispatchCleanupAge = std::chrono::seconds(10);
+		constexpr std::size_t kProcDispatchMaxEntries = 512u;
+
+		std::unordered_map<std::uint64_t, ProcDispatchRecord> s_procDispatch;
+		std::mutex s_procDispatchMutex;
 
 		struct DeferredConversionCast
 		{
@@ -595,8 +605,7 @@ namespace CalamityAffixes::Hooks
 				// the hitData is stale (leftover from a previous genuine hit,
 				// now attached to DoT, regen, or proc-spell leakage damage).
 				{
-					static std::unordered_map<std::uint64_t, ProcDispatchRecord> s_procDispatch;
-					static std::mutex s_procDispatchMutex;
+					// s_procDispatch / s_procDispatchMutex live at file scope (cleared by ClearRuntimeState).
 					constexpr auto kTimeCooldown = std::chrono::milliseconds(250);
 
 					const auto pairKey =
@@ -617,11 +626,12 @@ namespace CalamityAffixes::Hooks
 
 					// Layer 2: damage consistency — block if HandleHealthDamage
 					// damage is far below what the hitData expects (stale reuse).
-					if (preHitData && hasRecord && elapsed < std::chrono::seconds(5)) {
+					if (preHitData && hasRecord && elapsed < kStaleDamageElapsedMax) {
 						const float expectedDealt = std::max(0.0f,
 							preHitData->totalDamage - preHitData->resistedPhysicalDamage - preHitData->resistedTypedDamage);
 						const float absDmg = std::abs(a_damage);
-					if (expectedDealt >= 5.0f && absDmg > 0.0f && absDmg < expectedDealt * 0.25f) {
+						if (expectedDealt >= kStaleDamageMinExpected && absDmg > 0.0f && absDmg < expectedDealt * kStaleDamageRatioThreshold) {
+							SKSE::log::trace("CalamityAffixes: stale damage guard blocked proc (expected={:.1f}, actual={:.1f}).", expectedDealt, absDmg);
 							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 							return;
 						}
@@ -629,9 +639,9 @@ namespace CalamityAffixes::Hooks
 
 					record.dispatchTime = now;
 
-					if (s_procDispatch.size() > 512) {
+					if (s_procDispatch.size() > kProcDispatchMaxEntries) {
 						for (auto it = s_procDispatch.begin(); it != s_procDispatch.end();) {
-							if ((now - it->second.dispatchTime) >= std::chrono::seconds(10)) {
+							if ((now - it->second.dispatchTime) >= kProcDispatchCleanupAge) {
 								it = s_procDispatch.erase(it);
 							} else {
 								++it;
@@ -655,7 +665,7 @@ namespace CalamityAffixes::Hooks
 					adjustedDamage = std::abs(a_damage);
 				}
 				const float originalDamage = adjustedDamage;
-			const auto conversion = bridge->EvaluateConversion(
+				const auto conversion = bridge->EvaluateConversion(
 					safeAttacker,
 					safeTarget,
 					preHitData,
@@ -737,5 +747,17 @@ namespace CalamityAffixes::Hooks
 	bool IsHandleHealthDamageHooked(const RE::Actor* a_actor) noexcept
 	{
 		return ActorHandleHealthDamageHook::IsHooked(a_actor);
+	}
+
+	void ClearRuntimeState() noexcept
+	{
+		{
+			const std::scoped_lock lock(s_procDispatchMutex);
+			s_procDispatch.clear();
+		}
+		{
+			const std::scoped_lock lock(s_nextAllowedByTargetMutex);
+			s_nextAllowedByTarget.clear();
+		}
 	}
 }

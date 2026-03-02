@@ -16,6 +16,10 @@ namespace CalamityAffixes
 
 		_activeCounts.assign(_affixes.size(), 0);
 		_activeSlotPenalty.assign(_affixes.size(), 0.0f);
+		if (_activeCounts.size() != _affixes.size() || _activeSlotPenalty.size() != _affixes.size()) {
+			SKSE::log::error("CalamityAffixes: RebuildActiveCounts vector size mismatch; aborting rebuild.");
+			return;
+		}
 		_activeCritDamageBonusPct = 0.0f;
 		RebuildActiveTriggerIndexCaches();
 		_equippedInstanceKeysByToken.clear();

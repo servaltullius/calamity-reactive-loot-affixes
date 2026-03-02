@@ -73,12 +73,12 @@ namespace CalamityAffixes
 			a_out.lootWeight = lwIt->get<float>();
 		}
 
-		const float icdSeconds = a_runtime.value("icdSeconds", 0.0f);
+		const float icdSeconds = std::clamp(a_runtime.value("icdSeconds", 0.0f), 0.0f, 600.0f);
 		if (icdSeconds > 0.0f) {
 			a_out.icd = std::chrono::milliseconds(static_cast<std::int64_t>(icdSeconds * 1000.0f));
 		}
 
-		const float perTargetIcdSeconds = a_runtime.value("perTargetICDSeconds", 0.0f);
+		const float perTargetIcdSeconds = std::clamp(a_runtime.value("perTargetICDSeconds", 0.0f), 0.0f, 600.0f);
 		if (perTargetIcdSeconds > 0.0f) {
 			a_out.perTargetIcd = std::chrono::milliseconds(static_cast<std::int64_t>(perTargetIcdSeconds * 1000.0f));
 		}

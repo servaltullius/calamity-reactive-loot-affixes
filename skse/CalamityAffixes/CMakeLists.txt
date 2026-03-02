@@ -12,6 +12,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/CombatContext.h
 	    include/CalamityAffixes/AffixToken.h
 	    include/CalamityAffixes/EventBridge.h
+	    include/CalamityAffixes/detail/EventBridge.Types.inl
+	    include/CalamityAffixes/detail/EventBridge.Constants.inl
 	    include/CalamityAffixes/HitDataUtil.h
 	    include/CalamityAffixes/Hooks.h
 	    include/CalamityAffixes/InstanceStateKey.h
@@ -87,9 +89,12 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Actions.Cast.cpp
 	    src/EventBridge.Actions.Trap.cpp
 	    src/EventBridge.Actions.Special.cpp
+	    src/EventBridge.Actions.Archmage.cpp
 	    src/EventBridge.Actions.Corpse.cpp
 	    src/EventBridge.Traps.cpp
-	    src/EventBridge.Serialization.cpp
+	    src/EventBridge.Serialization.Save.cpp
+	    src/EventBridge.Serialization.Load.cpp
+	    src/EventBridge.Serialization.Lifecycle.cpp
 	    src/Hooks.cpp
 	    src/Papyrus.cpp
 	    src/PrismaLayoutPersistence.cpp

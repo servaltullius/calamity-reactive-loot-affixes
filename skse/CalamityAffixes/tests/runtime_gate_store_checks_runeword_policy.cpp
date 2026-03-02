@@ -122,6 +122,7 @@ namespace RuntimeGateStoreChecks
 			const fs::path eventBridgeHeaderFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "EventBridge.h";
 			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
 			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
 			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
 				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
 
@@ -145,11 +146,17 @@ namespace RuntimeGateStoreChecks
 				std::cerr << "runeword_recipe_tooltip_text: failed to open recipe entries file: " << recipeEntriesFile << "\n";
 				return false;
 			}
-			const auto prismaCoreText = loadText(prismaCoreFile);
-			if (!prismaCoreText.has_value()) {
-				std::cerr << "runeword_recipe_tooltip_text: failed to open prisma core file: " << prismaCoreFile << "\n";
-				return false;
+			// PrismaTooltip.cpp includes PanelData.inl — concatenate for pattern matching.
+			std::string prismaCoreTextCombined;
+			for (const auto& sf : { prismaCoreFile, prismaPanelDataFile }) {
+				const auto part = loadText(sf);
+				if (!part.has_value()) {
+					std::cerr << "runeword_recipe_tooltip_text: failed to open prisma source: " << sf << "\n";
+					return false;
+				}
+				prismaCoreTextCombined += *part;
 			}
+			const auto prismaCoreText = std::optional<std::string>(std::move(prismaCoreTextCombined));
 			const auto prismaUiText = loadText(prismaUiFile);
 			if (!prismaUiText.has_value()) {
 				std::cerr << "runeword_recipe_tooltip_text: failed to open prisma ui file: " << prismaUiFile << "\n";
@@ -784,6 +791,7 @@ namespace RuntimeGateStoreChecks
 			const fs::path testFile{ __FILE__ };
 			const fs::path prismaHandleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.HandleUiCommand.inl";
 			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
 			const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.TooltipResolution.cpp";
 			const fs::path runewordPanelStateFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.PanelState.cpp";
 			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
@@ -804,11 +812,17 @@ namespace RuntimeGateStoreChecks
 				std::cerr << "prisma_tooltip_refresh: failed to open handle source: " << prismaHandleFile << "\n";
 				return false;
 			}
-			const auto coreText = loadText(prismaCoreFile);
-			if (!coreText.has_value()) {
-				std::cerr << "prisma_tooltip_refresh: failed to open prisma source: " << prismaCoreFile << "\n";
-				return false;
+			// PrismaTooltip.cpp includes PanelData.inl — concatenate for pattern matching.
+			std::string coreTextCombined;
+			for (const auto& sf : { prismaCoreFile, prismaPanelDataFile }) {
+				const auto part = loadText(sf);
+				if (!part.has_value()) {
+					std::cerr << "prisma_tooltip_refresh: failed to open prisma source: " << sf << "\n";
+					return false;
+				}
+				coreTextCombined += *part;
 			}
+			const auto coreText = std::optional<std::string>(std::move(coreTextCombined));
 			const auto uiText = loadText(prismaUiFile);
 			if (!uiText.has_value()) {
 				std::cerr << "prisma_tooltip_refresh: failed to open ui source: " << prismaUiFile << "\n";
@@ -851,6 +865,7 @@ namespace RuntimeGateStoreChecks
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
 			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
 
 			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 				std::ifstream in(path);
@@ -862,11 +877,17 @@ namespace RuntimeGateStoreChecks
 					std::istreambuf_iterator<char>());
 			};
 
-			const auto coreText = loadText(prismaCoreFile);
-			if (!coreText.has_value()) {
-				std::cerr << "prisma_worker_scheduling: failed to open prisma source: " << prismaCoreFile << "\n";
-				return false;
+			// PrismaTooltip.cpp includes PanelData.inl — concatenate for pattern matching.
+			std::string coreTextCombined;
+			for (const auto& sf : { prismaCoreFile, prismaPanelDataFile }) {
+				const auto part = loadText(sf);
+				if (!part.has_value()) {
+					std::cerr << "prisma_worker_scheduling: failed to open prisma source: " << sf << "\n";
+					return false;
+				}
+				coreTextCombined += *part;
 			}
+			const auto coreText = std::optional<std::string>(std::move(coreTextCombined));
 
 			if (coreText->find("g_worker = std::jthread([](std::stop_token stopToken) {") == std::string::npos ||
 				coreText->find("std::this_thread::sleep_for(kPollInterval);") == std::string::npos ||
