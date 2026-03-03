@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <vector>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -81,7 +80,7 @@ namespace CalamityAffixes
 			a_action.magnitudeScaling);
 
 		if (a_logWithoutHitData && _loot.debugLog && !a_hitData) {
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: CastSpell computed magnitudeOverride without HitData (spell={}, baseMag={}, outMag={}).",
 				a_spell ? a_spell->GetName() : "<null>",
 				spellBaseMagnitude,
@@ -145,7 +144,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		spdlog::debug(
+		SKSE::log::debug(
 			"CalamityAffixes: CastSpellAdaptiveElement (pick={}, spell={}, magnitudeOverride={}, target={}, rFire={}, rFrost={}, rShock={}).",
 			static_cast<std::uint32_t>(a_selection.pick),
 			a_selection.spell->GetName(),
@@ -202,7 +201,7 @@ namespace CalamityAffixes
 			if (!castTarget || (targetActor && targetActor->IsDead())) {
 				castTarget = a_owner;
 				if (_loot.debugLog) {
-					spdlog::debug(
+					SKSE::log::debug(
 						"CalamityAffixes: CastSpell summon fallback (spell={}, originalTarget={}, fallback=self).",
 						spell->GetName(),
 						targetActor ? targetActor->GetName() : "<none>");
@@ -228,7 +227,7 @@ namespace CalamityAffixes
 
 		if (_loot.debugLog) {
 			const std::uint32_t xp = state ? state->evolutionXp : 0u;
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: CastSpellImmediate (affix={}, spell={}, magnitudeOverride={}, target={}, evolutionStage={}, evolutionXP={}, evolutionMult={}, modeIndex={}).",
 				a_affix.id,
 				spell->GetName(),
@@ -313,7 +312,7 @@ namespace CalamityAffixes
 			LogAdaptiveCastSpell(selection, castTarget, magnitudeOverride);
 		} else if (_loot.debugLog) {
 			const std::uint32_t xp = state ? state->evolutionXp : 0u;
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: CastSpellAdaptiveElementManualOverride (affix={}, spell={}, manualModeIndex={}, magnitudeOverride={}, target={}, evolutionStage={}, evolutionXP={}, evolutionMult={}).",
 				a_affix.id,
 				spell->GetName(),

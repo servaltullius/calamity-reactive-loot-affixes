@@ -12,19 +12,19 @@
 		static constexpr std::string_view kRuntimeConfigRelativePath = RuntimePolicy::kRuntimeConfigRelativePath;
 		static constexpr std::string_view kRuntimeContractRelativePath = RuntimePolicy::kRuntimeContractRelativePath;
 		static constexpr std::string_view kUserSettingsRelativePath = RuntimePolicy::kUserSettingsRelativePath;
-		static constexpr std::string_view kManualModeCycleNextEvent = "CalamityAffixes_ModeCycle_Next";
-		static constexpr std::string_view kManualModeCyclePrevEvent = "CalamityAffixes_ModeCycle_Prev";
-		static constexpr std::string_view kRunewordBaseNextEvent = "CalamityAffixes_Runeword_Base_Next";
-		static constexpr std::string_view kRunewordBasePrevEvent = "CalamityAffixes_Runeword_Base_Prev";
-		static constexpr std::string_view kRunewordRecipeNextEvent = "CalamityAffixes_Runeword_Recipe_Next";
-		static constexpr std::string_view kRunewordRecipePrevEvent = "CalamityAffixes_Runeword_Recipe_Prev";
-		static constexpr std::string_view kRunewordInsertRuneEvent = "CalamityAffixes_Runeword_InsertRune";
-		static constexpr std::string_view kRunewordStatusEvent = "CalamityAffixes_Runeword_Status";
-		static constexpr std::string_view kRunewordGrantNextRuneEvent = "CalamityAffixes_Runeword_GrantNextRune";
-		static constexpr std::string_view kRunewordGrantRecipeSetEvent = "CalamityAffixes_Runeword_GrantRecipeSet";
-		static constexpr std::string_view kRunewordGrantStarterOrbsEvent = "CalamityAffixes_Runeword_GrantStarterOrbs";
-		static constexpr std::string_view kUiSetPanelEvent = "CalamityAffixes_UI_SetPanel";
-		static constexpr std::string_view kUiTogglePanelEvent = "CalamityAffixes_UI_TogglePanel";
+		static constexpr std::string_view kManualModeCycleNextEvent = EventNames::kManualModeCycleNext;
+		static constexpr std::string_view kManualModeCyclePrevEvent = EventNames::kManualModeCyclePrev;
+		static constexpr std::string_view kRunewordBaseNextEvent = EventNames::kRunewordBaseNext;
+		static constexpr std::string_view kRunewordBasePrevEvent = EventNames::kRunewordBasePrev;
+		static constexpr std::string_view kRunewordRecipeNextEvent = EventNames::kRunewordRecipeNext;
+		static constexpr std::string_view kRunewordRecipePrevEvent = EventNames::kRunewordRecipePrev;
+		static constexpr std::string_view kRunewordInsertRuneEvent = EventNames::kRunewordInsertRune;
+		static constexpr std::string_view kRunewordStatusEvent = EventNames::kRunewordStatus;
+		static constexpr std::string_view kRunewordGrantNextRuneEvent = EventNames::kRunewordGrantNextRune;
+		static constexpr std::string_view kRunewordGrantRecipeSetEvent = EventNames::kRunewordGrantRecipeSet;
+		static constexpr std::string_view kRunewordGrantStarterOrbsEvent = EventNames::kRunewordGrantStarterOrbs;
+		static constexpr std::string_view kUiSetPanelEvent = EventNames::kUiSetPanel;
+		static constexpr std::string_view kUiTogglePanelEvent = EventNames::kUiTogglePanel;
 		static constexpr std::string_view kMcmSetEnabledEvent = RuntimePolicy::kMcmSetEnabledEvent;
 		static constexpr std::string_view kMcmSetDebugNotificationsEvent = RuntimePolicy::kMcmSetDebugNotificationsEvent;
 		static constexpr std::string_view kMcmSetValidationIntervalEvent = RuntimePolicy::kMcmSetValidationIntervalEvent;
@@ -33,9 +33,9 @@
 		static constexpr std::string_view kMcmSetReforgeOrbChanceEvent = RuntimePolicy::kMcmSetReforgeOrbChanceEvent;
 		static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = RuntimePolicy::kMcmSetDotSafetyAutoDisableEvent;
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = RuntimePolicy::kMcmSetAllowNonHostileFirstHitProcEvent;
-		static constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
-		static constexpr std::string_view kMcmForceRebuildEvent = "CalamityAffixes_MCM_ForceRebuild";
-		static constexpr std::string_view kMcmGrantRecoveryPackEvent = "CalamityAffixes_MCM_GrantRecoveryPack";
+		static constexpr std::string_view kMcmSpawnTestItemEvent = EventNames::kMcmSpawnTestItem;
+		static constexpr std::string_view kMcmForceRebuildEvent = EventNames::kMcmForceRebuild;
+		static constexpr std::string_view kMcmGrantRecoveryPackEvent = EventNames::kMcmGrantRecoveryPack;
 
 		// Policy constants.
 		static constexpr std::array<float, kMaxRegularAffixesPerItem> kAffixCountWeights = { 70.0f, 22.0f, 8.0f };

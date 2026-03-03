@@ -16,7 +16,6 @@
 #include <vector>
 
 #include <RE/M/Misc.h>
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -61,57 +60,6 @@ namespace CalamityAffixes
 
 			return hash;
 		}
-
-		[[nodiscard]] bool HitDataMatchesActors(
-			const RE::HitData* a_hitData,
-			const RE::Actor* a_target,
-			const RE::Actor* a_attacker) noexcept
-		{
-			if (!a_hitData) {
-				return false;
-			}
-
-			const auto hitTarget = a_hitData->target.get().get();
-			if (hitTarget && hitTarget != a_target) {
-				return false;
-			}
-
-			const auto hitAggressor = a_hitData->aggressor.get().get();
-			if (a_attacker) {
-				if (hitAggressor && hitAggressor != a_attacker) {
-					return false;
-				}
-			} else {
-				if (hitAggressor) {
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		[[nodiscard]] bool HasHitLikeSource(const RE::HitData* a_hitData, RE::Actor* a_attacker) noexcept
-		{
-			if (!a_hitData) {
-				return false;
-			}
-
-			if (a_hitData->weapon || a_hitData->attackDataSpell) {
-				return true;
-			}
-
-			// Bow/crossbow arrows: hitData->weapon may be null — resolve from attacker.
-			if (HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker)) {
-				return true;
-			}
-
-			if (a_hitData->flags.any(RE::HitData::Flag::kMeleeAttack) ||
-				a_hitData->flags.any(RE::HitData::Flag::kExplosion)) {
-				return true;
-			}
-
-			return false;
-		}
 	}
 
 	void EventBridge::OnHealthDamage(
@@ -133,7 +81,7 @@ namespace CalamityAffixes
 				static bool loggedOnce = false;
 				if (!loggedOnce) {
 					loggedOnce = true;
-					spdlog::info("CalamityAffixes: OnHealthDamage routing disabled by runtime setting.");
+					SKSE::log::info("CalamityAffixes: OnHealthDamage routing disabled by runtime setting.");
 				}
 			}
 			return;
@@ -169,52 +117,52 @@ namespace CalamityAffixes
 			}
 		}
 
-			// Fallback: if hitData was not captured by ThunkImpl (e.g., filtered
-			// by ResolveStableHitDataForSpecialActions for CoC/Conversion safety),
-			// re-fetch from the target.  OnHealthDamage runs on the main thread
-			// where lastHitData should reflect the current hit.
-			// RouteHealthDamageAsHit will still validate the re-fetched data.
-			const RE::HitData* effectiveHitData = a_hitData;
-			if (!effectiveHitData) {
-				effectiveHitData = HitDataUtil::GetLastHitData(a_target);
-			}
-
-			const auto sourceFormID = HitDataUtil::GetHitSourceFormID(effectiveHitData, a_attacker);
-			const bool routedAsHit = RouteHealthDamageAsHit(a_target, a_attacker, effectiveHitData, sourceFormID, a_damage, now);
-
-			const auto context = BuildCombatTriggerContext(a_target, a_attacker);
-			const bool playerRelevantCombatSignal =
-				context.targetIsPlayer ||
-				(context.attackerIsPlayerOwned && context.hasPlayerOwner);
-			const bool shouldMarkCombatEvidence =
-				playerRelevantCombatSignal && context.hostileEitherDirection;
-			if (routedAsHit) {
-				if (shouldMarkCombatEvidence) {
-					const auto* player = context.targetIsPlayer ? a_target : context.playerOwner;
-					const auto* other = context.targetIsPlayer ? a_attacker : a_target;
-					MarkPlayerCombatEvidence(
-						now,
-						PlayerCombatEvidenceSource::kHealthDamageRoutedHit,
-						player,
-						other);
-					_healthDamageHookLastAt = now;
-				} else if (_combatDebugLog && playerRelevantCombatSignal) {
-					static auto nextNonHostileLogAt = std::chrono::steady_clock::time_point{};
-					if (nextNonHostileLogAt.time_since_epoch().count() == 0 || now >= nextNonHostileLogAt) {
-						nextNonHostileLogAt = now + std::chrono::seconds(2);
-						spdlog::info(
-							"CalamityAffixes: skipped HealthDamage combat evidence mark (non-hostile relation, target={}, attacker={}).",
-							a_target ? a_target->GetName() : "<none>",
-							a_attacker ? a_attacker->GetName() : "<none>");
-					}
-				}
-				ProcessOutgoingHealthDamageHit(a_target, a_attacker, effectiveHitData, sourceFormID, now);
-				ProcessIncomingHealthDamageHit(a_target, a_attacker, effectiveHitData, sourceFormID, now);
-				ProcessImmediateCorpseExplosionFromLethalHit(a_target, a_attacker);
-			}
-
-			ProcessLowHealthTriggerFromHealthDamage(a_target, a_attacker, effectiveHitData);
+		// Fallback: if hitData was not captured by ThunkImpl (e.g., filtered
+		// by ResolveStableHitDataForSpecialActions for CoC/Conversion safety),
+		// re-fetch from the target.  OnHealthDamage runs on the main thread
+		// where lastHitData should reflect the current hit.
+		// RouteHealthDamageAsHit will still validate the re-fetched data.
+		const RE::HitData* effectiveHitData = a_hitData;
+		if (!effectiveHitData) {
+			effectiveHitData = HitDataUtil::GetLastHitData(a_target);
 		}
+
+		const auto sourceFormID = HitDataUtil::GetHitSourceFormID(effectiveHitData, a_attacker);
+		const bool routedAsHit = RouteHealthDamageAsHit(a_target, a_attacker, effectiveHitData, sourceFormID, a_damage, now);
+
+		const auto context = BuildCombatTriggerContext(a_target, a_attacker);
+		const bool playerRelevantCombatSignal =
+			context.targetIsPlayer ||
+			(context.attackerIsPlayerOwned && context.hasPlayerOwner);
+		const bool shouldMarkCombatEvidence =
+			playerRelevantCombatSignal && context.hostileEitherDirection;
+		if (routedAsHit) {
+			if (shouldMarkCombatEvidence) {
+				const auto* player = context.targetIsPlayer ? a_target : context.playerOwner;
+				const auto* other = context.targetIsPlayer ? a_attacker : a_target;
+				MarkPlayerCombatEvidence(
+					now,
+					PlayerCombatEvidenceSource::kHealthDamageRoutedHit,
+					player,
+					other);
+				_healthDamageHookLastAt = now;
+			} else if (_combatDebugLog && playerRelevantCombatSignal) {
+				static auto nextNonHostileLogAt = std::chrono::steady_clock::time_point{};
+				if (nextNonHostileLogAt.time_since_epoch().count() == 0 || now >= nextNonHostileLogAt) {
+					nextNonHostileLogAt = now + std::chrono::seconds(2);
+					SKSE::log::info(
+						"CalamityAffixes: skipped HealthDamage combat evidence mark (non-hostile relation, target={}, attacker={}).",
+						a_target ? a_target->GetName() : "<none>",
+						a_attacker ? a_attacker->GetName() : "<none>");
+				}
+			}
+			ProcessOutgoingHealthDamageHit(a_target, a_attacker, effectiveHitData, sourceFormID, now);
+			ProcessIncomingHealthDamageHit(a_target, a_attacker, effectiveHitData, sourceFormID, now);
+			ProcessImmediateCorpseExplosionFromLethalHit(a_target, a_attacker);
+		}
+
+		ProcessLowHealthTriggerFromHealthDamage(a_target, a_attacker, effectiveHitData);
+	}
 
 	bool EventBridge::RouteHealthDamageAsHit(
 		RE::Actor* a_target,
@@ -224,8 +172,8 @@ namespace CalamityAffixes
 		float a_damage,
 		std::chrono::steady_clock::time_point a_now)
 	{
-		const bool hitDataMatches = HitDataMatchesActors(a_hitData, a_target, a_attacker);
-		const bool hasHitLikeSource = HasHitLikeSource(a_hitData, a_attacker);
+		const bool hitDataMatches = HitDataUtil::HitDataMatchesActors(a_hitData, a_target, a_attacker);
+		const bool hasHitLikeSource = HitDataUtil::HasHitLikeSource(a_hitData, a_attacker);
 
 		bool routeAsHit = (a_hitData != nullptr) && hitDataMatches && hasHitLikeSource;
 		if (!routeAsHit) {
@@ -257,7 +205,7 @@ namespace CalamityAffixes
 			static std::uint32_t suppressed = 0;
 			suppressed += 1;
 			if (suppressed <= 3) {
-				spdlog::debug(
+				SKSE::log::debug(
 					"CalamityAffixes: suppressed HandleHealthDamage routing (damage={}, expectedDealt={}, target={}, attacker={}, source=0x{:X}).",
 					a_damage,
 					expectedDealt,
@@ -363,44 +311,44 @@ namespace CalamityAffixes
 		}
 	}
 
-		void EventBridge::ProcessImmediateCorpseExplosionFromLethalHit(
-			RE::Actor* a_target,
-			RE::Actor* a_attacker)
+	void EventBridge::ProcessImmediateCorpseExplosionFromLethalHit(
+		RE::Actor* a_target,
+		RE::Actor* a_attacker)
 	{
-		// For hit-like lethal damage, fire corpse explosion immediately instead of waiting for TESDeathEvent dispatch.
-		// Duplicate explosions are still blocked by corpse-budget dedupe in ProcessCorpseExplosionKill.
-		const auto context = BuildCombatTriggerContext(a_target, a_attacker);
-		if (a_target->IsPlayerRef() ||
-			!a_target->IsDead() ||
-			!context.attackerIsPlayerOwned ||
-			_corpseExplosionAffixIndices.empty()) {
+	// For hit-like lethal damage, fire corpse explosion immediately instead of waiting for TESDeathEvent dispatch.
+	// Duplicate explosions are still blocked by corpse-budget dedupe in ProcessCorpseExplosionKill.
+	const auto context = BuildCombatTriggerContext(a_target, a_attacker);
+	if (a_target->IsPlayerRef() ||
+		!a_target->IsDead() ||
+		!context.attackerIsPlayerOwned ||
+		_corpseExplosionAffixIndices.empty()) {
+		return;
+	}
+	if (!context.playerOwner || !context.hostileEitherDirection) {
+		return;
+	}
+
+	if (_loot.debugLog) {
+		SKSE::log::debug(
+			"CalamityAffixes: immediate corpse explosion path (target={}, attacker={}).",
+			a_target->GetName(),
+			a_attacker->GetName());
+	}
+	ProcessCorpseExplosionKill(context.playerOwner, a_target);
+	}
+
+	void EventBridge::ProcessLowHealthTriggerFromHealthDamage(
+		RE::Actor* a_target,
+		RE::Actor* a_attacker,
+		const RE::HitData* a_hitData)
+	{
+		if (!_configLoaded || !_runtimeEnabled || !a_target || _lowHealthTriggerAffixIndices.empty()) {
 			return;
 		}
-		if (!context.playerOwner || !context.hostileEitherDirection) {
+		if (!a_target->IsPlayerRef()) {
 			return;
 		}
 
-		if (_loot.debugLog) {
-			spdlog::debug(
-				"CalamityAffixes: immediate corpse explosion path (target={}, attacker={}).",
-				a_target->GetName(),
-				a_attacker->GetName());
-			}
-			ProcessCorpseExplosionKill(context.playerOwner, a_target);
-		}
-
-		void EventBridge::ProcessLowHealthTriggerFromHealthDamage(
-			RE::Actor* a_target,
-			RE::Actor* a_attacker,
-			const RE::HitData* a_hitData)
-		{
-			if (!_configLoaded || !_runtimeEnabled || !a_target || _lowHealthTriggerAffixIndices.empty()) {
-				return;
-			}
-			if (!a_target->IsPlayerRef()) {
-				return;
-			}
-
-			ProcessTrigger(Trigger::kLowHealth, a_target, a_attacker, a_hitData);
-		}
+		ProcessTrigger(Trigger::kLowHealth, a_target, a_attacker, a_hitData);
+	}
 	}

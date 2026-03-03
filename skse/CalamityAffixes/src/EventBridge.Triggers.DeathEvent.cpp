@@ -6,7 +6,6 @@
 
 #include <chrono>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -59,7 +58,7 @@ namespace CalamityAffixes
 			if (lastWarnAt.time_since_epoch().count() == 0 || (now - lastWarnAt) > std::chrono::seconds(2)) {
 				lastWarnAt = now;
 				if (_loot.debugLog) {
-					spdlog::info(
+					SKSE::log::info(
 						"CalamityAffixes: TESDeathEvent killer attribution failed (dying={}, killerRefPtr=0x{:X}); skipping Kill triggers.",
 						dying->GetName(),
 						reinterpret_cast<std::uintptr_t>(killerRef));
@@ -84,7 +83,7 @@ namespace CalamityAffixes
 			if (lastInfoAt.time_since_epoch().count() == 0 || (now - lastInfoAt) > std::chrono::seconds(2)) {
 				lastInfoAt = now;
 				if (_loot.debugLog) {
-					spdlog::info(
+					SKSE::log::info(
 						"CalamityAffixes: Kill ignored (non-hostile) (dying={}, killer={}).",
 						dying->GetName(),
 						killer->GetName());
@@ -96,7 +95,7 @@ namespace CalamityAffixes
 		if (_loot.debugLog) {
 			const auto probe = BuildCorpseCurrencyDropProbe(dying);
 			const auto snapshot = SnapshotCorpseCurrencyInventory(dying);
-			spdlog::info(
+			SKSE::log::info(
 				"CalamityAffixes: corpse-drop probe (dying={}, runewordFragmentRecordFound={}, reforgeOrbRecordFound={}, runewordDropListFound={}, reforgeDropListFound={}, chanceNone(runeword/reforge)={}/{}, corpseCurrencySnapshotAtDeathEvent(runewordFragments/reforgeOrbs/runewordLists/reforgeLists)={}/{}/{}/{}).",
 				dying->GetName(),
 				probe.runewordFragmentRecordFound,

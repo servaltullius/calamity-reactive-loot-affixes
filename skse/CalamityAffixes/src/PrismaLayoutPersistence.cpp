@@ -8,7 +8,7 @@
 #include <string_view>
 
 #include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
+#include <SKSE/SKSE.h>
 
 namespace CalamityAffixes::PrismaLayoutPersistence
 {
@@ -138,7 +138,7 @@ namespace CalamityAffixes::PrismaLayoutPersistence
 
 			return loaded;
 		} catch (const std::exception& e) {
-			spdlog::warn("CalamityAffixes: failed to parse panel layout JSON: {}", e.what());
+			SKSE::log::warn("CalamityAffixes: failed to parse panel layout JSON: {}", e.what());
 			return std::nullopt;
 		}
 	}
@@ -180,7 +180,7 @@ namespace CalamityAffixes::PrismaLayoutPersistence
 
 			return loaded;
 		} catch (const std::exception& e) {
-			spdlog::warn("CalamityAffixes: failed to parse tooltip layout JSON: {}", e.what());
+			SKSE::log::warn("CalamityAffixes: failed to parse tooltip layout JSON: {}", e.what());
 			return std::nullopt;
 		}
 	}

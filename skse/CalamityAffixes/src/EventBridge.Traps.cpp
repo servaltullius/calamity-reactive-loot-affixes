@@ -5,10 +5,26 @@
 #include <mutex>
 
 #include <RE/P/ProcessLists.h>
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
+	namespace
+	{
+		// Stale-combat resolution state (reset on Revert via ClearTrapRuntimeState).
+		std::chrono::steady_clock::time_point s_staleCombatLastClearAt{};
+		std::chrono::steady_clock::time_point s_staleCombatLastHardClearAt{};
+		std::uint32_t s_staleCombatClearConfidence = 0u;
+		std::chrono::steady_clock::time_point s_forceStopLastPulseAt{};
+	}
+
+	void ClearTrapRuntimeState() noexcept
+	{
+		s_staleCombatLastClearAt = {};
+		s_staleCombatLastHardClearAt = {};
+		s_staleCombatClearConfidence = 0u;
+		s_forceStopLastPulseAt = {};
+	}
+
 	void EventBridge::TickTraps()
 	{
 		std::unique_lock<std::recursive_mutex> lock(_stateMutex);
@@ -19,16 +35,16 @@ namespace CalamityAffixes
 				static auto nextLogAt = std::chrono::steady_clock::time_point{};
 				if (nextLogAt.time_since_epoch().count() == 0 || now >= nextLogAt) {
 					nextLogAt = now + std::chrono::seconds(2);
-					spdlog::info("CalamityAffixes: TickTraps disabled by runtime setting.");
+					SKSE::log::info("CalamityAffixes: TickTraps disabled by runtime setting.");
 				}
 			}
 			return;
 		}
 
 		auto tryResolveStalePlayerCombat = [&]() {
-			static auto lastClearAt = std::chrono::steady_clock::time_point{};
-			static auto lastHardClearAt = std::chrono::steady_clock::time_point{};
-			static std::uint32_t clearConfidence = 0u;
+			auto& lastClearAt = s_staleCombatLastClearAt;
+			auto& lastHardClearAt = s_staleCombatLastHardClearAt;
+			auto& clearConfidence = s_staleCombatClearConfidence;
 			constexpr auto kClearCooldown = std::chrono::seconds(5);
 			constexpr auto kHardClearCooldown = std::chrono::seconds(20);
 			constexpr std::uint32_t kRequiredConfidence = 8u;
@@ -48,7 +64,7 @@ namespace CalamityAffixes
 					? static_cast<std::int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(_playerCombatEvidenceExpiresAt - now).count())
 					: 0;
 				auto* player = RE::PlayerCharacter::GetSingleton();
-				spdlog::info(
+				SKSE::log::info(
 					"CalamityAffixes: stale combat check: {} (inCombat={}, leaseActive={}, leaseRemainingMs={}, confidence={}, traps={}).",
 					a_message,
 					player ? player->IsInCombat() : false,
@@ -79,7 +95,7 @@ namespace CalamityAffixes
 						? static_cast<std::int64_t>(
 							std::chrono::duration_cast<std::chrono::milliseconds>(_playerCombatEvidenceExpiresAt - now).count())
 						: 0;
-					spdlog::info(
+					SKSE::log::info(
 						"CalamityAffixes: stale combat heartbeat (hasPlayer={}, inCombat={}, leaseActive={}, leaseRemainingMs={}, traps={}, runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}).",
 						player != nullptr,
 						player ? player->IsInCombat() : false,
@@ -95,7 +111,7 @@ namespace CalamityAffixes
 			}
 
 			if (_forceStopAlarmPulse && player && processLists) {
-				static auto lastPulseAt = std::chrono::steady_clock::time_point{};
+				auto& lastPulseAt = s_forceStopLastPulseAt;
 				constexpr auto kPulseCooldown = std::chrono::milliseconds(300);
 				if (lastPulseAt.time_since_epoch().count() == 0 || (now - lastPulseAt) >= kPulseCooldown) {
 					lastPulseAt = now;
@@ -104,7 +120,7 @@ namespace CalamityAffixes
 					processLists->StopCombatAndAlarmOnActor(player, true);
 					processLists->ClearCachedFactionFightReactions();
 					if (_combatDebugLog) {
-						spdlog::info(
+						SKSE::log::info(
 							"CalamityAffixes: forceStopAlarmPulse fired (runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}, inCombat={}).",
 							runtimeCombatTargetHandle,
 							controllerTargetHandle,
@@ -181,7 +197,7 @@ namespace CalamityAffixes
 			if (hostileNearby) {
 				clearConfidence = 0u;
 				if (_combatDebugLog && hostileFormID != 0u) {
-					spdlog::info(
+					SKSE::log::info(
 						"CalamityAffixes: stale combat check: skip: hostile nearby (actor={}({:08X}), distSq={:.1f}).",
 						hostileName.empty() ? "<unnamed>" : hostileName,
 						hostileFormID,
@@ -213,7 +229,7 @@ namespace CalamityAffixes
 					(now - lastHardClearAt) >= kHardClearCooldown) {
 					processLists->StopCombatAndAlarmOnActor(player, true);
 					lastHardClearAt = now;
-					spdlog::info("CalamityAffixes: escalated stale combat clear with StopCombatAndAlarmOnActor.");
+					SKSE::log::info("CalamityAffixes: escalated stale combat clear with StopCombatAndAlarmOnActor.");
 				}
 			}
 			_recentOwnerHitAt.erase(playerFormID);
@@ -222,7 +238,7 @@ namespace CalamityAffixes
 			_playerCombatEvidenceExpiresAt = {};
 			_nonHostileFirstHitGate.Clear();
 			if (_loot.debugLog) {
-				spdlog::info("CalamityAffixes: cleared stale player combat state (no hostile actor nearby).");
+				SKSE::log::info("CalamityAffixes: cleared stale player combat state (no hostile actor nearby).");
 			}
 		};
 
@@ -253,7 +269,7 @@ namespace CalamityAffixes
 				static auto nextLogAt = std::chrono::steady_clock::time_point{};
 				if (nextLogAt.time_since_epoch().count() == 0 || now >= nextLogAt) {
 					nextLogAt = now + std::chrono::seconds(2);
-					spdlog::info(
+					SKSE::log::info(
 						"CalamityAffixes: trap casts disabled by runtime setting (activeTraps={}).",
 						_traps.size());
 				}
@@ -288,7 +304,7 @@ namespace CalamityAffixes
 		while (!_traps.empty() && visitedTraps < trapVisitBudgetPerTick) {
 			if (!hasTrapCastBudget()) {
 				if (_loot.debugLog && !loggedBudgetExhausted) {
-					spdlog::debug(
+					SKSE::log::debug(
 						"CalamityAffixes: trap cast budget exhausted for this tick (budget={}).",
 						trapCastBudgetPerTick);
 					loggedBudgetExhausted = true;
@@ -416,7 +432,7 @@ namespace CalamityAffixes
 
 			if (triggered) {
 				if (_loot.debugLog) {
-					spdlog::debug(
+					SKSE::log::debug(
 						"CalamityAffixes: trap triggered (token={}, target={}, targetsHit={}, count={} / max={}).",
 						trap.sourceToken,
 						triggeredTarget ? triggeredTarget->GetName() : "<none>",

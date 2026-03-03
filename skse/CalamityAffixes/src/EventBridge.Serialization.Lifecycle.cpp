@@ -7,6 +7,8 @@
 
 namespace CalamityAffixes
 {
+	void ClearTrapRuntimeState() noexcept;
+
 	void EventBridge::Revert(SKSE::SerializationInterface*)
 	{
 		const std::scoped_lock lock(_stateMutex);
@@ -94,6 +96,7 @@ namespace CalamityAffixes
 		}
 
 		Hooks::ClearRuntimeState();
+		ClearTrapRuntimeState();
 	}
 
 	void EventBridge::OnPostLoadGame()

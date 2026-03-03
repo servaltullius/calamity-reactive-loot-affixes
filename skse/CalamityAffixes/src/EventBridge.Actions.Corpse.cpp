@@ -8,7 +8,6 @@
 
 #include <RE/M/Misc.h>
 #include <RE/P/ProcessLists.h>
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -128,14 +127,14 @@ namespace CalamityAffixes
 		}
 
 		if (a_selection.activeAffixes == 0) {
-			spdlog::info(
+			SKSE::log::info(
 				"CalamityAffixes: {} skipped (no active affix equipped) (corpse={}).",
 				a_actionName ? a_actionName : "CorpseExplosion",
 				a_corpse ? a_corpse->GetName() : "<null>");
 			return;
 		}
 
-		spdlog::info(
+		SKSE::log::info(
 			"CalamityAffixes: {} skipped (no eligible affix) (activeAffixes={}, cooldown={}, noSpell={}, zeroDamage={}).",
 			a_actionName ? a_actionName : "CorpseExplosion",
 			a_selection.activeAffixes,
@@ -177,7 +176,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		spdlog::info(
+		SKSE::log::info(
 			"CalamityAffixes: {} denied by budget (reason={}, affixId={}, corpse=0x{:X}).",
 			a_actionName ? a_actionName : "CorpseExplosion",
 			DescribeCorpseExplosionDenyReason(a_reason),
@@ -298,7 +297,7 @@ namespace CalamityAffixes
 		}
 
 		if (_loot.debugLog) {
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: {} (corpse={}, maxHealth={}, baseDamage={}, chainDepth={}, chainMult={})",
 				a_actionName ? a_actionName : "CorpseExplosion",
 				a_corpse->GetName(),
@@ -317,7 +316,7 @@ namespace CalamityAffixes
 		}
 
 		if (_loot.debugLog) {
-			spdlog::info(
+			SKSE::log::info(
 				"CalamityAffixes: {} fired (affixId={}, corpse={}, targets={}, dmg={}, radius={}, chain={}).",
 				a_actionName ? a_actionName : "CorpseExplosion",
 				bestAffix.id,
@@ -521,7 +520,7 @@ namespace CalamityAffixes
 		});
 
 		if (_loot.debugLog) {
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: CorpseExplosion applying damage (targets={}, radius={}, damage={}).",
 				targets.size(),
 				radius,

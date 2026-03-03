@@ -7,7 +7,6 @@
 #include <string_view>
 #include <vector>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -156,7 +155,7 @@ namespace CalamityAffixes
 		}
 
 		if (_loot.debugLog && switched > 0u) {
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: manual mode cycle switched (count={}, direction={}, filter='{}').",
 				switched,
 				a_direction,

@@ -11,7 +11,6 @@
 #include <chrono>
 #include <cstdint>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -200,7 +199,7 @@ namespace CalamityAffixes
 												RE::ActorValue::kHealth,
 												mom.redirectedDamage);
 											if (_loot.debugLog) {
-												spdlog::debug(
+												SKSE::log::debug(
 													"CalamityAffixes: TESHitEvent fallback applied MoM heal correction (redirected={}).",
 													mom.redirectedDamage);
 											}

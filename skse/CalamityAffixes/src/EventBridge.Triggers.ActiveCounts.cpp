@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <unordered_set>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -138,14 +137,14 @@ namespace CalamityAffixes
 				if (_activeCounts[i] == 0) {
 					continue;
 				}
-				spdlog::debug("CalamityAffixes: active affix (id={}, count={})", _affixes[i].id, _activeCounts[i]);
+				SKSE::log::debug("CalamityAffixes: active affix (id={}, count={})", _affixes[i].id, _activeCounts[i]);
 				shown += 1;
 				if (shown >= 50) {
 					break;
 				}
 			}
 			if (shown == 0) {
-				spdlog::debug("CalamityAffixes: active affix list is empty (no equipped affix instances detected).");
+				SKSE::log::debug("CalamityAffixes: active affix list is empty (no equipped affix instances detected).");
 			}
 		}
 

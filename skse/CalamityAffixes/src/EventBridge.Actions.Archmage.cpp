@@ -6,7 +6,6 @@
 #include <mutex>
 #include <string_view>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -141,7 +140,7 @@ namespace CalamityAffixes
 			avOwner->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kMagicka, -a_extraCost);
 
 		if (_loot.debugLog) {
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: Archmage (source={}, maxMagicka={}, extraCost={}, extraDamage={})",
 				a_sourceEditorId,
 				a_maxMagicka,

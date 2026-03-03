@@ -1,0 +1,23 @@
+#pragma once
+
+#include <string_view>
+
+namespace CalamityAffixes::EventNames
+{
+	inline constexpr std::string_view kManualModeCycleNext = "CalamityAffixes_ModeCycle_Next";
+	inline constexpr std::string_view kManualModeCyclePrev = "CalamityAffixes_ModeCycle_Prev";
+	inline constexpr std::string_view kRunewordBaseNext = "CalamityAffixes_Runeword_Base_Next";
+	inline constexpr std::string_view kRunewordBasePrev = "CalamityAffixes_Runeword_Base_Prev";
+	inline constexpr std::string_view kRunewordRecipeNext = "CalamityAffixes_Runeword_Recipe_Next";
+	inline constexpr std::string_view kRunewordRecipePrev = "CalamityAffixes_Runeword_Recipe_Prev";
+	inline constexpr std::string_view kRunewordInsertRune = "CalamityAffixes_Runeword_InsertRune";
+	inline constexpr std::string_view kRunewordStatus = "CalamityAffixes_Runeword_Status";
+	inline constexpr std::string_view kRunewordGrantNextRune = "CalamityAffixes_Runeword_GrantNextRune";
+	inline constexpr std::string_view kRunewordGrantRecipeSet = "CalamityAffixes_Runeword_GrantRecipeSet";
+	inline constexpr std::string_view kRunewordGrantStarterOrbs = "CalamityAffixes_Runeword_GrantStarterOrbs";
+	inline constexpr std::string_view kUiSetPanel = "CalamityAffixes_UI_SetPanel";
+	inline constexpr std::string_view kUiTogglePanel = "CalamityAffixes_UI_TogglePanel";
+	inline constexpr std::string_view kMcmSpawnTestItem = "CalamityAffixes_MCM_SpawnTestItem";
+	inline constexpr std::string_view kMcmForceRebuild = "CalamityAffixes_MCM_ForceRebuild";
+	inline constexpr std::string_view kMcmGrantRecoveryPack = "CalamityAffixes_MCM_GrantRecoveryPack";
+}

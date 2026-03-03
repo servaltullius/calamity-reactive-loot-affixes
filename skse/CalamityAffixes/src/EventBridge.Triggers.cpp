@@ -15,7 +15,6 @@
 #include <vector>
 
 #include <RE/M/Misc.h>
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -377,7 +376,7 @@ namespace CalamityAffixes
 				static auto nextLogAt = std::chrono::steady_clock::time_point{};
 				if (nextLogAt.time_since_epoch().count() == 0 || a_now >= nextLogAt) {
 					nextLogAt = a_now + std::chrono::seconds(2);
-					spdlog::info(
+					SKSE::log::info(
 						"CalamityAffixes: combat evidence lease suppressed (source={}, player={}({:08X}), other={}({:08X})).",
 						describeSource(a_source),
 						a_player ? a_player->GetName() : "<none>",
@@ -403,7 +402,7 @@ namespace CalamityAffixes
 
 		const auto expiresInMs = static_cast<std::int64_t>(
 			std::chrono::duration_cast<std::chrono::milliseconds>(newExpiry - a_now).count());
-		spdlog::info(
+		SKSE::log::info(
 			"CalamityAffixes: combat evidence marked (source={}, player={}({:08X}) inCombat={}, other={}({:08X}), expiresIn={}ms).",
 			describeSource(a_source),
 			a_player ? a_player->GetName() : "<none>",
@@ -495,7 +494,7 @@ namespace CalamityAffixes
 
 			if (!TryConsumeTriggerProcBudget(now)) {
 				if (_loot.debugLog && !loggedProcBudgetDenied) {
-					spdlog::debug(
+					SKSE::log::debug(
 						"CalamityAffixes: trigger proc budget exhausted (budget={} / windowMs={}).",
 						_loot.triggerProcBudgetPerWindow,
 						_loot.triggerProcBudgetWindowMs);
@@ -518,7 +517,7 @@ namespace CalamityAffixes
 				}
 
 			if (_loot.debugLog) {
-				spdlog::debug(
+				SKSE::log::debug(
 					"CalamityAffixes: proc (affixId={}, trigger={}, chancePct={}, target={}, hasHitData={})",
 					affix.id,
 					static_cast<std::uint32_t>(a_trigger),

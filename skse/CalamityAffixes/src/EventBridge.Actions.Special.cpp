@@ -9,7 +9,6 @@
 #include <string_view>
 #include <vector>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -192,7 +191,7 @@ namespace CalamityAffixes
 
 		if (_loot.debugLog) {
 			const auto* hitWeapon = HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker);
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={:.1f}, convertPct={:.0f}%, converted={:.1f}, remainingPhys={:.1f})",
 				hitWeapon ? hitWeapon->GetName() : "<unknown>",
 				physicalDealt,
@@ -348,7 +347,7 @@ namespace CalamityAffixes
 		result.redirectPct = action->mindOverMatterDamageToMagickaPct;
 
 		if (_loot.debugLog) {
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: MindOverMatter (physicalTaken={}, redirectPct={}%, redirected={}, remainingHealthDamage={}).",
 				physicalTaken,
 				result.redirectPct,
@@ -488,7 +487,7 @@ namespace CalamityAffixes
 		}
 
 		if (_loot.debugLog) {
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: CastOnCrit triggered (crit={}, powerAttack={}, spells={}, picked={}).",
 				isCrit,
 				isPowerAttack,
@@ -537,7 +536,7 @@ namespace CalamityAffixes
 
 		const float mult = 1.0f + (_activeCritDamageBonusPct / 100.0f);
 		if (_loot.debugLog) {
-			spdlog::debug("CalamityAffixes: crit damage bonus {:.0f}% -> multiplier {:.2f}", _activeCritDamageBonusPct, mult);
+			SKSE::log::debug("CalamityAffixes: crit damage bonus {:.0f}% -> multiplier {:.2f}", _activeCritDamageBonusPct, mult);
 		}
 		return mult;
 	}

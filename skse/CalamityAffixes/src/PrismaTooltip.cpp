@@ -20,6 +20,7 @@
 #include <SKSE/SKSE.h>
 
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/EventNames.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/PrismaLayoutPersistence.h"
 #include "CalamityAffixes/UserSettingsPersistence.h"
@@ -30,8 +31,8 @@ namespace CalamityAffixes::PrismaTooltip
 {
 	namespace
 	{
-			constexpr auto kPollInterval = std::chrono::milliseconds(300);
-			constexpr auto kHotkeyRefreshInterval = std::chrono::seconds(2);
+		constexpr auto kPollInterval = std::chrono::milliseconds(300);
+		constexpr auto kHotkeyRefreshInterval = std::chrono::seconds(2);
 		constexpr auto kViewPath = "CalamityAffixes/index.html";
 		constexpr auto kViewOrder = 5000;
 		constexpr auto kMouseButtonOffset = 256u;
@@ -65,19 +66,6 @@ namespace CalamityAffixes::PrismaTooltip
 		constexpr int kDefaultTooltipFontPermille = 1000;
 		constexpr int kMinTooltipFontPermille = 700;
 		constexpr int kMaxTooltipFontPermille = 1800;
-
-		constexpr std::string_view kManualModeCycleNextEvent = "CalamityAffixes_ModeCycle_Next";
-		constexpr std::string_view kManualModeCyclePrevEvent = "CalamityAffixes_ModeCycle_Prev";
-		constexpr std::string_view kRunewordBaseNextEvent = "CalamityAffixes_Runeword_Base_Next";
-		constexpr std::string_view kRunewordBasePrevEvent = "CalamityAffixes_Runeword_Base_Prev";
-		constexpr std::string_view kRunewordRecipeNextEvent = "CalamityAffixes_Runeword_Recipe_Next";
-		constexpr std::string_view kRunewordRecipePrevEvent = "CalamityAffixes_Runeword_Recipe_Prev";
-		constexpr std::string_view kRunewordInsertRuneEvent = "CalamityAffixes_Runeword_InsertRune";
-		constexpr std::string_view kRunewordStatusEvent = "CalamityAffixes_Runeword_Status";
-		constexpr std::string_view kRunewordGrantNextRuneEvent = "CalamityAffixes_Runeword_GrantNextRune";
-		constexpr std::string_view kRunewordGrantRecipeSetEvent = "CalamityAffixes_Runeword_GrantRecipeSet";
-		constexpr std::string_view kRunewordGrantStarterOrbsEvent = "CalamityAffixes_Runeword_GrantStarterOrbs";
-		constexpr std::string_view kMcmSpawnTestItemEvent = "CalamityAffixes_MCM_SpawnTestItem";
 
 		std::atomic_bool g_installed{ false };
 		std::atomic_bool g_domReady{ false };

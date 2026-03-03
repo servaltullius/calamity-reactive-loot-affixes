@@ -5,7 +5,6 @@
 #include <mutex>
 #include <random>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -147,7 +146,7 @@ namespace CalamityAffixes
 		}
 
 		if (_loot.debugLog && before != _traps.size()) {
-			spdlog::debug(
+			SKSE::log::debug(
 				"CalamityAffixes: global trap cap enforced (max={}, before={}, after={}).",
 				globalMax,
 				before,
@@ -195,7 +194,7 @@ namespace CalamityAffixes
 		}
 
 		const char* extraName = (a_trap.extraSpell && a_trap.extraSpell->GetName()) ? a_trap.extraSpell->GetName() : "<none>";
-		spdlog::debug(
+		SKSE::log::debug(
 			"CalamityAffixes: trap spawned (token={}, radius={}, ttlMs={}, armDelayMs={}, rearmDelayMs={}, maxTriggers={}, maxTargetsPerTrigger={}, extra={}, pos=({}, {}, {})).",
 			a_trap.sourceToken,
 			a_trap.radius,

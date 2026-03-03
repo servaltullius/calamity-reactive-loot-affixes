@@ -6,7 +6,6 @@
 
 #include <chrono>
 
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
@@ -44,7 +43,7 @@ namespace CalamityAffixes
 				(baseObject && baseObject->GetFormEditorID())
 					? std::string_view(baseObject->GetFormEditorID())
 					: std::string_view{};
-			spdlog::info(
+			SKSE::log::info(
 				"CalamityAffixes: activation probe (targetRef={}({:08X}), base={}({:08X}), baseEditorId={}, inCombat={}, runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}).",
 				sourceRef->GetName(),
 				sourceRef->GetFormID(),

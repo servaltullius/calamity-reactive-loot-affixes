@@ -112,22 +112,22 @@
 			bool sent = false;
 			std::string_view feedback = {};
 			if (a_command == "mode.next") {
-				sent = EmitModEvent(kManualModeCycleNextEvent);
+				sent = EmitModEvent(EventNames::kManualModeCycleNext);
 				feedback = "Manual mode -> next";
 			} else if (a_command == "mode.prev") {
-				sent = EmitModEvent(kManualModeCyclePrevEvent);
+				sent = EmitModEvent(EventNames::kManualModeCyclePrev);
 				feedback = "Manual mode -> previous";
 			} else if (a_command == "runeword.base.next") {
-				sent = EmitModEvent(kRunewordBaseNextEvent);
+				sent = EmitModEvent(EventNames::kRunewordBaseNext);
 				feedback = "Runeword base -> next";
 			} else if (a_command == "runeword.base.prev") {
-				sent = EmitModEvent(kRunewordBasePrevEvent);
+				sent = EmitModEvent(EventNames::kRunewordBasePrev);
 				feedback = "Runeword base -> previous";
 			} else if (a_command == "runeword.recipe.next") {
-				sent = EmitModEvent(kRunewordRecipeNextEvent);
+				sent = EmitModEvent(EventNames::kRunewordRecipeNext);
 				feedback = "Runeword recipe -> next";
 			} else if (a_command == "runeword.recipe.prev") {
-				sent = EmitModEvent(kRunewordRecipePrevEvent);
+				sent = EmitModEvent(EventNames::kRunewordRecipePrev);
 				feedback = "Runeword recipe -> previous";
 			} else if (a_command == "runeword.insert") {
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
@@ -136,7 +136,7 @@
 					before = bridge->GetRunewordPanelState();
 				}
 
-				sent = EmitModEvent(kRunewordInsertRuneEvent);
+				sent = EmitModEvent(EventNames::kRunewordInsertRune);
 
 				if (sent && bridge) {
 					// SendEvent is synchronous; refresh status immediately so UI feedback isn't misleading.
@@ -179,7 +179,7 @@
 
 				feedback = "Runeword -> transmute requested";
 			} else if (a_command == "runeword.status") {
-				sent = EmitModEvent(kRunewordStatusEvent);
+				sent = EmitModEvent(EventNames::kRunewordStatus);
 				feedback = "Runeword -> status";
 			} else if (a_command == "runeword.reforge") {
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
@@ -196,16 +196,16 @@
 				PushUiFeedback(outcome.message.empty() ? "Reforge action processed." : outcome.message);
 				return;
 			} else if (a_command == "runeword.grant.next") {
-				sent = EmitModEvent(kRunewordGrantNextRuneEvent, {}, 1.0f);
+				sent = EmitModEvent(EventNames::kRunewordGrantNextRune, {}, 1.0f);
 				feedback = "Debug -> +1 next fragment";
 			} else if (a_command == "runeword.grant.set") {
-				sent = EmitModEvent(kRunewordGrantRecipeSetEvent, {}, 1.0f);
+				sent = EmitModEvent(EventNames::kRunewordGrantRecipeSet, {}, 1.0f);
 				feedback = "Debug -> +1 recipe set";
 			} else if (a_command == "runeword.grant.orb3") {
-				sent = EmitModEvent(kRunewordGrantStarterOrbsEvent, {}, 3.0f);
+				sent = EmitModEvent(EventNames::kRunewordGrantStarterOrbs, {}, 3.0f);
 				feedback = "Debug -> +3 reforge orbs";
 			} else if (a_command == "spawn.test") {
-				sent = EmitModEvent(kMcmSpawnTestItemEvent, {}, 1.0f);
+				sent = EmitModEvent(EventNames::kMcmSpawnTestItem, {}, 1.0f);
 				feedback = "Spawned test item request";
 			} else {
 				std::string note = "Unknown command: ";

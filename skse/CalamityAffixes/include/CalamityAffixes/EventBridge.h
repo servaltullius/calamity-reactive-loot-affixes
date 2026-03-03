@@ -30,6 +30,7 @@
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/RuntimeUserSettingsDebounce.h"
+#include "CalamityAffixes/EventNames.h"
 #include "CalamityAffixes/RuntimePolicy.h"
 #include "CalamityAffixes/ResyncScheduler.h"
 

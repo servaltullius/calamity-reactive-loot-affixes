@@ -9,7 +9,7 @@
 #include <unordered_set>
 
 #include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
+#include <SKSE/SKSE.h>
 
 namespace CalamityAffixes
 {
@@ -97,7 +97,7 @@ namespace CalamityAffixes
 		const auto contractPath = RuntimePaths::ResolveRuntimeRelativePath(a_relativePath);
 		std::ifstream in(contractPath, std::ios::binary);
 		if (!in.is_open()) {
-			spdlog::warn(
+			SKSE::log::warn(
 				"CalamityAffixes: runeword contract snapshot missing at {}.",
 				contractPath.string());
 			return false;
@@ -107,7 +107,7 @@ namespace CalamityAffixes
 		try {
 			in >> contract;
 		} catch (const std::exception& e) {
-			spdlog::warn(
+			SKSE::log::warn(
 				"CalamityAffixes: runeword contract snapshot parse failed at {} ({}).",
 				contractPath.string(),
 				e.what());
@@ -118,7 +118,7 @@ namespace CalamityAffixes
 
 		const auto catalogIt = contract.find(std::string(RuntimeContract::kFieldRunewordCatalog));
 		if (catalogIt == contract.end() || !catalogIt->is_array()) {
-			spdlog::warn(
+			SKSE::log::warn(
 				"CalamityAffixes: runeword contract snapshot missing '{}' array in {}.",
 				RuntimeContract::kFieldRunewordCatalog,
 				contractPath.string());
@@ -129,7 +129,7 @@ namespace CalamityAffixes
 		for (const auto& entry : *catalogIt) {
 			RunewordContractRecipeRow row{};
 			if (!ParseRunewordRecipeRow(entry, row)) {
-				spdlog::warn(
+				SKSE::log::warn(
 					"CalamityAffixes: invalid runeword recipe entry in '{}' at {}.",
 					RuntimeContract::kFieldRunewordCatalog,
 					contractPath.string());
@@ -138,7 +138,7 @@ namespace CalamityAffixes
 			snapshot.recipes.push_back(std::move(row));
 		}
 		if (snapshot.recipes.empty()) {
-			spdlog::warn(
+			SKSE::log::warn(
 				"CalamityAffixes: runeword contract snapshot has empty '{}' in {}.",
 				RuntimeContract::kFieldRunewordCatalog,
 				contractPath.string());
@@ -147,7 +147,7 @@ namespace CalamityAffixes
 
 		const auto weightsIt = contract.find(std::string(RuntimeContract::kFieldRunewordRuneWeights));
 		if (weightsIt == contract.end() || !weightsIt->is_array()) {
-			spdlog::warn(
+			SKSE::log::warn(
 				"CalamityAffixes: runeword contract snapshot missing '{}' array in {}.",
 				RuntimeContract::kFieldRunewordRuneWeights,
 				contractPath.string());
@@ -156,7 +156,7 @@ namespace CalamityAffixes
 
 		for (const auto& entry : *weightsIt) {
 			if (!entry.is_object()) {
-				spdlog::warn(
+				SKSE::log::warn(
 					"CalamityAffixes: invalid rune weight entry (not object) in {}.",
 					contractPath.string());
 				return false;
@@ -164,7 +164,7 @@ namespace CalamityAffixes
 
 			std::string runeName;
 			if (!TryReadRequiredString(entry, RuntimeContract::kFieldRuneWeightRune, runeName)) {
-				spdlog::warn(
+				SKSE::log::warn(
 					"CalamityAffixes: invalid rune weight entry (missing rune name) in {}.",
 					contractPath.string());
 				return false;
@@ -172,7 +172,7 @@ namespace CalamityAffixes
 
 			const auto weightIt = entry.find(std::string(RuntimeContract::kFieldRuneWeightWeight));
 			if (weightIt == entry.end() || !weightIt->is_number()) {
-				spdlog::warn(
+				SKSE::log::warn(
 					"CalamityAffixes: invalid rune weight entry for '{}' (missing weight) in {}.",
 					runeName,
 					contractPath.string());
@@ -181,7 +181,7 @@ namespace CalamityAffixes
 
 			const auto weight = weightIt->get<double>();
 			if (!(weight > 0.0)) {
-				spdlog::warn(
+				SKSE::log::warn(
 					"CalamityAffixes: invalid rune weight entry for '{}' (non-positive weight={}) in {}.",
 					runeName,
 					weight,
@@ -193,7 +193,7 @@ namespace CalamityAffixes
 		}
 
 		if (snapshot.runeWeightsByName.empty()) {
-			spdlog::warn(
+			SKSE::log::warn(
 				"CalamityAffixes: runeword contract snapshot has empty '{}' in {}.",
 				RuntimeContract::kFieldRunewordRuneWeights,
 				contractPath.string());
@@ -212,7 +212,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			spdlog::warn(
+			SKSE::log::warn(
 				"CalamityAffixes: runeword contract snapshot is missing weight for rune '{}' in {}.",
 				rune,
 				contractPath.string());

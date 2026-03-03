@@ -7,7 +7,6 @@
 #include <string_view>
 
 #include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
