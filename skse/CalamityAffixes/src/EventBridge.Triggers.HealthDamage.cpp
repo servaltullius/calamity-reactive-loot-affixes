@@ -314,26 +314,26 @@ namespace CalamityAffixes
 		RE::Actor* a_target,
 		RE::Actor* a_attacker)
 	{
-	// For hit-like lethal damage, fire corpse explosion immediately instead of waiting for TESDeathEvent dispatch.
-	// Duplicate explosions are still blocked by corpse-budget dedupe in ProcessCorpseExplosionKill.
-	const auto context = BuildCombatTriggerContext(a_target, a_attacker);
-	if (a_target->IsPlayerRef() ||
-		!a_target->IsDead() ||
-		!context.attackerIsPlayerOwned ||
-		_corpseExplosionAffixIndices.empty()) {
-		return;
-	}
-	if (!context.playerOwner || !context.hostileEitherDirection) {
-		return;
-	}
+		// For hit-like lethal damage, fire corpse explosion immediately instead of waiting for TESDeathEvent dispatch.
+		// Duplicate explosions are still blocked by corpse-budget dedupe in ProcessCorpseExplosionKill.
+		const auto context = BuildCombatTriggerContext(a_target, a_attacker);
+		if (a_target->IsPlayerRef() ||
+			!a_target->IsDead() ||
+			!context.attackerIsPlayerOwned ||
+			_corpseExplosionAffixIndices.empty()) {
+			return;
+		}
+		if (!context.playerOwner || !context.hostileEitherDirection) {
+			return;
+		}
 
-	if (_loot.debugLog) {
-		SKSE::log::debug(
-			"CalamityAffixes: immediate corpse explosion path (target={}, attacker={}).",
-			a_target->GetName(),
-			a_attacker->GetName());
-	}
-	ProcessCorpseExplosionKill(context.playerOwner, a_target);
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: immediate corpse explosion path (target={}, attacker={}).",
+				a_target->GetName(),
+				a_attacker->GetName());
+		}
+		ProcessCorpseExplosionKill(context.playerOwner, a_target);
 	}
 
 	void EventBridge::ProcessLowHealthTriggerFromHealthDamage(

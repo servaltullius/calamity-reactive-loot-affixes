@@ -10,7 +10,6 @@
 #include <unordered_set>
 
 #include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
 
 namespace CalamityAffixes
 {
