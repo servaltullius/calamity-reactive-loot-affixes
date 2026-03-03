@@ -53,3 +53,5 @@ cd tools && dotnet test CalamityAffixes.Generator.Tests
 - **vanilla hostile spell 금지**: `applyTo: "Self"`에 적대 스펠 사용 시 전투 상태 전환됨
 - **Suffix 동일 스펠 비중첩**: 같은 Suffix는 여러 장비에도 1회만 적용 (다른 티어는 중첩 가능)
 - **`procChancePct` 이중 의미**: Prefix = proc 확률, Suffix = 드롭 가중치
+- **CoC에서 ResolveHitWeapon 폴백 금지**: `EvaluateCastOnCrit`는 `hitData->weapon` 직접 확인만 사용. 폴백이 장착 활을 반환하면 주문 투사체가 무한 체인 발동
+- **passiveSpellEditorId 전 슬롯 지원**: prefix/suffix/runeword 모두 사용 가능 (v1.2.19.2~)
