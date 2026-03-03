@@ -83,55 +83,55 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_treachery", "self_muffle" },
 		{ "rw_honor", "soul_trap" },
 		{ "rw_eternity", "long_cd_bulwark" },
-		{ "rw_leaf", "fire_strike" },
+		{ "rw_leaf", "self_destruction_mastery" },
 		{ "rw_wrath", "fire_strike" },
 		{ "rw_brand", "fire_dot" },
-		{ "rw_voice_of_reason", "frost_strike" },
+		{ "rw_voice_of_reason", "debuff_frost_shred" },
 		{ "rw_pride", "frost_strike" },
-		{ "rw_mist", "debuff_frostbite" },
+		{ "rw_mist", "debuff_magicka_suppress" },
 		{ "rw_holy_thunder", "shock_strike" },
-		{ "rw_crescent_moon", "shock_strike" },
+		{ "rw_crescent_moon", "debuff_shock_shred" },
 		{ "rw_destruction", "shock_dot" },
 		{ "rw_malice", "poison_dot" },
-		{ "rw_venom", "poison_dot" },
+		{ "rw_venom", "debuff_poison_shred" },
 		{ "rw_plague", "kill_poison_cloud" },
 		{ "rw_nadir", "debuff_fear" },
 		{ "rw_peace", "debuff_calm" },
-		{ "rw_rift", "debuff_calm" },
+		{ "rw_rift", "debuff_magic_shred" },
 		{ "rw_delirium", "debuff_frenzy" },
 		{ "rw_black", "debuff_paralysis" },
 		{ "rw_ice", "aura_frost_shred" },
 		{ "rw_flickering_flame", "aura_fire_shred" },
 		{ "rw_silence", "debuff_magicka_drain" },
 		{ "rw_obedience", "debuff_slow" },
-		{ "rw_wind", "debuff_slow" },
+		{ "rw_wind", "debuff_attack_slow" },
 		{ "rw_famine", "debuff_stamina_drain" },
 		{ "rw_kingslayer", "bleed_dot" },
 		{ "rw_death", "debuff_absorb_health" },
 		{ "rw_mosaic", "debuff_multi_element" },
 		{ "rw_chaos", "adaptive_strike" },
-		{ "rw_steel", "self_weapon_speed" },
+		{ "rw_steel", "debuff_heal_suppress" },
 		{ "rw_fury", "self_weapon_fury" },
 		{ "rw_hand_of_justice", "self_judgment" },
-		{ "rw_passion", "self_haste" },
-		{ "rw_harmony", "self_haste" },
+		{ "rw_passion", "self_illusion_mastery" },
+		{ "rw_harmony", "debuff_stamina_suppress" },
 		{ "rw_memory", "self_stamina_recall" },
-		{ "rw_temper", "self_tempered_strike" },
+		{ "rw_temper", "self_stamina_regen" },
 		{ "rw_pattern", "self_crit_chance" },
 		{ "rw_strength", "self_two_handed" },
 		{ "rw_edge", "self_marksman" },
 		{ "rw_oath", "self_one_handed" },
 		{ "rw_zephyr", "self_bow_speed" },
-		{ "rw_melody", "self_bow_speed" },
+		{ "rw_melody", "absorb_stamina" },
 		{ "rw_unbending_will", "self_block" },
 		{ "rw_bulwark", "self_ward" },
-		{ "rw_duress", "self_ward" },
-		{ "rw_stone", "self_stone_skin" },
+		{ "rw_duress", "debuff_weaken" },
+		{ "rw_stone", "debuff_armor_shred" },
 		{ "rw_prudence", "self_shock_ward" },
 		{ "rw_bone", "self_frost_ward" },
 		{ "rw_splendor", "self_magic_shield" },
-		{ "rw_hearth", "self_frost_resist" },
-		{ "rw_ground", "self_shock_resist" },
+		{ "rw_hearth", "self_conjuration_mastery" },
+		{ "rw_ground", "self_shout_recovery" },
 		{ "rw_principle", "self_fire_resist" },
 		{ "rw_ancients_pledge", "self_poison_resist" },
 		{ "rw_myth", "self_heavy_armor" },
@@ -142,16 +142,16 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_enlightenment", "self_alteration" },
 		{ "rw_white", "self_mana_surge" },
 		{ "rw_kings_grace", "self_heal_rate" },
-		{ "rw_cure", "self_heal_rate" },
+		{ "rw_cure", "self_restoration_mastery" },
 		{ "rw_rain", "self_heal_rate_mult" },
-		{ "rw_wisdom", "self_healing_wisdom" },
+		{ "rw_wisdom", "self_magicka_regen" },
 		{ "rw_lionheart", "lowhealth_emergency" },
 		{ "rw_rhyme", "self_phase" },
 		{ "rw_wealth", "self_carry_weight" },
 		{ "rw_radiance", "self_detect_life" },
 		{ "rw_stealth", "self_invisibility" },
 		{ "rw_smoke", "self_smoke_escape" },
-		{ "rw_gloom", "self_invisibility" },
+		{ "rw_gloom", "absorb_magicka" },
 		{ "rw_lawbringer", "kill_turn_undead" },
 	};
 
@@ -232,7 +232,6 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "debuff_calm") return "평화의 파동으로 적의 적대심을 일시 해제";
 		if (a_key == "debuff_fear") return "공포의 파동으로 적을 도주하게 만듦";
 		if (a_key == "debuff_frenzy") return "광란의 파동으로 적을 동료에게 돌아서게 만듦";
-		if (a_key == "debuff_frostbite") return "서리 파편이 적의 움직임을 무겁게 둔화";
 		if (a_key == "debuff_slow") return "묵직한 압박으로 적의 이동을 크게 둔화";
 		if (a_key == "debuff_absorb_health") return "사신의 손길로 적의 생명력을 빼앗아 흡수";
 		if (a_key == "debuff_magicka_drain") return "침묵의 파동으로 적의 마력을 고갈시킴";
@@ -242,10 +241,8 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "aura_fire_shred") return "타격마다 화염 저항을 깎아 후속 화상 극대화";
 		if (a_key == "aura_frost_shred") return "타격마다 냉기 저항을 깎아 후속 동결 극대화";
 		if (a_key == "self_haste") return "가속으로 빈틈을 메워 기동 우위 확보";
-		if (a_key == "self_weapon_speed") return "연타 가속으로 무기 공격 속도를 끌어올림";
 		if (a_key == "self_weapon_fury") return "격노의 흐름으로 무기 공격 속도 상승";
 		if (a_key == "self_judgment") return "심판의 기세를 실어 공격력을 대폭 끌어올림";
-		if (a_key == "self_tempered_strike") return "피격의 열기를 공격력으로 전환해 반격 강화";
 		if (a_key == "self_stamina_recall") return "전투 기억을 되살려 스태미나 회복 가속";
 		if (a_key == "self_crit_chance") return "연계 리듬을 살려 치명타 확률 상승";
 		if (a_key == "self_two_handed") return "양손 전투 감각을 극대화해 타격력 강화";
@@ -258,11 +255,9 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "self_alteration") return "깨달음의 파동으로 변화마법 역량 강화";
 		if (a_key == "self_ward") return "수호막으로 방어도를 일시 대폭 상승";
 		if (a_key == "self_barrier") return "장벽으로 급사 구간을 얇게 끊어냄";
-		if (a_key == "self_stone_skin") return "석화로 피부를 돌처럼 굳혀 강력 방어";
 		if (a_key == "self_frost_ward") return "냉기 보호막으로 동결 피해를 차단";
 		if (a_key == "self_shock_ward") return "전기 보호막으로 전격 피해를 크게 경감";
 		if (a_key == "self_magic_shield") return "마력 방패로 마법 저항 전반을 강화";
-		if (a_key == "self_frost_resist") return "화덕의 온기로 냉기 저항을 올려 방어";
 		if (a_key == "self_shock_resist") return "대지 접지로 전격 저항을 올려 방어";
 		if (a_key == "self_fire_resist") return "원칙의 불꽃으로 화염 저항을 크게 강화";
 		if (a_key == "self_poison_resist") return "고대 서약으로 독과 질병에 대한 저항력 획득";
@@ -270,7 +265,6 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "self_ethereal") return "에테리얼 변신으로 잠시 무적 상태에 진입";
 		if (a_key == "self_heal_rate") return "치유의 흐름으로 체력 회복 속도 상승";
 		if (a_key == "self_heal_rate_mult") return "생명의 비로 체력 재생을 대폭 가속";
-		if (a_key == "self_healing_wisdom") return "지혜의 파동으로 상처를 서서히 치유";
 		if (a_key == "self_meditation") return "명상으로 전투 자원을 빠르게 회복";
 		if (a_key == "self_magicka_regen") return "지식의 빛으로 마나 재생을 가속";
 		if (a_key == "self_mana_surge") return "마나 쇄도로 마력 총량을 일시 증폭";
@@ -292,6 +286,24 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "long_cd_beast_rage") return "타격 시 야수의 격노로 폭발적 강화 (긴 재사용)";
 		if (a_key == "thorns_reflect") return "받은 피해 일부를 공격자에게 되돌려 보복";
 		if (a_key == "soul_trap") return "소울트랩으로 영혼을 묶어 포획";
+		if (a_key == "self_shout_recovery") return "접지의 힘으로 용언 재충전 속도를 가속";
+		if (a_key == "self_restoration_mastery") return "치유의 각성으로 회복 마법 위력을 증폭";
+		if (a_key == "self_destruction_mastery") return "나뭇잎의 불꽃으로 파괴 마법 위력을 증폭";
+		if (a_key == "self_conjuration_mastery") return "화덕의 불씨가 소환의 가교를 열어 강화";
+		if (a_key == "self_illusion_mastery") return "정열의 환상이 환혹 마법 역량을 증폭";
+		if (a_key == "self_stamina_regen") return "단련의 기운으로 기력 자연 재생을 가속";
+		if (a_key == "absorb_magicka") return "암흑의 흡인으로 적의 마력을 빼앗아 전환";
+		if (a_key == "absorb_stamina") return "선율의 울림으로 적의 활력을 흡수해 전환";
+		if (a_key == "debuff_weaken") return "강압의 기운으로 공격자의 공격력을 약화";
+		if (a_key == "debuff_attack_slow") return "질풍의 압박이 적의 공격 속도를 둔화";
+		if (a_key == "debuff_armor_shred") return "돌의 무게가 적의 방어구를 압쇄";
+		if (a_key == "debuff_poison_shred") return "맹독의 침식으로 적의 독 저항을 와해";
+		if (a_key == "debuff_shock_shred") return "달빛 전류가 적의 전격 방어를 붕괴";
+		if (a_key == "debuff_frost_shred") return "이성의 냉기가 적의 냉기 방어를 관통";
+		if (a_key == "debuff_magic_shred") return "차원의 균열이 적의 마법 방어를 분쇄";
+		if (a_key == "debuff_heal_suppress") return "강철 출혈이 적의 상처 회복을 방해";
+		if (a_key == "debuff_stamina_suppress") return "조화의 교란이 적의 기력 재생을 억제";
+		if (a_key == "debuff_magicka_suppress") return "안개가 적의 마력 흐름을 차단";
 		return {};
 	}
 }

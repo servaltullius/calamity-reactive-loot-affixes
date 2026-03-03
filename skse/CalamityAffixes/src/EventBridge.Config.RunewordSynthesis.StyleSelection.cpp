@@ -101,63 +101,67 @@ namespace CalamityAffixes
 		}
 
 		// ── Fire strikes ──
-		if (IdIsOneOf(id, { "rw_leaf", "rw_wrath", "rw_brand" })) {
+		if (IdIsOneOf(id, { "rw_wrath", "rw_brand" })) {
 			return SyntheticRunewordStyle::kFireStrike;
 		}
 		// ── Frost strikes ──
-		if (IdIsOneOf(id, { "rw_voice_of_reason", "rw_mist", "rw_pride" })) {
+		if (IdIsOneOf(id, { "rw_pride" })) {
 			return SyntheticRunewordStyle::kFrostStrike;
 		}
 		// ── Shock strikes ──
-		if (IdIsOneOf(id, { "rw_holy_thunder", "rw_crescent_moon", "rw_destruction" })) {
+		if (IdIsOneOf(id, { "rw_holy_thunder", "rw_destruction" })) {
 			return SyntheticRunewordStyle::kShockStrike;
 		}
 		// ── Poison ──
-		if (IdIsOneOf(id, { "rw_malice", "rw_venom", "rw_plague" })) {
+		if (IdIsOneOf(id, { "rw_malice", "rw_plague" })) {
 			return SyntheticRunewordStyle::kPoisonBloom;
 		}
 		// ── CC: Fear/Calm ──
-		if (IdIsOneOf(id, { "rw_nadir", "rw_peace", "rw_rift" })) {
+		if (IdIsOneOf(id, { "rw_nadir", "rw_peace" })) {
 			return SyntheticRunewordStyle::kCurseFear;
 		}
 		// ── CC: Frenzy/Paralysis ──
 		if (IdIsOneOf(id, { "rw_delirium", "rw_black" })) {
 			return SyntheticRunewordStyle::kCurseFrenzy;
 		}
-		// ── Elemental resist debuffs + magicka drain ──
-		if (IdIsOneOf(id, { "rw_ice", "rw_flickering_flame", "rw_silence" })) {
+		// ── Resist shred debuffs ──
+		if (IdIsOneOf(id, { "rw_ice", "rw_flickering_flame", "rw_silence", "rw_venom", "rw_crescent_moon", "rw_voice_of_reason", "rw_rift", "rw_stone" })) {
 			return SyntheticRunewordStyle::kCurseFragile;
 		}
-		// ── Speed/stamina debuffs ──
-		if (IdIsOneOf(id, { "rw_obedience", "rw_wind", "rw_famine", "rw_kingslayer" })) {
+		// ── Attack/regen suppress debuffs ──
+		if (IdIsOneOf(id, { "rw_obedience", "rw_famine", "rw_kingslayer", "rw_duress", "rw_wind", "rw_steel", "rw_harmony", "rw_mist" })) {
 			return SyntheticRunewordStyle::kCurseSlowAttack;
 		}
 		// ── Attack/speed buffs ──
-		if (IdIsOneOf(id, { "rw_steel", "rw_fury", "rw_hand_of_justice", "rw_passion", "rw_harmony", "rw_memory" })) {
+		if (IdIsOneOf(id, { "rw_fury", "rw_hand_of_justice", "rw_memory", "rw_ground" })) {
 			return SyntheticRunewordStyle::kSelfHaste;
 		}
+		// ── Absorb (siphon) ──
+		if (IdIsOneOf(id, { "rw_gloom", "rw_melody" })) {
+			return SyntheticRunewordStyle::kSiphonBloom;
+		}
 		// ── Skill buffs / combat adapters ──
-		if (IdIsOneOf(id, { "rw_pattern", "rw_strength", "rw_edge", "rw_oath", "rw_zephyr", "rw_melody", "rw_unbending_will", "rw_chaos", "rw_mosaic" })) {
+		if (IdIsOneOf(id, { "rw_pattern", "rw_strength", "rw_edge", "rw_oath", "rw_zephyr", "rw_unbending_will", "rw_chaos", "rw_mosaic" })) {
 			return SyntheticRunewordStyle::kAdaptiveStrike;
 		}
-		// ── Absorb ──
+		// ── Absorb Health ──
 		if (IdIsOneOf(id, { "rw_death" })) {
 			return SyntheticRunewordStyle::kAdaptiveExposure;
 		}
 		// ── Defensive buffs: armor, resists ──
-		if (IdIsOneOf(id, { "rw_temper", "rw_prudence", "rw_bone", "rw_splendor", "rw_bulwark", "rw_duress", "rw_stone", "rw_hearth", "rw_ground", "rw_principle", "rw_ancients_pledge", "rw_dragon", "rw_myth" })) {
+		if (IdIsOneOf(id, { "rw_prudence", "rw_bone", "rw_splendor", "rw_bulwark", "rw_principle", "rw_ancients_pledge", "rw_dragon", "rw_myth" })) {
 			return SyntheticRunewordStyle::kSelfWard;
 		}
 		// ── Exotic defense: reflect, ethereal ──
 		if (IdIsOneOf(id, { "rw_bramble", "rw_metamorphosis" })) {
 			return SyntheticRunewordStyle::kSelfBarrier;
 		}
-		// ── Mana/magic buffs ──
-		if (IdIsOneOf(id, { "rw_lore", "rw_enlightenment", "rw_white" })) {
+		// ── Magic school buffs (meditation) ──
+		if (IdIsOneOf(id, { "rw_lore", "rw_enlightenment", "rw_white", "rw_cure", "rw_leaf", "rw_hearth", "rw_passion", "rw_temper", "rw_wisdom" })) {
 			return SyntheticRunewordStyle::kSelfMeditation;
 		}
 		// ── Health/regen ──
-		if (IdIsOneOf(id, { "rw_kings_grace", "rw_cure", "rw_rain", "rw_wisdom", "rw_lionheart" })) {
+		if (IdIsOneOf(id, { "rw_kings_grace", "rw_rain", "rw_lionheart" })) {
 			return SyntheticRunewordStyle::kSelfPhoenix;
 		}
 		// ── Utility ──
@@ -165,7 +169,7 @@ namespace CalamityAffixes
 			return SyntheticRunewordStyle::kSelfPhase;
 		}
 		// ── Stealth ──
-		if (IdIsOneOf(id, { "rw_stealth", "rw_smoke", "rw_gloom" })) {
+		if (IdIsOneOf(id, { "rw_stealth", "rw_smoke" })) {
 			return SyntheticRunewordStyle::kSelfInvisibility;
 		}
 		// ── Kill: TurnUndead ──
