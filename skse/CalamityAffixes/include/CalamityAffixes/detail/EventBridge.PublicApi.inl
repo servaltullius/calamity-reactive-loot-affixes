@@ -64,6 +64,9 @@
 		[[nodiscard]] std::optional<std::string> GetSelectedRunewordBaseAffixTooltip(int a_uiLanguageMode = 2);
 		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseWithOrb();
 
+		// MCM manual recovery: grant starter orbs + missing rune fragments.
+		[[nodiscard]] std::string RecoverMiscCurrency();
+
 		// Combat/runtime evaluation entrypoints.
 		// Called from Actor::HandleHealthDamage hook to drive hit/incoming-hit procs reliably,
 		// even when TESHitEvent is delayed or suppressed by other mods.

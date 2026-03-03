@@ -204,6 +204,15 @@
 			} else if (a_command == "runeword.grant.orb3") {
 				sent = EmitModEvent(EventNames::kRunewordGrantStarterOrbs, {}, 3.0f);
 				feedback = "Debug -> +3 reforge orbs";
+			} else if (a_command == "currency.recover") {
+				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+				if (!bridge) {
+					PushUiFeedback("Currency system unavailable.");
+					return;
+				}
+				const auto result = bridge->RecoverMiscCurrency();
+				PushUiFeedback(result);
+				return;
 			} else if (a_command == "spawn.test") {
 				sent = EmitModEvent(EventNames::kMcmSpawnTestItem, {}, 1.0f);
 				feedback = "Spawned test item request";

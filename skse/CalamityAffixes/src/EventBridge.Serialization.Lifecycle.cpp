@@ -275,56 +275,31 @@ namespace CalamityAffixes
 
 	void EventBridge::MaybeMigrateMiscCurrency()
 	{
-		if (_miscCurrencyMigrated) {
-			return;
-		}
+		// Automatic migration disabled — use MCM "Recover Currency" button instead.
+		_miscCurrencyMigrated = true;
+	}
 
-		// Detect and recover physical MISC items (rune fragments, reforge orbs) lost
-		// due to ESP FormID changes between mod versions.
-		//
-		// Detection: player has affix instance data (_instanceAffixes non-empty,
-		// proving they played with the mod) but owns ZERO reforge orbs.  Since the
-		// starter grant gives orbs on first use, having affix data with zero orbs
-		// is a strong signal of FormID loss.
-		//
-		// This runs once per save file; after granting, the flag persists in the
-		// co-save and prevents repeated grants on subsequent loads.
-
-		if (_instanceAffixes.empty()) {
-			return;
-		}
+	std::string EventBridge::RecoverMiscCurrency()
+	{
+		const std::scoped_lock lock(_stateMutex);
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (!player) {
-			return;
+			return "Player not available.";
 		}
 
-		// Check reforge orb — most reliable signal since every player gets starter orbs.
 		auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
 		if (!orb) {
-			SKSE::log::warn("CalamityAffixes: MISC migration — reforge orb EditorID lookup failed.");
-			return;
+			SKSE::log::warn("CalamityAffixes: RecoverMiscCurrency — reforge orb EditorID lookup failed.");
+			return "Reforge orb lookup failed.";
 		}
-
-		const auto ownedOrbs = std::max(0, player->GetItemCount(orb));
-		if (ownedOrbs > 0) {
-			// Player has orbs — no FormID loss detected.
-			// Mark as checked so this never runs again for this save.
-			_miscCurrencyMigrated = true;
-			return;
-		}
-
-		// FormID loss detected: player has affix data but zero orbs.
-		SKSE::log::info(
-			"CalamityAffixes: MISC migration — FormID loss detected (instances={}, orbs=0). Granting recovery items.",
-			_instanceAffixes.size());
 
 		// Grant reforge orbs.
-		static constexpr std::uint32_t kMigrationOrbGrant = 5u;
+		static constexpr std::uint32_t kRecoveryOrbGrant = 5u;
 		player->AddObjectToContainer(orb, nullptr,
-			static_cast<std::int32_t>(kMigrationOrbGrant), nullptr);
+			static_cast<std::int32_t>(kRecoveryOrbGrant), nullptr);
 
-		// Grant rune fragments: give 1 of each known rune type.
+		// Grant rune fragments: give 1 of each known rune type the player doesn't own.
 		if (_runewordRuneNameByToken.empty()) {
 			InitializeRunewordCatalog();
 		}
@@ -342,11 +317,16 @@ namespace CalamityAffixes
 			}
 		}
 
-		_miscCurrencyMigrated = true;
-
 		SKSE::log::info(
-			"CalamityAffixes: MISC migration — granted {} orbs and {} rune fragment types.",
-			kMigrationOrbGrant, fragmentsGranted);
+			"CalamityAffixes: RecoverMiscCurrency — granted {} orbs and {} rune fragment types.",
+			kRecoveryOrbGrant, fragmentsGranted);
 		RE::DebugNotification("Calamity: recovered missing currency items.");
+
+		std::string result = "Granted ";
+		result.append(std::to_string(kRecoveryOrbGrant));
+		result.append(" orbs, ");
+		result.append(std::to_string(fragmentsGranted));
+		result.append(" fragment types.");
+		return result;
 	}
 }
