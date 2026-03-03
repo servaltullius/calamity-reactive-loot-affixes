@@ -1545,7 +1545,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_STRENGTH_POWER",
         "name": "Calamity: Runeword Strength / 룬워드 스트렝스",
-        "actorValue": "TwoHandedMod",
+        "actorValue": "TwoHandedModifier",
         "hostile": false,
         "recover": true
       },
@@ -1591,7 +1591,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_EDGE_BLADE",
         "name": "Calamity: Runeword Edge / 룬워드 엣지",
-        "actorValue": "MarksmanMod",
+        "actorValue": "MarksmanModifier",
         "hostile": false,
         "recover": true
       },
@@ -2064,7 +2064,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_UNBENDING_WILL_RESOLVE",
         "name": "Calamity: Runeword Unbending Will / 룬워드 언벤딩 윌",
-        "actorValue": "BlockMod",
+        "actorValue": "BlockModifier",
         "hostile": false,
         "recover": true
       },
@@ -2347,7 +2347,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_OATH_SWORN",
         "name": "Calamity: Runeword Oath / 룬워드 오스",
-        "actorValue": "OneHandedMod",
+        "actorValue": "OneHandedModifier",
         "hostile": false,
         "recover": true
       },
@@ -3561,7 +3561,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_MYTH_SHIELD",
         "name": "Calamity: Runeword Myth / 룬워드 미스",
-        "actorValue": "HeavyArmorMod",
+        "actorValue": "HeavyArmorModifier",
         "hostile": false,
         "recover": true
       },
@@ -4375,7 +4375,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_ENLIGHTENMENT_AURA",
         "name": "Calamity: Runeword Enlightenment / 룬워드 인라이튼먼트",
-        "actorValue": "AlterationMod",
+        "actorValue": "AlterationModifier",
         "hostile": false,
         "recover": true
       },
@@ -5017,7 +5017,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_DRAGON_SCALE",
         "name": "Calamity: Runeword Dragon / 룬워드 드래곤",
-        "actorValue": "LightArmorMod",
+        "actorValue": "LightArmorModifier",
         "hostile": false,
         "recover": true
       },
