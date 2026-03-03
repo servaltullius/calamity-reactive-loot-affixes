@@ -163,22 +163,29 @@ namespace CalamityAffixes
 		float _activeCritDamageBonusPct{ 0.0f };
 		std::unordered_map<std::string, std::size_t> _affixIndexById;
 		std::unordered_map<std::uint64_t, std::size_t> _affixIndexByToken;
+		// Trigger dispatch caches — all affixes of each trigger type (config-time).
 		std::vector<std::size_t> _hitTriggerAffixIndices;
 		std::vector<std::size_t> _incomingHitTriggerAffixIndices;
 		std::vector<std::size_t> _dotApplyTriggerAffixIndices;
 		std::vector<std::size_t> _killTriggerAffixIndices;
 		std::vector<std::size_t> _lowHealthTriggerAffixIndices;
+
+		// Active trigger caches — subset currently equipped on the player (runtime).
 		std::vector<std::size_t> _activeHitTriggerAffixIndices;
 		std::vector<std::size_t> _activeIncomingHitTriggerAffixIndices;
 		std::vector<std::size_t> _activeDotApplyTriggerAffixIndices;
 		std::vector<std::size_t> _activeKillTriggerAffixIndices;
 		std::vector<std::size_t> _activeLowHealthTriggerAffixIndices;
+
+		// Special action caches — affixes with non-standard action types.
 		std::vector<std::size_t> _castOnCritAffixIndices;
 		std::vector<std::size_t> _convertAffixIndices;
 		std::vector<std::size_t> _mindOverMatterAffixIndices;
 		std::vector<std::size_t> _archmageAffixIndices;
 		std::vector<std::size_t> _corpseExplosionAffixIndices;
 		std::vector<std::size_t> _summonCorpseExplosionAffixIndices;
+
+		// Loot pool caches — rollable affixes by item type (config-time).
 		std::vector<std::size_t> _lootWeaponAffixes;
 		std::vector<std::size_t> _lootArmorAffixes;
 		std::vector<std::size_t> _lootWeaponSuffixes;
@@ -278,6 +285,9 @@ namespace CalamityAffixes
 		}
 		std::mt19937 _rng{ MakeRngSeed() };
 		mutable std::mutex _rngMutex;
+		// Single coarse-grained lock by design: cross-domain interactions
+		// (trigger→loot, loot→serialization, etc.) make fine-grained splitting
+		// deadlock-prone without measurable contention benefit in a game mod.
 		mutable std::recursive_mutex _stateMutex;
 
 		ResyncScheduler _equipResync{ .nextAtMs = 0, .intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count()) };

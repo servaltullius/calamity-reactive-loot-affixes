@@ -14,6 +14,12 @@
 
 namespace CalamityAffixes
 {
+	namespace
+	{
+		// MCM passes boolean settings as float 1.0/0.0; threshold for truthy conversion.
+		constexpr float kMcmBoolThreshold = 0.5f;
+	}
+
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
 		const SKSE::ModCallbackEvent* a_event,
 		RE::BSTEventSource<SKSE::ModCallbackEvent>*)
@@ -39,7 +45,7 @@ namespace CalamityAffixes
 		}
 
 		if (eventName == kUiSetPanelEvent) {
-			const bool open = a_event->numArg > 0.5f;
+			const bool open = a_event->numArg > kMcmBoolThreshold;
 			PrismaTooltip::SetControlPanelOpen(open);
 			RE::DebugNotification(open ? "Calamity: Prisma panel ON" : "Calamity: Prisma panel OFF");
 			return RE::BSEventNotifyControl::kContinue;
@@ -72,14 +78,14 @@ namespace CalamityAffixes
 			};
 
 			if (eventName == kMcmSetEnabledEvent) {
-				_runtimeEnabled = (a_event->numArg > 0.5f);
+				_runtimeEnabled = (a_event->numArg > kMcmBoolThreshold);
 				queueRuntimeUserSettingsPersist();
 				RE::DebugNotification(_runtimeEnabled ? "Calamity: enabled" : "Calamity: disabled");
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
 				if (eventName == kMcmSetDebugNotificationsEvent) {
-					_loot.debugLog = (a_event->numArg > 0.5f);
+					_loot.debugLog = (a_event->numArg > kMcmBoolThreshold);
 					spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
 					spdlog::flush_on(spdlog::level::warn);
 					queueRuntimeUserSettingsPersist();
@@ -149,7 +155,7 @@ namespace CalamityAffixes
 			}
 
 			if (eventName == kMcmSetDotSafetyAutoDisableEvent) {
-				_loot.dotTagSafetyAutoDisable = (a_event->numArg > 0.5f);
+				_loot.dotTagSafetyAutoDisable = (a_event->numArg > kMcmBoolThreshold);
 				queueRuntimeUserSettingsPersist();
 				if (!_loot.dotTagSafetyAutoDisable) {
 					_dotTagSafetySuppressed = false;
@@ -167,7 +173,7 @@ namespace CalamityAffixes
 			}
 
 			if (eventName == kMcmSetAllowNonHostileFirstHitProcEvent) {
-				const bool enabled = (a_event->numArg > 0.5f);
+				const bool enabled = (a_event->numArg > kMcmBoolThreshold);
 				_allowNonHostilePlayerOwnedOutgoingProcs.store(enabled, std::memory_order_relaxed);
 				_nonHostileFirstHitGate.Clear();
 				queueRuntimeUserSettingsPersist();

@@ -242,6 +242,99 @@ namespace CalamityAffixes::Hooks
 		// this flag and skip the proc evaluation path.
 		thread_local bool g_inProcDispatch = false;
 
+		// Returns true if the proc dispatch guard allows this hit through.
+		// Updates s_procDispatch records and prunes stale entries.
+		[[nodiscard]] bool ShouldAllowProcDispatch(
+			RE::Actor* a_target,
+			RE::Actor* a_attacker,
+			const RE::HitData* a_preHitData,
+			float a_damage,
+			std::chrono::steady_clock::time_point a_now) noexcept
+		{
+			constexpr auto kTimeCooldown = std::chrono::milliseconds(250);
+
+			const auto pairKey =
+				(static_cast<std::uint64_t>(a_target->GetFormID()) << 32) |
+				static_cast<std::uint64_t>(a_attacker ? a_attacker->GetFormID() : 0u);
+
+			const std::scoped_lock lock(s_procDispatchMutex);
+			auto& record = s_procDispatch[pairKey];
+
+			const bool hasRecord = record.dispatchTime.time_since_epoch().count() != 0;
+			const auto elapsed = hasRecord ? (a_now - record.dispatchTime) : std::chrono::steady_clock::duration::max();
+
+			if (hasRecord && elapsed < kTimeCooldown) {
+				return false;
+			}
+
+			if (a_preHitData && hasRecord && elapsed < kStaleDamageElapsedMax) {
+				const float expectedDealt = std::max(0.0f,
+					a_preHitData->totalDamage - a_preHitData->resistedPhysicalDamage - a_preHitData->resistedTypedDamage);
+				const float absDmg = std::abs(a_damage);
+				if (expectedDealt >= kStaleDamageMinExpected && absDmg > 0.0f && absDmg < expectedDealt * kStaleDamageRatioThreshold) {
+					SKSE::log::trace("CalamityAffixes: stale damage guard blocked proc (expected={:.1f}, actual={:.1f}).", expectedDealt, absDmg);
+					return false;
+				}
+			}
+
+			record.dispatchTime = a_now;
+
+			if (s_procDispatch.size() > kProcDispatchMaxEntries) {
+				for (auto it = s_procDispatch.begin(); it != s_procDispatch.end();) {
+					if ((a_now - it->second.dispatchTime) >= kProcDispatchCleanupAge) {
+						it = s_procDispatch.erase(it);
+					} else {
+						++it;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		struct DamageAdjustmentResult
+		{
+			float adjustedDamage{ 0.0f };
+			float originalDamage{ 0.0f };
+			DeferredConversionCast conversion{};
+		};
+
+		// Normalizes damage sign, applies crit multiplier, evaluates Conversion/MoM.
+		[[nodiscard]] DamageAdjustmentResult AdjustDamageAndEvaluateSpecials(
+			CalamityAffixes::EventBridge* a_bridge,
+			RE::Actor* a_attacker,
+			RE::Actor* a_target,
+			const RE::HitData* a_preHitData,
+			float a_damage) noexcept
+		{
+			DamageAdjustmentResult result{};
+			result.adjustedDamage = std::abs(a_damage);
+
+			const float critMult = a_bridge->GetCritDamageMultiplier(a_attacker, a_preHitData);
+			if (std::isfinite(critMult) && critMult > 1.0f) {
+				result.adjustedDamage *= critMult;
+			}
+			if (!std::isfinite(result.adjustedDamage)) {
+				result.adjustedDamage = std::abs(a_damage);
+			}
+			result.originalDamage = result.adjustedDamage;
+
+			const auto conversion = a_bridge->EvaluateConversion(
+				a_attacker, a_target, a_preHitData, result.adjustedDamage, false);
+			const auto mindOverMatter = a_bridge->EvaluateMindOverMatter(
+				a_target, a_attacker, a_preHitData, result.adjustedDamage, false);
+			(void)mindOverMatter;
+
+			if (conversion.spell && conversion.convertedDamage > 0.0f && a_attacker && a_target) {
+				result.conversion.spellFormID = conversion.spell->GetFormID();
+				result.conversion.effectiveness = conversion.effectiveness;
+				result.conversion.noHitEffectArt = conversion.noHitEffectArt;
+				result.conversion.magnitudeOverride = conversion.convertedDamage;
+			}
+
+			return result;
+		}
+
 		void ExecutePostHealthDamageActions(
 			RE::Actor* a_target,
 			RE::Actor* a_attacker,
@@ -549,97 +642,13 @@ namespace CalamityAffixes::Hooks
 					safeTarget,
 					safeAttacker);
 
-				// Proc dispatch guard per (target, attacker) pair.
-				//
-				// Layer 1 — Time cooldown (250ms): catches ALL damage in the
-				// initial burst after a hit (explosions, projectiles, stale reuse).
-				//
-				// Layer 2 — Damage consistency check: catches stale hitData
-				// reuse AFTER the cooldown expires.  When the hitData expects
-				// significant damage but HandleHealthDamage received much less,
-				// the hitData is stale (leftover from a previous genuine hit,
-				// now attached to DoT, regen, or proc-spell leakage damage).
-				{
-					// s_procDispatch / s_procDispatchMutex live at file scope (cleared by ClearRuntimeState).
-					constexpr auto kTimeCooldown = std::chrono::milliseconds(250);
-
-					const auto pairKey =
-						(static_cast<std::uint64_t>(safeTarget->GetFormID()) << 32) |
-						static_cast<std::uint64_t>(safeAttacker ? safeAttacker->GetFormID() : 0u);
-
-					const std::scoped_lock lock(s_procDispatchMutex);
-					auto& record = s_procDispatch[pairKey];
-
-					const bool hasRecord = record.dispatchTime.time_since_epoch().count() != 0;
-					const auto elapsed = hasRecord ? (now - record.dispatchTime) : std::chrono::steady_clock::duration::max();
-
-					// Layer 1: time cooldown.
-					if (hasRecord && elapsed < kTimeCooldown) {
-						CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
-						return;
-					}
-
-					// Layer 2: damage consistency — block if HandleHealthDamage
-					// damage is far below what the hitData expects (stale reuse).
-					if (preHitData && hasRecord && elapsed < kStaleDamageElapsedMax) {
-						const float expectedDealt = std::max(0.0f,
-							preHitData->totalDamage - preHitData->resistedPhysicalDamage - preHitData->resistedTypedDamage);
-						const float absDmg = std::abs(a_damage);
-						if (expectedDealt >= kStaleDamageMinExpected && absDmg > 0.0f && absDmg < expectedDealt * kStaleDamageRatioThreshold) {
-							SKSE::log::trace("CalamityAffixes: stale damage guard blocked proc (expected={:.1f}, actual={:.1f}).", expectedDealt, absDmg);
-							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
-							return;
-						}
-					}
-
-					record.dispatchTime = now;
-
-					if (s_procDispatch.size() > kProcDispatchMaxEntries) {
-						for (auto it = s_procDispatch.begin(); it != s_procDispatch.end();) {
-							if ((now - it->second.dispatchTime) >= kProcDispatchCleanupAge) {
-								it = s_procDispatch.erase(it);
-							} else {
-								++it;
-							}
-						}
-					}
+				if (!ShouldAllowProcDispatch(safeTarget, safeAttacker, preHitData, a_damage, now)) {
+					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+					return;
 				}
 
-				// HandleHealthDamage sign convention varies: some engines pass negative
-				// for damage.  Normalize to positive for Conversion/MoM/CritBonus,
-				// then restore original sign for CallOriginal.
-				const bool damageWasNegative = (a_damage < 0.0f);
-				float adjustedDamage = std::abs(a_damage);
-				const float critMult = bridge->GetCritDamageMultiplier(
-					safeAttacker,
-					preHitData);
-				if (std::isfinite(critMult) && critMult > 1.0f) {
-					adjustedDamage *= critMult;
-				}
-				if (!std::isfinite(adjustedDamage)) {
-					adjustedDamage = std::abs(a_damage);
-				}
-				const float originalDamage = adjustedDamage;
-				const auto conversion = bridge->EvaluateConversion(
-					safeAttacker,
-					safeTarget,
-					preHitData,
-					adjustedDamage,
-					false);
-				const auto mindOverMatter = bridge->EvaluateMindOverMatter(
-					safeTarget,
-					safeAttacker,
-					preHitData,
-					adjustedDamage,
-					false);
-				(void)mindOverMatter;
-				DeferredConversionCast deferredConversion{};
-				if (conversion.spell && conversion.convertedDamage > 0.0f && safeAttacker && safeTarget) {
-					deferredConversion.spellFormID = conversion.spell->GetFormID();
-					deferredConversion.effectiveness = conversion.effectiveness;
-					deferredConversion.noHitEffectArt = conversion.noHitEffectArt;
-					deferredConversion.magnitudeOverride = conversion.convertedDamage;
-				}
+				const auto adj = AdjustDamageAndEvaluateSpecials(
+					bridge, safeAttacker, safeTarget, preHitData, a_damage);
 
 				// Snapshot the HitData before CallOriginal — for projectile hits, the engine
 				// may clear/overwrite lastHitData before the deferred SKSE task runs.
@@ -649,12 +658,16 @@ namespace CalamityAffixes::Hooks
 				}
 
 				// Restore original sign for the engine.
-				const float finalDamage = damageWasNegative ? -adjustedDamage : adjustedDamage;
+				const bool damageWasNegative = (a_damage < 0.0f);
+				const float finalDamage = damageWasNegative ? -adj.adjustedDamage : adj.adjustedDamage;
 				CallOriginal(a_original, safeTarget, safeAttacker, finalDamage, a_hookLabel);
 
 				if (auto* tasks = SKSE::GetTaskInterface()) {
 					const RE::FormID targetFormID = safeTarget->GetFormID();
 					const RE::FormID attackerFormID = safeAttacker ? safeAttacker->GetFormID() : 0u;
+					const auto deferredConversion = adj.conversion;
+					const float adjustedDamage = adj.adjustedDamage;
+					const float originalDamage = adj.originalDamage;
 					tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, originalDamage, deferredConversion, now, capturedHitData]() {
 						auto* target = RE::TESForm::LookupByID<RE::Actor>(targetFormID);
 						auto* attacker = attackerFormID != 0u ?
@@ -664,7 +677,7 @@ namespace CalamityAffixes::Hooks
 						ExecutePostHealthDamageActions(target, attacker, adjustedDamage, originalDamage, deferredConversion, now, hitDataPtr);
 					});
 				} else {
-					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adjustedDamage, originalDamage, deferredConversion, now, preHitData);
+					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adj.adjustedDamage, adj.originalDamage, adj.conversion, now, preHitData);
 				}
 			}
 

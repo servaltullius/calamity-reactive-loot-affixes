@@ -40,25 +40,13 @@ namespace CalamityAffixes
 			text = Trim(text);
 			std::string label(text);
 
-			auto replaceAll = [&](std::string_view a_from, std::string_view a_to) {
-				if (a_from.empty()) {
-					return;
-				}
-
-				std::size_t pos = 0;
-				while ((pos = label.find(a_from, pos)) != std::string::npos) {
-					label.replace(pos, a_from.size(), a_to);
-					pos += a_to.size();
-				}
-			};
-
 			// Some UI/font stacks render arrow glyphs as tofu squares.
 			// Normalize into ASCII so item labels remain readable in all menus.
-			replaceAll("→", "->");
-			replaceAll("⇒", "->");
-			replaceAll("➜", "->");
-			replaceAll("↔", "<->");
-			replaceAll("⟶", "->");
+			ConfigShared::ReplaceAll(label, "→", "->");
+			ConfigShared::ReplaceAll(label, "⇒", "->");
+			ConfigShared::ReplaceAll(label, "➜", "->");
+			ConfigShared::ReplaceAll(label, "↔", "<->");
+			ConfigShared::ReplaceAll(label, "⟶", "->");
 			return label;
 		}
 	}

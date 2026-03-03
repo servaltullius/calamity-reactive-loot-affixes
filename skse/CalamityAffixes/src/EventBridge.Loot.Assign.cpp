@@ -5,6 +5,7 @@
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/LootUiGuards.h"
+#include "EventBridge.Config.Shared.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
@@ -330,20 +331,8 @@ namespace CalamityAffixes
 	{
 		std::string out = _loot.nameFormat;
 
-		auto replaceAll = [](std::string& a_text, std::string_view a_from, std::string_view a_to) {
-			if (a_from.empty()) {
-				return;
-			}
-
-			std::size_t pos = 0;
-			while ((pos = a_text.find(a_from, pos)) != std::string::npos) {
-				a_text.replace(pos, a_from.size(), a_to);
-				pos += a_to.size();
-			}
-		};
-
-		replaceAll(out, "{base}", a_baseName);
-		replaceAll(out, "{affix}", a_affixName);
+		ConfigShared::ReplaceAll(out, "{base}", a_baseName);
+		ConfigShared::ReplaceAll(out, "{affix}", a_affixName);
 		return out;
 	}
 

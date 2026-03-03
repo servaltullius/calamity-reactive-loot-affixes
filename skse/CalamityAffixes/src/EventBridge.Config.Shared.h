@@ -48,6 +48,19 @@ namespace CalamityAffixes::ConfigShared
 		}
 	}
 
+	inline void ReplaceAll(std::string& a_text, std::string_view a_from, std::string_view a_to)
+	{
+		if (a_from.empty()) {
+			return;
+		}
+
+		std::size_t pos = 0;
+		while ((pos = a_text.find(a_from, pos)) != std::string::npos) {
+			a_text.replace(pos, a_from.size(), a_to);
+			pos += a_to.size();
+		}
+	}
+
 	inline RE::SpellItem* LookupSpellFromSpec(std::string_view a_spec, RE::TESDataHandler* a_handler)
 	{
 		const auto text = Trim(a_spec);

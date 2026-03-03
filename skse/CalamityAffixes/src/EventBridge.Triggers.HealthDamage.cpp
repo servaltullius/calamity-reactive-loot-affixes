@@ -3,7 +3,6 @@
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
-#include "CalamityAffixes/PrismaTooltip.h"
 #include "CalamityAffixes/TriggerGuards.h"
 
 #include <algorithm>

@@ -62,6 +62,31 @@
 		};
 
 		// Internal domain structs.
+		//
+		// Action — tagged union discriminated by ActionType.
+		//
+		// Field validity per ActionType (✓ = used, · = ignored):
+		//
+		//  Field group             | Notify | Cast | Adaptive | OnCrit | Convert | MoM | Archmage | Corpse | Trap |
+		// -------------------------|--------|------|----------|--------|---------|-----|----------|--------|------|
+		//  text                    |   ✓    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
+		//  spell                   |   ·    |  ✓   |    ·     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |
+		//  applyToSelf             |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
+		//  effectiveness           |   ·    |  ✓   |    ✓     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |
+		//  magnitudeOverride       |   ·    |  ✓   |    ✓     |   ✓    |    ·    |  ·  |    ·     |   ·    |  ✓   |
+		//  magnitudeScaling        |   ·    |  ✓   |    ✓     |   ✓    |    ·    |  ·  |    ·     |   ·    |  ✓   |
+		//  noHitEffectArt          |   ·    |  ✓   |    ✓     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |
+		//  adaptive{Mode,F/Fr/Sh}  |   ·    |  ·   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
+		//  element, convertPct     |   ·    |  ·   |    ·     |   ·    |    ✓    |  ·  |    ·     |   ·    |  ·   |
+		//  mindOverMatter*         |   ·    |  ·   |    ·     |   ·    |    ·    |  ✓  |    ·     |   ·    |  ·   |
+		//  archmage*               |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ✓     |   ·    |  ·   |
+		//  corpseExplosion*        |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ✓    |  ·   |
+		//  trap*                   |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ✓   |
+		//  evolution*              |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
+		//  modeCycle*              |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
+		//
+		// "Corpse" column applies to both kCorpseExplosion and kSummonCorpseExplosion.
+		//
 		struct Action
 		{
 			ActionType type{ ActionType::kDebugNotify };
