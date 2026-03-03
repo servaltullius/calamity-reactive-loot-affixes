@@ -27,16 +27,10 @@ namespace CalamityAffixes
 		}
 		panelState.hasBase = true;
 
-		// If the selected base is already a completed runeword, show status and block further crafting.
-		if (const auto* completed = ResolveCompletedRunewordRecipe(*_runewordSelectedBaseKey)) {
-			panelState.hasRecipe = true;
-			panelState.isComplete = true;
-			panelState.recipeName = completed->displayName;
-			panelState.totalRunes = static_cast<std::uint32_t>(completed->runeTokens.size());
-			panelState.insertedRunes = panelState.totalRunes;
-			panelState.canInsert = false;
-			return panelState;
-		}
+		// Re-transmutation: if the selected base already has a completed runeword,
+		// fall through to the normal recipe selection flow instead of blocking.
+		// The old runeword is removed when the first rune is inserted
+		// (InsertRunewordRuneIntoSelectedBase handles removal).
 
 		const RunewordRecipe* recipe = nullptr;
 		std::uint32_t inserted = 0u;
