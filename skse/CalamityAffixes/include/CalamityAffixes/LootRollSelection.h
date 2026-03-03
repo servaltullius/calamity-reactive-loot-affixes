@@ -30,11 +30,16 @@ namespace CalamityAffixes::detail
 
 	[[nodiscard]] constexpr LootPrefixSuffixTargets DetermineLootPrefixSuffixTargets(std::uint8_t a_targetAffixCount) noexcept
 	{
-		// Soft-disable suffix drops for new loot rolls.
-		// Keep suffix data/runtime handling for backward compatibility with existing items.
-		constexpr std::uint8_t kMaxCount = static_cast<std::uint8_t>(kMaxRegularAffixesPerItem);
-		const std::uint8_t clamped = (a_targetAffixCount > kMaxCount) ? kMaxCount : a_targetAffixCount;
-		return { clamped, 0u };
+		// Fixed-split model: max 1 prefix + max 2 suffix.
+		// 1 affix: 1P+0S (ShouldConsumeSuffixRollForSingleAffixTarget decides P-or-S 50/50).
+		// 2 affixes: 1P + 1S.
+		// 3 affixes: 1P + 2S.
+		switch (a_targetAffixCount) {
+		case 0u: return { 0u, 0u };
+		case 1u: return { 1u, 0u };
+		case 2u: return { 1u, 1u };
+		default: return { 1u, 2u };
+		}
 	}
 
 	[[nodiscard]] constexpr bool ShouldConsumeSuffixRollForSingleAffixTarget(

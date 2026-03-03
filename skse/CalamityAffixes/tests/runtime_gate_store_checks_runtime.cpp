@@ -515,19 +515,24 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
+			const auto zero = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(0u);
+			if (zero.prefixTarget != 0u || zero.suffixTarget != 0u) {
+				std::cerr << "shuffle_bag: target=0 composition should be (0/0)\n";
+				return false;
+			}
 			const auto one = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(1u);
 			if (one.prefixTarget != 1u || one.suffixTarget != 0u) {
-				std::cerr << "shuffle_bag: target=1 composition should be prefix-only (1/0)\n";
+				std::cerr << "shuffle_bag: target=1 composition should be (1/0)\n";
 				return false;
 			}
 			const auto two = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(2u);
-			if (two.prefixTarget != 2u || two.suffixTarget != 0u) {
-				std::cerr << "shuffle_bag: target=2 composition should be prefix-only (2/0)\n";
+			if (two.prefixTarget != 1u || two.suffixTarget != 1u) {
+				std::cerr << "shuffle_bag: target=2 composition should be (1P/1S)\n";
 				return false;
 			}
 			const auto three = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(3u);
-			if (three.prefixTarget != 3u || three.suffixTarget != 0u) {
-				std::cerr << "shuffle_bag: target=3 composition should be prefix-only (3/0)\n";
+			if (three.prefixTarget != 1u || three.suffixTarget != 2u) {
+				std::cerr << "shuffle_bag: target=3 composition should be (1P/2S)\n";
 				return false;
 			}
 
