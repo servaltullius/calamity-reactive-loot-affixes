@@ -35,6 +35,8 @@ namespace CalamityAffixes
 	EventBridge::SyntheticRunewordStyle EventBridge::ResolveSyntheticRunewordStyle(const RunewordRecipe& a_recipe)
 	{
 		const std::string_view id = a_recipe.id;
+
+		// ── Signatures (dedicated styles) ──
 		if (id == "rw_grief") {
 			return SyntheticRunewordStyle::kSignatureGrief;
 		}
@@ -47,6 +49,8 @@ namespace CalamityAffixes
 		if (id == "rw_call_to_arms") {
 			return SyntheticRunewordStyle::kSignatureCallToArms;
 		}
+
+		// ── Signatures (shared styles) ──
 		if (IdIsOneOf(id, { "rw_breath_of_the_dying" })) {
 			return SyntheticRunewordStyle::kAdaptiveStrike;
 		}
@@ -77,100 +81,99 @@ namespace CalamityAffixes
 		if (IdIsOneOf(id, { "rw_dream" })) {
 			return SyntheticRunewordStyle::kShockStrike;
 		}
-		if (IdIsOneOf(id, { "rw_hand_of_justice", "rw_fury", "rw_memory" })) {
-			return SyntheticRunewordStyle::kSelfHaste;
-		}
-		if (IdIsOneOf(id, { "rw_dragon", "rw_flickering_flame" })) {
-			return SyntheticRunewordStyle::kSelfFlameCloak;
-		}
-		if (IdIsOneOf(id, { "rw_ice", "rw_voice_of_reason", "rw_hearth" })) {
-			return SyntheticRunewordStyle::kSelfFrostCloak;
-		}
-		if (IdIsOneOf(id, { "rw_holy_thunder", "rw_zephyr", "rw_wind" })) {
-			return SyntheticRunewordStyle::kSelfShockCloak;
-		}
-		if (IdIsOneOf(id, { "rw_bulwark", "rw_cure", "rw_ancients_pledge", "rw_lionheart", "rw_radiance" })) {
-			return SyntheticRunewordStyle::kSelfOakflesh;
-		}
-		if (IdIsOneOf(id, { "rw_sanctuary", "rw_duress", "rw_peace", "rw_myth" })) {
+		if (IdIsOneOf(id, { "rw_sanctuary" })) {
 			return SyntheticRunewordStyle::kSelfStoneflesh;
 		}
-		if (IdIsOneOf(id, { "rw_pride", "rw_stone" })) {
-			return SyntheticRunewordStyle::kSelfIronflesh;
-		}
-		if (IdIsOneOf(id, { "rw_metamorphosis" })) {
-			return SyntheticRunewordStyle::kSelfEbonyflesh;
-		}
-		if (IdIsOneOf(id, { "rw_nadir" })) {
-			return SyntheticRunewordStyle::kCurseFear;
-		}
-		if (IdIsOneOf(id, { "rw_delirium" })) {
-			return SyntheticRunewordStyle::kCurseFrenzy;
-		}
-		if (IdIsOneOf(id, { "rw_malice", "rw_venom", "rw_plague", "rw_bramble" })) {
-			return SyntheticRunewordStyle::kPoisonBloom;
-		}
-		if (IdIsOneOf(id, { "rw_black", "rw_rift" })) {
-			return SyntheticRunewordStyle::kTarBloom;
-		}
-		if (IdIsOneOf(id, { "rw_mosaic", "rw_obsession" })) {
+		if (IdIsOneOf(id, { "rw_obsession" })) {
 			return SyntheticRunewordStyle::kSiphonBloom;
 		}
-		if (IdIsOneOf(id, { "rw_lawbringer", "rw_wrath", "rw_kingslayer", "rw_principle" })) {
-			return SyntheticRunewordStyle::kCurseFragile;
-		}
-		if (IdIsOneOf(id, { "rw_death", "rw_famine" })) {
-			return SyntheticRunewordStyle::kCurseSlowAttack;
-		}
-		if (IdIsOneOf(id, { "rw_leaf", "rw_destruction" })) {
-			return SyntheticRunewordStyle::kFireStrike;
-		}
-		if (IdIsOneOf(id, { "rw_crescent_moon" })) {
-			return SyntheticRunewordStyle::kShockStrike;
-		}
-		if (IdIsOneOf(id, { "rw_beast", "rw_hustle_w", "rw_harmony", "rw_unbending_will", "rw_passion" })) {
+		if (IdIsOneOf(id, { "rw_beast", "rw_hustle_w" })) {
 			return SyntheticRunewordStyle::kSelfHaste;
 		}
-		if (IdIsOneOf(id, { "rw_stealth", "rw_smoke", "rw_treachery" })) {
-			return SyntheticRunewordStyle::kSelfMuffle;
-		}
-		if (IdIsOneOf(id, { "rw_gloom" })) {
-			return SyntheticRunewordStyle::kSelfInvisibility;
-		}
-		if (IdIsOneOf(id, { "rw_wealth", "rw_obedience", "rw_honor", "rw_eternity" })) {
-			return SyntheticRunewordStyle::kSoulTrap;
-		}
-		if (IdIsOneOf(id, { "rw_lore", "rw_melody", "rw_enlightenment" })) {
-			return SyntheticRunewordStyle::kSelfMeditation;
-		}
-		if (IdIsOneOf(id, { "rw_steel", "rw_pattern", "rw_strength", "rw_kings_grace", "rw_edge", "rw_oath" })) {
-			return SyntheticRunewordStyle::kAdaptiveStrike;
-		}
-		if (IdIsOneOf(id, { "rw_silence", "rw_brand" })) {
-			return SyntheticRunewordStyle::kAdaptiveExposure;
-		}
-		if (IdIsOneOf(id, { "rw_hustle_a", "rw_rhyme" })) {
+		if (IdIsOneOf(id, { "rw_hustle_a" })) {
 			return SyntheticRunewordStyle::kSelfPhase;
 		}
-		if (IdIsOneOf(id, { "rw_rain", "rw_ground" })) {
-			return SyntheticRunewordStyle::kSelfPhoenix;
+		if (IdIsOneOf(id, { "rw_treachery" })) {
+			return SyntheticRunewordStyle::kSelfMuffle;
 		}
-		if (IdIsOneOf(id, { "rw_temper", "rw_prudence", "rw_bone", "rw_splendor" })) {
-			return SyntheticRunewordStyle::kSelfWard;
-		}
-		if (IdIsOneOf(id, { "rw_mist" })) {
-			return SyntheticRunewordStyle::kFrostStrike;
-		}
-		if (IdIsOneOf(id, { "rw_white" })) {
-			return SyntheticRunewordStyle::kSelfMeditation;
-		}
-		if (IdIsOneOf(id, { "rw_wisdom" })) {
-			return SyntheticRunewordStyle::kSelfPhoenix;
-		}
-		if (IdIsOneOf(id, { "rw_chaos" })) {
-			return SyntheticRunewordStyle::kAdaptiveStrike;
+		if (IdIsOneOf(id, { "rw_honor", "rw_eternity" })) {
+			return SyntheticRunewordStyle::kSoulTrap;
 		}
 
+		// ── Fire strikes ──
+		if (IdIsOneOf(id, { "rw_leaf", "rw_wrath", "rw_brand" })) {
+			return SyntheticRunewordStyle::kFireStrike;
+		}
+		// ── Frost strikes ──
+		if (IdIsOneOf(id, { "rw_voice_of_reason", "rw_mist", "rw_pride" })) {
+			return SyntheticRunewordStyle::kFrostStrike;
+		}
+		// ── Shock strikes ──
+		if (IdIsOneOf(id, { "rw_holy_thunder", "rw_crescent_moon", "rw_destruction" })) {
+			return SyntheticRunewordStyle::kShockStrike;
+		}
+		// ── Poison ──
+		if (IdIsOneOf(id, { "rw_malice", "rw_venom", "rw_plague" })) {
+			return SyntheticRunewordStyle::kPoisonBloom;
+		}
+		// ── CC: Fear/Calm ──
+		if (IdIsOneOf(id, { "rw_nadir", "rw_peace", "rw_rift" })) {
+			return SyntheticRunewordStyle::kCurseFear;
+		}
+		// ── CC: Frenzy/Paralysis ──
+		if (IdIsOneOf(id, { "rw_delirium", "rw_black" })) {
+			return SyntheticRunewordStyle::kCurseFrenzy;
+		}
+		// ── Elemental resist debuffs + magicka drain ──
+		if (IdIsOneOf(id, { "rw_ice", "rw_flickering_flame", "rw_silence" })) {
+			return SyntheticRunewordStyle::kCurseFragile;
+		}
+		// ── Speed/stamina debuffs ──
+		if (IdIsOneOf(id, { "rw_obedience", "rw_wind", "rw_famine", "rw_kingslayer" })) {
+			return SyntheticRunewordStyle::kCurseSlowAttack;
+		}
+		// ── Attack/speed buffs ──
+		if (IdIsOneOf(id, { "rw_steel", "rw_fury", "rw_hand_of_justice", "rw_passion", "rw_harmony", "rw_memory" })) {
+			return SyntheticRunewordStyle::kSelfHaste;
+		}
+		// ── Skill buffs / combat adapters ──
+		if (IdIsOneOf(id, { "rw_pattern", "rw_strength", "rw_edge", "rw_oath", "rw_zephyr", "rw_melody", "rw_unbending_will", "rw_chaos", "rw_mosaic" })) {
+			return SyntheticRunewordStyle::kAdaptiveStrike;
+		}
+		// ── Absorb ──
+		if (IdIsOneOf(id, { "rw_death" })) {
+			return SyntheticRunewordStyle::kAdaptiveExposure;
+		}
+		// ── Defensive buffs: armor, resists ──
+		if (IdIsOneOf(id, { "rw_temper", "rw_prudence", "rw_bone", "rw_splendor", "rw_bulwark", "rw_duress", "rw_stone", "rw_hearth", "rw_ground", "rw_principle", "rw_ancients_pledge", "rw_dragon", "rw_myth" })) {
+			return SyntheticRunewordStyle::kSelfWard;
+		}
+		// ── Exotic defense: reflect, ethereal ──
+		if (IdIsOneOf(id, { "rw_bramble", "rw_metamorphosis" })) {
+			return SyntheticRunewordStyle::kSelfBarrier;
+		}
+		// ── Mana/magic buffs ──
+		if (IdIsOneOf(id, { "rw_lore", "rw_enlightenment", "rw_white" })) {
+			return SyntheticRunewordStyle::kSelfMeditation;
+		}
+		// ── Health/regen ──
+		if (IdIsOneOf(id, { "rw_kings_grace", "rw_cure", "rw_rain", "rw_wisdom", "rw_lionheart" })) {
+			return SyntheticRunewordStyle::kSelfPhoenix;
+		}
+		// ── Utility ──
+		if (IdIsOneOf(id, { "rw_rhyme", "rw_wealth", "rw_radiance" })) {
+			return SyntheticRunewordStyle::kSelfPhase;
+		}
+		// ── Stealth ──
+		if (IdIsOneOf(id, { "rw_stealth", "rw_smoke", "rw_gloom" })) {
+			return SyntheticRunewordStyle::kSelfInvisibility;
+		}
+		// ── Kill: TurnUndead ──
+		if (IdIsOneOf(id, { "rw_lawbringer" })) {
+			return SyntheticRunewordStyle::kSoulTrap;
+		}
+
+		// ── Fallback by base type ──
 		if (a_recipe.recommendedBaseType) {
 			if (*a_recipe.recommendedBaseType == LootItemType::kWeapon) {
 				switch (RecipeBucket(id, 6u)) {
@@ -208,6 +211,7 @@ namespace CalamityAffixes
 
 		return RecipeBucket(id, 2u) == 0u ? SyntheticRunewordStyle::kAdaptiveExposure : SyntheticRunewordStyle::kAdaptiveStrike;
 	}
+
 
 	std::string_view EventBridge::DescribeSyntheticRunewordStyle(SyntheticRunewordStyle a_style)
 	{
