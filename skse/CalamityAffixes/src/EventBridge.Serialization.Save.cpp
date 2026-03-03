@@ -226,7 +226,8 @@ namespace CalamityAffixes
 		if (!a_intfc->OpenRecord(kSerializationRecordMigrationFlags, kMigrationFlagsVersion)) {
 			return;
 		}
-		const std::uint8_t migrationFlags = (_miscCurrencyMigrated ? 1u : 0u);
+		const std::uint8_t migrationFlags = (_miscCurrencyMigrated ? 1u : 0u)
+			| (_miscCurrencyRecovered ? 2u : 0u);
 		if (!a_intfc->WriteRecordData(migrationFlags)) {
 			return;
 		}

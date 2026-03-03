@@ -619,6 +619,7 @@ namespace CalamityAffixes
 						continue;
 					}
 					_miscCurrencyMigrated = (flags & 1u) != 0;
+					_miscCurrencyRecovered = (flags & 2u) != 0;
 					continue;
 				}
 

@@ -247,6 +247,7 @@ namespace CalamityAffixes
 		std::atomic_bool _dropDeleteDrainScheduled{ false };
 		std::map<std::pair<RE::FormID, RE::FormID>, std::int32_t> _playerContainerStash;  // {containerID, baseObj} -> count
 		bool _miscCurrencyMigrated{ false };
+		bool _miscCurrencyRecovered{ false };
 		bool _configLoaded{ false };
 		std::atomic_bool _eventSinksRegistered{ false };
 		std::atomic<std::uint32_t> _procDepth{ 0 };

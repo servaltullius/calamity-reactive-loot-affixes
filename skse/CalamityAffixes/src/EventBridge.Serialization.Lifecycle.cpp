@@ -90,6 +90,7 @@ namespace CalamityAffixes
 		_lastHealthDamageSignature = 0;
 		_lastHealthDamageSignatureAt = {};
 		_miscCurrencyMigrated = false;
+		_miscCurrencyRecovered = false;
 
 		for (auto& affix : _affixes) {
 			affix.nextAllowed = {};
@@ -283,6 +284,10 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 
+		if (_miscCurrencyRecovered) {
+			return "Already recovered this save. / 이미 복구 완료된 세이브입니다.";
+		}
+
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (!player) {
 			return "Player not available.";
@@ -316,6 +321,8 @@ namespace CalamityAffixes
 				fragmentsGranted += given;
 			}
 		}
+
+		_miscCurrencyRecovered = true;
 
 		SKSE::log::info(
 			"CalamityAffixes: RecoverMiscCurrency — granted {} orbs and {} rune fragment types.",
