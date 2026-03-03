@@ -1008,16 +1008,16 @@
     }
   },
   {
-    "id": "suffix_flame_ward_t1",
+    "id": "suffix_swordsman_t1",
     "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T1",
-    "name": "약간의 방화: 화염 저항 +5%",
-    "nameEn": "of Minor Flame Ward: Fire Resist +5%",
-    "nameKo": "약간의 방화: 화염 저항 +5%",
+    "name": "약간의 검술: 한손 무기 +5%",
+    "nameEn": "of Minor Swordsmanship: One-Handed +5%",
+    "nameKo": "약간의 검술: 한손 무기 +5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T1",
-        "name": "Calamity Suffix: Fire Resist +5% / 화염 저항 +5%",
-        "actorValue": "ResistFire",
+        "name": "Calamity Suffix: One-Handed +5% / 한손 무기 +5%",
+        "actorValue": "OneHandedModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1025,7 +1025,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T1",
-        "name": "Calamity Suffix: Fire Resist +5% / 화염 저항 +5%",
+        "name": "Calamity Suffix: One-Handed +5% / 한손 무기 +5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1045,7 +1045,7 @@
       "chance": 6
     },
     "slot": "suffix",
-    "family": "flame_ward",
+    "family": "swordsman",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1056,16 +1056,16 @@
     }
   },
   {
-    "id": "suffix_flame_ward_t2",
+    "id": "suffix_swordsman_t2",
     "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T2",
-    "name": "방화: 화염 저항 +10%",
-    "nameEn": "of Flame Ward: Fire Resist +10%",
-    "nameKo": "방화: 화염 저항 +10%",
+    "name": "검술: 한손 무기 +10%",
+    "nameEn": "of Swordsmanship: One-Handed +10%",
+    "nameKo": "검술: 한손 무기 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T2",
-        "name": "Calamity Suffix: Fire Resist +10% / 화염 저항 +10%",
-        "actorValue": "ResistFire",
+        "name": "Calamity Suffix: One-Handed +10% / 한손 무기 +10%",
+        "actorValue": "OneHandedModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1073,7 +1073,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T2",
-        "name": "Calamity Suffix: Fire Resist +10% / 화염 저항 +10%",
+        "name": "Calamity Suffix: One-Handed +10% / 한손 무기 +10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1093,7 +1093,7 @@
       "chance": 3
     },
     "slot": "suffix",
-    "family": "flame_ward",
+    "family": "swordsman",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1104,16 +1104,16 @@
     }
   },
   {
-    "id": "suffix_flame_ward_t3",
+    "id": "suffix_swordsman_t3",
     "editorId": "CAFF_KYWD_SUFFIX_FIRE_RESIST_T3",
-    "name": "위대한 방화: 화염 저항 +15%",
-    "nameEn": "of Grand Flame Ward: Fire Resist +15%",
-    "nameKo": "위대한 방화: 화염 저항 +15%",
+    "name": "위대한 검술: 한손 무기 +15%",
+    "nameEn": "of Grand Swordsmanship: One-Handed +15%",
+    "nameKo": "위대한 검술: 한손 무기 +15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_FIRE_RESIST_T3",
-        "name": "Calamity Suffix: Fire Resist +15% / 화염 저항 +15%",
-        "actorValue": "ResistFire",
+        "name": "Calamity Suffix: One-Handed +15% / 한손 무기 +15%",
+        "actorValue": "OneHandedModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1121,7 +1121,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_FIRE_RESIST_T3",
-        "name": "Calamity Suffix: Fire Resist +15% / 화염 저항 +15%",
+        "name": "Calamity Suffix: One-Handed +15% / 한손 무기 +15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1141,7 +1141,7 @@
       "chance": 1
     },
     "slot": "suffix",
-    "family": "flame_ward",
+    "family": "swordsman",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1152,16 +1152,16 @@
     }
   },
   {
-    "id": "suffix_frost_ward_t1",
+    "id": "suffix_champion_t1",
     "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T1",
-    "name": "약간의 결빙: 냉기 저항 +5%",
-    "nameEn": "of Minor Frost Ward: Frost Resist +5%",
-    "nameKo": "약간의 결빙: 냉기 저항 +5%",
+    "name": "약간의 투사: 양손 무기 +5%",
+    "nameEn": "of Minor Champion: Two-Handed +5%",
+    "nameKo": "약간의 투사: 양손 무기 +5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T1",
-        "name": "Calamity Suffix: Frost Resist +5% / 냉기 저항 +5%",
-        "actorValue": "ResistFrost",
+        "name": "Calamity Suffix: Two-Handed +5% / 양손 무기 +5%",
+        "actorValue": "TwoHandedModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1169,7 +1169,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T1",
-        "name": "Calamity Suffix: Frost Resist +5% / 냉기 저항 +5%",
+        "name": "Calamity Suffix: Two-Handed +5% / 양손 무기 +5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1189,7 +1189,7 @@
       "chance": 6
     },
     "slot": "suffix",
-    "family": "frost_ward",
+    "family": "champion",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1200,16 +1200,16 @@
     }
   },
   {
-    "id": "suffix_frost_ward_t2",
+    "id": "suffix_champion_t2",
     "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T2",
-    "name": "결빙: 냉기 저항 +10%",
-    "nameEn": "of Frost Ward: Frost Resist +10%",
-    "nameKo": "결빙: 냉기 저항 +10%",
+    "name": "투사: 양손 무기 +10%",
+    "nameEn": "of Champion: Two-Handed +10%",
+    "nameKo": "투사: 양손 무기 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T2",
-        "name": "Calamity Suffix: Frost Resist +10% / 냉기 저항 +10%",
-        "actorValue": "ResistFrost",
+        "name": "Calamity Suffix: Two-Handed +10% / 양손 무기 +10%",
+        "actorValue": "TwoHandedModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1217,7 +1217,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T2",
-        "name": "Calamity Suffix: Frost Resist +10% / 냉기 저항 +10%",
+        "name": "Calamity Suffix: Two-Handed +10% / 양손 무기 +10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1237,7 +1237,7 @@
       "chance": 3
     },
     "slot": "suffix",
-    "family": "frost_ward",
+    "family": "champion",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1248,16 +1248,16 @@
     }
   },
   {
-    "id": "suffix_frost_ward_t3",
+    "id": "suffix_champion_t3",
     "editorId": "CAFF_KYWD_SUFFIX_FROST_RESIST_T3",
-    "name": "위대한 결빙: 냉기 저항 +15%",
-    "nameEn": "of Grand Frost Ward: Frost Resist +15%",
-    "nameKo": "위대한 결빙: 냉기 저항 +15%",
+    "name": "위대한 투사: 양손 무기 +15%",
+    "nameEn": "of Grand Champion: Two-Handed +15%",
+    "nameKo": "위대한 투사: 양손 무기 +15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_FROST_RESIST_T3",
-        "name": "Calamity Suffix: Frost Resist +15% / 냉기 저항 +15%",
-        "actorValue": "ResistFrost",
+        "name": "Calamity Suffix: Two-Handed +15% / 양손 무기 +15%",
+        "actorValue": "TwoHandedModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1265,7 +1265,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_FROST_RESIST_T3",
-        "name": "Calamity Suffix: Frost Resist +15% / 냉기 저항 +15%",
+        "name": "Calamity Suffix: Two-Handed +15% / 양손 무기 +15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1285,7 +1285,7 @@
       "chance": 1
     },
     "slot": "suffix",
-    "family": "frost_ward",
+    "family": "champion",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1296,16 +1296,16 @@
     }
   },
   {
-    "id": "suffix_storm_ward_t1",
+    "id": "suffix_marksman_t1",
     "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T1",
-    "name": "약간의 방뢰: 전격 저항 +5%",
-    "nameEn": "of Minor Storm Ward: Shock Resist +5%",
-    "nameKo": "약간의 방뢰: 전격 저항 +5%",
+    "name": "약간의 명사수: 활/석궁 +5%",
+    "nameEn": "of Minor Marksman: Archery +5%",
+    "nameKo": "약간의 명사수: 활/석궁 +5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T1",
-        "name": "Calamity Suffix: Shock Resist +5% / 전격 저항 +5%",
-        "actorValue": "ResistShock",
+        "name": "Calamity Suffix: Archery +5% / 활/석궁 +5%",
+        "actorValue": "MarksmanModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1313,7 +1313,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T1",
-        "name": "Calamity Suffix: Shock Resist +5% / 전격 저항 +5%",
+        "name": "Calamity Suffix: Archery +5% / 활/석궁 +5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1333,7 +1333,7 @@
       "chance": 6
     },
     "slot": "suffix",
-    "family": "storm_ward",
+    "family": "marksman",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1344,16 +1344,16 @@
     }
   },
   {
-    "id": "suffix_storm_ward_t2",
+    "id": "suffix_marksman_t2",
     "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T2",
-    "name": "방뢰: 전격 저항 +10%",
-    "nameEn": "of Storm Ward: Shock Resist +10%",
-    "nameKo": "방뢰: 전격 저항 +10%",
+    "name": "명사수: 활/석궁 +10%",
+    "nameEn": "of Marksman: Archery +10%",
+    "nameKo": "명사수: 활/석궁 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T2",
-        "name": "Calamity Suffix: Shock Resist +10% / 전격 저항 +10%",
-        "actorValue": "ResistShock",
+        "name": "Calamity Suffix: Archery +10% / 활/석궁 +10%",
+        "actorValue": "MarksmanModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1361,7 +1361,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T2",
-        "name": "Calamity Suffix: Shock Resist +10% / 전격 저항 +10%",
+        "name": "Calamity Suffix: Archery +10% / 활/석궁 +10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1381,7 +1381,7 @@
       "chance": 3
     },
     "slot": "suffix",
-    "family": "storm_ward",
+    "family": "marksman",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1392,16 +1392,16 @@
     }
   },
   {
-    "id": "suffix_storm_ward_t3",
+    "id": "suffix_marksman_t3",
     "editorId": "CAFF_KYWD_SUFFIX_SHOCK_RESIST_T3",
-    "name": "위대한 방뢰: 전격 저항 +15%",
-    "nameEn": "of Grand Storm Ward: Shock Resist +15%",
-    "nameKo": "위대한 방뢰: 전격 저항 +15%",
+    "name": "위대한 명사수: 활/석궁 +15%",
+    "nameEn": "of Grand Marksman: Archery +15%",
+    "nameKo": "위대한 명사수: 활/석궁 +15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOCK_RESIST_T3",
-        "name": "Calamity Suffix: Shock Resist +15% / 전격 저항 +15%",
-        "actorValue": "ResistShock",
+        "name": "Calamity Suffix: Archery +15% / 활/석궁 +15%",
+        "actorValue": "MarksmanModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1409,7 +1409,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_SHOCK_RESIST_T3",
-        "name": "Calamity Suffix: Shock Resist +15% / 전격 저항 +15%",
+        "name": "Calamity Suffix: Archery +15% / 활/석궁 +15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1429,7 +1429,7 @@
       "chance": 1
     },
     "slot": "suffix",
-    "family": "storm_ward",
+    "family": "marksman",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1584,16 +1584,16 @@
     }
   },
   {
-    "id": "suffix_serpent_t1",
+    "id": "suffix_evasion_t1",
     "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T1",
-    "name": "약간의 독뱀: 독 저항 +5%",
-    "nameEn": "of Minor Serpent: Poison Resist +5%",
-    "nameKo": "약간의 독뱀: 독 저항 +5%",
+    "name": "약간의 회피: 경갑 +5%",
+    "nameEn": "of Minor Evasion: Light Armor +5%",
+    "nameKo": "약간의 회피: 경갑 +5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T1",
-        "name": "Calamity Suffix: Poison Resist +5% / 독 저항 +5%",
-        "actorValue": "PoisonResist",
+        "name": "Calamity Suffix: Light Armor +5% / 경갑 +5%",
+        "actorValue": "LightArmorModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1601,7 +1601,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T1",
-        "name": "Calamity Suffix: Poison Resist +5% / 독 저항 +5%",
+        "name": "Calamity Suffix: Light Armor +5% / 경갑 +5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1621,7 +1621,7 @@
       "chance": 6
     },
     "slot": "suffix",
-    "family": "serpent",
+    "family": "evasion",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1632,16 +1632,16 @@
     }
   },
   {
-    "id": "suffix_serpent_t2",
+    "id": "suffix_evasion_t2",
     "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T2",
-    "name": "독뱀: 독 저항 +10%",
-    "nameEn": "of the Serpent: Poison Resist +10%",
-    "nameKo": "독뱀: 독 저항 +10%",
+    "name": "회피: 경갑 +10%",
+    "nameEn": "of Evasion: Light Armor +10%",
+    "nameKo": "회피: 경갑 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T2",
-        "name": "Calamity Suffix: Poison Resist +10% / 독 저항 +10%",
-        "actorValue": "PoisonResist",
+        "name": "Calamity Suffix: Light Armor +10% / 경갑 +10%",
+        "actorValue": "LightArmorModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1649,7 +1649,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T2",
-        "name": "Calamity Suffix: Poison Resist +10% / 독 저항 +10%",
+        "name": "Calamity Suffix: Light Armor +10% / 경갑 +10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1669,7 +1669,7 @@
       "chance": 3
     },
     "slot": "suffix",
-    "family": "serpent",
+    "family": "evasion",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1680,16 +1680,16 @@
     }
   },
   {
-    "id": "suffix_serpent_t3",
+    "id": "suffix_evasion_t3",
     "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T3",
-    "name": "위대한 독뱀: 독 저항 +15%",
-    "nameEn": "of Grand Serpent: Poison Resist +15%",
-    "nameKo": "위대한 독뱀: 독 저항 +15%",
+    "name": "위대한 회피: 경갑 +15%",
+    "nameEn": "of Grand Evasion: Light Armor +15%",
+    "nameKo": "위대한 회피: 경갑 +15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T3",
-        "name": "Calamity Suffix: Poison Resist +15% / 독 저항 +15%",
-        "actorValue": "PoisonResist",
+        "name": "Calamity Suffix: Light Armor +15% / 경갑 +15%",
+        "actorValue": "LightArmorModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1697,7 +1697,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T3",
-        "name": "Calamity Suffix: Poison Resist +15% / 독 저항 +15%",
+        "name": "Calamity Suffix: Light Armor +15% / 경갑 +15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1717,7 +1717,7 @@
       "chance": 1
     },
     "slot": "suffix",
-    "family": "serpent",
+    "family": "evasion",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2163,16 +2163,16 @@
     }
   },
   {
-    "id": "suffix_destruction_t1",
+    "id": "suffix_fortitude_t1",
     "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T1",
-    "name": "약간의 파괴: 파괴 마법 위력 +5%",
-    "nameEn": "of Minor Destruction: Destruction Power +5%",
-    "nameKo": "약간의 파괴: 파괴 마법 위력 +5%",
+    "name": "약간의 견고: 중갑 +5%",
+    "nameEn": "of Minor Fortitude: Heavy Armor +5%",
+    "nameKo": "약간의 견고: 중갑 +5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T1",
-        "name": "Calamity Suffix: Destruction Power +5% / 파괴 마법 위력 +5%",
-        "actorValue": "DestructionModifier",
+        "name": "Calamity Suffix: Heavy Armor +5% / 중갑 +5%",
+        "actorValue": "HeavyArmorModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2180,7 +2180,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T1",
-        "name": "Calamity Suffix: Destruction Power +5% / 파괴 마법 위력 +5%",
+        "name": "Calamity Suffix: Heavy Armor +5% / 중갑 +5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2200,7 +2200,7 @@
       "chance": 6
     },
     "slot": "suffix",
-    "family": "destruction",
+    "family": "fortitude",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2211,16 +2211,16 @@
     }
   },
   {
-    "id": "suffix_destruction_t2",
+    "id": "suffix_fortitude_t2",
     "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T2",
-    "name": "파괴: 파괴 마법 위력 +10%",
-    "nameEn": "of Destruction: Destruction Power +10%",
-    "nameKo": "파괴: 파괴 마법 위력 +10%",
+    "name": "견고: 중갑 +10%",
+    "nameEn": "of Fortitude: Heavy Armor +10%",
+    "nameKo": "견고: 중갑 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T2",
-        "name": "Calamity Suffix: Destruction Power +10% / 파괴 마법 위력 +10%",
-        "actorValue": "DestructionModifier",
+        "name": "Calamity Suffix: Heavy Armor +10% / 중갑 +10%",
+        "actorValue": "HeavyArmorModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2228,7 +2228,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T2",
-        "name": "Calamity Suffix: Destruction Power +10% / 파괴 마법 위력 +10%",
+        "name": "Calamity Suffix: Heavy Armor +10% / 중갑 +10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2248,7 +2248,7 @@
       "chance": 3
     },
     "slot": "suffix",
-    "family": "destruction",
+    "family": "fortitude",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2259,16 +2259,16 @@
     }
   },
   {
-    "id": "suffix_destruction_t3",
+    "id": "suffix_fortitude_t3",
     "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T3",
-    "name": "위대한 파괴: 파괴 마법 위력 +15%",
-    "nameEn": "of Grand Destruction: Destruction Power +15%",
-    "nameKo": "위대한 파괴: 파괴 마법 위력 +15%",
+    "name": "위대한 견고: 중갑 +15%",
+    "nameEn": "of Grand Fortitude: Heavy Armor +15%",
+    "nameKo": "위대한 견고: 중갑 +15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T3",
-        "name": "Calamity Suffix: Destruction Power +15% / 파괴 마법 위력 +15%",
-        "actorValue": "DestructionModifier",
+        "name": "Calamity Suffix: Heavy Armor +15% / 중갑 +15%",
+        "actorValue": "HeavyArmorModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2276,7 +2276,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T3",
-        "name": "Calamity Suffix: Destruction Power +15% / 파괴 마법 위력 +15%",
+        "name": "Calamity Suffix: Heavy Armor +15% / 중갑 +15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2296,7 +2296,7 @@
       "chance": 1
     },
     "slot": "suffix",
-    "family": "destruction",
+    "family": "fortitude",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2451,16 +2451,16 @@
     }
   },
   {
-    "id": "suffix_alteration_t1",
+    "id": "suffix_bulwark_t1",
     "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T1",
-    "name": "약간의 변이: 변이 마법 위력 +5%",
-    "nameEn": "of Minor Alteration: Alteration Power +5%",
-    "nameKo": "약간의 변이: 변이 마법 위력 +5%",
+    "name": "약간의 방벽: 방어 +5%",
+    "nameEn": "of Minor Bulwark: Block +5%",
+    "nameKo": "약간의 방벽: 방어 +5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T1",
-        "name": "Calamity Suffix: Alteration Power +5% / 변이 마법 위력 +5%",
-        "actorValue": "AlterationModifier",
+        "name": "Calamity Suffix: Block +5% / 방어 +5%",
+        "actorValue": "BlockModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2468,7 +2468,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T1",
-        "name": "Calamity Suffix: Alteration Power +5% / 변이 마법 위력 +5%",
+        "name": "Calamity Suffix: Block +5% / 방어 +5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2488,7 +2488,7 @@
       "chance": 6
     },
     "slot": "suffix",
-    "family": "alteration",
+    "family": "bulwark",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2499,16 +2499,16 @@
     }
   },
   {
-    "id": "suffix_alteration_t2",
+    "id": "suffix_bulwark_t2",
     "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T2",
-    "name": "변이: 변이 마법 위력 +10%",
-    "nameEn": "of Alteration: Alteration Power +10%",
-    "nameKo": "변이: 변이 마법 위력 +10%",
+    "name": "방벽: 방어 +10%",
+    "nameEn": "of Bulwark: Block +10%",
+    "nameKo": "방벽: 방어 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T2",
-        "name": "Calamity Suffix: Alteration Power +10% / 변이 마법 위력 +10%",
-        "actorValue": "AlterationModifier",
+        "name": "Calamity Suffix: Block +10% / 방어 +10%",
+        "actorValue": "BlockModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2516,7 +2516,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T2",
-        "name": "Calamity Suffix: Alteration Power +10% / 변이 마법 위력 +10%",
+        "name": "Calamity Suffix: Block +10% / 방어 +10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2536,7 +2536,7 @@
       "chance": 3
     },
     "slot": "suffix",
-    "family": "alteration",
+    "family": "bulwark",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2547,16 +2547,16 @@
     }
   },
   {
-    "id": "suffix_alteration_t3",
+    "id": "suffix_bulwark_t3",
     "editorId": "CAFF_KYWD_SUFFIX_CARRY_WEIGHT_T3",
-    "name": "위대한 변이: 변이 마법 위력 +15%",
-    "nameEn": "of Grand Alteration: Alteration Power +15%",
-    "nameKo": "위대한 변이: 변이 마법 위력 +15%",
+    "name": "위대한 방벽: 방어 +15%",
+    "nameEn": "of Grand Bulwark: Block +15%",
+    "nameKo": "위대한 방벽: 방어 +15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CARRY_WEIGHT_T3",
-        "name": "Calamity Suffix: Alteration Power +15% / 변이 마법 위력 +15%",
-        "actorValue": "AlterationModifier",
+        "name": "Calamity Suffix: Block +15% / 방어 +15%",
+        "actorValue": "BlockModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2564,7 +2564,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_CARRY_WEIGHT_T3",
-        "name": "Calamity Suffix: Alteration Power +15% / 변이 마법 위력 +15%",
+        "name": "Calamity Suffix: Block +15% / 방어 +15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2584,7 +2584,7 @@
       "chance": 1
     },
     "slot": "suffix",
-    "family": "alteration",
+    "family": "bulwark",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2595,16 +2595,16 @@
     }
   },
   {
-    "id": "suffix_dovahkiin_t1",
+    "id": "suffix_eagle_eye_t1",
     "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T1",
-    "name": "약간의 도바킨: 쇼우트 회복 +5%",
-    "nameEn": "of Minor Dovahkiin: Shout Recovery +5%",
-    "nameKo": "약간의 도바킨: 쇼우트 회복 +5%",
+    "name": "약간의 독수리눈: 활 속도 +5%",
+    "nameEn": "of Minor Eagle Eye: Bow Speed +5%",
+    "nameKo": "약간의 독수리눈: 활 속도 +5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T1",
-        "name": "Calamity Suffix: Shout Recovery +5% / 쇼우트 회복 +5%",
-        "actorValue": "ShoutRecoveryMult",
+        "name": "Calamity Suffix: Bow Speed +5% / 활 속도 +5%",
+        "actorValue": "BowSpeedBonus",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2612,7 +2612,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T1",
-        "name": "Calamity Suffix: Shout Recovery +5% / 쇼우트 회복 +5%",
+        "name": "Calamity Suffix: Bow Speed +5% / 활 속도 +5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2632,7 +2632,7 @@
       "chance": 6
     },
     "slot": "suffix",
-    "family": "dovahkiin",
+    "family": "eagle_eye",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2643,16 +2643,16 @@
     }
   },
   {
-    "id": "suffix_dovahkiin_t2",
+    "id": "suffix_eagle_eye_t2",
     "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T2",
-    "name": "도바킨: 쇼우트 회복 +10%",
-    "nameEn": "of the Dovahkiin: Shout Recovery +10%",
-    "nameKo": "도바킨: 쇼우트 회복 +10%",
+    "name": "독수리눈: 활 속도 +10%",
+    "nameEn": "of Eagle Eye: Bow Speed +10%",
+    "nameKo": "독수리눈: 활 속도 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T2",
-        "name": "Calamity Suffix: Shout Recovery +10% / 쇼우트 회복 +10%",
-        "actorValue": "ShoutRecoveryMult",
+        "name": "Calamity Suffix: Bow Speed +10% / 활 속도 +10%",
+        "actorValue": "BowSpeedBonus",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2660,7 +2660,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T2",
-        "name": "Calamity Suffix: Shout Recovery +10% / 쇼우트 회복 +10%",
+        "name": "Calamity Suffix: Bow Speed +10% / 활 속도 +10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2680,7 +2680,7 @@
       "chance": 3
     },
     "slot": "suffix",
-    "family": "dovahkiin",
+    "family": "eagle_eye",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2691,16 +2691,16 @@
     }
   },
   {
-    "id": "suffix_dovahkiin_t3",
+    "id": "suffix_eagle_eye_t3",
     "editorId": "CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T3",
-    "name": "위대한 도바킨: 쇼우트 회복 +15%",
-    "nameEn": "of Grand Dovahkiin: Shout Recovery +15%",
-    "nameKo": "위대한 도바킨: 쇼우트 회복 +15%",
+    "name": "위대한 독수리눈: 활 속도 +15%",
+    "nameEn": "of Grand Eagle Eye: Bow Speed +15%",
+    "nameKo": "위대한 독수리눈: 활 속도 +15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3",
-        "name": "Calamity Suffix: Shout Recovery +15% / 쇼우트 회복 +15%",
-        "actorValue": "ShoutRecoveryMult",
+        "name": "Calamity Suffix: Bow Speed +15% / 활 속도 +15%",
+        "actorValue": "BowSpeedBonus",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2708,7 +2708,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T3",
-        "name": "Calamity Suffix: Shout Recovery +15% / 쇼우트 회복 +15%",
+        "name": "Calamity Suffix: Bow Speed +15% / 활 속도 +15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2728,7 +2728,7 @@
       "chance": 1
     },
     "slot": "suffix",
-    "family": "dovahkiin",
+    "family": "eagle_eye",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2739,16 +2739,16 @@
     }
   },
   {
-    "id": "suffix_conjuration_t1",
+    "id": "suffix_steed_t1",
     "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T1",
-    "name": "약간의 소환: 소환 마법 위력 +5%",
-    "nameEn": "of Minor Conjuration: Conjuration Power +5%",
-    "nameKo": "약간의 소환: 소환 마법 위력 +5%",
+    "name": "약간의 준마: 소지 무게 +15",
+    "nameEn": "of Minor Steed: Carry Weight +15",
+    "nameKo": "약간의 준마: 소지 무게 +15",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T1",
-        "name": "Calamity Suffix: Conjuration Power +5% / 소환 마법 위력 +5%",
-        "actorValue": "ConjurationModifier",
+        "name": "Calamity Suffix: Carry Weight +15 / 소지 무게 +15",
+        "actorValue": "CarryWeight",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2756,13 +2756,13 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T1",
-        "name": "Calamity Suffix: Conjuration Power +5% / 소환 마법 위력 +5%",
+        "name": "Calamity Suffix: Carry Weight +15 / 소지 무게 +15",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T1",
-          "magnitude": 5,
+          "magnitude": 15,
           "duration": 0,
           "area": 0
         }
@@ -2776,7 +2776,7 @@
       "chance": 6
     },
     "slot": "suffix",
-    "family": "conjuration",
+    "family": "steed",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2787,16 +2787,16 @@
     }
   },
   {
-    "id": "suffix_conjuration_t2",
+    "id": "suffix_steed_t2",
     "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T2",
-    "name": "소환: 소환 마법 위력 +10%",
-    "nameEn": "of Conjuration: Conjuration Power +10%",
-    "nameKo": "소환: 소환 마법 위력 +10%",
+    "name": "준마: 소지 무게 +30",
+    "nameEn": "of Steed: Carry Weight +30",
+    "nameKo": "준마: 소지 무게 +30",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T2",
-        "name": "Calamity Suffix: Conjuration Power +10% / 소환 마법 위력 +10%",
-        "actorValue": "ConjurationModifier",
+        "name": "Calamity Suffix: Carry Weight +30 / 소지 무게 +30",
+        "actorValue": "CarryWeight",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2804,13 +2804,13 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T2",
-        "name": "Calamity Suffix: Conjuration Power +10% / 소환 마법 위력 +10%",
+        "name": "Calamity Suffix: Carry Weight +30 / 소지 무게 +30",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T2",
-          "magnitude": 10,
+          "magnitude": 30,
           "duration": 0,
           "area": 0
         }
@@ -2824,7 +2824,7 @@
       "chance": 3
     },
     "slot": "suffix",
-    "family": "conjuration",
+    "family": "steed",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2835,16 +2835,16 @@
     }
   },
   {
-    "id": "suffix_conjuration_t3",
+    "id": "suffix_steed_t3",
     "editorId": "CAFF_KYWD_SUFFIX_EXPERIENCE_GAIN_T3",
-    "name": "위대한 소환: 소환 마법 위력 +15%",
-    "nameEn": "of Grand Conjuration: Conjuration Power +15%",
-    "nameKo": "위대한 소환: 소환 마법 위력 +15%",
+    "name": "위대한 준마: 소지 무게 +50",
+    "nameEn": "of Grand Steed: Carry Weight +50",
+    "nameKo": "위대한 준마: 소지 무게 +50",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T3",
-        "name": "Calamity Suffix: Conjuration Power +15% / 소환 마법 위력 +15%",
-        "actorValue": "ConjurationModifier",
+        "name": "Calamity Suffix: Carry Weight +50 / 소지 무게 +50",
+        "actorValue": "CarryWeight",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2852,13 +2852,13 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T3",
-        "name": "Calamity Suffix: Conjuration Power +15% / 소환 마법 위력 +15%",
+        "name": "Calamity Suffix: Carry Weight +50 / 소지 무게 +50",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_EXPERIENCE_GAIN_T3",
-          "magnitude": 15,
+          "magnitude": 50,
           "duration": 0,
           "area": 0
         }
@@ -2872,7 +2872,7 @@
       "chance": 1
     },
     "slot": "suffix",
-    "family": "conjuration",
+    "family": "steed",
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
