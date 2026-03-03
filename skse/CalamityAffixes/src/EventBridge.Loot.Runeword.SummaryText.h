@@ -77,9 +77,9 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_phoenix", "kill_restore" },
 		{ "rw_doom", "aura_slow" },
 		{ "rw_dragon", "self_flame_cloak" },
-		{ "rw_hand_of_justice", "lifesteal" },
+		{ "rw_hand_of_justice", "self_judgment" },
 		{ "rw_flickering_flame", "aura_fire_shred" },
-		{ "rw_temper", "self_flame_cloak" },
+		{ "rw_temper", "self_tempered_strike" },
 		{ "rw_ice", "aura_frost_shred" },
 		{ "rw_voice_of_reason", "self_frost_cloak" },
 		{ "rw_hearth", "self_frost_cloak" },
@@ -95,15 +95,15 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_duress", "self_stoneflesh" },
 		{ "rw_peace", "self_stoneflesh" },
 		{ "rw_myth", "self_stoneflesh" },
-		{ "rw_bone", "signature_bone" },
+		{ "rw_bone", "self_frost_ward" },
 		{ "rw_pride", "self_ironflesh" },
 		{ "rw_stone", "self_ironflesh" },
-		{ "rw_prudence", "self_ironflesh" },
-		{ "rw_mist", "self_ironflesh" },
+		{ "rw_prudence", "self_shock_ward" },
+		{ "rw_mist", "debuff_frostbite" },
 		{ "rw_metamorphosis", "self_ebonyflesh" },
 		{ "rw_nadir", "signature_nadir" },
 		{ "rw_delirium", "aura_confuse" },
-		{ "rw_chaos", "bleed_dot" },
+		{ "rw_chaos", "adaptive_strike" },
 		{ "rw_malice", "signature_malice" },
 		{ "rw_venom", "poison_dot" },
 		{ "rw_plague", "kill_poison_cloud" },
@@ -112,7 +112,7 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_rift", "tar_bloom" },
 		{ "rw_mosaic", "siphon_bloom" },
 		{ "rw_obsession", "siphon_bloom" },
-		{ "rw_white", "siphon_bloom" },
+		{ "rw_white", "self_mana_surge" },
 		{ "rw_lawbringer", "kill_soul_harvest" },
 		{ "rw_wrath", "curse_fragile" },
 		{ "rw_kingslayer", "bleed_dot" },
@@ -125,7 +125,7 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_beast", "long_cd_beast_rage" },
 		{ "rw_hustle_w", "self_haste" },
 		{ "rw_harmony", "self_haste" },
-		{ "rw_fury", "lifesteal" },
+		{ "rw_fury", "self_weapon_fury" },
 		{ "rw_unbending_will", "self_haste" },
 		{ "rw_passion", "self_haste" },
 		{ "rw_stealth", "signature_stealth" },
@@ -136,8 +136,8 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_obedience", "knockback_crush" },
 		{ "rw_honor", "soul_trap" },
 		{ "rw_eternity", "long_cd_bulwark" },
-		{ "rw_memory", "self_meditation" },
-		{ "rw_wisdom", "self_meditation" },
+		{ "rw_memory", "self_stamina_recall" },
+		{ "rw_wisdom", "self_healing_wisdom" },
 		{ "rw_lore", "self_meditation" },
 		{ "rw_melody", "self_meditation" },
 		{ "rw_enlightenment", "self_meditation" },
@@ -149,7 +149,7 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_silence", "adaptive_exposure" },
 		{ "rw_brand", "adaptive_exposure" },
 		{ "rw_hustle_a", "self_phase" },
-		{ "rw_splendor", "self_phase" },
+		{ "rw_splendor", "self_magic_shield" },
 		{ "rw_rhyme", "self_phase" },
 		{ "rw_rain", "self_phoenix" },
 		{ "rw_ground", "self_phoenix" },
@@ -286,6 +286,17 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "aura_frost_shred") return "타격마다 냉기 저항을 깎아 후속 동결 극대화";
 		if (a_key == "knockback_push") return "강한 타격으로 적을 밀어내 거리 확보";
 		if (a_key == "knockback_crush") return "묵직한 일격으로 적을 짓눌러 비틀거리게 함";
+		// Batch 4: diversified runeword effect keys.
+		if (a_key == "self_judgment") return "심판의 기세를 실어 공격력을 대폭 끌어올림";
+		if (a_key == "self_tempered_strike") return "피격의 열기를 공격력으로 전환해 반격 강화";
+		if (a_key == "self_shock_ward") return "전기 보호막으로 전격 피해를 크게 경감";
+		if (a_key == "debuff_frostbite") return "서리 파편이 적의 움직임을 무겁게 둔화";
+		if (a_key == "self_frost_ward") return "냉기 보호막으로 동결 피해를 차단";
+		if (a_key == "self_weapon_fury") return "격노의 흐름으로 무기 공격 속도 상승";
+		if (a_key == "self_stamina_recall") return "전투 기억을 되살려 스태미나 회복 가속";
+		if (a_key == "self_healing_wisdom") return "지혜의 파동으로 상처를 서서히 치유";
+		if (a_key == "self_magic_shield") return "마력 방패로 마법 저항 전반을 강화";
+		if (a_key == "self_mana_surge") return "마나 쇄도로 마력 총량을 일시 증폭";
 		return {};
 	}
 }

@@ -77,10 +77,10 @@ namespace CalamityAffixes
 		if (IdIsOneOf(id, { "rw_dream" })) {
 			return SyntheticRunewordStyle::kShockStrike;
 		}
-		if (IdIsOneOf(id, { "rw_bone" })) {
-			return SyntheticRunewordStyle::kSummonFamiliar;
+		if (IdIsOneOf(id, { "rw_hand_of_justice", "rw_fury", "rw_memory" })) {
+			return SyntheticRunewordStyle::kSelfHaste;
 		}
-		if (IdIsOneOf(id, { "rw_dragon", "rw_hand_of_justice", "rw_flickering_flame", "rw_temper" })) {
+		if (IdIsOneOf(id, { "rw_dragon", "rw_flickering_flame" })) {
 			return SyntheticRunewordStyle::kSelfFlameCloak;
 		}
 		if (IdIsOneOf(id, { "rw_ice", "rw_voice_of_reason", "rw_hearth" })) {
@@ -95,7 +95,7 @@ namespace CalamityAffixes
 		if (IdIsOneOf(id, { "rw_sanctuary", "rw_duress", "rw_peace", "rw_myth" })) {
 			return SyntheticRunewordStyle::kSelfStoneflesh;
 		}
-		if (IdIsOneOf(id, { "rw_pride", "rw_stone", "rw_prudence", "rw_mist" })) {
+		if (IdIsOneOf(id, { "rw_pride", "rw_stone" })) {
 			return SyntheticRunewordStyle::kSelfIronflesh;
 		}
 		if (IdIsOneOf(id, { "rw_metamorphosis" })) {
@@ -104,7 +104,7 @@ namespace CalamityAffixes
 		if (IdIsOneOf(id, { "rw_nadir" })) {
 			return SyntheticRunewordStyle::kCurseFear;
 		}
-		if (IdIsOneOf(id, { "rw_delirium", "rw_chaos" })) {
+		if (IdIsOneOf(id, { "rw_delirium" })) {
 			return SyntheticRunewordStyle::kCurseFrenzy;
 		}
 		if (IdIsOneOf(id, { "rw_malice", "rw_venom", "rw_plague", "rw_bramble" })) {
@@ -113,7 +113,7 @@ namespace CalamityAffixes
 		if (IdIsOneOf(id, { "rw_black", "rw_rift" })) {
 			return SyntheticRunewordStyle::kTarBloom;
 		}
-		if (IdIsOneOf(id, { "rw_mosaic", "rw_obsession", "rw_white" })) {
+		if (IdIsOneOf(id, { "rw_mosaic", "rw_obsession" })) {
 			return SyntheticRunewordStyle::kSiphonBloom;
 		}
 		if (IdIsOneOf(id, { "rw_lawbringer", "rw_wrath", "rw_kingslayer", "rw_principle" })) {
@@ -128,7 +128,7 @@ namespace CalamityAffixes
 		if (IdIsOneOf(id, { "rw_crescent_moon" })) {
 			return SyntheticRunewordStyle::kShockStrike;
 		}
-		if (IdIsOneOf(id, { "rw_beast", "rw_hustle_w", "rw_harmony", "rw_fury", "rw_unbending_will", "rw_passion" })) {
+		if (IdIsOneOf(id, { "rw_beast", "rw_hustle_w", "rw_harmony", "rw_unbending_will", "rw_passion" })) {
 			return SyntheticRunewordStyle::kSelfHaste;
 		}
 		if (IdIsOneOf(id, { "rw_stealth", "rw_smoke", "rw_treachery" })) {
@@ -140,7 +140,7 @@ namespace CalamityAffixes
 		if (IdIsOneOf(id, { "rw_wealth", "rw_obedience", "rw_honor", "rw_eternity" })) {
 			return SyntheticRunewordStyle::kSoulTrap;
 		}
-		if (IdIsOneOf(id, { "rw_memory", "rw_wisdom", "rw_lore", "rw_melody", "rw_enlightenment" })) {
+		if (IdIsOneOf(id, { "rw_lore", "rw_melody", "rw_enlightenment" })) {
 			return SyntheticRunewordStyle::kSelfMeditation;
 		}
 		if (IdIsOneOf(id, { "rw_steel", "rw_pattern", "rw_strength", "rw_kings_grace", "rw_edge", "rw_oath" })) {
@@ -149,11 +149,26 @@ namespace CalamityAffixes
 		if (IdIsOneOf(id, { "rw_silence", "rw_brand" })) {
 			return SyntheticRunewordStyle::kAdaptiveExposure;
 		}
-		if (IdIsOneOf(id, { "rw_hustle_a", "rw_splendor", "rw_rhyme" })) {
+		if (IdIsOneOf(id, { "rw_hustle_a", "rw_rhyme" })) {
 			return SyntheticRunewordStyle::kSelfPhase;
 		}
 		if (IdIsOneOf(id, { "rw_rain", "rw_ground" })) {
 			return SyntheticRunewordStyle::kSelfPhoenix;
+		}
+		if (IdIsOneOf(id, { "rw_temper", "rw_prudence", "rw_bone", "rw_splendor" })) {
+			return SyntheticRunewordStyle::kSelfWard;
+		}
+		if (IdIsOneOf(id, { "rw_mist" })) {
+			return SyntheticRunewordStyle::kFrostStrike;
+		}
+		if (IdIsOneOf(id, { "rw_white" })) {
+			return SyntheticRunewordStyle::kSelfMeditation;
+		}
+		if (IdIsOneOf(id, { "rw_wisdom" })) {
+			return SyntheticRunewordStyle::kSelfPhoenix;
+		}
+		if (IdIsOneOf(id, { "rw_chaos" })) {
+			return SyntheticRunewordStyle::kAdaptiveStrike;
 		}
 
 		if (a_recipe.recommendedBaseType) {

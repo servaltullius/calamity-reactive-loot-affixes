@@ -47,14 +47,8 @@ namespace CalamityAffixes::detail
 		if (a_recipeId == "rw_bramble") {
 			return MakeCastSpell(RunewordIdentitySpellRole::kDotTar);
 		}
-		if (a_recipeId == "rw_mist") {
-			return MakeCastSpell(RunewordIdentitySpellRole::kDynamicFrost);
-		}
 		if (a_recipeId == "rw_pride") {
 			return MakeCastSpell(RunewordIdentitySpellRole::kWard, true);
-		}
-		if (a_recipeId == "rw_fury") {
-			return MakeCastSpell(RunewordIdentitySpellRole::kArcLightning);
 		}
 		if (a_recipeId == "rw_obedience") {
 			return MakeCastSpell(RunewordIdentitySpellRole::kChaosSunder);
@@ -71,20 +65,21 @@ namespace CalamityAffixes::detail
 		if (a_recipeId == "rw_wealth") {
 			return MakeCastSpell(RunewordIdentitySpellRole::kPhase, true);
 		}
-		if (a_recipeId == "rw_memory") {
-			return MakeCastSpell(RunewordIdentitySpellRole::kWard, true);
-		}
 		if (a_recipeId == "rw_melody") {
 			return MakeCastSpell(RunewordIdentitySpellRole::kHaste, true);
-		}
-		if (a_recipeId == "rw_wisdom") {
-			return MakeCastSpell(RunewordIdentitySpellRole::kPhase, true);
 		}
 		if (a_recipeId == "rw_lore") {
 			return MakeCastSpell(RunewordIdentitySpellRole::kWard, true);
 		}
 		if (a_recipeId == "rw_enlightenment") {
 			return MakeCastSpell(RunewordIdentitySpellRole::kMeditation, true);
+		}
+		if (a_recipeId == "rw_chaos") {
+			RunewordIdentityOverride out{};
+			out.actionKind = RunewordIdentityActionKind::kCastSpellAdaptiveElement;
+			out.adaptiveMode = AdaptiveElementMode::kWeakestResist;
+			out.noHitEffectArt = true;
+			return out;
 		}
 
 		return std::nullopt;
