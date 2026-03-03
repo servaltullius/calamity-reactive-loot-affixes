@@ -234,6 +234,19 @@ if (BUILD_TESTING)
         )
     endif()
 
+    # Runtime distribution test for affix count rolling and reforge rules.
+    add_executable(test_loot_roll_distribution EXCLUDE_FROM_ALL tests/test_loot_roll_distribution.cpp)
+    target_include_directories(test_loot_roll_distribution PRIVATE include)
+    calamity_add_xwin_libpaths(test_loot_roll_distribution)
+
+    add_test(
+        NAME ${PROJECT_NAME}LootRollDistribution
+        COMMAND ${CMAKE_COMMAND}
+            --build ${CMAKE_BINARY_DIR}
+            --target test_loot_roll_distribution
+            --config $<CONFIG>
+    )
+
     # Micro-benchmark (manual-run only, not registered with ctest).
     add_executable(bench_core_ops EXCLUDE_FROM_ALL tests/bench_core_ops.cpp)
     target_include_directories(bench_core_ops PRIVATE include)

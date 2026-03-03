@@ -165,7 +165,8 @@ namespace CalamityAffixes
 		InstanceAffixSlots newSlots{};
 		static constexpr std::uint8_t kReforgeMaxAttempts = 4;
 		for (std::uint8_t attempt = 0; attempt < kReforgeMaxAttempts; ++attempt) {
-			const std::uint8_t targetCount = detail::ResolveReforgeTargetAffixCount(previousRegularSlots.count);
+			// Re-roll affix count fresh (same 70/22/8% distribution as new loot drops).
+			const std::uint8_t targetCount = std::max<std::uint8_t>(1u, RollAffixCount());
 			InstanceAffixSlots rolled = rollRegularAffixSlots(targetCount);
 
 			if (rolled.count == 0) {
