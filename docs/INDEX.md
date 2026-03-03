@@ -7,6 +7,7 @@
 | `NEXUS_DESCRIPTION.md` | Nexus Mods 배포 페이지 설명 (한국어/영어) |
 | `NEXUS_DESCRIPTION_BBCODE.txt` | Nexus Mods BBCode 포맷 설명 |
 | `스카이림 바닐라 효과 ARPG 변환 아이디어.md` | 바닐라 효과 → ARPG 어픽스 변환 기획 노트 |
+| `SUFFIX_EFFECTS.md` | 서픽스 20패밀리 60개 효과 목록 (자동 생성) |
 
 ## adr/ — Architecture Decision Records
 
