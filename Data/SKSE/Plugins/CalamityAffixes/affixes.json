@@ -5744,9 +5744,9 @@
       {
         "id": "runeword_rift_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RIFT",
-        "name": "룬워드 리프트 (Hel-Ko-Lem-Gul): 적중 20% / ICD 8초 - 마법 저항 분쇄(적 마저 -30, 6초)",
-        "nameEn": "Runeword Rift (Hel-Ko-Lem-Gul): 20% on hit / ICD 8s - Magic Shred (Magic Resist -30, 6s)",
-        "nameKo": "룬워드 리프트 (Hel-Ko-Lem-Gul): 적중 20% / ICD 8초 - 마법 저항 분쇄(적 마저 -30, 6초)",
+        "name": "룬워드 리프트 (Hel-Ko-Lem-Gul): 적중 20% / ICD 18초 - 마법 저항 분쇄(적 마저 -30, 6초)",
+        "nameEn": "Runeword Rift (Hel-Ko-Lem-Gul): 20% on hit / ICD 18s - Magic Shred (Magic Resist -30, 6s)",
+        "nameKo": "룬워드 리프트 (Hel-Ko-Lem-Gul): 적중 20% / ICD 18초 - 마법 저항 분쇄(적 마저 -30, 6초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_RIFT_SPARK",
@@ -5984,9 +5984,9 @@
       {
         "id": "runeword_wind_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WIND",
-        "name": "룬워드 바람 (Sur-El): 적중 20% / ICD 5초 - 질풍 압박(적 공속 -20%, 5초)",
-        "nameEn": "Runeword Wind (Sur-El): 20% on hit / ICD 5s - Gale Pressure (Weapon Speed -20%, 5s)",
-        "nameKo": "룬워드 바람 (Sur-El): 적중 20% / ICD 5초 - 질풍 압박(적 공속 -20%, 5초)",
+        "name": "룬워드 바람 (Sur-El): 적중 20% / ICD 4초 - 질풍 압박(적 공속 -20%, 5초)",
+        "nameEn": "Runeword Wind (Sur-El): 20% on hit / ICD 4s - Gale Pressure (Weapon Speed -20%, 5s)",
+        "nameKo": "룬워드 바람 (Sur-El): 적중 20% / ICD 4초 - 질풍 압박(적 공속 -20%, 5초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WIND_PUSH",
@@ -6403,9 +6403,9 @@
       {
         "id": "runeword_ice_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ICE",
-        "name": "룬워드 얼음 (Amn-Shael-Jah-Lo): 적중 100% / ICD 0초 - 동결 파편(적 냉기저항 -30, 6초)",
-        "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0s - Frost Shards (Target Frost Resist -30, 6s)",
-        "nameKo": "룬워드 얼음 (Amn-Shael-Jah-Lo): 적중 100% / ICD 0초 - 동결 파편(적 냉기저항 -30, 6초)",
+        "name": "룬워드 얼음 (Amn-Shael-Jah-Lo): 적중 100% / ICD 0.5초 - 동결 파편(적 냉기저항 -30, 6초)",
+        "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0.5s - Frost Shards (Target Frost Resist -30, 6s)",
+        "nameKo": "룬워드 얼음 (Amn-Shael-Jah-Lo): 적중 100% / ICD 0.5초 - 동결 파편(적 냉기저항 -30, 6초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ICE_FROST_SHRED",
@@ -7716,9 +7716,9 @@
       {
         "id": "runeword_wisdom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WISDOM",
-        "name": "룬워드 위즈덤 (Pul-Ith-Eld): 피격 20% / ICD 10초 - 지혜의 깊이(마력 재생 +5, 7초)",
-        "nameEn": "Runeword Wisdom (Pul-Ith-Eld): 20% on hit taken / ICD 10s - Wisdom Depth (Magicka Regen +5, 7s)",
-        "nameKo": "룬워드 위즈덤 (Pul-Ith-Eld): 피격 20% / ICD 10초 - 지혜의 깊이(마력 재생 +5, 7초)",
+        "name": "룬워드 위즈덤 (Pul-Ith-Eld): 피격 20% / ICD 11초 - 지혜의 깊이(마력 재생 +5, 7초)",
+        "nameEn": "Runeword Wisdom (Pul-Ith-Eld): 20% on hit taken / ICD 11s - Wisdom Depth (Magicka Regen +5, 7s)",
+        "nameKo": "룬워드 위즈덤 (Pul-Ith-Eld): 피격 20% / ICD 11초 - 지혜의 깊이(마력 재생 +5, 7초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WISDOM_INSIGHT",
@@ -8212,9 +8212,9 @@
       {
         "id": "runeword_flickering_flame_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FLICKERING_FLAME",
-        "name": "룬워드 깜박이는 (Nef-Pul-Vex): 적중 100% / ICD 0초 - 화염 침식(적 화염저항 -25, 6초)",
-        "nameEn": "Runeword Flickering (Nef-Pul-Vex): 100% on hit / ICD 0s - Flame Erosion (Target Fire Resist -25, 6s)",
-        "nameKo": "룬워드 깜박이는 (Nef-Pul-Vex): 적중 100% / ICD 0초 - 화염 침식(적 화염저항 -25, 6초)",
+        "name": "룬워드 깜박이는 (Nef-Pul-Vex): 적중 100% / ICD 0.5초 - 화염 침식(적 화염저항 -25, 6초)",
+        "nameEn": "Runeword Flickering (Nef-Pul-Vex): 100% on hit / ICD 0.5s - Flame Erosion (Target Fire Resist -25, 6s)",
+        "nameKo": "룬워드 깜박이는 (Nef-Pul-Vex): 적중 100% / ICD 0.5초 - 화염 침식(적 화염저항 -25, 6초)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_FLICKER_FIRE_SHRED",
