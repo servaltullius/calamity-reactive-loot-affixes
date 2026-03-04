@@ -62,11 +62,9 @@ namespace CalamityAffixes
 		}
 
 		if (a_affix.slot == AffixSlot::kSuffix) {
-			if (*a_affix.lootType == LootItemType::kWeapon) {
-				_lootWeaponSuffixes.push_back(a_index);
-			} else if (*a_affix.lootType == LootItemType::kArmor) {
-				_lootArmorSuffixes.push_back(a_index);
-			}
+			// Suffixes are passive AV bonuses — always eligible for both weapons and armor.
+			_lootWeaponSuffixes.push_back(a_index);
+			_lootArmorSuffixes.push_back(a_index);
 		} else {
 			if (*a_affix.lootType == LootItemType::kWeapon) {
 				_lootWeaponAffixes.push_back(a_index);
