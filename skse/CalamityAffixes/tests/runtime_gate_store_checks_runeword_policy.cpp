@@ -46,10 +46,9 @@ namespace RuntimeGateStoreChecks
 				(std::istreambuf_iterator<char>(baseIn)),
 				std::istreambuf_iterator<char>());
 
-			// Completed runeword base must pin recipe highlight to completed recipe token.
-			if (recipeEntriesSource.find("bool resolvedFromCompleted = false;") == std::string::npos ||
-				recipeEntriesSource.find("selectedToken = completed->token;") == std::string::npos ||
-				recipeEntriesSource.find("if (!resolvedFromCompleted)") == std::string::npos) {
+			// Completed runeword base sets default highlight; explicit instance state overrides it.
+			if (recipeEntriesSource.find("selectedToken = completed->token;") == std::string::npos ||
+				recipeEntriesSource.find("stateIt->second.recipeToken") == std::string::npos) {
 				std::cerr << "runeword_completed_selection: completed recipe highlight guard is missing\n";
 				return false;
 			}

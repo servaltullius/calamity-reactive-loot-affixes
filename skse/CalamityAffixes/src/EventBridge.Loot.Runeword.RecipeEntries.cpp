@@ -591,17 +591,15 @@ namespace CalamityAffixes
 		}
 		if (_runewordSelectedBaseKey) {
 			const auto selectedKey = *_runewordSelectedBaseKey;
-			bool resolvedFromCompleted = false;
 			if (const auto* completed = ResolveCompletedRunewordRecipe(selectedKey)) {
 				selectedToken = completed->token;
-				resolvedFromCompleted = true;
 			}
-			if (!resolvedFromCompleted) {
-				if (const auto stateIt = _runewordInstanceStates.find(selectedKey);
-					stateIt != _runewordInstanceStates.end() &&
-					stateIt->second.recipeToken != 0u) {
-					selectedToken = stateIt->second.recipeToken;
-				}
+			// Explicit recipe selection (instance state) wins over completed default,
+			// so re-transmutation highlights the newly chosen recipe.
+			if (const auto stateIt = _runewordInstanceStates.find(selectedKey);
+				stateIt != _runewordInstanceStates.end() &&
+				stateIt->second.recipeToken != 0u) {
+				selectedToken = stateIt->second.recipeToken;
 			}
 		}
 

@@ -38,12 +38,14 @@ namespace CalamityAffixes
 
 			if (ShouldClearRunewordInProgressState(completedBase)) {
 				_runewordInstanceStates.erase(selectedKey);
-			} else {
-				auto& state = _runewordInstanceStates[selectedKey];
-				if (state.recipeToken != recipe.token) {
-					state.recipeToken = recipe.token;
-					state.insertedRunes = 0u;
-				}
+			}
+
+			// Always record the explicit recipe selection so the UI can
+			// highlight the newly chosen recipe (even for re-transmutation).
+			auto& state = _runewordInstanceStates[selectedKey];
+			if (state.recipeToken != recipe.token) {
+				state.recipeToken = recipe.token;
+				state.insertedRunes = 0u;
 			}
 		}
 
