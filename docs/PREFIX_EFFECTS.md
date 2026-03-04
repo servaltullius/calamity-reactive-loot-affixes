@@ -25,7 +25,7 @@
 | 덫 / 룬 | 3 |
 | 원소 주입 (전환) | 6 |
 | 대마법사 | 4 |
-| 치명 시전 (Crit Cast) | 7 |
+| 치명 시전 | 7 |
 | 시체 소각 (죽음의 화장) | 3 |
 | 소환 화장 | 2 |
 | 역병 / 적응 | 4 |
@@ -38,7 +38,7 @@
 ## 원소 타격
 
 - **폭풍 소환** (`storm_call`) [Weapon]
-  - Lucky Hit 38.0% / ICD 1.5초 → 대상 | CastSpell
+  - 38% 확률 / 쿨타임 1.5초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_ARC_LIGHTNING`
   - 스케일: HitPhysicalDealt ×0.1
 
@@ -63,58 +63,58 @@
 ## 원소 취약
 
 - **화염 취약** (`flame_weakness`) [Weapon]
-  - Lucky Hit 36.0% / ICD 2.8초 → 대상 | CastSpell
+  - 36% 확률 / 쿨타임 2.8초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_FIRE_SHRED`
 
 - **냉기 취약** (`frost_weakness`) [Weapon]
-  - 적중 24.0% / ICD 2.4초 → 대상 | CastSpell
+  - 적중 24.0% / 쿨타임 2.4초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_FROST_SHRED`
 
 - **전격 취약** (`shock_weakness`) [Weapon]
-  - 적중 30.0% / ICD 2.0초 / 최근 처치 4.0초 → 대상 | CastSpell
+  - 적중 30.0% / 쿨타임 2초 / 최근 처치 4.0초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_SHOCK_SHRED`
 
 ## 소환
 
 - **늑대 혼령** (`wolf_spirit`) [Weapon]
-  - 적중 30.0% / ICD 24.0초 → 대상 | CastSpell
+  - 적중 30.0% / 쿨타임 24초 → 대상 | CastSpell
 
 - **화염 정령** (`flame_sprite`) [Weapon]
-  - Lucky Hit 36.0% / ICD 14.0초 → 대상 | CastSpell
+  - 36% 확률 / 쿨타임 14초 → 대상 | CastSpell
 
 - **화염 아트로나크** (`flame_atronach`) [Weapon]
-  - Lucky Hit 30.0% / ICD 32.0초 → 대상 | CastSpell
+  - 30% 확률 / 쿨타임 32초 → 대상 | CastSpell
 
 - **냉기 아트로나크** (`frost_atronach`) [Weapon]
-  - Lucky Hit 30.0% / ICD 32.0초 → 대상 | CastSpell
+  - 30% 확률 / 쿨타임 32초 → 대상 | CastSpell
 
 - **폭풍 아트로나크** (`storm_atronach`) [Weapon]
-  - Lucky Hit 26.0% / ICD 40.0초 → 대상 | CastSpell
+  - 26% 확률 / 쿨타임 40초 → 대상 | CastSpell
 
 - **드레모라 서약** (`dremora_pact`) [Weapon]
-  - Lucky Hit 22.0% / ICD 52.0초 → 대상 | CastSpell
+  - 22% 확률 / 쿨타임 52초 → 대상 | CastSpell
 
 - **영혼 올가미** (`soul_snare`) [Weapon]
-  - 적중 25.0% / ICD 2.5초 → 대상 | CastSpell
+  - 적중 25.0% / 쿨타임 2.5초 → 대상 | CastSpell
   - 드롭 가중치: 0 (하위 전용)
 
 ## 피격 방어
 
 - **그림자 장막** (`shadow_veil`) [Weapon]
-  - 피격 5.0% / ICD 45.0초 → 자신 | CastSpell
+  - 피격 5.0% / 쿨타임 45초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_INVISIBILITY`
   - 드롭 가중치: 0 (하위 전용)
 
 - **돌의 수호** (`stone_ward`) [Armor]
-  - 피격 10.0% / ICD 6.0초 → 자신 | CastSpell
+  - 피격 10.0% / 쿨타임 6초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_INCOMING_WARDEN_SHELL`
 
 - **마법 방벽** (`arcane_ward`) [Armor]
-  - 피격 18.0% / ICD 8.0초 → 자신 | CastSpell
+  - 피격 18.0% / 쿨타임 8초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_INCOMING_RESOLVE_BARRIER`
 
 - **치유의 파도** (`healing_surge`) [Armor]
-  - 피격 20.0% / ICD 9.0초 → 자신 | CastSpell
+  - 피격 20.0% / 쿨타임 9초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_INCOMING_VITAL_REBOUND`
 
 - **마법사의 갑옷 I: 물리 피해 10%를 매지카로 전환** (`mage_armor_t1`) [Armor]
@@ -142,62 +142,62 @@
 ## 화염 DoT
 
 - **잔불 낙인** (`ember_brand`) [Weapon]
-  - 적중 40.0% / ICD 0.8초 → 대상 | CastSpell
+  - 적중 40.0% / 쿨타임 0.8초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_HIT_EMBERBRAND_IGNITE`
   - 스케일: HitPhysicalDealt ×0.04
 
 - **잔불 장작** (`ember_pyre`) [Weapon]
-  - 처치 18.0% / ICD 1.0초 →  | CorpseExplosion
+  - 처치 18.0% / 쿨타임 1초 →  | CorpseExplosion
   - 스펠: `CAFF_SPEL_DMG_FIRE_DYNAMIC`
   - 반경 320.0, 14.0+0.08% 시체HP, 연쇄 2회
 
 ## CC / 디버프
 
 - **얼음 족쇄** (`ice_shackle`) [Weapon]
-  - 적중 24.0% / ICD 2.5초 → 대상 | CastSpell
+  - 적중 24.0% / 쿨타임 2.5초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_HIT_FROSTLOCK_SNARE`
 
 - **마나 소진** (`mana_burn`) [Weapon]
-  - Lucky Hit 35.0% / ICD 1.2초 → 대상 | CastSpell
+  - 35% 확률 / 쿨타임 1.2초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_HIT_SHOCK_OVERLOAD`
 
 - **생명 흡수** (`life_drain`) [Weapon]
-  - Lucky Hit 38.0% / ICD 0.7초 → 자신 | CastSpell
+  - 38% 확률 / 쿨타임 0.7초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_HIT_BLOOD_SIPHON`
   - 스케일: HitPhysicalDealt ×0.045 +4.0 (max 24.0)
 
 ## 유틸리티
 
 - **영혼 착취** (`soul_siphon`) [Weapon]
-  - 처치 30.0% / ICD 2.0초 → 자신 | CastSpell
+  - 처치 30.0% / 쿨타임 2초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_KILL_SOUL_SURGE`
 
 - **그림자 질주** (`shadow_stride`) [Weapon]
-  - 적중 20.0% / ICD 12.0초 / 최근 처치 4.0초 → 자신 | CastSpell
+  - 적중 20.0% / 쿨타임 12초 / 최근 처치 4.0초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_HIT_SHADOWSTEP_BURST`
 
 - **무음 보행** (`silent_step`) [Weapon]
-  - 적중 10.0% / ICD 180.0초 → 자신 | CastSpell
+  - 적중 10.0% / 쿨타임 180초 → 자신 | CastSpell
   - 드롭 가중치: 0 (하위 전용)
 
 - **전투 광란** (`battle_frenzy`) [Weapon]
-  - 적중 20.0% / ICD 0.6초 / 표적별 ICD 12.0초 → 자신 | CastSpell
+  - 적중 20.0% / 쿨타임 0.6초 / 표적별 쿨타임 12초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_SWAP_JACKPOT_HASTE`
 
 ## 덫 / 룬
 
 - **곰 덫** (`bear_trap`) [Weapon]
-  - 적중 20.0% / ICD 6.0초 →  | SpawnTrap
+  - 적중 20.0% / 쿨타임 6초 →  | SpawnTrap
   - 스펠: `CAFF_SPEL_TRAP_IRONJAW_SNARE`
   - 덫 설치: 0초 후, 0초 유지
 
 - **룬 함정** (`rune_trap`) [Weapon]
-  - 적중 12.0% / ICD 1.5초 →  | SpawnTrap
+  - 적중 12.0% / 쿨타임 1.5초 →  | SpawnTrap
   - 스펠: `CAFF_SPEL_MINEFIELD_SNARE`
   - 덫 설치: 0초 후, 0초 유지
 
 - **혼돈의 룬** (`chaos_rune`) [Weapon]
-  - 적중 12.0% / ICD 2.0초 / 표적별 ICD 8.0초 →  | SpawnTrap
+  - 적중 12.0% / 쿨타임 2초 / 표적별 쿨타임 8초 →  | SpawnTrap
   - 스펠: `CAFF_SPEL_CHAOS_MINE_SNARE`
   - 덫 설치: 0초 후, 0초 유지
 
@@ -255,7 +255,7 @@
   - 스펠: `CAFF_SPEL_DMG_SHOCK_DYNAMIC`
   - 대마법사: 티어 ?
 
-## 치명 시전 (Crit Cast)
+## 치명 시전
 
 - **치명 시전: 파이어볼트** (`crit_cast_firebolt`) [Armor]
   - 적중 →  | CastOnCrit
@@ -317,33 +317,33 @@
 ## 역병 / 적응
 
 - **원소 저주** (`elemental_bane`) [Weapon]
-  - 적중 20.0% / ICD 1.0초 / 표적별 ICD 12.0초 → 대상 | CastSpellAdaptiveElement
+  - 적중 20.0% / 쿨타임 1초 / 표적별 쿨타임 12초 → 대상 | CastSpellAdaptiveElement
 
 - **역병 포자** (`plague_spore`) [Weapon]
-  - 적중 20.0% / ICD 1.5초 →  | SpawnTrap
+  - 적중 20.0% / 쿨타임 1.5초 →  | SpawnTrap
   - 스펠: `CAFF_SPEL_DOT_BLOOM_POISON`
   - 덫 설치: 0초 후, 0초 유지
 
 - **역청 황폐** (`tar_blight`) [Weapon]
-  - 적중 18.0% / ICD 2.0초 →  | SpawnTrap
+  - 적중 18.0% / 쿨타임 2초 →  | SpawnTrap
   - 스펠: `CAFF_SPEL_DOT_BLOOM_TAR_SLOW`
   - 덫 설치: 0초 후, 0초 유지
 
 - **흡수 포자** (`siphon_spore`) [Weapon]
-  - 적중 18.0% / ICD 2.0초 →  | SpawnTrap
+  - 적중 18.0% / 쿨타임 2초 →  | SpawnTrap
   - 스펠: `CAFF_SPEL_DOT_BLOOM_SIPHON_MAG`
   - 덫 설치: 0초 후, 0초 유지
 
 ## 성장형
 
 - **뇌격 숙련** (`thunder_mastery`) [Weapon]
-  - 적중 100.0% / ICD 0.2초 → 대상 | CastSpell
+  - 적중 100.0% / 쿨타임 0.2초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_SHOCK_DAMAGE`
   - 성장형: 단계 [0, 15, 45, 90], 배수 [1.0, 1.25, 1.6, 2.1]
   - 스케일: HitPhysicalDealt ×0.08
 
 - **원소 조율** (`elemental_attunement`) [Weapon]
-  - 적중 100.0% / ICD 0.2초 → 대상 | CastSpell
+  - 적중 100.0% / 쿨타임 0.2초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_FIRE_DAMAGE`
   - 성장형: 단계 [0, 20, 60, 120], 배수 [1.0, 1.3, 1.7, 2.2]
   - 모드 순환: ['Flame', 'Frost', 'Storm']
@@ -354,23 +354,23 @@
 > v1.2.21 신규 추가 — freed slot 활용, 기존 스펠만 참조
 
 - **힘의 외침** (`voice_of_power`) [Armor]
-  - 피격 25.0% / ICD 6.0초 → 자신 | CastSpell
+  - 피격 25.0% / 쿨타임 6초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_SWAP_JACKPOT_HASTE`
 
 - **죽음의 표식** (`death_mark`) [Weapon]
-  - Lucky Hit 15.0% / ICD 1.0초 / 표적별 ICD 25.0초 → 대상 | CastSpell
+  - 15% 확률 / 쿨타임 1초 / 표적별 쿨타임 25초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_CHAOS_CURSE_SUNDER`
 
 - **얼음 형상** (`ice_form`) [Weapon]
-  - Lucky Hit 8.0% / ICD 15.0초 → 대상 | CastSpell
+  - 8% 확률 / 쿨타임 15초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_TRAP_IRONJAW_SNARE`
 
 - **무장 해제** (`disarming_shout`) [Weapon]
-  - Lucky Hit 10.0% / ICD 10.0초 → 대상 | CastSpell
+  - 10% 확률 / 쿨타임 10초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK`
 
 - **질풍 외침** (`whirlwind_sprint`) [Weapon]
-  - 처치 100.0% / ICD 3.0초 → 자신 | CastSpell
+  - 처치 100.0% / 쿨타임 3초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_HIT_SHADOWSTEP_BURST`
   - 성장형: 단계 [0, 8, 24, 50], 배수 [1.0, 1.25, 1.55, 2.0]
 
@@ -379,20 +379,20 @@
 > v1.2.21 신규 추가 — freed slot 활용, 기존 스펠만 참조
 
 - **마법 약화** (`spell_breach`) [Weapon]
-  - Lucky Hit 12.0% / ICD 10.0초 → 대상 | CastSpell
+  - 12% 확률 / 쿨타임 10초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_CHAOS_CURSE_FRAGILE`
 
 - **기력 고갈** (`stamina_drain`) [Weapon]
-  - Lucky Hit 20.0% / ICD 4.0초 → 대상 | CastSpell
+  - 20% 확률 / 쿨타임 4초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA`
 
 - **자양의 불꽃** (`nourishing_flame`) [Weapon]
-  - 적중 15.0% / ICD 1.5초 / 최근 처치 5.0초 → 자신 | CastSpell
+  - 적중 15.0% / 쿨타임 1.5초 / 최근 처치 5.0초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_HIT_BLOOD_SIPHON`
   - 스케일: HitPhysicalDealt ×0.06 +3.0 (max 20.0)
 
 - **마나 매듭** (`mana_knot`) [Weapon]
-  - Lucky Hit 15.0% / ICD 8.0초 → 대상 | CastSpell
+  - 15% 확률 / 쿨타임 8초 → 대상 | CastSpell
   - 스펠: `CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN`
 
 ## INTERNAL (내부 전용)
