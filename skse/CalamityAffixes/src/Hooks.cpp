@@ -296,7 +296,9 @@ namespace CalamityAffixes::Hooks
 		{
 			float adjustedDamage{ 0.0f };
 			float originalDamage{ 0.0f };
-			DeferredConversionCast conversion{};
+			static constexpr std::size_t kMaxConversions = CalamityAffixes::EventBridge::kMaxConversionsPerHit;
+			std::array<DeferredConversionCast, kMaxConversions> conversions{};
+			std::size_t conversionCount{ 0 };
 		};
 
 		// Normalizes damage sign, applies crit multiplier, evaluates Conversion/MoM.
@@ -319,17 +321,21 @@ namespace CalamityAffixes::Hooks
 			}
 			result.originalDamage = result.adjustedDamage;
 
-			const auto conversion = a_bridge->EvaluateConversion(
+			const auto conversionResults = a_bridge->EvaluateConversion(
 				a_attacker, a_target, a_preHitData, result.adjustedDamage, false);
 			const auto mindOverMatter = a_bridge->EvaluateMindOverMatter(
 				a_target, a_attacker, a_preHitData, result.adjustedDamage, false);
 			(void)mindOverMatter;
 
-			if (conversion.spell && conversion.convertedDamage > 0.0f && a_attacker && a_target) {
-				result.conversion.spellFormID = conversion.spell->GetFormID();
-				result.conversion.effectiveness = conversion.effectiveness;
-				result.conversion.noHitEffectArt = conversion.noHitEffectArt;
-				result.conversion.magnitudeOverride = conversion.convertedDamage;
+			for (std::size_t i = 0; i < conversionResults.count; ++i) {
+				const auto& cr = conversionResults.entries[i];
+				if (cr.spell && cr.convertedDamage > 0.0f && a_attacker && a_target) {
+					auto& dc = result.conversions[result.conversionCount++];
+					dc.spellFormID = cr.spell->GetFormID();
+					dc.effectiveness = cr.effectiveness;
+					dc.noHitEffectArt = cr.noHitEffectArt;
+					dc.magnitudeOverride = cr.convertedDamage;
+				}
 			}
 
 			return result;
@@ -340,7 +346,8 @@ namespace CalamityAffixes::Hooks
 			RE::Actor* a_attacker,
 			float a_adjustedDamage,
 			float a_originalDamage,
-			DeferredConversionCast a_conversion,
+			const std::array<DeferredConversionCast, DamageAdjustmentResult::kMaxConversions>& a_conversions,
+			std::size_t a_conversionCount,
 			std::chrono::steady_clock::time_point a_now,
 			const RE::HitData* a_capturedHitData) noexcept
 		{
@@ -375,19 +382,22 @@ namespace CalamityAffixes::Hooks
 			// which overwrites the actor's lastHitData and invalidates our hitData pointer.
 			bridge->OnHealthDamage(a_target, a_attacker, hitData, a_originalDamage);
 
-			// Cast Conversion spell (hitData pointer may become stale after this).
-			if (a_conversion.spellFormID != 0u && a_conversion.magnitudeOverride > 0.0f && a_attacker) {
-				auto* conversionSpell = RE::TESForm::LookupByID<RE::SpellItem>(a_conversion.spellFormID);
-				if (conversionSpell) {
-					if (auto* magicCaster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-						magicCaster->CastSpellImmediate(
-							conversionSpell,
-							a_conversion.noHitEffectArt,
-							a_target,
-							a_conversion.effectiveness,
-							false,
-							a_conversion.magnitudeOverride,
-							a_attacker);
+			// Cast Conversion spells (hitData pointer may become stale after this).
+			for (std::size_t i = 0; i < a_conversionCount; ++i) {
+				const auto& conv = a_conversions[i];
+				if (conv.spellFormID != 0u && conv.magnitudeOverride > 0.0f && a_attacker) {
+					auto* spell = RE::TESForm::LookupByID<RE::SpellItem>(conv.spellFormID);
+					if (spell) {
+						if (auto* caster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+							caster->CastSpellImmediate(
+								spell,
+								conv.noHitEffectArt,
+								a_target,
+								conv.effectiveness,
+								false,
+								conv.magnitudeOverride,
+								a_attacker);
+						}
 					}
 				}
 			}
@@ -665,19 +675,20 @@ namespace CalamityAffixes::Hooks
 				if (auto* tasks = SKSE::GetTaskInterface()) {
 					const RE::FormID targetFormID = safeTarget->GetFormID();
 					const RE::FormID attackerFormID = safeAttacker ? safeAttacker->GetFormID() : 0u;
-					const auto deferredConversion = adj.conversion;
+					const auto deferredConversions = adj.conversions;
+					const auto conversionCount = adj.conversionCount;
 					const float adjustedDamage = adj.adjustedDamage;
 					const float originalDamage = adj.originalDamage;
-					tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, originalDamage, deferredConversion, now, capturedHitData]() {
+					tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, originalDamage, deferredConversions, conversionCount, now, capturedHitData]() {
 						auto* target = RE::TESForm::LookupByID<RE::Actor>(targetFormID);
 						auto* attacker = attackerFormID != 0u ?
 							                 RE::TESForm::LookupByID<RE::Actor>(attackerFormID) :
 							                 nullptr;
 						const RE::HitData* hitDataPtr = capturedHitData->has_value() ? &capturedHitData->value() : nullptr;
-						ExecutePostHealthDamageActions(target, attacker, adjustedDamage, originalDamage, deferredConversion, now, hitDataPtr);
+						ExecutePostHealthDamageActions(target, attacker, adjustedDamage, originalDamage, deferredConversions, conversionCount, now, hitDataPtr);
 					});
 				} else {
-					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adj.adjustedDamage, adj.originalDamage, adj.conversion, now, preHitData);
+					ExecutePostHealthDamageActions(safeTarget, safeAttacker, adj.adjustedDamage, adj.originalDamage, adj.conversions, adj.conversionCount, now, preHitData);
 				}
 			}
 

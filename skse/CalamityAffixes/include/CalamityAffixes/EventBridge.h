@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -59,6 +60,13 @@ namespace CalamityAffixes
 			float convertedDamage{ 0.0f };
 			float effectiveness{ 1.0f };
 			bool noHitEffectArt{ false };
+		};
+
+		static constexpr std::size_t kMaxConversionsPerHit = 3;
+		struct ConversionResults
+		{
+			std::array<ConversionResult, kMaxConversionsPerHit> entries{};
+			std::size_t count{ 0 };
 		};
 
 		struct CastOnCritResult

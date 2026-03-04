@@ -76,7 +76,7 @@
 			const RE::HitData* a_hitData,
 			float a_damage);
 
-		[[nodiscard]] ConversionResult EvaluateConversion(
+		[[nodiscard]] ConversionResults EvaluateConversion(
 			RE::Actor* a_attacker,
 			RE::Actor* a_target,
 			const RE::HitData* a_hitData,

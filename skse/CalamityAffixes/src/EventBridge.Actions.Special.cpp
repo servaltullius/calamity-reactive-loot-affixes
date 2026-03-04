@@ -42,7 +42,7 @@ namespace CalamityAffixes
 		}
 
 	}
-	EventBridge::ConversionResult EventBridge::EvaluateConversion(
+	EventBridge::ConversionResults EventBridge::EvaluateConversion(
 		RE::Actor* a_attacker,
 		RE::Actor* a_target,
 		const RE::HitData* a_hitData,
@@ -92,11 +92,19 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		AffixRuntime* selectedAffix = nullptr;
-		PerTargetCooldownKey selectedPerTargetKey{};
-		bool selectedUsesPerTargetIcd = false;
-		const Action* action = nullptr;
-		float bestConvertPct = 0.0f;
+		// --- Phase 1: Collect best candidate per element ---
+		struct ConversionCandidate
+		{
+			AffixRuntime* affix{ nullptr };
+			const Action* action{ nullptr };
+			PerTargetCooldownKey perTargetKey{};
+			bool usesPerTargetIcd{ false };
+			float pct{ 0.0f };
+		};
+
+		// Index: 0=Fire, 1=Frost, 2=Shock (matching Element enum values minus 1)
+		std::array<ConversionCandidate, kMaxConversionsPerHit> candidates{};
+
 		for (const auto idx : _convertAffixIndices) {
 			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
 				continue;
@@ -108,6 +116,11 @@ namespace CalamityAffixes
 			auto& affix = _affixes[idx];
 			const auto& candidate = affix.action;
 			if (candidate.type != ActionType::kConvertDamage || !candidate.spell || candidate.convertPct <= 0.0f) {
+				continue;
+			}
+
+			const auto elemIdx = static_cast<std::size_t>(candidate.element);
+			if (elemIdx < 1u || elemIdx > kMaxConversionsPerHit) {
 				continue;
 			}
 
@@ -134,15 +147,23 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			if (!action || candidate.convertPct > bestConvertPct) {
-				action = std::addressof(candidate);
-				selectedAffix = std::addressof(affix);
-				selectedPerTargetKey = perTargetKey;
-				selectedUsesPerTargetIcd = usesPerTargetIcd;
-				bestConvertPct = candidate.convertPct;
+			// Same element: keep higher pct only
+			auto& slot = candidates[elemIdx - 1u];
+			if (candidate.convertPct > slot.pct) {
+				slot.affix = std::addressof(affix);
+				slot.action = std::addressof(candidate);
+				slot.perTargetKey = perTargetKey;
+				slot.usesPerTargetIcd = usesPerTargetIcd;
+				slot.pct = candidate.convertPct;
 			}
 		}
-		if (!action || !action->spell || action->convertPct <= 0.0f) {
+
+		// --- Phase 2: Compute total and normalize ---
+		float totalPct = 0.0f;
+		for (const auto& c : candidates) {
+			totalPct += c.pct;
+		}
+		if (totalPct <= 0.0f) {
 			return {};
 		}
 
@@ -151,48 +172,73 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		float converted = physicalDealt * (action->convertPct / 100.0f);
-		if (converted <= 0.0f) {
-			return {};
-		}
-
 		if (a_inOutDamage <= 0.0f) {
 			return {};
 		}
 
-		if (converted > a_inOutDamage) {
-			converted = a_inOutDamage;
+		const bool needsNormalization = (totalPct > 100.0f);
+
+		// --- Phase 3: Apply each candidate, deducting from remaining damage ---
+		ConversionResults results{};
+		const auto* hitWeapon = _loot.debugLog ? HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker) : nullptr;
+
+		for (std::size_t i = 0; i < kMaxConversionsPerHit; ++i) {
+			const auto& c = candidates[i];
+			if (!c.action || !c.affix) {
+				continue;
+			}
+
+			const float normalizedPct = needsNormalization
+				? (c.pct / totalPct * 100.0f)
+				: c.pct;
+
+			float converted = physicalDealt * (normalizedPct / 100.0f);
+			if (converted <= 0.0f) {
+				continue;
+			}
+
+			if (a_inOutDamage <= 0.0f) {
+				break;
+			}
+
+			if (converted > a_inOutDamage) {
+				converted = a_inOutDamage;
+			}
+
+			a_inOutDamage -= converted;
+			if (a_inOutDamage < 0.0f) {
+				a_inOutDamage = 0.0f;
+			}
+
+			results.entries[results.count++] = ConversionResult{
+				.spell = c.action->spell,
+				.convertedDamage = converted,
+				.effectiveness = c.action->effectiveness,
+				.noHitEffectArt = c.action->noHitEffectArt,
+			};
+
+			// Commit ICD
+			if (c.affix->icd.count() > 0) {
+				c.affix->nextAllowed = now + c.affix->icd;
+			}
+			if (c.usesPerTargetIcd) {
+				CommitPerTargetCooldown(c.perTargetKey, c.affix->perTargetIcd, now);
+			}
+
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={:.1f}, element={}, rawPct={:.0f}%, normalizedPct={:.0f}%, converted={:.1f}, remainingPhys={:.1f})",
+					hitWeapon ? hitWeapon->GetName() : "<unknown>",
+					physicalDealt,
+					static_cast<int>(c.action->element),
+					c.pct,
+					normalizedPct,
+					converted,
+					a_inOutDamage);
+			}
 		}
 
-		a_inOutDamage -= converted;
-		if (a_inOutDamage < 0.0f) {
-			a_inOutDamage = 0.0f;
-		}
-
-		if (selectedAffix && selectedAffix->icd.count() > 0) {
-			selectedAffix->nextAllowed = now + selectedAffix->icd;
-		}
-		if (selectedUsesPerTargetIcd && selectedAffix) {
-			CommitPerTargetCooldown(selectedPerTargetKey, selectedAffix->perTargetIcd, now);
-		}
-
-		if (_loot.debugLog) {
-			const auto* hitWeapon = HitDataUtil::ResolveHitWeapon(a_hitData, a_attacker);
-			SKSE::log::debug(
-				"CalamityAffixes: ConvertDamage (weapon={}, physicalDealt={:.1f}, convertPct={:.0f}%, converted={:.1f}, remainingPhys={:.1f})",
-				hitWeapon ? hitWeapon->GetName() : "<unknown>",
-				physicalDealt,
-				action->convertPct,
-				converted,
-				a_inOutDamage);
-		}
-
-		return ConversionResult{
-			.spell = action->spell,
-			.convertedDamage = converted,
-			.effectiveness = action->effectiveness,
-			.noHitEffectArt = action->noHitEffectArt,
-		};
+		return results;
 	}
 
 	EventBridge::MindOverMatterResult EventBridge::EvaluateMindOverMatter(
