@@ -54,6 +54,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache xwin sysroot
+        uses: actions/cache@v4
+        with:
+          path: ~/.xwin-cache
+          key: xwin-sysroot-${{ runner.os }}
+
       - name: Configure SKSE static checks
         working-directory: skse/CalamityAffixes
         run: cmake --preset linux-release-commonlibsse
