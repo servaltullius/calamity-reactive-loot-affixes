@@ -3,9 +3,9 @@
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/PointerSafety.h"
+#include "CalamityAffixes/ProcChanceUtil.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
-#include <mutex>
 #include <string_view>
 #include <vector>
 
@@ -41,19 +41,6 @@ namespace CalamityAffixes
 			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
 		}
 
-		bool RollProcChance(std::mt19937& a_rng, std::mutex& a_rngMutex, float a_chancePct)
-		{
-			if (a_chancePct >= 100.0f) {
-				return true;
-			}
-			if (a_chancePct <= 0.0f) {
-				return false;
-			}
-
-			std::lock_guard<std::mutex> lock(a_rngMutex);
-			std::uniform_real_distribution<float> dist(0.0f, 100.0f);
-			return dist(a_rng) < a_chancePct;
-		}
 	}
 	EventBridge::ConversionResult EventBridge::EvaluateConversion(
 		RE::Actor* a_attacker,

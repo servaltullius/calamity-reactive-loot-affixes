@@ -29,6 +29,10 @@ namespace CalamityAffixes
 			}
 		}
 
+		if (!a_affix.label.empty()) {
+			_affixLabelSet.insert(a_affix.label);
+		}
+
 		if (a_affix.token != 0u) {
 			const auto [it, inserted] = _affixIndexByToken.emplace(a_affix.token, a_index);
 			if (!inserted) {

@@ -9,6 +9,7 @@ namespace CalamityAffixes
 		_activeCritDamageBonusPct = 0.0f;
 		_affixIndexById.clear();
 		_affixIndexByToken.clear();
+		_affixLabelSet.clear();
 		_hitTriggerAffixIndices.clear();
 		_incomingHitTriggerAffixIndices.clear();
 		_dotApplyTriggerAffixIndices.clear();

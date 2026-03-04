@@ -163,6 +163,7 @@ namespace CalamityAffixes
 		float _activeCritDamageBonusPct{ 0.0f };
 		std::unordered_map<std::string, std::size_t> _affixIndexById;
 		std::unordered_map<std::uint64_t, std::size_t> _affixIndexByToken;
+		std::unordered_set<std::string> _affixLabelSet;
 		// Trigger dispatch caches — all affixes of each trigger type (config-time).
 		std::vector<std::size_t> _hitTriggerAffixIndices;
 		std::vector<std::size_t> _incomingHitTriggerAffixIndices;

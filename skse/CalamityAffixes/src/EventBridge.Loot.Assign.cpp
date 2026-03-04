@@ -626,13 +626,7 @@ namespace CalamityAffixes
 			if (a_label.empty()) {
 				return false;
 			}
-
-			for (const auto& affix : _affixes) {
-				if (!affix.label.empty() && affix.label == a_label) {
-					return true;
-				}
-			}
-			return false;
+			return _affixLabelSet.contains(std::string(a_label));
 		};
 
 		auto stripKnownAffixTags = [&](std::string_view a_name) {
