@@ -25,7 +25,7 @@ cd tools && dotnet test CalamityAffixes.Generator.Tests
 ## 아키텍처 요약
 
 - `InstanceAffixSlots` (max 4 토큰/아이템) — 유일한 진실의 원천
-- 237 어픽스: Prefix 83 + Runeword 94 + Suffix 60
+- 243 어픽스: Prefix 83 + Runeword 94 + Suffix 66 (22 families)
 - 직렬화 v7 (co-save IAXF), v1~v6 자동 마이그레이션
 - Proc 패널티 "Best Slot Wins": 1=1.0, 2=0.8, 3=0.65, 4=0.5
 
