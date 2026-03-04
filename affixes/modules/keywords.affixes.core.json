@@ -2,9 +2,9 @@
   {
     "id": "storm_call",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING",
-    "name": "폭풍 소환 (Lucky Hit 38% / ICD 1.5초): 번개 피해 10 (적중 피해 스케일)",
-    "nameEn": "Storm Call (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage (Hit Damage Scaling)",
-    "nameKo": "폭풍 소환 (Lucky Hit 38% / ICD 1.5초): 번개 피해 10 (적중 피해 스케일)",
+    "name": "폭풍 소환 (Lucky Hit 38% / ICD 1.5초): 번개 피해 10 + 적중 피해의 10%",
+    "nameEn": "Storm Call (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage + 10% of Hit Damage",
+    "nameKo": "폭풍 소환 (Lucky Hit 38% / ICD 1.5초): 번개 피해 10 + 적중 피해의 10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_ARC_LIGHTNING",
@@ -59,9 +59,9 @@
   {
     "id": "flame_strike",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_DAMAGE",
-    "name": "화염 일격 (적중 100%): 화염 피해 6 (적중 피해 스케일)",
-    "nameEn": "Flame Strike (100% on hit): 6 Fire Damage (Hit Damage Scaling)",
-    "nameKo": "화염 일격 (적중 100%): 화염 피해 6 (적중 피해 스케일)",
+    "name": "화염 일격 (적중 100%): 화염 피해 6 + 적중 피해의 10%",
+    "nameEn": "Flame Strike (100% on hit): 6 Fire Damage + 10% of Hit Damage",
+    "nameKo": "화염 일격 (적중 100%): 화염 피해 6 + 적중 피해의 10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_FIRE_DAMAGE",
@@ -114,9 +114,9 @@
   {
     "id": "frost_strike",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_DAMAGE",
-    "name": "냉기 일격 (적중 100%): 냉기 피해 6 (적중 피해 스케일)",
-    "nameEn": "Frost Strike (100% on hit): 6 Frost Damage (Hit Damage Scaling)",
-    "nameKo": "냉기 일격 (적중 100%): 냉기 피해 6 (적중 피해 스케일)",
+    "name": "냉기 일격 (적중 100%): 냉기 피해 6 + 적중 피해의 10%",
+    "nameEn": "Frost Strike (100% on hit): 6 Frost Damage + 10% of Hit Damage",
+    "nameKo": "냉기 일격 (적중 100%): 냉기 피해 6 + 적중 피해의 10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_FROST_DAMAGE",
@@ -169,9 +169,9 @@
   {
     "id": "spark_strike",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_DAMAGE",
-    "name": "전격 일격 (적중 100%): 번개 피해 6 (적중 피해 스케일)",
-    "nameEn": "Spark Strike (100% on hit): 6 Shock Damage (Hit Damage Scaling)",
-    "nameKo": "전격 일격 (적중 100%): 번개 피해 6 (적중 피해 스케일)",
+    "name": "전격 일격 (적중 100%): 번개 피해 6 + 적중 피해의 10%",
+    "nameEn": "Spark Strike (100% on hit): 6 Shock Damage + 10% of Hit Damage",
+    "nameKo": "전격 일격 (적중 100%): 번개 피해 6 + 적중 피해의 10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SHOCK_DAMAGE",
@@ -891,9 +891,9 @@
   {
     "id": "ember_brand",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_EMBERBRAND_IGNITE",
-    "name": "잔불 낙인 (적중 40% / ICD 0.8초): 점화 피해 4 (4초, 적중 피해 스케일)",
-    "nameEn": "Ember Brand (40% on hit / ICD 0.8s): Ignite 4 (4s, hit scaling)",
-    "nameKo": "잔불 낙인 (적중 40% / ICD 0.8초): 점화 피해 4 (4초, 적중 피해 스케일)",
+    "name": "잔불 낙인 (적중 40% / ICD 0.8초): 점화 피해 4 + 적중 피해의 4% (4초)",
+    "nameEn": "Ember Brand (40% on hit / ICD 0.8s): Ignite 4 + 4% of Hit Damage (4s)",
+    "nameKo": "잔불 낙인 (적중 40% / ICD 0.8초): 점화 피해 4 + 적중 피해의 4% (4초)",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_HIT_EMBERBRAND_IGNITE",
@@ -1458,9 +1458,9 @@
   {
     "id": "voice_of_power",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_25",
-    "name": "힘의 외침 (피격 25% / ICD 6초): 가속 부여",
-    "nameEn": "Voice of Power (25% on hit taken / ICD 6s): Haste Buff",
-    "nameKo": "힘의 외침 (피격 25% / ICD 6초): 가속 부여",
+    "name": "힘의 외침 (피격 25% / ICD 6초): 이동 +30%, 공격속도 +20% (6초)",
+    "nameEn": "Voice of Power (25% on hit taken / ICD 6s): Move Speed +30%, Attack Speed +20% (6s)",
+    "nameKo": "힘의 외침 (피격 25% / ICD 6초): 이동 +30%, 공격속도 +20% (6초)",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
@@ -1720,9 +1720,9 @@
   {
     "id": "whirlwind_sprint",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_25",
-    "name": "질풍 외침 (처치 100% / ICD 3초): 이동속도 버프 (성장형)",
-    "nameEn": "Whirlwind Sprint (100% on kill / ICD 3s): Move Speed Buff (Evolution)",
-    "nameKo": "질풍 외침 (처치 100% / ICD 3초): 이동속도 버프 (성장형)",
+    "name": "질풍 외침 (처치 100% / ICD 3초): 이동속도 강화 (성장: ×1.0→1.25→1.55→2.0)",
+    "nameEn": "Whirlwind Sprint (100% on kill / ICD 3s): Move Speed Boost (Growth: x1.0→1.25→1.55→2.0)",
+    "nameKo": "질풍 외침 (처치 100% / ICD 3초): 이동속도 강화 (성장: ×1.0→1.25→1.55→2.0)",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
@@ -1973,9 +1973,9 @@
   {
     "id": "crit_cast_firebolt",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_FIREBOLT",
-    "name": "치명 시전: 파이어볼트 (치명타/파워어택 적중, ICD 0.15초): Firebolt 발동 (적중 피해 스케일)",
-    "nameEn": "Crit Cast: Firebolt (Crit/Power Attack, ICD 0.15s): Cast Firebolt (Hit Damage Scaling)",
-    "nameKo": "치명 시전: 파이어볼트 (치명타/파워어택 적중, ICD 0.15초): Firebolt 발동 (적중 피해 스케일)",
+    "name": "치명 시전: 파이어볼트 (치명타/파워어택, ICD 0.15초): Firebolt + 적중 피해의 30%",
+    "nameEn": "Crit Cast: Firebolt (Crit/Power Attack, ICD 0.15s): Firebolt + 30% of Hit Damage",
+    "nameKo": "치명 시전: 파이어볼트 (치명타/파워어택, ICD 0.15초): Firebolt + 적중 피해의 30%",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2006,9 +2006,9 @@
   {
     "id": "crit_cast_ice_spike",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_SPIKE",
-    "name": "치명 시전: 아이스 스파이크 (치명타/파워어택 적중, ICD 0.15초): Ice Spike 발동 (적중 피해 스케일)",
-    "nameEn": "Crit Cast: Ice Spike (Crit/Power Attack, ICD 0.15s): Cast Ice Spike (Hit Damage Scaling)",
-    "nameKo": "치명 시전: 아이스 스파이크 (치명타/파워어택 적중, ICD 0.15초): Ice Spike 발동 (적중 피해 스케일)",
+    "name": "치명 시전: 아이스 스파이크 (치명타/파워어택, ICD 0.15초): Ice Spike + 적중 피해의 30%",
+    "nameEn": "Crit Cast: Ice Spike (Crit/Power Attack, ICD 0.15s): Ice Spike + 30% of Hit Damage",
+    "nameKo": "치명 시전: 아이스 스파이크 (치명타/파워어택, ICD 0.15초): Ice Spike + 적중 피해의 30%",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2039,9 +2039,9 @@
   {
     "id": "crit_cast_lightning_bolt",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_LIGHTNING_BOLT",
-    "name": "치명 시전: 라이트닝 볼트 (치명타/파워어택 적중, ICD 0.15초): Lightning Bolt 발동 (적중 피해 스케일)",
-    "nameEn": "Crit Cast: Lightning Bolt (Crit/Power Attack, ICD 0.15s): Cast Lightning Bolt (Hit Damage Scaling)",
-    "nameKo": "치명 시전: 라이트닝 볼트 (치명타/파워어택 적중, ICD 0.15초): Lightning Bolt 발동 (적중 피해 스케일)",
+    "name": "치명 시전: 라이트닝 볼트 (치명타/파워어택, ICD 0.15초): Lightning Bolt + 적중 피해의 30%",
+    "nameEn": "Crit Cast: Lightning Bolt (Crit/Power Attack, ICD 0.15s): Lightning Bolt + 30% of Hit Damage",
+    "nameKo": "치명 시전: 라이트닝 볼트 (치명타/파워어택, ICD 0.15초): Lightning Bolt + 적중 피해의 30%",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2072,9 +2072,9 @@
   {
     "id": "crit_cast_thunderbolt",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_THUNDERBOLT",
-    "name": "치명 시전: 썬더볼트 (치명타/파워어택 적중, ICD 0.15초): Thunderbolt 발동 (적중 피해 스케일)",
-    "nameEn": "Crit Cast: Thunderbolt (Crit/Power Attack, ICD 0.15s): Cast Thunderbolt (Hit Damage Scaling)",
-    "nameKo": "치명 시전: 썬더볼트 (치명타/파워어택 적중, ICD 0.15초): Thunderbolt 발동 (적중 피해 스케일)",
+    "name": "치명 시전: 썬더볼트 (치명타/파워어택, ICD 0.15초): Thunderbolt + 적중 피해의 30%",
+    "nameEn": "Crit Cast: Thunderbolt (Crit/Power Attack, ICD 0.15s): Thunderbolt + 30% of Hit Damage",
+    "nameKo": "치명 시전: 썬더볼트 (치명타/파워어택, ICD 0.15초): Thunderbolt + 적중 피해의 30%",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2105,9 +2105,9 @@
   {
     "id": "crit_cast_icy_spear",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICY_SPEAR",
-    "name": "치명 시전: 아이시 스피어 (치명타/파워어택 적중, ICD 0.15초): Icy Spear 발동 (적중 피해 스케일)",
-    "nameEn": "Crit Cast: Icy Spear (Crit/Power Attack, ICD 0.15s): Cast Icy Spear (Hit Damage Scaling)",
-    "nameKo": "치명 시전: 아이시 스피어 (치명타/파워어택 적중, ICD 0.15초): Icy Spear 발동 (적중 피해 스케일)",
+    "name": "치명 시전: 아이시 스피어 (치명타/파워어택, ICD 0.15초): Icy Spear + 적중 피해의 30%",
+    "nameEn": "Crit Cast: Icy Spear (Crit/Power Attack, ICD 0.15s): Icy Spear + 30% of Hit Damage",
+    "nameKo": "치명 시전: 아이시 스피어 (치명타/파워어택, ICD 0.15초): Icy Spear + 적중 피해의 30%",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2138,9 +2138,9 @@
   {
     "id": "crit_cast_chain_lightning",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_CHAIN_LIGHTNING",
-    "name": "치명 시전: 체인 라이트닝 (치명타/파워어택 적중, ICD 0.15초): Chain Lightning 발동 (적중 피해 스케일)",
-    "nameEn": "Crit Cast: Chain Lightning (Crit/Power Attack, ICD 0.15s): Cast Chain Lightning (Hit Damage Scaling)",
-    "nameKo": "치명 시전: 체인 라이트닝 (치명타/파워어택 적중, ICD 0.15초): Chain Lightning 발동 (적중 피해 스케일)",
+    "name": "치명 시전: 체인 라이트닝 (치명타/파워어택, ICD 0.15초): Chain Lightning + 적중 피해의 30%",
+    "nameEn": "Crit Cast: Chain Lightning (Crit/Power Attack, ICD 0.15s): Chain Lightning + 30% of Hit Damage",
+    "nameKo": "치명 시전: 체인 라이트닝 (치명타/파워어택, ICD 0.15초): Chain Lightning + 적중 피해의 30%",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2171,9 +2171,9 @@
   {
     "id": "crit_cast_ice_storm",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_STORM",
-    "name": "치명 시전: 아이스 스톰 (치명타/파워어택 적중, ICD 0.15초): Ice Storm 발동 (적중 피해 스케일)",
-    "nameEn": "Crit Cast: Ice Storm (Crit/Power Attack, ICD 0.15s): Cast Ice Storm (Hit Damage Scaling)",
-    "nameKo": "치명 시전: 아이스 스톰 (치명타/파워어택 적중, ICD 0.15초): Ice Storm 발동 (적중 피해 스케일)",
+    "name": "치명 시전: 아이스 스톰 (치명타/파워어택, ICD 0.15초): Ice Storm + 적중 피해의 30%",
+    "nameEn": "Crit Cast: Ice Storm (Crit/Power Attack, ICD 0.15s): Ice Storm + 30% of Hit Damage",
+    "nameKo": "치명 시전: 아이스 스톰 (치명타/파워어택, ICD 0.15초): Ice Storm + 적중 피해의 30%",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2337,9 +2337,9 @@
   {
     "id": "nourishing_flame",
     "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T5",
-    "name": "자양의 불꽃 (적중 15% / ICD 1.5초 / 최근 처치 필요): 자가 치유 (적중 피해 스케일)",
-    "nameEn": "Nourishing Flame (15% on hit / ICD 1.5s / requires recent kill): Self Heal (Hit Damage Scaling)",
-    "nameKo": "자양의 불꽃 (적중 15% / ICD 1.5초 / 최근 처치 필요): 자가 치유 (적중 피해 스케일)",
+    "name": "자양의 불꽃 (적중 15% / ICD 1.5초 / 최근 처치 필요): 자가 치유 + 적중 피해의 6%",
+    "nameEn": "Nourishing Flame (15% on hit / ICD 1.5s / requires recent kill): Self Heal + 6% of Hit Damage",
+    "nameKo": "자양의 불꽃 (적중 15% / ICD 1.5초 / 최근 처치 필요): 자가 치유 + 적중 피해의 6%",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -3148,9 +3148,9 @@
   {
     "id": "thunder_mastery",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_EVOLVING_LIGHTNING",
-    "name": "뇌격 숙련 (적중 100%): 누적 성장으로 번개 피해가 단계적으로 강화됨",
-    "nameEn": "Thunder Mastery (100% on hit): Accumulative growth — lightning damage scales up in stages",
-    "nameKo": "뇌격 숙련 (적중 100%): 누적 성장으로 번개 피해가 단계적으로 강화됨",
+    "name": "뇌격 숙련 (적중 100%): 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회)",
+    "nameEn": "Thunder Mastery (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits)",
+    "nameKo": "뇌격 숙련 (적중 100%): 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회)",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -3197,9 +3197,9 @@
   {
     "id": "elemental_attunement",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_MODE_CYCLE_ELEMENTS",
-    "name": "원소 조율 (적중 100%): 성장형 + 수동 모드 전환",
-    "nameEn": "Elemental Attunement (100% on hit): Growth-type + Manual mode switching",
-    "nameKo": "원소 조율 (적중 100%): 성장형 + 수동 모드 전환",
+    "name": "원소 조율 (적중 100%): 화염/냉기/번개 수동 전환 + 성장 (×1.0→1.3→1.7→2.2, 단계: 20/60/120회)",
+    "nameEn": "Elemental Attunement (100% on hit): Fire/Frost/Shock manual switch + Growth (x1.0→1.3→1.7→2.2, stages: 20/60/120 hits)",
+    "nameKo": "원소 조율 (적중 100%): 화염/냉기/번개 수동 전환 + 성장 (×1.0→1.3→1.7→2.2, 단계: 20/60/120회)",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
