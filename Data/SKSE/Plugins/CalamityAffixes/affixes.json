@@ -10131,16 +10131,16 @@
         }
       },
       {
-        "id": "suffix_warrior_t1",
+        "id": "suffix_shadow_t1",
         "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T1",
-        "name": "약간의 전사: 공격력 +5%",
-        "nameEn": "of Minor Warrior: Attack Damage +5%",
-        "nameKo": "약간의 전사: 공격력 +5%",
+        "name": "약간의 그림자: 은신 +5%",
+        "nameEn": "of Minor Shadow: Sneak +5%",
+        "nameKo": "약간의 그림자: 은신 +5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T1",
-            "name": "Calamity Suffix: Attack Damage +5% / 공격력 +5%",
-            "actorValue": "AttackDamageMult",
+            "name": "Calamity Suffix: Sneak +5% / 은신 +5%",
+            "actorValue": "SneakingModifier",
             "resistValue": null,
             "magicSkill": null,
             "hostile": false,
@@ -10148,7 +10148,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T1",
-            "name": "Calamity Suffix: Attack Damage +5% / 공격력 +5%",
+            "name": "Calamity Suffix: Sneak +5% / 은신 +5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -10168,7 +10168,7 @@
           "chance": 6
         },
         "slot": "suffix",
-        "family": "warrior",
+        "family": "shadow",
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0,
@@ -10179,16 +10179,16 @@
         }
       },
       {
-        "id": "suffix_warrior_t2",
+        "id": "suffix_shadow_t2",
         "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T2",
-        "name": "전사: 공격력 +10%",
-        "nameEn": "of the Warrior: Attack Damage +10%",
-        "nameKo": "전사: 공격력 +10%",
+        "name": "그림자: 은신 +10%",
+        "nameEn": "of the Shadow: Sneak +10%",
+        "nameKo": "그림자: 은신 +10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T2",
-            "name": "Calamity Suffix: Attack Damage +10% / 공격력 +10%",
-            "actorValue": "AttackDamageMult",
+            "name": "Calamity Suffix: Sneak +10% / 은신 +10%",
+            "actorValue": "SneakingModifier",
             "resistValue": null,
             "magicSkill": null,
             "hostile": false,
@@ -10196,7 +10196,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T2",
-            "name": "Calamity Suffix: Attack Damage +10% / 공격력 +10%",
+            "name": "Calamity Suffix: Sneak +10% / 은신 +10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -10216,7 +10216,7 @@
           "chance": 3
         },
         "slot": "suffix",
-        "family": "warrior",
+        "family": "shadow",
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0,
@@ -10227,16 +10227,16 @@
         }
       },
       {
-        "id": "suffix_warrior_t3",
+        "id": "suffix_shadow_t3",
         "editorId": "CAFF_KYWD_SUFFIX_DISEASE_RESIST_T3",
-        "name": "위대한 전사: 공격력 +15%",
-        "nameEn": "of Grand Warrior: Attack Damage +15%",
-        "nameKo": "위대한 전사: 공격력 +15%",
+        "name": "위대한 그림자: 은신 +15%",
+        "nameEn": "of Grand Shadow: Sneak +15%",
+        "nameKo": "위대한 그림자: 은신 +15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DISEASE_RESIST_T3",
-            "name": "Calamity Suffix: Attack Damage +15% / 공격력 +15%",
-            "actorValue": "AttackDamageMult",
+            "name": "Calamity Suffix: Sneak +15% / 은신 +15%",
+            "actorValue": "SneakingModifier",
             "resistValue": null,
             "magicSkill": null,
             "hostile": false,
@@ -10244,7 +10244,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DISEASE_RESIST_T3",
-            "name": "Calamity Suffix: Attack Damage +15% / 공격력 +15%",
+            "name": "Calamity Suffix: Sneak +15% / 은신 +15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -10264,7 +10264,7 @@
           "chance": 1
         },
         "slot": "suffix",
-        "family": "warrior",
+        "family": "shadow",
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 0,
@@ -11282,6 +11282,294 @@
           "action": {
             "type": "DebugNotify",
             "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_EXPERIENCE_GAIN_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_enchanter_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T1",
+        "name": "약간의 부여술사: 부여 +5%",
+        "nameEn": "of Minor Enchanter: Enchanting +5%",
+        "nameKo": "약간의 부여술사: 부여 +5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T1",
+            "name": "Calamity Suffix: Enchanting +5% / 부여 +5%",
+            "actorValue": "EnchantingModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T1",
+            "name": "Calamity Suffix: Enchanting +5% / 부여 +5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "enchanter",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_enchanter_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T2",
+        "name": "부여술사: 부여 +10%",
+        "nameEn": "of the Enchanter: Enchanting +10%",
+        "nameKo": "부여술사: 부여 +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T2",
+            "name": "Calamity Suffix: Enchanting +10% / 부여 +10%",
+            "actorValue": "EnchantingModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T2",
+            "name": "Calamity Suffix: Enchanting +10% / 부여 +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "enchanter",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_enchanter_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T3",
+        "name": "위대한 부여술사: 부여 +15%",
+        "nameEn": "of Grand Enchanter: Enchanting +15%",
+        "nameKo": "위대한 부여술사: 부여 +15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T3",
+            "name": "Calamity Suffix: Enchanting +15% / 부여 +15%",
+            "actorValue": "EnchantingModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T3",
+            "name": "Calamity Suffix: Enchanting +15% / 부여 +15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "enchanter",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T3"
+          }
+        }
+      },
+      {
+        "id": "suffix_conjurer_t1",
+        "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T1",
+        "name": "약간의 소환술사: 소환 +5%",
+        "nameEn": "of Minor Conjurer: Conjuration +5%",
+        "nameKo": "약간의 소환술사: 소환 +5%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T1",
+            "name": "Calamity Suffix: Conjuration +5% / 소환 +5%",
+            "actorValue": "ConjurationModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T1",
+            "name": "Calamity Suffix: Conjuration +5% / 소환 +5%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CONJURATION_T1",
+              "magnitude": 5,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 6
+        },
+        "slot": "suffix",
+        "family": "conjurer",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CONJURATION_T1"
+          }
+        }
+      },
+      {
+        "id": "suffix_conjurer_t2",
+        "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T2",
+        "name": "소환술사: 소환 +10%",
+        "nameEn": "of the Conjurer: Conjuration +10%",
+        "nameKo": "소환술사: 소환 +10%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T2",
+            "name": "Calamity Suffix: Conjuration +10% / 소환 +10%",
+            "actorValue": "ConjurationModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T2",
+            "name": "Calamity Suffix: Conjuration +10% / 소환 +10%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CONJURATION_T2",
+              "magnitude": 10,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 3
+        },
+        "slot": "suffix",
+        "family": "conjurer",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CONJURATION_T2"
+          }
+        }
+      },
+      {
+        "id": "suffix_conjurer_t3",
+        "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T3",
+        "name": "위대한 소환술사: 소환 +15%",
+        "nameEn": "of Grand Conjurer: Conjuration +15%",
+        "nameKo": "위대한 소환술사: 소환 +15%",
+        "records": {
+          "magicEffect": {
+            "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T3",
+            "name": "Calamity Suffix: Conjuration +15% / 소환 +15%",
+            "actorValue": "ConjurationModifier",
+            "resistValue": null,
+            "magicSkill": null,
+            "hostile": false,
+            "recover": true
+          },
+          "spell": {
+            "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T3",
+            "name": "Calamity Suffix: Conjuration +15% / 소환 +15%",
+            "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_SUFFIX_CONJURATION_T3",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          }
+        },
+        "kid": {
+          "type": "Weapon",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 1
+        },
+        "slot": "suffix",
+        "family": "conjurer",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 0,
+          "action": {
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_SUFFIX_CONJURATION_T3"
           }
         }
       }

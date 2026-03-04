@@ -1,4 +1,4 @@
-# Calamity Suffix Effects (20 Families, 60 Entries)
+# Calamity Suffix Effects (22 Families, 66 Entries)
 
 Auto-generated from `affixes/modules/keywords.affixes.suffixes.json`.
 
@@ -8,22 +8,24 @@ Auto-generated from `affixes/modules/keywords.affixes.suffixes.json`.
 | 2 | **brilliance** | Magicka | +20 | +40 | +60 | 마법사 |
 | 3 | **bulwark** | BlockModifier | +5 | +10 | +15 | 방패 탱커 |
 | 4 | **champion** | TwoHandedModifier | +5 | +10 | +15 | 양손 전사 |
-| 5 | **eagle_eye** | BowSpeedBonus | +5 | +10 | +15 | 궁수 |
-| 6 | **endurance** | Stamina | +20 | +40 | +60 | 근접/궁수 |
-| 7 | **evasion** | LightArmorModifier | +5 | +10 | +15 | 경장/도적 |
-| 8 | **fortitude** | HeavyArmorModifier | +5 | +10 | +15 | 중장/탱커 |
-| 9 | **gladiator** | WeaponSpeedMult | +5 | +10 | +15 | 공격 속도 |
-| 10 | **guardian** | DamageResist | +25 | +50 | +80 | 물리 방어 |
-| 11 | **marksman** | MarksmanModifier | +5 | +10 | +15 | 궁수 |
-| 12 | **meditation** | MagickaRate | +25 | +50 | +75 | 마법사 |
-| 13 | **regeneration** | HealRate | +25 | +50 | +75 | 범용 |
-| 14 | **spell_ward** | ResistMagic | +3 | +8 | +12 | 마법 저항 |
-| 15 | **steed** | CarryWeight | +15 | +30 | +50 | 범용 유틸 |
-| 16 | **swiftness** | SpeedMult | +4 | +7 | +10 | 범용 이동 |
-| 17 | **swordsman** | OneHandedModifier | +5 | +10 | +15 | 한손 전사 |
-| 18 | **tenacity** | StaminaRate | +25 | +50 | +75 | 근접 |
-| 19 | **vitality** | Health | +25 | +50 | +75 | 범용 |
-| 20 | **warrior** | AttackDamageMult | +5 | +10 | +15 | 범용 공격 |
+| 5 | **conjurer** | ConjurationModifier | +5 | +10 | +15 | 소환 마법사 |
+| 6 | **eagle_eye** | BowSpeedBonus | +5 | +10 | +15 | 궁수 |
+| 7 | **enchanter** | EnchantingModifier | +5 | +10 | +15 | 부여 마법사 |
+| 8 | **endurance** | Stamina | +20 | +40 | +60 | 근접/궁수 |
+| 9 | **evasion** | LightArmorModifier | +5 | +10 | +15 | 경장/도적 |
+| 10 | **fortitude** | HeavyArmorModifier | +5 | +10 | +15 | 중장/탱커 |
+| 11 | **gladiator** | WeaponSpeedMult | +5 | +10 | +15 | 공격 속도 |
+| 12 | **guardian** | DamageResist | +25 | +50 | +80 | 물리 방어 |
+| 13 | **marksman** | MarksmanModifier | +5 | +10 | +15 | 궁수 |
+| 14 | **meditation** | MagickaRate | +25 | +50 | +75 | 마법사 |
+| 15 | **regeneration** | HealRate | +25 | +50 | +75 | 범용 |
+| 16 | **shadow** | SneakingModifier | +5 | +10 | +15 | 스텔스/도적 |
+| 17 | **spell_ward** | ResistMagic | +3 | +8 | +12 | 마법 저항 |
+| 18 | **steed** | CarryWeight | +15 | +30 | +50 | 범용 유틸 |
+| 19 | **swiftness** | SpeedMult | +4 | +7 | +10 | 범용 이동 |
+| 20 | **swordsman** | OneHandedModifier | +5 | +10 | +15 | 한손 전사 |
+| 21 | **tenacity** | StaminaRate | +25 | +50 | +75 | 근접 |
+| 22 | **vitality** | Health | +25 | +50 | +75 | 범용 |
 
 ## Detail by Family
 
@@ -59,6 +61,14 @@ Auto-generated from `affixes/modules/keywords.affixes.suffixes.json`.
 | T2 | `suffix_champion_t2` | 투사: 양손 무기 +10% | of Champion: Two-Handed +10% | 10 | `CAFF_KYWD_SUFFIX_FROST_RESIST_T2` |
 | T3 | `suffix_champion_t3` | 위대한 투사: 양손 무기 +15% | of Grand Champion: Two-Handed +15% | 15 | `CAFF_KYWD_SUFFIX_FROST_RESIST_T3` |
 
+### conjurer
+
+| Tier | ID | Name (Ko) | Name (En) | Magnitude | EditorID (KYWD) |
+|------|----|-----------|-----------|-----------:|----------------|
+| T1 | `suffix_conjurer_t1` | 약간의 소환술사: 소환 +5% | of Minor Conjurer: Conjuration +5% | 5 | `CAFF_KYWD_SUFFIX_CONJURATION_T1` |
+| T2 | `suffix_conjurer_t2` | 소환술사: 소환 +10% | of the Conjurer: Conjuration +10% | 10 | `CAFF_KYWD_SUFFIX_CONJURATION_T2` |
+| T3 | `suffix_conjurer_t3` | 위대한 소환술사: 소환 +15% | of Grand Conjurer: Conjuration +15% | 15 | `CAFF_KYWD_SUFFIX_CONJURATION_T3` |
+
 ### eagle_eye
 
 | Tier | ID | Name (Ko) | Name (En) | Magnitude | EditorID (KYWD) |
@@ -66,6 +76,14 @@ Auto-generated from `affixes/modules/keywords.affixes.suffixes.json`.
 | T1 | `suffix_eagle_eye_t1` | 약간의 독수리눈: 활 속도 +5% | of Minor Eagle Eye: Bow Speed +5% | 5 | `CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T1` |
 | T2 | `suffix_eagle_eye_t2` | 독수리눈: 활 속도 +10% | of Eagle Eye: Bow Speed +10% | 10 | `CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T2` |
 | T3 | `suffix_eagle_eye_t3` | 위대한 독수리눈: 활 속도 +15% | of Grand Eagle Eye: Bow Speed +15% | 15 | `CAFF_KYWD_SUFFIX_SHOUT_COOLDOWN_T3` |
+
+### enchanter
+
+| Tier | ID | Name (Ko) | Name (En) | Magnitude | EditorID (KYWD) |
+|------|----|-----------|-----------|-----------:|----------------|
+| T1 | `suffix_enchanter_t1` | 약간의 부여술사: 부여 +5% | of Minor Enchanter: Enchanting +5% | 5 | `CAFF_KYWD_SUFFIX_ENCHANTING_T1` |
+| T2 | `suffix_enchanter_t2` | 부여술사: 부여 +10% | of the Enchanter: Enchanting +10% | 10 | `CAFF_KYWD_SUFFIX_ENCHANTING_T2` |
+| T3 | `suffix_enchanter_t3` | 위대한 부여술사: 부여 +15% | of Grand Enchanter: Enchanting +15% | 15 | `CAFF_KYWD_SUFFIX_ENCHANTING_T3` |
 
 ### endurance
 
@@ -131,6 +149,14 @@ Auto-generated from `affixes/modules/keywords.affixes.suffixes.json`.
 | T2 | `suffix_regeneration_t2` | 재생: 체력 재생 +50% | of Regeneration: Health Regen +50% | 50 | `CAFF_KYWD_SUFFIX_HEALTH_REGEN_T2` |
 | T3 | `suffix_regeneration_t3` | 위대한 재생: 체력 재생 +75% | of Grand Regeneration: Health Regen +75% | 75 | `CAFF_KYWD_SUFFIX_HEALTH_REGEN_T3` |
 
+### shadow
+
+| Tier | ID | Name (Ko) | Name (En) | Magnitude | EditorID (KYWD) |
+|------|----|-----------|-----------|-----------:|----------------|
+| T1 | `suffix_shadow_t1` | 약간의 그림자: 은신 +5% | of Minor Shadow: Sneak +5% | 5 | `CAFF_KYWD_SUFFIX_DISEASE_RESIST_T1` |
+| T2 | `suffix_shadow_t2` | 그림자: 은신 +10% | of the Shadow: Sneak +10% | 10 | `CAFF_KYWD_SUFFIX_DISEASE_RESIST_T2` |
+| T3 | `suffix_shadow_t3` | 위대한 그림자: 은신 +15% | of Grand Shadow: Sneak +15% | 15 | `CAFF_KYWD_SUFFIX_DISEASE_RESIST_T3` |
+
 ### spell_ward
 
 | Tier | ID | Name (Ko) | Name (En) | Magnitude | EditorID (KYWD) |
@@ -178,12 +204,4 @@ Auto-generated from `affixes/modules/keywords.affixes.suffixes.json`.
 | T1 | `suffix_vitality_t1` | 약간의 활력: 최대 체력 +25 | of Minor Vitality: Max Health +25 | 25 | `CAFF_KYWD_SUFFIX_MAX_HEALTH_T1` |
 | T2 | `suffix_vitality_t2` | 활력: 최대 체력 +50 | of Vitality: Max Health +50 | 50 | `CAFF_KYWD_SUFFIX_MAX_HEALTH_T2` |
 | T3 | `suffix_vitality_t3` | 위대한 활력: 최대 체력 +75 | of Grand Vitality: Max Health +75 | 75 | `CAFF_KYWD_SUFFIX_MAX_HEALTH_T3` |
-
-### warrior
-
-| Tier | ID | Name (Ko) | Name (En) | Magnitude | EditorID (KYWD) |
-|------|----|-----------|-----------|-----------:|----------------|
-| T1 | `suffix_warrior_t1` | 약간의 전사: 공격력 +5% | of Minor Warrior: Attack Damage +5% | 5 | `CAFF_KYWD_SUFFIX_DISEASE_RESIST_T1` |
-| T2 | `suffix_warrior_t2` | 전사: 공격력 +10% | of the Warrior: Attack Damage +10% | 10 | `CAFF_KYWD_SUFFIX_DISEASE_RESIST_T2` |
-| T3 | `suffix_warrior_t3` | 위대한 전사: 공격력 +15% | of Grand Warrior: Attack Damage +15% | 15 | `CAFF_KYWD_SUFFIX_DISEASE_RESIST_T3` |
 

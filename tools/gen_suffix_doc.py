@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""서픽스 60개 효과 목록 마크다운 문서 생성."""
+"""서픽스 효과 목록 마크다운 문서 생성."""
 from __future__ import annotations
 
 import json
@@ -25,7 +25,7 @@ def main() -> int:
         families.setdefault(fam, []).append(entry)
 
     lines = [
-        "# Calamity Suffix Effects (20 Families, 60 Entries)",
+        f"# Calamity Suffix Effects ({len(families)} Families, {len(data)} Entries)",
         "",
         f"Auto-generated from `{SUFFIXES_PATH}`.",
         "",
@@ -42,7 +42,7 @@ def main() -> int:
         "meditation": "마법사",
         "guardian": "물리 방어",
         "spell_ward": "마법 저항",
-        "warrior": "범용 공격",
+        "shadow": "스텔스/도적",
         "gladiator": "공격 속도",
         "assassin": "치명타",
         "swiftness": "범용 이동",
@@ -54,6 +54,8 @@ def main() -> int:
         "bulwark": "방패 탱커",
         "eagle_eye": "궁수",
         "steed": "범용 유틸",
+        "enchanter": "부여 마법사",
+        "conjurer": "소환 마법사",
     }
 
     for idx, (fam, entries) in enumerate(sorted(families.items()), 1):
