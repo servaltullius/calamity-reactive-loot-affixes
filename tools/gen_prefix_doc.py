@@ -5,7 +5,7 @@ import json, subprocess, sys
 from pathlib import Path
 
 CORE_JSON = Path("affixes/modules/keywords.affixes.core.json")
-OUTPUT = Path("doc/6.프리픽스_83개_효과_정리.md")
+OUTPUT = Path("docs/PREFIX_EFFECTS.md")
 
 
 def categorize(entries):

@@ -1,5 +1,14 @@
 # docs/ 디렉토리 인덱스
 
+## 어픽스 효과 목록
+
+| 파일 | 설명 | 생성 |
+|------|------|------|
+| `PREFIX_EFFECTS.md` | 프리픽스 83개 효과 정리 | `tools/gen_prefix_doc.py` |
+| `SUFFIX_EFFECTS.md` | 서픽스 22패밀리 66개 효과 목록 | `tools/gen_suffix_doc.py` |
+| `RUNEWORD_EFFECTS.md` | 룬워드 94개 효과 정리 | 수동 |
+| `AFFIX_CATALOG.md` | 현재 구현 어픽스 전체 목록 (243개) | 수동 |
+
 ## 루트 문서
 
 | 파일 | 설명 |
@@ -7,7 +16,17 @@
 | `NEXUS_DESCRIPTION.md` | Nexus Mods 배포 페이지 설명 (한국어/영어) |
 | `NEXUS_DESCRIPTION_BBCODE.txt` | Nexus Mods BBCode 포맷 설명 |
 | `스카이림 바닐라 효과 ARPG 변환 아이디어.md` | 바닐라 효과 → ARPG 어픽스 변환 기획 노트 |
-| `SUFFIX_EFFECTS.md` | 서픽스 20패밀리 60개 효과 목록 (자동 생성) |
+
+## design/ — 설계 문서
+
+프로젝트 기획, 아키텍처, 워크플로우 문서. (구 `doc/`에서 이동)
+
+| 파일 | 설명 |
+|------|------|
+| `개발명세서.md` | 프로젝트 개발 명세서 |
+| `CK_MVP_셋업_체크리스트.md` | Creation Kit MVP 셋업 체크리스트 |
+| `데이터주도_생성기_워크플로우.md` | 데이터 주도 생성기 워크플로우 |
+| `아키텍처_분석_리팩터링_로드맵.md` | 아키텍처 분석 및 리팩터링 로드맵 |
 
 ## adr/ — Architecture Decision Records
 
@@ -33,17 +52,19 @@
 
 ## references/ — 참조 문서
 
-외부 아키텍처 분석 및 호환성 정책.
+외부 아키텍처 분석, 호환성 정책, LoreBox 예제.
 
 | 파일 | 설명 |
 |------|------|
 | `2026-02-09-event-signatures.md` | SKSE 이벤트 시그니처 참조 |
 | `2026-02-15-calamityaffixes-architecture-snapshot-v1.2.14.md` | v1.2.14 아키텍처 스냅샷 |
 | `2026-02-22-corpse-drop-compat-policy.md` | 시체 드랍 호환성 정책 |
+| `LoreBox-Example/` | LoreBox ESP 예제 (Nexus #156534) |
+| `LoreBox-Tutorial/` | LoreBox 튜토리얼 (Nexus #156534) |
 
 ## releases/ — 릴리즈 기록
 
-GitHub 릴리즈 본문, Nexus 배포 카피, QA 체크리스트 등 (78개 파일).
+GitHub 릴리즈 본문, Nexus 배포 카피, QA 체크리스트 등.
 
 주요 유형:
 - `github-release-body-*.md` — GitHub 릴리즈 노트
