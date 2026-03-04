@@ -101,9 +101,9 @@ cp -a "${stage_data_dir}/." "${tmp_dir}/${mod_name}/"
 # Include docs for CK setup / debugging.
 mkdir -p "${tmp_dir}/${mod_name}/Docs"
 cp -a "${repo_root}/README.md" "${tmp_dir}/${mod_name}/Docs/README.md"
-cp -a "${repo_root}/doc/1.개발명세서.md" "${tmp_dir}/${mod_name}/Docs/1.개발명세서.md"
-cp -a "${repo_root}/doc/2.CK_MVP_셋업_체크리스트.md" "${tmp_dir}/${mod_name}/Docs/2.CK_MVP_셋업_체크리스트.md"
-cp -a "${repo_root}/doc/3.B_데이터주도_생성기_워크플로우.md" "${tmp_dir}/${mod_name}/Docs/3.B_데이터주도_생성기_워크플로우.md"
+cp -a "${repo_root}/docs/design/개발명세서.md" "${tmp_dir}/${mod_name}/Docs/개발명세서.md"
+cp -a "${repo_root}/docs/design/CK_MVP_셋업_체크리스트.md" "${tmp_dir}/${mod_name}/Docs/CK_MVP_셋업_체크리스트.md"
+cp -a "${repo_root}/docs/design/데이터주도_생성기_워크플로우.md" "${tmp_dir}/${mod_name}/Docs/데이터주도_생성기_워크플로우.md"
 
 (
   cd "${tmp_dir}"
