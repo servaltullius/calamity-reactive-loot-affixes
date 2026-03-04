@@ -54,9 +54,9 @@
       {
         "id": "storm_call",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING",
-        "name": "폭풍 소환 (Lucky Hit 38% / ICD 1.5초): 번개 피해 10 + 적중 피해의 10%",
+        "name": "폭풍 소환: 38% 확률로 번개 피해 10 + 적중의 10%. 1.5초마다 발동.",
         "nameEn": "Storm Call (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage + 10% of Hit Damage",
-        "nameKo": "폭풍 소환 (Lucky Hit 38% / ICD 1.5초): 번개 피해 10 + 적중 피해의 10%",
+        "nameKo": "폭풍 소환: 38% 확률로 번개 피해 10 + 적중의 10%. 1.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_ARC_LIGHTNING",
@@ -111,9 +111,9 @@
       {
         "id": "flame_strike",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_DAMAGE",
-        "name": "화염 일격 (적중 100%): 화염 피해 6 + 적중 피해의 10%",
+        "name": "화염 일격: 매 적중 시 화염 피해 6 + 적중의 10%.",
         "nameEn": "Flame Strike (100% on hit): 6 Fire Damage + 10% of Hit Damage",
-        "nameKo": "화염 일격 (적중 100%): 화염 피해 6 + 적중 피해의 10%",
+        "nameKo": "화염 일격: 매 적중 시 화염 피해 6 + 적중의 10%.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FIRE_DAMAGE",
@@ -166,9 +166,9 @@
       {
         "id": "frost_strike",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_DAMAGE",
-        "name": "냉기 일격 (적중 100%): 냉기 피해 6 + 적중 피해의 10%",
+        "name": "냉기 일격: 매 적중 시 냉기 피해 6 + 적중의 10%.",
         "nameEn": "Frost Strike (100% on hit): 6 Frost Damage + 10% of Hit Damage",
-        "nameKo": "냉기 일격 (적중 100%): 냉기 피해 6 + 적중 피해의 10%",
+        "nameKo": "냉기 일격: 매 적중 시 냉기 피해 6 + 적중의 10%.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FROST_DAMAGE",
@@ -221,9 +221,9 @@
       {
         "id": "spark_strike",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_DAMAGE",
-        "name": "전격 일격 (적중 100%): 번개 피해 6 + 적중 피해의 10%",
+        "name": "전격 일격: 매 적중 시 번개 피해 6 + 적중의 10%.",
         "nameEn": "Spark Strike (100% on hit): 6 Shock Damage + 10% of Hit Damage",
-        "nameKo": "전격 일격 (적중 100%): 번개 피해 6 + 적중 피해의 10%",
+        "nameKo": "전격 일격: 매 적중 시 번개 피해 6 + 적중의 10%.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SHOCK_DAMAGE",
@@ -276,9 +276,9 @@
       {
         "id": "flame_weakness",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_SHRED",
-        "name": "화염 취약 (Lucky Hit 36% / ICD 2.8초): 화염 저항 -15 (4초)",
+        "name": "화염 취약: 36% 확률로 화염 저항 -15 (4초). 2.8초마다 발동.",
         "nameEn": "Flame Weakness (Lucky Hit 36% / ICD 2.8s): Fire Resist -15 (4s)",
-        "nameKo": "화염 취약 (Lucky Hit 36% / ICD 2.8초): 화염 저항 -15 (4초)",
+        "nameKo": "화염 취약: 36% 확률로 화염 저항 -15 (4초). 2.8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FIRE_SHRED",
@@ -324,9 +324,9 @@
       {
         "id": "frost_weakness",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_SHRED",
-        "name": "냉기 취약 (최근 2초 내 적중 유지 시 24% / ICD 2.4초): 냉기 저항 -15 (4초)",
+        "name": "냉기 취약: 최근 2초 내 적중 유지 시 24% 확률로 냉기 저항 -15 (4초). 2.4초마다 발동.",
         "nameEn": "Frost Weakness (24% on hit while chaining hits in the last 2s / ICD 2.4s): Frost Resist -15 (4s)",
-        "nameKo": "냉기 취약 (최근 2초 내 적중 유지 시 24% / ICD 2.4초): 냉기 저항 -15 (4초)",
+        "nameKo": "냉기 취약: 최근 2초 내 적중 유지 시 24% 확률로 냉기 저항 -15 (4초). 2.4초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FROST_SHRED",
@@ -371,9 +371,9 @@
       {
         "id": "shock_weakness",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
-        "name": "전격 취약 (최근 4초 내 처치 후 적중 30% / ICD 2초): 번개 저항 -15 (4초)",
+        "name": "전격 취약: 최근 4초 내 처치 후 30% 확률로 번개 저항 -15 (4초). 2초마다 발동.",
         "nameEn": "Shock Weakness (30% on hit after a kill in the last 4s / ICD 2s): Shock Resist -15 (4s)",
-        "nameKo": "전격 취약 (최근 4초 내 처치 후 적중 30% / ICD 2초): 번개 저항 -15 (4초)",
+        "nameKo": "전격 취약: 최근 4초 내 처치 후 30% 확률로 번개 저항 -15 (4초). 2초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SHOCK_SHRED",
@@ -418,9 +418,9 @@
       {
         "id": "wolf_spirit",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FAMILIAR",
-        "name": "늑대 혼령 (적중 30% / ICD 24초): 패밀리어 소환 (60초)",
+        "name": "늑대 혼령: 적중 시 30% 확률로 패밀리어 소환 (60초). 24초마다 발동.",
         "nameEn": "Wolf Spirit (30% on hit / ICD 24s): Summon Familiar (60s)",
-        "nameKo": "늑대 혼령 (적중 30% / ICD 24초): 패밀리어 소환 (60초)",
+        "nameKo": "늑대 혼령: 적중 시 30% 확률로 패밀리어 소환 (60초). 24초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -444,9 +444,9 @@
       {
         "id": "flame_sprite",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FLAMING_FAMILIAR",
-        "name": "화염 정령 (Lucky Hit 36% / ICD 14초): 폭발하는 불꽃 패밀리어 소환",
+        "name": "화염 정령: 36% 확률로 폭발하는 불꽃 패밀리어 소환. 14초마다 발동.",
         "nameEn": "Flame Sprite (Lucky Hit 36% / ICD 14s): Summon Exploding Flame Familiar",
-        "nameKo": "화염 정령 (Lucky Hit 36% / ICD 14초): 폭발하는 불꽃 패밀리어 소환",
+        "nameKo": "화염 정령: 36% 확률로 폭발하는 불꽃 패밀리어 소환. 14초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -472,9 +472,9 @@
       {
         "id": "flame_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FLAME_ATRONACH",
-        "name": "화염 아트로나크 (Lucky Hit 30% / ICD 32초): 화염 아트로낙 소환 (60초)",
+        "name": "화염 아트로나크: 30% 확률로 화염 아트로낙 소환 (60초). 32초마다 발동.",
         "nameEn": "Flame Atronach (Lucky Hit 30% / ICD 32s): Summon Flame Atronach (60s)",
-        "nameKo": "화염 아트로나크 (Lucky Hit 30% / ICD 32초): 화염 아트로낙 소환 (60초)",
+        "nameKo": "화염 아트로나크: 30% 확률로 화염 아트로낙 소환 (60초). 32초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -500,9 +500,9 @@
       {
         "id": "frost_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FROST_ATRONACH",
-        "name": "냉기 아트로나크 (Lucky Hit 30% / ICD 32초): 냉기 아트로낙 소환 (60초)",
+        "name": "냉기 아트로나크: 30% 확률로 냉기 아트로낙 소환 (60초). 32초마다 발동.",
         "nameEn": "Frost Atronach (Lucky Hit 30% / ICD 32s): Summon Frost Atronach (60s)",
-        "nameKo": "냉기 아트로나크 (Lucky Hit 30% / ICD 32초): 냉기 아트로낙 소환 (60초)",
+        "nameKo": "냉기 아트로나크: 30% 확률로 냉기 아트로낙 소환 (60초). 32초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -528,9 +528,9 @@
       {
         "id": "storm_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_STORM_ATRONACH",
-        "name": "폭풍 아트로나크 (Lucky Hit 26% / ICD 40초): 폭풍 아트로낙 소환 (60초)",
+        "name": "폭풍 아트로나크: 26% 확률로 폭풍 아트로낙 소환 (60초). 40초마다 발동.",
         "nameEn": "Storm Atronach (Lucky Hit 26% / ICD 40s): Summon Storm Atronach (60s)",
-        "nameKo": "폭풍 아트로나크 (Lucky Hit 26% / ICD 40초): 폭풍 아트로낙 소환 (60초)",
+        "nameKo": "폭풍 아트로나크: 26% 확률로 폭풍 아트로낙 소환 (60초). 40초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -556,9 +556,9 @@
       {
         "id": "dremora_pact",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_DREMORA_LORD",
-        "name": "드레모라 서약 (Lucky Hit 22% / ICD 52초): 드레모라 군주 소환 (60초)",
+        "name": "드레모라 서약: 22% 확률로 드레모라 군주 소환 (60초). 52초마다 발동.",
         "nameEn": "Dremora Pact (Lucky Hit 22% / ICD 52s): Summon Dremora Lord (60s)",
-        "nameKo": "드레모라 서약 (Lucky Hit 22% / ICD 52초): 드레모라 군주 소환 (60초)",
+        "nameKo": "드레모라 서약: 22% 확률로 드레모라 군주 소환 (60초). 52초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -721,9 +721,9 @@
       {
         "id": "stone_ward",
         "editorId": "LoreBox_CAFF_AFFIX_INCOMING_WARDEN_SHELL",
-        "name": "돌의 수호 (피격 10% / ICD 6초): 피해 저항 +120 (3초)",
+        "name": "돌의 수호: 피격 시 10% 확률로 피해 저항 +120 (3초). 6초마다 발동.",
         "nameEn": "Stone Ward (10% on hit taken / ICD 6s): Damage Resist +120 (3s)",
-        "nameKo": "돌의 수호 (피격 10% / ICD 6초): 피해 저항 +120 (3초)",
+        "nameKo": "돌의 수호: 피격 시 10% 확률로 피해 저항 +120 (3초). 6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_INCOMING_WARDEN_SHELL",
@@ -768,9 +768,9 @@
       {
         "id": "arcane_ward",
         "editorId": "LoreBox_CAFF_AFFIX_INCOMING_RESOLVE_BARRIER",
-        "name": "마법 방벽 (피격 18% / ICD 8초): 마법 저항 +25% (4초)",
+        "name": "마법 방벽: 피격 시 18% 확률로 마법 저항 +25% (4초). 8초마다 발동.",
         "nameEn": "Arcane Ward (18% on hit taken / ICD 8s): Magic Resist +25% (4s)",
-        "nameKo": "마법 방벽 (피격 18% / ICD 8초): 마법 저항 +25% (4초)",
+        "nameKo": "마법 방벽: 피격 시 18% 확률로 마법 저항 +25% (4초). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_INCOMING_RESOLVE_BARRIER",
@@ -815,9 +815,9 @@
       {
         "id": "healing_surge",
         "editorId": "LoreBox_CAFF_AFFIX_INCOMING_VITAL_REBOUND",
-        "name": "치유의 파도 (피격 20% / ICD 9초): 체력 재생 +140% (5초)",
+        "name": "치유의 파도: 피격 시 20% 확률로 체력 재생 +140% (5초). 9초마다 발동.",
         "nameEn": "Healing Surge (20% on hit taken / ICD 9s): Health Regen +140% (5s)",
-        "nameKo": "치유의 파도 (피격 20% / ICD 9초): 체력 재생 +140% (5초)",
+        "nameKo": "치유의 파도: 피격 시 20% 확률로 체력 재생 +140% (5초). 9초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_INCOMING_VITAL_REBOUND",
@@ -1008,9 +1008,9 @@
       {
         "id": "ember_brand",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_EMBERBRAND_IGNITE",
-        "name": "잔불 낙인 (적중 40% / ICD 0.8초): 점화 피해 4 + 적중 피해의 4% (4초)",
+        "name": "잔불 낙인: 적중 시 40% 확률로 점화 피해 4 + 적중의 4% (4초). 0.8초마다 발동.",
         "nameEn": "Ember Brand (40% on hit / ICD 0.8s): Ignite 4 + 4% of Hit Damage (4s)",
-        "nameKo": "잔불 낙인 (적중 40% / ICD 0.8초): 점화 피해 4 + 적중 피해의 4% (4초)",
+        "nameKo": "잔불 낙인: 적중 시 40% 확률로 점화 피해 4 + 적중의 4% (4초). 0.8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_EMBERBRAND_IGNITE",
@@ -1063,9 +1063,9 @@
       {
         "id": "ember_pyre",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_EMBERBRAND_BURST",
-        "name": "잔불 장작 (처치 18% / ICD 1초): 시체 폭발 (반경 320, 최대체력 8% + 14 화염)",
+        "name": "잔불 장작: 처치 시 18% 확률로 시체 폭발 (반경 320, 최대체력 8% + 14 화염). 1초마다 발동.",
         "nameEn": "Ember Pyre (18% on kill / ICD 1s): Corpse explosion (320 radius, 8% max health + 14 fire)",
-        "nameKo": "잔불 장작 (처치 18% / ICD 1초): 시체 폭발 (반경 320, 최대체력 8% + 14 화염)",
+        "nameKo": "잔불 장작: 처치 시 18% 확률로 시체 폭발 (반경 320, 최대체력 8% + 14 화염). 1초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1098,9 +1098,9 @@
       {
         "id": "ice_shackle",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FROSTLOCK_SNARE",
-        "name": "얼음 족쇄 (적중 24% / ICD 2.5초): 냉기 감속 -35% (2초)",
+        "name": "얼음 족쇄: 적중 시 24% 확률로 냉기 감속 -35% (2초). 2.5초마다 발동.",
         "nameEn": "Ice Shackle (24% on hit / ICD 2.5s): Frost snare -35% (2s)",
-        "nameKo": "얼음 족쇄 (적중 24% / ICD 2.5초): 냉기 감속 -35% (2초)",
+        "nameKo": "얼음 족쇄: 적중 시 24% 확률로 냉기 감속 -35% (2초). 2.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_FROSTLOCK_SNARE",
@@ -1146,9 +1146,9 @@
       {
         "id": "mana_burn",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_OVERLOAD",
-        "name": "마나 소진 (Lucky Hit 35% / ICD 1.2초): 매지카 60 흡수",
+        "name": "마나 소진: 35% 확률로 매지카 60 흡수. 1.2초마다 발동.",
         "nameEn": "Mana Burn (Lucky Hit 35% / ICD 1.2s): Drain 60 Magicka",
-        "nameKo": "마나 소진 (Lucky Hit 35% / ICD 1.2초): 매지카 60 흡수",
+        "nameKo": "마나 소진: 35% 확률로 매지카 60 흡수. 1.2초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
@@ -1195,9 +1195,9 @@
       {
         "id": "life_drain",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_BLOOD_SIPHON",
-        "name": "생명 흡수 (Lucky Hit 38% / ICD 0.7초): 체력 회복 4 + 물리 피해의 4.5% (최대 24)",
+        "name": "생명 흡수: 38% 확률로 체력 회복 4 + 물리 피해의 4.5% (최대 24). 0.7초마다 발동.",
         "nameEn": "Life Drain (Lucky Hit 38% / ICD 0.7s): Heal 4 + 4.5% of physical hit damage (max 24)",
-        "nameKo": "생명 흡수 (Lucky Hit 38% / ICD 0.7초): 체력 회복 4 + 물리 피해의 4.5% (최대 24)",
+        "nameKo": "생명 흡수: 38% 확률로 체력 회복 4 + 물리 피해의 4.5% (최대 24). 0.7초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_BLOOD_SIPHON",
@@ -1253,9 +1253,9 @@
       {
         "id": "soul_siphon",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_SOUL_SURGE",
-        "name": "영혼 착취 (처치 30% / ICD 2초): 마나 재생 +35% (8초)",
+        "name": "영혼 착취: 처치 시 30% 확률로 마나 재생 +35% (8초). 2초마다 발동.",
         "nameEn": "Soul Siphon (30% on kill / ICD 2s): Magicka Regen +35% (8s)",
-        "nameKo": "영혼 착취 (처치 30% / ICD 2초): 마나 재생 +35% (8초)",
+        "nameKo": "영혼 착취: 처치 시 30% 확률로 마나 재생 +35% (8초). 2초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_KILL_SOUL_SURGE",
@@ -1300,9 +1300,9 @@
       {
         "id": "shadow_stride",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHADOWSTEP_BURST",
-        "name": "그림자 질주 (최근 4초 내 처치 후 적중 20% / ICD 12초): 이동속도 +20% (4초)",
+        "name": "그림자 질주: 최근 4초 내 처치 후 20% 확률로 이동속도 +20% (4초). 12초마다 발동.",
         "nameEn": "Shadow Stride (20% on hit after a kill in the last 4s / ICD 12s): Move Speed +20% (4s)",
-        "nameKo": "그림자 질주 (최근 4초 내 처치 후 적중 20% / ICD 12초): 이동속도 +20% (4초)",
+        "nameKo": "그림자 질주: 최근 4초 내 처치 후 20% 확률로 이동속도 +20% (4초). 12초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
@@ -1412,9 +1412,9 @@
       {
         "id": "bear_trap",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_TRAP_IRONJAW",
-        "name": "곰 덫 (치명타/파워어택 적중 20% / ICD 6초): 적 발밑에 덫 설치(재장전 2.5초) → 밟은 적 이동속도 -100% (2초) + 랜덤 추가 효과",
+        "name": "곰 덫: 치명타/강공 시 20% 확률로 적 발밑에 덫 설치(재장전 2.5초) → 밟은 적 이동속도 -100% (2초) + 랜덤 추가 효과. 6초마다 발동.",
         "nameEn": "Bear Trap (20% crit/power attack / ICD 6s): Deploy trap at enemy feet (2.5s reload) -> Snare -100% Move Speed (2s) + Random bonus effect",
-        "nameKo": "곰 덫 (치명타/파워어택 적중 20% / ICD 6초): 적 발밑에 덫 설치(재장전 2.5초) → 밟은 적 이동속도 -100% (2초) + 랜덤 추가 효과",
+        "nameKo": "곰 덫: 치명타/강공 시 20% 확률로 적 발밑에 덫 설치(재장전 2.5초) → 밟은 적 이동속도 -100% (2초) + 랜덤 추가 효과. 6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
@@ -1613,9 +1613,9 @@
       {
         "id": "voice_of_power",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_25",
-        "name": "힘의 외침 (피격 25% / ICD 6초): 이동 +30%, 공격속도 +20% (6초)",
+        "name": "힘의 외침: 피격 시 25% 확률로 이동 +30%, 공격속도 +20% (6초). 6초마다 발동.",
         "nameEn": "Voice of Power (25% on hit taken / ICD 6s): Move Speed +30%, Attack Speed +20% (6s)",
-        "nameKo": "힘의 외침 (피격 25% / ICD 6초): 이동 +30%, 공격속도 +20% (6초)",
+        "nameKo": "힘의 외침: 피격 시 25% 확률로 이동 +30%, 공격속도 +20% (6초). 6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
@@ -1688,9 +1688,9 @@
       {
         "id": "death_mark",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_75",
-        "name": "죽음의 표식 (Lucky Hit 15% / 표적별 ICD 25초): 방어력 파쇄",
+        "name": "죽음의 표식: 15% 확률로 방어력 파쇄. 1초마다 발동. 같은 대상 25초.",
         "nameEn": "Death's Mark (Lucky Hit 15% / per-target ICD 25s): Armor Shred",
-        "nameKo": "죽음의 표식 (Lucky Hit 15% / 표적별 ICD 25초): 방어력 파쇄",
+        "nameKo": "죽음의 표식: 15% 확률로 방어력 파쇄. 1초마다 발동. 같은 대상 25초.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1744,9 +1744,9 @@
       {
         "id": "ice_form",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_25",
-        "name": "얼음 형상 (Lucky Hit 8% / ICD 15초): 극한 동결",
+        "name": "얼음 형상: 8% 확률로 극한 동결. 15초마다 발동.",
         "nameEn": "Ice Form (Lucky Hit 8% / ICD 15s): Deep Freeze",
-        "nameKo": "얼음 형상 (Lucky Hit 8% / ICD 15초): 극한 동결",
+        "nameKo": "얼음 형상: 8% 확률로 극한 동결. 15초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
@@ -1820,9 +1820,9 @@
       {
         "id": "disarming_shout",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_75",
-        "name": "무장 해제 (Lucky Hit 10% / ICD 10초): 공격속도 감소",
+        "name": "무장 해제: 10% 확률로 공격속도 감소. 10초마다 발동.",
         "nameEn": "Disarming Shout (Lucky Hit 10% / ICD 10s): Attack Speed Reduction",
-        "nameKo": "무장 해제 (Lucky Hit 10% / ICD 10초): 공격속도 감소",
+        "nameKo": "무장 해제: 10% 확률로 공격속도 감소. 10초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1875,9 +1875,9 @@
       {
         "id": "whirlwind_sprint",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_25",
-        "name": "질풍 외침 (처치 100% / ICD 3초): 이동속도 강화 (성장: ×1.0→1.25→1.55→2.0)",
+        "name": "질풍 외침: 처치 시 이동속도 강화 (성장: ×1.0→1.25→1.55→2.0). 3초마다 발동.",
         "nameEn": "Whirlwind Sprint (100% on kill / ICD 3s): Move Speed Boost (Growth: x1.0→1.25→1.55→2.0)",
-        "nameKo": "질풍 외침 (처치 100% / ICD 3초): 이동속도 강화 (성장: ×1.0→1.25→1.55→2.0)",
+        "nameKo": "질풍 외침: 처치 시 이동속도 강화 (성장: ×1.0→1.25→1.55→2.0). 3초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
@@ -1965,9 +1965,9 @@
       {
         "id": "spell_breach",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_75",
-        "name": "마법 약화 (Lucky Hit 12% / ICD 10초): 마법 저항 감소",
+        "name": "마법 약화: 12% 확률로 마법 저항 감소. 10초마다 발동.",
         "nameEn": "Spell Breach (Lucky Hit 12% / ICD 10s): Magic Resist Reduction",
-        "nameKo": "마법 약화 (Lucky Hit 12% / ICD 10초): 마법 저항 감소",
+        "nameKo": "마법 약화: 12% 확률로 마법 저항 감소. 10초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2020,9 +2020,9 @@
       {
         "id": "archmage_t1",
         "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T1",
-        "name": "대마법사 (주문 적중): 최대 매지카 10% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "name": "대마법사: 주문 적중 시 최대 매지카의 10%를 번개 피해로 가하고, 5%를 추가 소모한다.",
         "nameEn": "Archmage (on spell hit): 10% Max Magicka as Lightning Damage / 5% Max Magicka extra cost",
-        "nameKo": "대마법사 (주문 적중): 최대 매지카 10% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "nameKo": "대마법사: 주문 적중 시 최대 매지카의 10%를 번개 피해로 가하고, 5%를 추가 소모한다.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2047,9 +2047,9 @@
       {
         "id": "archmage_t2",
         "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T2",
-        "name": "대마법사 (주문 적중): 최대 매지카 12% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "name": "대마법사: 주문 적중 시 최대 매지카의 12%를 번개 피해로 가하고, 5%를 추가 소모한다.",
         "nameEn": "Archmage (on spell hit): 12% Max Magicka as Lightning Damage / 5% Max Magicka extra cost",
-        "nameKo": "대마법사 (주문 적중): 최대 매지카 12% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "nameKo": "대마법사: 주문 적중 시 최대 매지카의 12%를 번개 피해로 가하고, 5%를 추가 소모한다.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2074,9 +2074,9 @@
       {
         "id": "archmage_t3",
         "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T3",
-        "name": "대마법사 (주문 적중): 최대 매지카 14% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "name": "대마법사: 주문 적중 시 최대 매지카의 14%를 번개 피해로 가하고, 5%를 추가 소모한다.",
         "nameEn": "Archmage (on spell hit): 14% Max Magicka as Lightning Damage / 5% Max Magicka extra cost",
-        "nameKo": "대마법사 (주문 적중): 최대 매지카 14% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "nameKo": "대마법사: 주문 적중 시 최대 매지카의 14%를 번개 피해로 가하고, 5%를 추가 소모한다.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2101,9 +2101,9 @@
       {
         "id": "archmage_t4",
         "editorId": "LoreBox_CAFF_AFFIX_ARCHMAGE_T4",
-        "name": "대마법사 (주문 적중): 최대 매지카 16% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "name": "대마법사: 주문 적중 시 최대 매지카의 16%를 번개 피해로 가하고, 5%를 추가 소모한다.",
         "nameEn": "Archmage (on spell hit): 16% Max Magicka as Lightning Damage / 5% Max Magicka extra cost",
-        "nameKo": "대마법사 (주문 적중): 최대 매지카 16% 번개 피해 / 최대 매지카 5% 추가 소모",
+        "nameKo": "대마법사: 주문 적중 시 최대 매지카의 16%를 번개 피해로 가하고, 5%를 추가 소모한다.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2128,9 +2128,9 @@
       {
         "id": "crit_cast_firebolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_FIREBOLT",
-        "name": "치명 시전: 파이어볼트 (치명타/파워어택, ICD 0.15초): Firebolt + 적중 피해의 30%",
+        "name": "치명 시전: 파이어볼트: 치명타/강공 시 파이어볼트 시전 (적중의 30%). 0.15초마다 발동.",
         "nameEn": "Crit Cast: Firebolt (Crit/Power Attack, ICD 0.15s): Firebolt + 30% of Hit Damage",
-        "nameKo": "치명 시전: 파이어볼트 (치명타/파워어택, ICD 0.15초): Firebolt + 적중 피해의 30%",
+        "nameKo": "치명 시전: 파이어볼트: 치명타/강공 시 파이어볼트 시전 (적중의 30%). 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2161,9 +2161,9 @@
       {
         "id": "crit_cast_ice_spike",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_SPIKE",
-        "name": "치명 시전: 아이스 스파이크 (치명타/파워어택, ICD 0.15초): Ice Spike + 적중 피해의 30%",
+        "name": "치명 시전: 아이스 스파이크: 치명타/강공 시 아이스 스파이크 시전 (적중의 30%). 0.15초마다 발동.",
         "nameEn": "Crit Cast: Ice Spike (Crit/Power Attack, ICD 0.15s): Ice Spike + 30% of Hit Damage",
-        "nameKo": "치명 시전: 아이스 스파이크 (치명타/파워어택, ICD 0.15초): Ice Spike + 적중 피해의 30%",
+        "nameKo": "치명 시전: 아이스 스파이크: 치명타/강공 시 아이스 스파이크 시전 (적중의 30%). 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2194,9 +2194,9 @@
       {
         "id": "crit_cast_lightning_bolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_LIGHTNING_BOLT",
-        "name": "치명 시전: 라이트닝 볼트 (치명타/파워어택, ICD 0.15초): Lightning Bolt + 적중 피해의 30%",
+        "name": "치명 시전: 라이트닝 볼트: 치명타/강공 시 라이트닝 볼트 시전 (적중의 30%). 0.15초마다 발동.",
         "nameEn": "Crit Cast: Lightning Bolt (Crit/Power Attack, ICD 0.15s): Lightning Bolt + 30% of Hit Damage",
-        "nameKo": "치명 시전: 라이트닝 볼트 (치명타/파워어택, ICD 0.15초): Lightning Bolt + 적중 피해의 30%",
+        "nameKo": "치명 시전: 라이트닝 볼트: 치명타/강공 시 라이트닝 볼트 시전 (적중의 30%). 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2227,9 +2227,9 @@
       {
         "id": "crit_cast_thunderbolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_THUNDERBOLT",
-        "name": "치명 시전: 썬더볼트 (치명타/파워어택, ICD 0.15초): Thunderbolt + 적중 피해의 30%",
+        "name": "치명 시전: 썬더볼트: 치명타/강공 시 썬더볼트 시전 (적중의 30%). 0.15초마다 발동.",
         "nameEn": "Crit Cast: Thunderbolt (Crit/Power Attack, ICD 0.15s): Thunderbolt + 30% of Hit Damage",
-        "nameKo": "치명 시전: 썬더볼트 (치명타/파워어택, ICD 0.15초): Thunderbolt + 적중 피해의 30%",
+        "nameKo": "치명 시전: 썬더볼트: 치명타/강공 시 썬더볼트 시전 (적중의 30%). 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2260,9 +2260,9 @@
       {
         "id": "crit_cast_icy_spear",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICY_SPEAR",
-        "name": "치명 시전: 아이시 스피어 (치명타/파워어택, ICD 0.15초): Icy Spear + 적중 피해의 30%",
+        "name": "치명 시전: 아이시 스피어: 치명타/강공 시 아이시 스피어 시전 (적중의 30%). 0.15초마다 발동.",
         "nameEn": "Crit Cast: Icy Spear (Crit/Power Attack, ICD 0.15s): Icy Spear + 30% of Hit Damage",
-        "nameKo": "치명 시전: 아이시 스피어 (치명타/파워어택, ICD 0.15초): Icy Spear + 적중 피해의 30%",
+        "nameKo": "치명 시전: 아이시 스피어: 치명타/강공 시 아이시 스피어 시전 (적중의 30%). 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2293,9 +2293,9 @@
       {
         "id": "crit_cast_chain_lightning",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_CHAIN_LIGHTNING",
-        "name": "치명 시전: 체인 라이트닝 (치명타/파워어택, ICD 0.15초): Chain Lightning + 적중 피해의 30%",
+        "name": "치명 시전: 체인 라이트닝: 치명타/강공 시 체인 라이트닝 시전 (적중의 30%). 0.15초마다 발동.",
         "nameEn": "Crit Cast: Chain Lightning (Crit/Power Attack, ICD 0.15s): Chain Lightning + 30% of Hit Damage",
-        "nameKo": "치명 시전: 체인 라이트닝 (치명타/파워어택, ICD 0.15초): Chain Lightning + 적중 피해의 30%",
+        "nameKo": "치명 시전: 체인 라이트닝: 치명타/강공 시 체인 라이트닝 시전 (적중의 30%). 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2326,9 +2326,9 @@
       {
         "id": "crit_cast_ice_storm",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_STORM",
-        "name": "치명 시전: 아이스 스톰 (치명타/파워어택, ICD 0.15초): Ice Storm + 적중 피해의 30%",
+        "name": "치명 시전: 아이스 스톰: 치명타/강공 시 아이스 스톰 시전 (적중의 30%). 0.15초마다 발동.",
         "nameEn": "Crit Cast: Ice Storm (Crit/Power Attack, ICD 0.15s): Ice Storm + 30% of Hit Damage",
-        "nameKo": "치명 시전: 아이스 스톰 (치명타/파워어택, ICD 0.15초): Ice Storm + 적중 피해의 30%",
+        "nameKo": "치명 시전: 아이스 스톰: 치명타/강공 시 아이스 스톰 시전 (적중의 30%). 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2359,9 +2359,9 @@
       {
         "id": "death_pyre_t1",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T1",
-        "name": "죽음의 화장 T1 (처치): 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "name": "죽음의 화장 T1: 처치 시 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
         "nameEn": "Death Pyre T1 (on kill): Radius 600, (12 + 6% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-        "nameKo": "죽음의 화장 T1 (처치): 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "nameKo": "죽음의 화장 T1: 처치 시 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2394,9 +2394,9 @@
       {
         "id": "death_pyre_t2",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T2",
-        "name": "죽음의 화장 T2 (처치): 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "name": "죽음의 화장 T2: 처치 시 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
         "nameEn": "Death Pyre T2 (on kill): Radius 600, (14 + 7% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-        "nameKo": "죽음의 화장 T2 (처치): 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "nameKo": "죽음의 화장 T2: 처치 시 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2429,9 +2429,9 @@
       {
         "id": "death_pyre_t3",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T3",
-        "name": "죽음의 화장 T3 (처치): 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "name": "죽음의 화장 T3: 처치 시 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
         "nameEn": "Death Pyre T3 (on kill): Radius 600, (16 + 8% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-        "nameKo": "죽음의 화장 T3 (처치): 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄(0.7x) 최대 5회, 1초 4회 제한",
+        "nameKo": "죽음의 화장 T3: 처치 시 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2464,9 +2464,9 @@
       {
         "id": "stamina_drain",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T4",
-        "name": "기력 고갈 (Lucky Hit 20% / ICD 4초): 스태미나 드레인",
+        "name": "기력 고갈: 20% 확률로 스태미나 드레인. 4초마다 발동.",
         "nameEn": "Stamina Drain (Lucky Hit 20% / ICD 4s): Stamina Drain",
-        "nameKo": "기력 고갈 (Lucky Hit 20% / ICD 4초): 스태미나 드레인",
+        "nameKo": "기력 고갈: 20% 확률로 스태미나 드레인. 4초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2492,9 +2492,9 @@
       {
         "id": "nourishing_flame",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T5",
-        "name": "자양의 불꽃 (적중 15% / ICD 1.5초 / 최근 처치 필요): 자가 치유 + 적중 피해의 6%",
+        "name": "자양의 불꽃: 최근 5초 내 처치 후 15% 확률로 자가 치유 + 적중의 6%. 1.5초마다 발동.",
         "nameEn": "Nourishing Flame (15% on hit / ICD 1.5s / requires recent kill): Self Heal + 6% of Hit Damage",
-        "nameKo": "자양의 불꽃 (적중 15% / ICD 1.5초 / 최근 처치 필요): 자가 치유 + 적중 피해의 6%",
+        "nameKo": "자양의 불꽃: 최근 5초 내 처치 후 15% 확률로 자가 치유 + 적중의 6%. 1.5초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2528,9 +2528,9 @@
       {
         "id": "conjured_pyre_t1",
         "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T1",
-        "name": "소환 화장 T1 (소환물 사망): 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "name": "소환 화장 T1: 소환물 사망 시 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄 폭발(위력 0.8x) 최대 3회, 초당 3회 제한.",
         "nameEn": "Conjured Pyre T1 (on summon death): Radius 600, (14 + 7% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
-        "nameKo": "소환 화장 T1 (소환물 사망): 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "nameKo": "소환 화장 T1: 소환물 사망 시 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄 폭발(위력 0.8x) 최대 3회, 초당 3회 제한.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2563,9 +2563,9 @@
       {
         "id": "conjured_pyre_t2",
         "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T2",
-        "name": "소환 화장 T2 (소환물 사망): 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "name": "소환 화장 T2: 소환물 사망 시 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄 폭발(위력 0.8x) 최대 3회, 초당 3회 제한.",
         "nameEn": "Conjured Pyre T2 (on summon death): Radius 600, (18 + 8.5% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
-        "nameKo": "소환 화장 T2 (소환물 사망): 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄(0.8x) 최대 3회, 1초 3회 제한",
+        "nameKo": "소환 화장 T2: 소환물 사망 시 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄 폭발(위력 0.8x) 최대 3회, 초당 3회 제한.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2598,9 +2598,9 @@
       {
         "id": "mana_knot",
         "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T3",
-        "name": "마나 매듭 (Lucky Hit 15% / ICD 8초): 매지카 재생 감소",
+        "name": "마나 매듭: 15% 확률로 매지카 재생 감소. 8초마다 발동.",
         "nameEn": "Mana Knot (Lucky Hit 15% / ICD 8s): Magicka Regen Reduction",
-        "nameKo": "마나 매듭 (Lucky Hit 15% / ICD 8초): 매지카 재생 감소",
+        "nameKo": "마나 매듭: 15% 확률로 매지카 재생 감소. 8초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2626,9 +2626,9 @@
       {
         "id": "rune_trap",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MINEFIELD",
-        "name": "룬 함정 (적중 12% / ICD 1.5초): 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 둔화(-40%, 2초)",
+        "name": "룬 함정: 적중 시 12% 확률로 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 둔화(-40%, 2초). 1.5초마다 발동.",
         "nameEn": "Rune Trap (12% on hit / ICD 1.5s): Deploy mine at target (0.6s delay, 8s, 1 charge) -> Radius 150 Slow (-40%, 2s)",
-        "nameKo": "룬 함정 (적중 12% / ICD 1.5초): 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 둔화(-40%, 2초)",
+        "nameKo": "룬 함정: 적중 시 12% 확률로 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 둔화(-40%, 2초). 1.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_MINEFIELD_SNARE",
@@ -2679,9 +2679,9 @@
       {
         "id": "elemental_bane",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_ADAPTIVE_EXPOSURE",
-        "name": "원소 저주 (적중 20% / ICD 1초 / 표적별 ICD 12초): 가장 높은 원소 저항 -15 (4초)",
+        "name": "원소 저주: 적중 시 20% 확률로 가장 높은 원소 저항 -15 (4초). 1초마다 발동. 같은 대상 12초.",
         "nameEn": "Elemental Bane (20% on hit / ICD 1s / per-target ICD 12s): Highest elemental resist -15 (4s)",
-        "nameKo": "원소 저주 (적중 20% / ICD 1초 / 표적별 ICD 12초): 가장 높은 원소 저항 -15 (4초)",
+        "nameKo": "원소 저주: 적중 시 20% 확률로 가장 높은 원소 저항 -15 (4초). 1초마다 발동. 같은 대상 12초.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2711,9 +2711,9 @@
       {
         "id": "plague_spore",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM",
-        "name": "역병 포자 (적중 20% / ICD 1.5초): 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초)",
+        "name": "역병 포자: 적중 시 20% 확률로 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초). 1.5초마다 발동.",
         "nameEn": "Plague Spore (20% on hit / ICD 1.5s): Spore burst after 0.6s (Radius 150, Poison 3/s, 4s)",
-        "nameKo": "역병 포자 (적중 20% / ICD 1.5초): 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초)",
+        "nameKo": "역병 포자: 적중 시 20% 확률로 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초). 1.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_POISON",
@@ -2766,9 +2766,9 @@
       {
         "id": "tar_blight",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_TAR",
-        "name": "역청 황폐 (적중 18% / ICD 2초): 0.6초 후 타르 폭발(반경 170, 둔화 -35% + 방어 -150, 4초)",
+        "name": "역청 황폐: 적중 시 18% 확률로 0.6초 후 타르 폭발(반경 170, 둔화 -35% + 방어 -150, 4초). 2초마다 발동.",
         "nameEn": "Tar Blight (18% on hit / ICD 2s): Tar burst after 0.6s (Radius 170, Slow -35% + Armor -150, 4s)",
-        "nameKo": "역청 황폐 (적중 18% / ICD 2초): 0.6초 후 타르 폭발(반경 170, 둔화 -35% + 방어 -150, 4초)",
+        "nameKo": "역청 황폐: 적중 시 18% 확률로 0.6초 후 타르 폭발(반경 170, 둔화 -35% + 방어 -150, 4초). 2초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
@@ -2868,9 +2868,9 @@
       {
         "id": "siphon_spore",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_SIPHON",
-        "name": "흡수 포자 (적중 18% / ICD 2초): 0.6초 후 흡수 폭발(반경 170, 매지카/스태미나 재생 -60%, 6초)",
+        "name": "흡수 포자: 적중 시 18% 확률로 0.6초 후 흡수 폭발(반경 170, 매지카/스태미나 재생 -60%, 6초). 2초마다 발동.",
         "nameEn": "Siphon Spore (18% on hit / ICD 2s): Siphon burst after 0.6s (Radius 170, Magicka/Stamina Regen -60%, 6s)",
-        "nameKo": "흡수 포자 (적중 18% / ICD 2초): 0.6초 후 흡수 폭발(반경 170, 매지카/스태미나 재생 -60%, 6초)",
+        "nameKo": "흡수 포자: 적중 시 18% 확률로 0.6초 후 흡수 폭발(반경 170, 매지카/스태미나 재생 -60%, 6초). 2초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
@@ -2970,9 +2970,9 @@
       {
         "id": "chaos_rune",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CHAOS_MINE",
-        "name": "혼돈의 룬 (적중 12% / ICD 2초 / 표적별 ICD 8초): 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 둔화 + 무작위 저주",
+        "name": "혼돈의 룬: 적중 시 12% 확률로 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 둔화 + 무작위 저주. 2초마다 발동. 같은 대상 8초.",
         "nameEn": "Chaos Rune (12% on hit / ICD 2s / per-target ICD 8s): Deploy mine at target (0.8s delay, 10s, 1 charge) -> Slow + Random curse",
-        "nameKo": "혼돈의 룬 (적중 12% / ICD 2초 / 표적별 ICD 8초): 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 둔화 + 무작위 저주",
+        "nameKo": "혼돈의 룬: 적중 시 12% 확률로 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 둔화 + 무작위 저주. 2초마다 발동. 같은 대상 8초.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
@@ -3256,9 +3256,9 @@
       {
         "id": "battle_frenzy",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SWAP_JACKPOT",
-        "name": "전투 광란 (적중 20% / ICD 0.6초 / 표적별 ICD 12초): 무기 공격속도 +15% (4초)",
+        "name": "전투 광란: 적중 시 20% 확률로 무기 공격속도 +15% (4초). 0.6초마다 발동. 같은 대상 12초.",
         "nameEn": "Battle Frenzy (20% on hit / ICD 0.6s / per-target ICD 12s): Weapon Attack Speed +15% (4s)",
-        "nameKo": "전투 광란 (적중 20% / ICD 0.6초 / 표적별 ICD 12초): 무기 공격속도 +15% (4초)",
+        "nameKo": "전투 광란: 적중 시 20% 확률로 무기 공격속도 +15% (4초). 0.6초마다 발동. 같은 대상 12초.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
@@ -3303,9 +3303,9 @@
       {
         "id": "thunder_mastery",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_EVOLVING_LIGHTNING",
-        "name": "뇌격 숙련 (적중 100%): 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회)",
+        "name": "뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동.",
         "nameEn": "Thunder Mastery (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits)",
-        "nameKo": "뇌격 숙련 (적중 100%): 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회)",
+        "nameKo": "뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -3352,9 +3352,9 @@
       {
         "id": "elemental_attunement",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MODE_CYCLE_ELEMENTS",
-        "name": "원소 조율 (적중 100%): 화염/냉기/번개 수동 전환 + 성장 (×1.0→1.3→1.7→2.2, 단계: 20/60/120회)",
+        "name": "원소 조율: 매 적중 시 화염/냉기/번개 수동 전환 + 성장 (×1.0→1.3→1.7→2.2, 단계: 20/60/120회). 0.2초마다 발동.",
         "nameEn": "Elemental Attunement (100% on hit): Fire/Frost/Shock manual switch + Growth (x1.0→1.3→1.7→2.2, stages: 20/60/120 hits)",
-        "nameKo": "원소 조율 (적중 100%): 화염/냉기/번개 수동 전환 + 성장 (×1.0→1.3→1.7→2.2, 단계: 20/60/120회)",
+        "nameKo": "원소 조율: 매 적중 시 화염/냉기/번개 수동 전환 + 성장 (×1.0→1.3→1.7→2.2, 단계: 20/60/120회). 0.2초마다 발동.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -3415,9 +3415,9 @@
       {
         "id": "runeword_enigma_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ENIGMA",
-        "name": "룬워드 수수께끼 (Jah-Ith-Ber): 피격시 / ICD 90초 - 차원 위상 (이속+45%, 8초) + 이동속도 +10%",
+        "name": "룬워드 수수께끼 [Jah-Ith-Ber]: 피격 시 차원 위상 (이속+45%, 8초). 이동속도 +10%. 90초마다 발동.",
         "nameEn": "Runeword Enigma (Jah-Ith-Ber): on Hit Taken / ICD 90s - Phase Shift (Move+45%, 8s) + Move Speed +10%",
-        "nameKo": "룬워드 수수께끼 (Jah-Ith-Ber): 피격시 / ICD 90초 - 차원 위상 (이속+45%, 8초) + 이동속도 +10%",
+        "nameKo": "룬워드 수수께끼 [Jah-Ith-Ber]: 피격 시 차원 위상 (이속+45%, 8초). 이동속도 +10%. 90초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -3486,9 +3486,9 @@
       {
         "id": "runeword_infinity_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INFINITY",
-        "name": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 100% / ICD 0.5초 / 대상별 6초 - 약점 원소 노출(적 저항 감소)",
+        "name": "룬워드 무한 [Ber-Mal-Ber-Ist]: 매 적중 시 약점 원소 저항 감소. 0.5초마다 발동. 같은 대상 6초.",
         "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction",
-        "nameKo": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 100% / ICD 0.5초 / 대상별 6초 - 약점 원소 저항 감소",
+        "nameKo": "룬워드 무한 [Ber-Mal-Ber-Ist]: 매 적중 시 약점 원소 저항 감소. 0.5초마다 발동. 같은 대상 6초.",
         "records": {
           "magicEffects": [
             {
@@ -3592,9 +3592,9 @@
       {
         "id": "runeword_fortitude_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FORTITUDE",
-        "name": "룬워드 불굴 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 방어 버프 + 방어도 +80",
+        "name": "룬워드 불굴 [El-Sol-Dol-Lo]: 피격 시 25% 확률로 대미지 저항 강화. 방어도 +80. 16초마다 발동.",
         "nameEn": "Runeword Fortitude (El-Sol-Dol-Lo): 25% on Hit Taken / ICD 16s - Damage Resist boost + Armor +80",
-        "nameKo": "룬워드 불굴 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 대미지 저항 강화 + 방어도 +80",
+        "nameKo": "룬워드 불굴 [El-Sol-Dol-Lo]: 피격 시 25% 확률로 대미지 저항 강화. 방어도 +80. 16초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -3663,9 +3663,9 @@
       {
         "id": "runeword_insight_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INSIGHT",
-        "name": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 마나 버프 + 마나 재생 +25",
+        "name": "룬워드 통찰 [Ral-Tir-Tal-Sol]: 적중 시 30% 확률로 마나 회복 강화. 마나 재생 +25. 10초마다 발동.",
         "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Magicka Recovery boost + Magicka Regen +25",
-        "nameKo": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 마나 회복 강화 + 마나 재생 +25",
+        "nameKo": "룬워드 통찰 [Ral-Tir-Tal-Sol]: 적중 시 30% 확률로 마나 회복 강화. 마나 재생 +25. 10초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -3734,9 +3734,9 @@
       {
         "id": "runeword_spirit_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPIRIT",
-        "name": "룬워드 영혼 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 마나 버프 + 마나 재생 +30",
+        "name": "룬워드 영혼 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 마나 회복 강화. 마나 재생 +30. 9초마다 발동.",
         "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 9s - Magicka Recovery boost + Magicka Regen +30",
-        "nameKo": "룬워드 영혼 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 마나 회복 강화 + 마나 재생 +30",
+        "nameKo": "룬워드 영혼 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 마나 회복 강화. 마나 재생 +30. 9초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -3805,9 +3805,9 @@
       {
         "id": "runeword_grief_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_GRIEF",
-        "name": "룬워드 비탄 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.5초 - 흡혈 (8%) + 공격속도 +10%",
+        "name": "룬워드 비탄 [Eth-Tir-Lo-Mal-Ral]: 적중 시 30% 확률로 흡혈 (8%). 공격속도 +10%. 0.5초마다 발동.",
         "nameEn": "Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on Hit / ICD 0.5s - Heal 8% of Hit Damage + Attack Speed +10%",
-        "nameKo": "룬워드 비탄 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.5초 - 흡혈 (8%) + 공격속도 +10%",
+        "nameKo": "룬워드 비탄 [Eth-Tir-Lo-Mal-Ral]: 적중 시 30% 확률로 흡혈 (8%). 공격속도 +10%. 0.5초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -3897,9 +3897,9 @@
       {
         "id": "runeword_call_to_arms_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CALL_TO_ARMS",
-        "name": "룬워드 전투 함성 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 버프 + 체력+50 마나+30",
+        "name": "룬워드 전투 함성 [Amn-Ral-Mal-Ist-Ohm]: 적중 시 24% 확률로 전투력 강화 (공격+방어). 체력+50 마나+30. 18초마다 발동.",
         "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on Hit / ICD 18s - Battle Cry (Offense+Defense) + HP+50 MP+30",
-        "nameKo": "룬워드 전투 함성 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투력 강화 (공격+방어) + 체력+50 마나+30",
+        "nameKo": "룬워드 전투 함성 [Amn-Ral-Mal-Ist-Ohm]: 적중 시 24% 확률로 전투력 강화 (공격+방어). 체력+50 마나+30. 18초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -3983,9 +3983,9 @@
       {
         "id": "runeword_chains_of_honor_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAINS_OF_HONOR",
-        "name": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 방어 버프 + 전 저항 +15",
+        "name": "룬워드 명예의 사슬 [Dol-Um-Ber-Ist]: 피격 시 20% 확률로 페이즈 (이동속도+회피 강화). 전 저항 +15. 16초마다 발동.",
         "nameEn": "Runeword Chains of Honor (Dol-Um-Ber-Ist): 20% on Hit Taken / ICD 16s - Phase (Speed+Evasion boost) + All Resist +15",
-        "nameKo": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 페이즈 (이동속도+회피 강화) + 전 저항 +15",
+        "nameKo": "룬워드 명예의 사슬 [Dol-Um-Ber-Ist]: 피격 시 20% 확률로 페이즈 (이동속도+회피 강화). 전 저항 +15. 16초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -4082,9 +4082,9 @@
       {
         "id": "runeword_heart_of_the_oak_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEART_OF_THE_OAK",
-        "name": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 노출)",
+        "name": "룬워드 참나무의 심장 [Ko-Vex-Pul-Thul]: 적중 시 32% 확률로 비전 균열(적응형 원소 저항 감소). 8초마다 발동.",
         "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction)",
-        "nameKo": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 저항 감소)",
+        "nameKo": "룬워드 참나무의 심장 [Ko-Vex-Pul-Thul]: 적중 시 32% 확률로 비전 균열(적응형 원소 저항 감소). 8초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -4173,9 +4173,9 @@
       {
         "id": "runeword_faith_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAITH",
-        "name": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 돌격 버프 + 공격속도 +15%",
+        "name": "룬워드 신념 [Ohm-Jah-Lem-Eld]: 적중 시 22% 확률로 광신 강화 (공격력+공속). 공격속도 +15%. 12초마다 발동.",
         "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on Hit / ICD 12s - Fanaticism (Damage+Speed) + Attack Speed +15%",
-        "nameKo": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 광신 강화 (공격력+공속) + 공격속도 +15%",
+        "nameKo": "룬워드 신념 [Ohm-Jah-Lem-Eld]: 적중 시 22% 확률로 광신 강화 (공격력+공속). 공격속도 +15%. 12초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -4259,9 +4259,9 @@
       {
         "id": "runeword_exile_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_EXILE",
-        "name": "룬워드 추방 (Vex-Ohm-Ist-Dol): 체력<40%시 / ICD 50초 - 강철 피부 (방어도+250, 10초)",
+        "name": "룬워드 추방 [Vex-Ohm-Ist-Dol]: 체력 40% 이하일 때 강철 피부 (방어도+250, 10초). 50초마다 발동.",
         "nameEn": "Runeword Exile (Vex-Ohm-Ist-Dol): HP<40% / ICD 50s - Iron Skin (Armor+250, 10s)",
-        "nameKo": "룬워드 추방 (Vex-Ohm-Ist-Dol): 체력<40%시 / ICD 50초 - 강철 피부 (방어도+250, 10초)",
+        "nameKo": "룬워드 추방 [Vex-Ohm-Ist-Dol]: 체력 40% 이하일 때 강철 피부 (방어도+250, 10초). 50초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_EXILE_IRONSKIN",
@@ -4306,9 +4306,9 @@
       {
         "id": "runeword_breath_of_the_dying_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BREATH_OF_THE_DYING",
-        "name": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적 처치 50% / ICD 3초 - 독 폭발 (광역 15)",
+        "name": "룬워드 죽음의 숨결 [Vex-Hel-El-Eld-Zod-Eth]: 처치 시 50% 확률로 독 폭발 (광역 15). 3초마다 발동.",
         "nameEn": "Runeword Breath of the Dying (Vex-Hel-El-Eld-Zod-Eth): 50% on Kill / ICD 3s - Poison Burst (Area 15)",
-        "nameKo": "룬워드 죽음의 숨결 (Vex-Hel-El-Eld-Zod-Eth): 적 처치 50% / ICD 3초 - 독 폭발 (광역 15)",
+        "nameKo": "룬워드 죽음의 숨결 [Vex-Hel-El-Eld-Zod-Eth]: 처치 시 50% 확률로 독 폭발 (광역 15). 3초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_BOTD_POISON_BURST",
@@ -4366,9 +4366,9 @@
       {
         "id": "runeword_last_wish_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAST_WISH",
-        "name": "룬워드 최후의 소원 (Jah-Mal-Jah-Sur-Jah-Ber): 체력<35%시 / ICD 60초 - 페이드 (방어+저항 대폭 버프 12초)",
+        "name": "룬워드 최후의 소원 [Jah-Mal-Jah-Sur-Jah-Ber]: 체력 35% 이하일 때 페이드 (방어도+저항 대폭 강화 12초). 60초마다 발동.",
         "nameEn": "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): HP<35% / ICD 60s - Fade (Armor+Resist boost 12s)",
-        "nameKo": "룬워드 최후의 소원 (Jah-Mal-Jah-Sur-Jah-Ber): 체력<35%시 / ICD 60초 - 페이드 (방어도+저항 대폭 강화 12초)",
+        "nameKo": "룬워드 최후의 소원 [Jah-Mal-Jah-Sur-Jah-Ber]: 체력 35% 이하일 때 페이드 (방어도+저항 대폭 강화 12초). 60초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -4432,9 +4432,9 @@
       {
         "id": "runeword_phoenix_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PHOENIX",
-        "name": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 적 처치 60% / ICD 2초 - 체력+마나 회복",
+        "name": "룬워드 피닉스 [Vex-Vex-Lo-Jah]: 처치 시 60% 확률로 체력+마나 회복. 2초마다 발동.",
         "nameEn": "Runeword Phoenix (Vex-Vex-Lo-Jah): 60% on Kill / ICD 2s - Restore HP+MP",
-        "nameKo": "룬워드 피닉스 (Vex-Vex-Lo-Jah): 적 처치 60% / ICD 2초 - 체력+마나 회복",
+        "nameKo": "룬워드 피닉스 [Vex-Vex-Lo-Jah]: 처치 시 60% 확률로 체력+마나 회복. 2초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -4497,9 +4497,9 @@
       {
         "id": "runeword_doom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DOOM",
-        "name": "룬워드 파멸 (Hel-Ohm-Um-Lo-Cham): 적중 100% / ICD 0.5초 - 냉기 감속 (이속-30%, 4초)",
+        "name": "룬워드 파멸 [Hel-Ohm-Um-Lo-Cham]: 매 적중 시 냉기 감속 (이속-30%, 4초). 0.5초마다 발동.",
         "nameEn": "Runeword Doom (Hel-Ohm-Um-Lo-Cham): 100% on Hit / ICD 0.5s - Frost Slow (Speed-30%, 4s)",
-        "nameKo": "룬워드 파멸 (Hel-Ohm-Um-Lo-Cham): 적중 100% / ICD 0.5초 - 냉기 감속 (이속-30%, 4초)",
+        "nameKo": "룬워드 파멸 [Hel-Ohm-Um-Lo-Cham]: 매 적중 시 냉기 감속 (이속-30%, 4초). 0.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_DOOM_SLOW",
@@ -4543,9 +4543,9 @@
       {
         "id": "runeword_dream_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DREAM",
-        "name": "룬워드 꿈 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개 타격 + 번개 저항 +20",
+        "name": "룬워드 꿈 [Io-Jah-Pul]: 적중 시 30% 확률로 번개 타격. 번개 저항 +20. 0.8초마다 발동.",
         "nameEn": "Runeword Dream (Io-Jah-Pul): 30% on Hit / ICD 0.8s - Shock Strike + Shock Resist +20",
-        "nameKo": "룬워드 꿈 (Io-Jah-Pul): 적중 30% / ICD 0.8초 - 번개 타격 + 번개 저항 +20",
+        "nameKo": "룬워드 꿈 [Io-Jah-Pul]: 적중 시 30% 확률로 번개 타격. 번개 저항 +20. 0.8초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -4623,9 +4623,9 @@
       {
         "id": "runeword_steel_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_STEEL",
-        "name": "룬워드 스틸 (Tir-El): 적중 18% / ICD 8초 - 강철 출혈(적 회복 억제 -80%, 5초)",
+        "name": "룬워드 스틸 [Tir-El]: 적중 시 18% 확률로 강철 출혈(적 회복 억제 -80%, 5초). 8초마다 발동.",
         "nameEn": "Runeword Steel (Tir-El): 18% on hit / ICD 8s - Steel Bleed (Heal Suppress -80%, 5s)",
-        "nameKo": "룬워드 스틸 (Tir-El): 적중 18% / ICD 8초 - 강철 출혈(적 회복 억제 -80%, 5초)",
+        "nameKo": "룬워드 스틸 [Tir-El]: 적중 시 18% 확률로 강철 출혈(적 회복 억제 -80%, 5초). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_STEEL_EMPOWER",
@@ -4669,9 +4669,9 @@
       {
         "id": "runeword_malice_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MALICE",
-        "name": "룬워드 멜리스 (Ith-El-Eth): 적중 20% / ICD 9초 - 맹독 감염(독 DoT 8/s, 6초)",
+        "name": "룬워드 멜리스 [Ith-El-Eth]: 적중 시 20% 확률로 맹독 감염(독 DoT 8/s, 6초). 9초마다 발동.",
         "nameEn": "Runeword Malice (Ith-El-Eth): 20% on hit / ICD 9s - Venom Infection (Poison DoT 8/s, 6s)",
-        "nameKo": "룬워드 멜리스 (Ith-El-Eth): 적중 20% / ICD 9초 - 맹독 감염(독 DoT 8/s, 6초)",
+        "nameKo": "룬워드 멜리스 [Ith-El-Eth]: 적중 시 20% 확률로 맹독 감염(독 DoT 8/s, 6초). 9초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_MALICE_STRIKE",
@@ -4717,9 +4717,9 @@
       {
         "id": "runeword_leaf_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LEAF",
-        "name": "룬워드 리프 (Tir-Ral): 적중 22% / ICD 7초 - 나뭇잎의 불꽃(파괴 마법 +20, 8초)",
+        "name": "룬워드 리프 [Tir-Ral]: 적중 시 22% 확률로 나뭇잎의 불꽃(파괴 마법 +20, 8초). 7초마다 발동.",
         "nameEn": "Runeword Leaf (Tir-Ral): 22% on hit / ICD 7s - Leaf Flame (Destruction +20, 8s)",
-        "nameKo": "룬워드 리프 (Tir-Ral): 적중 22% / ICD 7초 - 나뭇잎의 불꽃(파괴 마법 +20, 8초)",
+        "nameKo": "룬워드 리프 [Tir-Ral]: 적중 시 22% 확률로 나뭇잎의 불꽃(파괴 마법 +20, 8초). 7초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_LEAF_FLAME",
@@ -4763,9 +4763,9 @@
       {
         "id": "runeword_holy_thunder_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HOLY_THUNDER",
-        "name": "룬워드 홀리 (Eth-Ral-Ort-Tal): 적중 22% / ICD 7초 - 성전 번개(전격 피해 30)",
+        "name": "룬워드 홀리 [Eth-Ral-Ort-Tal]: 적중 시 22% 확률로 성전 번개(전격 피해 30). 7초마다 발동.",
         "nameEn": "Runeword Holy (Eth-Ral-Ort-Tal): 22% on hit / ICD 7s - Holy Thunder (Shock Damage 30)",
-        "nameKo": "룬워드 홀리 (Eth-Ral-Ort-Tal): 적중 22% / ICD 7초 - 성전 번개(전격 피해 30)",
+        "nameKo": "룬워드 홀리 [Eth-Ral-Ort-Tal]: 적중 시 22% 확률로 성전 번개(전격 피해 30). 7초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_HOLY_THUNDER_BOLT",
@@ -4811,9 +4811,9 @@
       {
         "id": "runeword_zephyr_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ZEPHYR",
-        "name": "룬워드 제퍼 (Ort-Eth): 적중 20% / ICD 8초 - 질풍 사격(활속도 +30%, 6초)",
+        "name": "룬워드 제퍼 [Ort-Eth]: 적중 시 20% 확률로 질풍 사격(활속도 +30%, 6초). 8초마다 발동.",
         "nameEn": "Runeword Zephyr (Ort-Eth): 20% on hit / ICD 8s - Gale Shot (Bow Speed +30%, 6s)",
-        "nameKo": "룬워드 제퍼 (Ort-Eth): 적중 20% / ICD 8초 - 질풍 사격(활속도 +30%, 6초)",
+        "nameKo": "룬워드 제퍼 [Ort-Eth]: 적중 시 20% 확률로 질풍 사격(활속도 +30%, 6초). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ZEPHYR_RUSH",
@@ -4857,9 +4857,9 @@
       {
         "id": "runeword_pattern_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PATTERN",
-        "name": "룬워드 패턴 (Tal-Ort-Thul): 적중 20% / ICD 8초 - 연계 리듬(치명타 +15%, 6초)",
+        "name": "룬워드 패턴 [Tal-Ort-Thul]: 적중 시 20% 확률로 연계 리듬(치명타 +15%, 6초). 8초마다 발동.",
         "nameEn": "Runeword Pattern (Tal-Ort-Thul): 20% on hit / ICD 8s - Combo Rhythm (Crit Chance +15%, 6s)",
-        "nameKo": "룬워드 패턴 (Tal-Ort-Thul): 적중 20% / ICD 8초 - 연계 리듬(치명타 +15%, 6초)",
+        "nameKo": "룬워드 패턴 [Tal-Ort-Thul]: 적중 시 20% 확률로 연계 리듬(치명타 +15%, 6초). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PATTERN_WARD",
@@ -4903,9 +4903,9 @@
       {
         "id": "runeword_kings_grace_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_KINGS_GRACE",
-        "name": "룬워드 킹스 (Amn-Ral-Thul): 적중 22% / ICD 9초 - 성스러운 치유(HealRate +8, 7초)",
+        "name": "룬워드 킹스 [Amn-Ral-Thul]: 적중 시 22% 확률로 성스러운 치유(회복력 +8, 7초). 9초마다 발동.",
         "nameEn": "Runeword King's (Amn-Ral-Thul): 22% on hit / ICD 9s - Holy Healing (HealRate +8, 7s)",
-        "nameKo": "룬워드 킹스 (Amn-Ral-Thul): 적중 22% / ICD 9초 - 성스러운 치유(HealRate +8, 7초)",
+        "nameKo": "룬워드 킹스 [Amn-Ral-Thul]: 적중 시 22% 확률로 성스러운 치유(회복력 +8, 7초). 9초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_KINGS_GRACE_GRACE",
@@ -4949,9 +4949,9 @@
       {
         "id": "runeword_strength_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_STRENGTH",
-        "name": "룬워드 스트렝스 (Amn-Tir): 적중 20% / ICD 9초 - 맹타(양손 스킬 +25, 6초)",
+        "name": "룬워드 스트렝스 [Amn-Tir]: 적중 시 20% 확률로 맹타(양손 스킬 +25, 6초). 9초마다 발동.",
         "nameEn": "Runeword Strength (Amn-Tir): 20% on hit / ICD 9s - Heavy Strike (Two-Handed +25, 6s)",
-        "nameKo": "룬워드 스트렝스 (Amn-Tir): 적중 20% / ICD 9초 - 맹타(양손 스킬 +25, 6초)",
+        "nameKo": "룬워드 스트렝스 [Amn-Tir]: 적중 시 20% 확률로 맹타(양손 스킬 +25, 6초). 9초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_STRENGTH_POWER",
@@ -4995,9 +4995,9 @@
       {
         "id": "runeword_edge_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_EDGE",
-        "name": "룬워드 엣지 (Tir-Tal-Amn): 적중 20% / ICD 8초 - 예리한 사격(궁술 +20, 7초)",
+        "name": "룬워드 엣지 [Tir-Tal-Amn]: 적중 시 20% 확률로 예리한 사격(궁술 +20, 7초). 8초마다 발동.",
         "nameEn": "Runeword Edge (Tir-Tal-Amn): 20% on hit / ICD 8s - Sharp Shot (Marksman +20, 7s)",
-        "nameKo": "룬워드 엣지 (Tir-Tal-Amn): 적중 20% / ICD 8초 - 예리한 사격(궁술 +20, 7초)",
+        "nameKo": "룬워드 엣지 [Tir-Tal-Amn]: 적중 시 20% 확률로 예리한 사격(궁술 +20, 7초). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_EDGE_BLADE",
@@ -5041,9 +5041,9 @@
       {
         "id": "runeword_honor_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HONOR",
-        "name": "룬워드 명예 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 강화 버프 + 체력 재생 +20",
+        "name": "룬워드 명예 [Amn-El-Ith-Tir-Sol]: 적중 시 26% 확률로 활력 강화 (공격력+방어). 체력 재생 +20. 8초마다 발동.",
         "nameEn": "Runeword Honor (Amn-El-Ith-Tir-Sol): 26% on Hit / ICD 8s - Vigor (Damage+Defense) + HP Regen +20",
-        "nameKo": "룬워드 명예 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 활력 강화 (공격력+방어) + 체력 재생 +20",
+        "nameKo": "룬워드 명예 [Amn-El-Ith-Tir-Sol]: 적중 시 26% 확률로 활력 강화 (공격력+방어). 체력 재생 +20. 8초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -5112,9 +5112,9 @@
       {
         "id": "runeword_black_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BLACK",
-        "name": "룬워드 블랙 (Thul-Io-Nef): 적중 8% / ICD 20초 - 암흑 충격(마비 2초)",
+        "name": "룬워드 블랙 [Thul-Io-Nef]: 적중 시 8% 확률로 암흑 충격(마비 2초). 20초마다 발동.",
         "nameEn": "Runeword Black (Thul-Io-Nef): 8% on hit / ICD 20s - Dark Shock (Paralysis 2s)",
-        "nameKo": "룬워드 블랙 (Thul-Io-Nef): 적중 8% / ICD 20초 - 암흑 충격(마비 2초)",
+        "nameKo": "룬워드 블랙 [Thul-Io-Nef]: 적중 시 8% 확률로 암흑 충격(마비 2초). 20초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_BLACK_FROST",
@@ -5159,9 +5159,9 @@
       {
         "id": "runeword_white_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WHITE",
-        "name": "룬워드 화이트 (Dol-Io): 적중 18% / ICD 8초 - 마나 쇄도(마력 +50, 10초)",
+        "name": "룬워드 화이트 [Dol-Io]: 적중 시 18% 확률로 마나 쇄도(마력 +50, 10초). 8초마다 발동.",
         "nameEn": "Runeword White (Dol-Io): 18% on hit / ICD 8s - Mana Surge (Magicka +50, 10s)",
-        "nameKo": "룬워드 화이트 (Dol-Io): 적중 18% / ICD 8초 - 마나 쇄도(마력 +50, 10초)",
+        "nameKo": "룬워드 화이트 [Dol-Io]: 적중 시 18% 확률로 마나 쇄도(마력 +50, 10초). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WHITE_GLOW",
@@ -5205,9 +5205,9 @@
       {
         "id": "runeword_memory_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MEMORY",
-        "name": "룬워드 메모리 (Lum-Io-Sol-Eth): 적중 20% / ICD 9초 - 전투 기억(스태미나재생 +100%, 8초)",
+        "name": "룬워드 메모리 [Lum-Io-Sol-Eth]: 적중 시 20% 확률로 전투 기억(스태미나재생 +100%, 8초). 9초마다 발동.",
         "nameEn": "Runeword Memory (Lum-Io-Sol-Eth): 20% on hit / ICD 9s - Stamina Recall (Stamina Regen +100%, 8s)",
-        "nameKo": "룬워드 메모리 (Lum-Io-Sol-Eth): 적중 20% / ICD 9초 - 전투 기억(스태미나재생 +100%, 8초)",
+        "nameKo": "룬워드 메모리 [Lum-Io-Sol-Eth]: 적중 시 20% 확률로 전투 기억(스태미나재생 +100%, 8초). 9초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_MEMORY_RECALL",
@@ -5251,9 +5251,9 @@
       {
         "id": "runeword_melody_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MELODY",
-        "name": "룬워드 멜로디 (Shael-Ko-Nef): 적중 18% / ICD 8초 - 선율의 울림(기력 흡수 20)",
+        "name": "룬워드 멜로디 [Shael-Ko-Nef]: 적중 시 18% 확률로 선율의 울림(기력 흡수 20). 8초마다 발동.",
         "nameEn": "Runeword Melody (Shael-Ko-Nef): 18% on hit / ICD 8s - Melodic Drain (Absorb Stamina 20)",
-        "nameKo": "룬워드 멜로디 (Shael-Ko-Nef): 적중 18% / ICD 8초 - 선율의 울림(기력 흡수 20)",
+        "nameKo": "룬워드 멜로디 [Shael-Ko-Nef]: 적중 시 18% 확률로 선율의 울림(기력 흡수 20). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_MELODY_NOTE",
@@ -5298,9 +5298,9 @@
       {
         "id": "runeword_harmony_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HARMONY",
-        "name": "룬워드 하모니 (Tir-Ith-Sol-Ko): 적중 20% / ICD 6초 - 조화의 교란(적 기력 재생 -80%, 5초)",
+        "name": "룬워드 하모니 [Tir-Ith-Sol-Ko]: 적중 시 20% 확률로 조화의 교란(적 기력 재생 -80%, 5초). 6초마다 발동.",
         "nameEn": "Runeword Harmony (Tir-Ith-Sol-Ko): 20% on hit / ICD 6s - Harmonic Disruption (Stamina Regen -80%, 5s)",
-        "nameKo": "룬워드 하모니 (Tir-Ith-Sol-Ko): 적중 20% / ICD 6초 - 조화의 교란(적 기력 재생 -80%, 5초)",
+        "nameKo": "룬워드 하모니 [Tir-Ith-Sol-Ko]: 적중 시 20% 확률로 조화의 교란(적 기력 재생 -80%, 5초). 6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_HARMONY_SYNC",
@@ -5344,9 +5344,9 @@
       {
         "id": "runeword_hustle_w_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HUSTLE_W",
-        "name": "룬워드 허슬-무기 (Shael-Ko-Eld): 적중 26% / ICD 7초 - 돌진 버프 + 공격속도 +12%",
+        "name": "룬워드 허슬-무기 [Shael-Ko-Eld]: 적중 시 26% 확률로 돌진 (이동+공속 강화). 공격속도 +12%. 7초마다 발동.",
         "nameEn": "Runeword Hustle-W (Shael-Ko-Eld): 26% on Hit / ICD 7s - Rush (Move+Attack Speed) + Attack Speed +12%",
-        "nameKo": "룬워드 허슬-무기 (Shael-Ko-Eld): 적중 26% / ICD 7초 - 돌진 (이동+공속 강화) + 공격속도 +12%",
+        "nameKo": "룬워드 허슬-무기 [Shael-Ko-Eld]: 적중 시 26% 확률로 돌진 (이동+공속 강화). 공격속도 +12%. 7초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -5415,9 +5415,9 @@
       {
         "id": "runeword_obedience_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_OBEDIENCE",
-        "name": "룬워드 복종 (Hel-Ko-Thul-Eth-Fal): 적중 18% / ICD 5초 - 짓누르기(적 이속 -50%, 3초)",
+        "name": "룬워드 복종 [Hel-Ko-Thul-Eth-Fal]: 적중 시 18% 확률로 짓누르기(적 이속 -50%, 3초). 5초마다 발동.",
         "nameEn": "Runeword Obedience (Hel-Ko-Thul-Eth-Fal): 18% on hit / ICD 5s - Crush (Target Speed -50%, 3s)",
-        "nameKo": "룬워드 복종 (Hel-Ko-Thul-Eth-Fal): 적중 18% / ICD 5초 - 짓누르기(적 이속 -50%, 3초)",
+        "nameKo": "룬워드 복종 [Hel-Ko-Thul-Eth-Fal]: 적중 시 18% 확률로 짓누르기(적 이속 -50%, 3초). 5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_OBEDIENCE_CRUSH",
@@ -5469,9 +5469,9 @@
       {
         "id": "runeword_unbending_will_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_UNBENDING_WILL",
-        "name": "룬워드 언벤딩 (Fal-Io-Ith-Eld-El-Hel): 적중 22% / ICD 9초 - 굳건한 의지(방패 스킬 +30, 7초)",
+        "name": "룬워드 언벤딩 [Fal-Io-Ith-Eld-El-Hel]: 적중 시 22% 확률로 굳건한 의지(방패 스킬 +30, 7초). 9초마다 발동.",
         "nameEn": "Runeword Unbending (Fal-Io-Ith-Eld-El-Hel): 22% on hit / ICD 9s - Unbending Will (Block +30, 7s)",
-        "nameKo": "룬워드 언벤딩 (Fal-Io-Ith-Eld-El-Hel): 적중 22% / ICD 9초 - 굳건한 의지(방패 스킬 +30, 7초)",
+        "nameKo": "룬워드 언벤딩 [Fal-Io-Ith-Eld-El-Hel]: 적중 시 22% 확률로 굳건한 의지(방패 스킬 +30, 7초). 9초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_UNBENDING_WILL_RESOLVE",
@@ -5515,9 +5515,9 @@
       {
         "id": "runeword_passion_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PASSION",
-        "name": "룬워드 패션 (Dol-Ort-Eld-Lem): 적중 22% / ICD 8초 - 정열의 환상(환혹 마법 +20, 7초)",
+        "name": "룬워드 패션 [Dol-Ort-Eld-Lem]: 적중 시 26% 확률로 정열의 환상(환혹 마법 +20, 7초). 7초마다 발동.",
         "nameEn": "Runeword Passion (Dol-Ort-Eld-Lem): 22% on hit / ICD 8s - Passionate Illusion (Illusion +20, 7s)",
-        "nameKo": "룬워드 패션 (Dol-Ort-Eld-Lem): 적중 22% / ICD 8초 - 정열의 환상(환혹 마법 +20, 7초)",
+        "nameKo": "룬워드 패션 [Dol-Ort-Eld-Lem]: 적중 시 26% 확률로 정열의 환상(환혹 마법 +20, 7초). 7초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PASSION_FURY",
@@ -5561,9 +5561,9 @@
       {
         "id": "runeword_lawbringer_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAWBRINGER",
-        "name": "룬워드 법 (Amn-Lem-Ko): 처치시 40% / ICD 6초 - 정의 집행(Turn Undead 범위, ICD 6초)",
+        "name": "룬워드 법 [Amn-Lem-Ko]: 처치 시 40% 확률로 정의 집행(언데드 퇴치 범위, ICD 6초). 6초마다 발동.",
         "nameEn": "Runeword Lawbringer (Amn-Lem-Ko): 40% on kill / ICD 6s - Justice (Turn Undead AoE, ICD 6s)",
-        "nameKo": "룬워드 법 (Amn-Lem-Ko): 처치시 40% / ICD 6초 - 정의 집행(Turn Undead 범위, ICD 6초)",
+        "nameKo": "룬워드 법 [Amn-Lem-Ko]: 처치 시 40% 확률로 정의 집행(언데드 퇴치 범위, ICD 6초). 6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_LAWBRINGER_HEAL",
@@ -5608,9 +5608,9 @@
       {
         "id": "runeword_voice_of_reason_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_VOICE_OF_REASON",
-        "name": "룬워드 보이스 (Lem-Ko-El-Eld): 적중 22% / ICD 7초 - 냉기 저항 분쇄(적 냉기저항 -35, 6초)",
+        "name": "룬워드 보이스 [Lem-Ko-El-Eld]: 적중 시 22% 확률로 냉기 저항 분쇄(적 냉기저항 -35, 6초). 7초마다 발동.",
         "nameEn": "Runeword Voice (Lem-Ko-El-Eld): 22% on hit / ICD 7s - Frost Shred (Frost Resist -35, 6s)",
-        "nameKo": "룬워드 보이스 (Lem-Ko-El-Eld): 적중 22% / ICD 7초 - 냉기 저항 분쇄(적 냉기저항 -35, 6초)",
+        "nameKo": "룬워드 보이스 [Lem-Ko-El-Eld]: 적중 시 22% 확률로 냉기 저항 분쇄(적 냉기저항 -35, 6초). 7초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_VOICE_OF_REASON_CHILL",
@@ -5654,9 +5654,9 @@
       {
         "id": "runeword_crescent_moon_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CRESCENT_MOON",
-        "name": "룬워드 크레센트 (Shael-Um-Tir): 적중 22% / ICD 7초 - 전격 저항 분쇄(적 전격저항 -35, 6초)",
+        "name": "룬워드 크레센트 [Shael-Um-Tir]: 적중 시 24% 확률로 전격 저항 분쇄(적 전격저항 -35, 6초). 6초마다 발동.",
         "nameEn": "Runeword Crescent (Shael-Um-Tir): 22% on hit / ICD 7s - Shock Shred (Shock Resist -35, 6s)",
-        "nameKo": "룬워드 크레센트 (Shael-Um-Tir): 적중 22% / ICD 7초 - 전격 저항 분쇄(적 전격저항 -35, 6초)",
+        "nameKo": "룬워드 크레센트 [Shael-Um-Tir]: 적중 시 24% 확률로 전격 저항 분쇄(적 전격저항 -35, 6초). 6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_CRESCENT_MOON_LUNAR",
@@ -5700,9 +5700,9 @@
       {
         "id": "runeword_venom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_VENOM",
-        "name": "룬워드 맹독 (Tal-Dol-Mal): 적중 22% / ICD 7초 - 독 저항 분쇄(적 독저항 -40, 6초)",
+        "name": "룬워드 맹독 [Tal-Dol-Mal]: 적중 시 24% 확률로 독 저항 분쇄(적 독저항 -40, 6초). 6초마다 발동.",
         "nameEn": "Runeword Venom (Tal-Dol-Mal): 22% on hit / ICD 7s - Poison Shred (Poison Resist -40, 6s)",
-        "nameKo": "룬워드 맹독 (Tal-Dol-Mal): 적중 22% / ICD 7초 - 독 저항 분쇄(적 독저항 -40, 6초)",
+        "nameKo": "룬워드 맹독 [Tal-Dol-Mal]: 적중 시 24% 확률로 독 저항 분쇄(적 독저항 -40, 6초). 6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_VENOM_POISON",
@@ -5746,9 +5746,9 @@
       {
         "id": "runeword_oath_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_OATH",
-        "name": "룬워드 오스 (Shael-Pul-Mal-Lum): 적중 24% / ICD 7초 - 서약의 힘(한손 스킬 +30, 7초)",
+        "name": "룬워드 오스 [Shael-Pul-Mal-Lum]: 적중 시 24% 확률로 서약의 힘(한손 스킬 +30, 7초). 7초마다 발동.",
         "nameEn": "Runeword Oath (Shael-Pul-Mal-Lum): 24% on hit / ICD 7s - Oath Power (One-Handed +30, 7s)",
-        "nameKo": "룬워드 오스 (Shael-Pul-Mal-Lum): 적중 24% / ICD 7초 - 서약의 힘(한손 스킬 +30, 7초)",
+        "nameKo": "룬워드 오스 [Shael-Pul-Mal-Lum]: 적중 시 24% 확률로 서약의 힘(한손 스킬 +30, 7초). 7초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_OATH_SWORN",
@@ -5792,9 +5792,9 @@
       {
         "id": "runeword_kingslayer_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_KINGSLAYER",
-        "name": "룬워드 왕 학살자 (Mal-Um-Gul-Fal): 적중 30% / ICD 0.6초 - 출혈 (3/초 × 8초, 물리 피해 4%)",
+        "name": "룬워드 왕 학살자 [Mal-Um-Gul-Fal]: 적중 시 30% 확률로 출혈 (3/초 × 8초, 물리 피해 4%). 0.6초마다 발동.",
         "nameEn": "Runeword Kingslayer (Mal-Um-Gul-Fal): 30% on Hit / ICD 0.6s - Bleed (3/s × 8s, 4% phys)",
-        "nameKo": "룬워드 왕 학살자 (Mal-Um-Gul-Fal): 적중 30% / ICD 0.6초 - 출혈 (3/초 × 8초, 물리 피해 4%)",
+        "nameKo": "룬워드 왕 학살자 [Mal-Um-Gul-Fal]: 적중 시 30% 확률로 출혈 (3/초 × 8초, 물리 피해 4%). 0.6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_KINGSLAYER_BLEED",
@@ -5847,9 +5847,9 @@
       {
         "id": "runeword_rift_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RIFT",
-        "name": "룬워드 리프트 (Hel-Ko-Lem-Gul): 적중 20% / ICD 8초 - 마법 저항 분쇄(적 마저 -30, 6초)",
+        "name": "룬워드 리프트 [Hel-Ko-Lem-Gul]: 적중 시 8% 확률로 마법 저항 분쇄(적 마저 -30, 6초). 18초마다 발동.",
         "nameEn": "Runeword Rift (Hel-Ko-Lem-Gul): 20% on hit / ICD 8s - Magic Shred (Magic Resist -30, 6s)",
-        "nameKo": "룬워드 리프트 (Hel-Ko-Lem-Gul): 적중 20% / ICD 8초 - 마법 저항 분쇄(적 마저 -30, 6초)",
+        "nameKo": "룬워드 리프트 [Hel-Ko-Lem-Gul]: 적중 시 8% 확률로 마법 저항 분쇄(적 마저 -30, 6초). 18초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_RIFT_SPARK",
@@ -5893,9 +5893,9 @@
       {
         "id": "runeword_mosaic_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MOSAIC",
-        "name": "룬워드 모자이크 (Mal-Gul-Amn): 적중 26% / ICD 5초 - 모자이크 원소(복합 원소 피해 20)",
+        "name": "룬워드 모자이크 [Mal-Gul-Amn]: 적중 시 26% 확률로 모자이크 원소(복합 원소 피해 20). 5초마다 발동.",
         "nameEn": "Runeword Mosaic (Mal-Gul-Amn): 26% on hit / ICD 5s - Mosaic Elements (Multi-element Damage 20)",
-        "nameKo": "룬워드 모자이크 (Mal-Gul-Amn): 적중 26% / ICD 5초 - 모자이크 원소(복합 원소 피해 20)",
+        "nameKo": "룬워드 모자이크 [Mal-Gul-Amn]: 적중 시 26% 확률로 모자이크 원소(복합 원소 피해 20). 5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_MOSAIC_PRISM",
@@ -5939,9 +5939,9 @@
       {
         "id": "runeword_silence_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SILENCE",
-        "name": "룬워드 사일런스 (Dol-Eld-Hel-Ist-Tir-Vex): 적중 26% / ICD 7초 - 침묵(Magicka -50, 5초)",
+        "name": "룬워드 사일런스 [Dol-Eld-Hel-Ist-Tir-Vex]: 적중 시 26% 확률로 침묵(Magicka -50, 5초). 7초마다 발동.",
         "nameEn": "Runeword Silence (Dol-Eld-Hel-Ist-Tir-Vex): 26% on hit / ICD 7s - Silence (Magicka -50, 5s)",
-        "nameKo": "룬워드 사일런스 (Dol-Eld-Hel-Ist-Tir-Vex): 적중 26% / ICD 7초 - 침묵(Magicka -50, 5초)",
+        "nameKo": "룬워드 사일런스 [Dol-Eld-Hel-Ist-Tir-Vex]: 적중 시 26% 확률로 침묵(Magicka -50, 5초). 7초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_SILENCE_MUTE",
@@ -5985,9 +5985,9 @@
       {
         "id": "runeword_death_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DEATH",
-        "name": "룬워드 죽음 (Hel-El-Vex-Ort-Gul): 적중 24% / ICD 5초 - 사신의 손길(체력 흡수 15)",
+        "name": "룬워드 죽음 [Hel-El-Vex-Ort-Gul]: 적중 시 24% 확률로 사신의 손길(체력 흡수 15). 5초마다 발동.",
         "nameEn": "Runeword Death (Hel-El-Vex-Ort-Gul): 24% on hit / ICD 5s - Death Touch (Absorb Health 15)",
-        "nameKo": "룬워드 죽음 (Hel-El-Vex-Ort-Gul): 적중 24% / ICD 5초 - 사신의 손길(체력 흡수 15)",
+        "nameKo": "룬워드 죽음 [Hel-El-Vex-Ort-Gul]: 적중 시 24% 확률로 사신의 손길(체력 흡수 15). 5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_DEATH_LIFESTEAL",
@@ -6040,9 +6040,9 @@
       {
         "id": "runeword_chaos_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAOS",
-        "name": "룬워드 혼돈 (Fal-Ohm-Um): 적중 16% / ICD 5.5초 - 적응형 원소(약점 속성 피해)",
+        "name": "룬워드 혼돈 [Fal-Ohm-Um]: 적중 시 16% 확률로 적응형 원소(약점 속성 피해). 5.5초마다 발동.",
         "nameEn": "Runeword Chaos (Fal-Ohm-Um): 16% on Hit / ICD 5.5s - Adaptive Element (weakest resist)",
-        "nameKo": "룬워드 혼돈 (Fal-Ohm-Um): 적중 16% / ICD 5.5초 - 적응형 원소(약점 속성 피해)",
+        "nameKo": "룬워드 혼돈 [Fal-Ohm-Um]: 적중 시 16% 확률로 적응형 원소(약점 속성 피해). 5.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_CHAOS_BLEED",
@@ -6087,9 +6087,9 @@
       {
         "id": "runeword_wind_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WIND",
-        "name": "룬워드 바람 (Sur-El): 적중 20% / ICD 5초 - 질풍 압박(적 공속 -20%, 5초)",
+        "name": "룬워드 바람 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적 공속 -20%, 5초). 4초마다 발동.",
         "nameEn": "Runeword Wind (Sur-El): 20% on hit / ICD 5s - Gale Pressure (Weapon Speed -20%, 5s)",
-        "nameKo": "룬워드 바람 (Sur-El): 적중 20% / ICD 5초 - 질풍 압박(적 공속 -20%, 5초)",
+        "nameKo": "룬워드 바람 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적 공속 -20%, 5초). 4초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WIND_PUSH",
@@ -6133,9 +6133,9 @@
       {
         "id": "runeword_beast_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BEAST",
-        "name": "룬워드 야수 (Ber-Tir-Um-Mal-Lum): 타격시 / ICD 180초 - 야수 격노 (공격+30, 방어+150, 12초)",
+        "name": "룬워드 야수 [Ber-Tir-Um-Mal-Lum]: 매 적중 시 야수 격노 (공격+30, 방어+150, 12초). 180초마다 발동.",
         "nameEn": "Runeword Beast (Ber-Tir-Um-Mal-Lum): on Hit / ICD 180s - Beast Rage (ATK+30, Armor+150, 12s)",
-        "nameKo": "룬워드 야수 (Ber-Tir-Um-Mal-Lum): 타격시 / ICD 180초 - 야수 격노 (공격+30, 방어+150, 12초)",
+        "nameKo": "룬워드 야수 [Ber-Tir-Um-Mal-Lum]: 매 적중 시 야수 격노 (공격+30, 방어+150, 12초). 180초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -6198,9 +6198,9 @@
       {
         "id": "runeword_eternity_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ETERNITY",
-        "name": "룬워드 영원 (Amn-Ber-Ist-Sol-Sur): 피격시 / ICD 120초 - 방벽 (방어도+300, 10초)",
+        "name": "룬워드 영원 [Amn-Ber-Ist-Sol-Sur]: 피격 시 방벽 (방어도+300, 10초). 120초마다 발동.",
         "nameEn": "Runeword Eternity (Amn-Ber-Ist-Sol-Sur): on Hit Taken / ICD 120s - Bulwark (Armor+300, 10s)",
-        "nameKo": "룬워드 영원 (Amn-Ber-Ist-Sol-Sur): 피격시 / ICD 120초 - 방벽 (방어도+300, 10초)",
+        "nameKo": "룬워드 영원 [Amn-Ber-Ist-Sol-Sur]: 피격 시 방벽 (방어도+300, 10초). 120초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ETERNITY_BULWARK",
@@ -6244,9 +6244,9 @@
       {
         "id": "runeword_wrath_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WRATH",
-        "name": "룬워드 래스 (Pul-Lum-Ber-Mal): 적중 26% / ICD 5초 - 신벌(화염 피해 30)",
+        "name": "룬워드 래스 [Pul-Lum-Ber-Mal]: 적중 시 26% 확률로 신벌(화염 피해 30). 5초마다 발동.",
         "nameEn": "Runeword Wrath (Pul-Lum-Ber-Mal): 26% on hit / ICD 5s - Divine Wrath (Fire Damage 30)",
-        "nameKo": "룬워드 래스 (Pul-Lum-Ber-Mal): 적중 26% / ICD 5초 - 신벌(화염 피해 30)",
+        "nameKo": "룬워드 래스 [Pul-Lum-Ber-Mal]: 적중 시 26% 확률로 신벌(화염 피해 30). 5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WRATH_SMITE",
@@ -6300,9 +6300,9 @@
       {
         "id": "runeword_fury_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FURY",
-        "name": "룬워드 분노 (Jah-Gul-Eth): 적중 24% / ICD 3.5초 - 격노의 흐름(공격속도 +15%, 8초)",
+        "name": "룬워드 분노 [Jah-Gul-Eth]: 적중 시 24% 확률로 격노의 흐름(공격속도 +15%, 8초). 3.5초마다 발동.",
         "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 3.5s - Weapon Fury (Attack Speed +15%, 8s)",
-        "nameKo": "룬워드 분노 (Jah-Gul-Eth): 적중 24% / ICD 3.5초 - 격노의 흐름(공격속도 +15%, 8초)",
+        "nameKo": "룬워드 분노 [Jah-Gul-Eth]: 적중 시 24% 확률로 격노의 흐름(공격속도 +15%, 8초). 3.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
@@ -6346,9 +6346,9 @@
       {
         "id": "runeword_famine_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAMINE",
-        "name": "룬워드 파민 (Fal-Ohm-Ort-Jah): 적중 26% / ICD 6초 - 기근(적 Stamina -30/s, 5초)",
+        "name": "룬워드 파민 [Fal-Ohm-Ort-Jah]: 적중 시 26% 확률로 기근(적 Stamina -30/s, 5초). 6초마다 발동.",
         "nameEn": "Runeword Famine (Fal-Ohm-Ort-Jah): 26% on hit / ICD 6s - Famine (Target Stamina -30/s, 5s)",
-        "nameKo": "룬워드 파민 (Fal-Ohm-Ort-Jah): 적중 26% / ICD 6초 - 기근(적 Stamina -30/s, 5초)",
+        "nameKo": "룬워드 파민 [Fal-Ohm-Ort-Jah]: 적중 시 26% 확률로 기근(적 Stamina -30/s, 5초). 6초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_FAMINE_DRAIN",
@@ -6402,9 +6402,9 @@
       {
         "id": "runeword_brand_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BRAND",
-        "name": "룬워드 브랜드 (Jah-Lo-Mal-Gul): 적중 28% / ICD 5초 - 낙인(화염 DoT 10/s, 6초)",
+        "name": "룬워드 브랜드 [Jah-Lo-Mal-Gul]: 적중 시 28% 확률로 낙인(화염 DoT 10/s, 6초). 5초마다 발동.",
         "nameEn": "Runeword Brand (Jah-Lo-Mal-Gul): 28% on hit / ICD 5s - Brand (Fire DoT 10/s, 6s)",
-        "nameKo": "룬워드 브랜드 (Jah-Lo-Mal-Gul): 적중 28% / ICD 5초 - 낙인(화염 DoT 10/s, 6초)",
+        "nameKo": "룬워드 브랜드 [Jah-Lo-Mal-Gul]: 적중 시 28% 확률로 낙인(화염 DoT 10/s, 6초). 5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_BRAND_SEAR",
@@ -6458,9 +6458,9 @@
       {
         "id": "runeword_destruction_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DESTRUCTION",
-        "name": "룬워드 파괴 (Vex-Lo-Ber-Jah-Ko): 적중 28% / ICD 5초 - 파멸(전격 DoT 8/s, 5초)",
+        "name": "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 28% 확률로 파멸(전격 DoT 8/s, 5초). 5초마다 발동.",
         "nameEn": "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 28% on hit / ICD 5s - Destruction (Shock DoT 8/s, 5s)",
-        "nameKo": "룬워드 파괴 (Vex-Lo-Ber-Jah-Ko): 적중 28% / ICD 5초 - 파멸(전격 DoT 8/s, 5초)",
+        "nameKo": "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 28% 확률로 파멸(전격 DoT 8/s, 5초). 5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_DESTRUCTION_BLEED",
@@ -6506,9 +6506,9 @@
       {
         "id": "runeword_ice_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ICE",
-        "name": "룬워드 얼음 (Amn-Shael-Jah-Lo): 적중 100% / ICD 0초 - 동결 파편(적 냉기저항 -30, 6초)",
+        "name": "룬워드 얼음 [Amn-Shael-Jah-Lo]: 매 적중 시 동결 파편(적 냉기저항 -30, 6초). 0.5초마다 발동.",
         "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0s - Frost Shards (Target Frost Resist -30, 6s)",
-        "nameKo": "룬워드 얼음 (Amn-Shael-Jah-Lo): 적중 100% / ICD 0초 - 동결 파편(적 냉기저항 -30, 6초)",
+        "nameKo": "룬워드 얼음 [Amn-Shael-Jah-Lo]: 매 적중 시 동결 파편(적 냉기저항 -30, 6초). 0.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ICE_FROST_SHRED",
@@ -6552,9 +6552,9 @@
       {
         "id": "runeword_hand_of_justice_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HAND_OF_JUSTICE",
-        "name": "룬워드 정의의 손 (Sur-Cham-Amn-Lo): 적중 20% / ICD 7초 - 심판의 기세(공격력 +20%, 6초)",
+        "name": "룬워드 정의의 손 [Sur-Cham-Amn-Lo]: 적중 시 20% 확률로 심판의 기세(공격력 +20%, 6초). 7초마다 발동.",
         "nameEn": "Runeword Hand of Justice (Sur-Cham-Amn-Lo): 20% on Hit / ICD 7s - Judgment (Attack +20%, 6s)",
-        "nameKo": "룬워드 정의의 손 (Sur-Cham-Amn-Lo): 적중 20% / ICD 7초 - 심판의 기세(공격력 +20%, 6초)",
+        "nameKo": "룬워드 정의의 손 [Sur-Cham-Amn-Lo]: 적중 시 20% 확률로 심판의 기세(공격력 +20%, 6초). 7초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_HOJ_LIFESTEAL",
@@ -6598,9 +6598,9 @@
       {
         "id": "runeword_pride_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PRIDE",
-        "name": "룬워드 프라이드 (Cham-Sur-Io-Lo): 적중 28% / ICD 4초 - 오만의 일격(냉기 피해 25)",
+        "name": "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 28% 확률로 오만의 일격(냉기 피해 25). 4초마다 발동.",
         "nameEn": "Runeword Pride (Cham-Sur-Io-Lo): 28% on hit / ICD 4s - Pride Strike (Frost Damage 25)",
-        "nameKo": "룬워드 프라이드 (Cham-Sur-Io-Lo): 적중 28% / ICD 4초 - 오만의 일격(냉기 피해 25)",
+        "nameKo": "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 28% 확률로 오만의 일격(냉기 피해 25). 4초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PRIDE_CHILL",
@@ -6654,9 +6654,9 @@
       {
         "id": "runeword_plague_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PLAGUE",
-        "name": "룬워드 역병 (Cham-Shael-Um): 처치시 40% / ICD 4초 - 역병 폭발(독 구름, 독 DoT 6/s, 5초)",
+        "name": "룬워드 역병 [Cham-Shael-Um]: 처치 시 40% 확률로 역병 폭발(독 구름, 독 DoT 6/s, 5초). 4초마다 발동.",
         "nameEn": "Runeword Plague (Cham-Shael-Um): 40% on kill / ICD 4s - Plague Burst (Poison Cloud, Poison DoT 6/s, 5s)",
-        "nameKo": "룬워드 역병 (Cham-Shael-Um): 처치시 40% / ICD 4초 - 역병 폭발(독 구름, 독 DoT 6/s, 5초)",
+        "nameKo": "룬워드 역병 [Cham-Shael-Um]: 처치 시 40% 확률로 역병 폭발(독 구름, 독 DoT 6/s, 5초). 4초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PLAGUE_CLOUD",
@@ -6702,9 +6702,9 @@
       {
         "id": "runeword_obsession_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_OBSESSION",
-        "name": "룬워드 집착 (Zod-Ist-Lem-Lum-Io-Nef): 적중 34% / ICD 5초 - 마법 폭발 + 마나 재생 +25",
+        "name": "룬워드 집착 [Zod-Ist-Lem-Lum-Io-Nef]: 적중 시 34% 확률로 마법 폭발. 마나 재생 +25. 5초마다 발동.",
         "nameEn": "Runeword Obsession (Zod-Ist-Lem-Lum-Io-Nef): 34% on Hit / ICD 5s - Magic blast + Magicka Regen +25",
-        "nameKo": "룬워드 집착 (Zod-Ist-Lem-Lum-Io-Nef): 적중 34% / ICD 5초 - 마법 폭발 + 마나 재생 +25",
+        "nameKo": "룬워드 집착 [Zod-Ist-Lem-Lum-Io-Nef]: 적중 시 34% 확률로 마법 폭발. 마나 재생 +25. 5초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -6773,9 +6773,9 @@
       {
         "id": "runeword_mist_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MIST",
-        "name": "룬워드 미스트 (Cham-Shael-Gul-Thul-Ith): 적중 18% / ICD 6초 - 마력 차단(적 마력 재생 -80%, 5초)",
+        "name": "룬워드 미스트 [Cham-Shael-Gul-Thul-Ith]: 적중 시 18% 확률로 마력 차단(적 마력 재생 -80%, 5초). 5초마다 발동.",
         "nameEn": "Runeword Mist (Cham-Shael-Gul-Thul-Ith): 18% on hit / ICD 6s - Magicka Block (Magicka Regen -80%, 5s)",
-        "nameKo": "룬워드 미스트 (Cham-Shael-Gul-Thul-Ith): 적중 18% / ICD 6초 - 마력 차단(적 마력 재생 -80%, 5초)",
+        "nameKo": "룬워드 미스트 [Cham-Shael-Gul-Thul-Ith]: 적중 시 18% 확률로 마력 차단(적 마력 재생 -80%, 5초). 5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_MIST_FOG",
@@ -6819,9 +6819,9 @@
       {
         "id": "runeword_nadir_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_NADIR",
-        "name": "룬워드 나디르 (Nef-Tir): 피격 12% / ICD 16초 - 공포의 나락(Fear 5초)",
+        "name": "룬워드 나디르 [Nef-Tir]: 피격 시 12% 확률로 공포의 나락(공포 5초). 16초마다 발동.",
         "nameEn": "Runeword Nadir (Nef-Tir): 12% on hit taken / ICD 16s - Nadir of Fear (Fear 5s)",
-        "nameKo": "룬워드 나디르 (Nef-Tir): 피격 12% / ICD 16초 - 공포의 나락(Fear 5초)",
+        "nameKo": "룬워드 나디르 [Nef-Tir]: 피격 시 12% 확률로 공포의 나락(공포 5초). 16초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_NADIR_WARD",
@@ -6866,9 +6866,9 @@
       {
         "id": "runeword_stealth_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_STEALTH",
-        "name": "룬워드 스텔스 (Tal-Eth): 피격 10% / ICD 20초 - 긴급 은신(투명화 2초)",
+        "name": "룬워드 스텔스 [Tal-Eth]: 피격 시 10% 확률로 긴급 은신(투명화 2초). 20초마다 발동.",
         "nameEn": "Runeword Stealth (Tal-Eth): 10% on hit taken / ICD 20s - Emergency Stealth (Invisibility 2s)",
-        "nameKo": "룬워드 스텔스 (Tal-Eth): 피격 10% / ICD 20초 - 긴급 은신(투명화 2초)",
+        "nameKo": "룬워드 스텔스 [Tal-Eth]: 피격 시 10% 확률로 긴급 은신(투명화 2초). 20초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_STEALTH_HASTE",
@@ -6913,9 +6913,9 @@
       {
         "id": "runeword_ancients_pledge_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ANCIENTS_PLEDGE",
-        "name": "룬워드 에이션트 (Ral-Ort-Tal): 피격 20% / ICD 11초 - 고대 서약(독저항 +60, 7초)",
+        "name": "룬워드 에이션트 [Ral-Ort-Tal]: 피격 시 20% 확률로 고대 서약(독저항 +60, 7초). 11초마다 발동.",
         "nameEn": "Runeword Ancient's (Ral-Ort-Tal): 20% on hit taken / ICD 11s - Ancient Pledge (Poison Resist +60, 7s)",
-        "nameKo": "룬워드 에이션트 (Ral-Ort-Tal): 피격 20% / ICD 11초 - 고대 서약(독저항 +60, 7초)",
+        "nameKo": "룬워드 에이션트 [Ral-Ort-Tal]: 피격 시 20% 확률로 고대 서약(독저항 +60, 7초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ANCIENTS_PLEDGE_OATH",
@@ -6959,9 +6959,9 @@
       {
         "id": "runeword_myth_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MYTH",
-        "name": "룬워드 미스 (Hel-Amn-Nef): 피격 20% / ICD 11초 - 신화의 갑옷(중갑 스킬 +25, 7초)",
+        "name": "룬워드 미스 [Hel-Amn-Nef]: 피격 시 20% 확률로 신화의 갑옷(중갑 스킬 +25, 7초). 11초마다 발동.",
         "nameEn": "Runeword Myth (Hel-Amn-Nef): 20% on hit taken / ICD 11s - Mythic Armor (Heavy Armor +25, 7s)",
-        "nameKo": "룬워드 미스 (Hel-Amn-Nef): 피격 20% / ICD 11초 - 신화의 갑옷(중갑 스킬 +25, 7초)",
+        "nameKo": "룬워드 미스 [Hel-Amn-Nef]: 피격 시 20% 확률로 신화의 갑옷(중갑 스킬 +25, 7초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_MYTH_SHIELD",
@@ -7005,9 +7005,9 @@
       {
         "id": "runeword_lore_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LORE",
-        "name": "룬워드 로어 (Ort-Sol): 피격 20% / ICD 11초 - 지식의 빛(마나 재생 +80%, 7초)",
+        "name": "룬워드 로어 [Ort-Sol]: 피격 시 20% 확률로 지식의 빛(마나 재생 +80%, 7초). 11초마다 발동.",
         "nameEn": "Runeword Lore (Ort-Sol): 20% on hit taken / ICD 11s - Light of Lore (Magicka Regen +80%, 7s)",
-        "nameKo": "룬워드 로어 (Ort-Sol): 피격 20% / ICD 11초 - 지식의 빛(마나 재생 +80%, 7초)",
+        "nameKo": "룬워드 로어 [Ort-Sol]: 피격 시 20% 확률로 지식의 빛(마나 재생 +80%, 7초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_LORE_GLOW",
@@ -7051,9 +7051,9 @@
       {
         "id": "runeword_radiance_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RADIANCE",
-        "name": "룬워드 레이디언스 (Nef-Sol-Ith): 피격 15% / ICD 40초 - 광채(생명 감지 200m, 30초)",
+        "name": "룬워드 레이디언스 [Nef-Sol-Ith]: 피격 시 15% 확률로 광채(생명 감지 200m, 30초). 40초마다 발동.",
         "nameEn": "Runeword Radiance (Nef-Sol-Ith): 15% on hit taken / ICD 40s - Radiance (Detect Life 200m, 30s)",
-        "nameKo": "룬워드 레이디언스 (Nef-Sol-Ith): 피격 15% / ICD 40초 - 광채(생명 감지 200m, 30초)",
+        "nameKo": "룬워드 레이디언스 [Nef-Sol-Ith]: 피격 시 15% 확률로 광채(생명 감지 200m, 30초). 40초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_RADIANCE_GUARD",
@@ -7098,9 +7098,9 @@
       {
         "id": "runeword_rhyme_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RHYME",
-        "name": "룬워드 운율 (Shael-Eth): 피격 22% / ICD 12초 - 방어 버프 + 냉기 저항 +40",
+        "name": "룬워드 운율 [Shael-Eth]: 피격 시 22% 확률로 보호막 (방어도 강화). 냉기 저항 +40. 12초마다 발동.",
         "nameEn": "Runeword Rhyme (Shael-Eth): 22% on Hit Taken / ICD 12s - Shield Ward (Armor boost) + Frost Resist +40",
-        "nameKo": "룬워드 운율 (Shael-Eth): 피격 22% / ICD 12초 - 보호막 (방어도 강화) + 냉기 저항 +40",
+        "nameKo": "룬워드 운율 [Shael-Eth]: 피격 시 22% 확률로 보호막 (방어도 강화). 냉기 저항 +40. 12초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -7169,9 +7169,9 @@
       {
         "id": "runeword_peace_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PEACE",
-        "name": "룬워드 피스 (Shael-Thul-Amn): 피격 10% / ICD 16초 - 평화의 파동(Calm 6초)",
+        "name": "룬워드 피스 [Shael-Thul-Amn]: 피격 시 10% 확률로 평화의 파동(진정 6초). 16초마다 발동.",
         "nameEn": "Runeword Peace (Shael-Thul-Amn): 10% on hit taken / ICD 16s - Wave of Peace (Calm 6s)",
-        "nameKo": "룬워드 피스 (Shael-Thul-Amn): 피격 10% / ICD 16초 - 평화의 파동(Calm 6초)",
+        "nameKo": "룬워드 피스 [Shael-Thul-Amn]: 피격 시 10% 확률로 평화의 파동(진정 6초). 16초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PEACE_BARRIER",
@@ -7216,9 +7216,9 @@
       {
         "id": "runeword_bulwark_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BULWARK",
-        "name": "룬워드 벌워크 (Shael-Io-Sol): 피격 22% / ICD 11초 - 보루(방어도 +80, 7초)",
+        "name": "룬워드 벌워크 [Shael-Io-Sol]: 피격 시 22% 확률로 보루(방어도 +80, 7초). 11초마다 발동.",
         "nameEn": "Runeword Bulwark (Shael-Io-Sol): 22% on hit taken / ICD 11s - Bulwark (Armor +80, 7s)",
-        "nameKo": "룬워드 벌워크 (Shael-Io-Sol): 피격 22% / ICD 11초 - 보루(방어도 +80, 7초)",
+        "nameKo": "룬워드 벌워크 [Shael-Io-Sol]: 피격 시 22% 확률로 보루(방어도 +80, 7초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_BULWARK_GUARD",
@@ -7262,9 +7262,9 @@
       {
         "id": "runeword_cure_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CURE",
-        "name": "룬워드 큐어 (Shael-Io-Tal): 피격 22% / ICD 11초 - 치유의 각성(회복 마법 +20, 8초)",
+        "name": "룬워드 큐어 [Shael-Io-Tal]: 피격 시 22% 확률로 치유의 각성(회복 마법 +20, 8초). 11초마다 발동.",
         "nameEn": "Runeword Cure (Shael-Io-Tal): 22% on hit taken / ICD 11s - Healing Awakening (Restoration +20, 8s)",
-        "nameKo": "룬워드 큐어 (Shael-Io-Tal): 피격 22% / ICD 11초 - 치유의 각성(회복 마법 +20, 8초)",
+        "nameKo": "룬워드 큐어 [Shael-Io-Tal]: 피격 시 22% 확률로 치유의 각성(회복 마법 +20, 8초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_CURE_HEAL",
@@ -7308,9 +7308,9 @@
       {
         "id": "runeword_ground_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_GROUND",
-        "name": "룬워드 그라운드 (Shael-Io-Ort): 피격 22% / ICD 11초 - 접지의 힘(용언 재충전 +50%, 8초)",
+        "name": "룬워드 그라운드 [Shael-Io-Ort]: 피격 시 22% 확률로 접지의 힘(용언 재충전 +50%, 8초). 11초마다 발동.",
         "nameEn": "Runeword Ground (Shael-Io-Ort): 22% on hit taken / ICD 11s - Grounding Force (Shout Recovery +50%, 8s)",
-        "nameKo": "룬워드 그라운드 (Shael-Io-Ort): 피격 22% / ICD 11초 - 접지의 힘(용언 재충전 +50%, 8초)",
+        "nameKo": "룬워드 그라운드 [Shael-Io-Ort]: 피격 시 22% 확률로 접지의 힘(용언 재충전 +50%, 8초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_GROUND_ANCHOR",
@@ -7354,9 +7354,9 @@
       {
         "id": "runeword_hearth_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEARTH",
-        "name": "룬워드 하스 (Shael-Io-Thul): 피격 22% / ICD 11초 - 소환의 불씨(소환 마법 +20, 7초)",
+        "name": "룬워드 하스 [Shael-Io-Thul]: 피격 시 22% 확률로 소환의 불씨(소환 마법 +20, 7초). 11초마다 발동.",
         "nameEn": "Runeword Hearth (Shael-Io-Thul): 22% on hit taken / ICD 11s - Conjuration Ember (Conjuration +20, 7s)",
-        "nameKo": "룬워드 하스 (Shael-Io-Thul): 피격 22% / ICD 11초 - 소환의 불씨(소환 마법 +20, 7초)",
+        "nameKo": "룬워드 하스 [Shael-Io-Thul]: 피격 시 22% 확률로 소환의 불씨(소환 마법 +20, 7초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_HEARTH_WARMTH",
@@ -7400,9 +7400,9 @@
       {
         "id": "runeword_temper_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_TEMPER",
-        "name": "룬워드 템퍼 (Shael-Io-Ral): 피격 20% / ICD 9초 - 단련의 기운(기력 재생 +5, 8초)",
+        "name": "룬워드 템퍼 [Shael-Io-Ral]: 피격 시 18% 확률로 단련의 기운(기력 재생 +5, 8초). 8초마다 발동.",
         "nameEn": "Runeword Temper (Shael-Io-Ral): 20% on hit taken / ICD 9s - Tempered Endurance (Stamina Regen +5, 8s)",
-        "nameKo": "룬워드 템퍼 (Shael-Io-Ral): 피격 20% / ICD 9초 - 단련의 기운(기력 재생 +5, 8초)",
+        "nameKo": "룬워드 템퍼 [Shael-Io-Ral]: 피격 시 18% 확률로 단련의 기운(기력 재생 +5, 8초). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_TEMPER_HEAT",
@@ -7446,9 +7446,9 @@
       {
         "id": "runeword_smoke_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SMOKE",
-        "name": "룬워드 스모크 (Nef-Lum): 피격 22% / ICD 12초 - 연막의 이동(이동속도 +22%, 5초)",
+        "name": "룬워드 스모크 [Nef-Lum]: 피격 시 22% 확률로 연막의 이동(이동속도 +22%, 5초). 12초마다 발동.",
         "nameEn": "Runeword Smoke (Nef-Lum): 22% on hit taken / ICD 12s - Smoke Screen (Move Speed +22%, 5s)",
-        "nameKo": "룬워드 스모크 (Nef-Lum): 피격 22% / ICD 12초 - 연막의 이동(이동속도 +22%, 5초)",
+        "nameKo": "룬워드 스모크 [Nef-Lum]: 피격 시 22% 확률로 연막의 이동(이동속도 +22%, 5초). 12초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_SMOKE_SCREEN",
@@ -7492,9 +7492,9 @@
       {
         "id": "runeword_splendor_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPLENDOR",
-        "name": "룬워드 스플렌더 (Eth-Lum): 피격 18% / ICD 10초 - 마력 방패(마법저항 +30, 7초)",
+        "name": "룬워드 스플렌더 [Eth-Lum]: 피격 시 18% 확률로 마력 방패(마법저항 +30, 7초). 10초마다 발동.",
         "nameEn": "Runeword Splendor (Eth-Lum): 18% on hit taken / ICD 10s - Magic Shield (Magic Resist +30, 7s)",
-        "nameKo": "룬워드 스플렌더 (Eth-Lum): 피격 18% / ICD 10초 - 마력 방패(마법저항 +30, 7초)",
+        "nameKo": "룬워드 스플렌더 [Eth-Lum]: 피격 시 18% 확률로 마력 방패(마법저항 +30, 7초). 10초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_SPLENDOR_AURA",
@@ -7538,9 +7538,9 @@
       {
         "id": "runeword_hustle_a_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HUSTLE_A",
-        "name": "룬워드 허슬-방어구 (Shael-Ko-Eld): 피격 26% / ICD 10초 - 방어 버프 + 이동속도 +8%",
+        "name": "룬워드 허슬-방어구 [Shael-Ko-Eld]: 피격 시 26% 확률로 방어 강화 (방어도+회피). 이동속도 +8%. 10초마다 발동.",
         "nameEn": "Runeword Hustle-A (Shael-Ko-Eld): 26% on Hit Taken / ICD 10s - Defense boost (Armor+Evasion) + Move Speed +8%",
-        "nameKo": "룬워드 허슬-방어구 (Shael-Ko-Eld): 피격 26% / ICD 10초 - 방어 강화 (방어도+회피) + 이동속도 +8%",
+        "nameKo": "룬워드 허슬-방어구 [Shael-Ko-Eld]: 피격 시 26% 확률로 방어 강화 (방어도+회피). 이동속도 +8%. 10초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -7609,9 +7609,9 @@
       {
         "id": "runeword_lionheart_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LIONHEART",
-        "name": "룬워드 사자심장 (Hel-Lum-Fal): 체력<30%시 / ICD 45초 - 사자의 심장(긴급 체력 200 회복)",
+        "name": "룬워드 사자심장 [Hel-Lum-Fal]: 체력 30% 이하일 때 사자의 심장(긴급 체력 200 회복). 45초마다 발동.",
         "nameEn": "Runeword Lionheart (Hel-Lum-Fal): HP<30% / ICD 45s - Lionheart (Emergency HP 200 restore)",
-        "nameKo": "룬워드 사자심장 (Hel-Lum-Fal): 체력<30%시 / ICD 45초 - 사자의 심장(긴급 체력 200 회복)",
+        "nameKo": "룬워드 사자심장 [Hel-Lum-Fal]: 체력 30% 이하일 때 사자의 심장(긴급 체력 200 회복). 45초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_LIONHEART_EMERGENCY",
@@ -7656,9 +7656,9 @@
       {
         "id": "runeword_wealth_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WEALTH",
-        "name": "룬워드 웰스 (Lem-Ko-Tir): 피격 20% / ICD 18초 - 부의 축적(소지무게 +100, 15초)",
+        "name": "룬워드 웰스 [Lem-Ko-Tir]: 피격 시 20% 확률로 부의 축적(소지무게 +100, 15초). 18초마다 발동.",
         "nameEn": "Runeword Wealth (Lem-Ko-Tir): 20% on hit taken / ICD 18s - Wealth (Carry Weight +100, 15s)",
-        "nameKo": "룬워드 웰스 (Lem-Ko-Tir): 피격 20% / ICD 18초 - 부의 축적(소지무게 +100, 15초)",
+        "nameKo": "룬워드 웰스 [Lem-Ko-Tir]: 피격 시 20% 확률로 부의 축적(소지무게 +100, 15초). 18초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WEALTH_VIGOR",
@@ -7702,9 +7702,9 @@
       {
         "id": "runeword_treachery_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_TREACHERY",
-        "name": "룬워드 배신 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 회피 버프 + 공격속도 +10%",
+        "name": "룬워드 배신 [Shael-Thul-Lem]: 피격 시 26% 확률로 회피 강화 (회피율+이동). 공격속도 +10%. 10초마다 발동.",
         "nameEn": "Runeword Treachery (Shael-Thul-Lem): 26% on Hit Taken / ICD 10s - Evasion boost (Dodge+Speed) + Attack Speed +10%",
-        "nameKo": "룬워드 배신 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 회피 강화 (회피율+이동) + 공격속도 +10%",
+        "nameKo": "룬워드 배신 [Shael-Thul-Lem]: 피격 시 26% 확률로 회피 강화 (회피율+이동). 공격속도 +10%. 10초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -7773,9 +7773,9 @@
       {
         "id": "runeword_enlightenment_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ENLIGHTENMENT",
-        "name": "룬워드 인라이튼먼트 (Pul-Ral-Sol): 피격 22% / ICD 11초 - 깨달음(변화마법 +25, 8초)",
+        "name": "룬워드 인라이튼먼트 [Pul-Ral-Sol]: 피격 시 22% 확률로 깨달음(변화마법 +25, 8초). 11초마다 발동.",
         "nameEn": "Runeword Enlightenment (Pul-Ral-Sol): 22% on hit taken / ICD 11s - Enlightenment (Alteration +25, 8s)",
-        "nameKo": "룬워드 인라이튼먼트 (Pul-Ral-Sol): 피격 22% / ICD 11초 - 깨달음(변화마법 +25, 8초)",
+        "nameKo": "룬워드 인라이튼먼트 [Pul-Ral-Sol]: 피격 시 22% 확률로 깨달음(변화마법 +25, 8초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ENLIGHTENMENT_AURA",
@@ -7819,9 +7819,9 @@
       {
         "id": "runeword_wisdom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WISDOM",
-        "name": "룬워드 위즈덤 (Pul-Ith-Eld): 피격 20% / ICD 10초 - 지혜의 깊이(마력 재생 +5, 7초)",
+        "name": "룬워드 위즈덤 [Pul-Ith-Eld]: 피격 시 18% 확률로 지혜의 깊이(마력 재생 +5, 7초). 11초마다 발동.",
         "nameEn": "Runeword Wisdom (Pul-Ith-Eld): 20% on hit taken / ICD 10s - Wisdom Depth (Magicka Regen +5, 7s)",
-        "nameKo": "룬워드 위즈덤 (Pul-Ith-Eld): 피격 20% / ICD 10초 - 지혜의 깊이(마력 재생 +5, 7초)",
+        "nameKo": "룬워드 위즈덤 [Pul-Ith-Eld]: 피격 시 18% 확률로 지혜의 깊이(마력 재생 +5, 7초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WISDOM_INSIGHT",
@@ -7865,9 +7865,9 @@
       {
         "id": "runeword_duress_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DURESS",
-        "name": "룬워드 듀레스 (Shael-Um-Thul): 피격 20% / ICD 12초 - 공격자 약화(공격력 -25%, 5초)",
+        "name": "룬워드 듀레스 [Shael-Um-Thul]: 피격 시 20% 확률로 공격자 약화(공격력 -25%, 5초). 12초마다 발동.",
         "nameEn": "Runeword Duress (Shael-Um-Thul): 20% on hit taken / ICD 12s - Weaken Attacker (Attack -25%, 5s)",
-        "nameKo": "룬워드 듀레스 (Shael-Um-Thul): 피격 20% / ICD 12초 - 공격자 약화(공격력 -25%, 5초)",
+        "nameKo": "룬워드 듀레스 [Shael-Um-Thul]: 피격 시 20% 확률로 공격자 약화(공격력 -25%, 5초). 12초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_DURESS_RESOLVE",
@@ -7911,9 +7911,9 @@
       {
         "id": "runeword_gloom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_GLOOM",
-        "name": "룬워드 글룸 (Fal-Um-Pul): 피격 12% / ICD 18초 - 암흑 흡인(마력 흡수 30)",
+        "name": "룬워드 글룸 [Fal-Um-Pul]: 피격 시 12% 확률로 암흑 흡인(마력 흡수 30). 18초마다 발동.",
         "nameEn": "Runeword Gloom (Fal-Um-Pul): 12% on hit taken / ICD 18s - Dark Siphon (Absorb Magicka 30)",
-        "nameKo": "룬워드 글룸 (Fal-Um-Pul): 피격 12% / ICD 18초 - 암흑 흡인(마력 흡수 30)",
+        "nameKo": "룬워드 글룸 [Fal-Um-Pul]: 피격 시 12% 확률로 암흑 흡인(마력 흡수 30). 18초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_GLOOM_VEIL",
@@ -7958,9 +7958,9 @@
       {
         "id": "runeword_stone_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_STONE",
-        "name": "룬워드 스톤 (Shael-Um-Pul-Lum): 피격 22% / ICD 8초 - 방어구 분쇄(적 방어도 -50, 6초)",
+        "name": "룬워드 스톤 [Shael-Um-Pul-Lum]: 피격 시 22% 확률로 방어구 분쇄(적 방어도 -50, 6초). 8초마다 발동.",
         "nameEn": "Runeword Stone (Shael-Um-Pul-Lum): 22% on hit taken / ICD 8s - Armor Crush (Target Armor -50, 6s)",
-        "nameKo": "룬워드 스톤 (Shael-Um-Pul-Lum): 피격 22% / ICD 8초 - 방어구 분쇄(적 방어도 -50, 6초)",
+        "nameKo": "룬워드 스톤 [Shael-Um-Pul-Lum]: 피격 시 22% 확률로 방어구 분쇄(적 방어도 -50, 6초). 8초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_STONE_WALL",
@@ -8004,9 +8004,9 @@
       {
         "id": "runeword_bone_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BONE",
-        "name": "룬워드 본 (Sol-Um-Um): 피격 16% / ICD 11초 - 냉기 보호막(냉기저항 +45, 7초)",
+        "name": "룬워드 본 [Sol-Um-Um]: 피격 시 16% 확률로 냉기 보호막(냉기저항 +45, 7초). 11초마다 발동.",
         "nameEn": "Runeword Bone (Sol-Um-Um): 16% on hit taken / ICD 11s - Frost Ward (Frost Resist +45, 7s)",
-        "nameKo": "룬워드 본 (Sol-Um-Um): 피격 16% / ICD 11초 - 냉기 보호막(냉기저항 +45, 7초)",
+        "nameKo": "룬워드 본 [Sol-Um-Um]: 피격 시 16% 확률로 냉기 보호막(냉기저항 +45, 7초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_BONE_SHELL",
@@ -8050,9 +8050,9 @@
       {
         "id": "runeword_prudence_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PRUDENCE",
-        "name": "룬워드 프루던스 (Mal-Tir): 피격 17% / ICD 11초 - 전격 보호막(전격저항 +40, 7초)",
+        "name": "룬워드 프루던스 [Mal-Tir]: 피격 시 17% 확률로 전격 보호막(전격저항 +40, 7초). 11초마다 발동.",
         "nameEn": "Runeword Prudence (Mal-Tir): 17% on hit taken / ICD 11s - Shock Ward (Shock Resist +40, 7s)",
-        "nameKo": "룬워드 프루던스 (Mal-Tir): 피격 17% / ICD 11초 - 전격 보호막(전격저항 +40, 7초)",
+        "nameKo": "룬워드 프루던스 [Mal-Tir]: 피격 시 17% 확률로 전격 보호막(전격저항 +40, 7초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PRUDENCE_SHIELD",
@@ -8096,9 +8096,9 @@
       {
         "id": "runeword_sanctuary_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SANCTUARY",
-        "name": "룬워드 성역 (Ko-Ko-Mal): 피격 100% / ICD 0.5초 - 반사 (받은 피해의 15%) + 마법 저항 +15",
+        "name": "룬워드 성역 [Ko-Ko-Mal]: 피격 시 반사 (받은 피해의 15%). 마법 저항 +15. 0.5초마다 발동.",
         "nameEn": "Runeword Sanctuary (Ko-Ko-Mal): 100% on Hit Taken / ICD 0.5s - Reflect (15%) + Magic Resist +15",
-        "nameKo": "룬워드 성역 (Ko-Ko-Mal): 피격 100% / ICD 0.5초 - 반사 (받은 피해의 15%) + 마법 저항 +15",
+        "nameKo": "룬워드 성역 [Ko-Ko-Mal]: 피격 시 반사 (받은 피해의 15%). 마법 저항 +15. 0.5초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -8176,9 +8176,9 @@
       {
         "id": "runeword_rain_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RAIN",
-        "name": "룬워드 레인 (Ort-Mal-Ith): 피격 22% / ICD 11초 - 생명의 비(회복속도 +100%, 8초)",
+        "name": "룬워드 레인 [Ort-Mal-Ith]: 피격 시 22% 확률로 생명의 비(회복속도 +100%, 8초). 11초마다 발동.",
         "nameEn": "Runeword Rain (Ort-Mal-Ith): 22% on hit taken / ICD 11s - Rain of Life (Heal Rate +100%, 8s)",
-        "nameKo": "룬워드 레인 (Ort-Mal-Ith): 피격 22% / ICD 11초 - 생명의 비(회복속도 +100%, 8초)",
+        "nameKo": "룬워드 레인 [Ort-Mal-Ith]: 피격 시 22% 확률로 생명의 비(회복속도 +100%, 8초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_RAIN_BLESS",
@@ -8222,9 +8222,9 @@
       {
         "id": "runeword_delirium_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DELIRIUM",
-        "name": "룬워드 딜리리움 (Lem-Ist-Io): 적중 10% / ICD 15초 - 정신착란(Frenzy 5초)",
+        "name": "룬워드 딜리리움 [Lem-Ist-Io]: 적중 시 10% 확률로 정신착란(광란 5초). 15초마다 발동.",
         "nameEn": "Runeword Delirium (Lem-Ist-Io): 10% on hit / ICD 15s - Delirium (Frenzy 5s)",
-        "nameKo": "룬워드 딜리리움 (Lem-Ist-Io): 적중 10% / ICD 15초 - 정신착란(Frenzy 5초)",
+        "nameKo": "룬워드 딜리리움 [Lem-Ist-Io]: 적중 시 10% 확률로 정신착란(광란 5초). 15초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_DELIRIUM_CONFUSE",
@@ -8269,9 +8269,9 @@
       {
         "id": "runeword_principle_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PRINCIPLE",
-        "name": "룬워드 프린시플 (Ral-Gul-Eld): 피격 28% / ICD 10초 - 원칙의 방패(화염저항 +50, 7초)",
+        "name": "룬워드 프린시플 [Ral-Gul-Eld]: 피격 시 28% 확률로 원칙의 방패(화염저항 +50, 7초). 10초마다 발동.",
         "nameEn": "Runeword Principle (Ral-Gul-Eld): 28% on hit taken / ICD 10s - Principle Shield (Fire Resist +50, 7s)",
-        "nameKo": "룬워드 프린시플 (Ral-Gul-Eld): 피격 28% / ICD 10초 - 원칙의 방패(화염저항 +50, 7초)",
+        "nameKo": "룬워드 프린시플 [Ral-Gul-Eld]: 피격 시 28% 확률로 원칙의 방패(화염저항 +50, 7초). 10초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PRINCIPLE_SHIELD",
@@ -8315,9 +8315,9 @@
       {
         "id": "runeword_flickering_flame_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FLICKERING_FLAME",
-        "name": "룬워드 깜박이는 (Nef-Pul-Vex): 적중 100% / ICD 0초 - 화염 침식(적 화염저항 -25, 6초)",
+        "name": "룬워드 깜박이는 [Nef-Pul-Vex]: 매 적중 시 화염 침식(적 화염저항 -25, 6초). 0.5초마다 발동.",
         "nameEn": "Runeword Flickering (Nef-Pul-Vex): 100% on hit / ICD 0s - Flame Erosion (Target Fire Resist -25, 6s)",
-        "nameKo": "룬워드 깜박이는 (Nef-Pul-Vex): 적중 100% / ICD 0초 - 화염 침식(적 화염저항 -25, 6초)",
+        "nameKo": "룬워드 깜박이는 [Nef-Pul-Vex]: 매 적중 시 화염 침식(적 화염저항 -25, 6초). 0.5초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_FLICKER_FIRE_SHRED",
@@ -8361,9 +8361,9 @@
       {
         "id": "runeword_bramble_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_BRAMBLE",
-        "name": "룬워드 브램블 (Ral-Ohm-Sur-Eth): 피격 22% / ICD 10초 - 가시 반사(피해 반사 +25%, 6초)",
+        "name": "룬워드 브램블 [Ral-Ohm-Sur-Eth]: 피격 시 22% 확률로 가시 반사(피해 반사 +25%, 6초). 10초마다 발동.",
         "nameEn": "Runeword Bramble (Ral-Ohm-Sur-Eth): 22% on hit taken / ICD 10s - Bramble (Reflect Damage +25%, 6s)",
-        "nameKo": "룬워드 브램블 (Ral-Ohm-Sur-Eth): 피격 22% / ICD 10초 - 가시 반사(피해 반사 +25%, 6초)",
+        "nameKo": "룬워드 브램블 [Ral-Ohm-Sur-Eth]: 피격 시 22% 확률로 가시 반사(피해 반사 +25%, 6초). 10초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_BRAMBLE_REFLECT",
@@ -8415,9 +8415,9 @@
       {
         "id": "runeword_dragon_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DRAGON",
-        "name": "룬워드 드래곤 (Sur-Lo-Sol): 피격 24% / ICD 11초 - 용의 비늘(경갑 스킬 +30, 8초)",
+        "name": "룬워드 드래곤 [Sur-Lo-Sol]: 피격 시 24% 확률로 용의 비늘(경갑 스킬 +30, 8초). 11초마다 발동.",
         "nameEn": "Runeword Dragon (Sur-Lo-Sol): 24% on hit taken / ICD 11s - Dragon Scales (Light Armor +30, 8s)",
-        "nameKo": "룬워드 드래곤 (Sur-Lo-Sol): 피격 24% / ICD 11초 - 용의 비늘(경갑 스킬 +30, 8초)",
+        "nameKo": "룬워드 드래곤 [Sur-Lo-Sol]: 피격 시 24% 확률로 용의 비늘(경갑 스킬 +30, 8초). 11초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_DRAGON_SCALE",
@@ -8461,9 +8461,9 @@
       {
         "id": "runeword_metamorphosis_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_METAMORPHOSIS",
-        "name": "룬워드 메타모포시스 (Io-Cham-Fal): 피격 5% / ICD 30초 - 변신(Ethereal 무적 3초)",
+        "name": "룬워드 메타모포시스 [Io-Cham-Fal]: 피격 시 5% 확률로 변신(에테리얼 무적 3초). 30초마다 발동.",
         "nameEn": "Runeword Metamorphosis (Io-Cham-Fal): 5% on hit taken / ICD 30s - Metamorphosis (Ethereal Invincibility 3s)",
-        "nameKo": "룬워드 메타모포시스 (Io-Cham-Fal): 피격 5% / ICD 30초 - 변신(Ethereal 무적 3초)",
+        "nameKo": "룬워드 메타모포시스 [Io-Cham-Fal]: 피격 시 5% 확률로 변신(에테리얼 무적 3초). 30초마다 발동.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_METAMORPHOSIS_SHIFT",
