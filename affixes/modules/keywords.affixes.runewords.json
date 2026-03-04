@@ -74,8 +74,8 @@
     "id": "runeword_infinity_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INFINITY",
     "name": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 100% / ICD 0.5초 / 대상별 6초 - 약점 원소 노출(적 저항 감소)",
-    "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Exposure",
-    "nameKo": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 100% / ICD 0.5초 / 대상별 6초 - 약점 원소 노출(적 저항 감소)",
+    "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction",
+    "nameKo": "룬워드 무한 (Ber-Mal-Ber-Ist): 적중 100% / ICD 0.5초 / 대상별 6초 - 약점 원소 저항 감소",
     "records": {
       "magicEffects": [
         {
@@ -180,8 +180,8 @@
     "id": "runeword_fortitude_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FORTITUDE",
     "name": "룬워드 불굴 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 방어 버프 + 방어도 +80",
-    "nameEn": "Runeword Fortitude (El-Sol-Dol-Lo): 25% on Hit Taken / ICD 16s - Defense buff + Armor +80",
-    "nameKo": "룬워드 불굴 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 방어 버프 + 방어도 +80",
+    "nameEn": "Runeword Fortitude (El-Sol-Dol-Lo): 25% on Hit Taken / ICD 16s - Damage Resist boost + Armor +80",
+    "nameKo": "룬워드 불굴 (El-Sol-Dol-Lo): 피격 25% / ICD 16초 - 대미지 저항 강화 + 방어도 +80",
     "records": {
       "magicEffects": [
         {
@@ -251,8 +251,8 @@
     "id": "runeword_insight_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INSIGHT",
     "name": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 마나 버프 + 마나 재생 +25",
-    "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Mana buff + Magicka Regen +25",
-    "nameKo": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 마나 버프 + 마나 재생 +25",
+    "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Magicka Recovery boost + Magicka Regen +25",
+    "nameKo": "룬워드 통찰 (Ral-Tir-Tal-Sol): 적중 30% / ICD 10초 - 마나 회복 강화 + 마나 재생 +25",
     "records": {
       "magicEffects": [
         {
@@ -322,8 +322,8 @@
     "id": "runeword_spirit_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPIRIT",
     "name": "룬워드 영혼 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 마나 버프 + 마나 재생 +30",
-    "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 9s - Mana buff + Magicka Regen +30",
-    "nameKo": "룬워드 영혼 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 마나 버프 + 마나 재생 +30",
+    "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 9s - Magicka Recovery boost + Magicka Regen +30",
+    "nameKo": "룬워드 영혼 (Tal-Thul-Ort-Amn): 적중 28% / ICD 9초 - 마나 회복 강화 + 마나 재생 +30",
     "records": {
       "magicEffects": [
         {
@@ -393,7 +393,7 @@
     "id": "runeword_grief_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_GRIEF",
     "name": "룬워드 비탄 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.5초 - 흡혈 (8%) + 공격속도 +10%",
-    "nameEn": "Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on Hit / ICD 0.5s - Life Steal (8%) + IAS +10%",
+    "nameEn": "Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on Hit / ICD 0.5s - Heal 8% of Hit Damage + Attack Speed +10%",
     "nameKo": "룬워드 비탄 (Eth-Tir-Lo-Mal-Ral): 적중 30% / ICD 0.5초 - 흡혈 (8%) + 공격속도 +10%",
     "records": {
       "magicEffects": [
@@ -485,8 +485,8 @@
     "id": "runeword_call_to_arms_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CALL_TO_ARMS",
     "name": "룬워드 전투 함성 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 버프 + 체력+50 마나+30",
-    "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on Hit / ICD 18s - Buff + HP+50 MP+30",
-    "nameKo": "룬워드 전투 함성 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투 버프 + 체력+50 마나+30",
+    "nameEn": "Runeword Call to Arms (Amn-Ral-Mal-Ist-Ohm): 24% on Hit / ICD 18s - Battle Cry (Offense+Defense) + HP+50 MP+30",
+    "nameKo": "룬워드 전투 함성 (Amn-Ral-Mal-Ist-Ohm): 적중 24% / ICD 18초 - 전투력 강화 (공격+방어) + 체력+50 마나+30",
     "records": {
       "magicEffects": [
         {
@@ -571,8 +571,8 @@
     "id": "runeword_chains_of_honor_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CHAINS_OF_HONOR",
     "name": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 방어 버프 + 전 저항 +15",
-    "nameEn": "Runeword Chains of Honor (Dol-Um-Ber-Ist): 20% on Hit Taken / ICD 16s - Buff + All Resist +15",
-    "nameKo": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 방어 버프 + 전 저항 +15",
+    "nameEn": "Runeword Chains of Honor (Dol-Um-Ber-Ist): 20% on Hit Taken / ICD 16s - Phase (Speed+Evasion boost) + All Resist +15",
+    "nameKo": "룬워드 명예의 사슬 (Dol-Um-Ber-Ist): 피격 20% / ICD 16초 - 페이즈 (이동속도+회피 강화) + 전 저항 +15",
     "records": {
       "magicEffects": [
         {
@@ -670,8 +670,8 @@
     "id": "runeword_heart_of_the_oak_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEART_OF_THE_OAK",
     "name": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 노출)",
-    "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental exposure)",
-    "nameKo": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 노출)",
+    "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction)",
+    "nameKo": "룬워드 참나무의 심장 (Ko-Vex-Pul-Thul): 적중 32% / ICD 8초 - 비전 균열(적응형 원소 저항 감소)",
     "records": {
       "magicEffects": [
         {
@@ -761,8 +761,8 @@
     "id": "runeword_faith_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FAITH",
     "name": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 돌격 버프 + 공격속도 +15%",
-    "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on Hit / ICD 12s - Surge buff + Attack Speed +15%",
-    "nameKo": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 돌격 버프 + 공격속도 +15%",
+    "nameEn": "Runeword Faith (Ohm-Jah-Lem-Eld): 22% on Hit / ICD 12s - Fanaticism (Damage+Speed) + Attack Speed +15%",
+    "nameKo": "룬워드 신념 (Ohm-Jah-Lem-Eld): 적중 22% / ICD 12초 - 광신 강화 (공격력+공속) + 공격속도 +15%",
     "records": {
       "magicEffects": [
         {
@@ -954,8 +954,8 @@
     "id": "runeword_last_wish_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAST_WISH",
     "name": "룬워드 최후의 소원 (Jah-Mal-Jah-Sur-Jah-Ber): 체력<35%시 / ICD 60초 - 페이드 (방어+저항 대폭 버프 12초)",
-    "nameEn": "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): HP<35% / ICD 60s - Fade (Armor+Resist buff 12s)",
-    "nameKo": "룬워드 최후의 소원 (Jah-Mal-Jah-Sur-Jah-Ber): 체력<35%시 / ICD 60초 - 페이드 (방어+저항 대폭 버프 12초)",
+    "nameEn": "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): HP<35% / ICD 60s - Fade (Armor+Resist boost 12s)",
+    "nameKo": "룬워드 최후의 소원 (Jah-Mal-Jah-Sur-Jah-Ber): 체력<35%시 / ICD 60초 - 페이드 (방어도+저항 대폭 강화 12초)",
     "records": {
       "magicEffects": [
         {
@@ -1629,8 +1629,8 @@
     "id": "runeword_honor_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HONOR",
     "name": "룬워드 명예 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 강화 버프 + 체력 재생 +20",
-    "nameEn": "Runeword Honor (Amn-El-Ith-Tir-Sol): 26% on Hit / ICD 8s - Buff + HP Regen +20",
-    "nameKo": "룬워드 명예 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 강화 버프 + 체력 재생 +20",
+    "nameEn": "Runeword Honor (Amn-El-Ith-Tir-Sol): 26% on Hit / ICD 8s - Vigor (Damage+Defense) + HP Regen +20",
+    "nameKo": "룬워드 명예 (Amn-El-Ith-Tir-Sol): 적중 26% / ICD 8초 - 활력 강화 (공격력+방어) + 체력 재생 +20",
     "records": {
       "magicEffects": [
         {
@@ -1932,8 +1932,8 @@
     "id": "runeword_hustle_w_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HUSTLE_W",
     "name": "룬워드 허슬-무기 (Shael-Ko-Eld): 적중 26% / ICD 7초 - 돌진 버프 + 공격속도 +12%",
-    "nameEn": "Runeword Hustle-W (Shael-Ko-Eld): 26% on Hit / ICD 7s - Rush buff + IAS +12%",
-    "nameKo": "룬워드 허슬-무기 (Shael-Ko-Eld): 적중 26% / ICD 7초 - 돌진 버프 + 공격속도 +12%",
+    "nameEn": "Runeword Hustle-W (Shael-Ko-Eld): 26% on Hit / ICD 7s - Rush (Move+Attack Speed) + Attack Speed +12%",
+    "nameKo": "룬워드 허슬-무기 (Shael-Ko-Eld): 적중 26% / ICD 7초 - 돌진 (이동+공속 강화) + 공격속도 +12%",
     "records": {
       "magicEffects": [
         {
@@ -3686,8 +3686,8 @@
     "id": "runeword_rhyme_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RHYME",
     "name": "룬워드 운율 (Shael-Eth): 피격 22% / ICD 12초 - 방어 버프 + 냉기 저항 +40",
-    "nameEn": "Runeword Rhyme (Shael-Eth): 22% on Hit Taken / ICD 12s - Buff + Frost Resist +40",
-    "nameKo": "룬워드 운율 (Shael-Eth): 피격 22% / ICD 12초 - 방어 버프 + 냉기 저항 +40",
+    "nameEn": "Runeword Rhyme (Shael-Eth): 22% on Hit Taken / ICD 12s - Shield Ward (Armor boost) + Frost Resist +40",
+    "nameKo": "룬워드 운율 (Shael-Eth): 피격 22% / ICD 12초 - 보호막 (방어도 강화) + 냉기 저항 +40",
     "records": {
       "magicEffects": [
         {
@@ -4126,8 +4126,8 @@
     "id": "runeword_hustle_a_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HUSTLE_A",
     "name": "룬워드 허슬-방어구 (Shael-Ko-Eld): 피격 26% / ICD 10초 - 방어 버프 + 이동속도 +8%",
-    "nameEn": "Runeword Hustle-A (Shael-Ko-Eld): 26% on Hit Taken / ICD 10s - Buff + Move Speed +8%",
-    "nameKo": "룬워드 허슬-방어구 (Shael-Ko-Eld): 피격 26% / ICD 10초 - 방어 버프 + 이동속도 +8%",
+    "nameEn": "Runeword Hustle-A (Shael-Ko-Eld): 26% on Hit Taken / ICD 10s - Defense boost (Armor+Evasion) + Move Speed +8%",
+    "nameKo": "룬워드 허슬-방어구 (Shael-Ko-Eld): 피격 26% / ICD 10초 - 방어 강화 (방어도+회피) + 이동속도 +8%",
     "records": {
       "magicEffects": [
         {
@@ -4290,8 +4290,8 @@
     "id": "runeword_treachery_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_TREACHERY",
     "name": "룬워드 배신 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 회피 버프 + 공격속도 +10%",
-    "nameEn": "Runeword Treachery (Shael-Thul-Lem): 26% on Hit Taken / ICD 10s - Evasion buff + IAS +10%",
-    "nameKo": "룬워드 배신 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 회피 버프 + 공격속도 +10%",
+    "nameEn": "Runeword Treachery (Shael-Thul-Lem): 26% on Hit Taken / ICD 10s - Evasion boost (Dodge+Speed) + Attack Speed +10%",
+    "nameKo": "룬워드 배신 (Shael-Thul-Lem): 피격 26% / ICD 10초 - 회피 강화 (회피율+이동) + 공격속도 +10%",
     "records": {
       "magicEffects": [
         {
