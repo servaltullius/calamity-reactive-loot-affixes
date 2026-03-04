@@ -482,6 +482,67 @@ def _lint_spec(
                 "Define it under records.spell or records.spells[]."
             )
 
+    # actorValue whitelist — Skyrim ActorValues used in affix magicEffect records.
+    VALID_ACTOR_VALUES: Set[str] = {
+        # Core stats
+        "Health", "Magicka", "Stamina",
+        "HealRate", "MagickaRate", "StaminaRate",
+        "HealRateMult", "MagickaRateMult", "StaminaRateMult",
+        # Combat
+        "AttackDamageMult", "WeaponSpeedMult", "CriticalChance",
+        "SpeedMult", "CarryWeight", "BowSpeedBonus",
+        "ReflectDamage", "ShoutRecoveryMult",
+        # Resistances
+        "DamageResist", "MagicResist", "ResistMagic",
+        "PoisonResist", "DiseaseResist",
+        "ResistFire", "ResistFrost", "ResistShock",
+        # Skills — combat
+        "OneHandedModifier", "TwoHandedModifier", "MarksmanModifier",
+        "BlockModifier", "LightArmorModifier", "HeavyArmorModifier",
+        "SneakingModifier",
+        # Skills — magic
+        "DestructionModifier", "ConjurationModifier", "RestorationModifier",
+        "AlterationModifier", "IllusionModifier", "EnchantingModifier",
+        # Skills — crafting & social
+        "SmithingModifier", "AlchemyModifier",
+        "LockpickingModifier", "PickpocketModifier", "SpeechcraftModifier",
+        # Special
+        "Invisibility", "Paralysis", "DetectLifeRange",
+        "Aggression", "Confidence",
+    }
+
+    # Validate actorValue on suffix/runeword magicEffect records.
+    suffix_family_avs: Dict[str, Set[str]] = {}
+    for idx, raw in enumerate(affixes):
+        affix = _as_dict(raw)
+        if not affix:
+            continue
+        affix_id = affix.get("id", f"<index:{idx}>")
+        records = _as_dict(affix.get("records"))
+        if not records:
+            continue
+        mgef = _as_dict(records.get("magicEffect"))
+        if not mgef:
+            continue
+        av = mgef.get("actorValue")
+        if av is None or av == "None":
+            continue
+        if not isinstance(av, str):
+            errors.append(f"{affix_id}: records.magicEffect.actorValue must be a string.")
+            continue
+        if av not in VALID_ACTOR_VALUES:
+            errors.append(f"{affix_id}: unknown actorValue '{av}'. Valid values: {sorted(VALID_ACTOR_VALUES)}")
+
+        slot = affix.get("slot")
+        family = affix.get("family")
+        if slot == "suffix" and isinstance(family, str):
+            suffix_family_avs.setdefault(family, set()).add(av)
+
+    # Suffix families must each use exactly one actorValue.
+    for fam, avs in sorted(suffix_family_avs.items()):
+        if len(avs) > 1:
+            errors.append(f"Suffix family '{fam}' uses multiple actorValues: {sorted(avs)}. Each family should use one AV.")
+
 
 def _check_generated_sync(
     spec: Dict[str, Any],
