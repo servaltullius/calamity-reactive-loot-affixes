@@ -130,6 +130,11 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Do not write output. Fail if output file differs from composed JSON.",
     )
+    parser.add_argument(
+        "--sync-runtime",
+        action="store_true",
+        help="Copy output to Data/SKSE/Plugins/CalamityAffixes/affixes.json after writing.",
+    )
     return parser.parse_args()
 
 
@@ -177,6 +182,14 @@ def main() -> int:
         print(f"Wrote composed spec: {output_path}")
     else:
         print(f"No changes: {output_path} already matches {manifest_path}")
+
+    if args.sync_runtime:
+        import shutil
+        runtime_path = output_path.parent.parent / "Data" / "SKSE" / "Plugins" / "CalamityAffixes" / "affixes.json"
+        runtime_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(output_path, runtime_path)
+        print(f"Synced runtime copy: {runtime_path}")
+
     return 0
 
 
