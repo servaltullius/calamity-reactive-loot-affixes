@@ -94,16 +94,17 @@
 - **드레모라 서약** (`dremora_pact`) [Weapon]
   - 22% 확률 / 쿨타임 52초 → 대상 | CastSpell
 
-- **영혼 올가미** (`soul_snare`) [Weapon]
-  - 적중 25.0% / 쿨타임 2.5초 → 대상 | CastSpell
-  - 드롭 가중치: 0 (하위 전용)
+- **영혼 수확** (`soul_snare`) [Weapon]
+  - Lucky Hit 30% / 쿨타임 1초 → 자신 | CastSpell
+  - 스펠: `CAFF_SPEL_SOUL_EXPLOIT` (마력·기력 각 8 + 물리 피해 3%)
+  - 드롭 가중치: 1.0
 
 ## 피격 방어
 
-- **그림자 장막** (`shadow_veil`) [Weapon]
-  - 피격 5.0% / 쿨타임 45초 → 자신 | CastSpell
-  - 스펠: `CAFF_SPEL_INVISIBILITY`
-  - 드롭 가중치: 0 (하위 전용)
+- **그림자 반격** (`shadow_veil`) [Weapon]
+  - 피격 100% / 쿨타임 30초 → 자신 | CastSpell
+  - 스펠: `CAFF_SPEL_INVISIBILITY` (투명화 3초 + 공격력 +25% 6초)
+  - 드롭 가중치: 1.0
 
 - **돌의 수호** (`stone_ward`) [Armor]
   - 피격 10.0% / 쿨타임 6초 → 자신 | CastSpell
@@ -176,9 +177,10 @@
   - 적중 20.0% / 쿨타임 12초 / 최근 처치 4.0초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_HIT_SHADOWSTEP_BURST`
 
-- **무음 보행** (`silent_step`) [Weapon]
-  - 적중 10.0% / 쿨타임 180초 → 자신 | CastSpell
-  - 드롭 가중치: 0 (하위 전용)
+- **은신 습격** (`silent_step`) [Weapon]
+  - 처치 100% / 쿨타임 8초 → 자신 | CastSpell
+  - 스펠: `CAFF_SPEL_STEALTH_ASSAULT` (투명화 3초 + 이동속도 +30% 6초)
+  - 드롭 가중치: 1.0
 
 - **전투 광란** (`battle_frenzy`) [Weapon]
   - 적중 20.0% / 쿨타임 0.6초 / 표적별 쿨타임 12초 → 자신 | CastSpell
