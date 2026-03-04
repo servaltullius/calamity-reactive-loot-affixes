@@ -584,9 +584,9 @@
       {
         "id": "soul_snare",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SOUL_TRAP",
-        "name": "영혼 수확 (Lucky Hit 30% / ICD 1초): 마력·기력 각 8 + 물리 피해의 3% 회복",
-        "nameEn": "Soul Harvest (Lucky Hit 30% / ICD 1s): Restore Magicka & Stamina 8 + 3% of Physical Damage",
-        "nameKo": "영혼 수확 (Lucky Hit 30% / ICD 1초): 마력·기력 각 8 + 물리 피해의 3% 회복",
+        "name": "영혼 수확: 30% 확률로 마력·기력 각 8 + 물리 피해의 3% 회복 (최대 24). 1초마다 발동.",
+        "nameEn": "Soul Harvest (Lucky Hit 30% / ICD 1s): Restore Magicka & Stamina 8 + 3% of Physical Damage (max 24)",
+        "nameKo": "영혼 수확: 30% 확률로 마력·기력 각 8 + 물리 피해의 3% 회복 (최대 24). 1초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -657,9 +657,9 @@
       {
         "id": "shadow_veil",
         "editorId": "LoreBox_CAFF_AFFIX_INCOMING_HIT_INVISIBILITY",
-        "name": "그림자 반격 (피격 / ICD 30초): 투명화 3초 + 공격력 25% 증가 6초",
+        "name": "그림자 반격: 피격 시 투명화 3초 + 공격력 25% 증가 6초. 30초마다 발동.",
         "nameEn": "Shadow Counter (on hit taken / ICD 30s): Invisibility 3s + Attack Damage +25% 6s",
-        "nameKo": "그림자 반격 (피격 / ICD 30초): 투명화 3초 + 공격력 25% 증가 6초",
+        "nameKo": "그림자 반격: 피격 시 투명화 3초 + 공격력 25% 증가 6초. 30초마다 발동.",
         "records": {
           "magicEffects": [
             {
@@ -1348,9 +1348,9 @@
       {
         "id": "silent_step",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MUFFLE",
-        "name": "은신 습격 (처치 / ICD 8초): 투명화 3초 + 이동속도 30% 증가 6초",
+        "name": "은신 습격: 처치 시 투명화 3초 + 이동속도 30% 증가 6초. 8초마다 발동.",
         "nameEn": "Stealth Assault (on kill / ICD 8s): Invisibility 3s + Move Speed +30% 6s",
-        "nameKo": "은신 습격 (처치 / ICD 8초): 투명화 3초 + 이동속도 30% 증가 6초",
+        "nameKo": "은신 습격: 처치 시 투명화 3초 + 이동속도 30% 증가 6초. 8초마다 발동.",
         "records": {
           "magicEffects": [
             {

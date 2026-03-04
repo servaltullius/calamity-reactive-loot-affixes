@@ -95,7 +95,7 @@
   - 22% 확률 / 쿨타임 52초 → 대상 | CastSpell
 
 - **영혼 수확** (`soul_snare`) [Weapon]
-  - Lucky Hit 30% / 쿨타임 1초 → 자신 | CastSpell
+  - 30% 확률 / 쿨타임 1초 → 자신 | CastSpell
   - 스펠: `CAFF_SPEL_SOUL_EXPLOIT` (마력·기력 각 8 + 물리 피해 3%)
   - 드롭 가중치: 1.0
 
