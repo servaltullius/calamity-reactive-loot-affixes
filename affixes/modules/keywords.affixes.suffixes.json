@@ -1895,7 +1895,7 @@
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
-          "magnitude": 5,
+          "magnitude": 0.05,
           "duration": 0,
           "area": 0
         }
@@ -1943,7 +1943,7 @@
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
-          "magnitude": 10,
+          "magnitude": 0.10,
           "duration": 0,
           "area": 0
         }
@@ -1991,7 +1991,7 @@
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
-          "magnitude": 15,
+          "magnitude": 0.15,
           "duration": 0,
           "area": 0
         }

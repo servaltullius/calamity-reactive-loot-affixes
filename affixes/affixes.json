@@ -3187,7 +3187,7 @@
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
-              "magnitude": -20,
+              "magnitude": -0.2,
               "duration": 6,
               "area": 0
             }
@@ -3272,7 +3272,7 @@
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
-              "magnitude": 15,
+              "magnitude": 0.15,
               "duration": 4,
               "area": 0
             }
@@ -6104,7 +6104,7 @@
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_WIND_PUSH",
-              "magnitude": -20,
+              "magnitude": -0.2,
               "duration": 5,
               "area": 0
             }
@@ -6161,7 +6161,7 @@
               "effects": [
                 {
                   "magicEffectEditorId": "CAFF_MGEF_RW_BEAST_RAGE_POWER",
-                  "magnitude": 30,
+                  "magnitude": 0.3,
                   "duration": 12,
                   "area": 0
                 },
@@ -6317,7 +6317,7 @@
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
-              "magnitude": 15,
+              "magnitude": 0.15,
               "duration": 8,
               "area": 0
             }
@@ -6569,7 +6569,7 @@
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_HOJ_LIFESTEAL",
-              "magnitude": 20,
+              "magnitude": 0.2,
               "duration": 6,
               "area": 0
             }
@@ -7882,7 +7882,7 @@
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_DURESS_RESOLVE",
-              "magnitude": -25,
+              "magnitude": -0.25,
               "duration": 5,
               "area": 0
             }
@@ -10401,7 +10401,7 @@
             "castType": "ConstantEffect",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
-              "magnitude": 5,
+              "magnitude": 0.05,
               "duration": 0,
               "area": 0
             }
@@ -10449,7 +10449,7 @@
             "castType": "ConstantEffect",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
-              "magnitude": 10,
+              "magnitude": 0.1,
               "duration": 0,
               "area": 0
             }
@@ -10497,7 +10497,7 @@
             "castType": "ConstantEffect",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
-              "magnitude": 15,
+              "magnitude": 0.15,
               "duration": 0,
               "area": 0
             }

@@ -3135,7 +3135,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
-          "magnitude": -20,
+          "magnitude": -0.20,
           "duration": 6,
           "area": 0
         }
@@ -3220,7 +3220,7 @@
         "delivery": "Self",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
-          "magnitude": 15,
+          "magnitude": 0.15,
           "duration": 4,
           "area": 0
         }

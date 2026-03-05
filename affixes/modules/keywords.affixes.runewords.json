@@ -2691,7 +2691,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_WIND_PUSH",
-          "magnitude": -20,
+          "magnitude": -0.20,
           "duration": 5,
           "area": 0
         }
@@ -2748,7 +2748,7 @@
           "effects": [
             {
               "magicEffectEditorId": "CAFF_MGEF_RW_BEAST_RAGE_POWER",
-              "magnitude": 30,
+              "magnitude": 0.30,
               "duration": 12,
               "area": 0
             },
@@ -2904,7 +2904,7 @@
         "delivery": "Self",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
-          "magnitude": 15,
+          "magnitude": 0.15,
           "duration": 8,
           "area": 0
         }
@@ -3156,7 +3156,7 @@
         "delivery": "Self",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_HOJ_LIFESTEAL",
-          "magnitude": 20,
+          "magnitude": 0.20,
           "duration": 6,
           "area": 0
         }
@@ -4469,7 +4469,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_DURESS_RESOLVE",
-          "magnitude": -25,
+          "magnitude": -0.25,
           "duration": 5,
           "area": 0
         }
