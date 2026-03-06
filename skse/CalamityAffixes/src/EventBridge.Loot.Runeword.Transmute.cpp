@@ -49,8 +49,8 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		const auto affixIt = _affixIndexByToken.find(a_recipe.resultAffixToken);
-		if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+		const auto affixIt = _affixRegistry.affixIndexByToken.find(a_recipe.resultAffixToken);
+		if (affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
 			if (a_outFailureReason) {
 				*a_outFailureReason = "result-affix-invalidated";
 			}
@@ -78,7 +78,7 @@ namespace CalamityAffixes
 		}
 
 		EnsureInstanceRuntimeState(a_instanceKey, a_recipe.resultAffixToken);
-		_runewordInstanceStates.erase(a_instanceKey);
+		_runewordState.instanceStates.erase(a_instanceKey);
 
 		RE::InventoryEntryData* entry = nullptr;
 		RE::ExtraDataList* xList = nullptr;
@@ -103,7 +103,7 @@ namespace CalamityAffixes
 		if (!_configLoaded) {
 			return;
 		}
-		if (_runewordTransmuteInProgress) {
+		if (_runewordState.transmuteInProgress) {
 			RE::DebugNotification("Runeword: transmute already in progress.");
 			return;
 		}
@@ -123,21 +123,21 @@ namespace CalamityAffixes
 				flag = false;
 			}
 		};
-		ScopedTransmuteInFlight transmuteGuard(_runewordTransmuteInProgress);
+		ScopedTransmuteInFlight transmuteGuard(_runewordState.transmuteInProgress);
 
 		SanitizeRunewordState();
-		if (!_runewordSelectedBaseKey) {
+		if (!_runewordState.selectedBaseKey) {
 			RE::DebugNotification("Runeword: select a base first.");
 			return;
 		}
-		const auto instanceKey = *_runewordSelectedBaseKey;
+		const auto instanceKey = *_runewordState.selectedBaseKey;
 
 		RE::InventoryEntryData* entry = nullptr;
 		RE::ExtraDataList* xList = nullptr;
 		if (!ResolvePlayerInventoryInstance(instanceKey, entry, xList)) {
 			RE::DebugNotification("Runeword: selected base is no longer available.");
-			if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == instanceKey) {
-				_runewordSelectedBaseKey.reset();
+			if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == instanceKey) {
+				_runewordState.selectedBaseKey.reset();
 			}
 			return;
 		}
@@ -148,7 +148,7 @@ namespace CalamityAffixes
 			auto& slots = _instanceAffixes[instanceKey];
 			slots.RemoveToken(oldToken);
 			_instanceStates.erase(MakeInstanceStateKey(instanceKey, oldToken));
-			_runewordInstanceStates.erase(instanceKey);
+			_runewordState.instanceStates.erase(instanceKey);
 
 			if (ResolvePlayerInventoryInstance(instanceKey, entry, xList) && entry && xList) {
 				EnsureMultiAffixDisplayName(entry, xList, slots);
@@ -162,7 +162,7 @@ namespace CalamityAffixes
 				completed->displayName);
 		}
 
-		auto& state = _runewordInstanceStates[instanceKey];
+		auto& state = _runewordState.instanceStates[instanceKey];
 		if (state.recipeToken == 0u) {
 			if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
 				state.recipeToken = currentRecipe->token;
@@ -242,11 +242,11 @@ namespace CalamityAffixes
 			}
 
 			std::string runeName = "Rune";
-			if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+			if (const auto nameIt = _runewordState.runeNameByToken.find(token); nameIt != _runewordState.runeNameByToken.end()) {
 				runeName = nameIt->second;
 			}
 
-			const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, token);
+			const auto owned = GetOwnedRunewordFragmentCount(player, _runewordState.runeNameByToken, token);
 			if (owned >= required) {
 				continue;
 			}
@@ -286,13 +286,13 @@ namespace CalamityAffixes
 
 				auto restored = GrantRunewordFragments(
 					player,
-					_runewordRuneNameByToken,
+					_runewordState.runeNameByToken,
 					consumed.token,
 					consumed.count);
 				if (restored < consumed.count) {
 					restored += GrantRunewordFragments(
 						player,
-						_runewordRuneNameByToken,
+						_runewordState.runeNameByToken,
 						consumed.token,
 						consumed.count - restored);
 				}
@@ -300,7 +300,7 @@ namespace CalamityAffixes
 					rollbackFullySucceeded = false;
 					const auto missing = consumed.count - std::min(consumed.count, restored);
 					if (missing > 0u) {
-						if (auto* fragmentItem = LookupRunewordFragmentItem(_runewordRuneNameByToken, consumed.token)) {
+						if (auto* fragmentItem = LookupRunewordFragmentItem(_runewordState.runeNameByToken, consumed.token)) {
 							for (std::uint32_t i = 0; i < missing; ++i) {
 								if (!player->PlaceObjectAtMe(fragmentItem, false)) {
 									SKSE::log::error(
@@ -334,11 +334,11 @@ namespace CalamityAffixes
 			}
 
 			std::string runeName = "Rune";
-			if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+			if (const auto nameIt = _runewordState.runeNameByToken.find(token); nameIt != _runewordState.runeNameByToken.end()) {
 				runeName = nameIt->second;
 			}
 
-			auto* fragmentItem = LookupRunewordFragmentItem(_runewordRuneNameByToken, token);
+			auto* fragmentItem = LookupRunewordFragmentItem(_runewordState.runeNameByToken, token);
 			if (!fragmentItem) {
 				const bool rollbackOk = rollbackConsumedRunes("fragment-item-missing");
 				std::string note = "Runeword fragment item missing: ";
@@ -417,8 +417,8 @@ namespace CalamityAffixes
 			std::string note = "Runeword failed (base-unavailable)";
 			note.append(rollbackOk ? ": fragments restored." : ": fragment rollback partial.");
 			RE::DebugNotification(note.c_str());
-			if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == instanceKey) {
-				_runewordSelectedBaseKey.reset();
+			if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == instanceKey) {
+				_runewordState.selectedBaseKey.reset();
 			}
 			SKSE::log::error(
 				"CalamityAffixes: runeword apply aborted after consume (reason=base-unavailable, instance={:016X}, recipe={}, rollbackOk={}).",

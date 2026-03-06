@@ -86,9 +86,9 @@ namespace CalamityAffixes
 
 		RE::FormID selectedBaseID = 0;
 		std::uint16_t selectedUniqueID = 0;
-		if (_runewordSelectedBaseKey) {
-			selectedBaseID = static_cast<RE::FormID>(*_runewordSelectedBaseKey >> 16);
-			selectedUniqueID = static_cast<std::uint16_t>(*_runewordSelectedBaseKey & 0xFFFFu);
+		if (_runewordState.selectedBaseKey) {
+			selectedBaseID = static_cast<RE::FormID>(*_runewordState.selectedBaseKey >> 16);
+			selectedUniqueID = static_cast<std::uint16_t>(*_runewordState.selectedBaseKey & 0xFFFFu);
 		}
 
 		if (!a_intfc->WriteRecordData(selectedBaseID)) {
@@ -97,18 +97,18 @@ namespace CalamityAffixes
 		if (!a_intfc->WriteRecordData(selectedUniqueID)) {
 			return;
 		}
-		if (!a_intfc->WriteRecordData(_runewordRecipeCycleCursor)) {
+		if (!a_intfc->WriteRecordData(_runewordState.recipeCycleCursor)) {
 			return;
 		}
-		if (!a_intfc->WriteRecordData(_runewordBaseCycleCursor)) {
+		if (!a_intfc->WriteRecordData(_runewordState.baseCycleCursor)) {
 			return;
 		}
 
-		const std::uint32_t fragmentCount = static_cast<std::uint32_t>(_runewordRuneFragments.size());
+		const std::uint32_t fragmentCount = static_cast<std::uint32_t>(_runewordState.runeFragments.size());
 		if (!a_intfc->WriteRecordData(fragmentCount)) {
 			return;
 		}
-		for (const auto& [runeToken, amount] : _runewordRuneFragments) {
+		for (const auto& [runeToken, amount] : _runewordState.runeFragments) {
 			if (!a_intfc->WriteRecordData(runeToken)) {
 				return;
 			}
@@ -117,11 +117,11 @@ namespace CalamityAffixes
 			}
 		}
 
-		const std::uint32_t runewordStateCount = static_cast<std::uint32_t>(_runewordInstanceStates.size());
+		const std::uint32_t runewordStateCount = static_cast<std::uint32_t>(_runewordState.instanceStates.size());
 		if (!a_intfc->WriteRecordData(runewordStateCount)) {
 			return;
 		}
-		for (const auto& [instanceKey, state] : _runewordInstanceStates) {
+		for (const auto& [instanceKey, state] : _runewordState.instanceStates) {
 			const auto baseID = static_cast<RE::FormID>(instanceKey >> 16);
 			const auto uniqueID = static_cast<std::uint16_t>(instanceKey & 0xFFFFu);
 			if (!a_intfc->WriteRecordData(baseID)) {
@@ -143,11 +143,11 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const std::uint32_t lootEvaluatedCount = static_cast<std::uint32_t>(_lootEvaluatedInstances.size());
+		const std::uint32_t lootEvaluatedCount = static_cast<std::uint32_t>(_lootState.evaluatedInstances.size());
 		if (!a_intfc->WriteRecordData(lootEvaluatedCount)) {
 			return;
 		}
-		for (const auto key : _lootEvaluatedInstances) {
+		for (const auto key : _lootState.evaluatedInstances) {
 			const auto baseID = static_cast<RE::FormID>(key >> 16);
 			const auto uniqueID = static_cast<std::uint16_t>(key & 0xFFFFu);
 			if (!a_intfc->WriteRecordData(baseID)) {
@@ -165,11 +165,11 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const std::uint32_t lootCurrencyLedgerCount = static_cast<std::uint32_t>(_lootCurrencyRollLedger.size());
+		const std::uint32_t lootCurrencyLedgerCount = static_cast<std::uint32_t>(_lootState.currencyRollLedger.size());
 		if (!a_intfc->WriteRecordData(lootCurrencyLedgerCount)) {
 			return;
 		}
-		for (const auto& [key, dayStamp] : _lootCurrencyRollLedger) {
+		for (const auto& [key, dayStamp] : _lootState.currencyRollLedger) {
 			if (!a_intfc->WriteRecordData(key)) {
 				return;
 			}
@@ -205,12 +205,12 @@ namespace CalamityAffixes
 		};
 
 		const std::array<std::pair<std::uint8_t, const LootShuffleBagState*>, 6> kBags{ {
-			{ 0u, &_lootPrefixSharedBag },
-			{ 1u, &_lootPrefixWeaponBag },
-			{ 2u, &_lootPrefixArmorBag },
-			{ 3u, &_lootSuffixSharedBag },
-			{ 4u, &_lootSuffixWeaponBag },
-			{ 5u, &_lootSuffixArmorBag },
+			{ 0u, &_lootState.prefixSharedBag },
+			{ 1u, &_lootState.prefixWeaponBag },
+			{ 2u, &_lootState.prefixArmorBag },
+			{ 3u, &_lootState.suffixSharedBag },
+			{ 4u, &_lootState.suffixWeaponBag },
+			{ 5u, &_lootState.suffixArmorBag },
 		} };
 		const auto bagCount = static_cast<std::uint8_t>(kBags.size());
 		if (!a_intfc->WriteRecordData(bagCount)) {

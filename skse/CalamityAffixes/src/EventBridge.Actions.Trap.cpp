@@ -90,6 +90,8 @@ namespace CalamityAffixes
 
 	void EventBridge::EnforcePerAffixTrapCap(const Action& a_action)
 	{
+		auto& activeTraps = _trapState.activeTraps;
+
 		// Enforce per-affix cap (drops the oldest trap if the cap is reached).
 		if (a_action.trapMaxActive == 0u) {
 			return;
@@ -97,13 +99,13 @@ namespace CalamityAffixes
 
 		while (true) {
 			std::size_t count = 0;
-			auto oldestIt = _traps.end();
-			for (auto it = _traps.begin(); it != _traps.end(); ++it) {
+			auto oldestIt = activeTraps.end();
+			for (auto it = activeTraps.begin(); it != activeTraps.end(); ++it) {
 				if (it->sourceToken != a_action.sourceToken) {
 					continue;
 				}
 				count += 1;
-				if (oldestIt == _traps.end() || it->createdAt < oldestIt->createdAt) {
+				if (oldestIt == activeTraps.end() || it->createdAt < oldestIt->createdAt) {
 					oldestIt = it;
 				}
 			}
@@ -112,8 +114,8 @@ namespace CalamityAffixes
 				break;
 			}
 
-			if (oldestIt != _traps.end()) {
-				_traps.erase(oldestIt);
+			if (oldestIt != activeTraps.end()) {
+				activeTraps.erase(oldestIt);
 			} else {
 				break;
 			}
@@ -122,35 +124,37 @@ namespace CalamityAffixes
 
 	void EventBridge::EnforceGlobalTrapCap()
 	{
+		auto& activeTraps = _trapState.activeTraps;
+
 		// Global safety cap: prevents trap-heavy affix pools from degrading performance.
 		// When the cap is reached, drop the oldest traps first.
 		const std::size_t globalMax = static_cast<std::size_t>(_loot.trapGlobalMaxActive);
-		if (globalMax == 0 || _traps.size() < globalMax) {
+		if (globalMax == 0 || activeTraps.size() < globalMax) {
 			return;
 		}
 
-		const std::size_t before = _traps.size();
-		while (_traps.size() >= globalMax) {
-			auto oldestIt = _traps.end();
-			for (auto it = _traps.begin(); it != _traps.end(); ++it) {
-				if (oldestIt == _traps.end() || it->createdAt < oldestIt->createdAt) {
+		const std::size_t before = activeTraps.size();
+		while (activeTraps.size() >= globalMax) {
+			auto oldestIt = activeTraps.end();
+			for (auto it = activeTraps.begin(); it != activeTraps.end(); ++it) {
+				if (oldestIt == activeTraps.end() || it->createdAt < oldestIt->createdAt) {
 					oldestIt = it;
 				}
 			}
 
-			if (oldestIt == _traps.end()) {
+			if (oldestIt == activeTraps.end()) {
 				break;
 			}
 
-			_traps.erase(oldestIt);
+			activeTraps.erase(oldestIt);
 		}
 
-		if (_loot.debugLog && before != _traps.size()) {
+		if (_loot.debugLog && before != activeTraps.size()) {
 			SKSE::log::debug(
 				"CalamityAffixes: global trap cap enforced (max={}, before={}, after={}).",
 				globalMax,
 				before,
-				_traps.size());
+				activeTraps.size());
 		}
 	}
 
@@ -211,6 +215,8 @@ namespace CalamityAffixes
 
 	void EventBridge::ExecuteSpawnTrapAction(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
+		auto& trapState = _trapState;
+
 		RE::Actor* spawnTarget = nullptr;
 		if (!SelectSpawnTrapTarget(a_action, a_owner, a_target, a_hitData, spawnTarget)) {
 			return;
@@ -223,8 +229,8 @@ namespace CalamityAffixes
 		EnforceGlobalTrapCap();
 
 		auto trap = BuildSpawnTrapInstance(a_action, a_owner, spawnTarget, magnitudeOverride, now);
-		_traps.push_back(trap);
-		_hasActiveTraps.store(true, std::memory_order_relaxed);
+		trapState.activeTraps.push_back(trap);
+		trapState.hasActiveTraps.store(true, std::memory_order_relaxed);
 		LogSpawnTrapCreated(trap, a_action);
 	}
 }

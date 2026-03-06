@@ -21,15 +21,15 @@ namespace CalamityAffixes
 		}
 
 		SanitizeRunewordState();
-		if (!_runewordSelectedBaseKey) {
+		if (!_runewordState.selectedBaseKey) {
 			result.message = "Reforge: select a base first.";
 			return result;
 		}
 
 		RE::InventoryEntryData* entry = nullptr;
 		RE::ExtraDataList* xList = nullptr;
-		if (!ResolvePlayerInventoryInstance(*_runewordSelectedBaseKey, entry, xList) || !entry || !entry->object || !xList) {
-			_runewordSelectedBaseKey.reset();
+		if (!ResolvePlayerInventoryInstance(*_runewordState.selectedBaseKey, entry, xList) || !entry || !entry->object || !xList) {
+			_runewordState.selectedBaseKey.reset();
 			result.message = "Reforge failed: selected base is no longer available.";
 			return result;
 		}
@@ -39,7 +39,7 @@ namespace CalamityAffixes
 			return result;
 		}
 
-		const auto instanceKey = *_runewordSelectedBaseKey;
+		const auto instanceKey = *_runewordState.selectedBaseKey;
 		const auto* completedRunewordRecipe = ResolveCompletedRunewordRecipe(instanceKey);
 		const std::uint64_t preservedRunewordToken =
 			completedRunewordRecipe ? completedRunewordRecipe->resultAffixToken : 0u;
@@ -203,8 +203,8 @@ namespace CalamityAffixes
 
 			if (_loot.debugLog) {
 				for (std::uint8_t di = 0; di < rolled.count; ++di) {
-					const auto dit = _affixIndexByToken.find(rolled.tokens[di]);
-					const auto& did = (dit != _affixIndexByToken.end() && dit->second < _affixes.size())
+					const auto dit = _affixRegistry.affixIndexByToken.find(rolled.tokens[di]);
+					const auto& did = (dit != _affixRegistry.affixIndexByToken.end() && dit->second < _affixes.size())
 						? _affixes[dit->second].id : std::string{"?"};
 					SKSE::log::info("CalamityAffixes: reforge rolled slot[{}] = {} (token={:016X}).",
 						di, did, rolled.tokens[di]);
@@ -222,7 +222,7 @@ namespace CalamityAffixes
 
 		EraseInstanceRuntimeStates(instanceKey);
 		if (preservedRunewordToken == 0u) {
-			_runewordInstanceStates.erase(instanceKey);
+			_runewordState.instanceStates.erase(instanceKey);
 		}
 		// Final safety: verify runeword token survived the roll pipeline.
 		if (preservedRunewordToken != 0u && !newSlots.HasToken(preservedRunewordToken)) {

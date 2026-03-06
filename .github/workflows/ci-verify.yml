@@ -48,6 +48,31 @@ jobs:
       - name: Run generator tests
         run: dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release --nologo
 
+  tools-workflow-tests:
+    name: Tools workflow tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install Python tool dependencies
+        run: python3 -m pip install --upgrade pip jsonschema
+
+      - name: Run tools workflow tests
+        run: python3 -m unittest discover -s tools/tests -p 'test_*.py'
+
+      - name: Verify runtime contract snapshot sync
+        run: python3 tools/verify_runtime_contract_sync.py
+
   runtime-gate-tests:
     name: Runtime gate tests
     runs-on: ubuntu-latest

@@ -479,8 +479,8 @@ namespace CalamityAffixes
 
 			for (std::uint8_t s = 0; s < a_candidate.slots.count; ++s) {
 				const auto token = a_candidate.slots.tokens[s];
-				const auto idxIt = _affixIndexByToken.find(token);
-				if (idxIt == _affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
+				const auto idxIt = _affixRegistry.affixIndexByToken.find(token);
+				if (idxIt == _affixRegistry.affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
 					continue;
 				}
 

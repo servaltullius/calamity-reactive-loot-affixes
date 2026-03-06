@@ -26,9 +26,9 @@ namespace CalamityAffixes
 
 	void EventBridge::ExecuteActionWithProcDepthGuard(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
-		_procDepth += 1;
+		_combatState.procDepth += 1;
 		ExecuteAction(a_affix, a_owner, a_target, a_hitData);
-		_procDepth -= 1;
+		_combatState.procDepth -= 1;
 	}
 
 	void EventBridge::ExecuteAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)

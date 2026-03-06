@@ -21,9 +21,9 @@ namespace CalamityAffixes
 			SanitizeRunewordState();
 			const RunewordRecipe* recipe = nullptr;
 			std::uint32_t nextIndex = 0u;
-			if (_runewordSelectedBaseKey) {
-				const auto stateIt = _runewordInstanceStates.find(*_runewordSelectedBaseKey);
-				if (stateIt != _runewordInstanceStates.end()) {
+			if (_runewordState.selectedBaseKey) {
+				const auto stateIt = _runewordState.instanceStates.find(*_runewordState.selectedBaseKey);
+				if (stateIt != _runewordState.instanceStates.end()) {
 					recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
 					nextIndex = stateIt->second.insertedRunes;
 				}
@@ -42,7 +42,7 @@ namespace CalamityAffixes
 
 				const auto runeToken = recipe->runeTokens[nextIndex];
 				std::string runeName = "Rune";
-				if (const auto nameIt = _runewordRuneNameByToken.find(runeToken); nameIt != _runewordRuneNameByToken.end()) {
+				if (const auto nameIt = _runewordState.runeNameByToken.find(runeToken); nameIt != _runewordState.runeNameByToken.end()) {
 					runeName = nameIt->second;
 				}
 
@@ -51,7 +51,7 @@ namespace CalamityAffixes
 					return;
 				}
 
-				const auto given = GrantRunewordFragments(player, _runewordRuneNameByToken, runeToken, a_amount);
+				const auto given = GrantRunewordFragments(player, _runewordState.runeNameByToken, runeToken, a_amount);
 				if (given == 0u) {
 					std::string note = "Runeword fragment item missing: ";
 					note.append(runeName);
@@ -63,7 +63,7 @@ namespace CalamityAffixes
 					return;
 				}
 
-				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, runeToken);
+				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordState.runeNameByToken, runeToken);
 				const std::string note = "Runeword Fragment + " + runeName + " (" + std::to_string(owned) + ")";
 				RE::DebugNotification(note.c_str());
 			}
@@ -86,7 +86,7 @@ namespace CalamityAffixes
 
 				std::uint32_t totalGiven = 0u;
 				for (const auto runeToken : recipe->runeTokens) {
-					const auto given = GrantRunewordFragments(player, _runewordRuneNameByToken, runeToken, a_amount);
+					const auto given = GrantRunewordFragments(player, _runewordState.runeNameByToken, runeToken, a_amount);
 					const auto maxVal = std::numeric_limits<std::uint32_t>::max();
 					totalGiven = (totalGiven > maxVal - given) ? maxVal : (totalGiven + given);
 				}
@@ -139,13 +139,13 @@ namespace CalamityAffixes
 		{
 			a_outRuneToken = 0u;
 			a_outPityTriggered = false;
-			if (_runewordRuneTokenPool.empty()) {
+			if (_runewordState.runeTokenPool.empty()) {
 				return false;
 			}
 
 			const float chance = std::clamp(_loot.runewordFragmentChancePercent, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
-				_runewordFragmentFailStreak = 0;
+				_lootState.runewordFragmentFailStreak = 0;
 				return false;
 			}
 
@@ -157,7 +157,7 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			a_outPityTriggered = (_runewordFragmentFailStreak >= kRunewordFragmentPityFailThreshold);
+			a_outPityTriggered = (_lootState.runewordFragmentFailStreak >= kRunewordFragmentPityFailThreshold);
 			bool grant = a_outPityTriggered;
 			if (!grant) {
 				std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
@@ -168,26 +168,26 @@ namespace CalamityAffixes
 			}
 
 			if (!grant) {
-				if (_runewordFragmentFailStreak < std::numeric_limits<std::uint32_t>::max()) {
-					++_runewordFragmentFailStreak;
+				if (_lootState.runewordFragmentFailStreak < std::numeric_limits<std::uint32_t>::max()) {
+					++_lootState.runewordFragmentFailStreak;
 				}
 				return false;
 			}
 
-			if (!_runewordRuneTokenWeights.empty() &&
-				_runewordRuneTokenWeights.size() == _runewordRuneTokenPool.size()) {
+			if (!_runewordState.runeTokenWeights.empty() &&
+				_runewordState.runeTokenWeights.size() == _runewordState.runeTokenPool.size()) {
 				std::discrete_distribution<std::size_t> pick(
-					_runewordRuneTokenWeights.begin(),
-					_runewordRuneTokenWeights.end());
+					_runewordState.runeTokenWeights.begin(),
+					_runewordState.runeTokenWeights.end());
 				{
 					std::lock_guard<std::mutex> rngLock(_rngMutex);
-					a_outRuneToken = _runewordRuneTokenPool[pick(_rng)];
+					a_outRuneToken = _runewordState.runeTokenPool[pick(_rng)];
 				}
 			} else {
-				std::uniform_int_distribution<std::size_t> pick(0, _runewordRuneTokenPool.size() - 1u);
+				std::uniform_int_distribution<std::size_t> pick(0, _runewordState.runeTokenPool.size() - 1u);
 				{
 					std::lock_guard<std::mutex> rngLock(_rngMutex);
-					a_outRuneToken = _runewordRuneTokenPool[pick(_rng)];
+					a_outRuneToken = _runewordState.runeTokenPool[pick(_rng)];
 				}
 			}
 
@@ -197,7 +197,7 @@ namespace CalamityAffixes
 		void EventBridge::CommitRunewordFragmentGrant(bool a_success)
 		{
 			if (a_success) {
-				_runewordFragmentFailStreak = 0;
+				_lootState.runewordFragmentFailStreak = 0;
 			}
 		}
 
@@ -208,7 +208,7 @@ namespace CalamityAffixes
 			a_outPityTriggered = false;
 			const float chance = std::clamp(_loot.reforgeOrbChancePercent, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
-				_reforgeOrbFailStreak = 0;
+				_lootState.reforgeOrbFailStreak = 0;
 				return false;
 			}
 
@@ -219,7 +219,7 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			a_outPityTriggered = (_reforgeOrbFailStreak >= kReforgeOrbPityFailThreshold);
+			a_outPityTriggered = (_lootState.reforgeOrbFailStreak >= kReforgeOrbPityFailThreshold);
 			bool grant = a_outPityTriggered;
 			if (!grant) {
 				std::uniform_real_distribution<float> chanceDist(0.0f, 100.0f);
@@ -230,8 +230,8 @@ namespace CalamityAffixes
 			}
 
 			if (!grant) {
-				if (_reforgeOrbFailStreak < std::numeric_limits<std::uint32_t>::max()) {
-					++_reforgeOrbFailStreak;
+				if (_lootState.reforgeOrbFailStreak < std::numeric_limits<std::uint32_t>::max()) {
+					++_lootState.reforgeOrbFailStreak;
 				}
 				return false;
 			}
@@ -242,7 +242,7 @@ namespace CalamityAffixes
 		void EventBridge::CommitReforgeOrbGrant(bool a_success)
 		{
 			if (a_success) {
-				_reforgeOrbFailStreak = 0;
+				_lootState.reforgeOrbFailStreak = 0;
 			}
 		}
 
@@ -290,10 +290,10 @@ namespace CalamityAffixes
 				note.append("No recipe");
 			}
 
-			if (_runewordSelectedBaseKey) {
+			if (_runewordState.selectedBaseKey) {
 				note.append(" | Base selected");
-				const auto stateIt = _runewordInstanceStates.find(*_runewordSelectedBaseKey);
-				if (stateIt != _runewordInstanceStates.end()) {
+				const auto stateIt = _runewordState.instanceStates.find(*_runewordState.selectedBaseKey);
+				if (stateIt != _runewordState.instanceStates.end()) {
 					const auto* recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
 					if (recipe) {
 						note.append(" | ");
@@ -309,10 +309,10 @@ namespace CalamityAffixes
 					auto* player = RE::PlayerCharacter::GetSingleton();
 					for (const auto token : recipe->runeTokens) {
 						std::string runeName = "Rune";
-						if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+						if (const auto nameIt = _runewordState.runeNameByToken.find(token); nameIt != _runewordState.runeNameByToken.end()) {
 							runeName = nameIt->second;
 						}
-						const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, token);
+						const auto owned = GetOwnedRunewordFragmentCount(player, _runewordState.runeNameByToken, token);
 						note.push_back(' ');
 						note.append(runeName);
 						note.push_back('=');

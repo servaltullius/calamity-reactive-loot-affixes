@@ -1,94 +1,100 @@
-		void HandleUiCommand(std::string_view a_command)
+		[[nodiscard]] std::optional<std::uint64_t> ParseUiCommandUint64(std::string_view a_text)
 		{
-			if (a_command.empty()) {
-				return;
+			std::uint64_t value = 0;
+			const auto* first = a_text.data();
+			const auto* last = first + a_text.size();
+			const auto [ptr, ec] = std::from_chars(first, last, value);
+			if (ec != std::errc{} || ptr != last || value == 0u) {
+				return std::nullopt;
 			}
+			return value;
+		}
 
+		[[nodiscard]] bool HandlePanelVisibilityCommand(std::string_view a_command)
+		{
 			if (a_command == "ui.toggle") {
 				SetControlPanelOpenImpl(!g_controlPanelOpen.load());
-				return;
+				return true;
 			}
 			if (a_command == "ui.open") {
 				SetControlPanelOpenImpl(true);
-				return;
+				return true;
 			}
 			if (a_command == "ui.close") {
 				SetControlPanelOpenImpl(false);
-				return;
+				return true;
 			}
 
+			return false;
+		}
+
+		[[nodiscard]] bool HandleRunewordSelectionCommand(std::string_view a_command)
+		{
 			if (a_command.rfind(kRunewordBaseSelectPrefix, 0) == 0) {
-				const auto keyText = a_command.substr(kRunewordBaseSelectPrefix.size());
-				std::uint64_t keyValue = 0;
-				const auto* first = keyText.data();
-				const auto* last = first + keyText.size();
-				const auto [ptr, ec] = std::from_chars(first, last, keyValue);
-				if (ec != std::errc{} || ptr != last || keyValue == 0u) {
+				const auto keyValue = ParseUiCommandUint64(a_command.substr(kRunewordBaseSelectPrefix.size()));
+				if (!keyValue) {
 					PushUiFeedback("Invalid base selection key.");
-					return;
+					return true;
 				}
 
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 				if (!bridge) {
 					PushUiFeedback("Runeword system unavailable.");
-					return;
+					return true;
 				}
 
-				if (!bridge->SelectRunewordBase(keyValue)) {
+				if (!bridge->SelectRunewordBase(*keyValue)) {
 					PushUiFeedback("Failed to select runeword base.");
-					return;
+					return true;
 				}
 
-				SetRunewordBaseInventoryList(bridge->GetRunewordBaseInventoryEntries());
-				SetRunewordPanelState(bridge->GetRunewordPanelState());
-				SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
+				RefreshRunewordPanelBindings(*bridge);
 				PushUiFeedback("Runeword base selected.");
-				return;
+				return true;
 			}
 
 			if (a_command.rfind(kRunewordRecipeSelectPrefix, 0) == 0) {
-				const auto tokenText = a_command.substr(kRunewordRecipeSelectPrefix.size());
-				std::uint64_t tokenValue = 0;
-				const auto* first = tokenText.data();
-				const auto* last = first + tokenText.size();
-				const auto [ptr, ec] = std::from_chars(first, last, tokenValue);
-				if (ec != std::errc{} || ptr != last || tokenValue == 0u) {
+				const auto tokenValue = ParseUiCommandUint64(a_command.substr(kRunewordRecipeSelectPrefix.size()));
+				if (!tokenValue) {
 					PushUiFeedback("Invalid recipe selection key.");
-					return;
+					return true;
 				}
 
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 				if (!bridge) {
 					PushUiFeedback("Runeword system unavailable.");
-					return;
+					return true;
 				}
 
-				if (!bridge->SelectRunewordRecipe(tokenValue)) {
+				if (!bridge->SelectRunewordRecipe(*tokenValue)) {
 					PushUiFeedback("Failed to select runeword recipe.");
-					return;
+					return true;
 				}
 
-				SetRunewordRecipeList(bridge->GetRunewordRecipeEntries());
-				SetRunewordPanelState(bridge->GetRunewordPanelState());
-				SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
+				RefreshRunewordPanelBindings(*bridge);
 				PushUiFeedback("Runeword recipe selected.");
-				return;
+				return true;
 			}
 
+			return false;
+		}
+
+		[[nodiscard]] bool HandleLayoutSaveCommand(std::string_view a_command)
+		{
 			if (a_command.rfind(kPanelLayoutSavePrefix, 0) == 0) {
 				PanelLayout parsed{};
 				if (!PrismaLayoutPersistence::ParsePanelLayoutPayload(
 						a_command.substr(kPanelLayoutSavePrefix.size()),
 						parsed)) {
 					SKSE::log::warn("CalamityAffixes: invalid panel layout payload: {}", a_command);
-					return;
+					return true;
 				}
 
-				g_panelLayout = parsed;
-				g_panelLayoutLoaded = true;
-				g_panelLayoutNeedsPush = false;
-				SavePanelLayoutToDisk(g_panelLayout);
-				return;
+				g_panelLayoutState.value = parsed;
+				g_panelLayoutState.loaded = true;
+				g_panelLayoutState.needsPush = false;
+				SavePanelLayoutToDisk(g_panelLayoutState.value);
+				return true;
 			}
 
 			if (a_command.rfind(kTooltipLayoutSavePrefix, 0) == 0) {
@@ -99,62 +105,50 @@
 						kMaxTooltipFontPermille,
 						parsed)) {
 					SKSE::log::warn("CalamityAffixes: invalid tooltip layout payload: {}", a_command);
-					return;
+					return true;
 				}
 
-				g_tooltipLayout = parsed;
-				g_tooltipLayoutLoaded = true;
-				g_tooltipLayoutNeedsPush = false;
-				SaveTooltipLayoutToDisk(g_tooltipLayout);
-				return;
+				g_tooltipLayoutState.value = parsed;
+				g_tooltipLayoutState.loaded = true;
+				g_tooltipLayoutState.needsPush = false;
+				SaveTooltipLayoutToDisk(g_tooltipLayoutState.value);
+				return true;
 			}
 
-			bool sent = false;
-			std::string_view feedback = {};
-			if (a_command == "mode.next") {
-				sent = EmitModEvent(EventNames::kManualModeCycleNext);
-				feedback = "Manual mode -> next";
-			} else if (a_command == "mode.prev") {
-				sent = EmitModEvent(EventNames::kManualModeCyclePrev);
-				feedback = "Manual mode -> previous";
-			} else if (a_command == "runeword.base.next") {
-				sent = EmitModEvent(EventNames::kRunewordBaseNext);
-				feedback = "Runeword base -> next";
-			} else if (a_command == "runeword.base.prev") {
-				sent = EmitModEvent(EventNames::kRunewordBasePrev);
-				feedback = "Runeword base -> previous";
-			} else if (a_command == "runeword.recipe.next") {
-				sent = EmitModEvent(EventNames::kRunewordRecipeNext);
-				feedback = "Runeword recipe -> next";
-			} else if (a_command == "runeword.recipe.prev") {
-				sent = EmitModEvent(EventNames::kRunewordRecipePrev);
-				feedback = "Runeword recipe -> previous";
-			} else if (a_command == "runeword.insert") {
+			return false;
+		}
+
+		[[nodiscard]] bool HandleImmediateRunewordCommand(std::string_view a_command)
+		{
+			if (a_command == "runeword.insert") {
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-				CalamityAffixes::EventBridge::RunewordPanelState before{};
+				CalamityAffixes::RunewordPanelState before{};
 				if (bridge) {
 					before = bridge->GetRunewordPanelState();
 				}
 
-				sent = EmitModEvent(EventNames::kRunewordInsertRune);
+				const bool sent = EmitModEvent(EventNames::kRunewordInsertRune);
+				if (!sent) {
+					PushUiFeedback("Failed to send command event.");
+					return true;
+				}
 
-				if (sent && bridge) {
+				if (bridge) {
 					// SendEvent is synchronous; refresh status immediately so UI feedback isn't misleading.
 					const auto after = bridge->GetRunewordPanelState();
-					SetRunewordPanelState(after);
-					SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
+					RefreshRunewordPanelBindings(*bridge);
 					PushSelectedTooltipSnapshot(true);
 
 					if (after.isComplete && !before.isComplete) {
 						std::string msg = "Runeword: transmuted ";
 						msg.append(after.recipeName.empty() ? "Runeword" : after.recipeName);
 						PushUiFeedback(msg);
-						return;
+						return true;
 					}
 
 					if (after.isComplete) {
 						PushUiFeedback("Runeword: already complete");
-						return;
+						return true;
 					}
 
 					if (!after.canInsert && after.hasRecipe) {
@@ -162,7 +156,7 @@
 							std::string msg = "Runeword: missing fragments ";
 							msg.append(after.missingSummary);
 							PushUiFeedback(msg);
-							return;
+							return true;
 						}
 
 						if (!after.nextRuneName.empty()) {
@@ -172,51 +166,133 @@
 							msg.append(std::to_string(after.nextRuneOwned));
 							msg.push_back(')');
 							PushUiFeedback(msg);
-							return;
+							return true;
 						}
 					}
 				}
 
-				feedback = "Runeword -> transmute requested";
-			} else if (a_command == "runeword.status") {
-				sent = EmitModEvent(EventNames::kRunewordStatus);
-				feedback = "Runeword -> status";
-			} else if (a_command == "runeword.reforge") {
+				PushUiFeedback("Runeword -> transmute requested");
+				return true;
+			}
+
+			if (a_command == "runeword.reforge") {
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 				if (!bridge) {
 					PushUiFeedback("Reforge system unavailable.");
-					return;
+					return true;
 				}
 
 				const auto outcome = bridge->ReforgeSelectedRunewordBaseWithOrb();
-				SetRunewordPanelState(bridge->GetRunewordPanelState());
-				SetRunewordBaseInventoryList(bridge->GetRunewordBaseInventoryEntries());
-				SetRunewordAffixPreview(bridge->GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
+				RefreshRunewordPanelBindings(*bridge);
 				PushSelectedTooltipSnapshot(true);
 				PushUiFeedback(outcome.message.empty() ? "Reforge action processed." : outcome.message);
-				return;
-			} else if (a_command == "runeword.grant.next") {
-				sent = EmitModEvent(EventNames::kRunewordGrantNextRune, {}, 1.0f);
-				feedback = "Debug -> +1 next fragment";
-			} else if (a_command == "runeword.grant.set") {
-				sent = EmitModEvent(EventNames::kRunewordGrantRecipeSet, {}, 1.0f);
-				feedback = "Debug -> +1 recipe set";
-			} else if (a_command == "runeword.grant.orb3") {
-				sent = EmitModEvent(EventNames::kRunewordGrantStarterOrbs, {}, 3.0f);
-				feedback = "Debug -> +3 reforge orbs";
-			} else if (a_command == "currency.recover") {
+				return true;
+			}
+
+			if (a_command == "currency.recover") {
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 				if (!bridge) {
 					PushUiFeedback("Currency system unavailable.");
-					return;
+					return true;
 				}
 				const auto result = bridge->RecoverMiscCurrency();
 				PushUiFeedback(result);
+				return true;
+			}
+
+			return false;
+		}
+
+		[[nodiscard]] bool DispatchEventBackedCommand(
+			std::string_view a_command,
+			bool& a_outSent,
+			std::string_view& a_outFeedback)
+		{
+			a_outSent = false;
+			a_outFeedback = {};
+
+			if (a_command == "mode.next") {
+				a_outSent = EmitModEvent(EventNames::kManualModeCycleNext);
+				a_outFeedback = "Manual mode -> next";
+				return true;
+			}
+			if (a_command == "mode.prev") {
+				a_outSent = EmitModEvent(EventNames::kManualModeCyclePrev);
+				a_outFeedback = "Manual mode -> previous";
+				return true;
+			}
+			if (a_command == "runeword.base.next") {
+				a_outSent = EmitModEvent(EventNames::kRunewordBaseNext);
+				a_outFeedback = "Runeword base -> next";
+				return true;
+			}
+			if (a_command == "runeword.base.prev") {
+				a_outSent = EmitModEvent(EventNames::kRunewordBasePrev);
+				a_outFeedback = "Runeword base -> previous";
+				return true;
+			}
+			if (a_command == "runeword.recipe.next") {
+				a_outSent = EmitModEvent(EventNames::kRunewordRecipeNext);
+				a_outFeedback = "Runeword recipe -> next";
+				return true;
+			}
+			if (a_command == "runeword.recipe.prev") {
+				a_outSent = EmitModEvent(EventNames::kRunewordRecipePrev);
+				a_outFeedback = "Runeword recipe -> previous";
+				return true;
+			}
+			if (a_command == "runeword.status") {
+				a_outSent = EmitModEvent(EventNames::kRunewordStatus);
+				a_outFeedback = "Runeword -> status";
+				return true;
+			}
+			if (a_command == "runeword.grant.next") {
+				a_outSent = EmitModEvent(EventNames::kRunewordGrantNextRune, {}, 1.0f);
+				a_outFeedback = "Debug -> +1 next fragment";
+				return true;
+			}
+			if (a_command == "runeword.grant.set") {
+				a_outSent = EmitModEvent(EventNames::kRunewordGrantRecipeSet, {}, 1.0f);
+				a_outFeedback = "Debug -> +1 recipe set";
+				return true;
+			}
+			if (a_command == "runeword.grant.orb3") {
+				a_outSent = EmitModEvent(EventNames::kRunewordGrantStarterOrbs, {}, 3.0f);
+				a_outFeedback = "Debug -> +3 reforge orbs";
+				return true;
+			}
+			if (a_command == "spawn.test") {
+				a_outSent = EmitModEvent(EventNames::kMcmSpawnTestItem, {}, 1.0f);
+				a_outFeedback = "Spawned test item request";
+				return true;
+			}
+
+			return false;
+		}
+
+		void HandleUiCommand(std::string_view a_command)
+		{
+			if (a_command.empty()) {
 				return;
-			} else if (a_command == "spawn.test") {
-				sent = EmitModEvent(EventNames::kMcmSpawnTestItem, {}, 1.0f);
-				feedback = "Spawned test item request";
-			} else {
+			}
+			g_prismaTelemetry.uiCommands.fetch_add(1u, std::memory_order_relaxed);
+
+			if (HandlePanelVisibilityCommand(a_command)) {
+				return;
+			}
+			if (HandleRunewordSelectionCommand(a_command)) {
+				return;
+			}
+			if (HandleLayoutSaveCommand(a_command)) {
+				return;
+			}
+			if (HandleImmediateRunewordCommand(a_command)) {
+				return;
+			}
+
+			bool sent = false;
+			std::string_view feedback = {};
+			if (!DispatchEventBackedCommand(a_command, sent, feedback)) {
 				std::string note = "Unknown command: ";
 				note.append(a_command);
 				PushUiFeedback(note);

@@ -11,8 +11,8 @@ namespace CalamityAffixes
 			return nullptr;
 		}
 
-		const auto it = _lootPreviewAffixes.find(a_instanceKey);
-		if (it == _lootPreviewAffixes.end()) {
+		const auto it = _lootState.previewAffixes.find(a_instanceKey);
+		if (it == _lootState.previewAffixes.end()) {
 			return nullptr;
 		}
 
@@ -25,17 +25,17 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const auto [_, inserted] = _lootPreviewAffixes.insert_or_assign(a_instanceKey, a_slots);
+		const auto [_, inserted] = _lootState.previewAffixes.insert_or_assign(a_instanceKey, a_slots);
 		if (!inserted) {
 			return;
 		}
 
-		_lootPreviewRecent.push_back(a_instanceKey);
-		while (_lootPreviewAffixes.size() > kLootPreviewCacheMax && !_lootPreviewRecent.empty()) {
-			const auto oldest = _lootPreviewRecent.front();
-			_lootPreviewRecent.pop_front();
+		_lootState.previewRecent.push_back(a_instanceKey);
+		while (_lootState.previewAffixes.size() > kLootPreviewCacheMax && !_lootState.previewRecent.empty()) {
+			const auto oldest = _lootState.previewRecent.front();
+			_lootState.previewRecent.pop_front();
 			if (oldest != 0u) {
-				_lootPreviewAffixes.erase(oldest);
+				_lootState.previewAffixes.erase(oldest);
 			}
 		}
 	}
@@ -45,7 +45,7 @@ namespace CalamityAffixes
 		if (a_instanceKey == 0u) {
 			return;
 		}
-		_lootPreviewAffixes.erase(a_instanceKey);
-		std::erase(_lootPreviewRecent, a_instanceKey);
+		_lootState.previewAffixes.erase(a_instanceKey);
+		std::erase(_lootState.previewRecent, a_instanceKey);
 	}
 }

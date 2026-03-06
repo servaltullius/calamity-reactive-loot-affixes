@@ -7,6 +7,14 @@ int main()
 	const bool gateOk = CheckNonHostileFirstHitGate();
 	const bool storeOk = CheckPerTargetCooldownStore();
 	const bool hookIndexPolicyOk = CheckHandleHealthDamageVfuncIndexPolicy();
+	const bool hooksDispatchExtractionOk = CheckHooksDispatchExtractionPolicy();
+	const bool pluginLoggingExceptionSafetyOk = CheckPluginLoggingExceptionSafetyPolicy();
+	const bool rebuildActiveCountsLoggingOk = CheckRebuildActiveCountsLoggingPolicy();
+	const bool healthDamageSignatureWindowOk = CheckHealthDamageSignatureWindowPolicy();
+	const bool tesHitFallbackSourceValidationOk = CheckTesHitFallbackSourceValidationPolicy();
+	const bool configLoadPipelineExtractionOk = CheckConfigLoadPipelineExtractionPolicy();
+	const bool affixSpecialActionStateExtractionOk = CheckAffixSpecialActionStateExtractionPolicy();
+	const bool triggerProcPolicyExtractionOk = CheckTriggerProcPolicyExtraction();
 	const bool lootSelectionOk = CheckUniformLootRollSelection();
 	const bool shuffleBagSelectionOk = CheckShuffleBagLootRollSelection();
 	const bool weightedShuffleBagSelectionOk = CheckWeightedShuffleBagLootRollSelection();
@@ -16,6 +24,7 @@ int main()
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
+	const bool lootServiceExtractionOk = CheckLootServiceExtractionPolicy();
 	const bool lootRerollExploitGuardOk = CheckLootRerollExploitGuardPolicy();
 	const bool lootCurrencyLedgerPolicyOk = CheckLootCurrencyLedgerSerializationPolicy();
 	const bool suffixProcChanceParsingPolicyOk = CheckSuffixProcChanceParsingPolicy();
@@ -28,7 +37,10 @@ int main()
 	const bool runewordCompletedSelectionOk = CheckRunewordCompletedSelectionPolicy();
 	const bool runewordRecipeEntriesMappingOk = CheckRunewordRecipeEntriesMappingPolicy();
 	const bool runewordRecipeTooltipTextOk = CheckRunewordRecipeTooltipTextPolicy();
+	const bool runewordUiContractExtractionOk = CheckRunewordUiContractExtractionPolicy();
+	const bool runewordRuntimeStateExtractionOk = CheckRunewordRuntimeStateExtractionPolicy();
 	const bool runewordCoverageConsistencyOk = CheckRunewordCoverageConsistencyPolicy();
+	const bool affixRegistryStateExtractionOk = CheckAffixRegistryStateExtractionPolicy();
 	const bool lowHealthTriggerSnapshotOk = CheckLowHealthTriggerSnapshotPolicy();
 	const bool runewordRecipeRuntimeEligibilityOk = CheckRunewordRecipeRuntimeEligibilityPolicy();
 	const bool runewordContractSnapshotOk = CheckRunewordContractSnapshotPolicy();
@@ -39,10 +51,17 @@ int main()
 	const bool runewordReforgeSafetyOk = CheckRunewordReforgeSafetyPolicy();
 	const bool prismaTooltipImmediateRefreshOk = CheckPrismaTooltipImmediateRefreshPolicy();
 	const bool prismaTooltipWorkerSchedulingPolicyOk = CheckPrismaTooltipWorkerSchedulingPolicy();
+	const bool prismaTooltipTelemetryPolicyOk = CheckPrismaTooltipTelemetryPolicy();
 	const bool runtimeUserSettingsDebounceOk = CheckRuntimeUserSettingsDebounceBehavior();
 	const bool externalUserSettingsPersistenceOk = CheckExternalUserSettingsPersistencePolicy();
 	const bool runtimeUserSettingsRoundTripFieldsOk = CheckRuntimeUserSettingsRoundTripFieldPolicy();
 	const bool eventBridgeStateMutexReentrancyOk = CheckEventBridgeStateMutexReentrancyPolicy();
+	const bool combatRuntimeStateResetOk = CheckCombatRuntimeStateResetBehavior();
+	const bool combatRuntimeStateExtractionOk = CheckCombatRuntimeStateExtractionPolicy();
+	const bool lootRuntimeStateResetOk = CheckLootRuntimeStateResetBehavior();
+	const bool lootRuntimeStateExtractionOk = CheckLootRuntimeStateExtractionPolicy();
+	const bool configReloadTransientResetOk = CheckConfigReloadTransientRuntimeResetPolicy();
+	const bool runewordUiContractDefaultsOk = CheckRunewordUiContractDefaults();
 	const bool perTargetPruningOk = CheckPerTargetCooldownStorePruning();
 	const bool perTargetIndependenceOk = CheckPerTargetCooldownStoreIndependence();
 	const bool nonHostileTtlExpiryOk = CheckNonHostileFirstHitGateTtlExpiry();
@@ -50,9 +69,10 @@ int main()
 	const bool lootRerollLifecycleOk = CheckLootRerollGuardLifecycle();
 	const bool lootRerollCircularOverflowOk = CheckLootRerollGuardCircularOverflow();
 	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
-	return (gateOk && storeOk && hookIndexPolicyOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
+	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && healthDamageSignatureWindowOk && tesHitFallbackSourceValidationOk && configLoadPipelineExtractionOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
+	        lootServiceExtractionOk &&
 	        lootRerollExploitGuardOk &&
 	        lootCurrencyLedgerPolicyOk &&
 	        suffixProcChanceParsingPolicyOk &&
@@ -62,10 +82,13 @@ int main()
 	        serializationTransientResetOk &&
 	        lootChanceMcmCleanupOk &&
 		        mcmDropChanceBridgeOk &&
-		        runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
-		        runewordRecipeTooltipTextOk &&
-		        runewordCoverageConsistencyOk &&
-		        lowHealthTriggerSnapshotOk &&
+			        runewordCompletedSelectionOk && runewordRecipeEntriesMappingOk &&
+			        runewordRecipeTooltipTextOk &&
+			        runewordUiContractExtractionOk &&
+			        runewordRuntimeStateExtractionOk &&
+			        runewordCoverageConsistencyOk &&
+			        affixRegistryStateExtractionOk &&
+			        lowHealthTriggerSnapshotOk &&
 		        runewordRecipeRuntimeEligibilityOk &&
 	        runewordContractSnapshotOk &&
 	        synthesizedAffixDisplayNameFallbackOk &&
@@ -75,11 +98,18 @@ int main()
 	        runewordReforgeSafetyOk &&
 	        prismaTooltipImmediateRefreshOk &&
 	        prismaTooltipWorkerSchedulingPolicyOk &&
+	        prismaTooltipTelemetryPolicyOk &&
 	        runtimeUserSettingsDebounceOk &&
-	        externalUserSettingsPersistenceOk &&
-	        runtimeUserSettingsRoundTripFieldsOk &&
-	        eventBridgeStateMutexReentrancyOk &&
-	        perTargetPruningOk &&
+		        externalUserSettingsPersistenceOk &&
+		        runtimeUserSettingsRoundTripFieldsOk &&
+		        eventBridgeStateMutexReentrancyOk &&
+		        combatRuntimeStateResetOk &&
+		        combatRuntimeStateExtractionOk &&
+		        lootRuntimeStateResetOk &&
+		        lootRuntimeStateExtractionOk &&
+		        configReloadTransientResetOk &&
+		        runewordUiContractDefaultsOk &&
+		        perTargetPruningOk &&
 	        perTargetIndependenceOk &&
 	        nonHostileTtlExpiryOk &&
 	        nonHostileCapacityEvictionOk &&

@@ -19,7 +19,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeEnabled || !a_event || !a_event->dead) {
+		if (!_configLoaded || !_runtimeSettings.enabled || !a_event || !a_event->dead) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -38,7 +38,7 @@ namespace CalamityAffixes
 		MaybeResyncEquippedAffixes(now);
 
 		// Independent path: player-owned summoned actor death can trigger dedicated summon corpse explosion.
-		if (!_summonCorpseExplosionAffixIndices.empty() &&
+		if (!_affixSpecialActions.summonCorpseExplosionAffixIndices.empty() &&
 			dying->IsSummoned() &&
 			IsPlayerOwned(dying)) {
 			if (auto* summonOwner = GetPlayerOwner(dying); summonOwner) {
@@ -112,7 +112,7 @@ namespace CalamityAffixes
 
 		ProcessTrigger(Trigger::kKill, owner, dying, nullptr);
 
-		if (!_corpseExplosionAffixIndices.empty()) {
+		if (!_affixSpecialActions.corpseExplosionAffixIndices.empty()) {
 			ProcessCorpseExplosionKill(owner, dying);
 		}
 

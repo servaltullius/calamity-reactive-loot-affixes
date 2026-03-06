@@ -71,12 +71,12 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeEnabled || !a_target) {
+		if (!_configLoaded || !_runtimeSettings.enabled || !a_target) {
 			return;
 		}
 
-		if (_disableHealthDamageRouting) {
-			if (_combatDebugLog) {
+		if (_runtimeSettings.disableHealthDamageRouting) {
+			if (_runtimeSettings.combatDebugLog) {
 				static bool loggedOnce = false;
 				if (!loggedOnce) {
 					loggedOnce = true;
@@ -88,7 +88,7 @@ namespace CalamityAffixes
 		// H2: MaybeResyncEquippedAffixes removed — the main-thread ProcessEvent handlers
 		// already drive resync; calling it from the hook thread risks data races.
 
-		_healthDamageHookSeen = true;
+		_combatState.healthDamageHookSeen = true;
 
 		static bool loggedHookIsActive = false;
 		if (!loggedHookIsActive) {
@@ -144,8 +144,8 @@ namespace CalamityAffixes
 					PlayerCombatEvidenceSource::kHealthDamageRoutedHit,
 					player,
 					other);
-				_healthDamageHookLastAt = now;
-			} else if (_combatDebugLog && playerRelevantCombatSignal) {
+				_combatState.healthDamageHookLastAt = now;
+			} else if (_runtimeSettings.combatDebugLog && playerRelevantCombatSignal) {
 				static auto nextNonHostileLogAt = std::chrono::steady_clock::time_point{};
 				if (nextNonHostileLogAt.time_since_epoch().count() == 0 || now >= nextNonHostileLogAt) {
 					nextNonHostileLogAt = now + std::chrono::seconds(2);
@@ -191,15 +191,16 @@ namespace CalamityAffixes
 		}
 
 		const auto sig = MakeHealthDamageSignature(a_target, a_attacker, a_hitData, a_sourceFormID, a_damage);
-		if (sig == _lastHealthDamageSignature &&
-			_lastHealthDamageSignatureAt.time_since_epoch().count() != 0 &&
-			(a_now - _lastHealthDamageSignatureAt) > kHealthDamageSignatureStaleWindow) {
+		// Suppress duplicate callbacks that re-enter within the short stale window.
+		if (sig == _combatState.lastHealthDamageSignature &&
+			_combatState.lastHealthDamageSignatureAt.time_since_epoch().count() != 0 &&
+			(a_now - _combatState.lastHealthDamageSignatureAt) < kHealthDamageSignatureStaleWindow) {
 			routeAsHit = false;
 		}
 
 		if (routeAsHit) {
-			_lastHealthDamageSignature = sig;
-			_lastHealthDamageSignatureAt = a_now;
+			_combatState.lastHealthDamageSignature = sig;
+			_combatState.lastHealthDamageSignatureAt = a_now;
 		} else if (_loot.debugLog) {
 			static std::uint32_t suppressed = 0;
 			suppressed += 1;
@@ -248,8 +249,8 @@ namespace CalamityAffixes
 		// dedup doesn't catch it.  This source-agnostic per-target window does.
 		constexpr auto kOutgoingPerTargetWindow = std::chrono::milliseconds(400);
 		const RE::FormID tgtFid = a_target->GetFormID();
-		if (const auto it = _outgoingHitPerTargetLastAt.find(tgtFid);
-			it != _outgoingHitPerTargetLastAt.end()) {
+		if (const auto it = _combatState.outgoingHitPerTargetLastAt.find(tgtFid);
+			it != _combatState.outgoingHitPerTargetLastAt.end()) {
 			if ((a_now - it->second) < kOutgoingPerTargetWindow) {
 				return;
 			}
@@ -266,11 +267,12 @@ namespace CalamityAffixes
 			return;
 		}
 
-		_outgoingHitPerTargetLastAt[tgtFid] = a_now;
-		if (_outgoingHitPerTargetLastAt.size() > 256) {
-			for (auto pit = _outgoingHitPerTargetLastAt.begin(); pit != _outgoingHitPerTargetLastAt.end();) {
+		_combatState.outgoingHitPerTargetLastAt[tgtFid] = a_now;
+		if (_combatState.outgoingHitPerTargetLastAt.size() > 256) {
+			for (auto pit = _combatState.outgoingHitPerTargetLastAt.begin();
+			     pit != _combatState.outgoingHitPerTargetLastAt.end();) {
 				if ((a_now - pit->second) > std::chrono::seconds(5)) {
-					pit = _outgoingHitPerTargetLastAt.erase(pit);
+					pit = _combatState.outgoingHitPerTargetLastAt.erase(pit);
 				} else {
 					++pit;
 				}
@@ -279,7 +281,7 @@ namespace CalamityAffixes
 
 		ProcessTrigger(Trigger::kHit, context.playerOwner, a_target, a_hitData);
 
-		if (a_attacker->IsPlayerRef() && a_hitData && a_hitData->attackDataSpell && !_archmageAffixIndices.empty()) {
+		if (a_attacker->IsPlayerRef() && a_hitData && a_hitData->attackDataSpell && !_affixSpecialActions.archmageAffixIndices.empty()) {
 			ProcessArchmageSpellHit(a_attacker, a_target, a_hitData->attackDataSpell, a_hitData);
 		}
 	}
@@ -320,7 +322,7 @@ namespace CalamityAffixes
 		if (a_target->IsPlayerRef() ||
 			!a_target->IsDead() ||
 			!context.attackerIsPlayerOwned ||
-			_corpseExplosionAffixIndices.empty()) {
+			_affixSpecialActions.corpseExplosionAffixIndices.empty()) {
 			return;
 		}
 		if (!context.playerOwner || !context.hostileEitherDirection) {
@@ -341,7 +343,7 @@ namespace CalamityAffixes
 		RE::Actor* a_attacker,
 		const RE::HitData* a_hitData)
 	{
-		if (!_configLoaded || !_runtimeEnabled || !a_target || _lowHealthTriggerAffixIndices.empty()) {
+		if (!_configLoaded || !_runtimeSettings.enabled || !a_target || _affixRegistry.lowHealthTriggerAffixIndices.empty()) {
 			return;
 		}
 		if (!a_target->IsPlayerRef()) {

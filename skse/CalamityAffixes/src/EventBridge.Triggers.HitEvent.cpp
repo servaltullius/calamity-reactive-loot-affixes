@@ -33,7 +33,7 @@ namespace CalamityAffixes
 		const auto now = std::chrono::steady_clock::now();
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_runtimeEnabled) {
+		if (!_runtimeSettings.enabled) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -115,19 +115,24 @@ namespace CalamityAffixes
 						.source = a_event->source
 					};
 
-					if (!ShouldSuppressDuplicateHit(key, now)) {
-						const auto* hitData = HitDataUtil::GetLastHitData(target);
+						if (!ShouldSuppressDuplicateHit(key, now)) {
+							const auto* hitData = HitDataUtil::GetLastHitData(target);
+							const bool hasCommittedHitData =
+								hitData &&
+								HitDataUtil::HitDataMatchesActors(hitData, target, aggressor) &&
+								HitDataUtil::HasHitLikeSource(hitData, aggressor);
 
-						// Some weapon types (especially modded weapons with custom
-						// animations) raise TESHitEvent before HitData is fully
-						// committed to the target actor.  The engine may fire the
-						// first event with stale/incomplete hitData (weapon ptr
-						// still null) and a follow-up event with the real data.
-						// Reset duplicate tracking so the follow-up is processed.
-						if (!hitData || !hitData->weapon) {
-							_lastHitAt = {};
-						} else {
-							ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
+							// Some weapon types (especially modded weapons with custom
+							// animations) raise TESHitEvent before HitData is fully
+							// committed to the target actor.  The engine may fire the
+							// first event with stale/incomplete hitData (missing or
+							// actor-mismatched source data) and a follow-up event with
+							// the real data.
+							// Reset duplicate tracking so the follow-up is processed.
+							if (!hasCommittedHitData) {
+								_combatState.lastHitAt = {};
+							} else {
+								ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
 
 							if (aggressor->IsPlayerRef()) {
 								const auto coc = EvaluateCastOnCrit(aggressor, target, hitData);
@@ -145,7 +150,7 @@ namespace CalamityAffixes
 								}
 							}
 
-							if (aggressor->IsPlayerRef() && !_archmageAffixIndices.empty()) {
+							if (aggressor->IsPlayerRef() && !_affixSpecialActions.archmageAffixIndices.empty()) {
 								auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
 								auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
 								if (spell) {
@@ -173,15 +178,20 @@ namespace CalamityAffixes
 
 					if (!ShouldSuppressDuplicateHit(key, now)) {
 						const auto* hitData = HitDataUtil::GetLastHitData(target);
+						const bool hasCommittedHitData =
+							hitData &&
+							HitDataUtil::HitDataMatchesActors(hitData, target, aggressor) &&
+							HitDataUtil::HasHitLikeSource(hitData, aggressor);
 
 						// Some weapon types (especially modded weapons with custom
 						// animations) raise TESHitEvent before HitData is fully
 						// committed to the target actor.  The engine may fire the
-						// first event with stale/incomplete hitData (weapon ptr
-						// still null) and a follow-up event with the real data.
+						// first event with stale/incomplete hitData (missing or
+						// actor-mismatched source data) and a follow-up event with
+						// the real data.
 						// Reset duplicate tracking so the follow-up is processed.
-						if (!hitData || !hitData->weapon) {
-							_lastHitAt = {};
+						if (!hasCommittedHitData) {
+							_combatState.lastHitAt = {};
 						} else {
 							// Hook-compat fallback:
 							// If HandleHealthDamage hook is not routed, emulate MoM by refunding Health after hit landed.

@@ -213,27 +213,27 @@ namespace CalamityAffixes
 
 		const EventBridge::RunewordRecipe* EventBridge::FindRunewordRecipeByToken(std::uint64_t a_recipeToken) const
 		{
-			const auto it = _runewordRecipeIndexByToken.find(a_recipeToken);
-			if (it == _runewordRecipeIndexByToken.end() || it->second >= _runewordRecipes.size()) {
+			const auto it = _runewordState.recipeIndexByToken.find(a_recipeToken);
+			if (it == _runewordState.recipeIndexByToken.end() || it->second >= _runewordState.recipes.size()) {
 				return nullptr;
 			}
 
-			return std::addressof(_runewordRecipes[it->second]);
+			return std::addressof(_runewordState.recipes[it->second]);
 		}
 
 		const EventBridge::RunewordRecipe* EventBridge::GetCurrentRunewordRecipe() const
 		{
-			if (_runewordRecipes.empty()) {
+			if (_runewordState.recipes.empty()) {
 				return nullptr;
 			}
 
-			const std::size_t count = _runewordRecipes.size();
-			const auto start = static_cast<std::size_t>(_runewordRecipeCycleCursor % count);
+			const std::size_t count = _runewordState.recipes.size();
+			const auto start = static_cast<std::size_t>(_runewordState.recipeCycleCursor % count);
 			for (std::size_t offset = 0; offset < count; ++offset) {
 				const auto idx = (start + offset) % count;
-				const auto& recipe = _runewordRecipes[idx];
-				if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
-					affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+				const auto& recipe = _runewordState.recipes[idx];
+				if (const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
+					affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
 					continue;
 				}
 				return std::addressof(recipe);
@@ -243,12 +243,7 @@ namespace CalamityAffixes
 
 		void EventBridge::InitializeRunewordCatalog()
 		{
-			_runewordRecipes.clear();
-			_runewordRecipeIndexByToken.clear();
-			_runewordRecipeIndexByResultAffixToken.clear();
-			_runewordRuneNameByToken.clear();
-			_runewordRuneTokenPool.clear();
-			_runewordRuneTokenWeights.clear();
+			_runewordState.ResetCatalog();
 
 			auto addRecipe = [&](std::string_view a_recipeId,
 				std::string_view a_displayName,
@@ -273,9 +268,9 @@ namespace CalamityAffixes
 					const auto runeToken = MakeAffixToken(ToLowerAscii(rune));
 					recipe.runeTokens.push_back(runeToken);
 
-					_runewordRuneNameByToken.try_emplace(runeToken, std::string(rune));
-					if (std::find(_runewordRuneTokenPool.begin(), _runewordRuneTokenPool.end(), runeToken) == _runewordRuneTokenPool.end()) {
-						_runewordRuneTokenPool.push_back(runeToken);
+					_runewordState.runeNameByToken.try_emplace(runeToken, std::string(rune));
+					if (std::find(_runewordState.runeTokenPool.begin(), _runewordState.runeTokenPool.end(), runeToken) == _runewordState.runeTokenPool.end()) {
+						_runewordState.runeTokenPool.push_back(runeToken);
 					}
 				}
 
@@ -283,14 +278,14 @@ namespace CalamityAffixes
 					return;
 				}
 
-				const auto idx = _runewordRecipes.size();
-				_runewordRecipeIndexByToken.emplace(recipe.token, idx);
-				if (const auto [it, inserted] = _runewordRecipeIndexByResultAffixToken.emplace(recipe.resultAffixToken, idx); !inserted) {
+				const auto idx = _runewordState.recipes.size();
+				_runewordState.recipeIndexByToken.emplace(recipe.token, idx);
+				if (const auto [it, inserted] = _runewordState.recipeIndexByResultAffixToken.emplace(recipe.resultAffixToken, idx); !inserted) {
 					SKSE::log::warn(
 						"CalamityAffixes: duplicate resultAffixToken {:016X} — recipe #{} collides with recipe #{}.",
 						recipe.resultAffixToken, idx, it->second);
 				}
-				_runewordRecipes.push_back(std::move(recipe));
+				_runewordState.recipes.push_back(std::move(recipe));
 			};
 
 			const auto parseRecommendedBaseType = [](const std::optional<bool>& a_recommendedBaseIsWeapon) {
@@ -368,7 +363,7 @@ namespace CalamityAffixes
 						parseRecommendedBaseType(row.recommendedBaseIsWeapon));
 				}
 
-				if (_runewordRecipes.empty()) {
+				if (_runewordState.recipes.empty()) {
 					SKSE::log::warn(
 						"CalamityAffixes: runtime contract snapshot produced zero usable runeword recipes; falling back to compiled catalog.");
 					loadCompiledFallbackCatalog();
@@ -376,31 +371,31 @@ namespace CalamityAffixes
 				} else {
 					SKSE::log::info(
 						"CalamityAffixes: loaded {} runeword recipes from runtime contract snapshot.",
-						_runewordRecipes.size());
+						_runewordState.recipes.size());
 				}
 			} else {
 				loadCompiledFallbackCatalog();
 			}
 
-			if (!_runewordRecipes.empty()) {
+			if (!_runewordState.recipes.empty()) {
 				if (!loadedFromContract) {
 					SKSE::log::info(
 						"CalamityAffixes: loaded {} runeword recipes from compiled fallback catalog.",
-						_runewordRecipes.size());
+						_runewordState.recipes.size());
 				}
 			} else {
 				SKSE::log::info(
 					"CalamityAffixes: runeword catalog is empty after contract/fallback load.");
 			}
 
-				if (_runewordRecipeCycleCursor >= _runewordRecipes.size()) {
-					_runewordRecipeCycleCursor = 0;
+				if (_runewordState.recipeCycleCursor >= _runewordState.recipes.size()) {
+					_runewordState.recipeCycleCursor = 0;
 				}
 
-				_runewordRuneTokenWeights.reserve(_runewordRuneTokenPool.size());
-				for (const auto token : _runewordRuneTokenPool) {
+				_runewordState.runeTokenWeights.reserve(_runewordState.runeTokenPool.size());
+				for (const auto token : _runewordState.runeTokenPool) {
 					double weight = 1.0;
-					if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+					if (const auto nameIt = _runewordState.runeNameByToken.find(token); nameIt != _runewordState.runeNameByToken.end()) {
 						if (loadedFromContract) {
 							if (const auto weightIt = contractSnapshot.runeWeightsByName.find(nameIt->second);
 								weightIt != contractSnapshot.runeWeightsByName.end() && weightIt->second > 0.0) {
@@ -412,7 +407,7 @@ namespace CalamityAffixes
 							weight = ResolveRunewordFragmentWeight(nameIt->second);
 						}
 					}
-					_runewordRuneTokenWeights.push_back(weight);
+					_runewordState.runeTokenWeights.push_back(weight);
 				}
 			}
 
@@ -423,25 +418,25 @@ namespace CalamityAffixes
 				if (canValidateInventory) {
 					// Legacy -> physical item migration: older saves stored fragments in SKSE serialization.
 					// Convert those counters into real inventory items once, then clear the legacy map.
-					if (!_runewordRuneFragments.empty()) {
-						if (_runewordRuneNameByToken.empty()) {
+					if (!_runewordState.runeFragments.empty()) {
+						if (_runewordState.runeNameByToken.empty()) {
 							InitializeRunewordCatalog();
 						}
 
 						std::uint32_t migrated = 0u;
-						for (auto it = _runewordRuneFragments.begin(); it != _runewordRuneFragments.end();) {
+						for (auto it = _runewordState.runeFragments.begin(); it != _runewordState.runeFragments.end();) {
 							const auto runeToken = it->first;
 							const auto amount = it->second;
 							if (runeToken == 0u || amount == 0u) {
-								it = _runewordRuneFragments.erase(it);
+								it = _runewordState.runeFragments.erase(it);
 								continue;
 							}
 
-							const auto given = GrantRunewordFragments(player, _runewordRuneNameByToken, runeToken, amount);
+							const auto given = GrantRunewordFragments(player, _runewordState.runeNameByToken, runeToken, amount);
 							if (given > 0u) {
 								const auto maxVal = std::numeric_limits<std::uint32_t>::max();
 								migrated = (migrated > maxVal - given) ? maxVal : (migrated + given);
-								it = _runewordRuneFragments.erase(it);
+								it = _runewordState.runeFragments.erase(it);
 							} else {
 								++it;
 							}
@@ -455,30 +450,30 @@ namespace CalamityAffixes
 						}
 					}
 
-					for (auto it = _runewordInstanceStates.begin(); it != _runewordInstanceStates.end();) {
+					for (auto it = _runewordState.instanceStates.begin(); it != _runewordState.instanceStates.end();) {
 						if (!PlayerHasInstanceKey(it->first)) {
-							it = _runewordInstanceStates.erase(it);
+							it = _runewordState.instanceStates.erase(it);
 						} else {
 							++it;
 					}
 				}
 
-					if (_runewordSelectedBaseKey && !PlayerHasInstanceKey(*_runewordSelectedBaseKey)) {
-						_runewordSelectedBaseKey.reset();
+					if (_runewordState.selectedBaseKey && !PlayerHasInstanceKey(*_runewordState.selectedBaseKey)) {
+						_runewordState.selectedBaseKey.reset();
 					}
 				}
 
-			if (_runewordRecipes.empty()) {
-				_runewordRecipeCycleCursor = 0;
+			if (_runewordState.recipes.empty()) {
+				_runewordState.recipeCycleCursor = 0;
 				return;
 			}
 
-			if (_runewordRecipeCycleCursor >= _runewordRecipes.size()) {
-				_runewordRecipeCycleCursor = 0;
+			if (_runewordState.recipeCycleCursor >= _runewordState.recipes.size()) {
+				_runewordState.recipeCycleCursor = 0;
 			}
 
 			const auto* currentRecipe = GetCurrentRunewordRecipe();
-			for (auto& [instanceKey, state] : _runewordInstanceStates) {
+			for (auto& [instanceKey, state] : _runewordState.instanceStates) {
 				auto* recipe = FindRunewordRecipeByToken(state.recipeToken);
 				if (!recipe) {
 					if (currentRecipe) {
@@ -506,9 +501,9 @@ namespace CalamityAffixes
 				return;
 			}
 
-			std::size_t index = static_cast<std::size_t>(_runewordBaseCycleCursor % candidates.size());
-			if (_runewordSelectedBaseKey) {
-				const auto selectedIt = std::find(candidates.begin(), candidates.end(), *_runewordSelectedBaseKey);
+			std::size_t index = static_cast<std::size_t>(_runewordState.baseCycleCursor % candidates.size());
+			if (_runewordState.selectedBaseKey) {
+				const auto selectedIt = std::find(candidates.begin(), candidates.end(), *_runewordState.selectedBaseKey);
 				if (selectedIt != candidates.end()) {
 					index = static_cast<std::size_t>(std::distance(candidates.begin(), selectedIt));
 				}
@@ -521,23 +516,23 @@ namespace CalamityAffixes
 			}
 
 			const auto selectedKey = candidates[index];
-			_runewordBaseCycleCursor = static_cast<std::uint32_t>(index);
+			_runewordState.baseCycleCursor = static_cast<std::uint32_t>(index);
 			(void)SelectRunewordBase(selectedKey);
 		}
 
 		void EventBridge::CycleRunewordRecipe(std::int32_t a_direction)
 		{
-			if (!_configLoaded || a_direction == 0 || _runewordRecipes.empty()) {
+			if (!_configLoaded || a_direction == 0 || _runewordState.recipes.empty()) {
 				return;
 			}
 
 			SanitizeRunewordState();
-			const std::size_t count = _runewordRecipes.size();
-			auto cursor = static_cast<std::size_t>(_runewordRecipeCycleCursor % count);
+			const std::size_t count = _runewordState.recipes.size();
+			auto cursor = static_cast<std::size_t>(_runewordState.recipeCycleCursor % count);
 			const auto isEligible = [&](std::size_t a_idx) {
-				const auto& recipe = _runewordRecipes[a_idx];
-				const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
-				return affixIt != _affixIndexByToken.end() && affixIt->second < _affixes.size();
+				const auto& recipe = _runewordState.recipes[a_idx];
+				const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
+				return affixIt != _affixRegistry.affixIndexByToken.end() && affixIt->second < _affixes.size();
 			};
 
 			for (std::size_t step = 0; step < count; ++step) {
@@ -549,7 +544,7 @@ namespace CalamityAffixes
 				if (!isEligible(cursor)) {
 					continue;
 				}
-				_runewordRecipeCycleCursor = static_cast<std::uint32_t>(cursor);
+				_runewordState.recipeCycleCursor = static_cast<std::uint32_t>(cursor);
 				break;
 			}
 

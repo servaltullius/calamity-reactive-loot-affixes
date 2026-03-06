@@ -11,8 +11,8 @@ namespace CalamityAffixes
 {
 	void EventBridge::ApplyRuntimeUserSettingsOverrides()
 	{
-		_runtimeUserSettingsPersist = {};
-		_runtimeUserSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
+		_runtimeSettings.userSettingsPersist = {};
+		_runtimeSettings.userSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
 
 		nlohmann::json root;
 		if (!UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)) {
@@ -39,29 +39,29 @@ namespace CalamityAffixes
 
 		try {
 			const auto& runtime = *runtimeIt;
-			_runtimeEnabled = runtime.value("enabled", _runtimeEnabled);
+			_runtimeSettings.enabled = runtime.value("enabled", _runtimeSettings.enabled);
 			_loot.debugLog = runtime.value("debugNotifications", _loot.debugLog);
-			_combatDebugLog = runtime.value("debugCombat", _combatDebugLog);
+			_runtimeSettings.combatDebugLog = runtime.value("debugCombat", _runtimeSettings.combatDebugLog);
 			_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
-			_disableCombatEvidenceLease = runtime.value("disableCombatEvidenceLease", _disableCombatEvidenceLease);
-			_disableHealthDamageRouting = runtime.value("disableHealthDamageRouting", _disableHealthDamageRouting);
-			_allowPlayerHealthDamageHook = runtime.value("allowPlayerHealthDamageHook", _allowPlayerHealthDamageHook);
-			_disablePassiveSuffixSpells = runtime.value("disablePassiveSuffixSpells", _disablePassiveSuffixSpells);
-			_disableTrapSystemTick = runtime.value("disableTrapSystemTick", _disableTrapSystemTick);
-			_disableTrapCasts = runtime.value("disableTrapCasts", _disableTrapCasts);
-			_forceStopAlarmPulse = runtime.value("forceStopAlarmPulse", _forceStopAlarmPulse);
+			_runtimeSettings.disableCombatEvidenceLease = runtime.value("disableCombatEvidenceLease", _runtimeSettings.disableCombatEvidenceLease);
+			_runtimeSettings.disableHealthDamageRouting = runtime.value("disableHealthDamageRouting", _runtimeSettings.disableHealthDamageRouting);
+			_runtimeSettings.allowPlayerHealthDamageHook = runtime.value("allowPlayerHealthDamageHook", _runtimeSettings.allowPlayerHealthDamageHook);
+			_runtimeSettings.disablePassiveSuffixSpells = runtime.value("disablePassiveSuffixSpells", _runtimeSettings.disablePassiveSuffixSpells);
+			_runtimeSettings.disableTrapSystemTick = runtime.value("disableTrapSystemTick", _runtimeSettings.disableTrapSystemTick);
+			_runtimeSettings.disableTrapCasts = runtime.value("disableTrapCasts", _runtimeSettings.disableTrapCasts);
+			_runtimeSettings.forceStopAlarmPulse = runtime.value("forceStopAlarmPulse", _runtimeSettings.forceStopAlarmPulse);
 
 			const double validationIntervalSeconds =
 				runtime.value("validationIntervalSeconds", static_cast<double>(_equipResync.intervalMs) / 1000.0);
 			const double procChanceMultiplier =
-				runtime.value("procChanceMultiplier", static_cast<double>(_runtimeProcChanceMult));
+				runtime.value("procChanceMultiplier", static_cast<double>(_runtimeSettings.procChanceMult));
 			const double runewordFragmentChancePercent =
 				runtime.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent));
 			const double reforgeOrbChancePercent =
 				runtime.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent));
 			const bool allowNonHostileFirstHitProc = runtime.value(
 				"allowNonHostileFirstHitProc",
-				_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed));
+				_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed));
 
 			const float clampedValidationIntervalSeconds =
 				std::clamp(static_cast<float>(validationIntervalSeconds), 0.0f, 30.0f);
@@ -71,10 +71,10 @@ namespace CalamityAffixes
 					: static_cast<std::uint64_t>(clampedValidationIntervalSeconds * 1000.0f);
 			_equipResync.nextAtMs = 0;
 
-			_runtimeProcChanceMult = std::clamp(static_cast<float>(procChanceMultiplier), 0.0f, 3.0f);
+			_runtimeSettings.procChanceMult = std::clamp(static_cast<float>(procChanceMultiplier), 0.0f, 3.0f);
 			_loot.runewordFragmentChancePercent = std::clamp(static_cast<float>(runewordFragmentChancePercent), 0.0f, 100.0f);
 			_loot.reforgeOrbChancePercent = std::clamp(static_cast<float>(reforgeOrbChancePercent), 0.0f, 100.0f);
-			_allowNonHostilePlayerOwnedOutgoingProcs.store(allowNonHostileFirstHitProc, std::memory_order_relaxed);
+			_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.store(allowNonHostileFirstHitProc, std::memory_order_relaxed);
 		} catch (const nlohmann::json::exception& e) {
 			SKSE::log::warn(
 				"CalamityAffixes: JSON error reading user runtime settings; using defaults. ({})",
@@ -83,7 +83,7 @@ namespace CalamityAffixes
 		SyncCurrencyDropModeState("ApplyRuntimeUserSettingsOverrides");
 
 		if (!_loot.dotTagSafetyAutoDisable) {
-			_dotTagSafetySuppressed = false;
+			_combatState.dotTagSafetySuppressed = false;
 		}
 
 		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
@@ -92,43 +92,43 @@ namespace CalamityAffixes
 		SKSE::log::info(
 			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
 			std::string(kUserSettingsRelativePath),
-			_runtimeEnabled,
-			_runtimeProcChanceMult,
+			_runtimeSettings.enabled,
+			_runtimeSettings.procChanceMult,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
 			_loot.runtimeCurrencyDropsEnabled,
-			_combatDebugLog,
-			_disableCombatEvidenceLease,
-			_disableHealthDamageRouting,
-			_allowPlayerHealthDamageHook,
-			_disablePassiveSuffixSpells,
-			_disableTrapSystemTick,
-			_disableTrapCasts,
-			_forceStopAlarmPulse);
+			_runtimeSettings.combatDebugLog,
+			_runtimeSettings.disableCombatEvidenceLease,
+			_runtimeSettings.disableHealthDamageRouting,
+			_runtimeSettings.allowPlayerHealthDamageHook,
+			_runtimeSettings.disablePassiveSuffixSpells,
+			_runtimeSettings.disableTrapSystemTick,
+			_runtimeSettings.disableTrapCasts,
+			_runtimeSettings.forceStopAlarmPulse);
 
-		_runtimeUserSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
+		_runtimeSettings.userSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
 	}
 
 	nlohmann::json EventBridge::BuildRuntimeUserSettingsJson() const
 	{
 		nlohmann::json runtime = nlohmann::json::object();
-		runtime["enabled"] = _runtimeEnabled;
+		runtime["enabled"] = _runtimeSettings.enabled;
 		runtime["debugNotifications"] = _loot.debugLog;
-		runtime["debugCombat"] = _combatDebugLog;
+		runtime["debugCombat"] = _runtimeSettings.combatDebugLog;
 		runtime["validationIntervalSeconds"] = static_cast<double>(_equipResync.intervalMs) / 1000.0;
-		runtime["procChanceMultiplier"] = _runtimeProcChanceMult;
+		runtime["procChanceMultiplier"] = _runtimeSettings.procChanceMult;
 		runtime["runewordFragmentChancePercent"] = _loot.runewordFragmentChancePercent;
 		runtime["reforgeOrbChancePercent"] = _loot.reforgeOrbChancePercent;
 		runtime["dotSafetyAutoDisable"] = _loot.dotTagSafetyAutoDisable;
 		runtime["allowNonHostileFirstHitProc"] =
-			_allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
-		runtime["disableCombatEvidenceLease"] = _disableCombatEvidenceLease;
-		runtime["disableHealthDamageRouting"] = _disableHealthDamageRouting;
-		runtime["allowPlayerHealthDamageHook"] = _allowPlayerHealthDamageHook;
-		runtime["disablePassiveSuffixSpells"] = _disablePassiveSuffixSpells;
-		runtime["disableTrapSystemTick"] = _disableTrapSystemTick;
-		runtime["disableTrapCasts"] = _disableTrapCasts;
-		runtime["forceStopAlarmPulse"] = _forceStopAlarmPulse;
+			_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
+		runtime["disableCombatEvidenceLease"] = _runtimeSettings.disableCombatEvidenceLease;
+		runtime["disableHealthDamageRouting"] = _runtimeSettings.disableHealthDamageRouting;
+		runtime["allowPlayerHealthDamageHook"] = _runtimeSettings.allowPlayerHealthDamageHook;
+		runtime["disablePassiveSuffixSpells"] = _runtimeSettings.disablePassiveSuffixSpells;
+		runtime["disableTrapSystemTick"] = _runtimeSettings.disableTrapSystemTick;
+		runtime["disableTrapCasts"] = _runtimeSettings.disableTrapCasts;
+		runtime["forceStopAlarmPulse"] = _runtimeSettings.forceStopAlarmPulse;
 		return runtime;
 	}
 
@@ -140,32 +140,38 @@ namespace CalamityAffixes
 	void EventBridge::MarkRuntimeUserSettingsDirty()
 	{
 		(void)RuntimeUserSettingsDebounce::MarkDirty(
-			_runtimeUserSettingsPersist,
+			_runtimeSettings.userSettingsPersist,
 			BuildRuntimeUserSettingsPayload(),
 			std::chrono::steady_clock::now(),
 			kRuntimeUserSettingsPersistDebounce);
 	}
 
+	void EventBridge::QueueRuntimeUserSettingsPersist()
+	{
+		MarkRuntimeUserSettingsDirty();
+		MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::now(), true);
+	}
+
 	void EventBridge::MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::time_point a_now, bool a_force)
 	{
-		if (!RuntimeUserSettingsDebounce::ShouldFlush(_runtimeUserSettingsPersist, a_now, a_force)) {
+		if (!RuntimeUserSettingsDebounce::ShouldFlush(_runtimeSettings.userSettingsPersist, a_now, a_force)) {
 			return;
 		}
 
-		if (_runtimeUserSettingsPersist.pendingPayload.empty()) {
-			_runtimeUserSettingsPersist.pendingPayload = BuildRuntimeUserSettingsPayload();
+		if (_runtimeSettings.userSettingsPersist.pendingPayload.empty()) {
+			_runtimeSettings.userSettingsPersist.pendingPayload = BuildRuntimeUserSettingsPayload();
 		}
-		if (_runtimeUserSettingsPersist.pendingPayload == _runtimeUserSettingsPersist.lastPersistedPayload) {
-			RuntimeUserSettingsDebounce::MarkPersistSuccess(_runtimeUserSettingsPersist);
+		if (_runtimeSettings.userSettingsPersist.pendingPayload == _runtimeSettings.userSettingsPersist.lastPersistedPayload) {
+			RuntimeUserSettingsDebounce::MarkPersistSuccess(_runtimeSettings.userSettingsPersist);
 			return;
 		}
 
 		if (PersistRuntimeUserSettings()) {
-			_runtimeUserSettingsPersist.lastPersistedPayload = _runtimeUserSettingsPersist.pendingPayload;
-			RuntimeUserSettingsDebounce::MarkPersistSuccess(_runtimeUserSettingsPersist);
+			_runtimeSettings.userSettingsPersist.lastPersistedPayload = _runtimeSettings.userSettingsPersist.pendingPayload;
+			RuntimeUserSettingsDebounce::MarkPersistSuccess(_runtimeSettings.userSettingsPersist);
 		} else {
 			RuntimeUserSettingsDebounce::MarkPersistFailure(
-				_runtimeUserSettingsPersist,
+				_runtimeSettings.userSettingsPersist,
 				a_now,
 				kRuntimeUserSettingsPersistDebounce);
 		}

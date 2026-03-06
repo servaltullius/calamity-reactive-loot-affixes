@@ -14,14 +14,14 @@ namespace CalamityAffixes
 			}
 		};
 
-		_lootSharedAffixes.clear();
-		_lootSharedAffixes.reserve(_lootWeaponAffixes.size() + _lootArmorAffixes.size());
-		appendUnique(_lootSharedAffixes, _lootWeaponAffixes);
-		appendUnique(_lootSharedAffixes, _lootArmorAffixes);
+		_affixRegistry.lootSharedAffixes.clear();
+		_affixRegistry.lootSharedAffixes.reserve(_affixRegistry.lootWeaponAffixes.size() + _affixRegistry.lootArmorAffixes.size());
+		appendUnique(_affixRegistry.lootSharedAffixes, _affixRegistry.lootWeaponAffixes);
+		appendUnique(_affixRegistry.lootSharedAffixes, _affixRegistry.lootArmorAffixes);
 
-		_lootSharedSuffixes.clear();
-		_lootSharedSuffixes.reserve(_lootWeaponSuffixes.size() + _lootArmorSuffixes.size());
-		appendUnique(_lootSharedSuffixes, _lootWeaponSuffixes);
-		appendUnique(_lootSharedSuffixes, _lootArmorSuffixes);
+		_affixRegistry.lootSharedSuffixes.clear();
+		_affixRegistry.lootSharedSuffixes.reserve(_affixRegistry.lootWeaponSuffixes.size() + _affixRegistry.lootArmorSuffixes.size());
+		appendUnique(_affixRegistry.lootSharedSuffixes, _affixRegistry.lootWeaponSuffixes);
+		appendUnique(_affixRegistry.lootSharedSuffixes, _affixRegistry.lootArmorSuffixes);
 	}
 }

@@ -1,5 +1,9 @@
 #include "runtime_gate_store_checks_common.h"
 
+#include "CalamityAffixes/PluginLogging.h"
+
+#include <stdexcept>
+
 namespace RuntimeGateStoreChecks
 {
 	bool CheckNonHostileFirstHitGate()
@@ -102,6 +106,345 @@ namespace RuntimeGateStoreChecks
 
 		if (CalamityAffixes::Hooks::HandleHealthDamageVfuncIndexForRuntime(true) != 0x106u) {
 			std::cerr << "hooks: expected VR HandleHealthDamage index to be 0x106\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckHooksDispatchExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path cmakeFile = repoRoot / "CMakeLists.txt";
+		const fs::path hooksFile = repoRoot / "src" / "Hooks.cpp";
+		const fs::path hooksDispatchHeaderFile = repoRoot / "src" / "Hooks.Dispatch.h";
+		const fs::path hooksDispatchFile = repoRoot / "src" / "Hooks.Dispatch.cpp";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto cmakeText = loadText(cmakeFile);
+		const auto hooksText = loadText(hooksFile);
+		const auto hooksDispatchHeaderText = loadText(hooksDispatchHeaderFile);
+		const auto hooksDispatchText = loadText(hooksDispatchFile);
+		if (!cmakeText.has_value() || !hooksText.has_value() || !hooksDispatchHeaderText.has_value() ||
+			!hooksDispatchText.has_value()) {
+			std::cerr << "hooks_dispatch_extraction: failed to load source files\n";
+			return false;
+		}
+
+		if (cmakeText->find("src/Hooks.Dispatch.cpp") == std::string::npos ||
+			hooksText->find("#include \"Hooks.Dispatch.h\"") == std::string::npos ||
+			hooksText->find("detail::AdjustDamageAndEvaluateSpecials(") == std::string::npos ||
+			hooksText->find("detail::SchedulePostHealthDamageActions(") == std::string::npos ||
+			hooksText->find("detail::ClearDispatchRuntimeState();") == std::string::npos ||
+			hooksText->find("PlayCastOnCritProcFeedbackSfx(") != std::string::npos ||
+			hooksText->find("ExecutePostHealthDamageActions(") != std::string::npos ||
+			hooksDispatchHeaderText->find("struct DamageAdjustmentResult") == std::string::npos ||
+			hooksDispatchHeaderText->find("void SchedulePostHealthDamageActions(") == std::string::npos ||
+			hooksDispatchText->find("PlayCastOnCritProcFeedbackSfx(") == std::string::npos ||
+			hooksDispatchText->find("ExecutePostHealthDamageActions(") == std::string::npos ||
+			hooksDispatchText->find("thread_local bool g_inProcDispatch = false;") == std::string::npos) {
+			std::cerr << "hooks_dispatch_extraction: hook plumbing and dispatch helpers are not cleanly separated\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckPluginLoggingExceptionSafetyPolicy()
+	{
+		std::size_t errorCalls = 0u;
+		std::string lastError;
+		const bool shouldFailSafely = CalamityAffixes::ConfigurePluginLogger(
+			[]() {
+				throw std::runtime_error("expected sink failure");
+			},
+			[&](std::string_view a_reason) {
+				++errorCalls;
+				lastError.assign(a_reason);
+			});
+		if (shouldFailSafely) {
+			std::cerr << "plugin_logging_exception_safety: expected throwing sink factory to return false\n";
+			return false;
+		}
+		if (errorCalls != 1u || lastError.find("expected sink failure") == std::string::npos) {
+			std::cerr << "plugin_logging_exception_safety: expected error handler to receive sink failure exactly once\n";
+			return false;
+		}
+
+		std::size_t installCalls = 0u;
+		const bool shouldSucceed = CalamityAffixes::ConfigurePluginLogger(
+			[&]() {
+				++installCalls;
+			},
+			[](std::string_view) {});
+		if (!shouldSucceed || installCalls != 1u) {
+			std::cerr << "plugin_logging_exception_safety: expected valid sink factory to install logger once\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckRebuildActiveCountsLoggingPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path sourceFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.ActiveCounts.cpp";
+
+		std::ifstream in(sourceFile);
+		if (!in.is_open()) {
+			std::cerr << "rebuild_active_counts_logging: failed to open source file: " << sourceFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("if (_loot.debugLog)") == std::string::npos ||
+			source.find("SKSE::log::debug(") == std::string::npos ||
+			source.find("\"CalamityAffixes: RebuildActiveCounts —") == std::string::npos ||
+			source.find("Always log rebuild summary at INFO level") != std::string::npos ||
+			source.find("SKSE::log::info(\n\t\t\t\t\t\"CalamityAffixes: RebuildActiveCounts —") != std::string::npos ||
+			source.find("SKSE::log::info(\"CalamityAffixes: RebuildActiveCounts —") != std::string::npos) {
+			std::cerr << "rebuild_active_counts_logging: expected summary logging to stay debug-only\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckHealthDamageSignatureWindowPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path sourceFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.HealthDamage.cpp";
+
+		std::ifstream in(sourceFile);
+		if (!in.is_open()) {
+			std::cerr << "health_damage_signature_window: failed to open source file: " << sourceFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+			if (source.find("const auto sig = MakeHealthDamageSignature") == std::string::npos ||
+				source.find("(a_now - _combatState.lastHealthDamageSignatureAt) < kHealthDamageSignatureStaleWindow") ==
+					std::string::npos ||
+				source.find("(a_now - _combatState.lastHealthDamageSignatureAt) > kHealthDamageSignatureStaleWindow") !=
+					std::string::npos) {
+				std::cerr << "health_damage_signature_window: expected duplicate-signature suppression within stale window\n";
+				return false;
+			}
+
+		return true;
+	}
+
+	bool CheckTesHitFallbackSourceValidationPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path sourceFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.HitEvent.cpp";
+
+		std::ifstream in(sourceFile);
+		if (!in.is_open()) {
+			std::cerr << "tes_hit_fallback_source_validation: failed to open source file: " << sourceFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("HitDataUtil::HitDataMatchesActors(hitData, target, aggressor)") == std::string::npos ||
+			source.find("HitDataUtil::HasHitLikeSource(hitData, aggressor)") == std::string::npos ||
+			source.find("if (!hasCommittedHitData)") == std::string::npos) {
+			std::cerr << "tes_hit_fallback_source_validation: TESHitEvent fallback must validate committed hit-like source data\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckConfigLoadPipelineExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
+		const fs::path configFile = repoRoot / "src" / "EventBridge.Config.cpp";
+		const fs::path pipelineFile = repoRoot / "src" / "EventBridge.Config.LoadPipeline.cpp";
+		const fs::path cmakeFile = repoRoot / "CMakeLists.txt";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto privateApiText = loadText(privateApiFile);
+		const auto configText = loadText(configFile);
+		const auto pipelineText = loadText(pipelineFile);
+		const auto cmakeText = loadText(cmakeFile);
+		if (!privateApiText.has_value() || !configText.has_value() || !cmakeText.has_value()) {
+			std::cerr << "config_load_pipeline_extraction: failed to load source files\n";
+			return false;
+		}
+		if (!pipelineText.has_value()) {
+			std::cerr << "config_load_pipeline_extraction: missing pipeline source file: " << pipelineFile << "\n";
+			return false;
+		}
+
+		if (privateApiText->find("void BuildConfigDerivedAffixState(const nlohmann::json& a_affixes, RE::TESDataHandler* a_handler);") == std::string::npos ||
+			cmakeText->find("src/EventBridge.Config.LoadPipeline.cpp") == std::string::npos ||
+			configText->find("BuildConfigDerivedAffixState(*affixes, handler);") == std::string::npos ||
+			configText->find("ParseConfiguredAffixesFromJson(*affixes, handler);") != std::string::npos ||
+			configText->find("IndexConfiguredAffixes();") != std::string::npos ||
+			configText->find("SynthesizeRunewordRuntimeAffixes();") != std::string::npos ||
+			configText->find("RebuildSharedLootPools();") != std::string::npos ||
+			configText->find("_activeCounts.assign(_affixes.size(), 0);") != std::string::npos ||
+			pipelineText->find("ParseConfiguredAffixesFromJson(a_affixes, a_handler);") == std::string::npos ||
+			pipelineText->find("IndexConfiguredAffixes();") == std::string::npos ||
+			pipelineText->find("SynthesizeRunewordRuntimeAffixes();") == std::string::npos ||
+			pipelineText->find("RebuildSharedLootPools();") == std::string::npos ||
+			pipelineText->find("_activeCounts.assign(_affixes.size(), 0);") == std::string::npos) {
+			std::cerr << "config_load_pipeline_extraction: config load pipeline extraction is incomplete\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckAffixSpecialActionStateExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path eventBridgeHeaderFile = repoRoot / "include" / "CalamityAffixes" / "EventBridge.h";
+		const fs::path specialActionHeaderFile = repoRoot / "include" / "CalamityAffixes" / "AffixSpecialActionState.h";
+		const fs::path indexingFile = repoRoot / "src" / "EventBridge.Config.IndexingShared.cpp";
+		const fs::path resetFile = repoRoot / "src" / "EventBridge.Config.Reset.cpp";
+		const fs::path configFile = repoRoot / "src" / "EventBridge.Config.cpp";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto eventBridgeHeaderText = loadText(eventBridgeHeaderFile);
+		const auto specialActionHeaderText = loadText(specialActionHeaderFile);
+		const auto indexingText = loadText(indexingFile);
+		const auto resetText = loadText(resetFile);
+		const auto configText = loadText(configFile);
+		if (!eventBridgeHeaderText.has_value() || !indexingText.has_value() || !resetText.has_value() || !configText.has_value()) {
+			std::cerr << "affix_special_action_state_extraction: failed to load source files\n";
+			return false;
+		}
+		if (!specialActionHeaderText.has_value()) {
+			std::cerr << "affix_special_action_state_extraction: missing special action header file: " << specialActionHeaderFile << "\n";
+			return false;
+		}
+
+		if (eventBridgeHeaderText->find("#include \"CalamityAffixes/AffixSpecialActionState.h\"") == std::string::npos ||
+			eventBridgeHeaderText->find("AffixSpecialActionState _affixSpecialActions{};") == std::string::npos ||
+			eventBridgeHeaderText->find("std::vector<std::size_t> _castOnCritAffixIndices;") != std::string::npos ||
+			eventBridgeHeaderText->find("std::vector<std::size_t> _convertAffixIndices;") != std::string::npos ||
+			eventBridgeHeaderText->find("std::vector<std::size_t> _mindOverMatterAffixIndices;") != std::string::npos ||
+			eventBridgeHeaderText->find("std::vector<std::size_t> _archmageAffixIndices;") != std::string::npos ||
+			eventBridgeHeaderText->find("std::vector<std::size_t> _corpseExplosionAffixIndices;") != std::string::npos ||
+			eventBridgeHeaderText->find("std::vector<std::size_t> _summonCorpseExplosionAffixIndices;") != std::string::npos ||
+			specialActionHeaderText->find("castOnCritAffixIndices") == std::string::npos ||
+			specialActionHeaderText->find("convertAffixIndices") == std::string::npos ||
+			specialActionHeaderText->find("mindOverMatterAffixIndices") == std::string::npos ||
+			specialActionHeaderText->find("archmageAffixIndices") == std::string::npos ||
+			specialActionHeaderText->find("corpseExplosionAffixIndices") == std::string::npos ||
+			specialActionHeaderText->find("summonCorpseExplosionAffixIndices") == std::string::npos ||
+			indexingText->find("_affixSpecialActions.castOnCritAffixIndices") == std::string::npos ||
+			indexingText->find("_affixSpecialActions.convertAffixIndices") == std::string::npos ||
+			indexingText->find("_affixSpecialActions.mindOverMatterAffixIndices") == std::string::npos ||
+			indexingText->find("_affixSpecialActions.archmageAffixIndices") == std::string::npos ||
+			indexingText->find("_affixSpecialActions.corpseExplosionAffixIndices") == std::string::npos ||
+			indexingText->find("_affixSpecialActions.summonCorpseExplosionAffixIndices") == std::string::npos ||
+			resetText->find("_affixSpecialActions = {};") == std::string::npos ||
+			configText->find("_affixSpecialActions.convertAffixIndices.size()") == std::string::npos ||
+			configText->find("_affixSpecialActions.castOnCritAffixIndices.size()") == std::string::npos ||
+			configText->find("_affixSpecialActions.mindOverMatterAffixIndices.size()") == std::string::npos ||
+			configText->find("_affixSpecialActions.archmageAffixIndices.size()") == std::string::npos ||
+			configText->find("_affixSpecialActions.corpseExplosionAffixIndices.size()") == std::string::npos) {
+			std::cerr << "affix_special_action_state_extraction: special action extraction is incomplete\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckTriggerProcPolicyExtraction()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
+		const fs::path triggersFile = repoRoot / "src" / "EventBridge.Triggers.cpp";
+		const fs::path policyFile = repoRoot / "src" / "EventBridge.Triggers.Policy.cpp";
+		const fs::path cmakeFile = repoRoot / "CMakeLists.txt";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto privateApiText = loadText(privateApiFile);
+		const auto triggersText = loadText(triggersFile);
+		const auto policyText = loadText(policyFile);
+		const auto cmakeText = loadText(cmakeFile);
+		if (!privateApiText.has_value() || !triggersText.has_value() || !policyText.has_value() || !cmakeText.has_value()) {
+			std::cerr << "trigger_proc_policy_extraction: failed to load source files\n";
+			return false;
+		}
+
+		if (cmakeText->find("src/EventBridge.Triggers.Policy.cpp") == std::string::npos ||
+			privateApiText->find("bool PassesTriggerProcPreconditions(") == std::string::npos ||
+			privateApiText->find("float ResolveTriggerProcChancePct(") == std::string::npos ||
+			privateApiText->find("bool RollTriggerProcChance(float a_chancePct);") == std::string::npos ||
+			privateApiText->find("void CommitTriggerProcRuntime(") == std::string::npos ||
+			triggersText->find("PassesTriggerProcPreconditions(") == std::string::npos ||
+			triggersText->find("ResolveTriggerProcChancePct(affix, i)") == std::string::npos ||
+			triggersText->find("RollTriggerProcChance(chance)") == std::string::npos ||
+			triggersText->find("CommitTriggerProcRuntime(affix, perTargetKey, usesPerTargetIcd, chance, now);") == std::string::npos ||
+			triggersText->find("affix.procChancePct * _runtimeSettings.procChanceMult") != std::string::npos ||
+			triggersText->find("ResolveTriggerProcCooldownMs(") != std::string::npos ||
+			policyText->find("bool EventBridge::PassesTriggerProcPreconditions(") == std::string::npos ||
+			policyText->find("float EventBridge::ResolveTriggerProcChancePct(") == std::string::npos ||
+			policyText->find("bool EventBridge::RollTriggerProcChance(") == std::string::npos ||
+			policyText->find("void EventBridge::CommitTriggerProcRuntime(") == std::string::npos) {
+			std::cerr << "trigger_proc_policy_extraction: ProcessTrigger policy extraction is incomplete\n";
 			return false;
 		}
 

@@ -160,6 +160,47 @@
 			return "Key" + std::to_string(a_keyCode);
 		}
 
+		[[nodiscard]] bool ShouldThrottleSettingsRefresh(
+			PrismaSettingsRefreshState& a_state,
+			std::chrono::steady_clock::time_point a_now,
+			bool a_force)
+		{
+			if (!a_force &&
+				a_state.nextRefreshAt.time_since_epoch().count() != 0 &&
+				a_now < a_state.nextRefreshAt) {
+				return true;
+			}
+
+			a_state.nextRefreshAt = a_now + kHotkeyRefreshInterval;
+			return false;
+		}
+
+		void ClearSettingsRefreshSource(PrismaSettingsRefreshState& a_state)
+		{
+			a_state.hasSourceSnapshot = false;
+			a_state.sourcePath.clear();
+		}
+
+		[[nodiscard]] bool IsKnownSettingsRefreshSource(
+			const PrismaSettingsRefreshState& a_state,
+			const std::filesystem::path& a_path,
+			std::filesystem::file_time_type a_mtime) noexcept
+		{
+			return a_state.hasSourceSnapshot &&
+				a_path == a_state.sourcePath &&
+				a_mtime == a_state.sourceMtime;
+		}
+
+		void RememberSettingsRefreshSource(
+			PrismaSettingsRefreshState& a_state,
+			const std::filesystem::path& a_path,
+			std::filesystem::file_time_type a_mtime)
+		{
+			a_state.hasSourceSnapshot = true;
+			a_state.sourcePath = a_path;
+			a_state.sourceMtime = a_mtime;
+		}
+
 		[[nodiscard]] std::string_view TrimAscii(std::string_view a_text) noexcept
 		{
 			while (!a_text.empty() && std::isspace(static_cast<unsigned char>(a_text.front()))) {
@@ -369,12 +410,12 @@
 			}
 
 			const auto text = DescribeHotkey(keyCode);
-			if (text == g_lastPanelHotkeyText) {
+			if (text == g_viewCache.panelHotkeyText) {
 				return;
 			}
 
-			g_lastPanelHotkeyText = text;
-			g_api->InteropCall(g_view, "setPanelHotkeyText", g_lastPanelHotkeyText.c_str());
+			g_viewCache.panelHotkeyText = text;
+			g_api->InteropCall(g_view, "setPanelHotkeyText", g_viewCache.panelHotkeyText.c_str());
 		}
 
 		void PushUiLanguageToJs()
@@ -384,31 +425,28 @@
 			}
 
 			const std::string mode = ResolveUiLanguageCode(g_uiLanguageMode.load());
-			if (mode == g_lastUiLanguageCode) {
+			if (mode == g_viewCache.uiLanguageCode) {
 				return;
 			}
 
-			g_lastUiLanguageCode = mode;
-			g_api->InteropCall(g_view, "setUiLanguage", g_lastUiLanguageCode.c_str());
+			g_viewCache.uiLanguageCode = mode;
+			g_api->InteropCall(g_view, "setUiLanguage", g_viewCache.uiLanguageCode.c_str());
 		}
 
 		void RefreshControlPanelHotkeyFromMcm(bool a_force)
 		{
 			const auto now = std::chrono::steady_clock::now();
-			std::scoped_lock lk{ g_hotkeyRefreshLock };
+			std::scoped_lock lk{ g_panelHotkeyRefresh.lock };
 
-			if (!a_force &&
-				g_nextHotkeyRefreshAt.time_since_epoch().count() != 0 &&
-				now < g_nextHotkeyRefreshAt) {
+			if (ShouldThrottleSettingsRefresh(g_panelHotkeyRefresh, now, a_force)) {
 				return;
 			}
-			g_nextHotkeyRefreshAt = now + kHotkeyRefreshInterval;
 
 			const std::filesystem::path settingsPath{ std::string(kMcmKeybindSettingsPath) };
 			std::error_code ec;
 			const bool exists = std::filesystem::exists(settingsPath, ec);
 			if (ec || !exists) {
-				g_hotkeySettingsKnown = false;
+				ClearSettingsRefreshSource(g_panelHotkeyRefresh);
 				RestorePanelHotkeyFromUserSettings();
 				return;
 			}
@@ -417,7 +455,7 @@
 			if (ec) {
 				return;
 			}
-			if (!a_force && g_hotkeySettingsKnown && mtime == g_hotkeySettingsMtime) {
+			if (!a_force && IsKnownSettingsRefreshSource(g_panelHotkeyRefresh, settingsPath, mtime)) {
 				return;
 			}
 
@@ -463,8 +501,7 @@
 			}
 
 			const auto previous = g_controlPanelHotkey.exchange(resolvedKey);
-			g_hotkeySettingsKnown = true;
-			g_hotkeySettingsMtime = mtime;
+			RememberSettingsRefreshSource(g_panelHotkeyRefresh, settingsPath, mtime);
 
 			if (previous != resolvedKey) {
 				PersistPanelHotkeyToUserSettings(resolvedKey);
@@ -475,14 +512,11 @@
 		void RefreshUiLanguageFromMcm(bool a_force)
 		{
 			const auto now = std::chrono::steady_clock::now();
-			std::scoped_lock lk{ g_uiLanguageRefreshLock };
+			std::scoped_lock lk{ g_uiLanguageRefresh.lock };
 
-			if (!a_force &&
-				g_nextUiLanguageRefreshAt.time_since_epoch().count() != 0 &&
-				now < g_nextUiLanguageRefreshAt) {
+			if (ShouldThrottleSettingsRefresh(g_uiLanguageRefresh, now, a_force)) {
 				return;
 			}
-			g_nextUiLanguageRefreshAt = now + kHotkeyRefreshInterval;
 
 			std::error_code ec;
 			const std::filesystem::path settingsPath{ std::string(kMcmModSettingsPath) };
@@ -500,8 +534,7 @@
 
 			if (activePath.empty()) {
 				RestoreUiLanguageModeFromUserSettings();
-				g_uiLanguageSettingsKnown = false;
-				g_uiLanguageSettingsPath.clear();
+				ClearSettingsRefreshSource(g_uiLanguageRefresh);
 				return;
 			}
 
@@ -510,9 +543,7 @@
 				return;
 			}
 
-			if (!a_force && g_uiLanguageSettingsKnown &&
-				activePath == g_uiLanguageSettingsPath &&
-				mtime == g_uiLanguageSettingsMtime) {
+			if (!a_force && IsKnownSettingsRefreshSource(g_uiLanguageRefresh, activePath, mtime)) {
 				return;
 			}
 
@@ -567,9 +598,7 @@
 
 			resolvedMode = NormalizeUiLanguageMode(resolvedMode);
 			const auto previous = g_uiLanguageMode.exchange(resolvedMode);
-			g_uiLanguageSettingsKnown = true;
-			g_uiLanguageSettingsPath = activePath;
-			g_uiLanguageSettingsMtime = mtime;
+			RememberSettingsRefreshSource(g_uiLanguageRefresh, activePath, mtime);
 
 			if (previous != resolvedMode) {
 				PersistUiLanguageModeToUserSettings(resolvedMode);
@@ -579,10 +608,10 @@
 
 		void LoadPanelLayoutFromDisk()
 		{
-			if (g_panelLayoutLoaded) {
+			if (g_panelLayoutState.loaded) {
 				return;
 			}
-			g_panelLayoutLoaded = true;
+			g_panelLayoutState.loaded = true;
 
 			const std::filesystem::path path{ std::string(kPanelLayoutPath) };
 			std::error_code ec;
@@ -597,9 +626,9 @@
 					return;
 				}
 
-				g_panelLayout = *loaded;
-				g_panelLayoutNeedsPush = true;
-				g_lastPanelLayoutJson.clear();
+				g_panelLayoutState.value = *loaded;
+				g_panelLayoutState.needsPush = true;
+				g_panelLayoutState.lastJson.clear();
 				SKSE::log::info("CalamityAffixes: loaded Prisma panel layout from {}.", kPanelLayoutPath);
 			} catch (const std::exception& e) {
 				SKSE::log::warn("CalamityAffixes: failed to parse panel layout {} ({})", kPanelLayoutPath, e.what());
@@ -608,10 +637,10 @@
 
 		void LoadTooltipLayoutFromDisk()
 		{
-			if (g_tooltipLayoutLoaded) {
+			if (g_tooltipLayoutState.loaded) {
 				return;
 			}
-			g_tooltipLayoutLoaded = true;
+			g_tooltipLayoutState.loaded = true;
 
 			const std::filesystem::path path{ std::string(kTooltipLayoutPath) };
 			std::error_code ec;
@@ -632,9 +661,9 @@
 					return;
 				}
 
-				g_tooltipLayout = *loaded;
-				g_tooltipLayoutNeedsPush = true;
-				g_lastTooltipLayoutJson.clear();
+				g_tooltipLayoutState.value = *loaded;
+				g_tooltipLayoutState.needsPush = true;
+				g_tooltipLayoutState.lastJson.clear();
 				SKSE::log::info("CalamityAffixes: loaded Prisma tooltip layout from {}.", kTooltipLayoutPath);
 			} catch (const std::exception& e) {
 				SKSE::log::warn("CalamityAffixes: failed to parse tooltip layout {} ({})", kTooltipLayoutPath, e.what());
@@ -652,7 +681,7 @@
 				return;
 			}
 
-			g_lastPanelLayoutJson = PrismaLayoutPersistence::EncodePanelLayoutJson(a_layout);
+			g_panelLayoutState.lastJson = PrismaLayoutPersistence::EncodePanelLayoutJson(a_layout);
 		}
 
 		void SaveTooltipLayoutToDisk(const TooltipLayout& a_layout)
@@ -666,35 +695,35 @@
 				return;
 			}
 
-			g_lastTooltipLayoutJson = PrismaLayoutPersistence::EncodeTooltipLayoutJsonForDisk(a_layout);
+			g_tooltipLayoutState.lastJson = PrismaLayoutPersistence::EncodeTooltipLayoutJsonForDisk(a_layout);
 		}
 
 		void PushPanelLayoutToJs()
 		{
-			if (!IsViewReady() || !g_panelLayout.valid) {
+			if (!IsViewReady() || !g_panelLayoutState.value.valid) {
 				return;
 			}
 
-			const std::string payload = PrismaLayoutPersistence::EncodePanelLayoutJson(g_panelLayout);
-			if (payload == g_lastPanelLayoutJson) {
+			const std::string payload = PrismaLayoutPersistence::EncodePanelLayoutJson(g_panelLayoutState.value);
+			if (payload == g_panelLayoutState.lastJson) {
 				return;
 			}
 
-			g_lastPanelLayoutJson = payload;
-			g_api->InteropCall(g_view, "setPanelLayout", g_lastPanelLayoutJson.c_str());
+			g_panelLayoutState.lastJson = payload;
+			g_api->InteropCall(g_view, "setPanelLayout", g_panelLayoutState.lastJson.c_str());
 		}
 
 		void PushTooltipLayoutToJs()
 		{
-			if (!IsViewReady() || !g_tooltipLayout.valid) {
+			if (!IsViewReady() || !g_tooltipLayoutState.value.valid) {
 				return;
 			}
 
-			const std::string payload = PrismaLayoutPersistence::EncodeTooltipLayoutJsonForJs(g_tooltipLayout);
-			if (payload == g_lastTooltipLayoutJson) {
+			const std::string payload = PrismaLayoutPersistence::EncodeTooltipLayoutJsonForJs(g_tooltipLayoutState.value);
+			if (payload == g_tooltipLayoutState.lastJson) {
 				return;
 			}
 
-			g_lastTooltipLayoutJson = payload;
-			g_api->InteropCall(g_view, "setTooltipLayout", g_lastTooltipLayoutJson.c_str());
+			g_tooltipLayoutState.lastJson = payload;
+			g_api->InteropCall(g_view, "setTooltipLayout", g_tooltipLayoutState.lastJson.c_str());
 		}

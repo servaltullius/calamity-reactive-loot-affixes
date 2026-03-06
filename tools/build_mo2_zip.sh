@@ -38,33 +38,61 @@ fi
 
 data_dir="${repo_root}/Data"
 dist_dir="${repo_root}/dist"
-linux_cross_dll="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll"
+repo_data_dll="${data_dir}/SKSE/Plugins/CalamityAffixes.dll"
+skse_build_dir_default="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel"
+linux_cross_dll_default="${skse_build_dir_default}/CalamityAffixes.dll"
+skse_build_dir="${CAFF_SKSE_BUILD_DIR:-${skse_build_dir_default}}"
+linux_cross_dll="${CAFF_LINUX_CROSS_DLL:-${linux_cross_dll_default}}"
 spec_manifest="${repo_root}/affixes/affixes.modules.json"
 spec_json="${repo_root}/affixes/affixes.json"
 tmp_dir="$(mktemp -d)"
 cleanup() { rm -rf "${tmp_dir}"; }
 trap cleanup EXIT
 
+jobs="${JOBS:-}"
+if [[ -z "${jobs}" ]]; then
+  if command -v nproc >/dev/null 2>&1; then
+    jobs="$(nproc)"
+  else
+    jobs="4"
+  fi
+fi
+
 stage_root="${tmp_dir}/stage"
 stage_data_dir="${stage_root}/Data"
 stage_dll="${stage_data_dir}/SKSE/Plugins/CalamityAffixes.dll"
 
-# Compose modular affix spec (if present) into affixes/affixes.json before generation.
+skse_build_dir_run="${skse_build_dir}"
+if [[ -z "${CAFF_SKSE_BUILD_DIR:-}" && "${repo_run_root}" != "${repo_root}" ]]; then
+  skse_build_dir_run="${repo_run_root}/skse/CalamityAffixes/build.linux-clangcl-rel"
+fi
+
+if [[ -d "${skse_build_dir}" ]]; then
+  cmake --build "${skse_build_dir_run}" --target CalamityAffixes --parallel "${jobs}"
+else
+  echo "SKSE build dir missing: ${skse_build_dir} (using staged Data DLL if present)" >&2
+fi
+
+# Refuse to package from a stale modular spec snapshot, but do not rewrite tracked files.
 if [[ -f "${spec_manifest}" ]]; then
   python3 "${repo_root}/tools/compose_affixes.py" \
     --manifest "${spec_manifest}" \
-    --output "${spec_json}"
+    --check
 fi
 
 # Stage Data/* first so packaging never mutates tracked repository outputs.
 mkdir -p "${stage_data_dir}"
 cp -a "${data_dir}/." "${stage_data_dir}/"
 
-# Keep staged DLL in sync with latest Linux cross-build output when present.
 if [[ -f "${linux_cross_dll}" ]]; then
   mkdir -p "$(dirname "${stage_dll}")"
   cp -f "${linux_cross_dll}" "${stage_dll}"
   echo "Staged DLL: ${linux_cross_dll} -> ${stage_dll}"
+elif [[ -f "${stage_dll}" ]]; then
+  echo "Staged DLL: using ${repo_data_dll}"
+else
+  echo "No packaged DLL available: ${linux_cross_dll} or ${repo_data_dll}" >&2
+  exit 1
 fi
 
 # Regenerate data-driven outputs (keywords/MCM plugin/runtime json) into staged Data.

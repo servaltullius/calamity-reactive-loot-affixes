@@ -9,8 +9,8 @@ namespace CalamityAffixes
 		std::uint64_t a_instanceKey,
 		const RunewordRecipe& a_recipe) const
 	{
-		const auto affixIt = _affixIndexByToken.find(a_recipe.resultAffixToken);
-		if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+		const auto affixIt = _affixRegistry.affixIndexByToken.find(a_recipe.resultAffixToken);
+		if (affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
 			return RunewordApplyBlockReason::kMissingResultAffix;
 		}
 

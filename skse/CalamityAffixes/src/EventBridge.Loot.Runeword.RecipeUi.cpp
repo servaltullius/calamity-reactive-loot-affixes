@@ -13,36 +13,36 @@ namespace CalamityAffixes
 	bool EventBridge::SelectRunewordRecipe(std::uint64_t a_recipeToken)
 	{
 		const std::scoped_lock lock(_stateMutex);
-		if (!_configLoaded || a_recipeToken == 0u || _runewordRecipes.empty()) {
+		if (!_configLoaded || a_recipeToken == 0u || _runewordState.recipes.empty()) {
 			return false;
 		}
 
 		SanitizeRunewordState();
-		const auto it = _runewordRecipeIndexByToken.find(a_recipeToken);
-		if (it == _runewordRecipeIndexByToken.end() || it->second >= _runewordRecipes.size()) {
+		const auto it = _runewordState.recipeIndexByToken.find(a_recipeToken);
+		if (it == _runewordState.recipeIndexByToken.end() || it->second >= _runewordState.recipes.size()) {
 			return false;
 		}
 
 		const auto idx = it->second;
-		const auto& recipe = _runewordRecipes[idx];
-		if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
-			affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+		const auto& recipe = _runewordState.recipes[idx];
+		if (const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
+			affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
 			RE::DebugNotification("Runeword Recipe: runtime effect not available.");
 			return false;
 		}
-		_runewordRecipeCycleCursor = static_cast<std::uint32_t>(idx);
+		_runewordState.recipeCycleCursor = static_cast<std::uint32_t>(idx);
 
-		if (_runewordSelectedBaseKey) {
-			const auto selectedKey = *_runewordSelectedBaseKey;
+		if (_runewordState.selectedBaseKey) {
+			const auto selectedKey = *_runewordState.selectedBaseKey;
 			const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;
 
 			if (ShouldClearRunewordInProgressState(completedBase)) {
-				_runewordInstanceStates.erase(selectedKey);
+				_runewordState.instanceStates.erase(selectedKey);
 			}
 
 			// Always record the explicit recipe selection so the UI can
 			// highlight the newly chosen recipe (even for re-transmutation).
-			auto& state = _runewordInstanceStates[selectedKey];
+			auto& state = _runewordState.instanceStates[selectedKey];
 			if (state.recipeToken != recipe.token) {
 				state.recipeToken = recipe.token;
 				state.insertedRunes = 0u;
@@ -58,8 +58,8 @@ namespace CalamityAffixes
 		}
 
 		std::string note = "Runeword Recipe: " + recipe.displayName + " [" + runes + "]";
-		if (_runewordSelectedBaseKey) {
-			const auto baseType = ResolveInstanceLootType(*_runewordSelectedBaseKey);
+		if (_runewordState.selectedBaseKey) {
+			const auto baseType = ResolveInstanceLootType(*_runewordState.selectedBaseKey);
 			if (recipe.recommendedBaseType && baseType && *recipe.recommendedBaseType != *baseType) {
 				note.append(" (Recommended ");
 				note.append(DescribeLootItemType(*recipe.recommendedBaseType));

@@ -64,65 +64,18 @@ namespace CalamityAffixes
 		_instanceAffixes.clear();
 		_equippedInstanceKeysByToken.clear();
 		_equippedTokenCacheReady = false;
-		_lootPrefixSharedBag = {};
-		_lootPrefixWeaponBag = {};
-		_lootPrefixArmorBag = {};
-		_lootSuffixSharedBag = {};
-		_lootSuffixWeaponBag = {};
-		_lootSuffixArmorBag = {};
-		_lootPreviewAffixes.clear();
-		_lootPreviewRecent.clear();
-		_lootEvaluatedInstances.clear();
-		_lootEvaluatedRecent.clear();
-		_lootEvaluatedInsertionsSincePrune = 0;
-		_lootCurrencyRollLedger.clear();
-		_lootCurrencyRollLedgerRecent.clear();
-		_lootChanceEligibleFailStreak = 0;
-		_runewordFragmentFailStreak = 0;
-		_reforgeOrbFailStreak = 0;
+		_lootState.ResetForLoadOrRevert();
 		_instanceStates.clear();
 		_activeCounts.clear();
-		_activeSlotPenalty.clear();
 		_activeCritDamageBonusPct = 0.0f;
 		_activeHitTriggerAffixIndices.clear();
 		_activeIncomingHitTriggerAffixIndices.clear();
 		_activeDotApplyTriggerAffixIndices.clear();
 		_activeKillTriggerAffixIndices.clear();
 		_activeLowHealthTriggerAffixIndices.clear();
-		_dotCooldowns.clear();
-		_dotCooldownsLastPruneAt = {};
-		_perTargetCooldownStore.Clear();
-		_nonHostileFirstHitGate.Clear();
-		_dotObservedMagicEffects.clear();
-		_dotTagSafetyWarned = false;
-		_dotObservedMagicEffectsCapWarned = false;
-		_dotTagSafetySuppressed = false;
-		_recentOwnerHitAt.clear();
-		_recentOwnerKillAt.clear();
-		_recentOwnerIncomingHitAt.clear();
-		_lowHealthTriggerConsumed.clear();
-		_lowHealthLastObservedPct.clear();
-		_lastHealthDamageSignature = 0;
-		_lastHealthDamageSignatureAt = {};
-		_castOnCritNextAllowed = {};
-		_castOnCritCycleCursor = 0;
-		_lastHitAt = {};
-		_lastHit = {};
-		_lastPapyrusHitEventAt = {};
-		_lastPapyrusHit = {};
-		_triggerProcBudgetWindowStartMs = 0u;
-		_triggerProcBudgetConsumed = 0u;
-		_procDepth = 0;
-		_traps.clear();
-		_hasActiveTraps.store(false, std::memory_order_relaxed);
-		_lootRerollGuard.Reset();
-		_runewordRuneFragments.clear();
-		_runewordInstanceStates.clear();
-		_runewordSelectedBaseKey.reset();
-		_runewordBaseCycleCursor = 0;
-		_runewordRecipeCycleCursor = 0;
-		_runewordTransmuteInProgress = false;
-		_playerContainerStash.clear();
+		_combatState.ResetTransientState();
+		_trapState.Reset();
+		_runewordState.ResetSelectionAndProgress();
 		_corpseExplosionSeenCorpses.clear();
 		_corpseExplosionState = {};
 		_summonCorpseExplosionSeenCorpses.clear();
@@ -398,7 +351,7 @@ namespace CalamityAffixes
 					RE::FormID selectedBaseID = 0;
 					std::uint16_t selectedUniqueID = 0;
 					if (!rd(selectedBaseID) || !rd(selectedUniqueID) ||
-						!rd(_runewordRecipeCycleCursor) || !rd(_runewordBaseCycleCursor)) {
+						!rd(_runewordState.recipeCycleCursor) || !rd(_runewordState.baseCycleCursor)) {
 						SKSE::log::warn("CalamityAffixes: truncated RWRD record header; skipping.");
 						drainRemaining();
 						continue;
@@ -417,11 +370,11 @@ namespace CalamityAffixes
 							break;
 						}
 						if (runeToken != 0u && amount > 0u) {
-							_runewordRuneFragments[runeToken] = amount;
+							_runewordState.runeFragments[runeToken] = amount;
 						}
 					}
 					if (!recordOk) {
-						SKSE::log::warn("CalamityAffixes: truncated RWRD fragments; recovered {} entries.", _runewordRuneFragments.size());
+						SKSE::log::warn("CalamityAffixes: truncated RWRD fragments; recovered {} entries.", _runewordState.runeFragments.size());
 						drainRemaining();
 						continue;
 					}
@@ -448,10 +401,10 @@ namespace CalamityAffixes
 						}
 
 						const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
-						_runewordInstanceStates[key] = state;
+						_runewordState.instanceStates[key] = state;
 					}
 					if (!recordOk) {
-						SKSE::log::warn("CalamityAffixes: truncated RWRD states; recovered {} entries.", _runewordInstanceStates.size());
+						SKSE::log::warn("CalamityAffixes: truncated RWRD states; recovered {} entries.", _runewordState.instanceStates.size());
 						drainRemaining();
 						// Fall through to resolve selectedBase with whatever was read.
 					}
@@ -459,7 +412,7 @@ namespace CalamityAffixes
 					if (selectedBaseID != 0 && selectedUniqueID != 0) {
 						RE::FormID resolvedSelectedBaseID = 0;
 						if (a_intfc->ResolveFormID(selectedBaseID, resolvedSelectedBaseID) && resolvedSelectedBaseID != 0) {
-							_runewordSelectedBaseKey = MakeInstanceKey(resolvedSelectedBaseID, selectedUniqueID);
+							_runewordState.selectedBaseKey = MakeInstanceKey(resolvedSelectedBaseID, selectedUniqueID);
 						}
 					}
 
@@ -494,11 +447,13 @@ namespace CalamityAffixes
 
 						const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
 						if (key != 0) {
-							_lootEvaluatedInstances.insert(key);
+							_lootState.evaluatedInstances.insert(key);
 						}
 					}
 					if (!recordOk) {
-						SKSE::log::warn("CalamityAffixes: truncated LRLD record; recovered {} entries.", _lootEvaluatedInstances.size());
+						SKSE::log::warn(
+							"CalamityAffixes: truncated LRLD record; recovered {} entries.",
+							_lootState.evaluatedInstances.size());
 						drainRemaining();
 					}
 
@@ -527,11 +482,13 @@ namespace CalamityAffixes
 							if (!rd(dayStamp)) break;
 						}
 						if (key != 0u) {
-							_lootCurrencyRollLedger.emplace(key, dayStamp);
+							_lootState.currencyRollLedger.emplace(key, dayStamp);
 						}
 					}
 					if (!recordOk) {
-						SKSE::log::warn("CalamityAffixes: truncated LCLD record; recovered {} entries.", _lootCurrencyRollLedger.size());
+						SKSE::log::warn(
+							"CalamityAffixes: truncated LCLD record; recovered {} entries.",
+							_lootState.currencyRollLedger.size());
 						drainRemaining();
 					}
 
@@ -554,17 +511,17 @@ namespace CalamityAffixes
 					auto resolveBag = [&](std::uint8_t a_id) -> LootShuffleBagState* {
 						switch (a_id) {
 						case 0u:
-							return &_lootPrefixSharedBag;
+							return &_lootState.prefixSharedBag;
 						case 1u:
-							return &_lootPrefixWeaponBag;
+							return &_lootState.prefixWeaponBag;
 						case 2u:
-							return &_lootPrefixArmorBag;
+							return &_lootState.prefixArmorBag;
 						case 3u:
-							return &_lootSuffixSharedBag;
+							return &_lootState.suffixSharedBag;
 						case 4u:
-							return &_lootSuffixWeaponBag;
+							return &_lootState.suffixWeaponBag;
 						case 5u:
-							return &_lootSuffixArmorBag;
+							return &_lootState.suffixArmorBag;
 						default:
 							return nullptr;
 						}
@@ -630,44 +587,62 @@ namespace CalamityAffixes
 			}
 
 			SKSE::log::info("CalamityAffixes: Load() — deserialized {} instance entries, {} runtime states.", _instanceAffixes.size(), _instanceStates.size());
-			if (!_affixIndexByToken.empty() && !_affixes.empty()) {
+			if (!_affixRegistry.affixIndexByToken.empty() && !_affixes.empty()) {
 				SanitizeAllTrackedLootInstancesForCurrentLootRules("Serialization.Load");
 			}
 
 			for (const auto& [key, _] : _instanceAffixes) {
-				_lootEvaluatedInstances.insert(key);
+				_lootState.evaluatedInstances.insert(key);
 			}
 
-			_lootEvaluatedRecent.clear();
-			for (const auto key : _lootEvaluatedInstances) {
+			_lootState.evaluatedRecent.clear();
+			for (const auto key : _lootState.evaluatedInstances) {
 				if (key != 0) {
-					_lootEvaluatedRecent.push_back(key);
+					_lootState.evaluatedRecent.push_back(key);
 				}
 			}
 			const std::size_t maxRecentEntries = kLootEvaluatedRecentKeep * 2;
-			while (_lootEvaluatedRecent.size() > maxRecentEntries) {
-				_lootEvaluatedRecent.pop_front();
+			while (_lootState.evaluatedRecent.size() > maxRecentEntries) {
+				_lootState.evaluatedRecent.pop_front();
 			}
-			_lootEvaluatedInsertionsSincePrune = 0;
+			_lootState.evaluatedInsertionsSincePrune = 0;
 
-			_lootCurrencyRollLedgerRecent.clear();
-			for (const auto& [key, _] : _lootCurrencyRollLedger) {
+			_lootState.currencyRollLedgerRecent.clear();
+			for (const auto& [key, _] : _lootState.currencyRollLedger) {
 				if (key != 0u) {
-					_lootCurrencyRollLedgerRecent.push_back(key);
+					_lootState.currencyRollLedgerRecent.push_back(key);
 				}
 			}
-			while (_lootCurrencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
-				const auto oldest = _lootCurrencyRollLedgerRecent.front();
-				_lootCurrencyRollLedgerRecent.pop_front();
-				_lootCurrencyRollLedger.erase(oldest);
+			while (_lootState.currencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
+				const auto oldest = _lootState.currencyRollLedgerRecent.front();
+				_lootState.currencyRollLedgerRecent.pop_front();
+				_lootState.currencyRollLedger.erase(oldest);
 			}
 
-			detail::SanitizeLootShuffleBagOrder(_lootSharedAffixes, _lootPrefixSharedBag.order, _lootPrefixSharedBag.cursor);
-			detail::SanitizeLootShuffleBagOrder(_lootWeaponAffixes, _lootPrefixWeaponBag.order, _lootPrefixWeaponBag.cursor);
-			detail::SanitizeLootShuffleBagOrder(_lootArmorAffixes, _lootPrefixArmorBag.order, _lootPrefixArmorBag.cursor);
-			detail::SanitizeLootShuffleBagOrder(_lootSharedSuffixes, _lootSuffixSharedBag.order, _lootSuffixSharedBag.cursor);
-			detail::SanitizeLootShuffleBagOrder(_lootWeaponSuffixes, _lootSuffixWeaponBag.order, _lootSuffixWeaponBag.cursor);
-			detail::SanitizeLootShuffleBagOrder(_lootArmorSuffixes, _lootSuffixArmorBag.order, _lootSuffixArmorBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(
+				_affixRegistry.lootSharedAffixes,
+				_lootState.prefixSharedBag.order,
+				_lootState.prefixSharedBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(
+				_affixRegistry.lootWeaponAffixes,
+				_lootState.prefixWeaponBag.order,
+				_lootState.prefixWeaponBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(
+				_affixRegistry.lootArmorAffixes,
+				_lootState.prefixArmorBag.order,
+				_lootState.prefixArmorBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(
+				_affixRegistry.lootSharedSuffixes,
+				_lootState.suffixSharedBag.order,
+				_lootState.suffixSharedBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(
+				_affixRegistry.lootWeaponSuffixes,
+				_lootState.suffixWeaponBag.order,
+				_lootState.suffixWeaponBag.cursor);
+			detail::SanitizeLootShuffleBagOrder(
+				_affixRegistry.lootArmorSuffixes,
+				_lootState.suffixArmorBag.order,
+				_lootState.suffixArmorBag.cursor);
 
 			SanitizeRunewordState();
 

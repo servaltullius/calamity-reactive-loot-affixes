@@ -99,9 +99,9 @@
 
 ## 레포 구조
 
-- `doc/` : 개발 명세서(컨셉/제약/설계)
-- `doc/4.현재_구현_어픽스_목록.md` : 현재 구현된 효과 목록(한국어 요약)
-- `doc/5.룬워드_94개_효과_정리.md` : 룬워드 94개 레시피별 효과 설명(직접 정의형 + 자동 합성형)
+- `docs/design/` : 개발 명세서(컨셉/제약/설계)
+- `docs/AFFIX_CATALOG.md` : 현재 구현된 효과 목록(한국어 요약)
+- `docs/RUNEWORD_EFFECTS.md` : 룬워드 94개 레시피별 효과 설명(직접 정의형 + 자동 합성형)
 - `Data/` : 게임 `Data/`에 그대로 설치 가능한 “스테이징” 폴더 (MO2 테스트용)
   - `Data/CalamityAffixes.esp` : 키워드/스펠/MGEF + MCM Helper Quest(자동 생성, 단일 ESP)
   - `Data/Scripts/Source/` : Papyrus 소스(.psc)
@@ -169,7 +169,7 @@
   - 대상+이펙트 단위로 강한 ICD(기본 1.5초)로 레이트리밋 후 Papyrus로 전달
 - `CAFF_TAG_DOT`은 `DotApply` 트리거용 DoT 태그입니다. 기본 배포본에서는 **비활성(chance=0)** 이며, 필요하면 `Data/CalamityAffixes_KID.ini`에서 바닐라 독 규칙(`*Alch*|H`)의 chance를 `100`으로 바꿔 활성화하세요. 다른 DoT(모드/커스텀 MGEF)에 반응시키려면 `affixes/modules/*.json`(조합 결과는 `affixes/affixes.json`)의 `keywords.kidRules`에 **좁은 필터 규칙**을 추가해 생성기로 다시 빌드하세요.
 
-관련 명세는 `doc/1.개발명세서.md`의 `5.4` 참고.
+관련 명세는 `docs/design/개발명세서.md`의 `5.4` 참고.
 
 ## 개발/테스트 준비물
 
@@ -331,8 +331,8 @@ tools/build_mo2_zip.sh
 2) Papyrus 컴파일(`Data/Scripts/*.pex`)
 를 수행합니다.
 
-상세 CK 체크리스트: `doc/2.CK_MVP_셋업_체크리스트.md`
+상세 CK 체크리스트: `docs/design/CK_MVP_셋업_체크리스트.md`
 
-자동화(B 방식) 워크플로우: `doc/3.B_데이터주도_생성기_워크플로우.md`
+자동화(B 방식) 워크플로우: `docs/design/데이터주도_생성기_워크플로우.md`
 
 </details>

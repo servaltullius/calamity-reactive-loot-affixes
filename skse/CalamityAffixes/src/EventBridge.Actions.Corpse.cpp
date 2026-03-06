@@ -47,10 +47,12 @@ namespace CalamityAffixes
 
 	}
 	EventBridge::CorpseExplosionSelection EventBridge::SelectBestCorpseExplosionAffix(
+		RE::Actor* a_owner,
+		RE::Actor* a_corpse,
 		const std::vector<std::size_t>& a_affixIndices,
 		ActionType a_expectedActionType,
 		float a_corpseMaxHealth,
-		std::chrono::steady_clock::time_point a_now) const
+		std::chrono::steady_clock::time_point a_now)
 	{
 		CorpseExplosionSelection selection{};
 
@@ -89,8 +91,25 @@ namespace CalamityAffixes
 				continue;
 			}
 
+			if (!PassesRecentlyGates(affix, a_owner, a_now)) {
+				continue;
+			}
+
+			PerTargetCooldownKey perTargetKey{};
+			const bool usesPerTargetIcd = (affix.perTargetIcd.count() > 0 && a_corpse && affix.token != 0u);
+			if (IsPerTargetCooldownBlocked(affix, a_corpse, a_now, &perTargetKey)) {
+				continue;
+			}
+
+			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
+			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
+				continue;
+			}
+
 			if (!selection.bestIdx || baseDamage > selection.bestBaseDamage) {
 				selection.bestIdx = idx;
+				selection.bestPerTargetKey = perTargetKey;
+				selection.bestUsesPerTargetIcd = usesPerTargetIcd;
 				selection.bestBaseDamage = baseDamage;
 			}
 		}
@@ -198,7 +217,7 @@ namespace CalamityAffixes
 		ProcessCorpseExplosionAction(
 			a_owner,
 			a_corpse,
-			_corpseExplosionAffixIndices,
+			_affixSpecialActions.corpseExplosionAffixIndices,
 			ActionType::kCorpseExplosion,
 			"CorpseExplosion",
 			false);
@@ -209,7 +228,7 @@ namespace CalamityAffixes
 		ProcessCorpseExplosionAction(
 			a_owner,
 			a_corpse,
-			_summonCorpseExplosionAffixIndices,
+			_affixSpecialActions.summonCorpseExplosionAffixIndices,
 			ActionType::kSummonCorpseExplosion,
 			"SummonCorpseExplosion",
 			true);
@@ -223,7 +242,7 @@ namespace CalamityAffixes
 		const char* a_actionName,
 		bool a_summonMode)
 	{
-		if (!_configLoaded || !_runtimeEnabled || !a_owner || !a_corpse) {
+		if (!_configLoaded || !_runtimeSettings.enabled || !a_owner || !a_corpse) {
 			return;
 		}
 		if (a_affixIndices.empty()) {
@@ -234,6 +253,8 @@ namespace CalamityAffixes
 		const float corpseMaxHealth = ResolveSafeCorpseMaxHealth(a_corpse);
 
 		const auto selection = SelectBestCorpseExplosionAffix(
+			a_owner,
+			a_corpse,
 			a_affixIndices,
 			a_expectedActionType,
 			corpseMaxHealth,
@@ -244,25 +265,6 @@ namespace CalamityAffixes
 		}
 
 		auto& bestAffix = _affixes[*selection.bestIdx];
-
-		if (!PassesRecentlyGates(bestAffix, a_owner, now)) {
-			return;
-		}
-
-		PerTargetCooldownKey perTargetKey{};
-		const bool usesPerTargetIcd = (bestAffix.perTargetIcd.count() > 0 && a_corpse && bestAffix.token != 0u);
-		if (IsPerTargetCooldownBlocked(bestAffix, a_corpse, now, &perTargetKey)) {
-			return;
-		}
-
-		const float chancePct = ResolveSpecialActionProcChancePct(bestAffix.procChancePct * _runtimeProcChanceMult);
-		if (!RollProcChance(_rng, _rngMutex, chancePct)) {
-			return;
-		}
-
-		if (bestAffix.icd.count() > 0) {
-			bestAffix.nextAllowed = now + bestAffix.icd;
-		}
 
 		std::uint32_t chainDepth = 0;
 		float chainMultiplier = 1.0f;
@@ -284,6 +286,10 @@ namespace CalamityAffixes
 			return;
 		}
 
+		if (bestAffix.icd.count() > 0) {
+			bestAffix.nextAllowed = now + bestAffix.icd;
+		}
+
 		if (_loot.debugLog) {
 			SKSE::log::debug(
 				"CalamityAffixes: {} (corpse={}, maxHealth={}, baseDamage={}, chainDepth={}, chainMult={})",
@@ -295,12 +301,12 @@ namespace CalamityAffixes
 				chainMultiplier);
 		}
 
-		_procDepth += 1;
+		_combatState.procDepth += 1;
 		const std::uint32_t targetsHit = ExecuteCorpseExplosion(bestAffix.action, a_owner, a_corpse, finalDamage);
-		_procDepth -= 1;
-		if (usesPerTargetIcd && targetsHit > 0u) {
+		_combatState.procDepth -= 1;
+		if (selection.bestUsesPerTargetIcd && targetsHit > 0u) {
 			// Consume per-target ICD only when the explosion actually hit at least one target.
-			CommitPerTargetCooldown(perTargetKey, bestAffix.perTargetIcd, now);
+			CommitPerTargetCooldown(selection.bestPerTargetKey, bestAffix.perTargetIcd, now);
 		}
 
 		if (_loot.debugLog) {

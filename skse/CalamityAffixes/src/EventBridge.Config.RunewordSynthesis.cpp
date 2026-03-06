@@ -34,14 +34,14 @@ namespace CalamityAffixes
 			}
 		}
 
-		if (!_runewordRecipes.empty()) {
+		if (!_runewordState.recipes.empty()) {
 			// Runeword synthesis appends many entries; reserve once to reduce realloc churn.
-			_affixes.reserve(_affixes.size() + _runewordRecipes.size());
+			_affixes.reserve(_affixes.size() + _runewordState.recipes.size());
 		}
 
 		std::uint32_t synthesizedRunewordAffixes = 0u;
-		for (const auto& recipe : _runewordRecipes) {
-			if (recipe.resultAffixToken == 0u || _affixIndexByToken.contains(recipe.resultAffixToken)) {
+		for (const auto& recipe : _runewordState.recipes) {
+			if (recipe.resultAffixToken == 0u || _affixRegistry.affixIndexByToken.contains(recipe.resultAffixToken)) {
 				continue;
 			}
 

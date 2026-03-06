@@ -127,13 +127,7 @@ namespace CalamityAffixes
 		}
 
 		auto* handler = RE::TESDataHandler::GetSingleton();
-		ParseConfiguredAffixesFromJson(*affixes, handler);
-
-		IndexConfiguredAffixes();
-		SynthesizeRunewordRuntimeAffixes();
-		RebuildSharedLootPools();
-
-		_activeCounts.assign(_affixes.size(), 0);
+		BuildConfigDerivedAffixState(*affixes, handler);
 
 		SanitizeRunewordState();
 		SanitizeAllTrackedLootInstancesForCurrentLootRules("LoadConfig.postIndex");
@@ -144,8 +138,8 @@ namespace CalamityAffixes
 		SKSE::log::info(
 			"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, runtimeCurrencyDropsEnabled={}, sourceMult(corpse/container/boss/world)={:.2f}/{:.2f}/{:.2f}/{:.2f}, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
 			_affixes.size(),
-			_lootWeaponAffixes.size(), _lootArmorAffixes.size(),
-			_lootWeaponSuffixes.size(), _lootArmorSuffixes.size(),
+			_affixRegistry.lootWeaponAffixes.size(), _affixRegistry.lootArmorAffixes.size(),
+			_affixRegistry.lootWeaponSuffixes.size(), _affixRegistry.lootArmorSuffixes.size(),
 			_loot.chancePercent,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
@@ -158,13 +152,13 @@ namespace CalamityAffixes
 			_loot.triggerProcBudgetWindowMs,
 			_loot.trapCastBudgetPerTick);
 
-		SKSE::log::info(
-			"CalamityAffixes: special action indices (convert={}, castOnCrit={}, mindOverMatter={}, archmage={}, corpseExplosion={}).",
-			_convertAffixIndices.size(),
-			_castOnCritAffixIndices.size(),
-			_mindOverMatterAffixIndices.size(),
-			_archmageAffixIndices.size(),
-			_corpseExplosionAffixIndices.size());
+			SKSE::log::info(
+				"CalamityAffixes: special action indices (convert={}, castOnCrit={}, mindOverMatter={}, archmage={}, corpseExplosion={}).",
+				_affixSpecialActions.convertAffixIndices.size(),
+				_affixSpecialActions.castOnCritAffixIndices.size(),
+				_affixSpecialActions.mindOverMatterAffixIndices.size(),
+				_affixSpecialActions.archmageAffixIndices.size(),
+				_affixSpecialActions.corpseExplosionAffixIndices.size());
 
 		if (_affixes.empty()) {
 			SKSE::log::error("CalamityAffixes: no affixes loaded. Is the generated CalamityAffixes plugin enabled?");

@@ -123,12 +123,7 @@ public sealed class RepoSpecRegressionTests
     [Fact]
     public void RuntimeHook_CastOnCrit_DoesNotInjectFeedbackHitShader()
     {
-        var repoRoot = FindRepoRoot();
-        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
-
-        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
-
-        var hooksSource = File.ReadAllText(hooksPath);
+        var hooksSource = ReadHooksRuntimeSource();
         Assert.DoesNotContain(
             "PlayCastOnCritProcFeedbackVfx(safeTarget, coc.spell);",
             hooksSource,
@@ -138,12 +133,7 @@ public sealed class RepoSpecRegressionTests
     [Fact]
     public void RuntimeHook_CastOnCrit_InjectsFeedbackSfxWhenHitEffectSuppressed()
     {
-        var repoRoot = FindRepoRoot();
-        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
-
-        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
-
-        var hooksSource = File.ReadAllText(hooksPath);
+        var hooksSource = ReadHooksRuntimeSource();
         Assert.Contains(
             "PlayCastOnCritProcFeedbackSfx(coc.spell);",
             hooksSource,
@@ -153,12 +143,7 @@ public sealed class RepoSpecRegressionTests
     [Fact]
     public void RuntimeHook_CastOnCrit_InjectsSafeShortFeedbackVfx()
     {
-        var repoRoot = FindRepoRoot();
-        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
-
-        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
-
-        var hooksSource = File.ReadAllText(hooksPath);
+        var hooksSource = ReadHooksRuntimeSource();
         Assert.Contains(
             "PlayCastOnCritProcFeedbackVfxSafe(a_target, coc.spell, a_now);",
             hooksSource,
@@ -176,12 +161,7 @@ public sealed class RepoSpecRegressionTests
     [Fact]
     public void RuntimeHook_CastOnCrit_UsesUnifiedSafeFeedbackVfxArt()
     {
-        var repoRoot = FindRepoRoot();
-        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
-
-        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
-
-        var hooksSource = File.ReadAllText(hooksPath);
+        var hooksSource = ReadHooksRuntimeSource();
         Assert.Contains(
             "ResolveSafeCastOnCritProcFeedbackArt",
             hooksSource,
@@ -199,12 +179,7 @@ public sealed class RepoSpecRegressionTests
     [Fact]
     public void RuntimeHook_OnHealthDamage_ForwardsOriginalDamage()
     {
-        var repoRoot = FindRepoRoot();
-        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
-
-        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
-
-        var hooksSource = File.ReadAllText(hooksPath);
+        var hooksSource = ReadHooksRuntimeSource();
         // OnHealthDamage receives the pre-conversion original damage so the stale
         // guard's expectedDealt comparison is like-for-like.
         Assert.Contains(
@@ -494,6 +469,18 @@ public sealed class RepoSpecRegressionTests
         }
 
         throw new DirectoryNotFoundException("Failed to locate repo root (affixes/affixes.json not found above test output directory).");
+    }
+
+    private static string ReadHooksRuntimeSource()
+    {
+        var repoRoot = FindRepoRoot();
+        var hooksPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.cpp");
+        var hooksDispatchPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "Hooks.Dispatch.cpp");
+
+        Assert.True(File.Exists(hooksPath), $"Expected Hooks.cpp to exist at path: {hooksPath}");
+        Assert.True(File.Exists(hooksDispatchPath), $"Expected Hooks.Dispatch.cpp to exist at path: {hooksDispatchPath}");
+
+        return File.ReadAllText(hooksPath) + "\n" + File.ReadAllText(hooksDispatchPath);
     }
 
     private static bool TryGetRuntimeString(RuntimeSpec? runtime, string key, out string? value)

@@ -78,14 +78,14 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const auto rwIt = _runewordRecipeIndexByResultAffixToken.find(token);
-			if (rwIt == _runewordRecipeIndexByResultAffixToken.end() || rwIt->second >= _runewordRecipes.size()) {
+			const auto rwIt = _runewordState.recipeIndexByResultAffixToken.find(token);
+			if (rwIt == _runewordState.recipeIndexByResultAffixToken.end() || rwIt->second >= _runewordState.recipes.size()) {
 				continue;
 			}
 
-			const auto& recipe = _runewordRecipes[rwIt->second];
-			if (const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
-				affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+			const auto& recipe = _runewordState.recipes[rwIt->second];
+			if (const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
+				affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
 				continue;
 			}
 
@@ -125,18 +125,18 @@ namespace CalamityAffixes
 		}
 		const RunewordRecipe* completedRecipe = ResolveCompletedRunewordRecipe(a_instanceKey);
 
-		_runewordSelectedBaseKey = a_instanceKey;
+		_runewordState.selectedBaseKey = a_instanceKey;
 
 		const auto candidates = CollectEquippedRunewordBaseCandidates(true);
 		if (const auto cursor = ResolveRunewordBaseCycleCursor(candidates, a_instanceKey); cursor) {
-			_runewordBaseCycleCursor = *cursor;
+			_runewordState.baseCycleCursor = *cursor;
 		}
 
 		std::optional<RunewordInstanceState> stateCopy;
 		if (completedRecipe) {
-			_runewordInstanceStates.erase(a_instanceKey);
+			_runewordState.instanceStates.erase(a_instanceKey);
 		} else {
-			auto& state = _runewordInstanceStates[a_instanceKey];
+			auto& state = _runewordState.instanceStates[a_instanceKey];
 			if (state.recipeToken == 0u) {
 				if (const auto* recipe = GetCurrentRunewordRecipe()) {
 					state.recipeToken = recipe->token;
@@ -203,7 +203,7 @@ namespace CalamityAffixes
 			entries.push_back(RunewordBaseInventoryEntry{
 				.instanceKey = key,
 				.displayName = std::move(displayName),
-				.selected = (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key)
+				.selected = (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == key)
 			});
 		}
 

@@ -179,6 +179,70 @@
 			std::uint32_t maxTargetsPerTrigger{ 1 };
 		};
 
+		struct TrapRuntimeState
+		{
+			std::vector<TrapInstance> activeTraps{};
+			std::size_t tickCursor{ 0 };
+			std::atomic_bool hasActiveTraps{ false };
+			std::chrono::steady_clock::time_point staleCombatLastClearAt{};
+			std::chrono::steady_clock::time_point staleCombatLastHardClearAt{};
+			std::uint32_t staleCombatClearConfidence{ 0u };
+			std::chrono::steady_clock::time_point forceStopLastPulseAt{};
+
+			void ClearTrapQueue() noexcept
+			{
+				activeTraps.clear();
+				tickCursor = 0u;
+				hasActiveTraps.store(false, std::memory_order_relaxed);
+			}
+
+			void ClearStaleCombatTracking() noexcept
+			{
+				staleCombatLastClearAt = {};
+				staleCombatLastHardClearAt = {};
+				staleCombatClearConfidence = 0u;
+				forceStopLastPulseAt = {};
+			}
+
+			void Reset() noexcept
+			{
+				ClearTrapQueue();
+				ClearStaleCombatTracking();
+			}
+		};
+
+		struct RuntimeSettingsState
+		{
+			bool enabled{ true };
+			float procChanceMult{ 1.0f };
+			std::atomic_bool allowNonHostilePlayerOwnedOutgoingProcs{ false };
+			bool combatDebugLog{ false };
+			bool disableCombatEvidenceLease{ false };
+			bool disableHealthDamageRouting{ false };
+			bool allowPlayerHealthDamageHook{ false };
+			bool disablePassiveSuffixSpells{ false };
+			bool disableTrapSystemTick{ false };
+			bool disableTrapCasts{ false };
+			bool forceStopAlarmPulse{ false };
+			RuntimeUserSettingsDebounce::State userSettingsPersist{};
+
+			void Reset() noexcept
+			{
+				enabled = true;
+				procChanceMult = 1.0f;
+				allowNonHostilePlayerOwnedOutgoingProcs.store(false, std::memory_order_relaxed);
+				combatDebugLog = false;
+				disableCombatEvidenceLease = false;
+				disableHealthDamageRouting = false;
+				allowPlayerHealthDamageHook = false;
+				disablePassiveSuffixSpells = false;
+				disableTrapSystemTick = false;
+				disableTrapCasts = false;
+				forceStopAlarmPulse = false;
+				userSettingsPersist = {};
+			}
+		};
+
 		struct InstanceRuntimeState
 		{
 			std::uint32_t evolutionXp{ 0 };
@@ -247,6 +311,51 @@
 			std::uint32_t insertedRunes{ 0 };
 		};
 
+		struct RunewordRuntimeState
+		{
+			// Catalog/cache data synthesized from runtime contracts or fallback rows.
+			std::vector<RunewordRecipe> recipes{};
+			std::unordered_map<std::uint64_t, std::size_t> recipeIndexByToken{};
+			std::unordered_map<std::uint64_t, std::size_t> recipeIndexByResultAffixToken{};
+			std::unordered_map<std::uint64_t, std::string> runeNameByToken{};
+			std::vector<std::uint64_t> runeTokenPool{};
+			std::vector<double> runeTokenWeights{};
+
+			// Mutable player progress / UI selection state for runeword flows.
+			std::unordered_map<std::uint64_t, std::uint32_t> runeFragments{};
+			std::unordered_map<std::uint64_t, RunewordInstanceState> instanceStates{};
+			std::optional<std::uint64_t> selectedBaseKey{};
+			std::uint32_t baseCycleCursor{ 0 };
+			std::uint32_t recipeCycleCursor{ 0 };
+			bool transmuteInProgress{ false };
+
+			void ResetCatalog() noexcept
+			{
+				recipes.clear();
+				recipeIndexByToken.clear();
+				recipeIndexByResultAffixToken.clear();
+				runeNameByToken.clear();
+				runeTokenPool.clear();
+				runeTokenWeights.clear();
+			}
+
+			void ResetSelectionAndProgress() noexcept
+			{
+				runeFragments.clear();
+				instanceStates.clear();
+				selectedBaseKey.reset();
+				baseCycleCursor = 0u;
+				recipeCycleCursor = 0u;
+				transmuteInProgress = false;
+			}
+
+			void Reset() noexcept
+			{
+				ResetCatalog();
+				ResetSelectionAndProgress();
+			}
+		};
+
 		struct AffixRuntime
 		{
 			std::string id{};
@@ -285,14 +394,6 @@
 			float scrollNoConsumeChancePct{ 0.0f };  // equipped: additive chance to preserve consumed scrolls
 
 			std::chrono::steady_clock::time_point nextAllowed{};
-		};
-
-		struct LastHitKey
-		{
-			bool outgoing{ false };
-			RE::FormID aggressor{ 0 };
-			RE::FormID target{ 0 };
-			RE::FormID source{ 0 };
 		};
 
 		// Runtime config/state PODs.
@@ -338,12 +439,6 @@
 			LootNameMarkerPosition nameMarkerPosition{ LootNameMarkerPosition::kTrailing };
 		};
 
-		struct LootShuffleBagState
-		{
-			std::vector<std::size_t> order{};
-			std::size_t cursor{ 0 };
-		};
-
 		struct CurrencyRollExecutionResult
 		{
 			bool runewordDropGranted{ false };
@@ -354,26 +449,6 @@
 		{
 			std::uint64_t token{ 0 };
 			RE::FormID target{ 0 };
-		};
-
-		struct LowHealthTriggerKey
-		{
-			std::uint64_t token{ 0 };
-			RE::FormID owner{ 0 };
-
-			[[nodiscard]] bool operator==(const LowHealthTriggerKey& a_rhs) const noexcept
-			{
-				return token == a_rhs.token && owner == a_rhs.owner;
-			}
-		};
-
-		struct LowHealthTriggerKeyHash
-		{
-			[[nodiscard]] std::size_t operator()(const LowHealthTriggerKey& a_key) const noexcept
-			{
-				const auto owner64 = static_cast<std::uint64_t>(a_key.owner);
-				return static_cast<std::size_t>((a_key.token << 1) ^ (owner64 * 0x9E3779B185EBCA87ull));
-			}
 		};
 
 		// Special-action selection/runtime structs.
@@ -397,6 +472,8 @@
 		struct CorpseExplosionSelection
 		{
 			std::optional<std::size_t> bestIdx{};
+			PerTargetCooldownKey bestPerTargetKey{};
+			bool bestUsesPerTargetIcd{ false };
 			float bestBaseDamage{ 0.0f };
 			std::uint32_t activeAffixes{ 0 };
 			std::uint32_t blockedCooldown{ 0 };
@@ -410,6 +487,9 @@
 			const Action* bestAction{ nullptr };
 			float bestDamagePct{ 0.0f };
 			float bestCostPct{ 0.0f };
+			float bestMaxMagicka{ 0.0f };
+			float bestExtraCost{ 0.0f };
+			float bestExtraDamage{ 0.0f };
 		};
 
 		struct AdaptiveCastSelection

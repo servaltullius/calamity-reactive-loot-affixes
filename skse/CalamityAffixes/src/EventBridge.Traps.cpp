@@ -8,30 +8,16 @@
 
 namespace CalamityAffixes
 {
-	namespace
-	{
-		// Stale-combat resolution state (reset on Revert via ClearTrapRuntimeState).
-		std::chrono::steady_clock::time_point s_staleCombatLastClearAt{};
-		std::chrono::steady_clock::time_point s_staleCombatLastHardClearAt{};
-		std::uint32_t s_staleCombatClearConfidence = 0u;
-		std::chrono::steady_clock::time_point s_forceStopLastPulseAt{};
-	}
-
-	void ClearTrapRuntimeState() noexcept
-	{
-		s_staleCombatLastClearAt = {};
-		s_staleCombatLastHardClearAt = {};
-		s_staleCombatClearConfidence = 0u;
-		s_forceStopLastPulseAt = {};
-	}
-
 	void EventBridge::TickTraps()
 	{
 		std::unique_lock<std::recursive_mutex> lock(_stateMutex);
+		auto& trapState = _trapState;
+		auto& activeTraps = trapState.activeTraps;
+		auto& trapTickCursor = trapState.tickCursor;
 		const auto now = std::chrono::steady_clock::now();
-		if (_disableTrapSystemTick) {
-			_hasActiveTraps.store(false, std::memory_order_relaxed);
-			if (_combatDebugLog) {
+		if (_runtimeSettings.disableTrapSystemTick) {
+			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
+			if (_runtimeSettings.combatDebugLog) {
 				static auto nextLogAt = std::chrono::steady_clock::time_point{};
 				if (nextLogAt.time_since_epoch().count() == 0 || now >= nextLogAt) {
 					nextLogAt = now + std::chrono::seconds(2);
@@ -42,15 +28,15 @@ namespace CalamityAffixes
 		}
 
 		auto tryResolveStalePlayerCombat = [&]() {
-			auto& lastClearAt = s_staleCombatLastClearAt;
-			auto& lastHardClearAt = s_staleCombatLastHardClearAt;
-			auto& clearConfidence = s_staleCombatClearConfidence;
+			auto& lastClearAt = trapState.staleCombatLastClearAt;
+			auto& lastHardClearAt = trapState.staleCombatLastHardClearAt;
+			auto& clearConfidence = trapState.staleCombatClearConfidence;
 			constexpr auto kClearCooldown = std::chrono::seconds(5);
 			constexpr auto kHardClearCooldown = std::chrono::seconds(20);
 			constexpr std::uint32_t kRequiredConfidence = 8u;
 
 			auto logStaleCombat = [&](const char* a_message) {
-				if (!_combatDebugLog) {
+				if (!_runtimeSettings.combatDebugLog) {
 					return;
 				}
 				static auto nextLogAt = std::chrono::steady_clock::time_point{};
@@ -58,11 +44,13 @@ namespace CalamityAffixes
 					return;
 				}
 				nextLogAt = now + std::chrono::seconds(2);
-				const bool hasLease = _playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0;
-				const bool leaseActive = hasLease && now <= _playerCombatEvidenceExpiresAt;
-				const auto leaseRemainingMs = leaseActive
-					? static_cast<std::int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(_playerCombatEvidenceExpiresAt - now).count())
-					: 0;
+					const bool hasLease = _combatState.playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0;
+					const bool leaseActive = hasLease && now <= _combatState.playerCombatEvidenceExpiresAt;
+					const auto leaseRemainingMs = leaseActive
+						? static_cast<std::int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+							  _combatState.playerCombatEvidenceExpiresAt - now)
+							  .count())
+						: 0;
 				auto* player = RE::PlayerCharacter::GetSingleton();
 				SKSE::log::info(
 					"CalamityAffixes: stale combat check: {} (inCombat={}, leaseActive={}, leaseRemainingMs={}, confidence={}, traps={}).",
@@ -71,7 +59,7 @@ namespace CalamityAffixes
 					leaseActive,
 					leaseRemainingMs,
 					clearConfidence,
-					_traps.size());
+					activeTraps.size());
 			};
 
 			auto* player = RE::PlayerCharacter::GetSingleton();
@@ -85,23 +73,25 @@ namespace CalamityAffixes
 				player ? player->GetActorRuntimeData().boolBits.any(RE::Actor::BOOL_BITS::kMurderAlarm) : false;
 			const bool controllerStarted = combatController ? combatController->startedCombat : false;
 			const bool controllerStopped = combatController ? combatController->stoppedCombat : false;
-			if (_combatDebugLog) {
+			if (_runtimeSettings.combatDebugLog) {
 				static auto nextHeartbeatLogAt = std::chrono::steady_clock::time_point{};
 				if (nextHeartbeatLogAt.time_since_epoch().count() == 0 || now >= nextHeartbeatLogAt) {
 					nextHeartbeatLogAt = now + std::chrono::seconds(2);
-					const bool hasLease = _playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0;
-					const bool leaseActive = hasLease && now <= _playerCombatEvidenceExpiresAt;
-					const auto leaseRemainingMs = leaseActive
-						? static_cast<std::int64_t>(
-							std::chrono::duration_cast<std::chrono::milliseconds>(_playerCombatEvidenceExpiresAt - now).count())
-						: 0;
+						const bool hasLease = _combatState.playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0;
+						const bool leaseActive = hasLease && now <= _combatState.playerCombatEvidenceExpiresAt;
+						const auto leaseRemainingMs = leaseActive
+							? static_cast<std::int64_t>(
+								std::chrono::duration_cast<std::chrono::milliseconds>(
+									_combatState.playerCombatEvidenceExpiresAt - now)
+									.count())
+							: 0;
 					SKSE::log::info(
 						"CalamityAffixes: stale combat heartbeat (hasPlayer={}, inCombat={}, leaseActive={}, leaseRemainingMs={}, traps={}, runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}).",
 						player != nullptr,
 						player ? player->IsInCombat() : false,
 						leaseActive,
 						leaseRemainingMs,
-						_traps.size(),
+						activeTraps.size(),
 						runtimeCombatTargetHandle,
 						controllerTargetHandle,
 						murderAlarmBit,
@@ -110,8 +100,8 @@ namespace CalamityAffixes
 				}
 			}
 
-			if (_forceStopAlarmPulse && player && processLists) {
-				auto& lastPulseAt = s_forceStopLastPulseAt;
+			if (_runtimeSettings.forceStopAlarmPulse && player && processLists) {
+				auto& lastPulseAt = trapState.forceStopLastPulseAt;
 				constexpr auto kPulseCooldown = std::chrono::milliseconds(300);
 				if (lastPulseAt.time_since_epoch().count() == 0 || (now - lastPulseAt) >= kPulseCooldown) {
 					lastPulseAt = now;
@@ -119,7 +109,7 @@ namespace CalamityAffixes
 					player->StopCombat();
 					processLists->StopCombatAndAlarmOnActor(player, true);
 					processLists->ClearCachedFactionFightReactions();
-					if (_combatDebugLog) {
+					if (_runtimeSettings.combatDebugLog) {
 						SKSE::log::info(
 							"CalamityAffixes: forceStopAlarmPulse fired (runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}, inCombat={}).",
 							runtimeCombatTargetHandle,
@@ -146,8 +136,8 @@ namespace CalamityAffixes
 				return;
 			}
 
-			if (_playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0 &&
-				now <= _playerCombatEvidenceExpiresAt) {
+				if (_combatState.playerCombatEvidenceExpiresAt.time_since_epoch().count() != 0 &&
+					now <= _combatState.playerCombatEvidenceExpiresAt) {
 				clearConfidence = 0u;
 				logStaleCombat("skip: combat evidence lease active");
 				return;
@@ -196,7 +186,7 @@ namespace CalamityAffixes
 
 			if (hostileNearby) {
 				clearConfidence = 0u;
-				if (_combatDebugLog && hostileFormID != 0u) {
+				if (_runtimeSettings.combatDebugLog && hostileFormID != 0u) {
 					SKSE::log::info(
 						"CalamityAffixes: stale combat check: skip: hostile nearby (actor={}({:08X}), distSq={:.1f}).",
 						hostileName.empty() ? "<unnamed>" : hostileName,
@@ -232,46 +222,46 @@ namespace CalamityAffixes
 					SKSE::log::info("CalamityAffixes: escalated stale combat clear with StopCombatAndAlarmOnActor.");
 				}
 			}
-			_recentOwnerHitAt.erase(playerFormID);
-			_recentOwnerKillAt.erase(playerFormID);
-			_recentOwnerIncomingHitAt.erase(playerFormID);
-			_playerCombatEvidenceExpiresAt = {};
-			_nonHostileFirstHitGate.Clear();
+			_combatState.recentOwnerHitAt.erase(playerFormID);
+			_combatState.recentOwnerKillAt.erase(playerFormID);
+			_combatState.recentOwnerIncomingHitAt.erase(playerFormID);
+			_combatState.playerCombatEvidenceExpiresAt = {};
+			_combatState.nonHostileFirstHitGate.Clear();
 			if (_loot.debugLog) {
 				SKSE::log::info("CalamityAffixes: cleared stale player combat state (no hostile actor nearby).");
 			}
 		};
 
-		if (_traps.empty()) {
-			_hasActiveTraps.store(false, std::memory_order_relaxed);
+		if (activeTraps.empty()) {
+			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
 			tryResolveStalePlayerCombat();
 			return;
 		}
 
 		// Prune expired/invalid traps.
-		for (auto it = _traps.begin(); it != _traps.end();) {
+		for (auto it = activeTraps.begin(); it != activeTraps.end();) {
 			if (!it->spell || it->radius <= 0.0f || now >= it->expiresAt) {
-				it = _traps.erase(it);
+				it = activeTraps.erase(it);
 			} else {
 				++it;
 			}
 		}
 
-		if (_traps.empty()) {
-			_hasActiveTraps.store(false, std::memory_order_relaxed);
+		if (activeTraps.empty()) {
+			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
 			tryResolveStalePlayerCombat();
 			return;
 		}
 
-		if (_disableTrapCasts) {
-			_hasActiveTraps.store(!_traps.empty(), std::memory_order_relaxed);
-			if (_combatDebugLog) {
+		if (_runtimeSettings.disableTrapCasts) {
+			trapState.hasActiveTraps.store(!activeTraps.empty(), std::memory_order_relaxed);
+			if (_runtimeSettings.combatDebugLog) {
 				static auto nextLogAt = std::chrono::steady_clock::time_point{};
 				if (nextLogAt.time_since_epoch().count() == 0 || now >= nextLogAt) {
 					nextLogAt = now + std::chrono::seconds(2);
 					SKSE::log::info(
 						"CalamityAffixes: trap casts disabled by runtime setting (activeTraps={}).",
-						_traps.size());
+						activeTraps.size());
 				}
 			}
 			tryResolveStalePlayerCombat();
@@ -291,17 +281,17 @@ namespace CalamityAffixes
 			return trapCastBudgetPerTick == 0u || (trapCastsConsumed + a_cost) <= trapCastBudgetPerTick;
 		};
 
-		if (_trapTickCursor >= _traps.size()) {
-			_trapTickCursor = 0;
+		if (trapTickCursor >= activeTraps.size()) {
+			trapTickCursor = 0;
 		}
 		const std::size_t trapVisitBudgetPerTick = std::min<std::size_t>(
-			_traps.size(),
+			activeTraps.size(),
 			(trapCastBudgetPerTick == 0u)
 				? static_cast<std::size_t>(8u)
 				: std::max<std::size_t>(1u, trapCastBudgetPerTick * 2u));
 		std::size_t visitedTraps = 0u;
 
-		while (!_traps.empty() && visitedTraps < trapVisitBudgetPerTick) {
+		while (!activeTraps.empty() && visitedTraps < trapVisitBudgetPerTick) {
 			if (!hasTrapCastBudget()) {
 				if (_loot.debugLog && !loggedBudgetExhausted) {
 					SKSE::log::debug(
@@ -312,15 +302,15 @@ namespace CalamityAffixes
 				break;
 			}
 
-			if (_trapTickCursor >= _traps.size()) {
-				_trapTickCursor = 0;
+			if (trapTickCursor >= activeTraps.size()) {
+				trapTickCursor = 0;
 			}
-			const auto trapIndex = _trapTickCursor;
+			const auto trapIndex = trapTickCursor;
 			++visitedTraps;
-			const TrapInstance trapSnapshot = _traps[trapIndex];
+			const TrapInstance trapSnapshot = activeTraps[trapIndex];
 			if (now < trapSnapshot.armedAt) {
-				if (!_traps.empty()) {
-					_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
+				if (!activeTraps.empty()) {
+					trapTickCursor = (trapTickCursor + 1u) % activeTraps.size();
 				}
 				continue;
 			}
@@ -328,17 +318,17 @@ namespace CalamityAffixes
 			auto* ownerForm = RE::TESForm::LookupByID<RE::TESForm>(trapSnapshot.ownerFormID);
 			auto* owner = ownerForm ? ownerForm->As<RE::Actor>() : nullptr;
 			if (!owner) {
-				_traps.erase(_traps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
-				if (_trapTickCursor >= _traps.size()) {
-					_trapTickCursor = 0;
+				activeTraps.erase(activeTraps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
+				if (trapTickCursor >= activeTraps.size()) {
+					trapTickCursor = 0;
 				}
 				continue;
 			}
 
 			auto* magicCaster = owner->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant);
 			if (!magicCaster) {
-				if (!_traps.empty()) {
-					_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
+				if (!activeTraps.empty()) {
+					trapTickCursor = (trapTickCursor + 1u) % activeTraps.size();
 				}
 				continue;
 			}
@@ -417,16 +407,16 @@ namespace CalamityAffixes
 			});
 			lock.lock();
 
-			if (trapIndex >= _traps.size()) {
-				_trapTickCursor = _traps.empty() ? 0u : (_trapTickCursor % _traps.size());
+			if (trapIndex >= activeTraps.size()) {
+				trapTickCursor = activeTraps.empty() ? 0u : (trapTickCursor % activeTraps.size());
 				continue;
 			}
 
-			auto& trap = _traps[trapIndex];
+			auto& trap = activeTraps[trapIndex];
 			if (trap.sourceToken != trapSnapshot.sourceToken ||
 				trap.ownerFormID != trapSnapshot.ownerFormID ||
 				trap.createdAt != trapSnapshot.createdAt) {
-				_trapTickCursor = _traps.empty() ? 0u : (_trapTickCursor % _traps.size());
+				trapTickCursor = activeTraps.empty() ? 0u : (trapTickCursor % activeTraps.size());
 				continue;
 			}
 
@@ -448,29 +438,29 @@ namespace CalamityAffixes
 				const bool canRearm = (trap.rearmDelay.count() > 0);
 
 				if (!canRearm || outOfTriggers) {
-					_traps.erase(_traps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
-					if (_trapTickCursor >= _traps.size()) {
-						_trapTickCursor = 0;
+					activeTraps.erase(activeTraps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
+					if (trapTickCursor >= activeTraps.size()) {
+						trapTickCursor = 0;
 					}
 					continue;
 				}
 
 				trap.armedAt = now + trap.rearmDelay;
-				if (!_traps.empty()) {
-					_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
+				if (!activeTraps.empty()) {
+					trapTickCursor = (trapTickCursor + 1u) % activeTraps.size();
 				}
 				continue;
 			}
 
-			if (!_traps.empty()) {
-				_trapTickCursor = (_trapTickCursor + 1u) % _traps.size();
+			if (!activeTraps.empty()) {
+				trapTickCursor = (trapTickCursor + 1u) % activeTraps.size();
 			}
 		}
 
-	if (_traps.empty()) {
-		_hasActiveTraps.store(false, std::memory_order_relaxed);
-	}
+		if (activeTraps.empty()) {
+			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
+		}
 
-	tryResolveStalePlayerCombat();
-}
+		tryResolveStalePlayerCombat();
+	}
 }

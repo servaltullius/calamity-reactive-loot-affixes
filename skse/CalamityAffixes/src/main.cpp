@@ -1,5 +1,6 @@
-#include <filesystem>
 #include <cstdint>
+#include <cstdio>
+#include <filesystem>
 
 #include <RE/Skyrim.h>
 #include <SKSE/Logger.h>
@@ -11,6 +12,7 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/Papyrus.h"
+#include "CalamityAffixes/PluginLogging.h"
 #include "CalamityAffixes/PrismaTooltip.h"
 #include "CalamityAffixes/TrapSystem.h"
 
@@ -30,22 +32,32 @@ SKSEPluginInfo(
 	{
 	constexpr std::uint32_t kBuildSeq = 40;
 
-	void SetupLogging()
-	{
-		const auto logDir = SKSE::log::log_directory();
-		if (!logDir) {
-			return;
+		bool SetupLogging()
+		{
+			const auto logDir = SKSE::log::log_directory();
+			if (!logDir) {
+				return false;
+			}
+
+			auto path = *logDir / "CalamityAffixes.log";
+			return CalamityAffixes::ConfigurePluginLogger(
+				[&path]() {
+					auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path.string(), true);
+					auto logger = std::make_shared<spdlog::logger>("CalamityAffixes", std::move(sink));
+					spdlog::set_default_logger(std::move(logger));
+					spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
+					spdlog::set_level(spdlog::level::info);
+					spdlog::flush_on(spdlog::level::info);
+				},
+				[&path](std::string_view a_reason) {
+					std::fprintf(
+						stderr,
+						"CalamityAffixes: failed to initialize file logger at %s (%.*s)\n",
+						path.string().c_str(),
+						static_cast<int>(a_reason.size()),
+						a_reason.data());
+				});
 		}
-
-		auto path = *logDir / "CalamityAffixes.log";
-		auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path.string(), true);
-
-		auto logger = std::make_shared<spdlog::logger>("", std::move(sink));
-		spdlog::set_default_logger(std::move(logger));
-		spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
-		spdlog::set_level(spdlog::level::info);
-		spdlog::flush_on(spdlog::level::info);
-	}
 
 	void OnSave(SKSE::SerializationInterface* a_intfc)
 	{

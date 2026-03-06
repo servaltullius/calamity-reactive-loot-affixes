@@ -9,7 +9,7 @@ namespace CalamityAffixes
 		bool a_warnOnDuplicate)
 	{
 		if (!a_affix.id.empty()) {
-			const auto [it, inserted] = _affixIndexById.emplace(a_affix.id, a_index);
+			const auto [it, inserted] = _affixRegistry.affixIndexById.emplace(a_affix.id, a_index);
 			if (!inserted) {
 				if (a_useSynthesizedDuplicateLogFormat) {
 					if (a_warnOnDuplicate) {
@@ -30,11 +30,11 @@ namespace CalamityAffixes
 		}
 
 		if (!a_affix.label.empty()) {
-			_affixLabelSet.insert(a_affix.label);
+			_affixRegistry.affixLabelSet.insert(a_affix.label);
 		}
 
 		if (a_affix.token != 0u) {
-			const auto [it, inserted] = _affixIndexByToken.emplace(a_affix.token, a_index);
+			const auto [it, inserted] = _affixRegistry.affixIndexByToken.emplace(a_affix.token, a_index);
 			if (!inserted) {
 				if (a_useSynthesizedDuplicateLogFormat) {
 					if (a_warnOnDuplicate) {
@@ -63,13 +63,13 @@ namespace CalamityAffixes
 
 		if (a_affix.slot == AffixSlot::kSuffix) {
 			// Suffixes are passive AV bonuses — always eligible for both weapons and armor.
-			_lootWeaponSuffixes.push_back(a_index);
-			_lootArmorSuffixes.push_back(a_index);
+			_affixRegistry.lootWeaponSuffixes.push_back(a_index);
+			_affixRegistry.lootArmorSuffixes.push_back(a_index);
 		} else {
 			if (*a_affix.lootType == LootItemType::kWeapon) {
-				_lootWeaponAffixes.push_back(a_index);
+				_affixRegistry.lootWeaponAffixes.push_back(a_index);
 			} else if (*a_affix.lootType == LootItemType::kArmor) {
-				_lootArmorAffixes.push_back(a_index);
+				_affixRegistry.lootArmorAffixes.push_back(a_index);
 			}
 		}
 	}
@@ -87,37 +87,37 @@ namespace CalamityAffixes
 
 		switch (a_affix.trigger) {
 		case Trigger::kHit:
-			_hitTriggerAffixIndices.push_back(a_index);
+			_affixRegistry.hitTriggerAffixIndices.push_back(a_index);
 			break;
 		case Trigger::kIncomingHit:
-			_incomingHitTriggerAffixIndices.push_back(a_index);
+			_affixRegistry.incomingHitTriggerAffixIndices.push_back(a_index);
 			break;
 		case Trigger::kDotApply:
-			_dotApplyTriggerAffixIndices.push_back(a_index);
+			_affixRegistry.dotApplyTriggerAffixIndices.push_back(a_index);
 			break;
 		case Trigger::kKill:
-			_killTriggerAffixIndices.push_back(a_index);
+			_affixRegistry.killTriggerAffixIndices.push_back(a_index);
 			break;
 		case Trigger::kLowHealth:
-			_lowHealthTriggerAffixIndices.push_back(a_index);
+			_affixRegistry.lowHealthTriggerAffixIndices.push_back(a_index);
 			break;
 		}
 	}
 
-	void EventBridge::IndexAffixSpecialActionBucket(const AffixRuntime& a_affix, std::size_t a_index)
-	{
-		if (a_affix.action.type == ActionType::kCastOnCrit) {
-			_castOnCritAffixIndices.push_back(a_index);
-		} else if (a_affix.action.type == ActionType::kConvertDamage) {
-			_convertAffixIndices.push_back(a_index);
-		} else if (a_affix.action.type == ActionType::kMindOverMatter) {
-			_mindOverMatterAffixIndices.push_back(a_index);
-		} else if (a_affix.action.type == ActionType::kArchmage) {
-			_archmageAffixIndices.push_back(a_index);
-		} else if (a_affix.action.type == ActionType::kCorpseExplosion) {
-			_corpseExplosionAffixIndices.push_back(a_index);
-		} else if (a_affix.action.type == ActionType::kSummonCorpseExplosion) {
-			_summonCorpseExplosionAffixIndices.push_back(a_index);
+		void EventBridge::IndexAffixSpecialActionBucket(const AffixRuntime& a_affix, std::size_t a_index)
+		{
+			if (a_affix.action.type == ActionType::kCastOnCrit) {
+				_affixSpecialActions.castOnCritAffixIndices.push_back(a_index);
+			} else if (a_affix.action.type == ActionType::kConvertDamage) {
+				_affixSpecialActions.convertAffixIndices.push_back(a_index);
+			} else if (a_affix.action.type == ActionType::kMindOverMatter) {
+				_affixSpecialActions.mindOverMatterAffixIndices.push_back(a_index);
+			} else if (a_affix.action.type == ActionType::kArchmage) {
+				_affixSpecialActions.archmageAffixIndices.push_back(a_index);
+			} else if (a_affix.action.type == ActionType::kCorpseExplosion) {
+				_affixSpecialActions.corpseExplosionAffixIndices.push_back(a_index);
+			} else if (a_affix.action.type == ActionType::kSummonCorpseExplosion) {
+				_affixSpecialActions.summonCorpseExplosionAffixIndices.push_back(a_index);
+			}
 		}
 	}
-}

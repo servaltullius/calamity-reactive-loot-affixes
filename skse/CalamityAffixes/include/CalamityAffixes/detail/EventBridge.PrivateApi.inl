@@ -48,10 +48,22 @@
 		void SyncCurrencyDropModeState(std::string_view a_contextTag);
 		[[nodiscard]] bool PersistRuntimeUserSettings();
 		void MarkRuntimeUserSettingsDirty();
+		void QueueRuntimeUserSettingsPersist();
 		void MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::time_point a_now, bool a_force = false);
 		[[nodiscard]] nlohmann::json BuildRuntimeUserSettingsJson() const;
 		[[nodiscard]] std::string BuildRuntimeUserSettingsPayload() const;
+		[[nodiscard]] bool HandleUiModCallback(std::string_view a_eventName, float a_numArg);
+		[[nodiscard]] bool HandleRuntimeSettingsModCallback(
+			std::string_view a_eventName,
+			float a_numArg,
+			std::chrono::steady_clock::time_point a_now);
+		[[nodiscard]] bool HandleDebugUtilityModCallback(std::string_view a_eventName, float a_numArg);
+		[[nodiscard]] bool HandleRuntimeGameplayModCallback(
+			std::string_view a_eventName,
+			float a_numArg,
+			std::string_view a_affixIdFilter);
 		[[nodiscard]] const nlohmann::json* ResolveAffixArray(const nlohmann::json& a_configRoot) const;
+		void BuildConfigDerivedAffixState(const nlohmann::json& a_affixes, RE::TESDataHandler* a_handler);
 		[[nodiscard]] bool InitializeAffixFromJson(const nlohmann::json& a_affix, AffixRuntime& a_out) const;
 		void ApplyAffixSlotAndFamilyFromJson(const nlohmann::json& a_affix, AffixRuntime& a_out) const;
 		void ApplyAffixKidLootFromJson(const nlohmann::json& a_affix, AffixRuntime& a_out, float& a_outKidChancePct) const;
@@ -329,6 +341,33 @@
 		void MarkLowHealthTriggerConsumed(
 			const AffixRuntime& a_affix,
 			RE::Actor* a_owner);
+		[[nodiscard]] bool PassesTriggerProcPreconditions(
+			const AffixRuntime& a_affix,
+			Trigger a_trigger,
+			RE::Actor* a_owner,
+			RE::Actor* a_target,
+			const RE::HitData* a_hitData,
+			std::chrono::steady_clock::time_point a_now,
+			float a_lowHealthPreviousPct,
+			float a_lowHealthCurrentPct,
+			PerTargetCooldownKey* a_outPerTargetKey);
+		[[nodiscard]] float ResolveTriggerProcChancePct(
+			const AffixRuntime& a_affix,
+			std::size_t a_affixIndex) const noexcept;
+		[[nodiscard]] bool RollTriggerProcChance(float a_chancePct);
+		void CommitTriggerProcRuntime(
+			AffixRuntime& a_affix,
+			const PerTargetCooldownKey& a_perTargetKey,
+			bool a_usesPerTargetIcd,
+			float a_chancePct,
+			std::chrono::steady_clock::time_point a_now);
+		[[nodiscard]] float ResolveLowHealthTriggerCurrentPct(
+			Trigger a_trigger,
+			RE::Actor* a_owner) const noexcept;
+		[[nodiscard]] float ResolveLowHealthTriggerPreviousPct(RE::FormID a_ownerFormID) const noexcept;
+		void StoreLowHealthTriggerSnapshot(
+			RE::FormID a_ownerFormID,
+			float a_currentHealthPct) noexcept;
 
 		// Corpse-explosion helpers.
 		void ProcessCorpseExplosionKill(RE::Actor* a_owner, RE::Actor* a_corpse);
@@ -341,10 +380,12 @@
 			const char* a_actionName,
 			bool a_summonMode);
 		[[nodiscard]] CorpseExplosionSelection SelectBestCorpseExplosionAffix(
+			RE::Actor* a_owner,
+			RE::Actor* a_corpse,
 			const std::vector<std::size_t>& a_affixIndices,
 			ActionType a_expectedActionType,
 			float a_corpseMaxHealth,
-			std::chrono::steady_clock::time_point a_now) const;
+			std::chrono::steady_clock::time_point a_now);
 		void LogCorpseExplosionSelectionSkipped(
 			const CorpseExplosionSelection& a_selection,
 			RE::Actor* a_corpse,

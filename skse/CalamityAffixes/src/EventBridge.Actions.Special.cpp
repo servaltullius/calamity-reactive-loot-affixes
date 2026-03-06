@@ -51,7 +51,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 
-		if (!_configLoaded || !_runtimeEnabled || _convertAffixIndices.empty()) {
+		if (!_configLoaded || !_runtimeSettings.enabled || _affixSpecialActions.convertAffixIndices.empty()) {
 			return {};
 		}
 
@@ -82,7 +82,7 @@ namespace CalamityAffixes
 		}
 
 		bool hasAnyConversion = false;
-		for (const auto idx : _convertAffixIndices) {
+		for (const auto idx : _affixSpecialActions.convertAffixIndices) {
 			if (idx < _activeCounts.size() && _activeCounts[idx] > 0) {
 				hasAnyConversion = true;
 				break;
@@ -105,7 +105,7 @@ namespace CalamityAffixes
 		// Index: 0=Fire, 1=Frost, 2=Shock (matching Element enum values minus 1)
 		std::array<ConversionCandidate, kMaxConversionsPerHit> candidates{};
 
-		for (const auto idx : _convertAffixIndices) {
+		for (const auto idx : _affixSpecialActions.convertAffixIndices) {
 			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
 				continue;
 			}
@@ -142,7 +142,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult);
+			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
@@ -251,7 +251,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 
 		MindOverMatterResult result{};
-		if (!_configLoaded || !_runtimeEnabled || _mindOverMatterAffixIndices.empty()) {
+		if (!_configLoaded || !_runtimeSettings.enabled || _affixSpecialActions.mindOverMatterAffixIndices.empty()) {
 			return result;
 		}
 		if (!a_target || !a_attacker || !a_target->IsPlayerRef()) {
@@ -274,7 +274,7 @@ namespace CalamityAffixes
 		}
 
 		bool hasAnyMindOverMatter = false;
-		for (const auto idx : _mindOverMatterAffixIndices) {
+		for (const auto idx : _affixSpecialActions.mindOverMatterAffixIndices) {
 			if (idx < _activeCounts.size() && _activeCounts[idx] > 0) {
 				hasAnyMindOverMatter = true;
 				break;
@@ -291,7 +291,7 @@ namespace CalamityAffixes
 		const Action* action = nullptr;
 		float bestRedirectPct = 0.0f;
 
-		for (const auto idx : _mindOverMatterAffixIndices) {
+		for (const auto idx : _affixSpecialActions.mindOverMatterAffixIndices) {
 			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
 				continue;
 			}
@@ -321,7 +321,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult);
+			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
@@ -399,7 +399,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 
-		if (!_configLoaded || !_runtimeEnabled || _castOnCritAffixIndices.empty()) {
+		if (!_configLoaded || !_runtimeSettings.enabled || _affixSpecialActions.castOnCritAffixIndices.empty()) {
 			return {};
 		}
 
@@ -452,14 +452,14 @@ namespace CalamityAffixes
 			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
 				return {};
 			}
-			if (now < _castOnCritNextAllowed) {
+			if (now < _combatState.castOnCritNextAllowed) {
 				return {};
 			}
 
 		std::vector<std::size_t> pool;
-		pool.reserve(_castOnCritAffixIndices.size());
+		pool.reserve(_affixSpecialActions.castOnCritAffixIndices.size());
 
-		for (const auto idx : _castOnCritAffixIndices) {
+		for (const auto idx : _affixSpecialActions.castOnCritAffixIndices) {
 			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
 				continue;
 			}
@@ -491,7 +491,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeProcChanceMult);
+			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
@@ -503,11 +503,11 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		const auto pickedIdx = pool[_castOnCritCycleCursor % pool.size()];
+		const auto pickedIdx = pool[_combatState.castOnCritCycleCursor % pool.size()];
 		auto& pickedAffix = _affixes[pickedIdx];
 		const auto* pick = std::addressof(pickedAffix.action);
-		_castOnCritCycleCursor += 1;
-		_castOnCritNextAllowed = now + kCastOnCritICD;
+		_combatState.castOnCritCycleCursor += 1;
+		_combatState.castOnCritNextAllowed = now + kCastOnCritICD;
 		if (pickedAffix.icd.count() > 0) {
 			pickedAffix.nextAllowed = now + pickedAffix.icd;
 		}
@@ -555,7 +555,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 
-		if (!_configLoaded || !_runtimeEnabled || _activeCritDamageBonusPct <= 0.0f) {
+		if (!_configLoaded || !_runtimeSettings.enabled || _activeCritDamageBonusPct <= 0.0f) {
 			return 1.0f;
 		}
 

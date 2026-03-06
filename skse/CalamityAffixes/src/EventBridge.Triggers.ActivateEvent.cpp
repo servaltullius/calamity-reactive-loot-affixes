@@ -20,7 +20,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeEnabled || !a_event || !a_event->actionRef || !a_event->objectActivated) {
+		if (!_configLoaded || !_runtimeSettings.enabled || !a_event || !a_event->actionRef || !a_event->objectActivated) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -31,7 +31,7 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		if (_combatDebugLog) {
+		if (_runtimeSettings.combatDebugLog) {
 			auto* baseObject = sourceRef->GetBaseObject();
 			auto* combatController = actionActor->GetActorRuntimeData().combatController;
 			const auto runtimeTargetHandle = actionActor->GetActorRuntimeData().currentCombatTarget.native_handle();

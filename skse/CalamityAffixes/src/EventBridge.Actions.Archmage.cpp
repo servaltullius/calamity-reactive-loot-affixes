@@ -30,7 +30,7 @@ namespace CalamityAffixes
 	{
 		ArchmageSelection selection{};
 
-		for (const auto idx : _archmageAffixIndices) {
+		for (const auto idx : _affixSpecialActions.archmageAffixIndices) {
 			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
 				continue;
 			}
@@ -52,7 +52,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct_Archmage(affix.procChancePct * _runtimeProcChanceMult);
+			const float chancePct = ResolveSpecialActionProcChancePct_Archmage(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
@@ -62,10 +62,26 @@ namespace CalamityAffixes
 				continue;
 			}
 
+			float maxMagicka = 0.0f;
+			float extraCost = 0.0f;
+			float extraDamage = 0.0f;
+			if (!ResolveArchmageResourceUsage(
+					a_owner,
+					action.archmageDamagePctOfMaxMagicka,
+					action.archmageCostPctOfMaxMagicka,
+					maxMagicka,
+					extraCost,
+					extraDamage)) {
+				continue;
+			}
+
 			if (action.archmageDamagePctOfMaxMagicka > selection.bestDamagePct) {
 				selection.bestIdx = idx;
 				selection.bestDamagePct = action.archmageDamagePctOfMaxMagicka;
 				selection.bestCostPct = action.archmageCostPctOfMaxMagicka;
+				selection.bestMaxMagicka = maxMagicka;
+				selection.bestExtraCost = extraCost;
+				selection.bestExtraDamage = extraDamage;
 				selection.bestAction = std::addressof(action);
 			}
 		}
@@ -148,13 +164,13 @@ namespace CalamityAffixes
 
 	void EventBridge::ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell, const RE::HitData* a_hitData)
 	{
-		if (!_configLoaded || !_runtimeEnabled || !a_caster || !a_target || !a_sourceSpell) {
+		if (!_configLoaded || !_runtimeSettings.enabled || !a_caster || !a_target || !a_sourceSpell) {
 			return;
 		}
 		if (!a_caster->IsPlayerRef()) {
 			return;
 		}
-		if (_procDepth > 0) {
+		if (_combatState.procDepth > 0) {
 			return;
 		}
 
@@ -170,14 +186,14 @@ namespace CalamityAffixes
 			return;
 		}
 
-		float maxMagicka = 0.0f;
-		float extraCost = 0.0f;
-		float extraDamage = 0.0f;
-		if (!ResolveArchmageResourceUsage(a_caster, selection.bestDamagePct, selection.bestCostPct, maxMagicka, extraCost, extraDamage)) {
-			return;
-		}
-
-		if (!ExecuteArchmageCast(*selection.bestAction, a_caster, a_target, sourceEditorId, maxMagicka, extraCost, extraDamage)) {
+		if (!ExecuteArchmageCast(
+				*selection.bestAction,
+				a_caster,
+				a_target,
+				sourceEditorId,
+				selection.bestMaxMagicka,
+				selection.bestExtraCost,
+				selection.bestExtraDamage)) {
 			return;
 		}
 

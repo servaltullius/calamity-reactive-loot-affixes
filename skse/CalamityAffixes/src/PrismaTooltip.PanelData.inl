@@ -1,9 +1,20 @@
-		void SetRunewordBaseInventoryList(const std::vector<EventBridge::RunewordBaseInventoryEntry>& a_entries)
+		void PushCachedInteropPayload(std::string& a_cache, const char* a_method, std::string a_payload)
 		{
 			if (!IsViewReady()) {
 				return;
 			}
 
+			if (a_payload == a_cache) {
+				return;
+			}
+
+			a_cache = std::move(a_payload);
+			g_api->InteropCall(g_view, a_method, a_cache.c_str());
+		}
+
+		[[nodiscard]] nlohmann::json BuildRunewordBaseInventoryPayload(
+			const std::vector<RunewordBaseInventoryEntry>& a_entries)
+		{
 			nlohmann::json payload = nlohmann::json::array();
 			for (const auto& entry : a_entries) {
 				payload.push_back({
@@ -13,21 +24,20 @@
 				});
 			}
 
-			const std::string encoded = payload.dump();
-			if (encoded == g_lastRunewordBaseListJson) {
-				return;
-			}
-
-			g_lastRunewordBaseListJson = encoded;
-			g_api->InteropCall(g_view, "setInventoryItems", g_lastRunewordBaseListJson.c_str());
+			return payload;
 		}
 
-		void SetRunewordRecipeList(const std::vector<EventBridge::RunewordRecipeEntry>& a_entries)
+		void SetRunewordBaseInventoryList(const std::vector<RunewordBaseInventoryEntry>& a_entries)
 		{
-			if (!IsViewReady()) {
-				return;
-			}
+			PushCachedInteropPayload(
+				g_runewordCache.baseListJson,
+				"setInventoryItems",
+				BuildRunewordBaseInventoryPayload(a_entries).dump());
+		}
 
+		[[nodiscard]] nlohmann::json BuildRunewordRecipePayload(
+			const std::vector<RunewordRecipeEntry>& a_entries)
+		{
 			nlohmann::json payload = nlohmann::json::array();
 			for (const auto& entry : a_entries) {
 				payload.push_back({
@@ -42,36 +52,27 @@
 				});
 			}
 
-			const std::string encoded = payload.dump();
-			if (encoded == g_lastRunewordRecipeListJson) {
-				return;
-			}
+			return payload;
+		}
 
-			g_lastRunewordRecipeListJson = encoded;
-			g_api->InteropCall(g_view, "setRecipeItems", g_lastRunewordRecipeListJson.c_str());
+		void SetRunewordRecipeList(const std::vector<RunewordRecipeEntry>& a_entries)
+		{
+			PushCachedInteropPayload(
+				g_runewordCache.recipeListJson,
+				"setRecipeItems",
+				BuildRunewordRecipePayload(a_entries).dump());
 		}
 
 		void SetRunewordAffixPreview(std::string_view a_text)
 		{
-			if (!IsViewReady()) {
-				return;
-			}
-
-			const std::string next(a_text);
-			if (next == g_lastRunewordAffixPreview) {
-				return;
-			}
-
-			g_lastRunewordAffixPreview = next;
-			g_api->InteropCall(g_view, "setRunewordAffixPreview", g_lastRunewordAffixPreview.c_str());
+			PushCachedInteropPayload(
+				g_runewordCache.affixPreview,
+				"setRunewordAffixPreview",
+				std::string(a_text));
 		}
 
-		void SetRunewordPanelState(const EventBridge::RunewordPanelState& a_state)
+		[[nodiscard]] nlohmann::json BuildRunewordPanelStatePayload(const RunewordPanelState& a_state)
 		{
-			if (!IsViewReady()) {
-				return;
-			}
-
 			nlohmann::json requiredRunes = nlohmann::json::array();
 			for (const auto& req : a_state.requiredRunes) {
 				requiredRunes.push_back({
@@ -95,13 +96,15 @@
 				{ "requiredRunes", requiredRunes }
 			};
 
-			const std::string encoded = payload.dump();
-			if (encoded == g_lastRunewordPanelStateJson) {
-				return;
-			}
+			return payload;
+		}
 
-			g_lastRunewordPanelStateJson = encoded;
-			g_api->InteropCall(g_view, "setRunewordPanelState", g_lastRunewordPanelStateJson.c_str());
+		void SetRunewordPanelState(const RunewordPanelState& a_state)
+		{
+			PushCachedInteropPayload(
+				g_runewordCache.panelStateJson,
+				"setRunewordPanelState",
+				BuildRunewordPanelStatePayload(a_state).dump());
 		}
 
 		[[nodiscard]] std::string ResolveSelectedItemDisplayName(const RE::ItemList::Item* a_item)
@@ -147,6 +150,124 @@
 			bool hasSelection{ false };
 		};
 
+		[[nodiscard]] RE::FormID ResolveRefHandleToFormID(RE::RefHandle a_handle)
+		{
+			if (a_handle == 0) {
+				return 0u;
+			}
+			if (auto ref = RE::TESObjectREFR::LookupByHandle(a_handle); ref) {
+				return ref->GetFormID();
+			}
+			return 0u;
+		}
+
+		[[nodiscard]] bool TryPopulateSelectedItemContext(
+			SelectedItemContext& a_result,
+			RE::ItemList* a_itemList,
+			std::string_view a_source,
+			RE::FormID a_sourceContainerFormID,
+			CalamityAffixes::EventBridge& a_bridge)
+		{
+			if (!a_itemList) {
+				return false;
+			}
+
+			auto* item = a_itemList->GetSelectedItem();
+			if (!item) {
+				return false;
+			}
+
+			auto selectedName = ResolveSelectedItemDisplayName(item);
+			if (selectedName.empty()) {
+				selectedName = "<Unknown>";
+			}
+			a_result.hasSelection = true;
+			a_result.itemName = std::move(selectedName);
+			a_result.itemSource = std::string(a_source);
+			a_result.tooltip = a_bridge.GetInstanceAffixTooltip(
+				item->data.objDesc,
+				a_result.itemName,
+				g_uiLanguageMode.load(),
+				a_result.itemSource,
+				a_sourceContainerFormID);
+			return true;
+		}
+
+		[[nodiscard]] bool TryReadInventorySelectedItemContext(
+			SelectedItemContext& a_result,
+			RE::UI& a_ui,
+			CalamityAffixes::EventBridge& a_bridge)
+		{
+			if (!a_ui.IsMenuOpen(kMenuInventory)) {
+				return false;
+			}
+
+			auto menu = a_ui.GetMenu<RE::InventoryMenu>();
+			if (!menu) {
+				return false;
+			}
+
+			auto& data = menu->GetRuntimeData();
+			return TryPopulateSelectedItemContext(a_result, data.itemList, kItemSourceInventory, 0u, a_bridge);
+		}
+
+		[[nodiscard]] bool TryReadBarterSelectedItemContext(
+			SelectedItemContext& a_result,
+			RE::UI& a_ui,
+			CalamityAffixes::EventBridge& a_bridge)
+		{
+			if (!a_ui.IsMenuOpen(kMenuBarter)) {
+				return false;
+			}
+
+			auto menu = a_ui.GetMenu<RE::BarterMenu>();
+			if (!menu) {
+				return false;
+			}
+
+			auto& data = menu->GetRuntimeData();
+			const auto sourceContainer = ResolveRefHandleToFormID(RE::BarterMenu::GetTargetRefHandle());
+			return TryPopulateSelectedItemContext(a_result, data.itemList, kItemSourceBarter, sourceContainer, a_bridge);
+		}
+
+		[[nodiscard]] bool TryReadContainerSelectedItemContext(
+			SelectedItemContext& a_result,
+			RE::UI& a_ui,
+			CalamityAffixes::EventBridge& a_bridge)
+		{
+			if (!a_ui.IsMenuOpen(kMenuContainer)) {
+				return false;
+			}
+
+			auto menu = a_ui.GetMenu<RE::ContainerMenu>();
+			if (!menu) {
+				return false;
+			}
+
+			auto& data = menu->GetRuntimeData();
+			const auto sourceContainer = ResolveRefHandleToFormID(RE::ContainerMenu::GetTargetRefHandle());
+			return TryPopulateSelectedItemContext(a_result, data.itemList, kItemSourceContainer, sourceContainer, a_bridge);
+		}
+
+		[[nodiscard]] bool TryReadGiftSelectedItemContext(
+			SelectedItemContext& a_result,
+			RE::UI& a_ui,
+			CalamityAffixes::EventBridge& a_bridge)
+		{
+			if (!a_ui.IsMenuOpen(kMenuGift)) {
+				return false;
+			}
+
+			auto menu = a_ui.GetMenu<RE::GiftMenu>();
+			if (!menu) {
+				return false;
+			}
+
+			auto& data = menu->GetRuntimeData();
+			const auto sourceContainer = ResolveRefHandleToFormID(RE::GiftMenu::GetTargetRefHandle());
+			return TryPopulateSelectedItemContext(a_result, data.itemList, kItemSourceGift, sourceContainer, a_bridge);
+		}
+
 		SelectedItemContext GetSelectedItemContext()
 		{
 			SelectedItemContext result;
@@ -161,79 +282,45 @@
 				return result;
 			}
 
-			auto resolveRefHandleToFormID = [](RE::RefHandle a_handle) -> RE::FormID {
-				if (a_handle == 0) {
-					return 0u;
-				}
-				if (auto ref = RE::TESObjectREFR::LookupByHandle(a_handle); ref) {
-					return ref->GetFormID();
-				}
-				return 0u;
-			};
-
-			auto readItem = [&](RE::ItemList* a_itemList, std::string_view a_source, RE::FormID a_sourceContainerFormID) -> bool {
-				if (!a_itemList) {
-					return false;
-				}
-
-				auto* item = a_itemList->GetSelectedItem();
-				if (!item) {
-					return false;
-				}
-
-				auto selectedName = ResolveSelectedItemDisplayName(item);
-				if (selectedName.empty()) {
-					selectedName = "<Unknown>";
-				}
-				result.hasSelection = true;
-				result.itemName = std::move(selectedName);
-				result.itemSource = std::string(a_source);
-				result.tooltip = bridge->GetInstanceAffixTooltip(
-					item->data.objDesc,
-					result.itemName,
-					g_uiLanguageMode.load(),
-					result.itemSource,
-					a_sourceContainerFormID);
-				return true;
-			};
-
-			if (auto menu = ui->GetMenu<RE::InventoryMenu>(); menu) {
-				if (ui->IsMenuOpen(kMenuInventory)) {
-					auto& data = menu->GetRuntimeData();
-					if (readItem(data.itemList, kItemSourceInventory, 0u)) {
-						return result;
-					}
-				}
-			}
-			if (auto menu = ui->GetMenu<RE::BarterMenu>(); menu) {
-				if (ui->IsMenuOpen(kMenuBarter)) {
-					auto& data = menu->GetRuntimeData();
-					const auto sourceContainer = resolveRefHandleToFormID(RE::BarterMenu::GetTargetRefHandle());
-					if (readItem(data.itemList, kItemSourceBarter, sourceContainer)) {
-						return result;
-					}
-				}
-			}
-			if (auto menu = ui->GetMenu<RE::ContainerMenu>(); menu) {
-				if (ui->IsMenuOpen(kMenuContainer)) {
-					auto& data = menu->GetRuntimeData();
-					const auto sourceContainer = resolveRefHandleToFormID(RE::ContainerMenu::GetTargetRefHandle());
-					if (readItem(data.itemList, kItemSourceContainer, sourceContainer)) {
-						return result;
-					}
-				}
-			}
-			if (auto menu = ui->GetMenu<RE::GiftMenu>(); menu) {
-				if (ui->IsMenuOpen(kMenuGift)) {
-					auto& data = menu->GetRuntimeData();
-					const auto sourceContainer = resolveRefHandleToFormID(RE::GiftMenu::GetTargetRefHandle());
-					if (readItem(data.itemList, kItemSourceGift, sourceContainer)) {
-						return result;
-					}
+			for (const auto tryReadContext : {
+					 &TryReadInventorySelectedItemContext,
+					 &TryReadBarterSelectedItemContext,
+					 &TryReadContainerSelectedItemContext,
+					 &TryReadGiftSelectedItemContext }) {
+				if (tryReadContext(result, *ui, *bridge)) {
+					return result;
 				}
 			}
 
 			return result;
+		}
+
+		[[nodiscard]] bool HasSelectedItemContextChanged(const SelectedItemContext& a_selected) noexcept
+		{
+			return
+				a_selected.itemName != g_viewCache.selectedItemName ||
+				a_selected.itemSource != g_viewCache.selectedItemSource;
+		}
+
+		[[nodiscard]] std::optional<std::string> BuildSelectedTooltipText(const SelectedItemContext& selected)
+		{
+			if (!selected.tooltip || selected.tooltip->empty()) {
+				return std::nullopt;
+			}
+
+			const std::string next = StripRunewordOverlayTooltipLines(*selected.tooltip);
+			if (next.empty()) {
+				return std::nullopt;
+			}
+
+			return next;
+		}
+
+		void PushSelectedTooltipToView(std::string a_text)
+		{
+			g_lastTooltip = std::move(a_text);
+			g_prismaTelemetry.tooltipPushes.fetch_add(1u, std::memory_order_relaxed);
+			g_api->InteropCall(g_view, "setTooltip", g_lastTooltip.c_str());
 		}
 
 		bool PushSelectedTooltipSnapshot(bool a_force /*= false*/)
@@ -243,32 +330,28 @@
 			}
 
 			const auto selected = GetSelectedItemContext();
-			const bool selectionChanged =
-				selected.itemName != g_lastSelectedItemName ||
-				selected.itemSource != g_lastSelectedItemSource;
+			const bool selectionChanged = HasSelectedItemContextChanged(selected);
 			SetSelectedItemContext(selected.itemName, selected.itemSource);
 
 			const auto clearTooltip = [&]() {
 				if (a_force || selectionChanged || !g_lastTooltip.empty()) {
+					if (!g_lastTooltip.empty()) {
+						g_prismaTelemetry.tooltipClears.fetch_add(1u, std::memory_order_relaxed);
+					}
 					g_lastTooltip.clear();
 					g_api->InteropCall(g_view, "setTooltip", "");
 				}
 			};
 
-			if (!selected.tooltip || selected.tooltip->empty()) {
+			const auto nextTooltip = BuildSelectedTooltipText(selected);
+			if (!nextTooltip.has_value()) {
 				clearTooltip();
 				return false;
 			}
 
-			const std::string next = StripRunewordOverlayTooltipLines(*selected.tooltip);
-			if (next.empty()) {
-				clearTooltip();
-				return false;
-			}
-
+			const auto& next = *nextTooltip;
 			if (a_force || selectionChanged || next != g_lastTooltip) {
-				g_lastTooltip = next;
-				g_api->InteropCall(g_view, "setTooltip", g_lastTooltip.c_str());
+				PushSelectedTooltipToView(next);
 			}
 			return true;
 		}

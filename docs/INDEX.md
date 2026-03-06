@@ -49,6 +49,11 @@
 - `2026-02-02-eventbridge-split-v1.md` — EventBridge 도메인 분할
 - `2026-02-09-eventbridge-actions-decomposition-v1.md` — EventBridge 액션 분해
 - `2026-01-31-autogen-spell-mgef.md` — ESP 자동 생성 (MagicEffect/Spell)
+- `2026-03-06-eventbridge-state-ownership-extraction-design.md` — EventBridge 상태 소유권 분리 상위 설계
+- `2026-03-06-combat-runtime-state-extraction-design.md` — 전투 runtime state ownership 분리 설계
+- `2026-03-06-loot-runtime-state-extraction-design.md` — loot runtime state ownership 분리 설계
+- `2026-03-06-runeword-runtime-state-extraction-design.md` — runeword runtime state ownership 분리 설계
+- `2026-03-06-serialization-runtime-state-extraction-design.md` — serialization runtime state ownership 분리 설계
 
 ## references/ — 참조 문서
 
@@ -80,3 +85,4 @@ GitHub 릴리즈 본문, Nexus 배포 카피, QA 체크리스트 등.
 | `2026-02-26-deep-analysis-comprehensive.md` | 종합 심층 분석 |
 | `2026-02-26-deep-analysis-round2-supplement.md` | 심층 분석 2차 보충 |
 | `2026-02-26-deep-analysis-round3-final-decision.md` | 심층 분석 3차 최종 결정 |
+| `2026-03-06-architecture-hotspots-overview.md` | 현재판 아키텍처 요약 + hotspot 5개 + 우선 개선 순서 |

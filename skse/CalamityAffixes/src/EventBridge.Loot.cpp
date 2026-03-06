@@ -161,13 +161,13 @@ namespace CalamityAffixes
 			return;
 		}
 
-		_lootEvaluatedRecent.push_back(a_instanceKey);
-		if (_lootEvaluatedInstances.insert(a_instanceKey).second) {
-			++_lootEvaluatedInsertionsSincePrune;
+		_lootState.evaluatedRecent.push_back(a_instanceKey);
+		if (_lootState.evaluatedInstances.insert(a_instanceKey).second) {
+			++_lootState.evaluatedInsertionsSincePrune;
 		}
 
-		if (_lootEvaluatedRecent.size() > (kLootEvaluatedRecentKeep * 4) ||
-			_lootEvaluatedInsertionsSincePrune >= kLootEvaluatedPruneEveryInserts) {
+		if (_lootState.evaluatedRecent.size() > (kLootEvaluatedRecentKeep * 4) ||
+			_lootState.evaluatedInsertionsSincePrune >= kLootEvaluatedPruneEveryInserts) {
 			PruneLootEvaluatedInstances();
 		}
 	}
@@ -178,7 +178,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		_lootEvaluatedInstances.erase(a_instanceKey);
+		_lootState.evaluatedInstances.erase(a_instanceKey);
 	}
 
 	bool EventBridge::IsLootEvaluatedInstance(std::uint64_t a_instanceKey) const
@@ -187,32 +187,32 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		return _lootEvaluatedInstances.contains(a_instanceKey);
+		return _lootState.evaluatedInstances.contains(a_instanceKey);
 	}
 
 	void EventBridge::PruneLootEvaluatedInstances()
 	{
-		if (_lootEvaluatedInstances.empty()) {
-			_lootEvaluatedRecent.clear();
-			_lootEvaluatedInsertionsSincePrune = 0;
+		if (_lootState.evaluatedInstances.empty()) {
+			_lootState.evaluatedRecent.clear();
+			_lootState.evaluatedInsertionsSincePrune = 0;
 			return;
 		}
 
 		std::unordered_set<std::uint64_t> keep;
 		keep.reserve(
 			_instanceAffixes.size() +
-			_runewordInstanceStates.size() +
+			_runewordState.instanceStates.size() +
 			kLootEvaluatedRecentKeep + 64);
 
 		// Always keep explicit runtime states.
 		for (const auto& [key, _] : _instanceAffixes) {
 			keep.insert(key);
 		}
-		for (const auto& [key, _] : _runewordInstanceStates) {
+		for (const auto& [key, _] : _runewordState.instanceStates) {
 			keep.insert(key);
 		}
-		if (_runewordSelectedBaseKey) {
-			keep.insert(*_runewordSelectedBaseKey);
+		if (_runewordState.selectedBaseKey) {
+			keep.insert(*_runewordState.selectedBaseKey);
 		}
 
 		// Keep keys that still exist in player inventory.
@@ -239,8 +239,8 @@ namespace CalamityAffixes
 
 		// Keep a recent window to survive short out-of-inventory transitions.
 		std::size_t recentKept = 0;
-		for (auto it = _lootEvaluatedRecent.rbegin();
-		     it != _lootEvaluatedRecent.rend() && recentKept < kLootEvaluatedRecentKeep;
+		for (auto it = _lootState.evaluatedRecent.rbegin();
+		     it != _lootState.evaluatedRecent.rend() && recentKept < kLootEvaluatedRecentKeep;
 		     ++it) {
 			if (*it == 0) {
 				continue;
@@ -249,17 +249,17 @@ namespace CalamityAffixes
 			++recentKept;
 		}
 
-		for (auto it = _lootEvaluatedInstances.begin(); it != _lootEvaluatedInstances.end();) {
+		for (auto it = _lootState.evaluatedInstances.begin(); it != _lootState.evaluatedInstances.end();) {
 			if (!keep.contains(*it)) {
-				it = _lootEvaluatedInstances.erase(it);
+				it = _lootState.evaluatedInstances.erase(it);
 			} else {
 				++it;
 			}
 		}
 
 		std::deque<std::uint64_t> compactedRecent;
-		for (const auto key : _lootEvaluatedRecent) {
-			if (key != 0 && _lootEvaluatedInstances.contains(key)) {
+		for (const auto key : _lootState.evaluatedRecent) {
+			if (key != 0 && _lootState.evaluatedInstances.contains(key)) {
 				compactedRecent.push_back(key);
 			}
 		}
@@ -269,8 +269,8 @@ namespace CalamityAffixes
 			compactedRecent.pop_front();
 		}
 
-		_lootEvaluatedRecent.swap(compactedRecent);
-		_lootEvaluatedInsertionsSincePrune = 0;
+		_lootState.evaluatedRecent.swap(compactedRecent);
+		_lootState.evaluatedInsertionsSincePrune = 0;
 	}
 
 	float EventBridge::ComputeActiveScrollNoConsumeChancePct() const
@@ -331,7 +331,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeEnabled) {
+		if (!_configLoaded || !_runtimeSettings.enabled) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -399,7 +399,7 @@ namespace CalamityAffixes
 			}
 
 			if (refHandle != 0) {
-				_lootRerollGuard.NotePlayerDrop(
+				_lootState.rerollGuard.NotePlayerDrop(
 					playerId,
 					a_event->oldContainer,
 					a_event->newContainer,
@@ -418,7 +418,7 @@ namespace CalamityAffixes
 			a_event->newContainer != playerId) {
 			if (a_event->baseObj != 0) {
 				const auto stashKey = std::make_pair(a_event->newContainer, a_event->baseObj);
-				_playerContainerStash[stashKey] += a_event->itemCount;
+				_lootState.playerContainerStash[stashKey] += a_event->itemCount;
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -434,7 +434,7 @@ namespace CalamityAffixes
 
 		// 3) Skip if this pickup is the player re-acquiring their own dropped reference.
 		if (refHandle != 0 &&
-			_lootRerollGuard.ConsumeIfPlayerDropPickup(
+			_lootState.rerollGuard.ConsumeIfPlayerDropPickup(
 				playerId,
 				a_event->oldContainer,
 				a_event->newContainer,
@@ -453,10 +453,11 @@ namespace CalamityAffixes
 		//     Tracked by {containerID, baseObj} count — UniqueID-independent.
 		if (a_event->baseObj != 0 && a_event->oldContainer != 0) {
 			const auto stashKey = std::make_pair(a_event->oldContainer, a_event->baseObj);
-			if (auto stashIt = _playerContainerStash.find(stashKey); stashIt != _playerContainerStash.end()) {
+			if (auto stashIt = _lootState.playerContainerStash.find(stashKey);
+				stashIt != _lootState.playerContainerStash.end()) {
 				stashIt->second -= a_event->itemCount;
 				if (stashIt->second <= 0) {
-					_playerContainerStash.erase(stashIt);
+					_lootState.playerContainerStash.erase(stashIt);
 				}
 				if (_loot.debugLog) {
 					SKSE::log::debug(
@@ -525,8 +526,8 @@ namespace CalamityAffixes
 			_instanceAffixes.contains(oldKey) ||
 			IsLootEvaluatedInstance(oldKey) ||
 			trackedPreview ||
-			_runewordInstanceStates.contains(oldKey) ||
-			(_runewordSelectedBaseKey && *_runewordSelectedBaseKey == oldKey);
+			_runewordState.instanceStates.contains(oldKey) ||
+			(_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == oldKey);
 		if (!trackedOld) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -597,15 +598,15 @@ namespace CalamityAffixes
 			_instanceStates.emplace(newStateKey, state);
 		}
 
-		if (auto rwNode = _runewordInstanceStates.extract(a_oldKey); !rwNode.empty()) {
-			if (!_runewordInstanceStates.contains(a_newKey)) {
+		if (auto rwNode = _runewordState.instanceStates.extract(a_oldKey); !rwNode.empty()) {
+			if (!_runewordState.instanceStates.contains(a_newKey)) {
 				rwNode.key() = a_newKey;
-				_runewordInstanceStates.insert(std::move(rwNode));
+				_runewordState.instanceStates.insert(std::move(rwNode));
 			}
 		}
 
-		if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == a_oldKey) {
-			_runewordSelectedBaseKey = a_newKey;
+		if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == a_oldKey) {
+			_runewordState.selectedBaseKey = a_newKey;
 		}
 	}
 

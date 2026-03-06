@@ -22,7 +22,7 @@ namespace CalamityAffixes
 		}
 
 		SanitizeRunewordState();
-		if (!_runewordSelectedBaseKey) {
+		if (!_runewordState.selectedBaseKey) {
 			return panelState;
 		}
 		panelState.hasBase = true;
@@ -35,8 +35,8 @@ namespace CalamityAffixes
 		const RunewordRecipe* recipe = nullptr;
 		std::uint32_t inserted = 0u;
 
-		const auto stateIt = _runewordInstanceStates.find(*_runewordSelectedBaseKey);
-		if (stateIt != _runewordInstanceStates.end()) {
+		const auto stateIt = _runewordState.instanceStates.find(*_runewordState.selectedBaseKey);
+		if (stateIt != _runewordState.instanceStates.end()) {
 			inserted = stateIt->second.insertedRunes;
 			recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
 		}
@@ -53,7 +53,7 @@ namespace CalamityAffixes
 		panelState.totalRunes = static_cast<std::uint32_t>(recipe->runeTokens.size());
 		panelState.insertedRunes = std::min(inserted, panelState.totalRunes);
 
-		const auto applyBlockReason = ResolveRunewordApplyBlockReason(*_runewordSelectedBaseKey, *recipe);
+		const auto applyBlockReason = ResolveRunewordApplyBlockReason(*_runewordState.selectedBaseKey, *recipe);
 		const bool canApplyResult = applyBlockReason == RunewordApplyBlockReason::kNone;
 
 		if (panelState.insertedRunes >= panelState.totalRunes) {
@@ -87,11 +87,11 @@ namespace CalamityAffixes
 			}
 
 			std::string runeName = "Rune";
-			if (const auto nameIt = _runewordRuneNameByToken.find(token); nameIt != _runewordRuneNameByToken.end()) {
+			if (const auto nameIt = _runewordState.runeNameByToken.find(token); nameIt != _runewordState.runeNameByToken.end()) {
 				runeName = nameIt->second;
 			}
 
-			const auto owned = GetOwnedRunewordFragmentCount(player, _runewordRuneNameByToken, token);
+			const auto owned = GetOwnedRunewordFragmentCount(player, _runewordState.runeNameByToken, token);
 			panelState.requiredRunes.push_back(RunewordRuneRequirement{
 				.runeName = runeName,
 				.required = required,
@@ -135,13 +135,13 @@ namespace CalamityAffixes
 		}
 
 		SanitizeRunewordState();
-		if (!_runewordSelectedBaseKey) {
+		if (!_runewordState.selectedBaseKey) {
 			return std::nullopt;
 		}
 
 		RE::InventoryEntryData* entry = nullptr;
 		RE::ExtraDataList* xList = nullptr;
-		if (!ResolvePlayerInventoryInstance(*_runewordSelectedBaseKey, entry, xList) || !entry || !entry->object || !xList) {
+		if (!ResolvePlayerInventoryInstance(*_runewordState.selectedBaseKey, entry, xList) || !entry || !entry->object || !xList) {
 			return std::nullopt;
 		}
 
@@ -152,7 +152,7 @@ namespace CalamityAffixes
 			a_uiLanguageMode,
 			"inventory",
 			0u,
-			*_runewordSelectedBaseKey);
+			*_runewordState.selectedBaseKey);
 	}
 
 }

@@ -135,7 +135,7 @@ namespace CalamityAffixes
 		}
 
 		SanitizeRunewordState();
-		entries.reserve(_runewordRecipes.size());
+		entries.reserve(_runewordState.recipes.size());
 
 		auto resolveRecommendedBaseKey = [&](const RunewordRecipe& a_recipe) -> std::string_view {
 			const std::string_view id = a_recipe.id;
@@ -589,23 +589,23 @@ namespace CalamityAffixes
 		if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
 			selectedToken = currentRecipe->token;
 		}
-		if (_runewordSelectedBaseKey) {
-			const auto selectedKey = *_runewordSelectedBaseKey;
+		if (_runewordState.selectedBaseKey) {
+			const auto selectedKey = *_runewordState.selectedBaseKey;
 			if (const auto* completed = ResolveCompletedRunewordRecipe(selectedKey)) {
 				selectedToken = completed->token;
 			}
 			// Explicit recipe selection (instance state) wins over completed default,
 			// so re-transmutation highlights the newly chosen recipe.
-			if (const auto stateIt = _runewordInstanceStates.find(selectedKey);
-				stateIt != _runewordInstanceStates.end() &&
+			if (const auto stateIt = _runewordState.instanceStates.find(selectedKey);
+				stateIt != _runewordState.instanceStates.end() &&
 				stateIt->second.recipeToken != 0u) {
 				selectedToken = stateIt->second.recipeToken;
 			}
 		}
 
-		for (const auto& recipe : _runewordRecipes) {
-			const auto affixIt = _affixIndexByToken.find(recipe.resultAffixToken);
-			if (affixIt == _affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+		for (const auto& recipe : _runewordState.recipes) {
+			const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
+			if (affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
 				continue;
 			}
 			const auto& affix = _affixes[affixIt->second];

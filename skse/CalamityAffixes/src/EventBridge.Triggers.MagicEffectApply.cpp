@@ -21,7 +21,7 @@ namespace CalamityAffixes
 		if (!a_event || !a_event->caster || !a_event->target || !a_event->magicEffect) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		if (!_runtimeEnabled) {
+		if (!_runtimeSettings.enabled) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -51,20 +51,20 @@ namespace CalamityAffixes
 		}
 
 		const RE::FormID observedMgefFormId = mgef->GetFormID();
-		if (_dotObservedMagicEffects.size() < kDotObservedMagicEffectsMaxEntries ||
-			_dotObservedMagicEffects.contains(observedMgefFormId)) {
-			_dotObservedMagicEffects.insert(observedMgefFormId);
-		} else if (!_dotObservedMagicEffectsCapWarned) {
-			_dotObservedMagicEffectsCapWarned = true;
+		if (_combatState.dotObservedMagicEffects.size() < kDotObservedMagicEffectsMaxEntries ||
+			_combatState.dotObservedMagicEffects.contains(observedMgefFormId)) {
+			_combatState.dotObservedMagicEffects.insert(observedMgefFormId);
+		} else if (!_combatState.dotObservedMagicEffectsCapWarned) {
+			_combatState.dotObservedMagicEffectsCapWarned = true;
 			SKSE::log::warn(
 				"CalamityAffixes: DotApply observed-magic-effect set reached hard cap ({}). Additional IDs will be ignored until reset.",
 				kDotObservedMagicEffectsMaxEntries);
 		}
-		const auto observedDotEffectCount = _dotObservedMagicEffects.size();
+		const auto observedDotEffectCount = _combatState.dotObservedMagicEffects.size();
 		if (_loot.dotTagSafetyUniqueEffectThreshold > 0u &&
 			observedDotEffectCount > _loot.dotTagSafetyUniqueEffectThreshold) {
-			if (!_dotTagSafetyWarned) {
-				_dotTagSafetyWarned = true;
+			if (!_combatState.dotTagSafetyWarned) {
+				_combatState.dotTagSafetyWarned = true;
 				SKSE::log::warn(
 					"CalamityAffixes: DotApply safety warning (unique tagged magic effects={}, threshold={}, autoDisable={}).",
 					observedDotEffectCount,
@@ -74,8 +74,8 @@ namespace CalamityAffixes
 			}
 
 			if (_loot.dotTagSafetyAutoDisable) {
-				if (!_dotTagSafetySuppressed) {
-					_dotTagSafetySuppressed = true;
+				if (!_combatState.dotTagSafetySuppressed) {
+					_combatState.dotTagSafetySuppressed = true;
 					SKSE::log::error(
 						"CalamityAffixes: DotApply safety auto-disabled (unique tagged magic effects={}, threshold={}).",
 						observedDotEffectCount,
@@ -86,7 +86,7 @@ namespace CalamityAffixes
 			}
 		}
 
-		if (_dotTagSafetySuppressed) {
+		if (_combatState.dotTagSafetySuppressed) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -100,22 +100,22 @@ namespace CalamityAffixes
 			(static_cast<std::uint64_t>(target->GetFormID()) << 32) |
 			static_cast<std::uint64_t>(mgef->GetFormID());
 
-		if (const auto it = _dotCooldowns.find(key); it != _dotCooldowns.end()) {
+		if (const auto it = _combatState.dotCooldowns.find(key); it != _combatState.dotCooldowns.end()) {
 			if (now - it->second < kDotApplyICD) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
 		}
 
-		_dotCooldowns[key] = now;
+		_combatState.dotCooldowns[key] = now;
 
-		if (_dotCooldowns.size() > kDotCooldownMaxEntries) {
-			if (_dotCooldownsLastPruneAt.time_since_epoch().count() == 0 ||
-				(now - _dotCooldownsLastPruneAt) > kDotCooldownPruneInterval) {
-				_dotCooldownsLastPruneAt = now;
+		if (_combatState.dotCooldowns.size() > kDotCooldownMaxEntries) {
+			if (_combatState.dotCooldownsLastPruneAt.time_since_epoch().count() == 0 ||
+				(now - _combatState.dotCooldownsLastPruneAt) > kDotCooldownPruneInterval) {
+				_combatState.dotCooldownsLastPruneAt = now;
 
-				for (auto it = _dotCooldowns.begin(); it != _dotCooldowns.end();) {
+				for (auto it = _combatState.dotCooldowns.begin(); it != _combatState.dotCooldowns.end();) {
 					if ((now - it->second) > kDotCooldownTtl) {
-						it = _dotCooldowns.erase(it);
+						it = _combatState.dotCooldowns.erase(it);
 					} else {
 						++it;
 					}

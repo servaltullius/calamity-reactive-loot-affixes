@@ -46,11 +46,11 @@ namespace CalamityAffixes
 		const std::vector<std::size_t>* prefixPool = nullptr;
 		const std::vector<std::size_t>* suffixPool = nullptr;
 		if (_loot.sharedPool) {
-			prefixPool = std::addressof(_lootSharedAffixes);
-			suffixPool = std::addressof(_lootSharedSuffixes);
+			prefixPool = std::addressof(_affixRegistry.lootSharedAffixes);
+			suffixPool = std::addressof(_affixRegistry.lootSharedSuffixes);
 		} else {
-			prefixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_lootWeaponAffixes) : std::addressof(_lootArmorAffixes);
-			suffixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_lootWeaponSuffixes) : std::addressof(_lootArmorSuffixes);
+			prefixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_affixRegistry.lootWeaponAffixes) : std::addressof(_affixRegistry.lootArmorAffixes);
+			suffixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_affixRegistry.lootWeaponSuffixes) : std::addressof(_affixRegistry.lootArmorSuffixes);
 		}
 
 		if (!prefixPool || prefixPool->empty()) {

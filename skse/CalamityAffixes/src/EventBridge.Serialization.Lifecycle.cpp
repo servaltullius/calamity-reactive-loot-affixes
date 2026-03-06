@@ -7,8 +7,6 @@
 
 namespace CalamityAffixes
 {
-	void ClearTrapRuntimeState() noexcept;
-
 	void EventBridge::Revert(SKSE::SerializationInterface*)
 	{
 		const std::scoped_lock lock(_stateMutex);
@@ -24,24 +22,8 @@ namespace CalamityAffixes
 		_instanceAffixes.clear();
 		_equippedInstanceKeysByToken.clear();
 		_equippedTokenCacheReady = false;
-		_lootPrefixSharedBag = {};
-		_lootPrefixWeaponBag = {};
-		_lootPrefixArmorBag = {};
-		_lootSuffixSharedBag = {};
-		_lootSuffixWeaponBag = {};
-		_lootSuffixArmorBag = {};
-		_lootPreviewAffixes.clear();
-		_lootPreviewRecent.clear();
-		_lootEvaluatedInstances.clear();
-		_lootEvaluatedRecent.clear();
-		_lootEvaluatedInsertionsSincePrune = 0;
-		_lootCurrencyRollLedger.clear();
-		_lootCurrencyRollLedgerRecent.clear();
-		_lootChanceEligibleFailStreak = 0;
-		_runewordFragmentFailStreak = 0;
-		_reforgeOrbFailStreak = 0;
+		_lootState.ResetForLoadOrRevert();
 		_activeCounts.clear();
-		_activeSlotPenalty.clear();
 		_activeCritDamageBonusPct = 0.0f;
 		_activeHitTriggerAffixIndices.clear();
 		_activeIncomingHitTriggerAffixIndices.clear();
@@ -49,47 +31,14 @@ namespace CalamityAffixes
 		_activeKillTriggerAffixIndices.clear();
 		_activeLowHealthTriggerAffixIndices.clear();
 		_instanceStates.clear();
-		_runewordRuneFragments.clear();
-		_runewordInstanceStates.clear();
-		_runewordSelectedBaseKey.reset();
-		_runewordBaseCycleCursor = 0;
-		_runewordRecipeCycleCursor = 0;
-		_runewordTransmuteInProgress = false;
-		_playerContainerStash.clear();
-		_traps.clear();
-		_hasActiveTraps.store(false, std::memory_order_relaxed);
-		_dotCooldowns.clear();
-		_dotCooldownsLastPruneAt = {};
-		_dotObservedMagicEffects.clear();
-		_dotTagSafetyWarned = false;
-		_dotObservedMagicEffectsCapWarned = false;
-		_dotTagSafetySuppressed = false;
-		_perTargetCooldownStore.Clear();
-		_nonHostileFirstHitGate.Clear();
+		_runewordState.ResetSelectionAndProgress();
+		_trapState.Reset();
 		_corpseExplosionSeenCorpses.clear();
 		_summonCorpseExplosionSeenCorpses.clear();
-		_lootRerollGuard.Reset();
 		_corpseExplosionState = {};
 		_summonCorpseExplosionState = {};
-		_procDepth = 0;
-		_healthDamageHookSeen = false;
-		_healthDamageHookLastAt = {};
-		_castOnCritNextAllowed = {};
-		_castOnCritCycleCursor = 0;
-		_lastHitAt = {};
-		_lastHit = {};
-		_lastPapyrusHitEventAt = {};
-		_lastPapyrusHit = {};
-		_recentOwnerHitAt.clear();
-		_recentOwnerKillAt.clear();
-		_recentOwnerIncomingHitAt.clear();
-		_lowHealthTriggerConsumed.clear();
-		_lowHealthLastObservedPct.clear();
-		_triggerProcBudgetWindowStartMs = 0u;
-		_triggerProcBudgetConsumed = 0u;
-		_lastHealthDamageSignature = 0;
-		_lastHealthDamageSignatureAt = {};
-		_miscCurrencyMigrated = false;
+		_combatState.ResetTransientState();
+			_miscCurrencyMigrated = false;
 		_miscCurrencyRecovered = false;
 
 		for (auto& affix : _affixes) {
@@ -97,7 +46,6 @@ namespace CalamityAffixes
 		}
 
 		Hooks::ClearRuntimeState();
-		ClearTrapRuntimeState();
 	}
 
 	void EventBridge::OnPostLoadGame()
@@ -135,7 +83,7 @@ namespace CalamityAffixes
 
 		{
 			const std::scoped_lock lock(_stateMutex);
-			_pendingDroppedRefDeletes.push_back(refHandle);
+			_lootState.pendingDroppedRefDeletes.push_back(refHandle);
 		}
 		ScheduleDroppedRefDeleteDrain();
 	}
@@ -144,13 +92,13 @@ namespace CalamityAffixes
 	{
 		{
 			const std::scoped_lock lock(_stateMutex);
-			if (_pendingDroppedRefDeletes.empty()) {
+			if (_lootState.pendingDroppedRefDeletes.empty()) {
 				return;
 			}
 		}
 
 		bool expected = false;
-		if (!_dropDeleteDrainScheduled.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
+		if (!_lootState.dropDeleteDrainScheduled.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
 			return;
 		}
 
@@ -164,7 +112,7 @@ namespace CalamityAffixes
 		}
 
 		// Task interface unavailable: keep pending queue for later safe drain.
-		_dropDeleteDrainScheduled.store(false, std::memory_order_release);
+		_lootState.dropDeleteDrainScheduled.store(false, std::memory_order_release);
 	}
 
 	void EventBridge::DrainPendingDroppedRefDeletes()
@@ -172,19 +120,19 @@ namespace CalamityAffixes
 		std::vector<LootRerollGuard::RefHandle> pending;
 		{
 			const std::scoped_lock lock(_stateMutex);
-			pending.swap(_pendingDroppedRefDeletes);
+			pending.swap(_lootState.pendingDroppedRefDeletes);
 		}
 
 		for (const auto refHandle : pending) {
 			ProcessDroppedRefDeleted(refHandle);
 		}
 
-		_dropDeleteDrainScheduled.store(false, std::memory_order_release);
+		_lootState.dropDeleteDrainScheduled.store(false, std::memory_order_release);
 
 		bool hasMorePending = false;
 		{
 			const std::scoped_lock lock(_stateMutex);
-			hasMorePending = !_pendingDroppedRefDeletes.empty();
+			hasMorePending = !_lootState.pendingDroppedRefDeletes.empty();
 		}
 		if (hasMorePending) {
 			ScheduleDroppedRefDeleteDrain();
@@ -202,7 +150,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 
-		const auto keyOpt = _lootRerollGuard.ConsumeIfPlayerDropDeleted(a_refHandle);
+		const auto keyOpt = _lootState.rerollGuard.ConsumeIfPlayerDropDeleted(a_refHandle);
 		if (!keyOpt) {
 			return;
 		}
@@ -210,8 +158,8 @@ namespace CalamityAffixes
 		const auto key = *keyOpt;
 		const auto it = _instanceAffixes.find(key);
 		const bool wasLootEvaluated = IsLootEvaluatedInstance(key);
-		const bool hasRunewordState = _runewordInstanceStates.contains(key);
-		const bool isSelectedRunewordBase = (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key);
+		const bool hasRunewordState = _runewordState.instanceStates.contains(key);
+		const bool isSelectedRunewordBase = (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == key);
 		if (it == _instanceAffixes.end() &&
 			!wasLootEvaluated &&
 			!hasRunewordState &&
@@ -229,9 +177,9 @@ namespace CalamityAffixes
 		}
 		ForgetLootEvaluatedInstance(key);
 		EraseInstanceRuntimeStates(key);
-		_runewordInstanceStates.erase(key);
-		if (_runewordSelectedBaseKey && *_runewordSelectedBaseKey == key) {
-			_runewordSelectedBaseKey.reset();
+		_runewordState.instanceStates.erase(key);
+		if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == key) {
+			_runewordState.selectedBaseKey.reset();
 		}
 		if (_loot.debugLog) {
 			SKSE::log::debug("CalamityAffixes: pruned instance affix (world ref deleted) (key={:016X}).", key);
@@ -305,19 +253,19 @@ namespace CalamityAffixes
 			static_cast<std::int32_t>(kRecoveryOrbGrant), nullptr);
 
 		// Grant rune fragments: give 1 of each known rune type the player doesn't own.
-		if (_runewordRuneNameByToken.empty()) {
+		if (_runewordState.runeNameByToken.empty()) {
 			InitializeRunewordCatalog();
 		}
 		std::uint32_t fragmentsGranted = 0u;
-		for (const auto& [runeToken, runeName] : _runewordRuneNameByToken) {
+		for (const auto& [runeToken, runeName] : _runewordState.runeNameByToken) {
 			if (runeToken == 0u || runeName.empty()) {
 				continue;
 			}
 			const auto owned = RunewordDetail::GetOwnedRunewordFragmentCount(
-				player, _runewordRuneNameByToken, runeToken);
+				player, _runewordState.runeNameByToken, runeToken);
 			if (owned == 0u) {
 				const auto given = RunewordDetail::GrantRunewordFragments(
-					player, _runewordRuneNameByToken, runeToken, 1u);
+					player, _runewordState.runeNameByToken, runeToken, 1u);
 				fragmentsGranted += given;
 			}
 		}

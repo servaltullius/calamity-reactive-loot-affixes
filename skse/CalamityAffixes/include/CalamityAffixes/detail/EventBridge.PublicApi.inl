@@ -24,14 +24,14 @@
 		// Runtime polling/feature gates.
 		// Tick lightweight runtime systems that need polling (e.g., ground traps).
 		void TickTraps();
-		[[nodiscard]] bool HasActiveTraps() const noexcept { return _hasActiveTraps.load(std::memory_order_relaxed); }
-		[[nodiscard]] bool IsRuntimeEnabled() const noexcept { return _runtimeEnabled; }
-		[[nodiscard]] bool IsHealthDamageRoutingDisabled() const noexcept { return _disableHealthDamageRouting; }
-		[[nodiscard]] bool IsTrapSystemTickDisabled() const noexcept { return _disableTrapSystemTick; }
-		[[nodiscard]] bool AllowsPlayerHealthDamageHook() const noexcept { return _allowPlayerHealthDamageHook; }
+		[[nodiscard]] bool HasActiveTraps() const noexcept { return _trapState.hasActiveTraps.load(std::memory_order_relaxed); }
+		[[nodiscard]] bool IsRuntimeEnabled() const noexcept { return _runtimeSettings.enabled; }
+		[[nodiscard]] bool IsHealthDamageRoutingDisabled() const noexcept { return _runtimeSettings.disableHealthDamageRouting; }
+		[[nodiscard]] bool IsTrapSystemTickDisabled() const noexcept { return _runtimeSettings.disableTrapSystemTick; }
+		[[nodiscard]] bool AllowsPlayerHealthDamageHook() const noexcept { return _runtimeSettings.allowPlayerHealthDamageHook; }
 		[[nodiscard]] bool AllowsNonHostilePlayerOwnedOutgoingProcs() const noexcept
 		{
-			return _allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
+			return _runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
 		}
 		[[nodiscard]] bool ResolveNonHostileOutgoingFirstHitAllowance(
 			RE::Actor* a_owner,

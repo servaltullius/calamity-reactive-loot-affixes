@@ -41,8 +41,9 @@ namespace RuntimeGateStoreChecks
 		const fs::path testFile{ __FILE__ };
 		const fs::path repoRoot = testFile.parent_path().parent_path();
 		const fs::path headerFile = repoRoot / "include" / "CalamityAffixes" / "EventBridge.h";
+		const fs::path lootRuntimeHeaderFile = repoRoot / "include" / "CalamityAffixes" / "LootRuntimeState.h";
 		const fs::path constantsInlFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Constants.inl";
-		const fs::path assignFile = repoRoot / "src" / "EventBridge.Loot.Assign.cpp";
+		const fs::path lootServiceFile = repoRoot / "src" / "EventBridge.Loot.Service.cpp";
 		const fs::path serializationSaveFile = repoRoot / "src" / "EventBridge.Serialization.Save.cpp";
 		const fs::path serializationLoadFile = repoRoot / "src" / "EventBridge.Serialization.Load.cpp";
 		const fs::path serializationLifecycleFile = repoRoot / "src" / "EventBridge.Serialization.Lifecycle.cpp";
@@ -89,34 +90,37 @@ namespace RuntimeGateStoreChecks
 		};
 
 		const auto headerText = loadText(headerFile);
-		if (!headerText.has_value()) {
+		const auto lootRuntimeHeaderText = loadText(lootRuntimeHeaderFile);
+		if (!headerText.has_value() || !lootRuntimeHeaderText.has_value()) {
 			std::cerr << "loot_currency_ledger_policy: failed to open header source: " << headerFile << "\n";
 			return false;
 		}
-		// Constants may live in EventBridge.h itself or in the extracted detail/EventBridge.Constants.inl.
-		std::string headerAndConstants = *headerText;
+		// Constants may live in EventBridge.h itself or in the extracted detail/EventBridge.Constants.inl,
+		// while loot runtime ownership lives in LootRuntimeState.h.
+		std::string headerAndConstants = *headerText + *lootRuntimeHeaderText;
 		if (const auto constantsText = loadText(constantsInlFile); constantsText.has_value()) {
 			headerAndConstants += *constantsText;
 		}
 		if (headerAndConstants.find("kSerializationRecordLootCurrencyLedger") == std::string::npos ||
 			headerAndConstants.find("kLootCurrencyLedgerSerializationVersion") == std::string::npos ||
-			headerAndConstants.find("_lootCurrencyRollLedger") == std::string::npos ||
-			headerAndConstants.find("_lootCurrencyRollLedgerRecent") == std::string::npos) {
-			std::cerr << "loot_currency_ledger_policy: ledger storage/constants missing from EventBridge.h\n";
+			headerAndConstants.find("LootRuntimeState _lootState{};") == std::string::npos ||
+			headerAndConstants.find("currencyRollLedger{}") == std::string::npos ||
+			headerAndConstants.find("currencyRollLedgerRecent{}") == std::string::npos) {
+			std::cerr << "loot_currency_ledger_policy: ledger storage/constants missing from extracted runtime ownership headers\n";
 			return false;
 		}
 
-			const auto assignText = loadText(assignFile);
-			if (!assignText.has_value()) {
-				std::cerr << "loot_currency_ledger_policy: failed to open assign source: " << assignFile << "\n";
+			const auto serviceText = loadText(lootServiceFile);
+			if (!serviceText.has_value()) {
+				std::cerr << "loot_currency_ledger_policy: failed to open loot service source: " << lootServiceFile << "\n";
 				return false;
 			}
-			if (assignText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos ||
-				assignText->find("FinalizeLootCurrencyLedgerRoll(") == std::string::npos ||
-				assignText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos ||
-				assignText->find("_lootCurrencyRollLedger.emplace(") == std::string::npos ||
-				assignText->find("_lootCurrencyRollLedger.erase(oldest)") == std::string::npos) {
-				std::cerr << "loot_currency_ledger_policy: source-keyed ledger behavior missing in EventBridge.Loot.Assign.cpp\n";
+			if (serviceText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos ||
+				serviceText->find("FinalizeLootCurrencyLedgerRoll(") == std::string::npos ||
+				serviceText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos ||
+				serviceText->find("_lootState.currencyRollLedger.emplace(") == std::string::npos ||
+				serviceText->find("_lootState.currencyRollLedger.erase(oldest)") == std::string::npos) {
+				std::cerr << "loot_currency_ledger_policy: source-keyed ledger behavior missing in EventBridge.Loot.Service.cpp\n";
 				return false;
 			}
 
@@ -132,10 +136,10 @@ namespace RuntimeGateStoreChecks
 		}
 		if (serializationText.find("kSerializationRecordLootCurrencyLedger") == std::string::npos ||
 			serializationText.find("kLootCurrencyLedgerSerializationVersion") == std::string::npos ||
-			serializationText.find("_lootCurrencyRollLedger.size()") == std::string::npos ||
-			serializationText.find("_lootCurrencyRollLedger.emplace(key, dayStamp)") == std::string::npos ||
-			serializationText.find("_lootCurrencyRollLedger.clear()") == std::string::npos ||
-			serializationText.find("_lootCurrencyRollLedgerRecent.clear()") == std::string::npos) {
+			serializationText.find("_lootState.currencyRollLedger.size()") == std::string::npos ||
+			serializationText.find("_lootState.currencyRollLedger.emplace(key, dayStamp)") == std::string::npos ||
+			serializationText.find("_lootState.ResetForLoadOrRevert();") == std::string::npos ||
+			serializationText.find("_lootState.currencyRollLedgerRecent.clear()") == std::string::npos) {
 			std::cerr << "loot_currency_ledger_policy: save/load/revert ledger handling missing in serialization sources\n";
 			return false;
 		}
@@ -174,6 +178,52 @@ namespace RuntimeGateStoreChecks
 					triggerText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos)) {
 				std::cerr << "loot_currency_ledger_policy: activation-time corpse/container currency roll path missing in EventBridge.Triggers.ActivateEvent.cpp\n";
 				return false;
+		}
+
+		return true;
+	}
+
+	bool CheckLootServiceExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path cmakeFile = repoRoot / "CMakeLists.txt";
+		const fs::path assignFile = repoRoot / "src" / "EventBridge.Loot.Assign.cpp";
+		const fs::path serviceFile = repoRoot / "src" / "EventBridge.Loot.Service.cpp";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto cmakeText = loadText(cmakeFile);
+		const auto assignText = loadText(assignFile);
+		const auto serviceText = loadText(serviceFile);
+		if (!cmakeText.has_value() || !assignText.has_value() || !serviceText.has_value()) {
+			std::cerr << "loot_service_extraction: failed to load source files\n";
+			return false;
+		}
+
+		if (cmakeText->find("src/EventBridge.Loot.Service.cpp") == std::string::npos ||
+			assignText->find("void EventBridge::EnsureMultiAffixDisplayName(") == std::string::npos ||
+			assignText->find("void EventBridge::CleanupInvalidLootInstance(") == std::string::npos ||
+			assignText->find("void EventBridge::SanitizeAllTrackedLootInstancesForCurrentLootRules(") == std::string::npos ||
+			assignText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") != std::string::npos ||
+			assignText->find("bool EventBridge::RollLootChanceGateForEligibleInstance()") != std::string::npos ||
+			assignText->find("bool EventBridge::IsLootObjectEligibleForAffixes(") != std::string::npos ||
+			serviceText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") == std::string::npos ||
+			serviceText->find("bool EventBridge::RollLootChanceGateForEligibleInstance()") == std::string::npos ||
+			serviceText->find("bool EventBridge::IsLootObjectEligibleForAffixes(") == std::string::npos ||
+			serviceText->find("bool EventBridge::TryBeginLootCurrencyLedgerRoll(") == std::string::npos ||
+			serviceText->find("void EventBridge::ProcessLootAcquired(") == std::string::npos) {
+			std::cerr << "loot_service_extraction: loot service/mutation responsibilities are not cleanly separated\n";
+			return false;
 		}
 
 		return true;
@@ -218,16 +268,11 @@ namespace RuntimeGateStoreChecks
 			return count;
 		};
 
-		const std::array<std::string_view, 8> requiredBothLoadAndRevert{
-			"_activeCounts.clear();",
-			"_activeHitTriggerAffixIndices.clear();",
-			"_dotCooldowns.clear();",
-			"_perTargetCooldownStore.Clear();",
-			"_nonHostileFirstHitGate.Clear();",
-			"_recentOwnerHitAt.clear();",
-			"_lowHealthTriggerConsumed.clear();",
-			"_triggerProcBudgetWindowStartMs = 0u;"
-		};
+			const std::array<std::string_view, 3> requiredBothLoadAndRevert{
+				"_activeCounts.clear();",
+				"_activeHitTriggerAffixIndices.clear();",
+				"_combatState.ResetTransientState();",
+			};
 
 		for (const auto needle : requiredBothLoadAndRevert) {
 			if (countOccurrences(needle) < 2) {
@@ -340,9 +385,11 @@ namespace RuntimeGateStoreChecks
 		if (source.find("ResolveSpecialActionProcChancePct") == std::string::npos ||
 			source.find("RollProcChance") == std::string::npos ||
 			source.find("PassesLuckyHitGate(affix, Trigger::kHit, a_hitData, now)") == std::string::npos ||
-			source.find("if (_procDepth > 0)") == std::string::npos ||
+			source.find("if (_combatState.procDepth > 0)") == std::string::npos ||
 			source.find("sourceEditorId.starts_with(\"CAFF_\")") == std::string::npos ||
 			source.find("ResolveArchmageResourceUsage(") == std::string::npos ||
+			source.find("selection.bestExtraDamage = extraDamage;") == std::string::npos ||
+			source.find("selection.bestExtraCost = extraCost;") == std::string::npos ||
 			source.find("ExecuteArchmageCast(") == std::string::npos) {
 			std::cerr << "special_action_proc_safety: special-action proc/lucky-hit/recursion guards are missing\n";
 			return false;
@@ -367,13 +414,19 @@ namespace RuntimeGateStoreChecks
 			(std::istreambuf_iterator<char>(in)),
 			std::istreambuf_iterator<char>());
 
-		if (source.find("if (!TryConsumeCorpseExplosionBudget(") == std::string::npos ||
+		const auto budgetPos = source.find("if (!TryConsumeCorpseExplosionBudget(");
+		const auto icdPos = source.find("bestAffix.nextAllowed = now + bestAffix.icd;");
+		if (budgetPos == std::string::npos ||
 			source.find("CorpseExplosionBudgetDenyReason::kDuplicateCorpse") == std::string::npos ||
 			source.find("CorpseExplosionBudgetDenyReason::kRateLimited") == std::string::npos ||
 			source.find("CorpseExplosionBudgetDenyReason::kChainDepthExceeded") == std::string::npos ||
 			source.find("seenCorpses.size() > 512u") == std::string::npos ||
 			source.find("kCorpseExplosionDefaultMaxTargets = 48u") == std::string::npos ||
-			source.find("if (usesPerTargetIcd && targetsHit > 0u)") == std::string::npos) {
+			source.find("RollProcChance(_rng, _rngMutex, chancePct)") == std::string::npos ||
+			source.find("selection.bestUsesPerTargetIcd") == std::string::npos ||
+			source.find("if (selection.bestUsesPerTargetIcd && targetsHit > 0u)") == std::string::npos ||
+			icdPos == std::string::npos ||
+			icdPos < budgetPos) {
 			std::cerr << "corpse_explosion_budget_safety: corpse budget/rate-limit/target-cap guards are missing\n";
 			return false;
 		}
@@ -398,8 +451,8 @@ namespace RuntimeGateStoreChecks
 			std::istreambuf_iterator<char>());
 
 		if (source.find("IsLootSourceCorpseChestOrWorld(") == std::string::npos ||
-			source.find("_lootRerollGuard.ConsumeIfPlayerDropPickup(") == std::string::npos ||
-			source.find("_playerContainerStash[stashKey] += a_event->itemCount;") == std::string::npos ||
+			source.find("_lootState.rerollGuard.ConsumeIfPlayerDropPickup(") == std::string::npos ||
+			source.find("_lootState.playerContainerStash[stashKey] += a_event->itemCount;") == std::string::npos ||
 			source.find("skipping loot roll (player dropped + re-picked)") == std::string::npos ||
 			source.find("skipping loot roll (player stashed + retrieved)") == std::string::npos) {
 			std::cerr << "loot_reroll_exploit_guard: anti-reroll pickup guards are missing\n";
@@ -427,7 +480,8 @@ namespace RuntimeGateStoreChecks
 		const fs::path configJsonFile = repoRoot / "Data" / "MCM" / "Config" / "CalamityAffixes" / "config.json";
 		const fs::path mcmConfigScriptFile = repoRoot / "Data" / "Scripts" / "Source" / "CalamityAffixes_MCMConfig.psc";
 		const fs::path modeControlScriptFile = repoRoot / "Data" / "Scripts" / "Source" / "CalamityAffixes_ModeControl.psc";
-		const fs::path triggerEventsFile = repoRoot / "skse" / "CalamityAffixes" / "src" / "EventBridge.Triggers.ModCallback.cpp";
+			const fs::path triggerDispatchFile = repoRoot / "skse" / "CalamityAffixes" / "src" / "EventBridge.Triggers.ModCallback.cpp";
+			const fs::path triggerHandlersFile = repoRoot / "skse" / "CalamityAffixes" / "src" / "EventBridge.Triggers.ModCallback.Handlers.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
@@ -498,21 +552,25 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
-		const auto triggerText = loadText(triggerEventsFile);
-		if (!triggerText.has_value()) {
-			std::cerr << "mcm_drop_chance_bridge: failed to open trigger source: " << triggerEventsFile << "\n";
-			return false;
-		}
-		if (triggerText->find("eventName == kMcmSetRunewordFragmentChanceEvent") == std::string::npos ||
-			triggerText->find("_loot.runewordFragmentChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);") == std::string::npos ||
-			triggerText->find("eventName == kMcmSetReforgeOrbChanceEvent") == std::string::npos ||
-			triggerText->find("_loot.reforgeOrbChancePercent = std::clamp(a_event->numArg, 0.0f, 100.0f);") == std::string::npos ||
-			triggerText->find("previousRunewordChance") == std::string::npos ||
-			triggerText->find("previousReforgeChance") == std::string::npos ||
-			triggerText->find("shouldEmitChanceNotification(") == std::string::npos) {
-			std::cerr << "mcm_drop_chance_bridge: trigger event handlers are missing\n";
-			return false;
-		}
+			std::string triggerTextCombined;
+			for (const auto& sf : { triggerDispatchFile, triggerHandlersFile }) {
+				const auto part = loadText(sf);
+				if (!part.has_value()) {
+					std::cerr << "mcm_drop_chance_bridge: failed to open trigger source: " << sf << "\n";
+					return false;
+				}
+				triggerTextCombined += *part;
+			}
+			if (triggerTextCombined.find("eventName == kMcmSetRunewordFragmentChanceEvent") == std::string::npos ||
+				triggerTextCombined.find("_loot.runewordFragmentChancePercent = std::clamp(a_numArg, 0.0f, 100.0f);") == std::string::npos ||
+				triggerTextCombined.find("eventName == kMcmSetReforgeOrbChanceEvent") == std::string::npos ||
+				triggerTextCombined.find("_loot.reforgeOrbChancePercent = std::clamp(a_numArg, 0.0f, 100.0f);") == std::string::npos ||
+				triggerTextCombined.find("previousRunewordChance") == std::string::npos ||
+				triggerTextCombined.find("previousReforgeChance") == std::string::npos ||
+				triggerTextCombined.find("ShouldEmitChanceNotification(") == std::string::npos) {
+				std::cerr << "mcm_drop_chance_bridge: trigger event handlers are missing\n";
+				return false;
+			}
 
 		return true;
 	}

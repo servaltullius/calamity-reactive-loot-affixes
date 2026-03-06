@@ -30,6 +30,14 @@ namespace RuntimeGateStoreChecks
 	bool CheckNonHostileFirstHitGate();
 	bool CheckPerTargetCooldownStore();
 	bool CheckHandleHealthDamageVfuncIndexPolicy();
+	bool CheckHooksDispatchExtractionPolicy();
+	bool CheckPluginLoggingExceptionSafetyPolicy();
+	bool CheckRebuildActiveCountsLoggingPolicy();
+	bool CheckHealthDamageSignatureWindowPolicy();
+	bool CheckTesHitFallbackSourceValidationPolicy();
+	bool CheckConfigLoadPipelineExtractionPolicy();
+	bool CheckAffixSpecialActionStateExtractionPolicy();
+	bool CheckTriggerProcPolicyExtraction();
 	bool CheckUniformLootRollSelection();
 	bool CheckShuffleBagLootRollSelection();
 	bool CheckWeightedShuffleBagLootRollSelection();
@@ -40,6 +48,7 @@ namespace RuntimeGateStoreChecks
 
 	bool CheckRunewordTooltipOverlayPolicy();
 	bool CheckLootPreviewRuntimePolicy();
+	bool CheckLootServiceExtractionPolicy();
 	bool CheckLootRerollExploitGuardPolicy();
 	bool CheckLootCurrencyLedgerSerializationPolicy();
 	bool CheckLootEligibilityCleanupSafetyPolicy();
@@ -54,7 +63,10 @@ namespace RuntimeGateStoreChecks
 	bool CheckRunewordCompletedSelectionPolicy();
 	bool CheckRunewordRecipeEntriesMappingPolicy();
 	bool CheckRunewordRecipeTooltipTextPolicy();
+	bool CheckRunewordUiContractExtractionPolicy();
+	bool CheckRunewordRuntimeStateExtractionPolicy();
 	bool CheckRunewordCoverageConsistencyPolicy();
+	bool CheckAffixRegistryStateExtractionPolicy();
 	bool CheckLowHealthTriggerSnapshotPolicy();
 	bool CheckRunewordRecipeRuntimeEligibilityPolicy();
 	bool CheckRunewordContractSnapshotPolicy();
@@ -65,11 +77,18 @@ namespace RuntimeGateStoreChecks
 	bool CheckRunewordReforgeSafetyPolicy();
 	bool CheckPrismaTooltipImmediateRefreshPolicy();
 	bool CheckPrismaTooltipWorkerSchedulingPolicy();
+	bool CheckPrismaTooltipTelemetryPolicy();
 
 	bool CheckRuntimeUserSettingsDebounceBehavior();
 	bool CheckExternalUserSettingsPersistencePolicy();
 	bool CheckRuntimeUserSettingsRoundTripFieldPolicy();
-	bool CheckEventBridgeStateMutexReentrancyPolicy();
+bool CheckEventBridgeStateMutexReentrancyPolicy();
+bool CheckCombatRuntimeStateResetBehavior();
+bool CheckCombatRuntimeStateExtractionPolicy();
+bool CheckLootRuntimeStateResetBehavior();
+bool CheckLootRuntimeStateExtractionPolicy();
+bool CheckConfigReloadTransientRuntimeResetPolicy();
+bool CheckRunewordUiContractDefaults();
 
 	bool CheckPerTargetCooldownStorePruning();
 	bool CheckPerTargetCooldownStoreIndependence();

@@ -20,7 +20,7 @@ Usage: tools/release_verify.sh [options]
 Runs the "static" verification chain that we expect before shipping a release.
 
 Options:
-  --fast          Skip slower steps (vibe doctor, cmake build) but still run core checks.
+  --fast          Skip slower steps (vibe doctor, full default build) but still compile CalamityAffixes and run core checks.
   --strict        Fail if SKSE build dir is missing.
   --no-strict     Allow SKSE checks to be skipped when build dir is missing.
   --with-mo2-zip  Also run tools/build_mo2_zip.sh (requires Papyrus compiler + Scripts.zip paths).
@@ -87,10 +87,10 @@ fi
 spec_manifest="${repo_root}/affixes/affixes.modules.json"
 spec_json="${repo_root}/affixes/affixes.json"
 if [[ -f "${spec_manifest}" ]]; then
-  step "Compose modular affix spec"
+  step "Check modular affix spec composition"
   python3 "${repo_root}/tools/compose_affixes.py" \
     --manifest "${spec_manifest}" \
-    --output "${spec_json}"
+    --check
 fi
 
 step "vibe-kit doctor (optional)"
@@ -102,17 +102,20 @@ fi
 
 step "Spec lint + generated runtime config sync"
 python3 "${repo_root}/tools/lint_affixes.py" \
-  --spec "${repo_root}/affixes/affixes.json" \
+  --spec "${spec_json}" \
   --manifest "${repo_root}/affixes/affixes.modules.json" \
   --generated "${repo_root}/Data/SKSE/Plugins/CalamityAffixes/affixes.json"
 
-step "compose_affixes workflow tests"
-python3 "${repo_root}/tools/tests/test_compose_affixes.py"
+step "tools workflow tests"
+python3 -m unittest discover -s "${repo_root}/tools/tests" -p 'test_*.py'
 
 step "MCM JSON sanity"
 python3 -m json.tool "${repo_root}/Data/MCM/Config/CalamityAffixes/config.json" >/dev/null
 python3 -m json.tool "${repo_root}/Data/MCM/Config/CalamityAffixes/keybinds.json" >/dev/null
 echo "MCM config/keybinds: OK"
+
+step "Runtime contract snapshot sync"
+python3 "${repo_root}/tools/verify_runtime_contract_sync.py"
 
 step "Generator tests"
 (
@@ -124,7 +127,7 @@ skse_build_dir="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel"
 if [[ -d "${skse_build_dir}" ]]; then
   step "SKSE static checks (cmake + ctest)"
   if [[ "${fast}" -eq 1 ]]; then
-    cmake --build "${skse_build_dir}" --target CalamityAffixesStaticChecks --parallel "${jobs}"
+    cmake --build "${skse_build_dir}" --target CalamityAffixes --parallel "${jobs}"
   else
     cmake --build "${skse_build_dir}" --parallel "${jobs}"
   fi

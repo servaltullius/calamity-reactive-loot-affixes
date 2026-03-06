@@ -8,8 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(CommonLibSSE CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-	set(headers
-	    include/CalamityAffixes/CombatContext.h
+		set(headers
+		    include/CalamityAffixes/CombatContext.h
+		    include/CalamityAffixes/CombatRuntimeState.h
+		    include/CalamityAffixes/AffixSpecialActionState.h
 	    include/CalamityAffixes/AffixToken.h
 	    include/CalamityAffixes/EventBridge.h
 	    include/CalamityAffixes/detail/EventBridge.Types.inl
@@ -19,10 +21,13 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/InstanceStateKey.h
 	    include/CalamityAffixes/LootCurrencyLedger.h
 	    include/CalamityAffixes/LootRerollGuard.h
+	    include/CalamityAffixes/LootShuffleBagState.h
+	    include/CalamityAffixes/LootRuntimeState.h
 	    include/CalamityAffixes/LootUiGuards.h
 	    include/CalamityAffixes/NonHostileFirstHitGate.h
 	    include/CalamityAffixes/Papyrus.h
 	    include/CalamityAffixes/PerTargetCooldownStore.h
+	    include/CalamityAffixes/PluginLogging.h
 	    include/CalamityAffixes/PointerSafety.h
 		    include/CalamityAffixes/PlayerOwnership.h
 		    include/CalamityAffixes/PrismaLayoutPersistence.h
@@ -46,6 +51,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Config.Reset.cpp
 	    src/EventBridge.Config.LootRuntime.cpp
 	    src/EventBridge.Config.RuntimeSettings.cpp
+	    src/EventBridge.Config.LoadPipeline.cpp
 	    src/EventBridge.Config.AffixParsing.cpp
 	    src/EventBridge.Config.AffixTriggerParsing.cpp
 	    src/EventBridge.Config.AffixActionParsing.cpp
@@ -72,6 +78,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Loot.Runeword.Policy.cpp
 	    src/EventBridge.Loot.Runtime.cpp
 	    src/EventBridge.Loot.TooltipResolution.cpp
+	    src/EventBridge.Loot.Service.cpp
 	    src/EventBridge.Loot.PreviewClaimStore.cpp
 	    src/EventBridge.Loot.AffixSlotRoll.cpp
 	    src/EventBridge.Loot.Assign.cpp
@@ -83,6 +90,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Triggers.ActivateEvent.cpp
 	    src/EventBridge.Triggers.MagicEffectApply.cpp
 	    src/EventBridge.Triggers.ModCallback.cpp
+	    src/EventBridge.Triggers.ModCallback.Handlers.cpp
+	    src/EventBridge.Triggers.Policy.cpp
 	    src/EventBridge.Triggers.ActiveCounts.cpp
 	    src/EventBridge.Actions.cpp
 	    src/EventBridge.Actions.Dispatch.cpp
@@ -96,6 +105,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Serialization.Load.cpp
 	    src/EventBridge.Serialization.Lifecycle.cpp
 	    src/Hooks.cpp
+	    src/Hooks.Dispatch.cpp
 	    src/Papyrus.cpp
 	    src/PrismaLayoutPersistence.cpp
 	    src/PrismaTooltip.cpp
