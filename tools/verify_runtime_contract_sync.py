@@ -43,6 +43,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="caff-runtime-contract-", dir=temp_parent) as temp_dir:
         temp_root = Path(temp_dir)
         generated_data_dir = temp_root / "Data"
+        generated_data_arg = generated_data_dir.relative_to(repo_run_root)
         cmd = [
             "dotnet",
             "run",
@@ -52,7 +53,7 @@ def main() -> int:
             "--spec",
             "affixes/affixes.json",
             "--data",
-            str(generated_data_dir),
+            generated_data_arg.as_posix(),
         ]
         result = subprocess.run(
             cmd,
