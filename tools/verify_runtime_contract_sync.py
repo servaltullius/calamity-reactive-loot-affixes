@@ -37,7 +37,10 @@ def main() -> int:
         print(f"runtime_contract sync: missing spec: {spec_path}", file=sys.stderr)
         return 1
 
-    with tempfile.TemporaryDirectory(prefix="caff-runtime-contract-") as temp_dir:
+    temp_parent = repo_run_root / ".tmp"
+    temp_parent.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.TemporaryDirectory(prefix="caff-runtime-contract-", dir=temp_parent) as temp_dir:
         temp_root = Path(temp_dir)
         generated_data_dir = temp_root / "Data"
         cmd = [
