@@ -1325,20 +1325,79 @@ namespace RuntimeGateStoreChecks
 				return std::string_view(*uiText).substr(bodyStart + 1, nextFunction - bodyStart - 1);
 			};
 
+			const auto extractElementOpenTagById = [&](std::string_view a_id) -> std::optional<std::string_view> {
+				const std::string marker = std::string("id=\"") + std::string(a_id) + "\"";
+				const auto start = uiText->find(marker);
+				if (start == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto tagStart = uiText->rfind('<', start);
+				if (tagStart == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto tagEnd = uiText->find('>', start);
+				if (tagEnd == std::string::npos) {
+					return std::nullopt;
+				}
+
+				return std::string_view(*uiText).substr(tagStart, tagEnd - tagStart + 1);
+			};
+
+			const auto tagHasClassToken = [](std::string_view a_tag, std::string_view a_token) {
+				const auto classStart = a_tag.find("class=\"");
+				if (classStart == std::string_view::npos) {
+					return false;
+				}
+
+				const auto valueStart = classStart + 7;
+				const auto valueEnd = a_tag.find('"', valueStart);
+				if (valueEnd == std::string_view::npos) {
+					return false;
+				}
+
+				const auto classValue = a_tag.substr(valueStart, valueEnd - valueStart);
+				std::string needle = std::string(" ") + std::string(a_token) + " ";
+				std::string haystack = std::string(" ") + std::string(classValue) + " ";
+				return haystack.find(needle) != std::string::npos;
+			};
+
 			const auto runewordBody = extractJsFunctionBody("function renderRunewordPanelState()");
 			const auto selectedBody = extractJsFunctionBody("function renderSelectedItemContext()");
 			const auto tooltipPlacementBody = extractJsFunctionBody("function applyTooltipPlacement()");
 			const auto openStateBody = extractJsFunctionBody("function applyControlPanelOpenState(nextOpen)");
+			const auto controlPanelTag = extractElementOpenTagById("controlPanel");
+			const auto progressTag = extractElementOpenTagById("runewordFlowProgress");
+			const auto baseStepTag = extractElementOpenTagById("runewordBaseStep");
+			const auto recipeStepTag = extractElementOpenTagById("runewordRecipeStep");
+			const auto actionStepTag = extractElementOpenTagById("runewordActionStep");
+			const auto insertButtonTag = extractElementOpenTagById("runewordInsertButton");
+			const auto debugPanelTag = extractElementOpenTagById("debugToolsPanel");
+			const auto debugSummaryTag = extractElementOpenTagById("debugSectionSummary");
 
 			if (uiText->find(":where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary):focus-visible") == std::string::npos ||
-				uiText->find("id=\"controlPanel\"\n        role=\"dialog\"") == std::string::npos ||
-				uiText->find("id=\"runewordFlowProgress\" class=\"rwProgressStrip\"") == std::string::npos ||
-				uiText->find("id=\"runewordBaseStep\" class=\"cpStepCard active\"") == std::string::npos ||
-				uiText->find("id=\"runewordRecipeStep\" class=\"cpStepCard muted\"") == std::string::npos ||
-				uiText->find("id=\"runewordActionStep\" class=\"cpStepCard cpActionCard muted\"") == std::string::npos ||
-				uiText->find("class=\"cpButton cpPrimaryButton\"") == std::string::npos ||
-				uiText->find("id=\"debugToolsPanel\" class=\"cpDangerDetails\"") == std::string::npos ||
-				uiText->find("id=\"debugSectionSummary\" class=\"cpDangerSummary\"") == std::string::npos ||
+				!controlPanelTag.has_value() ||
+				controlPanelTag->find("role=\"dialog\"") == std::string::npos ||
+				!progressTag.has_value() ||
+				!tagHasClassToken(*progressTag, "rwProgressStrip") ||
+				!baseStepTag.has_value() ||
+				!tagHasClassToken(*baseStepTag, "cpStepCard") ||
+				!tagHasClassToken(*baseStepTag, "active") ||
+				!recipeStepTag.has_value() ||
+				!tagHasClassToken(*recipeStepTag, "cpStepCard") ||
+				!tagHasClassToken(*recipeStepTag, "muted") ||
+				!actionStepTag.has_value() ||
+				!tagHasClassToken(*actionStepTag, "cpStepCard") ||
+				!tagHasClassToken(*actionStepTag, "cpActionCard") ||
+				!tagHasClassToken(*actionStepTag, "muted") ||
+				!insertButtonTag.has_value() ||
+				!tagHasClassToken(*insertButtonTag, "cpButton") ||
+				!tagHasClassToken(*insertButtonTag, "cpPrimaryButton") ||
+				!debugPanelTag.has_value() ||
+				!tagHasClassToken(*debugPanelTag, "cpDangerDetails") ||
+				!debugSummaryTag.has_value() ||
+				!tagHasClassToken(*debugSummaryTag, "cpDangerSummary") ||
 				uiText->find("function appendEmptyState(node, title, body, hint = \"\")") == std::string::npos ||
 				uiText->find("class=\"cpAffixPane\"") == std::string::npos ||
 				uiText->find("id=\"affixSelectedItemLabel\"") == std::string::npos ||
@@ -1351,7 +1410,7 @@ namespace RuntimeGateStoreChecks
 				selectedBody->find("affixSelectedItemName.textContent = viewModel.hasSelection") == std::string::npos ||
 				!runewordBody.has_value() ||
 				runewordBody->find("renderRunewordFlowProgress(actionState, state);") == std::string::npos ||
-				uiText->find("runewordInsertButton.classList.toggle(\"attention\", hasBase && hasRecipe && !isComplete);") == std::string::npos ||
+				uiText->find("runewordInsertButton.classList.toggle(\"attention\", canTransmute);") == std::string::npos ||
 				runewordBody->find("runewordActionHint.textContent = actionState.buttonHint;") == std::string::npos ||
 				!tooltipPlacementBody.has_value() ||
 				tooltipPlacementBody->find("appendEmptyState(") == std::string::npos ||

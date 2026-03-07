@@ -3432,7 +3432,7 @@
           isComplete ? "complete" : hasBase && hasRecipe ? "active" : "muted"
         );
         if (runewordInsertButton) {
-          runewordInsertButton.classList.toggle("attention", hasBase && hasRecipe && !isComplete);
+          runewordInsertButton.classList.toggle("attention", canTransmute);
         }
 
         if (!runewordFlowHint) {
