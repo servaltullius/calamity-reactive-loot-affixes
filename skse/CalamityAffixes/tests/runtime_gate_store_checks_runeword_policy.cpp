@@ -1372,6 +1372,9 @@ namespace RuntimeGateStoreChecks
 			const auto baseStepTag = extractElementOpenTagById("runewordBaseStep");
 			const auto recipeStepTag = extractElementOpenTagById("runewordRecipeStep");
 			const auto actionStepTag = extractElementOpenTagById("runewordActionStep");
+			const auto baseListTag = extractElementOpenTagById("inventoryBaseList");
+			const auto recipeListTag = extractElementOpenTagById("recipeList");
+			const auto cubeGridTag = extractElementOpenTagById("runewordCubeGrid");
 			const auto insertButtonTag = extractElementOpenTagById("runewordInsertButton");
 			const auto debugPanelTag = extractElementOpenTagById("debugToolsPanel");
 			const auto debugSummaryTag = extractElementOpenTagById("debugSectionSummary");
@@ -1379,18 +1382,29 @@ namespace RuntimeGateStoreChecks
 			if (uiText->find(":where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary):focus-visible") == std::string::npos ||
 				!controlPanelTag.has_value() ||
 				controlPanelTag->find("role=\"dialog\"") == std::string::npos ||
+				uiText->find("class=\"rwWorkspace\"") == std::string::npos ||
+				uiText->find("overflow-y: auto;") == std::string::npos ||
 				!progressTag.has_value() ||
 				!tagHasClassToken(*progressTag, "rwProgressStrip") ||
 				!baseStepTag.has_value() ||
 				!tagHasClassToken(*baseStepTag, "cpStepCard") ||
+				!tagHasClassToken(*baseStepTag, "rwBaseStrip") ||
 				!tagHasClassToken(*baseStepTag, "active") ||
 				!recipeStepTag.has_value() ||
 				!tagHasClassToken(*recipeStepTag, "cpStepCard") ||
+				!tagHasClassToken(*recipeStepTag, "rwRecipeExplorer") ||
 				!tagHasClassToken(*recipeStepTag, "muted") ||
 				!actionStepTag.has_value() ||
 				!tagHasClassToken(*actionStepTag, "cpStepCard") ||
 				!tagHasClassToken(*actionStepTag, "cpActionCard") ||
+				!tagHasClassToken(*actionStepTag, "rwActionTray") ||
 				!tagHasClassToken(*actionStepTag, "muted") ||
+				!baseListTag.has_value() ||
+				!tagHasClassToken(*baseListTag, "rwBaseQuickList") ||
+				!recipeListTag.has_value() ||
+				!tagHasClassToken(*recipeListTag, "rwRecipeExplorerList") ||
+				!cubeGridTag.has_value() ||
+				!tagHasClassToken(*cubeGridTag, "compact") ||
 				!insertButtonTag.has_value() ||
 				!tagHasClassToken(*insertButtonTag, "cpButton") ||
 				!tagHasClassToken(*insertButtonTag, "cpPrimaryButton") ||
@@ -1406,8 +1420,11 @@ namespace RuntimeGateStoreChecks
 				uiText->find("@keyframes rwStateShift") == std::string::npos ||
 				uiText->find("@keyframes rwPrimaryPulse") == std::string::npos ||
 				uiText->find("function renderRunewordFlowProgress(actionState, state)") == std::string::npos ||
+				uiText->find("-webkit-line-clamp: 2;") == std::string::npos ||
 				!selectedBody.has_value() ||
 				selectedBody->find("affixSelectedItemName.textContent = viewModel.hasSelection") == std::string::npos ||
+				uiText->find("button.title = name;") == std::string::npos ||
+				uiText->find("button.setAttribute(\"aria-label\", name);") == std::string::npos ||
 				!runewordBody.has_value() ||
 				runewordBody->find("renderRunewordFlowProgress(actionState, state);") == std::string::npos ||
 				uiText->find("runewordInsertButton.classList.toggle(\"attention\", canTransmute);") == std::string::npos ||

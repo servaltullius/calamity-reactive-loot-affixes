@@ -804,43 +804,114 @@
         padding-left: calc(8px * var(--panel-ui-scale));
       }
 
-      .rwLayout {
+      .rwWorkspace {
         height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: calc(12px * var(--panel-ui-scale));
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: calc(4px * var(--panel-ui-scale));
+      }
+
+      .rwBaseStrip .cpStepBody {
         display: grid;
-        grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
+        grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+        gap: calc(12px * var(--panel-ui-scale));
+        align-items: start;
+      }
+
+      .rwBaseChooser {
+        min-height: 0;
+      }
+
+      .rwBaseQuickList {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: calc(6px * var(--panel-ui-scale));
+        max-height: calc(160px * var(--panel-ui-scale));
+        overflow-y: auto;
+        padding-right: calc(4px * var(--panel-ui-scale));
+      }
+
+      .rwBaseQuickList .cpListItem {
+        padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.25;
+        min-height: calc(44px * var(--panel-ui-scale));
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .rwExplorer {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
         gap: calc(12px * var(--panel-ui-scale));
         min-height: 0;
       }
 
-      .rwLeft,
-      .rwRight {
+      .rwRecipeExplorer {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
         min-height: 0;
       }
 
-      .rwLeft {
+      .rwRecipeExplorer .cpStepBody {
         display: flex;
         flex-direction: column;
-        overflow-y: auto;
+        flex: 1 1 auto;
         min-height: 0;
-        padding-right: calc(4px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeExplorerList {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+      }
+
+      .rwActionTray {
+        flex: 0 0 auto;
+      }
+
+      .rwActionTray .cpStepBody {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.8fr);
+        gap: calc(12px * var(--panel-ui-scale));
+        align-items: start;
+      }
+
+      .rwActionSummary,
+      .rwActionControls {
+        min-width: 0;
+      }
+
+      .rwActionControls {
+        display: flex;
+        flex-direction: column;
+        gap: calc(10px * var(--panel-ui-scale));
+      }
+
+      .rwActionHintBox {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
       }
 
       .rwAffixBox {
         margin-top: calc(6px * var(--panel-ui-scale));
-        max-height: calc(190px * var(--panel-ui-scale));
+        max-height: calc(140px * var(--panel-ui-scale));
         overflow-y: auto;
       }
 
       .rwAffixHint {
         margin-top: calc(6px * var(--panel-ui-scale));
-      }
-
-      .rwRight {
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        overflow-y: auto;
-        padding-right: calc(4px * var(--panel-ui-scale));
       }
 
       .rwCubeFrame {
@@ -855,6 +926,10 @@
         padding: calc(10px * var(--panel-ui-scale));
       }
 
+      .rwCubeFrame.compact {
+        padding: calc(8px * var(--panel-ui-scale));
+      }
+
       .rwCubeGrid {
         --rwCell: calc(62px * var(--panel-ui-scale));
         display: grid;
@@ -862,6 +937,10 @@
         grid-template-rows: repeat(4, var(--rwCell));
         gap: calc(6px * var(--panel-ui-scale));
         justify-content: center;
+      }
+
+      .rwCubeGrid.compact {
+        --rwCell: calc(52px * var(--panel-ui-scale));
       }
 
       .rwCell {
@@ -932,16 +1011,14 @@
         gap: calc(8px * var(--panel-ui-scale));
       }
 
-      .rwPickers {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: calc(10px * var(--panel-ui-scale));
+      .rwTransmuteBar.compact {
+        margin-top: 0;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
-      .rwPicker {
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
+      .rwTransmuteBar.compact .cpButton {
+        text-align: center;
+        padding: calc(9px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
       }
 
       .rwRecipeTools {
@@ -1098,12 +1175,13 @@
       }
 
       @media (max-width: 1100px) {
-        .rwLayout {
+        .rwBaseStrip .cpStepBody,
+        .rwActionTray .cpStepBody {
           grid-template-columns: 1fr;
         }
 
-        .rwPickers {
-          grid-template-columns: 1fr;
+        .rwBaseQuickList {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .rwCubeGrid {
@@ -1161,6 +1239,11 @@
       }
 
       @media (max-width: 900px) {
+        .rwBaseQuickList,
+        .rwTransmuteBar.compact {
+          grid-template-columns: 1fr;
+        }
+
         #tooltipPanel {
           right: 16px;
           top: 180px;
@@ -1290,54 +1373,57 @@
             class="cpTabPane cpMainPane"
             role="tabpanel"
             aria-labelledby="mainRunewordTab">
-            <div class="rwFlowIntro">
-              <div class="cpSectionTitle" id="runewordFlowTitle">Runeword Flow / 룬워드 순서</div>
-              <div class="cpContextMeta" id="runewordFlowHint">
-                Choose an equipped base, select a recipe, then transmute. / 착용 베이스를 고르고, 레시피를 선택한 뒤 변환하세요.
+            <div class="rwWorkspace">
+              <div class="rwFlowIntro">
+                <div class="cpSectionTitle" id="runewordFlowTitle">Runeword Flow / 룬워드 순서</div>
+                <div class="cpContextMeta" id="runewordFlowHint">
+                  Choose an equipped base, browse recipes in the main list, then transmute from the compact tray below. / 착용 베이스를 고르고, 중앙 목록에서 레시피를 탐색한 뒤, 아래 compact tray에서 변환하세요.
+                </div>
               </div>
-            </div>
-            <div id="runewordFlowProgress" class="rwProgressStrip" aria-label="Runeword progress">
-              <div id="runewordProgressBase" class="rwProgressStep active">
-                <div class="rwProgressDot">1</div>
-                <div class="rwProgressLabel">Base / 베이스</div>
+              <div id="runewordFlowProgress" class="rwProgressStrip" aria-label="Runeword progress">
+                <div id="runewordProgressBase" class="rwProgressStep active">
+                  <div class="rwProgressDot">1</div>
+                  <div class="rwProgressLabel">Base / 베이스</div>
+                </div>
+                <div id="runewordProgressRecipe" class="rwProgressStep">
+                  <div class="rwProgressDot">2</div>
+                  <div class="rwProgressLabel">Recipe / 레시피</div>
+                </div>
+                <div id="runewordProgressTransmute" class="rwProgressStep">
+                  <div class="rwProgressDot">3</div>
+                  <div class="rwProgressLabel">Transmute / 변환</div>
+                </div>
               </div>
-              <div id="runewordProgressRecipe" class="rwProgressStep">
-                <div class="rwProgressDot">2</div>
-                <div class="rwProgressLabel">Recipe / 레시피</div>
-              </div>
-              <div id="runewordProgressTransmute" class="rwProgressStep">
-                <div class="rwProgressDot">3</div>
-                <div class="rwProgressLabel">Transmute / 변환</div>
-              </div>
-            </div>
-            <div class="rwLayout">
-              <div class="rwLeft">
-                <div id="runewordBaseStep" class="cpStepCard active">
-                  <div class="cpStepHeader">
-                    <div class="cpStepIndex">1</div>
-                    <div>
-                      <div id="runewordBaseEyebrow" class="cpStepEyebrow">Step 1</div>
-                      <div id="runewordBaseStepTitle" class="cpStepTitle">Choose Base / 베이스 선택</div>
-                    </div>
+
+              <div id="runewordBaseStep" class="cpStepCard rwBaseStrip active">
+                <div class="cpStepHeader">
+                  <div class="cpStepIndex">1</div>
+                  <div>
+                    <div id="runewordBaseEyebrow" class="cpStepEyebrow">Step 1</div>
+                    <div id="runewordBaseStepTitle" class="cpStepTitle">Choose Base / 베이스 선택</div>
                   </div>
-                  <div id="runewordBaseStepHint" class="cpStepHint">
-                    Start by selecting one equipped item that will receive the runeword. / 룬워드를 부여할 착용 아이템을 먼저 선택하세요.
+                </div>
+                <div id="runewordBaseStepHint" class="cpStepHint">
+                  Lock in one equipped item first, then keep browsing recipes without losing the base selection. / 먼저 착용 아이템 하나를 고정한 뒤, 베이스를 유지한 채 레시피를 탐색하세요.
+                </div>
+                <div class="cpStepBody">
+                  <div class="cpContext rwBaseCurrent">
+                    <div class="cpContextLabel" id="selectedItemLabel">Current Base / 현재 베이스</div>
+                    <div class="cpContextValue" id="selectedItemName">No base selected / 선택된 베이스 없음</div>
+                    <div class="cpContextMeta" id="selectedItemSource">Equipped only / 착용 장비 전용</div>
                   </div>
-                  <div class="cpStepBody">
-                    <div class="cpContext">
-                      <div class="cpContextLabel" id="selectedItemLabel">Current Base / 현재 베이스</div>
-                      <div class="cpContextValue" id="selectedItemName">No base selected / 선택된 베이스 없음</div>
-                      <div class="cpContextMeta" id="selectedItemSource">Equipped only / 착용 장비 전용</div>
-                    </div>
-                    <div class="cpSectionSubtle" id="runewordBaseListTitle">Equipped Base List / 착용 베이스 목록</div>
-                    <div id="inventoryBaseList" class="cpList rwList"></div>
+                  <div class="rwBaseChooser">
+                    <div class="cpSectionSubtle" id="runewordBaseListTitle">Available Equipped Bases / 사용 가능한 착용 베이스</div>
+                    <div id="inventoryBaseList" class="cpList rwBaseQuickList"></div>
                     <div class="cpContextMeta" id="runewordBaseListHint">
-                      Click an equipped item to set it as runeword base. / 착용한 아이템을 클릭해 룬워드 베이스로 지정하세요.
+                      Pick a base here once, then continue most of your work in the recipe explorer below. / 여기서 베이스를 고른 뒤, 아래 레시피 탐색 영역에서 대부분의 작업을 진행하세요.
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div id="runewordRecipeStep" class="cpStepCard muted">
+              <div class="rwExplorer">
+                <div id="runewordRecipeStep" class="cpStepCard rwRecipeExplorer muted">
                   <div class="cpStepHeader">
                     <div class="cpStepIndex">2</div>
                     <div>
@@ -1346,10 +1432,10 @@
                     </div>
                   </div>
                   <div id="runewordRecipeStepHint" class="cpStepHint">
-                    Narrow the list, inspect effects, and lock in the recipe you want to apply. / 목록을 좁히고 효과를 확인한 뒤 적용할 레시피를 선택하세요.
+                    This is the main workspace. Search, compare, and select the recipe you want before committing. / 이곳이 메인 작업 영역입니다. 검색하고 비교한 뒤 적용할 레시피를 선택하세요.
                   </div>
                   <div class="cpStepBody">
-                    <div class="cpSectionSubtle" id="runewordRecipeListTitle">Recipe List / 레시피 목록</div>
+                    <div class="cpSectionSubtle" id="runewordRecipeListTitle">Recipe Explorer / 레시피 탐색기</div>
                     <div class="rwRecipeTools">
                       <input
                         id="recipeSearchInput"
@@ -1359,16 +1445,14 @@
                         aria-label="Search runeword recipe" />
                       <div class="rwRecipeCount" id="recipeCountLabel">0</div>
                     </div>
-                    <div id="recipeList" class="cpList rwList"></div>
+                    <div id="recipeList" class="cpList rwList rwRecipeExplorerList"></div>
                     <div class="cpContextMeta" id="runewordRecipeListHint">
-                      Click recipe to select. / 클릭해서 레시피를 선택하세요.
+                      Select a recipe to load its requirements and transmute controls into the tray below. / 레시피를 선택하면 아래 tray에 요구 조건과 변환 컨트롤이 표시됩니다.
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="rwRight">
-                <div id="runewordActionStep" class="cpStepCard cpActionCard muted">
+                <div id="runewordActionStep" class="cpStepCard cpActionCard rwActionTray muted">
                   <div class="cpStepHeader">
                     <div class="cpStepIndex">3</div>
                     <div>
@@ -1377,28 +1461,32 @@
                     </div>
                   </div>
                   <div id="runewordActionStepHint" class="cpStepHint">
-                    Review the preview, confirm requirements, then transmute when ready. / 미리보기와 조건을 확인한 뒤 준비되면 변환하세요.
+                    Use this compact tray to confirm the selected recipe, check fragments, and execute the action. / 이 compact tray에서 선택한 레시피를 확인하고, 재료를 점검한 뒤 실행하세요.
                   </div>
                   <div class="cpStepBody">
-                    <div class="rwAffixBlock">
-                      <div class="cpSectionSubtle" id="runewordAffixTitle">Current Affix Preview / 현재 어픽스 미리보기</div>
-                      <div id="runewordAffixText" class="cpTooltipBox rwAffixBox"></div>
-                      <div class="cpContextMeta rwAffixHint" id="runewordAffixHint">
-                        Select an item in inventory to view affixes here. / 인벤토리에서 아이템을 선택하면 여기에서 어픽스를 표시합니다.
+                    <div class="rwActionSummary">
+                      <div id="runewordPanelStatus">
+                        Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
+                      </div>
+
+                      <div class="cpContextMeta rwActionHintBox" id="runewordActionHint">
+                        Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
+                      </div>
+
+                      <div class="rwAffixBlock">
+                        <div class="cpSectionSubtle" id="runewordAffixTitle">Selected Recipe Preview / 선택 레시피 미리보기</div>
+                        <div id="runewordAffixText" class="cpTooltipBox rwAffixBox"></div>
+                        <div class="cpContextMeta rwAffixHint" id="runewordAffixHint">
+                          When you choose a recipe, its tooltip-like preview and current item affix context appear here. / 레시피를 선택하면 툴팁형 미리보기와 현재 아이템 어픽스 맥락이 여기 표시됩니다.
+                        </div>
                       </div>
                     </div>
 
-                    <div id="runewordPanelStatus">
-                      Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
-                    </div>
-
-                    <div class="cpContextMeta" id="runewordActionHint">
-                      Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
-                    </div>
-
-                    <div class="rwCubeFrame">
-                      <div id="runewordCubeGrid" class="rwCubeGrid" aria-label="Horadric cube"></div>
-                      <div class="rwTransmuteBar">
+                    <div class="rwActionControls">
+                      <div class="rwCubeFrame compact">
+                        <div id="runewordCubeGrid" class="rwCubeGrid compact" aria-label="Horadric cube"></div>
+                      </div>
+                      <div class="rwTransmuteBar compact">
                         <button
                           id="runewordInsertButton"
                           class="cpButton cpPrimaryButton"
@@ -2008,8 +2096,8 @@
         }
         if (runewordFlowHint) {
           runewordFlowHint.textContent = t(
-            "Choose an equipped base, select a recipe, then transmute.",
-            "착용 베이스를 고르고, 레시피를 선택한 뒤 변환하세요."
+            "Choose an equipped base, browse recipes in the main list, then transmute from the compact tray below.",
+            "착용 베이스를 고르고, 중앙 목록에서 레시피를 탐색한 뒤, 아래 compact tray에서 변환하세요."
           );
         }
         if (runewordBaseEyebrow) {
@@ -2032,20 +2120,20 @@
         }
         if (runewordBaseStepHint) {
           runewordBaseStepHint.textContent = t(
-            "Start by selecting one equipped item that will receive the runeword.",
-            "룬워드를 부여할 착용 아이템을 먼저 선택하세요."
+            "Lock in one equipped item first, then keep browsing recipes without losing the base selection.",
+            "먼저 착용 아이템 하나를 고정한 뒤, 베이스를 유지한 채 레시피를 탐색하세요."
           );
         }
         if (runewordRecipeStepHint) {
           runewordRecipeStepHint.textContent = t(
-            "Narrow the list, inspect effects, and lock in the recipe you want to apply.",
-            "목록을 좁히고 효과를 확인한 뒤 적용할 레시피를 선택하세요."
+            "This is the main workspace. Search, compare, and select the recipe you want before committing.",
+            "이곳이 메인 작업 영역입니다. 검색하고 비교한 뒤 적용할 레시피를 선택하세요."
           );
         }
         if (runewordActionStepHint) {
           runewordActionStepHint.textContent = t(
-            "Review the preview, confirm requirements, then transmute when ready.",
-            "미리보기와 조건을 확인한 뒤 준비되면 변환하세요."
+            "Use this compact tray to confirm the selected recipe, check fragments, and execute the action.",
+            "이 compact tray에서 선택한 레시피를 확인하고, 재료를 점검한 뒤 실행하세요."
           );
         }
         if (runewordProgressBase) {
@@ -2082,27 +2170,27 @@
             "인벤토리에서 아이템을 선택하면 어픽스를 표시합니다."
           );
         }
-        runewordRecipeListTitle.textContent = t("Recipe List", "레시피 목록");
+        runewordRecipeListTitle.textContent = t("Recipe Explorer", "레시피 탐색기");
         runewordRecipeListHint.textContent = t(
-          "Click recipe to select.",
-          "클릭해서 레시피를 선택하세요."
+          "Select a recipe to load its requirements and transmute controls into the tray below.",
+          "레시피를 선택하면 아래 tray에 요구 조건과 변환 컨트롤이 표시됩니다."
         );
         if (recipeSearchInput) {
           recipeSearchInput.setAttribute("aria-label", t("Search runeword recipe", "룬워드 레시피 검색"));
           recipeSearchInput.placeholder = t("Search recipe...", "레시피 검색...");
         }
-        runewordBaseListTitle.textContent = t("Equipped Base List", "착용 베이스 목록");
+        runewordBaseListTitle.textContent = t("Available Equipped Bases", "사용 가능한 착용 베이스");
         runewordBaseListHint.textContent = t(
-          "Click an equipped item to set it as runeword base.",
-          "착용한 아이템을 클릭해 룬워드 베이스로 지정하세요."
+          "Pick a base here once, then continue most of your work in the recipe explorer below.",
+          "여기서 베이스를 고른 뒤, 아래 레시피 탐색 영역에서 대부분의 작업을 진행하세요."
         );
         if (runewordAffixTitle) {
-          runewordAffixTitle.textContent = t("Current Affix Preview", "현재 어픽스 미리보기");
+          runewordAffixTitle.textContent = t("Selected Recipe Preview", "선택 레시피 미리보기");
         }
         if (runewordAffixHint) {
           runewordAffixHint.textContent = t(
-            "Select an item in inventory to view affixes here.",
-            "인벤토리에서 아이템을 선택하면 여기에서 어픽스를 표시합니다."
+            "When you choose a recipe, its tooltip-like preview and current item affix context appear here.",
+            "레시피를 선택하면 툴팁형 미리보기와 현재 아이템 어픽스 맥락이 여기 표시됩니다."
           );
         }
         if (runewordCubeGrid) {
@@ -2831,6 +2919,8 @@
           button.type = "button";
           button.className = selected ? "cpListItem selected" : "cpListItem";
           button.textContent = name;
+          button.title = name;
+          button.setAttribute("aria-label", name);
           button.setAttribute(panelCommandAttribute, `runeword.base.select:${key}`);
           inventoryBaseList.appendChild(button);
         }
@@ -3449,8 +3539,8 @@
 
         if (!hasRecipe) {
           runewordFlowHint.textContent = t(
-            "Base locked in. Next, choose the runeword recipe that fits it.",
-            "베이스를 골랐습니다. 이제 어울리는 룬워드 레시피를 선택하세요."
+            "Base locked in. Now use the main recipe explorer to find the runeword that fits it.",
+            "베이스를 골랐습니다. 이제 메인 레시피 탐색기에서 어울리는 룬워드를 찾으세요."
           );
           return;
         }
@@ -3465,8 +3555,8 @@
 
         if (canTransmute) {
           runewordFlowHint.textContent = t(
-            "Everything is ready. Use Transmute to consume fragments and apply the runeword.",
-            "준비가 끝났습니다. 변환을 눌러 조각을 소모하고 룬워드를 적용하세요."
+            "Everything is ready. Use the compact tray below to transmute and apply the runeword.",
+            "준비가 끝났습니다. 아래 compact tray에서 변환을 눌러 룬워드를 적용하세요."
           );
           return;
         }
@@ -3477,8 +3567,8 @@
         }
 
         runewordFlowHint.textContent = t(
-          "Review the recipe requirements, then transmute when available.",
-          "레시피 조건을 확인한 뒤, 가능해지면 변환하세요."
+          "Review the selected recipe in the tray below, then transmute when available.",
+          "아래 tray에서 선택한 레시피를 확인한 뒤, 가능해지면 변환하세요."
         );
       }
 
