@@ -25,6 +25,7 @@
 3. 현재 베이스/선택 레시피를 context chip으로 분리하고, 본문 카드의 반복 요약을 줄인다
 4. 우측 inspector는 상태/버튼/큐브/상세 미리보기를 compact stack으로 재정렬
 5. UX 정책 테스트를 새 workbench 마커 기준으로 갱신
+6. 후속 밀도 패스에서 상단 summary bar 높이, 좌측 base chooser 노출 강도, 우측 rune grid 노출 강도를 더 낮춘다
 
 ## Validation
 1. `python3 tools/compose_affixes.py --check && python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json && python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null && python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null`

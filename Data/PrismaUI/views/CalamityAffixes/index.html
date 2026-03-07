@@ -629,13 +629,23 @@
 
       .rwContextBar {
         display: grid;
-        grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
-        gap: calc(10px * var(--panel-ui-scale));
-        align-items: start;
+        grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.1fr);
+        gap: calc(8px * var(--panel-ui-scale));
+        align-items: center;
       }
 
       .rwFlowIntro {
         min-width: 0;
+      }
+
+      .rwFlowIntro .cpSectionTitle {
+        font-size: calc(15px * var(--panel-ui-scale));
+        margin-bottom: calc(2px * var(--panel-ui-scale));
+      }
+
+      .rwFlowIntro .cpContextMeta {
+        font-size: calc(11px * var(--panel-ui-scale));
+        line-height: 1.25;
       }
 
       .rwContextSnapshot {
@@ -646,8 +656,8 @@
 
       .rwContextChip {
         min-width: 0;
-        padding: calc(10px * var(--panel-ui-scale));
-        border-radius: 12px;
+        padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
+        border-radius: 10px;
         border: 1px solid rgba(255, 255, 255, 0.12);
         background:
           linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
@@ -662,26 +672,31 @@
       }
 
       .rwContextChipValue {
-        margin-top: calc(4px * var(--panel-ui-scale));
+        margin-top: calc(3px * var(--panel-ui-scale));
         color: rgba(255, 255, 255, 0.98);
-        font-size: calc(15px * var(--panel-ui-scale));
+        font-size: calc(13px * var(--panel-ui-scale));
         font-weight: 700;
-        line-height: 1.25;
-        word-break: break-word;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .rwContextChipMeta {
-        margin-top: calc(4px * var(--panel-ui-scale));
+        margin-top: calc(2px * var(--panel-ui-scale));
         color: rgba(255, 255, 255, 0.68);
-        font-size: calc(11px * var(--panel-ui-scale));
-        line-height: 1.35;
+        font-size: calc(10px * var(--panel-ui-scale));
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .rwProgressStrip {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: calc(8px * var(--panel-ui-scale));
-        margin-bottom: calc(8px * var(--panel-ui-scale));
+        margin-bottom: calc(6px * var(--panel-ui-scale));
       }
 
       .rwProgressStep {
@@ -864,8 +879,8 @@
         flex: 1 1 auto;
         min-height: 0;
         display: grid;
-        grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(280px, 320px);
-        gap: calc(12px * var(--panel-ui-scale));
+        grid-template-columns: minmax(178px, 208px) minmax(0, 1fr) minmax(230px, 268px);
+        gap: calc(10px * var(--panel-ui-scale));
         align-items: stretch;
       }
 
@@ -882,6 +897,7 @@
       }
 
       .rwBaseRail .cpStepHint,
+      .rwRecipeExplorer .cpStepHint,
       .rwActionInspector .cpStepHint {
         display: none;
       }
@@ -906,6 +922,30 @@
         flex: 1 1 auto;
       }
 
+      .rwRailDetails {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        overflow: hidden;
+      }
+
+      .rwRailSummary {
+        list-style: none;
+        cursor: pointer;
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        color: rgba(235, 255, 244, 0.92);
+        font-size: calc(12px * var(--panel-ui-scale));
+        font-weight: 700;
+      }
+
+      .rwRailSummary::-webkit-details-marker {
+        display: none;
+      }
+
+      .rwRailBody {
+        padding: 0 calc(10px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+      }
+
       .rwBaseQuickList {
         display: grid;
         grid-template-columns: 1fr;
@@ -917,10 +957,10 @@
       }
 
       .rwBaseQuickList .cpListItem {
-        padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
-        font-size: calc(12px * var(--panel-ui-scale));
-        line-height: 1.25;
-        min-height: calc(44px * var(--panel-ui-scale));
+        padding: calc(6px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
+        font-size: calc(11px * var(--panel-ui-scale));
+        line-height: 1.2;
+        min-height: calc(38px * var(--panel-ui-scale));
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
@@ -961,7 +1001,7 @@
       .rwActionControls {
         display: flex;
         flex-direction: column;
-        gap: calc(10px * var(--panel-ui-scale));
+        gap: calc(8px * var(--panel-ui-scale));
         margin-top: auto;
       }
 
@@ -998,7 +1038,7 @@
       }
 
       .rwCubeFrame.compact {
-        padding: calc(6px * var(--panel-ui-scale));
+        padding: calc(5px * var(--panel-ui-scale));
       }
 
       .rwCubeGrid {
@@ -1011,7 +1051,7 @@
       }
 
       .rwCubeGrid.compact {
-        --rwCell: calc(44px * var(--panel-ui-scale));
+        --rwCell: calc(38px * var(--panel-ui-scale));
       }
 
       .rwCell {
@@ -1084,12 +1124,16 @@
 
       .rwTransmuteBar.compact {
         margin-top: 0;
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .rwTransmuteBar.compact .cpPrimaryButton {
+        grid-column: 1 / -1;
       }
 
       .rwTransmuteBar.compact .cpButton {
         text-align: center;
-        padding: calc(9px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
       }
 
       .rwActionDetails {
@@ -1121,7 +1165,7 @@
         display: flex;
         align-items: center;
         gap: calc(8px * var(--panel-ui-scale));
-        margin-bottom: calc(8px * var(--panel-ui-scale));
+        margin-bottom: calc(6px * var(--panel-ui-scale));
       }
 
       .rwSearchInput {
@@ -1151,10 +1195,13 @@
       }
 
       .rwRecipeName {
-        font-size: calc(13px * var(--panel-ui-scale));
+        font-size: calc(12px * var(--panel-ui-scale));
         font-weight: 600;
-        line-height: 1.25;
+        line-height: 1.2;
         color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .rwRecipeHead {
@@ -1168,8 +1215,8 @@
         flex: 0 0 auto;
         border-radius: 999px;
         border: 1px solid rgba(255, 255, 255, 0.26);
-        padding: calc(1px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
-        font-size: calc(10px * var(--panel-ui-scale));
+        padding: calc(1px * var(--panel-ui-scale)) calc(6px * var(--panel-ui-scale));
+        font-size: calc(9px * var(--panel-ui-scale));
         line-height: 1.4;
         white-space: nowrap;
         color: rgba(255, 255, 255, 0.88);
@@ -1192,15 +1239,20 @@
       }
 
       .rwRecipeSummary {
-        margin-top: calc(2px * var(--panel-ui-scale));
-        font-size: calc(11px * var(--panel-ui-scale));
-        line-height: 1.35;
+        margin-top: calc(1px * var(--panel-ui-scale));
+        font-size: calc(10px * var(--panel-ui-scale));
+        line-height: 1.25;
         color: rgba(255, 255, 255, 0.72);
         white-space: normal;
         overflow: hidden;
         display: -webkit-box;
         -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 1;
+      }
+
+      .rwRecipeListItem {
+        padding: calc(7px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        border-radius: 10px;
       }
 
       .cpListItem.selected .rwRecipeSummary {
@@ -1276,7 +1328,7 @@
         }
 
         .rwWorkbench {
-          grid-template-columns: minmax(220px, 250px) minmax(0, 1fr);
+          grid-template-columns: minmax(170px, 200px) minmax(0, 1fr);
         }
 
         .rwActionInspector {
@@ -1349,6 +1401,10 @@
 
         .rwBaseQuickList {
           max-height: calc(180px * var(--panel-ui-scale));
+        }
+
+        .rwTransmuteBar.compact {
+          grid-template-columns: 1fr;
         }
 
         #tooltipPanel {
@@ -1532,11 +1588,18 @@
                   </div>
                   <div class="cpStepBody">
                     <div class="rwBaseChooser">
-                      <div class="cpSectionSubtle" id="runewordBaseListTitle">Compatible Equipped Bases / 호환 착용 베이스</div>
-                      <div id="inventoryBaseList" class="cpList rwBaseQuickList"></div>
-                      <div class="cpContextMeta" id="runewordBaseListHint">
-                        This rail is only for choosing the base. Most work happens in the center recipe explorer. / 이 레일은 베이스를 고르는 용도입니다. 실제 비교 작업은 중앙 레시피 탐색기에서 진행하세요.
-                      </div>
+                      <details id="runewordBaseChooserDetails" class="rwRailDetails">
+                        <summary id="runewordBaseChooserSummary" class="rwRailSummary">
+                          Change Base / 베이스 변경
+                        </summary>
+                        <div class="rwRailBody">
+                          <div class="cpSectionSubtle" id="runewordBaseListTitle">Compatible Equipped Bases / 호환 착용 베이스</div>
+                          <div id="inventoryBaseList" class="cpList rwBaseQuickList"></div>
+                          <div class="cpContextMeta" id="runewordBaseListHint">
+                            Open this only when you want to swap the base. Most work happens in the center explorer. / 베이스를 바꾸고 싶을 때만 여세요. 실제 비교 작업은 중앙 탐색기에서 진행하세요.
+                          </div>
+                        </div>
+                      </details>
                     </div>
                   </div>
                 </div>
@@ -1616,9 +1679,16 @@
                         <button id="runewordReforgeButton" class="cpButton" data-cmd="runeword.reforge">Reforge / 재련</button>
                         <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Status / 상태</button>
                       </div>
-                      <div class="rwCubeFrame compact">
-                        <div id="runewordCubeGrid" class="rwCubeGrid compact" aria-label="Horadric cube"></div>
-                      </div>
+                      <details id="runewordCubeDetails" class="rwRailDetails">
+                        <summary id="runewordCubeDetailsSummary" class="rwRailSummary">
+                          Rune Grid / 룬 그리드
+                        </summary>
+                        <div class="rwRailBody">
+                          <div class="rwCubeFrame compact">
+                            <div id="runewordCubeGrid" class="rwCubeGrid compact" aria-label="Horadric cube"></div>
+                          </div>
+                        </div>
+                      </details>
                     </div>
                   </div>
                 </div>
@@ -1796,6 +1866,8 @@
       const runewordContextRecipeLabel = document.getElementById("runewordContextRecipeLabel");
       const runewordContextRecipeName = document.getElementById("runewordContextRecipeName");
       const runewordContextRecipeMeta = document.getElementById("runewordContextRecipeMeta");
+      const runewordBaseChooserSummary = document.getElementById("runewordBaseChooserSummary");
+      const runewordCubeDetailsSummary = document.getElementById("runewordCubeDetailsSummary");
       const affixSelectedItemLabel = document.getElementById("affixSelectedItemLabel");
       const affixSelectedItemName = document.getElementById("affixSelectedItemName");
       const affixSelectedItemMeta = document.getElementById("affixSelectedItemMeta");
@@ -2263,6 +2335,12 @@
             "이 compact inspector에서 요구 조건과 큐브를 확인한 뒤 실행하세요."
           );
         }
+        if (runewordBaseChooserSummary) {
+          runewordBaseChooserSummary.textContent = t("Change Base", "베이스 변경");
+        }
+        if (runewordCubeDetailsSummary) {
+          runewordCubeDetailsSummary.textContent = t("Rune Grid", "룬 그리드");
+        }
         if (runewordActionDetailsSummary) {
           runewordActionDetailsSummary.textContent = t(
             "Selected Recipe Preview",
@@ -2326,8 +2404,8 @@
         }
         runewordBaseListTitle.textContent = t("Compatible Equipped Bases", "호환 착용 베이스");
         runewordBaseListHint.textContent = t(
-          "This rail is only for choosing the base. Most work happens in the center recipe explorer.",
-          "이 레일은 베이스를 고르는 용도입니다. 실제 비교 작업은 중앙 레시피 탐색기에서 진행하세요."
+          "Open this only when you want to swap the base. Most work happens in the center explorer.",
+          "베이스를 바꾸고 싶을 때만 여세요. 실제 비교 작업은 중앙 탐색기에서 진행하세요."
         );
         if (runewordAffixTitle) {
           runewordAffixTitle.textContent = t("Selected Recipe Preview", "선택 레시피 미리보기");
@@ -3062,7 +3140,7 @@
 
           const button = document.createElement("button");
           button.type = "button";
-          button.className = selected ? "cpListItem selected" : "cpListItem";
+          button.className = selected ? "cpListItem rwRecipeListItem selected" : "cpListItem rwRecipeListItem";
           button.textContent = name;
           button.title = name;
           button.setAttribute("aria-label", name);

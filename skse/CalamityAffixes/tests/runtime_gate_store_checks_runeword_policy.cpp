@@ -1373,6 +1373,8 @@ namespace RuntimeGateStoreChecks
 			const auto recipeStepTag = extractElementOpenTagById("runewordRecipeStep");
 			const auto actionStepTag = extractElementOpenTagById("runewordActionStep");
 			const auto recipeContextTag = extractElementOpenTagById("runewordContextRecipeName");
+			const auto baseChooserDetailsTag = extractElementOpenTagById("runewordBaseChooserDetails");
+			const auto cubeDetailsTag = extractElementOpenTagById("runewordCubeDetails");
 			const auto baseListTag = extractElementOpenTagById("inventoryBaseList");
 			const auto recipeListTag = extractElementOpenTagById("recipeList");
 			const auto cubeGridTag = extractElementOpenTagById("runewordCubeGrid");
@@ -1404,6 +1406,10 @@ namespace RuntimeGateStoreChecks
 				!tagHasClassToken(*actionStepTag, "rwActionInspector") ||
 				!tagHasClassToken(*actionStepTag, "muted") ||
 				!recipeContextTag.has_value() ||
+				!baseChooserDetailsTag.has_value() ||
+				!tagHasClassToken(*baseChooserDetailsTag, "rwRailDetails") ||
+				!cubeDetailsTag.has_value() ||
+				!tagHasClassToken(*cubeDetailsTag, "rwRailDetails") ||
 				!baseListTag.has_value() ||
 				!tagHasClassToken(*baseListTag, "rwBaseQuickList") ||
 				!recipeListTag.has_value() ||
@@ -1429,6 +1435,9 @@ namespace RuntimeGateStoreChecks
 				uiText->find("function renderRunewordFlowProgress(actionState, state)") == std::string::npos ||
 				uiText->find("-webkit-line-clamp: 2;") == std::string::npos ||
 				uiText->find("runewordActionDetailsSummary") == std::string::npos ||
+				uiText->find("runewordBaseChooserSummary") == std::string::npos ||
+				uiText->find("runewordCubeDetailsSummary") == std::string::npos ||
+				uiText->find("rwRecipeListItem") == std::string::npos ||
 				!selectedBody.has_value() ||
 				selectedBody->find("affixSelectedItemName.textContent = viewModel.hasSelection") == std::string::npos ||
 				uiText->find("button.title = name;") == std::string::npos ||
