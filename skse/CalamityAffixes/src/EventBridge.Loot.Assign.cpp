@@ -150,6 +150,61 @@ namespace CalamityAffixes
 		}
 	}
 
+	bool EventBridge::ShouldKeepTrackedLootAffixToken(std::uint64_t a_token) const
+	{
+		const auto idxIt = _affixRegistry.affixIndexByToken.find(a_token);
+		if (idxIt == _affixRegistry.affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
+			if (_loot.debugLog) {
+				SKSE::log::warn("CalamityAffixes: cleanup skipping unknown affix token {:016X}.", a_token);
+			}
+			return false;
+		}
+
+		if (_loot.stripTrackedSuffixSlots && _affixes[idxIt->second].slot == AffixSlot::kSuffix) {
+			return false;
+		}
+
+		return true;
+	}
+
+	bool EventBridge::InstanceAffixSlotsEqual(
+		const InstanceAffixSlots& a_lhs,
+		const InstanceAffixSlots& a_rhs) noexcept
+	{
+		if (a_lhs.count != a_rhs.count) {
+			return false;
+		}
+
+		for (std::uint8_t i = 0; i < a_lhs.count; ++i) {
+			if (a_lhs.tokens[i] != a_rhs.tokens[i]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	void EventBridge::ApplySanitizedInstanceAffixSlots(
+		std::uint64_t a_instanceKey,
+		InstanceAffixSlots& a_slots,
+		const InstanceAffixSlots& a_sanitizedSlots,
+		const std::array<std::uint64_t, kMaxAffixesPerItem>& a_removedTokens,
+		std::uint8_t a_removedCount)
+	{
+		a_slots = a_sanitizedSlots;
+		for (std::uint8_t i = 0; i < a_removedCount; ++i) {
+			const auto removedToken = a_removedTokens[i];
+			if (removedToken == 0u || a_slots.HasToken(removedToken)) {
+				continue;
+			}
+			_instanceStates.erase(MakeInstanceStateKey(a_instanceKey, removedToken));
+		}
+
+		if (a_slots.count == 0) {
+			EraseInstanceRuntimeStates(a_instanceKey);
+		}
+	}
+
 	bool EventBridge::SanitizeInstanceAffixSlotsForCurrentLootRules(
 		std::uint64_t a_instanceKey,
 		InstanceAffixSlots& a_slots,
@@ -165,49 +220,16 @@ namespace CalamityAffixes
 		const auto sanitized = detail::BuildSanitizedInstanceAffixSlots(
 			a_slots,
 			[&](std::uint64_t a_token) {
-				const auto idxIt = _affixRegistry.affixIndexByToken.find(a_token);
-				if (idxIt == _affixRegistry.affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
-					if (_loot.debugLog) {
-						SKSE::log::warn("CalamityAffixes: cleanup skipping unknown affix token {:016X}.", a_token);
-					}
-					return false;
-				}
-				if (_loot.stripTrackedSuffixSlots && _affixes[idxIt->second].slot == AffixSlot::kSuffix) {
-					return false;
-				}
-				return true;
+				return ShouldKeepTrackedLootAffixToken(a_token);
 			},
 			&removedTokens,
 			&removedCount);
 
-		auto matchesCurrent = [&]() {
-			if (a_slots.count != sanitized.count) {
-				return false;
-			}
-			for (std::uint8_t i = 0; i < a_slots.count; ++i) {
-				if (a_slots.tokens[i] != sanitized.tokens[i]) {
-					return false;
-				}
-			}
-			return true;
-		};
-		const bool changed = !matchesCurrent();
-
-		if (!changed) {
+		if (InstanceAffixSlotsEqual(a_slots, sanitized)) {
 			return false;
 		}
 
-		a_slots = sanitized;
-		for (std::uint8_t i = 0; i < removedCount; ++i) {
-			const auto removedToken = removedTokens[i];
-			if (removedToken == 0u || a_slots.HasToken(removedToken)) {
-				continue;
-			}
-			_instanceStates.erase(MakeInstanceStateKey(a_instanceKey, removedToken));
-		}
-		if (a_slots.count == 0) {
-			EraseInstanceRuntimeStates(a_instanceKey);
-		}
+		ApplySanitizedInstanceAffixSlots(a_instanceKey, a_slots, sanitized, removedTokens, removedCount);
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
@@ -220,6 +242,45 @@ namespace CalamityAffixes
 		return true;
 	}
 
+	bool EventBridge::SanitizeTrackedLootInstanceForCurrentLootRules(
+		decltype(_instanceAffixes)::iterator& a_it,
+		std::string_view a_context,
+		std::uint32_t& a_sanitizedInstances,
+		std::uint32_t& a_erasedInstances)
+	{
+		auto& slots = a_it->second;
+		const bool changed = SanitizeInstanceAffixSlotsForCurrentLootRules(a_it->first, slots, a_context);
+		if (changed) {
+			++a_sanitizedInstances;
+		}
+
+		if (slots.count == 0) {
+			ForgetLootEvaluatedInstance(a_it->first);
+			a_it = _instanceAffixes.erase(a_it);
+			++a_erasedInstances;
+			return true;
+		}
+
+		++a_it;
+		return false;
+	}
+
+	void EventBridge::LogTrackedLootSanitizationSummary(
+		std::string_view a_context,
+		std::uint32_t a_sanitizedInstances,
+		std::uint32_t a_erasedInstances) const
+	{
+		if (!_loot.debugLog || (a_sanitizedInstances == 0u && a_erasedInstances == 0u)) {
+			return;
+		}
+
+		SKSE::log::debug(
+			"CalamityAffixes: sanitized tracked loot instances (context={}, changed={}, erased={}).",
+			a_context,
+			a_sanitizedInstances,
+			a_erasedInstances);
+	}
+
 	void EventBridge::SanitizeAllTrackedLootInstancesForCurrentLootRules(std::string_view a_context)
 	{
 		if (_affixes.empty() || _affixRegistry.affixIndexByToken.empty()) {
@@ -229,46 +290,24 @@ namespace CalamityAffixes
 		std::uint32_t sanitizedInstances = 0u;
 		std::uint32_t erasedInstances = 0u;
 		for (auto it = _instanceAffixes.begin(); it != _instanceAffixes.end();) {
-			auto& slots = it->second;
-			const bool changed = SanitizeInstanceAffixSlotsForCurrentLootRules(it->first, slots, a_context);
-			if (changed) {
-				++sanitizedInstances;
-			}
-
-			if (slots.count == 0) {
-				ForgetLootEvaluatedInstance(it->first);
-				it = _instanceAffixes.erase(it);
-				++erasedInstances;
-				continue;
-			}
-			++it;
+			(void)SanitizeTrackedLootInstanceForCurrentLootRules(it, a_context, sanitizedInstances, erasedInstances);
 		}
 
-		if (_loot.debugLog && (sanitizedInstances > 0u || erasedInstances > 0u)) {
-			SKSE::log::debug(
-				"CalamityAffixes: sanitized tracked loot instances (context={}, changed={}, erased={}).",
-				a_context,
-				sanitizedInstances,
-				erasedInstances);
-		}
+		LogTrackedLootSanitizationSummary(a_context, sanitizedInstances, erasedInstances);
 	}
 
-	void EventBridge::EnsureMultiAffixDisplayName(
+	[[nodiscard]] std::string EventBridge::ResolveStoredLootDisplayBaseName(
 		RE::InventoryEntryData* a_entry,
 		RE::ExtraDataList* a_xList,
-		const InstanceAffixSlots& a_slots)
+		std::string* a_outStoredCustomName) const
 	{
-		if (!_loot.renameItem || !a_entry || !a_entry->object || !a_xList) {
-			return;
+		if (!a_entry || !a_entry->object) {
+			return {};
 		}
 
-		if (a_slots.count == 0) {
-			return;
-		}
-
-		const char* currentRaw = a_xList->GetDisplayName(a_entry->object);
+		const char* currentRaw = a_xList ? a_xList->GetDisplayName(a_entry->object) : nullptr;
 		const std::string currentName = currentRaw ? currentRaw : "";
-		auto* text = a_xList->GetExtraTextDisplayData();
+		auto* text = a_xList ? a_xList->GetExtraTextDisplayData() : nullptr;
 
 		std::string storedCustomName = currentName;
 		std::size_t storedCustomNameLength = 0;
@@ -296,6 +335,21 @@ namespace CalamityAffixes
 			}
 		}
 
+		std::string baseName = StripKnownLootAffixTags(StripLootStarMarkers(storedCustomName));
+		if (baseName.empty()) {
+			const char* objectNameRaw = a_entry->object->GetName();
+			baseName = objectNameRaw ? objectNameRaw : "";
+		}
+
+		if (a_outStoredCustomName) {
+			*a_outStoredCustomName = storedCustomName;
+		}
+		TrimTrailingAsciiWhitespaceInPlace(baseName);
+		return baseName;
+	}
+
+	[[nodiscard]] std::string EventBridge::StripKnownLootAffixTags(std::string_view a_name) const
+	{
 		auto isKnownAffixLabel = [&](std::string_view a_label) {
 			if (a_label.empty()) {
 				return false;
@@ -303,63 +357,74 @@ namespace CalamityAffixes
 			return _affixRegistry.affixLabelSet.contains(std::string(a_label));
 		};
 
-		auto stripKnownAffixTags = [&](std::string_view a_name) {
-			std::string cleaned;
-			cleaned.reserve(a_name.size());
+		std::string cleaned;
+		cleaned.reserve(a_name.size());
 
-			std::size_t pos = 0;
-			while (pos < a_name.size()) {
-				if (a_name[pos] == '[') {
-					const auto right = a_name.find(']', pos + 1);
-					if (right != std::string::npos && right > pos + 1) {
-						const std::string_view label = a_name.substr(pos + 1, right - pos - 1);
-						if (isKnownAffixLabel(label)) {
-							while (!cleaned.empty() && cleaned.back() == ' ') {
-								cleaned.pop_back();
-							}
-							pos = right + 1;
-							while (pos < a_name.size() && a_name[pos] == ' ') {
-								++pos;
-							}
-							continue;
+		std::size_t pos = 0;
+		while (pos < a_name.size()) {
+			if (a_name[pos] == '[') {
+				const auto right = a_name.find(']', pos + 1);
+				if (right != std::string::npos && right > pos + 1) {
+					const std::string_view label = a_name.substr(pos + 1, right - pos - 1);
+					if (isKnownAffixLabel(label)) {
+						while (!cleaned.empty() && cleaned.back() == ' ') {
+							cleaned.pop_back();
 						}
+						pos = right + 1;
+						while (pos < a_name.size() && a_name[pos] == ' ') {
+							++pos;
+						}
+						continue;
 					}
 				}
-
-				cleaned.push_back(a_name[pos]);
-				++pos;
 			}
 
-			const auto first = cleaned.find_first_not_of(" \n\r\t");
-			if (first == std::string::npos) {
-				return std::string{};
-			}
-			const auto last = cleaned.find_last_not_of(" \n\r\t");
-			return cleaned.substr(first, last - first + 1);
-		};
-
-		std::string baseName = stripKnownAffixTags(StripLootStarMarkers(storedCustomName));
-
-		if (baseName.empty()) {
-			const char* objectNameRaw = a_entry->object->GetName();
-			baseName = objectNameRaw ? objectNameRaw : "";
+			cleaned.push_back(a_name[pos]);
+			++pos;
 		}
 
-		// Strip trailing whitespace/newlines that some mods embed in form names
-		while (!baseName.empty() && (baseName.back() == '\n' || baseName.back() == '\r' ||
-			baseName.back() == ' ' || baseName.back() == '\t')) {
-			baseName.pop_back();
+		const auto first = cleaned.find_first_not_of(" \n\r\t");
+		if (first == std::string::npos) {
+			return {};
+		}
+		const auto last = cleaned.find_last_not_of(" \n\r\t");
+		return cleaned.substr(first, last - first + 1);
+	}
+
+	[[nodiscard]] std::string EventBridge::BuildLootNameMarker(std::uint8_t a_affixCount)
+	{
+		if (a_affixCount >= 3) {
+			return "***";
+		}
+		if (a_affixCount == 2) {
+			return "**";
+		}
+		return "*";
+	}
+
+	void EventBridge::EnsureMultiAffixDisplayName(
+		RE::InventoryEntryData* a_entry,
+		RE::ExtraDataList* a_xList,
+		const InstanceAffixSlots& a_slots)
+	{
+		if (!_loot.renameItem || !a_entry || !a_entry->object || !a_xList) {
+			return;
+		}
+
+		if (a_slots.count == 0) {
+			return;
+		}
+
+		auto* text = a_xList->GetExtraTextDisplayData();
+		std::string storedCustomName;
+		const std::string baseName = ResolveStoredLootDisplayBaseName(a_entry, a_xList, &storedCustomName);
+
+		if (baseName.empty()) {
+			return;
 		}
 
 		// Build name marker based on affix count.
-		std::string marker;
-		if (a_slots.count >= 3) {
-			marker = "***";
-		} else if (a_slots.count == 2) {
-			marker = "**";
-		} else {
-			marker = "*";
-		}
+		const std::string marker = BuildLootNameMarker(a_slots.count);
 
 		std::string newName;
 		if (_loot.nameMarkerPosition == LootNameMarkerPosition::kTrailing) {

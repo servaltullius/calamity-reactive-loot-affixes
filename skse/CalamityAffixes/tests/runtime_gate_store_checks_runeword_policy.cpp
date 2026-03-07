@@ -530,16 +530,18 @@ namespace RuntimeGateStoreChecks
 				(std::istreambuf_iterator<char>(in)),
 				std::istreambuf_iterator<char>());
 
-			const auto snapshotDeclPos = source.find("const RE::FormID lowHealthOwnerFormID =");
-			const auto previousDeclPos = source.find("const float lowHealthPreviousPct = ResolveLowHealthTriggerPreviousPct(lowHealthOwnerFormID);");
-			const auto gateCallPos = source.find("PassesTriggerProcPreconditions(");
-			const auto mapUpdatePos = source.find("StoreLowHealthTriggerSnapshot(lowHealthOwnerFormID, lowHealthCurrentPct);");
+			const auto snapshotStructPos = source.find("struct LowHealthSnapshot");
+			const auto snapshotBuildPos = source.find("const auto buildLowHealthSnapshot = [&]() noexcept");
+			const auto snapshotUsePos = source.find("const auto lowHealthSnapshot = buildLowHealthSnapshot();");
+			const auto gateCallPos = (snapshotUsePos == std::string::npos) ? std::string::npos : source.find("TryProcessTriggerAffix(", snapshotUsePos);
+			const auto mapUpdatePos = source.find("StoreLowHealthTriggerSnapshot(a_lowHealthOwnerFormID, a_lowHealthCurrentPct);");
 
-			if (snapshotDeclPos == std::string::npos ||
-				previousDeclPos == std::string::npos ||
+			if (snapshotStructPos == std::string::npos ||
+				snapshotBuildPos == std::string::npos ||
+				snapshotUsePos == std::string::npos ||
 				gateCallPos == std::string::npos ||
 				mapUpdatePos == std::string::npos ||
-				mapUpdatePos < gateCallPos) {
+				!(snapshotStructPos < snapshotBuildPos && snapshotBuildPos < snapshotUsePos && snapshotUsePos < gateCallPos)) {
 				std::cerr << "low_health_trigger_snapshot: single-snapshot low-health gate guard is missing\n";
 				return false;
 			}
@@ -1026,12 +1028,13 @@ namespace RuntimeGateStoreChecks
 			if (coreText->find("PushSelectedTooltipSnapshot(") == std::string::npos ||
 				handleText->find("PushSelectedTooltipSnapshot(true);") == std::string::npos ||
 				coreText->find("const bool selectionChanged =") == std::string::npos ||
-				coreText->find("if (a_force || selectionChanged || !g_lastTooltip.empty())") == std::string::npos ||
+				coreText->find("void ClearSelectedTooltipFromView(bool a_force, bool a_selectionChanged)") == std::string::npos ||
+				coreText->find("ClearSelectedTooltipFromView(a_force, selectionChanged);") == std::string::npos ||
 				coreText->find("if (a_force || selectionChanged || next != g_lastTooltip)") == std::string::npos ||
-				coreText->find("setRunewordAffixPreview") == std::string::npos ||
+				coreText->find("kInteropSetRunewordAffixPreview") == std::string::npos ||
 				(handleText->find("SetRunewordAffixPreview(") == std::string::npos &&
 				 handleText->find("RefreshRunewordPanelBindings(*bridge);") == std::string::npos) ||
-				uiText->find("PrismaUI_Interop(\"setRunewordAffixPreview\"") == std::string::npos ||
+				uiText->find("PrismaUI_Interop(prismaInteropMethod.runewordAffixPreview") == std::string::npos ||
 				uiText->find("function setRunewordAffixPreview(raw)") == std::string::npos ||
 				runtimeText->find("std::uint64_t a_preferredInstanceKey") == std::string::npos ||
 				runtimeText->find("if (a_preferredInstanceKey != 0u)") == std::string::npos ||
@@ -1045,11 +1048,140 @@ namespace RuntimeGateStoreChecks
 			return true;
 		}
 
-		bool CheckPrismaTooltipWorkerSchedulingPolicy()
+		bool CheckPrismaPanelUiBootstrapExtractionPolicy()
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
-			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
+				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto uiText = loadText(prismaUiFile);
+			if (!uiText.has_value()) {
+				std::cerr << "prisma_panel_ui_bootstrap: failed to open ui source: " << prismaUiFile << "\n";
+				return false;
+			}
+
+			const auto extractJsFunctionBody = [&](std::string_view a_signature) -> std::optional<std::string_view> {
+				const auto start = uiText->find(a_signature);
+				if (start == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto bodyStart = uiText->find('{', start);
+				if (bodyStart == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto nextFunction = uiText->find("\n      function ", bodyStart + 1);
+				if (nextFunction == std::string::npos) {
+					return std::string_view(*uiText).substr(bodyStart + 1);
+				}
+
+				return std::string_view(*uiText).substr(bodyStart + 1, nextFunction - bodyStart - 1);
+			};
+
+			const auto setControlPanelBody = extractJsFunctionBody("function setControlPanel(raw)");
+			const auto setPanelLayoutBody = extractJsFunctionBody("function setPanelLayout(raw)");
+			const auto setTooltipLayoutBody = extractJsFunctionBody("function setTooltipLayout(raw)");
+			const auto setInventoryItemsBody = extractJsFunctionBody("function setInventoryItems(raw)");
+			const auto setRecipeItemsBody = extractJsFunctionBody("function setRecipeItems(raw)");
+			const auto setRunewordPanelStateBody = extractJsFunctionBody("function setRunewordPanelState(raw)");
+			const auto setTooltipBody = extractJsFunctionBody("function setTooltip(raw)");
+			const auto renderInventoryItemsBody = extractJsFunctionBody("function renderInventoryItems()");
+			const auto renderRecipeItemsBody = extractJsFunctionBody("function renderRecipeItems()");
+			const auto wireButtonsBody = extractJsFunctionBody("function wireButtons()");
+			const auto registerInteropBody = extractJsFunctionBody("function registerPrismaInteropHandlers()");
+			const auto registerFallbackBody = extractJsFunctionBody("function registerWindowInteropFallbacks()");
+
+			const auto interopArrayPos = uiText->find("function parseInteropArrayPayload(raw)");
+			const auto interopObjectPos = uiText->find("function parseInteropObjectPayload(raw)");
+			const auto controlPanelParsePos = uiText->find("function parseControlPanelOpenState(raw)");
+			const auto controlPanelApplyPos = uiText->find("function applyControlPanelOpenState(nextOpen)");
+			const auto interopRegisterPos = uiText->find("function registerPrismaInteropHandlers()");
+			const auto fallbackRegisterPos = uiText->find("function registerWindowInteropFallbacks()");
+			const auto eventRegisterPos = uiText->find("function registerPanelEventHandlers()");
+			const auto bootstrapPos = uiText->find("function initializeCalamityPanel()");
+			const auto bootstrapCallPos = uiText->find("initializeCalamityPanel();");
+
+			if (interopArrayPos == std::string::npos ||
+				interopObjectPos == std::string::npos ||
+				controlPanelParsePos == std::string::npos ||
+				controlPanelApplyPos == std::string::npos ||
+				uiText->find("const panelRenderSection = Object.freeze({") == std::string::npos ||
+				uiText->find("const prismaInteropMethod = Object.freeze({") == std::string::npos ||
+				uiText->find("function flushPanelRender()") == std::string::npos ||
+				uiText->find("function schedulePanelRender(...a_sections)") == std::string::npos ||
+				uiText->find("function shouldInvalidatePreviewForCommand(command)") == std::string::npos ||
+				uiText->find("function resolvePreviewPendingStateForCommand(command)") == std::string::npos ||
+				uiText->find("function dispatchPanelCommand(button)") == std::string::npos ||
+				uiText->find("function handleDelegatedPanelCommandClick(event)") == std::string::npos ||
+				interopRegisterPos == std::string::npos ||
+				fallbackRegisterPos == std::string::npos ||
+				eventRegisterPos == std::string::npos ||
+				bootstrapPos == std::string::npos ||
+				bootstrapCallPos == std::string::npos ||
+				uiText->find("const items = parseInteropArrayPayload(raw);") == std::string::npos ||
+				uiText->find("recipeItemsState = parseInteropArrayPayload(raw);") == std::string::npos ||
+				uiText->find("const data = parseInteropObjectPayload(raw) || {};") == std::string::npos ||
+				!setInventoryItemsBody.has_value() ||
+				setInventoryItemsBody->find("schedulePanelRender(") == std::string::npos ||
+				setInventoryItemsBody->find("renderInventoryItems();") != std::string::npos ||
+				!setRecipeItemsBody.has_value() ||
+				setRecipeItemsBody->find("schedulePanelRender(") == std::string::npos ||
+				setRecipeItemsBody->find("renderRecipeItems();") != std::string::npos ||
+				!setRunewordPanelStateBody.has_value() ||
+				setRunewordPanelStateBody->find("schedulePanelRender(") == std::string::npos ||
+				setRunewordPanelStateBody->find("renderRunewordPanelState();") != std::string::npos ||
+				!setTooltipBody.has_value() ||
+				setTooltipBody->find("schedulePanelRender(panelRenderSection.tooltipPlacement);") == std::string::npos ||
+				!setControlPanelBody.has_value() ||
+				setControlPanelBody->find("applyControlPanelOpenState(parseControlPanelOpenState(raw));") == std::string::npos ||
+				!setPanelLayoutBody.has_value() ||
+				setPanelLayoutBody->find("const data = parseInteropObjectPayload(raw);") == std::string::npos ||
+				!setTooltipLayoutBody.has_value() ||
+				setTooltipLayoutBody->find("const data = parseInteropObjectPayload(raw);") == std::string::npos ||
+				!renderInventoryItemsBody.has_value() ||
+				renderInventoryItemsBody->find("button.setAttribute(panelCommandAttribute, `runeword.base.select:${key}`);") == std::string::npos ||
+				renderInventoryItemsBody->find("button.addEventListener(\"click\"") != std::string::npos ||
+				!renderRecipeItemsBody.has_value() ||
+				renderRecipeItemsBody->find("button.setAttribute(panelCommandAttribute, `runeword.recipe.select:${token}`);") == std::string::npos ||
+				renderRecipeItemsBody->find("button.addEventListener(\"click\"") != std::string::npos ||
+				!wireButtonsBody.has_value() ||
+				wireButtonsBody->find("document.addEventListener(\"click\", handleDelegatedPanelCommandClick);") == std::string::npos ||
+				!registerInteropBody.has_value() ||
+				registerInteropBody->find("PrismaUI_Interop(prismaInteropMethod.tooltip, (data) => setTooltip(data));") == std::string::npos ||
+				!registerFallbackBody.has_value() ||
+				registerFallbackBody->find("window[prismaInteropMethod.tooltip] = setTooltip;") == std::string::npos ||
+				uiText->find("window.addEventListener(\"keydown\", handlePanelKeydown);") == std::string::npos) {
+				std::cerr << "prisma_panel_ui_bootstrap: expected ui bootstrap extraction markers are missing\n";
+				return false;
+			}
+
+			if (!(interopRegisterPos < fallbackRegisterPos &&
+					fallbackRegisterPos < eventRegisterPos &&
+					eventRegisterPos < bootstrapPos &&
+					bootstrapPos < bootstrapCallPos)) {
+				std::cerr << "prisma_panel_ui_bootstrap: bootstrap helper ordering is inconsistent\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckPrismaPanelDataExtractionPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
 			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
 
 			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
@@ -1062,9 +1194,206 @@ namespace RuntimeGateStoreChecks
 					std::istreambuf_iterator<char>());
 			};
 
-			// PrismaTooltip.cpp includes PanelData.inl — concatenate for pattern matching.
+			const auto panelDataText = loadText(prismaPanelDataFile);
+			if (!panelDataText.has_value()) {
+				std::cerr << "prisma_panel_data_extraction: failed to open panel data source: " << prismaPanelDataFile << "\n";
+				return false;
+			}
+
+			if (panelDataText->find("bool TryReadSelectedItemContextFromMenus(") == std::string::npos ||
+				panelDataText->find("void ClearSelectedTooltipFromView(bool a_force, bool a_selectionChanged)") == std::string::npos ||
+				panelDataText->find("if (TryReadSelectedItemContextFromMenus(result, *ui, *bridge)) {") == std::string::npos ||
+				panelDataText->find("ClearSelectedTooltipFromView(a_force, selectionChanged);") == std::string::npos) {
+				std::cerr << "prisma_panel_data_extraction: panel data helper extraction markers are missing\n";
+				return false;
+			}
+
+			if (panelDataText->find("const auto clearTooltip = [&]() {") != std::string::npos) {
+				std::cerr << "prisma_panel_data_extraction: inline tooltip clear lambda still exists in panel data source\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckPrismaPanelRenderViewModelExtractionPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
+				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto uiText = loadText(prismaUiFile);
+			if (!uiText.has_value()) {
+				std::cerr << "prisma_panel_render_view_model: failed to open ui source: " << prismaUiFile << "\n";
+				return false;
+			}
+
+			const auto extractJsFunctionBody = [&](std::string_view a_signature) -> std::optional<std::string_view> {
+				const auto start = uiText->find(a_signature);
+				if (start == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto bodyStart = uiText->find('{', start);
+				if (bodyStart == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto nextFunction = uiText->find("\n      function ", bodyStart + 1);
+				if (nextFunction == std::string::npos) {
+					return std::string_view(*uiText).substr(bodyStart + 1);
+				}
+
+				return std::string_view(*uiText).substr(bodyStart + 1, nextFunction - bodyStart - 1);
+			};
+
+			const auto selectedBody = extractJsFunctionBody("function renderSelectedItemContext()");
+			const auto inventoryBody = extractJsFunctionBody("function renderInventoryItems()");
+			const auto recipeBody = extractJsFunctionBody("function renderRecipeItems()");
+			const auto runewordBody = extractJsFunctionBody("function renderRunewordPanelState()");
+
+			if (uiText->find("function resolveSelectedItemContextViewModel()") == std::string::npos ||
+				uiText->find("function resolveInventoryListViewModel()") == std::string::npos ||
+				uiText->find("function resolveRecipeSearchDocument(item)") == std::string::npos ||
+				uiText->find("function resolveRecipeListViewModel()") == std::string::npos ||
+				uiText->find("function resolveRunewordPanelActionState(state)") == std::string::npos ||
+				!selectedBody.has_value() ||
+				selectedBody->find("const viewModel = resolveSelectedItemContextViewModel();") == std::string::npos ||
+				!inventoryBody.has_value() ||
+				inventoryBody->find("const viewModel = resolveInventoryListViewModel();") == std::string::npos ||
+				!recipeBody.has_value() ||
+				recipeBody->find("const viewModel = resolveRecipeListViewModel();") == std::string::npos ||
+				!runewordBody.has_value() ||
+				runewordBody->find("const actionState = resolveRunewordPanelActionState(state);") == std::string::npos) {
+				std::cerr << "prisma_panel_render_view_model: render view-model extraction markers are missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckPrismaPanelCommandRoutingExtractionPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path prismaHandleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.HandleUiCommand.inl";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto handleText = loadText(prismaHandleFile);
+			if (!handleText.has_value()) {
+				std::cerr << "prisma_panel_command_routing: failed to open handle source: " << prismaHandleFile << "\n";
+				return false;
+			}
+
+			const auto handleUiCommandPos = handleText->find("void HandleUiCommand(std::string_view a_command)");
+			if (handleUiCommandPos == std::string::npos) {
+				std::cerr << "prisma_panel_command_routing: HandleUiCommand entrypoint is missing\n";
+				return false;
+			}
+
+			const std::string_view handleUiCommandBody = std::string_view(*handleText).substr(handleUiCommandPos);
+
+			if (handleText->find("bool HandleStructuredUiCommand(std::string_view a_command)") == std::string::npos ||
+				handleText->find("void HandleEventBackedUiCommand(std::string_view a_command)") == std::string::npos ||
+				handleText->find("HandlePanelVisibilityCommand(a_command) ||") == std::string::npos ||
+				handleText->find("HandleImmediateRunewordCommand(a_command);") == std::string::npos ||
+				handleText->find("if (HandleStructuredUiCommand(a_command)) {") == std::string::npos ||
+				handleText->find("HandleEventBackedUiCommand(a_command);") == std::string::npos ||
+				handleUiCommandBody.find("HandlePanelVisibilityCommand(a_command)") != std::string::npos ||
+				handleUiCommandBody.find("HandleRunewordSelectionCommand(a_command)") != std::string::npos ||
+				handleUiCommandBody.find("HandleLayoutSaveCommand(a_command)") != std::string::npos ||
+				handleUiCommandBody.find("HandleImmediateRunewordCommand(a_command)") != std::string::npos) {
+				std::cerr << "prisma_panel_command_routing: command routing extraction markers are missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckPrismaSettingsLayoutExtractionPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path settingsFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SettingsLayout.inl";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto settingsText = loadText(settingsFile);
+			if (!settingsText.has_value()) {
+				std::cerr << "prisma_settings_layout_extraction: failed to open settings source: " << settingsFile << "\n";
+				return false;
+			}
+
+			if (settingsText->find("bool TryReadPanelHotkeyFromMcmJson(std::istream& a_in, std::uint32_t& a_outResolvedKey)") == std::string::npos ||
+				settingsText->find("bool TryResolveUiLanguageSettingsPath(std::filesystem::path& a_outPath)") == std::string::npos ||
+				settingsText->find("bool TryReadUiLanguageModeFromIni(std::istream& a_in, int& a_outResolvedMode)") == std::string::npos ||
+				settingsText->find("void MarkLayoutStateLoadedForPush(") == std::string::npos ||
+				settingsText->find("std::optional<PanelLayout> TryLoadPanelLayoutStateFromDisk()") == std::string::npos ||
+				settingsText->find("std::optional<TooltipLayout> TryLoadTooltipLayoutStateFromDisk()") == std::string::npos ||
+				settingsText->find("void PushLayoutStateJsonToJs(") == std::string::npos ||
+				settingsText->find("(void)TryReadPanelHotkeyFromMcmJson(in, resolvedKey);") == std::string::npos ||
+				settingsText->find("(void)TryResolveUiLanguageSettingsPath(activePath);") == std::string::npos ||
+				settingsText->find("(void)TryReadUiLanguageModeFromIni(in, resolvedMode);") == std::string::npos ||
+				settingsText->find("MarkLayoutStateLoadedForPush(g_panelLayoutState, *loaded);") == std::string::npos ||
+				settingsText->find("MarkLayoutStateLoadedForPush(g_tooltipLayoutState, *loaded);") == std::string::npos ||
+				settingsText->find("PushLayoutStateJsonToJs(") == std::string::npos) {
+				std::cerr << "prisma_settings_layout_extraction: settings/layout helper extraction markers are missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckPrismaTooltipWorkerSchedulingPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaMenuInputFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.MenuInput.inl";
+			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
+			const fs::path prismaViewLifecycleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.ViewLifecycle.inl";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			// PrismaTooltip.cpp includes the PrismaTooltip*.inl files — concatenate the relevant ones for pattern matching.
 			std::string coreTextCombined;
-			for (const auto& sf : { prismaCoreFile, prismaPanelDataFile }) {
+			for (const auto& sf : { prismaCoreFile, prismaMenuInputFile, prismaPanelDataFile, prismaViewLifecycleFile }) {
 				const auto part = loadText(sf);
 				if (!part.has_value()) {
 					std::cerr << "prisma_worker_scheduling: failed to open prisma source: " << sf << "\n";
@@ -1082,9 +1411,62 @@ namespace RuntimeGateStoreChecks
 				coreText->find("if (auto* tasks = SKSE::GetTaskInterface()) {") == std::string::npos ||
 				coreText->find("tasks->AddTask([]() {") == std::string::npos ||
 				coreText->find("Tick();") == std::string::npos ||
-				coreText->find("const auto clearTooltip = [&]() {") == std::string::npos ||
+				coreText->find("void ClearSelectedTooltipFromView(bool a_force, bool a_selectionChanged)") == std::string::npos ||
 				coreText->find("StripRunewordOverlayTooltipLines(*selected.tooltip)") == std::string::npos) {
 				std::cerr << "prisma_worker_scheduling: worker tick scheduling or tooltip-strip guards are missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckPrismaTooltipLifecycleExtractionPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaMenuInputFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.MenuInput.inl";
+			const fs::path prismaSettingsFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SettingsLayout.inl";
+			const fs::path prismaViewLifecycleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.ViewLifecycle.inl";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto coreText = loadText(prismaCoreFile);
+			const auto menuText = loadText(prismaMenuInputFile);
+			const auto settingsText = loadText(prismaSettingsFile);
+			const auto lifecycleText = loadText(prismaViewLifecycleFile);
+			if (!coreText.has_value() || !menuText.has_value() || !settingsText.has_value() || !lifecycleText.has_value()) {
+				std::cerr << "prisma_lifecycle_extraction: failed to open prisma lifecycle sources\n";
+				return false;
+			}
+
+			if (coreText->find("#include \"PrismaTooltip.MenuInput.inl\"") == std::string::npos ||
+				coreText->find("#include \"PrismaTooltip.ViewLifecycle.inl\"") == std::string::npos ||
+				coreText->find("constexpr auto kPrismaCommandListener = \"calamityCommand\";") == std::string::npos ||
+				coreText->find("constexpr auto kInteropSetTooltip = \"setTooltip\";") == std::string::npos ||
+				menuText->find("class PanelHotkeyEventSink final") == std::string::npos ||
+				menuText->find("class MenuEventSink final") == std::string::npos ||
+				settingsText->find("kInteropSetPanelLayout") == std::string::npos ||
+				settingsText->find("kInteropSetTooltipLayout") == std::string::npos ||
+				lifecycleText->find("void StartPrismaWorker()") == std::string::npos ||
+				lifecycleText->find("void RegisterPrismaEventSinks()") == std::string::npos ||
+				lifecycleText->find("void EnsurePrisma()") == std::string::npos ||
+				lifecycleText->find("RegisterJSListener(g_view, kPrismaCommandListener") == std::string::npos) {
+				std::cerr << "prisma_lifecycle_extraction: expected lifecycle/menu extraction markers are missing\n";
+				return false;
+			}
+
+			if (coreText->find("class PanelHotkeyEventSink final") != std::string::npos ||
+				coreText->find("g_worker = std::jthread") != std::string::npos) {
+				std::cerr << "prisma_lifecycle_extraction: core prisma file still owns extracted lifecycle/menu bodies\n";
 				return false;
 			}
 

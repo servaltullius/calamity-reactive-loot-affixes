@@ -6,6 +6,21 @@
 		void ResetRuntimeStateForConfigReload();
 		void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);
 		void RebuildActiveCounts();
+		void ResetActiveCountsStateForRebuild();
+		void RefreshInventoryInstanceActiveState(
+			RE::InventoryEntryData* a_entry,
+			RE::ExtraDataList* a_xList,
+			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
+		void AccumulateEquippedAffixState(
+			std::uint64_t a_instanceKey,
+			const InstanceAffixSlots& a_slots,
+			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
+		void LogActiveAffixListDebug() const;
+		void ApplyDesiredPassiveSpells(
+			RE::PlayerCharacter* a_player,
+			const std::unordered_set<RE::SpellItem*>& a_desiredPassives);
+		void LogRebuildActiveCountsDebugSummary(
+			const std::unordered_set<RE::SpellItem*>& a_desiredPassives) const;
 		void RebuildActiveTriggerIndexCaches();
 		void MarkLootEvaluatedInstance(std::uint64_t a_instanceKey);
 		void ForgetLootEvaluatedInstance(std::uint64_t a_instanceKey);
@@ -245,34 +260,58 @@
 			LootItemType a_itemType,
 			const std::vector<std::size_t>* a_exclude = nullptr,
 			bool a_skipChanceCheck = false);
-		[[nodiscard]] std::optional<std::size_t> RollSuffixIndex(
-			LootItemType a_itemType,
-			const std::vector<std::string>* a_excludeFamilies = nullptr);
-		[[nodiscard]] std::uint8_t RollAffixCount();
-		[[nodiscard]] bool RollLootChanceGateForEligibleInstance();
-		void EnsureMultiAffixDisplayName(
-			RE::InventoryEntryData* a_entry,
-			RE::ExtraDataList* a_xList,
-			const InstanceAffixSlots& a_slots);
-		[[nodiscard]] bool SanitizeInstanceAffixSlotsForCurrentLootRules(
-			std::uint64_t a_instanceKey,
-			InstanceAffixSlots& a_slots,
-			std::string_view a_context);
-		void SanitizeAllTrackedLootInstancesForCurrentLootRules(std::string_view a_context);
-		[[nodiscard]] bool IsLootObjectEligibleForAffixes(const RE::TESBoundObject* a_object) const;
-		[[nodiscard]] bool IsLootArmorEligibleForAffixes(const RE::TESObjectARMO* a_armor) const;
-		[[nodiscard]] bool TryClearStaleLootDisplayName(
-			RE::InventoryEntryData* a_entry,
-			RE::ExtraDataList* a_xList,
-			bool a_allowTrailingMarkerClear);
-		void CleanupInvalidLootInstance(
-			RE::InventoryEntryData* a_entry,
-			RE::ExtraDataList* a_xList,
-			std::uint64_t a_key,
-			std::string_view a_reason);
-
-		[[nodiscard]] std::optional<LootItemType> ParseLootItemType(std::string_view a_kidType) const;
-		[[nodiscard]] static const char* DescribeLootItemType(LootItemType a_type);
+			[[nodiscard]] std::optional<std::size_t> RollSuffixIndex(
+				LootItemType a_itemType,
+				const std::vector<std::string>* a_excludeFamilies = nullptr);
+			[[nodiscard]] std::uint8_t RollAffixCount();
+			[[nodiscard]] bool RollLootChanceGateForEligibleInstance();
+			[[nodiscard]] std::string ResolveStoredLootDisplayBaseName(
+				RE::InventoryEntryData* a_entry,
+				RE::ExtraDataList* a_xList,
+				std::string* a_outStoredCustomName = nullptr) const;
+			[[nodiscard]] std::string StripKnownLootAffixTags(std::string_view a_name) const;
+			[[nodiscard]] static std::string BuildLootNameMarker(std::uint8_t a_affixCount);
+			void EnsureMultiAffixDisplayName(
+				RE::InventoryEntryData* a_entry,
+				RE::ExtraDataList* a_xList,
+				const InstanceAffixSlots& a_slots);
+			[[nodiscard]] bool ShouldKeepTrackedLootAffixToken(std::uint64_t a_token) const;
+			[[nodiscard]] static bool InstanceAffixSlotsEqual(
+				const InstanceAffixSlots& a_lhs,
+				const InstanceAffixSlots& a_rhs) noexcept;
+			void ApplySanitizedInstanceAffixSlots(
+				std::uint64_t a_instanceKey,
+				InstanceAffixSlots& a_slots,
+				const InstanceAffixSlots& a_sanitizedSlots,
+				const std::array<std::uint64_t, kMaxAffixesPerItem>& a_removedTokens,
+				std::uint8_t a_removedCount);
+			[[nodiscard]] bool SanitizeInstanceAffixSlotsForCurrentLootRules(
+				std::uint64_t a_instanceKey,
+				InstanceAffixSlots& a_slots,
+				std::string_view a_context);
+			[[nodiscard]] bool SanitizeTrackedLootInstanceForCurrentLootRules(
+				decltype(_instanceAffixes)::iterator& a_it,
+				std::string_view a_context,
+				std::uint32_t& a_sanitizedInstances,
+				std::uint32_t& a_erasedInstances);
+			void LogTrackedLootSanitizationSummary(
+				std::string_view a_context,
+				std::uint32_t a_sanitizedInstances,
+				std::uint32_t a_erasedInstances) const;
+			void SanitizeAllTrackedLootInstancesForCurrentLootRules(std::string_view a_context);
+			[[nodiscard]] bool IsLootObjectEligibleForAffixes(const RE::TESBoundObject* a_object) const;
+			[[nodiscard]] bool IsLootArmorEligibleForAffixes(const RE::TESObjectARMO* a_armor) const;
+			[[nodiscard]] bool TryClearStaleLootDisplayName(
+				RE::InventoryEntryData* a_entry,
+				RE::ExtraDataList* a_xList,
+				bool a_allowTrailingMarkerClear);
+			void CleanupInvalidLootInstance(
+				RE::InventoryEntryData* a_entry,
+				RE::ExtraDataList* a_xList,
+				std::uint64_t a_key,
+				std::string_view a_reason);
+			[[nodiscard]] std::optional<LootItemType> ParseLootItemType(std::string_view a_kidType) const;
+			[[nodiscard]] static const char* DescribeLootItemType(LootItemType a_type);
 		[[nodiscard]] std::string FormatLootName(std::string_view a_baseName, std::string_view a_affixName) const;
 		[[nodiscard]] float ComputeActiveScrollNoConsumeChancePct() const;
 		[[nodiscard]] std::int32_t RollScrollNoConsumeRestoreCount(
@@ -319,6 +358,28 @@
 		[[nodiscard]] const std::vector<std::size_t>* ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept;
 		void ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);
 		void RecordRecentCombatEvent(Trigger a_trigger, RE::Actor* a_owner, std::chrono::steady_clock::time_point a_now);
+		[[nodiscard]] bool CanProcessTriggerDispatch(
+			Trigger a_trigger,
+			RE::Actor* a_owner,
+			RE::Actor* a_target,
+			const std::vector<std::size_t>*& a_outIndices) const noexcept;
+		[[nodiscard]] bool TryProcessTriggerAffix(
+			std::size_t a_affixIndex,
+			Trigger a_trigger,
+			RE::Actor* a_owner,
+			RE::Actor* a_target,
+			const RE::HitData* a_hitData,
+			std::chrono::steady_clock::time_point a_now,
+			float a_lowHealthPreviousPct,
+			float a_lowHealthCurrentPct,
+			bool& a_loggedProcBudgetDenied);
+		void FinalizeTriggerDispatch(
+			Trigger a_trigger,
+			RE::Actor* a_owner,
+			RE::FormID a_lowHealthOwnerFormID,
+			bool a_hasLowHealthSnapshot,
+			float a_lowHealthCurrentPct,
+			std::chrono::steady_clock::time_point a_now);
 		void MarkPlayerCombatEvidence(
 			std::chrono::steady_clock::time_point a_now,
 			PlayerCombatEvidenceSource a_source,

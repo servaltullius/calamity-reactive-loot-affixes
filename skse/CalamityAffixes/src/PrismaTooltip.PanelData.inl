@@ -31,7 +31,7 @@
 		{
 			PushCachedInteropPayload(
 				g_runewordCache.baseListJson,
-				"setInventoryItems",
+				kInteropSetInventoryItems,
 				BuildRunewordBaseInventoryPayload(a_entries).dump());
 		}
 
@@ -59,7 +59,7 @@
 		{
 			PushCachedInteropPayload(
 				g_runewordCache.recipeListJson,
-				"setRecipeItems",
+				kInteropSetRecipeItems,
 				BuildRunewordRecipePayload(a_entries).dump());
 		}
 
@@ -67,7 +67,7 @@
 		{
 			PushCachedInteropPayload(
 				g_runewordCache.affixPreview,
-				"setRunewordAffixPreview",
+				kInteropSetRunewordAffixPreview,
 				std::string(a_text));
 		}
 
@@ -103,7 +103,7 @@
 		{
 			PushCachedInteropPayload(
 				g_runewordCache.panelStateJson,
-				"setRunewordPanelState",
+				kInteropSetRunewordPanelState,
 				BuildRunewordPanelStatePayload(a_state).dump());
 		}
 
@@ -282,17 +282,29 @@
 				return result;
 			}
 
+			if (TryReadSelectedItemContextFromMenus(result, *ui, *bridge)) {
+				return result;
+			}
+
+			return result;
+		}
+
+		[[nodiscard]] bool TryReadSelectedItemContextFromMenus(
+			SelectedItemContext& a_result,
+			RE::UI& a_ui,
+			CalamityAffixes::EventBridge& a_bridge)
+		{
 			for (const auto tryReadContext : {
 					 &TryReadInventorySelectedItemContext,
 					 &TryReadBarterSelectedItemContext,
 					 &TryReadContainerSelectedItemContext,
 					 &TryReadGiftSelectedItemContext }) {
-				if (tryReadContext(result, *ui, *bridge)) {
-					return result;
+				if (tryReadContext(a_result, a_ui, a_bridge)) {
+					return true;
 				}
 			}
 
-			return result;
+			return false;
 		}
 
 		[[nodiscard]] bool HasSelectedItemContextChanged(const SelectedItemContext& a_selected) noexcept
@@ -320,7 +332,20 @@
 		{
 			g_lastTooltip = std::move(a_text);
 			g_prismaTelemetry.tooltipPushes.fetch_add(1u, std::memory_order_relaxed);
-			g_api->InteropCall(g_view, "setTooltip", g_lastTooltip.c_str());
+			g_api->InteropCall(g_view, kInteropSetTooltip, g_lastTooltip.c_str());
+		}
+
+		void ClearSelectedTooltipFromView(bool a_force, bool a_selectionChanged)
+		{
+			if (!a_force && !a_selectionChanged && g_lastTooltip.empty()) {
+				return;
+			}
+
+			if (!g_lastTooltip.empty()) {
+				g_prismaTelemetry.tooltipClears.fetch_add(1u, std::memory_order_relaxed);
+			}
+			g_lastTooltip.clear();
+			g_api->InteropCall(g_view, kInteropSetTooltip, "");
 		}
 
 		bool PushSelectedTooltipSnapshot(bool a_force /*= false*/)
@@ -333,19 +358,9 @@
 			const bool selectionChanged = HasSelectedItemContextChanged(selected);
 			SetSelectedItemContext(selected.itemName, selected.itemSource);
 
-			const auto clearTooltip = [&]() {
-				if (a_force || selectionChanged || !g_lastTooltip.empty()) {
-					if (!g_lastTooltip.empty()) {
-						g_prismaTelemetry.tooltipClears.fetch_add(1u, std::memory_order_relaxed);
-					}
-					g_lastTooltip.clear();
-					g_api->InteropCall(g_view, "setTooltip", "");
-				}
-			};
-
 			const auto nextTooltip = BuildSelectedTooltipText(selected);
 			if (!nextTooltip.has_value()) {
-				clearTooltip();
+				ClearSelectedTooltipFromView(a_force, selectionChanged);
 				return false;
 			}
 

@@ -38,6 +38,20 @@ namespace CalamityAffixes::PrismaTooltip
 		constexpr auto kMouseButtonOffset = 256u;
 		constexpr std::uint32_t kFallbackPanelHotkey = RE::BSKeyboardDevice::Keys::kF11;
 		constexpr int kDefaultUiLanguageMode = 2;  // 0=en, 1=ko, 2=both
+		constexpr auto kPrismaCommandListener = "calamityCommand";
+		constexpr auto kInteropSetTooltip = "setTooltip";
+		constexpr auto kInteropSetControlPanel = "setControlPanel";
+		constexpr auto kInteropSetActionFeedback = "setActionFeedback";
+		constexpr auto kInteropSetPanelHotkeyText = "setPanelHotkeyText";
+		constexpr auto kInteropSetUiLanguage = "setUiLanguage";
+		constexpr auto kInteropSetSelectedItemName = "setSelectedItemName";
+		constexpr auto kInteropSetSelectedItemSource = "setSelectedItemSource";
+		constexpr auto kInteropSetInventoryItems = "setInventoryItems";
+		constexpr auto kInteropSetRecipeItems = "setRecipeItems";
+		constexpr auto kInteropSetRunewordPanelState = "setRunewordPanelState";
+		constexpr auto kInteropSetRunewordAffixPreview = "setRunewordAffixPreview";
+		constexpr auto kInteropSetPanelLayout = "setPanelLayout";
+		constexpr auto kInteropSetTooltipLayout = "setTooltipLayout";
 
 		constexpr std::string_view kMenuInventory = RE::InventoryMenu::MENU_NAME;
 		constexpr std::string_view kMenuBarter = RE::BarterMenu::MENU_NAME;
@@ -127,6 +141,8 @@ namespace CalamityAffixes::PrismaTooltip
 			bool hasSourceSnapshot = false;
 		};
 
+		struct SelectedItemContext;
+
 		PrismaSettingsRefreshState g_panelHotkeyRefresh{};
 		PrismaSettingsRefreshState g_uiLanguageRefresh{};
 
@@ -154,14 +170,26 @@ namespace CalamityAffixes::PrismaTooltip
 		void SaveTooltipLayoutToDisk(const TooltipLayout& a_layout);
 		void PushPanelLayoutToJs();
 		void PushTooltipLayoutToJs();
+		[[nodiscard]] bool TryReadPanelHotkeyFromMcmJson(std::istream& a_in, std::uint32_t& a_outResolvedKey);
+		[[nodiscard]] bool TryResolveUiLanguageSettingsPath(std::filesystem::path& a_outPath);
+		[[nodiscard]] bool TryReadUiLanguageModeFromIni(std::istream& a_in, int& a_outResolvedMode);
+		[[nodiscard]] std::optional<PanelLayout> TryLoadPanelLayoutStateFromDisk();
+		[[nodiscard]] std::optional<TooltipLayout> TryLoadTooltipLayoutStateFromDisk();
 		void SetRunewordBaseInventoryList(const std::vector<RunewordBaseInventoryEntry>& a_entries);
 		void SetRunewordRecipeList(const std::vector<RunewordRecipeEntry>& a_entries);
 		void SetRunewordAffixPreview(std::string_view a_text);
 		void SetRunewordPanelState(const RunewordPanelState& a_state);
+		[[nodiscard]] bool TryReadSelectedItemContextFromMenus(
+			SelectedItemContext& a_result,
+			RE::UI& a_ui,
+			CalamityAffixes::EventBridge& a_bridge);
+		void ClearSelectedTooltipFromView(bool a_force, bool a_selectionChanged);
 		bool PushSelectedTooltipSnapshot(bool a_force = false);
 		void ClearTooltipViewState(bool a_clearRunewordPanelData);
 		void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge);
 		void MaybeLogPrismaTelemetry(std::chrono::steady_clock::time_point a_now, bool a_uiActive);
+		[[nodiscard]] bool HandleStructuredUiCommand(std::string_view a_command);
+		void HandleEventBackedUiCommand(std::string_view a_command);
 		[[nodiscard]] bool EnsurePrismaApiAvailable();
 		void PrepareForNewPrismaView();
 		void RegisterPrismaCommandListener();
@@ -284,7 +312,7 @@ namespace CalamityAffixes::PrismaTooltip
 			}
 
 			const char* value = a_open ? "1" : "0";
-			g_api->InteropCall(g_view, "setControlPanel", value);
+			g_api->InteropCall(g_view, kInteropSetControlPanel, value);
 
 			// Fallback path if JS interop registration failed for any reason.
 			g_api->Invoke(g_view, a_open
@@ -307,8 +335,8 @@ namespace CalamityAffixes::PrismaTooltip
 			g_viewCache.selectedItemName = itemName;
 			g_viewCache.selectedItemSource = itemSource;
 			g_prismaTelemetry.selectedContextRefreshes.fetch_add(1u, std::memory_order_relaxed);
-			g_api->InteropCall(g_view, "setSelectedItemName", g_viewCache.selectedItemName.c_str());
-			g_api->InteropCall(g_view, "setSelectedItemSource", g_viewCache.selectedItemSource.c_str());
+			g_api->InteropCall(g_view, kInteropSetSelectedItemName, g_viewCache.selectedItemName.c_str());
+			g_api->InteropCall(g_view, kInteropSetSelectedItemSource, g_viewCache.selectedItemSource.c_str());
 		}
 
 		void ApplyControlPanelState(bool a_open)
@@ -350,7 +378,7 @@ namespace CalamityAffixes::PrismaTooltip
 			}
 
 			const std::string message(a_message);
-			g_api->InteropCall(g_view, "setActionFeedback", message.c_str());
+			g_api->InteropCall(g_view, kInteropSetActionFeedback, message.c_str());
 		}
 
 		[[nodiscard]] bool EmitModEvent(std::string_view a_eventName, std::string_view a_strArg = {}, float a_numArg = 0.0f)
@@ -391,7 +419,7 @@ namespace CalamityAffixes::PrismaTooltip
 				g_lastTooltip.clear();
 				tooltipCleared = true;
 				if (IsViewReady()) {
-					g_api->InteropCall(g_view, "setTooltip", "");
+					g_api->InteropCall(g_view, kInteropSetTooltip, "");
 				}
 			}
 			if (tooltipCleared) {
@@ -442,302 +470,15 @@ namespace CalamityAffixes::PrismaTooltip
 				g_controlPanelOpen.load(std::memory_order_relaxed));
 		}
 
-		[[nodiscard]] std::uint32_t NormalizeButtonKeyCode(const RE::ButtonEvent* a_event) noexcept
-		{
-			if (!a_event) {
-				return 0;
-			}
-
-			auto keyCode = a_event->GetIDCode();
-			if (keyCode == 0) {
-				return 0;
-			}
-
-			switch (a_event->device.get()) {
-			case RE::INPUT_DEVICES::kKeyboard:
-				return keyCode;
-			case RE::INPUT_DEVICES::kMouse:
-				return kMouseButtonOffset + keyCode;
-			default:
-				return 0;
-			}
-		}
-
-		[[nodiscard]] std::uint32_t ResolveConfiguredControlPanelHotkey() noexcept
-		{
-			auto configuredHotkey = g_controlPanelHotkey.load();
-			if (configuredHotkey == 0u) {
-				// Fallback: allow opening the panel even if the user hasn't configured a keybind yet.
-				configuredHotkey = kFallbackPanelHotkey;
-			}
-			return configuredHotkey;
-		}
-
-		[[nodiscard]] bool ShouldToggleControlPanelForButton(
-			const RE::ButtonEvent* a_event,
-			std::uint32_t a_configuredHotkey) noexcept
-		{
-			if (!a_event || !a_event->IsDown()) {
-				return false;
-			}
-
-			const auto pressedKey = NormalizeButtonKeyCode(a_event);
-			if (pressedKey == 0u || pressedKey != a_configuredHotkey) {
-				return false;
-			}
-
-			return IsGameplayReady();
-		}
-
-		void QueueToggleControlPanelTask()
-		{
-			QueueTask([]() {
-				SetControlPanelOpenImpl(!g_controlPanelOpen.load());
-			});
-		}
-
-		[[nodiscard]] bool IsRelevantMenuEvent(const RE::MenuOpenCloseEvent& a_event) noexcept
-		{
-			const char* raw = a_event.menuName.c_str();
-			const std::string_view menuName = raw ? std::string_view(raw) : std::string_view{};
-			return IsRelevantMenu(menuName);
-		}
-
-		void HandleRelevantMenuOpened()
-		{
-			const int openCount = CountRelevantMenusOpenFromUi();
-			if (openCount > 0) {
-				g_relevantMenusOpen.store(openCount);
-			} else {
-				// Opening events can race before UI::IsMenuOpen reflects the new state.
-				// Fall back to event-based increment so polling doesn't stall at zero.
-				g_relevantMenusOpen.fetch_add(1);
-			}
-		}
-
-		[[nodiscard]] int ResolveRelevantMenuCountAfterClose() noexcept
-		{
-			int openCount = CountRelevantMenusOpenFromUi();
-			if (openCount < 0) {
-				const int prev = g_relevantMenusOpen.fetch_sub(1);
-				openCount = std::max(0, prev - 1);
-			}
-			g_relevantMenusOpen.store(std::max(0, openCount));
-			return openCount;
-		}
-
-		void SyncViewStateAfterRelevantMenusClosed(int a_openCount)
-		{
-			if (a_openCount > 0) {
-				return;
-			}
-
-			g_relevantMenusOpen.store(0);
-
-			if (!g_controlPanelOpen.load() && g_api && g_view && g_api->IsValid(g_view)) {
-				// Keep cursor/focus state in sync with menu lifetime.
-				// If focus remains after menu close, the cursor can linger until reopening a menu.
-				if (g_api->HasFocus(g_view)) {
-					g_api->Unfocus(g_view);
-				}
-
-				if (IsViewReady()) {
-					ClearTooltipViewState(false);
-				}
-
-				SetVisible(false);
-			}
-		}
-
-
 		#include "PrismaTooltip.SettingsLayout.inl"
 
-
-		class PanelHotkeyEventSink final : public RE::BSInputDeviceManager::Sink
-		{
-		public:
-			using Event = RE::InputEvent*;
-
-			RE::BSEventNotifyControl ProcessEvent(
-				const Event* a_event,
-				RE::BSTEventSource<Event>*) override
-			{
-				const auto configuredHotkey = ResolveConfiguredControlPanelHotkey();
-				if (configuredHotkey == 0u) {
-					return RE::BSEventNotifyControl::kContinue;
-				}
-
-				const auto* inputEvent = a_event ? *a_event : nullptr;
-				for (auto* current = inputEvent; current; current = current->next) {
-					const auto* buttonEvent = current->AsButtonEvent();
-					if (!ShouldToggleControlPanelForButton(buttonEvent, configuredHotkey)) {
-						continue;
-					}
-
-					QueueToggleControlPanelTask();
-					return RE::BSEventNotifyControl::kContinue;
-				}
-
-				return RE::BSEventNotifyControl::kContinue;
-			}
-		};
-
-		class MenuEventSink final : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
-		{
-		public:
-			RE::BSEventNotifyControl ProcessEvent(
-				const RE::MenuOpenCloseEvent* a_event,
-				RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override
-			{
-				if (!a_event || !IsRelevantMenuEvent(*a_event)) {
-					return RE::BSEventNotifyControl::kContinue;
-				}
-
-				if (a_event->opening) {
-					HandleRelevantMenuOpened();
-					return RE::BSEventNotifyControl::kContinue;
-				}
-
-				SyncViewStateAfterRelevantMenusClosed(ResolveRelevantMenuCountAfterClose());
-
-				return RE::BSEventNotifyControl::kContinue;
-			}
-		};
-
-		MenuEventSink g_menuSink;
-		PanelHotkeyEventSink g_hotkeySink;
-
+		#include "PrismaTooltip.MenuInput.inl"
 
 		#include "PrismaTooltip.PanelData.inl"
 
-		bool EnsurePrismaApiAvailable()
-		{
-			if (g_api) {
-				return true;
-			}
-
-			auto* api = static_cast<PRISMA_UI_API::IVPrismaUI1*>(
-				PRISMA_UI_API::RequestPluginAPI(PRISMA_UI_API::InterfaceVersion::V1));
-			if (!api) {
-				if (!g_loggedMissingApi.exchange(true)) {
-					SKSE::log::error("CalamityAffixes: PrismaUI API not available. Is PrismaUI installed and loaded?");
-				}
-				return false;
-			}
-
-			g_api = api;
-			SKSE::log::info("CalamityAffixes: PrismaUI API acquired.");
-			return true;
-		}
-
-		void PrepareForNewPrismaView()
-		{
-			g_domReady = false;
-			g_lastPanelStateKnown = false;
-			g_viewCache.uiLanguageCode.clear();
-			g_runewordCache.affixPreview.clear();
-		}
-
-		void RegisterPrismaCommandListener()
-		{
-			g_api->RegisterJSListener(g_view, "calamityCommand", [](const char* a_argument) {
-				const std::string command = a_argument ? std::string(a_argument) : std::string();
-				QueueTask([command]() {
-					HandleUiCommand(command);
-				});
-			});
-		}
-
-		void QueueCachedLayoutStateForNewView()
-		{
-			if (g_panelLayoutState.value.valid) {
-				g_panelLayoutState.lastJson.clear();
-				g_panelLayoutState.needsPush = true;
-			}
-			if (g_tooltipLayoutState.value.valid) {
-				g_tooltipLayoutState.lastJson.clear();
-				g_tooltipLayoutState.needsPush = true;
-			}
-		}
-
-		void CreatePrismaView()
-		{
-			PrepareForNewPrismaView();
-			g_view = g_api->CreateView(
-				kViewPath,
-				[](PRISMA_UI_API::PrismaView) {
-					g_domReady = true;
-				});
-			g_api->SetOrder(g_view, kViewOrder);
-			g_api->Hide(g_view);
-
-			RegisterPrismaCommandListener();
-			QueueCachedLayoutStateForNewView();
-
-			SKSE::log::info("CalamityAffixes: PrismaUI view created (view={}, path={}).", g_view, kViewPath);
-		}
-
-		void EnsurePrisma()
-		{
-			LoadPanelLayoutFromDisk();
-			LoadTooltipLayoutFromDisk();
-
-			if (g_api && g_view && g_api->IsValid(g_view)) {
-				return;
-			}
-
-			if (!EnsurePrismaApiAvailable()) {
-				return;
-			}
-
-			if (!g_view) {
-				CreatePrismaView();
-			}
-		}
-
-		void SetControlPanelOpenImpl(bool a_open)
-		{
-			g_controlPanelOpen.store(a_open);
-			EnsurePrisma();
-			ApplyControlPanelState(a_open);
-			PushUiFeedback(a_open ? "Prisma panel opened." : "Prisma panel closed.");
-		}
-
-		void RegisterPrismaEventSinks()
-		{
-			if (auto* ui = RE::UI::GetSingleton()) {
-				ui->AddEventSink<RE::MenuOpenCloseEvent>(&g_menuSink);
-				g_gatePollingOnMenus = true;
-			}
-			if (auto* input = RE::BSInputDeviceManager::GetSingleton()) {
-				input->AddEventSink(&g_hotkeySink);
-			}
-		}
-
-		void StartPrismaWorker()
-		{
-			g_worker = std::jthread([](std::stop_token stopToken) {
-				while (!stopToken.stop_requested()) {
-					std::this_thread::sleep_for(kPollInterval);
-
-					if (g_gatePollingOnMenus.load() &&
-						g_relevantMenusOpen.load() <= 0 &&
-						!g_controlPanelOpen.load()) {
-						continue;
-					}
-
-					if (auto* tasks = SKSE::GetTaskInterface()) {
-						g_prismaTelemetry.workerEnqueues.fetch_add(1u, std::memory_order_relaxed);
-						tasks->AddTask([]() {
-							Tick();
-						});
-					}
-				}
-			});
-		}
-
-
 		#include "PrismaTooltip.HandleUiCommand.inl"
+
+		#include "PrismaTooltip.ViewLifecycle.inl"
 
 		#include "PrismaTooltip.Tick.inl"
 

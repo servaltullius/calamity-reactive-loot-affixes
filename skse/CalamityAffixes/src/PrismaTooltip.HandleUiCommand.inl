@@ -270,26 +270,17 @@
 			return false;
 		}
 
-		void HandleUiCommand(std::string_view a_command)
+		[[nodiscard]] bool HandleStructuredUiCommand(std::string_view a_command)
 		{
-			if (a_command.empty()) {
-				return;
-			}
-			g_prismaTelemetry.uiCommands.fetch_add(1u, std::memory_order_relaxed);
+			return
+				HandlePanelVisibilityCommand(a_command) ||
+				HandleRunewordSelectionCommand(a_command) ||
+				HandleLayoutSaveCommand(a_command) ||
+				HandleImmediateRunewordCommand(a_command);
+		}
 
-			if (HandlePanelVisibilityCommand(a_command)) {
-				return;
-			}
-			if (HandleRunewordSelectionCommand(a_command)) {
-				return;
-			}
-			if (HandleLayoutSaveCommand(a_command)) {
-				return;
-			}
-			if (HandleImmediateRunewordCommand(a_command)) {
-				return;
-			}
-
+		void HandleEventBackedUiCommand(std::string_view a_command)
+		{
 			bool sent = false;
 			std::string_view feedback = {};
 			if (!DispatchEventBackedCommand(a_command, sent, feedback)) {
@@ -305,4 +296,18 @@
 			}
 
 			PushUiFeedback(feedback);
+		}
+
+		void HandleUiCommand(std::string_view a_command)
+		{
+			if (a_command.empty()) {
+				return;
+			}
+			g_prismaTelemetry.uiCommands.fetch_add(1u, std::memory_order_relaxed);
+
+			if (HandleStructuredUiCommand(a_command)) {
+				return;
+			}
+
+			HandleEventBackedUiCommand(a_command);
 		}

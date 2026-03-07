@@ -1246,6 +1246,104 @@
       let panelLayoutLoaded = false;
       let tooltipLayoutLoaded = false;
       let tooltipLayout = getDefaultTooltipLayout();
+      const panelCommandAttribute = "data-cmd";
+      const panelOpenTabAttribute = "data-open-tab";
+      const panelRenderSection = Object.freeze({
+        hotkeyHints: "hotkeyHints",
+        selectedItemContext: "selectedItemContext",
+        inventoryItems: "inventoryItems",
+        recipeItems: "recipeItems",
+        runewordPanelState: "runewordPanelState",
+        tooltipLayout: "tooltipLayout",
+        tooltipPlacement: "tooltipPlacement",
+        quickLaunch: "quickLaunch"
+      });
+      const prismaInteropMethod = Object.freeze({
+        tooltip: "setTooltip",
+        controlPanel: "setControlPanel",
+        actionFeedback: "setActionFeedback",
+        panelHotkeyText: "setPanelHotkeyText",
+        uiLanguage: "setUiLanguage",
+        selectedItemName: "setSelectedItemName",
+        selectedItemSource: "setSelectedItemSource",
+        inventoryItems: "setInventoryItems",
+        recipeItems: "setRecipeItems",
+        runewordPanelState: "setRunewordPanelState",
+        runewordAffixPreview: "setRunewordAffixPreview",
+        panelLayout: "setPanelLayout",
+        tooltipLayout: "setTooltipLayout"
+      });
+      const previewInvalidatingCommands = new Set([
+        "runeword.insert",
+        "runeword.reforge"
+      ]);
+      const previewInvalidatingCommandPrefixes = Object.freeze([
+        "runeword.base.select:"
+      ]);
+      const panelRenderState = {
+        queued: false,
+        dirty: {
+          hotkeyHints: false,
+          selectedItemContext: false,
+          inventoryItems: false,
+          recipeItems: false,
+          runewordPanelState: false,
+          tooltipLayout: false,
+          tooltipPlacement: false,
+          quickLaunch: false
+        }
+      };
+
+      function flushPanelRender() {
+        panelRenderState.queued = false;
+        const next = { ...panelRenderState.dirty };
+        for (const key of Object.keys(panelRenderState.dirty)) {
+          panelRenderState.dirty[key] = false;
+        }
+
+        if (next.hotkeyHints) {
+          updatePanelHotkeyHints();
+        }
+        if (next.selectedItemContext) {
+          renderSelectedItemContext();
+        }
+        if (next.inventoryItems) {
+          renderInventoryItems();
+        }
+        if (next.recipeItems) {
+          renderRecipeItems();
+        }
+        if (next.runewordPanelState) {
+          renderRunewordPanelState();
+        }
+        if (next.tooltipLayout) {
+          applyTooltipLayout();
+        }
+        if (next.tooltipPlacement) {
+          applyTooltipPlacement();
+        }
+        if (next.quickLaunch) {
+          applyQuickLaunchVisibility();
+        }
+      }
+
+      function schedulePanelRender(...a_sections) {
+        let hasDirtySection = false;
+        for (const section of a_sections) {
+          if (!section || !(section in panelRenderState.dirty)) {
+            continue;
+          }
+          panelRenderState.dirty[section] = true;
+          hasDirtySection = true;
+        }
+
+        if (!hasDirtySection || panelRenderState.queued) {
+          return;
+        }
+
+        panelRenderState.queued = true;
+        requestAnimationFrame(flushPanelRender);
+      }
 
       function normalizeUiLang(raw) {
         const value = String(raw ?? "").trim().toLowerCase();
@@ -1472,7 +1570,6 @@
         if (tooltipRunewordHint) {
           tooltipRunewordHint.setAttribute("aria-label", t("Open Calamity panel", "칼래미티 패널 열기"));
         }
-        updatePanelHotkeyHints();
         selectedItemLabel.textContent = t("Runeword Base", "룬워드 베이스");
         if (panelTooltipTitle) {
           panelTooltipTitle.textContent = t("Affix Tooltip", "어픽스");
@@ -1542,7 +1639,6 @@
         if (tooltipResetButton) {
           tooltipResetButton.textContent = t("Reset Tooltip", "툴팁 초기화");
         }
-        setTooltipSummaryText();
         panelDragHint.textContent = t(
           "Drag this header to move panel",
           "이 헤더를 드래그해 패널 위치 이동"
@@ -1584,13 +1680,16 @@
           footerCloseButton.textContent = t("Close Panel", "패널 닫기");
         }
         setMainTab(mainTabState);
-        renderSelectedItemContext();
-        renderRecipeItems();
-        renderInventoryItems();
-        renderRunewordPanelState();
-        applyTooltipLayout();
-        applyTooltipPlacement();
-        applyQuickLaunchVisibility();
+        schedulePanelRender(
+          panelRenderSection.hotkeyHints,
+          panelRenderSection.selectedItemContext,
+          panelRenderSection.recipeItems,
+          panelRenderSection.inventoryItems,
+          panelRenderSection.runewordPanelState,
+          panelRenderSection.tooltipLayout,
+          panelRenderSection.tooltipPlacement,
+          panelRenderSection.quickLaunch
+        );
       }
 
       function clearChildren(node) {
@@ -1614,8 +1713,11 @@
         runewordAffixPendingState = Boolean(pending);
         if (!runewordAffixPendingState) {
           runewordAffixPendingNonce += 1;
+          schedulePanelRender(panelRenderSection.tooltipPlacement);
           return;
         }
+
+        schedulePanelRender(panelRenderSection.tooltipPlacement);
 
         const pendingNonce = ++runewordAffixPendingNonce;
         // Failsafe: never leave preview in perpetual "refreshing" state.
@@ -1623,7 +1725,7 @@
           if (!runewordAffixPendingState) return;
           if (pendingNonce !== runewordAffixPendingNonce) return;
           runewordAffixPendingState = false;
-          applyTooltipPlacement();
+          schedulePanelRender(panelRenderSection.tooltipPlacement);
         }, runewordAffixPendingTimeoutMs);
       }
 
@@ -2079,29 +2181,45 @@
         persistPanelLayout();
       }
 
-      function renderSelectedItemContext() {
-        const name = selectedItemNameState || t("No base selected", "선택된 베이스 없음");
-        selectedItemName.textContent = name;
+      function resolveSelectedItemContextViewModel() {
+        return {
+          name: selectedItemNameState || t("No base selected", "선택된 베이스 없음"),
+          sourceText: t("Equipped only", "착용 장비 전용")
+        };
+      }
 
-        const sourceText = t("Equipped only", "착용 장비 전용");
-        selectedItemSource.textContent = sourceText;
+      function renderSelectedItemContext() {
+        const viewModel = resolveSelectedItemContextViewModel();
+        selectedItemName.textContent = viewModel.name;
+        selectedItemSource.textContent = viewModel.sourceText;
+      }
+
+      function resolveInventoryListViewModel() {
+        const items = Array.isArray(inventoryItemsState) ? inventoryItemsState : [];
+        return {
+          items,
+          emptyMessage: items.length === 0
+            ? t(
+                "No equipped weapon/armor base found.",
+                "착용 중인 무기/방어구 베이스를 찾지 못했습니다."
+              )
+            : ""
+        };
       }
 
       function renderInventoryItems() {
         clearChildren(inventoryBaseList);
+        const viewModel = resolveInventoryListViewModel();
 
-        if (!Array.isArray(inventoryItemsState) || inventoryItemsState.length === 0) {
+        if (viewModel.emptyMessage) {
           const empty = document.createElement("div");
           empty.className = "cpListEmpty";
-          empty.textContent = t(
-            "No equipped weapon/armor base found.",
-            "착용 중인 무기/방어구 베이스를 찾지 못했습니다."
-          );
+          empty.textContent = viewModel.emptyMessage;
           inventoryBaseList.appendChild(empty);
           return;
         }
 
-        for (const item of inventoryItemsState) {
+        for (const item of viewModel.items) {
           const key = typeof item?.key === "string" ? item.key : "";
           const name = typeof item?.name === "string" ? item.name : "";
           const selected = Boolean(item?.selected);
@@ -2113,11 +2231,7 @@
           button.type = "button";
           button.className = selected ? "cpListItem selected" : "cpListItem";
           button.textContent = name;
-          button.addEventListener("click", () => {
-            invalidateRunewordAffixPreview(true);
-            applyTooltipPlacement();
-            sendCommand(`runeword.base.select:${key}`);
-          });
+          button.setAttribute(panelCommandAttribute, `runeword.base.select:${key}`);
           inventoryBaseList.appendChild(button);
         }
       }
@@ -2470,66 +2584,72 @@
         return byName || null;
       }
 
-      function renderRecipeItems() {
-        clearChildren(recipeList);
+      function resolveRecipeSearchDocument(item) {
+        const name = typeof item?.name === "string" ? item.name.toLowerCase() : "";
+        const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
+        const base = resolveRecipeBaseBadge(item).text.toLowerCase();
+        const summary = resolveRecipeNumericSummaryText(item).toLowerCase();
+        const detail = resolveRecipeFlavorDetailText(item).toLowerCase();
+        const tooltipText = buildRunewordTooltipLikeText(item, {
+          includeName: true,
+          includeDetail: true
+        }).toLowerCase();
+
+        return `${name}\n${runes}\n${base}\n${summary}\n${detail}\n${tooltipText}`;
+      }
+
+      function resolveRecipeListViewModel() {
         const allItems = Array.isArray(recipeItemsState) ? recipeItemsState : [];
         const query = recipeSearchQuery.trim().toLowerCase();
         const visibleItems = allItems.filter((item) => {
           if (!query) return true;
-          const name = typeof item?.name === "string" ? item.name.toLowerCase() : "";
-          const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
-          const base = resolveRecipeBaseBadge(item).text.toLowerCase();
-          const summary = resolveRecipeNumericSummaryText(item).toLowerCase();
-          const detail = resolveRecipeFlavorDetailText(item).toLowerCase();
-          const tooltipText = buildRunewordTooltipLikeText(item, {
-            includeName: true,
-            includeDetail: true
-          }).toLowerCase();
-          return (
-            name.includes(query) ||
-            runes.includes(query) ||
-            base.includes(query) ||
-            summary.includes(query) ||
-            detail.includes(query) ||
-            tooltipText.includes(query)
-          );
+          return resolveRecipeSearchDocument(item).includes(query);
         });
 
-        if (runewordRecipeListTitle) {
-          runewordRecipeListTitle.textContent = t(
+        return {
+          allItems,
+          visibleItems,
+          titleText: t(
             `Recipe List (${allItems.length})`,
             `레시피 목록 (${allItems.length})`
-          );
+          ),
+          countText: query
+            ? t(`Matched ${visibleItems.length}/${allItems.length}`, `검색 ${visibleItems.length}/${allItems.length}`)
+            : t(`Total ${allItems.length}`, `총 ${allItems.length}`),
+          emptyMessage: allItems.length === 0
+            ? t(
+                "No runeword recipe available.",
+                "사용 가능한 룬워드 레시피가 없습니다."
+              )
+            : visibleItems.length === 0
+              ? t(
+                  "No recipe matches your search.",
+                  "검색 조건에 맞는 레시피가 없습니다."
+                )
+              : ""
+        };
+      }
+
+      function renderRecipeItems() {
+        clearChildren(recipeList);
+        const viewModel = resolveRecipeListViewModel();
+
+        if (runewordRecipeListTitle) {
+          runewordRecipeListTitle.textContent = viewModel.titleText;
         }
         if (recipeCountLabel) {
-          recipeCountLabel.textContent = query
-            ? t(`Matched ${visibleItems.length}/${allItems.length}`, `검색 ${visibleItems.length}/${allItems.length}`)
-            : t(`Total ${allItems.length}`, `총 ${allItems.length}`);
+          recipeCountLabel.textContent = viewModel.countText;
         }
 
-        if (allItems.length === 0) {
+        if (viewModel.emptyMessage) {
           const empty = document.createElement("div");
           empty.className = "cpListEmpty";
-          empty.textContent = t(
-            "No runeword recipe available.",
-            "사용 가능한 룬워드 레시피가 없습니다."
-          );
+          empty.textContent = viewModel.emptyMessage;
           recipeList.appendChild(empty);
           return;
         }
 
-        if (visibleItems.length === 0) {
-          const empty = document.createElement("div");
-          empty.className = "cpListEmpty";
-          empty.textContent = t(
-            "No recipe matches your search.",
-            "검색 조건에 맞는 레시피가 없습니다."
-          );
-          recipeList.appendChild(empty);
-          return;
-        }
-
-        for (const item of visibleItems) {
+        for (const item of viewModel.visibleItems) {
           const token = typeof item?.token === "string" ? item.token : "";
           const name = typeof item?.name === "string" ? item.name : "";
           const runes = typeof item?.runes === "string" ? item.runes : "";
@@ -2576,22 +2696,86 @@
             button.setAttribute("aria-label", name);
           }
 
-          button.addEventListener("click", () => {
-            sendCommand(`runeword.recipe.select:${token}`);
-          });
+          button.setAttribute(panelCommandAttribute, `runeword.recipe.select:${token}`);
           recipeList.appendChild(button);
         }
       }
 
-      function renderRunewordPanelState() {
-        const state = runewordPanelState || {};
-        let buttonLabel = t("Transmute", "변환");
-
+      function resolveRunewordPanelActionState(state) {
         const hasBase = Boolean(state.hasBase);
         const hasRecipe = Boolean(state.hasRecipe);
         const isComplete = Boolean(state.isComplete);
-        const requiredRunes = Array.isArray(state.requiredRunes) ? state.requiredRunes : [];
         const canTransmute = Boolean(state.canInsert) && hasBase && hasRecipe && !isComplete;
+
+        let buttonLabel = t("Transmute", "변환");
+        let buttonHint = "";
+
+        if (isComplete) {
+          buttonLabel = t("Complete", "완료");
+          buttonHint = t(
+            "This base already has a completed runeword.",
+            "이 베이스에는 이미 룬워드가 완성되어 있습니다."
+          );
+        } else if (!hasBase) {
+          buttonHint = t(
+            "Select an equipped base first.",
+            "착용 베이스를 먼저 선택하세요."
+          );
+        } else if (!hasRecipe) {
+          buttonHint = t(
+            "Select a runeword recipe first.",
+            "룬워드 레시피를 먼저 선택하세요."
+          );
+        } else if (!canTransmute && state.missingSummary) {
+          buttonHint = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
+        } else if (!canTransmute) {
+          buttonHint = t(
+            "Transmute is not available yet.",
+            "아직 변환할 수 없습니다."
+          );
+        } else {
+          buttonHint = t(
+            "Transmute consumes all required fragments and applies the runeword.",
+            "변환 시 필요한 룬조각을 모두 소모하고 룬워드를 적용합니다."
+          );
+        }
+
+        const reforgeEnabled = hasBase;
+        const reforgeHint = reforgeEnabled ?
+          (isComplete ?
+            t(
+              "Consume 1 Reforge Orb and reroll the runeword effect + affixes on the selected base.",
+              "재련 오브 1개를 소모해 선택 베이스의 룬워드 효과와 어픽스를 함께 재굴림합니다."
+            ) :
+            t(
+              "Consume 1 Reforge Orb and reroll affixes on the selected base.",
+              "재련 오브 1개를 소모해 선택 베이스의 어픽스를 재굴림합니다."
+            )) :
+          t(
+            "Select a base first.",
+            "베이스를 먼저 선택하세요."
+          );
+
+        return {
+          hasBase,
+          hasRecipe,
+          isComplete,
+          canTransmute,
+          buttonLabel,
+          buttonHint,
+          reforgeEnabled,
+          reforgeHint
+        };
+      }
+
+      function renderRunewordPanelState() {
+        const state = runewordPanelState || {};
+        const actionState = resolveRunewordPanelActionState(state);
+        const hasBase = actionState.hasBase;
+        const hasRecipe = actionState.hasRecipe;
+        const isComplete = actionState.isComplete;
+        const requiredRunes = Array.isArray(state.requiredRunes) ? state.requiredRunes : [];
+        const canTransmute = actionState.canTransmute;
 
         if (runewordCubeGrid) {
           clearChildren(runewordCubeGrid);
@@ -2689,7 +2873,6 @@
           if (isComplete) {
             badgeClass += " complete";
             badgeText = t("Complete", "완료");
-            buttonLabel = t("Complete", "완료");
           } else if (canTransmute) {
             badgeClass += " ready";
             badgeText = t("Ready", "가능");
@@ -2760,75 +2943,55 @@
           }
         }
 
-        runewordInsertButton.textContent = buttonLabel;
+        runewordInsertButton.textContent = actionState.buttonLabel;
         runewordInsertButton.disabled = !canTransmute;
-        let buttonHint = "";
-        if (isComplete) {
-          buttonHint = t(
-            "This base already has a completed runeword.",
-            "이 베이스에는 이미 룬워드가 완성되어 있습니다."
-          );
-        } else if (!hasBase) {
-          buttonHint = t(
-            "Select an equipped base first.",
-            "착용 베이스를 먼저 선택하세요."
-          );
-        } else if (!hasRecipe) {
-          buttonHint = t(
-            "Select a runeword recipe first.",
-            "룬워드 레시피를 먼저 선택하세요."
-          );
-        } else if (!canTransmute && state.missingSummary) {
-          buttonHint = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
-        } else if (!canTransmute) {
-          buttonHint = t(
-            "Transmute is not available yet.",
-            "아직 변환할 수 없습니다."
-          );
-        } else {
-          buttonHint = t(
-            "Transmute consumes all required fragments and applies the runeword.",
-            "변환 시 필요한 룬조각을 모두 소모하고 룬워드를 적용합니다."
-          );
-        }
-        runewordInsertButton.title = buttonHint;
-        runewordInsertButton.setAttribute("aria-label", buttonHint);
+        runewordInsertButton.title = actionState.buttonHint;
+        runewordInsertButton.setAttribute("aria-label", actionState.buttonHint);
 
         if (runewordReforgeButton) {
-          const reforgeEnabled = hasBase;
-          runewordReforgeButton.disabled = !reforgeEnabled;
-          const reforgeHint = reforgeEnabled ?
-            (isComplete ?
-              t(
-                "Consume 1 Reforge Orb and reroll the runeword effect + affixes on the selected base.",
-                "재련 오브 1개를 소모해 선택 베이스의 룬워드 효과와 어픽스를 함께 재굴림합니다."
-              ) :
-              t(
-                "Consume 1 Reforge Orb and reroll affixes on the selected base.",
-                "재련 오브 1개를 소모해 선택 베이스의 어픽스를 재굴림합니다."
-              )) :
-            t(
-              "Select a base first.",
-              "베이스를 먼저 선택하세요."
-            );
-          runewordReforgeButton.title = reforgeHint;
-          runewordReforgeButton.setAttribute("aria-label", reforgeHint);
+          runewordReforgeButton.disabled = !actionState.reforgeEnabled;
+          runewordReforgeButton.title = actionState.reforgeHint;
+          runewordReforgeButton.setAttribute("aria-label", actionState.reforgeHint);
+        }
+      }
+
+      function parseInteropArrayPayload(raw) {
+        if (Array.isArray(raw)) {
+          return raw;
+        }
+        if (typeof raw !== "string" || raw.trim().length === 0) {
+          return [];
+        }
+
+        try {
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (_) {
+          return [];
+        }
+      }
+
+      function parseInteropObjectPayload(raw) {
+        if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+          return raw;
+        }
+        if (typeof raw !== "string" || !raw.trim()) {
+          return null;
+        }
+
+        try {
+          const parsed = JSON.parse(raw);
+          return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+            ? parsed
+            : null;
+        } catch (_) {
+          return null;
         }
       }
 
       function setInventoryItems(raw) {
         const prevSelectedItemName = selectedItemNameState;
-        let items = [];
-        if (Array.isArray(raw)) {
-          items = raw;
-        } else if (typeof raw === "string" && raw.trim().length > 0) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              items = parsed;
-            }
-          } catch (_) {}
-        }
+        const items = parseInteropArrayPayload(raw);
 
         inventoryItemsState = items;
         const selected = items.find((item) => item && item.selected && typeof item.name === "string");
@@ -2843,48 +3006,25 @@
           invalidateRunewordAffixPreview(Boolean(selectedItemNameState));
         }
 
-        renderSelectedItemContext();
-        renderInventoryItems();
-        renderRunewordPanelState();
-        if (selectedItemNameState !== prevSelectedItemName) {
-          applyTooltipPlacement();
-        }
+        schedulePanelRender(
+          panelRenderSection.selectedItemContext,
+          panelRenderSection.inventoryItems,
+          panelRenderSection.runewordPanelState,
+          panelRenderSection.tooltipPlacement
+        );
       }
 
       function setRecipeItems(raw) {
-        let items = [];
-        if (Array.isArray(raw)) {
-          items = raw;
-        } else if (typeof raw === "string" && raw.trim().length > 0) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              items = parsed;
-            }
-          } catch (_) {}
-        }
-
-        recipeItemsState = items;
-        renderRecipeItems();
-        renderRunewordPanelState();
+        recipeItemsState = parseInteropArrayPayload(raw);
+        schedulePanelRender(
+          panelRenderSection.recipeItems,
+          panelRenderSection.runewordPanelState,
+          panelRenderSection.tooltipPlacement
+        );
       }
 
       function setRunewordPanelState(raw) {
-        let data = null;
-        if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-          data = raw;
-        } else if (typeof raw === "string" && raw.trim().length > 0) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-              data = parsed;
-            }
-          } catch (_) {}
-        }
-
-        if (!data) {
-          data = {};
-        }
+        const data = parseInteropObjectPayload(raw) || {};
 
         runewordPanelState = {
           hasBase: Boolean(data.hasBase),
@@ -2913,25 +3053,31 @@
         if (runewordAffixPendingState) {
           runewordAffixPendingState = false;
         }
-        renderRunewordPanelState();
-        applyTooltipPlacement();
+        schedulePanelRender(
+          panelRenderSection.runewordPanelState,
+          panelRenderSection.tooltipPlacement
+        );
       }
 
       function setRunewordAffixPreview(raw) {
         runewordAffixTextState = typeof raw === "string" ? raw : "";
         runewordAffixPendingState = false;
-        applyTooltipPlacement();
+        schedulePanelRender(panelRenderSection.tooltipPlacement);
       }
 
       function setTooltip(raw) {
         const value = typeof raw === "string" ? raw : "";
         tooltipTextState = value;
-        applyTooltipPlacement();
+        schedulePanelRender(panelRenderSection.tooltipPlacement);
       }
 
-      function setControlPanel(raw) {
+      function parseControlPanelOpenState(raw) {
         const value = String(raw ?? "").toLowerCase();
-        controlPanelOpen = value === "1" || value === "true" || value === "open";
+        return value === "1" || value === "true" || value === "open";
+      }
+
+      function applyControlPanelOpenState(nextOpen) {
+        controlPanelOpen = nextOpen;
         controlPanel.style.display = controlPanelOpen ? "flex" : "none";
 
         if (!controlPanelOpen) {
@@ -2951,8 +3097,10 @@
         }
 
         document.body.style.pointerEvents = controlPanelOpen ? "auto" : "none";
-        applyTooltipPlacement();
-        applyQuickLaunchVisibility();
+        schedulePanelRender(
+          panelRenderSection.tooltipPlacement,
+          panelRenderSection.quickLaunch
+        );
 
         if (controlPanelOpen) {
           if (pendingOpenMainTab) {
@@ -2978,19 +3126,12 @@
         }
       }
 
-      function setPanelLayout(raw) {
-        let data = null;
-        if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-          data = raw;
-        } else if (typeof raw === "string" && raw.trim()) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-              data = parsed;
-            }
-          } catch (_) {}
-        }
+      function setControlPanel(raw) {
+        applyControlPanelOpenState(parseControlPanelOpenState(raw));
+      }
 
+      function setPanelLayout(raw) {
+        const data = parseInteropObjectPayload(raw);
         if (!data) {
           return;
         }
@@ -3020,25 +3161,14 @@
       }
 
       function setTooltipLayout(raw) {
-        let data = null;
-        if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-          data = raw;
-        } else if (typeof raw === "string" && raw.trim()) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-              data = parsed;
-            }
-          } catch (_) {}
-        }
-
+        const data = parseInteropObjectPayload(raw);
         if (!data) {
           return;
         }
 
         tooltipLayout = normalizeTooltipLayout(data);
         tooltipLayoutLoaded = true;
-        applyTooltipLayout();
+        schedulePanelRender(panelRenderSection.tooltipLayout);
       }
 
       function setActionFeedback(raw) {
@@ -3046,7 +3176,7 @@
         feedback.textContent = value;
         if (runewordAffixPendingState) {
           runewordAffixPendingState = false;
-          applyTooltipPlacement();
+          schedulePanelRender(panelRenderSection.tooltipPlacement);
         }
       }
 
@@ -3054,7 +3184,7 @@
         const value = typeof raw === "string" ? raw.trim() : "";
         if (value && value !== panelHotkeyTextState) {
           panelHotkeyTextState = value;
-          updatePanelHotkeyHints();
+          schedulePanelRender(panelRenderSection.hotkeyHints);
         }
       }
 
@@ -3074,17 +3204,17 @@
         if (value !== prev) {
           invalidateRunewordAffixPreview(Boolean(value));
         }
-        renderSelectedItemContext();
-        renderRunewordPanelState();
-        if (value !== prev) {
-          applyTooltipPlacement();
-        }
+        schedulePanelRender(
+          panelRenderSection.selectedItemContext,
+          panelRenderSection.runewordPanelState,
+          panelRenderSection.tooltipPlacement
+        );
       }
 
       function setSelectedItemSource(raw) {
         const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
         selectedItemSourceState = value;
-        renderSelectedItemContext();
+        schedulePanelRender(panelRenderSection.selectedItemContext);
       }
 
       function sendCommand(command) {
@@ -3096,38 +3226,7 @@
         setActionFeedback(t("Command bridge unavailable.", "명령 브리지가 연결되지 않았습니다."));
       }
 
-      function wireButtons() {
-        const buttons = document.querySelectorAll("[data-cmd]");
-        buttons.forEach((button) => {
-          button.addEventListener("click", () => {
-            const command = button.getAttribute("data-cmd");
-            if (command && handleTooltipUiCommand(command)) {
-              return;
-            }
-
-            const openTab = button.getAttribute("data-open-tab");
-            if (openTab) {
-              pendingOpenMainTab = openTab;
-            }
-            if (command) {
-              if (command === "runeword.insert" || command === "runeword.reforge") {
-                invalidateRunewordAffixPreview(Boolean(selectedItemNameState));
-                applyTooltipPlacement();
-              }
-              sendCommand(command);
-            }
-          });
-        });
-
-        if (recipeSearchInput) {
-          recipeSearchInput.addEventListener("input", () => {
-            recipeSearchQuery = recipeSearchInput.value || "";
-            renderRecipeItems();
-          });
-        }
-      }
-
-      window.addEventListener("keydown", (event) => {
+      function handlePanelKeydown(event) {
         if (!controlPanelOpen) return;
         const key = event.key;
         const code = event.code;
@@ -3142,72 +3241,155 @@
           event.stopPropagation();
           sendCommand("ui.close");
         }
-      });
-
-      if (typeof PrismaUI_Interop === "function") {
-        PrismaUI_Interop("setTooltip", (data) => setTooltip(data));
-        PrismaUI_Interop("setControlPanel", (data) => setControlPanel(data));
-        PrismaUI_Interop("setActionFeedback", (data) => setActionFeedback(data));
-        PrismaUI_Interop("setPanelHotkeyText", (data) => setPanelHotkeyText(data));
-        PrismaUI_Interop("setUiLanguage", (data) => setUiLanguage(data));
-        PrismaUI_Interop("setSelectedItemName", (data) => setSelectedItemName(data));
-        PrismaUI_Interop("setSelectedItemSource", (data) => setSelectedItemSource(data));
-        PrismaUI_Interop("setInventoryItems", (data) => setInventoryItems(data));
-        PrismaUI_Interop("setRecipeItems", (data) => setRecipeItems(data));
-        PrismaUI_Interop("setRunewordPanelState", (data) => setRunewordPanelState(data));
-        PrismaUI_Interop("setRunewordAffixPreview", (data) => setRunewordAffixPreview(data));
-        PrismaUI_Interop("setPanelLayout", (data) => setPanelLayout(data));
-        PrismaUI_Interop("setTooltipLayout", (data) => setTooltipLayout(data));
       }
 
-      // Browser fallback and debugging hooks.
-      window.setTooltip = setTooltip;
-      window.setControlPanel = setControlPanel;
-      window.setActionFeedback = setActionFeedback;
-      window.setPanelHotkeyText = setPanelHotkeyText;
-      window.setUiLanguage = setUiLanguage;
-      window.setSelectedItemName = setSelectedItemName;
-      window.setSelectedItemSource = setSelectedItemSource;
-      window.setInventoryItems = setInventoryItems;
-      window.setRecipeItems = setRecipeItems;
-      window.setRunewordPanelState = setRunewordPanelState;
-      window.setRunewordAffixPreview = setRunewordAffixPreview;
-      window.setPanelLayout = setPanelLayout;
-      window.setTooltipLayout = setTooltipLayout;
+      function shouldInvalidatePreviewForCommand(command) {
+        if (previewInvalidatingCommands.has(command)) {
+          return true;
+        }
 
-      initUiText();
-      wireButtons();
-      wireMainTabs();
-      tooltipTitle.addEventListener("pointerdown", beginTooltipDrag);
-      tooltipTitle.addEventListener("mousedown", beginTooltipDrag);
-      tooltipTitle.addEventListener("dragstart", (event) => event.preventDefault());
-      panelDragHandle.addEventListener("pointerdown", beginPanelDrag);
-      panelResizeRight.addEventListener("pointerdown", (event) => beginPanelResize("x", event));
-      panelResizeBottom.addEventListener("pointerdown", (event) => beginPanelResize("y", event));
-      panelResizeCorner.addEventListener("pointerdown", (event) => beginPanelResize("xy", event));
-      window.addEventListener("pointermove", movePanel);
-      window.addEventListener("pointerup", endPanelDrag);
-      window.addEventListener("pointercancel", endPanelDrag);
-      window.addEventListener("mousemove", movePanel);
-      window.addEventListener("mouseup", endPanelDrag);
-      applyAutoScale();
-      if (typeof ResizeObserver === "function") {
-        const ro = new ResizeObserver(() => {
-          updatePanelUiScale();
-        });
-        ro.observe(controlPanel);
+        return previewInvalidatingCommandPrefixes.some((prefix) => command.startsWith(prefix));
       }
-      window.addEventListener("resize", () => {
-        requestAnimationFrame(() => {
-          applyAutoScale();
-          if (!tooltipLayoutLoaded) {
-            tooltipLayout = getDefaultTooltipLayout();
-          }
-          applyTooltipLayout();
-          updatePanelUiScale();
-          keepPanelInViewport();
+
+      function resolvePreviewPendingStateForCommand(command) {
+        if (previewInvalidatingCommandPrefixes.some((prefix) => command.startsWith(prefix))) {
+          return true;
+        }
+
+        return Boolean(selectedItemNameState);
+      }
+
+      function dispatchPanelCommand(button) {
+        const command = button.getAttribute(panelCommandAttribute);
+        if (!command) {
+          return false;
+        }
+
+        if (handleTooltipUiCommand(command)) {
+          return true;
+        }
+
+        const openTab = button.getAttribute(panelOpenTabAttribute);
+        if (openTab) {
+          pendingOpenMainTab = openTab;
+        }
+
+        if (shouldInvalidatePreviewForCommand(command)) {
+          invalidateRunewordAffixPreview(resolvePreviewPendingStateForCommand(command));
+        }
+
+        sendCommand(command);
+        return true;
+      }
+
+      function handleDelegatedPanelCommandClick(event) {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+
+        const button = target.closest(`[${panelCommandAttribute}]`);
+        if (!button || button.disabled) {
+          return;
+        }
+
+        if (dispatchPanelCommand(button)) {
+          event.preventDefault();
+        }
+      }
+
+      function wireButtons() {
+        document.addEventListener("click", handleDelegatedPanelCommandClick);
+
+        if (recipeSearchInput) {
+          recipeSearchInput.addEventListener("input", () => {
+            recipeSearchQuery = recipeSearchInput.value || "";
+            schedulePanelRender(panelRenderSection.recipeItems);
+          });
+        }
+      }
+
+      function registerPrismaInteropHandlers() {
+        if (typeof PrismaUI_Interop !== "function") {
+          return;
+        }
+
+        PrismaUI_Interop(prismaInteropMethod.tooltip, (data) => setTooltip(data));
+        PrismaUI_Interop(prismaInteropMethod.controlPanel, (data) => setControlPanel(data));
+        PrismaUI_Interop(prismaInteropMethod.actionFeedback, (data) => setActionFeedback(data));
+        PrismaUI_Interop(prismaInteropMethod.panelHotkeyText, (data) => setPanelHotkeyText(data));
+        PrismaUI_Interop(prismaInteropMethod.uiLanguage, (data) => setUiLanguage(data));
+        PrismaUI_Interop(prismaInteropMethod.selectedItemName, (data) => setSelectedItemName(data));
+        PrismaUI_Interop(prismaInteropMethod.selectedItemSource, (data) => setSelectedItemSource(data));
+        PrismaUI_Interop(prismaInteropMethod.inventoryItems, (data) => setInventoryItems(data));
+        PrismaUI_Interop(prismaInteropMethod.recipeItems, (data) => setRecipeItems(data));
+        PrismaUI_Interop(prismaInteropMethod.runewordPanelState, (data) => setRunewordPanelState(data));
+        PrismaUI_Interop(prismaInteropMethod.runewordAffixPreview, (data) => setRunewordAffixPreview(data));
+        PrismaUI_Interop(prismaInteropMethod.panelLayout, (data) => setPanelLayout(data));
+        PrismaUI_Interop(prismaInteropMethod.tooltipLayout, (data) => setTooltipLayout(data));
+      }
+
+      function registerWindowInteropFallbacks() {
+        // Browser fallback and debugging hooks.
+        window[prismaInteropMethod.tooltip] = setTooltip;
+        window[prismaInteropMethod.controlPanel] = setControlPanel;
+        window[prismaInteropMethod.actionFeedback] = setActionFeedback;
+        window[prismaInteropMethod.panelHotkeyText] = setPanelHotkeyText;
+        window[prismaInteropMethod.uiLanguage] = setUiLanguage;
+        window[prismaInteropMethod.selectedItemName] = setSelectedItemName;
+        window[prismaInteropMethod.selectedItemSource] = setSelectedItemSource;
+        window[prismaInteropMethod.inventoryItems] = setInventoryItems;
+        window[prismaInteropMethod.recipeItems] = setRecipeItems;
+        window[prismaInteropMethod.runewordPanelState] = setRunewordPanelState;
+        window[prismaInteropMethod.runewordAffixPreview] = setRunewordAffixPreview;
+        window[prismaInteropMethod.panelLayout] = setPanelLayout;
+        window[prismaInteropMethod.tooltipLayout] = setTooltipLayout;
+      }
+
+      function registerPanelEventHandlers() {
+        wireButtons();
+        wireMainTabs();
+        tooltipTitle.addEventListener("pointerdown", beginTooltipDrag);
+        tooltipTitle.addEventListener("mousedown", beginTooltipDrag);
+        tooltipTitle.addEventListener("dragstart", (event) => event.preventDefault());
+        panelDragHandle.addEventListener("pointerdown", beginPanelDrag);
+        panelResizeRight.addEventListener("pointerdown", (event) => beginPanelResize("x", event));
+        panelResizeBottom.addEventListener("pointerdown", (event) => beginPanelResize("y", event));
+        panelResizeCorner.addEventListener("pointerdown", (event) => beginPanelResize("xy", event));
+        window.addEventListener("keydown", handlePanelKeydown);
+        window.addEventListener("pointermove", movePanel);
+        window.addEventListener("pointerup", endPanelDrag);
+        window.addEventListener("pointercancel", endPanelDrag);
+        window.addEventListener("mousemove", movePanel);
+        window.addEventListener("mouseup", endPanelDrag);
+        if (typeof ResizeObserver === "function") {
+          const ro = new ResizeObserver(() => {
+            updatePanelUiScale();
+          });
+          ro.observe(controlPanel);
+        }
+        window.addEventListener("resize", () => {
+          requestAnimationFrame(() => {
+            applyAutoScale();
+            if (!tooltipLayoutLoaded) {
+              tooltipLayout = getDefaultTooltipLayout();
+            }
+            applyTooltipLayout();
+            updatePanelUiScale();
+            keepPanelInViewport();
+          });
         });
-      });
+      }
+
+      function initializeCalamityPanel() {
+        registerPrismaInteropHandlers();
+        registerWindowInteropFallbacks();
+        initUiText();
+        registerPanelEventHandlers();
+        applyAutoScale();
+      }
+
+      initializeCalamityPanel();
       // ── Smooth inertia scroll for CEF ──
       (function initSmoothScroll() {
         const SCROLL_MULT = 1.8;   // wheel amplification

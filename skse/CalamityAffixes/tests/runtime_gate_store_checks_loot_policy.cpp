@@ -229,6 +229,152 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckLootDisplayNameExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path assignFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Assign.cpp";
+
+		std::ifstream in(assignFile);
+		if (!in.is_open()) {
+			std::cerr << "loot_display_name_extraction: failed to open assign source: " << assignFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		const auto resolvePos = source.find("std::string EventBridge::ResolveStoredLootDisplayBaseName(");
+		const auto stripPos = source.find("std::string EventBridge::StripKnownLootAffixTags(");
+		const auto markerPos = source.find("std::string EventBridge::BuildLootNameMarker(");
+		const auto ensurePos = source.find("void EventBridge::EnsureMultiAffixDisplayName(");
+		const auto resolveCallPos = source.find("ResolveStoredLootDisplayBaseName(a_entry, a_xList, &storedCustomName)", ensurePos);
+		const auto markerCallPos = source.find("BuildLootNameMarker(a_slots.count)", ensurePos);
+
+		if (resolvePos == std::string::npos ||
+			stripPos == std::string::npos ||
+			markerPos == std::string::npos ||
+			ensurePos == std::string::npos ||
+			resolveCallPos == std::string::npos ||
+			markerCallPos == std::string::npos) {
+			std::cerr << "loot_display_name_extraction: expected display-name helpers or calls are missing\n";
+			return false;
+		}
+
+		if (!(resolvePos < stripPos && stripPos < markerPos && markerPos < ensurePos &&
+			ensurePos < resolveCallPos && resolveCallPos < markerCallPos)) {
+			std::cerr << "loot_display_name_extraction: helper extraction order regressed\n";
+			return false;
+		}
+
+		if (source.find("auto stripKnownAffixTags = [&](std::string_view a_name)", ensurePos) != std::string::npos ||
+			source.find("std::string marker;", ensurePos) != std::string::npos) {
+			std::cerr << "loot_display_name_extraction: EnsureMultiAffixDisplayName regained inline parsing/marker state\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckLootTrackedSanitizeExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path assignFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Assign.cpp";
+
+		std::ifstream in(assignFile);
+		if (!in.is_open()) {
+			std::cerr << "loot_tracked_sanitize_extraction: failed to open assign source: " << assignFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		const auto perInstancePos = source.find("bool EventBridge::SanitizeTrackedLootInstanceForCurrentLootRules(");
+		const auto summaryPos = source.find("void EventBridge::LogTrackedLootSanitizationSummary(");
+		const auto aggregatePos = source.find("void EventBridge::SanitizeAllTrackedLootInstancesForCurrentLootRules(");
+		const auto helperCallPos = source.find("SanitizeTrackedLootInstanceForCurrentLootRules(it, a_context, sanitizedInstances, erasedInstances)", aggregatePos);
+		const auto summaryCallPos = source.find("LogTrackedLootSanitizationSummary(a_context, sanitizedInstances, erasedInstances);", aggregatePos);
+
+		if (perInstancePos == std::string::npos ||
+			summaryPos == std::string::npos ||
+			aggregatePos == std::string::npos ||
+			helperCallPos == std::string::npos ||
+			summaryCallPos == std::string::npos) {
+			std::cerr << "loot_tracked_sanitize_extraction: expected tracked-loot sanitize helpers or calls are missing\n";
+			return false;
+		}
+
+		if (!(perInstancePos < summaryPos && summaryPos < aggregatePos &&
+			aggregatePos < helperCallPos && helperCallPos < summaryCallPos)) {
+			std::cerr << "loot_tracked_sanitize_extraction: tracked-loot sanitize helper order regressed\n";
+			return false;
+		}
+
+		if (source.find("ForgetLootEvaluatedInstance(it->first);", aggregatePos) != std::string::npos ||
+			source.find("_instanceAffixes.erase(it);", aggregatePos) != std::string::npos ||
+			source.find("sanitized tracked loot instances (context={}, changed={}, erased={}).", aggregatePos) != std::string::npos) {
+			std::cerr << "loot_tracked_sanitize_extraction: aggregate sanitize function regained inline erase/logging responsibilities\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckLootSlotSanitizeHelperExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path assignFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Assign.cpp";
+
+		std::ifstream in(assignFile);
+		if (!in.is_open()) {
+			std::cerr << "loot_slot_sanitize_helper_extraction: failed to open assign source: " << assignFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		const auto keepPos = source.find("bool EventBridge::ShouldKeepTrackedLootAffixToken(");
+		const auto equalPos = source.find("bool EventBridge::InstanceAffixSlotsEqual(");
+		const auto applyPos = source.find("void EventBridge::ApplySanitizedInstanceAffixSlots(");
+		const auto sanitizePos = source.find("bool EventBridge::SanitizeInstanceAffixSlotsForCurrentLootRules(");
+		const auto keepCallPos = source.find("return ShouldKeepTrackedLootAffixToken(a_token);", sanitizePos);
+		const auto equalCallPos = source.find("if (InstanceAffixSlotsEqual(a_slots, sanitized)) {", sanitizePos);
+		const auto applyCallPos = source.find("ApplySanitizedInstanceAffixSlots(a_instanceKey, a_slots, sanitized, removedTokens, removedCount);", sanitizePos);
+
+		if (keepPos == std::string::npos ||
+			equalPos == std::string::npos ||
+			applyPos == std::string::npos ||
+			sanitizePos == std::string::npos ||
+			keepCallPos == std::string::npos ||
+			equalCallPos == std::string::npos ||
+			applyCallPos == std::string::npos) {
+			std::cerr << "loot_slot_sanitize_helper_extraction: expected sanitize helpers or calls are missing\n";
+			return false;
+		}
+
+		if (!(keepPos < equalPos && equalPos < applyPos && applyPos < sanitizePos &&
+			sanitizePos < keepCallPos && keepCallPos < equalCallPos && equalCallPos < applyCallPos)) {
+			std::cerr << "loot_slot_sanitize_helper_extraction: sanitize helper order regressed\n";
+			return false;
+		}
+
+		if (source.find("const auto idxIt = _affixRegistry.affixIndexByToken.find(a_token);", sanitizePos) != std::string::npos ||
+			source.find("for (std::uint8_t i = 0; i < a_slots.count; ++i)", sanitizePos) != std::string::npos ||
+			source.find("_instanceStates.erase(MakeInstanceStateKey(a_instanceKey, removedToken));", sanitizePos) != std::string::npos) {
+			std::cerr << "loot_slot_sanitize_helper_extraction: sanitize function regained inline token/equality/apply responsibilities\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckSerializationTransientRuntimeResetPolicy()
 	{
 		namespace fs = std::filesystem;
@@ -268,11 +414,11 @@ namespace RuntimeGateStoreChecks
 			return count;
 		};
 
-			const std::array<std::string_view, 3> requiredBothLoadAndRevert{
-				"_activeCounts.clear();",
-				"_activeHitTriggerAffixIndices.clear();",
-				"_combatState.ResetTransientState();",
-			};
+		const std::array<std::string_view, 3> requiredBothLoadAndRevert{
+			"_activeCounts.clear();",
+			"_activeHitTriggerAffixIndices.clear();",
+			"_combatState.ResetTransientState();",
+		};
 
 		for (const auto needle : requiredBothLoadAndRevert) {
 			if (countOccurrences(needle) < 2) {

@@ -225,6 +225,49 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckRebuildActiveCountsExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
+		const fs::path sourceFile = repoRoot / "src" / "EventBridge.Triggers.ActiveCounts.cpp";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto privateApiText = loadText(privateApiFile);
+		const auto sourceText = loadText(sourceFile);
+		if (!privateApiText.has_value() || !sourceText.has_value()) {
+			std::cerr << "rebuild_active_counts_extraction: failed to load source files\n";
+			return false;
+		}
+
+		if (privateApiText->find("void ResetActiveCountsStateForRebuild();") == std::string::npos ||
+			privateApiText->find("void RefreshInventoryInstanceActiveState(") == std::string::npos ||
+			privateApiText->find("void AccumulateEquippedAffixState(") == std::string::npos ||
+			privateApiText->find("void ApplyDesiredPassiveSpells(") == std::string::npos ||
+			privateApiText->find("void LogRebuildActiveCountsDebugSummary(") == std::string::npos ||
+			sourceText->find("ResetActiveCountsStateForRebuild();") == std::string::npos ||
+			sourceText->find("RefreshInventoryInstanceActiveState(entry, xList, desiredPassives);") == std::string::npos ||
+			sourceText->find("AccumulateEquippedAffixState(key, slots, a_desiredPassives);") == std::string::npos ||
+			sourceText->find("ApplyDesiredPassiveSpells(player, desiredPassives);") == std::string::npos ||
+			sourceText->find("LogActiveAffixListDebug();") == std::string::npos ||
+			sourceText->find("LogRebuildActiveCountsDebugSummary(desiredPassives);") == std::string::npos) {
+			std::cerr << "rebuild_active_counts_extraction: expected rebuild flow to stay decomposed into focused helpers\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckHealthDamageSignatureWindowPolicy()
 	{
 		namespace fs = std::filesystem;
@@ -435,9 +478,9 @@ namespace RuntimeGateStoreChecks
 			privateApiText->find("bool RollTriggerProcChance(float a_chancePct);") == std::string::npos ||
 			privateApiText->find("void CommitTriggerProcRuntime(") == std::string::npos ||
 			triggersText->find("PassesTriggerProcPreconditions(") == std::string::npos ||
-			triggersText->find("ResolveTriggerProcChancePct(affix, i)") == std::string::npos ||
+			triggersText->find("ResolveTriggerProcChancePct(affix, a_affixIndex)") == std::string::npos ||
 			triggersText->find("RollTriggerProcChance(chance)") == std::string::npos ||
-			triggersText->find("CommitTriggerProcRuntime(affix, perTargetKey, usesPerTargetIcd, chance, now);") == std::string::npos ||
+			triggersText->find("CommitTriggerProcRuntime(affix, perTargetKey, usesPerTargetIcd, chance, a_now);") == std::string::npos ||
 			triggersText->find("affix.procChancePct * _runtimeSettings.procChanceMult") != std::string::npos ||
 			triggersText->find("ResolveTriggerProcCooldownMs(") != std::string::npos ||
 			policyText->find("bool EventBridge::PassesTriggerProcPreconditions(") == std::string::npos ||
@@ -445,6 +488,47 @@ namespace RuntimeGateStoreChecks
 			policyText->find("bool EventBridge::RollTriggerProcChance(") == std::string::npos ||
 			policyText->find("void EventBridge::CommitTriggerProcRuntime(") == std::string::npos) {
 			std::cerr << "trigger_proc_policy_extraction: ProcessTrigger policy extraction is incomplete\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckProcessTriggerExtractionPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
+		const fs::path triggersFile = repoRoot / "src" / "EventBridge.Triggers.cpp";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto privateApiText = loadText(privateApiFile);
+		const auto triggersText = loadText(triggersFile);
+		if (!privateApiText.has_value() || !triggersText.has_value()) {
+			std::cerr << "process_trigger_extraction: failed to load source files\n";
+			return false;
+		}
+
+		if (privateApiText->find("bool CanProcessTriggerDispatch(") == std::string::npos ||
+			privateApiText->find("bool TryProcessTriggerAffix(") == std::string::npos ||
+			privateApiText->find("void FinalizeTriggerDispatch(") == std::string::npos ||
+			triggersText->find("struct LowHealthSnapshot") == std::string::npos ||
+			triggersText->find("const auto buildLowHealthSnapshot = [&]() noexcept") == std::string::npos ||
+			triggersText->find("const auto lowHealthSnapshot = buildLowHealthSnapshot();") == std::string::npos ||
+			triggersText->find("CanProcessTriggerDispatch(a_trigger, a_owner, a_target, indices)") == std::string::npos ||
+			triggersText->find("TryProcessTriggerAffix(") == std::string::npos ||
+			triggersText->find("FinalizeTriggerDispatch(") == std::string::npos) {
+			std::cerr << "process_trigger_extraction: expected ProcessTrigger flow to stay decomposed into trigger helpers\n";
 			return false;
 		}
 

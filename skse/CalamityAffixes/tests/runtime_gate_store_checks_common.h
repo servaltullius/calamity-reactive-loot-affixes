@@ -33,11 +33,13 @@ namespace RuntimeGateStoreChecks
 	bool CheckHooksDispatchExtractionPolicy();
 	bool CheckPluginLoggingExceptionSafetyPolicy();
 	bool CheckRebuildActiveCountsLoggingPolicy();
+	bool CheckRebuildActiveCountsExtractionPolicy();
 	bool CheckHealthDamageSignatureWindowPolicy();
 	bool CheckTesHitFallbackSourceValidationPolicy();
 	bool CheckConfigLoadPipelineExtractionPolicy();
 	bool CheckAffixSpecialActionStateExtractionPolicy();
 	bool CheckTriggerProcPolicyExtraction();
+	bool CheckProcessTriggerExtractionPolicy();
 	bool CheckUniformLootRollSelection();
 	bool CheckShuffleBagLootRollSelection();
 	bool CheckWeightedShuffleBagLootRollSelection();
@@ -49,6 +51,9 @@ namespace RuntimeGateStoreChecks
 	bool CheckRunewordTooltipOverlayPolicy();
 	bool CheckLootPreviewRuntimePolicy();
 	bool CheckLootServiceExtractionPolicy();
+	bool CheckLootDisplayNameExtractionPolicy();
+	bool CheckLootTrackedSanitizeExtractionPolicy();
+	bool CheckLootSlotSanitizeHelperExtractionPolicy();
 	bool CheckLootRerollExploitGuardPolicy();
 	bool CheckLootCurrencyLedgerSerializationPolicy();
 	bool CheckLootEligibilityCleanupSafetyPolicy();
@@ -76,19 +81,25 @@ namespace RuntimeGateStoreChecks
 	bool CheckRunewordUiPolicyHelpers();
 	bool CheckRunewordReforgeSafetyPolicy();
 	bool CheckPrismaTooltipImmediateRefreshPolicy();
+	bool CheckPrismaPanelUiBootstrapExtractionPolicy();
+	bool CheckPrismaPanelRenderViewModelExtractionPolicy();
+	bool CheckPrismaPanelDataExtractionPolicy();
+	bool CheckPrismaPanelCommandRoutingExtractionPolicy();
+	bool CheckPrismaTooltipLifecycleExtractionPolicy();
+	bool CheckPrismaSettingsLayoutExtractionPolicy();
 	bool CheckPrismaTooltipWorkerSchedulingPolicy();
 	bool CheckPrismaTooltipTelemetryPolicy();
 
 	bool CheckRuntimeUserSettingsDebounceBehavior();
 	bool CheckExternalUserSettingsPersistencePolicy();
 	bool CheckRuntimeUserSettingsRoundTripFieldPolicy();
-bool CheckEventBridgeStateMutexReentrancyPolicy();
-bool CheckCombatRuntimeStateResetBehavior();
-bool CheckCombatRuntimeStateExtractionPolicy();
-bool CheckLootRuntimeStateResetBehavior();
-bool CheckLootRuntimeStateExtractionPolicy();
-bool CheckConfigReloadTransientRuntimeResetPolicy();
-bool CheckRunewordUiContractDefaults();
+	bool CheckEventBridgeStateMutexReentrancyPolicy();
+	bool CheckCombatRuntimeStateResetBehavior();
+	bool CheckCombatRuntimeStateExtractionPolicy();
+	bool CheckLootRuntimeStateResetBehavior();
+	bool CheckLootRuntimeStateExtractionPolicy();
+	bool CheckConfigReloadTransientRuntimeResetPolicy();
+	bool CheckRunewordUiContractDefaults();
 
 	bool CheckPerTargetCooldownStorePruning();
 	bool CheckPerTargetCooldownStoreIndependence();
