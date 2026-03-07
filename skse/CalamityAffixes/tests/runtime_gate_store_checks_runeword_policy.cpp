@@ -1283,6 +1283,88 @@ namespace RuntimeGateStoreChecks
 			return true;
 		}
 
+		bool CheckPrismaPanelUxFlowPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
+				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto uiText = loadText(prismaUiFile);
+			if (!uiText.has_value()) {
+				std::cerr << "prisma_panel_ux_flow: failed to open ui source: " << prismaUiFile << "\n";
+				return false;
+			}
+
+			const auto extractJsFunctionBody = [&](std::string_view a_signature) -> std::optional<std::string_view> {
+				const auto start = uiText->find(a_signature);
+				if (start == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto bodyStart = uiText->find('{', start);
+				if (bodyStart == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto nextFunction = uiText->find("\n      function ", bodyStart + 1);
+				if (nextFunction == std::string::npos) {
+					return std::string_view(*uiText).substr(bodyStart + 1);
+				}
+
+				return std::string_view(*uiText).substr(bodyStart + 1, nextFunction - bodyStart - 1);
+			};
+
+			const auto runewordBody = extractJsFunctionBody("function renderRunewordPanelState()");
+			const auto selectedBody = extractJsFunctionBody("function renderSelectedItemContext()");
+			const auto tooltipPlacementBody = extractJsFunctionBody("function applyTooltipPlacement()");
+			const auto openStateBody = extractJsFunctionBody("function applyControlPanelOpenState(nextOpen)");
+
+			if (uiText->find(":where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary):focus-visible") == std::string::npos ||
+				uiText->find("id=\"controlPanel\"\n        role=\"dialog\"") == std::string::npos ||
+				uiText->find("id=\"runewordFlowProgress\" class=\"rwProgressStrip\"") == std::string::npos ||
+				uiText->find("id=\"runewordBaseStep\" class=\"cpStepCard active\"") == std::string::npos ||
+				uiText->find("id=\"runewordRecipeStep\" class=\"cpStepCard muted\"") == std::string::npos ||
+				uiText->find("id=\"runewordActionStep\" class=\"cpStepCard cpActionCard muted\"") == std::string::npos ||
+				uiText->find("class=\"cpButton cpPrimaryButton\"") == std::string::npos ||
+				uiText->find("id=\"debugToolsPanel\" class=\"cpDangerDetails\"") == std::string::npos ||
+				uiText->find("id=\"debugSectionSummary\" class=\"cpDangerSummary\"") == std::string::npos ||
+				uiText->find("function appendEmptyState(node, title, body, hint = \"\")") == std::string::npos ||
+				uiText->find("class=\"cpAffixPane\"") == std::string::npos ||
+				uiText->find("id=\"affixSelectedItemLabel\"") == std::string::npos ||
+				uiText->find("id=\"panelTooltipLead\"") == std::string::npos ||
+				uiText->find("function triggerRunewordStateShift(element, state)") == std::string::npos ||
+				uiText->find("@keyframes rwStateShift") == std::string::npos ||
+				uiText->find("@keyframes rwPrimaryPulse") == std::string::npos ||
+				uiText->find("function renderRunewordFlowProgress(actionState, state)") == std::string::npos ||
+				!selectedBody.has_value() ||
+				selectedBody->find("affixSelectedItemName.textContent = viewModel.hasSelection") == std::string::npos ||
+				!runewordBody.has_value() ||
+				runewordBody->find("renderRunewordFlowProgress(actionState, state);") == std::string::npos ||
+				uiText->find("runewordInsertButton.classList.toggle(\"attention\", hasBase && hasRecipe && !isComplete);") == std::string::npos ||
+				runewordBody->find("runewordActionHint.textContent = actionState.buttonHint;") == std::string::npos ||
+				!tooltipPlacementBody.has_value() ||
+				tooltipPlacementBody->find("appendEmptyState(") == std::string::npos ||
+				uiText->find("function focusCurrentMainTab()") == std::string::npos ||
+				!openStateBody.has_value() ||
+				openStateBody->find("focusCurrentMainTab();") == std::string::npos) {
+				std::cerr << "prisma_panel_ux_flow: ux hierarchy/focus markers are missing\n";
+				return false;
+			}
+
+			return true;
+		}
+
 		bool CheckPrismaPanelCommandRoutingExtractionPolicy()
 		{
 			namespace fs = std::filesystem;

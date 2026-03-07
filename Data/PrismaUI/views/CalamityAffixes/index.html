@@ -14,6 +14,9 @@
         --border: rgba(255, 255, 255, 0.16);
         --accent: #00ff99;
         --accent-soft: rgba(0, 255, 153, 0.25);
+        --accent-strong: rgba(173, 255, 219, 0.96);
+        --danger: rgba(255, 128, 128, 0.92);
+        --danger-soft: rgba(255, 96, 96, 0.12);
         --text: rgba(255, 255, 255, 0.95);
         --muted: rgba(255, 255, 255, 0.75);
       }
@@ -167,6 +170,14 @@
 
       .qpPill:active {
         transform: translateY(1px);
+      }
+
+      :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary):focus-visible {
+        outline: none;
+        border-color: var(--accent-strong);
+        box-shadow:
+          0 0 0 1px rgba(0, 255, 153, 0.38),
+          0 0 0 3px rgba(173, 255, 219, 0.14);
       }
 
       #controlPanel {
@@ -372,6 +383,13 @@
         margin-bottom: calc(8px * var(--panel-ui-scale));
       }
 
+      .cpSectionSubtle {
+        margin-bottom: calc(8px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.7);
+        font-size: calc(11px * var(--panel-ui-scale));
+        letter-spacing: 0.18px;
+      }
+
       .cpTabs {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -446,16 +464,18 @@
         margin: 0;
         font-size: calc(13px * var(--panel-ui-scale));
         color: rgba(173, 255, 219, 0.95);
-        min-height: 1.2em;
+        min-height: 1.4em;
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
+        white-space: normal;
+        line-height: 1.35;
+        max-height: calc(2.7em * var(--panel-ui-scale));
       }
 
       .cpFooter {
         margin-top: calc(10px * var(--panel-ui-scale));
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: calc(10px * var(--panel-ui-scale));
         flex: 0 0 auto;
       }
@@ -464,6 +484,88 @@
         flex: 0 0 auto;
         min-width: calc(220px * var(--panel-ui-scale));
         text-align: center;
+      }
+
+      .cpDangerDetails {
+        margin-top: calc(10px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 128, 128, 0.28);
+        border-radius: 12px;
+        background:
+          linear-gradient(180deg, rgba(255, 96, 96, 0.08), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.02);
+        overflow: hidden;
+      }
+
+      .cpDangerSummary {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: calc(10px * var(--panel-ui-scale));
+        padding: calc(10px * var(--panel-ui-scale)) calc(12px * var(--panel-ui-scale));
+        cursor: pointer;
+        color: rgba(255, 230, 230, 0.96);
+        font-weight: 700;
+      }
+
+      .cpDangerSummary::-webkit-details-marker {
+        display: none;
+      }
+
+      .cpDangerSummary:hover {
+        background: rgba(255, 96, 96, 0.08);
+      }
+
+      .cpDangerBadge {
+        flex: 0 0 auto;
+        padding: calc(3px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
+        border-radius: 999px;
+        border: 1px solid rgba(255, 128, 128, 0.32);
+        background: rgba(255, 96, 96, 0.12);
+        color: rgba(255, 220, 220, 0.98);
+        font-size: calc(10px * var(--panel-ui-scale));
+        line-height: 1.2;
+        text-transform: uppercase;
+        letter-spacing: 0.24px;
+      }
+
+      .cpDangerMeta {
+        padding: 0 calc(12px * var(--panel-ui-scale));
+        color: rgba(255, 220, 220, 0.82);
+        font-size: calc(11px * var(--panel-ui-scale));
+        line-height: 1.45;
+      }
+
+      .cpDangerBody {
+        padding: calc(10px * var(--panel-ui-scale)) calc(12px * var(--panel-ui-scale)) calc(12px * var(--panel-ui-scale));
+      }
+
+      .cpEmptyState {
+        border: 1px dashed rgba(255, 255, 255, 0.18);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: calc(12px * var(--panel-ui-scale));
+      }
+
+      .cpEmptyTitle {
+        color: rgba(255, 255, 255, 0.94);
+        font-size: calc(13px * var(--panel-ui-scale));
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      .cpEmptyBody {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.45;
+      }
+
+      .cpEmptyHint {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        color: rgba(173, 255, 219, 0.9);
+        font-size: calc(11px * var(--panel-ui-scale));
+        line-height: 1.4;
       }
 
       #runewordPanelStatus {
@@ -525,6 +627,165 @@
         overflow-wrap: anywhere;
       }
 
+      .rwFlowIntro {
+        margin-bottom: calc(10px * var(--panel-ui-scale));
+      }
+
+      .rwProgressStrip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: calc(8px * var(--panel-ui-scale));
+        margin-bottom: calc(12px * var(--panel-ui-scale));
+      }
+
+      .rwProgressStep {
+        display: flex;
+        align-items: center;
+        gap: calc(8px * var(--panel-ui-scale));
+        padding: calc(9px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.03);
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .rwProgressStep.active {
+        border-color: rgba(0, 255, 153, 0.32);
+        background: rgba(0, 255, 153, 0.09);
+        color: rgba(230, 255, 243, 0.98);
+        animation: rwActivePulse 1.9s ease-in-out infinite;
+      }
+
+      .rwProgressStep.complete {
+        border-color: rgba(173, 255, 219, 0.32);
+        background: rgba(173, 255, 219, 0.11);
+        color: rgba(238, 255, 246, 0.98);
+      }
+
+      .rwProgressDot {
+        width: calc(26px * var(--panel-ui-scale));
+        height: calc(26px * var(--panel-ui-scale));
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: calc(11px * var(--panel-ui-scale));
+        font-weight: 800;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .rwProgressStep.active .rwProgressDot,
+      .rwProgressStep.complete .rwProgressDot {
+        border-color: rgba(0, 255, 153, 0.32);
+        background: rgba(0, 255, 153, 0.12);
+      }
+
+      .rwProgressLabel {
+        font-size: calc(12px * var(--panel-ui-scale));
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      .cpStepCard {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.02);
+        padding: calc(12px * var(--panel-ui-scale));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+
+      .cpStepCard + .cpStepCard {
+        margin-top: calc(10px * var(--panel-ui-scale));
+      }
+
+      .cpStepCard.active {
+        border-color: rgba(0, 255, 153, 0.26);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.03),
+          0 0 0 1px rgba(0, 255, 153, 0.1);
+        animation: rwActivePulse 1.9s ease-in-out infinite;
+      }
+
+      .cpStepCard.complete {
+        border-color: rgba(173, 255, 219, 0.22);
+        background:
+          linear-gradient(180deg, rgba(173, 255, 219, 0.08), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.02);
+      }
+
+      .cpStepCard.muted {
+        opacity: 0.88;
+      }
+
+      .cpStepHeader {
+        display: flex;
+        align-items: flex-start;
+        gap: calc(10px * var(--panel-ui-scale));
+      }
+
+      .cpStepIndex {
+        flex: 0 0 auto;
+        width: calc(28px * var(--panel-ui-scale));
+        height: calc(28px * var(--panel-ui-scale));
+        border-radius: 999px;
+        background: rgba(0, 255, 153, 0.12);
+        border: 1px solid rgba(0, 255, 153, 0.24);
+        color: rgba(230, 255, 243, 0.98);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: calc(12px * var(--panel-ui-scale));
+        font-weight: 800;
+      }
+
+      .cpStepEyebrow {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: calc(10px * var(--panel-ui-scale));
+        letter-spacing: 0.24px;
+        text-transform: uppercase;
+      }
+
+      .cpStepTitle {
+        margin-top: calc(2px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.98);
+        font-size: calc(15px * var(--panel-ui-scale));
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      .cpStepHint {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.45;
+      }
+
+      .cpStepBody {
+        margin-top: calc(10px * var(--panel-ui-scale));
+      }
+
+      .cpPrimaryButton {
+        background: rgba(0, 255, 153, 0.12);
+        border-color: rgba(0, 255, 153, 0.28);
+        font-weight: 800;
+      }
+
+      .cpPrimaryButton:hover {
+        background: rgba(0, 255, 153, 0.18);
+        border-color: rgba(0, 255, 153, 0.4);
+      }
+
+      .cpPrimaryButton.attention {
+        animation: rwPrimaryPulse 1.5s ease-in-out infinite;
+      }
+
+      .rwStateShift {
+        animation: rwStateShift 420ms ease;
+      }
+
       .rwRecipeEffectLine {
         margin-top: calc(6px * var(--panel-ui-scale));
         padding: calc(7px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
@@ -546,7 +807,7 @@
       .rwLayout {
         height: 100%;
         display: grid;
-        grid-template-columns: minmax(340px, 430px) 1fr;
+        grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
         gap: calc(12px * var(--panel-ui-scale));
         min-height: 0;
       }
@@ -559,7 +820,6 @@
       .rwLeft {
         display: flex;
         flex-direction: column;
-        gap: calc(10px * var(--panel-ui-scale));
         overflow-y: auto;
         min-height: 0;
         padding-right: calc(4px * var(--panel-ui-scale));
@@ -579,6 +839,8 @@
         display: flex;
         flex-direction: column;
         min-height: 0;
+        overflow-y: auto;
+        padding-right: calc(4px * var(--panel-ui-scale));
       }
 
       .rwCubeFrame {
@@ -670,24 +932,10 @@
         gap: calc(8px * var(--panel-ui-scale));
       }
 
-      .rwTransmuteButton {
-        text-align: center;
-        font-weight: 800;
-        background: rgba(0, 255, 153, 0.08);
-        border-color: rgba(0, 255, 153, 0.22);
-      }
-
-      .rwTransmuteButton:hover {
-        background: rgba(0, 255, 153, 0.14);
-        border-color: rgba(0, 255, 153, 0.35);
-      }
-
       .rwPickers {
-        flex: 1 1 auto;
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         gap: calc(10px * var(--panel-ui-scale));
-        min-height: 0;
       }
 
       .rwPicker {
@@ -725,6 +973,7 @@
         flex: 1 1 auto;
         overflow-y: auto;
         min-height: 0;
+        max-height: calc(240px * var(--panel-ui-scale));
         padding-right: calc(4px * var(--panel-ui-scale));
       }
 
@@ -785,6 +1034,69 @@
         color: rgba(225, 255, 240, 0.92);
       }
 
+      .cpAffixPane {
+        display: grid;
+        gap: calc(12px * var(--panel-ui-scale));
+      }
+
+      .cpAffixOverview {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: calc(12px * var(--panel-ui-scale));
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.02);
+      }
+
+      .cpAffixLead {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.45;
+      }
+
+      .cpTooltipBox.compact {
+        font-size: calc(13px * var(--panel-ui-scale));
+        line-height: 1.55;
+      }
+
+      @keyframes rwStateShift {
+        0% {
+          transform: scale(0.985);
+          box-shadow: 0 0 0 0 rgba(173, 255, 219, 0);
+        }
+        55% {
+          transform: scale(1.01);
+          box-shadow: 0 0 0 6px rgba(173, 255, 219, 0.08);
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(173, 255, 219, 0);
+        }
+      }
+
+      @keyframes rwActivePulse {
+        0%, 100% {
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.03),
+            0 0 0 1px rgba(0, 255, 153, 0.08);
+        }
+        50% {
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.03),
+            0 0 0 1px rgba(0, 255, 153, 0.16),
+            0 10px 28px rgba(0, 255, 153, 0.08);
+        }
+      }
+
+      @keyframes rwPrimaryPulse {
+        0%, 100% {
+          box-shadow: 0 0 0 0 rgba(0, 255, 153, 0);
+        }
+        50% {
+          box-shadow: 0 0 0 4px rgba(0, 255, 153, 0.1);
+        }
+      }
+
       @media (max-width: 1100px) {
         .rwLayout {
           grid-template-columns: 1fr;
@@ -800,6 +1112,15 @@
 
         .rwRecipeSummary {
           -webkit-line-clamp: 3;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .rwProgressStep.active,
+        .cpStepCard.active,
+        .cpPrimaryButton.attention,
+        .rwStateShift {
+          animation: none;
         }
       }
 
@@ -900,7 +1221,13 @@
       </div>
     </div>
 
-      <div id="controlPanel" aria-live="polite">
+      <div
+        id="controlPanel"
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby="panelTitle"
+        aria-describedby="panelSub"
+        aria-live="polite">
       <div id="panelDragHandle" class="cpDragHandle">
         <div class="cpTitleRow">
           <div>
@@ -963,45 +1290,66 @@
             class="cpTabPane cpMainPane"
             role="tabpanel"
             aria-labelledby="mainRunewordTab">
+            <div class="rwFlowIntro">
+              <div class="cpSectionTitle" id="runewordFlowTitle">Runeword Flow / 룬워드 순서</div>
+              <div class="cpContextMeta" id="runewordFlowHint">
+                Choose an equipped base, select a recipe, then transmute. / 착용 베이스를 고르고, 레시피를 선택한 뒤 변환하세요.
+              </div>
+            </div>
+            <div id="runewordFlowProgress" class="rwProgressStrip" aria-label="Runeword progress">
+              <div id="runewordProgressBase" class="rwProgressStep active">
+                <div class="rwProgressDot">1</div>
+                <div class="rwProgressLabel">Base / 베이스</div>
+              </div>
+              <div id="runewordProgressRecipe" class="rwProgressStep">
+                <div class="rwProgressDot">2</div>
+                <div class="rwProgressLabel">Recipe / 레시피</div>
+              </div>
+              <div id="runewordProgressTransmute" class="rwProgressStep">
+                <div class="rwProgressDot">3</div>
+                <div class="rwProgressLabel">Transmute / 변환</div>
+              </div>
+            </div>
             <div class="rwLayout">
               <div class="rwLeft">
-                <div class="cpContext">
-                  <div class="cpContextLabel" id="selectedItemLabel">Runeword Base / 룬워드 베이스</div>
-                  <div class="cpContextValue" id="selectedItemName">No base selected / 선택된 베이스 없음</div>
-                  <div class="cpContextMeta" id="selectedItemSource">Equipped only / 착용 장비 전용</div>
-                </div>
-
-                <div class="rwAffixBlock">
-                  <div class="cpSectionTitle" id="runewordAffixTitle">Current Affix Preview / 현재 어픽스 미리보기</div>
-                  <div id="runewordAffixText" class="cpTooltipBox rwAffixBox"></div>
-                  <div class="cpContextMeta rwAffixHint" id="runewordAffixHint">
-                    Select an item in inventory to view affixes here. / 인벤토리에서 아이템을 선택하면 여기에서 어픽스를 표시합니다.
+                <div id="runewordBaseStep" class="cpStepCard active">
+                  <div class="cpStepHeader">
+                    <div class="cpStepIndex">1</div>
+                    <div>
+                      <div id="runewordBaseEyebrow" class="cpStepEyebrow">Step 1</div>
+                      <div id="runewordBaseStepTitle" class="cpStepTitle">Choose Base / 베이스 선택</div>
+                    </div>
+                  </div>
+                  <div id="runewordBaseStepHint" class="cpStepHint">
+                    Start by selecting one equipped item that will receive the runeword. / 룬워드를 부여할 착용 아이템을 먼저 선택하세요.
+                  </div>
+                  <div class="cpStepBody">
+                    <div class="cpContext">
+                      <div class="cpContextLabel" id="selectedItemLabel">Current Base / 현재 베이스</div>
+                      <div class="cpContextValue" id="selectedItemName">No base selected / 선택된 베이스 없음</div>
+                      <div class="cpContextMeta" id="selectedItemSource">Equipped only / 착용 장비 전용</div>
+                    </div>
+                    <div class="cpSectionSubtle" id="runewordBaseListTitle">Equipped Base List / 착용 베이스 목록</div>
+                    <div id="inventoryBaseList" class="cpList rwList"></div>
+                    <div class="cpContextMeta" id="runewordBaseListHint">
+                      Click an equipped item to set it as runeword base. / 착용한 아이템을 클릭해 룬워드 베이스로 지정하세요.
+                    </div>
                   </div>
                 </div>
 
-                <div id="runewordPanelStatus">
-                  Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
-                </div>
-
-                <div class="rwCubeFrame">
-                  <div id="runewordCubeGrid" class="rwCubeGrid" aria-label="Horadric cube"></div>
-                  <div class="rwTransmuteBar">
-                    <button
-                      id="runewordInsertButton"
-                      class="cpButton rwTransmuteButton"
-                      data-cmd="runeword.insert">
-                      Transmute / 변환
-                    </button>
-                    <button id="runewordReforgeButton" class="cpButton" data-cmd="runeword.reforge">Reforge / 재련</button>
-                    <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Status / 상태</button>
+                <div id="runewordRecipeStep" class="cpStepCard muted">
+                  <div class="cpStepHeader">
+                    <div class="cpStepIndex">2</div>
+                    <div>
+                      <div id="runewordRecipeEyebrow" class="cpStepEyebrow">Step 2</div>
+                      <div id="runewordRecipeStepTitle" class="cpStepTitle">Choose Recipe / 레시피 선택</div>
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              <div class="rwRight">
-                <div class="rwPickers">
-                  <div class="rwPicker">
-                    <div class="cpSectionTitle" id="runewordRecipeListTitle">Recipe List / 레시피 목록</div>
+                  <div id="runewordRecipeStepHint" class="cpStepHint">
+                    Narrow the list, inspect effects, and lock in the recipe you want to apply. / 목록을 좁히고 효과를 확인한 뒤 적용할 레시피를 선택하세요.
+                  </div>
+                  <div class="cpStepBody">
+                    <div class="cpSectionSubtle" id="runewordRecipeListTitle">Recipe List / 레시피 목록</div>
                     <div class="rwRecipeTools">
                       <input
                         id="recipeSearchInput"
@@ -1016,11 +1364,50 @@
                       Click recipe to select. / 클릭해서 레시피를 선택하세요.
                     </div>
                   </div>
-                  <div class="rwPicker">
-                    <div class="cpSectionTitle" id="runewordBaseListTitle">Equipped Base List / 착용 베이스 목록</div>
-                    <div id="inventoryBaseList" class="cpList rwList"></div>
-                    <div class="cpContextMeta" id="runewordBaseListHint">
-                      Click an equipped item to set it as runeword base. / 착용한 아이템을 클릭해 룬워드 베이스로 지정하세요.
+                </div>
+              </div>
+
+              <div class="rwRight">
+                <div id="runewordActionStep" class="cpStepCard cpActionCard muted">
+                  <div class="cpStepHeader">
+                    <div class="cpStepIndex">3</div>
+                    <div>
+                      <div id="runewordActionEyebrow" class="cpStepEyebrow">Step 3</div>
+                      <div id="runewordActionStepTitle" class="cpStepTitle">Transmute / 변환</div>
+                    </div>
+                  </div>
+                  <div id="runewordActionStepHint" class="cpStepHint">
+                    Review the preview, confirm requirements, then transmute when ready. / 미리보기와 조건을 확인한 뒤 준비되면 변환하세요.
+                  </div>
+                  <div class="cpStepBody">
+                    <div class="rwAffixBlock">
+                      <div class="cpSectionSubtle" id="runewordAffixTitle">Current Affix Preview / 현재 어픽스 미리보기</div>
+                      <div id="runewordAffixText" class="cpTooltipBox rwAffixBox"></div>
+                      <div class="cpContextMeta rwAffixHint" id="runewordAffixHint">
+                        Select an item in inventory to view affixes here. / 인벤토리에서 아이템을 선택하면 여기에서 어픽스를 표시합니다.
+                      </div>
+                    </div>
+
+                    <div id="runewordPanelStatus">
+                      Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
+                    </div>
+
+                    <div class="cpContextMeta" id="runewordActionHint">
+                      Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
+                    </div>
+
+                    <div class="rwCubeFrame">
+                      <div id="runewordCubeGrid" class="rwCubeGrid" aria-label="Horadric cube"></div>
+                      <div class="rwTransmuteBar">
+                        <button
+                          id="runewordInsertButton"
+                          class="cpButton cpPrimaryButton"
+                          data-cmd="runeword.insert">
+                          Transmute / 변환
+                        </button>
+                        <button id="runewordReforgeButton" class="cpButton" data-cmd="runeword.reforge">Reforge / 재련</button>
+                        <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Status / 상태</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1034,10 +1421,24 @@
             role="tabpanel"
             aria-labelledby="mainAffixTab"
             hidden>
-            <div class="cpSectionTitle" id="panelTooltipTitle">Affix Tooltip / 어픽스</div>
-            <div id="panelTooltipText" class="cpTooltipBox"></div>
-            <div class="cpContextMeta" id="panelTooltipHint">
-              Select an item in inventory to view affixes. / 인벤토리에서 아이템을 선택하면 어픽스를 표시합니다.
+            <div class="cpAffixPane">
+              <div class="cpAffixOverview">
+                <div class="cpContextLabel" id="affixSelectedItemLabel">Selected Item / 선택 아이템</div>
+                <div class="cpContextValue" id="affixSelectedItemName">No item selected / 선택된 아이템 없음</div>
+                <div class="cpContextMeta" id="affixSelectedItemMeta">
+                  Highlight one inventory item to mirror its affix details here. / 인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다.
+                </div>
+              </div>
+              <div class="cpSection">
+                <div class="cpSectionTitle" id="panelTooltipTitle">Affix Details / 어픽스 상세</div>
+                <div class="cpAffixLead" id="panelTooltipLead">
+                  Focus one item at a time to read affix text without opening the full runeword flow. / 한 번에 아이템 하나에 집중해서 어픽스 텍스트를 읽을 수 있습니다.
+                </div>
+                <div id="panelTooltipText" class="cpTooltipBox compact"></div>
+                <div class="cpContextMeta" id="panelTooltipHint">
+                  Select an item in inventory to view affixes. / 인벤토리에서 아이템을 선택하면 어픽스를 표시합니다.
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1106,22 +1507,28 @@
               </div>
             </div>
 
-            <div class="cpSection">
-              <div id="debugSectionTitle" class="cpSectionTitle">Debug / 디버그</div>
-              <div class="cpGrid">
+            <details id="debugToolsPanel" class="cpDangerDetails">
+              <summary id="debugSectionSummary" class="cpDangerSummary">
+                <span id="debugSectionTitle">Debug / 디버그</span>
+                <span id="debugSectionBadge" class="cpDangerBadge">Careful</span>
+              </summary>
+              <div id="debugSectionHint" class="cpDangerMeta">
+                These actions are for testing and recovery. Use them only when you understand the effect. / 테스트 및 복구용 기능입니다. 효과를 이해할 때만 사용하세요.
+              </div>
+              <div class="cpGrid cpDangerBody">
                 <button id="debugGrantNextButton" class="cpButton" data-cmd="runeword.grant.next">+1 Next Fragment / 다음 조각 +1</button>
                 <button id="debugGrantSetButton" class="cpButton" data-cmd="runeword.grant.set">+1 Recipe Set / 레시피 세트 +1</button>
                 <button id="debugGrantStarterOrbsButton" class="cpButton" data-cmd="runeword.grant.orb3">Starter +3 Reforge Orbs / 스타트 재련 오브 +3</button>
                 <button id="debugSpawnTestButton" class="cpButton" data-cmd="spawn.test">Spawn Test Item / 테스트 아이템 지급</button>
                 <button id="currencyRecoverButton" class="cpButton" data-cmd="currency.recover">Recover Currency / 재료 복구</button>
               </div>
-            </div>
+            </details>
           </div>
         </div>
 
         <div class="cpFooter">
           <button id="footerCloseButton" class="cpButton" data-cmd="ui.close">Close Panel / 패널 닫기</button>
-          <div id="feedback"></div>
+          <div id="feedback" role="status" aria-live="polite"></div>
         </div>
       </div>
       <div id="panelResizeRight" class="cpResizeHandle cpResizeRight" aria-hidden="true"></div>
@@ -1155,10 +1562,31 @@
       const panelTitle = document.getElementById("panelTitle");
       const panelSub = document.getElementById("panelSub");
       const feedback = document.getElementById("feedback");
+      const runewordFlowTitle = document.getElementById("runewordFlowTitle");
+      const runewordFlowHint = document.getElementById("runewordFlowHint");
+      const runewordProgressBase = document.getElementById("runewordProgressBase");
+      const runewordProgressRecipe = document.getElementById("runewordProgressRecipe");
+      const runewordProgressTransmute = document.getElementById("runewordProgressTransmute");
+      const runewordBaseStep = document.getElementById("runewordBaseStep");
+      const runewordRecipeStep = document.getElementById("runewordRecipeStep");
+      const runewordActionStep = document.getElementById("runewordActionStep");
+      const runewordBaseEyebrow = document.getElementById("runewordBaseEyebrow");
+      const runewordRecipeEyebrow = document.getElementById("runewordRecipeEyebrow");
+      const runewordActionEyebrow = document.getElementById("runewordActionEyebrow");
+      const runewordBaseStepTitle = document.getElementById("runewordBaseStepTitle");
+      const runewordRecipeStepTitle = document.getElementById("runewordRecipeStepTitle");
+      const runewordActionStepTitle = document.getElementById("runewordActionStepTitle");
+      const runewordBaseStepHint = document.getElementById("runewordBaseStepHint");
+      const runewordRecipeStepHint = document.getElementById("runewordRecipeStepHint");
+      const runewordActionStepHint = document.getElementById("runewordActionStepHint");
       const selectedItemLabel = document.getElementById("selectedItemLabel");
       const selectedItemName = document.getElementById("selectedItemName");
       const selectedItemSource = document.getElementById("selectedItemSource");
+      const affixSelectedItemLabel = document.getElementById("affixSelectedItemLabel");
+      const affixSelectedItemName = document.getElementById("affixSelectedItemName");
+      const affixSelectedItemMeta = document.getElementById("affixSelectedItemMeta");
       const panelTooltipTitle = document.getElementById("panelTooltipTitle");
+      const panelTooltipLead = document.getElementById("panelTooltipLead");
       const panelTooltipText = document.getElementById("panelTooltipText");
       const panelTooltipHint = document.getElementById("panelTooltipHint");
       const inventoryBaseList = document.getElementById("inventoryBaseList");
@@ -1174,6 +1602,7 @@
       const runewordAffixText = document.getElementById("runewordAffixText");
       const runewordAffixHint = document.getElementById("runewordAffixHint");
       const runewordPanelStatus = document.getElementById("runewordPanelStatus");
+      const runewordActionHint = document.getElementById("runewordActionHint");
       const runewordInsertButton = document.getElementById("runewordInsertButton");
       const runewordReforgeButton = document.getElementById("runewordReforgeButton");
       const runewordStatusButton = document.getElementById("runewordStatusButton");
@@ -1197,10 +1626,14 @@
       const manualPrevButton = document.getElementById("manualPrevButton");
       const manualNextButton = document.getElementById("manualNextButton");
       const debugSectionTitle = document.getElementById("debugSectionTitle");
+      const debugSectionSummary = document.getElementById("debugSectionSummary");
+      const debugSectionBadge = document.getElementById("debugSectionBadge");
+      const debugSectionHint = document.getElementById("debugSectionHint");
       const debugGrantNextButton = document.getElementById("debugGrantNextButton");
       const debugGrantSetButton = document.getElementById("debugGrantSetButton");
       const debugGrantStarterOrbsButton = document.getElementById("debugGrantStarterOrbsButton");
       const debugSpawnTestButton = document.getElementById("debugSpawnTestButton");
+      const currencyRecoverButton = document.getElementById("currencyRecoverButton");
       const footerCloseButton = document.getElementById("footerCloseButton");
       const controlPanelCloseX = document.getElementById("controlPanelCloseX");
       const panelDragHandle = document.getElementById("panelDragHandle");
@@ -1570,9 +2003,78 @@
         if (tooltipRunewordHint) {
           tooltipRunewordHint.setAttribute("aria-label", t("Open Calamity panel", "칼래미티 패널 열기"));
         }
-        selectedItemLabel.textContent = t("Runeword Base", "룬워드 베이스");
+        if (runewordFlowTitle) {
+          runewordFlowTitle.textContent = t("Runeword Flow", "룬워드 순서");
+        }
+        if (runewordFlowHint) {
+          runewordFlowHint.textContent = t(
+            "Choose an equipped base, select a recipe, then transmute.",
+            "착용 베이스를 고르고, 레시피를 선택한 뒤 변환하세요."
+          );
+        }
+        if (runewordBaseEyebrow) {
+          runewordBaseEyebrow.textContent = t("Step 1", "1단계");
+        }
+        if (runewordRecipeEyebrow) {
+          runewordRecipeEyebrow.textContent = t("Step 2", "2단계");
+        }
+        if (runewordActionEyebrow) {
+          runewordActionEyebrow.textContent = t("Step 3", "3단계");
+        }
+        if (runewordBaseStepTitle) {
+          runewordBaseStepTitle.textContent = t("Choose Base", "베이스 선택");
+        }
+        if (runewordRecipeStepTitle) {
+          runewordRecipeStepTitle.textContent = t("Choose Recipe", "레시피 선택");
+        }
+        if (runewordActionStepTitle) {
+          runewordActionStepTitle.textContent = t("Transmute", "변환");
+        }
+        if (runewordBaseStepHint) {
+          runewordBaseStepHint.textContent = t(
+            "Start by selecting one equipped item that will receive the runeword.",
+            "룬워드를 부여할 착용 아이템을 먼저 선택하세요."
+          );
+        }
+        if (runewordRecipeStepHint) {
+          runewordRecipeStepHint.textContent = t(
+            "Narrow the list, inspect effects, and lock in the recipe you want to apply.",
+            "목록을 좁히고 효과를 확인한 뒤 적용할 레시피를 선택하세요."
+          );
+        }
+        if (runewordActionStepHint) {
+          runewordActionStepHint.textContent = t(
+            "Review the preview, confirm requirements, then transmute when ready.",
+            "미리보기와 조건을 확인한 뒤 준비되면 변환하세요."
+          );
+        }
+        if (runewordProgressBase) {
+          runewordProgressBase.querySelector(".rwProgressLabel").textContent = t("Base", "베이스");
+        }
+        if (runewordProgressRecipe) {
+          runewordProgressRecipe.querySelector(".rwProgressLabel").textContent = t("Recipe", "레시피");
+        }
+        if (runewordProgressTransmute) {
+          runewordProgressTransmute.querySelector(".rwProgressLabel").textContent = t("Transmute", "변환");
+        }
+        selectedItemLabel.textContent = t("Current Base", "현재 베이스");
+        if (affixSelectedItemLabel) {
+          affixSelectedItemLabel.textContent = t("Selected Item", "선택 아이템");
+        }
+        if (affixSelectedItemMeta) {
+          affixSelectedItemMeta.textContent = t(
+            "Highlight one inventory item to mirror its affix details here.",
+            "인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다."
+          );
+        }
         if (panelTooltipTitle) {
-          panelTooltipTitle.textContent = t("Affix Tooltip", "어픽스");
+          panelTooltipTitle.textContent = t("Affix Details", "어픽스 상세");
+        }
+        if (panelTooltipLead) {
+          panelTooltipLead.textContent = t(
+            "Focus one item at a time to read affix text without opening the full runeword flow.",
+            "한 번에 아이템 하나에 집중해서 어픽스 텍스트를 읽을 수 있습니다."
+          );
         }
         if (panelTooltipHint) {
           panelTooltipHint.textContent = t(
@@ -1659,7 +2161,16 @@
           manualNextButton.textContent = t("Manual Next", "수동 다음");
         }
         if (debugSectionTitle) {
-          debugSectionTitle.textContent = t("Debug", "디버그");
+          debugSectionTitle.textContent = t("Debug Tools", "디버그 도구");
+        }
+        if (debugSectionBadge) {
+          debugSectionBadge.textContent = t("Use carefully", "주의");
+        }
+        if (debugSectionHint) {
+          debugSectionHint.textContent = t(
+            "These actions are for testing and recovery. Use them only when you understand the effect.",
+            "테스트 및 복구용 기능입니다. 효과를 이해할 때만 사용하세요."
+          );
         }
         if (debugGrantNextButton) {
           debugGrantNextButton.textContent = t("+1 Next Fragment", "다음 조각 +1");
@@ -1675,6 +2186,9 @@
         }
         if (debugSpawnTestButton) {
           debugSpawnTestButton.textContent = t("Spawn Test Item", "테스트 아이템 지급");
+        }
+        if (currencyRecoverButton) {
+          currencyRecoverButton.textContent = t("Recover Currency", "재료 복구");
         }
         if (footerCloseButton) {
           footerCloseButton.textContent = t("Close Panel", "패널 닫기");
@@ -1692,11 +2206,52 @@
         );
       }
 
+      function focusCurrentMainTab() {
+        const focusEl =
+          mainTabState === "affix"
+            ? mainAffixTab
+            : mainTabState === "advanced"
+              ? mainAdvancedTab
+              : mainRunewordTab;
+        if (focusEl && typeof focusEl.focus === "function") {
+          focusEl.focus();
+        }
+      }
+
       function clearChildren(node) {
         if (!node) return;
         while (node.firstChild) {
           node.removeChild(node.firstChild);
         }
+      }
+
+      function appendEmptyState(node, title, body, hint = "") {
+        if (!node) return;
+        clearChildren(node);
+
+        const wrap = document.createElement("div");
+        wrap.className = "cpEmptyState";
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "cpEmptyTitle";
+        titleEl.textContent = title;
+        wrap.appendChild(titleEl);
+
+        if (body) {
+          const bodyEl = document.createElement("div");
+          bodyEl.className = "cpEmptyBody";
+          bodyEl.textContent = body;
+          wrap.appendChild(bodyEl);
+        }
+
+        if (hint) {
+          const hintEl = document.createElement("div");
+          hintEl.className = "cpEmptyHint";
+          hintEl.textContent = hint;
+          wrap.appendChild(hintEl);
+        }
+
+        node.appendChild(wrap);
       }
 
       function applyQuickLaunchVisibility() {
@@ -1740,9 +2295,22 @@
         const hasEffectiveRunewordAffix = Boolean(effectiveRunewordAffixText);
 
         if (panelTooltipText) {
-          panelTooltipText.textContent = hasTooltip
-            ? tooltipTextState
-            : t("No affix tooltip available.", "어픽스 툴팁이 없습니다.");
+          if (hasTooltip) {
+            panelTooltipText.textContent = tooltipTextState;
+          } else {
+            appendEmptyState(
+              panelTooltipText,
+              t("Select one item to inspect affixes", "어픽스를 확인할 아이템 하나를 선택하세요"),
+              t(
+                "The Affix tab mirrors the currently highlighted inventory item and shows its tooltip text in a calmer layout.",
+                "Affix 탭은 현재 인벤토리에서 강조한 아이템의 툴팁을 더 차분한 레이아웃으로 보여줍니다."
+              ),
+              t(
+                "When you hover or select an item, its affix text will appear here.",
+                "아이템을 가리키거나 선택하면 어픽스 텍스트가 여기 표시됩니다."
+              )
+            );
+          }
         }
 
         if (panelTooltipHint) {
@@ -2182,9 +2750,16 @@
       }
 
       function resolveSelectedItemContextViewModel() {
+        const hasSelection = Boolean(selectedItemNameState);
+        const sourceText = selectedItemSourceState === "equipped"
+          ? t("Equipped item selection", "착용 아이템 선택")
+          : t("Current selection", "현재 선택");
         return {
+          hasSelection,
           name: selectedItemNameState || t("No base selected", "선택된 베이스 없음"),
-          sourceText: t("Equipped only", "착용 장비 전용")
+          sourceText: hasSelection
+            ? sourceText
+            : t("Equipped items only", "착용 장비만 대상")
         };
       }
 
@@ -2192,18 +2767,41 @@
         const viewModel = resolveSelectedItemContextViewModel();
         selectedItemName.textContent = viewModel.name;
         selectedItemSource.textContent = viewModel.sourceText;
+        if (affixSelectedItemName) {
+          affixSelectedItemName.textContent = viewModel.hasSelection
+            ? viewModel.name
+            : t("No item selected", "선택된 아이템 없음");
+        }
+        if (affixSelectedItemMeta) {
+          affixSelectedItemMeta.textContent = viewModel.hasSelection
+            ? t(
+                "This mirrors the currently highlighted inventory item.",
+                "현재 인벤토리에서 강조된 아이템을 그대로 보여줍니다."
+              )
+            : t(
+                "Highlight one inventory item to mirror its affix details here.",
+                "인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다."
+              );
+        }
       }
 
       function resolveInventoryListViewModel() {
         const items = Array.isArray(inventoryItemsState) ? inventoryItemsState : [];
         return {
           items,
-          emptyMessage: items.length === 0
-            ? t(
-                "No equipped weapon/armor base found.",
-                "착용 중인 무기/방어구 베이스를 찾지 못했습니다."
-              )
-            : ""
+          emptyState: items.length === 0
+            ? {
+                title: t("No compatible equipped base", "호환되는 착용 베이스가 없습니다"),
+                body: t(
+                  "Equip a weapon, armor, helm, or shield first so Calamity can use it as a runeword base.",
+                  "룬워드 베이스로 사용할 무기, 갑옷, 투구, 방패를 먼저 착용하세요."
+                ),
+                hint: t(
+                  "Only currently equipped gear can be selected here.",
+                  "여기에서는 현재 착용 중인 장비만 선택할 수 있습니다."
+                )
+              }
+            : null
         };
       }
 
@@ -2211,11 +2809,13 @@
         clearChildren(inventoryBaseList);
         const viewModel = resolveInventoryListViewModel();
 
-        if (viewModel.emptyMessage) {
-          const empty = document.createElement("div");
-          empty.className = "cpListEmpty";
-          empty.textContent = viewModel.emptyMessage;
-          inventoryBaseList.appendChild(empty);
+        if (viewModel.emptyState) {
+          appendEmptyState(
+            inventoryBaseList,
+            viewModel.emptyState.title,
+            viewModel.emptyState.body,
+            viewModel.emptyState.hint
+          );
           return;
         }
 
@@ -2616,17 +3216,31 @@
           countText: query
             ? t(`Matched ${visibleItems.length}/${allItems.length}`, `검색 ${visibleItems.length}/${allItems.length}`)
             : t(`Total ${allItems.length}`, `총 ${allItems.length}`),
-          emptyMessage: allItems.length === 0
-            ? t(
-                "No runeword recipe available.",
-                "사용 가능한 룬워드 레시피가 없습니다."
-              )
-            : visibleItems.length === 0
-              ? t(
-                  "No recipe matches your search.",
-                  "검색 조건에 맞는 레시피가 없습니다."
+          emptyState: allItems.length === 0
+            ? {
+                title: t("No runeword recipe available", "사용 가능한 룬워드 레시피가 없습니다"),
+                body: t(
+                  "Recipe data has not reached this panel yet, so there is nothing to choose from.",
+                  "이 패널에 아직 레시피 데이터가 도착하지 않아 선택할 항목이 없습니다."
+                ),
+                hint: t(
+                  "Reopen the panel or reload the mod data if this keeps happening.",
+                  "계속 비어 있으면 패널을 다시 열거나 모드 데이터를 다시 불러오세요."
                 )
-              : ""
+              }
+            : visibleItems.length === 0
+              ? {
+                  title: t("No recipe matched your search", "검색과 일치하는 레시피가 없습니다"),
+                  body: t(
+                    "Try a different rune name, base type, or effect keyword.",
+                    "다른 룬 이름, 베이스 타입, 또는 효과 키워드로 다시 검색해 보세요."
+                  ),
+                  hint: t(
+                    "Search checks recipe name, rune order, base badge, and summary text.",
+                    "검색은 레시피 이름, 룬 순서, 베이스 배지, 요약 텍스트를 함께 확인합니다."
+                  )
+                }
+              : null
         };
       }
 
@@ -2641,11 +3255,13 @@
           recipeCountLabel.textContent = viewModel.countText;
         }
 
-        if (viewModel.emptyMessage) {
-          const empty = document.createElement("div");
-          empty.className = "cpListEmpty";
-          empty.textContent = viewModel.emptyMessage;
-          recipeList.appendChild(empty);
+        if (viewModel.emptyState) {
+          appendEmptyState(
+            recipeList,
+            viewModel.emptyState.title,
+            viewModel.emptyState.body,
+            viewModel.emptyState.hint
+          );
           return;
         }
 
@@ -2768,6 +3384,104 @@
         };
       }
 
+      function triggerRunewordStateShift(element, state) {
+        if (!element) return;
+        const previous = element.dataset.stepState || "";
+        if (previous === state) {
+          return;
+        }
+        element.dataset.stepState = state;
+        element.classList.remove("rwStateShift");
+        void element.offsetWidth;
+        element.classList.add("rwStateShift");
+        window.setTimeout(() => element.classList.remove("rwStateShift"), 420);
+      }
+
+      function setRunewordFlowState(element, state) {
+        if (!element) return;
+        triggerRunewordStateShift(element, state);
+        element.classList.toggle("active", state === "active");
+        element.classList.toggle("complete", state === "complete");
+      }
+
+      function setRunewordStepCardState(element, state) {
+        if (!element) return;
+        triggerRunewordStateShift(element, state);
+        element.classList.toggle("active", state === "active");
+        element.classList.toggle("complete", state === "complete");
+        element.classList.toggle("muted", state === "muted");
+      }
+
+      function renderRunewordFlowProgress(actionState, state) {
+        const hasBase = Boolean(actionState?.hasBase);
+        const hasRecipe = Boolean(actionState?.hasRecipe);
+        const isComplete = Boolean(actionState?.isComplete);
+        const canTransmute = Boolean(actionState?.canTransmute);
+
+        setRunewordFlowState(runewordProgressBase, hasBase ? "complete" : "active");
+        setRunewordFlowState(runewordProgressRecipe, hasRecipe ? "complete" : hasBase ? "active" : "pending");
+        setRunewordFlowState(
+          runewordProgressTransmute,
+          isComplete ? "complete" : hasBase && hasRecipe ? "active" : "pending"
+        );
+
+        setRunewordStepCardState(runewordBaseStep, hasBase ? "complete" : "active");
+        setRunewordStepCardState(runewordRecipeStep, hasRecipe ? "complete" : hasBase ? "active" : "muted");
+        setRunewordStepCardState(
+          runewordActionStep,
+          isComplete ? "complete" : hasBase && hasRecipe ? "active" : "muted"
+        );
+        if (runewordInsertButton) {
+          runewordInsertButton.classList.toggle("attention", hasBase && hasRecipe && !isComplete);
+        }
+
+        if (!runewordFlowHint) {
+          return;
+        }
+
+        if (!hasBase) {
+          runewordFlowHint.textContent = t(
+            "Start by selecting one equipped base.",
+            "먼저 착용 중인 베이스 아이템 하나를 선택하세요."
+          );
+          return;
+        }
+
+        if (!hasRecipe) {
+          runewordFlowHint.textContent = t(
+            "Base locked in. Next, choose the runeword recipe that fits it.",
+            "베이스를 골랐습니다. 이제 어울리는 룬워드 레시피를 선택하세요."
+          );
+          return;
+        }
+
+        if (isComplete) {
+          runewordFlowHint.textContent = t(
+            "This base already has a completed runeword. Reforge if you want a new result.",
+            "이 베이스에는 이미 룬워드가 완성되어 있습니다. 결과를 바꾸고 싶다면 재련하세요."
+          );
+          return;
+        }
+
+        if (canTransmute) {
+          runewordFlowHint.textContent = t(
+            "Everything is ready. Use Transmute to consume fragments and apply the runeword.",
+            "준비가 끝났습니다. 변환을 눌러 조각을 소모하고 룬워드를 적용하세요."
+          );
+          return;
+        }
+
+        if (state?.missingSummary) {
+          runewordFlowHint.textContent = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
+          return;
+        }
+
+        runewordFlowHint.textContent = t(
+          "Review the recipe requirements, then transmute when available.",
+          "레시피 조건을 확인한 뒤, 가능해지면 변환하세요."
+        );
+      }
+
       function renderRunewordPanelState() {
         const state = runewordPanelState || {};
         const actionState = resolveRunewordPanelActionState(state);
@@ -2776,6 +3490,8 @@
         const isComplete = actionState.isComplete;
         const requiredRunes = Array.isArray(state.requiredRunes) ? state.requiredRunes : [];
         const canTransmute = actionState.canTransmute;
+
+        renderRunewordFlowProgress(actionState, state);
 
         if (runewordCubeGrid) {
           clearChildren(runewordCubeGrid);
@@ -2948,6 +3664,10 @@
         runewordInsertButton.title = actionState.buttonHint;
         runewordInsertButton.setAttribute("aria-label", actionState.buttonHint);
 
+        if (runewordActionHint) {
+          runewordActionHint.textContent = actionState.buttonHint;
+        }
+
         if (runewordReforgeButton) {
           runewordReforgeButton.disabled = !actionState.reforgeEnabled;
           runewordReforgeButton.title = actionState.reforgeHint;
@@ -3109,19 +3829,16 @@
             setMainTab(next);
             requestAnimationFrame(() => {
               try {
-                const focusEl =
-                  next === "affix"
-                    ? mainAffixTab
-                    : next === "advanced"
-                      ? mainAdvancedTab
-                      : mainRunewordTab;
-                if (focusEl && typeof focusEl.focus === "function") {
-                  focusEl.focus();
-                }
+                focusCurrentMainTab();
               } catch (_) {}
             });
           } else {
             setMainTab(mainTabState);
+            requestAnimationFrame(() => {
+              try {
+                focusCurrentMainTab();
+              } catch (_) {}
+            });
           }
         }
       }
