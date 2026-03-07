@@ -29,13 +29,10 @@ CTestTestfile.cmake
 *.log
 *:Zone.Identifier
 
-# vibe-kit
-.vibe/db/
-.vibe/reports/
-.vibe/locks/
-.vibe/context/LATEST_CONTEXT.md
-.vibe/context/PACK_*.md
-.vibe/context/typecheck_baseline.json
+# vibe-kit and local agent runtime
+.vibe/
+.claude/
+skse/CalamityAffixes/tests/build/
 
 # OMC session/runtime artifacts
 .omc/

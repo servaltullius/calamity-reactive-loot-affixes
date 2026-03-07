@@ -16,9 +16,9 @@ import sys
 from pathlib import Path
 
 repo_root = Path(__file__).resolve().parents[2]
-brain = repo_root / ".vibe" / "brain"
-sys.path.insert(0, str(brain))
-runpy.run_path(str(brain / "precommit.py"), run_name="__main__")
+runner = repo_root / "scripts" / "precommit_runner.py"
+sys.path.insert(0, str(runner.parent))
+runpy.run_path(str(runner), run_name="__main__")
 """
 
 

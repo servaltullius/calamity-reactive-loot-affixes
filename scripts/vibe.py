@@ -18,6 +18,11 @@ try:
 except ModuleNotFoundError:
     from scripts.setup_vibe_env import ensure_boundaries_template
 
+try:
+    from vibe_bootstrap import bundled_brain_dir, bundled_readme_path, install_bundled_brain
+except ModuleNotFoundError:
+    from scripts.vibe_bootstrap import bundled_brain_dir, bundled_readme_path, install_bundled_brain
+
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
@@ -25,10 +30,11 @@ def _repo_root() -> Path:
 
 def _ensure_bootstrap(root: Path) -> None:
     cfg = root / ".vibe" / "config.json"
-    if cfg.exists():
-        return
     setup = root / "scripts" / "setup_vibe_env.py"
-    subprocess.check_call([sys.executable, str(setup)], cwd=str(root))
+    if not cfg.exists():
+        subprocess.check_call([sys.executable, str(setup)], cwd=str(root))
+        return
+    install_bundled_brain(root)
 
 
 def _run(script: Path, argv: list[str]) -> int:
@@ -76,11 +82,11 @@ def _seed_collect_files(root: Path) -> list[Path]:
         root / "scripts" / "vibekit.cmd",
         root / "scripts" / "setup_vibe_env.py",
         root / "scripts" / "install_hooks.py",
-        root / ".vibe" / "README.md",
+        root / "scripts" / "vibe_bootstrap.py",
+        root / "scripts" / "precommit_runner.py",
         root / ".vibe" / "AGENT_CHECKLIST.md",
         root / ".vibe" / "agent_memory" / "DONT_DO_THIS.md",
         root / ".vibe" / "context" / "PROFILE_GUIDE.md",
-        root / ".vibe" / "brain" / "requirements.txt",
     ]
 
     out: list[Path] = []
@@ -89,7 +95,15 @@ def _seed_collect_files(root: Path) -> list[Path]:
             out.append(p)
 
     # Keep the core brain scripts (no caches/zips).
-    for p in sorted((root / ".vibe" / "brain").glob("*.py")):
+    bundled_readme = bundled_readme_path(root)
+    if bundled_readme.exists() and bundled_readme.is_file():
+        out.append(bundled_readme)
+
+    bundled_requirements = bundled_brain_dir(root) / "requirements.txt"
+    if bundled_requirements.exists() and bundled_requirements.is_file():
+        out.append(bundled_requirements)
+
+    for p in sorted(bundled_brain_dir(root).glob("*.py")):
         if p.name.endswith(".py") and p.is_file():
             out.append(p)
 
@@ -370,7 +384,7 @@ def main(argv: list[str]) -> int:
         pre_args: list[str] = []
         if args.run_tests:
             pre_args.append("--run-tests")
-        return _run(brain / "precommit.py", pre_args)
+        return _run(root / "scripts" / "precommit_runner.py", pre_args)
 
     if args.cmd == "pack":
         pack_args = [
