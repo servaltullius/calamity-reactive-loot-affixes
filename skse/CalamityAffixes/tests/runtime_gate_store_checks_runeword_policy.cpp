@@ -181,7 +181,7 @@ namespace RuntimeGateStoreChecks
 				prismaUiText->find("function buildRunewordTooltipLikeText(item") == std::string::npos ||
 				prismaUiText->find("function buildRecipePreviewTooltipText(item)") == std::string::npos ||
 				prismaUiText->find("buildRunewordTooltipLikeText(getSelectedRecipeItem()") == std::string::npos ||
-				prismaUiText->find("const effectTooltipText = buildRunewordTooltipLikeText(selectedRecipe") == std::string::npos) {
+				prismaUiText->find("const recipePreviewText = buildRunewordTooltipLikeText(getSelectedRecipeItem()") == std::string::npos) {
 				std::cerr << "runeword_recipe_tooltip_text: recipe tooltip text enrichment guard is missing\n";
 				return false;
 			}
@@ -1372,9 +1372,11 @@ namespace RuntimeGateStoreChecks
 			const auto baseStepTag = extractElementOpenTagById("runewordBaseStep");
 			const auto recipeStepTag = extractElementOpenTagById("runewordRecipeStep");
 			const auto actionStepTag = extractElementOpenTagById("runewordActionStep");
+			const auto recipeContextTag = extractElementOpenTagById("runewordContextRecipeName");
 			const auto baseListTag = extractElementOpenTagById("inventoryBaseList");
 			const auto recipeListTag = extractElementOpenTagById("recipeList");
 			const auto cubeGridTag = extractElementOpenTagById("runewordCubeGrid");
+			const auto actionDetailsTag = extractElementOpenTagById("runewordActionDetails");
 			const auto insertButtonTag = extractElementOpenTagById("runewordInsertButton");
 			const auto debugPanelTag = extractElementOpenTagById("debugToolsPanel");
 			const auto debugSummaryTag = extractElementOpenTagById("debugSectionSummary");
@@ -1383,12 +1385,14 @@ namespace RuntimeGateStoreChecks
 				!controlPanelTag.has_value() ||
 				controlPanelTag->find("role=\"dialog\"") == std::string::npos ||
 				uiText->find("class=\"rwWorkspace\"") == std::string::npos ||
+				uiText->find("class=\"rwContextBar\"") == std::string::npos ||
+				uiText->find("class=\"rwWorkbench\"") == std::string::npos ||
 				uiText->find("overflow-y: auto;") == std::string::npos ||
 				!progressTag.has_value() ||
 				!tagHasClassToken(*progressTag, "rwProgressStrip") ||
 				!baseStepTag.has_value() ||
 				!tagHasClassToken(*baseStepTag, "cpStepCard") ||
-				!tagHasClassToken(*baseStepTag, "rwBaseStrip") ||
+				!tagHasClassToken(*baseStepTag, "rwBaseRail") ||
 				!tagHasClassToken(*baseStepTag, "active") ||
 				!recipeStepTag.has_value() ||
 				!tagHasClassToken(*recipeStepTag, "cpStepCard") ||
@@ -1397,14 +1401,17 @@ namespace RuntimeGateStoreChecks
 				!actionStepTag.has_value() ||
 				!tagHasClassToken(*actionStepTag, "cpStepCard") ||
 				!tagHasClassToken(*actionStepTag, "cpActionCard") ||
-				!tagHasClassToken(*actionStepTag, "rwActionTray") ||
+				!tagHasClassToken(*actionStepTag, "rwActionInspector") ||
 				!tagHasClassToken(*actionStepTag, "muted") ||
+				!recipeContextTag.has_value() ||
 				!baseListTag.has_value() ||
 				!tagHasClassToken(*baseListTag, "rwBaseQuickList") ||
 				!recipeListTag.has_value() ||
 				!tagHasClassToken(*recipeListTag, "rwRecipeExplorerList") ||
 				!cubeGridTag.has_value() ||
 				!tagHasClassToken(*cubeGridTag, "compact") ||
+				!actionDetailsTag.has_value() ||
+				!tagHasClassToken(*actionDetailsTag, "rwActionDetails") ||
 				!insertButtonTag.has_value() ||
 				!tagHasClassToken(*insertButtonTag, "cpButton") ||
 				!tagHasClassToken(*insertButtonTag, "cpPrimaryButton") ||
@@ -1421,11 +1428,14 @@ namespace RuntimeGateStoreChecks
 				uiText->find("@keyframes rwPrimaryPulse") == std::string::npos ||
 				uiText->find("function renderRunewordFlowProgress(actionState, state)") == std::string::npos ||
 				uiText->find("-webkit-line-clamp: 2;") == std::string::npos ||
+				uiText->find("runewordActionDetailsSummary") == std::string::npos ||
 				!selectedBody.has_value() ||
 				selectedBody->find("affixSelectedItemName.textContent = viewModel.hasSelection") == std::string::npos ||
 				uiText->find("button.title = name;") == std::string::npos ||
 				uiText->find("button.setAttribute(\"aria-label\", name);") == std::string::npos ||
 				!runewordBody.has_value() ||
+				runewordBody->find("runewordContextRecipeName.textContent") == std::string::npos ||
+				runewordBody->find("runewordContextRecipeMeta.textContent") == std::string::npos ||
 				runewordBody->find("renderRunewordFlowProgress(actionState, state);") == std::string::npos ||
 				uiText->find("runewordInsertButton.classList.toggle(\"attention\", canTransmute);") == std::string::npos ||
 				runewordBody->find("runewordActionHint.textContent = actionState.buttonHint;") == std::string::npos ||
