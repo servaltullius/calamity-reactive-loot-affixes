@@ -1384,6 +1384,8 @@ namespace RuntimeGateStoreChecks
 			const auto debugSummaryTag = extractElementOpenTagById("debugSectionSummary");
 
 			if (uiText->find(":where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary):focus-visible") == std::string::npos ||
+				uiText->find("text-rendering: optimizeLegibility;") == std::string::npos ||
+				uiText->find("-webkit-font-smoothing: antialiased;") == std::string::npos ||
 				!controlPanelTag.has_value() ||
 				controlPanelTag->find("role=\"dialog\"") == std::string::npos ||
 				uiText->find("class=\"rwWorkspace\"") == std::string::npos ||
@@ -1408,12 +1410,14 @@ namespace RuntimeGateStoreChecks
 				!recipeContextTag.has_value() ||
 				!baseChooserDetailsTag.has_value() ||
 				!tagHasClassToken(*baseChooserDetailsTag, "rwRailDetails") ||
+				!tagHasClassToken(*baseChooserDetailsTag, "rwRailDetailsStatic") ||
 				!cubeDetailsTag.has_value() ||
 				!tagHasClassToken(*cubeDetailsTag, "rwRailDetails") ||
 				!baseListTag.has_value() ||
 				!tagHasClassToken(*baseListTag, "rwBaseQuickList") ||
 				!recipeListTag.has_value() ||
 				!tagHasClassToken(*recipeListTag, "rwRecipeExplorerList") ||
+				!tagHasClassToken(*recipeListTag, "rwRecipeGrid") ||
 				!cubeGridTag.has_value() ||
 				!tagHasClassToken(*cubeGridTag, "compact") ||
 				!actionDetailsTag.has_value() ||
