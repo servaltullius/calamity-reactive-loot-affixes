@@ -27,21 +27,23 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.is_file() else ""
 
 
-def _cache_has_current_paths(source_dir: Path, build_dir: Path) -> bool:
+def _cache_has_current_paths(source_dir: Path, build_dir: Path, required_cache_entries: tuple[str, ...] = ()) -> bool:
     cache_text = _read_text(build_dir / "CMakeCache.txt")
     dart_text = _read_text(build_dir / "DartConfiguration.tcl")
     if not cache_text or not dart_text:
         return False
+    cache_lines = set(cache_text.splitlines())
 
     expected_source = str(source_dir)
     expected_build = str(build_dir)
-    return (
+    path_matches = (
         f"For build in directory: {expected_build}" in cache_text
         and f"CMAKE_HOME_DIRECTORY:INTERNAL={expected_source}" in cache_text
         and f"SourceDirectory: {expected_source}" in dart_text
         and f"BuildDirectory: {expected_build}" in dart_text
         and f'ConfigureCommand: "/usr/bin/cmake" "{expected_source}"' in dart_text
     )
+    return path_matches and all(entry in cache_lines for entry in required_cache_entries)
 
 
 def _required_tool(name: str) -> str:
@@ -99,7 +101,7 @@ def _plugin_lane(repo_root: Path, repo_run_root_path: Path) -> LaneSpec:
     skse_root = repo_root / "skse" / "CalamityAffixes"
     run_skse_root = repo_run_root_path / "skse" / "CalamityAffixes"
     winsysroot = run_skse_root / ".xwin"
-    prefix_path = run_skse_root / "extern" / "CommonLibSSE-NG" / "install.linux-clangcl-rel-se"
+    prefix_path = run_skse_root / "extern" / "CommonLibSSE-NG" / "install.linux-clangcl-rel"
     vendor_cmake_root = run_skse_root / "extern" / "vendor" / "lib" / "cmake"
     linker_flags = _xwin_linker_flags(winsysroot)
 
@@ -148,7 +150,12 @@ def _runtime_gate_lane(repo_root: Path) -> LaneSpec:
 
 def ensure_lane(lane: LaneSpec) -> bool:
     lane.build_dir.mkdir(parents=True, exist_ok=True)
-    if _cache_has_current_paths(lane.source_dir, lane.build_dir):
+    required_cache_entries: tuple[str, ...] = ()
+    prefix_entry = next((arg for arg in lane.configure_args if arg.startswith("-DCMAKE_PREFIX_PATH=")), None)
+    if prefix_entry:
+        required_cache_entries = (f"CMAKE_PREFIX_PATH:UNINITIALIZED={prefix_entry.split('=', 1)[1]}",)
+
+    if _cache_has_current_paths(lane.source_dir, lane.build_dir, required_cache_entries):
         return False
 
     _clear_stale_cmake_state(lane.build_dir)

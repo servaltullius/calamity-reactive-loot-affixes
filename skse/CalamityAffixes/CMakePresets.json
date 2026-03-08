@@ -8,14 +8,14 @@
   "configurePresets": [
     {
       "name": "linux-release-commonlibsse",
-      "displayName": "Linux Release (Local CommonLibSSE)",
-      "description": "Configure with the repo-local CommonLibSSE-NG install tree.",
+      "displayName": "Linux Release (Local CommonLibSSE flatrim)",
+      "description": "Configure with the repo-local CommonLibSSE-NG flatrim install tree (SE/AE shared).",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/presets/linux-release-commonlibsse",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "BUILD_TESTING": "ON",
-        "CMAKE_PREFIX_PATH": "${sourceDir}/extern/CommonLibSSE-NG/install.linux-clangcl-rel-se"
+        "CMAKE_PREFIX_PATH": "${sourceDir}/extern/CommonLibSSE-NG/install.linux-clangcl-rel"
       }
     }
   ],
