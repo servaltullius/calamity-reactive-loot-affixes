@@ -1422,6 +1422,7 @@ namespace RuntimeGateStoreChecks
 				!tagHasClassToken(*cubeGridTag, "compact") ||
 				!actionDetailsTag.has_value() ||
 				!tagHasClassToken(*actionDetailsTag, "rwActionDetails") ||
+				actionDetailsTag->find("open") == std::string::npos ||
 				!insertButtonTag.has_value() ||
 				!tagHasClassToken(*insertButtonTag, "cpButton") ||
 				!tagHasClassToken(*insertButtonTag, "cpPrimaryButton") ||
