@@ -414,9 +414,12 @@ namespace RuntimeGateStoreChecks
 			(std::istreambuf_iterator<char>(in)),
 			std::istreambuf_iterator<char>());
 
-		if (source.find("HitDataUtil::HitDataMatchesActors(hitData, target, aggressor)") == std::string::npos ||
+		if (source.find("if (_combatState.procDepth > 0)") == std::string::npos ||
+			source.find("HitDataUtil::HitDataMatchesActors(hitData, target, aggressor)") == std::string::npos ||
 			source.find("HitDataUtil::HasHitLikeSource(hitData, aggressor)") == std::string::npos ||
-			source.find("if (!hasCommittedHitData)") == std::string::npos) {
+			source.find("if (!hasCommittedHitData)") == std::string::npos ||
+			source.find("ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);") == std::string::npos ||
+			source.find("ProcessTrigger(Trigger::kLowHealth, target, aggressor, hitData);") == std::string::npos) {
 			std::cerr << "tes_hit_fallback_source_validation: TESHitEvent fallback must validate committed hit-like source data\n";
 			return false;
 		}

@@ -170,6 +170,42 @@ namespace RuntimeGateStoreChecks
 			return true;
 		}
 
+		bool CheckPlayerHealthDamageHookDefaultPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path repoRoot = testFile.parent_path().parent_path();
+			const fs::path typesFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Types.inl";
+			const fs::path runtimeSettingsFile = repoRoot / "src" / "EventBridge.Config.RuntimeSettings.cpp";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto typesText = loadText(typesFile);
+			const auto runtimeText = loadText(runtimeSettingsFile);
+			if (!typesText || !runtimeText) {
+				std::cerr << "player_health_damage_hook_default: failed to load runtime settings source files\n";
+				return false;
+			}
+
+			if (typesText->find("bool allowPlayerHealthDamageHook{ true };") == std::string::npos ||
+				typesText->find("allowPlayerHealthDamageHook = true;") == std::string::npos ||
+				runtimeText->find("_runtimeSettings.allowPlayerHealthDamageHook = true;") == std::string::npos ||
+				runtimeText->find("runtime override 'allowPlayerHealthDamageHook' is ignored") == std::string::npos) {
+				std::cerr << "player_health_damage_hook_default: player health-damage hook must stay enabled by default and ignore legacy runtime overrides\n";
+				return false;
+			}
+
+			return true;
+		}
+
 		bool CheckEventBridgeStateMutexReentrancyPolicy()
 		{
 			namespace fs = std::filesystem;

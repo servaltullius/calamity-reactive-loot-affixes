@@ -219,7 +219,7 @@
 			bool combatDebugLog{ false };
 			bool disableCombatEvidenceLease{ false };
 			bool disableHealthDamageRouting{ false };
-			bool allowPlayerHealthDamageHook{ false };
+			bool allowPlayerHealthDamageHook{ true };
 			bool disablePassiveSuffixSpells{ false };
 			bool disableTrapSystemTick{ false };
 			bool disableTrapCasts{ false };
@@ -234,7 +234,7 @@
 				combatDebugLog = false;
 				disableCombatEvidenceLease = false;
 				disableHealthDamageRouting = false;
-				allowPlayerHealthDamageHook = false;
+				allowPlayerHealthDamageHook = true;
 				disablePassiveSuffixSpells = false;
 				disableTrapSystemTick = false;
 				disableTrapCasts = false;

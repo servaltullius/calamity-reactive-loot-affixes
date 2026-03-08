@@ -37,6 +37,13 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		// Ignore synchronous TESHitEvent reentry caused by proc actions that are already
+		// resolving this hit. Without this, incoming-hit/low-health fallback dispatch can
+		// observe its own proc side effects and spiral into duplicate follow-up work.
+		if (_combatState.procDepth > 0) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
 		auto* aggressor = ResolveActorFromCombatRef(causeRef);
 		auto* target = targetRef->As<RE::Actor>();
 		if (!aggressor || !target) {

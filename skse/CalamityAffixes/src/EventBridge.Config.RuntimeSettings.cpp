@@ -39,13 +39,14 @@ namespace CalamityAffixes
 
 		try {
 			const auto& runtime = *runtimeIt;
+			const bool hadLegacyPlayerHookOverride = runtime.contains("allowPlayerHealthDamageHook");
 			_runtimeSettings.enabled = runtime.value("enabled", _runtimeSettings.enabled);
 			_loot.debugLog = runtime.value("debugNotifications", _loot.debugLog);
 			_runtimeSettings.combatDebugLog = runtime.value("debugCombat", _runtimeSettings.combatDebugLog);
 			_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
 			_runtimeSettings.disableCombatEvidenceLease = runtime.value("disableCombatEvidenceLease", _runtimeSettings.disableCombatEvidenceLease);
 			_runtimeSettings.disableHealthDamageRouting = runtime.value("disableHealthDamageRouting", _runtimeSettings.disableHealthDamageRouting);
-			_runtimeSettings.allowPlayerHealthDamageHook = runtime.value("allowPlayerHealthDamageHook", _runtimeSettings.allowPlayerHealthDamageHook);
+			_runtimeSettings.allowPlayerHealthDamageHook = true;
 			_runtimeSettings.disablePassiveSuffixSpells = runtime.value("disablePassiveSuffixSpells", _runtimeSettings.disablePassiveSuffixSpells);
 			_runtimeSettings.disableTrapSystemTick = runtime.value("disableTrapSystemTick", _runtimeSettings.disableTrapSystemTick);
 			_runtimeSettings.disableTrapCasts = runtime.value("disableTrapCasts", _runtimeSettings.disableTrapCasts);
@@ -75,6 +76,11 @@ namespace CalamityAffixes
 			_loot.runewordFragmentChancePercent = std::clamp(static_cast<float>(runewordFragmentChancePercent), 0.0f, 100.0f);
 			_loot.reforgeOrbChancePercent = std::clamp(static_cast<float>(reforgeOrbChancePercent), 0.0f, 100.0f);
 			_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.store(allowNonHostileFirstHitProc, std::memory_order_relaxed);
+
+			if (hadLegacyPlayerHookOverride) {
+				SKSE::log::warn(
+					"CalamityAffixes: runtime override 'allowPlayerHealthDamageHook' is ignored; player incoming hits now use the HandleHealthDamage hook by default.");
+			}
 		} catch (const nlohmann::json::exception& e) {
 			SKSE::log::warn(
 				"CalamityAffixes: JSON error reading user runtime settings; using defaults. ({})",
