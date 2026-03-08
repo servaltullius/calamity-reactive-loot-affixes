@@ -14,6 +14,7 @@ int main()
 	const bool healthDamageSignatureWindowOk = CheckHealthDamageSignatureWindowPolicy();
 	const bool tesHitFallbackSourceValidationOk = CheckTesHitFallbackSourceValidationPolicy();
 	const bool configLoadPipelineExtractionOk = CheckConfigLoadPipelineExtractionPolicy();
+	const bool hybridCurrencyDropPolicyOk = CheckHybridCurrencyDropPolicy();
 	const bool affixSpecialActionStateExtractionOk = CheckAffixSpecialActionStateExtractionPolicy();
 	const bool triggerProcPolicyExtractionOk = CheckTriggerProcPolicyExtraction();
 	const bool processTriggerExtractionOk = CheckProcessTriggerExtractionPolicy();
@@ -81,7 +82,7 @@ int main()
 	const bool lootRerollLifecycleOk = CheckLootRerollGuardLifecycle();
 	const bool lootRerollCircularOverflowOk = CheckLootRerollGuardCircularOverflow();
 	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
-	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && tesHitFallbackSourceValidationOk && configLoadPipelineExtractionOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
+	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && tesHitFallbackSourceValidationOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
 	        lootServiceExtractionOk &&

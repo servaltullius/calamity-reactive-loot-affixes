@@ -375,6 +375,36 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckHybridCurrencyDropPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path sourceFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.LootRuntime.cpp";
+
+		std::ifstream in(sourceFile);
+		if (!in.is_open()) {
+			std::cerr << "hybrid_currency_drop_policy: failed to open source file: " << sourceFile << "\n";
+			return false;
+		}
+
+		const std::string source(
+			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		if (source.find("_loot.currencyDropMode = CurrencyDropMode::kHybrid;") == std::string::npos ||
+			source.find("_loot.runtimeCurrencyDropsEnabled = false;") == std::string::npos ||
+			source.find("_loot.runtimeCurrencyDropsEnabled = true;") != std::string::npos ||
+			source.find("Hybrid keeps corpse") == std::string::npos ||
+			source.find("container/world/activation/pickup rolls disabled") == std::string::npos ||
+			source.find("corpseAuthority={}") == std::string::npos ||
+			source.find("\"SPID/ESP\"") == std::string::npos) {
+			std::cerr << "hybrid_currency_drop_policy: expected hybrid mode to keep SPID corpse authority and runtime rolls disabled\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckAffixSpecialActionStateExtractionPolicy()
 	{
 		namespace fs = std::filesystem;

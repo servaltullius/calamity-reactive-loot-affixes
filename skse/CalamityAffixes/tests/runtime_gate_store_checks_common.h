@@ -37,6 +37,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckHealthDamageSignatureWindowPolicy();
 	bool CheckTesHitFallbackSourceValidationPolicy();
 	bool CheckConfigLoadPipelineExtractionPolicy();
+	bool CheckHybridCurrencyDropPolicy();
 	bool CheckAffixSpecialActionStateExtractionPolicy();
 	bool CheckTriggerProcPolicyExtraction();
 	bool CheckProcessTriggerExtractionPolicy();

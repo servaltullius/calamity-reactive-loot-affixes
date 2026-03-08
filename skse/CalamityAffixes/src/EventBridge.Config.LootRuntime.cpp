@@ -72,7 +72,7 @@ namespace CalamityAffixes
 		_loot.bossContainerEditorIdDenyContains.clear();
 		_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
 		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
-		_loot.runtimeCurrencyDropsEnabled = true;
+		_loot.runtimeCurrencyDropsEnabled = false;
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
 			_loot.chancePercent = loot.value("chancePercent", 0.0f);
@@ -95,7 +95,7 @@ namespace CalamityAffixes
 				}
 			}
 			_loot.currencyDropMode = CurrencyDropMode::kHybrid;
-			_loot.runtimeCurrencyDropsEnabled = true;
+			_loot.runtimeCurrencyDropsEnabled = false;
 			_loot.lootSourceChanceMultCorpse =
 				static_cast<float>(loot.value("lootSourceChanceMultCorpse", static_cast<double>(_loot.lootSourceChanceMultCorpse)));
 			_loot.lootSourceChanceMultContainer =
@@ -258,20 +258,23 @@ namespace CalamityAffixes
 
 	void EventBridge::SyncCurrencyDropModeState(std::string_view a_contextTag)
 	{
-		// Currency drop mode is intentionally fixed to hybrid.
+		// Currency drop mode is intentionally fixed to hybrid. Hybrid keeps corpse
+		// currency authority in the generated ESP/SPID layer and leaves runtime
+		// container/world/activation/pickup rolls disabled.
 		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
-		_loot.runtimeCurrencyDropsEnabled = true;
+		_loot.runtimeCurrencyDropsEnabled = false;
 
 		// SPID-owned corpse authority: leveled-list chanceNone values come from the ESP
 		// (set by Generator) and are NOT modified at runtime. MCM drop-chance settings
-		// only affect container-source runtime rolls.
+		// no longer drive runtime activation/pickup rolls.
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
-				"CalamityAffixes: {} currency mode synced (mode={}, runtimeEnabled={}, configuredRune={}%, configuredReforge={}%, currentRune={}%, currentReforge={}%).",
+				"CalamityAffixes: {} currency mode synced (mode={}, runtimeEnabled={}, corpseAuthority={}, configuredRune={}%, configuredReforge={}%, currentRune={}%, currentReforge={}%).",
 				a_contextTag,
 				"hybrid",
 				_loot.runtimeCurrencyDropsEnabled,
+				"SPID/ESP",
 				_loot.configuredRunewordFragmentChancePercent,
 				_loot.configuredReforgeOrbChancePercent,
 				_loot.runewordFragmentChancePercent,
