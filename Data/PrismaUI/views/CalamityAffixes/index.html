@@ -2846,6 +2846,37 @@
         document.documentElement.style.setProperty("--panel-ui-scale", nextScale.toFixed(3));
       }
 
+      function setPanelAnchoredPosition(left, top) {
+        controlPanel.style.left = `${Math.round(left)}px`;
+        controlPanel.style.top = `${Math.round(top)}px`;
+        controlPanel.style.right = "auto";
+        controlPanel.style.bottom = "auto";
+      }
+
+      function clearPanelDragVisualState() {
+        controlPanel.style.transform = "";
+        controlPanel.style.willChange = "";
+      }
+
+      function schedulePanelDragFrame() {
+        if (!panelDragState || panelDragState.framePending) {
+          return;
+        }
+
+        panelDragState.framePending = true;
+        requestAnimationFrame(() => {
+          if (!panelDragState) {
+            clearPanelDragVisualState();
+            return;
+          }
+
+          panelDragState.framePending = false;
+          const deltaX = Math.round(panelDragState.nextLeft) - panelDragState.baseLeft;
+          const deltaY = Math.round(panelDragState.nextTop) - panelDragState.baseTop;
+          controlPanel.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
+        });
+      }
+
       function keepPanelInViewport() {
         if (!controlPanelOpen) return;
         if (!controlPanel.style.left || !controlPanel.style.top) return;
@@ -2867,10 +2898,7 @@
         const nextLeft = clamp(rect.left, margin, maxLeft);
         const nextTop = clamp(rect.top, margin, maxTop);
 
-        controlPanel.style.left = `${Math.round(nextLeft)}px`;
-        controlPanel.style.top = `${Math.round(nextTop)}px`;
-        controlPanel.style.right = "auto";
-        controlPanel.style.bottom = "auto";
+        setPanelAnchoredPosition(nextLeft, nextTop);
         updatePanelUiScale();
       }
 
@@ -2902,15 +2930,23 @@
         }
 
         const rect = controlPanel.getBoundingClientRect();
-        controlPanel.style.left = `${Math.round(rect.left)}px`;
-        controlPanel.style.top = `${Math.round(rect.top)}px`;
-        controlPanel.style.right = "auto";
-        controlPanel.style.bottom = "auto";
+        const baseLeft = Math.round(rect.left);
+        const baseTop = Math.round(rect.top);
+        setPanelAnchoredPosition(baseLeft, baseTop);
+        controlPanel.style.willChange = "transform";
+        controlPanel.style.transform = "translate3d(0, 0, 0)";
 
         panelDragState = {
           pointerId: event.pointerId,
           offsetX: event.clientX - rect.left,
-          offsetY: event.clientY - rect.top
+          offsetY: event.clientY - rect.top,
+          baseLeft,
+          baseTop,
+          width: rect.width,
+          height: rect.height,
+          nextLeft: baseLeft,
+          nextTop: baseTop,
+          framePending: false
         };
 
         if (typeof panelDragHandle.setPointerCapture === "function") {
@@ -2925,12 +2961,9 @@
         if (event.button !== undefined && event.button !== 0) return;
 
         const rect = controlPanel.getBoundingClientRect();
-        controlPanel.style.left = `${Math.round(rect.left)}px`;
-        controlPanel.style.top = `${Math.round(rect.top)}px`;
+        setPanelAnchoredPosition(rect.left, rect.top);
         controlPanel.style.width = `${Math.round(rect.width)}px`;
         controlPanel.style.height = `${Math.round(rect.height)}px`;
-        controlPanel.style.right = "auto";
-        controlPanel.style.bottom = "auto";
 
         panelResizeState = {
           mode,
@@ -3034,18 +3067,13 @@
         if (!panelDragState) return;
         if (event.pointerId !== panelDragState.pointerId) return;
 
-        const width = controlPanel.offsetWidth;
-        const height = controlPanel.offsetHeight;
         const margin = 8;
-        const maxLeft = Math.max(margin, window.innerWidth - width - margin);
-        const maxTop = Math.max(margin, window.innerHeight - height - margin);
+        const maxLeft = Math.max(margin, window.innerWidth - panelDragState.width - margin);
+        const maxTop = Math.max(margin, window.innerHeight - panelDragState.height - margin);
 
-        const nextLeft = clamp(event.clientX - panelDragState.offsetX, margin, maxLeft);
-        const nextTop = clamp(event.clientY - panelDragState.offsetY, margin, maxTop);
-        controlPanel.style.left = `${Math.round(nextLeft)}px`;
-        controlPanel.style.top = `${Math.round(nextTop)}px`;
-        controlPanel.style.right = "auto";
-        controlPanel.style.bottom = "auto";
+        panelDragState.nextLeft = clamp(event.clientX - panelDragState.offsetX, margin, maxLeft);
+        panelDragState.nextTop = clamp(event.clientY - panelDragState.offsetY, margin, maxTop);
+        schedulePanelDragFrame();
         event.preventDefault();
       }
 
@@ -3125,6 +3153,8 @@
             panelDragHandle.releasePointerCapture(panelDragState.pointerId);
           } catch (_) {}
         }
+        setPanelAnchoredPosition(panelDragState.nextLeft, panelDragState.nextTop);
+        clearPanelDragVisualState();
         panelDragState = null;
         keepPanelInViewport();
         persistPanelLayout();
@@ -4278,12 +4308,9 @@
           return;
         }
 
-        controlPanel.style.left = `${Math.round(left)}px`;
-        controlPanel.style.top = `${Math.round(top)}px`;
+        setPanelAnchoredPosition(left, top);
         controlPanel.style.width = `${Math.round(width)}px`;
         controlPanel.style.height = `${Math.round(height)}px`;
-        controlPanel.style.right = "auto";
-        controlPanel.style.bottom = "auto";
         panelLayoutLoaded = true;
         updatePanelUiScale();
         if (controlPanelOpen) {
