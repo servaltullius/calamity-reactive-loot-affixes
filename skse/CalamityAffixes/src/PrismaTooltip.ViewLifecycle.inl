@@ -115,7 +115,7 @@
 				}
 
 				if (auto* tasks = SKSE::GetTaskInterface()) {
-					g_prismaTelemetry.workerEnqueues.fetch_add(1u, std::memory_order_relaxed);
+					PrismaTelemetryController::RecordWorkerEnqueue();
 					tasks->AddTask([]() {
 						Tick();
 					});

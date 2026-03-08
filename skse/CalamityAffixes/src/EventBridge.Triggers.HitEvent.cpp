@@ -203,7 +203,7 @@ namespace CalamityAffixes
 								if (fallbackIncomingDamage > 0.0f) {
 									const auto mom = EvaluateMindOverMatter(target, aggressor, hitData, fallbackIncomingDamage);
 									if (mom.redirectedDamage > 0.0f) {
-										if (auto* avOwner = target->AsActorValueOwner()) {
+										if (auto* avOwner = skyrim_cast<RE::ActorValueOwner*>(target)) {
 											avOwner->RestoreActorValue(
 												RE::ACTOR_VALUE_MODIFIER::kDamage,
 												RE::ActorValue::kHealth,

@@ -36,6 +36,44 @@ namespace CalamityAffixes
 		return a_current == a_last;
 	}
 
+	[[nodiscard]] constexpr bool ShouldSuppressDuplicateHealthDamageSignature(
+		std::uint64_t a_currentSignature,
+		std::uint64_t a_lastSignature,
+		std::uint64_t a_nowMs,
+		std::uint64_t a_lastMs,
+		std::uint64_t a_windowMs) noexcept
+	{
+		if (a_windowMs == 0u) {
+			return false;
+		}
+		if (a_currentSignature == 0u || a_lastSignature == 0u) {
+			return false;
+		}
+		if (a_currentSignature != a_lastSignature) {
+			return false;
+		}
+		if (a_nowMs < a_lastMs) {
+			return false;
+		}
+		return (a_nowMs - a_lastMs) < a_windowMs;
+	}
+
+	[[nodiscard]] constexpr bool ShouldSuppressHealthDamageStaleLeak(
+		float a_expectedDealt,
+		float a_absDamage) noexcept
+	{
+		return a_expectedDealt >= 5.0f &&
+		       a_absDamage > 0.0f &&
+		       a_absDamage < (a_expectedDealt * 0.25f);
+	}
+
+	[[nodiscard]] constexpr bool ShouldSuppressPerTargetRepeatWindow(
+		std::uint64_t a_elapsedMs,
+		std::uint64_t a_windowMs) noexcept
+	{
+		return a_elapsedMs < a_windowMs;
+	}
+
 	[[nodiscard]] constexpr std::optional<std::uint64_t> ComputePerTargetCooldownNextAllowedMs(
 		std::uint64_t a_nowMs,
 		std::int64_t a_perTargetIcdMs,

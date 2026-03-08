@@ -12,7 +12,7 @@ Steps:
 Usage:
     python3 tools/release_build.py
     python3 tools/release_build.py --skip-build   # reuse existing DLL
-    python3 tools/release_build.py --version 1.2.19
+    python3 tools/release_build.py --version 1.2.20-rc19
 """
 
 from __future__ import annotations
@@ -23,6 +23,8 @@ import pathlib
 import subprocess
 import sys
 import time
+
+from repo_paths import repo_run_root
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 SKSE_DIR = REPO_ROOT / "skse" / "CalamityAffixes"
@@ -72,6 +74,8 @@ def main() -> int:
 
     t0 = time.monotonic()
 
+    run(["python3", str(REPO_ROOT / "tools" / "ensure_skse_build.py"), "--lane", "plugin", "--lane", "runtime-gate"])
+
     # 1. C++ build
     if args.skip_build:
         step("1/6 C++ build — SKIPPED")
@@ -95,12 +99,11 @@ def main() -> int:
         step("3/6 C# Generator tests — SKIPPED")
     else:
         step("3/6 C# Generator tests")
-        # Use no-space symlink if available (WSL dotnet compat)
-        run_root = REPO_ROOT
-        safe_link = REPO_ROOT.parent / "calamity"
-        if " " in str(REPO_ROOT) and safe_link.is_dir() and safe_link.resolve() == REPO_ROOT.resolve():
-            run_root = safe_link
-        run(["dotnet", "test", "tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj", "-c", "Release"], cwd=run_root)
+        with repo_run_root(REPO_ROOT) as run_root:
+            run(
+                ["dotnet", "test", "tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj", "-c", "Release"],
+                cwd=run_root,
+            )
 
     # 4. MO2 ZIP packaging
     step("4/6 MO2 ZIP packaging")

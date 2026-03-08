@@ -12,6 +12,7 @@ int main()
 	const bool rebuildActiveCountsLoggingOk = CheckRebuildActiveCountsLoggingPolicy();
 	const bool rebuildActiveCountsExtractionOk = CheckRebuildActiveCountsExtractionPolicy();
 	const bool healthDamageSignatureWindowOk = CheckHealthDamageSignatureWindowPolicy();
+	const bool healthDamageGuardHelperFlowOk = CheckHealthDamageGuardHelperFlow();
 	const bool tesHitFallbackSourceValidationOk = CheckTesHitFallbackSourceValidationPolicy();
 	const bool configLoadPipelineExtractionOk = CheckConfigLoadPipelineExtractionPolicy();
 	const bool hybridCurrencyDropPolicyOk = CheckHybridCurrencyDropPolicy();
@@ -82,7 +83,9 @@ int main()
 	const bool lootRerollLifecycleOk = CheckLootRerollGuardLifecycle();
 	const bool lootRerollCircularOverflowOk = CheckLootRerollGuardCircularOverflow();
 	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
-	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && tesHitFallbackSourceValidationOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
+	const bool serializationLoadStateHelpersOk = CheckSerializationLoadStateHelpers();
+	const bool lowHealthTriggerSnapshotHelpersOk = CheckLowHealthTriggerSnapshotHelpers();
+	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && healthDamageGuardHelperFlowOk && tesHitFallbackSourceValidationOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
 	        lootServiceExtractionOk &&
@@ -138,6 +141,8 @@ int main()
 	        nonHostileCapacityEvictionOk &&
 	        lootRerollLifecycleOk &&
 	        lootRerollCircularOverflowOk &&
-	        lootRerollEdgeCasesOk) ? 0 :
+	        lootRerollEdgeCasesOk &&
+	        serializationLoadStateHelpersOk &&
+	        lowHealthTriggerSnapshotHelpersOk) ? 0 :
 		                                1;
 }

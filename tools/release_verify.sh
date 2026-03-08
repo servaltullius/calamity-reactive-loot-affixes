@@ -2,16 +2,9 @@
 set -euo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-repo_run_root="${repo_root}"
-
-# Windows-hosted dotnet can break on WSL paths containing spaces.
-# Prefer the existing no-space symlink path when it points to the same repo.
-safe_repo_link="$(dirname "${repo_root}")/calamity"
-if [[ "${repo_root}" == *" "* && -d "${safe_repo_link}" ]]; then
-  if [[ "$(realpath "${safe_repo_link}")" == "$(realpath "${repo_root}")" ]]; then
-    repo_run_root="${safe_repo_link}"
-  fi
-fi
+source "${repo_root}/tools/path_helpers.sh"
+repo_run_root="$(resolve_repo_run_root "${repo_root}")"
+trap cleanup_repo_run_root EXIT
 
 show_help() {
   cat <<'EOF'
@@ -28,6 +21,8 @@ Options:
 
 Environment:
   JOBS=<n>         Parallel jobs for cmake builds (default: nproc or 4).
+  CAFF_REPO_RUN_ROOT=<path>
+                   Optional no-space alias for the repo root when dotnet has trouble with spaced paths.
 EOF
 }
 
@@ -73,6 +68,8 @@ if [[ -z "${jobs}" ]]; then
     jobs="4"
   fi
 fi
+
+python3 "${repo_root}/tools/ensure_skse_build.py" --lane plugin --lane runtime-gate
 
 step() {
   echo ""

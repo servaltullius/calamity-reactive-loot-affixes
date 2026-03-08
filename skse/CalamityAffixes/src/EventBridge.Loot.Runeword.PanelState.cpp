@@ -32,18 +32,14 @@ namespace CalamityAffixes
 		// The old runeword is removed when the first rune is inserted
 		// (InsertRunewordRuneIntoSelectedBase handles removal).
 
-		const RunewordRecipe* recipe = nullptr;
 		std::uint32_t inserted = 0u;
 
 		const auto stateIt = _runewordState.instanceStates.find(*_runewordState.selectedBaseKey);
 		if (stateIt != _runewordState.instanceStates.end()) {
 			inserted = stateIt->second.insertedRunes;
-			recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
 		}
 
-		if (!recipe) {
-			recipe = GetCurrentRunewordRecipe();
-		}
+		const auto* recipe = ResolveSelectedRunewordRecipe(*_runewordState.selectedBaseKey);
 		if (!recipe || recipe->runeTokens.empty()) {
 			return panelState;
 		}

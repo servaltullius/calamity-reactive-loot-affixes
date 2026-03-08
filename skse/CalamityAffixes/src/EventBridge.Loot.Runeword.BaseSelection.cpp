@@ -84,8 +84,7 @@ namespace CalamityAffixes
 			}
 
 			const auto& recipe = _runewordState.recipes[rwIt->second];
-			if (const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
-				affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+			if (!HasRunewordRuntimeEffect(recipe)) {
 				continue;
 			}
 
@@ -132,7 +131,6 @@ namespace CalamityAffixes
 			_runewordState.baseCycleCursor = *cursor;
 		}
 
-		std::optional<RunewordInstanceState> stateCopy;
 		if (completedRecipe) {
 			_runewordState.instanceStates.erase(a_instanceKey);
 		} else {
@@ -142,32 +140,17 @@ namespace CalamityAffixes
 					state.recipeToken = recipe->token;
 				}
 			}
-			stateCopy = state;
 		}
 
 		const std::string selectedName = ResolveInventoryDisplayName(entry, xList);
-
-		const auto* recipe = completedRecipe;
-		if (!recipe && stateCopy) {
-			recipe = FindRunewordRecipeByToken(stateCopy->recipeToken);
-		}
-		if (!recipe) {
-			recipe = GetCurrentRunewordRecipe();
-		}
+		const auto* recipe = ResolveSelectedRunewordRecipe(a_instanceKey, completedRecipe);
+		const auto baseType = ResolveInstanceLootType(a_instanceKey);
 
 		std::string note = "Runeword Base: " + selectedName;
 		if (recipe) {
 			note.append(" | ");
 			note.append(recipe->displayName);
-
-			const auto baseType = ResolveInstanceLootType(a_instanceKey);
-			if (recipe->recommendedBaseType && baseType && *recipe->recommendedBaseType != *baseType) {
-				note.append(" (Recommended ");
-				note.append(DescribeLootItemType(*recipe->recommendedBaseType));
-				note.append(", current ");
-				note.append(DescribeLootItemType(*baseType));
-				note.append(")");
-			}
+			AppendRunewordSelectionRecommendation(note, *recipe, baseType);
 		}
 
 		RE::DebugNotification(note.c_str());

@@ -6,6 +6,7 @@
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/LootRerollGuard.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
+#include "CalamityAffixes/LowHealthTriggerSnapshot.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/RuntimeUserSettingsDebounce.h"
 #include "CalamityAffixes/Hooks.h"
@@ -35,6 +36,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckRebuildActiveCountsLoggingPolicy();
 	bool CheckRebuildActiveCountsExtractionPolicy();
 	bool CheckHealthDamageSignatureWindowPolicy();
+	bool CheckHealthDamageGuardHelperFlow();
 	bool CheckTesHitFallbackSourceValidationPolicy();
 	bool CheckConfigLoadPipelineExtractionPolicy();
 	bool CheckHybridCurrencyDropPolicy();
@@ -110,4 +112,6 @@ namespace RuntimeGateStoreChecks
 	bool CheckLootRerollGuardLifecycle();
 	bool CheckLootRerollGuardCircularOverflow();
 	bool CheckLootRerollGuardEdgeCases();
+	bool CheckSerializationLoadStateHelpers();
+	bool CheckLowHealthTriggerSnapshotHelpers();
 }

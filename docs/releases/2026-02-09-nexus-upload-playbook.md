@@ -21,14 +21,16 @@
 아래 순서대로 실행하면 생성/검증/압축까지 한 번에 끝납니다.
 
 ```bash
-cd "/home/kdw73/projects/Calamity - Reactive Loot & Affixes"
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
 tools/build_mo2_zip.sh
 ```
 
 수동으로 DLL만 재빌드해야 할 때(WSL/Linux cross):
 
 ```bash
-cd "/home/kdw73/projects/Calamity - Reactive Loot & Affixes/skse/CalamityAffixes"
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root/skse/CalamityAffixes"
 cmake --build build.linux-clangcl-rel --target CalamityAffixes
 ctest --test-dir build.linux-clangcl-rel --output-on-failure
 cp -f build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll

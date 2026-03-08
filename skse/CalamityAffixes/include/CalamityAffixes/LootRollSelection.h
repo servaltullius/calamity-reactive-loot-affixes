@@ -53,6 +53,79 @@ namespace CalamityAffixes::detail
 		return a_currentAssignedCount == 0u;
 	}
 
+	[[nodiscard]] constexpr bool AreInstanceAffixSlotsEqual(
+		const InstanceAffixSlots& a_left,
+		const InstanceAffixSlots& a_right) noexcept
+	{
+		if (a_left.count != a_right.count) {
+			return false;
+		}
+		for (std::uint8_t i = 0; i < a_left.count; ++i) {
+			if (a_left.tokens[i] != a_right.tokens[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	[[nodiscard]] constexpr InstanceAffixSlots BuildRegularOnlyAffixSlots(
+		const InstanceAffixSlots& a_slots,
+		std::uint64_t a_preservedRunewordToken) noexcept
+	{
+		InstanceAffixSlots regularSlots{};
+		for (std::uint8_t i = 0; i < a_slots.count; ++i) {
+			const auto token = a_slots.tokens[i];
+			if (token == 0u || token == a_preservedRunewordToken) {
+				continue;
+			}
+			(void)regularSlots.AddToken(token);
+		}
+		return regularSlots;
+	}
+
+	[[nodiscard]] constexpr bool ShouldRetryRegularAffixReforgeRoll(
+		const InstanceAffixSlots& a_previousRegularSlots,
+		const InstanceAffixSlots& a_rolledRegularSlots,
+		std::uint8_t a_attemptIndex,
+		std::uint8_t a_maxAttempts) noexcept
+	{
+		if (a_previousRegularSlots.count == 0u) {
+			return false;
+		}
+		if ((a_attemptIndex + 1u) >= a_maxAttempts) {
+			return false;
+		}
+		return AreInstanceAffixSlotsEqual(a_previousRegularSlots, a_rolledRegularSlots);
+	}
+
+	constexpr bool TryPromotePreservedRunewordPrimary(
+		InstanceAffixSlots& a_slots,
+		std::uint64_t a_preservedRunewordToken) noexcept
+	{
+		if (a_preservedRunewordToken == 0u) {
+			return true;
+		}
+		return a_slots.PromoteTokenToPrimary(a_preservedRunewordToken);
+	}
+
+	constexpr void ForcePreserveRunewordPrimary(
+		InstanceAffixSlots& a_slots,
+		std::uint64_t a_preservedRunewordToken) noexcept
+	{
+		if (a_preservedRunewordToken == 0u) {
+			return;
+		}
+		if (a_slots.count < kMaxAffixesPerItem) {
+			for (std::uint8_t i = a_slots.count; i > 0; --i) {
+				a_slots.tokens[i] = a_slots.tokens[i - 1u];
+			}
+			a_slots.tokens[0] = a_preservedRunewordToken;
+			++a_slots.count;
+			return;
+		}
+		a_slots.tokens[0] = a_preservedRunewordToken;
+	}
+
 	inline void SanitizeLootShuffleBagOrder(
 		const std::vector<std::size_t>& a_pool,
 		std::vector<std::size_t>& a_bag,

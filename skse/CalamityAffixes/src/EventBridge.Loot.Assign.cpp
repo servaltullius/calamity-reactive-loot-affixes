@@ -243,7 +243,7 @@ namespace CalamityAffixes
 	}
 
 	bool EventBridge::SanitizeTrackedLootInstanceForCurrentLootRules(
-		decltype(_instanceAffixes)::iterator& a_it,
+		std::remove_reference_t<decltype(_instanceAffixes)>::iterator& a_it,
 		std::string_view a_context,
 		std::uint32_t& a_sanitizedInstances,
 		std::uint32_t& a_erasedInstances)

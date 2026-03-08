@@ -21,25 +21,14 @@ namespace CalamityAffixes
 		}
 
 		SanitizeRunewordState();
-		if (!_runewordState.selectedBaseKey) {
-			result.message = "Reforge: select a base first.";
-			return result;
-		}
-
+		std::uint64_t instanceKey = 0u;
 		RE::InventoryEntryData* entry = nullptr;
 		RE::ExtraDataList* xList = nullptr;
-		if (!ResolvePlayerInventoryInstance(*_runewordState.selectedBaseKey, entry, xList) || !entry || !entry->object || !xList) {
-			_runewordState.selectedBaseKey.reset();
-			result.message = "Reforge failed: selected base is no longer available.";
+		std::string baseResolveFailure;
+		if (!ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)) {
+			result.message = "Reforge failed: " + baseResolveFailure;
 			return result;
 		}
-
-		if (!IsLootObjectEligibleForAffixes(entry->object)) {
-			result.message = "Reforge failed: this item type is not eligible.";
-			return result;
-		}
-
-		const auto instanceKey = *_runewordState.selectedBaseKey;
 		const auto* completedRunewordRecipe = ResolveCompletedRunewordRecipe(instanceKey);
 		const std::uint64_t preservedRunewordToken =
 			completedRunewordRecipe ? completedRunewordRecipe->resultAffixToken : 0u;
@@ -74,23 +63,8 @@ namespace CalamityAffixes
 			previousSlots = it->second;
 		}
 
-		// Build regular-only snapshot for comparison (exclude runeword token).
-		InstanceAffixSlots previousRegularSlots = previousSlots;
-		if (preservedRunewordToken != 0u) {
-			previousRegularSlots.RemoveToken(preservedRunewordToken);
-		}
-
-		auto sameSlots = [](const InstanceAffixSlots& a_left, const InstanceAffixSlots& a_right) {
-			if (a_left.count != a_right.count) {
-				return false;
-			}
-			for (std::uint8_t i = 0; i < a_left.count; ++i) {
-				if (a_left.tokens[i] != a_right.tokens[i]) {
-					return false;
-				}
-			}
-			return true;
-		};
+		const InstanceAffixSlots previousRegularSlots =
+			detail::BuildRegularOnlyAffixSlots(previousSlots, preservedRunewordToken);
 
 		auto rollRegularAffixSlots = [&](std::uint8_t a_rollCount) -> InstanceAffixSlots {
 			InstanceAffixSlots slots{};
@@ -172,30 +146,20 @@ namespace CalamityAffixes
 			if (rolled.count == 0) {
 				continue;
 			}
-			if (previousRegularSlots.count > 0 && sameSlots(previousRegularSlots, rolled) && attempt + 1 < kReforgeMaxAttempts) {
+			if (detail::ShouldRetryRegularAffixReforgeRoll(previousRegularSlots, rolled, attempt, kReforgeMaxAttempts)) {
 				continue;
 			}
 
 			// Re-insert preserved runeword token as primary (slot 0).
 			if (preservedRunewordToken != 0u) {
-				if (!rolled.PromoteTokenToPrimary(preservedRunewordToken)) {
+				if (!detail::TryPromotePreservedRunewordPrimary(rolled, preservedRunewordToken)) {
 					SKSE::log::error(
 						"CalamityAffixes: reforge runeword preserve failed — PromoteTokenToPrimary returned false "
 						"(instance={:016X}, runewordToken={:016X}, rolledCount={}).",
 						instanceKey,
 						preservedRunewordToken,
 						rolled.count);
-					// Defensive fallback: force the token into the slot structure.
-					if (rolled.count < kMaxAffixesPerItem) {
-						for (std::uint8_t i = rolled.count; i > 0; --i) {
-							rolled.tokens[i] = rolled.tokens[i - 1u];
-						}
-						rolled.tokens[0] = preservedRunewordToken;
-						++rolled.count;
-					} else {
-						// Absolute last resort: overwrite slot 0.
-						rolled.tokens[0] = preservedRunewordToken;
-					}
+					detail::ForcePreserveRunewordPrimary(rolled, preservedRunewordToken);
 				}
 			}
 
@@ -231,13 +195,12 @@ namespace CalamityAffixes
 				preservedRunewordToken,
 				instanceKey,
 				newSlots.count);
-			if (!newSlots.PromoteTokenToPrimary(preservedRunewordToken)) {
-				// Overflow: displace last regular slot to make room.
+			if (!detail::TryPromotePreservedRunewordPrimary(newSlots, preservedRunewordToken)) {
 				if (newSlots.count > 0) {
 					newSlots.tokens[newSlots.count - 1u] = 0u;
 					--newSlots.count;
 				}
-				newSlots.PromoteTokenToPrimary(preservedRunewordToken);
+				detail::ForcePreserveRunewordPrimary(newSlots, preservedRunewordToken);
 			}
 		}
 

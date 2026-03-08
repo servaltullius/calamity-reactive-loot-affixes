@@ -101,7 +101,7 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			auto* avOwner = a_caster->AsActorValueOwner();
+			auto* avOwner = skyrim_cast<RE::ActorValueOwner*>(a_caster);
 			if (!avOwner) {
 				return false;
 			}
@@ -136,7 +136,7 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			auto* avOwner = a_caster ? a_caster->AsActorValueOwner() : nullptr;
+			auto* avOwner = a_caster ? skyrim_cast<RE::ActorValueOwner*>(a_caster) : nullptr;
 			if (!avOwner) {
 				return false;
 			}

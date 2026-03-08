@@ -604,10 +604,10 @@ namespace CalamityAffixes
 		}
 
 		for (const auto& recipe : _runewordState.recipes) {
-			const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
-			if (affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+			if (!HasRunewordRuntimeEffect(recipe)) {
 				continue;
 			}
+			const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
 			const auto& affix = _affixes[affixIt->second];
 			const auto effectSummaryKey = resolveRecipeEffectSummaryKey(recipe);
 

@@ -331,7 +331,7 @@
 		void PushSelectedTooltipToView(std::string a_text)
 		{
 			g_lastTooltip = std::move(a_text);
-			g_prismaTelemetry.tooltipPushes.fetch_add(1u, std::memory_order_relaxed);
+			PrismaTelemetryController::RecordTooltipPush();
 			g_api->InteropCall(g_view, kInteropSetTooltip, g_lastTooltip.c_str());
 		}
 
@@ -342,7 +342,7 @@
 			}
 
 			if (!g_lastTooltip.empty()) {
-				g_prismaTelemetry.tooltipClears.fetch_add(1u, std::memory_order_relaxed);
+				PrismaTelemetryController::RecordTooltipClear();
 			}
 			g_lastTooltip.clear();
 			g_api->InteropCall(g_view, kInteropSetTooltip, "");

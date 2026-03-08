@@ -41,13 +41,15 @@ namespace RuntimeGateStoreChecks
 		const fs::path testFile{ __FILE__ };
 		const fs::path repoRoot = testFile.parent_path().parent_path();
 		const fs::path headerFile = repoRoot / "include" / "CalamityAffixes" / "EventBridge.h";
-		const fs::path lootRuntimeHeaderFile = repoRoot / "include" / "CalamityAffixes" / "LootRuntimeState.h";
-		const fs::path constantsInlFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Constants.inl";
-		const fs::path lootServiceFile = repoRoot / "src" / "EventBridge.Loot.Service.cpp";
-		const fs::path serializationSaveFile = repoRoot / "src" / "EventBridge.Serialization.Save.cpp";
-		const fs::path serializationLoadFile = repoRoot / "src" / "EventBridge.Serialization.Load.cpp";
-		const fs::path serializationLifecycleFile = repoRoot / "src" / "EventBridge.Serialization.Lifecycle.cpp";
-		const fs::path triggerEventsFile = repoRoot / "src" / "EventBridge.Triggers.ActivateEvent.cpp";
+			const fs::path lootRuntimeHeaderFile = repoRoot / "include" / "CalamityAffixes" / "LootRuntimeState.h";
+			const fs::path constantsInlFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Constants.inl";
+			const fs::path lootServiceFile = repoRoot / "src" / "EventBridge.Loot.Service.cpp";
+			const fs::path serializationSaveFile = repoRoot / "src" / "EventBridge.Serialization.Save.cpp";
+			const fs::path serializationLoadFile = repoRoot / "src" / "EventBridge.Serialization.Load.cpp";
+			const fs::path serializationLoadRecordsFile = repoRoot / "src" / "EventBridge.Serialization.Load.Records.inl";
+			const fs::path serializationLoadStateHeaderFile = repoRoot / "include" / "CalamityAffixes" / "SerializationLoadState.h";
+			const fs::path serializationLifecycleFile = repoRoot / "src" / "EventBridge.Serialization.Lifecycle.cpp";
+			const fs::path triggerEventsFile = repoRoot / "src" / "EventBridge.Triggers.ActivateEvent.cpp";
 
 		const auto worldKeyDay10 = CalamityAffixes::detail::BuildLootCurrencyLedgerKey(
 			CalamityAffixes::detail::LootCurrencySourceTier::kWorld,
@@ -124,25 +126,25 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
-		// Serialization is split across Save/Load/Lifecycle — concatenate all three.
-		std::string serializationText;
-		for (const auto& sf : { serializationSaveFile, serializationLoadFile, serializationLifecycleFile }) {
-			const auto part = loadText(sf);
-			if (!part.has_value()) {
-				std::cerr << "loot_currency_ledger_policy: failed to open serialization source: " << sf << "\n";
+			// Serialization is split across Save/Load/Load helpers/Lifecycle — concatenate all of them.
+			std::string serializationText;
+			for (const auto& sf : { serializationSaveFile, serializationLoadFile, serializationLoadRecordsFile, serializationLoadStateHeaderFile, serializationLifecycleFile }) {
+				const auto part = loadText(sf);
+				if (!part.has_value()) {
+					std::cerr << "loot_currency_ledger_policy: failed to open serialization source: " << sf << "\n";
+					return false;
+				}
+				serializationText += *part;
+			}
+			if (serializationText.find("kSerializationRecordLootCurrencyLedger") == std::string::npos ||
+				serializationText.find("kLootCurrencyLedgerSerializationVersion") == std::string::npos ||
+				serializationText.find("_lootState.currencyRollLedger.size()") == std::string::npos ||
+				serializationText.find("_lootState.currencyRollLedger.emplace(key, dayStamp)") == std::string::npos ||
+				serializationText.find("_lootState.ResetForLoadOrRevert();") == std::string::npos ||
+				serializationText.find("currencyRollLedgerRecent.clear()") == std::string::npos) {
+				std::cerr << "loot_currency_ledger_policy: save/load/revert ledger handling missing in serialization sources\n";
 				return false;
 			}
-			serializationText += *part;
-		}
-		if (serializationText.find("kSerializationRecordLootCurrencyLedger") == std::string::npos ||
-			serializationText.find("kLootCurrencyLedgerSerializationVersion") == std::string::npos ||
-			serializationText.find("_lootState.currencyRollLedger.size()") == std::string::npos ||
-			serializationText.find("_lootState.currencyRollLedger.emplace(key, dayStamp)") == std::string::npos ||
-			serializationText.find("_lootState.ResetForLoadOrRevert();") == std::string::npos ||
-			serializationText.find("_lootState.currencyRollLedgerRecent.clear()") == std::string::npos) {
-			std::cerr << "loot_currency_ledger_policy: save/load/revert ledger handling missing in serialization sources\n";
-			return false;
-		}
 
 		const auto triggerText = loadText(triggerEventsFile);
 		if (!triggerText.has_value()) {
@@ -178,7 +180,7 @@ namespace RuntimeGateStoreChecks
 					triggerText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos)) {
 				std::cerr << "loot_currency_ledger_policy: activation-time corpse/container currency roll path missing in EventBridge.Triggers.ActivateEvent.cpp\n";
 				return false;
-		}
+			}
 
 		return true;
 	}
@@ -468,23 +470,34 @@ namespace RuntimeGateStoreChecks
 	{
 		namespace fs = std::filesystem;
 		const fs::path testFile{ __FILE__ };
-		const fs::path serializationLoadFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Serialization.Load.cpp";
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path serializationLoadFile = repoRoot / "src" / "EventBridge.Serialization.Load.cpp";
+		const fs::path serializationLoadRecordsFile = repoRoot / "src" / "EventBridge.Serialization.Load.Records.inl";
 
-		std::ifstream in(serializationLoadFile);
-		if (!in.is_open()) {
-			std::cerr << "serialization_drain_safety: failed to open serialization source: " << serializationLoadFile << "\n";
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto loadTextMain = loadText(serializationLoadFile);
+		const auto loadTextRecords = loadText(serializationLoadRecordsFile);
+		if (!loadTextMain.has_value() || !loadTextRecords.has_value()) {
+			std::cerr << "serialization_drain_safety: failed to open serialization sources\n";
 			return false;
 		}
 
-		const std::string source(
-			(std::istreambuf_iterator<char>(in)),
-			std::istreambuf_iterator<char>());
+		const std::string source = *loadTextMain + *loadTextRecords;
 
 		if (source.find("constexpr std::uint32_t kMaxDrainBytes = 10'000'000u;") == std::string::npos ||
 			source.find("bool DrainRecordBytes(") == std::string::npos ||
 			source.find("std::array<std::uint8_t, 4096> sink{};") == std::string::npos ||
-			source.find("DrainRecordBytes(a_intfc, remaining, \"partial-record-recovery\");") == std::string::npos ||
-			source.find("DrainRecordBytes(a_intfc, length, \"unsupported-iaxf-version\");") == std::string::npos ||
+			source.find("DrainRemaining(\"partial-record-recovery\")") == std::string::npos ||
+			source.find("\"unsupported-iaxf-version\"") == std::string::npos ||
 			source.find("DrainRecordBytes(a_intfc, length, \"unknown-record\");") == std::string::npos) {
 			std::cerr << "serialization_drain_safety: bounded drain path guards are missing\n";
 			return false;

@@ -227,16 +227,15 @@ namespace CalamityAffixes
 				return nullptr;
 			}
 
-			const std::size_t count = _runewordState.recipes.size();
-			const auto start = static_cast<std::size_t>(_runewordState.recipeCycleCursor % count);
-			for (std::size_t offset = 0; offset < count; ++offset) {
-				const auto idx = (start + offset) % count;
-				const auto& recipe = _runewordState.recipes[idx];
-				if (const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
-					affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
-					continue;
-				}
-				return std::addressof(recipe);
+		const std::size_t count = _runewordState.recipes.size();
+		const auto start = static_cast<std::size_t>(_runewordState.recipeCycleCursor % count);
+		for (std::size_t offset = 0; offset < count; ++offset) {
+			const auto idx = (start + offset) % count;
+			const auto& recipe = _runewordState.recipes[idx];
+			if (!HasRunewordRuntimeEffect(recipe)) {
+				continue;
+			}
+			return std::addressof(recipe);
 			}
 			return nullptr;
 		}
@@ -530,9 +529,7 @@ namespace CalamityAffixes
 			const std::size_t count = _runewordState.recipes.size();
 			auto cursor = static_cast<std::size_t>(_runewordState.recipeCycleCursor % count);
 			const auto isEligible = [&](std::size_t a_idx) {
-				const auto& recipe = _runewordState.recipes[a_idx];
-				const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
-				return affixIt != _affixRegistry.affixIndexByToken.end() && affixIt->second < _affixes.size();
+				return HasRunewordRuntimeEffect(_runewordState.recipes[a_idx]);
 			};
 
 			for (std::size_t step = 0; step < count; ++step) {

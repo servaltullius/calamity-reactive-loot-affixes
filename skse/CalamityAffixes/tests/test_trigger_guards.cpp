@@ -8,6 +8,9 @@ using CalamityAffixes::IsWithinRecentlyWindowMs;
 using CalamityAffixes::ResolveLuckyHitEffectiveChancePct;
 using CalamityAffixes::ResolveTriggerProcCooldownMs;
 using CalamityAffixes::ShouldHandleScrollConsumePreservation;
+using CalamityAffixes::ShouldSuppressHealthDamageStaleLeak;
+using CalamityAffixes::ShouldSuppressPerTargetRepeatWindow;
+using CalamityAffixes::ShouldSuppressDuplicateHealthDamageSignature;
 using CalamityAffixes::ShouldResolveNonHostileOutgoingFirstHitAllowance;
 using CalamityAffixes::ShouldProcessHealthDamageProcPath;
 using CalamityAffixes::ShouldSendPlayerOwnedHitEvent;
@@ -40,6 +43,21 @@ static_assert([] {
 	return !ShouldSuppressDuplicateHitWindow(current, last, 90u, 100u, 100u);
 }(),
 	"ShouldSuppressDuplicateHitWindow: does not suppress when clock moves backwards");
+
+static_assert([] {
+	return ShouldSuppressDuplicateHealthDamageSignature(0xAAu, 0xAAu, 150u, 100u, 100u);
+}(),
+	"ShouldSuppressDuplicateHealthDamageSignature: suppresses matching signatures inside stale window");
+
+static_assert([] {
+	return !ShouldSuppressDuplicateHealthDamageSignature(0xAAu, 0xAAu, 200u, 100u, 100u);
+}(),
+	"ShouldSuppressDuplicateHealthDamageSignature: allows matching signatures at stale window boundary");
+
+static_assert([] {
+	return !ShouldSuppressDuplicateHealthDamageSignature(0xAAu, 0xBBu, 150u, 100u, 100u);
+}(),
+	"ShouldSuppressDuplicateHealthDamageSignature: ignores different signatures");
 
 static_assert([] {
 	const auto nextAllowed = ComputePerTargetCooldownNextAllowedMs(1000u, 250, 0xA5u, 0x14u);
@@ -238,6 +256,26 @@ static_assert([] {
 		true);
 }(),
 	"ShouldProcessHealthDamageProcPath: allows optional non-hostile outgoing player-owned path");
+
+static_assert([] {
+	return ShouldSuppressHealthDamageStaleLeak(20.0f, 4.0f);
+}(),
+	"ShouldSuppressHealthDamageStaleLeak: suppresses low fractional damage compared to last-hit snapshot");
+
+static_assert([] {
+	return !ShouldSuppressHealthDamageStaleLeak(20.0f, 5.0f);
+}(),
+	"ShouldSuppressHealthDamageStaleLeak: keeps threshold-boundary damage routable");
+
+static_assert([] {
+	return ShouldSuppressPerTargetRepeatWindow(399u, 400u);
+}(),
+	"ShouldSuppressPerTargetRepeatWindow: suppresses repeated same-target callbacks inside window");
+
+static_assert([] {
+	return !ShouldSuppressPerTargetRepeatWindow(400u, 400u);
+}(),
+	"ShouldSuppressPerTargetRepeatWindow: allows repeated same-target callbacks at window boundary");
 
 static_assert([] {
 	return ShouldHandleScrollConsumePreservation(

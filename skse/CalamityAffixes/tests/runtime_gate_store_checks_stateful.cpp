@@ -1,5 +1,6 @@
 #include "runtime_gate_store_checks_common.h"
 #include "CalamityAffixes/LootRerollGuard.h"
+#include "CalamityAffixes/SerializationLoadState.h"
 
 namespace RuntimeGateStoreChecks
 {
@@ -369,6 +370,110 @@ namespace RuntimeGateStoreChecks
 		// ConsumeIfPlayerDropDeleted with ref==0: should return nullopt.
 		if (guard.ConsumeIfPlayerDropDeleted(0u).has_value()) {
 			std::cerr << "edge: ref==0 should return nullopt for ConsumeIfPlayerDropDeleted\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckSerializationLoadStateHelpers()
+	{
+		CalamityAffixes::LootRuntimeState state{};
+
+		if (CalamityAffixes::SerializationLoadState::ResolveShuffleBag(state, 0u) != &state.prefixSharedBag ||
+			CalamityAffixes::SerializationLoadState::ResolveShuffleBag(state, 5u) != &state.suffixArmorBag ||
+			CalamityAffixes::SerializationLoadState::ResolveShuffleBag(state, 9u) != nullptr) {
+			std::cerr << "serialization_load_state: shuffle bag resolver mapping regressed\n";
+			return false;
+		}
+
+		state.evaluatedInstances = { 9u, 2u, 7u, 4u };
+		CalamityAffixes::SerializationLoadState::RebuildEvaluatedRecent(state, 3u);
+		if (state.evaluatedRecent.size() != 3u ||
+			state.evaluatedRecent[0] != 4u ||
+			state.evaluatedRecent[1] != 7u ||
+			state.evaluatedRecent[2] != 9u ||
+			state.evaluatedInsertionsSincePrune != 0u) {
+			std::cerr << "serialization_load_state: evaluated recent rebuild/truncation is incorrect\n";
+			return false;
+		}
+
+		state.currencyRollLedger = {
+			{ 40u, 4u },
+			{ 10u, 1u },
+			{ 30u, 3u },
+			{ 20u, 2u },
+		};
+		CalamityAffixes::SerializationLoadState::RebuildCurrencyLedgerRecent(state, 2u);
+		if (state.currencyRollLedgerRecent.size() != 2u ||
+			state.currencyRollLedgerRecent[0] != 30u ||
+			state.currencyRollLedgerRecent[1] != 40u ||
+			state.currencyRollLedger.size() != 2u ||
+			state.currencyRollLedger.contains(10u) ||
+			state.currencyRollLedger.contains(20u) ||
+			!state.currencyRollLedger.contains(30u) ||
+			!state.currencyRollLedger.contains(40u)) {
+			std::cerr << "serialization_load_state: currency ledger recent rebuild/pruning is incorrect\n";
+			return false;
+		}
+
+		CalamityAffixes::AffixRegistryState registry{};
+		registry.lootSharedAffixes = { 3u, 7u, 9u };
+		registry.lootWeaponAffixes = { 11u, 13u };
+		registry.lootArmorAffixes = { 21u };
+		registry.lootSharedSuffixes = { 31u, 33u };
+		registry.lootWeaponSuffixes = { 41u };
+		registry.lootArmorSuffixes = {};
+
+		state.prefixSharedBag.order = { 7u, 7u, 999u, 3u };
+		state.prefixSharedBag.cursor = 8u;
+		state.prefixWeaponBag.order = { 13u };
+		state.prefixWeaponBag.cursor = 0u;
+		state.suffixArmorBag.order = { 55u };
+		state.suffixArmorBag.cursor = 1u;
+
+		CalamityAffixes::SerializationLoadState::SanitizeShuffleBagOrders(registry, state);
+		if (state.prefixSharedBag.order != std::vector<std::size_t>({ 7u, 3u, 9u }) ||
+			state.prefixSharedBag.cursor != 3u) {
+			std::cerr << "serialization_load_state: shared prefix bag sanitize behavior regressed\n";
+			return false;
+		}
+		if (state.prefixWeaponBag.order != std::vector<std::size_t>({ 13u, 11u }) ||
+			state.prefixWeaponBag.cursor != 0u) {
+			std::cerr << "serialization_load_state: weapon prefix bag sanitize behavior regressed\n";
+			return false;
+		}
+		if (!state.suffixArmorBag.order.empty() || state.suffixArmorBag.cursor != 0u) {
+			std::cerr << "serialization_load_state: empty suffix bag sanitize behavior regressed\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckLowHealthTriggerSnapshotHelpers()
+	{
+		const auto inactive = CalamityAffixes::BuildLowHealthTriggerSnapshot(false, 0x14u, 35.0f, 62.0f);
+		if (inactive.hasSnapshot ||
+			inactive.ownerFormID != 0u ||
+			inactive.currentPct != 100.0f ||
+			inactive.previousPct != 100.0f) {
+			std::cerr << "low_health_trigger_snapshot_helpers: inactive trigger should keep default sentinel snapshot\n";
+			return false;
+		}
+
+		const auto missingOwner = CalamityAffixes::BuildLowHealthTriggerSnapshot(true, 0u, 35.0f, 62.0f);
+		if (missingOwner.hasSnapshot || missingOwner.ownerFormID != 0u) {
+			std::cerr << "low_health_trigger_snapshot_helpers: zero owner should not produce a snapshot\n";
+			return false;
+		}
+
+		const auto active = CalamityAffixes::BuildLowHealthTriggerSnapshot(true, 0x14u, 35.0f, 62.0f);
+		if (!active.hasSnapshot ||
+			active.ownerFormID != 0x14u ||
+			active.currentPct != 35.0f ||
+			active.previousPct != 62.0f) {
+			std::cerr << "low_health_trigger_snapshot_helpers: active trigger snapshot values regressed\n";
 			return false;
 		}
 

@@ -107,8 +107,8 @@ namespace CalamityAffixes
 		// NOTE:
 		// Actor's multiple-inheritance layout differs across Skyrim versions (notably 1.6.629+),
 		// so accessing ActorValueOwner directly through Actor is unsafe for a multi-version DLL.
-		// CommonLibSSE-NG provides AsActorValueOwner() to do this cast in a layout-agnostic way.
-		if (auto* avOwner = a_analysisTarget->AsActorValueOwner()) {
+		// CommonLibSSE-NG exposes skyrim_cast for RTTI-safe cross-version ActorValueOwner access.
+		if (auto* avOwner = skyrim_cast<RE::ActorValueOwner*>(a_analysisTarget)) {
 			selection.resistFire = avOwner->GetActorValue(RE::ActorValue::kResistFire);
 			selection.resistFrost = avOwner->GetActorValue(RE::ActorValue::kResistFrost);
 			selection.resistShock = avOwner->GetActorValue(RE::ActorValue::kResistShock);

@@ -45,6 +45,10 @@ class ReleaseVerifyTests(unittest.TestCase):
         self.assertIn("--check", source)
         self.assertNotIn('--output "${spec_json}"', source)
 
+    def test_release_verify_ensures_skse_build_lanes_before_checks(self) -> None:
+        source = self.release_verify_path.read_text(encoding="utf-8")
+        self.assertIn('python3 "${repo_root}/tools/ensure_skse_build.py" --lane plugin --lane runtime-gate', source)
+
     def test_ci_verify_runs_tools_workflow_tests(self) -> None:
         source = self.ci_verify_path.read_text(encoding="utf-8")
         self.assertIn("python3 -m unittest discover -s tools/tests -p 'test_*.py'", source)
@@ -53,8 +57,17 @@ class ReleaseVerifyTests(unittest.TestCase):
         source = self.ci_verify_path.read_text(encoding="utf-8")
         self.assertIn("python3 tools/verify_runtime_contract_sync.py", source)
 
+    def test_plugin_version_comes_from_cmake_generated_header(self) -> None:
+        cmake_source = (self.repo_root / "skse" / "CalamityAffixes" / "CMakeLists.txt").read_text(encoding="utf-8")
+        main_source = (self.repo_root / "skse" / "CalamityAffixes" / "src" / "main.cpp").read_text(encoding="utf-8")
+        self.assertIn("configure_file(", cmake_source)
+        self.assertIn("generated/CalamityAffixes/Version.h", cmake_source)
+        self.assertIn('#include "CalamityAffixes/Version.h"', main_source)
+        self.assertIn("CALAMITYAFFIXES_VERSION_MAJOR", main_source)
+
     def test_build_mo2_zip_rebuilds_fresh_plugin_target(self) -> None:
         source = self.build_mo2_zip_path.read_text(encoding="utf-8")
+        self.assertIn('python3 "${repo_root}/tools/ensure_skse_build.py" --lane plugin', source)
         self.assertIn("cmake --build", source)
         self.assertIn("--target CalamityAffixes", source)
 
@@ -88,8 +101,7 @@ class ReleaseVerifyTests(unittest.TestCase):
             self.assertTrue((out_dir / "ExampleScript.pex").is_file(), "expected fake compiler to emit .pex output")
 
     def test_build_mo2_zip_uses_no_space_build_path_for_cmake(self) -> None:
-        safe_repo_link = self.repo_root.parent / "calamity"
-        if " " not in str(self.repo_root) or not safe_repo_link.is_dir():
+        if " " not in str(self.repo_root):
             self.skipTest("repo path does not require no-space cmake build routing")
         self.assertTrue(self.repo_data_dll.is_file(), "expected checked-in Data DLL for packaging smoke test")
 
@@ -121,7 +133,7 @@ class ReleaseVerifyTests(unittest.TestCase):
                 self.assertTrue(cmake_log.is_file(), "expected fake cmake to capture build path")
                 build_path = cmake_log.read_text(encoding="utf-8").strip()
                 self.assertTrue(build_path, "expected cmake --build path to be recorded")
-                self.assertNotIn(" ", build_path, "cmake --build should use the no-space repo symlink path")
+                self.assertNotIn(" ", build_path, "cmake --build should use a no-space repo alias path")
             finally:
                 out_zip.unlink(missing_ok=True)
 

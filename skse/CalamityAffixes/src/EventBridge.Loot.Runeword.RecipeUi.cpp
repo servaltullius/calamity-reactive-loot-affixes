@@ -25,8 +25,7 @@ namespace CalamityAffixes
 
 		const auto idx = it->second;
 		const auto& recipe = _runewordState.recipes[idx];
-		if (const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
-			affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+		if (!HasRunewordRuntimeEffect(recipe)) {
 			RE::DebugNotification("Runeword Recipe: runtime effect not available.");
 			return false;
 		}
@@ -59,14 +58,7 @@ namespace CalamityAffixes
 
 		std::string note = "Runeword Recipe: " + recipe.displayName + " [" + runes + "]";
 		if (_runewordState.selectedBaseKey) {
-			const auto baseType = ResolveInstanceLootType(*_runewordState.selectedBaseKey);
-			if (recipe.recommendedBaseType && baseType && *recipe.recommendedBaseType != *baseType) {
-				note.append(" (Recommended ");
-				note.append(DescribeLootItemType(*recipe.recommendedBaseType));
-				note.append(", current ");
-				note.append(DescribeLootItemType(*baseType));
-				note.append(")");
-			}
+			AppendRunewordSelectionRecommendation(note, recipe, ResolveInstanceLootType(*_runewordState.selectedBaseKey));
 		}
 
 		RE::DebugNotification(note.c_str());

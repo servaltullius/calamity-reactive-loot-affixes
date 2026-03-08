@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 1.2.19 LANGUAGES CXX)
+project(CalamityAffixes VERSION 1.2.20 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+configure_file(
+    include/CalamityAffixes/Version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/generated/CalamityAffixes/Version.h
+    @ONLY
+)
 
 find_package(CommonLibSSE CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -74,6 +80,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Loot.Runeword.Catalog.cpp
 	    src/EventBridge.Loot.Runeword.Crafting.cpp
 	    src/EventBridge.Loot.Runeword.Transmute.cpp
+	    src/EventBridge.Loot.Runeword.Transmute.Fragments.cpp
 	    src/EventBridge.Loot.Runeword.Reforge.cpp
 	    src/EventBridge.Loot.Runeword.Policy.cpp
 	    src/EventBridge.Loot.Runtime.cpp
@@ -83,7 +90,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Loot.AffixSlotRoll.cpp
 	    src/EventBridge.Loot.Assign.cpp
 	    src/EventBridge.Triggers.cpp
+	    src/EventBridge.Triggers.Runtime.cpp
 	    src/EventBridge.Triggers.HealthDamage.cpp
+	    src/EventBridge.Triggers.HealthDamage.Routing.cpp
 	    src/EventBridge.Triggers.HitEvent.cpp
 	    src/EventBridge.Triggers.DeathEvent.cpp
 	    src/EventBridge.Triggers.EquipEvent.cpp
@@ -123,7 +132,7 @@ add_library(
         ${sources}
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_include_directories(${PROJECT_NAME} PRIVATE include ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 # CommonLibSSE install exports do not always propagate rapidcsv include paths.
 # Add local fallbacks when available so REL/Relocation.h can resolve rapidcsv.h.

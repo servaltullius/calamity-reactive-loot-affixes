@@ -3,7 +3,8 @@ set -euo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 mod_name="CalamityAffixes"
-repo_run_root="${repo_root}"
+source "${repo_root}/tools/path_helpers.sh"
+repo_run_root="$(resolve_repo_run_root "${repo_root}")"
 version="0.0.0"
 
 # Version precedence for package naming:
@@ -27,15 +28,6 @@ if [[ "${version}" == "0.0.0" && -f "${cmake_project_file}" ]]; then
   fi
 fi
 
-# Windows-hosted dotnet can break on WSL paths containing spaces.
-# Prefer the existing no-space symlink path when it points to the same repo.
-safe_repo_link="$(dirname "${repo_root}")/calamity"
-if [[ "${repo_root}" == *" "* && -d "${safe_repo_link}" ]]; then
-  if [[ "$(realpath "${safe_repo_link}")" == "$(realpath "${repo_root}")" ]]; then
-    repo_run_root="${safe_repo_link}"
-  fi
-fi
-
 data_dir="${repo_root}/Data"
 dist_dir="${repo_root}/dist"
 repo_data_dll="${data_dir}/SKSE/Plugins/CalamityAffixes.dll"
@@ -46,7 +38,10 @@ linux_cross_dll="${CAFF_LINUX_CROSS_DLL:-${linux_cross_dll_default}}"
 spec_manifest="${repo_root}/affixes/affixes.modules.json"
 spec_json="${repo_root}/affixes/affixes.json"
 tmp_dir="$(mktemp -d)"
-cleanup() { rm -rf "${tmp_dir}"; }
+cleanup() {
+  cleanup_repo_run_root
+  rm -rf "${tmp_dir}"
+}
 trap cleanup EXIT
 
 jobs="${JOBS:-}"
@@ -68,6 +63,7 @@ if [[ -z "${CAFF_SKSE_BUILD_DIR:-}" && "${repo_run_root}" != "${repo_root}" ]]; 
 fi
 
 if [[ -d "${skse_build_dir}" ]]; then
+  python3 "${repo_root}/tools/ensure_skse_build.py" --lane plugin
   cmake --build "${skse_build_dir_run}" --target CalamityAffixes --parallel "${jobs}"
 else
   echo "SKSE build dir missing: ${skse_build_dir} (using staged Data DLL if present)" >&2

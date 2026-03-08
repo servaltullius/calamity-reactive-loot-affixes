@@ -15,11 +15,16 @@
 #include "CalamityAffixes/PluginLogging.h"
 #include "CalamityAffixes/PrismaTooltip.h"
 #include "CalamityAffixes/TrapSystem.h"
+#include "CalamityAffixes/Version.h"
 
 using namespace std::literals;
 
 SKSEPluginInfo(
-	.Version = REL::Version{ 1, 0, 2, 0 },
+	.Version = REL::Version{
+		CALAMITYAFFIXES_VERSION_MAJOR,
+		CALAMITYAFFIXES_VERSION_MINOR,
+		CALAMITYAFFIXES_VERSION_PATCH,
+		CALAMITYAFFIXES_VERSION_TWEAK },
 	.Name = "CalamityAffixes"sv,
 	.Author = ""sv,
 	.SupportEmail = ""sv,

@@ -596,7 +596,7 @@ mkdir -p CalamityAffixes/MCM/Config/CalamityAffixes
 mkdir -p CalamityAffixes/PrismaUI/views/CalamityAffixes
 mkdir -p CalamityAffixes/Scripts/Source
 
-PROJECT="/home/kdw73/projects/Calamity - Reactive Loot & Affixes"
+PROJECT="$(git rev-parse --show-toplevel)"
 
 cp "$PROJECT/Data/CalamityAffixes.esp" CalamityAffixes/
 cp "$PROJECT/Data/CalamityAffixes_DISTR.ini" CalamityAffixes/

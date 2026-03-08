@@ -26,7 +26,7 @@ namespace CalamityAffixes
 				return 100.0f;
 			}
 
-			auto* avOwner = a_actor->AsActorValueOwner();
+			auto* avOwner = skyrim_cast<RE::ActorValueOwner*>(a_actor);
 			if (!avOwner) {
 				return 100.0f;
 			}

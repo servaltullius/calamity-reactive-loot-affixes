@@ -117,7 +117,7 @@
 		void Tick()
 		{
 			const auto now = std::chrono::steady_clock::now();
-			g_prismaTelemetry.tickRuns.fetch_add(1u, std::memory_order_relaxed);
+			PrismaTelemetryController::RecordTickRun();
 			RefreshControlPanelHotkeyFromMcm(false);
 			RefreshUiLanguageFromMcm(false);
 			EnsurePrisma();

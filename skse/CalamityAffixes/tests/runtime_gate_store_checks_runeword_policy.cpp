@@ -12,15 +12,26 @@ namespace RuntimeGateStoreChecks
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
+			const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
 			const fs::path baseSelectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.BaseSelection.cpp";
 			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
 			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
+
+			std::ifstream selectionIn(selectionFile);
+			if (!selectionIn.is_open()) {
+				std::cerr << "runeword_completed_selection: failed to open source file: " << selectionFile << "\n";
+				return false;
+			}
 
 			std::ifstream recipeEntriesIn(recipeEntriesFile);
 			if (!recipeEntriesIn.is_open()) {
 				std::cerr << "runeword_completed_selection: failed to open source file: " << recipeEntriesFile << "\n";
 				return false;
 			}
+
+			std::string selectionSource(
+				(std::istreambuf_iterator<char>(selectionIn)),
+				std::istreambuf_iterator<char>());
 
 			std::string recipeEntriesSource(
 				(std::istreambuf_iterator<char>(recipeEntriesIn)),
@@ -57,6 +68,7 @@ namespace RuntimeGateStoreChecks
 			if (recipeUiSource.find("const bool completedBase = ResolveCompletedRunewordRecipe(selectedKey) != nullptr;") ==
 				    std::string::npos ||
 				recipeUiSource.find("ShouldClearRunewordInProgressState(completedBase)") == std::string::npos ||
+				recipeUiSource.find("AppendRunewordSelectionRecommendation(") == std::string::npos ||
 				recipeUiSource.find("_runewordState.instanceStates.erase(selectedKey);") == std::string::npos) {
 				std::cerr << "runeword_completed_selection: completed-base state write guard is missing\n";
 				return false;
@@ -64,8 +76,16 @@ namespace RuntimeGateStoreChecks
 
 			// Base selection should also clear mutable in-progress state for completed runeword bases.
 			if (baseSource.find("if (completedRecipe)") == std::string::npos ||
+				baseSource.find("ResolveSelectedRunewordRecipe(a_instanceKey, completedRecipe)") == std::string::npos ||
 				baseSource.find("_runewordState.instanceStates.erase(a_instanceKey);") == std::string::npos) {
 				std::cerr << "runeword_completed_selection: base-selection completed-state guard is missing\n";
+				return false;
+			}
+
+			if (selectionSource.find("bool EventBridge::HasRunewordRuntimeEffect(") == std::string::npos ||
+				selectionSource.find("const EventBridge::RunewordRecipe* EventBridge::ResolveSelectedRunewordRecipe(") == std::string::npos ||
+				selectionSource.find("void EventBridge::AppendRunewordSelectionRecommendation(") == std::string::npos) {
+				std::cerr << "runeword_completed_selection: selection helper extraction is missing\n";
 				return false;
 			}
 
@@ -493,7 +513,8 @@ namespace RuntimeGateStoreChecks
 			}
 
 			if (eventBridgeHeaderText->find("#include \"CalamityAffixes/AffixRegistryState.h\"") == std::string::npos ||
-				eventBridgeHeaderText->find("AffixRegistryState _affixRegistry{};") == std::string::npos ||
+				eventBridgeHeaderText->find("AffixRegistryState& _affixRegistry{ _affixRuntimeState.affixRegistry };") == std::string::npos ||
+				eventBridgeHeaderText->find("AffixRuntimeCacheState _affixRuntimeState{};") == std::string::npos ||
 				eventBridgeHeaderText->find("std::unordered_map<std::string, std::size_t> _affixIndexById;") != std::string::npos ||
 				eventBridgeHeaderText->find("std::unordered_map<std::uint64_t, std::size_t> _affixIndexByToken;") != std::string::npos ||
 				eventBridgeHeaderText->find("std::unordered_set<std::string> _affixLabelSet;") != std::string::npos ||
@@ -518,30 +539,43 @@ namespace RuntimeGateStoreChecks
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
-			const fs::path triggersFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.cpp";
+			const fs::path snapshotFile = testFile.parent_path().parent_path() / "include" / "CalamityAffixes" / "LowHealthTriggerSnapshot.h";
+			const fs::path triggersDispatchFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.cpp";
 
-			std::ifstream in(triggersFile);
-			if (!in.is_open()) {
-				std::cerr << "low_health_trigger_snapshot: failed to open source file: " << triggersFile << "\n";
+			std::ifstream snapshotIn(snapshotFile);
+			if (!snapshotIn.is_open()) {
+				std::cerr << "low_health_trigger_snapshot: failed to open helper file: " << snapshotFile << "\n";
 				return false;
 			}
 
+			std::ifstream in(triggersDispatchFile);
+			if (!in.is_open()) {
+				std::cerr << "low_health_trigger_snapshot: failed to open source file: " << triggersDispatchFile << "\n";
+				return false;
+			}
+
+			std::string snapshotSource(
+				(std::istreambuf_iterator<char>(snapshotIn)),
+				std::istreambuf_iterator<char>());
 			std::string source(
 				(std::istreambuf_iterator<char>(in)),
 				std::istreambuf_iterator<char>());
 
-			const auto snapshotStructPos = source.find("struct LowHealthSnapshot");
-			const auto snapshotBuildPos = source.find("const auto buildLowHealthSnapshot = [&]() noexcept");
-			const auto snapshotUsePos = source.find("const auto lowHealthSnapshot = buildLowHealthSnapshot();");
+			const auto snapshotStructPos = snapshotSource.find("struct LowHealthTriggerSnapshot");
+			const auto snapshotBuildPos = snapshotSource.find("constexpr LowHealthTriggerSnapshot BuildLowHealthTriggerSnapshot(");
+			const auto snapshotUsePos = source.find("const auto lowHealthSnapshot = BuildLowHealthTriggerSnapshot(");
 			const auto gateCallPos = (snapshotUsePos == std::string::npos) ? std::string::npos : source.find("TryProcessTriggerAffix(", snapshotUsePos);
 			const auto mapUpdatePos = source.find("StoreLowHealthTriggerSnapshot(a_lowHealthOwnerFormID, a_lowHealthCurrentPct);");
+			const auto includePos = source.find("#include \"CalamityAffixes/LowHealthTriggerSnapshot.h\"");
 
 			if (snapshotStructPos == std::string::npos ||
 				snapshotBuildPos == std::string::npos ||
 				snapshotUsePos == std::string::npos ||
 				gateCallPos == std::string::npos ||
 				mapUpdatePos == std::string::npos ||
-				!(snapshotStructPos < snapshotBuildPos && snapshotBuildPos < snapshotUsePos && snapshotUsePos < gateCallPos)) {
+				includePos == std::string::npos ||
+				!(snapshotStructPos < snapshotBuildPos) ||
+				!(snapshotUsePos < gateCallPos)) {
 				std::cerr << "low_health_trigger_snapshot: single-snapshot low-health gate guard is missing\n";
 				return false;
 			}
@@ -553,6 +587,7 @@ namespace RuntimeGateStoreChecks
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
+			const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
 			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
 			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
 			const fs::path catalogFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Catalog.cpp";
@@ -568,6 +603,11 @@ namespace RuntimeGateStoreChecks
 					std::istreambuf_iterator<char>());
 			};
 
+			const auto selectionText = loadText(selectionFile);
+			if (!selectionText.has_value()) {
+				std::cerr << "runeword_recipe_runtime_eligibility: failed to open source file: " << selectionFile << "\n";
+				return false;
+			}
 			const auto recipeEntriesText = loadText(recipeEntriesFile);
 			if (!recipeEntriesText.has_value()) {
 				std::cerr << "runeword_recipe_runtime_eligibility: failed to open source file: " << recipeEntriesFile << "\n";
@@ -592,17 +632,19 @@ namespace RuntimeGateStoreChecks
 			const auto recipeUiGuardPos = recipeUiText->find("Runeword Recipe: runtime effect not available.");
 			const auto recipeUiCursorUpdatePos = recipeUiText->find("_runewordState.recipeCycleCursor = static_cast<std::uint32_t>(idx);");
 
-			if (recipeEntriesText->find("const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);") == std::string::npos ||
-				recipeEntriesText->find("affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size())") == std::string::npos ||
+			if (selectionText->find("bool EventBridge::HasRunewordRuntimeEffect(") == std::string::npos ||
+				selectionText->find("return affixIt != _affixRegistry.affixIndexByToken.end() && affixIt->second < _affixes.size();") == std::string::npos ||
+				recipeEntriesText->find("if (!HasRunewordRuntimeEffect(recipe))") == std::string::npos ||
 				recipeUiText->find("Runeword Recipe: runtime effect not available.") == std::string::npos ||
+				recipeUiText->find("if (!HasRunewordRuntimeEffect(recipe))") == std::string::npos ||
 				recipeUiGuardPos == std::string::npos ||
 				recipeUiCursorUpdatePos == std::string::npos ||
 				recipeUiCursorUpdatePos < recipeUiGuardPos ||
 				catalogText->find("const auto isEligible = [&](std::size_t a_idx)") == std::string::npos ||
 				catalogText->find("if (!isEligible(cursor))") == std::string::npos ||
-				catalogText->find("if (const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);") == std::string::npos ||
+				catalogText->find("return HasRunewordRuntimeEffect(_runewordState.recipes[a_idx]);") == std::string::npos ||
 				baseSelectionText->find("const auto rwIt = _runewordState.recipeIndexByResultAffixToken.find(token);") == std::string::npos ||
-				baseSelectionText->find("if (const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);") == std::string::npos ||
+				baseSelectionText->find("if (!HasRunewordRuntimeEffect(recipe))") == std::string::npos ||
 				baseSelectionText->find("return std::addressof(recipe);") == std::string::npos) {
 				std::cerr << "runeword_recipe_runtime_eligibility: unsupported recipe guard is missing\n";
 				return false;
@@ -824,6 +866,7 @@ namespace RuntimeGateStoreChecks
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
+			const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
 			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
 			const fs::path panelStateFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.PanelState.cpp";
 			const fs::path transmuteFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Transmute.cpp";
@@ -877,6 +920,17 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
+			std::ifstream selectionIn(selectionFile);
+			if (!selectionIn.is_open()) {
+				std::cerr << "runeword_transmute_safety: failed to open selection helper source: " << selectionFile << "\n";
+				return false;
+			}
+			std::string selectionSource(
+				(std::istreambuf_iterator<char>(selectionIn)),
+				std::istreambuf_iterator<char>());
+
+			const fs::path transmuteFragmentsFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Transmute.Fragments.cpp";
+
 			std::ifstream transmuteIn(transmuteFile);
 			if (!transmuteIn.is_open()) {
 				std::cerr << "runeword_transmute_safety: failed to open transmute source: " << transmuteFile << "\n";
@@ -886,16 +940,31 @@ namespace RuntimeGateStoreChecks
 				(std::istreambuf_iterator<char>(transmuteIn)),
 				std::istreambuf_iterator<char>());
 
-			if (transmuteSource.find("ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe)") == std::string::npos ||
-				transmuteSource.find("const auto instanceKey = *_runewordState.selectedBaseKey;") == std::string::npos ||
+			std::ifstream transmuteFragmentsIn(transmuteFragmentsFile);
+			if (!transmuteFragmentsIn.is_open()) {
+				std::cerr << "runeword_transmute_safety: failed to open transmute fragment helper source: " << transmuteFragmentsFile << "\n";
+				return false;
+			}
+			std::string transmuteFragmentsSource(
+				(std::istreambuf_iterator<char>(transmuteFragmentsIn)),
+				std::istreambuf_iterator<char>());
+
+			if (selectionSource.find("bool EventBridge::ResolveSelectedRunewordBaseInstance(") == std::string::npos ||
+				selectionSource.find("const EventBridge::RunewordRecipe* EventBridge::ResolvePendingRunewordRecipe(") == std::string::npos ||
+				transmuteSource.find("ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe)") == std::string::npos ||
+				transmuteSource.find("ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, false)") == std::string::npos ||
+				transmuteSource.find("ResolvePendingRunewordRecipe(instanceKey)") == std::string::npos ||
 				transmuteSource.find("ResolveRunewordApplyBlockReason(instanceKey, *recipe)") == std::string::npos ||
 				transmuteSource.find("runeword result affix missing before transmute") == std::string::npos ||
 				transmuteSource.find("note.append(BuildRunewordApplyBlockMessage(blockReason));") == std::string::npos ||
-				transmuteSource.find("rollbackConsumedRunes") == std::string::npos ||
+				transmuteSource.find("RollbackConsumedRunewordFragments(") == std::string::npos ||
+				transmuteSource.find("ConsumeRunewordFragmentRequirement(") == std::string::npos ||
 				transmuteSource.find("_runewordState.transmuteInProgress") == std::string::npos ||
 				transmuteSource.find("Runeword: transmute already in progress.") == std::string::npos ||
 				transmuteSource.find("if (!PlayerHasInstanceKey(instanceKey))") == std::string::npos ||
-				transmuteSource.find("consume-postcheck-partial") == std::string::npos ||
+				transmuteFragmentsSource.find("consume-postcheck-partial") == std::string::npos ||
+				transmuteFragmentsSource.find("GrantRunewordFragments(") == std::string::npos ||
+				transmuteFragmentsSource.find("PlaceObjectAtMe(fragmentItem, false)") == std::string::npos ||
 				transmuteSource.find("ApplyRunewordResult(instanceKey, *recipe, &applyFailureReason)") == std::string::npos ||
 				transmuteSource.find(": fragments restored.") == std::string::npos ||
 				transmuteSource.find(": fragment rollback partial.") == std::string::npos) {
@@ -935,7 +1004,17 @@ namespace RuntimeGateStoreChecks
 		{
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
+			const fs::path selectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Selection.cpp";
 			const fs::path reforgeFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.Reforge.cpp";
+
+			std::ifstream selectionIn(selectionFile);
+			if (!selectionIn.is_open()) {
+				std::cerr << "runeword_reforge_safety: failed to open selection helper source: " << selectionFile << "\n";
+				return false;
+			}
+			std::string selectionSource(
+				(std::istreambuf_iterator<char>(selectionIn)),
+				std::istreambuf_iterator<char>());
 
 			std::ifstream reforgeIn(reforgeFile);
 			if (!reforgeIn.is_open()) {
@@ -946,11 +1025,12 @@ namespace RuntimeGateStoreChecks
 				(std::istreambuf_iterator<char>(reforgeIn)),
 				std::istreambuf_iterator<char>());
 
-			if (reforgeSource.find("preservedRunewordToken") == std::string::npos ||
-				reforgeSource.find("previousRegularSlots.RemoveToken(preservedRunewordToken)") == std::string::npos ||
-				reforgeSource.find("rolled.PromoteTokenToPrimary(preservedRunewordToken)") == std::string::npos ||
+			if (selectionSource.find("bool EventBridge::ResolveSelectedRunewordBaseInstance(") == std::string::npos ||
+				reforgeSource.find("ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)") == std::string::npos ||
+				reforgeSource.find("preservedRunewordToken") == std::string::npos ||
+				reforgeSource.find("BuildRegularOnlyAffixSlots(previousSlots, preservedRunewordToken)") == std::string::npos ||
+				reforgeSource.find("TryPromotePreservedRunewordPrimary(rolled, preservedRunewordToken)") == std::string::npos ||
 				reforgeSource.find("_runewordState.instanceStates.erase(instanceKey);") == std::string::npos ||
-				reforgeSource.find("IsLootObjectEligibleForAffixes(entry->object)") == std::string::npos ||
 				reforgeSource.find("Reforge blocked: completed runeword base.") != std::string::npos) {
 				std::cerr << "runeword_reforge_safety: completed-base reroll integration guard is missing\n";
 				return false;
@@ -1495,12 +1575,14 @@ namespace RuntimeGateStoreChecks
 
 			const std::string_view handleUiCommandBody = std::string_view(*handleText).substr(handleUiCommandPos);
 
-			if (handleText->find("bool HandleStructuredUiCommand(std::string_view a_command)") == std::string::npos ||
-				handleText->find("void HandleEventBackedUiCommand(std::string_view a_command)") == std::string::npos ||
+			if (handleText->find("class PrismaCommandController final") == std::string::npos ||
+				handleText->find("bool HandleStructuredUiCommand(std::string_view a_command) const") == std::string::npos ||
+				handleText->find("void HandleEventBackedUiCommand(std::string_view a_command) const") == std::string::npos ||
 				handleText->find("HandlePanelVisibilityCommand(a_command) ||") == std::string::npos ||
 				handleText->find("HandleImmediateRunewordCommand(a_command);") == std::string::npos ||
-				handleText->find("if (HandleStructuredUiCommand(a_command)) {") == std::string::npos ||
-				handleText->find("HandleEventBackedUiCommand(a_command);") == std::string::npos ||
+				handleText->find("auto controller = BuildPrismaCommandController();") == std::string::npos ||
+				handleText->find("if (controller.HandleStructuredUiCommand(a_command)) {") == std::string::npos ||
+				handleText->find("controller.HandleEventBackedUiCommand(a_command);") == std::string::npos ||
 				handleUiCommandBody.find("HandlePanelVisibilityCommand(a_command)") != std::string::npos ||
 				handleUiCommandBody.find("HandleRunewordSelectionCommand(a_command)") != std::string::npos ||
 				handleUiCommandBody.find("HandleLayoutSaveCommand(a_command)") != std::string::npos ||
@@ -1607,6 +1689,8 @@ namespace RuntimeGateStoreChecks
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
 			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaSharedStateFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SharedState.inl";
+			const fs::path prismaViewStateFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.ViewState.inl";
 			const fs::path prismaMenuInputFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.MenuInput.inl";
 			const fs::path prismaSettingsFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SettingsLayout.inl";
 			const fs::path prismaViewLifecycleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.ViewLifecycle.inl";
@@ -1622,18 +1706,25 @@ namespace RuntimeGateStoreChecks
 			};
 
 			const auto coreText = loadText(prismaCoreFile);
+			const auto sharedStateText = loadText(prismaSharedStateFile);
+			const auto viewStateText = loadText(prismaViewStateFile);
 			const auto menuText = loadText(prismaMenuInputFile);
 			const auto settingsText = loadText(prismaSettingsFile);
 			const auto lifecycleText = loadText(prismaViewLifecycleFile);
-			if (!coreText.has_value() || !menuText.has_value() || !settingsText.has_value() || !lifecycleText.has_value()) {
+			if (!coreText.has_value() || !sharedStateText.has_value() || !viewStateText.has_value() || !menuText.has_value() ||
+				!settingsText.has_value() || !lifecycleText.has_value()) {
 				std::cerr << "prisma_lifecycle_extraction: failed to open prisma lifecycle sources\n";
 				return false;
 			}
 
 			if (coreText->find("#include \"PrismaTooltip.MenuInput.inl\"") == std::string::npos ||
 				coreText->find("#include \"PrismaTooltip.ViewLifecycle.inl\"") == std::string::npos ||
-				coreText->find("constexpr auto kPrismaCommandListener = \"calamityCommand\";") == std::string::npos ||
-				coreText->find("constexpr auto kInteropSetTooltip = \"setTooltip\";") == std::string::npos ||
+				coreText->find("#include \"PrismaTooltip.SharedState.inl\"") == std::string::npos ||
+				coreText->find("#include \"PrismaTooltip.ViewState.inl\"") == std::string::npos ||
+				sharedStateText->find("constexpr auto kPrismaCommandListener = \"calamityCommand\";") == std::string::npos ||
+				sharedStateText->find("constexpr auto kInteropSetTooltip = \"setTooltip\";") == std::string::npos ||
+				viewStateText->find("class PrismaTelemetryController final") == std::string::npos ||
+				viewStateText->find("class PrismaViewStateController final") == std::string::npos ||
 				menuText->find("class PanelHotkeyEventSink final") == std::string::npos ||
 				menuText->find("class MenuEventSink final") == std::string::npos ||
 				settingsText->find("kInteropSetPanelLayout") == std::string::npos ||
@@ -1660,6 +1751,8 @@ namespace RuntimeGateStoreChecks
 			namespace fs = std::filesystem;
 			const fs::path testFile{ __FILE__ };
 			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
+			const fs::path prismaSharedStateFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SharedState.inl";
+			const fs::path prismaViewStateFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.ViewState.inl";
 			const fs::path prismaTickFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.Tick.inl";
 			const fs::path prismaHandleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.HandleUiCommand.inl";
 			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
@@ -1675,7 +1768,7 @@ namespace RuntimeGateStoreChecks
 			};
 
 			std::string combinedCore;
-			for (const auto& sf : { prismaCoreFile, prismaTickFile, prismaPanelDataFile, prismaHandleFile }) {
+			for (const auto& sf : { prismaCoreFile, prismaSharedStateFile, prismaViewStateFile, prismaTickFile, prismaPanelDataFile, prismaHandleFile }) {
 				const auto part = loadText(sf);
 				if (!part.has_value()) {
 					std::cerr << "prisma_telemetry: failed to open prisma source: " << sf << "\n";
@@ -1687,18 +1780,19 @@ namespace RuntimeGateStoreChecks
 			if (combinedCore.find("struct PrismaTelemetryCounters") == std::string::npos ||
 				combinedCore.find("std::atomic<std::uint64_t> workerEnqueues") == std::string::npos ||
 				combinedCore.find("std::atomic<std::uint64_t> tooltipClears") == std::string::npos ||
+				combinedCore.find("class PrismaTelemetryController final") == std::string::npos ||
+				combinedCore.find("class PrismaViewStateController final") == std::string::npos ||
 				combinedCore.find("void ClearTooltipViewState(bool a_clearRunewordPanelData);") == std::string::npos ||
 				combinedCore.find("void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge);") == std::string::npos ||
 				combinedCore.find("void MaybeLogPrismaTelemetry(std::chrono::steady_clock::time_point a_now, bool a_uiActive);") == std::string::npos ||
-				combinedCore.find("g_prismaTelemetry.tickRuns.fetch_add(1u") == std::string::npos ||
-				combinedCore.find("g_prismaTelemetry.uiCommands.fetch_add(1u") == std::string::npos ||
-				combinedCore.find("g_prismaTelemetry.tooltipPushes.fetch_add(1u") == std::string::npos ||
+				combinedCore.find("PrismaTelemetryController::RecordTickRun();") == std::string::npos ||
+				combinedCore.find("PrismaTelemetryController::RecordUiCommand();") == std::string::npos ||
+				combinedCore.find("PrismaTelemetryController::RecordTooltipPush();") == std::string::npos ||
 				combinedCore.find("RefreshRunewordPanelBindings(*bridge);") == std::string::npos ||
 				combinedCore.find("ClearTooltipViewState(true);") == std::string::npos ||
 				combinedCore.find("ClearTooltipViewState(false);") == std::string::npos ||
 				combinedCore.find("MaybeLogPrismaTelemetry(now, true);") == std::string::npos ||
-				combinedCore.find("SKSE::log::debug(\n\t\t\t\t\"CalamityAffixes: Prisma telemetry") == std::string::npos &&
-				combinedCore.find("SKSE::log::debug(\"CalamityAffixes: Prisma telemetry") == std::string::npos) {
+				combinedCore.find("CalamityAffixes: Prisma telemetry (ticks={}, queued={}, clears={}, tooltipPushes={}, contextRefreshes={}, panelRefreshes={}, commands={}, menus={}, panelOpen={}).") == std::string::npos) {
 				std::cerr << "prisma_telemetry: tooltip telemetry/helper extraction is incomplete\n";
 				return false;
 			}

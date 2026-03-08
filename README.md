@@ -7,6 +7,7 @@
 
 - GitHub Releases (최신): https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/latest
 - 다운로드 파일: `CalamityAffixes_MO2_vX.Y.Z_YYYY-MM-DD.zip`
+- 변경 이력: `CHANGELOG.md`
 
 ## 필수/권장 모드
 
@@ -52,6 +53,7 @@
 ### Maintainer 빠른 링크
 
 - GitHub Releases(전체): https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
+- 체인지로그: `CHANGELOG.md`
 - 넥서스 업로드 실무 가이드: `docs/releases/2026-02-09-nexus-upload-playbook.md`
 - 넥서스 붙여넣기 완성본(v0.1.0-beta.1): `docs/releases/2026-02-09-nexus-publish-copy-v0.1.0-beta.1.md`
 
@@ -207,6 +209,7 @@
 
 ```bash
 cd skse/CalamityAffixes
+python3 ../../tools/ensure_skse_build.py --lane plugin --lane runtime-gate
 cmake --build build.linux-clangcl-rel --target CalamityAffixes
 ctest --test-dir build.linux-clangcl-rel --no-tests=error --output-on-failure
 cp -f build.linux-clangcl-rel/CalamityAffixes.dll ../../Data/SKSE/Plugins/CalamityAffixes.dll

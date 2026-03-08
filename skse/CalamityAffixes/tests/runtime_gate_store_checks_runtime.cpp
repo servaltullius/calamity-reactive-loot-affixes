@@ -272,26 +272,128 @@ namespace RuntimeGateStoreChecks
 	{
 		namespace fs = std::filesystem;
 		const fs::path testFile{ __FILE__ };
-		const fs::path sourceFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.HealthDamage.cpp";
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path sourceFile = repoRoot / "src" / "EventBridge.Triggers.HealthDamage.Routing.cpp";
+		const fs::path triggerGuardsFile = repoRoot / "include" / "CalamityAffixes" / "TriggerGuards.h";
 
 		std::ifstream in(sourceFile);
 		if (!in.is_open()) {
 			std::cerr << "health_damage_signature_window: failed to open source file: " << sourceFile << "\n";
 			return false;
 		}
+		std::ifstream guardsIn(triggerGuardsFile);
+		if (!guardsIn.is_open()) {
+			std::cerr << "health_damage_signature_window: failed to open helper file: " << triggerGuardsFile << "\n";
+			return false;
+		}
 
 		const std::string source(
 			(std::istreambuf_iterator<char>(in)),
 			std::istreambuf_iterator<char>());
+		const std::string guards(
+			(std::istreambuf_iterator<char>(guardsIn)),
+			std::istreambuf_iterator<char>());
 
-			if (source.find("const auto sig = MakeHealthDamageSignature") == std::string::npos ||
-				source.find("(a_now - _combatState.lastHealthDamageSignatureAt) < kHealthDamageSignatureStaleWindow") ==
-					std::string::npos ||
-				source.find("(a_now - _combatState.lastHealthDamageSignatureAt) > kHealthDamageSignatureStaleWindow") !=
-					std::string::npos) {
-				std::cerr << "health_damage_signature_window: expected duplicate-signature suppression within stale window\n";
+		if (guards.find("constexpr bool ShouldSuppressDuplicateHealthDamageSignature(") == std::string::npos ||
+			guards.find("constexpr bool ShouldSuppressHealthDamageStaleLeak(") == std::string::npos ||
+			guards.find("constexpr bool ShouldSuppressPerTargetRepeatWindow(") == std::string::npos ||
+			source.find("const auto sig = MakeHealthDamageSignature") == std::string::npos ||
+			source.find("ShouldSuppressDuplicateHealthDamageSignature(") == std::string::npos ||
+			source.find("ShouldSuppressHealthDamageStaleLeak(expectedDealt, absDamage)") == std::string::npos ||
+			source.find("ShouldSuppressPerTargetRepeatWindow(") == std::string::npos) {
+			std::cerr << "health_damage_signature_window: expected routing guards to be extracted and used from the dedicated routing file\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckHealthDamageGuardHelperFlow()
+	{
+		struct FakeHealthDamageState
+		{
+			std::uint64_t lastSignature{ 0u };
+			std::uint64_t lastSignatureAtMs{ 0u };
+			std::uint64_t lastTargetHitAtMs{ 0u };
+		};
+
+		struct FakeHealthDamageEvent
+		{
+			std::uint64_t signature{ 0u };
+			std::uint64_t nowMs{ 0u };
+			float expectedDealt{ 0.0f };
+			float absDamage{ 0.0f };
+			std::uint64_t repeatWindowMs{ 0u };
+		};
+
+		auto shouldRoute = [](FakeHealthDamageState& a_state, const FakeHealthDamageEvent& a_event) {
+			if (CalamityAffixes::ShouldSuppressDuplicateHealthDamageSignature(
+				a_event.signature,
+				a_state.lastSignature,
+				a_event.nowMs,
+				a_state.lastSignatureAtMs,
+				100u)) {
 				return false;
 			}
+			if (CalamityAffixes::ShouldSuppressHealthDamageStaleLeak(a_event.expectedDealt, a_event.absDamage)) {
+				return false;
+			}
+			if (a_state.lastTargetHitAtMs != 0u && a_event.nowMs >= a_state.lastTargetHitAtMs &&
+				CalamityAffixes::ShouldSuppressPerTargetRepeatWindow(
+					a_event.nowMs - a_state.lastTargetHitAtMs,
+					a_event.repeatWindowMs)) {
+				return false;
+			}
+
+			a_state.lastSignature = a_event.signature;
+			a_state.lastSignatureAtMs = a_event.nowMs;
+			a_state.lastTargetHitAtMs = a_event.nowMs;
+			return true;
+		};
+
+		{
+			FakeHealthDamageState state{};
+			if (!shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xAAu, .nowMs = 100u, .expectedDealt = 18.0f, .absDamage = 18.0f })) {
+				std::cerr << "health_damage_guard_flow: expected first fake routed hit to pass\n";
+				return false;
+			}
+			if (shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xAAu, .nowMs = 150u, .expectedDealt = 18.0f, .absDamage = 18.0f })) {
+				std::cerr << "health_damage_guard_flow: expected duplicate signature inside stale window to be suppressed\n";
+				return false;
+			}
+			if (!shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xAAu, .nowMs = 200u, .expectedDealt = 18.0f, .absDamage = 18.0f })) {
+				std::cerr << "health_damage_guard_flow: expected duplicate signature at stale window boundary to pass\n";
+				return false;
+			}
+		}
+
+		{
+			FakeHealthDamageState state{};
+			if (shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xBBu, .nowMs = 300u, .expectedDealt = 20.0f, .absDamage = 4.0f })) {
+				std::cerr << "health_damage_guard_flow: expected stale-leak fake event to be suppressed\n";
+				return false;
+			}
+			if (state.lastSignature != 0u || state.lastTargetHitAtMs != 0u) {
+				std::cerr << "health_damage_guard_flow: expected suppressed stale-leak event to leave fake state untouched\n";
+				return false;
+			}
+		}
+
+		{
+			FakeHealthDamageState state{};
+			if (!shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xC1u, .nowMs = 1000u, .expectedDealt = 14.0f, .absDamage = 14.0f, .repeatWindowMs = 400u })) {
+				std::cerr << "health_damage_guard_flow: expected initial same-target fake event to pass\n";
+				return false;
+			}
+			if (shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xC2u, .nowMs = 1200u, .expectedDealt = 14.0f, .absDamage = 14.0f, .repeatWindowMs = 400u })) {
+				std::cerr << "health_damage_guard_flow: expected repeat-window fake event to be suppressed\n";
+				return false;
+			}
+			if (!shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xC3u, .nowMs = 1400u, .expectedDealt = 14.0f, .absDamage = 14.0f, .repeatWindowMs = 400u })) {
+				std::cerr << "health_damage_guard_flow: expected repeat-window boundary fake event to pass\n";
+				return false;
+			}
+		}
 
 		return true;
 	}
@@ -411,6 +513,7 @@ namespace RuntimeGateStoreChecks
 		const fs::path testFile{ __FILE__ };
 		const fs::path repoRoot = testFile.parent_path().parent_path();
 		const fs::path eventBridgeHeaderFile = repoRoot / "include" / "CalamityAffixes" / "EventBridge.h";
+		const fs::path stateGroupsFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.StateGroups.inl";
 		const fs::path specialActionHeaderFile = repoRoot / "include" / "CalamityAffixes" / "AffixSpecialActionState.h";
 		const fs::path indexingFile = repoRoot / "src" / "EventBridge.Config.IndexingShared.cpp";
 		const fs::path resetFile = repoRoot / "src" / "EventBridge.Config.Reset.cpp";
@@ -427,11 +530,13 @@ namespace RuntimeGateStoreChecks
 		};
 
 		const auto eventBridgeHeaderText = loadText(eventBridgeHeaderFile);
+		const auto stateGroupsText = loadText(stateGroupsFile);
 		const auto specialActionHeaderText = loadText(specialActionHeaderFile);
 		const auto indexingText = loadText(indexingFile);
 		const auto resetText = loadText(resetFile);
 		const auto configText = loadText(configFile);
-		if (!eventBridgeHeaderText.has_value() || !indexingText.has_value() || !resetText.has_value() || !configText.has_value()) {
+		if (!eventBridgeHeaderText.has_value() || !stateGroupsText.has_value() ||
+			!indexingText.has_value() || !resetText.has_value() || !configText.has_value()) {
 			std::cerr << "affix_special_action_state_extraction: failed to load source files\n";
 			return false;
 		}
@@ -441,13 +546,23 @@ namespace RuntimeGateStoreChecks
 		}
 
 		if (eventBridgeHeaderText->find("#include \"CalamityAffixes/AffixSpecialActionState.h\"") == std::string::npos ||
+			eventBridgeHeaderText->find("#include \"detail/EventBridge.StateGroups.inl\"") == std::string::npos ||
 			eventBridgeHeaderText->find("AffixSpecialActionState _affixSpecialActions{};") == std::string::npos ||
+			eventBridgeHeaderText->find("AffixRuntimeCacheState _affixRuntimeState{};") == std::string::npos ||
+			eventBridgeHeaderText->find("InstanceTrackingState _instanceTrackingState{};") == std::string::npos ||
+			eventBridgeHeaderText->find("std::vector<AffixRuntime> _affixes;") != std::string::npos ||
+			eventBridgeHeaderText->find("std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _castOnCritAffixIndices;") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _convertAffixIndices;") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _mindOverMatterAffixIndices;") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _archmageAffixIndices;") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _corpseExplosionAffixIndices;") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _summonCorpseExplosionAffixIndices;") != std::string::npos ||
+			stateGroupsText->find("struct AffixRuntimeCacheState") == std::string::npos ||
+			stateGroupsText->find("std::vector<AffixRuntime> affixes{};") == std::string::npos ||
+			stateGroupsText->find("std::vector<std::size_t> activeHitTriggerAffixIndices{};") == std::string::npos ||
+			stateGroupsText->find("struct InstanceTrackingState") == std::string::npos ||
+			stateGroupsText->find("std::unordered_map<std::uint64_t, InstanceAffixSlots> instanceAffixes{};") == std::string::npos ||
 			specialActionHeaderText->find("castOnCritAffixIndices") == std::string::npos ||
 			specialActionHeaderText->find("convertAffixIndices") == std::string::npos ||
 			specialActionHeaderText->find("mindOverMatterAffixIndices") == std::string::npos ||
@@ -474,14 +589,15 @@ namespace RuntimeGateStoreChecks
 	}
 
 	bool CheckTriggerProcPolicyExtraction()
-	{
-		namespace fs = std::filesystem;
-		const fs::path testFile{ __FILE__ };
-		const fs::path repoRoot = testFile.parent_path().parent_path();
-		const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
-		const fs::path triggersFile = repoRoot / "src" / "EventBridge.Triggers.cpp";
-		const fs::path policyFile = repoRoot / "src" / "EventBridge.Triggers.Policy.cpp";
-		const fs::path cmakeFile = repoRoot / "CMakeLists.txt";
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path repoRoot = testFile.parent_path().parent_path();
+			const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
+			const fs::path triggersDispatchFile = repoRoot / "src" / "EventBridge.Triggers.cpp";
+			const fs::path triggersRuntimeFile = repoRoot / "src" / "EventBridge.Triggers.Runtime.cpp";
+			const fs::path policyFile = repoRoot / "src" / "EventBridge.Triggers.Policy.cpp";
+			const fs::path cmakeFile = repoRoot / "CMakeLists.txt";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
@@ -491,28 +607,33 @@ namespace RuntimeGateStoreChecks
 			return std::string(
 				(std::istreambuf_iterator<char>(in)),
 				std::istreambuf_iterator<char>());
-		};
+			};
 
-		const auto privateApiText = loadText(privateApiFile);
-		const auto triggersText = loadText(triggersFile);
-		const auto policyText = loadText(policyFile);
-		const auto cmakeText = loadText(cmakeFile);
-		if (!privateApiText.has_value() || !triggersText.has_value() || !policyText.has_value() || !cmakeText.has_value()) {
-			std::cerr << "trigger_proc_policy_extraction: failed to load source files\n";
-			return false;
-		}
+			const auto privateApiText = loadText(privateApiFile);
+			const auto triggersDispatchText = loadText(triggersDispatchFile);
+			const auto triggersRuntimeText = loadText(triggersRuntimeFile);
+			const auto policyText = loadText(policyFile);
+			const auto cmakeText = loadText(cmakeFile);
+			if (!privateApiText.has_value() || !triggersDispatchText.has_value() || !triggersRuntimeText.has_value() ||
+				!policyText.has_value() || !cmakeText.has_value()) {
+				std::cerr << "trigger_proc_policy_extraction: failed to load source files\n";
+				return false;
+			}
 
-		if (cmakeText->find("src/EventBridge.Triggers.Policy.cpp") == std::string::npos ||
-			privateApiText->find("bool PassesTriggerProcPreconditions(") == std::string::npos ||
-			privateApiText->find("float ResolveTriggerProcChancePct(") == std::string::npos ||
-			privateApiText->find("bool RollTriggerProcChance(float a_chancePct);") == std::string::npos ||
+			const std::string triggersText = *triggersDispatchText + *triggersRuntimeText;
+
+			if (cmakeText->find("src/EventBridge.Triggers.Policy.cpp") == std::string::npos ||
+				cmakeText->find("src/EventBridge.Triggers.Runtime.cpp") == std::string::npos ||
+				privateApiText->find("bool PassesTriggerProcPreconditions(") == std::string::npos ||
+				privateApiText->find("float ResolveTriggerProcChancePct(") == std::string::npos ||
+				privateApiText->find("bool RollTriggerProcChance(float a_chancePct);") == std::string::npos ||
 			privateApiText->find("void CommitTriggerProcRuntime(") == std::string::npos ||
-			triggersText->find("PassesTriggerProcPreconditions(") == std::string::npos ||
-			triggersText->find("ResolveTriggerProcChancePct(affix, a_affixIndex)") == std::string::npos ||
-			triggersText->find("RollTriggerProcChance(chance)") == std::string::npos ||
-			triggersText->find("CommitTriggerProcRuntime(affix, perTargetKey, usesPerTargetIcd, chance, a_now);") == std::string::npos ||
-			triggersText->find("affix.procChancePct * _runtimeSettings.procChanceMult") != std::string::npos ||
-			triggersText->find("ResolveTriggerProcCooldownMs(") != std::string::npos ||
+				triggersText.find("PassesTriggerProcPreconditions(") == std::string::npos ||
+				triggersText.find("ResolveTriggerProcChancePct(affix, a_affixIndex)") == std::string::npos ||
+				triggersText.find("RollTriggerProcChance(chance)") == std::string::npos ||
+				triggersText.find("CommitTriggerProcRuntime(affix, perTargetKey, usesPerTargetIcd, chance, a_now);") == std::string::npos ||
+				triggersText.find("affix.procChancePct * _runtimeSettings.procChanceMult") != std::string::npos ||
+				triggersText.find("ResolveTriggerProcCooldownMs(") != std::string::npos ||
 			policyText->find("bool EventBridge::PassesTriggerProcPreconditions(") == std::string::npos ||
 			policyText->find("float EventBridge::ResolveTriggerProcChancePct(") == std::string::npos ||
 			policyText->find("bool EventBridge::RollTriggerProcChance(") == std::string::npos ||
@@ -524,16 +645,17 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
-	bool CheckProcessTriggerExtractionPolicy()
-	{
-		namespace fs = std::filesystem;
-		const fs::path testFile{ __FILE__ };
-		const fs::path repoRoot = testFile.parent_path().parent_path();
-		const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
-		const fs::path triggersFile = repoRoot / "src" / "EventBridge.Triggers.cpp";
+		bool CheckProcessTriggerExtractionPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path repoRoot = testFile.parent_path().parent_path();
+			const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
+			const fs::path snapshotFile = repoRoot / "include" / "CalamityAffixes" / "LowHealthTriggerSnapshot.h";
+			const fs::path triggersFile = repoRoot / "src" / "EventBridge.Triggers.cpp";
 
-		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
-			std::ifstream in(path);
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
 			if (!in.is_open()) {
 				return std::nullopt;
 			}
@@ -543,8 +665,9 @@ namespace RuntimeGateStoreChecks
 		};
 
 		const auto privateApiText = loadText(privateApiFile);
+		const auto snapshotText = loadText(snapshotFile);
 		const auto triggersText = loadText(triggersFile);
-		if (!privateApiText.has_value() || !triggersText.has_value()) {
+		if (!privateApiText.has_value() || !snapshotText.has_value() || !triggersText.has_value()) {
 			std::cerr << "process_trigger_extraction: failed to load source files\n";
 			return false;
 		}
@@ -552,9 +675,10 @@ namespace RuntimeGateStoreChecks
 		if (privateApiText->find("bool CanProcessTriggerDispatch(") == std::string::npos ||
 			privateApiText->find("bool TryProcessTriggerAffix(") == std::string::npos ||
 			privateApiText->find("void FinalizeTriggerDispatch(") == std::string::npos ||
-			triggersText->find("struct LowHealthSnapshot") == std::string::npos ||
-			triggersText->find("const auto buildLowHealthSnapshot = [&]() noexcept") == std::string::npos ||
-			triggersText->find("const auto lowHealthSnapshot = buildLowHealthSnapshot();") == std::string::npos ||
+			snapshotText->find("struct LowHealthTriggerSnapshot") == std::string::npos ||
+			snapshotText->find("constexpr LowHealthTriggerSnapshot BuildLowHealthTriggerSnapshot(") == std::string::npos ||
+			triggersText->find("#include \"CalamityAffixes/LowHealthTriggerSnapshot.h\"") == std::string::npos ||
+			triggersText->find("const auto lowHealthSnapshot = BuildLowHealthTriggerSnapshot(") == std::string::npos ||
 			triggersText->find("CanProcessTriggerDispatch(a_trigger, a_owner, a_target, indices)") == std::string::npos ||
 			triggersText->find("TryProcessTriggerAffix(") == std::string::npos ||
 			triggersText->find("FinalizeTriggerDispatch(") == std::string::npos) {
@@ -1004,6 +1128,29 @@ namespace RuntimeGateStoreChecks
 			if (!CalamityAffixes::detail::ShouldConsumeSuffixRollForSingleAffixTarget(2u, 1u)) {
 				std::cerr << "shuffle_bag: multi-affix suffix roll should remain enabled\n";
 				return false;
+			}
+
+			{
+				CalamityAffixes::InstanceAffixSlots previous{};
+				CalamityAffixes::InstanceAffixSlots rolled{};
+				(void)previous.AddToken(0xA0u);
+				(void)previous.AddToken(0xB0u);
+				(void)previous.AddToken(0xC0u);
+				(void)rolled.AddToken(0xB0u);
+				(void)rolled.AddToken(0xC0u);
+				const auto regular = CalamityAffixes::detail::BuildRegularOnlyAffixSlots(previous, 0xA0u);
+				if (regular.count != 2u || regular.tokens[0] != 0xB0u || regular.tokens[1] != 0xC0u) {
+					std::cerr << "reforge: regular-slot snapshot should exclude preserved runeword token\n";
+					return false;
+				}
+				if (!CalamityAffixes::detail::ShouldRetryRegularAffixReforgeRoll(regular, rolled, 0u, 4u)) {
+					std::cerr << "reforge: identical regular reroll should retry before final attempt\n";
+					return false;
+				}
+				if (CalamityAffixes::detail::ShouldRetryRegularAffixReforgeRoll(regular, rolled, 3u, 4u)) {
+					std::cerr << "reforge: identical regular reroll should stop retrying on final attempt\n";
+					return false;
+				}
 			}
 		}
 

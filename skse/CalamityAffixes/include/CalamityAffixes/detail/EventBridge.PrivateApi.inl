@@ -6,6 +6,35 @@
 		void ResetRuntimeStateForConfigReload();
 		void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);
 		void RebuildActiveCounts();
+		void FinalizeLoadedSerializationState();
+		void LoadInstanceAffixesRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
+		void LoadInstanceRuntimeStatesRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
+		void LoadRunewordStateRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
+		void LoadLootEvaluatedRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
+		void LoadLootCurrencyLedgerRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
+		void LoadLootShuffleBagsRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
+		void LoadMigrationFlagsRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
 		void ResetActiveCountsStateForRebuild();
 		void RefreshInventoryInstanceActiveState(
 			RE::InventoryEntryData* a_entry,
@@ -43,6 +72,12 @@
 		[[nodiscard]] std::optional<std::uint64_t> ResolvePrimaryEquippedInstanceKey(std::uint64_t a_affixToken) const;
 		[[nodiscard]] std::vector<std::uint64_t> CollectEquippedInstanceKeysForAffixToken(std::uint64_t a_affixToken) const;
 		[[nodiscard]] std::vector<std::uint64_t> CollectEquippedRunewordBaseCandidates(bool a_ensureUniqueId);
+		[[nodiscard]] bool ResolveSelectedRunewordBaseInstance(
+			std::uint64_t& a_outInstanceKey,
+			RE::InventoryEntryData*& a_outEntry,
+			RE::ExtraDataList*& a_outXList,
+			std::string* a_outFailureMessage,
+			bool a_requireEligible);
 		[[nodiscard]] bool ResolvePlayerInventoryInstance(
 			std::uint64_t a_instanceKey,
 			RE::InventoryEntryData*& a_outEntry,
@@ -50,6 +85,15 @@
 		[[nodiscard]] std::optional<LootItemType> ResolveInstanceLootType(std::uint64_t a_instanceKey) const;
 		[[nodiscard]] const RunewordRecipe* FindRunewordRecipeByToken(std::uint64_t a_recipeToken) const;
 		[[nodiscard]] const RunewordRecipe* GetCurrentRunewordRecipe() const;
+		[[nodiscard]] const RunewordRecipe* ResolvePendingRunewordRecipe(std::uint64_t a_instanceKey);
+		[[nodiscard]] bool HasRunewordRuntimeEffect(const RunewordRecipe& a_recipe) const noexcept;
+		[[nodiscard]] const RunewordRecipe* ResolveSelectedRunewordRecipe(
+			std::uint64_t a_selectedBaseKey,
+			const RunewordRecipe* a_preferredRecipe = nullptr) const;
+		void AppendRunewordSelectionRecommendation(
+			std::string& a_note,
+			const RunewordRecipe& a_recipe,
+			std::optional<LootItemType> a_currentBaseType) const;
 		[[nodiscard]] const RunewordRecipe* ResolveCompletedRunewordRecipe(const InstanceAffixSlots& a_slots) const;
 		[[nodiscard]] const RunewordRecipe* ResolveCompletedRunewordRecipe(std::uint64_t a_instanceKey) const;
 		[[nodiscard]] RunewordApplyBlockReason ResolveRunewordApplyBlockReason(
@@ -209,6 +253,23 @@
 		void CycleRunewordBase(std::int32_t a_direction);
 		void CycleRunewordRecipe(std::int32_t a_direction);
 		void InsertRunewordRuneIntoSelectedBase();
+		struct ConsumedRunewordFragment
+		{
+			std::uint64_t token{ 0u };
+			std::uint32_t count{ 0u };
+			std::string runeName;
+		};
+		[[nodiscard]] bool ConsumeRunewordFragmentRequirement(
+			RE::PlayerCharacter* a_player,
+			std::uint64_t a_runeToken,
+			std::uint32_t a_requiredCount,
+			std::vector<ConsumedRunewordFragment>& a_inOutConsumedRunes,
+			std::string* a_outRuneName = nullptr,
+			std::string* a_outFailureReason = nullptr);
+		[[nodiscard]] bool RollbackConsumedRunewordFragments(
+			RE::PlayerCharacter* a_player,
+			const std::vector<ConsumedRunewordFragment>& a_consumedRunes,
+			std::string_view a_reasonTag);
 		void GrantNextRequiredRuneFragment(std::uint32_t a_amount = 1u);
 		void GrantCurrentRecipeRuneSet(std::uint32_t a_amount = 1u);
 		std::uint32_t GrantReforgeOrbs(std::uint32_t a_amount = 1u);
@@ -289,11 +350,11 @@
 				std::uint64_t a_instanceKey,
 				InstanceAffixSlots& a_slots,
 				std::string_view a_context);
-			[[nodiscard]] bool SanitizeTrackedLootInstanceForCurrentLootRules(
-				decltype(_instanceAffixes)::iterator& a_it,
-				std::string_view a_context,
-				std::uint32_t& a_sanitizedInstances,
-				std::uint32_t& a_erasedInstances);
+		[[nodiscard]] bool SanitizeTrackedLootInstanceForCurrentLootRules(
+			std::remove_reference_t<decltype(_instanceAffixes)>::iterator& a_it,
+			std::string_view a_context,
+			std::uint32_t& a_sanitizedInstances,
+			std::uint32_t& a_erasedInstances);
 			void LogTrackedLootSanitizationSummary(
 				std::string_view a_context,
 				std::uint32_t a_sanitizedInstances,
