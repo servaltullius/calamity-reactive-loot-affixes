@@ -13,10 +13,6 @@ namespace CalamityAffixes
 	{
 		float ResolveSpecialActionProcChancePct_Archmage(float a_configuredChancePct)
 		{
-			if (a_configuredChancePct <= 0.0f) {
-				return 100.0f;
-			}
-
 			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
 		}
 

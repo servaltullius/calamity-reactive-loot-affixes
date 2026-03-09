@@ -1096,6 +1096,55 @@ public sealed class AffixSpecLoaderTests
     }
 
     [Fact]
+    public void Load_WhenSpecialActionProcChancePercentIsZero_Throws()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, """
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_zero_convert",
+                "editorId": "CAFF_AFFIX_ZERO_CONVERT",
+                "name": "Affix: Zero Convert",
+                "kid": { "type": "Weapon", "strings": "NONE", "formFilters": "NONE", "traits": "-E", "chance": 1.0 },
+                "runtime": {
+                  "trigger": "Hit",
+                  "procChancePercent": 0.0,
+                  "action": {
+                    "type": "ConvertDamage",
+                    "spellEditorId": "CAFF_SPEL_TEST",
+                    "element": "Fire",
+                    "percent": 50.0
+                  }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains("requires runtime.procChancePercent > 0", ex.Message, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Load_WhenIcdSecondsExactlyZero_DoesNotThrow()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));

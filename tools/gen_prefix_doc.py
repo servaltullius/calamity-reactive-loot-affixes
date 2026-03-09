@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate prefix 83 effects documentation markdown."""
+"""Generate public prefix effects documentation markdown."""
 
 import json, subprocess, sys
 from pathlib import Path
@@ -90,9 +90,8 @@ def categorize(entries):
     for i, e in enumerate(entries):
         eid = e["id"]
         if eid.startswith("internal_"):
-            cat = "INTERNAL (내부 전용)"
-        else:
-            cat = cat_map.get(eid, "기타")
+            continue
+        cat = cat_map.get(eid, "기타")
         cats.setdefault(cat, []).append((i, e))
     return cats
 
@@ -109,7 +108,6 @@ CAT_ORDER = [
     "시체 소각 (죽음의 화장)", "소환 화장",
     "역병 / 적응", "성장형",
     "Thu'um (외침) — 신규", "마법학파 — 신규",
-    "INTERNAL (내부 전용)",
 ]
 
 
@@ -228,17 +226,19 @@ def main():
     with open(CORE_JSON) as f:
         entries = json.load(f)
 
+    public_entries = [entry for entry in entries if not entry["id"].startswith("internal_")]
     cats = categorize(entries)
 
     out = []
-    out.append("# 프리픽스 83개 효과 정리 (v1.2.21)")
+    out.append("# 프리픽스 효과 정리 (공개용)")
     out.append("")
     out.append("> 업데이트: 2026-03-04")
     out.append("> 기준 코드:")
     out.append("> - 효과 정의: `affixes/modules/keywords.affixes.core.json`")
     out.append("> - 변환 스크립트: `tools/transform_prefixes.py`")
     out.append("")
-    out.append("- 총 프리픽스: **83개** (INTERNAL 10개 포함)")
+    out.append(f"- 총 공개 프리픽스: **{len(public_entries)}개**")
+    out.append("- INTERNAL 항목은 공개 문서에서 숨김")
     out.append("- 스카이림 로어 기반 전면 리네이밍 (v1.2.21)")
     out.append("- 9개 freed slot → Thu'um 5종 + 마법학파 4종 신규 효과")
     out.append("- EditorID 100% 보존 (FormID 무변동)")
@@ -252,7 +252,7 @@ def main():
     for cat in CAT_ORDER:
         if cat in cats:
             out.append(f"| {cat} | {len(cats[cat])} |")
-    out.append(f"| **합계** | **{len(entries)}** |")
+    out.append(f"| **합계** | **{len(public_entries)}** |")
     out.append("")
 
     # Per-category entries
@@ -279,15 +279,15 @@ def main():
     if old_ids:
         out.append("| # | 이전 ID | 현재 ID | 유형 |")
         out.append("|---|---------|---------|------|")
-        for i in range(83):
+        for i in range(min(len(old_ids), len(entries))):
             old_id = old_ids[i]
             new_id = entries[i]["id"]
+            if old_id.startswith("internal_") or new_id.startswith("internal_"):
+                continue
             if old_id == new_id:
                 typ = "유지"
             elif i in freed_indices:
                 typ = "**신규 효과**"
-            elif old_id.startswith("internal_"):
-                typ = "INTERNAL"
             else:
                 typ = "리네이밍"
             out.append(f"| {i} | `{old_id}` | `{new_id}` | {typ} |")

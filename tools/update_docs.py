@@ -62,16 +62,16 @@ def regenerate_affix_catalog():
     prefixes = [a for a in affixes if a.get("slot") == "prefix"
                 and not a.get("id", "").startswith("internal_")
                 and not (a.get("id", "").startswith("runeword_") and a.get("id", "").endswith("_final"))]
-    internals = [a for a in affixes if a.get("id", "").startswith("internal_")]
     suffixes = [a for a in affixes if a.get("slot") == "suffix"]
     runewords = [a for a in affixes if a.get("id", "").startswith("runeword_") and a.get("id", "").endswith("_final")]
 
     lines = []
-    lines.append("# 어픽스 카탈로그 — 전체 243개 한국어 설명")
+    lines.append("# 어픽스 카탈로그 — 공개 한국어 설명")
     lines.append("")
     lines.append(f"> 기준: `affixes/affixes.json` (자동 생성)")
     lines.append(f"> 업데이트: 2026-03-04")
-    lines.append(f"> 프리픽스 {len(prefixes)}개 + 서픽스 {len(suffixes)}개 + 룬워드 {len(runewords)}개 + 내부 {len(internals)}개")
+    lines.append(f"> 프리픽스 {len(prefixes)}개 + 서픽스 {len(suffixes)}개 + 룬워드 {len(runewords)}개")
+    lines.append("> INTERNAL 항목은 공개 카탈로그에서 숨김")
     lines.append("")
 
     # --- Prefixes ---
@@ -151,14 +151,6 @@ def regenerate_affix_catalog():
     lines.append("")
     for a in runewords:
         _write_affix_entry(lines, a)
-    lines.append("")
-
-    # --- Internals ---
-    lines.append("## 내부 전용 (Internal)")
-    lines.append("")
-    for a in internals:
-        aid = a.get("id", "")
-        lines.append(f"- `{aid}` — 내부 전용 (드롭 불가)")
     lines.append("")
 
     path = DOCS / "AFFIX_CATALOG.md"

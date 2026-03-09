@@ -70,6 +70,50 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
             msg=f"expected runtime mismatch error, got errors={errors} warnings={warnings}",
         )
 
+    def test_special_actions_require_positive_proc_chance(self) -> None:
+        spec_payload = {
+            "$schema": "https://example.invalid/schema.json",
+            "keywords": {
+                "affixes": [
+                    {
+                        "id": "affix_special",
+                        "editorId": "CAFF_AFFIX_SPECIAL",
+                        "runtime": {
+                            "trigger": "Hit",
+                            "procChancePercent": 0.0,
+                            "action": {"type": "ConvertDamage"},
+                        },
+                    }
+                ]
+            },
+        }
+
+        errors: list[str] = []
+        warnings: list[str] = []
+        self.lint_affixes._lint_spec(
+            spec_payload,
+            errors=errors,
+            warnings=warnings,
+            supported_triggers={"Hit", "IncomingHit", "DotApply", "Kill", "LowHealth"},
+            supported_action_types={
+                "DebugNotify",
+                "CastSpell",
+                "CastSpellAdaptiveElement",
+                "CastOnCrit",
+                "ConvertDamage",
+                "MindOverMatter",
+                "Archmage",
+                "CorpseExplosion",
+                "SummonCorpseExplosion",
+                "SpawnTrap",
+            },
+        )
+
+        self.assertTrue(
+            any("special actions require runtime.procChancePercent > 0" in error for error in errors),
+            msg=f"expected special-action proc chance error, got errors={errors} warnings={warnings}",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

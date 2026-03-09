@@ -46,28 +46,26 @@ namespace CalamityAffixes
 		const auto triggerStr = a_runtime.value("trigger", std::string{});
 		const auto trigger = parseTrigger(triggerStr);
 		if (!trigger) {
-			if (isSpecialActionType(a_actionType)) {
-				// Special actions use dedicated execution paths and do not consume Trigger routing.
-				// Keep loading them even if trigger text is missing/invalid.
-				a_out.trigger = Trigger::kHit;
-				SKSE::log::warn(
-					"CalamityAffixes: special action uses invalid trigger (affixId={}, actionType={}, trigger='{}'); defaulting to Hit.",
-					a_out.id,
-					a_actionType,
-					triggerStr);
-			} else {
-				SKSE::log::error(
-					"CalamityAffixes: invalid trigger '{}' (affixId={}, actionType={}); skipping affix.",
-					triggerStr,
-					a_out.id,
-					a_actionType);
-				return false;
-			}
-		} else {
-			a_out.trigger = *trigger;
+			SKSE::log::error(
+				"CalamityAffixes: invalid trigger '{}' (affixId={}, actionType={}); skipping affix.",
+				triggerStr,
+				a_out.id,
+				a_actionType);
+			return false;
 		}
+		a_out.trigger = *trigger;
 
+		const auto procChanceIt = a_runtime.find("procChancePercent");
+		const bool hasNumericProcChance = (procChanceIt != a_runtime.end() && procChanceIt->is_number());
 		a_out.procChancePct = std::clamp(a_runtime.value("procChancePercent", 0.0f), 0.0f, 100.0f);
+		if (isSpecialActionType(a_actionType) && (!hasNumericProcChance || a_out.procChancePct <= 0.0f)) {
+			SKSE::log::error(
+				"CalamityAffixes: special action requires runtime.procChancePercent > 0 (affixId={}, actionType={}, value={}).",
+				a_out.id,
+				a_actionType,
+				hasNumericProcChance ? std::to_string(a_out.procChancePct) : std::string("<missing>"));
+			return false;
+		}
 		if (const auto lwIt = a_runtime.find("lootWeight"); lwIt != a_runtime.end() && lwIt->is_number()) {
 			a_out.lootWeight = lwIt->get<float>();
 		}

@@ -270,6 +270,17 @@ public static class AffixSpecLoader
     {
         var rt = affix.Runtime;
 
+        var actionElement = JsonSerializer.SerializeToElement(rt.Action);
+        if (actionElement.ValueKind != JsonValueKind.Object)
+        {
+            throw new InvalidDataException($"{affix.Id}: runtime.action must be an object.");
+        }
+
+        if (!TryGetRequiredString(actionElement, "type", out var actionType) || !SupportedActionTypes.Contains(actionType))
+        {
+            throw new InvalidDataException($"{affix.Id}: runtime.action.type must be one of [{string.Join(", ", SupportedActionTypes)}].");
+        }
+
         if (!SupportedTriggers.Contains(rt.Trigger))
         {
             throw new InvalidDataException($"{affix.Id}: runtime.trigger must be one of [{string.Join(", ", SupportedTriggers)}].");
@@ -278,6 +289,12 @@ public static class AffixSpecLoader
         if (rt.ProcChancePercent.HasValue && rt.ProcChancePercent.Value is < 0.0 or > 100.0)
         {
             throw new InvalidDataException($"{affix.Id}: runtime.procChancePercent must be in range 0..100 (got: {rt.ProcChancePercent.Value}).");
+        }
+
+        if (IsSpecialActionType(actionType) && (!rt.ProcChancePercent.HasValue || rt.ProcChancePercent.Value <= 0.0))
+        {
+            throw new InvalidDataException(
+                $"{affix.Id}: special action {actionType} requires runtime.procChancePercent > 0 (use 100 for always-on).");
         }
 
         if (rt.IcdSeconds.HasValue && rt.IcdSeconds.Value < 0.0)
@@ -290,16 +307,17 @@ public static class AffixSpecLoader
             throw new InvalidDataException($"{affix.Id}: runtime.perTargetICDSeconds must be >= 0 (got: {rt.PerTargetICDSeconds.Value}).");
         }
 
-        var actionElement = JsonSerializer.SerializeToElement(rt.Action);
-        if (actionElement.ValueKind != JsonValueKind.Object)
-        {
-            throw new InvalidDataException($"{affix.Id}: runtime.action must be an object.");
-        }
+    }
 
-        if (!TryGetRequiredString(actionElement, "type", out var actionType) || !SupportedActionTypes.Contains(actionType))
-        {
-            throw new InvalidDataException($"{affix.Id}: runtime.action.type must be one of [{string.Join(", ", SupportedActionTypes)}].");
-        }
+    private static bool IsSpecialActionType(string actionType)
+    {
+        return actionType is
+            "CastOnCrit" or
+            "ConvertDamage" or
+            "MindOverMatter" or
+            "Archmage" or
+            "CorpseExplosion" or
+            "SummonCorpseExplosion";
     }
 
     private static bool TryGetRequiredString(JsonElement parent, string key, out string value)

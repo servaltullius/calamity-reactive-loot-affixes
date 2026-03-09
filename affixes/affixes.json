@@ -1673,7 +1673,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "ConvertDamage",
             "element": "Fire",
@@ -1729,7 +1729,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "ConvertDamage",
             "element": "Fire",
@@ -1805,7 +1805,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "ConvertDamage",
             "element": "Frost",
@@ -1860,7 +1860,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "ConvertDamage",
             "element": "Frost",
@@ -1950,7 +1950,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "ConvertDamage",
             "element": "Shock",
@@ -2005,7 +2005,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "ConvertDamage",
             "element": "Shock",
@@ -2032,7 +2032,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "Archmage",
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
@@ -2059,7 +2059,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "Archmage",
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
@@ -2086,7 +2086,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "Archmage",
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
@@ -2113,7 +2113,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "Archmage",
             "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
@@ -2140,7 +2140,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00012FD0",
@@ -2173,7 +2173,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0002B96C",
@@ -2206,7 +2206,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0002DD29",
@@ -2239,7 +2239,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0010F7EE",
@@ -2272,7 +2272,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|0010F7EC",
@@ -2305,7 +2305,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00045F9D",
@@ -2338,7 +2338,7 @@
         },
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CastOnCrit",
             "spellForm": "Skyrim.esm|00045F9C",
@@ -2371,7 +2371,7 @@
         },
         "runtime": {
           "trigger": "Kill",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CorpseExplosion",
             "debugNotify": false,
@@ -2406,7 +2406,7 @@
         },
         "runtime": {
           "trigger": "Kill",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CorpseExplosion",
             "debugNotify": false,
@@ -2441,7 +2441,7 @@
         },
         "runtime": {
           "trigger": "Kill",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "CorpseExplosion",
             "debugNotify": false,
@@ -2540,7 +2540,7 @@
         },
         "runtime": {
           "trigger": "Kill",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "SummonCorpseExplosion",
             "debugNotify": false,
@@ -2575,7 +2575,7 @@
         },
         "runtime": {
           "trigger": "Kill",
-          "procChancePercent": 0.0,
+          "procChancePercent": 100.0,
           "action": {
             "type": "SummonCorpseExplosion",
             "debugNotify": false,

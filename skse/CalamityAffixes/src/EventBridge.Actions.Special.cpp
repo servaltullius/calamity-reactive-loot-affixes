@@ -32,12 +32,6 @@ namespace CalamityAffixes
 
 		float ResolveSpecialActionProcChancePct(float a_configuredChancePct)
 		{
-			if (a_configuredChancePct <= 0.0f) {
-				// Keep backward compatibility with existing configs:
-				// special actions historically used 0% as "always on".
-				return 100.0f;
-			}
-
 			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
 		}
 

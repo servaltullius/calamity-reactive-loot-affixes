@@ -1,8 +1,9 @@
-# 어픽스 카탈로그 — 전체 243개 한국어 설명
+# 어픽스 카탈로그 — 공개 한국어 설명
 
 > 기준: `affixes/affixes.json` (자동 생성)
 > 업데이트: 2026-03-04
-> 프리픽스 73개 + 서픽스 66개 + 룬워드 94개 + 내부 10개
+> 프리픽스 73개 + 서픽스 66개 + 룬워드 94개
+> INTERNAL 항목은 공개 카탈로그에서 숨김
 
 ## 프리픽스 (Prefix)
 
@@ -278,16 +279,3 @@
 - **룬워드 브램블 [Ral-Ohm-Sur-Eth]: 피격 시 22% 확률로 가시 반사(피해 반사 +25%, 6초). 10초마다 발동.** (`runeword_bramble_final`) [prefix]
 - **룬워드 드래곤 [Sur-Lo-Sol]: 피격 시 24% 확률로 용의 비늘(경갑 스킬 +30, 8초). 11초마다 발동.** (`runeword_dragon_final`) [prefix]
 - **룬워드 메타모포시스 [Io-Cham-Fal]: 피격 시 5% 확률로 변신(에테리얼 무적 3초). 30초마다 발동.** (`runeword_metamorphosis_final`) [prefix]
-
-## 내부 전용 (Internal)
-
-- `internal_spell_bear_trap_poison` — 내부 전용 (드롭 불가)
-- `internal_spell_bear_trap_drain_magicka` — 내부 전용 (드롭 불가)
-- `internal_spell_bear_trap_drain_stamina` — 내부 전용 (드롭 불가)
-- `internal_spell_tar_blight_sunder` — 내부 전용 (드롭 불가)
-- `internal_spell_siphon_spore_sta` — 내부 전용 (드롭 불가)
-- `internal_spell_chaos_rune_sunder` — 내부 전용 (드롭 불가)
-- `internal_spell_chaos_rune_drain_magregen` — 내부 전용 (드롭 불가)
-- `internal_spell_chaos_rune_drain_stamregen` — 내부 전용 (드롭 불가)
-- `internal_spell_chaos_rune_slow_attack` — 내부 전용 (드롭 불가)
-- `internal_spell_chaos_rune_fragile` — 내부 전용 (드롭 불가)

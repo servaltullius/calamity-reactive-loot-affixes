@@ -455,6 +455,33 @@ public sealed class RepoSpecRegressionTests
         Assert.True(found, "Expected at least one MindOverMatter affix in affixes/affixes.json.");
     }
 
+    [Fact]
+    public void RepoSpec_SpecialActions_UseExplicitPositiveProcChance()
+    {
+        var repoRoot = FindRepoRoot();
+        var specPath = Path.Combine(repoRoot, "affixes", "affixes.json");
+
+        var spec = AffixSpecLoader.Load(specPath);
+        var offenders = spec.Keywords.Affixes
+            .Where(affix =>
+            {
+                if (!TryGetActionType(affix.Runtime, out var actionType) ||
+                    actionType is not ("CastOnCrit" or "ConvertDamage" or "MindOverMatter" or "Archmage" or "CorpseExplosion" or "SummonCorpseExplosion"))
+                {
+                    return false;
+                }
+
+                return !TryGetRuntimeNumber(affix.Runtime, "procChancePercent", out var procChance) || procChance <= 0.0;
+            })
+            .Select(affix => affix.Id)
+            .ToList();
+
+        Assert.True(
+            offenders.Count == 0,
+            "Expected special actions to use explicit runtime.procChancePercent > 0; offenders: " +
+            string.Join(", ", offenders));
+    }
+
     private static string FindRepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

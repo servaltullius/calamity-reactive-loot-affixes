@@ -64,9 +64,6 @@ def build_trigger_text(rt: dict) -> str:
     """Build trigger condition text from runtime config."""
     trigger = rt.get("trigger", "Hit")
     proc_pct = rt.get("procChancePercent", 100.0)
-    # procChancePercent <= 0 means "always on" for special action types
-    if proc_pct <= 0:
-        proc_pct = 100.0
     lucky_hit = rt.get("luckyHitChancePercent", 0)
     require_recently_hit = rt.get("requireRecentlyHitSeconds", 0)
     require_recently_kill = rt.get("requireRecentlyKillSeconds", 0)
@@ -313,9 +310,6 @@ def rewrite_prefix(affix_id: str, nameKo: str, rt: dict) -> str:
         # Keep the effect mostly as is but clean trigger
         trigger = rt.get("trigger", "Kill")
         proc = rt.get("procChancePercent", 100)
-        # procChancePercent <= 0 means "always on" for special action types
-        if proc <= 0:
-            proc = 100
 
         if act_type == "SummonCorpseExplosion":
             trigger_str = "소환물 사망 시"

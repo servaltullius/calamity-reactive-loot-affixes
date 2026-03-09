@@ -93,6 +93,16 @@ def _load_validation_contract() -> Tuple[Set[str], Set[str]]:
     return read_set("supportedTriggers"), read_set("supportedActionTypes")
 
 
+_SPECIAL_ACTION_TYPES: Set[str] = {
+    "CastOnCrit",
+    "ConvertDamage",
+    "MindOverMatter",
+    "Archmage",
+    "CorpseExplosion",
+    "SummonCorpseExplosion",
+}
+
+
 def _format_json_path(path_tokens: Iterable[Any]) -> str:
     path = "$"
     for token in path_tokens:
@@ -342,6 +352,13 @@ def _lint_spec(
         if not isinstance(action_type, str) or action_type not in supported_action_types:
             errors.append(f"{affix_id}: action.type must be one of {sorted(supported_action_types)}.")
             continue
+
+        if action_type in _SPECIAL_ACTION_TYPES:
+            if chance is None or not _is_number(chance) or chance <= 0.0:
+                errors.append(
+                    f"{affix_id}: special actions require runtime.procChancePercent > 0 "
+                    f"(action.type={action_type})."
+                )
 
         lucky_hit_configured = (
             (lucky_hit_chance is not None and _is_number(lucky_hit_chance) and lucky_hit_chance > 0.0) or
