@@ -61,6 +61,12 @@ public sealed class LootSpec
     [JsonPropertyName("debugLog")]
     public bool DebugLog { get; init; }
 
+    [JsonPropertyName("debugHudNotifications")]
+    public bool? DebugHudNotifications { get; init; }
+
+    [JsonPropertyName("debugVerboseLogging")]
+    public bool? DebugVerboseLogging { get; init; }
+
     // If true, DotApply trigger handling auto-disables when CAFF_TAG_DOT coverage is detected as too broad.
     [JsonPropertyName("dotTagSafetyAutoDisable")]
     public bool DotTagSafetyAutoDisable { get; init; } = false;

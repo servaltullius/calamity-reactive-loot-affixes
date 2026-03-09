@@ -106,7 +106,9 @@ namespace CalamityAffixes
 				static_cast<float>(loot.value("lootSourceChanceMultWorld", static_cast<double>(_loot.lootSourceChanceMultWorld)));
 			_loot.renameItem = loot.value("renameItem", false);
 			_loot.sharedPool = loot.value("sharedPool", false);
-			_loot.debugLog = loot.value("debugLog", false);
+			const bool legacyDebugSetting = loot.value("debugLog", false);
+			_loot.debugHudNotifications = loot.value("debugHudNotifications", legacyDebugSetting);
+			_loot.debugLog = loot.value("debugVerboseLogging", legacyDebugSetting);
 			_loot.dotTagSafetyAutoDisable = loot.value("dotTagSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
 			const double dotTagSafetyThreshold =
 				loot.value("dotTagSafetyUniqueEffectThreshold", static_cast<double>(_loot.dotTagSafetyUniqueEffectThreshold));
@@ -252,7 +254,7 @@ namespace CalamityAffixes
 
 		SyncCurrencyDropModeState("ApplyLootConfigFromJson");
 
-		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+		ApplyVerboseLoggingLevel();
 		spdlog::flush_on(spdlog::level::info);
 	}
 

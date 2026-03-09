@@ -98,6 +98,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckRuntimeUserSettingsDebounceBehavior();
 	bool CheckExternalUserSettingsPersistencePolicy();
 	bool CheckRuntimeUserSettingsRoundTripFieldPolicy();
+	bool CheckRuntimeDebugSettingsSplitPolicy();
 	bool CheckPlayerHealthDamageHookDefaultPolicy();
 	bool CheckEventBridgeStateMutexReentrancyPolicy();
 	bool CheckCombatRuntimeStateResetBehavior();

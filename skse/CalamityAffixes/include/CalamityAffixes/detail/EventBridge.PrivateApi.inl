@@ -563,6 +563,9 @@
 		[[nodiscard]] bool TryConsumeTriggerProcBudget(std::chrono::steady_clock::time_point a_now) noexcept;
 
 		// Action execution helpers (dispatch + typed executors).
+		void ApplyVerboseLoggingLevel() const;
+		void EmitHudNotification(const char* a_message) const;
+		void EmitDebugHudNotification(const char* a_message) const;
 		void ExecuteDebugNotifyAction(const Action& a_action);
 		[[nodiscard]] RE::TESObjectREFR* ResolveSpellCastTarget(const Action& a_action, RE::Actor* a_target) const;
 		[[nodiscard]] float ResolveSpellMagnitudeOverride(

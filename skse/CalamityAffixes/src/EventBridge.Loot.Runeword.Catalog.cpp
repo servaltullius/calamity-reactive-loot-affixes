@@ -442,7 +442,7 @@ namespace CalamityAffixes
 						}
 
 						if (migrated > 0u) {
-							RE::DebugNotification("Runeword: migrated legacy rune fragments to inventory.");
+							EmitHudNotification("Runeword: migrated legacy rune fragments to inventory.");
 							SKSE::log::info(
 								"CalamityAffixes: migrated {} legacy runeword fragments to inventory items.",
 								migrated);
@@ -496,7 +496,7 @@ namespace CalamityAffixes
 			SanitizeRunewordState();
 			auto candidates = CollectEquippedRunewordBaseCandidates(true);
 			if (candidates.empty()) {
-				RE::DebugNotification("Runeword: no equipped weapon/armor base found.");
+				EmitHudNotification("Runeword: no equipped weapon/armor base found.");
 				return;
 			}
 

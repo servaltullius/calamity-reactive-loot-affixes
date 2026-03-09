@@ -26,7 +26,7 @@ namespace CalamityAffixes
 		const auto idx = it->second;
 		const auto& recipe = _runewordState.recipes[idx];
 		if (!HasRunewordRuntimeEffect(recipe)) {
-			RE::DebugNotification("Runeword Recipe: runtime effect not available.");
+			EmitHudNotification("Runeword Recipe: runtime effect not available.");
 			return false;
 		}
 		_runewordState.recipeCycleCursor = static_cast<std::uint32_t>(idx);
@@ -61,7 +61,7 @@ namespace CalamityAffixes
 			AppendRunewordSelectionRecommendation(note, recipe, ResolveInstanceLootType(*_runewordState.selectedBaseKey));
 		}
 
-		RE::DebugNotification(note.c_str());
+		EmitHudNotification(note.c_str());
 		return true;
 	}
 }

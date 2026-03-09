@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -21,6 +22,7 @@ def _normalize_json(path: Path) -> object:
 
 def main() -> int:
     repo_root = _repo_root()
+    dotnet_cmd = os.environ.get("CAFF_DOTNET", "dotnet")
     expected_contract = repo_root / "Data" / "SKSE" / "Plugins" / "CalamityAffixes" / "runtime_contract.json"
     spec_path = repo_root / "affixes" / "affixes.json"
 
@@ -40,7 +42,7 @@ def main() -> int:
             generated_data_dir = temp_root / "Data"
             generated_data_arg = generated_data_dir.relative_to(run_root)
             cmd = [
-                "dotnet",
+                dotnet_cmd,
                 "run",
                 "--project",
                 "tools/CalamityAffixes.Generator",

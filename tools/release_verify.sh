@@ -61,6 +61,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 jobs="${JOBS:-}"
+dotnet_cmd="${CAFF_DOTNET:-dotnet}"
 if [[ -z "${jobs}" ]]; then
   if command -v nproc >/dev/null 2>&1; then
     jobs="$(nproc)"
@@ -117,7 +118,7 @@ python3 "${repo_root}/tools/verify_runtime_contract_sync.py"
 step "Generator tests"
 (
   cd "${repo_run_root}"
-  dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release
+  "${dotnet_cmd}" test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release
 )
 
 skse_build_dir="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel"

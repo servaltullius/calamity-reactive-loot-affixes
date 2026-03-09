@@ -45,6 +45,7 @@ cleanup() {
 trap cleanup EXIT
 
 jobs="${JOBS:-}"
+dotnet_cmd="${CAFF_DOTNET:-dotnet}"
 if [[ -z "${jobs}" ]]; then
   if command -v nproc >/dev/null 2>&1; then
     jobs="$(nproc)"
@@ -99,7 +100,7 @@ generator_args=(
 
 (
   cd "${repo_run_root}"
-  dotnet run --project tools/CalamityAffixes.Generator -- "${generator_args[@]}"
+  "${dotnet_cmd}" run --project tools/CalamityAffixes.Generator -- "${generator_args[@]}"
 )
 
 # Compile required Papyrus scripts into staged Data/Scripts/*.pex.

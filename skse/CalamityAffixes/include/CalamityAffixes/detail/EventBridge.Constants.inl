@@ -26,7 +26,9 @@
 		static constexpr std::string_view kUiSetPanelEvent = EventNames::kUiSetPanel;
 		static constexpr std::string_view kUiTogglePanelEvent = EventNames::kUiTogglePanel;
 		static constexpr std::string_view kMcmSetEnabledEvent = RuntimePolicy::kMcmSetEnabledEvent;
-		static constexpr std::string_view kMcmSetDebugNotificationsEvent = RuntimePolicy::kMcmSetDebugNotificationsEvent;
+		static constexpr std::string_view kLegacyMcmSetDebugNotificationsEvent = RuntimePolicy::kLegacyMcmSetDebugNotificationsEvent;
+		static constexpr std::string_view kMcmSetDebugHudNotificationsEvent = RuntimePolicy::kMcmSetDebugHudNotificationsEvent;
+		static constexpr std::string_view kMcmSetDebugVerboseLoggingEvent = RuntimePolicy::kMcmSetDebugVerboseLoggingEvent;
 		static constexpr std::string_view kMcmSetValidationIntervalEvent = RuntimePolicy::kMcmSetValidationIntervalEvent;
 		static constexpr std::string_view kMcmSetProcChanceMultEvent = RuntimePolicy::kMcmSetProcChanceMultEvent;
 		static constexpr std::string_view kMcmSetRunewordFragmentChanceEvent = RuntimePolicy::kMcmSetRunewordFragmentChanceEvent;

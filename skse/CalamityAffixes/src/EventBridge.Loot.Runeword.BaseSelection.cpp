@@ -153,7 +153,7 @@ namespace CalamityAffixes
 			AppendRunewordSelectionRecommendation(note, *recipe, baseType);
 		}
 
-		RE::DebugNotification(note.c_str());
+		EmitHudNotification(note.c_str());
 		return true;
 	}
 

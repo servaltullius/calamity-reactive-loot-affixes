@@ -275,7 +275,7 @@ namespace CalamityAffixes
 		SKSE::log::info(
 			"CalamityAffixes: RecoverMiscCurrency — granted {} orbs and {} rune fragment types.",
 			kRecoveryOrbGrant, fragmentsGranted);
-		RE::DebugNotification("Calamity: recovered missing currency items.");
+		EmitHudNotification("Calamity: recovered missing currency items.");
 
 		std::string result = "Granted ";
 		result.append(std::to_string(kRecoveryOrbGrant));

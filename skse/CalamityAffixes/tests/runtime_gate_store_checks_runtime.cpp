@@ -459,12 +459,15 @@ namespace RuntimeGateStoreChecks
 			feedbackHeaderText->find("inline std::string_view ResolveBloomProcDebugLabel(") == std::string::npos ||
 			trapActionText->find("#include \"CalamityAffixes/ProcFeedback.h\"") == std::string::npos ||
 			trapActionText->find("std::clamp(armDelaySeconds, 0.18f, 0.75f)") == std::string::npos ||
-			trapActionText->find("RE::DebugNotification(note.c_str());") == std::string::npos ||
+			trapActionText->find("_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(a_action.spell)") == std::string::npos ||
+			trapActionText->find("EmitDebugHudNotification(note.c_str());") == std::string::npos ||
 			trapActionText->find("Calamity: {} planted") == std::string::npos ||
 			trapActionText->find("Calamity: {} skipped ({})") == std::string::npos ||
 			trapActionText->find("SelectSpawnTrapTarget(a_action, a_owner, a_target, a_hitData, spawnTarget, &failureReason)") == std::string::npos ||
 			trapsText->find("#include \"CalamityAffixes/ProcFeedback.h\"") == std::string::npos ||
 			trapsText->find("ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);") == std::string::npos ||
+			trapsText->find("_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(trapSnapshot.spell)") == std::string::npos ||
+			trapsText->find("EmitDebugHudNotification(note.c_str());") == std::string::npos ||
 			trapsText->find("Calamity: {} burst") == std::string::npos) {
 			std::cerr << "bloom_trap_proc_feedback: expected bloom trap proc feedback helper to stay wired at spawn and trigger time\n";
 			return false;

@@ -40,8 +40,27 @@ namespace CalamityAffixes
 		try {
 			const auto& runtime = *runtimeIt;
 			const bool hadLegacyPlayerHookOverride = runtime.contains("allowPlayerHealthDamageHook");
+			const bool hasDebugHudNotifications = runtime.contains("debugHudNotifications");
+			const bool hasDebugVerboseLogging = runtime.contains("debugVerboseLogging");
+			const bool useLegacyDebugNotifications =
+				!hasDebugHudNotifications &&
+				!hasDebugVerboseLogging &&
+				runtime.contains("debugNotifications");
+			const bool legacyDebugNotifications =
+				useLegacyDebugNotifications
+					? runtime.value("debugNotifications", _loot.debugLog)
+					: false;
 			_runtimeSettings.enabled = runtime.value("enabled", _runtimeSettings.enabled);
-			_loot.debugLog = runtime.value("debugNotifications", _loot.debugLog);
+			if (hasDebugHudNotifications) {
+				_loot.debugHudNotifications = runtime.value("debugHudNotifications", _loot.debugHudNotifications);
+			} else if (useLegacyDebugNotifications) {
+				_loot.debugHudNotifications = legacyDebugNotifications;
+			}
+			if (hasDebugVerboseLogging) {
+				_loot.debugLog = runtime.value("debugVerboseLogging", _loot.debugLog);
+			} else if (useLegacyDebugNotifications) {
+				_loot.debugLog = legacyDebugNotifications;
+			}
 			_runtimeSettings.combatDebugLog = runtime.value("debugCombat", _runtimeSettings.combatDebugLog);
 			_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
 			_runtimeSettings.disableCombatEvidenceLease = runtime.value("disableCombatEvidenceLease", _runtimeSettings.disableCombatEvidenceLease);
@@ -92,17 +111,19 @@ namespace CalamityAffixes
 			_combatState.dotTagSafetySuppressed = false;
 		}
 
-		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+		ApplyVerboseLoggingLevel();
 		spdlog::flush_on(spdlog::level::warn);
 
 		SKSE::log::info(
-			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
+			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}, debugHud={}, debugVerbose={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
 			std::string(kUserSettingsRelativePath),
 			_runtimeSettings.enabled,
 			_runtimeSettings.procChanceMult,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
 			_loot.runtimeCurrencyDropsEnabled,
+			_loot.debugHudNotifications,
+			_loot.debugLog,
 			_runtimeSettings.combatDebugLog,
 			_runtimeSettings.disableCombatEvidenceLease,
 			_runtimeSettings.disableHealthDamageRouting,
@@ -119,7 +140,8 @@ namespace CalamityAffixes
 	{
 		nlohmann::json runtime = nlohmann::json::object();
 		runtime["enabled"] = _runtimeSettings.enabled;
-		runtime["debugNotifications"] = _loot.debugLog;
+		runtime["debugHudNotifications"] = _loot.debugHudNotifications;
+		runtime["debugVerboseLogging"] = _loot.debugLog;
 		runtime["debugCombat"] = _runtimeSettings.combatDebugLog;
 		runtime["validationIntervalSeconds"] = static_cast<double>(_equipResync.intervalMs) / 1000.0;
 		runtime["procChanceMultiplier"] = _runtimeSettings.procChanceMult;
@@ -130,7 +152,6 @@ namespace CalamityAffixes
 			_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);
 		runtime["disableCombatEvidenceLease"] = _runtimeSettings.disableCombatEvidenceLease;
 		runtime["disableHealthDamageRouting"] = _runtimeSettings.disableHealthDamageRouting;
-		runtime["allowPlayerHealthDamageHook"] = _runtimeSettings.allowPlayerHealthDamageHook;
 		runtime["disablePassiveSuffixSpells"] = _runtimeSettings.disablePassiveSuffixSpells;
 		runtime["disableTrapSystemTick"] = _runtimeSettings.disableTrapSystemTick;
 		runtime["disableTrapCasts"] = _runtimeSettings.disableTrapCasts;

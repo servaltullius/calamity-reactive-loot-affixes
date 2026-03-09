@@ -16,7 +16,9 @@ namespace CalamityAffixes::RuntimePolicy
 	inline constexpr bool kAllowCorpseActivationRuntimeCurrencyRollInHybridMode = false;
 
 	inline constexpr std::string_view kMcmSetEnabledEvent = "CalamityAffixes_MCM_SetEnabled";
-	inline constexpr std::string_view kMcmSetDebugNotificationsEvent = "CalamityAffixes_MCM_SetDebugNotifications";
+	inline constexpr std::string_view kLegacyMcmSetDebugNotificationsEvent = "CalamityAffixes_MCM_SetDebugNotifications";
+	inline constexpr std::string_view kMcmSetDebugHudNotificationsEvent = "CalamityAffixes_MCM_SetDebugHudNotifications";
+	inline constexpr std::string_view kMcmSetDebugVerboseLoggingEvent = "CalamityAffixes_MCM_SetDebugVerboseLogging";
 	inline constexpr std::string_view kMcmSetValidationIntervalEvent = "CalamityAffixes_MCM_SetValidationInterval";
 	inline constexpr std::string_view kMcmSetProcChanceMultEvent = "CalamityAffixes_MCM_SetProcChanceMult";
 	inline constexpr std::string_view kMcmSetRunewordFragmentChanceEvent = "CalamityAffixes_MCM_SetRunewordFragmentChance";
@@ -24,9 +26,10 @@ namespace CalamityAffixes::RuntimePolicy
 	inline constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
 	inline constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = "CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc";
 
-	inline constexpr std::array<std::string_view, 8> kPersistedRuntimeUserSettingEventNames{
+	inline constexpr std::array<std::string_view, 9> kPersistedRuntimeUserSettingEventNames{
 		kMcmSetEnabledEvent,
-		kMcmSetDebugNotificationsEvent,
+		kMcmSetDebugHudNotificationsEvent,
+		kMcmSetDebugVerboseLoggingEvent,
 		kMcmSetValidationIntervalEvent,
 		kMcmSetProcChanceMultEvent,
 		kMcmSetRunewordFragmentChanceEvent,
@@ -35,9 +38,10 @@ namespace CalamityAffixes::RuntimePolicy
 		kMcmSetAllowNonHostileFirstHitProcEvent
 	};
 
-	inline constexpr std::array<std::string_view, 8> kRuntimeUserSettingKeys{
+	inline constexpr std::array<std::string_view, 9> kRuntimeUserSettingKeys{
 		"enabled",
-		"debugNotifications",
+		"debugHudNotifications",
+		"debugVerboseLogging",
 		"validationIntervalSeconds",
 		"procChanceMultiplier",
 		"runewordFragmentChancePercent",

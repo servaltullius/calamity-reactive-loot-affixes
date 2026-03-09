@@ -459,7 +459,7 @@ namespace CalamityAffixes
 							note.append(" [Pity]");
 						}
 						if (shouldEmitDropNotification(s_lastRunewordDropNotificationAt)) {
-							RE::DebugNotification(note.c_str());
+							EmitHudNotification(note.c_str());
 						}
 					}
 				}
@@ -476,7 +476,7 @@ namespace CalamityAffixes
 						CommitReforgeOrbGrant(true);
 						result.reforgeDropGranted = true;
 						if (shouldEmitDropNotification(s_lastReforgeDropNotificationAt)) {
-							RE::DebugNotification("Reforge Orb Drop");
+							EmitHudNotification("Reforge Orb Drop");
 						}
 						if (reforgePityTriggered && _loot.debugLog) {
 							SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");

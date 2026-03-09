@@ -70,7 +70,7 @@ namespace CalamityAffixes
 					observedDotEffectCount,
 					_loot.dotTagSafetyUniqueEffectThreshold,
 					_loot.dotTagSafetyAutoDisable);
-				RE::DebugNotification("Calamity: DotApply safety warning (tag spread broad)");
+				EmitHudNotification("Calamity: DotApply safety warning (tag spread broad)");
 			}
 
 			if (_loot.dotTagSafetyAutoDisable) {
@@ -80,7 +80,7 @@ namespace CalamityAffixes
 						"CalamityAffixes: DotApply safety auto-disabled (unique tagged magic effects={}, threshold={}).",
 						observedDotEffectCount,
 						_loot.dotTagSafetyUniqueEffectThreshold);
-					RE::DebugNotification("Calamity: DotApply safety auto-disabled");
+					EmitHudNotification("Calamity: DotApply safety auto-disabled");
 				}
 				return RE::BSEventNotifyControl::kContinue;
 			}

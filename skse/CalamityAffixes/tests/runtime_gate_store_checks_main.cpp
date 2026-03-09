@@ -70,6 +70,7 @@ int main()
 	const bool runtimeUserSettingsDebounceOk = CheckRuntimeUserSettingsDebounceBehavior();
 	const bool externalUserSettingsPersistenceOk = CheckExternalUserSettingsPersistencePolicy();
 	const bool runtimeUserSettingsRoundTripFieldsOk = CheckRuntimeUserSettingsRoundTripFieldPolicy();
+	const bool runtimeDebugSettingsSplitOk = CheckRuntimeDebugSettingsSplitPolicy();
 	const bool playerHealthDamageHookDefaultOk = CheckPlayerHealthDamageHookDefaultPolicy();
 	const bool eventBridgeStateMutexReentrancyOk = CheckEventBridgeStateMutexReentrancyPolicy();
 	const bool combatRuntimeStateResetOk = CheckCombatRuntimeStateResetBehavior();
@@ -130,6 +131,7 @@ int main()
 	        runtimeUserSettingsDebounceOk &&
 	        externalUserSettingsPersistenceOk &&
 	        runtimeUserSettingsRoundTripFieldsOk &&
+	        runtimeDebugSettingsSplitOk &&
 	        playerHealthDamageHookDefaultOk &&
 	        eventBridgeStateMutexReentrancyOk &&
 	        combatRuntimeStateResetOk &&

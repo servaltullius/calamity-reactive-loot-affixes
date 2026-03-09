@@ -84,9 +84,10 @@ namespace CalamityAffixes
 				chance,
 				a_target ? a_target->GetName() : "<none>",
 				(a_hitData != nullptr));
-
+		}
+		if (_loot.debugHudNotifications) {
 			const std::string note = std::string("CAFF proc: ") + affix.id;
-			RE::DebugNotification(note.c_str());
+			EmitDebugHudNotification(note.c_str());
 		}
 
 		AdvanceRuntimeStateForAffixProc(affix);

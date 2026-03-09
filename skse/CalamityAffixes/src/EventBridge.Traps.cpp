@@ -424,9 +424,9 @@ namespace CalamityAffixes
 
 			if (triggered) {
 				ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);
-				if (_loot.debugLog && ProcFeedback::IsBloomProcSpell(trapSnapshot.spell)) {
+				if (_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(trapSnapshot.spell)) {
 					const auto note = std::format("Calamity: {} burst", ProcFeedback::ResolveBloomProcDebugLabel(trapSnapshot.spell));
-					RE::DebugNotification(note.c_str());
+					EmitDebugHudNotification(note.c_str());
 				}
 
 				if (_loot.debugLog) {

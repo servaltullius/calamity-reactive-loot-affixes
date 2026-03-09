@@ -424,6 +424,7 @@
 			bool renameItem{ false };
 			bool sharedPool{ false };
 			bool debugLog{ false };
+			bool debugHudNotifications{ false };
 			bool dotTagSafetyAutoDisable{ false };
 			std::uint32_t dotTagSafetyUniqueEffectThreshold{ 96 };
 			std::uint32_t trapGlobalMaxActive{ 48 };

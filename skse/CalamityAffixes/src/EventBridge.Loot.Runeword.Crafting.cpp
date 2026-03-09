@@ -55,7 +55,7 @@ namespace CalamityAffixes
 				if (given == 0u) {
 					std::string note = "Runeword fragment item missing: ";
 					note.append(runeName);
-					RE::DebugNotification(note.c_str());
+					EmitHudNotification(note.c_str());
 					SKSE::log::error(
 						"CalamityAffixes: runeword fragment item missing (runeToken={:016X}, runeName={}).",
 						runeToken,
@@ -65,7 +65,7 @@ namespace CalamityAffixes
 
 				const auto owned = GetOwnedRunewordFragmentCount(player, _runewordState.runeNameByToken, runeToken);
 				const std::string note = "Runeword Fragment + " + runeName + " (" + std::to_string(owned) + ")";
-				RE::DebugNotification(note.c_str());
+				EmitHudNotification(note.c_str());
 			}
 
 		void EventBridge::GrantCurrentRecipeRuneSet(std::uint32_t a_amount)
@@ -92,13 +92,13 @@ namespace CalamityAffixes
 				}
 
 				if (totalGiven == 0u) {
-					RE::DebugNotification("Runeword fragments: missing rune fragment item records.");
+					EmitHudNotification("Runeword fragments: missing rune fragment item records.");
 					SKSE::log::error("CalamityAffixes: runeword fragment items missing (grant recipe set).");
 					return;
 				}
 
 				const std::string note = "Runeword Fragments + Set: " + recipe->displayName;
-				RE::DebugNotification(note.c_str());
+				EmitHudNotification(note.c_str());
 			}
 
 		std::uint32_t EventBridge::GrantReforgeOrbs(std::uint32_t a_amount)
@@ -128,7 +128,7 @@ namespace CalamityAffixes
 			note.append(" (");
 			note.append(std::to_string(owned));
 			note.push_back(')');
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			return give;
 		}
 
@@ -320,7 +320,7 @@ namespace CalamityAffixes
 					}
 				}
 
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			SKSE::log::info("CalamityAffixes: {}", note);
 		}
 

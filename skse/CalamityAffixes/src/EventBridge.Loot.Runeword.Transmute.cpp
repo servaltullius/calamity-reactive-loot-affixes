@@ -28,7 +28,7 @@ namespace CalamityAffixes
 			}
 			std::string note = "Runeword failed: missing affix ";
 			note.append(a_recipe.displayName);
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			SKSE::log::error(
 				"CalamityAffixes: runeword result affix missing (recipe={}, resultToken={:016X}).",
 				a_recipe.id,
@@ -40,7 +40,7 @@ namespace CalamityAffixes
 				*a_outFailureReason = "affix-slots-full";
 			}
 			std::string note = "Runeword failed: base has max affixes";
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			SKSE::log::warn(
 				"CalamityAffixes: runeword apply blocked (instance={:016X}, recipe={}, reason=max-affixes-full, max={}).",
 				a_instanceKey,
@@ -54,7 +54,7 @@ namespace CalamityAffixes
 			if (a_outFailureReason) {
 				*a_outFailureReason = "result-affix-invalidated";
 			}
-			RE::DebugNotification("Runeword failed: internal error (affix invalidated).");
+			EmitHudNotification("Runeword failed: internal error (affix invalidated).");
 			SKSE::log::error(
 				"CalamityAffixes: runeword result affix became invalid after policy check (recipe={}, resultToken={:016X}).",
 				a_recipe.id,
@@ -68,7 +68,7 @@ namespace CalamityAffixes
 			if (a_outFailureReason) {
 				*a_outFailureReason = "promote-to-primary-failed";
 			}
-			RE::DebugNotification("Runeword failed: internal error (apply failed).");
+			EmitHudNotification("Runeword failed: internal error (apply failed).");
 			SKSE::log::error(
 				"CalamityAffixes: runeword promote-to-primary failed after policy check (instance={:016X}, recipe={}, resultToken={:016X}).",
 				a_instanceKey,
@@ -90,7 +90,7 @@ namespace CalamityAffixes
 
 		std::string note = "Runeword Complete: ";
 		note.append(a_recipe.displayName);
-		RE::DebugNotification(note.c_str());
+		EmitHudNotification(note.c_str());
 		SKSE::log::info(
 			"CalamityAffixes: runeword completed (recipe={}, resultAffix={}).",
 			a_recipe.id,
@@ -104,7 +104,7 @@ namespace CalamityAffixes
 			return;
 		}
 		if (_runewordState.transmuteInProgress) {
-			RE::DebugNotification("Runeword: transmute already in progress.");
+			EmitHudNotification("Runeword: transmute already in progress.");
 			return;
 		}
 
@@ -133,7 +133,7 @@ namespace CalamityAffixes
 		if (!ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, false)) {
 			std::string note = "Runeword: ";
 			note.append(baseResolveFailure);
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			return;
 		}
 
@@ -160,7 +160,7 @@ namespace CalamityAffixes
 		auto& state = _runewordState.instanceStates[instanceKey];
 		const RunewordRecipe* recipe = ResolvePendingRunewordRecipe(instanceKey);
 		if (!recipe || recipe->runeTokens.empty()) {
-			RE::DebugNotification("Runeword: recipe is not set.");
+			EmitHudNotification("Runeword: recipe is not set.");
 			return;
 		}
 
@@ -168,7 +168,7 @@ namespace CalamityAffixes
 		if (blockReason == RunewordApplyBlockReason::kMissingResultAffix) {
 			std::string note = "Runeword failed: missing affix ";
 			note.append(recipe->displayName);
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			SKSE::log::error(
 				"CalamityAffixes: runeword result affix missing before transmute (recipe={}, resultToken={:016X}).",
 				recipe->id,
@@ -178,7 +178,7 @@ namespace CalamityAffixes
 		if (blockReason == RunewordApplyBlockReason::kAffixSlotsFull) {
 			std::string note = "Runeword blocked: ";
 			note.append(BuildRunewordApplyBlockMessage(blockReason));
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			return;
 		}
 
@@ -198,14 +198,14 @@ namespace CalamityAffixes
 		if (!ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)) {
 			std::string note = "Runeword: ";
 			note.append(baseResolveFailure == "selected base is no longer available." ? "selected base became unavailable." : baseResolveFailure);
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			return;
 		}
 		const auto preflightBlockReason = ResolveRunewordApplyBlockReason(instanceKey, *recipe);
 		if (preflightBlockReason != RunewordApplyBlockReason::kNone) {
 			std::string note = "Runeword blocked: ";
 			note.append(BuildRunewordApplyBlockMessage(preflightBlockReason));
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			return;
 		}
 
@@ -245,7 +245,7 @@ namespace CalamityAffixes
 		if (!ready) {
 			std::string note = "Runeword missing fragments: ";
 			note.append(missingSummary.empty() ? "?" : missingSummary);
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			return;
 		}
 
@@ -282,7 +282,7 @@ namespace CalamityAffixes
 				if (rollbackOk) {
 					note.append(" (rollback restored)");
 				}
-				RE::DebugNotification(note.c_str());
+				EmitHudNotification(note.c_str());
 				if (consumeFailureReason == "fragment-item-missing") {
 					SKSE::log::error(
 						"CalamityAffixes: runeword fragment item missing (requiredRuneToken={:016X}, runeName={}, rollbackOk={}).",
@@ -306,7 +306,7 @@ namespace CalamityAffixes
 			const bool rollbackOk = RollbackConsumedRunewordFragments(player, consumedRunes, "base-unavailable-after-consume");
 			std::string note = "Runeword failed (base-unavailable)";
 			note.append(rollbackOk ? ": fragments restored." : ": fragment rollback partial.");
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == instanceKey) {
 				_runewordState.selectedBaseKey.reset();
 			}
@@ -328,7 +328,7 @@ namespace CalamityAffixes
 				note.push_back(')');
 			}
 			note.append(rollbackOk ? ": fragments restored." : ": fragment rollback partial.");
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			SKSE::log::error(
 				"CalamityAffixes: runeword apply failed after fragment consume (recipe={}, reason={}, rollbackOk={}).",
 				recipe->id,

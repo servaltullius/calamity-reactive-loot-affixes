@@ -36,12 +36,6 @@ namespace CalamityAffixes
 
 		float ResolveSpecialActionProcChancePct(float a_configuredChancePct)
 		{
-			if (a_configuredChancePct <= 0.0f) {
-				// Keep backward compatibility with existing configs:
-				// special actions historically used 0% as "always on".
-				return 100.0f;
-			}
-
 			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
 		}
 
@@ -209,7 +203,7 @@ namespace CalamityAffixes
 		note += ", chain=";
 		note += std::to_string(a_chainDepth);
 		note += ")";
-		RE::DebugNotification(note.c_str());
+		EmitDebugHudNotification(note.c_str());
 	}
 
 	void EventBridge::ProcessCorpseExplosionKill(RE::Actor* a_owner, RE::Actor* a_corpse)
@@ -321,7 +315,7 @@ namespace CalamityAffixes
 				chainDepth);
 		}
 
-		if (bestAffix.action.debugNotify || _loot.debugLog) {
+		if (bestAffix.action.debugNotify || _loot.debugHudNotifications) {
 			NotifyCorpseExplosionFired(bestAffix, targetsHit, finalDamage, a_actionName, chainDepth);
 		}
 	}

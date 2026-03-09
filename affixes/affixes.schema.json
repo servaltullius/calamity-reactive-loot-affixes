@@ -51,6 +51,8 @@
         "nameMarkerPosition": { "type": "string", "enum": ["leading", "trailing"] },
         "sharedPool": { "type": "boolean" },
         "debugLog": { "type": "boolean" },
+        "debugHudNotifications": { "type": "boolean" },
+        "debugVerboseLogging": { "type": "boolean" },
         "dotTagSafetyAutoDisable": { "type": "boolean" },
         "dotTagSafetyUniqueEffectThreshold": { "type": "integer", "minimum": 0, "maximum": 4096 },
         "trapGlobalMaxActive": { "type": "integer", "minimum": 0, "maximum": 4096 },

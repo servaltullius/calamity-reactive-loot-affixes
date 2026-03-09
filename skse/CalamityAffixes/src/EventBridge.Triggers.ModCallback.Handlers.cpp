@@ -40,14 +40,14 @@ namespace CalamityAffixes
 	{
 		if (a_eventName == kUiTogglePanelEvent) {
 			PrismaTooltip::ToggleControlPanel();
-			RE::DebugNotification("Calamity: Prisma panel toggled");
+			EmitHudNotification("Calamity: Prisma panel toggled");
 			return true;
 		}
 
 		if (a_eventName == kUiSetPanelEvent) {
 			const bool open = a_numArg > kMcmBoolThreshold;
 			PrismaTooltip::SetControlPanelOpen(open);
-			RE::DebugNotification(open ? "Calamity: Prisma panel ON" : "Calamity: Prisma panel OFF");
+			EmitHudNotification(open ? "Calamity: Prisma panel ON" : "Calamity: Prisma panel OFF");
 			return true;
 		}
 
@@ -65,16 +65,34 @@ namespace CalamityAffixes
 		if (a_eventName == kMcmSetEnabledEvent) {
 			_runtimeSettings.enabled = (a_numArg > kMcmBoolThreshold);
 			QueueRuntimeUserSettingsPersist();
-			RE::DebugNotification(_runtimeSettings.enabled ? "Calamity: enabled" : "Calamity: disabled");
+			EmitHudNotification(_runtimeSettings.enabled ? "Calamity: enabled" : "Calamity: disabled");
 			return true;
 		}
 
-		if (a_eventName == kMcmSetDebugNotificationsEvent) {
-			_loot.debugLog = (a_numArg > kMcmBoolThreshold);
-			spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+		if (a_eventName == kLegacyMcmSetDebugNotificationsEvent) {
+			const bool enabled = (a_numArg > kMcmBoolThreshold);
+			_loot.debugHudNotifications = enabled;
+			_loot.debugLog = enabled;
+			ApplyVerboseLoggingLevel();
 			spdlog::flush_on(spdlog::level::warn);
 			QueueRuntimeUserSettingsPersist();
-			RE::DebugNotification(_loot.debugLog ? "Calamity: debug notifications ON" : "Calamity: debug notifications OFF");
+			EmitHudNotification(enabled ? "Calamity: debug HUD/log ON (legacy)" : "Calamity: debug HUD/log OFF (legacy)");
+			return true;
+		}
+
+		if (a_eventName == kMcmSetDebugHudNotificationsEvent) {
+			_loot.debugHudNotifications = (a_numArg > kMcmBoolThreshold);
+			QueueRuntimeUserSettingsPersist();
+			EmitHudNotification(_loot.debugHudNotifications ? "Calamity: debug HUD ON" : "Calamity: debug HUD OFF");
+			return true;
+		}
+
+		if (a_eventName == kMcmSetDebugVerboseLoggingEvent) {
+			_loot.debugLog = (a_numArg > kMcmBoolThreshold);
+			ApplyVerboseLoggingLevel();
+			spdlog::flush_on(spdlog::level::warn);
+			QueueRuntimeUserSettingsPersist();
+			EmitHudNotification(_loot.debugLog ? "Calamity: debug log ON" : "Calamity: debug log OFF");
 			return true;
 		}
 
@@ -84,12 +102,12 @@ namespace CalamityAffixes
 			_equipResync.nextAtMs = 0;
 			QueueRuntimeUserSettingsPersist();
 			if (seconds <= 0.0f) {
-				RE::DebugNotification("Calamity: periodic validation OFF");
+				EmitHudNotification("Calamity: periodic validation OFF");
 			} else {
 				std::string note = "Calamity: validation interval ";
 				note += std::to_string(static_cast<int>(seconds));
 				note += "s";
-				RE::DebugNotification(note.c_str());
+				EmitHudNotification(note.c_str());
 			}
 			return true;
 		}
@@ -99,7 +117,7 @@ namespace CalamityAffixes
 			QueueRuntimeUserSettingsPersist();
 			std::string note = "Calamity: proc x";
 			note += std::to_string(_runtimeSettings.procChanceMult);
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			return true;
 		}
 
@@ -115,7 +133,7 @@ namespace CalamityAffixes
 					std::string note = "Calamity: runeword fragment chance ";
 					note += std::to_string(_loot.runewordFragmentChancePercent);
 					note += "%";
-					RE::DebugNotification(note.c_str());
+					EmitHudNotification(note.c_str());
 				}
 			}
 			return true;
@@ -133,7 +151,7 @@ namespace CalamityAffixes
 					std::string note = "Calamity: reforge orb chance ";
 					note += std::to_string(_loot.reforgeOrbChancePercent);
 					note += "%";
-					RE::DebugNotification(note.c_str());
+					EmitHudNotification(note.c_str());
 				}
 			}
 			return true;
@@ -144,14 +162,14 @@ namespace CalamityAffixes
 			QueueRuntimeUserSettingsPersist();
 			if (!_loot.dotTagSafetyAutoDisable) {
 				_combatState.dotTagSafetySuppressed = false;
-				RE::DebugNotification("Calamity: DotApply auto-disable OFF (warn only)");
+				EmitHudNotification("Calamity: DotApply auto-disable OFF (warn only)");
 			} else {
 				if (_loot.dotTagSafetyUniqueEffectThreshold > 0u &&
 					_combatState.dotObservedMagicEffects.size() > _loot.dotTagSafetyUniqueEffectThreshold) {
 					_combatState.dotTagSafetySuppressed = true;
-					RE::DebugNotification("Calamity: DotApply auto-disabled (safety)");
+					EmitHudNotification("Calamity: DotApply auto-disabled (safety)");
 				} else {
-					RE::DebugNotification("Calamity: DotApply auto-disable ON");
+					EmitHudNotification("Calamity: DotApply auto-disable ON");
 				}
 			}
 			return true;
@@ -162,7 +180,7 @@ namespace CalamityAffixes
 			_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.store(enabled, std::memory_order_relaxed);
 			_combatState.nonHostileFirstHitGate.Clear();
 			QueueRuntimeUserSettingsPersist();
-			RE::DebugNotification(enabled ?
+			EmitHudNotification(enabled ?
 				"Calamity: non-hostile first-hit proc ON" :
 				"Calamity: non-hostile first-hit proc OFF");
 			return true;
@@ -178,7 +196,7 @@ namespace CalamityAffixes
 			auto* ironSword = RE::TESForm::LookupByID<RE::TESBoundObject>(0x00012EB7);
 			if (player && ironSword) {
 				player->AddObjectToContainer(ironSword, nullptr, 1, nullptr);
-				RE::DebugNotification("Calamity: spawned test item (Iron Sword)");
+				EmitHudNotification("Calamity: spawned test item (Iron Sword)");
 			}
 			return true;
 		}
@@ -190,7 +208,7 @@ namespace CalamityAffixes
 				? RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")
 				: nullptr;
 			if (player && orb && player->GetItemCount(orb) > 0) {
-				RE::DebugNotification("Reforge Orbs: already owned.");
+				EmitHudNotification("Reforge Orbs: already owned.");
 				return true;
 			}
 
@@ -219,7 +237,7 @@ namespace CalamityAffixes
 			note += " active, ";
 			note += std::to_string(_appliedPassiveSpells.size());
 			note += " passive)";
-			RE::DebugNotification(note.c_str());
+			EmitHudNotification(note.c_str());
 			SKSE::log::info("CalamityAffixes: force-rebuild — {} active affixes, {} passive spells applied.",
 				activeCount, _appliedPassiveSpells.size());
 			return true;
@@ -244,7 +262,7 @@ namespace CalamityAffixes
 				std::string note = "Calamity: recovery pack (5 orbs, ";
 				note += std::to_string(fragmentsGranted);
 				note += " fragments)";
-				RE::DebugNotification(note.c_str());
+				EmitHudNotification(note.c_str());
 				SKSE::log::info("CalamityAffixes: granted recovery pack — 5 orbs, {} fragment types.", fragmentsGranted);
 			}
 			return true;

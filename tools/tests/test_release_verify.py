@@ -22,15 +22,23 @@ class ReleaseVerifyTests(unittest.TestCase):
         cls.repo_data_dll = cls.repo_root / "Data" / "SKSE" / "Plugins" / "CalamityAffixes.dll"
 
     def test_runtime_contract_sync_script_passes_for_repo_snapshot(self) -> None:
-        result = subprocess.run(
-            ["python3", str(self.runtime_contract_sync_path)],
-            cwd=self.repo_root,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
-        self.assertIn("runtime_contract sync: OK", result.stdout)
+        with tempfile.TemporaryDirectory(prefix="caff-fake-dotnet-contract-") as temp_dir:
+            temp_root = Path(temp_dir)
+            fake_dotnet = self._write_fake_dotnet(temp_root / "bin")
+            result = subprocess.run(
+                ["python3", str(self.runtime_contract_sync_path)],
+                cwd=self.repo_root,
+                text=True,
+                capture_output=True,
+                check=False,
+                env={
+                    **os.environ,
+                    "CAFF_DOTNET": str(fake_dotnet),
+                    "CAFF_TEST_REPO_ROOT": str(self.repo_root),
+                },
+            )
+            self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+            self.assertIn("runtime_contract sync: OK", result.stdout)
 
     def test_release_verify_invokes_runtime_contract_sync(self) -> None:
         source = self.release_verify_path.read_text(encoding="utf-8")
@@ -111,12 +119,15 @@ class ReleaseVerifyTests(unittest.TestCase):
             temp_root = Path(temp_dir)
             cmake_log = temp_root / "cmake-build-path.txt"
             self._write_fake_cmake(temp_root / "bin", fail_on_space=True)
+            fake_dotnet = self._write_fake_dotnet(temp_root / "bin")
             env = self._build_mo2_zip_env(
                 temp_root=temp_root,
                 package_version=package_version,
                 extra_env={
                     "PATH": f"{temp_root / 'bin'}:{os.environ['PATH']}",
                     "CAFF_TEST_CMAKE_LOG": str(cmake_log),
+                    "CAFF_DOTNET": str(fake_dotnet),
+                    "CAFF_TEST_REPO_ROOT": str(self.repo_root),
                 },
             )
 
@@ -145,6 +156,7 @@ class ReleaseVerifyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="caff-build-fallback-") as temp_dir:
             temp_root = Path(temp_dir)
             self._write_fake_cmake(temp_root / "bin", fail_on_call=True)
+            fake_dotnet = self._write_fake_dotnet(temp_root / "bin")
             env = self._build_mo2_zip_env(
                 temp_root=temp_root,
                 package_version=package_version,
@@ -152,6 +164,8 @@ class ReleaseVerifyTests(unittest.TestCase):
                     "PATH": f"{temp_root / 'bin'}:{os.environ['PATH']}",
                     "CAFF_SKSE_BUILD_DIR": str(temp_root / "missing-build-dir"),
                     "CAFF_LINUX_CROSS_DLL": str(temp_root / "missing-build-dir" / "CalamityAffixes.dll"),
+                    "CAFF_DOTNET": str(fake_dotnet),
+                    "CAFF_TEST_REPO_ROOT": str(self.repo_root),
                 },
             )
 
@@ -260,6 +274,52 @@ class ReleaseVerifyTests(unittest.TestCase):
             extra = ""
         cmake_path.write_text(cmake_path.read_text(encoding="utf-8") + extra + "exit 0\n", encoding="utf-8")
         cmake_path.chmod(0o755)
+
+    def _write_fake_dotnet(self, bin_dir: Path) -> Path:
+        bin_dir.mkdir(parents=True, exist_ok=True)
+        dotnet_path = bin_dir / "dotnet"
+        dotnet_path.write_text(
+            "#!/usr/bin/env bash\n"
+            "set -euo pipefail\n"
+            "repo_root=\"${CAFF_TEST_REPO_ROOT:?}\"\n"
+            "if [[ \"${1:-}\" == \"--version\" ]]; then\n"
+            "  echo \"9.9.9-test\"\n"
+            "  exit 0\n"
+            "fi\n"
+            "if [[ \"${1:-}\" == \"test\" ]]; then\n"
+            "  exit 0\n"
+            "fi\n"
+            "if [[ \"${1:-}\" != \"run\" ]]; then\n"
+            "  echo \"unsupported fake dotnet invocation: $*\" >&2\n"
+            "  exit 3\n"
+            "fi\n"
+            "shift\n"
+            "out_dir=\"\"\n"
+            "while [[ $# -gt 0 ]]; do\n"
+            "  if [[ \"$1\" == \"--data\" ]]; then\n"
+            "    out_dir=\"$2\"\n"
+            "    shift 2\n"
+            "    continue\n"
+            "  fi\n"
+            "  shift\n"
+            "done\n"
+            "if [[ -z \"$out_dir\" ]]; then\n"
+            "  echo \"missing --data output dir\" >&2\n"
+            "  exit 4\n"
+            "fi\n"
+            "if [[ \"$out_dir\" != /* ]]; then\n"
+            "  out_dir=\"$PWD/$out_dir\"\n"
+            "fi\n"
+            "mkdir -p \"$out_dir/SKSE/Plugins/CalamityAffixes\"\n"
+            "cp \"$repo_root/Data/SKSE/Plugins/CalamityAffixes/runtime_contract.json\" "
+            "\"$out_dir/SKSE/Plugins/CalamityAffixes/runtime_contract.json\"\n"
+            "cp \"$repo_root/Data/SKSE/Plugins/CalamityAffixes/affixes.json\" "
+            "\"$out_dir/SKSE/Plugins/CalamityAffixes/affixes.json\"\n"
+            "exit 0\n",
+            encoding="utf-8",
+        )
+        dotnet_path.chmod(0o755)
+        return dotnet_path
 
 
 if __name__ == "__main__":

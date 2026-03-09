@@ -100,6 +100,11 @@ namespace RuntimeGateStoreChecks
 				std::cerr << "external_user_settings_persistence: deprecated loot chance event must not be persisted\n";
 				return false;
 			}
+			if (CalamityAffixes::RuntimePolicy::IsPersistedRuntimeUserSettingEvent(
+					CalamityAffixes::RuntimePolicy::kLegacyMcmSetDebugNotificationsEvent)) {
+				std::cerr << "external_user_settings_persistence: legacy debug notifications event must not be persisted\n";
+				return false;
+			}
 
 			const auto hasDuplicates = [](const auto& names) {
 				for (std::size_t i = 0; i < names.size(); ++i) {
@@ -141,7 +146,7 @@ namespace RuntimeGateStoreChecks
 		bool CheckRuntimeUserSettingsRoundTripFieldPolicy()
 		{
 			const auto& runtimeKeys = CalamityAffixes::RuntimePolicy::kRuntimeUserSettingKeys;
-			if (runtimeKeys.size() != 8u) {
+			if (runtimeKeys.size() != 9u) {
 				std::cerr << "runtime_user_settings_round_trip: runtime user-setting key count changed unexpectedly\n";
 				return false;
 			}
@@ -165,6 +170,64 @@ namespace RuntimeGateStoreChecks
 					std::cerr << "runtime_user_settings_round_trip: deprecated lootChancePercent key must stay removed\n";
 					return false;
 				}
+				if (key == "debugNotifications") {
+					std::cerr << "runtime_user_settings_round_trip: legacy debugNotifications key must stay removed from persisted round-trip keys\n";
+					return false;
+				}
+			}
+			if (std::find(runtimeKeys.begin(), runtimeKeys.end(), "debugHudNotifications") == runtimeKeys.end() ||
+				std::find(runtimeKeys.begin(), runtimeKeys.end(), "debugVerboseLogging") == runtimeKeys.end()) {
+				std::cerr << "runtime_user_settings_round_trip: split debug setting keys must stay persisted\n";
+				return false;
+			}
+
+			return true;
+		}
+
+		bool CheckRuntimeDebugSettingsSplitPolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path repoRoot = testFile.parent_path().parent_path();
+			const fs::path runtimeSettingsFile = repoRoot / "src" / "EventBridge.Config.RuntimeSettings.cpp";
+			const fs::path modCallbackFile = repoRoot / "src" / "EventBridge.Triggers.ModCallback.Handlers.cpp";
+			const fs::path actionsFile = repoRoot / "src" / "EventBridge.Actions.cpp";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto runtimeText = loadText(runtimeSettingsFile);
+			const auto modCallbackText = loadText(modCallbackFile);
+			const auto actionsText = loadText(actionsFile);
+			if (!runtimeText || !modCallbackText || !actionsText) {
+				std::cerr << "runtime_debug_settings_split: failed to load source files\n";
+				return false;
+			}
+
+			if (runtimeText->find("debugHudNotifications") == std::string::npos ||
+				runtimeText->find("debugVerboseLogging") == std::string::npos ||
+				runtimeText->find("runtime.contains(\"debugNotifications\")") == std::string::npos ||
+				runtimeText->find("runtime[\"debugHudNotifications\"] = _loot.debugHudNotifications;") == std::string::npos ||
+				runtimeText->find("runtime[\"debugVerboseLogging\"] = _loot.debugLog;") == std::string::npos ||
+				runtimeText->find("runtime[\"debugNotifications\"]") != std::string::npos ||
+				modCallbackText->find("kMcmSetDebugHudNotificationsEvent") == std::string::npos ||
+				modCallbackText->find("kMcmSetDebugVerboseLoggingEvent") == std::string::npos ||
+				modCallbackText->find("kLegacyMcmSetDebugNotificationsEvent") == std::string::npos ||
+				modCallbackText->find("ApplyVerboseLoggingLevel();") == std::string::npos ||
+				actionsText->find("void EventBridge::EmitHudNotification(const char* a_message) const") == std::string::npos ||
+				actionsText->find("void EventBridge::EmitDebugHudNotification(const char* a_message) const") == std::string::npos ||
+				actionsText->find("if (!a_message || *a_message == '\\0')") == std::string::npos ||
+				actionsText->find("if (!_loot.debugHudNotifications)") == std::string::npos ||
+				actionsText->find("RE::DebugNotification(a_message);") == std::string::npos) {
+				std::cerr << "runtime_debug_settings_split: expected split HUD/log toggles with legacy migration and separate general/debug HUD helpers\n";
+				return false;
 			}
 
 			return true;

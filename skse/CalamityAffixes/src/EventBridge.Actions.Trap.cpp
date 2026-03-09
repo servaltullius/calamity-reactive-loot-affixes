@@ -238,12 +238,12 @@ namespace CalamityAffixes
 		RE::Actor* spawnTarget = nullptr;
 		const char* failureReason = "unknown";
 		if (!SelectSpawnTrapTarget(a_action, a_owner, a_target, a_hitData, spawnTarget, &failureReason)) {
-			if (_loot.debugLog && ProcFeedback::IsBloomProcSpell(a_action.spell)) {
+			if (_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(a_action.spell)) {
 				const auto note = std::format(
 					"Calamity: {} skipped ({})",
 					ProcFeedback::ResolveBloomProcDebugLabel(a_action.spell),
 					failureReason);
-				RE::DebugNotification(note.c_str());
+				EmitDebugHudNotification(note.c_str());
 			}
 			return;
 		}
@@ -263,9 +263,9 @@ namespace CalamityAffixes
 			a_action.spell,
 			std::clamp(armDelaySeconds, 0.18f, 0.75f),
 			true);
-		if (_loot.debugLog && ProcFeedback::IsBloomProcSpell(a_action.spell)) {
+		if (_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(a_action.spell)) {
 			const auto note = std::format("Calamity: {} planted", ProcFeedback::ResolveBloomProcDebugLabel(a_action.spell));
-			RE::DebugNotification(note.c_str());
+			EmitDebugHudNotification(note.c_str());
 		}
 		LogSpawnTrapCreated(trap, a_action);
 	}
