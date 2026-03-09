@@ -1,7 +1,9 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/ProcFeedback.h"
 #include "CalamityAffixes/CombatContext.h"
 
 #include <algorithm>
+#include <format>
 #include <mutex>
 
 #include <RE/P/ProcessLists.h>
@@ -421,6 +423,12 @@ namespace CalamityAffixes
 			}
 
 			if (triggered) {
+				ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);
+				if (_loot.debugLog && ProcFeedback::IsBloomProcSpell(trapSnapshot.spell)) {
+					const auto note = std::format("Calamity: {} burst", ProcFeedback::ResolveBloomProcDebugLabel(trapSnapshot.spell));
+					RE::DebugNotification(note.c_str());
+				}
+
 				if (_loot.debugLog) {
 					SKSE::log::debug(
 						"CalamityAffixes: trap triggered (token={}, target={}, targetsHit={}, count={} / max={}).",

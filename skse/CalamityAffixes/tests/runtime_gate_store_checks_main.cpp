@@ -14,6 +14,7 @@ int main()
 	const bool healthDamageSignatureWindowOk = CheckHealthDamageSignatureWindowPolicy();
 	const bool healthDamageGuardHelperFlowOk = CheckHealthDamageGuardHelperFlow();
 	const bool tesHitFallbackSourceValidationOk = CheckTesHitFallbackSourceValidationPolicy();
+	const bool bloomTrapProcFeedbackOk = CheckBloomTrapProcFeedbackPolicy();
 	const bool configLoadPipelineExtractionOk = CheckConfigLoadPipelineExtractionPolicy();
 	const bool hybridCurrencyDropPolicyOk = CheckHybridCurrencyDropPolicy();
 	const bool affixSpecialActionStateExtractionOk = CheckAffixSpecialActionStateExtractionPolicy();
@@ -86,7 +87,7 @@ int main()
 	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
 	const bool serializationLoadStateHelpersOk = CheckSerializationLoadStateHelpers();
 	const bool lowHealthTriggerSnapshotHelpersOk = CheckLowHealthTriggerSnapshotHelpers();
-	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && healthDamageGuardHelperFlowOk && tesHitFallbackSourceValidationOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
+	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && healthDamageGuardHelperFlowOk && tesHitFallbackSourceValidationOk && bloomTrapProcFeedbackOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
 	        lootServiceExtractionOk &&

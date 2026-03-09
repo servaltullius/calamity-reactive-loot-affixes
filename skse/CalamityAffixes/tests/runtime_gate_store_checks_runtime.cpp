@@ -427,6 +427,52 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckBloomTrapProcFeedbackPolicy()
+	{
+		namespace fs = std::filesystem;
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		const fs::path feedbackHeaderFile = repoRoot / "include" / "CalamityAffixes" / "ProcFeedback.h";
+		const fs::path trapActionFile = repoRoot / "src" / "EventBridge.Actions.Trap.cpp";
+		const fs::path trapsFile = repoRoot / "src" / "EventBridge.Traps.cpp";
+
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto feedbackHeaderText = loadText(feedbackHeaderFile);
+		const auto trapActionText = loadText(trapActionFile);
+		const auto trapsText = loadText(trapsFile);
+		if (!feedbackHeaderText.has_value() || !trapActionText.has_value() || !trapsText.has_value()) {
+			std::cerr << "bloom_trap_proc_feedback: failed to load source files\n";
+			return false;
+		}
+
+		if (feedbackHeaderText->find("kBloomSpellEditorIdPrefix = \"CAFF_SPEL_DOT_BLOOM_\"") == std::string::npos ||
+			feedbackHeaderText->find("inline void PlayBloomProcFeedback(") == std::string::npos ||
+			feedbackHeaderText->find("inline std::string_view ResolveBloomProcDebugLabel(") == std::string::npos ||
+			trapActionText->find("#include \"CalamityAffixes/ProcFeedback.h\"") == std::string::npos ||
+			trapActionText->find("std::clamp(armDelaySeconds, 0.18f, 0.75f)") == std::string::npos ||
+			trapActionText->find("RE::DebugNotification(note.c_str());") == std::string::npos ||
+			trapActionText->find("Calamity: {} planted") == std::string::npos ||
+			trapActionText->find("Calamity: {} skipped ({})") == std::string::npos ||
+			trapActionText->find("SelectSpawnTrapTarget(a_action, a_owner, a_target, a_hitData, spawnTarget, &failureReason)") == std::string::npos ||
+			trapsText->find("#include \"CalamityAffixes/ProcFeedback.h\"") == std::string::npos ||
+			trapsText->find("ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);") == std::string::npos ||
+			trapsText->find("Calamity: {} burst") == std::string::npos) {
+			std::cerr << "bloom_trap_proc_feedback: expected bloom trap proc feedback helper to stay wired at spawn and trigger time\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckConfigLoadPipelineExtractionPolicy()
 	{
 		namespace fs = std::filesystem;

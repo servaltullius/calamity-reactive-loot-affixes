@@ -1,9 +1,12 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HitDataUtil.h"
+#include "CalamityAffixes/ProcFeedback.h"
 
 #include <algorithm>
+#include <format>
 #include <mutex>
 #include <random>
+#include <string_view>
 
 
 namespace CalamityAffixes
@@ -32,32 +35,41 @@ namespace CalamityAffixes
 		RE::Actor* a_owner,
 		RE::Actor* a_target,
 		const RE::HitData* a_hitData,
-		RE::Actor*& a_outSpawnTarget)
+		RE::Actor*& a_outSpawnTarget,
+		const char** a_outFailureReason)
 	{
+		const auto setFailureReason = [&](const char* a_reason) {
+			if (a_outFailureReason) {
+				*a_outFailureReason = a_reason;
+			}
+		};
+
 		if (!a_action.spell || a_action.trapRadius <= 0.0f || a_action.trapTtl.count() <= 0) {
+			setFailureReason("invalid trap config");
 			return false;
 		}
 
-			if (a_action.trapRequireWeaponHit) {
-				if (!HitDataUtil::IsWeaponLikeHit(a_hitData, a_owner)) {
-					return false;
-				}
-			}
+		if (a_action.trapRequireWeaponHit && !HitDataUtil::IsWeaponLikeHit(a_hitData, a_owner)) {
+			setFailureReason("needs weapon hit");
+			return false;
+		}
 
 		if (a_action.trapRequireCritOrPowerAttack) {
 			if (!a_hitData) {
+				setFailureReason("missing hit data");
 				return false;
 			}
 
 			const bool isCrit = a_hitData->flags.any(RE::HitData::Flag::kCritical);
 			const bool isPowerAttack = a_hitData->flags.any(RE::HitData::Flag::kPowerAttack);
 			if (!isCrit && !isPowerAttack) {
+				setFailureReason("needs crit/power attack");
 				return false;
 			}
 		}
 
-		// Avoid friendly-fire weirdness (placing traps on friends feels bad).
 		if (a_target && !a_owner->IsHostileToActor(a_target)) {
+			setFailureReason("target not hostile");
 			return false;
 		}
 
@@ -68,7 +80,13 @@ namespace CalamityAffixes
 			a_outSpawnTarget = a_target;
 		}
 
-		return a_outSpawnTarget != nullptr;
+		if (!a_outSpawnTarget) {
+			setFailureReason("target unavailable");
+			return false;
+		}
+
+		setFailureReason("unknown");
+		return true;
 	}
 
 	float EventBridge::ResolveSpawnTrapMagnitudeOverride(const Action& a_action, const RE::HitData* a_hitData) const
@@ -218,7 +236,15 @@ namespace CalamityAffixes
 		auto& trapState = _trapState;
 
 		RE::Actor* spawnTarget = nullptr;
-		if (!SelectSpawnTrapTarget(a_action, a_owner, a_target, a_hitData, spawnTarget)) {
+		const char* failureReason = "unknown";
+		if (!SelectSpawnTrapTarget(a_action, a_owner, a_target, a_hitData, spawnTarget, &failureReason)) {
+			if (_loot.debugLog && ProcFeedback::IsBloomProcSpell(a_action.spell)) {
+				const auto note = std::format(
+					"Calamity: {} skipped ({})",
+					ProcFeedback::ResolveBloomProcDebugLabel(a_action.spell),
+					failureReason);
+				RE::DebugNotification(note.c_str());
+			}
 			return;
 		}
 
@@ -231,6 +257,16 @@ namespace CalamityAffixes
 		auto trap = BuildSpawnTrapInstance(a_action, a_owner, spawnTarget, magnitudeOverride, now);
 		trapState.activeTraps.push_back(trap);
 		trapState.hasActiveTraps.store(true, std::memory_order_relaxed);
+		const auto armDelaySeconds = static_cast<float>(a_action.trapArmDelay.count()) / 1000.0f;
+		ProcFeedback::PlayBloomProcFeedback(
+			spawnTarget,
+			a_action.spell,
+			std::clamp(armDelaySeconds, 0.18f, 0.75f),
+			true);
+		if (_loot.debugLog && ProcFeedback::IsBloomProcSpell(a_action.spell)) {
+			const auto note = std::format("Calamity: {} planted", ProcFeedback::ResolveBloomProcDebugLabel(a_action.spell));
+			RE::DebugNotification(note.c_str());
+		}
 		LogSpawnTrapCreated(trap, a_action);
 	}
 }
