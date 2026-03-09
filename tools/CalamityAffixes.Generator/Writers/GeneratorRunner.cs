@@ -35,7 +35,11 @@ public static class GeneratorRunner
         var configDir = Path.Combine(dataDir, "SKSE", "Plugins", "CalamityAffixes");
         Directory.CreateDirectory(configDir);
 
-        var json = JsonSerializer.Serialize(spec, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(spec, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+        });
         File.WriteAllText(Path.Combine(configDir, "affixes.json"), json);
         File.WriteAllText(Path.Combine(configDir, "runtime_contract.json"), AffixSpecLoader.BuildValidationContractJson());
 

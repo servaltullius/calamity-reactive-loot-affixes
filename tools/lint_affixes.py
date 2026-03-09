@@ -582,6 +582,8 @@ def _check_generated_sync(
                 return
             for key, value in expected.items():
                 if key not in actual:
+                    if value is None:
+                        continue
                     out.append(f"{_format_json_path([*path_tokens, key])} (missing key in generated)")
                     if len(out) >= max_mismatches:
                         return

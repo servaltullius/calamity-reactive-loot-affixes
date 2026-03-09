@@ -9,6 +9,8 @@ namespace CalamityAffixes.Generator.Tests;
 
 public sealed class KeywordPluginBuilderTests
 {
+    private static string NormalizeModelPath(string path) => path.Replace('\\', '/');
+
     [Fact]
     public void BuildKeywordPlugin_CreatesKeywordsWithEditorIds()
     {
@@ -119,7 +121,7 @@ public sealed class KeywordPluginBuilderTests
             var item = Assert.Single(mod.MiscItems, misc => misc.EditorID == editorId);
             Assert.Equal($"Rune Fragment: {rune}", item.Name?.String);
             Assert.NotNull(item.Model);
-            Assert.Equal(expectedModel, item.Model!.File.ToString());
+            Assert.Equal(NormalizeModelPath(expectedModel), NormalizeModelPath(item.Model!.File.ToString()));
         }
     }
 
@@ -145,7 +147,9 @@ public sealed class KeywordPluginBuilderTests
         var orb = Assert.Single(mod.MiscItems, item => item.EditorID == "CAFF_Misc_ReforgeOrb");
         Assert.Equal("Reforge Orb", orb.Name?.String);
         Assert.NotNull(orb.Model);
-        Assert.Equal(@"Meshes\Clutter\SoulGem\SoulGemPiece01.nif", orb.Model!.File.ToString());
+        Assert.Equal(
+            NormalizeModelPath(@"Meshes\Clutter\SoulGem\SoulGemPiece01.nif"),
+            NormalizeModelPath(orb.Model!.File.ToString()));
     }
 
     [Fact]

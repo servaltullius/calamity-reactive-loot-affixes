@@ -37,7 +37,25 @@ skse_build_dir="${CAFF_SKSE_BUILD_DIR:-${skse_build_dir_default}}"
 linux_cross_dll="${CAFF_LINUX_CROSS_DLL:-${linux_cross_dll_default}}"
 spec_manifest="${repo_root}/affixes/affixes.modules.json"
 spec_json="${repo_root}/affixes/affixes.json"
-tmp_dir="$(mktemp -d)"
+papyrus_compiler="${PAPYRUS_COMPILER_EXE:-/mnt/c/Program Files (x86)/Steam/steamapps/content/app_1946180/depot_1946183/Papyrus Compiler/PapyrusCompiler.exe}"
+
+resolve_packaging_tmp_parent() {
+  if [[ -n "${CAFF_PACKAGING_TMPDIR:-}" ]]; then
+    printf '%s\n' "${CAFF_PACKAGING_TMPDIR}"
+    return
+  fi
+
+  if [[ "${papyrus_compiler}" == *.exe && -d /mnt/c/Temp ]]; then
+    printf '%s\n' "/mnt/c/Temp"
+    return
+  fi
+
+  printf '%s\n' "${TMPDIR:-/tmp}"
+}
+
+tmp_parent="$(resolve_packaging_tmp_parent)"
+mkdir -p "${tmp_parent}"
+tmp_dir="$(mktemp -d -p "${tmp_parent}" caff-build-XXXXXX)"
 cleanup() {
   cleanup_repo_run_root
   rm -rf "${tmp_dir}"

@@ -62,9 +62,11 @@ public sealed class LootSpec
     public bool DebugLog { get; init; }
 
     [JsonPropertyName("debugHudNotifications")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? DebugHudNotifications { get; init; }
 
     [JsonPropertyName("debugVerboseLogging")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? DebugVerboseLogging { get; init; }
 
     // If true, DotApply trigger handling auto-disables when CAFF_TAG_DOT coverage is detected as too broad.

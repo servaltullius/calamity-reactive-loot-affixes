@@ -84,10 +84,20 @@ if [[ ! -f "${flags_file}" ]]; then
   exit 1
 fi
 
-if ! command -v wslpath >/dev/null 2>&1; then
-  echo "This script requires wslpath (WSL environment)." >&2
-  exit 1
-fi
+can_run_windows_interop() {
+  local cmd_exe="/mnt/c/Windows/System32/cmd.exe"
+  [[ -x "${cmd_exe}" ]] || return 1
+  "${cmd_exe}" /c exit 0 >/dev/null 2>&1
+}
+
+path_for_compiler() {
+  local path="$1"
+  if [[ "${path_mode}" == "windows" ]]; then
+    wslpath -w "${path}"
+  else
+    printf '%s\n' "${path}"
+  fi
+}
 
 # Active Papyrus bridge (SKSE-first runtime):
 # - compile only the lightweight ModEvent/MCM bridge scripts below.
@@ -105,9 +115,20 @@ for script in "${targets[@]}"; do
   fi
 done
 
-imports="$(wslpath -w "${src_dir}");$(wslpath -w "${stub_dir}");$(wslpath -w "${vanilla_src_dir}")"
-flags_win="$(wslpath -w "${flags_file}")"
-out_win="$(wslpath -w "${out_dir}")"
+expected_outputs=(
+  "CalamityAffixes_ModeControl.pex"
+  "CalamityAffixes_ModEventEmitter.pex"
+  "CalamityAffixes_MCMConfig.pex"
+)
+
+path_mode="posix"
+if [[ "${papyrus_compiler}" == *.exe ]] && command -v wslpath >/dev/null 2>&1 && can_run_windows_interop; then
+  path_mode="windows"
+fi
+
+imports="$(path_for_compiler "${src_dir}");$(path_for_compiler "${stub_dir}");$(path_for_compiler "${vanilla_src_dir}")"
+flags_arg="$(path_for_compiler "${flags_file}")"
+out_arg="$(path_for_compiler "${out_dir}")"
 
 # Legacy outputs are removed on each build so packaged artifacts only contain active scripts.
 stale_outputs=(
@@ -121,8 +142,16 @@ for stale in "${stale_outputs[@]}"; do
 done
 
 pushd "${src_dir}" >/dev/null
-for script in "${targets[@]}"; do
-  "${papyrus_compiler}" "${script}" "-i=${imports}" "-o=${out_win}" "-f=${flags_win}" -op
+for i in "${!targets[@]}"; do
+  script="${targets[i]}"
+  output="${out_dir}/${expected_outputs[i]}"
+  if ! "${papyrus_compiler}" "${script}" "-i=${imports}" "-o=${out_arg}" "-f=${flags_arg}" -op; then
+    if [[ -f "${output}" ]]; then
+      echo "Papyrus compile failed for ${script}; using staged output ${output}" >&2
+      continue
+    fi
+    exit 1
+  fi
 done
 popd >/dev/null
 
