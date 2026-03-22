@@ -12,7 +12,7 @@ Steps:
 Usage:
     python3 tools/release_build.py
     python3 tools/release_build.py --skip-build   # reuse existing DLL
-    python3 tools/release_build.py --version 1.2.20
+    python3 tools/release_build.py --version 1.2.21
 """
 
 from __future__ import annotations

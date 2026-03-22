@@ -7,6 +7,19 @@
 
 ## [Unreleased]
 
+## [1.2.21] - 2026-03-22
+
+`v1.2.21`은 `v1.2.20` 이후 확인된 룬워드 워크벤치 스크롤 UX 문제를 정리한 유지보수 릴리즈입니다.
+
+### Changed
+
+- Prisma 룬워드 레시피 목록이 전역 inertia 스크롤을 타지 않고, 목록 전용 amplified wheel scroll 경로를 사용하도록 조정했습니다.
+- CEF가 작은 휠 델타를 줄 때도 의미 있게 내려가도록 최소 스크롤 step을 추가해, 휠을 과도하게 많이 굴려야 하던 문제를 완화했습니다.
+
+### Fixed
+
+- 룬워드 레시피 목록이 무겁게 끊기거나, 반대로 너무 조금씩만 내려가서 긴 목록 탐색이 불편하던 문제를 수정했습니다.
+
 ## [1.2.20] - 2026-03-22
 
 상세한 RC 흐름은 [v1.2.20 RC 통합 노트](docs/releases/2026-03-22-v1.2.20-rc02-rc23-consolidated-notes.md)를 참고하세요.
@@ -95,7 +108,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.21...HEAD
+[1.2.21]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20...v1.2.21
 [1.2.20]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.19.2...v1.2.20
 [1.2.20-rc23]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20-rc22...v1.2.20-rc23
 [1.2.20-rc22]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20-rc21...v1.2.20-rc22
