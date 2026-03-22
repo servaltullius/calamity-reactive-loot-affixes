@@ -9,26 +9,27 @@
 
 ## [1.2.20] - 2026-03-22
 
+상세한 RC 흐름은 [v1.2.20 RC 통합 노트](docs/releases/2026-03-22-v1.2.20-rc02-rc23-consolidated-notes.md)를 참고하세요.
+
 ### Added
 
-- 룬워드 워크벤치 UI를 재설계하고 레시피 프리뷰 기본 오픈, 스크롤 복구, 패널 드래그/배치 개선을 포함한 작업 흐름 개선을 반영했습니다.
-- Bloom 계열 트랩에 `planted / burst` 피드백과 생성 실패 진단을 추가해, 심김/대기/발동 흐름을 인게임에서 직접 확인할 수 있게 했습니다.
-- 경로 이동 뒤 stale SKSE build tree를 자동 복구하고, Linux/WSL 환경에서도 generator·패키징 검증을 계속 돌릴 수 있는 릴리즈 보강을 추가했습니다.
+- 룬워드 효과군을 스카이림 마법 학파 기반으로 재설계하고, 겹치던 효과를 고유 효과로 바꿔 빌드 선택지가 더 분명해졌습니다.
+- Utility prefix 3종을 전투용 효과로 복귀시키고, suffix 패밀리를 재편해 장비 파밍 결과가 더 뚜렷하게 갈리도록 정리했습니다.
+- Bloom 계열 트랩에 `planted / burst` 피드백과 생성 실패 진단을 추가해, 심김과 실제 발동을 인게임에서 바로 확인할 수 있게 했습니다.
 
 ### Changed
 
-- 룬워드 효과군을 스카이림 마법 학파 기반으로 재설계하고, 중복 효과를 고유 효과로 치환했으며, 재변환/재련 UX와 패널 레이아웃을 전반적으로 손봤습니다.
-- 프리픽스/서픽스 데이터와 한국어 설명을 대규모로 정리해, utility prefix 3종 복귀, suffix 패밀리 교체, 설명 구체화, 공개 카탈로그 정비를 한 사이클에 반영했습니다.
-- `EventBridge`/`PrismaTooltip`/serialization/runtime ownership을 helper와 controller 중심으로 더 잘게 분해해, 트리거/룬워드/직렬화 경로의 유지보수성을 높였습니다.
-- 특수 액션(`CastOnCrit`, `ConvertDamage`, `MindOverMatter`, `Archmage`, `CorpseExplosion`, `SummonCorpseExplosion`)은 이제 유효한 `runtime.trigger`와 명시적 `runtime.procChancePercent > 0`이 없으면 실패하도록 계약을 강화했습니다.
-- `debug notifications`를 `debugHudNotifications`와 `debugVerboseLogging`으로 분리하고, 공개 문서 생성에서는 INTERNAL 항목을 기본 숨김 처리하도록 정리했습니다.
+- 룬워드 워크벤치 UI를 재설계해 레시피 프리뷰 기본 오픈, 스크롤 복구, 레이아웃 밀도 조정, 패널 드래그/배치 개선을 한 사이클에 묶었습니다.
+- 아이템 설명과 공개 문서를 대규모로 손봐, 한국어 설명이 더 구체적으로 보이고 내부용 정의는 플레이어 문서에서 숨기도록 정리했습니다.
+- 트리거, 룬워드, 직렬화, Prisma 패널 관련 내부 구조를 분해해 이후 기능 수정과 검증이 쉬운 방향으로 정리했습니다.
+- 특수 액션 계약을 강화해 잘못된 `runtime.trigger`나 암묵적인 `0 = always-on` 보정을 제거했고, 디버그 HUD와 verbose 로그도 분리했습니다.
 
 ### Fixed
 
 - 플레이어 피격 시 `TESHitEvent` fallback 재진입으로 이어지던 전투 프리징을 수정하고, `HandleHealthDamage` hook 기반의 안정적인 incoming hit routing으로 되돌렸습니다.
 - SE/AE 공용 CommonLibSSE 타깃이 깨져 Address Library 초기화가 실패하던 릴리즈 빌드 문제를 수정했습니다.
-- `ConvertDamage`의 원소별 동시 적용, `AttackDamageMult`/`WeaponSpeedMult` magnitude 단위, affix 개수 reroll, 방어구 suffix 드롭 풀 누락 같은 런타임/데이터 버그를 정리했습니다.
-- runtime contract sync, generator path 처리, MO2 ZIP 패키징, Papyrus compile fallback, fake-`dotnet` 검증 경로를 보강해 릴리즈 검증의 운영 리스크를 줄였습니다.
+- `ConvertDamage`의 원소별 동시 적용, `AttackDamageMult`/`WeaponSpeedMult` magnitude 단위, 어픽스 개수 reroll, 방어구 suffix 드롭 풀 누락 같은 데이터/런타임 버그를 정리했습니다.
+- 프로젝트 경로 이동 뒤 build tree가 깨지던 문제, generator/runtime contract sync 불안정, MO2 ZIP 패키징과 Papyrus compile 검증 경로를 보강해 배포 안정성을 높였습니다.
 
 ## [1.2.20-rc23] - 2026-03-09
 
