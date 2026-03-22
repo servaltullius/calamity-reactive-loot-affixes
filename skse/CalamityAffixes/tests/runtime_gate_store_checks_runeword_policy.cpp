@@ -1593,10 +1593,19 @@ namespace RuntimeGateStoreChecks
 				recipeListTag->find("data-wheel-scroll-mode=\"amplified\"") == std::string::npos ||
 				uiText->find("[data-wheel-scroll-mode=\"amplified\"]") == std::string::npos ||
 				uiText->find("scroll-behavior: auto;") == std::string::npos ||
-				uiText->find("const RECIPE_SCROLL_MULT = 2.35;") == std::string::npos ||
+				uiText->find("const RECIPE_SCROLL_MULT = 1.9;") == std::string::npos ||
+				uiText->find("const RECIPE_SCROLL_MIN_STEP = 72;") == std::string::npos ||
+				uiText->find("const RECIPE_SCROLL_LINE_HEIGHT = 28;") == std::string::npos ||
 				uiText->find("function resolveWheelScrollMode(el)") == std::string::npos ||
+				uiText->find("function resolveWheelDeltaPixels(event, scroller)") == std::string::npos ||
+				uiText->find("function normalizeAmplifiedWheelDelta(deltaPixels)") == std::string::npos ||
+				uiText->find("if (event.deltaMode === 1)") == std::string::npos ||
+				uiText->find("if (event.deltaMode === 2)") == std::string::npos ||
+				uiText->find("const magnitude = Math.max(Math.abs(deltaPixels), RECIPE_SCROLL_MIN_STEP);") == std::string::npos ||
 				uiText->find("if (scrollMode === \"amplified\") {") == std::string::npos ||
-				uiText->find("scroller.scrollTop += e.deltaY * RECIPE_SCROLL_MULT;") == std::string::npos ||
+				uiText->find("const deltaPixels = resolveWheelDeltaPixels(e, scroller);") == std::string::npos ||
+				uiText->find("const normalizedDeltaPixels = normalizeAmplifiedWheelDelta(deltaPixels);") == std::string::npos ||
+				uiText->find("scroller.scrollTop += normalizedDeltaPixels * RECIPE_SCROLL_MULT;") == std::string::npos ||
 				uiText->find("e.preventDefault();") == std::string::npos) {
 				std::cerr << "prisma_panel_recipe_scroll_performance: amplified wheel-scroll guard is missing for dense recipe list\n";
 				return false;

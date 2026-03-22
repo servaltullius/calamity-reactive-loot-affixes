@@ -4559,7 +4559,9 @@
       // ── Smooth inertia scroll for CEF ──
       (function initSmoothScroll() {
         const SCROLL_MULT = 1.8;   // wheel amplification
-        const RECIPE_SCROLL_MULT = 2.35;
+        const RECIPE_SCROLL_MULT = 1.9;
+        const RECIPE_SCROLL_MIN_STEP = 72;
+        const RECIPE_SCROLL_LINE_HEIGHT = 28;
         const FRICTION    = 0.88;  // per-frame decay (lower = more drag)
         const MIN_VEL     = 0.5;   // stop threshold
 
@@ -4602,13 +4604,33 @@
           return typeof mode === "string" ? mode : "";
         }
 
+        function resolveWheelDeltaPixels(event, scroller) {
+          if (event.deltaMode === 1) {
+            return event.deltaY * RECIPE_SCROLL_LINE_HEIGHT;
+          }
+          if (event.deltaMode === 2) {
+            return event.deltaY * Math.max(scroller?.clientHeight || 0, RECIPE_SCROLL_LINE_HEIGHT * 8);
+          }
+          return event.deltaY;
+        }
+
+        function normalizeAmplifiedWheelDelta(deltaPixels) {
+          if (!Number.isFinite(deltaPixels) || deltaPixels === 0) {
+            return 0;
+          }
+          const magnitude = Math.max(Math.abs(deltaPixels), RECIPE_SCROLL_MIN_STEP);
+          return Math.sign(deltaPixels) * magnitude;
+        }
+
         document.addEventListener("wheel", function (e) {
           const scroller = findScrollParent(e.target);
           if (!scroller) return;
           const scrollMode = resolveWheelScrollMode(scroller);
           if (scrollMode === "amplified") {
             e.preventDefault();
-            scroller.scrollTop += e.deltaY * RECIPE_SCROLL_MULT;
+            const deltaPixels = resolveWheelDeltaPixels(e, scroller);
+            const normalizedDeltaPixels = normalizeAmplifiedWheelDelta(deltaPixels);
+            scroller.scrollTop += normalizedDeltaPixels * RECIPE_SCROLL_MULT;
             return;
           }
 
