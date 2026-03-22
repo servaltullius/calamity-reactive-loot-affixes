@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
-"""서픽스 효과 목록 마크다운 문서 생성."""
+"""공개용 서픽스 효과 문서 생성."""
 from __future__ import annotations
 
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 SUFFIXES_PATH = Path("affixes/modules/keywords.affixes.suffixes.json")
 OUTPUT_PATH = Path("docs/SUFFIX_EFFECTS.md")
+
+
+def display_magnitude(actor_value: str, magnitude: float | int) -> str:
+    if actor_value == "WeaponSpeedMult":
+        return str(int(round(float(magnitude) * 100)))
+    if isinstance(magnitude, float) and magnitude.is_integer():
+        return str(int(magnitude))
+    return str(magnitude)
 
 
 def main() -> int:
@@ -25,12 +34,21 @@ def main() -> int:
         families.setdefault(fam, []).append(entry)
 
     lines = [
-        f"# Calamity Suffix Effects ({len(families)} Families, {len(data)} Entries)",
+        "# 서픽스 효과 정리 (공개용)",
         "",
-        f"Auto-generated from `{SUFFIXES_PATH}`.",
+        f"> 업데이트: {date.today().isoformat()}",
+        "> 기준 버전: `v1.2.21`",
+        f"> 기준 코드: `{SUFFIXES_PATH}`",
         "",
-        "| # | Family | ActorValue | Minor (T1) | Standard (T2) | Grand (T3) | Build |",
-        "|---|--------|-----------|-----------|--------------|-----------|-------|",
+        f"- 총 서픽스 패밀리: **{len(families)}개**",
+        f"- 총 서픽스 엔트리: **{len(data)}개**",
+        "- 각 티어 이름은 인게임 표시 문자열(`nameKo`/`nameEn`)을 그대로 사용",
+        "- 공개용 문서 기준으로 패밀리/핵심 수치/추천 빌드를 중심으로 정리",
+        "",
+        "## 패밀리 요약",
+        "",
+        "| # | 패밀리 | 영향 능력치 | T1 | T2 | T3 | 추천 빌드 |",
+        "|---|--------|-------------|----|----|----|-----------|",
     ]
 
     BUILD_MAP = {
@@ -61,30 +79,35 @@ def main() -> int:
     for idx, (fam, entries) in enumerate(sorted(families.items()), 1):
         entries.sort(key=lambda e: e["id"])
         av = entries[0]["records"]["magicEffect"]["actorValue"]
+        av = str(av)
         mags = []
         for e in entries:
             mag = e["records"]["spell"]["effect"]["magnitude"]
-            mags.append(f"+{mag}")
+            mags.append(f"+{display_magnitude(av, mag)}")
         build = BUILD_MAP.get(fam, "")
         lines.append(
             f"| {idx} | **{fam}** | {av} | {mags[0]} | {mags[1]} | {mags[2]} | {build} |"
         )
 
     lines.append("")
-    lines.append("## Detail by Family")
+    lines.append("## 패밀리별 상세")
     lines.append("")
 
     for fam, entries in sorted(families.items()):
         entries.sort(key=lambda e: e["id"])
         lines.append(f"### {fam}")
         lines.append("")
-        lines.append("| Tier | ID | Name (Ko) | Name (En) | Magnitude | EditorID (KYWD) |")
-        lines.append("|------|----|-----------|-----------|-----------:|----------------|")
+        lines.append(f"- 영향 능력치: `{entries[0]['records']['magicEffect']['actorValue']}`")
+        if BUILD_MAP.get(fam):
+            lines.append(f"- 추천 빌드: {BUILD_MAP[fam]}")
+        lines.append("")
+        lines.append("| 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |")
+        lines.append("|------|----|-------------|-----------|-----:|")
         for e in entries:
             tier = e["id"].split("_")[-1].upper()
             mag = e["records"]["spell"]["effect"]["magnitude"]
             lines.append(
-                f"| {tier} | `{e['id']}` | {e['nameKo']} | {e['nameEn']} | {mag} | `{e['editorId']}` |"
+                f"| {tier} | `{e['id']}` | {e['nameKo']} | {e['nameEn']} | {display_magnitude(entries[0]['records']['magicEffect']['actorValue'], mag)} |"
             )
         lines.append("")
 

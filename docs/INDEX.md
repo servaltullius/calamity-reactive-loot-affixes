@@ -4,10 +4,10 @@
 
 | 파일 | 설명 | 생성 |
 |------|------|------|
-| `PREFIX_EFFECTS.md` | 프리픽스 83개 효과 정리 | `tools/gen_prefix_doc.py` |
-| `SUFFIX_EFFECTS.md` | 서픽스 22패밀리 66개 효과 목록 | `tools/gen_suffix_doc.py` |
-| `RUNEWORD_EFFECTS.md` | 룬워드 94개 효과 정리 | 수동 |
-| `AFFIX_CATALOG.md` | 현재 구현 어픽스 전체 목록 (243개) | 수동 |
+| `PREFIX_EFFECTS.md` | 공개용 프리픽스 73개 효과 정리, 인게임 표시 문자열 기준 | `tools/gen_prefix_doc.py` |
+| `SUFFIX_EFFECTS.md` | 공개용 서픽스 22패밀리 66개 효과 정리, 인게임 표시 문자열 기준 | `tools/gen_suffix_doc.py` |
+| `RUNEWORD_EFFECTS.md` | 공개용 룬워드 94개 효과 정리, 인게임 표시 문자열 기준 | `tools/gen_runeword_doc.py` |
+| `AFFIX_CATALOG.md` | 공개용 어픽스 전체 입구 문서 | `tools/update_docs.py` |
 
 ## 루트 문서
 

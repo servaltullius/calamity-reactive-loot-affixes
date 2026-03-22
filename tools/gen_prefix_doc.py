@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate public prefix effects documentation markdown."""
 
-import json, subprocess, sys
+import json
+from datetime import date
 from pathlib import Path
 
 CORE_JSON = Path("affixes/modules/keywords.affixes.core.json")
@@ -95,12 +96,6 @@ def categorize(entries):
         cats.setdefault(cat, []).append((i, e))
     return cats
 
-
-TRIGGER_KO = {
-    "Hit": "적중", "IncomingHit": "피격", "Kill": "처치",
-    "DotApply": "DoT 적용", "LowHealth": "체력 위급",
-}
-
 CAT_ORDER = [
     "원소 타격", "원소 취약", "소환", "피격 방어", "두루마리 숙련",
     "화염 DoT", "CC / 디버프", "유틸리티", "덫 / 룬",
@@ -114,112 +109,25 @@ CAT_ORDER = [
 def format_entry(idx, e):
     rt = e.get("runtime", {})
     action = rt.get("action", {})
-    trigger = rt.get("trigger", "")
-    proc = rt.get("procChancePercent", 0)
-    lucky = rt.get("luckyHitChancePercent", 0)
-    icd = rt.get("icdSeconds", 0)
-    pt_icd = rt.get("perTargetICDSeconds", 0)
-    req_kill = rt.get("requireRecentlyKillSeconds", 0)
-    atype = action.get("type", "")
-    apply_to = action.get("applyTo", "")
     spell = action.get("spellEditorId", "")
     kid = e.get("kid", {})
     kid_type = kid.get("type", "")
-    chance = kid.get("chance", 0)
-    lw = rt.get("lootWeight", 0)
-
-    trig_ko = TRIGGER_KO.get(trigger, trigger)
-
-    # Extract display label
     name_ko = e.get("nameKo", e.get("name", ""))
-    label = name_ko.split(" (")[0] if " (" in name_ko else name_ko
-
-    parts = []
-    if lucky > 0:
-        parts.append(f"Lucky Hit {lucky}%")
-    elif proc > 0:
-        parts.append(f"{trig_ko} {proc}%")
-    else:
-        parts.append(trig_ko)
-    if icd > 0:
-        parts.append(f"ICD {icd}초")
-    if pt_icd > 0:
-        parts.append(f"표적별 ICD {pt_icd}초")
-    if req_kill > 0:
-        parts.append(f"최근 처치 {req_kill}초")
-    trigger_str = " / ".join(parts)
-
-    target_str = "자신" if apply_to == "Self" else "대상" if apply_to == "Target" else apply_to
+    name_en = e.get("nameEn", "")
 
     lines = []
-    header = f"- **{label}** (`{e['id']}`)"
+    header = f"- **`{e['id']}`**"
     if kid_type:
         header += f" [{kid_type}]"
     lines.append(header)
-    lines.append(f"  - {trigger_str} → {target_str} | {atype}")
-
+    if name_ko:
+        lines.append(f"  - 한글 표시: {name_ko}")
+    if name_en and name_en != name_ko:
+        lines.append(f"  - 영문 표시: {name_en}")
     if spell:
-        lines.append(f"  - 스펠: `{spell}`")
-
-    # Evolution
-    evo = action.get("evolution")
-    if evo:
-        lines.append(f"  - 성장형: 단계 {evo['thresholds']}, 배수 {evo['multipliers']}")
-
-    # ModeCycle
-    mc = action.get("modeCycle")
-    if mc:
-        lines.append(f"  - 모드 순환: {mc['labels']}")
-
-    # MagnitudeScaling
-    ms = action.get("magnitudeScaling")
-    if ms:
-        s = f"  - 스케일: {ms['source']} ×{ms['mult']}"
-        if ms.get("add", 0):
-            s += f" +{ms['add']}"
-        if ms.get("max", 0):
-            s += f" (max {ms['max']})"
-        lines.append(s)
-
-    # Special action fields
-    if atype == "ConvertDamage":
-        lines.append(f"  - 전환: {action['element']} {action['percent']}%")
-    elif atype == "CorpseExplosion":
-        lines.append(
-            f"  - 반경 {action['radius']}, {action['flatDamage']}+{action['pctOfCorpseMaxHealth']}% 시체HP, "
-            f"연쇄 {action['maxChainDepth']}회"
-        )
-    elif atype == "SummonCorpseExplosion":
-        lines.append(
-            f"  - 반경 {action['radius']}, {action['flatDamage']}+{action['pctOfCorpseMaxHealth']}% 소환물HP, "
-            f"연쇄 {action['maxChainDepth']}회"
-        )
-    elif atype == "SpawnTrap":
-        lines.append(f"  - 덫 설치: {action.get('delaySeconds', 0)}초 후, {action.get('lifetimeSeconds', 0)}초 유지")
-    elif atype == "MindOverMatter":
-        lines.append(f"  - 물리 피해 {action.get('percent', 0)}% → 매지카 전환")
-    elif atype == "ScrollEchoPreservation":
-        lines.append(f"  - 스크롤 비소모 +{action.get('chancePercent', 0)}%")
-    elif atype == "Archmage":
-        lines.append(f"  - 대마법사: 티어 {action.get('tier', '?')}")
-
-    if lw == 0:
-        lines.append("  - 드롭 가중치: 0 (하위 전용)")
-    elif lw != 1.0:
-        lines.append(f"  - 드롭 가중치: {lw}")
+        lines.append(f"  - 대표 스펠: `{spell}`")
 
     return "\n".join(lines)
-
-
-def get_old_ids():
-    """Get old IDs from git HEAD."""
-    r = subprocess.run(
-        ["git", "show", "HEAD:affixes/modules/keywords.affixes.core.json"],
-        capture_output=True, text=True,
-    )
-    if r.returncode != 0:
-        return None
-    return [e["id"] for e in json.loads(r.stdout)]
 
 
 def main():
@@ -232,7 +140,8 @@ def main():
     out = []
     out.append("# 프리픽스 효과 정리 (공개용)")
     out.append("")
-    out.append("> 업데이트: 2026-03-04")
+    out.append(f"> 업데이트: {date.today().isoformat()}")
+    out.append("> 기준 버전: `v1.2.21`")
     out.append("> 기준 코드:")
     out.append("> - 효과 정의: `affixes/modules/keywords.affixes.core.json`")
     out.append("> - 변환 스크립트: `tools/transform_prefixes.py`")
@@ -241,7 +150,7 @@ def main():
     out.append("- INTERNAL 항목은 공개 문서에서 숨김")
     out.append("- 스카이림 로어 기반 전면 리네이밍 (v1.2.21)")
     out.append("- 9개 freed slot → Thu'um 5종 + 마법학파 4종 신규 효과")
-    out.append("- EditorID 100% 보존 (FormID 무변동)")
+    out.append("- 각 효과 설명은 인게임 표시 문자열(`nameKo`/`nameEn`)을 그대로 사용")
     out.append("")
 
     # Category counts
@@ -267,34 +176,6 @@ def main():
         for idx, e in cats[cat]:
             out.append(format_entry(idx, e))
             out.append("")
-
-    # ID mapping table
-    out.append("---")
-    out.append("")
-    out.append("## 전체 ID 매핑 (이전 → 현재)")
-    out.append("")
-
-    freed_indices = {36, 38, 40, 42, 44, 46, 62, 63, 66}
-    old_ids = get_old_ids()
-    if old_ids:
-        out.append("| # | 이전 ID | 현재 ID | 유형 |")
-        out.append("|---|---------|---------|------|")
-        for i in range(min(len(old_ids), len(entries))):
-            old_id = old_ids[i]
-            new_id = entries[i]["id"]
-            if old_id.startswith("internal_") or new_id.startswith("internal_"):
-                continue
-            if old_id == new_id:
-                typ = "유지"
-            elif i in freed_indices:
-                typ = "**신규 효과**"
-            else:
-                typ = "리네이밍"
-            out.append(f"| {i} | `{old_id}` | `{new_id}` | {typ} |")
-    else:
-        out.append("(git HEAD에서 이전 ID를 가져올 수 없음)")
-
-    out.append("")
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text("\n".join(out) + "\n", encoding="utf-8")
