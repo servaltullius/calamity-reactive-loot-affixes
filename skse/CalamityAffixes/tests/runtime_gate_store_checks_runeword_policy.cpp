@@ -1590,13 +1590,15 @@ namespace RuntimeGateStoreChecks
 
 			const auto recipeListTag = extractElementOpenTagById("recipeList");
 			if (!recipeListTag.has_value() ||
-				recipeListTag->find("data-native-wheel-scroll=\"true\"") == std::string::npos ||
-				uiText->find("[data-native-wheel-scroll=\"true\"]") == std::string::npos ||
+				recipeListTag->find("data-wheel-scroll-mode=\"amplified\"") == std::string::npos ||
+				uiText->find("[data-wheel-scroll-mode=\"amplified\"]") == std::string::npos ||
 				uiText->find("scroll-behavior: auto;") == std::string::npos ||
-				uiText->find("function shouldUseNativeWheelScroll(el)") == std::string::npos ||
-				uiText->find("if (shouldUseNativeWheelScroll(scroller)) return;") == std::string::npos ||
+				uiText->find("const RECIPE_SCROLL_MULT = 2.35;") == std::string::npos ||
+				uiText->find("function resolveWheelScrollMode(el)") == std::string::npos ||
+				uiText->find("if (scrollMode === \"amplified\") {") == std::string::npos ||
+				uiText->find("scroller.scrollTop += e.deltaY * RECIPE_SCROLL_MULT;") == std::string::npos ||
 				uiText->find("e.preventDefault();") == std::string::npos) {
-				std::cerr << "prisma_panel_recipe_scroll_performance: native wheel-scroll guard is missing for dense recipe list\n";
+				std::cerr << "prisma_panel_recipe_scroll_performance: amplified wheel-scroll guard is missing for dense recipe list\n";
 				return false;
 			}
 

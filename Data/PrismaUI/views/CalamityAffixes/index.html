@@ -1261,7 +1261,7 @@
         padding-right: calc(4px * var(--panel-ui-scale));
       }
 
-      [data-native-wheel-scroll="true"] {
+      [data-wheel-scroll-mode="amplified"] {
         scroll-behavior: auto;
       }
 
@@ -1702,7 +1702,7 @@
                     <div
                       id="recipeList"
                       class="cpList rwList rwRecipeExplorerList rwRecipeGrid"
-                      data-native-wheel-scroll="true"
+                      data-wheel-scroll-mode="amplified"
                     ></div>
                     <div class="cpContextMeta" id="runewordRecipeListHint">
                       Select a recipe to load its requirements and action controls into the inspector on the right. / 레시피를 선택하면 오른쪽 inspector에 요구 조건과 실행 컨트롤이 표시됩니다.
@@ -4559,6 +4559,7 @@
       // ── Smooth inertia scroll for CEF ──
       (function initSmoothScroll() {
         const SCROLL_MULT = 1.8;   // wheel amplification
+        const RECIPE_SCROLL_MULT = 2.35;
         const FRICTION    = 0.88;  // per-frame decay (lower = more drag)
         const MIN_VEL     = 0.5;   // stop threshold
 
@@ -4595,14 +4596,21 @@
           return null;
         }
 
-        function shouldUseNativeWheelScroll(el) {
-          return Boolean(el && el.hasAttribute("data-native-wheel-scroll"));
+        function resolveWheelScrollMode(el) {
+          if (!el) return "";
+          const mode = el.getAttribute("data-wheel-scroll-mode");
+          return typeof mode === "string" ? mode : "";
         }
 
         document.addEventListener("wheel", function (e) {
           const scroller = findScrollParent(e.target);
           if (!scroller) return;
-          if (shouldUseNativeWheelScroll(scroller)) return;
+          const scrollMode = resolveWheelScrollMode(scroller);
+          if (scrollMode === "amplified") {
+            e.preventDefault();
+            scroller.scrollTop += e.deltaY * RECIPE_SCROLL_MULT;
+            return;
+          }
 
           e.preventDefault();
           const s = getState(scroller);
