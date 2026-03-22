@@ -1545,6 +1545,64 @@ namespace RuntimeGateStoreChecks
 			return true;
 		}
 
+		bool CheckPrismaPanelRecipeScrollPerformancePolicy()
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
+				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
+
+			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+				std::ifstream in(path);
+				if (!in.is_open()) {
+					return std::nullopt;
+				}
+				return std::string(
+					(std::istreambuf_iterator<char>(in)),
+					std::istreambuf_iterator<char>());
+			};
+
+			const auto uiText = loadText(prismaUiFile);
+			if (!uiText.has_value()) {
+				std::cerr << "prisma_panel_recipe_scroll_performance: failed to open ui source: " << prismaUiFile << "\n";
+				return false;
+			}
+
+			const auto extractElementOpenTagById = [&](std::string_view a_id) -> std::optional<std::string_view> {
+				const std::string marker = std::string("id=\"") + std::string(a_id) + "\"";
+				const auto start = uiText->find(marker);
+				if (start == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto tagStart = uiText->rfind('<', start);
+				if (tagStart == std::string::npos) {
+					return std::nullopt;
+				}
+
+				const auto tagEnd = uiText->find('>', start);
+				if (tagEnd == std::string::npos) {
+					return std::nullopt;
+				}
+
+				return std::string_view(*uiText).substr(tagStart, tagEnd - tagStart + 1);
+			};
+
+			const auto recipeListTag = extractElementOpenTagById("recipeList");
+			if (!recipeListTag.has_value() ||
+				recipeListTag->find("data-native-wheel-scroll=\"true\"") == std::string::npos ||
+				uiText->find("[data-native-wheel-scroll=\"true\"]") == std::string::npos ||
+				uiText->find("scroll-behavior: auto;") == std::string::npos ||
+				uiText->find("function shouldUseNativeWheelScroll(el)") == std::string::npos ||
+				uiText->find("if (shouldUseNativeWheelScroll(scroller)) return;") == std::string::npos ||
+				uiText->find("e.preventDefault();") == std::string::npos) {
+				std::cerr << "prisma_panel_recipe_scroll_performance: native wheel-scroll guard is missing for dense recipe list\n";
+				return false;
+			}
+
+			return true;
+		}
+
 		bool CheckPrismaPanelCommandRoutingExtractionPolicy()
 		{
 			namespace fs = std::filesystem;

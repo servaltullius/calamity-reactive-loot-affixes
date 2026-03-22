@@ -61,6 +61,7 @@ int main()
 	const bool prismaPanelUiBootstrapExtractionOk = CheckPrismaPanelUiBootstrapExtractionPolicy();
 	const bool prismaPanelRenderViewModelExtractionOk = CheckPrismaPanelRenderViewModelExtractionPolicy();
 	const bool prismaPanelUxFlowPolicyOk = CheckPrismaPanelUxFlowPolicy();
+	const bool prismaPanelRecipeScrollPerformanceOk = CheckPrismaPanelRecipeScrollPerformancePolicy();
 	const bool prismaPanelDataExtractionOk = CheckPrismaPanelDataExtractionPolicy();
 	const bool prismaPanelCommandRoutingExtractionOk = CheckPrismaPanelCommandRoutingExtractionPolicy();
 	const bool prismaTooltipLifecycleExtractionOk = CheckPrismaTooltipLifecycleExtractionPolicy();
@@ -122,6 +123,7 @@ int main()
 	        prismaPanelUiBootstrapExtractionOk &&
 	        prismaPanelRenderViewModelExtractionOk &&
 	        prismaPanelUxFlowPolicyOk &&
+	        prismaPanelRecipeScrollPerformanceOk &&
 	        prismaPanelDataExtractionOk &&
 	        prismaPanelCommandRoutingExtractionOk &&
 	        prismaTooltipLifecycleExtractionOk &&

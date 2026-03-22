@@ -1261,6 +1261,10 @@
         padding-right: calc(4px * var(--panel-ui-scale));
       }
 
+      [data-native-wheel-scroll="true"] {
+        scroll-behavior: auto;
+      }
+
       .rwRecipeName {
         font-size: calc(12px * var(--panel-ui-scale));
         font-weight: 600;
@@ -1695,7 +1699,11 @@
                         aria-label="Search runeword recipe" />
                       <div class="rwRecipeCount" id="recipeCountLabel">0</div>
                     </div>
-                    <div id="recipeList" class="cpList rwList rwRecipeExplorerList rwRecipeGrid"></div>
+                    <div
+                      id="recipeList"
+                      class="cpList rwList rwRecipeExplorerList rwRecipeGrid"
+                      data-native-wheel-scroll="true"
+                    ></div>
                     <div class="cpContextMeta" id="runewordRecipeListHint">
                       Select a recipe to load its requirements and action controls into the inspector on the right. / 레시피를 선택하면 오른쪽 inspector에 요구 조건과 실행 컨트롤이 표시됩니다.
                     </div>
@@ -4587,9 +4595,14 @@
           return null;
         }
 
+        function shouldUseNativeWheelScroll(el) {
+          return Boolean(el && el.hasAttribute("data-native-wheel-scroll"));
+        }
+
         document.addEventListener("wheel", function (e) {
           const scroller = findScrollParent(e.target);
           if (!scroller) return;
+          if (shouldUseNativeWheelScroll(scroller)) return;
 
           e.preventDefault();
           const s = getState(scroller);

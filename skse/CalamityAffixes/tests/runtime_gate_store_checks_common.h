@@ -88,6 +88,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckPrismaPanelUiBootstrapExtractionPolicy();
 	bool CheckPrismaPanelRenderViewModelExtractionPolicy();
 	bool CheckPrismaPanelUxFlowPolicy();
+	bool CheckPrismaPanelRecipeScrollPerformancePolicy();
 	bool CheckPrismaPanelDataExtractionPolicy();
 	bool CheckPrismaPanelCommandRoutingExtractionPolicy();
 	bool CheckPrismaTooltipLifecycleExtractionPolicy();
