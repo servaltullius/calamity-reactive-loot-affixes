@@ -7,6 +7,29 @@
 
 ## [Unreleased]
 
+## [1.2.20] - 2026-03-22
+
+### Added
+
+- 룬워드 워크벤치 UI를 재설계하고 레시피 프리뷰 기본 오픈, 스크롤 복구, 패널 드래그/배치 개선을 포함한 작업 흐름 개선을 반영했습니다.
+- Bloom 계열 트랩에 `planted / burst` 피드백과 생성 실패 진단을 추가해, 심김/대기/발동 흐름을 인게임에서 직접 확인할 수 있게 했습니다.
+- 경로 이동 뒤 stale SKSE build tree를 자동 복구하고, Linux/WSL 환경에서도 generator·패키징 검증을 계속 돌릴 수 있는 릴리즈 보강을 추가했습니다.
+
+### Changed
+
+- 룬워드 효과군을 스카이림 마법 학파 기반으로 재설계하고, 중복 효과를 고유 효과로 치환했으며, 재변환/재련 UX와 패널 레이아웃을 전반적으로 손봤습니다.
+- 프리픽스/서픽스 데이터와 한국어 설명을 대규모로 정리해, utility prefix 3종 복귀, suffix 패밀리 교체, 설명 구체화, 공개 카탈로그 정비를 한 사이클에 반영했습니다.
+- `EventBridge`/`PrismaTooltip`/serialization/runtime ownership을 helper와 controller 중심으로 더 잘게 분해해, 트리거/룬워드/직렬화 경로의 유지보수성을 높였습니다.
+- 특수 액션(`CastOnCrit`, `ConvertDamage`, `MindOverMatter`, `Archmage`, `CorpseExplosion`, `SummonCorpseExplosion`)은 이제 유효한 `runtime.trigger`와 명시적 `runtime.procChancePercent > 0`이 없으면 실패하도록 계약을 강화했습니다.
+- `debug notifications`를 `debugHudNotifications`와 `debugVerboseLogging`으로 분리하고, 공개 문서 생성에서는 INTERNAL 항목을 기본 숨김 처리하도록 정리했습니다.
+
+### Fixed
+
+- 플레이어 피격 시 `TESHitEvent` fallback 재진입으로 이어지던 전투 프리징을 수정하고, `HandleHealthDamage` hook 기반의 안정적인 incoming hit routing으로 되돌렸습니다.
+- SE/AE 공용 CommonLibSSE 타깃이 깨져 Address Library 초기화가 실패하던 릴리즈 빌드 문제를 수정했습니다.
+- `ConvertDamage`의 원소별 동시 적용, `AttackDamageMult`/`WeaponSpeedMult` magnitude 단위, affix 개수 reroll, 방어구 suffix 드롭 풀 누락 같은 런타임/데이터 버그를 정리했습니다.
+- runtime contract sync, generator path 처리, MO2 ZIP 패키징, Papyrus compile fallback, fake-`dotnet` 검증 경로를 보강해 릴리즈 검증의 운영 리스크를 줄였습니다.
+
 ## [1.2.20-rc23] - 2026-03-09
 
 ### Added
@@ -71,7 +94,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20-rc23...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20...HEAD
+[1.2.20]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.19.2...v1.2.20
 [1.2.20-rc23]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20-rc22...v1.2.20-rc23
 [1.2.20-rc22]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20-rc21...v1.2.20-rc22
 [1.2.20-rc21]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20-rc20...v1.2.20-rc21
