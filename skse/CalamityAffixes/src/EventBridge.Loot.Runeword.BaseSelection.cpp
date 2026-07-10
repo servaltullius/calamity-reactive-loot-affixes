@@ -49,7 +49,7 @@ namespace CalamityAffixes
 				auto* uid = xList->GetByType<RE::ExtraUniqueID>();
 				if (!uid && a_ensureUniqueId) {
 					auto* created = RE::BSExtraData::Create<RE::ExtraUniqueID>();
-					created->baseID = entry->object->GetFormID();
+					created->baseID = player->GetFormID();
 					created->uniqueID = changes->GetNextUniqueID();
 					xList->Add(created);
 					uid = created;

@@ -79,26 +79,115 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache xwin sysroot
+      - name: Cache xwin tool and SDK downloads
         uses: actions/cache@v4
         with:
-          path: ~/.xwin-cache
-          key: xwin-sysroot-${{ runner.os }}
+          path: |
+            ~/.cargo/bin/xwin
+            ~/.xwin-cache
+          key: xwin-${{ runner.os }}-0.7.0-manifest17
 
-      - name: Configure SKSE static checks
-        working-directory: skse/CalamityAffixes
-        run: cmake --preset linux-release-commonlibsse
+      - name: Cache CommonLibSSE install
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/calamity/commonlibsse-ng/flatrim
+          key: commonlibsse-flatrim-${{ runner.os }}-${{ hashFiles('skse/CalamityAffixes/extern/CommonLibSSE-NG/**', 'skse/CalamityAffixes/extern/vendor/**') }}
+
+      - name: Install cross-build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends clang-19 lld-19 llvm-19 ninja-build
+
+          if [[ ! -x "$HOME/.cargo/bin/xwin" ]]; then
+            cargo install xwin --version 0.7.0 --locked
+          fi
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+          tool_dir="$RUNNER_TEMP/caff-llvm-tools"
+          mkdir -p "$tool_dir"
+          ln -s "$(command -v clang-19)" "$tool_dir/clang-cl"
+          ln -s "$(command -v lld-link-19)" "$tool_dir/lld-link"
+          ln -s "$(command -v llvm-lib-19)" "$tool_dir/llvm-lib"
+          ln -s "$(command -v llvm-mt-19)" "$tool_dir/llvm-mt"
+          ln -s "$(command -v llvm-rc-19)" "$tool_dir/llvm-rc"
+          echo "$tool_dir" >> "$GITHUB_PATH"
+
+      - name: Prepare xwin sysroot
+        run: |
+          xwin --accept-license --cache-dir "$HOME/.xwin-cache" splat \
+            --use-winsysroot-style \
+            --output "$RUNNER_TEMP/caff-xwin"
+
+          # CommonLib requests Windows' mixed-case Version.lib. xwin 0.7 emits
+          # Version.Lib plus lowercase aliases, so add the missing Linux alias.
+          version_lib="$(find "$RUNNER_TEMP/caff-xwin/Windows Kits/10/Lib" \
+            -path '*/um/x86_64/Version.Lib' -print -quit)"
+          test -n "$version_lib"
+          version_lib_dir="$(dirname "$version_lib")"
+          if [[ ! -e "$version_lib_dir/Version.lib" ]]; then
+            ln -s version.lib "$version_lib_dir/Version.lib"
+          fi
+
+          ln -s "$RUNNER_TEMP/caff-xwin" skse/CalamityAffixes/.xwin
+
+      - name: Build CommonLibSSE install tree
+        run: |
+          commonlib_source="$GITHUB_WORKSPACE/skse/CalamityAffixes/extern/CommonLibSSE-NG"
+          commonlib_build="$RUNNER_TEMP/caff-commonlibsse-build"
+          commonlib_install="$HOME/.cache/calamity/commonlibsse-ng/flatrim"
+          vendor_root="$GITHUB_WORKSPACE/skse/CalamityAffixes/extern/vendor"
+          clang_cl="$(command -v clang-cl)"
+          lld_link="$(command -v lld-link)"
+          llvm_lib="$(command -v llvm-lib)"
+          llvm_mt="$(command -v llvm-mt)"
+          llvm_rc="$(command -v llvm-rc)"
+
+          # These generated CMake lists are intentionally ignored by the vendored
+          # CommonLib checkout, so recreate them on a fresh GitHub runner.
+          python3 "$commonlib_source/scripts/cmake_generate.py"
+          cmake -E touch "$commonlib_source/cmake/testlist.cmake"
+
+          if [[ ! -f "$commonlib_install/lib/CommonLibSSE.lib" || \
+                ! -f "$commonlib_install/lib/cmake/CommonLibSSE/CommonLibSSEConfig.cmake" ]]; then
+            cmake -S "$commonlib_source" -B "$commonlib_build" -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_CXX_COMPILER="$clang_cl" \
+              -DCMAKE_LINKER="$lld_link" \
+              -DCMAKE_AR="$llvm_lib" \
+              -DCMAKE_MT="$llvm_mt" \
+              -DCMAKE_RC_COMPILER="$llvm_rc" \
+              "-DCMAKE_CXX_FLAGS=/winsysroot $RUNNER_TEMP/caff-xwin" \
+              -DCMAKE_EXE_LINKER_FLAGS=/machine:x64 \
+              -DCMAKE_MODULE_LINKER_FLAGS=/machine:x64 \
+              -DCMAKE_SHARED_LINKER_FLAGS=/machine:x64 \
+              -DCMAKE_STATIC_LINKER_FLAGS=/machine:x64 \
+              -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+              -DCMAKE_INSTALL_PREFIX="$commonlib_install" \
+              -Dfmt_DIR="$vendor_root/lib/cmake/fmt" \
+              -Dspdlog_DIR="$vendor_root/lib/cmake/spdlog" \
+              -DRAPIDCSV_INCLUDE_DIRS="$vendor_root/include" \
+              -DBUILD_TESTS=OFF \
+              -DSKSE_SUPPORT_XBYAK=ON \
+              -DENABLE_SKYRIM_SE=ON \
+              -DENABLE_SKYRIM_AE=ON \
+              -DENABLE_SKYRIM_VR=OFF
+            cmake --build "$commonlib_build" --target install --parallel
+          fi
+
+          cmake -E copy_if_different \
+            "$commonlib_source/cmake/CommonLibSSE.cmake" \
+            "$commonlib_install/lib/cmake/CommonLibSSE/CommonLibSSE.cmake"
+          ln -s "$commonlib_install" skse/CalamityAffixes/extern/CommonLibSSE-NG/install.linux-clangcl-rel
+
+      - name: Configure SKSE and runtime gates
+        run: python3 tools/ensure_skse_build.py --lane plugin --lane runtime-gate
 
       - name: Build SKSE static checks
-        working-directory: skse/CalamityAffixes
-        run: cmake --build --preset linux-release-commonlibsse-static-checks --parallel
+        run: cmake --build skse/CalamityAffixes/build.linux-clangcl-rel --target CalamityAffixesStaticChecks --parallel
 
       - name: Build SKSE plugin target
-        working-directory: skse/CalamityAffixes
-        run: cmake --build --preset linux-release-commonlibsse --target CalamityAffixes --parallel
-
-      - name: Configure runtime gate checks
-        run: cmake -S skse/CalamityAffixes/tests -B skse/CalamityAffixes/tests/build -DCMAKE_BUILD_TYPE=Release
+        run: cmake --build skse/CalamityAffixes/build.linux-clangcl-rel --target CalamityAffixes --parallel
 
       - name: Build runtime gate checks
         run: cmake --build skse/CalamityAffixes/tests/build --parallel

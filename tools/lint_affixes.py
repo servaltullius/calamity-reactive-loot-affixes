@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
+from compose_affixes import compose_spec
+
 
 def _read_json(path: Path) -> Any:
     try:
@@ -612,27 +614,6 @@ def _check_generated_sync(
         if expected != actual:
             out.append(f"{path} (value mismatch: expected {expected!r}, got {actual!r})")
 
-    # Keep this intentionally simple and robust:
-    # - The generator re-serializes the spec into Data/SKSE/Plugins/CalamityAffixes/affixes.json.
-    # - The serialized form may include defaulted fields (e.g., bools), so strict JSON equality
-    #   against the author spec is not reliable.
-    #
-    # We treat the generated file as stale if it's older than the spec file, and also sanity-check
-    # the affix id set to catch partial/corrupt outputs.
-    try:
-        spec_mtime = spec_path.stat().st_mtime_ns
-        gen_mtime = generated_path.stat().st_mtime_ns
-    except OSError as e:
-        warnings.append(f"Unable to stat files for staleness check: {e}")
-        spec_mtime = 0
-        gen_mtime = 0
-
-    if spec_mtime and gen_mtime and spec_mtime > gen_mtime:
-        errors.append(
-            "Generated runtime config is older than the spec (Data/SKSE/Plugins/CalamityAffixes/affixes.json looks stale). "
-            "Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
-        )
-
     spec_kw = _as_dict(spec.get("keywords")) or {}
     gen_kw = _as_dict(generated.get("keywords")) or {}
     spec_affixes = _as_list(spec_kw.get("affixes")) or []
@@ -665,41 +646,12 @@ def _check_generated_sync(
             + " Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
         )
 
-    generated_by_id: Dict[str, Dict[str, Any]] = {}
-    for entry in gen_affixes:
-        obj = _as_dict(entry)
-        if not obj:
-            continue
-        value = obj.get("id")
-        if isinstance(value, str) and value.strip():
-            generated_by_id[value.strip()] = obj
-
+    # The generator may add defaulted fields, so compare every authored field as a subset
+    # instead of relying on checkout-dependent file timestamps. The authoring-only schema
+    # reference is intentionally absent from the runtime snapshot.
+    authored_spec = {key: value for key, value in spec.items() if key != "$schema"}
     subset_mismatches: List[str] = []
-    for idx, entry in enumerate(spec_affixes):
-        spec_affix = _as_dict(entry)
-        if not spec_affix:
-            continue
-
-        value = spec_affix.get("id")
-        if not isinstance(value, str) or not value.strip():
-            continue
-        affix_id = value.strip()
-        generated_affix = generated_by_id.get(affix_id)
-        if not generated_affix:
-            continue
-
-        for key in ("editorId", "runtime", "records", "kid"):
-            if key not in spec_affix:
-                continue
-            compare_subset(spec_affix.get(key), generated_affix.get(key), path_tokens=["keywords", "affixes", idx, key], out=subset_mismatches)
-            if len(subset_mismatches) >= 20:
-                break
-
-        if len(subset_mismatches) >= 20:
-            break
-
-    if "loot" in spec:
-        compare_subset(spec.get("loot"), generated.get("loot"), path_tokens=["loot"], out=subset_mismatches)
+    compare_subset(authored_spec, generated, path_tokens=[], out=subset_mismatches)
 
     if subset_mismatches:
         errors.append(
@@ -707,41 +659,6 @@ def _check_generated_sync(
             + " ; ".join(subset_mismatches)
             + " Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
         )
-
-
-def _collect_manifest_module_paths(manifest_path: Path) -> List[Path]:
-    manifest = _read_json(manifest_path)
-    if not isinstance(manifest, dict):
-        raise RuntimeError(f"Modules manifest must be an object: {manifest_path}")
-
-    root = manifest.get("root")
-    keywords = _as_dict(manifest.get("keywords"))
-    if not isinstance(root, str) or not root.strip():
-        raise RuntimeError(f"Modules manifest requires a non-empty string 'root': {manifest_path}")
-    if not keywords:
-        raise RuntimeError(f"Modules manifest requires object 'keywords': {manifest_path}")
-
-    def read_module_array(key: str) -> List[str]:
-        raw = _as_list(keywords.get(key))
-        if raw is None:
-            raise RuntimeError(f"Modules manifest requires keywords.{key} array: {manifest_path}")
-        out: List[str] = []
-        for idx, value in enumerate(raw):
-            if not isinstance(value, str) or not value.strip():
-                raise RuntimeError(f"Modules manifest invalid path at keywords.{key}[{idx}]: {manifest_path}")
-            out.append(value.strip())
-        return out
-
-    module_rel_paths: List[str] = [root.strip()]
-    module_rel_paths.extend(read_module_array("tags"))
-    module_rel_paths.extend(read_module_array("affixes"))
-    module_rel_paths.extend(read_module_array("kidRules"))
-    module_rel_paths.extend(read_module_array("spidRules"))
-
-    resolved: List[Path] = []
-    for rel in module_rel_paths:
-        resolved.append((manifest_path.parent / rel).resolve())
-    return resolved
 
 
 def _check_module_manifest_sync(
@@ -752,39 +669,20 @@ def _check_module_manifest_sync(
     warnings: List[str],
 ) -> None:
     try:
-        module_paths = _collect_manifest_module_paths(manifest_path)
+        composed = compose_spec(manifest_path.resolve())
     except RuntimeError as e:
         errors.append(str(e))
         return
 
-    missing_paths = [p for p in module_paths if not p.exists()]
-    if missing_paths:
-        preview = ", ".join(str(p) for p in missing_paths[:3])
-        suffix = "" if len(missing_paths) <= 3 else ", ..."
-        errors.append(
-            f"Modules manifest references missing files: {preview}{suffix}. "
-            "Run: python3 tools/compose_affixes.py"
-        )
-        return
-
     try:
-        spec_mtime = spec_path.stat().st_mtime_ns
-    except OSError as e:
-        warnings.append(f"Unable to stat spec file for modules staleness check: {e}")
+        current = _read_json(spec_path)
+    except RuntimeError as e:
+        errors.append(str(e))
         return
 
-    latest_module_mtime = 0
-    for module_path in module_paths:
-        try:
-            module_mtime = module_path.stat().st_mtime_ns
-        except OSError as e:
-            warnings.append(f"Unable to stat module file for staleness check: {module_path} ({e})")
-            continue
-        latest_module_mtime = max(latest_module_mtime, module_mtime)
-
-    if latest_module_mtime and latest_module_mtime > spec_mtime:
+    if current != composed:
         errors.append(
-            f"Spec file is older than modular sources ({spec_path} is stale vs {manifest_path}). "
+            f"Spec file does not match modular sources ({spec_path} vs {manifest_path}). "
             "Run: python3 tools/compose_affixes.py"
         )
 

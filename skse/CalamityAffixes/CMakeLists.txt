@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 1.2.21 LANGUAGES CXX)
+project(CalamityAffixes VERSION 1.2.22 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,6 +24,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/detail/EventBridge.Constants.inl
 	    include/CalamityAffixes/HitDataUtil.h
 	    include/CalamityAffixes/Hooks.h
+	    include/CalamityAffixes/InstanceKeyTransferPolicy.h
 	    include/CalamityAffixes/InstanceStateKey.h
 	    include/CalamityAffixes/LootCurrencyLedger.h
 	    include/CalamityAffixes/LootRerollGuard.h
@@ -214,6 +215,7 @@ if (BUILD_TESTING)
             tests/test_loot_eligibility.cpp
             tests/test_loot_ui_guards.cpp
             tests/test_instance_state_key.cpp
+            tests/test_instance_key_transfer_policy.cpp
             tests/test_resync_scheduler.cpp
             tests/test_runeword_util.cpp
             tests/test_reforge_rules.cpp

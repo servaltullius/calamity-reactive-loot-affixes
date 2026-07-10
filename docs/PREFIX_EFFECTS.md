@@ -1,7 +1,7 @@
 # 프리픽스 효과 정리 (공개용)
 
 > 업데이트: 2026-03-22
-> 기준 버전: `v1.2.21`
+> 기준 버전: `v1.2.22`
 > 기준 코드:
 > - 효과 정의: `affixes/modules/keywords.affixes.core.json`
 > - 변환 스크립트: `tools/transform_prefixes.py`
@@ -420,4 +420,3 @@
   - 한글 표시: 마나 매듭: 15% 확률로 매지카 재생 감소. 8초마다 발동.
   - 영문 표시: Mana Knot (Lucky Hit 15% / ICD 8s): Magicka Regen Reduction
   - 대표 스펠: `CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN`
-

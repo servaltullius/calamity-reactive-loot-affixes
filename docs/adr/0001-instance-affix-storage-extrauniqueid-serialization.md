@@ -24,12 +24,20 @@ Accepted
 
 - 아이템 인스턴스 식별은 `RE::ExtraUniqueID`를 기준으로 한다.
 - 플러그인 내부에 인스턴스 어픽스를 저장하는 맵을 유지한다:
-  - key = `(baseFormID << 16) | uniqueID` (`EventBridge::MakeInstanceKey`)
+  - key = `(ownerFormID << 16) | uniqueID` (`EventBridge::MakeInstanceKey`)
   - value = `affixToken`(64-bit) = `FNV-1a(affixId)` (`CalamityAffixes::MakeAffixToken`)
 - 이 맵은 SKSE Serialization으로 저장/복원한다.
   - v1(과거): `affixId` 문자열을 그대로 저장
   - v2(현재): `affixToken`(64-bit)만 저장 (세이브 크기/메모리 최적화)
   - 로드 시 v1 → v2 자동 마이그레이션(문자열 → 토큰) 지원
+- `TESUniqueIDChangeEvent`가 보고하는 `(oldOwnerFormID, oldUniqueID)`에서
+  `(newOwnerFormID, newUniqueID)`로 모든 관련 상태를 함께 이동한다.
+- 목적지 키에 이미 실질 상태가 있으면 토큰을 합치지 않는다. 어느 쪽이 실제 소유자인지
+  증명할 수 없는 두 충돌 상태를 모두 fail-closed 방식으로 폐기하고 경고를 기록한다.
+- v1.2.21 이하에서 잘못 생성된 `(itemFormID, uniqueID)` synthetic 키는
+  `kPostLoadGame` 시점에 현재 플레이어 인벤토리와 UID 유일성이 확인되는 경우에만
+  `(playerFormID, uniqueID)`로 보정한다. 목적지에 애매한 기존 상태가 있으면 먼저 폐기해
+  현재 아이템으로 누수되지 않게 한 뒤, xList가 직접 증명하는 legacy source만 이동한다.
 
 ## Consequences
 
@@ -59,5 +67,6 @@ Accepted
 
 ## References
 
+- SKSE64: `ExtraUniqueID::ownerFormId`, `TESUniqueIDChangeEvent::oldOwnerFormId/newOwnerFormId`
 - CommonLibSSE: `RE::TESContainerChangedEvent`의 `uniqueID` 필드(문서/헤더)
 - SKSE: Serialization Interface 개요

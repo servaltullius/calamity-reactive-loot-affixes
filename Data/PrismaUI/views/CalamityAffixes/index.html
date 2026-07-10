@@ -464,6 +464,23 @@
         background: rgba(255, 255, 255, 0.03);
       }
 
+      .cpDangerButton {
+        border-color: rgba(255, 128, 128, 0.34);
+        background: rgba(255, 96, 96, 0.08);
+        color: rgba(255, 232, 232, 0.96);
+      }
+
+      .cpDangerButton:hover {
+        border-color: rgba(255, 150, 150, 0.72);
+        background: rgba(255, 96, 96, 0.16);
+      }
+
+      .cpDangerButton.armed {
+        border-color: rgba(255, 112, 112, 0.92);
+        background: rgba(170, 28, 38, 0.42);
+        box-shadow: 0 0 0 1px rgba(255, 112, 112, 0.18) inset;
+      }
+
       #feedback {
         flex: 1 1 auto;
         margin: 0;
@@ -1197,6 +1214,10 @@
         grid-column: 1 / -1;
       }
 
+      .rwTransmuteBar.compact .cpDangerButton {
+        grid-column: 1 / -1;
+      }
+
       .rwTransmuteBar.compact .cpButton {
         text-align: center;
         padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
@@ -1756,6 +1777,7 @@
                         </button>
                         <button id="runewordReforgeButton" class="cpButton" data-cmd="runeword.reforge">Reforge / 재련</button>
                         <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Status / 상태</button>
+                        <button id="runewordResetButton" class="cpButton cpDangerButton" data-cmd="runeword.reset">Reset State / 상태 초기화</button>
                       </div>
                       <details id="runewordCubeDetails" class="rwRailDetails">
                         <summary id="runewordCubeDetailsSummary" class="rwRailSummary">
@@ -1971,6 +1993,7 @@
       const runewordInsertButton = document.getElementById("runewordInsertButton");
       const runewordReforgeButton = document.getElementById("runewordReforgeButton");
       const runewordStatusButton = document.getElementById("runewordStatusButton");
+      const runewordResetButton = document.getElementById("runewordResetButton");
       const mainRunewordTab = document.getElementById("mainRunewordTab");
       const mainAffixTab = document.getElementById("mainAffixTab");
       const mainAdvancedTab = document.getElementById("mainAdvancedTab");
@@ -2038,6 +2061,9 @@
         missingSummary: "",
         requiredRunes: []
       };
+      let runewordResetArmedUntil = 0;
+      let runewordResetArmedBaseKey = "";
+      const runewordResetConfirmWindowMs = 6000;
       let panelDragState = null;
       let panelResizeState = null;
       let tooltipDragState = null;
@@ -2073,7 +2099,8 @@
       });
       const previewInvalidatingCommands = new Set([
         "runeword.insert",
-        "runeword.reforge"
+        "runeword.reforge",
+        "runeword.reset"
       ]);
       const previewInvalidatingCommandPrefixes = Object.freeze([
         "runeword.base.select:"
@@ -2539,6 +2566,9 @@
         }
         if (runewordReforgeButton) {
           runewordReforgeButton.textContent = t("Reforge", "재련");
+        }
+        if (runewordResetButton && Date.now() >= runewordResetArmedUntil) {
+          runewordResetButton.textContent = t("Reset State", "상태 초기화");
         }
         if (manualModeTitle) {
           manualModeTitle.textContent = t("Manual Mode", "수동 모드");
@@ -3793,6 +3823,17 @@
             "베이스를 먼저 선택하세요."
           );
 
+        const resetEnabled = hasBase;
+        const resetHint = resetEnabled ?
+          t(
+            "Remove all Calamity affixes, runeword progress, and instance state from the selected base. No material refund.",
+            "선택 베이스의 모든 Calamity 어픽스, 룬워드 진행도, 인스턴스 상태를 제거합니다. 재료는 환불되지 않습니다."
+          ) :
+          t(
+            "Select a base first.",
+            "베이스를 먼저 선택하세요."
+          );
+
         return {
           hasBase,
           hasRecipe,
@@ -3801,7 +3842,9 @@
           buttonLabel,
           buttonHint,
           reforgeEnabled,
-          reforgeHint
+          reforgeHint,
+          resetEnabled,
+          resetHint
         };
       }
 
@@ -4125,6 +4168,16 @@
           runewordReforgeButton.title = actionState.reforgeHint;
           runewordReforgeButton.setAttribute("aria-label", actionState.reforgeHint);
         }
+        if (runewordResetButton) {
+          runewordResetButton.disabled = !actionState.resetEnabled;
+          if (!actionState.resetEnabled || Date.now() >= runewordResetArmedUntil) {
+            runewordResetArmedUntil = 0;
+            runewordResetButton.classList.remove("armed");
+            runewordResetButton.textContent = t("Reset State", "상태 초기화");
+            runewordResetButton.title = actionState.resetHint;
+            runewordResetButton.setAttribute("aria-label", actionState.resetHint);
+          }
+        }
       }
 
       function parseInteropArrayPayload(raw) {
@@ -4163,9 +4216,14 @@
 
       function setInventoryItems(raw) {
         const prevSelectedItemName = selectedItemNameState;
+        const prevSelectedBaseKey = resolveSelectedRunewordBaseKey();
         const items = parseInteropArrayPayload(raw);
 
         inventoryItemsState = items;
+        const nextSelectedBaseKey = resolveSelectedRunewordBaseKey();
+        if (runewordResetArmedUntil !== 0 && nextSelectedBaseKey !== prevSelectedBaseKey) {
+          clearRunewordResetConfirmation();
+        }
         const selected = items.find((item) => item && item.selected && typeof item.name === "string");
         if (selected && typeof selected.name === "string") {
           selectedItemNameState = selected.name;
@@ -4417,6 +4475,63 @@
         return previewInvalidatingCommandPrefixes.some((prefix) => command.startsWith(prefix));
       }
 
+      function clearRunewordResetConfirmation() {
+        runewordResetArmedUntil = 0;
+        runewordResetArmedBaseKey = "";
+        if (!runewordResetButton) {
+          return;
+        }
+        runewordResetButton.classList.remove("armed");
+        runewordResetButton.textContent = t("Reset State", "상태 초기화");
+        const actionState = resolveRunewordPanelActionState(runewordPanelState);
+        runewordResetButton.title = actionState.resetHint;
+        runewordResetButton.setAttribute("aria-label", actionState.resetHint);
+      }
+
+      function resolveSelectedRunewordBaseKey() {
+        const selected = inventoryItemsState.find((item) => item && item.selected);
+        return selected && typeof selected.key === "string" ? selected.key : "";
+      }
+
+      function armRunewordResetConfirmation(button) {
+        const now = Date.now();
+        const selectedBaseKey = resolveSelectedRunewordBaseKey();
+        if (runewordResetArmedUntil > now) {
+          const confirmsSameBase =
+            selectedBaseKey.length > 0 && selectedBaseKey === runewordResetArmedBaseKey;
+          clearRunewordResetConfirmation();
+          if (confirmsSameBase) {
+            return false;
+          }
+        }
+
+        if (!selectedBaseKey) {
+          setActionFeedback(t(
+            "Select the equipped base again before resetting it.",
+            "초기화할 착용 베이스를 다시 선택하세요."
+          ));
+          return true;
+        }
+
+        runewordResetArmedUntil = now + runewordResetConfirmWindowMs;
+        runewordResetArmedBaseKey = selectedBaseKey;
+        button.classList.add("armed");
+        button.textContent = t("Confirm Full Reset", "전체 초기화 확인");
+        const warning = t(
+          "Click again within 6 seconds. All affixes and runeword progress will be removed; materials are not refunded.",
+          "6초 안에 다시 누르세요. 모든 어픽스와 룬워드 진행도가 삭제되며 재료는 환불되지 않습니다."
+        );
+        button.title = warning;
+        button.setAttribute("aria-label", warning);
+        setActionFeedback(warning);
+        window.setTimeout(() => {
+          if (runewordResetArmedUntil !== 0 && Date.now() >= runewordResetArmedUntil) {
+            clearRunewordResetConfirmation();
+          }
+        }, runewordResetConfirmWindowMs + 50);
+        return true;
+      }
+
       function resolvePreviewPendingStateForCommand(command) {
         if (previewInvalidatingCommandPrefixes.some((prefix) => command.startsWith(prefix))) {
           return true;
@@ -4433,6 +4548,14 @@
 
         if (handleTooltipUiCommand(command)) {
           return true;
+        }
+
+        if (command === "runeword.reset") {
+          if (armRunewordResetConfirmation(button)) {
+            return true;
+          }
+        } else if (runewordResetArmedUntil !== 0) {
+          clearRunewordResetConfirmation();
         }
 
         const openTab = button.getAttribute(panelOpenTabAttribute);

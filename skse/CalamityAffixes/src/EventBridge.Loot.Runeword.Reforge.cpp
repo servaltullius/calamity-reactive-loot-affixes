@@ -230,4 +230,75 @@ namespace CalamityAffixes
 		return result;
 	}
 
+	EventBridge::OperationResult EventBridge::ResetSelectedRunewordBaseCalamityState()
+	{
+		const std::scoped_lock lock(_stateMutex);
+		OperationResult result{};
+		if (!_configLoaded) {
+			result.message = "Reset unavailable: runtime config not loaded.";
+			return result;
+		}
+		if (_runewordState.transmuteInProgress) {
+			result.message = "Reset unavailable while runeword transmutation is in progress.";
+			return result;
+		}
+
+		SanitizeRunewordState();
+		std::uint64_t instanceKey = 0u;
+		RE::InventoryEntryData* entry = nullptr;
+		RE::ExtraDataList* xList = nullptr;
+		std::string baseResolveFailure;
+		if (!ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)) {
+			result.message = "Reset failed: " + baseResolveFailure;
+			return result;
+		}
+
+		std::string itemName = ResolveStoredLootDisplayBaseName(entry, xList);
+		if (itemName.empty()) {
+			itemName = ResolveInventoryDisplayName(entry, xList);
+		}
+		if (itemName.empty()) {
+			itemName = "Selected base";
+		}
+
+		const bool hadAffixes = _instanceAffixes.erase(instanceKey) > 0u;
+		const bool hadRuntimeState = std::ranges::any_of(
+			_instanceStates,
+			[instanceKey](const auto& stateEntry) {
+				return stateEntry.first.instanceKey == instanceKey;
+			});
+		const bool hadRunewordProgress = _runewordState.instanceStates.erase(instanceKey) > 0u;
+		const bool hadPreview = FindLootPreviewSlots(instanceKey) != nullptr;
+
+		EraseInstanceRuntimeStates(instanceKey);
+		ForgetLootPreviewSlots(instanceKey);
+		// Keep the evaluated marker so reset cannot become a free-reroll path if
+		// automatic assignment is enabled again in a future version.
+		if (!IsLootEvaluatedInstance(instanceKey)) {
+			MarkLootEvaluatedInstance(instanceKey);
+		}
+
+		bool renamed = false;
+		if (auto* text = xList->GetExtraTextDisplayData(); text && !itemName.empty()) {
+			const char* currentRaw = xList->GetDisplayName(entry->object);
+			const std::string_view currentName = currentRaw ? std::string_view(currentRaw) : std::string_view{};
+			if (currentName != itemName) {
+				text->SetName(itemName.c_str());
+				renamed = true;
+			}
+		}
+
+		if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == instanceKey) {
+			_runewordState.selectedBaseKey.reset();
+		}
+		RebuildActiveCounts();
+
+		result.success = true;
+		const bool changed = hadAffixes || hadRuntimeState || hadRunewordProgress || hadPreview || renamed;
+		result.message = changed ?
+			"Reset complete: " + itemName + " (Calamity state removed; no material refund)." :
+			"Already clear: " + itemName + ".";
+		return result;
+	}
+
 }

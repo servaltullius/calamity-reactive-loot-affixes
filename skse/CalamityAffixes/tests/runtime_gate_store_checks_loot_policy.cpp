@@ -598,23 +598,53 @@ namespace RuntimeGateStoreChecks
 		namespace fs = std::filesystem;
 		const fs::path testFile{ __FILE__ };
 		const fs::path lootFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.cpp";
+		const fs::path lifecycleFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Serialization.Lifecycle.cpp";
+		const fs::path baseSelectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.BaseSelection.cpp";
 
-		std::ifstream in(lootFile);
-		if (!in.is_open()) {
-			std::cerr << "loot_reroll_exploit_guard: failed to open loot source: " << lootFile << "\n";
+		const auto loadText = [](const fs::path& a_path) -> std::optional<std::string> {
+			std::ifstream in(a_path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+		const auto source = loadText(lootFile);
+		const auto lifecycleSource = loadText(lifecycleFile);
+		const auto baseSelectionSource = loadText(baseSelectionFile);
+		if (!source || !lifecycleSource || !baseSelectionSource) {
+			std::cerr << "loot_reroll_exploit_guard: failed to open instance ownership sources\n";
 			return false;
 		}
 
-		std::string source(
-			(std::istreambuf_iterator<char>(in)),
-			std::istreambuf_iterator<char>());
-
-		if (source.find("IsLootSourceCorpseChestOrWorld(") == std::string::npos ||
-			source.find("_lootState.rerollGuard.ConsumeIfPlayerDropPickup(") == std::string::npos ||
-			source.find("_lootState.playerContainerStash[stashKey] += a_event->itemCount;") == std::string::npos ||
-			source.find("skipping loot roll (player dropped + re-picked)") == std::string::npos ||
-			source.find("skipping loot roll (player stashed + retrieved)") == std::string::npos) {
+		if (source->find("IsLootSourceCorpseChestOrWorld(") == std::string::npos ||
+			source->find("_lootState.rerollGuard.ConsumeIfPlayerDropPickup(") == std::string::npos ||
+			source->find("_lootState.playerContainerStash[stashKey] += a_event->itemCount;") == std::string::npos ||
+			source->find("skipping loot roll (player dropped + re-picked)") == std::string::npos ||
+			source->find("skipping loot roll (player stashed + retrieved)") == std::string::npos) {
 			std::cerr << "loot_reroll_exploit_guard: anti-reroll pickup guards are missing\n";
+			return false;
+		}
+
+		if (source->find("const auto oldKey = MakeInstanceKey(oldOwnerID, a_event->oldUniqueID);") == std::string::npos ||
+			source->find("const auto newKey = MakeInstanceKey(newOwnerID, a_event->newUniqueID);") == std::string::npos ||
+			source->find("const auto legacyItemKey = MakeInstanceKey(itemFormID, a_event->oldUniqueID);") == std::string::npos ||
+			source->find("if (materialOld && materialLegacyItemKey)") == std::string::npos ||
+			source->find(".legacyItemKeyTracked = policyLegacyTracked") == std::string::npos ||
+			source->find("if (HasMaterialInstanceState(a_newKey))") == std::string::npos ||
+			source->find("DiscardInstanceKeyState(transferPlan.oldKey);") == std::string::npos ||
+			source->find("DiscardInstanceKeyState(transferPlan.newKey);") == std::string::npos ||
+			source->find("AddToken(affixNode") != std::string::npos ||
+			baseSelectionSource->find("created->baseID = player->GetFormID();") == std::string::npos ||
+			lifecycleSource->find("bool EventBridge::NormalizeLegacyPlayerInstanceKeys()") == std::string::npos ||
+			lifecycleSource->find("uidUseCounts[uid->uniqueID]") == std::string::npos ||
+			lifecycleSource->find("if (duplicateUID)") == std::string::npos ||
+			lifecycleSource->find("DiscardInstanceKeyState(canonicalKey);") == std::string::npos ||
+			lifecycleSource->find("uid->baseID != itemFormID") == std::string::npos ||
+			lifecycleSource->find("RemapInstanceKey(legacyKey, canonicalKey);") == std::string::npos ||
+			lifecycleSource->find("uid->baseID = playerID;") == std::string::npos) {
+			std::cerr << "loot_reroll_exploit_guard: owner+UID transfer or legacy normalization policy is incomplete\n";
 			return false;
 		}
 
