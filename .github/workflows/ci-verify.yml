@@ -117,6 +117,17 @@ jobs:
           xwin --accept-license --cache-dir "$HOME/.xwin-cache" splat \
             --use-winsysroot-style \
             --output "$RUNNER_TEMP/caff-xwin"
+
+          # CommonLib requests Windows' mixed-case Version.lib. xwin 0.7 emits
+          # Version.Lib plus lowercase aliases, so add the missing Linux alias.
+          version_lib="$(find "$RUNNER_TEMP/caff-xwin/Windows Kits/10/Lib" \
+            -path '*/um/x86_64/Version.Lib' -print -quit)"
+          test -n "$version_lib"
+          version_lib_dir="$(dirname "$version_lib")"
+          if [[ ! -e "$version_lib_dir/Version.lib" ]]; then
+            ln -s version.lib "$version_lib_dir/Version.lib"
+          fi
+
           ln -s "$RUNNER_TEMP/caff-xwin" skse/CalamityAffixes/.xwin
 
       - name: Build CommonLibSSE install tree
