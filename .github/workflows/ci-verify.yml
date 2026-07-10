@@ -130,6 +130,11 @@ jobs:
           llvm_mt="$(command -v llvm-mt)"
           llvm_rc="$(command -v llvm-rc)"
 
+          # These generated CMake lists are intentionally ignored by the vendored
+          # CommonLib checkout, so recreate them on a fresh GitHub runner.
+          python3 "$commonlib_source/scripts/cmake_generate.py"
+          cmake -E touch "$commonlib_source/cmake/testlist.cmake"
+
           if [[ ! -f "$commonlib_install/lib/CommonLibSSE.lib" || \
                 ! -f "$commonlib_install/lib/cmake/CommonLibSSE/CommonLibSSEConfig.cmake" ]]; then
             cmake -S "$commonlib_source" -B "$commonlib_build" -G Ninja \
