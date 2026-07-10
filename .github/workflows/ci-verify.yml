@@ -115,7 +115,9 @@ jobs:
 
       - name: Prepare xwin sysroot
         run: |
-          xwin --accept-license --cache-dir "$HOME/.xwin-cache" splat --output "$RUNNER_TEMP/caff-xwin"
+          xwin --accept-license --cache-dir "$HOME/.xwin-cache" splat \
+            --use-winsysroot-style \
+            --output "$RUNNER_TEMP/caff-xwin"
           ln -s "$RUNNER_TEMP/caff-xwin" skse/CalamityAffixes/.xwin
 
       - name: Build CommonLibSSE install tree
