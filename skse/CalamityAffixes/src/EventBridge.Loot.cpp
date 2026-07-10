@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/InstanceKeyTransferPolicy.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/TriggerGuards.h"
 
@@ -394,8 +395,8 @@ namespace CalamityAffixes
 					}
 				}
 			}
-			if (instanceKey == 0 && a_event->baseObj != 0 && a_event->uniqueID != 0) {
-				instanceKey = MakeInstanceKey(a_event->baseObj, a_event->uniqueID);
+			if (instanceKey == 0 && a_event->uniqueID != 0) {
+				instanceKey = MakeInstanceKey(playerId, a_event->uniqueID);
 			}
 
 			if (refHandle != 0) {
@@ -508,50 +509,156 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		if (a_event->oldBaseID == 0 || a_event->newBaseID == 0) {
+		const auto oldOwnerID = a_event->oldBaseID;
+		const auto newOwnerID = a_event->newBaseID;
+		const auto itemFormID = a_event->objectID;
+		if (oldOwnerID == 0 || newOwnerID == 0 || itemFormID == 0) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 		if (a_event->oldUniqueID == 0 || a_event->newUniqueID == 0) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		const auto oldKey = MakeInstanceKey(a_event->oldBaseID, a_event->oldUniqueID);
-		const auto newKey = MakeInstanceKey(a_event->newBaseID, a_event->newUniqueID);
-		if (oldKey == newKey) {
-			return RE::BSEventNotifyControl::kContinue;
-		}
-
-		const bool trackedPreview = FindLootPreviewSlots(oldKey) != nullptr;
-		const bool trackedOld =
-			_instanceAffixes.contains(oldKey) ||
-			IsLootEvaluatedInstance(oldKey) ||
-			trackedPreview ||
-			_runewordState.instanceStates.contains(oldKey) ||
-			(_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == oldKey);
-		if (!trackedOld) {
-			return RE::BSEventNotifyControl::kContinue;
-		}
+		const auto oldKey = MakeInstanceKey(oldOwnerID, a_event->oldUniqueID);
+		const auto newKey = MakeInstanceKey(newOwnerID, a_event->newUniqueID);
+		const auto legacyItemKey = MakeInstanceKey(itemFormID, a_event->oldUniqueID);
+		const bool trackedOld = IsInstanceKeyTracked(oldKey);
+		const bool trackedLegacyItemKey = legacyItemKey != oldKey && IsInstanceKeyTracked(legacyItemKey);
+		const bool materialOld = HasMaterialInstanceState(oldKey);
+		const bool materialLegacyItemKey =
+			legacyItemKey != oldKey && HasMaterialInstanceState(legacyItemKey);
+		const bool trackedNew = IsInstanceKeyTracked(newKey);
+		const bool materialNew = HasMaterialInstanceState(newKey);
+		const bool trackedPreview =
+			FindLootPreviewSlots(oldKey) != nullptr ||
+			(trackedLegacyItemKey && FindLootPreviewSlots(legacyItemKey) != nullptr);
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		const auto playerId = player ? player->GetFormID() : 0u;
-		const bool ownerIsPlayer = (playerId != 0u && a_event->objectID == playerId);
-		const bool playerOwnsEither = ownerIsPlayer || PlayerHasInstanceKey(oldKey) || PlayerHasInstanceKey(newKey);
+		const bool playerHasOldKey =
+			PlayerHasInstanceKey(oldKey) ||
+			(trackedLegacyItemKey && PlayerHasInstanceKey(legacyItemKey));
+		const bool playerHasNewKey = PlayerHasInstanceKey(newKey);
 		const bool previewMenuContextOpen = IsPreviewRemapMenuContextOpen();
-		if (!ShouldAllowPreviewUniqueIdRemap(playerOwnsEither, trackedPreview, previewMenuContextOpen)) {
+		const bool previewRemapEvidence = ShouldAllowPreviewUniqueIdRemap(
+			false,
+			trackedPreview,
+			previewMenuContextOpen);
+		if (materialOld && materialLegacyItemKey) {
+			SKSE::log::warn(
+				"CalamityAffixes: blocked ambiguous canonical+legacy source collision; all involved states were discarded (oldOwner={:08X}, newOwner={:08X}, item={:08X}, oldUid={}, newUid={}, oldKey={:016X}, legacyKey={:016X}, newKey={:016X}).",
+				oldOwnerID,
+				newOwnerID,
+				itemFormID,
+				a_event->oldUniqueID,
+				a_event->newUniqueID,
+				oldKey,
+				legacyItemKey,
+				newKey);
+			DiscardInstanceKeyState(oldKey);
+			DiscardInstanceKeyState(legacyItemKey);
+			if (materialNew) {
+				DiscardInstanceKeyState(newKey);
+			}
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		const bool policyOldTracked = materialOld || (!materialLegacyItemKey && trackedOld);
+		const bool policyLegacyTracked =
+			materialLegacyItemKey || (!policyOldTracked && trackedLegacyItemKey);
+		const auto transferPlan = ResolveInstanceKeyTransfer(InstanceKeyTransferContext{
+			.playerID = playerId,
+			.oldOwnerID = oldOwnerID,
+			.newOwnerID = newOwnerID,
+			.itemFormID = itemFormID,
+			.oldUniqueID = a_event->oldUniqueID,
+			.newUniqueID = a_event->newUniqueID,
+			.playerHasOldKey = playerHasOldKey || previewRemapEvidence,
+			.playerHasNewKey = playerHasNewKey,
+			.oldKeyTracked = policyOldTracked,
+			.legacyItemKeyTracked = policyLegacyTracked,
+			.newKeyTracked = materialNew
+		});
+		if (transferPlan.decision == InstanceKeyTransferDecision::kIgnore) {
 			if (_loot.debugLog) {
 				SKSE::log::debug(
-					"CalamityAffixes: ignored TESUniqueIDChangeEvent not associated with player-tracked item (obj={:08X}, old={:016X}, new={:016X}, trackedPreview={}, previewMenuOpen={}).",
-					a_event->objectID,
+					"CalamityAffixes: ignored TESUniqueIDChangeEvent (oldOwner={:08X}, newOwner={:08X}, item={:08X}, oldUid={}, newUid={}, oldKey={:016X}, legacyKey={:016X}, newKey={:016X}, trackedOld={}, trackedLegacy={}, trackedNew={}, playerHasOld={}, playerHasNew={}, trackedPreview={}, previewMenuOpen={}).",
+					oldOwnerID,
+					newOwnerID,
+					itemFormID,
+					a_event->oldUniqueID,
+					a_event->newUniqueID,
 					oldKey,
+					legacyItemKey,
 					newKey,
+					trackedOld,
+					trackedLegacyItemKey,
+					trackedNew,
+					playerHasOldKey,
+					playerHasNewKey,
 					trackedPreview,
 					previewMenuContextOpen);
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
+		if (transferPlan.decision == InstanceKeyTransferDecision::kConflict) {
+			SKSE::log::warn(
+				"CalamityAffixes: blocked instance-key remap collision; both ambiguous states were discarded instead of merged (oldOwner={:08X}, newOwner={:08X}, item={:08X}, oldUid={}, newUid={}, oldKey={:016X}, newKey={:016X}).",
+				oldOwnerID,
+				newOwnerID,
+				itemFormID,
+				a_event->oldUniqueID,
+				a_event->newUniqueID,
+				transferPlan.oldKey,
+				transferPlan.newKey);
+			DiscardInstanceKeyState(transferPlan.oldKey);
+			DiscardInstanceKeyState(transferPlan.newKey);
+			return RE::BSEventNotifyControl::kContinue;
+		}
 
-		RemapInstanceKey(oldKey, newKey);
+		RemapInstanceKey(transferPlan.oldKey, transferPlan.newKey);
 		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	bool EventBridge::HasMaterialInstanceState(std::uint64_t a_instanceKey) const
+	{
+		if (a_instanceKey == 0u) {
+			return false;
+		}
+
+		const bool hasRuntimeState = std::ranges::any_of(
+			_instanceStates,
+			[a_instanceKey](const auto& entry) {
+				return entry.first.instanceKey == a_instanceKey;
+			});
+		return _instanceAffixes.contains(a_instanceKey) ||
+		       hasRuntimeState ||
+		       _runewordState.instanceStates.contains(a_instanceKey) ||
+		       (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == a_instanceKey);
+	}
+
+	bool EventBridge::IsInstanceKeyTracked(std::uint64_t a_instanceKey) const
+	{
+		return HasMaterialInstanceState(a_instanceKey) ||
+		       IsLootEvaluatedInstance(a_instanceKey) ||
+		       FindLootPreviewSlots(a_instanceKey) != nullptr;
+	}
+
+	void EventBridge::DiscardInstanceKeyState(std::uint64_t a_instanceKey)
+	{
+		if (a_instanceKey == 0u) {
+			return;
+		}
+
+		_instanceAffixes.erase(a_instanceKey);
+		ForgetLootEvaluatedInstance(a_instanceKey);
+		ForgetLootPreviewSlots(a_instanceKey);
+		EraseInstanceRuntimeStates(a_instanceKey);
+		_runewordState.instanceStates.erase(a_instanceKey);
+		if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == a_instanceKey) {
+			_runewordState.selectedBaseKey.reset();
+		}
+		_equippedTokenCacheReady = false;
 	}
 
 	void EventBridge::RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey)
@@ -559,6 +666,17 @@ namespace CalamityAffixes
 		if (a_oldKey == 0 || a_newKey == 0 || a_oldKey == a_newKey) {
 			return;
 		}
+		if (HasMaterialInstanceState(a_newKey)) {
+			SKSE::log::warn(
+				"CalamityAffixes: refused occupied instance-key remap; destination state was preserved (old={:016X}, new={:016X}).",
+				a_oldKey,
+				a_newKey);
+			return;
+		}
+		// Evaluation/preview markers do not own an item. Clear them so a material
+		// source can move into the canonical destination without data loss.
+		ForgetLootEvaluatedInstance(a_newKey);
+		ForgetLootPreviewSlots(a_newKey);
 
 		if (IsLootEvaluatedInstance(a_oldKey)) {
 			ForgetLootEvaluatedInstance(a_oldKey);
@@ -572,14 +690,8 @@ namespace CalamityAffixes
 		}
 
 		if (auto affixNode = _instanceAffixes.extract(a_oldKey); !affixNode.empty()) {
-			if (auto it = _instanceAffixes.find(a_newKey); it != _instanceAffixes.end()) {
-				for (std::uint8_t slot = 0; slot < affixNode.mapped().count; ++slot) {
-					it->second.AddToken(affixNode.mapped().tokens[slot]);
-				}
-			} else {
-				affixNode.key() = a_newKey;
-				_instanceAffixes.insert(std::move(affixNode));
-			}
+			affixNode.key() = a_newKey;
+			_instanceAffixes.insert(std::move(affixNode));
 		}
 
 		std::vector<std::pair<InstanceStateKey, InstanceRuntimeState>> remappedStates;
@@ -608,6 +720,7 @@ namespace CalamityAffixes
 		if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == a_oldKey) {
 			_runewordState.selectedBaseKey = a_newKey;
 		}
+		_equippedTokenCacheReady = false;
 	}
 
 

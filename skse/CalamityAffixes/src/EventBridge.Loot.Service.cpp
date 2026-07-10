@@ -117,9 +117,9 @@ namespace CalamityAffixes
 		}
 	}
 
-	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept
+	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_ownerFormID, std::uint16_t a_uniqueID) noexcept
 	{
-		return (static_cast<std::uint64_t>(a_baseID) << 16) | static_cast<std::uint64_t>(a_uniqueID);
+		return (static_cast<std::uint64_t>(a_ownerFormID) << 16) | static_cast<std::uint64_t>(a_uniqueID);
 	}
 
 	bool EventBridge::IsLootArmorEligibleForAffixes(const RE::TESObjectARMO* a_armor) const

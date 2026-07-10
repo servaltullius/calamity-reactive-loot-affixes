@@ -55,7 +55,11 @@
 		void ForgetLootEvaluatedInstance(std::uint64_t a_instanceKey);
 		void PruneLootEvaluatedInstances();
 		[[nodiscard]] bool IsLootEvaluatedInstance(std::uint64_t a_instanceKey) const;
+		[[nodiscard]] bool HasMaterialInstanceState(std::uint64_t a_instanceKey) const;
+		[[nodiscard]] bool IsInstanceKeyTracked(std::uint64_t a_instanceKey) const;
+		void DiscardInstanceKeyState(std::uint64_t a_instanceKey);
 		void RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey);
+		[[nodiscard]] bool NormalizeLegacyPlayerInstanceKeys();
 		void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
 		void ScheduleDroppedRefDeleteDrain();
 		void DrainPendingDroppedRefDeletes();
@@ -378,7 +382,7 @@
 		[[nodiscard]] std::int32_t RollScrollNoConsumeRestoreCount(
 			std::int32_t a_consumedCount,
 			float a_preserveChancePct);
-		[[nodiscard]] static std::uint64_t MakeInstanceKey(RE::FormID a_baseID, std::uint16_t a_uniqueID) noexcept;
+		[[nodiscard]] static std::uint64_t MakeInstanceKey(RE::FormID a_ownerFormID, std::uint16_t a_uniqueID) noexcept;
 
 		// Health-damage/TESHit trigger routing path.
 		[[nodiscard]] bool RouteHealthDamageAsHit(

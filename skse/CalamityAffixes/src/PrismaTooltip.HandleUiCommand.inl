@@ -221,6 +221,20 @@
 					return true;
 				}
 
+				if (a_command == "runeword.reset") {
+					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+					if (!bridge) {
+						PushUiFeedback("Reset system unavailable.");
+						return true;
+					}
+
+					const auto outcome = bridge->ResetSelectedRunewordBaseCalamityState();
+					RefreshRunewordPanelBindings(*bridge);
+					PushSelectedTooltipSnapshot(true);
+					PushUiFeedback(outcome.message.empty() ? "Reset action processed." : outcome.message);
+					return true;
+				}
+
 				if (a_command == "currency.recover") {
 					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 					if (!bridge) {

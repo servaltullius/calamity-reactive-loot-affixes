@@ -1,7 +1,7 @@
 # 서픽스 효과 정리 (공개용)
 
 > 업데이트: 2026-03-22
-> 기준 버전: `v1.2.21`
+> 기준 버전: `v1.2.22`
 > 기준 코드: `affixes/modules/keywords.affixes.suffixes.json`
 
 - 총 서픽스 패밀리: **22개**
@@ -279,4 +279,3 @@
 | T1 | `suffix_vitality_t1` | 약간의 활력: 최대 체력 +25 | of Minor Vitality: Max Health +25 | 25 |
 | T2 | `suffix_vitality_t2` | 활력: 최대 체력 +50 | of Vitality: Max Health +50 | 50 |
 | T3 | `suffix_vitality_t3` | 위대한 활력: 최대 체력 +75 | of Grand Vitality: Max Health +75 | 75 |
-

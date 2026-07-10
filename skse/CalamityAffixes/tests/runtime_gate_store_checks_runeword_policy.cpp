@@ -1048,6 +1048,20 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
+			if (reforgeSource.find("EventBridge::OperationResult EventBridge::ResetSelectedRunewordBaseCalamityState()") == std::string::npos ||
+				reforgeSource.find("if (_runewordState.transmuteInProgress)") == std::string::npos ||
+				reforgeSource.find("ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)") == std::string::npos ||
+				reforgeSource.find("_instanceAffixes.erase(instanceKey)") == std::string::npos ||
+				reforgeSource.find("EraseInstanceRuntimeStates(instanceKey);") == std::string::npos ||
+				reforgeSource.find("_runewordState.instanceStates.erase(instanceKey)") == std::string::npos ||
+				reforgeSource.find("ForgetLootPreviewSlots(instanceKey);") == std::string::npos ||
+				reforgeSource.find("MarkLootEvaluatedInstance(instanceKey);") == std::string::npos ||
+				reforgeSource.find("RebuildActiveCounts();") == std::string::npos ||
+				reforgeSource.find("ForgetLootEvaluatedInstance(instanceKey)") != std::string::npos) {
+				std::cerr << "runeword_reforge_safety: destructive reset recovery policy is incomplete\n";
+				return false;
+			}
+
 			return true;
 		}
 
@@ -1107,6 +1121,8 @@ namespace RuntimeGateStoreChecks
 
 			if (coreText->find("PushSelectedTooltipSnapshot(") == std::string::npos ||
 				handleText->find("PushSelectedTooltipSnapshot(true);") == std::string::npos ||
+				handleText->find("a_command == \"runeword.reset\"") == std::string::npos ||
+				handleText->find("ResetSelectedRunewordBaseCalamityState()") == std::string::npos ||
 				coreText->find("const bool selectionChanged =") == std::string::npos ||
 				coreText->find("void ClearSelectedTooltipFromView(bool a_force, bool a_selectionChanged)") == std::string::npos ||
 				coreText->find("ClearSelectedTooltipFromView(a_force, selectionChanged);") == std::string::npos ||
@@ -1116,6 +1132,10 @@ namespace RuntimeGateStoreChecks
 				 handleText->find("RefreshRunewordPanelBindings(*bridge);") == std::string::npos) ||
 				uiText->find("PrismaUI_Interop(prismaInteropMethod.runewordAffixPreview") == std::string::npos ||
 				uiText->find("function setRunewordAffixPreview(raw)") == std::string::npos ||
+				uiText->find("runewordResetConfirmWindowMs = 6000") == std::string::npos ||
+				uiText->find("runewordResetArmedBaseKey") == std::string::npos ||
+				uiText->find("selectedBaseKey === runewordResetArmedBaseKey") == std::string::npos ||
+				uiText->find("function armRunewordResetConfirmation(button)") == std::string::npos ||
 				runtimeText->find("std::uint64_t a_preferredInstanceKey") == std::string::npos ||
 				runtimeText->find("if (a_preferredInstanceKey != 0u)") == std::string::npos ||
 				runtimeText->find("a_candidate.instanceKey == a_preferredInstanceKey") == std::string::npos ||

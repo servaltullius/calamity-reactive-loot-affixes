@@ -7,6 +7,34 @@
 
 ## [Unreleased]
 
+## [1.2.22] - 2026-07-10
+
+`v1.2.22`는 아이템 판매·보관 중 ExtraUniqueID 소유권이 바뀔 때 인스턴스 상태가 끊기거나 다른 아이템으로 이어질 수 있던 문제를 막는 안전성 핫픽스입니다.
+
+### Added
+
+- 룬워드 패널에 선택 장비의 Calamity 어픽스, 룬워드 진행도, 런타임 상태, 프리뷰와 표시 이름을 제거하는 `Reset State / 상태 초기화` 동작을 추가했습니다.
+- 실수 방지를 위해 상태 초기화는 6초 안에 두 번 눌러야 하며, 소모한 재련 오브와 룬 조각은 환불되지 않습니다.
+- 판매·상자 보관·회수 및 목적지 키 충돌을 owner+UID 기준으로 검증하는 회귀 테스트를 추가했습니다.
+
+### Changed
+
+- `ExtraUniqueID` 인스턴스 키 의미를 SKSE 원본 계약인 `(owner FormID, UID)`로 명확히 통일했습니다.
+- 구버전이 `(item FormID, UID)`로 만든 플레이어 인벤토리 키는 UID가 유일할 때만 로드 후 변환합니다. 같은 owner+UID에 애매한 기존 상태가 있으면 먼저 fail-closed로 제거해 현재 아이템에 잘못 붙지 않게 합니다.
+- 생성물 최신성 검사는 파일 수정시각 대신 실제 JSON 콘텐츠를 비교하도록 변경했습니다.
+- GitHub Actions가 fresh checkout에서도 xwin과 CommonLibSSE-NG를 외부 캐시에 준비한 뒤 실제 DLL/runtime-gate를 빌드하도록 보강했습니다.
+
+### Fixed
+
+- `TESUniqueIDChangeEvent`의 아이템 FormID를 플레이어 소유자 ID로 오인해 판매·상자 이동 이벤트를 놓치던 문제를 수정했습니다.
+- UID 변경 목적지에 기존 상태가 있을 때 두 아이템의 어픽스 토큰을 합치던 동작을 제거했습니다. 소유자를 증명할 수 없는 충돌 상태는 양쪽 모두 fail-closed로 제거해 다른 아이템으로 이어지지 않게 합니다.
+- 플레이어가 직접 생성한 `ExtraUniqueID`에 아이템 FormID를 기록하던 문제를 수정해 실제 소유자 FormID를 기록합니다.
+
+### Compatibility
+
+- 이미 다른 아이템에 잘못 붙어 버린 legacy 상태는 원래 소유자를 안전하게 추론할 수 없습니다. 해당 장비를 선택하고 `Reset State / 상태 초기화`를 사용해야 합니다.
+- 상태 초기화 뒤 자동 어픽스 재롤을 막기 위해 evaluated 표시는 유지됩니다.
+
 ## [1.2.21] - 2026-03-22
 
 `v1.2.21`은 `v1.2.20` 이후 확인된 룬워드 워크벤치 스크롤 UX 문제를 정리한 유지보수 릴리즈입니다.
@@ -108,7 +136,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.21...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.22...HEAD
+[1.2.22]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.21...v1.2.22
 [1.2.21]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20...v1.2.21
 [1.2.20]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.19.2...v1.2.20
 [1.2.20-rc23]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20-rc22...v1.2.20-rc23

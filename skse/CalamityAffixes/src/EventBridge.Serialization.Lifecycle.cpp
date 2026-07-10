@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <unordered_map>
 
 namespace CalamityAffixes
 {
@@ -51,7 +52,114 @@ namespace CalamityAffixes
 	void EventBridge::OnPostLoadGame()
 	{
 		const std::scoped_lock lock(_stateMutex);
+		if (NormalizeLegacyPlayerInstanceKeys()) {
+			RebuildActiveCounts();
+		}
 		MaybeMigrateMiscCurrency();
+	}
+
+	bool EventBridge::NormalizeLegacyPlayerInstanceKeys()
+	{
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return false;
+		}
+
+		auto* changes = player->GetInventoryChanges();
+		if (!changes || !changes->entryList) {
+			return false;
+		}
+
+		const auto playerID = player->GetFormID();
+		std::unordered_map<std::uint16_t, std::uint32_t> uidUseCounts;
+		for (auto* entry : *changes->entryList) {
+			if (!entry || !entry->extraLists) {
+				continue;
+			}
+			for (auto* xList : *entry->extraLists) {
+				const auto* uid = xList ? xList->GetByType<RE::ExtraUniqueID>() : nullptr;
+				if (uid && uid->uniqueID != 0u) {
+					++uidUseCounts[uid->uniqueID];
+				}
+			}
+		}
+
+		std::uint32_t normalized = 0u;
+		std::uint32_t remapped = 0u;
+		std::uint32_t conflicts = 0u;
+		std::uint32_t discarded = 0u;
+		for (auto* entry : *changes->entryList) {
+			if (!entry || !entry->object || !entry->extraLists) {
+				continue;
+			}
+
+			const auto itemFormID = entry->object->GetFormID();
+			if (itemFormID == 0u || itemFormID == playerID) {
+				continue;
+			}
+
+			for (auto* xList : *entry->extraLists) {
+				if (!xList) {
+					continue;
+				}
+
+				auto* uid = xList->GetByType<RE::ExtraUniqueID>();
+				if (!uid || uid->uniqueID == 0u || uid->baseID != itemFormID) {
+					continue;
+				}
+
+				const auto legacyKey = MakeInstanceKey(itemFormID, uid->uniqueID);
+				const auto canonicalKey = MakeInstanceKey(playerID, uid->uniqueID);
+				const bool legacyTracked = IsInstanceKeyTracked(legacyKey);
+				const bool canonicalTracked = IsInstanceKeyTracked(canonicalKey);
+				const auto uidCountIt = uidUseCounts.find(uid->uniqueID);
+				const bool duplicateUID = uidCountIt != uidUseCounts.end() && uidCountIt->second > 1u;
+				if (duplicateUID) {
+					++conflicts;
+					if (legacyTracked) {
+						DiscardInstanceKeyState(legacyKey);
+						++discarded;
+					}
+					if (canonicalTracked) {
+						DiscardInstanceKeyState(canonicalKey);
+						++discarded;
+					}
+					SKSE::log::warn(
+						"CalamityAffixes: legacy player instance normalization discarded duplicate-UID state (item={:08X}, uid={}, legacyTracked={}, ownerTracked={}, legacy={:016X}, owner={:016X}).",
+						itemFormID,
+						uid->uniqueID,
+						legacyTracked,
+						canonicalTracked,
+						legacyKey,
+						canonicalKey);
+					continue;
+				}
+				if (canonicalTracked) {
+					// The xList itself proves this is a v1.2.21 item-form identity.
+					// A pre-existing owner key is therefore ambiguous and must not be
+					// allowed to attach to this item during normalization.
+					DiscardInstanceKeyState(canonicalKey);
+					++discarded;
+				}
+
+				if (legacyTracked) {
+					RemapInstanceKey(legacyKey, canonicalKey);
+					++remapped;
+				}
+				uid->baseID = playerID;
+				++normalized;
+			}
+		}
+
+		if (normalized > 0u || conflicts > 0u || discarded > 0u) {
+			SKSE::log::info(
+				"CalamityAffixes: legacy player instance normalization complete (normalized={}, remapped={}, conflicts={}, discarded={}).",
+				normalized,
+				remapped,
+				conflicts,
+				discarded);
+		}
+		return remapped > 0u || discarded > 0u;
 	}
 
 	void EventBridge::OnFormDelete(RE::VMHandle a_handle)
