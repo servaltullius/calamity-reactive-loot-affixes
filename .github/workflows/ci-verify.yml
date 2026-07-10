@@ -96,21 +96,20 @@ jobs:
       - name: Install cross-build tools
         run: |
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends clang lld llvm ninja-build
+          sudo apt-get install --yes --no-install-recommends clang-19 lld-19 llvm-19 ninja-build
 
           if [[ ! -x "$HOME/.cargo/bin/xwin" ]]; then
             cargo install xwin --version 0.7.0 --locked
           fi
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
-          llvm_bin="$(dirname "$(readlink -f "$(command -v lld-link)")")"
           tool_dir="$RUNNER_TEMP/caff-llvm-tools"
           mkdir -p "$tool_dir"
-          ln -s "$(command -v clang)" "$tool_dir/clang-cl"
-          ln -s "$llvm_bin/lld-link" "$tool_dir/lld-link"
-          ln -s "$llvm_bin/llvm-lib" "$tool_dir/llvm-lib"
-          ln -s "$llvm_bin/llvm-mt" "$tool_dir/llvm-mt"
-          ln -s "$llvm_bin/llvm-rc" "$tool_dir/llvm-rc"
+          ln -s "$(command -v clang-19)" "$tool_dir/clang-cl"
+          ln -s "$(command -v lld-link-19)" "$tool_dir/lld-link"
+          ln -s "$(command -v llvm-lib-19)" "$tool_dir/llvm-lib"
+          ln -s "$(command -v llvm-mt-19)" "$tool_dir/llvm-mt"
+          ln -s "$(command -v llvm-rc-19)" "$tool_dir/llvm-rc"
           echo "$tool_dir" >> "$GITHUB_PATH"
 
       - name: Prepare xwin sysroot
