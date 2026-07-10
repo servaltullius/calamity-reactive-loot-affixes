@@ -3,6 +3,11 @@
 # Repo Agent Instructions
 사용자와 한국어로 대화합니다.
 
+## First action
+
+- Context entrypoint: `.vibe/AGENT_CHECKLIST.md`
+- Run: `python3 scripts/vibe.py doctor --full`
+
 ## Required fields (repo-local AGENTS.md)
 
 - Install command: `dotnet restore tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj`

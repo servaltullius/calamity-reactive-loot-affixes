@@ -124,17 +124,22 @@ jobs:
           commonlib_build="$RUNNER_TEMP/caff-commonlibsse-build"
           commonlib_install="$HOME/.cache/calamity/commonlibsse-ng/flatrim"
           vendor_root="$GITHUB_WORKSPACE/skse/CalamityAffixes/extern/vendor"
+          clang_cl="$(command -v clang-cl)"
+          lld_link="$(command -v lld-link)"
+          llvm_lib="$(command -v llvm-lib)"
+          llvm_mt="$(command -v llvm-mt)"
+          llvm_rc="$(command -v llvm-rc)"
 
           if [[ ! -f "$commonlib_install/lib/CommonLibSSE.lib" || \
                 ! -f "$commonlib_install/lib/cmake/CommonLibSSE/CommonLibSSEConfig.cmake" ]]; then
             cmake -S "$commonlib_source" -B "$commonlib_build" -G Ninja \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_SYSTEM_NAME=Windows \
-              -DCMAKE_CXX_COMPILER=clang-cl \
-              -DCMAKE_LINKER=lld-link \
-              -DCMAKE_AR=llvm-lib \
-              -DCMAKE_MT=llvm-mt \
-              -DCMAKE_RC_COMPILER=llvm-rc \
+              -DCMAKE_CXX_COMPILER="$clang_cl" \
+              -DCMAKE_LINKER="$lld_link" \
+              -DCMAKE_AR="$llvm_lib" \
+              -DCMAKE_MT="$llvm_mt" \
+              -DCMAKE_RC_COMPILER="$llvm_rc" \
               "-DCMAKE_CXX_FLAGS=/winsysroot $RUNNER_TEMP/caff-xwin" \
               -DCMAKE_EXE_LINKER_FLAGS=/machine:x64 \
               -DCMAKE_MODULE_LINKER_FLAGS=/machine:x64 \
