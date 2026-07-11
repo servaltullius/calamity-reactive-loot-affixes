@@ -7,6 +7,30 @@
 
 ## [Unreleased]
 
+## [1.2.23] - 2026-07-11
+
+`v1.2.23`은 4K에서 확인된 기존 어픽스 툴팁 외관을 유지하면서 QHD, FHD, 울트라와이드 해상도에서 화면 비율에 맞게 크기와 기본 위치를 조정하는 UI 호환성 업데이트입니다.
+
+### Added
+
+- 4K, QHD, FHD, UWQHD의 툴팁 배율·기본 위치와 모바일 분기, 수동 글자 크기 저장 경로를 고정하는 회귀 테스트를 추가했습니다.
+
+### Changed
+
+- 툴팁 자동 배율 기준을 `3840x2160`의 기존 `2.5x` 외관으로 명시하고, 뷰포트의 가로·세로 중 작은 비율을 사용하도록 변경했습니다.
+- 저장된 사용자 배치가 없을 때 툴팁 기본 `right/top` 위치도 같은 4K 기준으로 비례 조정합니다.
+
+### Fixed
+
+- QHD와 FHD에서 어픽스 툴팁이 4K보다 화면을 더 크게 차지하던 문제를 수정했습니다.
+- `3440x1440` 같은 울트라와이드에서 가로 폭만 따라 툴팁이 과도하게 커질 수 있는 문제를 높이 기준 비율로 제한했습니다.
+
+### Compatibility
+
+- 세이브 및 어픽스 런타임 저장 형식은 변경하지 않았습니다.
+- 기존 `prisma_tooltip_layout.json`의 수동 `right/top` 위치와 글자 크기는 그대로 유지됩니다. 현재 해상도의 새 기본 위치를 적용하려면 해당 해상도에서 툴팁 UI를 초기화해야 합니다.
+- 폭 `900px` 이하 분기와 기존 글자 크기 조절 범위 `70%~180%`는 유지됩니다.
+
 ## [1.2.22] - 2026-07-10
 
 `v1.2.22`는 아이템 판매·보관 중 ExtraUniqueID 소유권이 바뀔 때 인스턴스 상태가 끊기거나 다른 아이템으로 이어질 수 있던 문제를 막는 안전성 핫픽스입니다.
@@ -136,7 +160,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.22...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.23...HEAD
+[1.2.23]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.22...v1.2.23
 [1.2.22]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.21...v1.2.22
 [1.2.21]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20...v1.2.21
 [1.2.20]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.19.2...v1.2.20
