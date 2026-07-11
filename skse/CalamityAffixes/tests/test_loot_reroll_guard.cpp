@@ -19,6 +19,79 @@ static_assert([] {
 	LootRerollGuard g{};
 	constexpr LootRerollGuard::FormID player = 0x14;
 	constexpr LootRerollGuard::RefHandle ref = 0x1234;
+	constexpr std::uint64_t detachedWorldKey = 0xFF001234FFFFull;
+
+	g.NotePlayerDrop(
+		player,
+		player,
+		LootRerollGuard::kWorldContainer,
+		1,
+		ref,
+		detachedWorldKey);
+
+	const auto consumedKey = g.ConsumePlayerDropPickupInstanceKey(
+		player,
+		LootRerollGuard::kWorldContainer,
+		player,
+		1,
+		ref);
+
+	return consumedKey.has_value() && *consumedKey == detachedWorldKey;
+}(),
+	"Loot reroll guard: pickup must return the detached world-state key so the same item can reclaim its affixes");
+
+static_assert([] {
+	LootRerollGuard g{};
+	constexpr LootRerollGuard::FormID player = 0x14;
+	constexpr LootRerollGuard::RefHandle ref = 0x1234;
+
+	g.NotePlayerDrop(player, player, LootRerollGuard::kWorldContainer, 1, ref, 0u);
+	const auto consumedKey = g.ConsumePlayerDropPickupInstanceKey(
+		player,
+		LootRerollGuard::kWorldContainer,
+		player,
+		1,
+		ref);
+
+	return consumedKey.has_value() && *consumedKey == 0u;
+}(),
+	"Loot reroll guard: a matched drop with no transferable key must remain distinguishable from no match");
+
+static_assert([] {
+	LootRerollGuard g{};
+	constexpr LootRerollGuard::FormID player = 0x14;
+	constexpr LootRerollGuard::RefHandle ref = 0x1234;
+	constexpr std::uint64_t firstKey = 0xFF001234FFFFull;
+	constexpr std::uint64_t correctedKey = 0xFF005678FFFFull;
+
+	g.NotePlayerDrop(player, player, LootRerollGuard::kWorldContainer, 1, ref, firstKey);
+	g.NotePlayerDrop(player, player, LootRerollGuard::kWorldContainer, 1, ref, correctedKey);
+	// A duplicate event may lose reference resolution; it must not erase a
+	// previously proven detached key.
+	g.NotePlayerDrop(player, player, LootRerollGuard::kWorldContainer, 1, ref, 0u);
+	const auto consumedKey = g.ConsumePlayerDropPickupInstanceKey(
+		player,
+		LootRerollGuard::kWorldContainer,
+		player,
+		1,
+		ref);
+	const auto duplicate = g.ConsumePlayerDropPickupInstanceKey(
+		player,
+		LootRerollGuard::kWorldContainer,
+		player,
+		1,
+		ref);
+
+	return consumedKey.has_value() &&
+	       *consumedKey == correctedKey &&
+	       !duplicate.has_value();
+}(),
+	"Loot reroll guard: duplicate drop events for one reference must update one entry instead of leaving a stale handle match");
+
+static_assert([] {
+	LootRerollGuard g{};
+	constexpr LootRerollGuard::FormID player = 0x14;
+	constexpr LootRerollGuard::RefHandle ref = 0x1234;
 	constexpr std::uint64_t key = 0xDEADBEEF1234ull;
 
 	g.NotePlayerDrop(player, player, LootRerollGuard::kWorldContainer, 1, ref, key);

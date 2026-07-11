@@ -1,7 +1,7 @@
 # 룬워드 효과 정리 (공개용)
 
 > 업데이트: 2026-07-11
-> 기준 버전: `v1.2.23`
+> 기준 버전: `v1.2.24`
 > 기준 코드: `affixes/modules/keywords.affixes.runewords.json`
 > 룬 조합 기준: `affixes/runeword.contract.json`
 

@@ -141,7 +141,7 @@ def main():
     out.append("# 프리픽스 효과 정리 (공개용)")
     out.append("")
     out.append(f"> 업데이트: {date.today().isoformat()}")
-    out.append("> 기준 버전: `v1.2.23`")
+    out.append("> 기준 버전: `v1.2.24`")
     out.append("> 기준 코드:")
     out.append("> - 효과 정의: `affixes/modules/keywords.affixes.core.json`")
     out.append("> - 변환 스크립트: `tools/transform_prefixes.py`")
@@ -178,7 +178,7 @@ def main():
             out.append("")
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text("\n".join(out) + "\n", encoding="utf-8")
+    OUTPUT.write_text("\n".join(out).rstrip() + "\n", encoding="utf-8")
     print(f"Wrote {OUTPUT} ({len(out)} lines)")
 
 

@@ -347,6 +347,17 @@ namespace CalamityAffixes
 
 		const auto playerId = player->GetFormID();
 		const auto refHandle = static_cast<LootRerollGuard::RefHandle>(RE::ObjectRefHandle(a_event->reference).native_handle());
+		RE::FormID referenceFormID = 0;
+		std::uint64_t referenceUniqueKey = 0;
+		if (a_event->reference) {
+			if (auto ref = a_event->reference.get(); ref) {
+				referenceFormID = ref->GetFormID();
+				if (const auto* uid = ref->extraList.GetByType<RE::ExtraUniqueID>();
+					uid && uid->baseID != 0u && uid->uniqueID != 0u) {
+					referenceUniqueKey = MakeInstanceKey(uid->baseID, uid->uniqueID);
+				}
+			}
+		}
 
 		// Scroll preserve path:
 		// - event shape: player inventory -> null container
@@ -387,16 +398,106 @@ namespace CalamityAffixes
 		// 1a) Record player-dropped world references so re-picking them up can't "reroll" loot affixes.
 		if (a_event->oldContainer == playerId &&
 			a_event->newContainer == LootRerollGuard::kWorldContainer) {
-			std::uint64_t instanceKey = 0;
-			if (a_event->reference) {
-				if (auto ref = a_event->reference.get(); ref) {
-					if (const auto* uid = ref->extraList.GetByType<RE::ExtraUniqueID>(); uid && uid->baseID != 0 && uid->uniqueID != 0) {
-						instanceKey = MakeInstanceKey(uid->baseID, uid->uniqueID);
+			const auto detachedWorldKey = MakeDetachedWorldInstanceKey(referenceFormID);
+			const auto playerEventKey = a_event->uniqueID != 0u ?
+				MakeInstanceKey(playerId, a_event->uniqueID) :
+				std::uint64_t{ 0 };
+			const auto legacyEventKey = a_event->baseObj != 0u && a_event->uniqueID != 0u ?
+				MakeInstanceKey(a_event->baseObj, a_event->uniqueID) :
+				std::uint64_t{ 0 };
+			const std::array dropSourceCandidates{
+				playerEventKey,
+				referenceUniqueKey,
+				legacyEventKey
+			};
+
+			std::uint64_t dropSourceKey = 0;
+			bool ambiguousMaterialSources = false;
+			for (const auto candidateKey : dropSourceCandidates) {
+				if (candidateKey == 0u ||
+					candidateKey == detachedWorldKey ||
+					!HasMaterialInstanceState(candidateKey)) {
+					continue;
+				}
+				if (dropSourceKey == 0u) {
+					dropSourceKey = candidateKey;
+				} else if (dropSourceKey != candidateKey) {
+					ambiguousMaterialSources = true;
+				}
+			}
+
+			if (!ambiguousMaterialSources && dropSourceKey == 0u) {
+				for (const auto candidateKey : dropSourceCandidates) {
+					if (candidateKey != 0u &&
+						candidateKey != detachedWorldKey &&
+						IsInstanceKeyTracked(candidateKey)) {
+						dropSourceKey = candidateKey;
+						break;
 					}
 				}
 			}
-			if (instanceKey == 0 && a_event->uniqueID != 0) {
-				instanceKey = MakeInstanceKey(playerId, a_event->uniqueID);
+
+			if (ambiguousMaterialSources) {
+				SKSE::log::warn(
+					"CalamityAffixes: blocked ambiguous player-to-world state transfer; candidate states were discarded (baseObj={:08X}, ref={:08X}, uniqueID={}, detachedKey={:016X}).",
+					a_event->baseObj,
+					referenceFormID,
+					a_event->uniqueID,
+					detachedWorldKey);
+				for (const auto candidateKey : dropSourceCandidates) {
+					DiscardInstanceKeyState(candidateKey);
+				}
+				DiscardInstanceKeyState(detachedWorldKey);
+				dropSourceKey = 0u;
+			} else if (dropSourceKey != 0u && detachedWorldKey == 0u) {
+				SKSE::log::warn(
+					"CalamityAffixes: discarded player-to-world state because the dropped reference had no stable FormID (baseObj={:08X}, uniqueID={}, sourceKey={:016X}).",
+					a_event->baseObj,
+					a_event->uniqueID,
+					dropSourceKey);
+				DiscardInstanceKeyState(dropSourceKey);
+				dropSourceKey = 0u;
+			} else if (dropSourceKey != 0u && HasMaterialInstanceState(detachedWorldKey)) {
+				if (HasMaterialInstanceState(dropSourceKey)) {
+					SKSE::log::warn(
+						"CalamityAffixes: blocked occupied player-to-world state transfer; both ambiguous states were discarded (baseObj={:08X}, ref={:08X}, sourceKey={:016X}, detachedKey={:016X}).",
+						a_event->baseObj,
+						referenceFormID,
+						dropSourceKey,
+						detachedWorldKey);
+					DiscardInstanceKeyState(dropSourceKey);
+					DiscardInstanceKeyState(detachedWorldKey);
+				}
+			} else if (dropSourceKey != 0u) {
+				RemapInstanceKey(dropSourceKey, detachedWorldKey);
+			}
+			if (dropSourceKey == 0u) {
+				if (auto* task = SKSE::GetTaskInterface()) {
+					task->AddTask([]() {
+						if (auto* bridge = EventBridge::GetSingleton(); bridge) {
+							const std::scoped_lock lock(bridge->_stateMutex);
+							const bool prunedOrphanedDropKeys = bridge->PruneOrphanedPlayerInstanceKeys();
+							if (prunedOrphanedDropKeys) {
+								bridge->RebuildActiveCounts();
+							}
+						}
+					});
+				} else {
+					const bool prunedOrphanedDropKeys = PruneOrphanedPlayerInstanceKeys();
+					if (prunedOrphanedDropKeys) {
+						RebuildActiveCounts();
+					}
+				}
+			}
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: reconciled player-to-world instance ownership (baseObj={:08X}, ref={:08X}, eventUid={}, referenceKey={:016X}, sourceKey={:016X}, detachedKey={:016X}).",
+					a_event->baseObj,
+					referenceFormID,
+					a_event->uniqueID,
+					referenceUniqueKey,
+					dropSourceKey,
+					detachedWorldKey);
 			}
 
 			if (refHandle != 0) {
@@ -406,7 +507,7 @@ namespace CalamityAffixes
 					a_event->newContainer,
 					a_event->itemCount,
 					refHandle,
-					instanceKey);
+					detachedWorldKey);
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -433,19 +534,65 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		// 3) Skip if this pickup is the player re-acquiring their own dropped reference.
-		if (refHandle != 0 &&
-			_lootState.rerollGuard.ConsumeIfPlayerDropPickup(
+		// 3) Reattach state only when this is the exact world reference the player dropped.
+		std::optional<std::uint64_t> guardedDropKey;
+		if (refHandle != 0u) {
+			guardedDropKey = _lootState.rerollGuard.ConsumePlayerDropPickupInstanceKey(
 				playerId,
 				a_event->oldContainer,
 				a_event->newContainer,
 				a_event->itemCount,
-				refHandle)) {
+				refHandle);
+		}
+
+		const auto referenceDetachedWorldKey = MakeDetachedWorldInstanceKey(referenceFormID);
+		if (guardedDropKey &&
+			!IsDetachedWorldReferenceMatch(*guardedDropKey, referenceDetachedWorldKey)) {
+			SKSE::log::warn(
+				"CalamityAffixes: rejected recycled drop-reference handle during pickup (baseObj={:08X}, ref={:08X}, guardedKey={:016X}, referenceKey={:016X}).",
+				a_event->baseObj,
+				referenceFormID,
+				*guardedDropKey,
+				referenceDetachedWorldKey);
+			guardedDropKey.reset();
+		}
+		std::uint64_t detachedWorldKey = guardedDropKey.value_or(0u);
+		if ((!IsInstanceKeyTracked(detachedWorldKey)) &&
+			IsInstanceKeyTracked(referenceDetachedWorldKey)) {
+			detachedWorldKey = referenceDetachedWorldKey;
+		}
+		const bool trackedDetachedWorldState = IsInstanceKeyTracked(detachedWorldKey);
+		if (guardedDropKey.has_value() || trackedDetachedWorldState) {
+			const auto pickupKey = a_event->uniqueID != 0u ?
+				MakeInstanceKey(playerId, a_event->uniqueID) :
+				((referenceUniqueKey >> 16u) == playerId ? referenceUniqueKey : std::uint64_t{ 0 });
+			if (trackedDetachedWorldState && pickupKey != 0u) {
+				if (HasMaterialInstanceState(pickupKey)) {
+					SKSE::log::warn(
+						"CalamityAffixes: blocked occupied world-to-player state transfer; both ambiguous states were discarded (baseObj={:08X}, ref={:08X}, detachedKey={:016X}, pickupKey={:016X}).",
+						a_event->baseObj,
+						referenceFormID,
+						detachedWorldKey,
+						pickupKey);
+					DiscardInstanceKeyState(detachedWorldKey);
+					DiscardInstanceKeyState(pickupKey);
+				} else {
+					RemapInstanceKey(detachedWorldKey, pickupKey);
+				}
+			} else if (trackedDetachedWorldState) {
+				SKSE::log::warn(
+					"CalamityAffixes: retained detached world state because pickup had no stable player UID (baseObj={:08X}, ref={:08X}, detachedKey={:016X}).",
+					a_event->baseObj,
+					referenceFormID,
+					detachedWorldKey);
+			}
 			if (_loot.debugLog) {
 				SKSE::log::debug(
-					"CalamityAffixes: skipping loot roll (player dropped + re-picked) (baseObj={:08X}, uniqueID={}).",
+					"CalamityAffixes: skipping loot roll (player dropped + re-picked) (baseObj={:08X}, uniqueID={}, detachedKey={:016X}, pickupKey={:016X}).",
 					a_event->baseObj,
-					a_event->uniqueID);
+					a_event->uniqueID,
+					detachedWorldKey,
+					pickupKey);
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -513,9 +660,27 @@ namespace CalamityAffixes
 		const auto newOwnerID = a_event->newBaseID;
 		const auto itemFormID = a_event->objectID;
 		if (oldOwnerID == 0 || newOwnerID == 0 || itemFormID == 0) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: ignored incomplete TESUniqueIDChangeEvent owner boundary (oldOwner={:08X}, newOwner={:08X}, item={:08X}, oldUid={}, newUid={}).",
+					oldOwnerID,
+					newOwnerID,
+					itemFormID,
+					a_event->oldUniqueID,
+					a_event->newUniqueID);
+			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
 		if (a_event->oldUniqueID == 0 || a_event->newUniqueID == 0) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: ignored incomplete TESUniqueIDChangeEvent UID boundary (oldOwner={:08X}, newOwner={:08X}, item={:08X}, oldUid={}, newUid={}).",
+					oldOwnerID,
+					newOwnerID,
+					itemFormID,
+					a_event->oldUniqueID,
+					a_event->newUniqueID);
+			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
 

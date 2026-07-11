@@ -44,12 +44,23 @@ namespace CalamityAffixes
 			if (a_newContainer != kWorldContainer) {
 				return;
 			}
+			for (auto& entry : _refs) {
+				if (entry.ref == a_reference) {
+					if (a_instanceKey != 0u || entry.instanceKey == 0u) {
+						entry.instanceKey = a_instanceKey;
+					}
+					return;
+				}
+			}
 
 			_refs[_cursor] = { .ref = a_reference, .instanceKey = a_instanceKey };
 			_cursor = (_cursor + 1) % _refs.size();
 		}
 
-		[[nodiscard]] constexpr bool ConsumeIfPlayerDropPickup(
+		// Returns the state key associated with the exact dropped reference. An
+		// engaged optional containing zero still means the reference matched; zero
+		// only means there was no transferable state key.
+		[[nodiscard]] constexpr std::optional<InstanceKey> ConsumePlayerDropPickupInstanceKey(
 			FormID a_player,
 			FormID,
 			FormID a_newContainer,
@@ -57,22 +68,39 @@ namespace CalamityAffixes
 			RefHandle a_reference) noexcept
 		{
 			if (a_reference == 0) {
-				return false;
+				return std::nullopt;
 			}
 			if (a_itemCount == 0) {
-				return false;
+				return std::nullopt;
 			}
 			if (a_newContainer != a_player) {
-				return false;
+				return std::nullopt;
 			}
 
 			for (auto& entry : _refs) {
 				if (entry.ref == a_reference) {
+					const auto key = entry.instanceKey;
 					entry = {};
-					return true;
+					return std::optional<InstanceKey>{ key };
 				}
 			}
-			return false;
+			return std::nullopt;
+		}
+
+		[[nodiscard]] constexpr bool ConsumeIfPlayerDropPickup(
+			FormID a_player,
+			FormID a_oldContainer,
+			FormID a_newContainer,
+			std::int32_t a_itemCount,
+			RefHandle a_reference) noexcept
+		{
+			return ConsumePlayerDropPickupInstanceKey(
+				a_player,
+				a_oldContainer,
+				a_newContainer,
+				a_itemCount,
+				a_reference)
+				.has_value();
 		}
 
 		// Called when a previously dropped world reference is deleted (e.g. cell cleanup).

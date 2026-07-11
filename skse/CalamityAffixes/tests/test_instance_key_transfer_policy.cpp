@@ -2,6 +2,9 @@
 
 using CalamityAffixes::InstanceKeyTransferContext;
 using CalamityAffixes::InstanceKeyTransferDecision;
+using CalamityAffixes::IsDetachedWorldReferenceMatch;
+using CalamityAffixes::IsOrphanedPlayerInstanceKey;
+using CalamityAffixes::MakeDetachedWorldInstanceKey;
 using CalamityAffixes::MakeTrackedInstanceKey;
 using CalamityAffixes::ResolveInstanceKeyTransfer;
 
@@ -11,7 +14,46 @@ namespace
 	constexpr std::uint32_t kMerchantID = 0x1000u;
 	constexpr std::uint32_t kChestID = 0x2000u;
 	constexpr std::uint32_t kItemFormID = 0x3000u;
+	constexpr std::uint32_t kDroppedWeaponRefID = 0xFF001234u;
 }
+
+static_assert([] {
+	constexpr std::uint16_t recycledPlayerUID = 80u;
+	constexpr auto formerPlayerKey = MakeTrackedInstanceKey(kPlayerID, recycledPlayerUID);
+	constexpr auto detachedWorldKey = MakeDetachedWorldInstanceKey(kDroppedWeaponRefID);
+	constexpr auto unrelatedIncomingKey = MakeTrackedInstanceKey(kPlayerID, recycledPlayerUID);
+
+	return detachedWorldKey != 0u &&
+	       detachedWorldKey != formerPlayerKey &&
+	       detachedWorldKey != unrelatedIncomingKey &&
+	       detachedWorldKey == MakeDetachedWorldInstanceKey(kDroppedWeaponRefID);
+}(),
+	"Weapon-rack transfer: dropped state must leave the reusable player-UID namespace and remain bound to the world reference");
+
+static_assert(MakeDetachedWorldInstanceKey(0u) == 0u,
+	"Weapon-rack transfer: an invalid world reference must not produce a state key");
+
+static_assert([] {
+	constexpr auto firstWorldKey = MakeDetachedWorldInstanceKey(kDroppedWeaponRefID);
+	constexpr auto secondWorldKey = MakeDetachedWorldInstanceKey(kDroppedWeaponRefID + 1u);
+
+	return IsDetachedWorldReferenceMatch(firstWorldKey, firstWorldKey) &&
+	       IsDetachedWorldReferenceMatch(0u, firstWorldKey) &&
+	       !IsDetachedWorldReferenceMatch(firstWorldKey, secondWorldKey) &&
+	       !IsDetachedWorldReferenceMatch(firstWorldKey, 0u);
+}(),
+	"Weapon-rack transfer: a recycled reference handle must never authorize state transfer to a different world reference");
+
+static_assert([] {
+	constexpr auto playerKey = MakeTrackedInstanceKey(kPlayerID, 90u);
+	constexpr auto chestKey = MakeTrackedInstanceKey(kChestID, 90u);
+
+	return IsOrphanedPlayerInstanceKey(playerKey, kPlayerID, false) &&
+	       !IsOrphanedPlayerInstanceKey(playerKey, kPlayerID, true) &&
+	       !IsOrphanedPlayerInstanceKey(chestKey, kPlayerID, false) &&
+	       !IsOrphanedPlayerInstanceKey(0u, kPlayerID, false);
+}(),
+	"Weapon-rack migration: only player-owned state without a matching inventory instance is orphaned");
 
 static_assert([] {
 	const auto plan = ResolveInstanceKeyTransfer(InstanceKeyTransferContext{

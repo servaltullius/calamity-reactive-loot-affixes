@@ -37,7 +37,7 @@ def main() -> int:
         "# 서픽스 효과 정리 (공개용)",
         "",
         f"> 업데이트: {date.today().isoformat()}",
-        "> 기준 버전: `v1.2.23`",
+        "> 기준 버전: `v1.2.24`",
         f"> 기준 코드: `{SUFFIXES_PATH}`",
         "",
         f"- 총 서픽스 패밀리: **{len(families)}개**",
@@ -112,7 +112,7 @@ def main() -> int:
         lines.append("")
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    OUTPUT_PATH.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
     print(f"[OK] Wrote {OUTPUT_PATH} ({len(data)} entries, {len(families)} families)")
     return 0
 
