@@ -130,7 +130,7 @@ def regenerate_affix_catalog() -> None:
         "# 어픽스 카탈로그",
         "",
         f"> 업데이트: {date.today().isoformat()}",
-        "> 기준 버전: `v1.2.22`",
+        "> 기준 버전: `v1.2.23`",
         "> 기준 파일: `affixes/affixes.json`",
         "> INTERNAL 항목은 공개 문서에서 숨김",
         "",

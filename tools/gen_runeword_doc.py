@@ -41,7 +41,7 @@ def main() -> int:
         "# 룬워드 효과 정리 (공개용)",
         "",
         f"> 업데이트: {date.today().isoformat()}",
-        "> 기준 버전: `v1.2.22`",
+        "> 기준 버전: `v1.2.23`",
         f"> 기준 코드: `{RUNEWORDS_PATH}`",
         f"> 룬 조합 기준: `{CONTRACT_PATH}`",
         "",
