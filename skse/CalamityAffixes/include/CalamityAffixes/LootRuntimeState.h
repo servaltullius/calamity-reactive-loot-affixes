@@ -18,6 +18,12 @@ namespace CalamityAffixes
 {
 	struct LootRuntimeState
 	{
+		struct PendingDroppedRefDelete
+		{
+			LootRerollGuard::RefHandle refHandle{ 0 };
+			LootRerollGuard::InstanceKey detachedWorldKey{ 0 };
+		};
+
 		LootShuffleBagState prefixSharedBag{};
 		LootShuffleBagState prefixWeaponBag{};
 		LootShuffleBagState prefixArmorBag{};
@@ -41,7 +47,7 @@ namespace CalamityAffixes
 
 		std::vector<float> activeSlotPenalty{};
 		LootRerollGuard rerollGuard{};
-		std::vector<LootRerollGuard::RefHandle> pendingDroppedRefDeletes{};
+		std::vector<PendingDroppedRefDelete> pendingDroppedRefDeletes{};
 		std::atomic_bool dropDeleteDrainScheduled{ false };
 		std::map<std::pair<LootRerollGuard::FormID, LootRerollGuard::FormID>, std::int32_t> playerContainerStash{};
 
@@ -71,6 +77,8 @@ namespace CalamityAffixes
 			evaluatedInsertionsSincePrune = 0;
 			currencyRollLedger.clear();
 			currencyRollLedgerRecent.clear();
+			pendingDroppedRefDeletes.clear();
+			dropDeleteDrainScheduled.store(false, std::memory_order_release);
 		}
 	};
 }

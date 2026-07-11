@@ -1,10 +1,12 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/Hooks.h"
+#include "CalamityAffixes/InstanceKeyTransferPolicy.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
 #include <cstdint>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace CalamityAffixes
 {
@@ -52,7 +54,9 @@ namespace CalamityAffixes
 	void EventBridge::OnPostLoadGame()
 	{
 		const std::scoped_lock lock(_stateMutex);
-		if (NormalizeLegacyPlayerInstanceKeys()) {
+		const bool normalizedLegacyKeys = NormalizeLegacyPlayerInstanceKeys();
+		const bool prunedOrphanedPlayerKeys = PruneOrphanedPlayerInstanceKeys();
+		if (normalizedLegacyKeys || prunedOrphanedPlayerKeys) {
 			RebuildActiveCounts();
 		}
 		MaybeMigrateMiscCurrency();
@@ -162,6 +166,63 @@ namespace CalamityAffixes
 		return remapped > 0u || discarded > 0u;
 	}
 
+	bool EventBridge::PruneOrphanedPlayerInstanceKeys()
+	{
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return false;
+		}
+
+		auto* changes = player->GetInventoryChanges();
+		if (!changes || !changes->entryList) {
+			return false;
+		}
+
+		const auto playerID = player->GetFormID();
+		std::unordered_set<std::uint64_t> inventoryKeys;
+		for (auto* entry : *changes->entryList) {
+			if (!entry || !entry->extraLists) {
+				continue;
+			}
+			for (auto* xList : *entry->extraLists) {
+				const auto* uid = xList ? xList->GetByType<RE::ExtraUniqueID>() : nullptr;
+				if (uid && uid->baseID != 0u && uid->uniqueID != 0u) {
+					inventoryKeys.insert(MakeInstanceKey(uid->baseID, uid->uniqueID));
+				}
+			}
+		}
+
+		std::unordered_set<std::uint64_t> materialKeys;
+		for (const auto& [key, _] : _instanceAffixes) {
+			materialKeys.insert(key);
+		}
+		for (const auto& [stateKey, _] : _instanceStates) {
+			materialKeys.insert(stateKey.instanceKey);
+		}
+		for (const auto& [key, _] : _runewordState.instanceStates) {
+			materialKeys.insert(key);
+		}
+		if (_runewordState.selectedBaseKey) {
+			materialKeys.insert(*_runewordState.selectedBaseKey);
+		}
+
+		std::uint32_t pruned = 0u;
+		for (const auto key : materialKeys) {
+			if (!IsOrphanedPlayerInstanceKey(key, playerID, inventoryKeys.contains(key))) {
+				continue;
+			}
+			DiscardInstanceKeyState(key);
+			++pruned;
+		}
+
+		if (pruned > 0u) {
+			SKSE::log::warn(
+				"CalamityAffixes: discarded {} orphaned player-owned instance state(s) during ownership reconciliation; this prevents stale weapon-rack UIDs from attaching to unrelated items.",
+				pruned);
+		}
+		return pruned > 0u;
+	}
+
 	void EventBridge::OnFormDelete(RE::VMHandle a_handle)
 	{
 		auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
@@ -188,10 +249,14 @@ namespace CalamityAffixes
 		if (refHandle == 0) {
 			return;
 		}
+		const auto detachedWorldKey = MakeDetachedWorldInstanceKey(ref->GetFormID());
 
 		{
 			const std::scoped_lock lock(_stateMutex);
-			_lootState.pendingDroppedRefDeletes.push_back(refHandle);
+			_lootState.pendingDroppedRefDeletes.push_back(LootRuntimeState::PendingDroppedRefDelete{
+				.refHandle = refHandle,
+				.detachedWorldKey = detachedWorldKey
+			});
 		}
 		ScheduleDroppedRefDeleteDrain();
 	}
@@ -225,14 +290,14 @@ namespace CalamityAffixes
 
 	void EventBridge::DrainPendingDroppedRefDeletes()
 	{
-		std::vector<LootRerollGuard::RefHandle> pending;
+		std::vector<LootRuntimeState::PendingDroppedRefDelete> pending;
 		{
 			const std::scoped_lock lock(_stateMutex);
 			pending.swap(_lootState.pendingDroppedRefDeletes);
 		}
 
-		for (const auto refHandle : pending) {
-			ProcessDroppedRefDeleted(refHandle);
+		for (const auto& pendingDelete : pending) {
+			ProcessDroppedRefDeleted(pendingDelete.refHandle, pendingDelete.detachedWorldKey);
 		}
 
 		_lootState.dropDeleteDrainScheduled.store(false, std::memory_order_release);
@@ -254,24 +319,23 @@ namespace CalamityAffixes
 		});
 	}
 
-	void EventBridge::ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle)
+	void EventBridge::ProcessDroppedRefDeleted(
+		LootRerollGuard::RefHandle a_refHandle,
+		std::uint64_t a_detachedWorldKey)
 	{
 		const std::scoped_lock lock(_stateMutex);
 
 		const auto keyOpt = _lootState.rerollGuard.ConsumeIfPlayerDropDeleted(a_refHandle);
-		if (!keyOpt) {
-			return;
+		if (keyOpt && !IsDetachedWorldReferenceMatch(*keyOpt, a_detachedWorldKey)) {
+			SKSE::log::warn(
+				"CalamityAffixes: rejected recycled drop-reference handle during delete cleanup (guardedKey={:016X}, referenceKey={:016X}).",
+				*keyOpt,
+				a_detachedWorldKey);
 		}
-
-		const auto key = *keyOpt;
-		const auto it = _instanceAffixes.find(key);
-		const bool wasLootEvaluated = IsLootEvaluatedInstance(key);
-		const bool hasRunewordState = _runewordState.instanceStates.contains(key);
-		const bool isSelectedRunewordBase = (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == key);
-		if (it == _instanceAffixes.end() &&
-			!wasLootEvaluated &&
-			!hasRunewordState &&
-			!isSelectedRunewordBase) {
+		const auto key = keyOpt && IsDetachedWorldReferenceMatch(*keyOpt, a_detachedWorldKey) ?
+			*keyOpt :
+			a_detachedWorldKey;
+		if (key == 0u || !IsInstanceKeyTracked(key)) {
 			return;
 		}
 
@@ -280,15 +344,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		if (it != _instanceAffixes.end()) {
-			_instanceAffixes.erase(it);
-		}
-		ForgetLootEvaluatedInstance(key);
-		EraseInstanceRuntimeStates(key);
-		_runewordState.instanceStates.erase(key);
-		if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == key) {
-			_runewordState.selectedBaseKey.reset();
-		}
+		DiscardInstanceKeyState(key);
 		if (_loot.debugLog) {
 			SKSE::log::debug("CalamityAffixes: pruned instance affix (world ref deleted) (key={:016X}).", key);
 		}

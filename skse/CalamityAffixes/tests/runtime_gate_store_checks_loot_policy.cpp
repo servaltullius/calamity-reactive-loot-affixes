@@ -600,6 +600,7 @@ namespace RuntimeGateStoreChecks
 		const fs::path lootFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.cpp";
 		const fs::path lifecycleFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Serialization.Lifecycle.cpp";
 		const fs::path baseSelectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.BaseSelection.cpp";
+		const fs::path runtimeSettingsHandlerFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Triggers.ModCallback.Handlers.cpp";
 
 		const auto loadText = [](const fs::path& a_path) -> std::optional<std::string> {
 			std::ifstream in(a_path);
@@ -613,13 +614,20 @@ namespace RuntimeGateStoreChecks
 		const auto source = loadText(lootFile);
 		const auto lifecycleSource = loadText(lifecycleFile);
 		const auto baseSelectionSource = loadText(baseSelectionFile);
-		if (!source || !lifecycleSource || !baseSelectionSource) {
+		const auto runtimeSettingsHandlerSource = loadText(runtimeSettingsHandlerFile);
+		if (!source || !lifecycleSource || !baseSelectionSource || !runtimeSettingsHandlerSource) {
 			std::cerr << "loot_reroll_exploit_guard: failed to open instance ownership sources\n";
 			return false;
 		}
 
 		if (source->find("IsLootSourceCorpseChestOrWorld(") == std::string::npos ||
-			source->find("_lootState.rerollGuard.ConsumeIfPlayerDropPickup(") == std::string::npos ||
+			source->find("_lootState.rerollGuard.ConsumePlayerDropPickupInstanceKey(") == std::string::npos ||
+			source->find("MakeDetachedWorldInstanceKey(referenceFormID)") == std::string::npos ||
+			source->find("IsDetachedWorldReferenceMatch(") == std::string::npos ||
+			source->find("RemapInstanceKey(dropSourceKey, detachedWorldKey);") == std::string::npos ||
+			source->find("if (dropSourceKey == 0u)") == std::string::npos ||
+			source->find("prunedOrphanedDropKeys = bridge->PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
+			source->find("RemapInstanceKey(detachedWorldKey, pickupKey);") == std::string::npos ||
 			source->find("_lootState.playerContainerStash[stashKey] += a_event->itemCount;") == std::string::npos ||
 			source->find("skipping loot roll (player dropped + re-picked)") == std::string::npos ||
 			source->find("skipping loot roll (player stashed + retrieved)") == std::string::npos) {
@@ -638,12 +646,16 @@ namespace RuntimeGateStoreChecks
 			source->find("AddToken(affixNode") != std::string::npos ||
 			baseSelectionSource->find("created->baseID = player->GetFormID();") == std::string::npos ||
 			lifecycleSource->find("bool EventBridge::NormalizeLegacyPlayerInstanceKeys()") == std::string::npos ||
+			lifecycleSource->find("bool EventBridge::PruneOrphanedPlayerInstanceKeys()") == std::string::npos ||
+			lifecycleSource->find("const bool prunedOrphanedPlayerKeys = PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
+			lifecycleSource->find("IsOrphanedPlayerInstanceKey(") == std::string::npos ||
 			lifecycleSource->find("uidUseCounts[uid->uniqueID]") == std::string::npos ||
 			lifecycleSource->find("if (duplicateUID)") == std::string::npos ||
 			lifecycleSource->find("DiscardInstanceKeyState(canonicalKey);") == std::string::npos ||
 			lifecycleSource->find("uid->baseID != itemFormID") == std::string::npos ||
 			lifecycleSource->find("RemapInstanceKey(legacyKey, canonicalKey);") == std::string::npos ||
-			lifecycleSource->find("uid->baseID = playerID;") == std::string::npos) {
+			lifecycleSource->find("uid->baseID = playerID;") == std::string::npos ||
+			runtimeSettingsHandlerSource->find("const bool prunedOrphanedEnableKeys = _runtimeSettings.enabled && PruneOrphanedPlayerInstanceKeys();") == std::string::npos) {
 			std::cerr << "loot_reroll_exploit_guard: owner+UID transfer or legacy normalization policy is incomplete\n";
 			return false;
 		}

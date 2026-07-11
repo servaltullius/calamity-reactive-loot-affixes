@@ -64,6 +64,10 @@ namespace CalamityAffixes
 
 		if (a_eventName == kMcmSetEnabledEvent) {
 			_runtimeSettings.enabled = (a_numArg > kMcmBoolThreshold);
+			const bool prunedOrphanedEnableKeys = _runtimeSettings.enabled && PruneOrphanedPlayerInstanceKeys();
+			if (prunedOrphanedEnableKeys) {
+				RebuildActiveCounts();
+			}
 			QueueRuntimeUserSettingsPersist();
 			EmitHudNotification(_runtimeSettings.enabled ? "Calamity: enabled" : "Calamity: disabled");
 			return true;

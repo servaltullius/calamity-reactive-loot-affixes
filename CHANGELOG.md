@@ -7,6 +7,35 @@
 
 ## [Unreleased]
 
+## [1.2.24] - 2026-07-11
+
+`v1.2.24`는 무기 거치대가 사용하는 플레이어 인벤토리 → 월드 오브젝트 경로에서 어픽스 상태가 플레이어 UID에 남아, 이후 다른 창고에서 꺼낸 무기에 잘못 이어질 수 있던 문제를 막는 상태 소유권 핫픽스입니다.
+
+### Added
+
+- 드롭된 월드 참조 전용 상태 키, 동일 참조 재획득 검증, 핸들 재사용 차단, 중복 드롭 기록 갱신 및 기존 세이브의 orphan player-key 정리를 고정하는 회귀 테스트를 추가했습니다.
+
+### Changed
+
+- 플레이어가 드롭한 장비의 상태를 재사용 가능한 플레이어 UID 공간에서 제거하고, 실제 월드 참조 FormID에 임시 귀속합니다.
+- 같은 월드 참조를 다시 주울 때에만 해당 상태를 새 플레이어 UID로 복원합니다.
+- 월드 참조 삭제 대기열이 참조별 상태 키를 함께 보존하며, 세이브 로드·되돌리기 시 이전 세이브의 대기 항목을 초기화합니다.
+- 모드를 다시 활성화할 때와 세이브를 로드할 때 실제 인벤토리에 없는 플레이어 소유 상태를 fail-closed 방식으로 정리합니다.
+
+### Fixed
+
+- 어픽스 무기 A를 무기 거치대에 건 뒤 다른 창고에서 꺼낸 무기 B가 A의 이전 UID를 재사용하면 A의 어픽스와 런타임 상태가 B에 보이던 문제를 수정했습니다.
+- 저장·로드 뒤 드롭 추적 캐시가 초기화된 경우에도 동일 월드 참조를 통해 원래 장비 상태를 복원할 수 있도록 수정했습니다.
+- 삭제된 월드 참조의 어픽스, 런타임 상태, 룬워드 상태, 프리뷰·평가 마커가 일부 남을 수 있던 정리 경로를 통합했습니다.
+- 오래된 참조 핸들이 다른 월드 오브젝트에 재사용됐을 때 상태를 잘못 이전하거나 삭제할 수 있던 경로를 차단했습니다.
+
+### Compatibility
+
+- 세이브 및 어픽스 직렬화 레코드 버전은 변경하지 않았습니다.
+- `v1.2.23`에서 무기를 거치대에 둔 채 아직 다른 아이템이 오염되지 않은 세이브는 로드 시 남은 플레이어 UID 상태를 안전하게 폐기합니다. 원본 거치대 무기의 상태는 증명할 방법이 없어 보존되지 않을 수 있습니다.
+- 이미 다른 아이템 B에 A의 상태가 나타난 세이브는 자동으로 A/B를 구분할 수 없습니다. 해당 아이템에 `Reset State / 상태 초기화`를 사용하거나 문제가 발생하기 전 세이브에서 다시 시작해야 합니다.
+- `v1.2.23`의 해상도별 툴팁 배율과 기존 설정 호환성은 그대로 유지됩니다.
+
 ## [1.2.23] - 2026-07-11
 
 `v1.2.23`은 4K에서 확인된 기존 어픽스 툴팁 외관을 유지하면서 QHD, FHD, 울트라와이드 해상도에서 화면 비율에 맞게 크기와 기본 위치를 조정하는 UI 호환성 업데이트입니다.
@@ -160,7 +189,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.23...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.24...HEAD
+[1.2.24]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.23...v1.2.24
 [1.2.23]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.22...v1.2.23
 [1.2.22]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.21...v1.2.22
 [1.2.21]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.20...v1.2.21

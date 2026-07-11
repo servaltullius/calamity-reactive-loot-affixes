@@ -253,6 +253,16 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
+		CalamityAffixes::LootRuntimeState state{};
+		state.pendingDroppedRefDeletes.emplace_back();
+		state.dropDeleteDrainScheduled.store(true, std::memory_order_release);
+		state.ResetForLoadOrRevert();
+		if (!state.pendingDroppedRefDeletes.empty() ||
+			state.dropDeleteDrainScheduled.load(std::memory_order_acquire)) {
+			std::cerr << "lifecycle: load/revert must clear pending world-reference deletes\n";
+			return false;
+		}
+
 		return true;
 	}
 

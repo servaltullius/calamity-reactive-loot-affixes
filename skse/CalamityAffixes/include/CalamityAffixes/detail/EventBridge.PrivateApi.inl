@@ -60,7 +60,10 @@
 		void DiscardInstanceKeyState(std::uint64_t a_instanceKey);
 		void RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey);
 		[[nodiscard]] bool NormalizeLegacyPlayerInstanceKeys();
-		void ProcessDroppedRefDeleted(LootRerollGuard::RefHandle a_refHandle);
+		[[nodiscard]] bool PruneOrphanedPlayerInstanceKeys();
+		void ProcessDroppedRefDeleted(
+			LootRerollGuard::RefHandle a_refHandle,
+			std::uint64_t a_detachedWorldKey);
 		void ScheduleDroppedRefDeleteDrain();
 		void DrainPendingDroppedRefDeletes();
 		void EraseInstanceRuntimeStates(std::uint64_t a_instanceKey);
