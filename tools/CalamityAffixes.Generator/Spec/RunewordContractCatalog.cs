@@ -35,39 +35,39 @@ internal static class RunewordContractCatalog
 
     private static readonly IReadOnlyList<RuneWeightEntry> FallbackRuneWeights =
     [
-        new RuneWeightEntry("El", 1200.0),
-        new RuneWeightEntry("Eld", 1100.0),
-        new RuneWeightEntry("Tir", 1000.0),
-        new RuneWeightEntry("Nef", 900.0),
-        new RuneWeightEntry("Eth", 800.0),
-        new RuneWeightEntry("Ith", 700.0),
-        new RuneWeightEntry("Tal", 620.0),
-        new RuneWeightEntry("Ral", 560.0),
-        new RuneWeightEntry("Ort", 500.0),
-        new RuneWeightEntry("Thul", 450.0),
-        new RuneWeightEntry("Amn", 400.0),
-        new RuneWeightEntry("Sol", 340.0),
-        new RuneWeightEntry("Shael", 280.0),
-        new RuneWeightEntry("Dol", 230.0),
-        new RuneWeightEntry("Hel", 190.0),
-        new RuneWeightEntry("Io", 155.0),
-        new RuneWeightEntry("Lum", 125.0),
-        new RuneWeightEntry("Ko", 100.0),
-        new RuneWeightEntry("Fal", 80.0),
-        new RuneWeightEntry("Lem", 64.0),
-        new RuneWeightEntry("Pul", 50.0),
-        new RuneWeightEntry("Um", 39.0),
-        new RuneWeightEntry("Mal", 30.0),
-        new RuneWeightEntry("Ist", 23.0),
-        new RuneWeightEntry("Gul", 17.0),
-        new RuneWeightEntry("Vex", 14.0),
-        new RuneWeightEntry("Ohm", 11.0),
-        new RuneWeightEntry("Lo", 8.0),
-        new RuneWeightEntry("Sur", 6.0),
-        new RuneWeightEntry("Ber", 5.0),
-        new RuneWeightEntry("Jah", 4.0),
-        new RuneWeightEntry("Cham", 3.0),
-        new RuneWeightEntry("Zod", 2.0),
+        new RuneWeightEntry("El", 4.0),
+        new RuneWeightEntry("Eld", 4.0),
+        new RuneWeightEntry("Tir", 4.0),
+        new RuneWeightEntry("Nef", 4.0),
+        new RuneWeightEntry("Eth", 4.0),
+        new RuneWeightEntry("Ith", 4.0),
+        new RuneWeightEntry("Tal", 4.0),
+        new RuneWeightEntry("Ral", 4.0),
+        new RuneWeightEntry("Ort", 4.0),
+        new RuneWeightEntry("Thul", 4.0),
+        new RuneWeightEntry("Amn", 4.0),
+        new RuneWeightEntry("Sol", 3.0),
+        new RuneWeightEntry("Shael", 3.0),
+        new RuneWeightEntry("Dol", 3.0),
+        new RuneWeightEntry("Hel", 3.0),
+        new RuneWeightEntry("Io", 3.0),
+        new RuneWeightEntry("Lum", 3.0),
+        new RuneWeightEntry("Ko", 3.0),
+        new RuneWeightEntry("Fal", 3.0),
+        new RuneWeightEntry("Lem", 3.0),
+        new RuneWeightEntry("Pul", 3.0),
+        new RuneWeightEntry("Um", 3.0),
+        new RuneWeightEntry("Mal", 2.0),
+        new RuneWeightEntry("Ist", 2.0),
+        new RuneWeightEntry("Gul", 2.0),
+        new RuneWeightEntry("Vex", 2.0),
+        new RuneWeightEntry("Ohm", 2.0),
+        new RuneWeightEntry("Lo", 2.0),
+        new RuneWeightEntry("Sur", 1.0),
+        new RuneWeightEntry("Ber", 1.0),
+        new RuneWeightEntry("Jah", 1.0),
+        new RuneWeightEntry("Cham", 1.0),
+        new RuneWeightEntry("Zod", 1.0),
     ];
 
     internal static Snapshot Load()
@@ -100,7 +100,7 @@ internal static class RunewordContractCatalog
                     continue;
                 }
 
-                runeWeights.Add(new RuneWeightEntry(rune, 25.0));
+                runeWeights.Add(new RuneWeightEntry(rune, 1.0));
             }
         }
 

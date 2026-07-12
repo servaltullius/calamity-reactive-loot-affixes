@@ -37,7 +37,7 @@ def main() -> int:
         "# 서픽스 효과 정리 (공개용)",
         "",
         f"> 업데이트: {date.today().isoformat()}",
-        "> 기준 버전: `v1.2.24`",
+        "> 기준 버전: `v1.2.25`",
         f"> 기준 코드: `{SUFFIXES_PATH}`",
         "",
         f"- 총 서픽스 패밀리: **{len(families)}개**",

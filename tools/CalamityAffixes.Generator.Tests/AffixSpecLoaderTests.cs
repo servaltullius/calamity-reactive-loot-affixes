@@ -969,7 +969,20 @@ public sealed class AffixSpecLoaderTests
 
         Assert.True(seenRunes.TryGetValue("El", out var elWeight));
         Assert.True(seenRunes.TryGetValue("Zod", out var zodWeight));
-        Assert.True(elWeight > zodWeight, "Low-tier rune weight should be higher than high-tier rune weight.");
+        Assert.Equal(33, seenRunes.Count);
+        Assert.Equal(4.0, elWeight);
+        Assert.Equal(4.0, seenRunes["Amn"]);
+        Assert.Equal(3.0, seenRunes["Sol"]);
+        Assert.Equal(3.0, seenRunes["Um"]);
+        Assert.Equal(2.0, seenRunes["Mal"]);
+        Assert.Equal(2.0, seenRunes["Lo"]);
+        Assert.Equal(1.0, seenRunes["Sur"]);
+        Assert.Equal(1.0, zodWeight);
+        Assert.Equal(11, seenRunes.Values.Count(weight => weight == 4.0));
+        Assert.Equal(11, seenRunes.Values.Count(weight => weight == 3.0));
+        Assert.Equal(6, seenRunes.Values.Count(weight => weight == 2.0));
+        Assert.Equal(5, seenRunes.Values.Count(weight => weight == 1.0));
+        Assert.Equal(4.0, seenRunes.Values.Max() / seenRunes.Values.Min());
     }
 
     [Fact]

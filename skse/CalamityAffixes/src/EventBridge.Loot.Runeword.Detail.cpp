@@ -52,8 +52,8 @@ namespace CalamityAffixes::RunewordDetail
 					return displayName;
 				}
 
-				// Weighted rune fragment distribution to mimic D2 rune tier rarity.
-				// Higher-tier runes intentionally have much lower weight.
+				// Four broad rarity tiers preserve rune progression without an extreme tail.
+				// Low/mid/high/top weights are capped at a 4:1 ratio.
 				[[nodiscard]] double ResolveRunewordFragmentWeight(std::string_view a_runeName)
 				{
 					if (a_runeName.empty()) {
@@ -61,39 +61,39 @@ namespace CalamityAffixes::RunewordDetail
 					}
 
 					constexpr std::array<std::pair<std::string_view, double>, 33> kRuneWeights{ {
-						{ "El", 1200.0 },
-						{ "Eld", 1100.0 },
-						{ "Tir", 1000.0 },
-						{ "Nef", 900.0 },
-						{ "Eth", 800.0 },
-						{ "Ith", 700.0 },
-						{ "Tal", 620.0 },
-						{ "Ral", 560.0 },
-						{ "Ort", 500.0 },
-						{ "Thul", 450.0 },
-						{ "Amn", 400.0 },
-						{ "Sol", 340.0 },
-						{ "Shael", 280.0 },
-						{ "Dol", 230.0 },
-						{ "Hel", 190.0 },
-						{ "Io", 155.0 },
-						{ "Lum", 125.0 },
-						{ "Ko", 100.0 },
-						{ "Fal", 80.0 },
-						{ "Lem", 64.0 },
-						{ "Pul", 50.0 },
-						{ "Um", 39.0 },
-						{ "Mal", 30.0 },
-						{ "Ist", 23.0 },
-						{ "Gul", 17.0 },
-						{ "Vex", 14.0 },
-						{ "Ohm", 11.0 },
-						{ "Lo", 8.0 },
-						{ "Sur", 6.0 },
-						{ "Ber", 5.0 },
-						{ "Jah", 4.0 },
-						{ "Cham", 3.0 },
-						{ "Zod", 2.0 },
+						{ "El", 4.0 },
+						{ "Eld", 4.0 },
+						{ "Tir", 4.0 },
+						{ "Nef", 4.0 },
+						{ "Eth", 4.0 },
+						{ "Ith", 4.0 },
+						{ "Tal", 4.0 },
+						{ "Ral", 4.0 },
+						{ "Ort", 4.0 },
+						{ "Thul", 4.0 },
+						{ "Amn", 4.0 },
+						{ "Sol", 3.0 },
+						{ "Shael", 3.0 },
+						{ "Dol", 3.0 },
+						{ "Hel", 3.0 },
+						{ "Io", 3.0 },
+						{ "Lum", 3.0 },
+						{ "Ko", 3.0 },
+						{ "Fal", 3.0 },
+						{ "Lem", 3.0 },
+						{ "Pul", 3.0 },
+						{ "Um", 3.0 },
+						{ "Mal", 2.0 },
+						{ "Ist", 2.0 },
+						{ "Gul", 2.0 },
+						{ "Vex", 2.0 },
+						{ "Ohm", 2.0 },
+						{ "Lo", 2.0 },
+						{ "Sur", 1.0 },
+						{ "Ber", 1.0 },
+						{ "Jah", 1.0 },
+						{ "Cham", 1.0 },
+						{ "Zod", 1.0 },
 					} };
 
 					for (const auto& [name, weight] : kRuneWeights) {
@@ -102,7 +102,7 @@ namespace CalamityAffixes::RunewordDetail
 						}
 					}
 
-					return 25.0;
+					return 1.0;
 				}
 					constexpr std::string_view kRunewordFragmentEditorIdPrefix = "CAFF_RuneFrag_";
 

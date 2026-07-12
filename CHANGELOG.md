@@ -7,6 +7,36 @@
 
 ## [Unreleased]
 
+## [1.2.25] - 2026-07-12
+
+`v1.2.25`는 공개 피드백에서 확인된 룬 파편 편중을 완화하고, 룬워드 성능 차이에 비해 과도했던 고급 룬 병목을 현실적인 범위로 줄이는 룬 경제 밸런스 프리릴리즈입니다.
+
+### Added
+
+- 룬 33종의 정확한 4단계 가중치, 4:1 상·하한 비율, SPID 94티켓 산출물과 런타임 계약을 고정하는 회귀 테스트를 추가했습니다.
+
+### Changed
+
+- 룬 가중치를 저급 `El-Amn=4`, 중급 `Sol-Um=3`, 고급 `Mal-Lo=2`, 최상급 `Sur-Zod=1`의 네 단계로 재조정했습니다.
+- SKSE 상자/컨테이너 선택과 SPID 시체 레벨드 리스트가 같은 4:1 분포를 사용하도록 SSOT, 생성기 폴백과 DLL 폴백을 일치시켰습니다.
+- 첫 10종 룬의 파편 내 점유율을 약 78.25%에서 42.55%로 낮추고, 최상급 룬 1종의 비중을 약 0.02~0.06%에서 약 1.064%로 조정했습니다.
+- 누락 룬 폴백을 새 최상급 가중치 `1`로 낮춰 계약 누락이 오히려 최고 빈도로 역전되지 않도록 했습니다.
+
+### Fixed
+
+- Windows dotnet 래퍼를 사용하는 WSL 패키징에서 `/mnt/c` staging 경로가 잘못된 WSL UNC로 전달되어 Generator가 실패하던 문제를 Windows 경로 변환으로 수정했습니다.
+
+### Balance
+
+- 독립 가중 추첨·교환 없음 기준 94개 레시피의 완성 기대 파편 격차는 약 563배에서 8.64배로 줄어듭니다.
+- 고급 룬워드는 크게 접근하기 쉬워지는 대신, 가장 쉬운 저급 레시피는 기존보다 약 2.55배 느려질 수 있습니다.
+- 기본 파편 드롭 판정 `8%`와 99회 무드롭 피티는 변경하지 않았습니다.
+
+### Compatibility
+
+- 세이브·어픽스·룬워드 직렬화 형식은 변경하지 않았으며, 이미 보유한 룬 파편과 완성 룬워드는 그대로 유지됩니다.
+- 새 분포는 업데이트 후 새로 선택되는 파편에 적용됩니다. 이미 SPID로 분배된 액터/시체 인벤토리는 즉시 다시 추첨되지 않습니다.
+
 ## [1.2.24] - 2026-07-11
 
 `v1.2.24`는 무기 거치대가 사용하는 플레이어 인벤토리 → 월드 오브젝트 경로에서 어픽스 상태가 플레이어 UID에 남아, 이후 다른 창고에서 꺼낸 무기에 잘못 이어질 수 있던 문제를 막는 상태 소유권 핫픽스입니다.
@@ -189,7 +219,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.24...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.25...HEAD
+[1.2.25]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.24...v1.2.25
 [1.2.24]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.23...v1.2.24
 [1.2.23]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.22...v1.2.23
 [1.2.22]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.21...v1.2.22

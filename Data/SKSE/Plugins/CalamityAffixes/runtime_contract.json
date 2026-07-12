@@ -1104,135 +1104,135 @@
   "runewordRuneWeights": [
     {
       "rune": "El",
-      "weight": 1200
-    },
-    {
-      "rune": "Eld",
-      "weight": 1100
-    },
-    {
-      "rune": "Tir",
-      "weight": 1000
-    },
-    {
-      "rune": "Nef",
-      "weight": 900
-    },
-    {
-      "rune": "Eth",
-      "weight": 800
-    },
-    {
-      "rune": "Ith",
-      "weight": 700
-    },
-    {
-      "rune": "Tal",
-      "weight": 620
-    },
-    {
-      "rune": "Ral",
-      "weight": 560
-    },
-    {
-      "rune": "Ort",
-      "weight": 500
-    },
-    {
-      "rune": "Thul",
-      "weight": 450
-    },
-    {
-      "rune": "Amn",
-      "weight": 400
-    },
-    {
-      "rune": "Sol",
-      "weight": 340
-    },
-    {
-      "rune": "Shael",
-      "weight": 280
-    },
-    {
-      "rune": "Dol",
-      "weight": 230
-    },
-    {
-      "rune": "Hel",
-      "weight": 190
-    },
-    {
-      "rune": "Io",
-      "weight": 155
-    },
-    {
-      "rune": "Lum",
-      "weight": 125
-    },
-    {
-      "rune": "Ko",
-      "weight": 100
-    },
-    {
-      "rune": "Fal",
-      "weight": 80
-    },
-    {
-      "rune": "Lem",
-      "weight": 64
-    },
-    {
-      "rune": "Pul",
-      "weight": 50
-    },
-    {
-      "rune": "Um",
-      "weight": 39
-    },
-    {
-      "rune": "Mal",
-      "weight": 30
-    },
-    {
-      "rune": "Ist",
-      "weight": 23
-    },
-    {
-      "rune": "Gul",
-      "weight": 17
-    },
-    {
-      "rune": "Vex",
-      "weight": 14
-    },
-    {
-      "rune": "Ohm",
-      "weight": 11
-    },
-    {
-      "rune": "Lo",
-      "weight": 8
-    },
-    {
-      "rune": "Sur",
-      "weight": 6
-    },
-    {
-      "rune": "Ber",
-      "weight": 5
-    },
-    {
-      "rune": "Jah",
       "weight": 4
     },
     {
-      "rune": "Cham",
+      "rune": "Eld",
+      "weight": 4
+    },
+    {
+      "rune": "Tir",
+      "weight": 4
+    },
+    {
+      "rune": "Nef",
+      "weight": 4
+    },
+    {
+      "rune": "Eth",
+      "weight": 4
+    },
+    {
+      "rune": "Ith",
+      "weight": 4
+    },
+    {
+      "rune": "Tal",
+      "weight": 4
+    },
+    {
+      "rune": "Ral",
+      "weight": 4
+    },
+    {
+      "rune": "Ort",
+      "weight": 4
+    },
+    {
+      "rune": "Thul",
+      "weight": 4
+    },
+    {
+      "rune": "Amn",
+      "weight": 4
+    },
+    {
+      "rune": "Sol",
       "weight": 3
     },
     {
-      "rune": "Zod",
+      "rune": "Shael",
+      "weight": 3
+    },
+    {
+      "rune": "Dol",
+      "weight": 3
+    },
+    {
+      "rune": "Hel",
+      "weight": 3
+    },
+    {
+      "rune": "Io",
+      "weight": 3
+    },
+    {
+      "rune": "Lum",
+      "weight": 3
+    },
+    {
+      "rune": "Ko",
+      "weight": 3
+    },
+    {
+      "rune": "Fal",
+      "weight": 3
+    },
+    {
+      "rune": "Lem",
+      "weight": 3
+    },
+    {
+      "rune": "Pul",
+      "weight": 3
+    },
+    {
+      "rune": "Um",
+      "weight": 3
+    },
+    {
+      "rune": "Mal",
       "weight": 2
+    },
+    {
+      "rune": "Ist",
+      "weight": 2
+    },
+    {
+      "rune": "Gul",
+      "weight": 2
+    },
+    {
+      "rune": "Vex",
+      "weight": 2
+    },
+    {
+      "rune": "Ohm",
+      "weight": 2
+    },
+    {
+      "rune": "Lo",
+      "weight": 2
+    },
+    {
+      "rune": "Sur",
+      "weight": 1
+    },
+    {
+      "rune": "Ber",
+      "weight": 1
+    },
+    {
+      "rune": "Jah",
+      "weight": 1
+    },
+    {
+      "rune": "Cham",
+      "weight": 1
+    },
+    {
+      "rune": "Zod",
+      "weight": 1
     }
   ]
 }

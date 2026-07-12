@@ -288,9 +288,9 @@ public sealed class KeywordPluginBuilderTests
         var elTickets = runewordDropList.Entries!.Count(entry => entry.Data?.Reference.FormKey == elFragment.FormKey);
         var zodTickets = runewordDropList.Entries.Count(entry => entry.Data?.Reference.FormKey == zodFragment.FormKey);
 
-        Assert.True(elTickets > zodTickets);
-        Assert.True(zodTickets >= 1);
-        Assert.True(runewordDropList.Entries.Count > mod.MiscItems.Count(item => item.EditorID?.StartsWith("CAFF_RuneFrag_", StringComparison.Ordinal) == true));
+        Assert.Equal(4, elTickets);
+        Assert.Equal(1, zodTickets);
+        Assert.Equal(94, runewordDropList.Entries.Count);
     }
 
 

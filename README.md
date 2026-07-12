@@ -266,6 +266,7 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
   - 기본 하이브리드:
     - 시체: SPID `Item` 분배 (액터 인벤토리 선지급 -> 사망 시 시체 루팅)
     - 상자/월드: SKSE 런타임 롤 경로
+  - 룬 종류는 저급 `El-Amn=4`, 중급 `Sol-Um=3`, 고급 `Mal-Lo=2`, 최상급 `Sur-Zod=1`의 4단계 가중치로 선택됩니다(최고:최저 4:1).
   - 시체 루팅 호환성을 위해 `DeathItem` 직접 분배와 `Perk` 기반 On-Death 분배는 사용하지 않습니다.
   - SPID ActorType 필터 미매칭 시체(일부 모드 추가 적 등)는 현재 정책상 시체 통화 드랍이 발생하지 않습니다.
   - 확률은 기본적으로 생성기 단계(`loot.runewordFragmentChancePercent`)에 반영됩니다.

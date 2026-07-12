@@ -79,6 +79,12 @@ class ReleaseVerifyTests(unittest.TestCase):
         self.assertIn("cmake --build", source)
         self.assertIn("--target CalamityAffixes", source)
 
+    def test_build_mo2_zip_translates_stage_path_for_windows_dotnet(self) -> None:
+        source = self.build_mo2_zip_path.read_text(encoding="utf-8")
+        self.assertIn("dotnet_uses_windows_interop", source)
+        self.assertIn('generator_data_dir="$(wslpath -w "${stage_data_dir}")"', source)
+        self.assertIn('--data "${generator_data_dir}"', source)
+
     def test_build_mo2_zip_checks_modular_spec_without_rewriting_tracked_affixes_json(self) -> None:
         source = self.build_mo2_zip_path.read_text(encoding="utf-8")
         self.assertIn("--check", source)

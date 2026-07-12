@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <string_view>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <nlohmann/json.hpp>
@@ -739,23 +740,28 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
-			std::unordered_set<std::string> weightedRunes;
+			std::unordered_map<std::string, double> weightedRunes;
 			for (const auto& weightEntry : *weightsIt) {
 				if (!weightEntry.is_object()) {
 					continue;
 				}
 				const auto runeIt = weightEntry.find("rune");
 				const auto weightIt2 = weightEntry.find("weight");
-				if (runeIt == weightEntry.end() || !runeIt->is_string() ||
-					weightIt2 == weightEntry.end() || !weightIt2->is_number() || !(weightIt2->get<double>() > 0.0)) {
+				const auto weight = weightIt2 != weightEntry.end() && weightIt2->is_number() ?
+					weightIt2->get<double>() : 0.0;
+				if (runeIt == weightEntry.end() || !runeIt->is_string() || !(weight > 0.0)) {
 					std::cerr << "runeword_contract_snapshot: invalid rune weight entry\n";
 					return false;
 				}
-				weightedRunes.insert(runeIt->get<std::string>());
+				weightedRunes.emplace(runeIt->get<std::string>(), weight);
 			}
 
-			if (weightedRunes.find("El") == weightedRunes.end() || weightedRunes.find("Zod") == weightedRunes.end()) {
-				std::cerr << "runeword_contract_snapshot: expected rune weights are missing\n";
+			const auto elWeight = weightedRunes.find("El");
+			const auto zodWeight = weightedRunes.find("Zod");
+			if (weightsIt->size() != 33u || weightedRunes.size() != 33u ||
+				elWeight == weightedRunes.end() || elWeight->second != 4.0 ||
+				zodWeight == weightedRunes.end() || zodWeight->second != 1.0) {
+				std::cerr << "runeword_contract_snapshot: expected 33-rune 4:1 weight contract\n";
 				return false;
 			}
 

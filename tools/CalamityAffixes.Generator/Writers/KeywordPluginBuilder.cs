@@ -13,7 +13,7 @@ namespace CalamityAffixes.Generator.Writers;
 public static class KeywordPluginBuilder
 {
     private const string RunewordFragmentEditorIdPrefix = "CAFF_RuneFrag_";
-    private const double DefaultRunewordFragmentWeight = 25.0;
+    private const double DefaultRunewordFragmentWeight = 1.0;
     private const int MaxRunewordFragmentWeightTickets = 64;
     private const double TargetMaxRunewordFragmentWeightTickets = 48.0;
 

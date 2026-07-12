@@ -72,6 +72,18 @@ if [[ -z "${jobs}" ]]; then
   fi
 fi
 
+dotnet_uses_windows_interop() {
+  local resolved
+  resolved="$(command -v "${dotnet_cmd}" 2>/dev/null || true)"
+  if [[ "${resolved}" == *.exe ]]; then
+    return 0
+  fi
+  if [[ -f "${resolved}" ]] && grep -q 'dotnet\.exe' "${resolved}"; then
+    return 0
+  fi
+  return 1
+}
+
 stage_root="${tmp_dir}/stage"
 stage_data_dir="${stage_root}/Data"
 stage_dll="${stage_data_dir}/SKSE/Plugins/CalamityAffixes.dll"
@@ -111,9 +123,14 @@ else
 fi
 
 # Regenerate data-driven outputs (keywords/MCM plugin/runtime json) into staged Data.
+generator_data_dir="${stage_data_dir}"
+if command -v wslpath >/dev/null 2>&1 && dotnet_uses_windows_interop; then
+  generator_data_dir="$(wslpath -w "${stage_data_dir}")"
+fi
+
 generator_args=(
   --spec affixes/affixes.json
-  --data "${stage_data_dir}"
+  --data "${generator_data_dir}"
 )
 
 (

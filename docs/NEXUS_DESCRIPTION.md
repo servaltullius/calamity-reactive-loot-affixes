@@ -102,6 +102,7 @@ It tracks item instances via ExtraUniqueID, and the current build is **Reforge-c
 - Containers: **SKSE runtime roll**
 - World pickups: **no drops**
 - Default rates: runeword fragment `8%`, reforge orb `5%`
+- Rune type weights: low `El-Amn=4`, mid `Sol-Um=3`, high `Mal-Lo=2`, top `Sur-Zod=1` (maximum ratio `4:1`)
 - Rates are adjustable via MCM (applies immediately at runtime)
 
 ### Combat System
