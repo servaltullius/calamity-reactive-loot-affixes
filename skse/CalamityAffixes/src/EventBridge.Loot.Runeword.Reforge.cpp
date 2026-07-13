@@ -38,6 +38,8 @@ namespace CalamityAffixes
 			result.message = "Reforge failed: unable to resolve item type.";
 			return result;
 		}
+		const auto weaponSubtype =
+			detail::ResolveWeaponSubtype(entry->object->As<RE::TESObjectWEAP>());
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (!player) {
@@ -111,7 +113,7 @@ namespace CalamityAffixes
 					break;
 				}
 
-				const auto idx = RollSuffixIndex(*lootType, &chosenFamilies);
+				const auto idx = RollSuffixIndex(*lootType, weaponSubtype, &chosenFamilies);
 				if (!idx) {
 					break;
 				}

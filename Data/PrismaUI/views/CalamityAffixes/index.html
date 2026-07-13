@@ -641,12 +641,23 @@
         color: rgba(220, 235, 255, 0.98);
       }
 
+      .rwBadge.warning {
+        border-color: rgba(255, 188, 86, 0.72);
+        background: rgba(255, 155, 45, 0.16);
+        color: rgba(255, 231, 184, 0.98);
+      }
+
       .rwMetaLine {
         margin-top: calc(6px * var(--panel-ui-scale));
         color: rgba(255, 255, 255, 0.74);
         line-height: 1.4;
         white-space: pre-line;
         overflow-wrap: anywhere;
+      }
+
+      .rwMetaLine.warning {
+        color: rgba(255, 211, 142, 0.98);
+        font-weight: 700;
       }
 
       .rwContextBar {
@@ -3602,6 +3613,10 @@
             return { className: "weapon", text: t("Base: Polearm/Spear", "베이스: 폴암/창") };
           case "bow":
             return { className: "weapon", text: t("Base: Bow/Crossbow", "베이스: 활/석궁") };
+          case "one_handed_melee":
+            return { className: "weapon", text: t("Base: One-Handed Melee", "베이스: 한손 근접 무기") };
+          case "two_handed_melee":
+            return { className: "weapon", text: t("Base: Two-Handed Melee", "베이스: 양손 근접 무기") };
           case "staff_wand":
             return { className: "weapon", text: t("Base: Staff/Wand", "베이스: 지팡이/완드") };
           case "claw":
@@ -3614,6 +3629,8 @@
             return { className: "armor", text: t("Base: Helm", "베이스: 투구") };
           case "armor":
             return { className: "armor", text: t("Base: Armor", "베이스: 갑옷") };
+          case "heavy_armor":
+            return { className: "armor", text: t("Base: Heavy Armor", "베이스: 중갑") };
           case "weapon_shield":
             return { className: "mixed", text: t("Base: Weapon/Shield", "베이스: 무기/방패") };
           case "helm_shield":
@@ -3791,6 +3808,13 @@
         const hasRecipe = Boolean(state.hasRecipe);
         const isComplete = Boolean(state.isComplete);
         const canTransmute = Boolean(state.canInsert) && hasBase && hasRecipe && !isComplete;
+        const baseCompatibilityWarning = Boolean(state.baseCompatibilityWarning);
+        const baseCompatibilityMessage = baseCompatibilityWarning
+          ? t(
+              typeof state.baseCompatibilityMessageEn === "string" ? state.baseCompatibilityMessageEn : "Selected base mismatch.",
+              typeof state.baseCompatibilityMessageKo === "string" ? state.baseCompatibilityMessageKo : "선택한 베이스가 권장 타입과 다릅니다."
+            )
+          : "";
 
         let buttonLabel = t("Transmute", "변환");
         let buttonHint = "";
@@ -3825,6 +3849,13 @@
           );
         }
 
+        if (baseCompatibilityMessage) {
+          buttonHint = buttonHint
+            ? `${baseCompatibilityMessage}
+${buttonHint}`
+            : baseCompatibilityMessage;
+        }
+
         const reforgeEnabled = hasBase;
         const reforgeHint = reforgeEnabled ?
           (isComplete ?
@@ -3857,6 +3888,8 @@
           hasRecipe,
           isComplete,
           canTransmute,
+          baseCompatibilityWarning,
+          baseCompatibilityMessage,
           buttonLabel,
           buttonHint,
           reforgeEnabled,
@@ -3937,6 +3970,11 @@
           return;
         }
 
+        if (actionState.baseCompatibilityWarning) {
+          runewordFlowHint.textContent = actionState.baseCompatibilityMessage;
+          return;
+        }
+
         if (isComplete) {
           runewordFlowHint.textContent = t(
             "This base already has a completed runeword. Reforge if you want a new result.",
@@ -3997,6 +4035,8 @@
               "Search the center explorer and select the recipe you want to review.",
               "중앙 탐색기에서 검토할 레시피를 선택하세요."
             );
+          } else if (actionState.baseCompatibilityWarning) {
+            runewordContextRecipeMeta.textContent = actionState.baseCompatibilityMessage;
           } else if (state.missingSummary) {
             runewordContextRecipeMeta.textContent = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
           } else if (isComplete) {
@@ -4112,6 +4152,9 @@
           if (isComplete) {
             badgeClass += " complete";
             badgeText = t("Complete", "완료");
+          } else if (actionState.baseCompatibilityWarning) {
+            badgeClass += " warning";
+            badgeText = t("Base Mismatch", "베이스 불일치");
           } else if (canTransmute) {
             badgeClass += " ready";
             badgeText = t("Ready", "가능");
@@ -4153,6 +4196,13 @@
             baseLine.className = "rwMetaLine";
             baseLine.textContent = `${t("Recommended Base", "권장 베이스")}: ${baseBadge.text}`;
             runewordPanelStatus.appendChild(baseLine);
+
+            if (actionState.baseCompatibilityWarning) {
+              const warningLine = document.createElement("div");
+              warningLine.className = "rwMetaLine warning";
+              warningLine.textContent = actionState.baseCompatibilityMessage;
+              runewordPanelStatus.appendChild(warningLine);
+            }
 
             const runeSequence = typeof selectedRecipe?.runes === "string" ? selectedRecipe.runes : "";
             if (runeSequence.trim()) {

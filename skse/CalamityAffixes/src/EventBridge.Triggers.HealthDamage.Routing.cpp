@@ -15,7 +15,6 @@ namespace CalamityAffixes
 	namespace
 	{
 		constexpr auto kHealthDamageSignatureStaleWindow = std::chrono::milliseconds(300);
-		constexpr auto kOutgoingPerTargetWindow = std::chrono::milliseconds(400);
 
 		[[nodiscard]] std::uint32_t FloatBits(float a_value) noexcept
 		{
@@ -142,16 +141,6 @@ namespace CalamityAffixes
 		}
 
 		const RE::FormID targetFormID = a_target->GetFormID();
-		if (const auto it = _combatState.outgoingHitPerTargetLastAt.find(targetFormID);
-			it != _combatState.outgoingHitPerTargetLastAt.end()) {
-			const auto elapsedMs = ToElapsedMilliseconds(a_now - it->second);
-			if (ShouldSuppressPerTargetRepeatWindow(
-					elapsedMs,
-					static_cast<std::uint64_t>(kOutgoingPerTargetWindow.count()))) {
-				return;
-			}
-		}
-
 		const LastHitKey key{
 			.outgoing = true,
 			.aggressor = a_attacker->GetFormID(),
@@ -160,18 +149,6 @@ namespace CalamityAffixes
 		};
 		if (ShouldSuppressDuplicateHit(key, a_now)) {
 			return;
-		}
-
-		_combatState.outgoingHitPerTargetLastAt[targetFormID] = a_now;
-		if (_combatState.outgoingHitPerTargetLastAt.size() > 256) {
-			for (auto it = _combatState.outgoingHitPerTargetLastAt.begin();
-			     it != _combatState.outgoingHitPerTargetLastAt.end();) {
-				if ((a_now - it->second) > std::chrono::seconds(5)) {
-					it = _combatState.outgoingHitPerTargetLastAt.erase(it);
-				} else {
-					++it;
-				}
-			}
 		}
 
 		ProcessTrigger(Trigger::kHit, context.playerOwner, a_target, a_hitData);

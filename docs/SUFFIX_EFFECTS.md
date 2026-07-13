@@ -1,13 +1,16 @@
 # 서픽스 효과 정리 (공개용)
 
-> 업데이트: 2026-07-12
-> 기준 버전: `v1.2.25`
+> 업데이트: 2026-07-13
+> 기준 버전: `v1.3.0`
 > 기준 코드: `affixes/modules/keywords.affixes.suffixes.json`
 
 - 총 서픽스 패밀리: **22개**
 - 총 서픽스 엔트리: **66개**
 - 각 티어 이름은 인게임 표시 문자열(`nameKo`/`nameEn`)을 그대로 사용
 - 공개용 문서 기준으로 패밀리/핵심 수치/추천 빌드를 중심으로 정리
+- 장착 중인 같은 패밀리는 가장 높은 티어 하나만 적용 (예: T1 + T3 → T3)
+- 같은 패밀리·같은 티어를 여러 장비에 착용해도 추가 중첩되지 않음
+- 서로 다른 패밀리와 패밀리가 없는 룬워드 패시브는 이 선택 규칙의 영향을 받지 않음
 
 ## 패밀리 요약
 
@@ -26,14 +29,14 @@
 | 11 | **gladiator** | WeaponSpeedMult | +5 | +10 | +15 | 공격 속도 |
 | 12 | **guardian** | DamageResist | +25 | +50 | +80 | 물리 방어 |
 | 13 | **marksman** | MarksmanModifier | +5 | +10 | +15 | 궁수 |
-| 14 | **meditation** | MagickaRate | +25 | +50 | +75 | 마법사 |
-| 15 | **regeneration** | HealRate | +25 | +50 | +75 | 범용 |
+| 14 | **meditation** | MagickaRateMult | +25 | +50 | +75 | 마법사 |
+| 15 | **regeneration** | HealRateMult | +25 | +50 | +75 | 범용 |
 | 16 | **shadow** | SneakingModifier | +5 | +10 | +15 | 스텔스/도적 |
 | 17 | **spell_ward** | ResistMagic | +3 | +8 | +12 | 마법 저항 |
 | 18 | **steed** | CarryWeight | +15 | +30 | +50 | 범용 유틸 |
 | 19 | **swiftness** | SpeedMult | +4 | +7 | +10 | 범용 이동 |
 | 20 | **swordsman** | OneHandedModifier | +5 | +10 | +15 | 한손 전사 |
-| 21 | **tenacity** | StaminaRate | +25 | +50 | +75 | 근접 |
+| 21 | **tenacity** | StaminaRateMult | +25 | +50 | +75 | 근접 |
 | 22 | **vitality** | Health | +25 | +50 | +75 | 범용 |
 
 ## 패밀리별 상세
@@ -45,9 +48,9 @@
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
 |------|----|-------------|-----------|-----:|
-| T1 | `suffix_assassin_t1` | 약간의 암살자: 치명타 확률 +10% | of Minor Assassin: Critical Chance +10% | 10 |
-| T2 | `suffix_assassin_t2` | 암살자: 치명타 확률 +20% | of the Assassin: Critical Chance +20% | 20 |
-| T3 | `suffix_assassin_t3` | 위대한 암살자: 치명타 확률 +30% | of Grand Assassin: Critical Chance +30% | 30 |
+| T1 | `suffix_assassin_t1` | 약간의 암살자: 치명타 확률 +10%, 치명타 피해 +10% | of Minor Assassin: Critical Chance +10%, Critical Damage +10% | 10 |
+| T2 | `suffix_assassin_t2` | 암살자: 치명타 확률 +20%, 치명타 피해 +20% | of the Assassin: Critical Chance +20%, Critical Damage +20% | 20 |
+| T3 | `suffix_assassin_t3` | 위대한 암살자: 치명타 확률 +30%, 치명타 피해 +30% | of Grand Assassin: Critical Chance +30%, Critical Damage +30% | 30 |
 
 ### brilliance
 
@@ -183,7 +186,7 @@
 
 ### meditation
 
-- 영향 능력치: `MagickaRate`
+- 영향 능력치: `MagickaRateMult`
 - 추천 빌드: 마법사
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
@@ -194,7 +197,7 @@
 
 ### regeneration
 
-- 영향 능력치: `HealRate`
+- 영향 능력치: `HealRateMult`
 - 추천 빌드: 범용
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
@@ -260,7 +263,7 @@
 
 ### tenacity
 
-- 영향 능력치: `StaminaRate`
+- 영향 능력치: `StaminaRateMult`
 - 추천 빌드: 근접
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |

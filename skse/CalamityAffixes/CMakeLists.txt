@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 1.2.25 LANGUAGES CXX)
+project(CalamityAffixes VERSION 1.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,6 +26,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/Hooks.h
 	    include/CalamityAffixes/InstanceKeyTransferPolicy.h
 	    include/CalamityAffixes/InstanceStateKey.h
+	    include/CalamityAffixes/ItemSubtypePolicy.h
 	    include/CalamityAffixes/LootCurrencyLedger.h
 	    include/CalamityAffixes/LootRerollGuard.h
 	    include/CalamityAffixes/LootShuffleBagState.h
@@ -46,6 +47,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/RunewordContractSnapshot.h
 	    include/CalamityAffixes/RunewordUtil.h
 	    include/CalamityAffixes/RunewordUiPolicy.h
+	    include/CalamityAffixes/SuffixFamilySelection.h
 	    include/CalamityAffixes/TriggerGuards.h
 	    include/CalamityAffixes/TrapSystem.h
 	    include/CalamityAffixes/UserSettingsPersistence.h
@@ -223,9 +225,12 @@ if (BUILD_TESTING)
             tests/test_non_hostile_first_hit_gate.cpp
             tests/test_per_target_cooldown_store.cpp
             tests/test_instance_affix_slots.cpp
+            tests/test_item_subtype_policy.cpp
             tests/test_effective_loot_weight.cpp
             tests/test_pointer_safety.cpp
             tests/test_editor_id_safety.cpp
+            tests/test_suffix_family_selection.cpp
+            tests/test_corpse_explosion_selection.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

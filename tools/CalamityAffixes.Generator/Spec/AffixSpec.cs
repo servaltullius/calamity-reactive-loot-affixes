@@ -169,6 +169,9 @@ public sealed class AffixDefinition
     [JsonPropertyName("family")]
     public string? Family { get; init; }
 
+    [JsonPropertyName("weaponSubtypes")]
+    public List<string>? WeaponSubtypes { get; init; }
+
     [JsonPropertyName("runtime")]
     public required RuntimeSpec Runtime { get; init; }
 }

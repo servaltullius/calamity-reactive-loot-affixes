@@ -141,7 +141,7 @@ def main():
     out.append("# 프리픽스 효과 정리 (공개용)")
     out.append("")
     out.append(f"> 업데이트: {date.today().isoformat()}")
-    out.append("> 기준 버전: `v1.2.25`")
+    out.append("> 기준 버전: `v1.3.0`")
     out.append("> 기준 코드:")
     out.append("> - 효과 정의: `affixes/modules/keywords.affixes.core.json`")
     out.append("> - 변환 스크립트: `tools/transform_prefixes.py`")
@@ -151,6 +151,8 @@ def main():
     out.append("- 스카이림 로어 기반 전면 리네이밍 (v1.2.21)")
     out.append("- 9개 freed slot → Thu'um 5종 + 마법학파 4종 신규 효과")
     out.append("- 각 효과 설명은 인게임 표시 문자열(`nameKo`/`nameEn`)을 그대로 사용")
+    out.append("- 티어형 프리픽스는 같은 패밀리가 한 아이템에 중복되지 않으며, 각 `kid.chance`를 실제 획득 가중치로 사용")
+    out.append("- 같은 원소의 50%/100% 피해 주입도 하나의 배타적 패밀리로 취급")
     out.append("")
 
     # Category counts

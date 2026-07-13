@@ -16,8 +16,19 @@ namespace CalamityAffixes
 
 		if (const auto it = _instanceAffixes.find(a_instanceKey); it != _instanceAffixes.end()) {
 			const auto& slots = it->second;
+			auto effectiveCount = slots.count;
+			if (!slots.HasToken(a_recipe.resultAffixToken)) {
+				// Keep the completed result active for rollback, but count its slot as
+				// replaceable while validating a re-transmutation.
+				if (const auto* completed = ResolveCompletedRunewordRecipe(slots);
+					completed && completed->resultAffixToken != a_recipe.resultAffixToken &&
+					slots.HasToken(completed->resultAffixToken) && effectiveCount > 0u) {
+					--effectiveCount;
+				}
+			}
+
 			if (!slots.HasToken(a_recipe.resultAffixToken) &&
-				slots.count >= static_cast<std::uint8_t>(kMaxAffixesPerItem)) {
+				effectiveCount >= static_cast<std::uint8_t>(kMaxAffixesPerItem)) {
 				return RunewordApplyBlockReason::kAffixSlotsFull;
 			}
 		}

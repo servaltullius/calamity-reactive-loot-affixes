@@ -109,6 +109,15 @@
         "nameKo": { "type": "string" },
         "slot": { "type": "string" },
         "family": { "type": ["string", "null"] },
+        "weaponSubtypes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["OneHandedMelee", "TwoHandedMelee", "Bow", "Crossbow"]
+          }
+        },
         "records": {
           "oneOf": [
             { "$ref": "#/$defs/records" },

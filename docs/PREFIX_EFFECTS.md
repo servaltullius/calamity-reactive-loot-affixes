@@ -1,7 +1,7 @@
 # 프리픽스 효과 정리 (공개용)
 
-> 업데이트: 2026-07-12
-> 기준 버전: `v1.2.25`
+> 업데이트: 2026-07-13
+> 기준 버전: `v1.3.0`
 > 기준 코드:
 > - 효과 정의: `affixes/modules/keywords.affixes.core.json`
 > - 변환 스크립트: `tools/transform_prefixes.py`
@@ -11,6 +11,8 @@
 - 스카이림 로어 기반 전면 리네이밍 (v1.2.21)
 - 9개 freed slot → Thu'um 5종 + 마법학파 4종 신규 효과
 - 각 효과 설명은 인게임 표시 문자열(`nameKo`/`nameEn`)을 그대로 사용
+- 티어형 프리픽스는 같은 패밀리가 한 아이템에 중복되지 않으며, 각 `kid.chance`를 실제 획득 가중치로 사용
+- 같은 원소의 50%/100% 피해 주입도 하나의 배타적 패밀리로 취급
 
 ### 카테고리별 수량
 
@@ -71,8 +73,8 @@
   - 대표 스펠: `CAFF_SPEL_FROST_SHRED`
 
 - **`shock_weakness`** [Weapon]
-  - 한글 표시: 전격 취약: 최근 4초 내 처치 후 30% 확률로 번개 저항 -15 (4초). 2초마다 발동.
-  - 영문 표시: Shock Weakness (30% on hit after a kill in the last 4s / ICD 2s): Shock Resist -15 (4s)
+  - 한글 표시: 전격 취약: 35% 확률로 번개 저항 -25 (4초). 4초마다 발동.
+  - 영문 표시: Shock Weakness (Lucky Hit 35% / ICD 4s): Shock Resist -25 (4s)
   - 대표 스펠: `CAFF_SPEL_SHOCK_SHRED`
 
 ## 소환
@@ -191,9 +193,9 @@
   - 대표 스펠: `CAFF_SPEL_KILL_SOUL_SURGE`
 
 - **`shadow_stride`** [Weapon]
-  - 한글 표시: 그림자 질주: 최근 4초 내 처치 후 20% 확률로 이동속도 +20% (4초). 12초마다 발동.
-  - 영문 표시: Shadow Stride (20% on hit after a kill in the last 4s / ICD 12s): Move Speed +20% (4s)
-  - 대표 스펠: `CAFF_SPEL_HIT_SHADOWSTEP_BURST`
+  - 한글 표시: 그림자 질주: 처치 시 무기 공격속도 +15% (4초), 발동 10/30회 후 +18%/+21%. 6초마다 발동.
+  - 영문 표시: Shadow Stride (on kill / ICD 6s): Weapon Attack Speed +15% (4s), evolves to +18%/+21% after 10/30 procs
+  - 대표 스펠: `CAFF_SPEL_SWAP_JACKPOT_HASTE`
 
 - **`silent_step`** [Weapon]
   - 한글 표시: 은신 습격: 처치 시 투명화 3초 + 이동속도 30% 증가 6초. 8초마다 발동.
@@ -373,18 +375,18 @@
 > v1.2.21 신규 추가 — freed slot 활용, 기존 스펠만 참조
 
 - **`voice_of_power`** [Armor]
-  - 한글 표시: 힘의 외침: 피격 시 25% 확률로 이동 +30%, 공격속도 +20% (6초). 6초마다 발동.
-  - 영문 표시: Voice of Power (25% on hit taken / ICD 6s): Move Speed +30%, Attack Speed +20% (6s)
+  - 한글 표시: 힘의 외침: 피격 시 25% 확률로 무기 공격속도 +15% (4초). 6초마다 발동.
+  - 영문 표시: Voice of Power (25% on hit taken / ICD 6s): Weapon Attack Speed +15% (4s)
   - 대표 스펠: `CAFF_SPEL_SWAP_JACKPOT_HASTE`
 
 - **`death_mark`** [Weapon]
-  - 한글 표시: 죽음의 표식: 15% 확률로 방어력 파쇄. 1초마다 발동. 같은 대상 25초.
-  - 영문 표시: Death's Mark (Lucky Hit 15% / per-target ICD 25s): Armor Shred
+  - 한글 표시: 죽음의 표식: 25% 확률로 방어력 -200 (6초). 1초마다 발동. 같은 대상 10초.
+  - 영문 표시: Death's Mark (Lucky Hit 25% / ICD 1s / per-target ICD 10s): Armor -200 (6s)
   - 대표 스펠: `CAFF_SPEL_CHAOS_CURSE_SUNDER`
 
 - **`ice_form`** [Weapon]
-  - 한글 표시: 얼음 형상: 8% 확률로 극한 동결. 15초마다 발동.
-  - 영문 표시: Ice Form (Lucky Hit 8% / ICD 15s): Deep Freeze
+  - 한글 표시: 얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동.
+  - 영문 표시: Ice Form (Lucky Hit 15% / ICD 10s): Move Speed -100% (2s)
   - 대표 스펠: `CAFF_SPEL_TRAP_IRONJAW_SNARE`
 
 - **`disarming_shout`** [Weapon]
@@ -412,11 +414,11 @@
   - 대표 스펠: `CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA`
 
 - **`nourishing_flame`** [Weapon]
-  - 한글 표시: 자양의 불꽃: 최근 5초 내 처치 후 15% 확률로 자가 치유 + 적중의 6%. 1.5초마다 발동.
-  - 영문 표시: Nourishing Flame (15% on hit / ICD 1.5s / requires recent kill): Self Heal + 6% of Hit Damage
+  - 한글 표시: 자양의 불꽃: 최근 5초 내 처치 후 적중 시 체력 6 + 물리 피해의 10% 회복 (최대 50). 2초마다 발동.
+  - 영문 표시: Nourishing Flame (on hit after a kill in the last 5s / ICD 2s): Heal 6 + 10% of Physical Hit Damage (max 50)
   - 대표 스펠: `CAFF_SPEL_HIT_BLOOD_SIPHON`
 
 - **`mana_knot`** [Weapon]
-  - 한글 표시: 마나 매듭: 15% 확률로 매지카 재생 감소. 8초마다 발동.
-  - 영문 표시: Mana Knot (Lucky Hit 15% / ICD 8s): Magicka Regen Reduction
+  - 한글 표시: 마나 매듭: 35% 확률로 매지카 재생 -100% (6초). 5초마다 발동.
+  - 영문 표시: Mana Knot (Lucky Hit 35% / ICD 5s): Magicka Regen -100% (6s)
   - 대표 스펠: `CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN`

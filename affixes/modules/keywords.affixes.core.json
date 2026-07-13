@@ -319,9 +319,9 @@
   {
     "id": "shock_weakness",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
-    "name": "전격 취약: 최근 4초 내 처치 후 30% 확률로 번개 저항 -15 (4초). 2초마다 발동.",
-    "nameEn": "Shock Weakness (30% on hit after a kill in the last 4s / ICD 2s): Shock Resist -15 (4s)",
-    "nameKo": "전격 취약: 최근 4초 내 처치 후 30% 확률로 번개 저항 -15 (4초). 2초마다 발동.",
+    "name": "전격 취약: 35% 확률로 번개 저항 -25 (4초). 4초마다 발동.",
+    "nameEn": "Shock Weakness (Lucky Hit 35% / ICD 4s): Shock Resist -25 (4s)",
+    "nameKo": "전격 취약: 35% 확률로 번개 저항 -25 (4초). 4초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SHOCK_SHRED",
@@ -351,13 +351,15 @@
     },
     "runtime": {
       "trigger": "Hit",
-      "procChancePercent": 30.0,
-      "requireRecentlyKillSeconds": 4.0,
-      "icdSeconds": 2.0,
+      "procChancePercent": 100.0,
+      "luckyHitChancePercent": 35.0,
+      "luckyHitProcCoefficient": 1.0,
+      "icdSeconds": 4.0,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "magnitudeOverride": 25.0
       },
       "lootWeight": 1.0
     },
@@ -542,14 +544,14 @@
           "name": "Calamity: Soul Harvest Magicka / 영혼 수확 마력",
           "actorValue": "Magicka",
           "hostile": false,
-          "recover": true
+          "recover": false
         },
         {
           "editorId": "CAFF_MGEF_SOUL_EXPLOIT_STAMINA",
           "name": "Calamity: Soul Harvest Stamina / 영혼 수확 기력",
           "actorValue": "Stamina",
           "hostile": false,
-          "recover": true
+          "recover": false
         }
       ],
       "spell": {
@@ -770,7 +772,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_INCOMING_VITAL_REBOUND",
         "name": "Calamity: Healing Surge / 치유의 파도",
-        "actorValue": "HealRate",
+        "actorValue": "HealRateMult",
         "hostile": false,
         "recover": true
       },
@@ -823,13 +825,14 @@
     "runtime": {
       "trigger": "IncomingHit",
       "procChancePercent": 100.0,
-      "lootWeight": 1.0,
+      "lootWeight": 0.25,
       "action": {
         "type": "MindOverMatter",
         "damageToMagickaPct": 10.0,
         "maxRedirectPerHit": 35.0
       }
     },
+    "family": "mage_armor",
     "slot": "prefix"
   },
   {
@@ -848,13 +851,14 @@
     "runtime": {
       "trigger": "IncomingHit",
       "procChancePercent": 100.0,
-      "lootWeight": 1.0,
+      "lootWeight": 0.2,
       "action": {
         "type": "MindOverMatter",
         "damageToMagickaPct": 15.0,
         "maxRedirectPerHit": 50.0
       }
     },
+    "family": "mage_armor",
     "slot": "prefix"
   },
   {
@@ -873,12 +877,13 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0.0,
-      "lootWeight": 1.0,
+      "lootWeight": 0.35,
       "action": {
         "type": "DebugNotify",
         "scrollNoConsumeChancePct": 20.0
       }
     },
+    "family": "scroll_mastery",
     "slot": "prefix"
   },
   {
@@ -897,12 +902,13 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0.0,
-      "lootWeight": 1.0,
+      "lootWeight": 0.3,
       "action": {
         "type": "DebugNotify",
         "scrollNoConsumeChancePct": 25.0
       }
     },
+    "family": "scroll_mastery",
     "slot": "prefix"
   },
   {
@@ -921,12 +927,13 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0.0,
-      "lootWeight": 1.0,
+      "lootWeight": 0.3,
       "action": {
         "type": "DebugNotify",
         "scrollNoConsumeChancePct": 30.0
       }
     },
+    "family": "scroll_mastery",
     "slot": "prefix"
   },
   {
@@ -945,12 +952,13 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0.0,
-      "lootWeight": 1.0,
+      "lootWeight": 0.22,
       "action": {
         "type": "DebugNotify",
         "scrollNoConsumeChancePct": 35.0
       }
     },
+    "family": "scroll_mastery",
     "slot": "prefix"
   },
   {
@@ -1029,7 +1037,7 @@
         "type": "CorpseExplosion",
         "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
         "flatDamage": 14.0,
-        "pctOfCorpseMaxHealth": 0.08,
+        "pctOfCorpseMaxHealth": 8.0,
         "radius": 320.0,
         "maxTargets": 8,
         "maxChainDepth": 2,
@@ -1065,7 +1073,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_HIT_FROSTLOCK_SNARE",
-          "magnitude": -35,
+          "magnitude": 35,
           "duration": 2,
           "area": 0
         }
@@ -1153,7 +1161,7 @@
         "actorValue": "Health",
         "magicSkill": "Restoration",
         "hostile": false,
-        "recover": true
+        "recover": false
       },
       "spell": {
         "editorId": "CAFF_SPEL_HIT_BLOOD_SIPHON",
@@ -1248,9 +1256,9 @@
   {
     "id": "shadow_stride",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_SHADOWSTEP_BURST",
-    "name": "그림자 질주: 최근 4초 내 처치 후 20% 확률로 이동속도 +20% (4초). 12초마다 발동.",
-    "nameEn": "Shadow Stride (20% on hit after a kill in the last 4s / ICD 12s): Move Speed +20% (4s)",
-    "nameKo": "그림자 질주: 최근 4초 내 처치 후 20% 확률로 이동속도 +20% (4초). 12초마다 발동.",
+    "name": "그림자 질주: 처치 시 무기 공격속도 +15% (4초), 발동 10/30회 후 +18%/+21%. 6초마다 발동.",
+    "nameEn": "Shadow Stride (on kill / ICD 6s): Weapon Attack Speed +15% (4s), evolves to +18%/+21% after 10/30 procs",
+    "nameKo": "그림자 질주: 처치 시 무기 공격속도 +15% (4초), 발동 10/30회 후 +18%/+21%. 6초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
@@ -1279,15 +1287,27 @@
       "chance": 0.5
     },
     "runtime": {
-      "trigger": "Hit",
-      "procChancePercent": 20.0,
-      "requireRecentlyKillSeconds": 4.0,
-      "icdSeconds": 12.0,
+      "trigger": "Kill",
+      "procChancePercent": 100.0,
+      "icdSeconds": 6.0,
       "action": {
         "type": "CastSpell",
-        "spellEditorId": "CAFF_SPEL_HIT_SHADOWSTEP_BURST",
+        "spellEditorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "evolution": {
+          "xpPerProc": 1,
+          "thresholds": [
+            0,
+            10,
+            30
+          ],
+          "multipliers": [
+            1.0,
+            1.2,
+            1.4
+          ]
+        }
       },
       "lootWeight": 1.0
     },
@@ -1368,7 +1388,8 @@
         "editorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
         "name": "Calamity: Bear Trap / 곰 덫",
         "actorValue": "SpeedMult",
-        "hostile": true
+        "hostile": true,
+        "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
@@ -1376,7 +1397,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
-          "magnitude": -100,
+          "magnitude": 100,
           "duration": 2,
           "area": 0
         }
@@ -1561,9 +1582,9 @@
   {
     "id": "voice_of_power",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_25",
-    "name": "힘의 외침: 피격 시 25% 확률로 이동 +30%, 공격속도 +20% (6초). 6초마다 발동.",
-    "nameEn": "Voice of Power (25% on hit taken / ICD 6s): Move Speed +30%, Attack Speed +20% (6s)",
-    "nameKo": "힘의 외침: 피격 시 25% 확률로 이동 +30%, 공격속도 +20% (6초). 6초마다 발동.",
+    "name": "힘의 외침: 피격 시 25% 확률로 무기 공격속도 +15% (4초). 6초마다 발동.",
+    "nameEn": "Voice of Power (25% on hit taken / ICD 6s): Weapon Attack Speed +15% (4s)",
+    "nameKo": "힘의 외침: 피격 시 25% 확률로 무기 공격속도 +15% (4초). 6초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
@@ -1629,16 +1650,17 @@
         "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.4
     },
+    "family": "fire_infusion",
     "slot": "prefix"
   },
   {
     "id": "death_mark",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_75",
-    "name": "죽음의 표식: 15% 확률로 방어력 파쇄. 1초마다 발동. 같은 대상 25초.",
-    "nameEn": "Death's Mark (Lucky Hit 15% / per-target ICD 25s): Armor Shred",
-    "nameKo": "죽음의 표식: 15% 확률로 방어력 파쇄. 1초마다 발동. 같은 대상 25초.",
+    "name": "죽음의 표식: 25% 확률로 방어력 -200 (6초). 1초마다 발동. 같은 대상 10초.",
+    "nameEn": "Death's Mark (Lucky Hit 25% / ICD 1s / per-target ICD 10s): Armor -200 (6s)",
+    "nameKo": "죽음의 표식: 25% 확률로 방어력 -200 (6초). 1초마다 발동. 같은 대상 10초.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -1649,14 +1671,15 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 100.0,
-      "luckyHitChancePercent": 15.0,
+      "luckyHitChancePercent": 25.0,
       "luckyHitProcCoefficient": 1.0,
       "icdSeconds": 1.0,
-      "perTargetICDSeconds": 25.0,
+      "perTargetICDSeconds": 10.0,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "magnitudeOverride": 200.0
       },
       "lootWeight": 1.0
     },
@@ -1685,16 +1708,17 @@
         "spellEditorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.1
     },
+    "family": "fire_infusion",
     "slot": "prefix"
   },
   {
     "id": "ice_form",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_25",
-    "name": "얼음 형상: 8% 확률로 극한 동결. 15초마다 발동.",
-    "nameEn": "Ice Form (Lucky Hit 8% / ICD 15s): Deep Freeze",
-    "nameKo": "얼음 형상: 8% 확률로 극한 동결. 15초마다 발동.",
+    "name": "얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동.",
+    "nameEn": "Ice Form (Lucky Hit 15% / ICD 10s): Move Speed -100% (2s)",
+    "nameKo": "얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
@@ -1726,9 +1750,9 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 100.0,
-      "luckyHitChancePercent": 8.0,
+      "luckyHitChancePercent": 15.0,
       "luckyHitProcCoefficient": 1.0,
-      "icdSeconds": 15.0,
+      "icdSeconds": 10.0,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
@@ -1761,8 +1785,9 @@
         "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.4
     },
+    "family": "frost_infusion",
     "slot": "prefix"
   },
   {
@@ -1816,8 +1841,9 @@
         "spellEditorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.1
     },
+    "family": "frost_infusion",
     "slot": "prefix"
   },
   {
@@ -1906,8 +1932,9 @@
         "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.4
     },
+    "family": "shock_infusion",
     "slot": "prefix"
   },
   {
@@ -1961,8 +1988,9 @@
         "spellEditorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.1
     },
+    "family": "shock_infusion",
     "slot": "prefix"
   },
   {
@@ -1988,8 +2016,9 @@
         "costPctOfMaxMagicka": 5.0,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 2
     },
+    "family": "archmage",
     "slot": "prefix"
   },
   {
@@ -2015,8 +2044,9 @@
         "costPctOfMaxMagicka": 5.0,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 1
     },
+    "family": "archmage",
     "slot": "prefix"
   },
   {
@@ -2042,8 +2072,9 @@
         "costPctOfMaxMagicka": 5.0,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.5
     },
+    "family": "archmage",
     "slot": "prefix"
   },
   {
@@ -2069,8 +2100,9 @@
         "costPctOfMaxMagicka": 5.0,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.2
     },
+    "family": "archmage",
     "slot": "prefix"
   },
   {
@@ -2335,8 +2367,9 @@
         "maxExplosionsPerWindow": 4,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.2
     },
+    "family": "death_pyre",
     "slot": "prefix"
   },
   {
@@ -2370,8 +2403,9 @@
         "maxExplosionsPerWindow": 4,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.1
     },
+    "family": "death_pyre",
     "slot": "prefix"
   },
   {
@@ -2405,8 +2439,9 @@
         "maxExplosionsPerWindow": 4,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.05
     },
+    "family": "death_pyre",
     "slot": "prefix"
   },
   {
@@ -2440,9 +2475,9 @@
   {
     "id": "nourishing_flame",
     "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T5",
-    "name": "자양의 불꽃: 최근 5초 내 처치 후 15% 확률로 자가 치유 + 적중의 6%. 1.5초마다 발동.",
-    "nameEn": "Nourishing Flame (15% on hit / ICD 1.5s / requires recent kill): Self Heal + 6% of Hit Damage",
-    "nameKo": "자양의 불꽃: 최근 5초 내 처치 후 15% 확률로 자가 치유 + 적중의 6%. 1.5초마다 발동.",
+    "name": "자양의 불꽃: 최근 5초 내 처치 후 적중 시 체력 6 + 물리 피해의 10% 회복 (최대 50). 2초마다 발동.",
+    "nameEn": "Nourishing Flame (on hit after a kill in the last 5s / ICD 2s): Heal 6 + 10% of Physical Hit Damage (max 50)",
+    "nameKo": "자양의 불꽃: 최근 5초 내 처치 후 적중 시 체력 6 + 물리 피해의 10% 회복 (최대 50). 2초마다 발동.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -2452,9 +2487,9 @@
     },
     "runtime": {
       "trigger": "Hit",
-      "procChancePercent": 15.0,
+      "procChancePercent": 100.0,
       "requireRecentlyKillSeconds": 5.0,
-      "icdSeconds": 1.5,
+      "icdSeconds": 2.0,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_HIT_BLOOD_SIPHON",
@@ -2462,10 +2497,10 @@
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
-          "mult": 0.06,
-          "add": 3.0,
-          "min": 3.0,
-          "max": 20.0,
+          "mult": 0.10,
+          "add": 6.0,
+          "min": 6.0,
+          "max": 50.0,
           "spellBaseAsMin": true
         }
       },
@@ -2504,8 +2539,9 @@
         "maxExplosionsPerWindow": 3,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.2
     },
+    "family": "conjured_pyre",
     "slot": "prefix"
   },
   {
@@ -2539,16 +2575,17 @@
         "maxExplosionsPerWindow": 3,
         "noHitEffectArt": false
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.1
     },
+    "family": "conjured_pyre",
     "slot": "prefix"
   },
   {
     "id": "mana_knot",
     "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T3",
-    "name": "마나 매듭: 15% 확률로 매지카 재생 감소. 8초마다 발동.",
-    "nameEn": "Mana Knot (Lucky Hit 15% / ICD 8s): Magicka Regen Reduction",
-    "nameKo": "마나 매듭: 15% 확률로 매지카 재생 감소. 8초마다 발동.",
+    "name": "마나 매듭: 35% 확률로 매지카 재생 -100% (6초). 5초마다 발동.",
+    "nameEn": "Mana Knot (Lucky Hit 35% / ICD 5s): Magicka Regen -100% (6s)",
+    "nameKo": "마나 매듭: 35% 확률로 매지카 재생 -100% (6초). 5초마다 발동.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -2559,13 +2596,14 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 100.0,
-      "luckyHitChancePercent": 15.0,
+      "luckyHitChancePercent": 35.0,
       "luckyHitProcCoefficient": 1.0,
-      "icdSeconds": 8.0,
+      "icdSeconds": 5.0,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "magnitudeOverride": 100.0
       },
       "lootWeight": 1.0
     },
@@ -2591,7 +2629,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_MINEFIELD_SNARE",
-          "magnitude": -40,
+          "magnitude": 40,
           "duration": 2,
           "area": 150
         }
@@ -2731,7 +2769,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
-          "magnitude": -35,
+          "magnitude": 35,
           "duration": 4,
           "area": 170
         }
@@ -2790,7 +2828,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
-          "magnitude": -150,
+          "magnitude": 150,
           "duration": 4,
           "area": 170
         }
@@ -2833,7 +2871,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
-          "magnitude": -60,
+          "magnitude": 60,
           "duration": 6,
           "area": 170
         }
@@ -2892,7 +2930,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
-          "magnitude": -60,
+          "magnitude": 60,
           "duration": 6,
           "area": 170
         }
@@ -2935,7 +2973,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
-          "magnitude": -30,
+          "magnitude": 30,
           "duration": 3,
           "area": 150
         }
@@ -3006,7 +3044,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
-          "magnitude": -150,
+          "magnitude": 150,
           "duration": 6,
           "area": 0
         }
@@ -3049,7 +3087,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
-          "magnitude": -60,
+          "magnitude": 60,
           "duration": 6,
           "area": 0
         }
@@ -3092,7 +3130,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
-          "magnitude": -60,
+          "magnitude": 60,
           "duration": 6,
           "area": 0
         }
@@ -3135,7 +3173,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
-          "magnitude": -0.20,
+          "magnitude": 0.20,
           "duration": 6,
           "area": 0
         }
@@ -3178,7 +3216,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
-          "magnitude": -20,
+          "magnitude": 20,
           "duration": 6,
           "area": 0
         }

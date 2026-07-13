@@ -13,6 +13,57 @@ namespace CalamityAffixes
 {
 	using namespace RunewordDetail;
 
+	namespace
+	{
+		[[nodiscard]] detail::RunewordBaseKind ResolveRunewordBaseKind(RE::TESBoundObject* a_object) noexcept
+		{
+			if (!a_object) {
+				return detail::RunewordBaseKind::kUnknown;
+			}
+			if (const auto* weapon = a_object->As<RE::TESObjectWEAP>()) {
+				return detail::ResolveRunewordWeaponBaseKind(
+					static_cast<std::uint8_t>(weapon->GetWeaponType()));
+			}
+			if (const auto* armor = a_object->As<RE::TESObjectARMO>()) {
+				return detail::ResolveRunewordArmorBaseKind(
+					armor->IsShield(),
+					armor->IsHeavyArmor(),
+					armor->IsLightArmor(),
+					armor->IsClothing());
+			}
+			return detail::RunewordBaseKind::kUnknown;
+		}
+
+		void PopulateSpecializedBaseWarning(
+			RunewordPanelState& a_panelState,
+			std::string_view a_recipeId,
+			RE::TESBoundObject* a_object)
+		{
+			const auto requirement = detail::ResolveSpecializedRunewordBase(a_recipeId);
+			if (requirement == detail::SpecializedRunewordBase::kNone ||
+				detail::IsSpecializedRunewordBaseCompatible(
+					requirement,
+					ResolveRunewordBaseKind(a_object))) {
+				return;
+			}
+
+			a_panelState.baseCompatibilityWarning = true;
+			a_panelState.baseCompatibilityMessageEn =
+				"Base mismatch: recommended base is ";
+			a_panelState.baseCompatibilityMessageEn.append(
+				detail::DescribeSpecializedRunewordBaseEn(requirement));
+			a_panelState.baseCompatibilityMessageEn.append(
+				". The selected base is incompatible; transmute remains allowed.");
+
+			a_panelState.baseCompatibilityMessageKo =
+				"베이스 불일치: 이 룬워드는 ";
+			a_panelState.baseCompatibilityMessageKo.append(
+				detail::DescribeSpecializedRunewordBaseKo(requirement));
+			a_panelState.baseCompatibilityMessageKo.append(
+				"에 맞춰져 있습니다. 현재 베이스와 호환되지 않지만 변환은 계속할 수 있습니다.");
+		}
+	}
+
 	EventBridge::RunewordPanelState EventBridge::GetRunewordPanelState()
 	{
 		const std::scoped_lock lock(_stateMutex);
@@ -27,10 +78,8 @@ namespace CalamityAffixes
 		}
 		panelState.hasBase = true;
 
-		// Re-transmutation: if the selected base already has a completed runeword,
-		// fall through to the normal recipe selection flow instead of blocking.
-		// The old runeword is removed when the first rune is inserted
-		// (InsertRunewordRuneIntoSelectedBase handles removal).
+		// Re-transmutation falls through to the normal recipe selection flow.
+		// The old runeword remains active until the replacement commits successfully.
 
 		std::uint32_t inserted = 0u;
 
@@ -48,6 +97,16 @@ namespace CalamityAffixes
 		panelState.recipeName = recipe->displayName;
 		panelState.totalRunes = static_cast<std::uint32_t>(recipe->runeTokens.size());
 		panelState.insertedRunes = std::min(inserted, panelState.totalRunes);
+
+		RE::InventoryEntryData* selectedEntry = nullptr;
+		RE::ExtraDataList* selectedXList = nullptr;
+		if (ResolvePlayerInventoryInstance(
+				*_runewordState.selectedBaseKey,
+				selectedEntry,
+				selectedXList) &&
+			selectedEntry && selectedEntry->object) {
+			PopulateSpecializedBaseWarning(panelState, recipe->id, selectedEntry->object);
+		}
 
 		const auto applyBlockReason = ResolveRunewordApplyBlockReason(*_runewordState.selectedBaseKey, *recipe);
 		const bool canApplyResult = applyBlockReason == RunewordApplyBlockReason::kNone;

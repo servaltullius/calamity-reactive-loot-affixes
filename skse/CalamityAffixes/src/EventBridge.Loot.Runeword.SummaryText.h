@@ -67,34 +67,34 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_insight", "signature_insight" },
 		{ "rw_fortitude", "signature_fortitude" },
 		{ "rw_heart_of_the_oak", "signature_heart_of_the_oak" },
-		{ "rw_last_wish", "lowhealth_fade" },
+		{ "rw_last_wish", "signature_last_wish" },
 		{ "rw_exile", "lowhealth_ironskin" },
-		{ "rw_breath_of_the_dying", "kill_poison_burst" },
+		{ "rw_breath_of_the_dying", "signature_breath_of_the_dying" },
 		{ "rw_chains_of_honor", "signature_chains_of_honor" },
 		{ "rw_dream", "signature_dream" },
 		{ "rw_faith", "signature_faith" },
 		{ "rw_phoenix", "kill_restore" },
 		{ "rw_doom", "aura_slow" },
 		{ "rw_sanctuary", "thorns_reflect" },
-		{ "rw_obsession", "siphon_bloom" },
-		{ "rw_beast", "long_cd_beast_rage" },
+		{ "rw_obsession", "signature_obsession" },
+		{ "rw_beast", "signature_beast" },
 		{ "rw_hustle_w", "self_haste" },
-		{ "rw_hustle_a", "self_phase" },
-		{ "rw_treachery", "self_muffle" },
-		{ "rw_honor", "soul_trap" },
-		{ "rw_eternity", "long_cd_bulwark" },
+		{ "rw_hustle_a", "signature_hustle_a" },
+		{ "rw_treachery", "signature_treachery" },
+		{ "rw_honor", "signature_honor" },
+		{ "rw_eternity", "signature_eternity" },
 		{ "rw_leaf", "self_destruction_mastery" },
 		{ "rw_wrath", "fire_strike" },
 		{ "rw_brand", "fire_dot" },
 		{ "rw_voice_of_reason", "debuff_frost_shred" },
-		{ "rw_pride", "frost_strike" },
-		{ "rw_mist", "debuff_magicka_suppress" },
+		{ "rw_pride", "signature_pride" },
+		{ "rw_mist", "signature_mist" },
 		{ "rw_holy_thunder", "shock_strike" },
 		{ "rw_crescent_moon", "debuff_shock_shred" },
-		{ "rw_destruction", "shock_dot" },
+		{ "rw_destruction", "signature_destruction" },
 		{ "rw_malice", "poison_dot" },
 		{ "rw_venom", "debuff_poison_shred" },
-		{ "rw_plague", "kill_poison_cloud" },
+		{ "rw_plague", "signature_plague" },
 		{ "rw_nadir", "debuff_fear" },
 		{ "rw_peace", "debuff_calm" },
 		{ "rw_rift", "debuff_magic_shred" },
@@ -105,14 +105,14 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_silence", "debuff_magicka_drain" },
 		{ "rw_obedience", "debuff_slow" },
 		{ "rw_wind", "debuff_attack_slow" },
-		{ "rw_famine", "debuff_stamina_drain" },
+		{ "rw_famine", "signature_famine" },
 		{ "rw_kingslayer", "bleed_dot" },
 		{ "rw_death", "debuff_absorb_health" },
-		{ "rw_mosaic", "debuff_multi_element" },
-		{ "rw_chaos", "adaptive_strike" },
+		{ "rw_mosaic", "signature_mosaic" },
+		{ "rw_chaos", "signature_chaos" },
 		{ "rw_steel", "debuff_heal_suppress" },
 		{ "rw_fury", "self_weapon_fury" },
-		{ "rw_hand_of_justice", "self_judgment" },
+		{ "rw_hand_of_justice", "signature_hand_of_justice" },
 		{ "rw_passion", "self_illusion_mastery" },
 		{ "rw_harmony", "debuff_stamina_suppress" },
 		{ "rw_memory", "self_stamina_recall" },
@@ -135,7 +135,7 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_principle", "self_fire_resist" },
 		{ "rw_ancients_pledge", "self_poison_resist" },
 		{ "rw_myth", "self_heavy_armor" },
-		{ "rw_dragon", "self_light_armor" },
+		{ "rw_dragon", "signature_dragon" },
 		{ "rw_bramble", "self_reflect_damage" },
 		{ "rw_metamorphosis", "self_ethereal" },
 		{ "rw_lore", "self_magicka_regen" },
@@ -146,7 +146,7 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_rain", "self_heal_rate_mult" },
 		{ "rw_wisdom", "self_magicka_regen" },
 		{ "rw_lionheart", "lowhealth_emergency" },
-		{ "rw_rhyme", "self_phase" },
+		{ "rw_rhyme", "signature_rhyme" },
 		{ "rw_wealth", "self_carry_weight" },
 		{ "rw_radiance", "self_detect_life" },
 		{ "rw_stealth", "self_invisibility" },
@@ -208,16 +208,34 @@ namespace CalamityAffixes::RunewordSummary
 	[[nodiscard]] inline std::string_view ActionSummaryTextByKey(std::string_view a_key) noexcept
 	{
 		if (a_key == "signature_grief") return "빈틈 없이 몰아치는 초고속 참격 연타";
-		if (a_key == "signature_infinity") return "저항이 높은 축을 먼저 찢어 약점 개방";
-		if (a_key == "signature_enigma") return "위험 순간 위상 전환으로 즉시 이탈";
-		if (a_key == "signature_call_to_arms") return "함성으로 아군 페이스를 끌어올려 공방 동시 강화";
+		if (a_key == "signature_infinity") return "가장 낮은 원소 저항을 더 깎아 약점 피해 증폭";
+		if (a_key == "signature_enigma") return "피격 시 투명화·이동 속도 +45%(4초), 상시 이동 속도 +10%";
+		if (a_key == "signature_call_to_arms") return "적중 시 공격력 +20%(8초), 상시 체력 +50·마나 +30";
 		if (a_key == "signature_spirit") return "집중력 흐름을 올려 전투 리듬 안정화";
 		if (a_key == "signature_insight") return "명상 파동으로 자원 고갈 구간을 완화";
 		if (a_key == "signature_fortitude") return "강철 의지 버프로 난전 생존력 상승";
 		if (a_key == "signature_heart_of_the_oak") return "견고한 저항 축부터 깎아 후속 딜 창출";
 		if (a_key == "signature_dream") return "번개 공명을 축적해 전격 일격을 터뜨림";
-		if (a_key == "signature_faith") return "광신의 돌격으로 기동과 생존을 동시에 끌어올림";
-		if (a_key == "signature_chains_of_honor") return "명예의 사슬로 성역의 보호를 단단히 고정";
+		if (a_key == "signature_faith") return "적중 시 공격력 +20%·공속 +15%(6초), 상시 공속 +15%";
+		if (a_key == "signature_chains_of_honor") return "피격 시 이동 속도 +35%(5초), 상시 3원소 저항 +15";
+		if (a_key == "signature_breath_of_the_dying") return "처치한 시체가 폭발해 반경 600에 독 피해 24 + 시체 최대 체력 6%";
+		if (a_key == "signature_obsession") return "적중 시 마법 피해 75~300(적중 피해 18%), 상시 마나 재생률 +25%";
+		if (a_key == "signature_hustle_a") return "피격 시 방어도 +60(5초), 상시 이동 속도 +8%";
+		if (a_key == "signature_treachery") return "피격 시 이동 속도 +28%(5초), 상시 공속 +10%";
+		if (a_key == "signature_honor") return "적중 시 체력 재생률 +80%(7초), 상시 체력 재생률 +20%";
+		if (a_key == "signature_mosaic") return "화염·냉기·전격 피해를 각각 8~80(적중 피해 5%) 동시에 가함";
+		if (a_key == "signature_chaos") return "가장 낮은 원소 저항을 추적해 해당 원소 피해 45";
+		if (a_key == "signature_rhyme") return "피격 시 방어도 +60(6초), 상시 냉기 저항 +40";
+		if (a_key == "signature_destruction") return "적중 시 반경 350 전격 폭풍: 물리 피해의 4%, 초당 10~40(5초)";
+		if (a_key == "signature_hand_of_justice") return "화염 심판으로 체력 40~250 흡수(적중 피해 18%)";
+		if (a_key == "signature_dragon") return "피격 시 방어도 +120·화염/냉기/전격 저항 +25(8초)";
+		if (a_key == "signature_mist") return "마나 재생 -100%·마법 저항 -30(6초), 마나 75 즉시 소진";
+		if (a_key == "signature_famine") return "기력 -30/초(5초), 공격력 -20%·공격 속도 -15%(6초)";
+		if (a_key == "signature_beast") return "공격력 +30%·방어도 +150·공격 속도 +15%(10초)";
+		if (a_key == "signature_eternity") return "피격 시 방어도 +300·피해 반사 +25%(6초)";
+		if (a_key == "signature_last_wish") return "체력 35% 이하에서 체력 250 회복·방어도 +250·마법 저항 +50(12초)";
+		if (a_key == "signature_plague") return "시체 연쇄 폭발: 독 피해 12 + 시체 최대 체력 3%, 반경 450, 최대 연쇄 깊이 2";
+		if (a_key == "signature_pride") return "적중 시 반경 250 냉기 충격파: 물리 피해의 16%, 피해 30~200";
 		if (a_key == "adaptive_strike") return "적의 가장 약한 원소 저항 축을 자동 추적해 관통 타격";
 		if (a_key == "adaptive_exposure") return "적의 가장 높은 저항 축을 벗겨내 후속 원소 피해 창출";
 		if (a_key == "fire_strike") return "화염을 실은 일격으로 적에게 추가 화염 피해";
@@ -235,7 +253,7 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "debuff_slow") return "묵직한 압박으로 적의 이동을 크게 둔화";
 		if (a_key == "debuff_absorb_health") return "사신의 손길로 적의 생명력을 빼앗아 흡수";
 		if (a_key == "debuff_magicka_drain") return "침묵의 파동으로 적의 마력을 고갈시킴";
-		if (a_key == "debuff_stamina_drain") return "기근의 저주로 적의 체력을 소진시킴";
+		if (a_key == "debuff_stamina_drain") return "기근의 저주로 적의 기력을 소진시킴";
 		if (a_key == "debuff_multi_element") return "복합 원소 파편이 한꺼번에 작렬";
 		if (a_key == "aura_slow") return "타격마다 냉기 감속장을 씌워 둔화 유지";
 		if (a_key == "aura_fire_shred") return "타격마다 화염 저항을 깎아 후속 화상 극대화";

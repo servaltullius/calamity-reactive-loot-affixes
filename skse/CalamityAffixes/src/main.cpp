@@ -93,28 +93,30 @@ SKSEPluginInfo(
 		switch (a_message->type) {
 		case SKSE::MessagingInterface::kDataLoaded: {
 			auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-				bridge->LoadConfig();
-				bridge->Register();
-				if (bridge->IsRuntimeEnabled()) {
-					if (!bridge->IsHealthDamageRoutingDisabled()) {
-						CalamityAffixes::Hooks::Install();
-					} else {
-						SKSE::log::info("CalamityAffixes: disableHealthDamageRouting=true; skipping HandleHealthDamage hooks install.");
-					}
+			bridge->LoadConfig();
+			bridge->Register();
+			// Install process-lifetime systems independently of the persisted enabled flag.
+			// Their runtime entrypoints stay dormant until the MCM enables the mod.
+			if (!bridge->IsHealthDamageRoutingDisabled()) {
+				CalamityAffixes::Hooks::Install();
+			} else {
+				SKSE::log::info("CalamityAffixes: disableHealthDamageRouting=true; skipping HandleHealthDamage hooks install.");
+			}
 
-					if (!bridge->IsTrapSystemTickDisabled()) {
-						CalamityAffixes::TrapSystem::Install();
-					} else {
-						SKSE::log::info("CalamityAffixes: disableTrapSystemTick=true; skipping TrapSystem install.");
-					}
-				} else {
-					SKSE::log::info("CalamityAffixes: runtime disabled; skipping hooks and TrapSystem install.");
-				}
-				CalamityAffixes::PrismaTooltip::Install();
+			if (!bridge->IsTrapSystemTickDisabled()) {
+				CalamityAffixes::TrapSystem::Install();
+			} else {
+				SKSE::log::info("CalamityAffixes: disableTrapSystemTick=true; skipping TrapSystem install.");
+			}
 
-				if (auto* console = RE::ConsoleLog::GetSingleton()) {
-					console->Print("CalamityAffixes: EventBridge registered.");
-				}
+			if (!bridge->IsRuntimeEnabled()) {
+				SKSE::log::info("CalamityAffixes: runtime starts disabled; installed systems remain dormant until enabled.");
+			}
+			CalamityAffixes::PrismaTooltip::Install();
+
+			if (auto* console = RE::ConsoleLog::GetSingleton()) {
+				console->Print("CalamityAffixes: EventBridge registered.");
+			}
 			break;
 		}
 		case SKSE::MessagingInterface::kPostLoadGame:

@@ -104,6 +104,39 @@ namespace CalamityAffixes
 		if (famIt != a_affix.end() && famIt->is_string()) {
 			a_out.family = famIt->get<std::string>();
 		}
+
+		const auto subtypeIt = a_affix.find("weaponSubtypes");
+		if (subtypeIt == a_affix.end()) {
+			return;
+		}
+
+		if (a_out.slot != AffixSlot::kSuffix || !subtypeIt->is_array() || subtypeIt->empty()) {
+			a_out.weaponSubtypeMask = detail::kWeaponSubtypeInvalid;
+			SKSE::log::error(
+				"CalamityAffixes: weaponSubtypes requires a non-empty array on a suffix affix (affixId={}).",
+				a_out.id);
+			return;
+		}
+
+		std::uint8_t parsedMask = 0u;
+		for (const auto& subtype : *subtypeIt) {
+			if (!subtype.is_string()) {
+				parsedMask |= detail::kWeaponSubtypeInvalid;
+				continue;
+			}
+			const auto key = subtype.get<std::string>();
+			const auto bit = detail::WeaponSubtypeMaskForContractKey(key);
+			if (bit == 0u || (parsedMask & bit) != 0u) {
+				parsedMask |= detail::kWeaponSubtypeInvalid;
+				SKSE::log::error(
+					"CalamityAffixes: invalid or duplicate weaponSubtypes value '{}' (affixId={}).",
+					key,
+					a_out.id);
+				continue;
+			}
+			parsedMask |= bit;
+		}
+		a_out.weaponSubtypeMask = parsedMask == 0u ? detail::kWeaponSubtypeInvalid : parsedMask;
 	}
 
 	void EventBridge::ApplyAffixKidLootFromJson(const nlohmann::json& a_affix, AffixRuntime& a_out, float& a_outKidChancePct) const

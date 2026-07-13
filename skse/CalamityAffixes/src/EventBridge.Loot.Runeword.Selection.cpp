@@ -94,6 +94,12 @@ namespace CalamityAffixes
 		const RunewordRecipe& a_recipe,
 		std::optional<LootItemType> a_currentBaseType) const
 	{
+		// Specialized recipe guidance is evaluated against the actual selected base
+		// in the panel. Suppress the generic Weapon/Armor note so it cannot contradict
+		// stronger guidance such as Unbending Will -> Shield.
+		if (detail::ResolveSpecializedRunewordBase(a_recipe.id) != detail::SpecializedRunewordBase::kNone) {
+			return;
+		}
 		if (!a_recipe.recommendedBaseType || !a_currentBaseType || *a_recipe.recommendedBaseType == *a_currentBaseType) {
 			return;
 		}

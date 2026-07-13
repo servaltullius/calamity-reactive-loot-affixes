@@ -41,7 +41,8 @@ namespace CalamityAffixes
 
 	std::optional<InstanceAffixSlots> EventBridge::BuildLootPreviewAffixSlots(
 		std::uint64_t a_instanceKey,
-		LootItemType a_itemType) const
+		LootItemType a_itemType,
+		detail::WeaponSubtypeGroup a_weaponSubtype) const
 	{
 		const std::vector<std::size_t>* prefixPool = nullptr;
 		const std::vector<std::size_t>* suffixPool = nullptr;
@@ -148,18 +149,34 @@ namespace CalamityAffixes
 
 		std::vector<std::size_t> chosenPrefixIndices;
 		chosenPrefixIndices.reserve(prefixTarget);
+		std::vector<std::string> chosenPrefixFamilies;
+		chosenPrefixFamilies.reserve(prefixTarget);
 		for (std::uint8_t p = 0; p < prefixTarget; ++p) {
 			const auto idx = pickWeightedIndex(*prefixPool, [&](std::size_t a_idx) {
 				if (std::find(chosenPrefixIndices.begin(), chosenPrefixIndices.end(), a_idx) != chosenPrefixIndices.end()) {
 					return false;
 				}
-				return _affixes[a_idx].slot != AffixSlot::kSuffix;
+
+				const auto& affix = _affixes[a_idx];
+				if (affix.slot == AffixSlot::kSuffix) {
+					return false;
+				}
+				if (!affix.family.empty() &&
+					std::find(chosenPrefixFamilies.begin(), chosenPrefixFamilies.end(), affix.family) != chosenPrefixFamilies.end()) {
+					return false;
+				}
+				return true;
 			});
 			if (!idx) {
 				break;
 			}
+
 			chosenPrefixIndices.push_back(*idx);
-			slots.AddToken(_affixes[*idx].token);
+			const auto& affix = _affixes[*idx];
+			if (!affix.family.empty()) {
+				chosenPrefixFamilies.push_back(affix.family);
+			}
+			slots.AddToken(affix.token);
 		}
 
 		std::vector<std::string> chosenFamilies;
@@ -172,6 +189,12 @@ namespace CalamityAffixes
 			const auto idx = pickWeightedIndex(*suffixPool, [&](std::size_t a_idx) {
 				const auto& affix = _affixes[a_idx];
 				if (affix.slot != AffixSlot::kSuffix) {
+					return false;
+				}
+				if (!detail::IsSuffixWeaponSubtypeEligible(
+						affix.weaponSubtypeMask,
+						a_itemType == LootItemType::kWeapon,
+						a_weaponSubtype)) {
 					return false;
 				}
 				if (!affix.family.empty() &&

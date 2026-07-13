@@ -1,12 +1,39 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/Hooks.h"
+#include "CalamityAffixes/SuffixFamilySelection.h"
 
 #include <algorithm>
 #include <cstdint>
+#include <unordered_map>
 #include <unordered_set>
 
 
 namespace CalamityAffixes
 {
+	void EventBridge::DeactivateRuntimeState()
+	{
+		ResetActiveCountsStateForRebuild();
+
+		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
+			for (const auto& affix : _affixes) {
+				if (affix.passiveSpell) {
+					_appliedPassiveSpells.insert(affix.passiveSpell);
+				}
+			}
+			ApplyDesiredPassiveSpells(player, {});
+		} else {
+			_appliedPassiveSpells.clear();
+		}
+
+		_trapState.Reset();
+		_combatState.ResetTransientState();
+		Hooks::ClearRuntimeState();
+		_equipResync.nextAtMs = 0u;
+		for (auto& affix : _affixes) {
+			affix.nextAllowed = {};
+		}
+	}
+
 	void EventBridge::ResetActiveCountsStateForRebuild()
 	{
 		_activeCounts.assign(_affixes.size(), 0);
@@ -100,17 +127,28 @@ namespace CalamityAffixes
 				_activeCounts[affixIdx] += 1;
 			}
 
-			// Collect passive spells for equipped affixes (any slot).
+			// Family-less passives (including runewords) keep their existing behavior.
+			// Tiered suffix families are selected once, after all worn items are counted.
 			if (!_runtimeSettings.disablePassiveSuffixSpells &&
 				affixIdx < _affixes.size() &&
 				_affixes[affixIdx].passiveSpell) {
-				a_desiredPassives.insert(_affixes[affixIdx].passiveSpell);
+				const auto& affix = _affixes[affixIdx];
+				const bool deferTieredSuffix =
+					affix.slot == AffixSlot::kSuffix && !affix.family.empty();
+				if (!deferTieredSuffix) {
+					a_desiredPassives.insert(affix.passiveSpell);
+				}
 			}
 
-			// Accumulate crit damage bonus for equipped suffixes.
-			// Intentionally stacks across multiple equipped items (same suffix on sword + shield = additive).
-			if (affixIdx < _affixes.size() && _affixes[affixIdx].critDamageBonusPct > 0.0f) {
-				_activeCritDamageBonusPct += _affixes[affixIdx].critDamageBonusPct;
+			// Family-less suffix values keep their legacy additive behavior.
+			// Tiered families are resolved once after all worn items are counted.
+			if (affixIdx < _affixes.size()) {
+				const auto& affix = _affixes[affixIdx];
+				if (affix.slot == AffixSlot::kSuffix &&
+					affix.family.empty() &&
+					affix.critDamageBonusPct > 0.0f) {
+					_activeCritDamageBonusPct += affix.critDamageBonusPct;
+				}
 			}
 
 			// "Best Slot Wins" penalty only for prefixes.
@@ -118,6 +156,34 @@ namespace CalamityAffixes
 				if (affixIdx < _lootState.activeSlotPenalty.size()) {
 					_lootState.activeSlotPenalty[affixIdx] = std::max(_lootState.activeSlotPenalty[affixIdx], penalty);
 				}
+			}
+		}
+	}
+
+	void EventBridge::CollectBestSuffixFamilyState(
+		std::unordered_set<RE::SpellItem*>& a_desiredPassives)
+	{
+		std::unordered_map<std::string_view, detail::SuffixFamilyBestCandidate> bestAffixByFamily;
+		for (std::size_t affixIdx = 0; affixIdx < _affixes.size() && affixIdx < _activeCounts.size(); ++affixIdx) {
+			const auto& affix = _affixes[affixIdx];
+			if (_activeCounts[affixIdx] == 0 ||
+				affix.slot != AffixSlot::kSuffix ||
+				affix.family.empty()) {
+				continue;
+			}
+
+			bestAffixByFamily[affix.family].Consider(affix.id, affixIdx);
+		}
+
+		for (const auto& [_, best] : bestAffixByFamily) {
+			if (!best.selected || best.index >= _affixes.size()) {
+				continue;
+			}
+
+			const auto& affix = _affixes[best.index];
+			_activeCritDamageBonusPct += affix.critDamageBonusPct;
+			if (!_runtimeSettings.disablePassiveSuffixSpells && affix.passiveSpell) {
+				a_desiredPassives.insert(affix.passiveSpell);
 			}
 		}
 	}
@@ -150,32 +216,47 @@ namespace CalamityAffixes
 			return;
 		}
 
-		if (_runtimeSettings.disablePassiveSuffixSpells) {
-			for (auto* spell : _appliedPassiveSpells) {
-				a_player->RemoveSpell(spell);
-				SKSE::log::info(
-					"CalamityAffixes: removed passive suffix spell {:08X} (passives disabled).",
-					spell ? spell->GetFormID() : 0u);
-			}
-			_appliedPassiveSpells.clear();
-			return;
-		}
-
-		for (auto it = _appliedPassiveSpells.begin(); it != _appliedPassiveSpells.end();) {
-			if (a_desiredPassives.find(*it) == a_desiredPassives.end()) {
-				a_player->RemoveSpell(*it);
-				SKSE::log::debug("CalamityAffixes: removed passive suffix spell {:08X}.", (*it)->GetFormID());
-				it = _appliedPassiveSpells.erase(it);
-			} else {
-				++it;
+		std::unordered_set<RE::SpellItem*> knownPassiveSpells = _appliedPassiveSpells;
+		for (const auto& affix : _affixes) {
+			if (affix.passiveSpell) {
+				knownPassiveSpells.insert(affix.passiveSpell);
 			}
 		}
-
 		for (auto* spell : a_desiredPassives) {
-			if (_appliedPassiveSpells.find(spell) == _appliedPassiveSpells.end()) {
+			if (spell) {
+				knownPassiveSpells.insert(spell);
+			}
+		}
+
+		const bool passivesDisabled = _runtimeSettings.disablePassiveSuffixSpells;
+		for (auto* spell : knownPassiveSpells) {
+			if (!spell) {
+				continue;
+			}
+
+			const bool desired = a_desiredPassives.find(spell) != a_desiredPassives.end();
+			const bool present = a_player->HasSpell(spell);
+			switch (detail::ResolvePassiveSpellReconcileAction(desired, present, passivesDisabled)) {
+			case detail::PassiveSpellReconcileAction::kAdd:
 				a_player->AddSpell(spell);
-				_appliedPassiveSpells.insert(spell);
-				SKSE::log::debug("CalamityAffixes: applied passive suffix spell {:08X}.", spell->GetFormID());
+				SKSE::log::debug("CalamityAffixes: applied passive spell {:08X}.", spell->GetFormID());
+				break;
+			case detail::PassiveSpellReconcileAction::kRemove:
+				a_player->RemoveSpell(spell);
+				SKSE::log::debug("CalamityAffixes: removed stale passive spell {:08X}.", spell->GetFormID());
+				break;
+			case detail::PassiveSpellReconcileAction::kKeep:
+			default:
+				break;
+			}
+		}
+
+		_appliedPassiveSpells.clear();
+		if (!passivesDisabled) {
+			for (auto* spell : a_desiredPassives) {
+				if (spell) {
+					_appliedPassiveSpells.insert(spell);
+				}
 			}
 		}
 	}
@@ -209,6 +290,10 @@ namespace CalamityAffixes
 		if (!_configLoaded) {
 			return;
 		}
+		if (!_runtimeSettings.enabled) {
+			DeactivateRuntimeState();
+			return;
+		}
 
 		ResetActiveCountsStateForRebuild();
 		std::unordered_set<RE::SpellItem*> desiredPassives;
@@ -232,6 +317,8 @@ namespace CalamityAffixes
 				RefreshInventoryInstanceActiveState(entry, xList, desiredPassives);
 			}
 		}
+
+		CollectBestSuffixFamilyState(desiredPassives);
 
 		for (auto& [_, keys] : _equippedInstanceKeysByToken) {
 			std::sort(keys.begin(), keys.end());

@@ -1,6 +1,7 @@
 #include "Hooks.Dispatch.h"
 
 #include <array>
+#include <bit>
 #include <cmath>
 #include <memory>
 #include <mutex>
@@ -180,7 +181,40 @@ namespace CalamityAffixes::Hooks::detail
 		struct ProcDispatchRecord
 		{
 			std::chrono::steady_clock::time_point dispatchTime{};
+			std::uint64_t signature{ 0u };
 		};
+
+		[[nodiscard]] std::uint64_t MakeProcDispatchSignature(
+			const RE::Actor* a_target,
+			RE::Actor* a_attacker,
+			const RE::HitData* a_hitData,
+			float a_damage) noexcept
+		{
+			std::uint64_t hash = 14695981039346656037ull;
+			const auto mix = [&](std::uint64_t a_value) {
+				hash ^= a_value;
+				hash *= 1099511628211ull;
+			};
+			const auto floatBits = [](float a_value) noexcept {
+				return static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_value));
+			};
+
+			mix(static_cast<std::uint64_t>(a_target ? a_target->GetFormID() : 0u));
+			mix(static_cast<std::uint64_t>(a_attacker ? a_attacker->GetFormID() : 0u));
+			mix(floatBits(a_damage));
+			if (a_hitData) {
+				mix(static_cast<std::uint64_t>(HitDataUtil::GetHitSourceFormID(a_hitData, a_attacker)));
+				mix(static_cast<std::uint64_t>(a_hitData->flags.underlying()));
+				mix(floatBits(a_hitData->totalDamage));
+				mix(floatBits(a_hitData->hitPosition.x));
+				mix(floatBits(a_hitData->hitPosition.y));
+				mix(floatBits(a_hitData->hitPosition.z));
+				mix(floatBits(a_hitData->hitDirection.x));
+				mix(floatBits(a_hitData->hitDirection.y));
+				mix(floatBits(a_hitData->hitDirection.z));
+			}
+			return hash;
+		}
 
 		constexpr float kStaleDamageMinExpected = 5.0f;
 		constexpr float kStaleDamageRatioThreshold = 0.25f;
@@ -315,7 +349,7 @@ namespace CalamityAffixes::Hooks::detail
 		float a_damage,
 		std::chrono::steady_clock::time_point a_now) noexcept
 	{
-		constexpr auto kTimeCooldown = std::chrono::milliseconds(250);
+		constexpr auto kExactDuplicateCallbackWindow = std::chrono::milliseconds(50);
 
 		const auto pairKey =
 			(static_cast<std::uint64_t>(a_target->GetFormID()) << 32) |
@@ -326,8 +360,9 @@ namespace CalamityAffixes::Hooks::detail
 
 		const bool hasRecord = record.dispatchTime.time_since_epoch().count() != 0;
 		const auto elapsed = hasRecord ? (a_now - record.dispatchTime) : std::chrono::steady_clock::duration::max();
+		const auto dispatchSignature = MakeProcDispatchSignature(a_target, a_attacker, a_preHitData, a_damage);
 
-		if (hasRecord && elapsed < kTimeCooldown) {
+		if (hasRecord && record.signature == dispatchSignature && elapsed < kExactDuplicateCallbackWindow) {
 			return false;
 		}
 
@@ -343,6 +378,7 @@ namespace CalamityAffixes::Hooks::detail
 		}
 
 		record.dispatchTime = a_now;
+		record.signature = dispatchSignature;
 
 		if (s_procDispatch.size() > kProcDispatchMaxEntries) {
 			for (auto it = s_procDispatch.begin(); it != s_procDispatch.end();) {

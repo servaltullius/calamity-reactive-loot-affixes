@@ -562,15 +562,21 @@ namespace RuntimeGateStoreChecks
 		namespace fs = std::filesystem;
 		const fs::path testFile{ __FILE__ };
 		const fs::path corpseFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Actions.Corpse.cpp";
+		const fs::path parserFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Config.AffixActionParsing.cpp";
 
 		std::ifstream in(corpseFile);
-		if (!in.is_open()) {
-			std::cerr << "corpse_explosion_budget_safety: failed to open corpse-actions source: " << corpseFile << "\n";
+		std::ifstream parserIn(parserFile);
+		if (!in.is_open() || !parserIn.is_open()) {
+			std::cerr << "corpse_explosion_budget_safety: failed to open corpse-actions/parser sources\n";
 			return false;
 		}
 
 		const std::string source(
 			(std::istreambuf_iterator<char>(in)),
+			std::istreambuf_iterator<char>());
+
+		const std::string parserSource(
+			(std::istreambuf_iterator<char>(parserIn)),
 			std::istreambuf_iterator<char>());
 
 		const auto budgetPos = source.find("if (!TryConsumeCorpseExplosionBudget(");
@@ -582,6 +588,10 @@ namespace RuntimeGateStoreChecks
 			source.find("seenCorpses.size() > 512u") == std::string::npos ||
 			source.find("kCorpseExplosionDefaultMaxTargets = 48u") == std::string::npos ||
 			source.find("RollProcChance(_rng, _rngMutex, chancePct)") == std::string::npos ||
+			source.find("detail::IsPreferredCorpseExplosionCandidate(") == std::string::npos ||
+			source.find("selection.bestSelectionPriority = action.corpseExplosionSelectionPriority;") == std::string::npos ||
+			parserSource.find("detail::ClampCorpseExplosionSelectionPriority(") == std::string::npos ||
+			parserSource.find("a_action.value(\"selectionPriority\", 0)") == std::string::npos ||
 			source.find("selection.bestUsesPerTargetIcd") == std::string::npos ||
 			source.find("if (selection.bestUsesPerTargetIcd && targetsHit > 0u)") == std::string::npos ||
 			icdPos == std::string::npos ||
@@ -647,7 +657,8 @@ namespace RuntimeGateStoreChecks
 			baseSelectionSource->find("created->baseID = player->GetFormID();") == std::string::npos ||
 			lifecycleSource->find("bool EventBridge::NormalizeLegacyPlayerInstanceKeys()") == std::string::npos ||
 			lifecycleSource->find("bool EventBridge::PruneOrphanedPlayerInstanceKeys()") == std::string::npos ||
-			lifecycleSource->find("const bool prunedOrphanedPlayerKeys = PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
+			lifecycleSource->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
+			lifecycleSource->find("RebuildActiveCounts();") == std::string::npos ||
 			lifecycleSource->find("IsOrphanedPlayerInstanceKey(") == std::string::npos ||
 			lifecycleSource->find("uidUseCounts[uid->uniqueID]") == std::string::npos ||
 			lifecycleSource->find("if (duplicateUID)") == std::string::npos ||
@@ -655,7 +666,8 @@ namespace RuntimeGateStoreChecks
 			lifecycleSource->find("uid->baseID != itemFormID") == std::string::npos ||
 			lifecycleSource->find("RemapInstanceKey(legacyKey, canonicalKey);") == std::string::npos ||
 			lifecycleSource->find("uid->baseID = playerID;") == std::string::npos ||
-			runtimeSettingsHandlerSource->find("const bool prunedOrphanedEnableKeys = _runtimeSettings.enabled && PruneOrphanedPlayerInstanceKeys();") == std::string::npos) {
+			runtimeSettingsHandlerSource->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
+			runtimeSettingsHandlerSource->find("DeactivateRuntimeState();") == std::string::npos) {
 			std::cerr << "loot_reroll_exploit_guard: owner+UID transfer or legacy normalization policy is incomplete\n";
 			return false;
 		}

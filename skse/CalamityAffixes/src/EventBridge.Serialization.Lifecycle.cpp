@@ -54,11 +54,11 @@ namespace CalamityAffixes
 	void EventBridge::OnPostLoadGame()
 	{
 		const std::scoped_lock lock(_stateMutex);
-		const bool normalizedLegacyKeys = NormalizeLegacyPlayerInstanceKeys();
-		const bool prunedOrphanedPlayerKeys = PruneOrphanedPlayerInstanceKeys();
-		if (normalizedLegacyKeys || prunedOrphanedPlayerKeys) {
-			RebuildActiveCounts();
-		}
+		(void)NormalizeLegacyPlayerInstanceKeys();
+		(void)PruneOrphanedPlayerInstanceKeys();
+		// Serialization Load runs before inventory restoration. Always rebuild at
+		// PostLoadGame so normal saves cannot retain an empty/stale equipped cache.
+		RebuildActiveCounts();
 		MaybeMigrateMiscCurrency();
 	}
 

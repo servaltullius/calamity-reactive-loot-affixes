@@ -441,7 +441,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T1",
         "name": "Calamity Suffix: Health Regen +25% / 체력 재생 +25%",
-        "actorValue": "HealRate",
+        "actorValue": "HealRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -489,7 +489,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T2",
         "name": "Calamity Suffix: Health Regen +50% / 체력 재생 +50%",
-        "actorValue": "HealRate",
+        "actorValue": "HealRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -537,7 +537,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_HEALTH_REGEN_T3",
         "name": "Calamity Suffix: Health Regen +75% / 체력 재생 +75%",
-        "actorValue": "HealRate",
+        "actorValue": "HealRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -585,7 +585,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T1",
         "name": "Calamity Suffix: Stamina Regen +25% / 스태미나 재생 +25%",
-        "actorValue": "StaminaRate",
+        "actorValue": "StaminaRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -633,7 +633,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T2",
         "name": "Calamity Suffix: Stamina Regen +50% / 스태미나 재생 +50%",
-        "actorValue": "StaminaRate",
+        "actorValue": "StaminaRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -681,7 +681,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_STAMINA_REGEN_T3",
         "name": "Calamity Suffix: Stamina Regen +75% / 스태미나 재생 +75%",
-        "actorValue": "StaminaRate",
+        "actorValue": "StaminaRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -729,7 +729,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T1",
         "name": "Calamity Suffix: Magicka Regen +25% / 매지카 재생 +25%",
-        "actorValue": "MagickaRate",
+        "actorValue": "MagickaRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -777,7 +777,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T2",
         "name": "Calamity Suffix: Magicka Regen +50% / 매지카 재생 +50%",
-        "actorValue": "MagickaRate",
+        "actorValue": "MagickaRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -825,7 +825,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_MAGICKA_REGEN_T3",
         "name": "Calamity Suffix: Magicka Regen +75% / 매지카 재생 +75%",
-        "actorValue": "MagickaRate",
+        "actorValue": "MagickaRateMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1046,6 +1046,7 @@
     },
     "slot": "suffix",
     "family": "swordsman",
+    "weaponSubtypes": ["OneHandedMelee"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1094,6 +1095,7 @@
     },
     "slot": "suffix",
     "family": "swordsman",
+    "weaponSubtypes": ["OneHandedMelee"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1142,6 +1144,7 @@
     },
     "slot": "suffix",
     "family": "swordsman",
+    "weaponSubtypes": ["OneHandedMelee"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1190,6 +1193,7 @@
     },
     "slot": "suffix",
     "family": "champion",
+    "weaponSubtypes": ["TwoHandedMelee"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1238,6 +1242,7 @@
     },
     "slot": "suffix",
     "family": "champion",
+    "weaponSubtypes": ["TwoHandedMelee"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1286,6 +1291,7 @@
     },
     "slot": "suffix",
     "family": "champion",
+    "weaponSubtypes": ["TwoHandedMelee"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1334,6 +1340,7 @@
     },
     "slot": "suffix",
     "family": "marksman",
+    "weaponSubtypes": ["Bow", "Crossbow"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1382,6 +1389,7 @@
     },
     "slot": "suffix",
     "family": "marksman",
+    "weaponSubtypes": ["Bow", "Crossbow"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -1430,6 +1438,7 @@
     },
     "slot": "suffix",
     "family": "marksman",
+    "weaponSubtypes": ["Bow", "Crossbow"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2018,9 +2027,9 @@
   {
     "id": "suffix_assassin_t1",
     "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T1",
-    "name": "약간의 암살자: 치명타 확률 +10%",
-    "nameEn": "of Minor Assassin: Critical Chance +10%",
-    "nameKo": "약간의 암살자: 치명타 확률 +10%",
+    "name": "약간의 암살자: 치명타 확률 +10%, 치명타 피해 +10%",
+    "nameEn": "of Minor Assassin: Critical Chance +10%, Critical Damage +10%",
+    "nameKo": "약간의 암살자: 치명타 확률 +10%, 치명타 피해 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T1",
@@ -2067,9 +2076,9 @@
   {
     "id": "suffix_assassin_t2",
     "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T2",
-    "name": "암살자: 치명타 확률 +20%",
-    "nameEn": "of the Assassin: Critical Chance +20%",
-    "nameKo": "암살자: 치명타 확률 +20%",
+    "name": "암살자: 치명타 확률 +20%, 치명타 피해 +20%",
+    "nameEn": "of the Assassin: Critical Chance +20%, Critical Damage +20%",
+    "nameKo": "암살자: 치명타 확률 +20%, 치명타 피해 +20%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T2",
@@ -2116,9 +2125,9 @@
   {
     "id": "suffix_assassin_t3",
     "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T3",
-    "name": "위대한 암살자: 치명타 확률 +30%",
-    "nameEn": "of Grand Assassin: Critical Chance +30%",
-    "nameKo": "위대한 암살자: 치명타 확률 +30%",
+    "name": "위대한 암살자: 치명타 확률 +30%, 치명타 피해 +30%",
+    "nameEn": "of Grand Assassin: Critical Chance +30%, Critical Damage +30%",
+    "nameKo": "위대한 암살자: 치명타 확률 +30%, 치명타 피해 +30%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T3",
@@ -2633,6 +2642,7 @@
     },
     "slot": "suffix",
     "family": "eagle_eye",
+    "weaponSubtypes": ["Bow", "Crossbow"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2681,6 +2691,7 @@
     },
     "slot": "suffix",
     "family": "eagle_eye",
+    "weaponSubtypes": ["Bow", "Crossbow"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,
@@ -2729,6 +2740,7 @@
     },
     "slot": "suffix",
     "family": "eagle_eye",
+    "weaponSubtypes": ["Bow", "Crossbow"],
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 0,

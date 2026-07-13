@@ -57,6 +57,28 @@ namespace CalamityAffixes
 			return false;
 		}
 
+		// Check SpawnTrap-specific hit/target requirements before chance, budget,
+		// and ICD commits so an ineligible hit cannot consume the next valid proc.
+		if (affix.action.type == ActionType::kSpawnTrap) {
+			RE::Actor* ignoredSpawnTarget = nullptr;
+			const char* failureReason = "unknown";
+			if (!SelectSpawnTrapTarget(
+					affix.action,
+					a_owner,
+					a_target,
+					a_hitData,
+					ignoredSpawnTarget,
+					&failureReason)) {
+				if (_loot.debugLog) {
+					SKSE::log::debug(
+						"CalamityAffixes: trap proc precondition skipped (affixId={}, reason={}).",
+						affix.id,
+						failureReason);
+				}
+				return false;
+			}
+		}
+
 		const float chance = ResolveTriggerProcChancePct(affix, a_affixIndex);
 		if (!RollTriggerProcChance(chance)) {
 			return false;

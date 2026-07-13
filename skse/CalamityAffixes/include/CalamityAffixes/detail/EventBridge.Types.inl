@@ -119,6 +119,7 @@
 			float archmageCostPctOfMaxMagicka{ 0.0f };
 
 			// CorpseExplosion
+			std::int32_t corpseExplosionSelectionPriority{ 0 };
 			float corpseExplosionFlatDamage{ 0.0f };
 			float corpseExplosionPctOfCorpseMaxHealth{ 0.0f };
 			float corpseExplosionRadius{ 0.0f };
@@ -188,6 +189,7 @@
 			std::chrono::steady_clock::time_point staleCombatLastHardClearAt{};
 			std::uint32_t staleCombatClearConfidence{ 0u };
 			std::chrono::steady_clock::time_point forceStopLastPulseAt{};
+			std::chrono::steady_clock::time_point playerOwnedCombatCleanupExpiresAt{};
 
 			void ClearTrapQueue() noexcept
 			{
@@ -202,6 +204,7 @@
 				staleCombatLastHardClearAt = {};
 				staleCombatClearConfidence = 0u;
 				forceStopLastPulseAt = {};
+				playerOwnedCombatCleanupExpiresAt = {};
 			}
 
 			void Reset() noexcept
@@ -389,6 +392,7 @@
 			// Prefix/Suffix classification
 			AffixSlot slot{ AffixSlot::kNone };
 			std::string family{};            // suffix family grouping (e.g., "max_health")
+			std::uint8_t weaponSubtypeMask{ 0u };  // 0 = unrestricted; applied only while rolling new weapon suffixes
 			RE::SpellItem* passiveSpell{ nullptr };  // suffix: Ability spell to add/remove on equip
 			float critDamageBonusPct{ 0.0f };        // suffix: crit damage bonus (applied in HandleHealthDamage hook)
 			float scrollNoConsumeChancePct{ 0.0f };  // equipped: additive chance to preserve consumed scrolls
@@ -475,6 +479,7 @@
 			std::optional<std::size_t> bestIdx{};
 			PerTargetCooldownKey bestPerTargetKey{};
 			bool bestUsesPerTargetIcd{ false };
+			std::int32_t bestSelectionPriority{ 0 };
 			float bestBaseDamage{ 0.0f };
 			std::uint32_t activeAffixes{ 0 };
 			std::uint32_t blockedCooldown{ 0 };

@@ -17,6 +17,9 @@ namespace CalamityAffixes
 		auto& activeTraps = trapState.activeTraps;
 		auto& trapTickCursor = trapState.tickCursor;
 		const auto now = std::chrono::steady_clock::now();
+		if (!_runtimeSettings.enabled) {
+			return;
+		}
 		if (_runtimeSettings.disableTrapSystemTick) {
 			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
 			if (_runtimeSettings.combatDebugLog) {
@@ -33,6 +36,7 @@ namespace CalamityAffixes
 			auto& lastClearAt = trapState.staleCombatLastClearAt;
 			auto& lastHardClearAt = trapState.staleCombatLastHardClearAt;
 			auto& clearConfidence = trapState.staleCombatClearConfidence;
+			auto& cleanupLeaseExpiresAt = trapState.playerOwnedCombatCleanupExpiresAt;
 			constexpr auto kClearCooldown = std::chrono::seconds(5);
 			constexpr auto kHardClearCooldown = std::chrono::seconds(20);
 			constexpr std::uint32_t kRequiredConfidence = 8u;
@@ -63,6 +67,14 @@ namespace CalamityAffixes
 					clearConfidence,
 					activeTraps.size());
 			};
+
+			// StopCombat is a global player mutation. Only a recent, actually-triggered
+			// player-owned Calamity trap may authorize this cleanup path.
+			if (cleanupLeaseExpiresAt.time_since_epoch().count() == 0 || now > cleanupLeaseExpiresAt) {
+				cleanupLeaseExpiresAt = {};
+				clearConfidence = 0u;
+				return;
+			}
 
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			auto* processLists = RE::ProcessLists::GetSingleton();
@@ -130,6 +142,7 @@ namespace CalamityAffixes
 
 			if (!player->IsInCombat()) {
 				clearConfidence = 0u;
+				cleanupLeaseExpiresAt = {};
 				return;
 			}
 
@@ -229,6 +242,7 @@ namespace CalamityAffixes
 			_combatState.recentOwnerIncomingHitAt.erase(playerFormID);
 			_combatState.playerCombatEvidenceExpiresAt = {};
 			_combatState.nonHostileFirstHitGate.Clear();
+			cleanupLeaseExpiresAt = {};
 			if (_loot.debugLog) {
 				SKSE::log::info("CalamityAffixes: cleared stale player combat state (no hostile actor nearby).");
 			}
@@ -423,6 +437,12 @@ namespace CalamityAffixes
 			}
 
 			if (triggered) {
+				if (IsPlayerOwned(owner)) {
+					constexpr auto kPlayerOwnedTrapCombatCleanupLease = std::chrono::seconds(45);
+					trapState.playerOwnedCombatCleanupExpiresAt = std::max(
+						trapState.playerOwnedCombatCleanupExpiresAt,
+						now + kPlayerOwnedTrapCombatCleanupLease);
+				}
 				ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);
 				if (_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(trapSnapshot.spell)) {
 					const auto note = std::format("Calamity: {} burst", ProcFeedback::ResolveBloomProcDebugLabel(trapSnapshot.spell));

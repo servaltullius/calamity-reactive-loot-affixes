@@ -32,6 +32,78 @@ def _is_number(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
+def _collect_record_objects(
+    container: Dict[str, Any],
+    *,
+    singular_key: str,
+    plural_key: str,
+    base_path: str,
+    affix_id: str,
+    errors: List[str],
+) -> List[Tuple[str, Dict[str, Any]]]:
+    objects: List[Tuple[str, Dict[str, Any]]] = []
+
+    if singular_key in container:
+        path = f"{base_path}.{singular_key}"
+        value = _as_dict(container.get(singular_key))
+        if not value:
+            errors.append(f"{affix_id}: {path} must be an object.")
+        else:
+            objects.append((path, value))
+
+    if plural_key in container:
+        path = f"{base_path}.{plural_key}"
+        values = _as_list(container.get(plural_key))
+        if values is None:
+            errors.append(f"{affix_id}: {path} must be an array.")
+        else:
+            for idx, raw in enumerate(values):
+                item_path = f"{path}[{idx}]"
+                value = _as_dict(raw)
+                if not value:
+                    errors.append(f"{affix_id}: {item_path} must be an object.")
+                else:
+                    objects.append((item_path, value))
+
+    return objects
+
+
+_VALID_ACTOR_VALUES: Set[str] = {
+    # Core stats
+    "Health", "Magicka", "Stamina",
+    "HealRate", "MagickaRate", "StaminaRate",
+    "HealRateMult", "MagickaRateMult", "StaminaRateMult",
+    # Combat
+    "AttackDamageMult", "WeaponSpeedMult", "CriticalChance",
+    "SpeedMult", "CarryWeight", "BowSpeedBonus",
+    "ReflectDamage", "ShoutRecoveryMult",
+    # Resistances
+    "DamageResist", "MagicResist", "ResistMagic",
+    "PoisonResist", "DiseaseResist",
+    "ResistFire", "ResistFrost", "ResistShock",
+    # Skills — combat
+    "OneHandedModifier", "TwoHandedModifier", "MarksmanModifier",
+    "BlockModifier", "LightArmorModifier", "HeavyArmorModifier",
+    "SneakingModifier",
+    # Skills — magic
+    "DestructionModifier", "ConjurationModifier", "RestorationModifier",
+    "AlterationModifier", "IllusionModifier", "EnchantingModifier",
+    # Skills — crafting & social
+    "SmithingModifier", "AlchemyModifier",
+    "LockpickingModifier", "PickpocketModifier", "SpeechcraftModifier",
+    # Special
+    "Invisibility", "Paralysis", "DetectLifeRange",
+    "Aggression", "Confidence",
+}
+
+
+_SUFFIX_REGEN_ACTOR_VALUES: Dict[str, str] = {
+    "regeneration": "HealRateMult",
+    "tenacity": "StaminaRateMult",
+    "meditation": "MagickaRateMult",
+}
+
+
 def _extract_spell_editor_id(value: Any) -> Optional[str]:
     if isinstance(value, str):
         return value
@@ -232,6 +304,7 @@ def _lint_spec(
     seen_editor_ids: Dict[str, int] = {}
     generated_spells: Set[str] = set()
     spell_refs: List[Tuple[str, str]] = []
+    suffix_family_avs: Dict[str, Set[str]] = {}
 
     for idx, raw in enumerate(affixes):
         affix = _as_dict(raw)
@@ -267,22 +340,117 @@ def _lint_spec(
 
         records = _as_dict(affix.get("records"))
         if records:
-            spell = _as_dict(records.get("spell"))
-            if spell:
-                spell_edid = spell.get("editorId")
-                if isinstance(spell_edid, str) and spell_edid.strip():
-                    generated_spells.add(spell_edid.strip())
+            magic_effects = _collect_record_objects(
+                records,
+                singular_key="magicEffect",
+                plural_key="magicEffects",
+                base_path="records",
+                affix_id=str(affix_id),
+                errors=errors,
+            )
+            spells = _collect_record_objects(
+                records,
+                singular_key="spell",
+                plural_key="spells",
+                base_path="records",
+                affix_id=str(affix_id),
+                errors=errors,
+            )
 
-            spells = _as_list(records.get("spells")) or []
-            for s_idx, raw_spell in enumerate(spells):
-                spell_entry = _as_dict(raw_spell)
-                if not spell_entry:
-                    errors.append(f"{affix_id}: records.spells[{s_idx}] must be an object.")
+            mgef_by_editor_id: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+            slot = affix.get("slot")
+            family = affix.get("family")
+            expected_suffix_av = (
+                _SUFFIX_REGEN_ACTOR_VALUES.get(family)
+                if slot == "suffix" and isinstance(family, str)
+                else None
+            )
+
+            for mgef_path, mgef in magic_effects:
+                mgef_edid = mgef.get("editorId")
+                if isinstance(mgef_edid, str) and mgef_edid.strip():
+                    mgef_by_editor_id[mgef_edid.strip()] = (mgef_path, mgef)
+
+                archetype = mgef.get("archetype")
+                if (
+                    isinstance(archetype, str)
+                    and archetype.strip().casefold() == "paralysis"
+                    and mgef.get("recover") is not True
+                ):
+                    errors.append(
+                        f"{affix_id}: {mgef_path} with archetype=Paralysis requires recover=true."
+                    )
+
+                av = mgef.get("actorValue")
+                if expected_suffix_av is not None and av != expected_suffix_av:
+                    errors.append(
+                        f"{affix_id}: suffix family '{family}' requires {mgef_path}.actorValue="
+                        f"'{expected_suffix_av}' (got {av!r})."
+                    )
+
+                if av is None or av == "None":
                     continue
+                if not isinstance(av, str):
+                    errors.append(f"{affix_id}: {mgef_path}.actorValue must be a string.")
+                    continue
+                if av not in _VALID_ACTOR_VALUES:
+                    errors.append(
+                        f"{affix_id}: unknown actorValue '{av}' at {mgef_path}.actorValue. "
+                        f"Valid values: {sorted(_VALID_ACTOR_VALUES)}"
+                    )
 
+                if slot == "suffix" and isinstance(family, str):
+                    suffix_family_avs.setdefault(family, set()).add(av)
+
+            for spell_path, spell_entry in spells:
                 spell_edid = spell_entry.get("editorId")
                 if isinstance(spell_edid, str) and spell_edid.strip():
                     generated_spells.add(spell_edid.strip())
+
+                spell_effects = _collect_record_objects(
+                    spell_entry,
+                    singular_key="effect",
+                    plural_key="effects",
+                    base_path=spell_path,
+                    affix_id=str(affix_id),
+                    errors=errors,
+                )
+                is_constant_effect = spell_entry.get("castType") == "ConstantEffect"
+
+                for effect_path, spell_effect in spell_effects:
+                    mgef_ref = spell_effect.get("magicEffectEditorId")
+                    if not isinstance(mgef_ref, str):
+                        continue
+                    linked = mgef_by_editor_id.get(mgef_ref.strip())
+                    if linked is None:
+                        continue
+
+                    mgef_path, mgef = linked
+                    magnitude = spell_effect.get("magnitude")
+                    duration = spell_effect.get("duration")
+                    hostile = mgef.get("hostile") is True
+
+                    if hostile and _is_number(magnitude) and magnitude < 0.0:
+                        errors.append(
+                            f"{affix_id}: {effect_path}.magnitude is negative ({magnitude}) for "
+                            f"hostile {mgef_path}; Detrimental effects require a non-negative magnitude."
+                        )
+
+                    actor_value = mgef.get("actorValue")
+                    if (
+                        not hostile
+                        and actor_value in {"Health", "Magicka", "Stamina"}
+                        and mgef.get("recover") is True
+                        and _is_number(magnitude)
+                        and magnitude > 0.0
+                        and _is_number(duration)
+                        and duration == 0.0
+                        and not is_constant_effect
+                    ):
+                        errors.append(
+                            f"{affix_id}: instant positive {actor_value} effect at {effect_path} "
+                            f"uses recover=true on {mgef_path}; non-ConstantEffect restores require recover=false."
+                        )
 
         runtime = _as_dict(affix.get("runtime"))
         if not runtime:
@@ -360,6 +528,35 @@ def _lint_spec(
                 errors.append(
                     f"{affix_id}: special actions require runtime.procChancePercent > 0 "
                     f"(action.type={action_type})."
+                )
+
+        if action_type in {"CorpseExplosion", "SummonCorpseExplosion"}:
+            selection_priority = action.get("selectionPriority", 0)
+            if not isinstance(selection_priority, int) or isinstance(selection_priority, bool):
+                errors.append(
+                    f"{affix_id}: action.selectionPriority must be an integer (0-100)."
+                )
+            elif selection_priority < 0 or selection_priority > 100:
+                errors.append(
+                    f"{affix_id}: action.selectionPriority out of range: {selection_priority} "
+                    "(expected 0-100)."
+                )
+
+            corpse_health_pct = action.get("pctOfCorpseMaxHealth")
+            if not _is_number(corpse_health_pct):
+                errors.append(
+                    f"{affix_id}: {action_type} requires action.pctOfCorpseMaxHealth as a number "
+                    "(0 or percent points in the range 1-100)."
+                )
+            elif 0.0 < corpse_health_pct < 1.0:
+                errors.append(
+                    f"{affix_id}: action.pctOfCorpseMaxHealth={corpse_health_pct} looks like a fraction; "
+                    "use percent points (for example, 8.0 for 8%) or 0 to disable percent damage."
+                )
+            elif corpse_health_pct < 0.0 or corpse_health_pct > 100.0:
+                errors.append(
+                    f"{affix_id}: action.pctOfCorpseMaxHealth out of range: {corpse_health_pct} "
+                    "(expected 0 or 1-100 percent points)."
                 )
 
         lucky_hit_configured = (
@@ -500,62 +697,6 @@ def _lint_spec(
                 f"Missing generated spell for reference '{ref}' ({ctx}). "
                 "Define it under records.spell or records.spells[]."
             )
-
-    # actorValue whitelist — Skyrim ActorValues used in affix magicEffect records.
-    VALID_ACTOR_VALUES: Set[str] = {
-        # Core stats
-        "Health", "Magicka", "Stamina",
-        "HealRate", "MagickaRate", "StaminaRate",
-        "HealRateMult", "MagickaRateMult", "StaminaRateMult",
-        # Combat
-        "AttackDamageMult", "WeaponSpeedMult", "CriticalChance",
-        "SpeedMult", "CarryWeight", "BowSpeedBonus",
-        "ReflectDamage", "ShoutRecoveryMult",
-        # Resistances
-        "DamageResist", "MagicResist", "ResistMagic",
-        "PoisonResist", "DiseaseResist",
-        "ResistFire", "ResistFrost", "ResistShock",
-        # Skills — combat
-        "OneHandedModifier", "TwoHandedModifier", "MarksmanModifier",
-        "BlockModifier", "LightArmorModifier", "HeavyArmorModifier",
-        "SneakingModifier",
-        # Skills — magic
-        "DestructionModifier", "ConjurationModifier", "RestorationModifier",
-        "AlterationModifier", "IllusionModifier", "EnchantingModifier",
-        # Skills — crafting & social
-        "SmithingModifier", "AlchemyModifier",
-        "LockpickingModifier", "PickpocketModifier", "SpeechcraftModifier",
-        # Special
-        "Invisibility", "Paralysis", "DetectLifeRange",
-        "Aggression", "Confidence",
-    }
-
-    # Validate actorValue on suffix/runeword magicEffect records.
-    suffix_family_avs: Dict[str, Set[str]] = {}
-    for idx, raw in enumerate(affixes):
-        affix = _as_dict(raw)
-        if not affix:
-            continue
-        affix_id = affix.get("id", f"<index:{idx}>")
-        records = _as_dict(affix.get("records"))
-        if not records:
-            continue
-        mgef = _as_dict(records.get("magicEffect"))
-        if not mgef:
-            continue
-        av = mgef.get("actorValue")
-        if av is None or av == "None":
-            continue
-        if not isinstance(av, str):
-            errors.append(f"{affix_id}: records.magicEffect.actorValue must be a string.")
-            continue
-        if av not in VALID_ACTOR_VALUES:
-            errors.append(f"{affix_id}: unknown actorValue '{av}'. Valid values: {sorted(VALID_ACTOR_VALUES)}")
-
-        slot = affix.get("slot")
-        family = affix.get("family")
-        if slot == "suffix" and isinstance(family, str):
-            suffix_family_avs.setdefault(family, set()).add(av)
 
     # Suffix families must each use exactly one actorValue.
     for fam, avs in sorted(suffix_family_avs.items()):

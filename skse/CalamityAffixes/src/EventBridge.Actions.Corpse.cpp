@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 
+#include "CalamityAffixes/CorpseExplosionSelectionPolicy.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
 #include <algorithm>
 #include <chrono>
@@ -100,10 +101,15 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			if (!selection.bestIdx || baseDamage > selection.bestBaseDamage) {
+			if (!selection.bestIdx || detail::IsPreferredCorpseExplosionCandidate(
+				action.corpseExplosionSelectionPriority,
+				baseDamage,
+				selection.bestSelectionPriority,
+				selection.bestBaseDamage)) {
 				selection.bestIdx = idx;
 				selection.bestPerTargetKey = perTargetKey;
 				selection.bestUsesPerTargetIcd = usesPerTargetIcd;
+				selection.bestSelectionPriority = action.corpseExplosionSelectionPriority;
 				selection.bestBaseDamage = baseDamage;
 			}
 		}

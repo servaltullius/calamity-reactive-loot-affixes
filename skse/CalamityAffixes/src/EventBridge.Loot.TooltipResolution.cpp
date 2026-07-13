@@ -118,7 +118,11 @@ namespace CalamityAffixes
 				if (const auto* previewSlots = FindLootPreviewSlots(key)) {
 					candidate.slots = *previewSlots;
 					candidate.preview = true;
-				} else if (const auto generatedPreview = BuildLootPreviewAffixSlots(key, *itemType); generatedPreview.has_value()) {
+				} else if (const auto generatedPreview = BuildLootPreviewAffixSlots(
+					key,
+					*itemType,
+					detail::ResolveWeaponSubtype(a_item->object->As<RE::TESObjectWEAP>()));
+					generatedPreview.has_value()) {
 					RememberLootPreviewSlots(key, *generatedPreview);
 					if (const auto* storedPreview = FindLootPreviewSlots(key)) {
 						candidate.slots = *storedPreview;

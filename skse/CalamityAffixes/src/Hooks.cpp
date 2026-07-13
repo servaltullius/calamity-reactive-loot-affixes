@@ -221,7 +221,7 @@ namespace CalamityAffixes::Hooks
 				}
 
 				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-				if (!bridge) {
+				if (!bridge || !bridge->IsRuntimeEnabled()) {
 					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
 				}

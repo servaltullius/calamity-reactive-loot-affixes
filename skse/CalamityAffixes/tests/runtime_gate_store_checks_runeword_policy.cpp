@@ -127,7 +127,11 @@ namespace RuntimeGateStoreChecks
 				source.find("RunewordSummary::ResolveEffectSummaryKey") == std::string::npos ||
 				summaryHeader.find("kEffectSummaryOverrides") == std::string::npos ||
 				summaryHeader.find("static_assert(!HasDuplicateOverrideIds(kEffectSummaryOverrides)") == std::string::npos ||
-				summaryHeader.find("{ \"rw_spirit\", \"signature_spirit\" }") == std::string::npos) {
+				summaryHeader.find("{ \"rw_spirit\", \"signature_spirit\" }") == std::string::npos ||
+				summaryHeader.find("가장 낮은 원소 저항을 더 깎아 약점 피해 증폭") == std::string::npos ||
+				summaryHeader.find("기근의 저주로 적의 기력을 소진시킴") == std::string::npos ||
+				summaryHeader.find("저항이 높은 축을 먼저 찢어 약점 개방") != std::string::npos ||
+				summaryHeader.find("기근의 저주로 적의 체력을 소진시킴") != std::string::npos) {
 				std::cerr << "runeword_recipe_entries_mapping: recipe-entry table mapping guard is missing\n";
 				return false;
 			}
@@ -921,7 +925,9 @@ namespace RuntimeGateStoreChecks
 				std::istreambuf_iterator<char>());
 
 			if (policySource.find("Runeword result affix missing") == std::string::npos ||
-				policySource.find("Affix slots full (max ") == std::string::npos) {
+				policySource.find("Affix slots full (max ") == std::string::npos ||
+				policySource.find("ResolveCompletedRunewordRecipe(slots)") == std::string::npos ||
+				policySource.find("--effectiveCount;") == std::string::npos) {
 				std::cerr << "runeword_transmute_safety: policy messages for apply block reasons are missing\n";
 				return false;
 			}
@@ -965,6 +971,10 @@ namespace RuntimeGateStoreChecks
 				transmuteSource.find("note.append(BuildRunewordApplyBlockMessage(blockReason));") == std::string::npos ||
 				transmuteSource.find("RollbackConsumedRunewordFragments(") == std::string::npos ||
 				transmuteSource.find("ConsumeRunewordFragmentRequirement(") == std::string::npos ||
+				transmuteSource.find("const InstanceAffixSlots previousSlots = slots;") == std::string::npos ||
+				transmuteSource.find("slots = previousSlots;") == std::string::npos ||
+				transmuteSource.find("const auto replacedResultToken = completedBefore ? completedBefore->resultAffixToken : 0u;") == std::string::npos ||
+				transmuteSource.find("removed existing runeword for re-transmutation") != std::string::npos ||
 				transmuteSource.find("_runewordState.transmuteInProgress") == std::string::npos ||
 				transmuteSource.find("Runeword: transmute already in progress.") == std::string::npos ||
 				transmuteSource.find("if (!PlayerHasInstanceKey(instanceKey))") == std::string::npos ||

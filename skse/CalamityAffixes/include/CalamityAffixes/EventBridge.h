@@ -22,6 +22,8 @@
 #include <SKSE/Events.h>
 #include <SKSE/SKSE.h>
 
+#include "CalamityAffixes/ItemSubtypePolicy.h"
+
 	#include "CalamityAffixes/AdaptiveElement.h"
 	#include "CalamityAffixes/AffixSpecialActionState.h"
 	#include "CalamityAffixes/AffixRegistryState.h"

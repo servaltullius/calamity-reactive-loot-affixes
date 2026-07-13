@@ -93,6 +93,9 @@
 				{ "nextRuneOwned", a_state.nextRuneOwned },
 				{ "canInsert", a_state.canInsert },
 				{ "missingSummary", a_state.missingSummary },
+				{ "baseCompatibilityWarning", a_state.baseCompatibilityWarning },
+				{ "baseCompatibilityMessageEn", a_state.baseCompatibilityMessageEn },
+				{ "baseCompatibilityMessageKo", a_state.baseCompatibilityMessageKo },
 				{ "requiredRunes", requiredRunes }
 			};
 

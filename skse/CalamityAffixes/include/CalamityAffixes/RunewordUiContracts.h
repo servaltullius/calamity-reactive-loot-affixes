@@ -44,6 +44,9 @@ namespace CalamityAffixes
 		std::uint32_t nextRuneOwned{ 0 };
 		bool canInsert{ false };
 		std::string missingSummary{};
+		bool baseCompatibilityWarning{ false };
+		std::string baseCompatibilityMessageEn{};
+		std::string baseCompatibilityMessageKo{};
 		std::vector<RunewordRuneRequirement> requiredRunes{};
 	};
 

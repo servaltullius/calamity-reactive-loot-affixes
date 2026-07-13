@@ -5,6 +5,7 @@
 		// Runtime lifecycle and data maintenance.
 		void ResetRuntimeStateForConfigReload();
 		void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);
+		void DeactivateRuntimeState();
 		void RebuildActiveCounts();
 		void FinalizeLoadedSerializationState();
 		void LoadInstanceAffixesRecord(
@@ -44,6 +45,8 @@
 			std::uint64_t a_instanceKey,
 			const InstanceAffixSlots& a_slots,
 			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
+		void CollectBestSuffixFamilyState(
+			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
 		void LogActiveAffixListDebug() const;
 		void ApplyDesiredPassiveSpells(
 			RE::PlayerCharacter* a_player,
@@ -72,7 +75,8 @@
 		void ForgetLootPreviewSlots(std::uint64_t a_instanceKey);
 		[[nodiscard]] std::optional<InstanceAffixSlots> BuildLootPreviewAffixSlots(
 			std::uint64_t a_instanceKey,
-			LootItemType a_itemType) const;
+			LootItemType a_itemType,
+			detail::WeaponSubtypeGroup a_weaponSubtype) const;
 		[[nodiscard]] static std::uint64_t HashLootPreviewSeed(std::uint64_t a_instanceKey, std::uint64_t a_salt);
 		[[nodiscard]] bool PlayerHasInstanceKey(std::uint64_t a_instanceKey) const;
 		[[nodiscard]] const std::vector<std::uint64_t>* FindEquippedInstanceKeysForAffixTokenCached(std::uint64_t a_affixToken) const;
@@ -330,6 +334,7 @@
 			bool a_skipChanceCheck = false);
 			[[nodiscard]] std::optional<std::size_t> RollSuffixIndex(
 				LootItemType a_itemType,
+				detail::WeaponSubtypeGroup a_weaponSubtype,
 				const std::vector<std::string>* a_excludeFamilies = nullptr);
 			[[nodiscard]] std::uint8_t RollAffixCount();
 			[[nodiscard]] bool RollLootChanceGateForEligibleInstance();

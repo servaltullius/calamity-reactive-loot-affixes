@@ -21,6 +21,8 @@ namespace CalamityAffixes
 		const RunewordRecipe& a_recipe,
 		std::string* a_outFailureReason)
 	{
+		const auto* completedBefore = ResolveCompletedRunewordRecipe(a_instanceKey);
+		const auto replacedResultToken = completedBefore ? completedBefore->resultAffixToken : 0u;
 		const auto blockReason = ResolveRunewordApplyBlockReason(a_instanceKey, a_recipe);
 		if (blockReason == RunewordApplyBlockReason::kMissingResultAffix) {
 			if (a_outFailureReason) {
@@ -63,8 +65,13 @@ namespace CalamityAffixes
 		}
 
 		auto& slots = _instanceAffixes[a_instanceKey];
+		const InstanceAffixSlots previousSlots = slots;
+		if (replacedResultToken != 0u && replacedResultToken != a_recipe.resultAffixToken) {
+			slots.RemoveToken(replacedResultToken);
+		}
 
 		if (!slots.PromoteTokenToPrimary(a_recipe.resultAffixToken)) {
+			slots = previousSlots;
 			if (a_outFailureReason) {
 				*a_outFailureReason = "promote-to-primary-failed";
 			}
@@ -77,6 +84,9 @@ namespace CalamityAffixes
 			return false;
 		}
 
+		if (replacedResultToken != 0u && replacedResultToken != a_recipe.resultAffixToken) {
+			_instanceStates.erase(MakeInstanceStateKey(a_instanceKey, replacedResultToken));
+		}
 		EnsureInstanceRuntimeState(a_instanceKey, a_recipe.resultAffixToken);
 		_runewordState.instanceStates.erase(a_instanceKey);
 
@@ -135,26 +145,6 @@ namespace CalamityAffixes
 			note.append(baseResolveFailure);
 			EmitHudNotification(note.c_str());
 			return;
-		}
-
-		// If base already has a completed runeword, remove it to allow re-transmutation.
-		if (const auto* completed = ResolveCompletedRunewordRecipe(instanceKey)) {
-			const auto oldToken = completed->resultAffixToken;
-			auto& slots = _instanceAffixes[instanceKey];
-			slots.RemoveToken(oldToken);
-			_instanceStates.erase(MakeInstanceStateKey(instanceKey, oldToken));
-			_runewordState.instanceStates.erase(instanceKey);
-
-			if (ResolvePlayerInventoryInstance(instanceKey, entry, xList) && entry && xList) {
-				EnsureMultiAffixDisplayName(entry, xList, slots);
-			}
-			RebuildActiveCounts();
-
-			SKSE::log::info(
-				"CalamityAffixes: removed existing runeword for re-transmutation (instance={:016X}, oldToken={:016X}, displayName={}).",
-				instanceKey,
-				oldToken,
-				completed->displayName);
 		}
 
 		auto& state = _runewordState.instanceStates[instanceKey];

@@ -119,6 +119,7 @@ public static class AffixSpecLoader
             }
 
             ValidateRuntimeShape(affix);
+            ValidateWeaponSubtypePolicy(affix);
 
             var records = affix.Records;
             var magicEffects = records?.ResolveMagicEffects() ?? [];
@@ -175,6 +176,48 @@ public static class AffixSpecLoader
                             $"Spell {spell.EditorId} has an empty magicEffectEditorId at effect index {i}.");
                     }
                 }
+            }
+        }
+    }
+
+    private static void ValidateWeaponSubtypePolicy(AffixDefinition affix)
+    {
+        if (affix.WeaponSubtypes is null)
+        {
+            return;
+        }
+
+        if (!string.Equals(affix.Slot, "suffix", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException(
+                $"weaponSubtypes is supported only for suffix affixes (affix: {affix.Id}).");
+        }
+
+        if (affix.WeaponSubtypes.Count == 0)
+        {
+            throw new InvalidDataException(
+                $"weaponSubtypes must contain at least one subtype (affix: {affix.Id}).");
+        }
+
+        var allowed = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "OneHandedMelee",
+            "TwoHandedMelee",
+            "Bow",
+            "Crossbow"
+        };
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var subtype in affix.WeaponSubtypes)
+        {
+            if (!allowed.Contains(subtype))
+            {
+                throw new InvalidDataException(
+                    $"Unknown weaponSubtypes value '{subtype}' (affix: {affix.Id}).");
+            }
+            if (!seen.Add(subtype))
+            {
+                throw new InvalidDataException(
+                    $"Duplicate weaponSubtypes value '{subtype}' (affix: {affix.Id}).");
             }
         }
     }

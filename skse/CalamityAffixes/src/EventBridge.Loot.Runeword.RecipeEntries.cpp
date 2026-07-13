@@ -64,6 +64,7 @@ namespace CalamityAffixes
 		}
 
 		static constexpr RecipeKeyOverride kRecommendedBaseOverrides[] = {
+			{ "rw_strength", "two_handed_melee" },
 			{ "rw_insight", "polearm" },
 			{ "rw_infinity", "polearm" },
 			{ "rw_pride", "polearm" },
@@ -73,6 +74,7 @@ namespace CalamityAffixes
 			{ "rw_mist", "bow" },
 			{ "rw_harmony", "bow" },
 			{ "rw_edge", "bow" },
+			{ "rw_zephyr", "bow" },
 			{ "rw_melody", "bow" },
 			{ "rw_wrath", "bow" },
 			{ "rw_brand", "bow" },
@@ -84,8 +86,8 @@ namespace CalamityAffixes
 			{ "rw_mosaic", "claw" },
 			{ "rw_grief", "sword" },
 			{ "rw_lawbringer", "sword" },
-			{ "rw_oath", "sword" },
-			{ "rw_unbending_will", "sword" },
+			{ "rw_oath", "one_handed_melee" },
+			{ "rw_unbending_will", "shield" },
 			{ "rw_kingslayer", "sword" },
 			{ "rw_exile", "shield" },
 			{ "rw_sanctuary", "shield" },
@@ -112,7 +114,7 @@ namespace CalamityAffixes
 			{ "rw_gloom", "armor" },
 			{ "rw_stone", "armor" },
 			{ "rw_bramble", "armor" },
-			{ "rw_myth", "armor" },
+			{ "rw_myth", "heavy_armor" },
 			{ "rw_peace", "armor" },
 			{ "rw_prudence", "armor" },
 			{ "rw_rain", "armor" },

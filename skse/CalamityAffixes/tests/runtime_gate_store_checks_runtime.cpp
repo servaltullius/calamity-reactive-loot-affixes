@@ -144,6 +144,7 @@ namespace RuntimeGateStoreChecks
 
 		if (cmakeText->find("src/Hooks.Dispatch.cpp") == std::string::npos ||
 			hooksText->find("#include \"Hooks.Dispatch.h\"") == std::string::npos ||
+			hooksText->find("!bridge->IsRuntimeEnabled()") == std::string::npos ||
 			hooksText->find("detail::AdjustDamageAndEvaluateSpecials(") == std::string::npos ||
 			hooksText->find("detail::SchedulePostHealthDamageActions(") == std::string::npos ||
 			hooksText->find("detail::ClearDispatchRuntimeState();") == std::string::npos ||
@@ -153,7 +154,11 @@ namespace RuntimeGateStoreChecks
 			hooksDispatchHeaderText->find("void SchedulePostHealthDamageActions(") == std::string::npos ||
 			hooksDispatchText->find("PlayCastOnCritProcFeedbackSfx(") == std::string::npos ||
 			hooksDispatchText->find("ExecutePostHealthDamageActions(") == std::string::npos ||
-			hooksDispatchText->find("thread_local bool g_inProcDispatch = false;") == std::string::npos) {
+			hooksDispatchText->find("thread_local bool g_inProcDispatch = false;") == std::string::npos ||
+			hooksDispatchText->find("MakeProcDispatchSignature(") == std::string::npos ||
+			hooksDispatchText->find("record.signature == dispatchSignature") == std::string::npos ||
+			hooksDispatchText->find("kExactDuplicateCallbackWindow = std::chrono::milliseconds(50)") == std::string::npos ||
+			hooksDispatchText->find("hasRecord && elapsed < kTimeCooldown") != std::string::npos) {
 			std::cerr << "hooks_dispatch_extraction: hook plumbing and dispatch helpers are not cleanly separated\n";
 			return false;
 		}
@@ -232,6 +237,10 @@ namespace RuntimeGateStoreChecks
 		const fs::path repoRoot = testFile.parent_path().parent_path();
 		const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
 		const fs::path sourceFile = repoRoot / "src" / "EventBridge.Triggers.ActiveCounts.cpp";
+		const fs::path mainFile = repoRoot / "src" / "main.cpp";
+		const fs::path handlerFile = repoRoot / "src" / "EventBridge.Triggers.ModCallback.Handlers.cpp";
+		const fs::path lifecycleFile = repoRoot / "src" / "EventBridge.Serialization.Lifecycle.cpp";
+		const fs::path trapsFile = repoRoot / "src" / "EventBridge.Traps.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
@@ -245,12 +254,38 @@ namespace RuntimeGateStoreChecks
 
 		const auto privateApiText = loadText(privateApiFile);
 		const auto sourceText = loadText(sourceFile);
-		if (!privateApiText.has_value() || !sourceText.has_value()) {
+		const auto mainText = loadText(mainFile);
+		const auto handlerText = loadText(handlerFile);
+		const auto lifecycleText = loadText(lifecycleFile);
+		const auto trapsText = loadText(trapsFile);
+		if (!privateApiText.has_value() || !sourceText.has_value() || !mainText.has_value() ||
+			!handlerText.has_value() || !lifecycleText.has_value() || !trapsText.has_value()) {
 			std::cerr << "rebuild_active_counts_extraction: failed to load source files\n";
 			return false;
 		}
 
-		if (privateApiText->find("void ResetActiveCountsStateForRebuild();") == std::string::npos ||
+		const auto slotRollText = loadText(repoRoot / "src" / "EventBridge.Loot.AffixSlotRoll.cpp");
+		if (!slotRollText.has_value() ||
+			privateApiText->find("void CollectBestSuffixFamilyState(") == std::string::npos ||
+			sourceText->find("CollectBestSuffixFamilyState(desiredPassives);") == std::string::npos ||
+			sourceText->find("affix.slot == AffixSlot::kSuffix && !affix.family.empty()") == std::string::npos ||
+			sourceText->find("if (!deferTieredSuffix)") == std::string::npos ||
+			sourceText->find("a_desiredPassives.insert(affix.passiveSpell);") == std::string::npos ||
+			sourceText->find("bestAffixByFamily[affix.family].Consider(affix.id, affixIdx);") == std::string::npos ||
+			sourceText->find("_activeCritDamageBonusPct += affix.critDamageBonusPct;") == std::string::npos ||
+			sourceText->find("affix.slot == AffixSlot::kSuffix &&") == std::string::npos ||
+			sourceText->find("affix.family.empty() &&") == std::string::npos ||
+			sourceText->find("if (!_runtimeSettings.disablePassiveSuffixSpells && affix.passiveSpell)") == std::string::npos ||
+			sourceText->find("_activeCritDamageBonusPct += _affixes[affixIdx].critDamageBonusPct;") != std::string::npos ||
+			slotRollText->find("std::vector<std::string> chosenPrefixFamilies;") == std::string::npos ||
+			slotRollText->find("std::find(chosenPrefixFamilies.begin(), chosenPrefixFamilies.end(), affix.family)") == std::string::npos ||
+			slotRollText->find("chosenPrefixFamilies.push_back(affix.family);") == std::string::npos) {
+			std::cerr << "suffix_family_selection: expected highest-tier passive/crit selection and prefix family exclusion\n";
+			return false;
+		}
+
+		if (privateApiText->find("void DeactivateRuntimeState();") == std::string::npos ||
+			privateApiText->find("void ResetActiveCountsStateForRebuild();") == std::string::npos ||
 			privateApiText->find("void RefreshInventoryInstanceActiveState(") == std::string::npos ||
 			privateApiText->find("void AccumulateEquippedAffixState(") == std::string::npos ||
 			privateApiText->find("void ApplyDesiredPassiveSpells(") == std::string::npos ||
@@ -260,7 +295,25 @@ namespace RuntimeGateStoreChecks
 			sourceText->find("AccumulateEquippedAffixState(key, slots, a_desiredPassives);") == std::string::npos ||
 			sourceText->find("ApplyDesiredPassiveSpells(player, desiredPassives);") == std::string::npos ||
 			sourceText->find("LogActiveAffixListDebug();") == std::string::npos ||
-			sourceText->find("LogRebuildActiveCountsDebugSummary(desiredPassives);") == std::string::npos) {
+			sourceText->find("LogRebuildActiveCountsDebugSummary(desiredPassives);") == std::string::npos ||
+			sourceText->find("void EventBridge::DeactivateRuntimeState()") == std::string::npos ||
+			sourceText->find("for (const auto& affix : _affixes)") == std::string::npos ||
+			sourceText->find("_appliedPassiveSpells.insert(affix.passiveSpell);") == std::string::npos ||
+			sourceText->find("std::unordered_set<RE::SpellItem*> knownPassiveSpells = _appliedPassiveSpells;") == std::string::npos ||
+			sourceText->find("a_player->HasSpell(spell)") == std::string::npos ||
+			sourceText->find("detail::ResolvePassiveSpellReconcileAction(desired, present, passivesDisabled)") == std::string::npos ||
+			sourceText->find("a_player->RemoveSpell(spell);") == std::string::npos ||
+			sourceText->find("ApplyDesiredPassiveSpells(player, {});") == std::string::npos ||
+			sourceText->find("_trapState.Reset();") == std::string::npos ||
+			sourceText->find("_combatState.ResetTransientState();") == std::string::npos ||
+			mainText->find("if (bridge->IsRuntimeEnabled()) {") != std::string::npos ||
+			mainText->find("CalamityAffixes::Hooks::Install();") == std::string::npos ||
+			mainText->find("CalamityAffixes::TrapSystem::Install();") == std::string::npos ||
+			handlerText->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
+			handlerText->find("DeactivateRuntimeState();") == std::string::npos ||
+			lifecycleText->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
+			lifecycleText->find("RebuildActiveCounts();") == std::string::npos ||
+			trapsText->find("if (!_runtimeSettings.enabled) {") == std::string::npos) {
 			std::cerr << "rebuild_active_counts_extraction: expected rebuild flow to stay decomposed into focused helpers\n";
 			return false;
 		}
@@ -296,11 +349,11 @@ namespace RuntimeGateStoreChecks
 
 		if (guards.find("constexpr bool ShouldSuppressDuplicateHealthDamageSignature(") == std::string::npos ||
 			guards.find("constexpr bool ShouldSuppressHealthDamageStaleLeak(") == std::string::npos ||
-			guards.find("constexpr bool ShouldSuppressPerTargetRepeatWindow(") == std::string::npos ||
 			source.find("const auto sig = MakeHealthDamageSignature") == std::string::npos ||
 			source.find("ShouldSuppressDuplicateHealthDamageSignature(") == std::string::npos ||
 			source.find("ShouldSuppressHealthDamageStaleLeak(expectedDealt, absDamage)") == std::string::npos ||
-			source.find("ShouldSuppressPerTargetRepeatWindow(") == std::string::npos) {
+			source.find("kOutgoingPerTargetWindow") != std::string::npos ||
+			source.find("outgoingHitPerTargetLastAt") != std::string::npos) {
 			std::cerr << "health_damage_signature_window: expected routing guards to be extracted and used from the dedicated routing file\n";
 			return false;
 		}
@@ -314,7 +367,6 @@ namespace RuntimeGateStoreChecks
 		{
 			std::uint64_t lastSignature{ 0u };
 			std::uint64_t lastSignatureAtMs{ 0u };
-			std::uint64_t lastTargetHitAtMs{ 0u };
 		};
 
 		struct FakeHealthDamageEvent
@@ -323,7 +375,6 @@ namespace RuntimeGateStoreChecks
 			std::uint64_t nowMs{ 0u };
 			float expectedDealt{ 0.0f };
 			float absDamage{ 0.0f };
-			std::uint64_t repeatWindowMs{ 0u };
 		};
 
 		auto shouldRoute = [](FakeHealthDamageState& a_state, const FakeHealthDamageEvent& a_event) {
@@ -338,16 +389,8 @@ namespace RuntimeGateStoreChecks
 			if (CalamityAffixes::ShouldSuppressHealthDamageStaleLeak(a_event.expectedDealt, a_event.absDamage)) {
 				return false;
 			}
-			if (a_state.lastTargetHitAtMs != 0u && a_event.nowMs >= a_state.lastTargetHitAtMs &&
-				CalamityAffixes::ShouldSuppressPerTargetRepeatWindow(
-					a_event.nowMs - a_state.lastTargetHitAtMs,
-					a_event.repeatWindowMs)) {
-				return false;
-			}
-
 			a_state.lastSignature = a_event.signature;
 			a_state.lastSignatureAtMs = a_event.nowMs;
-			a_state.lastTargetHitAtMs = a_event.nowMs;
 			return true;
 		};
 
@@ -373,7 +416,7 @@ namespace RuntimeGateStoreChecks
 				std::cerr << "health_damage_guard_flow: expected stale-leak fake event to be suppressed\n";
 				return false;
 			}
-			if (state.lastSignature != 0u || state.lastTargetHitAtMs != 0u) {
+			if (state.lastSignature != 0u) {
 				std::cerr << "health_damage_guard_flow: expected suppressed stale-leak event to leave fake state untouched\n";
 				return false;
 			}
@@ -381,16 +424,12 @@ namespace RuntimeGateStoreChecks
 
 		{
 			FakeHealthDamageState state{};
-			if (!shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xC1u, .nowMs = 1000u, .expectedDealt = 14.0f, .absDamage = 14.0f, .repeatWindowMs = 400u })) {
-				std::cerr << "health_damage_guard_flow: expected initial same-target fake event to pass\n";
+			if (!shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xC1u, .nowMs = 1000u, .expectedDealt = 14.0f, .absDamage = 14.0f })) {
+				std::cerr << "health_damage_guard_flow: expected initial fake event to pass\n";
 				return false;
 			}
-			if (shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xC2u, .nowMs = 1200u, .expectedDealt = 14.0f, .absDamage = 14.0f, .repeatWindowMs = 400u })) {
-				std::cerr << "health_damage_guard_flow: expected repeat-window fake event to be suppressed\n";
-				return false;
-			}
-			if (!shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xC3u, .nowMs = 1400u, .expectedDealt = 14.0f, .absDamage = 14.0f, .repeatWindowMs = 400u })) {
-				std::cerr << "health_damage_guard_flow: expected repeat-window boundary fake event to pass\n";
+			if (!shouldRoute(state, FakeHealthDamageEvent{ .signature = 0xC2u, .nowMs = 1001u, .expectedDealt = 14.0f, .absDamage = 14.0f })) {
+				std::cerr << "health_damage_guard_flow: expected distinct rapid-hit signature to pass\n";
 				return false;
 			}
 		}
@@ -433,6 +472,7 @@ namespace RuntimeGateStoreChecks
 		const fs::path testFile{ __FILE__ };
 		const fs::path repoRoot = testFile.parent_path().parent_path();
 		const fs::path feedbackHeaderFile = repoRoot / "include" / "CalamityAffixes" / "ProcFeedback.h";
+		const fs::path eventBridgeTypesFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Types.inl";
 		const fs::path trapActionFile = repoRoot / "src" / "EventBridge.Actions.Trap.cpp";
 		const fs::path trapsFile = repoRoot / "src" / "EventBridge.Traps.cpp";
 
@@ -447,9 +487,11 @@ namespace RuntimeGateStoreChecks
 		};
 
 		const auto feedbackHeaderText = loadText(feedbackHeaderFile);
+		const auto eventBridgeTypesText = loadText(eventBridgeTypesFile);
 		const auto trapActionText = loadText(trapActionFile);
 		const auto trapsText = loadText(trapsFile);
-		if (!feedbackHeaderText.has_value() || !trapActionText.has_value() || !trapsText.has_value()) {
+		if (!feedbackHeaderText.has_value() || !eventBridgeTypesText.has_value() ||
+			!trapActionText.has_value() || !trapsText.has_value()) {
 			std::cerr << "bloom_trap_proc_feedback: failed to load source files\n";
 			return false;
 		}
@@ -457,6 +499,8 @@ namespace RuntimeGateStoreChecks
 		if (feedbackHeaderText->find("kBloomSpellEditorIdPrefix = \"CAFF_SPEL_DOT_BLOOM_\"") == std::string::npos ||
 			feedbackHeaderText->find("inline void PlayBloomProcFeedback(") == std::string::npos ||
 			feedbackHeaderText->find("inline std::string_view ResolveBloomProcDebugLabel(") == std::string::npos ||
+			eventBridgeTypesText->find("std::chrono::steady_clock::time_point playerOwnedCombatCleanupExpiresAt{};") == std::string::npos ||
+			eventBridgeTypesText->find("playerOwnedCombatCleanupExpiresAt = {};") == std::string::npos ||
 			trapActionText->find("#include \"CalamityAffixes/ProcFeedback.h\"") == std::string::npos ||
 			trapActionText->find("std::clamp(armDelaySeconds, 0.18f, 0.75f)") == std::string::npos ||
 			trapActionText->find("_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(a_action.spell)") == std::string::npos ||
@@ -468,7 +512,10 @@ namespace RuntimeGateStoreChecks
 			trapsText->find("ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);") == std::string::npos ||
 			trapsText->find("_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(trapSnapshot.spell)") == std::string::npos ||
 			trapsText->find("EmitDebugHudNotification(note.c_str());") == std::string::npos ||
-			trapsText->find("Calamity: {} burst") == std::string::npos) {
+			trapsText->find("Calamity: {} burst") == std::string::npos ||
+			trapsText->find("playerOwnedCombatCleanupExpiresAt") == std::string::npos ||
+			trapsText->find("if (cleanupLeaseExpiresAt.time_since_epoch().count() == 0 || now > cleanupLeaseExpiresAt)") == std::string::npos ||
+			trapsText->find("if (IsPlayerOwned(owner))") == std::string::npos) {
 			std::cerr << "bloom_trap_proc_feedback: expected bloom trap proc feedback helper to stay wired at spawn and trigger time\n";
 			return false;
 		}
@@ -673,6 +720,9 @@ namespace RuntimeGateStoreChecks
 			}
 
 			const std::string triggersText = *triggersDispatchText + *triggersRuntimeText;
+			const auto trapEligibilityPos = triggersDispatchText->find("if (affix.action.type == ActionType::kSpawnTrap)");
+			const auto chanceRollPos = triggersDispatchText->find("RollTriggerProcChance(chance)");
+			const auto runtimeCommitPos = triggersDispatchText->find("CommitTriggerProcRuntime(affix, perTargetKey, usesPerTargetIcd, chance, a_now);");
 
 			if (cmakeText->find("src/EventBridge.Triggers.Policy.cpp") == std::string::npos ||
 				cmakeText->find("src/EventBridge.Triggers.Runtime.cpp") == std::string::npos ||
@@ -683,6 +733,11 @@ namespace RuntimeGateStoreChecks
 				triggersText.find("PassesTriggerProcPreconditions(") == std::string::npos ||
 				triggersText.find("ResolveTriggerProcChancePct(affix, a_affixIndex)") == std::string::npos ||
 				triggersText.find("RollTriggerProcChance(chance)") == std::string::npos ||
+				trapEligibilityPos == std::string::npos ||
+				chanceRollPos == std::string::npos ||
+				runtimeCommitPos == std::string::npos ||
+				trapEligibilityPos > chanceRollPos ||
+				trapEligibilityPos > runtimeCommitPos ||
 				triggersText.find("CommitTriggerProcRuntime(affix, perTargetKey, usesPerTargetIcd, chance, a_now);") == std::string::npos ||
 				triggersText.find("affix.procChancePct * _runtimeSettings.procChanceMult") != std::string::npos ||
 				triggersText.find("ResolveTriggerProcCooldownMs(") != std::string::npos ||

@@ -1,10 +1,23 @@
 using System.Text.Json;
 using CalamityAffixes.Generator.Spec;
+using CalamityAffixes.Generator.Writers;
 
 namespace CalamityAffixes.Generator.Tests;
 
 public sealed class RepoSpecRegressionTests
 {
+    [Fact]
+    public void RepoSpec_GeneratorBuildsWithoutForwardMagicEffectReferences()
+    {
+        var repoRoot = FindRepoRoot();
+        var specPath = Path.Combine(repoRoot, "affixes", "affixes.json");
+        var spec = AffixSpecLoader.Load(specPath);
+
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        Assert.NotNull(mod);
+    }
+
     [Fact]
     public void RepoSpec_IncludesCorpseExplosionKillAffix()
     {
@@ -355,6 +368,539 @@ public sealed class RepoSpecRegressionTests
         Assert.True(
             hasCombinedAffix,
             "Expected at least one affix with both runtime.action.evolution and runtime.action.modeCycle.manualOnly == true in affixes/affixes.json");
+    }
+
+    [Fact]
+    public void RepoSpec_RunewordIdentityWave_MatchesSemanticContract()
+    {
+        var repoRoot = FindRepoRoot();
+        var modulePath = Path.Combine(repoRoot, "affixes", "modules", "keywords.affixes.runewords.json");
+        Assert.True(File.Exists(modulePath), $"Expected runeword module at: {modulePath}");
+
+        using var document = JsonDocument.Parse(File.ReadAllText(modulePath));
+        Assert.True(document.RootElement.ValueKind == JsonValueKind.Array, "Expected the runeword module to contain a top-level array.");
+
+        var runewords = document.RootElement
+            .EnumerateArray()
+            .ToDictionary(
+                element => element.GetProperty("id").GetString()!,
+                element => element.Clone(),
+                StringComparer.Ordinal);
+
+        JsonElement Affix(string id)
+        {
+            Assert.True(runewords.TryGetValue(id, out var affix), $"Expected runeword '{id}' in the source module.");
+            return affix;
+        }
+
+        JsonElement Object(JsonElement parent, string property, string context)
+        {
+            Assert.True(
+                parent.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.Object,
+                $"{context}: expected '{property}' to be an object.");
+            return value;
+        }
+
+        void StringValue(JsonElement parent, string property, string expected, string context)
+        {
+            Assert.True(
+                parent.TryGetProperty(property, out var value) &&
+                value.ValueKind == JsonValueKind.String &&
+                value.GetString() == expected,
+                $"{context}: expected '{property}' == '{expected}'.");
+        }
+
+        void NumberValue(JsonElement parent, string property, double expected, string context)
+        {
+            Assert.True(
+                parent.TryGetProperty(property, out var value) &&
+                value.ValueKind == JsonValueKind.Number &&
+                value.TryGetDouble(out var actual) &&
+                Math.Abs(actual - expected) < 0.000001,
+                $"{context}: expected '{property}' == {expected}.");
+        }
+
+        JsonElement Action(JsonElement affix, string context) =>
+            Object(Object(affix, "runtime", context), "action", $"{context} runtime");
+
+        JsonElement Record(JsonElement affix, string singular, string plural, string editorId, string context)
+        {
+            var records = Object(affix, "records", context);
+            var matches = new List<JsonElement>();
+
+            if (records.TryGetProperty(singular, out var one) &&
+                one.ValueKind == JsonValueKind.Object &&
+                one.TryGetProperty("editorId", out var oneId) &&
+                oneId.GetString() == editorId)
+            {
+                matches.Add(one.Clone());
+            }
+
+            if (records.TryGetProperty(plural, out var many) && many.ValueKind == JsonValueKind.Array)
+            {
+                matches.AddRange(
+                    many.EnumerateArray()
+                        .Where(record =>
+                            record.TryGetProperty("editorId", out var recordId) &&
+                            recordId.GetString() == editorId)
+                        .Select(record => record.Clone()));
+            }
+
+            Assert.True(matches.Count == 1, $"{context}: expected exactly one record '{editorId}'; got {matches.Count}.");
+            return matches[0];
+        }
+
+        List<JsonElement> Effects(JsonElement spell, string context)
+        {
+            if (spell.TryGetProperty("effects", out var many) && many.ValueKind == JsonValueKind.Array)
+            {
+                return many.EnumerateArray().Select(effect => effect.Clone()).ToList();
+            }
+
+            Assert.True(
+                spell.TryGetProperty("effect", out var one) && one.ValueKind == JsonValueKind.Object,
+                $"{context}: expected an effect object or effects array.");
+            return new List<JsonElement> { one.Clone() };
+        }
+
+        void SpellMagnitude(IReadOnlyCollection<JsonElement> effects, string magicEffectEditorId, double magnitude, string context)
+        {
+            var matches = effects
+                .Where(effect =>
+                    effect.TryGetProperty("magicEffectEditorId", out var effectId) &&
+                    effectId.GetString() == magicEffectEditorId)
+                .ToList();
+            Assert.True(matches.Count == 1, $"{context}: expected exactly one effect '{magicEffectEditorId}'; got {matches.Count}.");
+            NumberValue(matches[0], "magnitude", magnitude, context);
+        }
+
+        void ActorValueEffect(
+            string affixId,
+            string spellEditorId,
+            string magicEffectEditorId,
+            string actorValue,
+            double magnitude,
+            string context)
+        {
+            var affix = Affix(affixId);
+            var spell = Record(affix, "spell", "spells", spellEditorId, $"{context} spell");
+            SpellMagnitude(Effects(spell, $"{context} spell"), magicEffectEditorId, magnitude, context);
+            var magicEffect = Record(affix, "magicEffect", "magicEffects", magicEffectEditorId, $"{context} magic effect");
+            StringValue(magicEffect, "actorValue", actorValue, $"{context} magic effect");
+        }
+
+        var chaosAction = Action(Affix("runeword_chaos_final"), "Chaos");
+        StringValue(chaosAction, "type", "CastSpellAdaptiveElement", "Chaos action");
+        StringValue(chaosAction, "mode", "WeakestResist", "Chaos action");
+        NumberValue(chaosAction, "magnitudeOverride", 45.0, "Chaos action");
+        var chaosSpells = Object(chaosAction, "spells", "Chaos action");
+        Assert.True(chaosSpells.EnumerateObject().Count() == 3, $"Chaos action: expected exactly 3 shared elemental spells; got {chaosSpells.EnumerateObject().Count()}.");
+        StringValue(chaosSpells, "Fire", "CAFF_SPEL_DMG_FIRE_DYNAMIC", "Chaos spells");
+        StringValue(chaosSpells, "Frost", "CAFF_SPEL_DMG_FROST_DYNAMIC", "Chaos spells");
+        StringValue(chaosSpells, "Shock", "CAFF_SPEL_DMG_SHOCK_DYNAMIC", "Chaos spells");
+
+        var mosaic = Affix("runeword_mosaic_final");
+        var mosaicSpell = Record(mosaic, "spell", "spells", "CAFF_SPEL_RW_MOSAIC_PRISM", "Mosaic");
+        var mosaicEffects = Effects(mosaicSpell, "Mosaic spell");
+        Assert.True(mosaicEffects.Count == 3, $"Mosaic spell: expected exactly 3 elemental effects; got {mosaicEffects.Count}.");
+        SpellMagnitude(mosaicEffects, "CAFF_MGEF_DMG_FIRE_DYNAMIC", 8.0, "Mosaic fire");
+        SpellMagnitude(mosaicEffects, "CAFF_MGEF_DMG_FROST_DYNAMIC", 8.0, "Mosaic frost");
+        SpellMagnitude(mosaicEffects, "CAFF_MGEF_DMG_SHOCK_DYNAMIC", 8.0, "Mosaic shock");
+
+        var obsessionAction = Action(Affix("runeword_obsession_final"), "Obsession");
+        StringValue(obsessionAction, "type", "CastSpell", "Obsession action");
+        StringValue(obsessionAction, "spellEditorId", "CAFF_SPEL_RW_CHAOS_BLEED", "Obsession action");
+        StringValue(obsessionAction, "applyTo", "Target", "Obsession action");
+        NumberValue(obsessionAction, "magnitudeOverride", 75.0, "Obsession action");
+        StringValue(obsessionAction, "passiveSpellEditorId", "CAFF_SPEL_RW_OBSESSION_PASSIVE", "Obsession action");
+
+        var botd = Affix("runeword_breath_of_the_dying_final");
+        var botdAction = Action(botd, "Breath of the Dying");
+        StringValue(botdAction, "type", "CorpseExplosion", "Breath of the Dying action");
+        NumberValue(botdAction, "flatDamage", 24.0, "Breath of the Dying action");
+        NumberValue(botdAction, "pctOfCorpseMaxHealth", 6.0, "Breath of the Dying action");
+        NumberValue(botdAction, "radius", 600.0, "Breath of the Dying action");
+        NumberValue(botdAction, "maxTargets", 8.0, "Breath of the Dying action");
+        NumberValue(botdAction, "selectionPriority", 10.0, "Breath of the Dying action");
+        var botdEffect = Record(botd, "magicEffect", "magicEffects", "CAFF_MGEF_RW_BOTD_POISON_BURST", "Breath of the Dying");
+        StringValue(botdEffect, "resistValue", "PoisonResist", "Breath of the Dying magic effect");
+        var botdSpell = Record(botd, "spell", "spells", "CAFF_SPEL_RW_BOTD_POISON_BURST", "Breath of the Dying");
+        var botdSpellEffects = Effects(botdSpell, "Breath of the Dying spell");
+        Assert.True(botdSpellEffects.Count == 1, $"Breath of the Dying spell: expected exactly one effect; got {botdSpellEffects.Count}.");
+        StringValue(
+            botdSpellEffects[0],
+            "magicEffectEditorId",
+            "CAFF_MGEF_RW_BOTD_POISON_BURST",
+            "Breath of the Dying spell effect");
+        NumberValue(botdSpellEffects[0], "area", 0.0, "Breath of the Dying spell effect");
+
+        var obedienceAction = Action(Affix("runeword_obedience_final"), "Obedience");
+        Assert.False(
+            obedienceAction.TryGetProperty("magnitudeScaling", out _),
+            "Obedience action: fixed SpeedMult -50% must not scale with hit damage.");
+
+        var brambleAction = Action(Affix("runeword_bramble_final"), "Bramble");
+        Assert.False(
+            brambleAction.TryGetProperty("magnitudeScaling", out _),
+            "Bramble action: fixed ReflectDamage +25% must not reinterpret incoming damage as a percent magnitude.");
+
+        var effectContracts = new[]
+        {
+            ("runeword_obedience_final", "CAFF_SPEL_RW_OBEDIENCE_CRUSH", "CAFF_MGEF_RW_OBEDIENCE_CRUSH", "SpeedMult", 50.0, "Obedience fixed slow"),
+            ("runeword_bramble_final", "CAFF_SPEL_RW_BRAMBLE_REFLECT", "CAFF_MGEF_RW_BRAMBLE_REFLECT", "ReflectDamage", 25.0, "Bramble fixed reflect"),
+            ("runeword_obsession_final", "CAFF_SPEL_RW_OBSESSION_PASSIVE", "CAFF_MGEF_RW_OBSESSION_PASSIVE_MPREGEN", "MagickaRateMult", 25.0, "Obsession passive"),
+            ("runeword_rhyme_final", "CAFF_SPEL_RW_RHYME_SHIELD", "CAFF_MGEF_RW_RHYME_SHIELD", "DamageResist", 60.0, "Rhyme active"),
+            ("runeword_rhyme_final", "CAFF_SPEL_RW_RHYME_PASSIVE", "CAFF_MGEF_RW_RHYME_PASSIVE_FROST", "ResistFrost", 40.0, "Rhyme passive"),
+            ("runeword_faith_final", "CAFF_SPEL_RW_FAITH_FANATIC", "CAFF_MGEF_RW_FAITH_FANATIC_SPEED", "WeaponSpeedMult", 0.15, "Faith active attack speed"),
+            ("runeword_faith_final", "CAFF_SPEL_RW_FAITH_FANATIC", "CAFF_MGEF_RW_FAITH_FANATIC_WARD", "AttackDamageMult", 0.20, "Faith active attack damage"),
+            ("runeword_faith_final", "CAFF_SPEL_RW_FAITH_PASSIVE", "CAFF_MGEF_RW_FAITH_PASSIVE_IAS", "WeaponSpeedMult", 0.15, "Faith passive"),
+            ("runeword_call_to_arms_final", "CAFF_SPEL_RW_CTA_WARCRY", "CAFF_MGEF_RW_CTA_WARCRY", "AttackDamageMult", 0.20, "Call to Arms active"),
+            ("runeword_honor_final", "CAFF_SPEL_RW_HONOR_VIGOR", "CAFF_MGEF_RW_HONOR_VIGOR", "HealRateMult", 80.0, "Honor active"),
+            ("runeword_honor_final", "CAFF_SPEL_RW_HONOR_PASSIVE", "CAFF_MGEF_RW_HONOR_PASSIVE_HPREGEN", "HealRateMult", 20.0, "Honor passive"),
+            ("runeword_hustle_a_final", "CAFF_SPEL_RW_HUSTLE_A_RUSH", "CAFF_MGEF_RW_HUSTLE_A_RUSH", "DamageResist", 60.0, "Hustle-A active"),
+            ("runeword_hustle_a_final", "CAFF_SPEL_RW_HUSTLEA_PASSIVE", "CAFF_MGEF_RW_HUSTLEA_PASSIVE_SPEED", "SpeedMult", 8.0, "Hustle-A passive")
+        };
+
+        foreach (var contract in effectContracts)
+        {
+            ActorValueEffect(
+                contract.Item1,
+                contract.Item2,
+                contract.Item3,
+                contract.Item4,
+                contract.Item5,
+                contract.Item6);
+        }
+    }
+
+    [Fact]
+    public void RepoSpec_RunewordIdentityWave2_MatchesSemanticContract()
+    {
+        var repoRoot = FindRepoRoot();
+        var modulePath = Path.Combine(repoRoot, "affixes", "modules", "keywords.affixes.runewords.json");
+        using var moduleDocument = JsonDocument.Parse(File.ReadAllText(modulePath));
+        var runewords = moduleDocument.RootElement.EnumerateArray()
+            .ToDictionary(x => x.GetProperty("id").GetString()!, x => x.Clone(), StringComparer.Ordinal);
+
+        JsonElement Affix(string id)
+        {
+            Assert.True(runewords.TryGetValue(id, out var value), $"Expected runeword '{id}'.");
+            return value;
+        }
+
+        JsonElement Action(string id) => Affix(id).GetProperty("runtime").GetProperty("action");
+
+        void StringValue(JsonElement parent, string property, string expected, string context)
+        {
+            Assert.True(
+                parent.TryGetProperty(property, out var value) &&
+                value.ValueKind == JsonValueKind.String &&
+                value.GetString() == expected,
+                $"{context}: expected {property} == '{expected}'.");
+        }
+
+        void NumberValue(JsonElement parent, string property, double expected, string context)
+        {
+            Assert.True(
+                parent.TryGetProperty(property, out var value) &&
+                value.ValueKind == JsonValueKind.Number &&
+                value.TryGetDouble(out var actual) &&
+                Math.Abs(actual - expected) < 0.000001,
+                $"{context}: expected {property} == {expected}.");
+        }
+
+        void BoolValue(JsonElement parent, string property, bool expected, string context)
+        {
+            Assert.True(
+                parent.TryGetProperty(property, out var value) &&
+                (value.ValueKind is JsonValueKind.True or JsonValueKind.False) &&
+                value.GetBoolean() == expected,
+                $"{context}: expected {property} == {expected}.");
+        }
+
+        var spells = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+        foreach (var affix in runewords.Values)
+        {
+            var records = affix.GetProperty("records");
+            if (records.TryGetProperty("spell", out var one) && one.ValueKind == JsonValueKind.Object)
+            {
+                spells.Add(one.GetProperty("editorId").GetString()!, one.Clone());
+            }
+            if (records.TryGetProperty("spells", out var many) && many.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var spell in many.EnumerateArray())
+                {
+                    spells.Add(spell.GetProperty("editorId").GetString()!, spell.Clone());
+                }
+            }
+        }
+
+        var magicEffects = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+        void CollectMagicEffects(JsonElement node)
+        {
+            if (node.ValueKind == JsonValueKind.Object)
+            {
+                if (node.TryGetProperty("magicEffect", out var one) &&
+                    one.ValueKind == JsonValueKind.Object &&
+                    one.TryGetProperty("editorId", out var oneId))
+                {
+                    magicEffects.TryAdd(oneId.GetString()!, one.Clone());
+                }
+                if (node.TryGetProperty("magicEffects", out var many) && many.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var effect in many.EnumerateArray())
+                    {
+                        magicEffects.TryAdd(effect.GetProperty("editorId").GetString()!, effect.Clone());
+                    }
+                }
+                foreach (var property in node.EnumerateObject())
+                {
+                    CollectMagicEffects(property.Value);
+                }
+            }
+            else if (node.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in node.EnumerateArray())
+                {
+                    CollectMagicEffects(item);
+                }
+            }
+        }
+
+        foreach (var sourcePath in Directory.EnumerateFiles(
+                     Path.Combine(repoRoot, "affixes", "modules"),
+                     "*.json",
+                     SearchOption.AllDirectories))
+        {
+            using var sourceDocument = JsonDocument.Parse(File.ReadAllText(sourcePath));
+            CollectMagicEffects(sourceDocument.RootElement);
+        }
+
+        void AssertRuntime(
+            string id, string trigger, double chance, double icd,
+            string actionType, string spellEditorId, string? applyTo, bool noHitEffectArt)
+        {
+            var affix = Affix(id);
+            var runtime = affix.GetProperty("runtime");
+            StringValue(runtime, "trigger", trigger, id);
+            NumberValue(runtime, "procChancePercent", chance, id);
+            NumberValue(runtime, "icdSeconds", icd, id);
+            var action = runtime.GetProperty("action");
+            StringValue(action, "type", actionType, id);
+            StringValue(action, "spellEditorId", spellEditorId, id);
+            if (applyTo is null)
+            {
+                Assert.False(action.TryGetProperty("applyTo", out _), $"{id}: specialized action must not retain applyTo.");
+            }
+            else
+            {
+                StringValue(action, "applyTo", applyTo, id);
+            }
+            BoolValue(action, "noHitEffectArt", noHitEffectArt, id);
+        }
+
+        void AssertSpell(
+            string context,
+            string spellEditorId,
+            params (string EffectId, double Magnitude, double Duration, double Area)[] expected)
+        {
+            Assert.True(spells.TryGetValue(spellEditorId, out var spell), $"{context}: missing spell {spellEditorId}.");
+            var effects = spell.TryGetProperty("effects", out var many)
+                ? many.EnumerateArray().Select(x => x.Clone()).ToList()
+                : new List<JsonElement> { spell.GetProperty("effect").Clone() };
+            Assert.Equal(expected.Length, effects.Count);
+            for (var i = 0; i < expected.Length; i++)
+            {
+                StringValue(effects[i], "magicEffectEditorId", expected[i].EffectId, context);
+                NumberValue(effects[i], "magnitude", expected[i].Magnitude, context);
+                NumberValue(effects[i], "duration", expected[i].Duration, context);
+                NumberValue(effects[i], "area", expected[i].Area, context);
+                Assert.True(magicEffects.ContainsKey(expected[i].EffectId), $"{context}: unresolved MGEF {expected[i].EffectId}.");
+            }
+        }
+
+        void AssertScaling(
+            string id, string source, double mult, double min, double max, bool spellBaseAsMin)
+        {
+            var scaling = Action(id).GetProperty("magnitudeScaling");
+            StringValue(scaling, "source", source, id);
+            NumberValue(scaling, "mult", mult, id);
+            NumberValue(scaling, "add", 0.0, id);
+            NumberValue(scaling, "min", min, id);
+            NumberValue(scaling, "max", max, id);
+            BoolValue(scaling, "spellBaseAsMin", spellBaseAsMin, id);
+        }
+
+        void AssertNoScaling(string id) =>
+            Assert.False(Action(id).TryGetProperty("magnitudeScaling", out _), $"{id}: unexpected magnitudeScaling.");
+
+        void AssertUiText(string id, string expectedKo, string expectedEn)
+        {
+            var affix = Affix(id);
+            StringValue(affix, "name", expectedKo, id);
+            StringValue(affix, "nameKo", expectedKo, id);
+            StringValue(affix, "nameEn", expectedEn, id);
+        }
+
+        void AssertMagicEffect(
+            string id, string actorValue, bool hostile, bool? recover,
+            string? resistValue = null, string? archetype = null)
+        {
+            Assert.True(magicEffects.TryGetValue(id, out var effect), $"Missing MGEF {id}.");
+            StringValue(effect, "actorValue", actorValue, id);
+            BoolValue(effect, "hostile", hostile, id);
+            if (recover.HasValue)
+            {
+                BoolValue(effect, "recover", recover.Value, id);
+            }
+            else
+            {
+                Assert.False(effect.TryGetProperty("recover", out _), $"{id}: recover must be absent.");
+            }
+            if (resistValue is not null) StringValue(effect, "resistValue", resistValue, id);
+            if (archetype is not null) StringValue(effect, "archetype", archetype, id);
+        }
+
+        AssertRuntime("runeword_destruction_final", "Hit", 30, 5, "CastSpell", "CAFF_SPEL_RW_DESTRUCTION_BLEED", "Target", false);
+        AssertRuntime("runeword_hand_of_justice_final", "Hit", 28, 4, "CastSpell", "CAFF_SPEL_RW_HOJ_LIFESTEAL", "Target", false);
+        AssertRuntime("runeword_dragon_final", "IncomingHit", 30, 10, "CastSpell", "CAFF_SPEL_RW_DRAGON_SCALE", "Self", true);
+        AssertRuntime("runeword_mist_final", "Hit", 30, 6, "CastSpell", "CAFF_SPEL_RW_MIST_FOG", "Target", false);
+        AssertRuntime("runeword_famine_final", "Hit", 30, 7, "CastSpell", "CAFF_SPEL_RW_FAMINE_DRAIN", "Target", false);
+        AssertRuntime("runeword_beast_final", "Hit", 30, 18, "CastSpell", "CAFF_SPEL_RW_BEAST_RAGE", "Self", true);
+        AssertRuntime("runeword_eternity_final", "IncomingHit", 25, 15, "CastSpell", "CAFF_SPEL_RW_ETERNITY_BULWARK", "Self", true);
+        AssertRuntime("runeword_enigma_final", "IncomingHit", 100, 30, "CastSpell", "CAFF_SPEL_RW_ENIGMA_PHASE", "Self", true);
+        AssertRuntime("runeword_last_wish_final", "LowHealth", 100, 45, "CastSpell", "CAFF_SPEL_RW_LASTWISH_FADE", "Self", true);
+        AssertRuntime("runeword_plague_final", "Kill", 40, 4, "CorpseExplosion", "CAFF_SPEL_RW_PLAGUE_CLOUD", null, false);
+        NumberValue(Action("runeword_plague_final"), "selectionPriority", 20.0, "Plague action");
+        AssertRuntime("runeword_pride_final", "Hit", 30, 4, "CastSpell", "CAFF_SPEL_RW_PRIDE_CHILL", "Target", false);
+        AssertRuntime("runeword_mosaic_final", "Hit", 26, 5, "CastSpell", "CAFF_SPEL_RW_MOSAIC_PRISM", "Target", false);
+        AssertRuntime("runeword_obsession_final", "Hit", 34, 5, "CastSpell", "CAFF_SPEL_RW_CHAOS_BLEED", "Target", false);
+
+        AssertSpell("Destruction", "CAFF_SPEL_RW_DESTRUCTION_BLEED",
+            ("CAFF_MGEF_RW_DESTRUCTION_BLEED", 10, 5, 350));
+        AssertSpell("Hand of Justice", "CAFF_SPEL_RW_HOJ_LIFESTEAL",
+            ("CAFF_MGEF_RW_HOJ_LIFESTEAL", 40, 0, 0));
+        AssertSpell("Dragon", "CAFF_SPEL_RW_DRAGON_SCALE",
+            ("CAFF_MGEF_RW_DRAGON_SCALE", 120, 8, 0),
+            ("CAFF_MGEF_RW_COH_PASSIVE_FIRE", 25, 8, 0),
+            ("CAFF_MGEF_RW_COH_PASSIVE_FROST", 25, 8, 0),
+            ("CAFF_MGEF_RW_COH_PASSIVE_SHOCK", 25, 8, 0));
+        AssertSpell("Mist", "CAFF_SPEL_RW_MIST_FOG",
+            ("CAFF_MGEF_RW_MIST_FOG", 100, 6, 0),
+            ("CAFF_MGEF_HIT_SHOCK_OVERLOAD", 75, 0, 0),
+            ("CAFF_MGEF_RW_RIFT_SPARK", 30, 6, 0));
+        AssertSpell("Famine", "CAFF_SPEL_RW_FAMINE_DRAIN",
+            ("CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA", 30, 5, 0),
+            ("CAFF_MGEF_RW_FAMINE_DRAIN", 0.20, 6, 0),
+            ("CAFF_MGEF_RW_WIND_PUSH", 0.15, 6, 0));
+        AssertSpell("Beast", "CAFF_SPEL_RW_BEAST_RAGE",
+            ("CAFF_MGEF_RW_BEAST_RAGE_POWER", 0.30, 10, 0),
+            ("CAFF_MGEF_RW_BEAST_RAGE_ARMOR", 150, 10, 0),
+            ("CAFF_MGEF_RW_FAITH_FANATIC_SPEED", 0.15, 10, 0));
+        AssertSpell("Eternity", "CAFF_SPEL_RW_ETERNITY_BULWARK",
+            ("CAFF_MGEF_INCOMING_WARDEN_SHELL", 300, 6, 0),
+            ("CAFF_MGEF_RW_ETERNITY_BULWARK", 25, 6, 0));
+        AssertSpell("Enigma", "CAFF_SPEL_RW_ENIGMA_PHASE",
+            ("CAFF_MGEF_RW_ENIGMA_PHASE", 1, 4, 0),
+            ("CAFF_MGEF_HIT_SHADOWSTEP_BURST", 45, 4, 0));
+        AssertSpell("Last Wish", "CAFF_SPEL_RW_LASTWISH_FADE",
+            ("CAFF_MGEF_RW_LASTWISH_FADE_ARMOR", 250, 12, 0),
+            ("CAFF_MGEF_RW_LASTWISH_FADE_RESIST", 50, 12, 0),
+            ("CAFF_MGEF_HIT_BLOOD_SIPHON", 250, 0, 0));
+        AssertSpell("Plague", "CAFF_SPEL_RW_PLAGUE_CLOUD",
+            ("CAFF_MGEF_RW_PLAGUE_CLOUD", 1, 1, 0));
+        AssertSpell("Pride", "CAFF_SPEL_RW_PRIDE_CHILL",
+            ("CAFF_MGEF_RW_PRIDE_CHILL", 30, 0, 250));
+        AssertSpell("Mosaic", "CAFF_SPEL_RW_MOSAIC_PRISM",
+            ("CAFF_MGEF_DMG_FIRE_DYNAMIC", 8, 0, 0),
+            ("CAFF_MGEF_DMG_FROST_DYNAMIC", 8, 0, 0),
+            ("CAFF_MGEF_DMG_SHOCK_DYNAMIC", 8, 0, 0));
+        AssertSpell("Obsession", "CAFF_SPEL_RW_CHAOS_BLEED",
+            ("CAFF_MGEF_RW_CHAOS_BLEED", 1, 0, 0));
+
+        AssertScaling("runeword_destruction_final", "HitPhysicalDealt", 0.04, 0, 40, true);
+        AssertScaling("runeword_hand_of_justice_final", "HitTotalDealt", 0.18, 40, 250, true);
+        AssertScaling("runeword_pride_final", "HitPhysicalDealt", 0.16, 0, 200, true);
+        AssertScaling("runeword_mosaic_final", "HitTotalDealt", 0.05, 0, 80, true);
+        AssertScaling("runeword_obsession_final", "HitTotalDealt", 0.18, 75, 300, false);
+        AssertUiText(
+            "runeword_destruction_final",
+            "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동.",
+            "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350)");
+        AssertUiText(
+            "runeword_last_wish_final",
+            "룬워드 최후의 소원 [Jah-Mal-Jah-Sur-Jah-Ber]: 체력 35% 이하일 때 체력 250 즉시 회복, 방어도 +250·마법저항 +50(12초). 45초마다 발동.",
+            "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): HP<35% / ICD 45s - Restore 250 Health + Armor 250 and Magic Resist 50 (12s)");
+        AssertUiText(
+            "runeword_plague_final",
+            "룬워드 역병 [Cham-Shael-Um]: 처치 시 40% 확률로 역병 시체 연쇄 폭발(독 피해 12 + 시체 최대 체력 3%, 반경 450, 최대 12명, 최대 연쇄 깊이 2). 4초마다 발동.",
+            "Runeword Plague (Cham-Shael-Um): 40% on Kill / ICD 4s - Plague Corpse Chain Explosion (12 + 3% Corpse Max Health, Radius 450, up to 12 targets, max chain depth 2)");
+        AssertUiText(
+            "runeword_pride_final",
+            "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동.",
+            "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250)");
+        foreach (var id in new[]
+                 {
+                     "runeword_dragon_final", "runeword_mist_final", "runeword_famine_final",
+                     "runeword_beast_final", "runeword_eternity_final", "runeword_enigma_final",
+                     "runeword_last_wish_final", "runeword_plague_final"
+                 })
+        {
+            AssertNoScaling(id);
+        }
+
+        AssertMagicEffect("CAFF_MGEF_RW_HOJ_LIFESTEAL", "Health", true, false, "ResistFire", "Absorb");
+        AssertMagicEffect("CAFF_MGEF_INCOMING_WARDEN_SHELL", "DamageResist", false, true);
+        AssertMagicEffect("CAFF_MGEF_RW_ETERNITY_BULWARK", "ReflectDamage", false, true);
+        AssertMagicEffect("CAFF_MGEF_RW_DRAGON_SCALE", "DamageResist", false, true);
+        AssertMagicEffect("CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA", "Stamina", true, null);
+        AssertMagicEffect("CAFF_MGEF_RW_FAMINE_DRAIN", "AttackDamageMult", true, true);
+        AssertMagicEffect("CAFF_MGEF_RW_ENIGMA_PHASE", "Invisibility", false, null, archetype: "Invisibility");
+
+        var lastWishRuntime = Affix("runeword_last_wish_final").GetProperty("runtime");
+        NumberValue(lastWishRuntime, "lowHealthThresholdPercent", 35, "Last Wish");
+        var obsessionAction = Action("runeword_obsession_final");
+        NumberValue(obsessionAction, "magnitudeOverride", 75, "Obsession");
+        StringValue(obsessionAction, "passiveSpellEditorId", "CAFF_SPEL_RW_OBSESSION_PASSIVE", "Obsession");
+
+        var plagueAction = Action("runeword_plague_final");
+        NumberValue(plagueAction, "flatDamage", 12, "Plague");
+        NumberValue(plagueAction, "pctOfCorpseMaxHealth", 3, "Plague");
+        NumberValue(plagueAction, "radius", 450, "Plague");
+        NumberValue(plagueAction, "maxTargets", 12, "Plague");
+        NumberValue(plagueAction, "maxChainDepth", 2, "Plague");
+        NumberValue(plagueAction, "chainFalloff", 0.70, "Plague");
+        NumberValue(plagueAction, "chainWindowSeconds", 0.6, "Plague");
+        NumberValue(plagueAction, "rateLimitWindowSeconds", 1.0, "Plague");
+        NumberValue(plagueAction, "maxExplosionsPerWindow", 2, "Plague");
+
+        var summaryPath = Path.Combine(repoRoot, "skse", "CalamityAffixes", "src", "EventBridge.Loot.Runeword.SummaryText.h");
+        var summary = File.ReadAllText(summaryPath);
+        (string Id, string Key, string Text, string? OldKey)[] uiContracts =
+        {
+            ("rw_destruction", "signature_destruction", "적중 시 반경 350 전격 폭풍: 물리 피해의 4%, 초당 10~40(5초)", "shock_dot"),
+            ("rw_hand_of_justice", "signature_hand_of_justice", "화염 심판으로 체력 40~250 흡수(적중 피해 18%)", "self_judgment"),
+            ("rw_dragon", "signature_dragon", "피격 시 방어도 +120·화염/냉기/전격 저항 +25(8초)", "self_light_armor"),
+            ("rw_mist", "signature_mist", "마나 재생 -100%·마법 저항 -30(6초), 마나 75 즉시 소진", "debuff_magicka_suppress"),
+            ("rw_famine", "signature_famine", "기력 -30/초(5초), 공격력 -20%·공격 속도 -15%(6초)", "debuff_stamina_drain"),
+            ("rw_beast", "signature_beast", "공격력 +30%·방어도 +150·공격 속도 +15%(10초)", "long_cd_beast_rage"),
+            ("rw_eternity", "signature_eternity", "피격 시 방어도 +300·피해 반사 +25%(6초)", "long_cd_bulwark"),
+            ("rw_enigma", "signature_enigma", "피격 시 투명화·이동 속도 +45%(4초), 상시 이동 속도 +10%", null),
+            ("rw_last_wish", "signature_last_wish", "체력 35% 이하에서 체력 250 회복·방어도 +250·마법 저항 +50(12초)", "lowhealth_fade"),
+            ("rw_plague", "signature_plague", "시체 연쇄 폭발: 독 피해 12 + 시체 최대 체력 3%, 반경 450, 최대 연쇄 깊이 2", "kill_poison_cloud"),
+            ("rw_pride", "signature_pride", "적중 시 반경 250 냉기 충격파: 물리 피해의 16%, 피해 30~200", "frost_strike"),
+            ("rw_mosaic", "signature_mosaic", "화염·냉기·전격 피해를 각각 8~80(적중 피해 5%) 동시에 가함", null),
+            ("rw_obsession", "signature_obsession", "적중 시 마법 피해 75~300(적중 피해 18%), 상시 마나 재생률 +25%", null)
+        };
+        foreach (var contract in uiContracts)
+        {
+            Assert.Contains($"{{ \"{contract.Id}\", \"{contract.Key}\" }}", summary);
+            Assert.Contains(contract.Text, summary);
+            if (contract.OldKey is not null)
+            {
+                Assert.DoesNotContain($"{{ \"{contract.Id}\", \"{contract.OldKey}\" }}", summary);
+            }
+        }
     }
 
     [Fact]

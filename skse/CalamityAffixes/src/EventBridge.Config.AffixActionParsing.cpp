@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/CorpseExplosionSelectionPolicy.h"
 #include "CalamityAffixes/RuntimeContract.h"
 #include "EventBridge.Config.Shared.h"
 
@@ -347,6 +348,8 @@ namespace CalamityAffixes
 			a_out.action.effectiveness = a_action.value("effectiveness", 1.0f);
 			a_out.action.noHitEffectArt = a_action.value("noHitEffectArt", true);
 
+			a_out.action.corpseExplosionSelectionPriority = detail::ClampCorpseExplosionSelectionPriority(
+				a_action.value("selectionPriority", 0));
 			a_out.action.corpseExplosionFlatDamage = a_action.value("flatDamage", 0.0f);
 			a_out.action.corpseExplosionPctOfCorpseMaxHealth = a_action.value("pctOfCorpseMaxHealth", 0.0f);
 			a_out.action.corpseExplosionRadius = a_action.value("radius", 0.0f);

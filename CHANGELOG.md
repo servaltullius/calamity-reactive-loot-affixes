@@ -6,6 +6,49 @@
 버전 표기는 [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 기반으로 관리합니다.
 
 ## [Unreleased]
+## [1.3.0] - 2026-07-13
+
+`v1.3.0`은 어픽스와 룬워드의 역할 중복을 줄이고, 각 효과가 실제 빌드 선택으로 구분되도록 발동 구조·접미 중첩·장비 유형·런타임 정확성을 함께 재정비한 공개 테스트 프리릴리즈입니다.
+
+### Added
+
+- 한손, 양손, 활·석궁을 구분하는 무기 하위 유형 계약을 추가해 Swordsman, Champion, Marksman, Eagle Eye 계열이 의미 있는 무기군에 생성되도록 했습니다.
+- Strength, Edge, Zephyr, Oath, Myth, Unbending Will에 권장 룬워드 베이스 경고를 추가했습니다. 경고는 비차단 방식이며 플레이어가 원하면 그대로 변환할 수 있습니다.
+- Plague, Breath of the Dying 및 일반 시체 폭발이 함께 존재할 때 고유 효과가 영구적으로 가려지지 않도록 시체 폭발 선택 우선순위를 추가했습니다.
+- 동일 접미 계열 최고 티어 선택, 무기 하위 유형, 시체 폭발 우선순위와 새 룬워드 의미 계약을 고정하는 회귀 테스트를 추가했습니다.
+
+### Changed
+
+- Destruction, Hand of Justice, Dragon, Mist, Famine, Beast, Eternity, Enigma, Last Wish, Plague, Pride, Mosaic, Obsession 등 주요 룬워드를 단순 수치 변형에서 고유한 복합 발동 효과로 개편했습니다.
+- Chaos, Breath of the Dying, Rhyme, Faith, Call to Arms, Honor, Hustle-A를 포함한 기존 룬워드의 시그니처 동작과 설명을 강화했습니다.
+- Shadow Stride, Nourishing Flame, Mana Knot, Shock Weakness, Death Mark, Ice Form의 발동 조건과 전투 역할을 구분했습니다.
+- 같은 접미 계열을 여러 부위에 장착하면 합산하지 않고 가장 높은 티어 하나만 적용하도록 변경했습니다.
+- 접미 22개 계열의 실제 T1/T2/T3 선택 가중치를 `6/3/1`로 통일했습니다.
+- Assassin 접미 툴팁에 치명타 확률뿐 아니라 실제 적용되는 치명타 피해 증가도 표시합니다.
+- 프리픽스 티어 계열과 원소 피해 주입 계열은 한 아이템에서 같은 패밀리가 중복 선택되지 않도록 변경했습니다.
+
+### Fixed
+
+- hostile Magic Effect의 잘못된 수치 부호, 회복 플래그, Actor Value 연결과 시체 체력 비율 단위를 수정했습니다.
+- 모드 효과를 껐다 켰을 때 발동 효과와 접미 패시브가 정확히 중단·복원되도록 런타임 상태 동기화를 보강했습니다.
+- 같은 타격이 여러 이벤트 경로에서 중복 처리될 수 있던 문제를 줄이고 함정·룬워드 재변환 경로를 보완했습니다.
+- 구버전 저장에 남은 접미 Ability를 실제 Spell 보유 상태와 대조해 불필요한 패시브를 제거하고 누락된 패시브를 복원합니다.
+- Plague 시체 폭발이 Death Pyre 계열의 높은 기본 피해 때문에 선택 단계에서 항상 사라지던 문제를 수정했습니다.
+- Generator의 전방 Magic Effect 참조와 일부 룬워드의 잘못된 Magic Effect 연결을 제거했습니다.
+
+### Balance
+
+- 공개 프리픽스 73개, 접미 22계열 66개, 룬워드 94개의 역할을 재검토했으며 정규화된 공개 효과 중 완전히 동일한 의미의 중복은 남기지 않았습니다.
+- 공격속도, 이동·은신, 방어, 자원 재생, 원소 공격처럼 선택지가 많은 역할군은 새 일반 효과를 더 추가하지 않고 공개 테스트 피드백을 우선합니다.
+- `v1.2.25`의 룬 파편 `4/3/2/1` 가중치, 기본 파편 드롭 판정 `8%`, 99회 무드롭 피티는 유지됩니다.
+
+### Compatibility
+
+- 세이브 및 어픽스·룬워드 직렬화 형식은 변경하지 않았습니다.
+- 기존 어픽스 ID, 룬워드 ID, 생성 레코드 순서와 FormID 배치를 유지합니다.
+- 기존 장비와 완성된 룬워드는 그대로 유지되며, 같은 ID의 개편된 효과 정의를 사용합니다.
+- 무기 하위 유형 제한은 업데이트 후 새로 생성하거나 재련하는 장비에 적용되며 기존 장비를 강제로 재추첨하지 않습니다.
+- 구버전 접미 패시브는 다음 런타임 동기화에서 현재 장비 상태에 맞게 자동 정리됩니다.
 
 ## [1.2.25] - 2026-07-12
 
@@ -219,7 +262,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.25...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.25...v1.3.0
 [1.2.25]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.24...v1.2.25
 [1.2.24]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.23...v1.2.24
 [1.2.23]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.22...v1.2.23
