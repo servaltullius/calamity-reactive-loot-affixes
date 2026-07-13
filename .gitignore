@@ -29,8 +29,6 @@ CTestTestfile.cmake
 *.log
 *:Zone.Identifier
 
-# vibe-kit and local agent runtime
-.vibe/
 .claude/
 skse/CalamityAffixes/tests/build/
 

@@ -13,7 +13,7 @@ Usage: tools/release_verify.sh [options]
 Runs the "static" verification chain that we expect before shipping a release.
 
 Options:
-  --fast          Skip slower steps (vibe doctor, full default build) but still compile CalamityAffixes and run core checks.
+  --fast          Skip the full default CMake build but still compile CalamityAffixes and run core checks.
   --strict        Fail if SKSE build dir is missing.
   --no-strict     Allow SKSE checks to be skipped when build dir is missing.
   --with-mo2-zip  Also run tools/build_mo2_zip.sh (requires Papyrus compiler + Scripts.zip paths).
@@ -89,13 +89,6 @@ if [[ -f "${spec_manifest}" ]]; then
   python3 "${repo_root}/tools/compose_affixes.py" \
     --manifest "${spec_manifest}" \
     --check
-fi
-
-step "vibe-kit doctor (optional)"
-if [[ "${fast}" -eq 1 ]]; then
-  echo "(skipped: --fast)"
-else
-  python3 "${repo_root}/scripts/vibe.py" doctor --full
 fi
 
 step "Spec lint + generated runtime config sync"
