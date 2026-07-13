@@ -17,7 +17,9 @@ namespace CalamityAffixes::EventNames
 	inline constexpr std::string_view kRunewordGrantStarterOrbs = "CalamityAffixes_Runeword_GrantStarterOrbs";
 	inline constexpr std::string_view kUiSetPanel = "CalamityAffixes_UI_SetPanel";
 	inline constexpr std::string_view kUiTogglePanel = "CalamityAffixes_UI_TogglePanel";
+	inline constexpr std::string_view kUiStatus = "CalamityAffixes_UI_Status";
 	inline constexpr std::string_view kMcmSpawnTestItem = "CalamityAffixes_MCM_SpawnTestItem";
 	inline constexpr std::string_view kMcmForceRebuild = "CalamityAffixes_MCM_ForceRebuild";
 	inline constexpr std::string_view kMcmGrantRecoveryPack = "CalamityAffixes_MCM_GrantRecoveryPack";
+	inline constexpr std::string_view kMcmRecoverMiscCurrency = "CalamityAffixes_MCM_RecoverMiscCurrency";
 }

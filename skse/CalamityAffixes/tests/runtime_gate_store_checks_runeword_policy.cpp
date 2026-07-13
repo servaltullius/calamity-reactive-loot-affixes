@@ -1828,6 +1828,11 @@ namespace RuntimeGateStoreChecks
 				coreText->find("#include \"PrismaTooltip.ViewState.inl\"") == std::string::npos ||
 				sharedStateText->find("constexpr auto kPrismaCommandListener = \"calamityCommand\";") == std::string::npos ||
 				sharedStateText->find("constexpr auto kInteropSetTooltip = \"setTooltip\";") == std::string::npos ||
+				sharedStateText->find("constexpr auto kPrismaRetryInterval") == std::string::npos ||
+				sharedStateText->find("g_activePrismaView") == std::string::npos ||
+				sharedStateText->find("g_domReadyView") == std::string::npos ||
+				sharedStateText->find("g_prismaViewReadinessMutex") == std::string::npos ||
+				sharedStateText->find("g_pendingDomReadyViews") == std::string::npos ||
 				viewStateText->find("class PrismaTelemetryController final") == std::string::npos ||
 				viewStateText->find("class PrismaViewStateController final") == std::string::npos ||
 				menuText->find("class PanelHotkeyEventSink final") == std::string::npos ||
@@ -1836,7 +1841,16 @@ namespace RuntimeGateStoreChecks
 				settingsText->find("kInteropSetTooltipLayout") == std::string::npos ||
 				lifecycleText->find("void StartPrismaWorker()") == std::string::npos ||
 				lifecycleText->find("void RegisterPrismaEventSinks()") == std::string::npos ||
-				lifecycleText->find("void EnsurePrisma()") == std::string::npos ||
+				lifecycleText->find("PrismaAvailabilityStatus EnsurePrisma(bool a_forceAttempt)") == std::string::npos ||
+				lifecycleText->find("if (!candidate || !g_api->IsValid(candidate))") == std::string::npos ||
+				lifecycleText->find("ResetPrismaViewForRetry") == std::string::npos ||
+				lifecycleText->find("RecordPrismaViewDomReady") == std::string::npos ||
+				lifecycleText->find("ActivatePrismaViewReadiness") == std::string::npos ||
+				lifecycleText->find("DeactivatePrismaViewReadiness") == std::string::npos ||
+				lifecycleText->find("g_api->Destroy(expiredView)") == std::string::npos ||
+				lifecycleText->find("g_domReadyView.load(std::memory_order_acquire) == g_view") == std::string::npos ||
+				lifecycleText->find("g_runewordCache.baseListJson.clear()") == std::string::npos ||
+				lifecycleText->find("g_nextPrismaAttemptAt") == std::string::npos ||
 				lifecycleText->find("RegisterJSListener(g_view, kPrismaCommandListener") == std::string::npos) {
 				std::cerr << "prisma_lifecycle_extraction: expected lifecycle/menu extraction markers are missing\n";
 				return false;

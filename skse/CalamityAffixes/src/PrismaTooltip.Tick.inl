@@ -1,6 +1,6 @@
 		[[nodiscard]] bool TickShouldWaitForReadyView(std::chrono::steady_clock::time_point now)
 		{
-			if (g_api && g_view && g_api->IsValid(g_view) && g_domReady.load()) {
+			if (IsViewReady()) {
 				return false;
 			}
 
@@ -120,7 +120,7 @@
 			PrismaTelemetryController::RecordTickRun();
 			RefreshControlPanelHotkeyFromMcm(false);
 			RefreshUiLanguageFromMcm(false);
-			EnsurePrisma();
+			(void)EnsurePrisma(false);
 
 			if (TickShouldWaitForReadyView(now)) {
 				return;

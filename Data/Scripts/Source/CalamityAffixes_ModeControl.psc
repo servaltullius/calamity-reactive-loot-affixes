@@ -122,6 +122,14 @@ Function TogglePrismaControlPanel() global
 	Emit("CalamityAffixes_UI_TogglePanel", "", 0.0)
 EndFunction
 
+Function CheckPrismaUiStatus() global
+	Emit("CalamityAffixes_UI_Status", "", 0.0)
+EndFunction
+
+Function RecoverMissingCurrency() global
+	Emit("CalamityAffixes_MCM_RecoverMiscCurrency", "", 0.0)
+EndFunction
+
 Function PanelHotkey_NoOp() global
 	; Intentionally empty. The SKSE plugin reads the configured keycode from MCM settings and toggles the panel.
 EndFunction

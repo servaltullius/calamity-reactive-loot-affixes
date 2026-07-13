@@ -210,6 +210,52 @@
           "valueOptions": {
             "value": "Prisma-first UX enabled / Prisma 우선 UX 적용"
           }
+        },
+        {
+          "type": "header",
+          "text": "Status & Safe Recovery / 상태·안전 복구"
+        },
+        {
+          "type": "text",
+          "id": "btnPrismaStatus:General",
+          "text": "Check Prisma UI Status / Prisma UI 상태 확인",
+          "help": "Checks whether the Prisma API and Calamity view are ready. The result appears in the HUD. / Prisma API와 Calamity 화면이 준비됐는지 확인하고 HUD에 결과를 표시합니다.",
+          "valueOptions": {
+            "value": "Check / 확인"
+          },
+          "action": {
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "CheckPrismaUiStatus"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btnRunewordStatus:General",
+          "text": "Show Runeword Status / 룬워드 상태 표시",
+          "help": "Shows the selected base, recipe progress, and required rune status in the HUD/log. / 선택 베이스, 레시피 진행도와 필요 룬 상태를 HUD와 로그에 표시합니다.",
+          "valueOptions": {
+            "value": "Show / 표시"
+          },
+          "action": {
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "RunewordStatus"
+          }
+        },
+        {
+          "type": "text",
+          "id": "btnRecoverMissingCurrency:General",
+          "text": "Recover Missing Currency / 누락 통화 복구",
+          "help": "Once per save: grants 5 reforge orbs and 1 fragment only for rune types you do not own. It does not reset equipment. / 세이브당 1회: 재련 오브 5개와 현재 보유하지 않은 룬 종류의 파편만 1개씩 지급합니다. 장비 상태는 초기화하지 않습니다.",
+          "valueOptions": {
+            "value": "Recover / 복구"
+          },
+          "action": {
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "RecoverMissingCurrency"
+          }
         }
       ]
     },

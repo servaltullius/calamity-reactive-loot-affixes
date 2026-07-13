@@ -1,5 +1,7 @@
 		constexpr auto kPollInterval = std::chrono::milliseconds(300);
 		constexpr auto kHotkeyRefreshInterval = std::chrono::seconds(2);
+		constexpr auto kPrismaRetryInterval = std::chrono::seconds(5);
+		constexpr auto kPrismaDomReadyTimeout = std::chrono::seconds(15);
 		constexpr auto kViewPath = "CalamityAffixes/index.html";
 		constexpr auto kViewOrder = 5000;
 		constexpr auto kMouseButtonOffset = 256u;
@@ -49,8 +51,25 @@
 		constexpr int kMaxTooltipFontPermille = 1800;
 
 		std::atomic_bool g_installed{ false };
-		std::atomic_bool g_domReady{ false };
+		enum class PrismaAvailabilityStatus : std::uint8_t
+		{
+			kNotChecked,
+			kApiUnavailable,
+			kViewLoading,
+			kReady,
+			kViewFailed,
+			kDomReadyTimedOut
+		};
+
+		std::atomic<PrismaAvailabilityStatus> g_prismaStatus{ PrismaAvailabilityStatus::kNotChecked };
+		std::atomic<PRISMA_UI_API::PrismaView> g_activePrismaView{ 0 };
+		std::atomic<PRISMA_UI_API::PrismaView> g_domReadyView{ 0 };
+		std::mutex g_prismaViewReadinessMutex;
+		std::array<PRISMA_UI_API::PrismaView, 8> g_pendingDomReadyViews{};
 		std::atomic_bool g_loggedMissingApi{ false };
+		std::atomic_bool g_loggedViewFailure{ false };
+		std::atomic_bool g_loggedDomReadyTimeout{ false };
+		std::atomic_bool g_userFailureNotificationShown{ false };
 		std::atomic_int g_relevantMenusOpen{ 0 };
 		std::atomic_bool g_gatePollingOnMenus{ false };
 		std::atomic_bool g_controlPanelOpen{ false };
@@ -59,6 +78,8 @@
 
 		PRISMA_UI_API::IVPrismaUI1* g_api = nullptr;
 		PRISMA_UI_API::PrismaView g_view = 0;
+		std::chrono::steady_clock::time_point g_nextPrismaAttemptAt{};
+		std::chrono::steady_clock::time_point g_prismaViewCreatedAt{};
 
 		std::string g_lastTooltip;
 		std::jthread g_worker;

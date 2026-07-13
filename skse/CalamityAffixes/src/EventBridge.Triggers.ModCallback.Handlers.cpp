@@ -40,14 +40,17 @@ namespace CalamityAffixes
 	{
 		if (a_eventName == kUiTogglePanelEvent) {
 			PrismaTooltip::ToggleControlPanel();
-			EmitHudNotification("Calamity: Prisma panel toggled");
 			return true;
 		}
 
 		if (a_eventName == kUiSetPanelEvent) {
 			const bool open = a_numArg > kMcmBoolThreshold;
 			PrismaTooltip::SetControlPanelOpen(open);
-			EmitHudNotification(open ? "Calamity: Prisma panel ON" : "Calamity: Prisma panel OFF");
+			return true;
+		}
+
+		if (a_eventName == kUiStatusEvent) {
+			PrismaTooltip::ReportStatus();
 			return true;
 		}
 
@@ -270,6 +273,14 @@ namespace CalamityAffixes
 				note += " fragments)";
 				EmitHudNotification(note.c_str());
 				SKSE::log::info("CalamityAffixes: granted recovery pack — 5 orbs, {} fragment types.", fragmentsGranted);
+			}
+			return true;
+		}
+
+		if (a_eventName == kMcmRecoverMiscCurrencyEvent) {
+			const auto result = RecoverMiscCurrency();
+			if (!result.starts_with("Granted ")) {
+				EmitHudNotification(result.c_str());
 			}
 			return true;
 		}

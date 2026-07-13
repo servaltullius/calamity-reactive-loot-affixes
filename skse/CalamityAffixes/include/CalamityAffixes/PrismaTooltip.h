@@ -4,6 +4,7 @@ namespace CalamityAffixes::PrismaTooltip
 {
 	void Install();
 	[[nodiscard]] bool IsAvailable();
+	void ReportStatus();
 	void SetControlPanelOpen(bool a_open);
 	void ToggleControlPanel();
 }

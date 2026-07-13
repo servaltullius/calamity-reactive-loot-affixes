@@ -1,5 +1,6 @@
 #include "CalamityAffixes/PrismaTooltip.h"
 
+#include <array>
 #include <atomic>
 #include <cctype>
 #include <charconv>
@@ -64,11 +65,14 @@ namespace CalamityAffixes::PrismaTooltip
 		void MaybeLogPrismaTelemetry(std::chrono::steady_clock::time_point a_now, bool a_uiActive);
 		[[nodiscard]] bool HandleStructuredUiCommand(std::string_view a_command);
 		void HandleEventBackedUiCommand(std::string_view a_command);
-		[[nodiscard]] bool EnsurePrismaApiAvailable();
+		[[nodiscard]] bool EnsurePrismaApiAvailable(
+			std::chrono::steady_clock::time_point a_now,
+			bool a_forceAttempt);
+		[[nodiscard]] PrismaAvailabilityStatus EnsurePrisma(bool a_forceAttempt = false);
 		void PrepareForNewPrismaView();
 		void RegisterPrismaCommandListener();
 		void QueueCachedLayoutStateForNewView();
-		void CreatePrismaView();
+		[[nodiscard]] PrismaAvailabilityStatus CreatePrismaView(std::chrono::steady_clock::time_point a_now);
 		void Tick();
 		void RegisterPrismaEventSinks();
 		void StartPrismaWorker();
@@ -140,7 +144,9 @@ namespace CalamityAffixes::PrismaTooltip
 
 		[[nodiscard]] bool IsViewReady() noexcept
 		{
-			return g_api && g_view && g_api->IsValid(g_view) && g_domReady.load();
+			const auto activeView = g_activePrismaView.load(std::memory_order_acquire);
+			return g_api && activeView && g_api->IsValid(activeView) &&
+				g_domReadyView.load(std::memory_order_acquire) == activeView;
 		}
 
 		[[nodiscard]] bool IsGameplayReady() noexcept
@@ -289,18 +295,36 @@ namespace CalamityAffixes::PrismaTooltip
 
 	bool IsAvailable()
 	{
-		if (g_api) {
-			return true;
-		}
+		return IsViewReady();
+	}
 
-		auto* api = static_cast<PRISMA_UI_API::IVPrismaUI1*>(
-			PRISMA_UI_API::RequestPluginAPI(PRISMA_UI_API::InterfaceVersion::V1));
-		if (!api) {
-			return false;
-		}
-
-		g_api = api;
-		return true;
+	void ReportStatus()
+	{
+		QueueTask([]() {
+			const auto status = EnsurePrisma(false);
+			const char* message = "Calamity: Prisma UI status unknown.";
+			switch (status) {
+			case PrismaAvailabilityStatus::kApiUnavailable:
+				message = "Calamity: Prisma UI unavailable; full UI is disabled.";
+				break;
+			case PrismaAvailabilityStatus::kViewLoading:
+				message = "Calamity: Prisma UI detected; Calamity view is loading.";
+				break;
+			case PrismaAvailabilityStatus::kReady:
+				message = "Calamity: Prisma UI ready.";
+				break;
+			case PrismaAvailabilityStatus::kViewFailed:
+				message = "Calamity: Prisma UI view failed. Check the SKSE log.";
+				break;
+			case PrismaAvailabilityStatus::kDomReadyTimedOut:
+				message = "Calamity: Prisma UI view timed out. Check the SKSE log.";
+				break;
+			case PrismaAvailabilityStatus::kNotChecked:
+			default:
+				break;
+			}
+			RE::DebugNotification(message);
+		});
 	}
 
 	void SetControlPanelOpen(bool a_open)

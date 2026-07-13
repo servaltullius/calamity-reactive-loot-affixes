@@ -25,6 +25,7 @@
 		static constexpr std::string_view kRunewordGrantStarterOrbsEvent = EventNames::kRunewordGrantStarterOrbs;
 		static constexpr std::string_view kUiSetPanelEvent = EventNames::kUiSetPanel;
 		static constexpr std::string_view kUiTogglePanelEvent = EventNames::kUiTogglePanel;
+		static constexpr std::string_view kUiStatusEvent = EventNames::kUiStatus;
 		static constexpr std::string_view kMcmSetEnabledEvent = RuntimePolicy::kMcmSetEnabledEvent;
 		static constexpr std::string_view kLegacyMcmSetDebugNotificationsEvent = RuntimePolicy::kLegacyMcmSetDebugNotificationsEvent;
 		static constexpr std::string_view kMcmSetDebugHudNotificationsEvent = RuntimePolicy::kMcmSetDebugHudNotificationsEvent;
@@ -38,6 +39,7 @@
 		static constexpr std::string_view kMcmSpawnTestItemEvent = EventNames::kMcmSpawnTestItem;
 		static constexpr std::string_view kMcmForceRebuildEvent = EventNames::kMcmForceRebuild;
 		static constexpr std::string_view kMcmGrantRecoveryPackEvent = EventNames::kMcmGrantRecoveryPack;
+		static constexpr std::string_view kMcmRecoverMiscCurrencyEvent = EventNames::kMcmRecoverMiscCurrency;
 
 		// Policy constants.
 		static constexpr std::array<float, kMaxRegularAffixesPerItem> kAffixCountWeights = { 70.0f, 22.0f, 8.0f };
