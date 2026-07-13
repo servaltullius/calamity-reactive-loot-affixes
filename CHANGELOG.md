@@ -7,6 +7,34 @@
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-07-14
+
+v1.3.3은 v1.3.2의 패널 성능 개선을 유지하면서, 레시피 탐색기의 커스텀 wheel RAF가 네이티브 scrollbar 조작과 경쟁하던 회귀를 바로잡는 공개 테스트 hotfix입니다. 실제 게임 테스트에서 수정 후 스크롤이 부드러워진 것을 확인했습니다.
+
+### Added
+
+- 실제 index.html의 스크롤 controller를 추출해 가짜 CEF DOM, 정수형 scrollTop과 RAF queue에서 실행하는 Node 동작 회귀 테스트를 추가했습니다.
+- 마우스 휠 위·아래, legacy deltaY=0, 다중 노치 clamp, line/page mode, 트랙패드, 즉시·지연 thumb 이동과 pointer/mouse 취소를 고정하는 계약을 추가했습니다.
+
+### Changed
+
+- 명확한 120단위 일반 마우스 휠 노치만 한 노치당 64px 목표로 정규화하고, 트랙패드의 작은 연속 pixel delta는 그대로 유지합니다.
+- scroll 감쇠 시간상수를 72ms에서 48ms로 줄이고, 0.75px 도달 거리와 0.5px 최소 유효 이동량으로 정수형 CEF에서도 RAF가 확실히 종료되도록 변경했습니다.
+- 커스텀 frame-paced wheel 처리를 명시적으로 지정된 레시피 목록에만 한정해 다른 패널 스크롤 영역의 네이티브 동작을 보존합니다.
+
+### Fixed
+
+- 레시피 탐색기의 진행 중 wheel RAF가 scrollbar thumb·track·키보드 또는 외부 scrollTop 이동을 이전 목표 위치로 되감던 문제를 수정했습니다.
+- 자체 scroll 이벤트 뒤 native scroll 통지가 한 RAF 늦게 도착하는 경우에도 다음 RAF가 실제 위치를 덮어쓰기 전에 취소·동기화하도록 수정했습니다.
+- 일부 CEF 입력 경로에서 일반 마우스 휠이 작은 pixel delta로 전달되어 스크롤이 지나치게 느리던 문제를 수정했습니다.
+- 정수 단위로 양자화되는 scrollTop에서 마지막 1px 부근의 RAF가 종료되지 않을 수 있던 문제를 수정했습니다.
+
+### Compatibility
+
+- Prisma UI 프레임워크와 v1.3.2의 Tick 병합, 정적 레시피 분리, keyed DOM, View 복구 및 MCM 안전 폴백을 유지합니다.
+- 어픽스·룬워드 효과 정의, 룬 가중치와 분포, 기본 파편 드롭률 8%, 99회 무드롭 피티는 변경하지 않았습니다.
+- 기존 장비, 파편, 완성 룬워드와 저장·직렬화 형식은 변경하지 않았으며 새 게임은 필요하지 않습니다.
+
 ## [1.3.2] - 2026-07-13
 
 `v1.3.2`는 Prisma UI 프레임워크와 v1.3.1의 View 복구 경로를 유지하면서, 패널을 연 뒤 반복되던 메인 스레드 작업과 거친 입력 처리를 줄여 조작감과 프레임 일관성을 개선하는 공개 테스트 패치입니다.
@@ -326,7 +354,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.3...HEAD
+[1.3.3]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.25...v1.3.0
