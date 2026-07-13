@@ -1,6 +1,6 @@
 {
   "name": "calamity-affixes",
-  "version-string": "1.3.1",
+  "version-string": "1.3.2",
   "dependencies": [
     "commonlibsse-ng-flatrim",
     "nlohmann-json"
