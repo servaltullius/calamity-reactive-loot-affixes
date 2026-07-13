@@ -6,6 +6,39 @@
 버전 표기는 [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 기반으로 관리합니다.
 
 ## [Unreleased]
+
+## [1.3.1] - 2026-07-13
+
+`v1.3.1`은 Prisma UI 프레임워크를 유지하면서 View 생성·DOM 준비·재시도 수명주기를 안정화하고, Prisma를 사용할 수 없을 때도 상태 확인과 안전한 통화 복구를 제공하는 공개 테스트 패치입니다.
+
+### Added
+
+- MCM에 Prisma UI 상태 확인, 룬워드 상태 표시와 누락 통화 복구 기능을 추가했습니다.
+- Prisma View identity, 오래된 DOM-ready 콜백, timeout 복구와 MCM 이벤트 연결을 고정하는 회귀 테스트를 추가했습니다.
+
+### Changed
+
+- Prisma API 및 View 생성 실패 시 5초 간격으로 재시도하고, DOM-ready가 15초 동안 도착하지 않으면 해당 View를 폐기한 뒤 복구하도록 변경했습니다.
+- Prisma 상태 확인은 정상 View를 강제로 파괴하지 않는 비파괴 검사로 동작합니다.
+- 새 View가 생성되면 툴팁, 언어, 레이아웃, 룬워드 목록, 레시피와 패널 캐시를 완전히 갱신합니다.
+- 패널 열기 요청은 View 로딩 중에도 보존하며, 실제 DOM-ready 이후에만 패널이 열린 것으로 처리합니다.
+- 사용을 종료한 Vibekit 도구와 남아 있던 릴리스 검증 호출을 제거했습니다.
+
+### Fixed
+
+- `CreateView()`가 invalid handle을 반환했는데도 View API를 호출할 수 있던 문제를 수정했습니다.
+- invalid nonzero View가 남아 이후 복구를 영구적으로 막을 수 있던 문제를 수정했습니다.
+- 이전 View의 늦은 DOM-ready 콜백이 새 View의 준비 상태를 덮어쓸 수 있던 문제를 수정했습니다.
+- Prisma 콜백과 활성 View 상태 사이의 동시 접근 및 동기 콜백 손실 가능성을 수정했습니다.
+- Prisma가 없거나 View 생성에 실패했는데도 패널이 열렸다는 성공 HUD가 표시되던 문제를 수정했습니다.
+
+### Compatibility
+
+- Prisma UI는 전체 툴팁과 룬워드·재련 패널을 위한 기본 프레임워크로 계속 사용합니다.
+- MCM 폴백은 상태 확인과 안전 복구만 제공하며 전체 Prisma UI를 복제하지 않습니다.
+- 세이브 및 어픽스·룬워드 직렬화 형식, 효과 정의, 룬 분포와 드롭률은 변경하지 않았습니다.
+- 누락 통화 복구는 세이브당 한 번만 동작하며 장비, 어픽스 또는 완성 룬워드를 초기화하지 않습니다.
+
 ## [1.3.0] - 2026-07-13
 
 `v1.3.0`은 어픽스와 룬워드의 역할 중복을 줄이고, 각 효과가 실제 빌드 선택으로 구분되도록 발동 구조·접미 중첩·장비 유형·런타임 정확성을 함께 재정비한 공개 테스트 프리릴리즈입니다.
@@ -262,7 +295,8 @@
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.25...v1.3.0
 [1.2.25]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.24...v1.2.25
 [1.2.24]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.2.23...v1.2.24
