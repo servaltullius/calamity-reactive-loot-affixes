@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import math
 import re
+import shutil
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -87,18 +90,34 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         )
         self.assertIn("applyConfirmedRecipeSelection(recipeToken)", panel_state)
 
-    def test_wheel_scroll_is_clamped_and_frame_paced(self) -> None:
+    def test_wheel_scroll_is_responsive_and_yields_to_native_input(self) -> None:
         for marker in (
             'data-wheel-scroll-mode="smooth"',
             "(function initFramePacedScroll()",
             "const SCROLL_LINE_HEIGHT_PX = 28;",
+            "const LEGACY_WHEEL_NOTCH_DELTA = 120;",
+            "const MOUSE_WHEEL_NOTCH_PX = 64;",
             "const MAX_WHEEL_DELTA_PX = 160;",
-            "const SMOOTH_SCROLL_TIME_CONSTANT_MS = 72;",
+            "const SMOOTH_SCROLL_TIME_CONSTANT_MS = 48;",
+            "const SCROLL_STOP_DISTANCE_PX = 0.75;",
+            "const SCROLL_MIN_EFFECTIVE_STEP_PX = 0.5;",
+            "lastProgrammaticScrollTop: null",
+            "function cancelScrollAnimation(element)",
+            "cancelAnimationFrame(scrollState.raf);",
             "function normalizeWheelDeltaPixels(event, scroller)",
+            "Math.abs(legacyWheelDelta) >= LEGACY_WHEEL_NOTCH_DELTA",
+            "MOUSE_WHEEL_NOTCH_PX *",
             "element.clientHeight > 0",
+            "isControlledScroller(element)",
             "if (!isScrollable(element))",
+            "const expectedScrollTop =",
             "-deltaTime / SMOOTH_SCROLL_TIME_CONSTANT_MS",
             "scrollState.targetScrollTop = clamp(",
+            "const nextScrollTop = current + remaining * blend;",
+            "SCROLL_MIN_EFFECTIVE_STEP_PX",
+            'document.addEventListener("pointerdown", cancelScrollForPointer, true);',
+            'document.addEventListener("mousedown", cancelScrollForPointer, true);',
+            'document.addEventListener("scroll", syncExternalScroll, true);',
             "const targetUnchanged =",
             "const currentAtTarget =",
             "if (targetUnchanged && currentAtTarget)",
@@ -108,13 +127,30 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
 
         animation = self._between(
             "function animateScroll(element, timestamp)",
-            'document.addEventListener("wheel"',
+            "function cancelScrollForPointer(event)",
         )
         self.assertIn("if (!isScrollable(element))", animation)
         self.assertLess(
             animation.index("scrollState.targetScrollTop = clamp("),
             animation.index("const remaining ="),
         )
+        self.assertIn("cancelScrollAnimation(element)", animation)
+        self.assertLess(
+            animation.index("cancelScrollAnimation(element)"),
+            animation.index("const remaining ="),
+        )
+        self.assertLess(
+            animation.index("SCROLL_MIN_EFFECTIVE_STEP_PX"),
+            animation.index("requestAnimationFrame((nextTimestamp)"),
+        )
+
+        native_input = self._between(
+            "function cancelScrollForPointer(event)",
+            'document.addEventListener("wheel"',
+        )
+        self.assertIn("cancelScrollAnimation(scroller)", native_input)
+        self.assertIn("lastProgrammaticScrollTop", native_input)
+        self.assertIn("actualScrollTop", native_input)
 
         wheel_handler = self._between(
             'document.addEventListener("wheel"',
@@ -127,6 +163,60 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
 
         self.assertNotIn('data-wheel-scroll-mode="amplified"', self.source)
         self.assertNotIn("RECIPE_SCROLL_MIN_STEP", self.source)
+
+    def test_integer_scroll_quantization_has_a_bounded_stop_path(self) -> None:
+        def constant(name: str) -> float:
+            match = re.search(
+                rf"const {name} = ([0-9]+(?:\.[0-9]+)?);",
+                self.source,
+            )
+            self.assertIsNotNone(match, name)
+            return float(match.group(1))
+
+        target = constant("MOUSE_WHEEL_NOTCH_PX")
+        time_constant = constant("SMOOTH_SCROLL_TIME_CONSTANT_MS")
+        stop_distance = constant("SCROLL_STOP_DISTANCE_PX")
+        minimum_step = constant("SCROLL_MIN_EFFECTIVE_STEP_PX")
+
+        current = 0.0
+        frame_ms = 16.67
+        for frame in range(1, 121):
+            remaining = target - current
+            if abs(remaining) <= stop_distance:
+                current = target
+                break
+            blend = 1.0 - math.exp(-frame_ms / time_constant)
+            next_position = current + remaining * blend
+            if abs(next_position - current) < minimum_step:
+                current = target
+                break
+            current = float(round(next_position))
+        else:
+            self.fail("quantized scroll animation did not terminate")
+
+        self.assertEqual(current, target)
+        self.assertLess(frame, 30)
+
+    def test_scroll_controller_behavior_in_node(self) -> None:
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("Node.js is unavailable")
+
+        script = self.repo_root / "tools" / "tests" / "prisma_scroll_behavior_test.js"
+        result = subprocess.run(
+            [node, str(script)],
+            cwd=self.repo_root,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("Prisma scroll behavior: OK", result.stdout)
 
     def test_motion_avoids_forced_reflow_and_infinite_paint(self) -> None:
         self.assertNotIn("void element.offsetWidth", self.source)

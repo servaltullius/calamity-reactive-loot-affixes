@@ -1664,21 +1664,35 @@ namespace RuntimeGateStoreChecks
 				uiText->find("scroll-behavior: auto;") == std::string::npos ||
 				uiText->find("(function initFramePacedScroll()") == std::string::npos ||
 				uiText->find("const SCROLL_LINE_HEIGHT_PX = 28;") == std::string::npos ||
+				uiText->find("const LEGACY_WHEEL_NOTCH_DELTA = 120;") == std::string::npos ||
+				uiText->find("const MOUSE_WHEEL_NOTCH_PX = 64;") == std::string::npos ||
 				uiText->find("const MAX_WHEEL_DELTA_PX = 160;") == std::string::npos ||
-				uiText->find("const SMOOTH_SCROLL_TIME_CONSTANT_MS = 72;") == std::string::npos ||
-				uiText->find("const SCROLL_STOP_DISTANCE_PX = 0.35;") == std::string::npos ||
+				uiText->find("const SMOOTH_SCROLL_TIME_CONSTANT_MS = 48;") == std::string::npos ||
+				uiText->find("const SCROLL_STOP_DISTANCE_PX = 0.75;") == std::string::npos ||
+				uiText->find("const SCROLL_MIN_EFFECTIVE_STEP_PX = 0.5;") == std::string::npos ||
+				uiText->find("function isControlledScroller(element)") == std::string::npos ||
+				uiText->find("function cancelScrollAnimation(element)") == std::string::npos ||
+				uiText->find("cancelAnimationFrame(scrollState.raf);") == std::string::npos ||
+				uiText->find("const expectedScrollTop =") == std::string::npos ||
+				uiText->find("cancelScrollAnimation(element);") == std::string::npos ||
 				uiText->find("function normalizeWheelDeltaPixels(event, scroller)") == std::string::npos ||
 				uiText->find("if (event.deltaMode === 1)") == std::string::npos ||
 				uiText->find("if (event.deltaMode === 2)") == std::string::npos ||
+				uiText->find("Math.abs(legacyWheelDelta) >= LEGACY_WHEEL_NOTCH_DELTA") == std::string::npos ||
 				uiText->find("const blend = 1 - Math.exp(") == std::string::npos ||
-				uiText->find("element.scrollTop = current + remaining * blend;") == std::string::npos ||
+				uiText->find("const nextScrollTop = current + remaining * blend;") == std::string::npos ||
+				uiText->find("lastProgrammaticScrollTop") == std::string::npos ||
+				uiText->find("document.addEventListener(\"pointerdown\", cancelScrollForPointer, true);") == std::string::npos ||
+				uiText->find("document.addEventListener(\"mousedown\", cancelScrollForPointer, true);") == std::string::npos ||
+				uiText->find("document.addEventListener(\"scroll\", syncExternalScroll, true);") == std::string::npos ||
 				uiText->find("scrollState.targetScrollTop = clamp(") == std::string::npos ||
 				uiText->find("scrollState.raf = requestAnimationFrame((timestamp) => {") == std::string::npos ||
 				uiText->find("event.preventDefault();") == std::string::npos ||
+				uiText->find("element.scrollTop = current + remaining * blend;") != std::string::npos ||
 				uiText->find("data-wheel-scroll-mode=\"amplified\"") != std::string::npos ||
 				uiText->find("scroller.scrollTop += normalizedDeltaPixels") != std::string::npos ||
 				uiText->find("RECIPE_SCROLL_MIN_STEP") != std::string::npos) {
-				std::cerr << "prisma_panel_recipe_scroll_performance: frame-paced clamped wheel-scroll guard is missing for dense recipe list\n";
+				std::cerr << "prisma_panel_recipe_scroll_performance: native-safe responsive wheel-scroll guard is missing for dense recipe list\n";
 				return false;
 			}
 
