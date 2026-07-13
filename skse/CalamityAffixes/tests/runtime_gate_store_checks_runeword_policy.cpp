@@ -17,6 +17,7 @@ namespace RuntimeGateStoreChecks
 			const fs::path baseSelectionFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.BaseSelection.cpp";
 			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
 			const fs::path recipeUiFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeUi.cpp";
+			const fs::path panelStateFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.PanelState.cpp";
 
 			std::ifstream selectionIn(selectionFile);
 			if (!selectionIn.is_open()) {
@@ -58,6 +59,16 @@ namespace RuntimeGateStoreChecks
 				(std::istreambuf_iterator<char>(baseIn)),
 				std::istreambuf_iterator<char>());
 
+			std::ifstream panelStateIn(panelStateFile);
+			if (!panelStateIn.is_open()) {
+				std::cerr << "runeword_completed_selection: failed to open source file: " << panelStateFile << "\n";
+				return false;
+			}
+
+			std::string panelStateSource(
+				(std::istreambuf_iterator<char>(panelStateIn)),
+				std::istreambuf_iterator<char>());
+
 			// Completed runeword base sets default highlight; explicit instance state overrides it.
 			if (recipeEntriesSource.find("selectedToken = completed->token;") == std::string::npos ||
 				recipeEntriesSource.find("stateIt->second.recipeToken") == std::string::npos) {
@@ -87,6 +98,21 @@ namespace RuntimeGateStoreChecks
 				selectionSource.find("const EventBridge::RunewordRecipe* EventBridge::ResolveSelectedRunewordRecipe(") == std::string::npos ||
 				selectionSource.find("void EventBridge::AppendRunewordSelectionRecommendation(") == std::string::npos) {
 				std::cerr << "runeword_completed_selection: selection helper extraction is missing\n";
+				return false;
+			}
+
+			// Without a selected base, the small dynamic panel payload must still
+			// confirm the current recipe selected by the static recipe catalog.
+			const auto currentRecipePos =
+				panelStateSource.find("if (const auto* currentRecipe = GetCurrentRunewordRecipe())");
+			const auto noBaseReturnPos =
+				panelStateSource.find("if (!_runewordState.selectedBaseKey)");
+			if (currentRecipePos == std::string::npos ||
+				noBaseReturnPos == std::string::npos ||
+				currentRecipePos > noBaseReturnPos ||
+				panelStateSource.find("panelState.recipeName = currentRecipe->displayName;") == std::string::npos ||
+				panelStateSource.find("panelState.recipeToken = currentRecipe->token;") == std::string::npos) {
+				std::cerr << "runeword_completed_selection: no-base recipe confirmation payload is missing\n";
 				return false;
 			}
 
@@ -1145,7 +1171,7 @@ namespace RuntimeGateStoreChecks
 				coreText->find("if (a_force || selectionChanged || next != g_lastTooltip)") == std::string::npos ||
 				coreText->find("kInteropSetRunewordAffixPreview") == std::string::npos ||
 				(handleText->find("SetRunewordAffixPreview(") == std::string::npos &&
-				 handleText->find("RefreshRunewordPanelBindings(*bridge);") == std::string::npos) ||
+				 handleText->find("RefreshRunewordPanelBindings(*bridge, false);") == std::string::npos) ||
 				uiText->find("PrismaUI_Interop(prismaInteropMethod.runewordAffixPreview") == std::string::npos ||
 				uiText->find("function setRunewordAffixPreview(raw)") == std::string::npos ||
 				uiText->find("runewordResetConfirmWindowMs = 6000") == std::string::npos ||
@@ -1247,7 +1273,8 @@ namespace RuntimeGateStoreChecks
 				bootstrapPos == std::string::npos ||
 				bootstrapCallPos == std::string::npos ||
 				uiText->find("const items = parseInteropArrayPayload(raw);") == std::string::npos ||
-				uiText->find("recipeItemsState = parseInteropArrayPayload(raw);") == std::string::npos ||
+				uiText->find("const nextItems = parseInteropArrayPayload(raw);") == std::string::npos ||
+				uiText->find("const recipeSelectionCommandPrefix = \"runeword.recipe.select:\";") == std::string::npos ||
 				uiText->find("const data = parseInteropObjectPayload(raw) || {};") == std::string::npos ||
 				!setInventoryItemsBody.has_value() ||
 				setInventoryItemsBody->find("schedulePanelRender(") == std::string::npos ||
@@ -1270,7 +1297,7 @@ namespace RuntimeGateStoreChecks
 				renderInventoryItemsBody->find("button.setAttribute(panelCommandAttribute, `runeword.base.select:${key}`);") == std::string::npos ||
 				renderInventoryItemsBody->find("button.addEventListener(\"click\"") != std::string::npos ||
 				!renderRecipeItemsBody.has_value() ||
-				renderRecipeItemsBody->find("button.setAttribute(panelCommandAttribute, `runeword.recipe.select:${token}`);") == std::string::npos ||
+				uiText->find("recipeSelectionCommandPrefix + token") == std::string::npos ||
 				renderRecipeItemsBody->find("button.addEventListener(\"click\"") != std::string::npos ||
 				!wireButtonsBody.has_value() ||
 				wireButtonsBody->find("document.addEventListener(\"click\", handleDelegatedPanelCommandClick);") == std::string::npos ||
@@ -1552,8 +1579,14 @@ namespace RuntimeGateStoreChecks
 				uiText->find("id=\"panelTooltipLead\"") == std::string::npos ||
 				uiText->find("function triggerRunewordStateShift(element, state)") == std::string::npos ||
 				uiText->find("@keyframes rwStateShift") == std::string::npos ||
-				uiText->find("@keyframes rwPrimaryPulse") == std::string::npos ||
+				uiText->find(".cpPrimaryButton.attention") == std::string::npos ||
+				uiText->find("animation: rwStateShift 160ms ease-out;") == std::string::npos ||
+				uiText->find("transform: translate3d(0, 2px, 0);") == std::string::npos ||
+				uiText->find("element.dataset.shiftNonce") == std::string::npos ||
+				uiText->find("window.setTimeout(() =>") == std::string::npos ||
 				uiText->find("function renderRunewordFlowProgress(actionState, state)") == std::string::npos ||
+				uiText->find("@keyframes rwPrimaryPulse") != std::string::npos ||
+				uiText->find("void element.offsetWidth") != std::string::npos ||
 				uiText->find("-webkit-line-clamp: 2;") == std::string::npos ||
 				uiText->find("runewordActionDetailsSummary") == std::string::npos ||
 				uiText->find("runewordBaseChooserSummary") == std::string::npos ||
@@ -1626,24 +1659,26 @@ namespace RuntimeGateStoreChecks
 
 			const auto recipeListTag = extractElementOpenTagById("recipeList");
 			if (!recipeListTag.has_value() ||
-				recipeListTag->find("data-wheel-scroll-mode=\"amplified\"") == std::string::npos ||
-				uiText->find("[data-wheel-scroll-mode=\"amplified\"]") == std::string::npos ||
+				recipeListTag->find("data-wheel-scroll-mode=\"smooth\"") == std::string::npos ||
+				uiText->find("[data-wheel-scroll-mode=\"smooth\"]") == std::string::npos ||
 				uiText->find("scroll-behavior: auto;") == std::string::npos ||
-				uiText->find("const RECIPE_SCROLL_MULT = 1.9;") == std::string::npos ||
-				uiText->find("const RECIPE_SCROLL_MIN_STEP = 72;") == std::string::npos ||
-				uiText->find("const RECIPE_SCROLL_LINE_HEIGHT = 28;") == std::string::npos ||
-				uiText->find("function resolveWheelScrollMode(el)") == std::string::npos ||
-				uiText->find("function resolveWheelDeltaPixels(event, scroller)") == std::string::npos ||
-				uiText->find("function normalizeAmplifiedWheelDelta(deltaPixels)") == std::string::npos ||
+				uiText->find("(function initFramePacedScroll()") == std::string::npos ||
+				uiText->find("const SCROLL_LINE_HEIGHT_PX = 28;") == std::string::npos ||
+				uiText->find("const MAX_WHEEL_DELTA_PX = 160;") == std::string::npos ||
+				uiText->find("const SMOOTH_SCROLL_TIME_CONSTANT_MS = 72;") == std::string::npos ||
+				uiText->find("const SCROLL_STOP_DISTANCE_PX = 0.35;") == std::string::npos ||
+				uiText->find("function normalizeWheelDeltaPixels(event, scroller)") == std::string::npos ||
 				uiText->find("if (event.deltaMode === 1)") == std::string::npos ||
 				uiText->find("if (event.deltaMode === 2)") == std::string::npos ||
-				uiText->find("const magnitude = Math.max(Math.abs(deltaPixels), RECIPE_SCROLL_MIN_STEP);") == std::string::npos ||
-				uiText->find("if (scrollMode === \"amplified\") {") == std::string::npos ||
-				uiText->find("const deltaPixels = resolveWheelDeltaPixels(e, scroller);") == std::string::npos ||
-				uiText->find("const normalizedDeltaPixels = normalizeAmplifiedWheelDelta(deltaPixels);") == std::string::npos ||
-				uiText->find("scroller.scrollTop += normalizedDeltaPixels * RECIPE_SCROLL_MULT;") == std::string::npos ||
-				uiText->find("e.preventDefault();") == std::string::npos) {
-				std::cerr << "prisma_panel_recipe_scroll_performance: amplified wheel-scroll guard is missing for dense recipe list\n";
+				uiText->find("const blend = 1 - Math.exp(") == std::string::npos ||
+				uiText->find("element.scrollTop = current + remaining * blend;") == std::string::npos ||
+				uiText->find("scrollState.targetScrollTop = clamp(") == std::string::npos ||
+				uiText->find("scrollState.raf = requestAnimationFrame((timestamp) => {") == std::string::npos ||
+				uiText->find("event.preventDefault();") == std::string::npos ||
+				uiText->find("data-wheel-scroll-mode=\"amplified\"") != std::string::npos ||
+				uiText->find("scroller.scrollTop += normalizedDeltaPixels") != std::string::npos ||
+				uiText->find("RECIPE_SCROLL_MIN_STEP") != std::string::npos) {
+				std::cerr << "prisma_panel_recipe_scroll_performance: frame-paced clamped wheel-scroll guard is missing for dense recipe list\n";
 				return false;
 			}
 
@@ -1873,6 +1908,7 @@ namespace RuntimeGateStoreChecks
 			const fs::path prismaSharedStateFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.SharedState.inl";
 			const fs::path prismaViewStateFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.ViewState.inl";
 			const fs::path prismaTickFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.Tick.inl";
+			const fs::path prismaLifecycleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.ViewLifecycle.inl";
 			const fs::path prismaHandleFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.HandleUiCommand.inl";
 			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
 
@@ -1886,8 +1922,18 @@ namespace RuntimeGateStoreChecks
 					std::istreambuf_iterator<char>());
 			};
 
+			const auto viewStateText = loadText(prismaViewStateFile);
+			const auto tickText = loadText(prismaTickFile);
+			const auto lifecycleText = loadText(prismaLifecycleFile);
+			if (!viewStateText.has_value() ||
+				!tickText.has_value() ||
+				!lifecycleText.has_value()) {
+				std::cerr << "prisma_telemetry: failed to load semantic contract sources\n";
+				return false;
+			}
+
 			std::string combinedCore;
-			for (const auto& sf : { prismaCoreFile, prismaSharedStateFile, prismaViewStateFile, prismaTickFile, prismaPanelDataFile, prismaHandleFile }) {
+			for (const auto& sf : { prismaCoreFile, prismaSharedStateFile, prismaViewStateFile, prismaTickFile, prismaLifecycleFile, prismaPanelDataFile, prismaHandleFile }) {
 				const auto part = loadText(sf);
 				if (!part.has_value()) {
 					std::cerr << "prisma_telemetry: failed to open prisma source: " << sf << "\n";
@@ -1898,21 +1944,123 @@ namespace RuntimeGateStoreChecks
 
 			if (combinedCore.find("struct PrismaTelemetryCounters") == std::string::npos ||
 				combinedCore.find("std::atomic<std::uint64_t> workerEnqueues") == std::string::npos ||
+				combinedCore.find("std::atomic<std::uint64_t> recipeRefreshes") == std::string::npos ||
+				combinedCore.find("std::atomic<std::uint64_t> coalescedTicks") == std::string::npos ||
+				combinedCore.find("std::atomic<std::uint64_t> slowTicks") == std::string::npos ||
 				combinedCore.find("std::atomic<std::uint64_t> tooltipClears") == std::string::npos ||
+				combinedCore.find("std::atomic_bool g_tickTaskPending") == std::string::npos ||
+				combinedCore.find("constexpr auto kPanelSafetyRefreshInterval") == std::string::npos ||
+				combinedCore.find("g_runewordPanelDynamicDirty") == std::string::npos ||
+				combinedCore.find("g_runewordRecipeListDirty") == std::string::npos ||
 				combinedCore.find("class PrismaTelemetryController final") == std::string::npos ||
 				combinedCore.find("class PrismaViewStateController final") == std::string::npos ||
 				combinedCore.find("void ClearTooltipViewState(bool a_clearRunewordPanelData);") == std::string::npos ||
-				combinedCore.find("void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge);") == std::string::npos ||
+				combinedCore.find("void RequestRunewordPanelRefresh(bool a_includeRecipes) noexcept;") == std::string::npos ||
+				combinedCore.find("void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge, bool a_includeRecipes);") == std::string::npos ||
 				combinedCore.find("void MaybeLogPrismaTelemetry(std::chrono::steady_clock::time_point a_now, bool a_uiActive);") == std::string::npos ||
 				combinedCore.find("PrismaTelemetryController::RecordTickRun();") == std::string::npos ||
 				combinedCore.find("PrismaTelemetryController::RecordUiCommand();") == std::string::npos ||
 				combinedCore.find("PrismaTelemetryController::RecordTooltipPush();") == std::string::npos ||
-				combinedCore.find("RefreshRunewordPanelBindings(*bridge);") == std::string::npos ||
+				combinedCore.find("PrismaTelemetryController::RecordRecipeRefresh();") == std::string::npos ||
+				combinedCore.find("PrismaTelemetryController::RecordCoalescedTick();") == std::string::npos ||
+				combinedCore.find("PrismaTelemetryController::RecordSlowTick();") == std::string::npos ||
+				combinedCore.find("class TickTaskPendingReset final") == std::string::npos ||
+				combinedCore.find("g_tickTaskPending.compare_exchange_strong(") == std::string::npos ||
+				combinedCore.find("class SlowPrismaTickProbe final") == std::string::npos ||
+				combinedCore.find("RefreshRunewordRecipeBindings(CalamityAffixes::EventBridge& a_bridge)") == std::string::npos ||
+				combinedCore.find("RefreshRunewordPanelDynamicBindings(CalamityAffixes::EventBridge& a_bridge)") == std::string::npos ||
+				combinedCore.find("RefreshRunewordPanelBindings(*bridge, g_runewordRecipeListDirty);") == std::string::npos ||
+				combinedCore.find("RefreshRunewordPanelBindings(*bridge, false);") == std::string::npos ||
 				combinedCore.find("ClearTooltipViewState(true);") == std::string::npos ||
 				combinedCore.find("ClearTooltipViewState(false);") == std::string::npos ||
 				combinedCore.find("MaybeLogPrismaTelemetry(now, true);") == std::string::npos ||
-				combinedCore.find("CalamityAffixes: Prisma telemetry (ticks={}, queued={}, clears={}, tooltipPushes={}, contextRefreshes={}, panelRefreshes={}, commands={}, menus={}, panelOpen={}).") == std::string::npos) {
+				combinedCore.find("coalesced={}, slow={}") == std::string::npos ||
+				combinedCore.find("recipeRefreshes={}") == std::string::npos ||
+				combinedCore.find("CalamityAffixes: slow Prisma tick") == std::string::npos ||
+				combinedCore.find("\"recipeToken\"") == std::string::npos ||
+				combinedCore.find("g_tickTaskPending.store(false, std::memory_order_release);") == std::string::npos ||
+				combinedCore.find("if (!g_runewordPanelDynamicDirty && !g_runewordRecipeListDirty && !safetyRefreshDue)") == std::string::npos ||
+				combinedCore.find("if (a_includeRecipes) {") == std::string::npos ||
+				combinedCore.find("RefreshRunewordPanelBindings(*bridge);") != std::string::npos ||
+				combinedCore.find("Fallback path if JS interop registration failed") != std::string::npos) {
 				std::cerr << "prisma_telemetry: tooltip telemetry/helper extraction is incomplete\n";
+				return false;
+			}
+
+			const auto prepareViewPos = lifecycleText->find("void PrepareForNewPrismaView()");
+			const auto prepareRefreshPos = lifecycleText->find(
+				"RequestRunewordPanelRefresh(true);", prepareViewPos);
+			const auto registerListenerPos = lifecycleText->find("void RegisterPrismaCommandListener()");
+			const auto pendingResetPos = lifecycleText->find("class TickTaskPendingReset final");
+			const auto pendingResetStorePos = lifecycleText->find(
+				"g_tickTaskPending.store(false, std::memory_order_release);", pendingResetPos);
+			const auto startWorkerPos = lifecycleText->find("void StartPrismaWorker()");
+			const auto compareExchangePos = lifecycleText->find(
+				"g_tickTaskPending.compare_exchange_strong(", startWorkerPos);
+			const auto recordEnqueuePos = lifecycleText->find(
+				"PrismaTelemetryController::RecordWorkerEnqueue();", compareExchangePos);
+			if (prepareViewPos == std::string::npos ||
+				prepareRefreshPos == std::string::npos ||
+				registerListenerPos == std::string::npos ||
+				prepareRefreshPos > registerListenerPos ||
+				pendingResetPos == std::string::npos ||
+				pendingResetStorePos == std::string::npos ||
+				startWorkerPos == std::string::npos ||
+				pendingResetPos > pendingResetStorePos ||
+				pendingResetStorePos > startWorkerPos ||
+				compareExchangePos == std::string::npos ||
+				recordEnqueuePos == std::string::npos ||
+				compareExchangePos > recordEnqueuePos) {
+				std::cerr << "prisma_telemetry: view reset or tick coalescing ordering is incomplete\n";
+				return false;
+			}
+
+			const auto refreshBindingsPos = viewStateText->find(
+				"void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge, bool a_includeRecipes)");
+			const auto includeRecipesPos = viewStateText->find(
+				"if (a_includeRecipes) {", refreshBindingsPos);
+			const auto recipeRefreshPos = viewStateText->find(
+				"PrismaViewStateController::RefreshRunewordRecipeBindings(a_bridge);", includeRecipesPos);
+			const auto dynamicRefreshPos = viewStateText->find(
+				"PrismaViewStateController::RefreshRunewordPanelDynamicBindings(a_bridge);", recipeRefreshPos);
+			if (refreshBindingsPos == std::string::npos ||
+				includeRecipesPos == std::string::npos ||
+				recipeRefreshPos == std::string::npos ||
+				dynamicRefreshPos == std::string::npos ||
+				!(refreshBindingsPos < includeRecipesPos &&
+					includeRecipesPos < recipeRefreshPos &&
+					recipeRefreshPos < dynamicRefreshPos)) {
+				std::cerr << "prisma_telemetry: static/dynamic refresh ordering is incomplete\n";
+				return false;
+			}
+
+			const auto tickFunctionPos = tickText->find("void Tick()");
+			const auto languageSnapshotPos = tickText->find(
+				"const auto previousUiLanguageMode", tickFunctionPos);
+			const auto languageRefreshPos = tickText->find(
+				"RefreshUiLanguageFromMcm(false);", languageSnapshotPos);
+			const auto languageDirtyPos = tickText->find(
+				"RequestRunewordPanelRefresh(true);", languageRefreshPos);
+			const auto ensurePrismaPos = tickText->find("(void)EnsurePrisma(false);", languageDirtyPos);
+			const auto refreshTickPos = tickText->find("void RefreshTickRunewordPanelBindings(");
+			const auto cleanTickReturnPos = tickText->find(
+				"if (!g_runewordPanelDynamicDirty && !g_runewordRecipeListDirty && !safetyRefreshDue)",
+				refreshTickPos);
+			const auto bridgeRefreshPos = tickText->find(
+				"RefreshRunewordPanelBindings(*bridge, g_runewordRecipeListDirty);", cleanTickReturnPos);
+			if (tickFunctionPos == std::string::npos ||
+				languageSnapshotPos == std::string::npos ||
+				languageRefreshPos == std::string::npos ||
+				languageDirtyPos == std::string::npos ||
+				ensurePrismaPos == std::string::npos ||
+				!(languageSnapshotPos < languageRefreshPos &&
+					languageRefreshPos < languageDirtyPos &&
+					languageDirtyPos < ensurePrismaPos) ||
+				refreshTickPos == std::string::npos ||
+				cleanTickReturnPos == std::string::npos ||
+				bridgeRefreshPos == std::string::npos ||
+				cleanTickReturnPos > bridgeRefreshPos) {
+				std::cerr << "prisma_telemetry: language or dirty-refresh ordering is incomplete\n";
 				return false;
 			}
 

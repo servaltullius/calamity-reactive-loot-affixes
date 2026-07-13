@@ -80,7 +80,7 @@
 						return true;
 					}
 
-					RefreshRunewordPanelBindings(*bridge);
+					RefreshRunewordPanelBindings(*bridge, false);
 					PushUiFeedback("Runeword base selected.");
 					return true;
 				}
@@ -103,7 +103,7 @@
 						return true;
 					}
 
-					RefreshRunewordPanelBindings(*bridge);
+					RefreshRunewordPanelBindings(*bridge, false);
 					PushUiFeedback("Runeword recipe selected.");
 					return true;
 				}
@@ -168,7 +168,7 @@
 					if (bridge) {
 						// SendEvent is synchronous; refresh status immediately so UI feedback isn't misleading.
 						const auto after = bridge->GetRunewordPanelState();
-						RefreshRunewordPanelBindings(*bridge);
+						RefreshRunewordPanelBindings(*bridge, false);
 						PushSelectedTooltipSnapshot(true);
 
 						if (after.isComplete && !before.isComplete) {
@@ -215,7 +215,7 @@
 					}
 
 					const auto outcome = bridge->ReforgeSelectedRunewordBaseWithOrb();
-					RefreshRunewordPanelBindings(*bridge);
+					RefreshRunewordPanelBindings(*bridge, false);
 					PushSelectedTooltipSnapshot(true);
 					PushUiFeedback(outcome.message.empty() ? "Reforge action processed." : outcome.message);
 					return true;
@@ -229,7 +229,7 @@
 					}
 
 					const auto outcome = bridge->ResetSelectedRunewordBaseCalamityState();
-					RefreshRunewordPanelBindings(*bridge);
+					RefreshRunewordPanelBindings(*bridge, false);
 					PushSelectedTooltipSnapshot(true);
 					PushUiFeedback(outcome.message.empty() ? "Reset action processed." : outcome.message);
 					return true;
@@ -242,6 +242,7 @@
 						return true;
 					}
 					const auto result = bridge->RecoverMiscCurrency();
+					RefreshRunewordPanelBindings(*bridge, false);
 					PushUiFeedback(result);
 					return true;
 				}
@@ -345,4 +346,8 @@
 			}
 
 			controller.HandleEventBackedUiCommand(a_command);
+			if (a_command.rfind("runeword.", 0) == 0 ||
+				a_command.rfind("mode.", 0) == 0) {
+				RequestRunewordPanelRefresh(false);
+			}
 		}

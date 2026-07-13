@@ -26,6 +26,21 @@
 				g_prismaTelemetry.panelRefreshes.fetch_add(1u, std::memory_order_relaxed);
 			}
 
+			static void RecordRecipeRefresh() noexcept
+			{
+				g_prismaTelemetry.recipeRefreshes.fetch_add(1u, std::memory_order_relaxed);
+			}
+
+			static void RecordCoalescedTick() noexcept
+			{
+				g_prismaTelemetry.coalescedTicks.fetch_add(1u, std::memory_order_relaxed);
+			}
+
+			static void RecordSlowTick() noexcept
+			{
+				g_prismaTelemetry.slowTicks.fetch_add(1u, std::memory_order_relaxed);
+			}
+
 			static void RecordUiCommand() noexcept
 			{
 				g_prismaTelemetry.uiCommands.fetch_add(1u, std::memory_order_relaxed);
@@ -48,13 +63,16 @@
 				g_nextTelemetryLogAt = a_now + std::chrono::seconds(15);
 
 				SKSE::log::debug(
-					"CalamityAffixes: Prisma telemetry (ticks={}, queued={}, clears={}, tooltipPushes={}, contextRefreshes={}, panelRefreshes={}, commands={}, menus={}, panelOpen={}).",
+					"CalamityAffixes: Prisma telemetry (ticks={}, queued={}, coalesced={}, slow={}, clears={}, tooltipPushes={}, contextRefreshes={}, panelRefreshes={}, recipeRefreshes={}, commands={}, menus={}, panelOpen={}).",
 					g_prismaTelemetry.tickRuns.load(std::memory_order_relaxed),
 					g_prismaTelemetry.workerEnqueues.load(std::memory_order_relaxed),
+					g_prismaTelemetry.coalescedTicks.load(std::memory_order_relaxed),
+					g_prismaTelemetry.slowTicks.load(std::memory_order_relaxed),
 					g_prismaTelemetry.tooltipClears.load(std::memory_order_relaxed),
 					g_prismaTelemetry.tooltipPushes.load(std::memory_order_relaxed),
 					g_prismaTelemetry.selectedContextRefreshes.load(std::memory_order_relaxed),
 					g_prismaTelemetry.panelRefreshes.load(std::memory_order_relaxed),
+					g_prismaTelemetry.recipeRefreshes.load(std::memory_order_relaxed),
 					g_prismaTelemetry.uiCommands.load(std::memory_order_relaxed),
 					g_relevantMenusOpen.load(std::memory_order_relaxed),
 					g_controlPanelOpen.load(std::memory_order_relaxed));
@@ -106,13 +124,19 @@
 				SetRunewordRecipeList({});
 				SetRunewordPanelState({});
 				SetRunewordAffixPreview("");
+				RequestRunewordPanelRefresh(true);
 			}
 
-			static void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge)
+			static void RefreshRunewordRecipeBindings(CalamityAffixes::EventBridge& a_bridge)
+			{
+				PrismaTelemetryController::RecordRecipeRefresh();
+				SetRunewordRecipeList(a_bridge.GetRunewordRecipeEntries());
+			}
+
+			static void RefreshRunewordPanelDynamicBindings(CalamityAffixes::EventBridge& a_bridge)
 			{
 				PrismaTelemetryController::RecordPanelRefresh();
 				SetRunewordBaseInventoryList(a_bridge.GetRunewordBaseInventoryEntries());
-				SetRunewordRecipeList(a_bridge.GetRunewordRecipeEntries());
 				SetRunewordPanelState(a_bridge.GetRunewordPanelState());
 				SetRunewordAffixPreview(a_bridge.GetSelectedRunewordBaseAffixTooltip(g_uiLanguageMode.load()).value_or(""));
 			}
@@ -140,9 +164,24 @@
 			PrismaViewStateController::ClearTooltipViewState(a_clearRunewordPanelData);
 		}
 
-		void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge)
+		void RequestRunewordPanelRefresh(bool a_includeRecipes) noexcept
 		{
-			PrismaViewStateController::RefreshRunewordPanelBindings(a_bridge);
+			g_runewordPanelDynamicDirty = true;
+			if (a_includeRecipes) {
+				g_runewordRecipeListDirty = true;
+			}
+		}
+
+		void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge, bool a_includeRecipes)
+		{
+			if (a_includeRecipes) {
+				PrismaViewStateController::RefreshRunewordRecipeBindings(a_bridge);
+				g_runewordRecipeListDirty = false;
+			}
+			PrismaViewStateController::RefreshRunewordPanelDynamicBindings(a_bridge);
+			g_runewordPanelDynamicDirty = false;
+			g_nextPanelSafetyRefreshAt =
+				std::chrono::steady_clock::now() + kPanelSafetyRefreshInterval;
 		}
 
 		void MaybeLogPrismaTelemetry(std::chrono::steady_clock::time_point a_now, bool a_uiActive)

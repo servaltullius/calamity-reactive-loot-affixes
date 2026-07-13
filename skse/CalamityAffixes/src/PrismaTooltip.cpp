@@ -61,7 +61,8 @@ namespace CalamityAffixes::PrismaTooltip
 		void ClearSelectedTooltipFromView(bool a_force, bool a_selectionChanged);
 		bool PushSelectedTooltipSnapshot(bool a_force = false);
 		void ClearTooltipViewState(bool a_clearRunewordPanelData);
-		void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge);
+		void RequestRunewordPanelRefresh(bool a_includeRecipes) noexcept;
+		void RefreshRunewordPanelBindings(CalamityAffixes::EventBridge& a_bridge, bool a_includeRecipes);
 		void MaybeLogPrismaTelemetry(std::chrono::steady_clock::time_point a_now, bool a_uiActive);
 		[[nodiscard]] bool HandleStructuredUiCommand(std::string_view a_command);
 		void HandleEventBackedUiCommand(std::string_view a_command);
@@ -193,11 +194,6 @@ namespace CalamityAffixes::PrismaTooltip
 
 			const char* value = a_open ? "1" : "0";
 			g_api->InteropCall(g_view, kInteropSetControlPanel, value);
-
-			// Fallback path if JS interop registration failed for any reason.
-			g_api->Invoke(g_view, a_open
-				? "if (window.setControlPanel) { window.setControlPanel('1'); }"
-				: "if (window.setControlPanel) { window.setControlPanel('0'); }");
 		}
 
 		void ApplyControlPanelState(bool a_open)

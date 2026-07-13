@@ -1,5 +1,8 @@
 		constexpr auto kPollInterval = std::chrono::milliseconds(300);
 		constexpr auto kHotkeyRefreshInterval = std::chrono::seconds(2);
+		constexpr auto kPanelSafetyRefreshInterval = std::chrono::seconds(2);
+		constexpr auto kSlowTickThreshold = std::chrono::milliseconds(8);
+		constexpr auto kSlowTickLogInterval = std::chrono::seconds(30);
 		constexpr auto kPrismaRetryInterval = std::chrono::seconds(5);
 		constexpr auto kPrismaDomReadyTimeout = std::chrono::seconds(15);
 		constexpr auto kViewPath = "CalamityAffixes/index.html";
@@ -51,6 +54,7 @@
 		constexpr int kMaxTooltipFontPermille = 1800;
 
 		std::atomic_bool g_installed{ false };
+		std::atomic_bool g_tickTaskPending{ false };
 		enum class PrismaAvailabilityStatus : std::uint8_t
 		{
 			kNotChecked,
@@ -86,6 +90,10 @@
 
 		bool g_lastPanelStateKnown = false;
 		bool g_lastPanelState = false;
+		bool g_runewordPanelDynamicDirty = true;
+		bool g_runewordRecipeListDirty = true;
+		std::chrono::steady_clock::time_point g_nextPanelSafetyRefreshAt{};
+		std::chrono::steady_clock::time_point g_nextSlowTickLogAt{};
 
 		using PanelLayout = PrismaLayoutPersistence::PanelLayout;
 		using TooltipLayout = PrismaLayoutPersistence::TooltipLayout;
@@ -142,6 +150,9 @@
 			std::atomic<std::uint64_t> tooltipPushes{ 0u };
 			std::atomic<std::uint64_t> selectedContextRefreshes{ 0u };
 			std::atomic<std::uint64_t> panelRefreshes{ 0u };
+			std::atomic<std::uint64_t> recipeRefreshes{ 0u };
+			std::atomic<std::uint64_t> coalescedTicks{ 0u };
+			std::atomic<std::uint64_t> slowTicks{ 0u };
 			std::atomic<std::uint64_t> uiCommands{ 0u };
 		};
 

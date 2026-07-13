@@ -38,6 +38,7 @@ namespace CalamityAffixes
 		bool hasRecipe{ false };
 		bool isComplete{ false };
 		std::string recipeName{};
+		std::uint64_t recipeToken{ 0 };
 		std::uint32_t insertedRunes{ 0 };
 		std::uint32_t totalRunes{ 0 };
 		std::string nextRuneName{};

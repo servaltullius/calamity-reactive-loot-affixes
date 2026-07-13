@@ -1,3 +1,41 @@
+		class SlowPrismaTickProbe final
+		{
+		public:
+			explicit SlowPrismaTickProbe(std::chrono::steady_clock::time_point a_started) noexcept :
+				_started(a_started)
+			{}
+
+			~SlowPrismaTickProbe()
+			{
+				const auto finished = std::chrono::steady_clock::now();
+				const auto elapsed = finished - _started;
+				if (elapsed < kSlowTickThreshold) {
+					return;
+				}
+
+				PrismaTelemetryController::RecordSlowTick();
+				if (g_nextSlowTickLogAt.time_since_epoch().count() != 0 &&
+					finished < g_nextSlowTickLogAt) {
+					return;
+				}
+				g_nextSlowTickLogAt = finished + kSlowTickLogInterval;
+
+				const auto elapsedMs = std::chrono::duration<double, std::milli>(elapsed).count();
+				SKSE::log::warn(
+					"CalamityAffixes: slow Prisma tick ({:.2f}ms, panelOpen={}, dynamicDirty={}, recipeDirty={}, panelRefreshes={}, recipeRefreshes={}, coalesced={}).",
+					elapsedMs,
+					g_controlPanelOpen.load(std::memory_order_relaxed),
+					g_runewordPanelDynamicDirty,
+					g_runewordRecipeListDirty,
+					g_prismaTelemetry.panelRefreshes.load(std::memory_order_relaxed),
+					g_prismaTelemetry.recipeRefreshes.load(std::memory_order_relaxed),
+					g_prismaTelemetry.coalescedTicks.load(std::memory_order_relaxed));
+			}
+
+		private:
+			std::chrono::steady_clock::time_point _started;
+		};
+
 		[[nodiscard]] bool TickShouldWaitForReadyView(std::chrono::steady_clock::time_point now)
 		{
 			if (IsViewReady()) {
@@ -74,14 +112,23 @@
 			return true;
 		}
 
-		void RefreshTickRunewordPanelBindings(bool a_panelRequested)
+		void RefreshTickRunewordPanelBindings(
+			bool a_panelRequested,
+			std::chrono::steady_clock::time_point a_now)
 		{
 			if (!a_panelRequested) {
 				return;
 			}
 
+			const bool safetyRefreshDue =
+				g_nextPanelSafetyRefreshAt.time_since_epoch().count() == 0 ||
+				a_now >= g_nextPanelSafetyRefreshAt;
+			if (!g_runewordPanelDynamicDirty && !g_runewordRecipeListDirty && !safetyRefreshDue) {
+				return;
+			}
+
 			if (auto* bridge = CalamityAffixes::EventBridge::GetSingleton()) {
-				RefreshRunewordPanelBindings(*bridge);
+				RefreshRunewordPanelBindings(*bridge, g_runewordRecipeListDirty);
 			}
 		}
 
@@ -117,9 +164,14 @@
 		void Tick()
 		{
 			const auto now = std::chrono::steady_clock::now();
+			const SlowPrismaTickProbe slowTickProbe{ now };
 			PrismaTelemetryController::RecordTickRun();
 			RefreshControlPanelHotkeyFromMcm(false);
+			const auto previousUiLanguageMode = g_uiLanguageMode.load(std::memory_order_relaxed);
 			RefreshUiLanguageFromMcm(false);
+			if (g_uiLanguageMode.load(std::memory_order_relaxed) != previousUiLanguageMode) {
+				RequestRunewordPanelRefresh(true);
+			}
 			(void)EnsurePrisma(false);
 
 			if (TickShouldWaitForReadyView(now)) {
@@ -138,6 +190,6 @@
 				return;
 			}
 
-			RefreshTickRunewordPanelBindings(panelRequested);
+			RefreshTickRunewordPanelBindings(panelRequested, now);
 			FinalizeTickTooltipPresentation(panelRequested, now);
 		}

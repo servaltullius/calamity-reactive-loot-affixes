@@ -43,10 +43,7 @@
         box-sizing: border-box;
       }
 
-      /* ── Smooth scrolling & thin scrollbar ── */
-      * {
-        scroll-behavior: smooth;
-      }
+      /* ── Thin scrollbar; scrolling is frame-paced in JS for CEF. ── */
       ::-webkit-scrollbar {
         width: calc(5px * var(--panel-ui-scale));
       }
@@ -205,6 +202,12 @@
         flex-direction: column;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
+        opacity: 0;
+        transition: opacity 140ms ease-out;
+      }
+
+      #controlPanel.is-visible {
+        opacity: 1;
       }
 
       .cpTitle {
@@ -253,6 +256,15 @@
         justify-content: center;
         font-size: calc(18px * var(--panel-ui-scale));
         line-height: 1;
+      }
+
+      :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary) {
+        transition:
+          background-color 120ms ease-out,
+          border-color 120ms ease-out,
+          color 120ms ease-out,
+          opacity 120ms ease-out,
+          transform 90ms ease-out;
       }
 
       .cpIconButton:hover {
@@ -428,6 +440,10 @@
 
       .cpTabPane[hidden] {
         display: none;
+      }
+
+      .cpTabPane:not([hidden]) {
+        animation: cpPaneEnter 140ms ease-out;
       }
 
       .cpGrid {
@@ -747,7 +763,6 @@
         border-color: rgba(0, 255, 153, 0.32);
         background: rgba(0, 255, 153, 0.09);
         color: rgba(230, 255, 243, 0.98);
-        animation: rwActivePulse 1.9s ease-in-out infinite;
       }
 
       .rwProgressStep.complete {
@@ -800,7 +815,6 @@
         box-shadow:
           inset 0 1px 0 rgba(255, 255, 255, 0.03),
           0 0 0 1px rgba(0, 255, 153, 0.1);
-        animation: rwActivePulse 1.9s ease-in-out infinite;
       }
 
       .cpStepCard.complete {
@@ -873,11 +887,11 @@
       }
 
       .cpPrimaryButton.attention {
-        animation: rwPrimaryPulse 1.5s ease-in-out infinite;
+        box-shadow: 0 0 0 2px rgba(0, 255, 153, 0.12);
       }
 
       .rwStateShift {
-        animation: rwStateShift 420ms ease;
+        animation: rwStateShift 160ms ease-out;
       }
 
       .rwRecipeEffectLine {
@@ -1293,7 +1307,7 @@
         padding-right: calc(4px * var(--panel-ui-scale));
       }
 
-      [data-wheel-scroll-mode="amplified"] {
+      [data-wheel-scroll-mode="smooth"] {
         scroll-behavior: auto;
       }
 
@@ -1388,40 +1402,24 @@
       }
 
       @keyframes rwStateShift {
-        0% {
-          transform: scale(0.985);
-          box-shadow: 0 0 0 0 rgba(173, 255, 219, 0);
+        from {
+          opacity: 0.78;
+          transform: translate3d(0, 2px, 0);
         }
-        55% {
-          transform: scale(1.01);
-          box-shadow: 0 0 0 6px rgba(173, 255, 219, 0.08);
-        }
-        100% {
-          transform: scale(1);
-          box-shadow: 0 0 0 0 rgba(173, 255, 219, 0);
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
         }
       }
 
-      @keyframes rwActivePulse {
-        0%, 100% {
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.03),
-            0 0 0 1px rgba(0, 255, 153, 0.08);
+      @keyframes cpPaneEnter {
+        from {
+          opacity: 0.72;
+          transform: translate3d(0, 3px, 0);
         }
-        50% {
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.03),
-            0 0 0 1px rgba(0, 255, 153, 0.16),
-            0 10px 28px rgba(0, 255, 153, 0.08);
-        }
-      }
-
-      @keyframes rwPrimaryPulse {
-        0%, 100% {
-          box-shadow: 0 0 0 0 rgba(0, 255, 153, 0);
-        }
-        50% {
-          box-shadow: 0 0 0 4px rgba(0, 255, 153, 0.1);
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
         }
       }
 
@@ -1451,11 +1449,12 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .rwProgressStep.active,
-        .cpStepCard.active,
-        .cpPrimaryButton.attention,
-        .rwStateShift {
+        #controlPanel,
+        .cpTabPane:not([hidden]),
+        .rwStateShift,
+        :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary) {
           animation: none;
+          transition: none;
         }
       }
 
@@ -1734,7 +1733,7 @@
                     <div
                       id="recipeList"
                       class="cpList rwList rwRecipeExplorerList rwRecipeGrid"
-                      data-wheel-scroll-mode="amplified"
+                      data-wheel-scroll-mode="smooth"
                     ></div>
                     <div class="cpContextMeta" id="runewordRecipeListHint">
                       Select a recipe to load its requirements and action controls into the inspector on the right. / 레시피를 선택하면 오른쪽 inspector에 요구 조건과 실행 컨트롤이 표시됩니다.
@@ -2069,6 +2068,14 @@
       let inventoryItemsState = [];
       let recipeItemsState = [];
       let recipeSearchQuery = "";
+      let recipeCatalogSignatureState = "";
+      let recipeCatalogDomDirty = true;
+      let confirmedRecipeTokenState = "";
+      let optimisticRecipeTokenState = "";
+      let optimisticRecipeSelectionNonce = 0;
+      const optimisticRecipeSelectionTimeoutMs = 1200;
+      const recipeNodeByToken = new Map();
+      const recipeSearchDocumentByToken = new Map();
       let mainTabState = "runeword";
       let pendingOpenMainTab = null;
       let runewordPanelState = {
@@ -2095,6 +2102,7 @@
       let tooltipLayout = getDefaultTooltipLayout();
       const panelCommandAttribute = "data-cmd";
       const panelOpenTabAttribute = "data-open-tab";
+      const recipeSelectionCommandPrefix = "runeword.recipe.select:";
       const panelRenderSection = Object.freeze({
         hotkeyHints: "hotkeyHints",
         selectedItemContext: "selectedItemContext",
@@ -2944,6 +2952,22 @@
         });
       }
 
+      function applyPendingPanelResize() {
+        if (!panelResizeState) return;
+        panelResizeState.framePending = false;
+        controlPanel.style.width = Math.round(panelResizeState.nextWidth) + "px";
+        controlPanel.style.height = Math.round(panelResizeState.nextHeight) + "px";
+        updatePanelUiScale();
+      }
+
+      function schedulePanelResizeFrame() {
+        if (!panelResizeState || panelResizeState.framePending) {
+          return;
+        }
+        panelResizeState.framePending = true;
+        requestAnimationFrame(applyPendingPanelResize);
+      }
+
       function keepPanelInViewport() {
         if (!controlPanelOpen) return;
         if (!controlPanel.style.left || !controlPanel.style.top) return;
@@ -3040,7 +3064,10 @@
           startLeft: rect.left,
           startTop: rect.top,
           startWidth: rect.width,
-          startHeight: rect.height
+          startHeight: rect.height,
+          nextWidth: rect.width,
+          nextHeight: rect.height,
+          framePending: false
         };
 
         const target = event.currentTarget;
@@ -3124,9 +3151,9 @@
           nextWidth = clamp(nextWidth, minWidth, Math.max(minWidth, limitWidth));
           nextHeight = clamp(nextHeight, minHeight, Math.max(minHeight, limitHeight));
 
-          controlPanel.style.width = `${Math.round(nextWidth)}px`;
-          controlPanel.style.height = `${Math.round(nextHeight)}px`;
-          updatePanelUiScale();
+          panelResizeState.nextWidth = nextWidth;
+          panelResizeState.nextHeight = nextHeight;
+          schedulePanelResizeFrame();
           event.preventDefault();
           return;
         }
@@ -3196,6 +3223,7 @@
 
         if (panelResizeState) {
           if (!event || event.pointerId === panelResizeState.pointerId) {
+            applyPendingPanelResize();
             const id = panelResizeState.pointerId;
             const targets = [panelResizeRight, panelResizeBottom, panelResizeCorner];
             for (const target of targets) {
@@ -3650,8 +3678,96 @@
         }
       }
 
+      function resolveRecipeToken(item) {
+        return typeof item?.token === "string" ? item.token.trim() : "";
+      }
+
+      function buildRecipeCatalogSignature(items) {
+        const catalog = (Array.isArray(items) ? items : []).map((item) => [
+          resolveRecipeToken(item),
+          typeof item?.name === "string" ? item.name : "",
+          typeof item?.runes === "string" ? item.runes : "",
+          typeof item?.summaryKey === "string" ? item.summaryKey : "",
+          typeof item?.summary === "string" ? item.summary : "",
+          typeof item?.detail === "string" ? item.detail : "",
+          typeof item?.baseKey === "string" ? item.baseKey : ""
+        ]);
+        return JSON.stringify(catalog);
+      }
+
+      function resolveConfirmedRecipeToken(items) {
+        const selected = (Array.isArray(items) ? items : []).find(
+          (item) => Boolean(item?.selected) && Boolean(resolveRecipeToken(item))
+        );
+        return selected ? resolveRecipeToken(selected) : "";
+      }
+
+      function getDisplayedRecipeToken() {
+        return optimisticRecipeTokenState || confirmedRecipeTokenState;
+      }
+
+      function updateRecipeSelectionDom(previousToken, nextToken) {
+        if (previousToken === nextToken) return;
+
+        const previousNode = recipeNodeByToken.get(previousToken);
+        if (previousNode) {
+          previousNode.classList.remove("selected");
+          previousNode.setAttribute("aria-pressed", "false");
+        }
+
+        const nextNode = recipeNodeByToken.get(nextToken);
+        if (nextNode) {
+          nextNode.classList.add("selected");
+          nextNode.setAttribute("aria-pressed", "true");
+        }
+      }
+
+      function applyConfirmedRecipeSelection(nextToken) {
+        const previousToken = getDisplayedRecipeToken();
+        confirmedRecipeTokenState = nextToken || "";
+        optimisticRecipeTokenState = "";
+        optimisticRecipeSelectionNonce += 1;
+        updateRecipeSelectionDom(previousToken, confirmedRecipeTokenState);
+      }
+
+      function beginOptimisticRecipeSelection(nextToken) {
+        if (!nextToken) return;
+
+        const previousToken = getDisplayedRecipeToken();
+        if (nextToken === confirmedRecipeTokenState) {
+          optimisticRecipeTokenState = "";
+          updateRecipeSelectionDom(previousToken, confirmedRecipeTokenState);
+          return;
+        }
+
+        optimisticRecipeTokenState = nextToken;
+        updateRecipeSelectionDom(previousToken, nextToken);
+        const pendingNonce = ++optimisticRecipeSelectionNonce;
+        window.setTimeout(() => {
+          if (pendingNonce !== optimisticRecipeSelectionNonce) return;
+          const optimisticToken = getDisplayedRecipeToken();
+          optimisticRecipeTokenState = "";
+          updateRecipeSelectionDom(optimisticToken, confirmedRecipeTokenState);
+        }, optimisticRecipeSelectionTimeoutMs);
+      }
+
+      function invalidateRecipePresentationCaches() {
+        recipeCatalogDomDirty = true;
+        recipeNodeByToken.clear();
+        recipeSearchDocumentByToken.clear();
+      }
+
       function getSelectedRecipeItem() {
         const items = Array.isArray(recipeItemsState) ? recipeItemsState : [];
+        if (confirmedRecipeTokenState) {
+          const byToken = items.find(
+            (item) => resolveRecipeToken(item) === confirmedRecipeTokenState
+          );
+          if (byToken) {
+            return byToken;
+          }
+        }
+
         const selected = items.find((item) => Boolean(item?.selected));
         if (selected) {
           return selected;
@@ -3670,7 +3786,7 @@
         return byName || null;
       }
 
-      function resolveRecipeSearchDocument(item) {
+      function buildRecipeSearchDocument(item) {
         const name = typeof item?.name === "string" ? item.name.toLowerCase() : "";
         const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
         const base = resolveRecipeBaseBadge(item).text.toLowerCase();
@@ -3681,7 +3797,20 @@
           includeDetail: true
         }).toLowerCase();
 
-        return `${name}\n${runes}\n${base}\n${summary}\n${detail}\n${tooltipText}`;
+        return [name, runes, base, summary, detail, tooltipText].join("\n");
+      }
+
+      function resolveRecipeSearchDocument(item) {
+        const token = resolveRecipeToken(item);
+        if (token && recipeSearchDocumentByToken.has(token)) {
+          return recipeSearchDocumentByToken.get(token);
+        }
+
+        const searchDocument = buildRecipeSearchDocument(item);
+        if (token) {
+          recipeSearchDocumentByToken.set(token, searchDocument);
+        }
+        return searchDocument;
       }
 
       function resolveRecipeListViewModel() {
@@ -3730,8 +3859,76 @@
         };
       }
 
+      function createRecipeButton(item) {
+        const token = resolveRecipeToken(item);
+        const name = typeof item?.name === "string" ? item.name : "";
+        if (!token || !name) {
+          return null;
+        }
+
+        const runes = typeof item?.runes === "string" ? item.runes : "";
+        const baseBadge = resolveRecipeBaseBadge(item);
+        const summaryText = resolveRecipeNumericSummaryText(item);
+        const tooltipLikeText = buildRunewordTooltipLikeText(item, {
+          includeName: true,
+          includeDetail: true
+        });
+        const selected = token === getDisplayedRecipeToken();
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = selected ? "cpListItem selected" : "cpListItem";
+        button.dataset.recipeToken = token;
+        button.setAttribute("aria-pressed", selected ? "true" : "false");
+
+        const head = document.createElement("div");
+        head.className = "rwRecipeHead";
+        const title = document.createElement("div");
+        title.className = "rwRecipeName";
+        title.textContent = runes ? name + " [" + runes + "]" : name;
+        head.appendChild(title);
+
+        const badge = document.createElement("div");
+        badge.className = "rwRecipeBaseBadge " + baseBadge.className;
+        badge.textContent = baseBadge.text;
+        head.appendChild(badge);
+        button.appendChild(head);
+
+        if (summaryText) {
+          const summary = document.createElement("div");
+          summary.className = "rwRecipeSummary";
+          summary.textContent = summaryText;
+          button.appendChild(summary);
+        }
+
+        const hoverText = tooltipLikeText.trim();
+        if (hoverText) {
+          button.title = hoverText;
+          button.setAttribute("aria-label", hoverText.replace(/\n/g, ". "));
+        } else {
+          button.setAttribute("aria-label", name);
+        }
+
+        button.setAttribute(
+          panelCommandAttribute,
+          recipeSelectionCommandPrefix + token
+        );
+        return button;
+      }
+
+      function rebuildRecipeCatalogDom() {
+        recipeNodeByToken.clear();
+        for (const item of recipeItemsState) {
+          const token = resolveRecipeToken(item);
+          const button = createRecipeButton(item);
+          if (token && button) {
+            recipeNodeByToken.set(token, button);
+          }
+        }
+        recipeCatalogDomDirty = false;
+      }
+
       function renderRecipeItems() {
-        clearChildren(recipeList);
         const viewModel = resolveRecipeListViewModel();
 
         if (runewordRecipeListTitle) {
@@ -3739,6 +3936,10 @@
         }
         if (recipeCountLabel) {
           recipeCountLabel.textContent = viewModel.countText;
+        }
+
+        if (recipeCatalogDomDirty) {
+          rebuildRecipeCatalogDom();
         }
 
         if (viewModel.emptyState) {
@@ -3751,56 +3952,19 @@
           return;
         }
 
+        const selectedToken = getDisplayedRecipeToken();
+        const fragment = document.createDocumentFragment();
         for (const item of viewModel.visibleItems) {
-          const token = typeof item?.token === "string" ? item.token : "";
-          const name = typeof item?.name === "string" ? item.name : "";
-          const runes = typeof item?.runes === "string" ? item.runes : "";
-          const baseBadge = resolveRecipeBaseBadge(item);
-          const summaryText = resolveRecipeNumericSummaryText(item);
-          const tooltipLikeText = buildRunewordTooltipLikeText(item, {
-            includeName: true,
-            includeDetail: true
-          });
-          const selected = Boolean(item?.selected);
-          if (!token || !name) {
-            continue;
-          }
+          const token = resolveRecipeToken(item);
+          const button = recipeNodeByToken.get(token);
+          if (!button) continue;
 
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = selected ? "cpListItem selected" : "cpListItem";
-          const head = document.createElement("div");
-          head.className = "rwRecipeHead";
-          const title = document.createElement("div");
-          title.className = "rwRecipeName";
-          title.textContent = runes ? `${name} [${runes}]` : name;
-          head.appendChild(title);
-
-          const badge = document.createElement("div");
-          badge.className = `rwRecipeBaseBadge ${baseBadge.className}`;
-          badge.textContent = baseBadge.text;
-          head.appendChild(badge);
-          button.appendChild(head);
-
-          if (summaryText) {
-            const summary = document.createElement("div");
-            summary.className = "rwRecipeSummary";
-            summary.textContent = summaryText;
-            button.appendChild(summary);
-          }
-
-          const hoverText = tooltipLikeText.trim();
-          if (hoverText) {
-            button.title = hoverText;
-            button.setAttribute("aria-label", hoverText.replace(/\n/g, ". "));
-          } else {
-            button.removeAttribute("title");
-            button.setAttribute("aria-label", name);
-          }
-
-          button.setAttribute(panelCommandAttribute, `runeword.recipe.select:${token}`);
-          recipeList.appendChild(button);
+          const selected = token === selectedToken;
+          button.classList.toggle("selected", selected);
+          button.setAttribute("aria-pressed", selected ? "true" : "false");
+          fragment.appendChild(button);
         }
+        recipeList.replaceChildren(fragment);
       }
 
       function resolveRunewordPanelActionState(state) {
@@ -3905,11 +4069,16 @@ ${buttonHint}`
         if (previous === state) {
           return;
         }
+
         element.dataset.stepState = state;
-        element.classList.remove("rwStateShift");
-        void element.offsetWidth;
+        const shiftNonce = String((Number(element.dataset.shiftNonce) || 0) + 1);
+        element.dataset.shiftNonce = shiftNonce;
         element.classList.add("rwStateShift");
-        window.setTimeout(() => element.classList.remove("rwStateShift"), 420);
+        window.setTimeout(() => {
+          if (element.dataset.shiftNonce === shiftNonce) {
+            element.classList.remove("rwStateShift");
+          }
+        }, 170);
       }
 
       function setRunewordFlowState(element, state) {
@@ -4313,9 +4482,22 @@ ${buttonHint}`
       }
 
       function setRecipeItems(raw) {
-        recipeItemsState = parseInteropArrayPayload(raw);
+        const nextItems = parseInteropArrayPayload(raw);
+        const nextCatalogSignature = buildRecipeCatalogSignature(nextItems);
+        const catalogChanged = nextCatalogSignature !== recipeCatalogSignatureState;
+        const nextConfirmedToken = resolveConfirmedRecipeToken(nextItems);
+
+        recipeItemsState = nextItems;
+        if (catalogChanged) {
+          recipeCatalogSignatureState = nextCatalogSignature;
+          invalidateRecipePresentationCaches();
+        }
+        applyConfirmedRecipeSelection(nextConfirmedToken);
+
+        if (catalogChanged) {
+          schedulePanelRender(panelRenderSection.recipeItems);
+        }
         schedulePanelRender(
-          panelRenderSection.recipeItems,
           panelRenderSection.runewordPanelState,
           panelRenderSection.tooltipPlacement
         );
@@ -4348,6 +4530,13 @@ ${buttonHint}`
             : []
         };
 
+        if (Object.prototype.hasOwnProperty.call(data, "recipeToken")) {
+          const recipeToken = typeof data.recipeToken === "string"
+            ? data.recipeToken.trim()
+            : "";
+          applyConfirmedRecipeSelection(recipeToken);
+        }
+
         if (runewordAffixPendingState) {
           runewordAffixPendingState = false;
         }
@@ -4375,23 +4564,37 @@ ${buttonHint}`
       }
 
       function applyControlPanelOpenState(nextOpen) {
-        controlPanelOpen = nextOpen;
-        controlPanel.style.display = controlPanelOpen ? "flex" : "none";
+        const expectedDisplay = nextOpen ? "flex" : "none";
+        if (
+          controlPanelOpen === nextOpen &&
+          controlPanel.style.display === expectedDisplay
+        ) {
+          return;
+        }
 
+        controlPanelOpen = nextOpen;
         if (!controlPanelOpen) {
           feedback.textContent = "";
           endPanelDrag();
           persistPanelLayout();
+          controlPanel.classList.remove("is-visible");
+          controlPanel.style.display = "none";
         } else {
+          controlPanel.classList.remove("is-visible");
+          controlPanel.style.display = "flex";
           if (!panelLayoutLoaded && !controlPanel.style.left) {
             const rect = controlPanel.getBoundingClientRect();
-            controlPanel.style.left = `${Math.round(rect.left)}px`;
-            controlPanel.style.top = `${Math.round(rect.top)}px`;
+            controlPanel.style.left = Math.round(rect.left) + "px";
+            controlPanel.style.top = Math.round(rect.top) + "px";
             controlPanel.style.right = "auto";
             controlPanel.style.bottom = "auto";
           }
-          updatePanelUiScale();
           keepPanelInViewport();
+          requestAnimationFrame(() => {
+            if (controlPanelOpen) {
+              controlPanel.classList.add("is-visible");
+            }
+          });
         }
 
         document.body.style.pointerEvents = controlPanelOpen ? "auto" : "none";
@@ -4486,6 +4689,7 @@ ${buttonHint}`
           return;
         }
         uiLang = next;
+        invalidateRecipePresentationCaches();
         initUiText();
       }
 
@@ -4631,6 +4835,12 @@ ${buttonHint}`
           pendingOpenMainTab = openTab;
         }
 
+        if (command.startsWith(recipeSelectionCommandPrefix)) {
+          beginOptimisticRecipeSelection(
+            command.slice(recipeSelectionCommandPrefix.length)
+          );
+        }
+
         if (shouldInvalidatePreviewForCommand(command)) {
           invalidateRunewordAffixPreview(resolvePreviewPendingStateForCommand(command));
         }
@@ -4747,89 +4957,153 @@ ${buttonHint}`
       }
 
       initializeCalamityPanel();
-      // ── Smooth inertia scroll for CEF ──
-      (function initSmoothScroll() {
-        const SCROLL_MULT = 1.8;   // wheel amplification
-        const RECIPE_SCROLL_MULT = 1.9;
-        const RECIPE_SCROLL_MIN_STEP = 72;
-        const RECIPE_SCROLL_LINE_HEIGHT = 28;
-        const FRICTION    = 0.88;  // per-frame decay (lower = more drag)
-        const MIN_VEL     = 0.5;   // stop threshold
-
+      // Frame-paced wheel scrolling for PrismaUI's CEF view.
+      (function initFramePacedScroll() {
+        const SCROLL_LINE_HEIGHT_PX = 28;
+        const MAX_WHEEL_DELTA_PX = 160;
+        const SMOOTH_SCROLL_TIME_CONSTANT_MS = 72;
+        const SCROLL_STOP_DISTANCE_PX = 0.35;
         const state = new WeakMap();
+        const scrollParentCache = new WeakMap();
 
-        function getState(el) {
-          if (!state.has(el)) {
-            state.set(el, { velocity: 0, raf: 0 });
+        function getScrollState(element) {
+          if (!state.has(element)) {
+            state.set(element, {
+              targetScrollTop: element.scrollTop,
+              raf: 0,
+              lastTimestamp: 0
+            });
           }
-          return state.get(el);
+          return state.get(element);
         }
 
-        function animate(el) {
-          const s = getState(el);
-          s.velocity *= FRICTION;
-          if (Math.abs(s.velocity) < MIN_VEL) {
-            s.velocity = 0;
-            s.raf = 0;
-            return;
-          }
-          el.scrollTop += s.velocity;
-          s.raf = requestAnimationFrame(() => animate(el));
+        function isScrollable(element) {
+          return Boolean(
+            element &&
+            element.isConnected &&
+            element.clientHeight > 0 &&
+            element.scrollHeight > element.clientHeight
+          );
         }
 
         function findScrollParent(target) {
-          let el = target;
-          while (el && el !== document.body) {
-            const ov = getComputedStyle(el).overflowY;
-            if ((ov === "auto" || ov === "scroll") && el.scrollHeight > el.clientHeight) {
-              return el;
+          if (!(target instanceof Element)) return null;
+
+          const cached = scrollParentCache.get(target);
+          if (isScrollable(cached)) {
+            return cached;
+          }
+
+          let element = target;
+          while (element && element !== document.body) {
+            const overflowY = getComputedStyle(element).overflowY;
+            if (
+              (overflowY === "auto" || overflowY === "scroll") &&
+              isScrollable(element)
+            ) {
+              scrollParentCache.set(target, element);
+              return element;
             }
-            el = el.parentElement;
+            element = element.parentElement;
           }
           return null;
         }
 
-        function resolveWheelScrollMode(el) {
-          if (!el) return "";
-          const mode = el.getAttribute("data-wheel-scroll-mode");
-          return typeof mode === "string" ? mode : "";
-        }
-
-        function resolveWheelDeltaPixels(event, scroller) {
+        function normalizeWheelDeltaPixels(event, scroller) {
+          let deltaPixels = Number(event.deltaY) || 0;
           if (event.deltaMode === 1) {
-            return event.deltaY * RECIPE_SCROLL_LINE_HEIGHT;
+            deltaPixels *= SCROLL_LINE_HEIGHT_PX;
+          } else if (event.deltaMode === 2) {
+            deltaPixels *= Math.max(
+              scroller.clientHeight * 0.9,
+              SCROLL_LINE_HEIGHT_PX * 8
+            );
           }
-          if (event.deltaMode === 2) {
-            return event.deltaY * Math.max(scroller?.clientHeight || 0, RECIPE_SCROLL_LINE_HEIGHT * 8);
-          }
-          return event.deltaY;
+          return clamp(
+            deltaPixels,
+            -MAX_WHEEL_DELTA_PX,
+            MAX_WHEEL_DELTA_PX
+          );
         }
 
-        function normalizeAmplifiedWheelDelta(deltaPixels) {
-          if (!Number.isFinite(deltaPixels) || deltaPixels === 0) {
-            return 0;
-          }
-          const magnitude = Math.max(Math.abs(deltaPixels), RECIPE_SCROLL_MIN_STEP);
-          return Math.sign(deltaPixels) * magnitude;
-        }
-
-        document.addEventListener("wheel", function (e) {
-          const scroller = findScrollParent(e.target);
-          if (!scroller) return;
-          const scrollMode = resolveWheelScrollMode(scroller);
-          if (scrollMode === "amplified") {
-            e.preventDefault();
-            const deltaPixels = resolveWheelDeltaPixels(e, scroller);
-            const normalizedDeltaPixels = normalizeAmplifiedWheelDelta(deltaPixels);
-            scroller.scrollTop += normalizedDeltaPixels * RECIPE_SCROLL_MULT;
+        function animateScroll(element, timestamp) {
+          const scrollState = getScrollState(element);
+          if (!isScrollable(element)) {
+            scrollState.targetScrollTop = element?.scrollTop || 0;
+            scrollState.raf = 0;
+            scrollState.lastTimestamp = 0;
             return;
           }
 
-          e.preventDefault();
-          const s = getState(scroller);
-          s.velocity += e.deltaY * SCROLL_MULT;
-          if (!s.raf) {
-            s.raf = requestAnimationFrame(() => animate(scroller));
+          const maxScrollTop = Math.max(
+            0,
+            element.scrollHeight - element.clientHeight
+          );
+          scrollState.targetScrollTop = clamp(
+            scrollState.targetScrollTop,
+            0,
+            maxScrollTop
+          );
+          const deltaTime = scrollState.lastTimestamp
+            ? Math.min(40, Math.max(1, timestamp - scrollState.lastTimestamp))
+            : 16.67;
+          scrollState.lastTimestamp = timestamp;
+
+          const current = element.scrollTop;
+          const remaining = scrollState.targetScrollTop - current;
+          if (Math.abs(remaining) <= SCROLL_STOP_DISTANCE_PX) {
+            element.scrollTop = scrollState.targetScrollTop;
+            scrollState.raf = 0;
+            scrollState.lastTimestamp = 0;
+            return;
+          }
+
+          const blend = 1 - Math.exp(
+            -deltaTime / SMOOTH_SCROLL_TIME_CONSTANT_MS
+          );
+          element.scrollTop = current + remaining * blend;
+          scrollState.raf = requestAnimationFrame((nextTimestamp) => {
+            animateScroll(element, nextTimestamp);
+          });
+        }
+
+        document.addEventListener("wheel", (event) => {
+          const scroller = findScrollParent(event.target);
+          if (!scroller) return;
+
+          const deltaPixels = normalizeWheelDeltaPixels(event, scroller);
+          if (deltaPixels === 0) return;
+
+          const scrollState = getScrollState(scroller);
+          if (!scrollState.raf) {
+            scrollState.targetScrollTop = scroller.scrollTop;
+          }
+          const maxScrollTop = Math.max(
+            0,
+            scroller.scrollHeight - scroller.clientHeight
+          );
+          const previousTarget = scrollState.targetScrollTop;
+          const nextTarget = clamp(
+            scrollState.targetScrollTop + deltaPixels,
+            0,
+            maxScrollTop
+          );
+          const targetUnchanged =
+            Math.abs(nextTarget - previousTarget) <= SCROLL_STOP_DISTANCE_PX;
+          const currentAtTarget =
+            Math.abs(scroller.scrollTop - previousTarget) <= SCROLL_STOP_DISTANCE_PX;
+          if (targetUnchanged && currentAtTarget) {
+            return;
+          }
+
+          event.preventDefault();
+          scrollState.targetScrollTop = nextTarget;
+
+          if (!scrollState.raf) {
+            scrollState.lastTimestamp = 0;
+            scrollState.raf = requestAnimationFrame((timestamp) => {
+              animateScroll(scroller, timestamp);
+            });
           }
         }, { passive: false, capture: true });
       })();

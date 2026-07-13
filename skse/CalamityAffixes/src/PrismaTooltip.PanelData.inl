@@ -87,6 +87,7 @@
 				{ "hasRecipe", a_state.hasRecipe },
 				{ "isComplete", a_state.isComplete },
 				{ "recipeName", a_state.recipeName },
+				{ "recipeToken", a_state.recipeToken == 0u ? std::string{} : std::to_string(a_state.recipeToken) },
 				{ "insertedRunes", a_state.insertedRunes },
 				{ "totalRunes", a_state.totalRunes },
 				{ "nextRuneName", a_state.nextRuneName },

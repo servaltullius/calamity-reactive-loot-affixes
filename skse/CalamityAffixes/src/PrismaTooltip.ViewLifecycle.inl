@@ -129,6 +129,8 @@
 		g_runewordCache.recipeListJson.clear();
 		g_runewordCache.panelStateJson.clear();
 		g_runewordCache.affixPreview.clear();
+		RequestRunewordPanelRefresh(true);
+		g_nextPanelSafetyRefreshAt = {};
 	}
 
 	void RegisterPrismaCommandListener()
@@ -285,9 +287,12 @@
 		if (!a_open) {
 			g_controlPanelOpen.store(false);
 			ApplyControlPanelState(false);
+			g_lastPanelState = false;
+			g_lastPanelStateKnown = true;
 			PushUiFeedback("Prisma panel closed.");
 			return;
 		}
+		RequestRunewordPanelRefresh(g_runewordCache.recipeListJson.empty());
 
 		const auto status = EnsurePrisma(true);
 		if (IsPrismaFailureStatus(status)) {
@@ -298,6 +303,8 @@
 
 		g_controlPanelOpen.store(true);
 		if (status == PrismaAvailabilityStatus::kReady) {
+			g_lastPanelState = true;
+			g_lastPanelStateKnown = IsGameplayReady();
 			ApplyControlPanelState(true);
 			PushUiFeedback("Prisma panel opened.");
 		}
@@ -314,6 +321,15 @@
 		}
 	}
 
+	class TickTaskPendingReset final
+	{
+	public:
+		~TickTaskPendingReset()
+		{
+			g_tickTaskPending.store(false, std::memory_order_release);
+		}
+	};
+
 	void StartPrismaWorker()
 	{
 		g_worker = std::jthread([](std::stop_token stopToken) {
@@ -328,8 +344,15 @@
 				}
 
 				if (auto* tasks = SKSE::GetTaskInterface()) {
+					bool expected = false;
+					if (!g_tickTaskPending.compare_exchange_strong(
+							expected, true, std::memory_order_acq_rel)) {
+						PrismaTelemetryController::RecordCoalescedTick();
+						continue;
+					}
 					PrismaTelemetryController::RecordWorkerEnqueue();
 					tasks->AddTask([]() {
+						[[maybe_unused]] const TickTaskPendingReset pendingReset{};
 						Tick();
 					});
 				}
