@@ -178,6 +178,34 @@ namespace CalamityAffixes
 			}
 		}
 
+		// --- CCRT: corpse-only currency ledger + persisted pity ---
+		if (!a_intfc->OpenRecord(
+				kSerializationRecordCorpseCurrencyRuntime,
+				kCorpseCurrencyRuntimeSerializationVersion)) {
+			return;
+		}
+		if (!a_intfc->WriteRecordData(_lootState.runewordFragmentFailStreak) ||
+			!a_intfc->WriteRecordData(_lootState.reforgeOrbFailStreak)) {
+			return;
+		}
+
+		const auto corpseCurrencyLedgerCount =
+			static_cast<std::uint32_t>(_lootState.corpseCurrencyRollLedger.size());
+		if (!a_intfc->WriteRecordData(corpseCurrencyLedgerCount)) {
+			return;
+		}
+		for (const auto& [corpseFormId, entry] : _lootState.corpseCurrencyRollLedger) {
+			if (!a_intfc->WriteRecordData(corpseFormId)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(entry.dayStamp)) {
+				return;
+			}
+			if (!a_intfc->WriteRecordData(entry.processedMask)) {
+				return;
+			}
+		}
+
 		// --- LSBG ---
 		if (!a_intfc->OpenRecord(kSerializationRecordLootShuffleBags, kLootShuffleBagSerializationVersion)) {
 			return;

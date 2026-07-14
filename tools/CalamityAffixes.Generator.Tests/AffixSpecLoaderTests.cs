@@ -920,7 +920,7 @@ public sealed class AffixSpecLoaderTests
         var ladder = AffixSpecLoader.GetRunewordRuneLadder();
 
         Assert.NotNull(ladder);
-        Assert.True(ladder.Count >= 33, "Rune ladder should include full D2-style rune tiers.");
+        Assert.Equal(33, ladder.Count);
         Assert.Equal("El", ladder[0]);
         Assert.Equal("Zod", ladder[^1]);
 
@@ -936,7 +936,7 @@ public sealed class AffixSpecLoaderTests
 
         Assert.True(root.TryGetProperty("runewordCatalog", out var runewordCatalog));
         Assert.Equal(JsonValueKind.Array, runewordCatalog.ValueKind);
-        Assert.True(runewordCatalog.GetArrayLength() >= 90);
+        Assert.Equal(94, runewordCatalog.GetArrayLength());
 
         Assert.True(root.TryGetProperty("runewordRuneWeights", out var runewordRuneWeights));
         Assert.Equal(JsonValueKind.Array, runewordRuneWeights.ValueKind);

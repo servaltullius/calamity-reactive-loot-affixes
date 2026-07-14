@@ -44,7 +44,8 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		auto* aggressor = ResolveActorFromCombatRef(causeRef);
+		const auto aggressorHolder = ResolveActorFromCombatRef(causeRef);
+		auto* aggressor = aggressorHolder.get();
 		auto* target = targetRef->As<RE::Actor>();
 		if (!aggressor || !target) {
 			return RE::BSEventNotifyControl::kContinue;

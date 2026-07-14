@@ -145,7 +145,6 @@ namespace CalamityAffixes
 
 			const float chance = std::clamp(_loot.runewordFragmentChancePercent, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
-				_lootState.runewordFragmentFailStreak = 0;
 				return false;
 			}
 
@@ -208,7 +207,6 @@ namespace CalamityAffixes
 			a_outPityTriggered = false;
 			const float chance = std::clamp(_loot.reforgeOrbChancePercent, 0.0f, 100.0f);
 			if (chance <= 0.0f) {
-				_lootState.reforgeOrbFailStreak = 0;
 				return false;
 			}
 
@@ -246,39 +244,26 @@ namespace CalamityAffixes
 			}
 		}
 
-		bool EventBridge::TryPlaceLootCurrencyItem(
+		bool EventBridge::TryAddLootCurrencyToCorpseInventory(
 			RE::TESBoundObject* a_dropItem,
-			RE::TESObjectREFR* a_sourceContainerRef,
-			bool a_forceWorldPlacement) const
+			RE::Actor* a_corpse) const
 		{
-			if (!a_dropItem) {
+			static_assert(!RuntimePolicy::kAllowWorldCurrencyPlacement);
+
+			if (!a_dropItem || !a_corpse || !a_corpse->IsDead()) {
 				return false;
 			}
 
-			if (!a_forceWorldPlacement && a_sourceContainerRef) {
-				a_sourceContainerRef->AddObjectToContainer(a_dropItem, nullptr, 1, nullptr);
-				return true;
-			}
+			const auto countInCorpse = [a_corpse, a_dropItem]() {
+				auto inventory = a_corpse->GetInventory();
+				const auto it = inventory.find(a_dropItem);
+				return it != inventory.end() ? std::max(0, it->second.first) : 0;
+			};
 
-			auto* anchor = a_sourceContainerRef ? a_sourceContainerRef : RE::PlayerCharacter::GetSingleton();
-			if (!anchor) {
-				return false;
-			}
-
-			auto placed = anchor->PlaceObjectAtMe(a_dropItem, false);
-			if (!placed) {
-				return false;
-			}
-
-			// Avoid "Steal" prompts when currency drops are spawned in owned cells (e.g., Jarl's house).
-			// The engine can apply cell ownership to loose references; explicitly mark these as player-owned.
-			if (auto* player = RE::PlayerCharacter::GetSingleton(); player) {
-				if (auto* playerBase = player->GetActorBase(); playerBase) {
-					placed->extraList.SetOwner(playerBase);
-				}
-			}
-
-			return true;
+			const auto before = countInCorpse();
+			a_corpse->AddObjectToContainer(a_dropItem, nullptr, 1, nullptr);
+			const auto after = countInCorpse();
+			return after > before;
 		}
 
 		void EventBridge::LogRunewordStatus() const

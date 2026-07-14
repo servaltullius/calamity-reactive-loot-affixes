@@ -133,15 +133,15 @@ namespace CalamityAffixes::TriggersDetail
 		return !editorId.empty() && editorId.starts_with("CAFF_");
 	}
 
-	[[nodiscard]] inline RE::Actor* ResolveActorFromCombatRef(RE::TESObjectREFR* a_ref)
+	[[nodiscard]] inline RE::NiPointer<RE::Actor> ResolveActorFromCombatRef(RE::TESObjectREFR* a_ref)
 	{
 		a_ref = SanitizeObjectPointer(a_ref);
 		if (!a_ref) {
-			return nullptr;
+			return {};
 		}
 
 		if (auto* actor = a_ref->As<RE::Actor>()) {
-			return actor;
+			return RE::NiPointer<RE::Actor>{ actor };
 		}
 
 		if (auto* proj = a_ref->As<RE::Projectile>()) {
@@ -149,7 +149,7 @@ namespace CalamityAffixes::TriggersDetail
 			if (auto shooterAny = rt.shooter.get(); shooterAny) {
 				auto* shooterRef = SanitizeObjectPointer(shooterAny.get());
 				if (auto* shooterActor = shooterRef ? shooterRef->As<RE::Actor>() : nullptr) {
-					return shooterActor;
+					return RE::NiPointer<RE::Actor>{ shooterActor };
 				}
 			}
 
@@ -159,12 +159,12 @@ namespace CalamityAffixes::TriggersDetail
 					auto actorAny = actorCause->actor.get();
 					auto* actorRef = actorAny ? SanitizeObjectPointer(actorAny.get()) : nullptr;
 					if (actorRef) {
-						return actorRef;
+						return RE::NiPointer<RE::Actor>{ actorRef };
 					}
 				}
 			}
 		}
 
-		return nullptr;
+		return {};
 	}
 }

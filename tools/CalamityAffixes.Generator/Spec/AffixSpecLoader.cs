@@ -87,6 +87,25 @@ public static class AffixSpecLoader
         return RunewordContract.RuneWeights;
     }
 
+    internal static void ValidateRunewordContractReferences(AffixSpec spec)
+    {
+        var affixIds = new HashSet<string>(
+            spec.Keywords.Affixes.Select(affix => affix.Id),
+            StringComparer.OrdinalIgnoreCase);
+        var missingResultAffixIds = RunewordContract.Recipes
+            .Select(recipe => recipe.ResultAffixId)
+            .Where(resultAffixId => !affixIds.Contains(resultAffixId))
+            .OrderBy(resultAffixId => resultAffixId, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (missingResultAffixIds.Length > 0)
+        {
+            throw new InvalidDataException(
+                "Runeword contract references missing result affixes: " +
+                string.Join(", ", missingResultAffixIds));
+        }
+    }
+
     private static void Validate(AffixSpec spec)
     {
         ValidateModKey(spec.ModKey);
@@ -103,6 +122,7 @@ public static class AffixSpecLoader
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenMagicEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var spellDefinitions = new List<SpellRecordSpec>();
         foreach (var kw in spec.Keywords.Tags)
         {
             if (!seen.Add(kw.EditorId))
@@ -175,6 +195,34 @@ public static class AffixSpecLoader
                         throw new InvalidDataException(
                             $"Spell {spell.EditorId} has an empty magicEffectEditorId at effect index {i}.");
                     }
+                }
+
+                spellDefinitions.Add(spell);
+            }
+        }
+
+        foreach (var magicEffect in spec.Keywords.AppendedMagicEffects)
+        {
+            if (!seenMagicEffects.Add(magicEffect.EditorId))
+            {
+                throw new InvalidDataException($"Duplicate appended MagicEffect editorId: {magicEffect.EditorId}");
+            }
+
+            if (!Enum.TryParse<ActorValue>(magicEffect.ActorValue, ignoreCase: true, out _))
+            {
+                throw new InvalidDataException(
+                    $"Unknown ActorValue: {magicEffect.ActorValue} (appended MagicEffect: {magicEffect.EditorId})");
+            }
+        }
+
+        foreach (var spell in spellDefinitions)
+        {
+            foreach (var effect in spell.ResolveEffects())
+            {
+                if (!seenMagicEffects.Contains(effect.MagicEffectEditorId))
+                {
+                    throw new InvalidDataException(
+                        $"Spell {spell.EditorId} references missing MagicEffect {effect.MagicEffectEditorId}.");
                 }
             }
         }

@@ -5117,19 +5117,19 @@
             "area": 0
           },
           {
-            "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_FIRE",
+            "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
             "magnitude": 25,
             "duration": 8,
             "area": 0
           },
           {
-            "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_FROST",
+            "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
             "magnitude": 25,
             "duration": 8,
             "area": 0
           },
           {
-            "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_SHOCK",
+            "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
             "magnitude": 25,
             "duration": 8,
             "area": 0

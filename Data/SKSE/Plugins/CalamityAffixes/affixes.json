@@ -7,7 +7,7 @@
     "runewordFragmentChancePercent": 8,
     "reforgeOrbChancePercent": 5,
     "currencyDropMode": "hybrid",
-    "lootSourceChanceMultCorpse": 0.8,
+    "lootSourceChanceMultCorpse": 1,
     "lootSourceChanceMultContainer": 1,
     "lootSourceChanceMultBossContainer": 1.15,
     "lootSourceChanceMultWorld": 1,
@@ -8585,19 +8585,19 @@
                 "area": 0
               },
               {
-                "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_FIRE",
+                "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
                 "magnitude": 25,
                 "duration": 8,
                 "area": 0
               },
               {
-                "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_FROST",
+                "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
                 "magnitude": 25,
                 "duration": 8,
                 "area": 0
               },
               {
-                "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_SHOCK",
+                "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
                 "magnitude": 25,
                 "duration": 8,
                 "area": 0
@@ -11765,14 +11765,28 @@
         "chance": 0
       }
     ],
-    "spidRules": [
+    "spidRules": [],
+    "appendedMagicEffects": [
       {
-        "comment": "Runeword fragments via SPID Item distribution (actor inventory -\u003E corpse loot on death). Exclude player base NPC (0x7~Skyrim.esm) via FormFilter.",
-        "line": "Item = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|-0x7~Skyrim.esm|NONE|NONE|1|100"
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
+        "name": "Calamity: Runeword Dragon Fire Resist / \uB8EC\uC6CC\uB4DC \uB4DC\uB798\uACE4 \uD654\uC5FC \uC800\uD56D",
+        "actorValue": "ResistFire",
+        "hostile": false,
+        "recover": true
       },
       {
-        "comment": "Reforge orb via SPID Item distribution (actor inventory -\u003E corpse loot on death). Exclude player base NPC (0x7~Skyrim.esm) via FormFilter.",
-        "line": "Item = CAFF_LItem_ReforgeOrbDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|-0x7~Skyrim.esm|NONE|NONE|1|100"
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
+        "name": "Calamity: Runeword Dragon Frost Resist / \uB8EC\uC6CC\uB4DC \uB4DC\uB798\uACE4 \uB0C9\uAE30 \uC800\uD56D",
+        "actorValue": "ResistFrost",
+        "hostile": false,
+        "recover": true
+      },
+      {
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
+        "name": "Calamity: Runeword Dragon Shock Resist / \uB8EC\uC6CC\uB4DC \uB4DC\uB798\uACE4 \uBC88\uAC1C \uC800\uD56D",
+        "actorValue": "ResistShock",
+        "hostile": false,
+        "recover": true
       }
     ]
   }

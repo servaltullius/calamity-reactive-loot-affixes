@@ -4,7 +4,14 @@ set -euo pipefail
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/tools/path_helpers.sh"
 repo_run_root="$(resolve_repo_run_root "${repo_root}")"
-trap cleanup_repo_run_root EXIT
+package_path_file=""
+cleanup() {
+  cleanup_repo_run_root
+  if [[ -n "${package_path_file}" ]]; then
+    rm -f "${package_path_file}"
+  fi
+}
+trap cleanup EXIT
 
 show_help() {
   cat <<'EOF'
@@ -16,7 +23,7 @@ Options:
   --fast          Skip the full default CMake build but still compile CalamityAffixes and run core checks.
   --strict        Fail if SKSE build dir is missing.
   --no-strict     Allow SKSE checks to be skipped when build dir is missing.
-  --with-mo2-zip  Also run tools/build_mo2_zip.sh (requires Papyrus compiler + Scripts.zip paths).
+  --with-mo2-zip  Build the MO2 ZIP, then verify structure, exact PEX set, DLL hash, CRC, and version.
   -h, --help      Show this help.
 
 Environment:
@@ -76,6 +83,22 @@ step() {
   echo ""
   echo "==> $*"
 }
+resolve_expected_package_version() {
+  if [[ -n "${CAFF_PACKAGE_VERSION:-}" ]]; then
+    printf '%s\n' "${CAFF_PACKAGE_VERSION#v}"
+    return
+  fi
+
+  local cmake_project_file="${repo_root}/skse/CalamityAffixes/CMakeLists.txt"
+  local cmake_version
+  cmake_version="$(grep -Eo 'project\(CalamityAffixes VERSION [0-9]+\.[0-9]+\.[0-9]+' "${cmake_project_file}" | awk '{print $3}' | head -n1)"
+  if [[ -z "${cmake_version}" ]]; then
+    echo "Could not resolve CalamityAffixes package version from ${cmake_project_file}" >&2
+    return 1
+  fi
+  printf '%s\n' "${cmake_version}"
+}
+
 
 step "Repo root: ${repo_root}"
 if [[ "${repo_run_root}" != "${repo_root}" ]]; then
@@ -134,7 +157,27 @@ fi
 
 if [[ "${with_mo2_zip}" -eq 1 ]]; then
   step "MO2 zip build"
-  "${repo_root}/tools/build_mo2_zip.sh"
+  package_path_file="$(mktemp)"
+  CAFF_PACKAGE_OUTPUT_FILE="${package_path_file}" "${repo_root}/tools/build_mo2_zip.sh"
+
+  zip_path=""
+  if ! IFS= read -r zip_path < "${package_path_file}" || [[ -z "${zip_path}" ]]; then
+    echo "MO2 package builder did not report its output path." >&2
+    exit 1
+  fi
+  if [[ ! -f "${zip_path}" ]]; then
+    echo "Reported MO2 package does not exist: ${zip_path}" >&2
+    exit 1
+  fi
+
+  package_skse_build_dir="${CAFF_SKSE_BUILD_DIR:-${skse_build_dir}}"
+  expected_dll="${CAFF_LINUX_CROSS_DLL:-${package_skse_build_dir}/CalamityAffixes.dll}"
+  expected_version="$(resolve_expected_package_version)"
+
+  step "MO2 zip structure, DLL hash, CRC, and package version"
+  python3 "${repo_root}/tools/verify_mo2_zip.py" "${zip_path}" \
+    --expected-dll "${expected_dll}" \
+    --expected-version "${expected_version}"
 else
   step "MO2 zip build"
   echo "(skipped: pass --with-mo2-zip to run packaging)"

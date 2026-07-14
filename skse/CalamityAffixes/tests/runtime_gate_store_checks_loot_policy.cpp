@@ -22,13 +22,11 @@ namespace RuntimeGateStoreChecks
 		if (CalamityAffixes::RuntimePolicy::kAllowPickupRandomAffixAssignment ||
 			CalamityAffixes::RuntimePolicy::kAllowLegacyPickupAffixRollBranch ||
 			CalamityAffixes::RuntimePolicy::kAllowWorldPickupCurrencyRoll ||
-			CalamityAffixes::RuntimePolicy::kAllowPickupCurrencyRollFromContainerSources) {
-			std::cerr << "loot_preview_policy: pickup runtime policy must remain activation-only without legacy/random branches\n";
-			return false;
-		}
-
-		if (CalamityAffixes::RuntimePolicy::kAllowCorpseActivationRuntimeCurrencyRollInHybridMode) {
-			std::cerr << "loot_preview_policy: hybrid corpse activation runtime rolls must stay disabled\n";
+			CalamityAffixes::RuntimePolicy::kAllowPickupCurrencyRollFromContainerSources ||
+			CalamityAffixes::RuntimePolicy::kAllowActivationCurrencyRoll ||
+			CalamityAffixes::RuntimePolicy::kAllowWorldCurrencyPlacement ||
+			!CalamityAffixes::RuntimePolicy::kAllowCorpseDeathRuntimeCurrencyRoll) {
+			std::cerr << "loot_preview_policy: runtime currency policy must stay hostile-corpse-death only\n";
 			return false;
 		}
 
@@ -38,49 +36,94 @@ namespace RuntimeGateStoreChecks
 	bool CheckLootCurrencyLedgerSerializationPolicy()
 	{
 		namespace fs = std::filesystem;
-		const fs::path testFile{ __FILE__ };
-		const fs::path repoRoot = testFile.parent_path().parent_path();
-		const fs::path headerFile = repoRoot / "include" / "CalamityAffixes" / "EventBridge.h";
-			const fs::path lootRuntimeHeaderFile = repoRoot / "include" / "CalamityAffixes" / "LootRuntimeState.h";
-			const fs::path constantsInlFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Constants.inl";
-			const fs::path lootServiceFile = repoRoot / "src" / "EventBridge.Loot.Service.cpp";
-			const fs::path serializationSaveFile = repoRoot / "src" / "EventBridge.Serialization.Save.cpp";
-			const fs::path serializationLoadFile = repoRoot / "src" / "EventBridge.Serialization.Load.cpp";
-			const fs::path serializationLoadRecordsFile = repoRoot / "src" / "EventBridge.Serialization.Load.Records.inl";
-			const fs::path serializationLoadStateHeaderFile = repoRoot / "include" / "CalamityAffixes" / "SerializationLoadState.h";
-			const fs::path serializationLifecycleFile = repoRoot / "src" / "EventBridge.Serialization.Lifecycle.cpp";
-			const fs::path triggerEventsFile = repoRoot / "src" / "EventBridge.Triggers.ActivateEvent.cpp";
+		using CalamityAffixes::detail::CorpseRuntimeCurrencyEligibilityInput;
 
-		const auto worldKeyDay10 = CalamityAffixes::detail::BuildLootCurrencyLedgerKey(
-			CalamityAffixes::detail::LootCurrencySourceTier::kWorld,
-			0x00000000u,
-			0x00012EB7u,
-			0x0042u,
-			10u);
-		const auto worldKeyDay11 = CalamityAffixes::detail::BuildLootCurrencyLedgerKey(
-			CalamityAffixes::detail::LootCurrencySourceTier::kWorld,
-			0x00000000u,
-			0x00012EB7u,
-			0x0042u,
-			11u);
-		const auto corpseKeyDay10 = CalamityAffixes::detail::BuildLootCurrencyLedgerKey(
-			CalamityAffixes::detail::LootCurrencySourceTier::kCorpse,
-			0x000ABC01u,
-			0u,
-			0u,
-			10u);
-		if (worldKeyDay10 == 0u || worldKeyDay10 == worldKeyDay11 || worldKeyDay10 == corpseKeyDay10) {
-			std::cerr << "loot_currency_ledger_policy: key builder must produce non-zero and source/day-distinct keys\n";
+		const CorpseRuntimeCurrencyEligibilityInput eligible{
+			.eventIsDeath = true,
+			.dyingIsDead = true,
+			.dyingIsPlayerOwned = false,
+			.dyingIsPlayerTeammate = false,
+			.dyingIsSummoned = false,
+			.dyingIsCommanded = false,
+			.dyingIsChild = false,
+			.killerIsPlayerOwned = true,
+			.hostileToPlayerOwner = true
+		};
+		if (!CalamityAffixes::detail::IsCorpseRuntimeCurrencyDropEligible(eligible)) {
+			std::cerr << "corpse_currency_policy: normal player-side hostile kill must be eligible\n";
 			return false;
 		}
+
+		auto mustReject = [](CorpseRuntimeCurrencyEligibilityInput input) {
+			return !CalamityAffixes::detail::IsCorpseRuntimeCurrencyDropEligible(input);
+		};
+		auto rejected = eligible;
+		rejected.eventIsDeath = false;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+		rejected = eligible;
+		rejected.dyingIsDead = false;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+		rejected = eligible;
+		rejected.dyingIsPlayerOwned = true;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+		rejected = eligible;
+		rejected.dyingIsPlayerTeammate = true;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+		rejected = eligible;
+		rejected.dyingIsSummoned = true;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+		rejected = eligible;
+		rejected.dyingIsCommanded = true;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+		rejected = eligible;
+		rejected.dyingIsChild = true;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+		rejected = eligible;
+		rejected.killerIsPlayerOwned = false;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+		rejected = eligible;
+		rejected.hostileToPlayerOwner = false;
+		if (!mustReject(rejected)) {
+			return false;
+		}
+
+		const auto bothAllowed = CalamityAffixes::detail::ResolveCorpseCurrencyRollAllowance(0u, false, false);
+		const auto runewordPresent = CalamityAffixes::detail::ResolveCorpseCurrencyRollAllowance(0u, true, false);
+		const auto runewordProcessed = CalamityAffixes::detail::ResolveCorpseCurrencyRollAllowance(CalamityAffixes::detail::kCorpseCurrencyRunewordProcessed, false, false);
+		const auto allProcessed = CalamityAffixes::detail::ResolveCorpseCurrencyRollAllowance(CalamityAffixes::detail::kCorpseCurrencyAllProcessed, false, false);
+		if (!bothAllowed.runeword || !bothAllowed.reforge ||
+			runewordPresent.runeword || !runewordPresent.reforge ||
+			runewordProcessed.runeword || !runewordProcessed.reforge ||
+			allProcessed.runeword || allProcessed.reforge) {
+			std::cerr << "corpse_currency_policy: category-specific migration/duplicate allowance is incorrect\n";
+			return false;
+		}
+
 		if (!CalamityAffixes::detail::IsLootCurrencyLedgerExpired(5u, 35u, 30u) ||
 			CalamityAffixes::detail::IsLootCurrencyLedgerExpired(6u, 35u, 30u) ||
-			CalamityAffixes::detail::IsLootCurrencyLedgerExpired(10u, 9u, 30u) ||
-			CalamityAffixes::detail::IsLootCurrencyLedgerExpired(1u, 100u, 0u)) {
-			std::cerr << "loot_currency_ledger_policy: expiry helper behavior is incorrect\n";
+			CalamityAffixes::detail::IsLootCurrencyLedgerExpired(10u, 9u, 30u)) {
+			std::cerr << "corpse_currency_policy: lifecycle TTL behavior is incorrect\n";
 			return false;
 		}
 
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
 			if (!in.is_open()) {
@@ -91,96 +134,79 @@ namespace RuntimeGateStoreChecks
 				std::istreambuf_iterator<char>());
 		};
 
-		const auto headerText = loadText(headerFile);
-		const auto lootRuntimeHeaderText = loadText(lootRuntimeHeaderFile);
-		if (!headerText.has_value() || !lootRuntimeHeaderText.has_value()) {
-			std::cerr << "loot_currency_ledger_policy: failed to open header source: " << headerFile << "\n";
-			return false;
-		}
-		// Constants may live in EventBridge.h itself or in the extracted detail/EventBridge.Constants.inl,
-		// while loot runtime ownership lives in LootRuntimeState.h.
-		std::string headerAndConstants = *headerText + *lootRuntimeHeaderText;
-		if (const auto constantsText = loadText(constantsInlFile); constantsText.has_value()) {
-			headerAndConstants += *constantsText;
-		}
-		if (headerAndConstants.find("kSerializationRecordLootCurrencyLedger") == std::string::npos ||
-			headerAndConstants.find("kLootCurrencyLedgerSerializationVersion") == std::string::npos ||
-			headerAndConstants.find("LootRuntimeState _lootState{};") == std::string::npos ||
-			headerAndConstants.find("currencyRollLedger{}") == std::string::npos ||
-			headerAndConstants.find("currencyRollLedgerRecent{}") == std::string::npos) {
-			std::cerr << "loot_currency_ledger_policy: ledger storage/constants missing from extracted runtime ownership headers\n";
+		const auto stateText = loadText(repoRoot / "include" / "CalamityAffixes" / "LootRuntimeState.h");
+		const auto constantsText = loadText(repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Constants.inl");
+		const auto serviceText = loadText(repoRoot / "src" / "EventBridge.Loot.Service.cpp");
+		const auto deathText = loadText(repoRoot / "src" / "EventBridge.Triggers.DeathEvent.cpp");
+		const auto hitText = loadText(repoRoot / "src" / "EventBridge.Triggers.HitEvent.cpp");
+		const auto eventsDetailText = loadText(repoRoot / "src" / "EventBridge.Triggers.Events.Detail.h");
+		const auto activateText = loadText(repoRoot / "src" / "EventBridge.Triggers.ActivateEvent.cpp");
+		const auto craftingText = loadText(repoRoot / "src" / "EventBridge.Loot.Runeword.Crafting.cpp");
+		if (!stateText || !constantsText || !serviceText || !deathText || !hitText || !eventsDetailText ||
+			!activateText || !craftingText) {
+			std::cerr << "corpse_currency_policy: failed to load runtime sources\n";
 			return false;
 		}
 
-			const auto serviceText = loadText(lootServiceFile);
-			if (!serviceText.has_value()) {
-				std::cerr << "loot_currency_ledger_policy: failed to open loot service source: " << lootServiceFile << "\n";
-				return false;
-			}
-			if (serviceText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos ||
-				serviceText->find("FinalizeLootCurrencyLedgerRoll(") == std::string::npos ||
-				serviceText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos ||
-				serviceText->find("_lootState.currencyRollLedger.emplace(") == std::string::npos ||
-				serviceText->find("_lootState.currencyRollLedger.erase(oldest)") == std::string::npos) {
-				std::cerr << "loot_currency_ledger_policy: source-keyed ledger behavior missing in EventBridge.Loot.Service.cpp\n";
-				return false;
-			}
-
-			// Serialization is split across Save/Load/Load helpers/Lifecycle — concatenate all of them.
-			std::string serializationText;
-			for (const auto& sf : { serializationSaveFile, serializationLoadFile, serializationLoadRecordsFile, serializationLoadStateHeaderFile, serializationLifecycleFile }) {
-				const auto part = loadText(sf);
-				if (!part.has_value()) {
-					std::cerr << "loot_currency_ledger_policy: failed to open serialization source: " << sf << "\n";
-					return false;
-				}
-				serializationText += *part;
-			}
-			if (serializationText.find("kSerializationRecordLootCurrencyLedger") == std::string::npos ||
-				serializationText.find("kLootCurrencyLedgerSerializationVersion") == std::string::npos ||
-				serializationText.find("_lootState.currencyRollLedger.size()") == std::string::npos ||
-				serializationText.find("_lootState.currencyRollLedger.emplace(key, dayStamp)") == std::string::npos ||
-				serializationText.find("_lootState.ResetForLoadOrRevert();") == std::string::npos ||
-				serializationText.find("currencyRollLedgerRecent.clear()") == std::string::npos) {
-				std::cerr << "loot_currency_ledger_policy: save/load/revert ledger handling missing in serialization sources\n";
-				return false;
-			}
-
-		const auto triggerText = loadText(triggerEventsFile);
-		if (!triggerText.has_value()) {
-			std::cerr << "loot_currency_ledger_policy: failed to open trigger-events source: " << triggerEventsFile << "\n";
+		if (stateText->find("corpseCurrencyRollLedger{}") == std::string::npos ||
+			stateText->find("runewordFragmentFailStreak") == std::string::npos ||
+			stateText->find("reforgeOrbFailStreak") == std::string::npos ||
+			constantsText->find("kSerializationRecordCorpseCurrencyRuntime") == std::string::npos ||
+			serviceText->find("GetCorpseCurrencyProcessedMask(") == std::string::npos ||
+			serviceText->find("MarkCorpseCurrencyProcessed(") == std::string::npos ||
+			serviceText->find("ExecuteCorpseCurrencyDropRolls(") == std::string::npos ||
+			deathText->find("IsCorpseRuntimeCurrencyDropEligible(") == std::string::npos ||
+			deathText->find("SnapshotCorpseCurrencyInventory(dying)") == std::string::npos ||
+			deathText->find("ForgetCorpseCurrencyProcessed(dying->GetFormID())") == std::string::npos ||
+			deathText->find("ExecuteCorpseCurrencyDropRolls(") == std::string::npos ||
+			eventsDetailText->find("a_ref->As<RE::Projectile>()") == std::string::npos ||
+			eventsDetailText->find("RE::NiPointer<RE::Actor> ResolveActorFromCombatRef") == std::string::npos ||
+			deathText->find("const auto killerHolder = ResolveActorFromCombatRef(killerRef);") == std::string::npos ||
+			hitText->find("const auto aggressorHolder = ResolveActorFromCombatRef(causeRef);") == std::string::npos ||
+			eventsDetailText->find("a_ref->GetActorCause()") != std::string::npos ||
+			activateText->find("ExecuteCorpseCurrencyDropRolls(") != std::string::npos ||
+			activateText->find("ResolveLootCurrencySourceTier(") != std::string::npos ||
+			craftingText->find("TryAddLootCurrencyToCorpseInventory(") == std::string::npos ||
+			craftingText->find("AddObjectToContainer(a_dropItem") == std::string::npos ||
+			craftingText->find("PlaceObjectAtMe(a_dropItem") != std::string::npos) {
+			std::cerr << "corpse_currency_policy: corpse-only runtime source contract is incomplete\n";
 			return false;
 		}
-			const bool hasDirectActivationRollPath =
-				triggerText->find("TryRollRunewordFragmentToken(") != std::string::npos &&
-				triggerText->find("TryRollReforgeOrbGrant(") != std::string::npos &&
-				triggerText->find("TryPlaceLootCurrencyItem(") != std::string::npos;
-			const bool hasSharedActivationRollHelper =
-				triggerText->find("ExecuteCurrencyDropRolls(") != std::string::npos;
-			const bool hasSourceTierResolverCall =
-				triggerText->find("ResolveActivatedLootCurrencySourceTier(") != std::string::npos ||
-				triggerText->find("detail::ResolveLootCurrencySourceTier(") != std::string::npos;
-			const bool hasSpidOnlyCorpseSkipLog =
-				triggerText->find("activation corpse currency roll skipped (SPID-owned corpse policy in hybrid mode)") != std::string::npos;
-			const bool hasLegacyTaggedCorpseSkipLog =
-				triggerText->find("SPID-tagged corpse in hybrid mode") != std::string::npos;
-			const bool hasLegacyUntaggedCorpseSkipLog =
-				triggerText->find("untagged corpse in hybrid mode; SPID-only corpse policy") != std::string::npos;
-			const bool hasLegacyCorpseFallbackLog =
-				triggerText->find("activation corpse currency roll fallback (untagged corpse in hybrid mode)") != std::string::npos;
-			if (triggerText->find("const RE::TESActivateEvent* a_event") == std::string::npos ||
-				!hasSourceTierResolverCall ||
-				triggerText->find("HasCurrencyDeathDistributionTag(") != std::string::npos ||
-				!hasSpidOnlyCorpseSkipLog ||
-				hasLegacyTaggedCorpseSkipLog ||
-				hasLegacyUntaggedCorpseSkipLog ||
-				hasLegacyCorpseFallbackLog ||
-				(!hasDirectActivationRollPath && !hasSharedActivationRollHelper) ||
-				(triggerText->find("detail::IsLootCurrencyLedgerExpired(") == std::string::npos &&
-					triggerText->find("TryBeginLootCurrencyLedgerRoll(") == std::string::npos)) {
-				std::cerr << "loot_currency_ledger_policy: activation-time corpse/container currency roll path missing in EventBridge.Triggers.ActivateEvent.cpp\n";
+
+		const auto countOccurrences = [](std::string_view text, std::string_view needle) {
+			std::size_t count = 0u;
+			for (std::size_t pos = 0u; (pos = text.find(needle, pos)) != std::string_view::npos;
+				pos += needle.size()) {
+				++count;
+			}
+			return count;
+		};
+		if (countOccurrences(*craftingText, "_lootState.runewordFragmentFailStreak = 0;") != 1u ||
+			countOccurrences(*craftingText, "_lootState.reforgeOrbFailStreak = 0;") != 1u) {
+			std::cerr << "corpse_currency_policy: currency pity may reset outside successful corpse insertion commit\n";
+			return false;
+		}
+
+		std::string serializationText;
+		for (const auto& path : {
+			repoRoot / "src" / "EventBridge.Serialization.Save.cpp",
+			repoRoot / "src" / "EventBridge.Serialization.Load.cpp",
+			repoRoot / "src" / "EventBridge.Serialization.Load.Records.inl",
+			repoRoot / "include" / "CalamityAffixes" / "SerializationLoadState.h" }) {
+			const auto part = loadText(path);
+			if (!part) {
 				return false;
 			}
+			serializationText += *part;
+		}
+		if (serializationText.find("kSerializationRecordCorpseCurrencyRuntime") == std::string::npos ||
+			serializationText.find("_lootState.runewordFragmentFailStreak") == std::string::npos ||
+			serializationText.find("_lootState.reforgeOrbFailStreak") == std::string::npos ||
+			serializationText.find("ResolveFormID(corpseFormId") == std::string::npos ||
+			serializationText.find("RebuildCorpseCurrencyLedgerRecent") == std::string::npos) {
+			std::cerr << "corpse_currency_policy: CCRT pity/ledger save-load contract is incomplete\n";
+			return false;
+		}
 
 		return true;
 	}
@@ -216,10 +242,10 @@ namespace RuntimeGateStoreChecks
 			assignText->find("void EventBridge::EnsureMultiAffixDisplayName(") == std::string::npos ||
 			assignText->find("void EventBridge::CleanupInvalidLootInstance(") == std::string::npos ||
 			assignText->find("void EventBridge::SanitizeAllTrackedLootInstancesForCurrentLootRules(") == std::string::npos ||
-			assignText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") != std::string::npos ||
+			assignText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCorpseCurrencyDropRolls(") != std::string::npos ||
 			assignText->find("bool EventBridge::RollLootChanceGateForEligibleInstance()") != std::string::npos ||
 			assignText->find("bool EventBridge::IsLootObjectEligibleForAffixes(") != std::string::npos ||
-			serviceText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(") == std::string::npos ||
+			serviceText->find("EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCorpseCurrencyDropRolls(") == std::string::npos ||
 			serviceText->find("bool EventBridge::RollLootChanceGateForEligibleInstance()") == std::string::npos ||
 			serviceText->find("bool EventBridge::IsLootObjectEligibleForAffixes(") == std::string::npos ||
 			serviceText->find("bool EventBridge::TryBeginLootCurrencyLedgerRoll(") == std::string::npos ||

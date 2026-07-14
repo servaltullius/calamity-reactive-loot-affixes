@@ -8,7 +8,7 @@
     "runewordFragmentChancePercent": 8.0,
     "reforgeOrbChancePercent": 5.0,
     "currencyDropMode": "hybrid",
-    "lootSourceChanceMultCorpse": 0.8,
+    "lootSourceChanceMultCorpse": 1.0,
     "lootSourceChanceMultContainer": 1.0,
     "lootSourceChanceMultBossContainer": 1.15,
     "lootSourceChanceMultWorld": 1.0,
@@ -40,6 +40,29 @@
     "nameFormat": "{base}[{affix}]"
   },
   "keywords": {
+    "appendedMagicEffects": [
+      {
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
+        "name": "Calamity: Runeword Dragon Fire Resist / 룬워드 드래곤 화염 저항",
+        "actorValue": "ResistFire",
+        "hostile": false,
+        "recover": true
+      },
+      {
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
+        "name": "Calamity: Runeword Dragon Frost Resist / 룬워드 드래곤 냉기 저항",
+        "actorValue": "ResistFrost",
+        "hostile": false,
+        "recover": true
+      },
+      {
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
+        "name": "Calamity: Runeword Dragon Shock Resist / 룬워드 드래곤 번개 저항",
+        "actorValue": "ResistShock",
+        "hostile": false,
+        "recover": true
+      }
+    ],
     "tags": [
       {
         "editorId": "CAFF_TAG_DOT",
@@ -8568,19 +8591,19 @@
                 "area": 0
               },
               {
-                "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_FIRE",
+                "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
                 "magnitude": 25,
                 "duration": 8,
                 "area": 0
               },
               {
-                "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_FROST",
+                "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
                 "magnitude": 25,
                 "duration": 8,
                 "area": 0
               },
               {
-                "magicEffectEditorId": "CAFF_MGEF_RW_COH_PASSIVE_SHOCK",
+                "magicEffectEditorId": "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
                 "magnitude": 25,
                 "duration": 8,
                 "area": 0
@@ -11880,15 +11903,6 @@
         "chance": 0.0
       }
     ],
-    "spidRules": [
-      {
-        "comment": "Runeword fragments via SPID Item distribution (actor inventory -> corpse loot on death). Exclude player base NPC (0x7~Skyrim.esm) via FormFilter.",
-        "line": "Item = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|-0x7~Skyrim.esm|NONE|NONE|1|100"
-      },
-      {
-        "comment": "Reforge orb via SPID Item distribution (actor inventory -> corpse loot on death). Exclude player base NPC (0x7~Skyrim.esm) via FormFilter.",
-        "line": "Item = CAFF_LItem_ReforgeOrbDrops|ActorTypeNPC,ActorTypeUndead,ActorTypeDaedra,ActorTypeDwarven,ActorTypeGhost,ActorTypeDragon,ActorTypeCreature,ActorTypeAnimal|-0x7~Skyrim.esm|NONE|NONE|1|100"
-      }
-    ]
+    "spidRules": []
   }
 }

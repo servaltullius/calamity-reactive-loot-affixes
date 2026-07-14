@@ -117,6 +117,33 @@ class PrismaTooltipScalingTests(unittest.TestCase):
         self.assertIn('data-cmd="ui.tooltip.font:0.08"', self.source)
         self.assertIn("ui.tooltip.save:${right},${top},${fontPermille}", self.source)
 
+    def test_rendered_rect_is_clamped_and_long_720p_tooltips_scroll(self) -> None:
+        for marker in (
+            "overflow-y: auto;",
+            "overscroll-behavior: contain;",
+            "pointer-events: auto;",
+            'data-wheel-scroll-mode="smooth"',
+            "function getTooltipMaxLogicalHeight()",
+            "availableVisualHeight / getTooltipAutoScale()",
+            "function fitTooltipLayoutToViewport(rawLayout, rect)",
+            "Math.floor(window.innerWidth - margin - rectWidth)",
+            "Math.floor(window.innerHeight - margin - rectHeight)",
+            "function measureTooltipRect()",
+            "tooltipPanel.getBoundingClientRect()",
+            "tooltipPanel.style.maxHeight = `${getTooltipMaxLogicalHeight()}px`;",
+        ):
+            self.assertIn(marker, self.source)
+
+        placement = self.source.index("tooltipText.textContent = tooltipTextState;")
+        reclamp = self.source.index("applyTooltipLayout();", placement)
+        quick_launch = self.source.index("applyQuickLaunchVisibility();", placement)
+        self.assertLess(placement, reclamp)
+        self.assertLess(reclamp, quick_launch)
+
+        # At 720p auto-scale bottoms out at 1.0. The 560 logical-pixel cap
+        # remains in force even at 180% text, with overflow scrolling the rest.
+        self.assertEqual(min(560, (720 - 16) // 1), 560)
+
 
 if __name__ == "__main__":
     unittest.main()

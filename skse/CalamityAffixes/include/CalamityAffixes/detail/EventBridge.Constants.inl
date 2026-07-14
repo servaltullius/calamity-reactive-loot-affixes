@@ -70,6 +70,7 @@
 		static constexpr std::uint32_t kSerializationRecordMigrationFlags = 'MFLG';
 		static constexpr std::uint32_t kRunewordSerializationVersion = 1;
 		static constexpr std::uint32_t kMigrationFlagsVersion = 1;
+		static constexpr std::uint32_t kSerializationRecordCorpseCurrencyRuntime = 'CCRT';
 		static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
 		static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
 		static constexpr std::uint32_t kLootCurrencyLedgerSerializationVersion = 2;
@@ -79,3 +80,4 @@
 		// Runtime debounce/resync intervals.
 		static constexpr std::chrono::milliseconds kRuntimeUserSettingsPersistDebounce{ 250 };
 		static constexpr std::chrono::milliseconds kEquipResyncInterval{ 8000 };
+		static constexpr std::uint32_t kCorpseCurrencyRuntimeSerializationVersion = 1;

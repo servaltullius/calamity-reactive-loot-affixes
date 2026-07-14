@@ -18,6 +18,7 @@ const controller = source.slice(start, end + endMarker.length);
 const handlers = new Map();
 const rafQueue = new Map();
 let nextRafId = 1;
+let prefersReducedMotion = false;
 
 class FakeElement {
   constructor(marked = true) {
@@ -50,6 +51,16 @@ class FakeElement {
 }
 
 global.Element = FakeElement;
+global.window = {
+  matchMedia(query) {
+    assert.strictEqual(query, "(prefers-reduced-motion: reduce)");
+    return {
+      get matches() {
+        return prefersReducedMotion;
+      }
+    };
+  }
+};
 global.document = {
   body: {},
   addEventListener(type, callback) {
@@ -235,6 +246,19 @@ assert.strictEqual(
   rafQueue.size,
   0,
   "unmarked scroller was intercepted"
+);
+
+prefersReducedMotion = true;
+const reducedMotion = new FakeElement();
+reducedMotion.scrollTop = 500;
+assert(
+  sendWheel(reducedMotion, { deltaY: 3, wheelDelta: -120 })
+);
+assert.strictEqual(reducedMotion.scrollTop, 564);
+assert.strictEqual(
+  rafQueue.size,
+  0,
+  "reduced motion still queued smooth-scroll frames"
 );
 
 console.log("Prisma scroll behavior: OK");

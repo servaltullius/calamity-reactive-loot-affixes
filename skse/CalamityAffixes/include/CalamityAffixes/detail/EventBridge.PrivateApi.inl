@@ -28,6 +28,10 @@
 			SKSE::SerializationInterface* a_intfc,
 			std::uint32_t a_version,
 			std::uint32_t a_length);
+		void LoadCorpseCurrencyRuntimeRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
 		void LoadLootShuffleBagsRecord(
 			SKSE::SerializationInterface* a_intfc,
 			std::uint32_t a_version,
@@ -294,14 +298,12 @@
 			float a_sourceChanceMultiplier,
 			bool& a_outPityTriggered);
 		void CommitReforgeOrbGrant(bool a_success);
-		[[nodiscard]] bool TryPlaceLootCurrencyItem(
+		[[nodiscard]] bool TryAddLootCurrencyToCorpseInventory(
 			RE::TESBoundObject* a_dropItem,
-			RE::TESObjectREFR* a_sourceContainerRef,
-			bool a_forceWorldPlacement) const;
-		[[nodiscard]] CurrencyRollExecutionResult ExecuteCurrencyDropRolls(
+			RE::Actor* a_corpse) const;
+		[[nodiscard]] CurrencyRollExecutionResult ExecuteCorpseCurrencyDropRolls(
 			float a_sourceChanceMultiplier,
-			RE::TESObjectREFR* a_sourceContainerRef,
-			bool a_forceWorldPlacement,
+			RE::Actor* a_corpse,
 			std::uint32_t a_rollCount,
 			bool a_allowRunewordRoll = true,
 			bool a_allowReforgeRoll = true);
@@ -309,6 +311,14 @@
 		[[nodiscard]] float ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier a_sourceTier) const noexcept;
 		[[nodiscard]] bool TryBeginLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp);
 		void FinalizeLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp);
+		[[nodiscard]] std::uint8_t GetCorpseCurrencyProcessedMask(
+			RE::FormID a_corpseFormId,
+			std::uint32_t a_dayStamp);
+		void MarkCorpseCurrencyProcessed(
+			RE::FormID a_corpseFormId,
+			std::uint32_t a_dayStamp,
+			std::uint8_t a_processedMask);
+		void ForgetCorpseCurrencyProcessed(RE::FormID a_corpseFormId);
 		[[nodiscard]] bool ApplyRunewordResult(
 			std::uint64_t a_instanceKey,
 			const RunewordRecipe& a_recipe,

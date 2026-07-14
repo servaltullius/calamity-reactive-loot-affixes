@@ -11,6 +11,7 @@ namespace CalamityAffixes
 {
 	using namespace TriggersDetail;
 
+	static_assert(RuntimePolicy::kAllowCorpseDeathRuntimeCurrencyRoll);
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
 		const RE::TESDeathEvent* a_event,
 		RE::BSTEventSource<RE::TESDeathEvent>*)
@@ -19,10 +20,9 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeSettings.enabled || !a_event || !a_event->dead) {
+		if (!a_event) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-
 		// Keep event references alive for the entire handler. Using raw pointers directly from
 		// TESDeathEvent can race with reference release under heavy combat churn.
 		const auto dyingRefHolder = a_event->actorDying;
@@ -32,6 +32,15 @@ namespace CalamityAffixes
 		auto* killerRef = SanitizeObjectPointer(killerRefHolder.get());
 		auto* dying = dyingRef ? dyingRef->As<RE::Actor>() : nullptr;
 		if (!dying) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		if (!a_event->dead) {
+			ForgetCorpseCurrencyProcessed(dying->GetFormID());
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		if (!_configLoaded || !_runtimeSettings.enabled) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -50,8 +59,9 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		// TESDeathEvent::actorKiller can be Projectile/Hazard/etc; resolve shooter/actorCause for ranged/magic kills.
-		RE::Actor* killer = ResolveActorFromCombatRef(killerRef);
+		// TESDeathEvent::actorKiller may be an Actor or Projectile; resolve only the projectile shooter/actorCause. Environment refs remain ineligible.
+		const auto killerHolder = ResolveActorFromCombatRef(killerRef);
+		auto* killer = killerHolder.get();
 
 		if (!killer) {
 			static auto lastWarnAt = std::chrono::steady_clock::time_point{};
@@ -92,22 +102,84 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		if (_loot.debugLog) {
-			const auto probe = BuildCorpseCurrencyDropProbe(dying);
+		const bool corpseCurrencyEligible = detail::IsCorpseRuntimeCurrencyDropEligible({
+			.eventIsDeath = a_event->dead,
+			.dyingIsDead = dying->IsDead(),
+			.dyingIsPlayerOwned = IsPlayerOwned(dying),
+			.dyingIsPlayerTeammate = dying->IsPlayerTeammate(),
+			.dyingIsSummoned = dying->IsSummoned(),
+			.dyingIsCommanded = dying->IsCommandedActor(),
+			.dyingIsChild = dying->IsChild(),
+			.killerIsPlayerOwned = true,
+			.hostileToPlayerOwner = hostile
+		});
+
+		if (corpseCurrencyEligible && _loot.runtimeCorpseDeathCurrencyDropsEnabled) {
+			const auto dayStamp = detail::GetInGameDayStamp();
+			const auto corpseFormId = dying->GetFormID();
+			const auto processedMask = GetCorpseCurrencyProcessedMask(corpseFormId, dayStamp);
 			const auto snapshot = SnapshotCorpseCurrencyInventory(dying);
-			SKSE::log::info(
-				"CalamityAffixes: corpse-drop probe (dying={}, runewordFragmentRecordFound={}, reforgeOrbRecordFound={}, runewordDropListFound={}, reforgeDropListFound={}, chanceNone(runeword/reforge)={}/{}, corpseCurrencySnapshotAtDeathEvent(runewordFragments/reforgeOrbs/runewordLists/reforgeLists)={}/{}/{}/{}).",
+			const bool hasRunewordCurrency =
+				snapshot.runewordFragments > 0u || snapshot.runewordDropLists > 0u;
+			const bool hasReforgeCurrency =
+				snapshot.reforgeOrbs > 0u || snapshot.reforgeDropLists > 0u;
+			const auto allowance = detail::ResolveCorpseCurrencyRollAllowance(
+				processedMask,
+				hasRunewordCurrency,
+				hasReforgeCurrency);
+
+			CurrencyRollExecutionResult dropResult{};
+			if (allowance.runeword || allowance.reforge) {
+				dropResult = ExecuteCorpseCurrencyDropRolls(
+					ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier::kCorpse),
+					dying,
+					1u,
+					allowance.runeword,
+					allowance.reforge);
+			}
+
+			const auto newlyProcessedMask = static_cast<std::uint8_t>(
+				detail::kCorpseCurrencyAllProcessed & static_cast<std::uint8_t>(~processedMask));
+			MarkCorpseCurrencyProcessed(corpseFormId, dayStamp, newlyProcessedMask);
+
+			if (_loot.debugLog) {
+				const auto probe = BuildCorpseCurrencyDropProbe(dying);
+				SKSE::log::info(
+					"CalamityAffixes: corpse-only currency roll (dying={}({:08X}), sourceMult={:.2f}, previousMask={}, newlyProcessedMask={}, existing(runeword/reforge)={}/{}, allow(runeword/reforge)={}/{}, granted(runeword/reforge)={}/{}, inventory(runewordFragments/reforgeOrbs/runewordLists/reforgeLists)={}/{}/{}/{}, records(fragment/orb/lists)={}/{}/{}/{}, legacyChanceNone(runeword/reforge)={}/{}).",
+					dying->GetName(),
+					corpseFormId,
+					ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier::kCorpse),
+					processedMask,
+					newlyProcessedMask,
+					hasRunewordCurrency,
+					hasReforgeCurrency,
+					allowance.runeword,
+					allowance.reforge,
+					dropResult.runewordDropGranted,
+					dropResult.reforgeDropGranted,
+					snapshot.runewordFragments,
+					snapshot.reforgeOrbs,
+					snapshot.runewordDropLists,
+					snapshot.reforgeDropLists,
+					probe.runewordFragmentRecordFound,
+					probe.reforgeOrbRecordFound,
+					probe.runewordDropListFound,
+					probe.reforgeDropListFound,
+					probe.runewordChanceNone,
+					probe.reforgeChanceNone);
+			}
+		} else if (_loot.debugLog && !corpseCurrencyEligible) {
+			SKSE::log::debug(
+				"CalamityAffixes: corpse currency skipped by eligibility (dying={}({:08X}), dead={}, playerOwned={}, teammate={}, summoned={}, commanded={}, child={}, hostile={}).",
 				dying->GetName(),
-				probe.runewordFragmentRecordFound,
-				probe.reforgeOrbRecordFound,
-				probe.runewordDropListFound,
-				probe.reforgeDropListFound,
-				probe.runewordChanceNone,
-				probe.reforgeChanceNone,
-				snapshot.runewordFragments,
-				snapshot.reforgeOrbs,
-				snapshot.runewordDropLists,
-				snapshot.reforgeDropLists);
+				dying->GetFormID(),
+				dying->IsDead(),
+				IsPlayerOwned(dying),
+				dying->IsPlayerTeammate(),
+				dying->IsSummoned(),
+				dying->IsCommandedActor(),
+				dying->IsChild(),
+				hostile);
 		}
 
 		ProcessTrigger(Trigger::kKill, owner, dying, nullptr);

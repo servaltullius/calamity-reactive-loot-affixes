@@ -13,7 +13,9 @@ namespace CalamityAffixes::RuntimePolicy
 	inline constexpr bool kAllowLegacyPickupAffixRollBranch = false;
 	inline constexpr bool kAllowPickupCurrencyRollFromContainerSources = false;
 	inline constexpr bool kAllowWorldPickupCurrencyRoll = false;
-	inline constexpr bool kAllowCorpseActivationRuntimeCurrencyRollInHybridMode = false;
+	inline constexpr bool kAllowActivationCurrencyRoll = false;
+	inline constexpr bool kAllowCorpseDeathRuntimeCurrencyRoll = true;
+	inline constexpr bool kAllowWorldCurrencyPlacement = false;
 
 	inline constexpr std::string_view kMcmSetEnabledEvent = "CalamityAffixes_MCM_SetEnabled";
 	inline constexpr std::string_view kLegacyMcmSetDebugNotificationsEvent = "CalamityAffixes_MCM_SetDebugNotifications";

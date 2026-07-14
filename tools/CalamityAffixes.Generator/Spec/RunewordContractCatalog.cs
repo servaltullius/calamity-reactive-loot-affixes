@@ -24,6 +24,9 @@ internal static class RunewordContractCatalog
     private const string RunewordContractRelativePath = "affixes/runeword.contract.json";
     private const string RunewordCatalogRowsRelativePath = "skse/CalamityAffixes/src/RunewordCatalogRows.inl";
     private const string RunewordWeightsRelativePath = "skse/CalamityAffixes/src/EventBridge.Loot.Runeword.Detail.cpp";
+    private const string AllowLegacyFallbackEnvironmentVariable = "CAFF_ALLOW_LEGACY_RUNEWORD_CONTRACT_FALLBACK";
+    private const int ExpectedRecipeCount = 94;
+    private const int ExpectedRuneWeightCount = 33;
 
     private static readonly Regex RunewordCatalogRowRegex = new(
         "RunewordCatalogRow\\{\\s*\"(?<id>[^\"]+)\"\\s*,\\s*\"(?<name>[^\"]+)\"\\s*,\\s*\"(?<runes>[^\"]*)\"\\s*,\\s*\"(?<result>[^\"]+)\"\\s*,\\s*(?<base>[^}\\r\\n]+)\\s*\\},?",
@@ -72,18 +75,56 @@ internal static class RunewordContractCatalog
 
     internal static Snapshot Load()
     {
-        var contractSnapshot = ParseContractSnapshot(FindByWalkingParents(RunewordContractRelativePath));
-        var recipes = contractSnapshot.Recipes.Count > 0
-            ? contractSnapshot.Recipes.ToList()
-            : ParseCatalogRows(FindByWalkingParents(RunewordCatalogRowsRelativePath));
-        var runeWeights = contractSnapshot.RuneWeights.Count > 0
-            ? contractSnapshot.RuneWeights.ToList()
-            : ParseRuneWeights(FindByWalkingParents(RunewordWeightsRelativePath));
+        var contractPath = FindByWalkingParents(RunewordContractRelativePath);
+        var allowLegacyFallback = string.Equals(
+            Environment.GetEnvironmentVariable(AllowLegacyFallbackEnvironmentVariable),
+            "1",
+            StringComparison.Ordinal);
+
+        if (!string.IsNullOrWhiteSpace(contractPath) && File.Exists(contractPath))
+        {
+            try
+            {
+                return LoadFromPath(contractPath);
+            }
+            catch (Exception ex) when (allowLegacyFallback)
+            {
+                Console.Error.WriteLine(
+                    $"WARNING: Strict runeword contract validation failed ({ex.Message}). " +
+                    $"Using explicitly enabled legacy fallback from {AllowLegacyFallbackEnvironmentVariable}=1.");
+            }
+        }
+        else if (!allowLegacyFallback)
+        {
+            throw new FileNotFoundException(
+                $"Required runeword contract was not found: {RunewordContractRelativePath}. " +
+                $"Legacy fallback is disabled by default; set {AllowLegacyFallbackEnvironmentVariable}=1 only for recovery tooling.");
+        }
+
+        if (!allowLegacyFallback)
+        {
+            throw new InvalidDataException(
+                $"Runeword contract validation failed and legacy fallback is disabled. " +
+                $"Set {AllowLegacyFallbackEnvironmentVariable}=1 only for recovery tooling.");
+        }
+
+        return LoadLegacyFallback();
+    }
+
+    internal static Snapshot LoadFromPath(string sourcePath)
+    {
+        return ValidateSnapshot(ParseContractSnapshot(sourcePath), sourcePath);
+    }
+
+    private static Snapshot LoadLegacyFallback()
+    {
+        var recipes = ParseCatalogRows(FindByWalkingParents(RunewordCatalogRowsRelativePath));
+        var runeWeights = ParseRuneWeights(FindByWalkingParents(RunewordWeightsRelativePath));
 
         if (runeWeights.Count == 0)
         {
             Console.Error.WriteLine(
-                "WARNING: No rune weights loaded from contract or source. Using hardcoded fallback (may be outdated).");
+                "WARNING: No rune weights loaded from source. Using explicitly enabled hardcoded legacy fallback.");
             runeWeights = FallbackRuneWeights.ToList();
         }
 
@@ -104,35 +145,26 @@ internal static class RunewordContractCatalog
             }
         }
 
-        return new Snapshot(recipes, runeWeights);
+        return ValidateSnapshot(new Snapshot(recipes, runeWeights), "legacy fallback sources");
     }
 
     private static Snapshot ParseContractSnapshot(string? sourcePath)
     {
         if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
         {
-            return new Snapshot([], []);
+            throw new FileNotFoundException("Runeword contract file does not exist.", sourcePath);
         }
 
-        try
+        using var doc = JsonDocument.Parse(File.ReadAllText(sourcePath));
+        var root = doc.RootElement;
+        if (root.ValueKind != JsonValueKind.Object)
         {
-            using var doc = JsonDocument.Parse(File.ReadAllText(sourcePath));
-            var root = doc.RootElement;
-            if (root.ValueKind != JsonValueKind.Object)
-            {
-                return new Snapshot([], []);
-            }
+            throw new InvalidDataException("Runeword contract root must be a JSON object.");
+        }
 
-            var recipes = ParseContractRecipes(root);
-            var runeWeights = ParseContractRuneWeights(root);
-            return new Snapshot(recipes, runeWeights);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine(
-                $"WARNING: Failed to parse runeword contract ({ex.Message}). Using fallback sources.");
-            return new Snapshot([], []);
-        }
+        var recipes = ParseContractRecipes(root);
+        var runeWeights = ParseContractRuneWeights(root);
+        return new Snapshot(recipes, runeWeights);
     }
 
     private static List<RecipeEntry> ParseContractRecipes(JsonElement root)
@@ -140,66 +172,76 @@ internal static class RunewordContractCatalog
         if (!root.TryGetProperty("runewordCatalog", out var catalogElement) ||
             catalogElement.ValueKind != JsonValueKind.Array)
         {
-            return [];
+            throw new InvalidDataException("Runeword contract requires a runewordCatalog array.");
         }
 
         var output = new List<RecipeEntry>(catalogElement.GetArrayLength());
+        var recipeIndex = 0;
         foreach (var recipeElement in catalogElement.EnumerateArray())
         {
             if (recipeElement.ValueKind != JsonValueKind.Object)
             {
-                continue;
+                throw new InvalidDataException($"runewordCatalog[{recipeIndex}] must be an object.");
             }
 
             if (!TryGetRequiredString(recipeElement, "id", out var recipeId) ||
                 !TryGetRequiredString(recipeElement, "name", out var displayName) ||
                 !TryGetRequiredString(recipeElement, "resultAffixId", out var resultAffixId))
             {
-                continue;
+                throw new InvalidDataException(
+                    $"runewordCatalog[{recipeIndex}] requires non-empty id, name, and resultAffixId strings.");
             }
 
             if (!recipeElement.TryGetProperty("runes", out var runesElement) ||
                 runesElement.ValueKind != JsonValueKind.Array)
             {
-                continue;
+                throw new InvalidDataException($"Runeword recipe '{recipeId}' requires a runes array.");
             }
 
             var runes = new List<string>(runesElement.GetArrayLength());
+            var runeIndex = 0;
             foreach (var runeElement in runesElement.EnumerateArray())
             {
                 if (runeElement.ValueKind != JsonValueKind.String)
                 {
-                    continue;
+                    throw new InvalidDataException(
+                        $"Runeword recipe '{recipeId}' rune at index {runeIndex} must be a string.");
                 }
 
                 var rune = runeElement.GetString()?.Trim();
                 if (string.IsNullOrWhiteSpace(rune))
                 {
-                    continue;
+                    throw new InvalidDataException(
+                        $"Runeword recipe '{recipeId}' rune at index {runeIndex} must not be empty.");
                 }
 
                 runes.Add(rune);
+                runeIndex += 1;
             }
 
             if (runes.Count == 0)
             {
-                Console.Error.WriteLine(
-                    $"WARNING: Runeword recipe '{recipeId}' has empty runes array, skipping.");
-                continue;
+                throw new InvalidDataException($"Runeword recipe '{recipeId}' must contain at least one rune.");
             }
 
             string? recommendedBase = null;
-            if (recipeElement.TryGetProperty("recommendedBase", out var baseElement) &&
-                baseElement.ValueKind == JsonValueKind.String)
+            if (recipeElement.TryGetProperty("recommendedBase", out var baseElement))
             {
-                var baseToken = baseElement.GetString()?.Trim();
-                if (string.Equals(baseToken, "Weapon", StringComparison.OrdinalIgnoreCase))
+                if (baseElement.ValueKind == JsonValueKind.String)
                 {
-                    recommendedBase = "Weapon";
+                    var baseToken = baseElement.GetString()?.Trim();
+                    recommendedBase = baseToken?.ToLowerInvariant() switch
+                    {
+                        "weapon" => "Weapon",
+                        "armor" => "Armor",
+                        _ => throw new InvalidDataException(
+                            $"Runeword recipe '{recipeId}' recommendedBase must be Weapon, Armor, or null."),
+                    };
                 }
-                else if (string.Equals(baseToken, "Armor", StringComparison.OrdinalIgnoreCase))
+                else if (baseElement.ValueKind != JsonValueKind.Null)
                 {
-                    recommendedBase = "Armor";
+                    throw new InvalidDataException(
+                        $"Runeword recipe '{recipeId}' recommendedBase must be Weapon, Armor, or null.");
                 }
             }
 
@@ -209,6 +251,7 @@ internal static class RunewordContractCatalog
                 runes,
                 resultAffixId,
                 recommendedBase));
+            recipeIndex += 1;
         }
 
         return output;
@@ -219,36 +262,116 @@ internal static class RunewordContractCatalog
         if (!root.TryGetProperty("runewordRuneWeights", out var weightsElement) ||
             weightsElement.ValueKind != JsonValueKind.Array)
         {
-            return [];
+            throw new InvalidDataException("Runeword contract requires a runewordRuneWeights array.");
         }
 
         var output = new List<RuneWeightEntry>(weightsElement.GetArrayLength());
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var weightIndex = 0;
         foreach (var entryElement in weightsElement.EnumerateArray())
         {
             if (entryElement.ValueKind != JsonValueKind.Object)
             {
-                continue;
+                throw new InvalidDataException($"runewordRuneWeights[{weightIndex}] must be an object.");
             }
 
             if (!TryGetRequiredString(entryElement, "rune", out var rune) ||
                 !entryElement.TryGetProperty("weight", out var weightElement) ||
                 weightElement.ValueKind != JsonValueKind.Number ||
                 !weightElement.TryGetDouble(out var weight) ||
+                !double.IsFinite(weight) ||
                 weight <= 0.0)
             {
-                continue;
+                throw new InvalidDataException(
+                    $"runewordRuneWeights[{weightIndex}] requires a non-empty rune and finite positive weight.");
             }
 
             if (!seen.Add(rune))
             {
-                continue;
+                throw new InvalidDataException($"Duplicate runeword rune weight: {rune}");
             }
 
             output.Add(new RuneWeightEntry(rune, weight));
+            weightIndex += 1;
         }
 
         return output;
+    }
+
+    private static Snapshot ValidateSnapshot(Snapshot snapshot, string sourceLabel)
+    {
+        if (snapshot.Recipes.Count != ExpectedRecipeCount)
+        {
+            throw new InvalidDataException(
+                $"Runeword contract '{sourceLabel}' must contain exactly {ExpectedRecipeCount} recipes " +
+                $"(found {snapshot.Recipes.Count}).");
+        }
+
+        if (snapshot.RuneWeights.Count != ExpectedRuneWeightCount)
+        {
+            throw new InvalidDataException(
+                $"Runeword contract '{sourceLabel}' must contain exactly {ExpectedRuneWeightCount} rune weights " +
+                $"(found {snapshot.RuneWeights.Count}).");
+        }
+
+        var recipeIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var resultAffixIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var recipe in snapshot.Recipes)
+        {
+            if (!recipeIds.Add(recipe.Id))
+            {
+                throw new InvalidDataException($"Duplicate runeword recipe id: {recipe.Id}");
+            }
+
+            if (!resultAffixIds.Add(recipe.ResultAffixId))
+            {
+                throw new InvalidDataException($"Duplicate runeword resultAffixId: {recipe.ResultAffixId}");
+            }
+        }
+
+        var runeNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var runeWeight in snapshot.RuneWeights)
+        {
+            if (string.IsNullOrWhiteSpace(runeWeight.Rune) ||
+                !double.IsFinite(runeWeight.Weight) ||
+                runeWeight.Weight <= 0.0)
+            {
+                throw new InvalidDataException(
+                    $"Rune weights require non-empty rune names and finite positive values: {runeWeight.Rune}");
+            }
+
+            if (!runeNames.Add(runeWeight.Rune))
+            {
+                throw new InvalidDataException($"Duplicate runeword rune weight: {runeWeight.Rune}");
+            }
+        }
+
+        var referencedRunes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var recipe in snapshot.Recipes)
+        {
+            foreach (var rune in recipe.Runes)
+            {
+                if (!runeNames.Contains(rune))
+                {
+                    throw new InvalidDataException(
+                        $"Runeword recipe '{recipe.Id}' references rune '{rune}' without a weight entry.");
+                }
+
+                referencedRunes.Add(rune);
+            }
+        }
+
+        var unusedRuneWeights = runeNames
+            .Where(rune => !referencedRunes.Contains(rune))
+            .OrderBy(rune => rune, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (unusedRuneWeights.Length > 0)
+        {
+            throw new InvalidDataException(
+                "Runeword contract contains unreferenced rune weights: " + string.Join(", ", unusedRuneWeights));
+        }
+
+        return snapshot;
     }
 
     private static bool TryGetRequiredString(JsonElement parent, string key, out string value)

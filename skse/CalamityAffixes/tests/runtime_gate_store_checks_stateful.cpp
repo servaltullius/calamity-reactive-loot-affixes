@@ -427,6 +427,23 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
+		state.corpseCurrencyRollLedger = {
+			{ 0x400u, { .dayStamp = 10u, .processedMask = CalamityAffixes::detail::kCorpseCurrencyAllProcessed } },
+			{ 0x200u, { .dayStamp = 20u, .processedMask = CalamityAffixes::detail::kCorpseCurrencyRunewordProcessed } },
+			{ 0x100u, { .dayStamp = 20u, .processedMask = CalamityAffixes::detail::kCorpseCurrencyReforgeProcessed } },
+			{ 0x300u, { .dayStamp = 30u, .processedMask = CalamityAffixes::detail::kCorpseCurrencyAllProcessed } },
+		};
+		CalamityAffixes::SerializationLoadState::RebuildCorpseCurrencyLedgerRecent(state, 3u);
+		if (state.corpseCurrencyRollLedgerRecent.size() != 3u ||
+			state.corpseCurrencyRollLedgerRecent[0] != 0x100u ||
+			state.corpseCurrencyRollLedgerRecent[1] != 0x200u ||
+			state.corpseCurrencyRollLedgerRecent[2] != 0x300u ||
+			state.corpseCurrencyRollLedger.size() != 3u ||
+			state.corpseCurrencyRollLedger.contains(0x400u)) {
+			std::cerr << "serialization_load_state: corpse ledger must prune oldest day then order same-day FormIDs\n";
+			return false;
+		}
+
 		CalamityAffixes::AffixRegistryState registry{};
 		registry.lootSharedAffixes = { 3u, 7u, 9u };
 		registry.lootWeaponAffixes = { 11u, 13u };

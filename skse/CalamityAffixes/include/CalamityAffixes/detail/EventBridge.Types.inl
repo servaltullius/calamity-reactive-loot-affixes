@@ -420,8 +420,9 @@
 			float configuredRunewordFragmentChancePercent{ 8.0f };
 			float configuredReforgeOrbChancePercent{ 5.0f };
 			CurrencyDropMode currencyDropMode{ CurrencyDropMode::kHybrid };
-			bool runtimeCurrencyDropsEnabled{ true };
-			float lootSourceChanceMultCorpse{ 0.80f };
+			bool runtimeCurrencyDropsEnabled{ false };
+			bool runtimeCorpseDeathCurrencyDropsEnabled{ true };
+			float lootSourceChanceMultCorpse{ 1.00f };
 			float lootSourceChanceMultContainer{ 1.00f };
 			float lootSourceChanceMultBossContainer{ 1.15f };
 			float lootSourceChanceMultWorld{ 1.00f };

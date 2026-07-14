@@ -136,7 +136,7 @@ namespace CalamityAffixes
 		RebuildActiveCounts();
 
 		SKSE::log::info(
-			"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, runtimeCurrencyDropsEnabled={}, sourceMult(corpse/container/boss/world)={:.2f}/{:.2f}/{:.2f}/{:.2f}, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
+			"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, broadRuntimeCurrencyDropsEnabled={}, corpseDeathCurrencyDropsEnabled={}, sourceMult(corpse/container/boss/world)={:.2f}/{:.2f}/{:.2f}/{:.2f}, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
 			_affixes.size(),
 			_affixRegistry.lootWeaponAffixes.size(), _affixRegistry.lootArmorAffixes.size(),
 			_affixRegistry.lootWeaponSuffixes.size(), _affixRegistry.lootArmorSuffixes.size(),
@@ -144,6 +144,7 @@ namespace CalamityAffixes
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
 			_loot.runtimeCurrencyDropsEnabled,
+			_loot.runtimeCorpseDeathCurrencyDropsEnabled,
 			_loot.lootSourceChanceMultCorpse,
 			_loot.lootSourceChanceMultContainer,
 			_loot.lootSourceChanceMultBossContainer,

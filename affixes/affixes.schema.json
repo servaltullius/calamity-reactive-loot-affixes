@@ -30,6 +30,11 @@
         "spidRules": {
           "type": "array",
           "items": { "$ref": "#/$defs/spidRule" }
+        },
+        "appendedMagicEffects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/magicEffectRecord" },
+          "minItems": 1
         }
       }
     }

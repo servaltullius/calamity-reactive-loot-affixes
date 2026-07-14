@@ -29,6 +29,7 @@
 	#include "CalamityAffixes/AffixRegistryState.h"
 	#include "CalamityAffixes/AffixToken.h"
 	#include "CalamityAffixes/CombatRuntimeState.h"
+	#include "CalamityAffixes/CorpseCurrencyPolicy.h"
 	#include "CalamityAffixes/InstanceAffixSlots.h"
 	#include "CalamityAffixes/InstanceStateKey.h"
 	#include "CalamityAffixes/LootCurrencyLedger.h"

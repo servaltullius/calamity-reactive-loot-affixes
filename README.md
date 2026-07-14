@@ -13,7 +13,7 @@
 
 - 필수: SKSE64, Address Library for SKSE Plugins, Prisma UI
 - 권장: SkyUI
-- 선택: KID, SPID, MCM Helper, I4
+- 선택: KID, MCM Helper, I4
 
 ## 5분 설치 (MO2 기준)
 
@@ -25,18 +25,20 @@
 
 ## 사용법 (한 줄 요약)
 
-- 아이템 획득 시에는 **룬워드 조각/재련 오브**만 확률 롤이 수행됩니다. (어픽스 자동 부여 없음)
+- 플레이어 또는 player-owned summon/proxy가 적대 대상을 처치하면 해당 **시체 인벤토리**에만 룬워드 조각/재련 오브 확률 롤이 수행됩니다. (어픽스 자동 부여, 일반 상자/컨테이너/월드 드랍 없음)
 - 인벤/루팅/상점에서 아이템을 “선택”하면 Prisma UI 툴팁에 어픽스 설명이 표시됩니다.
 - Prisma 조작 패널 토글: 기본 `F11` (MCM에서 변경 가능)
 - 룬워드 패널에서 **재련 오브(Reforge Orb)** 를 사용해 선택 장비를 재련할 수 있습니다.
 - 잘못 연결된 어픽스 상태를 지우려면 장비를 착용·선택한 뒤 **Reset State / 상태 초기화**를 두 번 누릅니다. Calamity 어픽스/룬워드/런타임 상태가 제거되며 재료는 환불되지 않습니다.
-- 룬워드 패널에서 레시피를 선택하면 **효과/권장 베이스/룬 순서/상세**가 상태 영역에 표시되며, 레시피 항목 hover로도 효과 요약을 확인할 수 있습니다.
+- 룬워드 패널에서 레시피를 선택하면 **효과/권장 베이스/룬 순서/상세**가 한국어/영어 설정에 맞춰 상태 영역에 표시되며, 레시피 항목 hover로도 상세 효과를 확인할 수 있습니다.
+- 패널은 화면 경계 안에 자동 배치되고, 레시피 목록은 wheel·스크롤바 드래그·키보드 스크롤과 ARIA 접근성을 함께 지원합니다.
 
 ## 문제 해결 (가장 흔한 것)
 
 - 툴팁이 안 뜸: Prisma UI 설치 확인, `Data/PrismaUI/views/CalamityAffixes/index.html`가 있는지 확인, 로그 확인
 - 실행/크래시: 런타임과 맞는 SKSE/Address Library인지 확인, `Data/SKSE/Plugins/*.dll` 충돌 여부 확인
 - 판매/상자 이동 뒤 다른 장비에 예전 어픽스가 보임: 잘못 표시된 장비를 착용·선택하고 룬워드 패널의 **Reset State / 상태 초기화**를 두 번 누릅니다. v1.2.22부터 새 소유권 이동은 owner+UID 기준으로 추적되며 상태끼리 병합되지 않습니다.
+- 업데이트 뒤 구 SPID 분배가 계속 보임: MO2에서 새 버전을 별도 모드로 겹쳐 켜면 충돌 우선순위에 따라 구 `CalamityAffixes_DISTR.ini`가 새 빈 파일보다 우선할 수 있습니다. 기존 Calamity 모드를 교체/덮어쓰거나 구 DISTR 파일을 비활성화하세요.
 - 설정 변경:
   - MCM Helper가 있으면 MCM에서 조정
   - 없으면 `Data/MCM/Config/CalamityAffixes/settings.ini`를 `Data/MCM/Settings/CalamityAffixes.ini`로 복사해서 오버라이드
@@ -87,7 +89,7 @@
 - (기본값) `loot.renameItem=true` : 아이템 이름에 **짧은 어픽스 라벨**을 붙여(좌측 리스트) 빠르게 식별합니다.
   - `loot.nameMarkerPosition=trailing`이면 이름 마커를 뒤에 붙입니다. 예: `철검*` (정렬 안정화)
 
-기본값: `loot.runewordFragmentChancePercent=8`, `loot.reforgeOrbChancePercent=5`, `loot.currencyDropMode=hybrid(고정)`, `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
+기본값: `loot.runewordFragmentChancePercent=8`, `loot.reforgeOrbChancePercent=5`, `loot.currencyDropMode=hybrid` (레거시 설정 호환 토큰; 실제 드랍 권한은 SKSE death-event corpse-only), `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
 참고: `loot.chancePercent`는 현재 기본 정책에서 실질적으로 사용되지 않는 레거시 호환 필드입니다.
 추가 안전장치(권장): `loot.trapGlobalMaxActive=64` (전역 트랩 하드캡, 0=무제한)
 
@@ -106,7 +108,7 @@
 
 - `docs/design/` : 개발 명세서(컨셉/제약/설계)
 - `docs/AFFIX_CATALOG.md` : 현재 구현된 효과 목록(한국어 요약)
-- `docs/RUNEWORD_EFFECTS.md` : 룬워드 94개 레시피별 효과 설명(직접 정의형 + 자동 합성형)
+- `docs/RUNEWORD_EFFECTS.md` : JSON에서 개별 정의한 룬워드 94개 레시피별 효과 설명
 - `Data/` : 게임 `Data/`에 그대로 설치 가능한 “스테이징” 폴더 (MO2 테스트용)
   - `Data/CalamityAffixes.esp` : 키워드/스펠/MGEF + MCM Helper Quest(자동 생성, 단일 ESP)
   - `Data/Scripts/Source/` : Papyrus 소스(.psc)
@@ -120,7 +122,7 @@
     - `keybinds.json`: `prisma_panel_toggle` 포함(Prisma 패널 빠른 토글)
     - MCM `Panel Language / 패널 언어`에서 Prisma 패널 텍스트를 영어/한국어/병행 표기로 전환
   - `Data/CalamityAffixes_KID.ini` : KID 템플릿(태그/옵션 분배)
-  - `Data/CalamityAffixes_DISTR.ini` : SPID 템플릿(분배)
+  - `Data/CalamityAffixes_DISTR.ini` : 빈 SPID 호환 산출물(새 통화 분배 규칙 비활성)
 - `skse/CalamityAffixes/` : CommonLibSSE-NG 기반 SKSE 플러그인(CMake/vcpkg)
 
 ## 설치 전 준비물(플레이어)
@@ -138,6 +140,8 @@
   - 메인 조작 UI(수동 모드/룬워드/디버그)도 Prisma 패널에서 처리
   - 인벤토리에서는 기본적으로 “툴팁은 클릭-스루(비상호작용)”입니다. 패널은 **단일 단축키**(`prisma_panel_toggle`, MCM에서 설정)로 열고/닫습니다. 키가 미설정이면 기본 `F11`로 토글됩니다(인벤 밖에서도 가능).
   - 패널 표시 언어는 MCM `Panel Language / 패널 언어` 옵션에서 즉시 변경할 수 있습니다.
+  - 레시피의 효과·권장 베이스·룬 순서·상세는 선택 언어에 맞춰 표시되고, 검색 결과·hover 상세도 같은 설명 계약을 사용합니다.
+  - 패널 위치는 현재 viewport 안으로 제한되며, 레시피 목록은 wheel과 네이티브 scrollbar 조작을 경쟁시키지 않고 키보드·ARIA 상태도 제공합니다.
   - 패널 단축키/언어 값은 `Data/SKSE/Plugins/CalamityAffixes/user_settings.json`에 동기화되며, MCM 설정 파일이 없는 상태에서도 해당 값으로 복원됩니다.
   - 패널이 열리면 입력/커서는 패널이 잡아 “클릭-스루”로 인벤이 함께 눌리는 현상을 방지합니다(ESC 또는 Close로 닫기).
   - 패널이 열리면 툴팁은 패널 안으로 이동합니다(중복 표시 방지).
@@ -151,10 +155,11 @@
 - KID (태그 분배; DoT 태그 `CAFF_TAG_DOT` 포함) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/55728))
 - 주의: `CAFF_TAG_DOT`을 **필터 없이(Magic Effect + `NONE`) 전체 분배**하면, 키워드 기반 디스펠/정화 효과와 상호작용해 “적용중인 효과”가 사라지는 등 **심각한 부작용**이 날 수 있습니다. 그래서 기본 KID 규칙은 `*Alch*|H`(바닐라 독/알케미 해로운 MGEF)로 **좁게 제한**하고, 위험한 무필터 규칙은 생성 단계에서 출력 자체를 건너뜁니다.
 
-#### (선택) SPID
+#### SPID 호환 참고
 
-- SPID (NPC/아이템/퍼크 분배) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/36869))
-- 참고: SPID는 분배 도구이며, 본 모드의 어픽스 런타임 대상 범위를 자동으로 NPC 전체로 확장하지는 않습니다.
+- 현재 통화 드랍은 SKSE death event가 처리하므로 SPID가 필요하지 않습니다.
+- `Data/CalamityAffixes_DISTR.ini`는 설치·업데이트 호환을 위해 남기는 **빈 산출물**이며 새 룬 조각/재련 오브 분배 규칙을 등록하지 않습니다.
+- SPID를 별도로 설치해도 본 모드의 어픽스 런타임 대상 범위를 NPC 전체로 확장하거나, 일반 상자·컨테이너에 통화를 추가하지 않습니다.
 
 ### 의존성(선택)
 
@@ -260,22 +265,21 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 
 - 현재는 **유저 자유 베이스 지정**을 지원합니다. (장착 중 무기/방어구를 순환 선택)
 - 레시피는 D2/D2R 기준 **94개 룬워드 카탈로그**(2차 확장)를 제공합니다. 레시피별 **권장 베이스 타입(무기/방어구)**은 안내만 하고 강제하지 않습니다.
-- `affixes/affixes.json`(모듈 조합 결과)에 정의되지 않은 룬워드 최종 어픽스는 SKSE 런타임에서 **ID 기반 스타일 매핑 + 개별 튜닝 + 베이스 타입 분산 + 레거시 폴백**으로 자동 합성됩니다. (D2 오라 감성은 Flame/Frost/Shock Cloak, Oak/Stone/Iron/Ebonyflesh, Fear/Frenzy 등 바닐라 주문 치환)
-- Prisma 룬워드 패널은 레시피가 많아진 것을 반영해 **검색 + 총/검색결과 카운트**를 표시합니다.
+- 룬워드 94개는 `affixes/affixes.json`의 JSON 정의로 각각 명시되며, 생성기는 정확히 **94개 레시피 + 33개 룬 가중치** 계약이 아니거나 ID/레코드가 충돌하면 실패합니다.
+- Prisma 룬워드 패널은 **검색 + 총/검색결과 카운트**와 한국어/영어 상세 설명을 표시하며, 화면 경계 제한과 wheel·스크롤바·키보드/ARIA 탐색을 지원합니다.
 - 조각 수급:
-  - 기본 하이브리드:
-    - 시체: SPID `Item` 분배 (액터 인벤토리 선지급 -> 사망 시 시체 루팅)
-    - 상자/월드: SKSE 런타임 롤 경로
+  - 설정 파일의 `hybrid` 값은 구버전 호환 토큰입니다. 실제 권한은 **SKSE death event corpse-only** 경로 하나입니다.
+  - 플레이어 또는 player-owned summon/proxy가 처치한 적대 대상만 판정하며, 성공한 통화는 바닥에 생성하지 않고 해당 시체 인벤토리에 조용히 직접 추가합니다.
+  - 일반 상자/컨테이너 활성화, 아이템 픽업, 월드 생성과 새 SPID 통화 분배는 모두 사용하지 않습니다.
+  - 피해자가 팔로워/동료, 소환·지휘된 액터, 아동, player-owned 또는 비적대 대상이면 제외합니다. 환경 오브젝트나 player-owned가 아닌 독립 NPC/팔로워가 낸 처치도 제외합니다.
   - 룬 종류는 저급 `El-Amn=4`, 중급 `Sol-Um=3`, 고급 `Mal-Lo=2`, 최상급 `Sur-Zod=1`의 4단계 가중치로 선택됩니다(최고:최저 4:1).
-  - 시체 루팅 호환성을 위해 `DeathItem` 직접 분배와 `Perk` 기반 On-Death 분배는 사용하지 않습니다.
-  - SPID ActorType 필터 미매칭 시체(일부 모드 추가 적 등)는 현재 정책상 시체 통화 드랍이 발생하지 않습니다.
-  - 확률은 기본적으로 생성기 단계(`loot.runewordFragmentChancePercent`)에 반영됩니다.
-    (MCM 슬라이더는 런타임 상자/월드 롤에는 즉시 반영되지만, 이미 분배된 SPID 시체 인벤토리에는 즉시 재분배되지 않습니다.)
+  - 기본 파편 판정은 `8%`이고 99회 연속 실패 뒤 보장하는 피티를 유지합니다. 피티 카운터와 시체별 카테고리 ledger는 `CCRT` 코세이브 레코드에 저장됩니다.
+  - 업데이트 전에 SPID로 통화 또는 해당 레벨드 리스트가 이미 들어간 전환 시체는 룬 조각/재련 오브 카테고리별로 감지해 같은 카테고리의 런타임 중복 롤을 건너뜁니다.
+  - MCM 확률 변경은 다음 eligible hostile death 판정부터 적용됩니다.
   - Prisma 디버그 버튼: `+1 next fragment`, `+1 recipe set`
 - 재련 오브(리포지):
-  - 룬 조각과 동일한 하이브리드 경로(시체 SPID Item + 상자/월드 런타임)로 획득합니다.
-  - 확률은 `loot.reforgeOrbChancePercent`로 제어합니다.
-    (MCM 슬라이더는 런타임 상자/월드 롤에는 즉시 반영되지만, 이미 분배된 SPID 시체 인벤토리에는 즉시 재분배되지 않습니다.)
+  - 룬 조각과 같은 eligible hostile corpse-only 경로로 획득합니다.
+  - 기본 확률은 `loot.reforgeOrbChancePercent=5`입니다.
   - 룬워드 패널 `Reforge / 재련` 버튼으로 **선택된 장착 장비**에 1개를 소모해 재련합니다.
   - 일반 장비 재련: 일반 어픽스를 재굴림합니다.
   - 완성 룬워드 장비 재련: **룬워드 효과는 보존**하고, 일반 어픽스만 재롤합니다.
@@ -314,18 +318,14 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 
 ### 드랍 경로 정책
 
-- 정책 메모: `docs/references/2026-02-22-corpse-drop-compat-policy.md`
-- 드랍 정책은 `hybrid` 단일 경로를 기본으로 사용합니다.
-  - 시체: SPID `Item` 분배 (ActorType 직접 필터)
-  - 상자/월드: SKSE 런타임 롤
-  - SPID ActorType 필터 미매칭 시체: 드랍 없음
-- 상자/월드 활성화 롤은 **타입별 중복 가드**를 사용합니다.
-  - runeword 관련 통화/드랍리스트가 이미 있으면 runeword 롤만 스킵
-  - reforge 관련 통화/드랍리스트가 이미 있으면 reforge 롤만 스킵
-  - 양 타입이 모두 비어 있을 때만 양쪽 롤을 동시에 수행
-- `DeathItem` 직접 분배는 다른 모드 시체 루팅 충돌 가능성 때문에 사용하지 않습니다.
-- 레거시 `Perk + AddLeveledListOnDeath` 시체 경로는 사용하지 않습니다.
-- 레벨리스트(LVLI) 주입/오버라이드는 더 이상 사용하지 않습니다.
+- 현재 정책 메모: `docs/references/2026-07-14-corpse-runtime-currency-policy.md`
+- `loot.currencyDropMode=hybrid`는 기존 설정 파일을 깨지 않기 위한 레거시 토큰일 뿐이며, 실제 통화 판정 권한은 **플레이어 또는 player-owned summon/proxy의 적대 처치를 받는 SKSE death event**에만 있습니다.
+- 성공한 룬 조각/재련 오브는 사망한 대상의 인벤토리에 직접 추가됩니다. `PlaceAtMe` 월드 생성, 플레이어 인벤토리 직행, 일반 컨테이너 활성화, 픽업 롤과 새 SPID 분배는 사용하지 않습니다.
+- 피해자가 팔로워/동료, 소환·지휘 액터, 아동, player-owned/비적대 대상이면 제외하며, 환경 오브젝트와 player-owned가 아닌 독립 NPC/팔로워의 처치도 제외합니다.
+- 시체 FormID·날짜·통화 카테고리 mask와 룬/오브 피티를 새 `CCRT` 코세이브 레코드에 저장해 재로드 후 중복 롤과 피티 초기화를 막습니다.
+- 기존 SPID 분배가 남아 있는 전환 시체는 보유 통화/레벨드 리스트를 카테고리별로 확인하고 해당 카테고리만 건너뜁니다.
+- 기존 `IAXF` 등 직렬화 레코드, 어픽스 ID, 장비, 보유 룬 조각과 완성 룬워드는 그대로 호환됩니다. `CCRT`는 추가 레코드이므로 새 게임이 필요하지 않습니다.
+- `Data/CalamityAffixes_DISTR.ini`는 빈 호환 산출물이며 레벨리스트(LVLI) 주입/오버라이드, `DeathItem`, `Perk + AddLeveledListOnDeath`는 사용하지 않습니다.
 
 ### MO2 배포 ZIP 생성
 

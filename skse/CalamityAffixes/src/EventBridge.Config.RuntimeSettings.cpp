@@ -115,13 +115,14 @@ namespace CalamityAffixes
 		spdlog::flush_on(spdlog::level::warn);
 
 		SKSE::log::info(
-			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, runtimeCurrencyDropsEnabled={}, debugHud={}, debugVerbose={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
+			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, broadRuntimeCurrencyDropsEnabled={}, corpseDeathCurrencyDropsEnabled={}, debugHud={}, debugVerbose={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
 			std::string(kUserSettingsRelativePath),
 			_runtimeSettings.enabled,
 			_runtimeSettings.procChanceMult,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
 			_loot.runtimeCurrencyDropsEnabled,
+			_loot.runtimeCorpseDeathCurrencyDropsEnabled,
 			_loot.debugHudNotifications,
 			_loot.debugLog,
 			_runtimeSettings.combatDebugLog,

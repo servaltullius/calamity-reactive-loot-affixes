@@ -17,6 +17,11 @@ public static class KeywordPluginBuilder
     private const int MaxRunewordFragmentWeightTickets = 64;
     private const double TargetMaxRunewordFragmentWeightTickets = 48.0;
 
+    private sealed record MagicEffectUsage(
+        CastType CastType,
+        TargetType TargetType,
+        string SpellEditorId);
+
     // Non-localized ESP records cannot safely carry Hangul in all Skyrim UI paths.
     // For ESP-facing display names, keep a printable ASCII variant (usually English side of "EN / KO").
     private static string ToPluginSafeName(string rawName, string editorId)
@@ -82,6 +87,21 @@ public static class KeywordPluginBuilder
 
     public static SkyrimMod Build(AffixSpec spec)
     {
+        return BuildCore(spec, includeAppendedMagicEffects: true, populateSpellEffects: true);
+    }
+
+    internal static SkyrimMod BuildRecordAllocationSnapshot(
+        AffixSpec spec,
+        bool includeAppendedMagicEffects)
+    {
+        return BuildCore(spec, includeAppendedMagicEffects, populateSpellEffects: false);
+    }
+
+    private static SkyrimMod BuildCore(
+        AffixSpec spec,
+        bool includeAppendedMagicEffects,
+        bool populateSpellEffects)
+    {
         var mod = new SkyrimMod(ModKey.FromFileName(spec.ModKey), SkyrimRelease.SkyrimSE);
 
         if (spec.EslFlag)
@@ -102,6 +122,8 @@ public static class KeywordPluginBuilder
         var seenMagicEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var magicEffectsByEditorId = new Dictionary<string, MagicEffect>(StringComparer.OrdinalIgnoreCase);
+        var pendingSpells = new List<(Spell Record, SpellRecordSpec Spec)>();
+        var magicEffectUsagesByEditorId = new Dictionary<string, MagicEffectUsage>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var tag in spec.Keywords.Tags)
         {
@@ -134,14 +156,47 @@ public static class KeywordPluginBuilder
                     continue;
                 }
 
-                AddSpell(mod, spell, magicEffectsByEditorId);
+                var created = AddSpellRecord(mod, spell);
                 seenSpells.Add(spell.EditorId);
+                pendingSpells.Add((created, spell));
             }
         }
 
         if (spec.Loot is not null)
         {
             _ = EnsureCurrencyDropLists(mod, spec.Loot);
+        }
+
+        // Explicit append-only compatibility zone. These records are allocated only
+        // after every pre-existing generated record, so the stable prefix keeps its
+        // original FormIDs when a new shared effect must be split.
+        if (includeAppendedMagicEffects)
+        {
+            foreach (var magicEffect in spec.Keywords.AppendedMagicEffects)
+            {
+                if (!seenMagicEffects.Add(magicEffect.EditorId))
+                {
+                    throw new InvalidDataException(
+                        $"Duplicate appended MagicEffect editorId: {magicEffect.EditorId}");
+                }
+
+                var created = AddMagicEffect(mod, magicEffect);
+                magicEffectsByEditorId.Add(magicEffect.EditorId, created);
+            }
+        }
+
+        // Linking effects does not allocate records. Deferring it lets spells refer to
+        // append-only MagicEffects without moving the spells or any other stable record.
+        if (populateSpellEffects)
+        {
+            foreach (var pendingSpell in pendingSpells)
+            {
+                PopulateSpellEffects(
+                    pendingSpell.Record,
+                    pendingSpell.Spec,
+                    magicEffectsByEditorId,
+                    magicEffectUsagesByEditorId);
+            }
         }
 
         return mod;
@@ -431,7 +486,7 @@ public static class KeywordPluginBuilder
         return mgef;
     }
 
-    private static void AddSpell(SkyrimMod mod, SpellRecordSpec spec, IReadOnlyDictionary<string, MagicEffect> magicEffectsByEditorId)
+    private static Spell AddSpellRecord(SkyrimMod mod, SpellRecordSpec spec)
     {
         var spell = mod.Spells.AddNew();
         spell.EditorID = spec.EditorId;
@@ -460,6 +515,15 @@ public static class KeywordPluginBuilder
         spell.Range = (spell.TargetType == TargetType.TargetActor && spell.CastType != Mutagen.Bethesda.Skyrim.CastType.ConstantEffect) ? 4096.0f : 0.0f;
         spell.Flags = (SpellDataFlag)0;
 
+        return spell;
+    }
+
+    private static void PopulateSpellEffects(
+        Spell spell,
+        SpellRecordSpec spec,
+        IReadOnlyDictionary<string, MagicEffect> magicEffectsByEditorId,
+        IDictionary<string, MagicEffectUsage> magicEffectUsagesByEditorId)
+    {
         var effectSpecs = spec.ResolveEffects();
         if (effectSpecs.Count == 0)
         {
@@ -478,24 +542,25 @@ public static class KeywordPluginBuilder
 
             // MagicEffects are validated (and used for various runtime behaviors) by their own cast/target types.
             // If we leave defaults here, the spell can be cast but silently fail to apply to the intended target.
-            // Detect conflicting overwrites: if a previous spell already set different values, the last
-            // writer wins silently — warn so the spec author can split the MagicEffect.
-            if (magicEffect.CastType != spell.CastType &&
-                magicEffect.CastType != default)
+            // Track assignments explicitly instead of using enum defaults as a sentinel:
+            // ConstantEffect and Self can themselves be zero-valued enum members.
+            if (magicEffectUsagesByEditorId.TryGetValue(effectSpec.MagicEffectEditorId, out var priorUsage) &&
+                (priorUsage.CastType != spell.CastType || priorUsage.TargetType != spell.TargetType))
             {
-                Console.Error.WriteLine(
-                    $"WARNING: MagicEffect {effectSpec.MagicEffectEditorId} CastType overwritten " +
-                    $"({magicEffect.CastType} → {spell.CastType}) by Spell {spec.EditorId}. " +
-                    "Consider using separate MagicEffects per spell.");
+                throw new InvalidDataException(
+                    $"MagicEffect {effectSpec.MagicEffectEditorId} has conflicting spell contracts: " +
+                    $"{priorUsage.SpellEditorId} uses {priorUsage.CastType}/{priorUsage.TargetType}, " +
+                    $"but {spec.EditorId} uses {spell.CastType}/{spell.TargetType}. " +
+                    "Use separate MagicEffects per cast/target contract.");
             }
-            if (magicEffect.TargetType != spell.TargetType &&
-                magicEffect.TargetType != default)
+
+            if (priorUsage is null)
             {
-                Console.Error.WriteLine(
-                    $"WARNING: MagicEffect {effectSpec.MagicEffectEditorId} TargetType overwritten " +
-                    $"({magicEffect.TargetType} → {spell.TargetType}) by Spell {spec.EditorId}. " +
-                    "Consider using separate MagicEffects per spell.");
+                magicEffectUsagesByEditorId.Add(
+                    effectSpec.MagicEffectEditorId,
+                    new MagicEffectUsage(spell.CastType, spell.TargetType, spec.EditorId));
             }
+
             magicEffect.CastType = spell.CastType;
             magicEffect.TargetType = spell.TargetType;
 

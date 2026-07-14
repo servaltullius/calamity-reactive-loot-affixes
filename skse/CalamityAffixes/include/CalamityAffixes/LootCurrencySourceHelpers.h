@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CalamityAffixes/LootCurrencyLedger.h"
+#include "CalamityAffixes/CorpseCurrencyPolicy.h"
 #include "CalamityAffixes/LootEligibility.h"
 
 #include <RE/Skyrim.h>
@@ -12,6 +13,7 @@
 
 namespace CalamityAffixes::detail
 {
+
 	[[nodiscard]] inline bool IsBossContainerEditorId(
 		std::string_view a_editorId,
 		const std::vector<std::string>& a_allowContains,

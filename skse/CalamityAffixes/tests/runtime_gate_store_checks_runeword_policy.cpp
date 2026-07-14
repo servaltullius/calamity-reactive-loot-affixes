@@ -220,19 +220,27 @@ namespace RuntimeGateStoreChecks
 			}
 
 			const std::string headerContractsText = *headerText + *contractsHeaderText;
-			if (headerContractsText.find("std::string effectSummaryText{};") == std::string::npos ||
-				headerContractsText.find("std::string effectDetailText{};") == std::string::npos ||
-				recipeEntriesText->find(".effectSummaryText =") == std::string::npos ||
-				recipeEntriesText->find(".effectDetailText =") == std::string::npos ||
-				prismaCoreText->find("{ \"summary\", entry.effectSummaryText }") == std::string::npos ||
-				prismaCoreText->find("{ \"detail\", entry.effectDetailText }") == std::string::npos ||
-				prismaUiText->find("const fallbackSummary = typeof item?.summary === \"string\"") == std::string::npos ||
-				prismaUiText->find("const fallbackDetail = typeof item?.detail === \"string\"") == std::string::npos ||
+			if (headerContractsText.find("std::string effectSummaryTextEn{};") == std::string::npos ||
+				headerContractsText.find("std::string effectSummaryTextKo{};") == std::string::npos ||
+				headerContractsText.find("std::string effectDetailTextEn{};") == std::string::npos ||
+				headerContractsText.find("std::string effectDetailTextKo{};") == std::string::npos ||
+				recipeEntriesText->find(".effectSummaryTextEn = buildEffectSummaryTextEn(affix)") == std::string::npos ||
+				recipeEntriesText->find(".effectSummaryTextKo = buildEffectSummaryTextKo(affix, effectSummaryKey)") == std::string::npos ||
+				recipeEntriesText->find(".effectDetailTextEn = buildEffectDetailTextEn(affix)") == std::string::npos ||
+				recipeEntriesText->find(".effectDetailTextKo = buildEffectDetailTextKo(affix)") == std::string::npos ||
+				prismaCoreText->find("{ \"summaryEn\", entry.effectSummaryTextEn }") == std::string::npos ||
+				prismaCoreText->find("{ \"summaryKo\", entry.effectSummaryTextKo }") == std::string::npos ||
+				prismaCoreText->find("{ \"detailEn\", entry.effectDetailTextEn }") == std::string::npos ||
+				prismaCoreText->find("{ \"detailKo\", entry.effectDetailTextKo }") == std::string::npos ||
+				prismaCoreText->find("{ \"summary\", entry.effectSummaryTextKo }") == std::string::npos ||
+				prismaCoreText->find("{ \"detail\", entry.effectDetailTextKo }") == std::string::npos ||
+				prismaUiText->find("function resolveLocalizedRecipeText(") == std::string::npos ||
 				prismaUiText->find("function resolveRecipeFlavorDetailText(item)") == std::string::npos ||
+				prismaUiText->find("const detailText = resolveRecipeDetailText(item);") == std::string::npos ||
+				prismaUiText->find("const detail = resolveRecipeDetailText(item).toLowerCase();") == std::string::npos ||
 				prismaUiText->find("function buildRunewordTooltipLikeText(item") == std::string::npos ||
 				prismaUiText->find("function buildRecipePreviewTooltipText(item)") == std::string::npos ||
-				prismaUiText->find("buildRunewordTooltipLikeText(getSelectedRecipeItem()") == std::string::npos ||
-				prismaUiText->find("const recipePreviewText = buildRunewordTooltipLikeText(getSelectedRecipeItem()") == std::string::npos) {
+				prismaUiText->find("const recipePreviewText = buildRecipePreviewTooltipText(") == std::string::npos) {
 				std::cerr << "runeword_recipe_tooltip_text: recipe tooltip text enrichment guard is missing\n";
 				return false;
 			}

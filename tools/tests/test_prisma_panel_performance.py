@@ -101,6 +101,8 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
             "const SMOOTH_SCROLL_TIME_CONSTANT_MS = 48;",
             "const SCROLL_STOP_DISTANCE_PX = 0.75;",
             "const SCROLL_MIN_EFFECTIVE_STEP_PX = 0.5;",
+            'window.matchMedia("(prefers-reduced-motion: reduce)")',
+            "function shouldReduceMotion()",
             "lastProgrammaticScrollTop: null",
             "function cancelScrollAnimation(element)",
             "cancelAnimationFrame(scrollState.raf);",
@@ -122,6 +124,7 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
             "const currentAtTarget =",
             "if (targetUnchanged && currentAtTarget)",
             "requestAnimationFrame((timestamp) =>",
+            "if (shouldReduceMotion())",
         ):
             self.assertIn(marker, self.source)
 
@@ -217,6 +220,60 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
             msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
         )
         self.assertIn("Prisma scroll behavior: OK", result.stdout)
+
+    def test_recipe_content_and_tooltip_layout_behavior_in_node(self) -> None:
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("Node.js is unavailable")
+
+        script = self.repo_root / "tools" / "tests" / "prisma_recipe_ui_behavior_test.js"
+        result = subprocess.run(
+            [node, str(script)],
+            cwd=self.repo_root,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("Prisma recipe UI behavior: OK", result.stdout)
+
+    def test_recipe_localization_detail_and_selection_semantics_are_connected(self) -> None:
+        for marker in (
+            'role="listbox"',
+            'aria-label="Equipped runeword bases / 착용 룬워드 베이스"',
+            'aria-label="Runeword recipes / 룬워드 레시피"',
+            'button.setAttribute("role", "option")',
+            'button.setAttribute("aria-selected", selected ? "true" : "false")',
+            "button.tabIndex = -1;",
+            "function resolveListboxNavigationIndex(",
+            "function handleListboxKeydown(event)",
+            'controlPanel.addEventListener("keydown", handleListboxKeydown);',
+            "function resolveLocalizedRecipeText(",
+            'resolveLocalizedRecipeText(\n          item,\n          "summary"',
+            'resolveLocalizedRecipeText(\n          item,\n          "detail"',
+            "const detailText = resolveRecipeDetailText(item);",
+            "const detail = resolveRecipeDetailText(item).toLowerCase();",
+            "buildRecipePreviewTooltipText(\n          getSelectedRecipeItem()",
+            "function buildSelectedRecipeInspectorText(",
+            "schedulePanelRender(panelRenderSection.tooltipPlacement);",
+            "if (value !== tooltipTextState)",
+            "tooltipPanel.scrollTop = 0;",
+        ):
+            self.assertIn(marker, self.source)
+
+        self.assertNotIn("aria-pressed", self.source)
+
+        signature = self._between(
+            "function buildRecipeCatalogSignature(items)",
+            "function resolveConfirmedRecipeToken(items)",
+        )
+        for field in ("summaryEn", "summaryKo", "detailEn", "detailKo"):
+            self.assertIn(field, signature)
 
     def test_motion_avoids_forced_reflow_and_infinite_paint(self) -> None:
         self.assertNotIn("void element.offsetWidth", self.source)

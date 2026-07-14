@@ -30,11 +30,9 @@ fi
 
 data_dir="${repo_root}/Data"
 dist_dir="${repo_root}/dist"
-repo_data_dll="${data_dir}/SKSE/Plugins/CalamityAffixes.dll"
 skse_build_dir_default="${repo_root}/skse/CalamityAffixes/build.linux-clangcl-rel"
-linux_cross_dll_default="${skse_build_dir_default}/CalamityAffixes.dll"
 skse_build_dir="${CAFF_SKSE_BUILD_DIR:-${skse_build_dir_default}}"
-linux_cross_dll="${CAFF_LINUX_CROSS_DLL:-${linux_cross_dll_default}}"
+linux_cross_dll="${CAFF_LINUX_CROSS_DLL:-${skse_build_dir}/CalamityAffixes.dll}"
 spec_manifest="${repo_root}/affixes/affixes.modules.json"
 spec_json="${repo_root}/affixes/affixes.json"
 papyrus_compiler="${PAPYRUS_COMPILER_EXE:-/mnt/c/Program Files (x86)/Steam/steamapps/content/app_1946180/depot_1946183/Papyrus Compiler/PapyrusCompiler.exe}"
@@ -93,13 +91,19 @@ if [[ -z "${CAFF_SKSE_BUILD_DIR:-}" && "${repo_run_root}" != "${repo_root}" ]]; 
   skse_build_dir_run="${repo_run_root}/skse/CalamityAffixes/build.linux-clangcl-rel"
 fi
 
-if [[ -d "${skse_build_dir}" ]]; then
-  python3 "${repo_root}/tools/ensure_skse_build.py" --lane plugin
-  cmake --build "${skse_build_dir_run}" --target CalamityAffixes --parallel "${jobs}"
-else
-  echo "SKSE build dir missing: ${skse_build_dir} (using staged Data DLL if present)" >&2
+if [[ ! -d "${skse_build_dir}" ]]; then
+  echo "SKSE build dir missing: ${skse_build_dir}" >&2
+  echo "Release packaging requires a successful fresh CalamityAffixes target build." >&2
+  exit 1
 fi
 
+python3 "${repo_root}/tools/ensure_skse_build.py" --lane plugin
+cmake --build "${skse_build_dir_run}" --target CalamityAffixes --parallel "${jobs}"
+
+if [[ ! -f "${linux_cross_dll}" ]]; then
+  echo "Freshly built SKSE DLL not found: ${linux_cross_dll}" >&2
+  exit 1
+fi
 # Refuse to package from a stale modular spec snapshot, but do not rewrite tracked files.
 if [[ -f "${spec_manifest}" ]]; then
   python3 "${repo_root}/tools/compose_affixes.py" \
@@ -111,17 +115,9 @@ fi
 mkdir -p "${stage_data_dir}"
 cp -a "${data_dir}/." "${stage_data_dir}/"
 
-if [[ -f "${linux_cross_dll}" ]]; then
-  mkdir -p "$(dirname "${stage_dll}")"
-  cp -f "${linux_cross_dll}" "${stage_dll}"
-  echo "Staged DLL: ${linux_cross_dll} -> ${stage_dll}"
-elif [[ -f "${stage_dll}" ]]; then
-  echo "Staged DLL: using ${repo_data_dll}"
-else
-  echo "No packaged DLL available: ${linux_cross_dll} or ${repo_data_dll}" >&2
-  exit 1
-fi
-
+mkdir -p "$(dirname "${stage_dll}")"
+cp -f "${linux_cross_dll}" "${stage_dll}"
+echo "Staged freshly built DLL: ${linux_cross_dll} -> ${stage_dll}"
 # Regenerate data-driven outputs (keywords/MCM plugin/runtime json) into staged Data.
 generator_data_dir="${stage_data_dir}"
 if command -v wslpath >/dev/null 2>&1 && dotnet_uses_windows_interop; then
@@ -171,3 +167,6 @@ cp -a "${repo_root}/docs/design/데이터주도_생성기_워크플로우.md" "$
 )
 
 echo "Wrote: ${out_zip}"
+if [[ -n "${CAFF_PACKAGE_OUTPUT_FILE:-}" ]]; then
+  printf '%s\n' "${out_zip}" > "${CAFF_PACKAGE_OUTPUT_FILE}"
+fi

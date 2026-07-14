@@ -104,6 +104,9 @@ namespace CalamityAffixes
 			case kSerializationRecordLootCurrencyLedger:
 				LoadLootCurrencyLedgerRecord(a_intfc, version, length);
 				break;
+			case kSerializationRecordCorpseCurrencyRuntime:
+				LoadCorpseCurrencyRuntimeRecord(a_intfc, version, length);
+				break;
 			case kSerializationRecordLootShuffleBags:
 				LoadLootShuffleBagsRecord(a_intfc, version, length);
 				break;

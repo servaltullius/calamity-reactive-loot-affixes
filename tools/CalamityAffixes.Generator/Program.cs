@@ -43,6 +43,7 @@ specPath = Path.GetFullPath(specPath);
 dataDir = Path.GetFullPath(dataDir);
 
 var spec = AffixSpecLoader.Load(specPath);
+AffixSpecLoader.ValidateRunewordContractReferences(spec);
 GeneratorRunner.Generate(spec, dataDir);
 
 Console.WriteLine("Generation complete:");

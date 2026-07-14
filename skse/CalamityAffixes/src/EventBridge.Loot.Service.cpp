@@ -116,6 +116,69 @@ namespace CalamityAffixes
 			}
 		}
 	}
+	std::uint8_t EventBridge::GetCorpseCurrencyProcessedMask(
+		RE::FormID a_corpseFormId,
+		std::uint32_t a_dayStamp)
+	{
+		if (a_corpseFormId == 0u) {
+			return 0u;
+		}
+
+		auto it = _lootState.corpseCurrencyRollLedger.find(a_corpseFormId);
+		if (it == _lootState.corpseCurrencyRollLedger.end()) {
+			return 0u;
+		}
+
+		if (detail::IsLootCurrencyLedgerExpired(
+				it->second.dayStamp,
+				a_dayStamp,
+				kLootCurrencyLedgerTtlDays)) {
+			_lootState.corpseCurrencyRollLedger.erase(it);
+			std::erase(_lootState.corpseCurrencyRollLedgerRecent, a_corpseFormId);
+			return 0u;
+		}
+
+		return it->second.processedMask;
+	}
+
+	void EventBridge::MarkCorpseCurrencyProcessed(
+		RE::FormID a_corpseFormId,
+		std::uint32_t a_dayStamp,
+		std::uint8_t a_processedMask)
+	{
+		if (a_corpseFormId == 0u || a_processedMask == 0u) {
+			return;
+		}
+
+		const auto [it, inserted] = _lootState.corpseCurrencyRollLedger.emplace(
+			a_corpseFormId,
+			LootRuntimeState::CorpseCurrencyLedgerEntry{
+				.dayStamp = a_dayStamp,
+				.processedMask = a_processedMask
+			});
+		if (!inserted) {
+			it->second.dayStamp = a_dayStamp;
+			it->second.processedMask |= a_processedMask;
+			return;
+		}
+
+		_lootState.corpseCurrencyRollLedgerRecent.push_back(a_corpseFormId);
+		while (_lootState.corpseCurrencyRollLedgerRecent.size() > kLootCurrencyLedgerMaxEntries) {
+			const auto oldest = _lootState.corpseCurrencyRollLedgerRecent.front();
+			_lootState.corpseCurrencyRollLedgerRecent.pop_front();
+			_lootState.corpseCurrencyRollLedger.erase(oldest);
+		}
+	}
+
+	void EventBridge::ForgetCorpseCurrencyProcessed(RE::FormID a_corpseFormId)
+	{
+		if (a_corpseFormId == 0u) {
+			return;
+		}
+		_lootState.corpseCurrencyRollLedger.erase(a_corpseFormId);
+		std::erase(_lootState.corpseCurrencyRollLedgerRecent, a_corpseFormId);
+	}
+
 
 	std::uint64_t EventBridge::MakeInstanceKey(RE::FormID a_ownerFormID, std::uint16_t a_uniqueID) noexcept
 	{
@@ -403,7 +466,7 @@ namespace CalamityAffixes
 		if (!RuntimePolicy::kAllowPickupCurrencyRollFromContainerSources) {
 			if (_loot.debugLog && sourceTier != LootCurrencySourceTier::kUnknown) {
 				SKSE::log::debug(
-					"CalamityAffixes: pickup currency roll skipped (activation-only source policy) (baseObj={:08X}, sourceTier={}, uniqueID={}, oldContainer={:08X}).",
+					"CalamityAffixes: pickup currency roll skipped (corpse-death-only source policy) (baseObj={:08X}, sourceTier={}, uniqueID={}, oldContainer={:08X}).",
 					a_baseObj,
 					detail::LootCurrencySourceTierLabel(sourceTier),
 					a_uniqueID,
@@ -413,10 +476,9 @@ namespace CalamityAffixes
 		}
 	}
 
-	EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCurrencyDropRolls(
+	EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCorpseCurrencyDropRolls(
 		float a_sourceChanceMultiplier,
-		RE::TESObjectREFR* a_sourceContainerRef,
-		bool a_forceWorldPlacement,
+		RE::Actor* a_corpse,
 		std::uint32_t a_rollCount,
 		bool a_allowRunewordRoll,
 		bool a_allowReforgeRoll)
@@ -452,7 +514,7 @@ namespace CalamityAffixes
 						SKSE::log::error(
 							"CalamityAffixes: runeword fragment item missing (runeToken={:016X}).",
 							runeToken);
-					} else if (TryPlaceLootCurrencyItem(fragmentItem, a_sourceContainerRef, a_forceWorldPlacement)) {
+					} else if (TryAddLootCurrencyToCorpseInventory(fragmentItem, a_corpse)) {
 						CommitRunewordFragmentGrant(true);
 						result.runewordDropGranted = true;
 						std::string runeName = "Rune";
@@ -465,8 +527,8 @@ namespace CalamityAffixes
 						if (runewordPityTriggered) {
 							note.append(" [Pity]");
 						}
-						if (shouldEmitDropNotification(s_lastRunewordDropNotificationAt)) {
-							EmitHudNotification(note.c_str());
+						if (_loot.debugHudNotifications && shouldEmitDropNotification(s_lastRunewordDropNotificationAt)) {
+							EmitDebugHudNotification(note.c_str());
 						}
 					}
 				}
@@ -479,11 +541,11 @@ namespace CalamityAffixes
 					if (!orb) {
 						SKSE::log::error(
 							"CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
-					} else if (TryPlaceLootCurrencyItem(orb, a_sourceContainerRef, a_forceWorldPlacement)) {
+					} else if (TryAddLootCurrencyToCorpseInventory(orb, a_corpse)) {
 						CommitReforgeOrbGrant(true);
 						result.reforgeDropGranted = true;
-						if (shouldEmitDropNotification(s_lastReforgeDropNotificationAt)) {
-							EmitHudNotification("Reforge Orb Drop");
+						if (_loot.debugHudNotifications && shouldEmitDropNotification(s_lastReforgeDropNotificationAt)) {
+							EmitDebugHudNotification("Reforge Orb Drop");
 						}
 						if (reforgePityTriggered && _loot.debugLog) {
 							SKSE::log::debug("CalamityAffixes: reforge orb pity triggered.");

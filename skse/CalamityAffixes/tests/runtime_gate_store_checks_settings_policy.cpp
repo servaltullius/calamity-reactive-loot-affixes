@@ -406,6 +406,12 @@ namespace RuntimeGateStoreChecks
 			state.evaluatedInsertionsSincePrune = 3u;
 			state.currencyRollLedger.emplace(0x20003u, 7u);
 			state.currencyRollLedgerRecent.push_back(0x20003u);
+			state.corpseCurrencyRollLedger.emplace(
+				0x20004u,
+				CalamityAffixes::LootRuntimeState::CorpseCurrencyLedgerEntry{
+					.dayStamp = 8u,
+					.processedMask = 3u });
+			state.corpseCurrencyRollLedgerRecent.push_back(0x20004u);
 			state.lootChanceEligibleFailStreak = 4u;
 			state.runewordFragmentFailStreak = 5u;
 			state.reforgeOrbFailStreak = 6u;
@@ -417,15 +423,17 @@ namespace RuntimeGateStoreChecks
 			if (!state.previewAffixes.empty() ||
 				!state.previewRecent.empty() ||
 				state.lootChanceEligibleFailStreak != 0u ||
-				state.runewordFragmentFailStreak != 0u ||
-				state.reforgeOrbFailStreak != 0u ||
+				state.runewordFragmentFailStreak != 5u ||
+				state.reforgeOrbFailStreak != 6u ||
 				!state.activeSlotPenalty.empty() ||
 				!state.playerContainerStash.empty()) {
-				std::cerr << "loot_runtime_state_reset: config-reload reset must clear preview/pity/slot-penalty/stash state\n";
+				std::cerr << "loot_runtime_state_reset: config reload must clear transient loot state while preserving serialized currency pity\n";
 				return false;
 			}
-			if (state.evaluatedInstances.empty() || state.currencyRollLedger.empty()) {
-				std::cerr << "loot_runtime_state_reset: config-reload reset must preserve save-backed evaluated/ledger state\n";
+			if (state.evaluatedInstances.empty() ||
+				state.currencyRollLedger.empty() ||
+				state.corpseCurrencyRollLedger.empty()) {
+				std::cerr << "loot_runtime_state_reset: config reload must preserve save-backed evaluated and currency-ledger state\n";
 				return false;
 			}
 
@@ -434,8 +442,12 @@ namespace RuntimeGateStoreChecks
 				!state.evaluatedRecent.empty() ||
 				state.evaluatedInsertionsSincePrune != 0u ||
 				!state.currencyRollLedger.empty() ||
-				!state.currencyRollLedgerRecent.empty()) {
-				std::cerr << "loot_runtime_state_reset: load/revert reset must clear evaluated/ledger state\n";
+				!state.currencyRollLedgerRecent.empty() ||
+				!state.corpseCurrencyRollLedger.empty() ||
+				!state.corpseCurrencyRollLedgerRecent.empty() ||
+				state.runewordFragmentFailStreak != 0u ||
+				state.reforgeOrbFailStreak != 0u) {
+				std::cerr << "loot_runtime_state_reset: load/revert reset must clear evaluated, ledger, and pre-load pity state\n";
 				return false;
 			}
 
@@ -554,12 +566,16 @@ namespace RuntimeGateStoreChecks
 			}
 
 			panel.requiredRunes.push_back({ .runeName = "El", .required = 1u, .owned = 0u });
-			recipe.effectSummaryText = "summary";
-			recipe.effectDetailText = "detail";
+			recipe.effectSummaryTextEn = "summary-en";
+			recipe.effectSummaryTextKo = "summary-ko";
+			recipe.effectDetailTextEn = "detail-en";
+			recipe.effectDetailTextKo = "detail-ko";
 			result.message = "ok";
 			if (panel.requiredRunes.size() != 1u ||
-				recipe.effectSummaryText != "summary" ||
-				recipe.effectDetailText != "detail" ||
+				recipe.effectSummaryTextEn != "summary-en" ||
+				recipe.effectSummaryTextKo != "summary-ko" ||
+				recipe.effectDetailTextEn != "detail-en" ||
+				recipe.effectDetailTextKo != "detail-ko" ||
 				result.message != "ok") {
 				std::cerr << "runeword_ui_contract_defaults: expected DTO fields to remain usable as runtime contracts\n";
 				return false;

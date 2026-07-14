@@ -584,7 +584,7 @@ namespace RuntimeGateStoreChecks
 
 		std::ifstream in(sourceFile);
 		if (!in.is_open()) {
-			std::cerr << "hybrid_currency_drop_policy: failed to open source file: " << sourceFile << "\n";
+			std::cerr << "corpse_currency_drop_policy: failed to open source file: " << sourceFile << "\n";
 			return false;
 		}
 
@@ -595,11 +595,12 @@ namespace RuntimeGateStoreChecks
 		if (source.find("_loot.currencyDropMode = CurrencyDropMode::kHybrid;") == std::string::npos ||
 			source.find("_loot.runtimeCurrencyDropsEnabled = false;") == std::string::npos ||
 			source.find("_loot.runtimeCurrencyDropsEnabled = true;") != std::string::npos ||
-			source.find("Hybrid keeps corpse") == std::string::npos ||
-			source.find("container/world/activation/pickup rolls disabled") == std::string::npos ||
+			source.find("_loot.runtimeCorpseDeathCurrencyDropsEnabled = true;") == std::string::npos ||
+			source.find("only eligible hostile deaths use the isolated corpse path") == std::string::npos ||
+			source.find("Container activation, pickup, world placement, and new SPID distribution stay off") == std::string::npos ||
 			source.find("corpseAuthority={}") == std::string::npos ||
-			source.find("\"SPID/ESP\"") == std::string::npos) {
-			std::cerr << "hybrid_currency_drop_policy: expected hybrid mode to keep SPID corpse authority and runtime rolls disabled\n";
+			source.find("SKSE death event (corpse inventory only)") == std::string::npos) {
+			std::cerr << "corpse_currency_drop_policy: expected legacy hybrid token with hostile-corpse-only SKSE authority\n";
 			return false;
 		}
 

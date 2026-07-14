@@ -73,6 +73,7 @@ namespace CalamityAffixes
 		_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
 		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
 		_loot.runtimeCurrencyDropsEnabled = false;
+		_loot.runtimeCorpseDeathCurrencyDropsEnabled = true;
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
 			_loot.chancePercent = loot.value("chancePercent", 0.0f);
@@ -86,16 +87,17 @@ namespace CalamityAffixes
 					const auto normalized = ToLowerAscii(Trim(modeText));
 					if (normalized != "hybrid") {
 						SKSE::log::warn(
-							"CalamityAffixes: loot.currencyDropMode='{}' is deprecated. Hybrid-only drop mode is enforced.",
+							"CalamityAffixes: loot.currencyDropMode='{}' is deprecated. Legacy token 'hybrid' is retained, but corpse-death-only runtime currency is enforced.",
 							modeText);
 					}
 				} else {
 					SKSE::log::warn(
-						"CalamityAffixes: loot.currencyDropMode must be string 'hybrid'. Hybrid-only drop mode is enforced.");
+						"CalamityAffixes: loot.currencyDropMode must be legacy string 'hybrid'; corpse-death-only runtime currency is enforced.");
 				}
 			}
 			_loot.currencyDropMode = CurrencyDropMode::kHybrid;
 			_loot.runtimeCurrencyDropsEnabled = false;
+			_loot.runtimeCorpseDeathCurrencyDropsEnabled = true;
 			_loot.lootSourceChanceMultCorpse =
 				static_cast<float>(loot.value("lootSourceChanceMultCorpse", static_cast<double>(_loot.lootSourceChanceMultCorpse)));
 			_loot.lootSourceChanceMultContainer =
@@ -260,23 +262,23 @@ namespace CalamityAffixes
 
 	void EventBridge::SyncCurrencyDropModeState(std::string_view a_contextTag)
 	{
-		// Currency drop mode is intentionally fixed to hybrid. Hybrid keeps corpse
-		// currency authority in the generated ESP/SPID layer and leaves runtime
-		// container/world/activation/pickup rolls disabled.
+		// Keep the legacy "hybrid" token for config compatibility. The broad runtime
+		// gate remains off; only eligible hostile deaths use the isolated corpse path.
 		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
 		_loot.runtimeCurrencyDropsEnabled = false;
+		_loot.runtimeCorpseDeathCurrencyDropsEnabled = true;
 
-		// SPID-owned corpse authority: leveled-list chanceNone values come from the ESP
-		// (set by Generator) and are NOT modified at runtime. MCM drop-chance settings
-		// no longer drive runtime activation/pickup rolls.
+		// MCM chances drive only the death-event roll and serialized pity counters.
+		// Container activation, pickup, world placement, and new SPID distribution stay off.
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
-				"CalamityAffixes: {} currency mode synced (mode={}, runtimeEnabled={}, corpseAuthority={}, configuredRune={}%, configuredReforge={}%, currentRune={}%, currentReforge={}%).",
+				"CalamityAffixes: {} currency mode synced (mode={}, broadRuntimeEnabled={}, corpseDeathRuntimeEnabled={}, corpseAuthority={}, configuredRune={}%, configuredReforge={}%, currentRune={}%, currentReforge={}%).",
 				a_contextTag,
 				"hybrid",
 				_loot.runtimeCurrencyDropsEnabled,
-				"SPID/ESP",
+				_loot.runtimeCorpseDeathCurrencyDropsEnabled,
+				"SKSE death event (corpse inventory only)",
 				_loot.configuredRunewordFragmentChancePercent,
 				_loot.configuredReforgeOrbChancePercent,
 				_loot.runewordFragmentChancePercent,

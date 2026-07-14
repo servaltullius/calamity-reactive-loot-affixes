@@ -27,10 +27,10 @@ public sealed class LootSpec
 
     // Chance (0-100) to grant a random runeword fragment on eligible loot-roll events.
     [JsonPropertyName("runewordFragmentChancePercent")]
-    public double RunewordFragmentChancePercent { get; init; } = 5.0;
+    public double RunewordFragmentChancePercent { get; init; } = 8.0;
 
     [JsonPropertyName("reforgeOrbChancePercent")]
-    public double ReforgeOrbChancePercent { get; init; } = 3.0;
+    public double ReforgeOrbChancePercent { get; init; } = 5.0;
 
     // Currency drop policy is now hybrid-only.
     // Runtime enforces 'hybrid' even if legacy values are supplied for backward compatibility.
@@ -38,13 +38,13 @@ public sealed class LootSpec
     public string CurrencyDropMode { get; init; } = "hybrid";
 
     [JsonPropertyName("lootSourceChanceMultCorpse")]
-    public double LootSourceChanceMultCorpse { get; init; } = 0.8;
+    public double LootSourceChanceMultCorpse { get; init; } = 1.0;
 
     [JsonPropertyName("lootSourceChanceMultContainer")]
     public double LootSourceChanceMultContainer { get; init; } = 1.0;
 
     [JsonPropertyName("lootSourceChanceMultBossContainer")]
-    public double LootSourceChanceMultBossContainer { get; init; } = 1.35;
+    public double LootSourceChanceMultBossContainer { get; init; } = 1.15;
 
     [JsonPropertyName("lootSourceChanceMultWorld")]
     public double LootSourceChanceMultWorld { get; init; } = 1.0;
@@ -129,6 +129,14 @@ public sealed class KeywordSpec
 
     [JsonPropertyName("spidRules")]
     public required List<Dictionary<string, object?>> SpidRules { get; init; }
+
+    /// <summary>
+    /// MagicEffect records that must be allocated after every existing generated record.
+    /// This is an explicit save-compatibility boundary: adding records here must never
+    /// renumber the stable record prefix.
+    /// </summary>
+    [JsonPropertyName("appendedMagicEffects")]
+    public List<MagicEffectRecordSpec> AppendedMagicEffects { get; init; } = [];
 }
 
 public sealed class KeywordDefinition

@@ -30,7 +30,7 @@
         background: transparent;
         overflow: hidden;
         user-select: none;
-        pointer-events: none;
+        pointer-events: auto;
         font-family: "Segoe UI Variable", "Segoe UI", "Noto Sans KR", "Malgun Gothic", Tahoma, Geneva, Verdana, sans-serif;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
@@ -64,6 +64,9 @@
         top: 255px;
         max-width: 720px;
         max-height: 560px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
         padding: 14px 16px;
         border: 1px solid var(--border);
         background: var(--bg);
@@ -96,6 +99,7 @@
         line-height: 1.4;
         color: var(--text);
         white-space: pre-wrap;
+        pointer-events: auto;
       }
 
       #tooltipHint {
@@ -1555,7 +1559,7 @@
       </button>
     </div>
 
-    <div id="tooltipPanel" aria-live="polite">
+    <div id="tooltipPanel" aria-live="polite" data-wheel-scroll-mode="smooth">
       <div id="tooltipTitle">Affix / 어픽스</div>
       <div id="tooltipText"></div>
       <div id="tooltipHint"></div>
@@ -1699,7 +1703,12 @@
                         </div>
                         <div class="rwRailBody">
                           <div class="cpSectionSubtle" id="runewordBaseListTitle">Compatible Equipped Bases / 호환 착용 베이스</div>
-                          <div id="inventoryBaseList" class="cpList rwBaseQuickList"></div>
+                          <div
+                            id="inventoryBaseList"
+                            class="cpList rwBaseQuickList"
+                            role="listbox"
+                            aria-label="Equipped runeword bases / 착용 룬워드 베이스"
+                          ></div>
                           <div class="cpContextMeta" id="runewordBaseListHint">
                             Keep this open by default so you can swap the equipped base quickly while comparing recipes. / 비교 중에도 빠르게 베이스를 바꿀 수 있도록 기본 상태에서 열어 둡니다.
                           </div>
@@ -1733,6 +1742,8 @@
                     <div
                       id="recipeList"
                       class="cpList rwList rwRecipeExplorerList rwRecipeGrid"
+                      role="listbox"
+                      aria-label="Runeword recipes / 룬워드 레시피"
                       data-wheel-scroll-mode="smooth"
                     ></div>
                     <div class="cpContextMeta" id="runewordRecipeListHint">
@@ -1947,12 +1958,16 @@
         return Math.min(w / tooltipReferenceDesktop.width, h / tooltipReferenceDesktop.height);
       }
 
-      function applyAutoScale() {
-        const scale = clamp(
+      function getTooltipAutoScale() {
+        return clamp(
           getTooltipViewportRatio() * tooltipReferenceDesktop.scale,
           1.0,
           tooltipReferenceDesktop.scale
         );
+      }
+
+      function applyAutoScale() {
+        const scale = getTooltipAutoScale();
         document.documentElement.style.setProperty("--scale", scale.toFixed(3));
       }
 
@@ -2304,6 +2319,56 @@
         };
       }
 
+      function getTooltipMaxLogicalHeight() {
+        const availableVisualHeight = Math.max(120, window.innerHeight - 16);
+        return Math.max(
+          120,
+          Math.min(560, Math.floor(availableVisualHeight / getTooltipAutoScale()))
+        );
+      }
+
+      function fitTooltipLayoutToViewport(rawLayout, rect) {
+        const normalized = normalizeTooltipLayout(rawLayout);
+        const margin = 8;
+        const rectWidth = Math.max(0, Number(rect?.width) || 0);
+        const rectHeight = Math.max(0, Number(rect?.height) || 0);
+        if (rectWidth === 0 || rectHeight === 0) {
+          return normalized;
+        }
+
+        const maxRight = Math.max(
+          margin,
+          Math.floor(window.innerWidth - margin - rectWidth)
+        );
+        const maxTop = Math.max(
+          margin,
+          Math.floor(window.innerHeight - margin - rectHeight)
+        );
+        return {
+          ...normalized,
+          right: clamp(normalized.right, margin, maxRight),
+          top: clamp(normalized.top, margin, maxTop)
+        };
+      }
+
+      function measureTooltipRect() {
+        const computedDisplay = window.getComputedStyle(tooltipPanel).display;
+        const wasHidden = computedDisplay === "none";
+        const previousDisplay = tooltipPanel.style.display;
+        const previousVisibility = tooltipPanel.style.visibility;
+        if (wasHidden) {
+          tooltipPanel.style.visibility = "hidden";
+          tooltipPanel.style.display = "block";
+        }
+
+        const rect = tooltipPanel.getBoundingClientRect();
+        if (wasHidden) {
+          tooltipPanel.style.display = previousDisplay;
+          tooltipPanel.style.visibility = previousVisibility;
+        }
+        return rect;
+      }
+
       function setTooltipSummaryText() {
         if (!tooltipUiSummary) return;
         const percent = Math.round(tooltipLayout.fontScale * 100);
@@ -2315,13 +2380,20 @@
 
       function applyTooltipLayout() {
         tooltipLayout = normalizeTooltipLayout(tooltipLayout);
+        document.documentElement.style.setProperty("--tooltip-font-scale", tooltipLayout.fontScale.toFixed(3));
+        tooltipPanel.style.maxHeight = `${getTooltipMaxLogicalHeight()}px`;
+        tooltipPanel.style.right = `${tooltipLayout.right}px`;
+        tooltipPanel.style.top = `${tooltipLayout.top}px`;
+        tooltipLayout = fitTooltipLayoutToViewport(
+          tooltipLayout,
+          measureTooltipRect()
+        );
         tooltipPanel.style.right = `${tooltipLayout.right}px`;
         tooltipPanel.style.top = `${tooltipLayout.top}px`;
         quickLaunch.style.right = `${tooltipLayout.right}px`;
         const quickOffset = window.innerWidth <= 900 ? 25 : 35;
         const quickTop = clamp(tooltipLayout.top - quickOffset, 8, Math.max(8, window.innerHeight - 56));
         quickLaunch.style.top = `${Math.round(quickTop)}px`;
-        document.documentElement.style.setProperty("--tooltip-font-scale", tooltipLayout.fontScale.toFixed(3));
         setTooltipSummaryText();
       }
 
@@ -2740,14 +2812,32 @@
         }, runewordAffixPendingTimeoutMs);
       }
 
+      function buildSelectedRecipeInspectorText(
+        recipePreviewText,
+        selectedBaseAffixText
+      ) {
+        const recipeText = typeof recipePreviewText === "string"
+          ? recipePreviewText.trim()
+          : "";
+        const baseText = typeof selectedBaseAffixText === "string"
+          ? selectedBaseAffixText.trim()
+          : "";
+        const baseSection = baseText
+          ? `${t("Selected base affixes", "선택 베이스 어픽스")}\n${baseText}`
+          : "";
+        return [recipeText, baseSection].filter(Boolean).join("\n\n");
+      }
+
       function applyTooltipPlacement() {
         const hasTooltip = Boolean(tooltipTextState);
         const hasRunewordAffix = Boolean(runewordAffixTextState);
-        const recipePreviewText = buildRunewordTooltipLikeText(getSelectedRecipeItem(), {
-          includeName: true,
-          includeDetail: true
-        });
-        const effectiveRunewordAffixText = hasRunewordAffix ? runewordAffixTextState : recipePreviewText;
+        const recipePreviewText = buildRecipePreviewTooltipText(
+          getSelectedRecipeItem()
+        );
+        const effectiveRunewordAffixText = buildSelectedRecipeInspectorText(
+          recipePreviewText,
+          hasRunewordAffix ? runewordAffixTextState : ""
+        );
         const hasEffectiveRunewordAffix = Boolean(effectiveRunewordAffixText);
 
         if (panelTooltipText) {
@@ -2801,6 +2891,7 @@
 
         tooltipPanel.style.display = "block";
         tooltipText.textContent = tooltipTextState;
+        applyTooltipLayout();
         applyQuickLaunchVisibility();
       }
 
@@ -3312,6 +3403,9 @@
       }
 
       function renderInventoryItems() {
+        const focusedBaseKey = inventoryBaseList.contains(document.activeElement)
+          ? document.activeElement?.dataset?.baseKey || ""
+          : "";
         clearChildren(inventoryBaseList);
         const viewModel = resolveInventoryListViewModel();
 
@@ -3325,6 +3419,8 @@
           return;
         }
 
+        const renderedOptions = [];
+
         for (const item of viewModel.items) {
           const key = typeof item?.key === "string" ? item.key : "";
           const name = typeof item?.name === "string" ? item.name : "";
@@ -3336,15 +3432,64 @@
           const button = document.createElement("button");
           button.type = "button";
           button.className = selected ? "cpListItem rwRecipeListItem selected" : "cpListItem rwRecipeListItem";
+          button.dataset.baseKey = key;
           button.textContent = name;
           button.title = name;
+          button.setAttribute("role", "option");
           button.setAttribute("aria-label", name);
+          button.setAttribute("aria-selected", selected ? "true" : "false");
+          button.tabIndex = -1;
           button.setAttribute(panelCommandAttribute, `runeword.base.select:${key}`);
           inventoryBaseList.appendChild(button);
+          renderedOptions.push({ button, key, selected });
+        }
+
+        const preferredOption = renderedOptions.find(
+          (entry) => entry.key === focusedBaseKey
+        ) || renderedOptions.find((entry) => entry.selected) || renderedOptions[0];
+        if (preferredOption) {
+          preferredOption.button.tabIndex = 0;
         }
       }
 
+      function resolveLocalizedRecipeText(
+        item,
+        fieldName,
+        bilingualSeparator = " / ",
+        includeLegacyFallback = true
+      ) {
+        const enValue = typeof item?.[`${fieldName}En`] === "string"
+          ? item[`${fieldName}En`].trim()
+          : "";
+        const koValue = typeof item?.[`${fieldName}Ko`] === "string"
+          ? item[`${fieldName}Ko`].trim()
+          : "";
+        const legacyValue = includeLegacyFallback && typeof item?.[fieldName] === "string"
+          ? item[fieldName].trim()
+          : "";
+
+        if (uiLang === "en") {
+          return enValue || legacyValue || koValue;
+        }
+        if (uiLang === "ko") {
+          return koValue || legacyValue || enValue;
+        }
+        if (enValue && koValue && enValue !== koValue) {
+          return `${enValue}${bilingualSeparator}${koValue}`;
+        }
+        return enValue || koValue || legacyValue;
+      }
+
       function resolveRecipeSummaryText(item) {
+        const localizedSummary = resolveLocalizedRecipeText(
+          item,
+          "summary",
+          " / ",
+          false
+        );
+        if (localizedSummary) {
+          return localizedSummary;
+        }
         const fallbackSummary = typeof item?.summary === "string" ? item.summary.trim() : "";
         const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
         switch (key) {
@@ -3468,10 +3613,6 @@
       }
 
       function resolveRecipeNumericSummaryText(item) {
-        const fallbackSummary = typeof item?.summary === "string" ? item.summary.trim() : "";
-        if (fallbackSummary) {
-          return fallbackSummary;
-        }
         return resolveRecipeSummaryText(item);
       }
 
@@ -3583,7 +3724,11 @@
       }
 
       function resolveRecipeDetailText(item) {
-        const fallbackDetail = typeof item?.detail === "string" ? item.detail.trim() : "";
+        const fallbackDetail = resolveLocalizedRecipeText(
+          item,
+          "detail",
+          "\n"
+        );
         const mergeDetail = (mappedDetail) => {
           const mapped = typeof mappedDetail === "string" ? mappedDetail.trim() : "";
           if (fallbackDetail && mapped) {
@@ -3618,7 +3763,7 @@
         }
 
         if (includeDetail) {
-          const detailText = resolveRecipeFlavorDetailText(item);
+          const detailText = resolveRecipeDetailText(item);
           if (detailText) {
             lines.push(detailText);
           }
@@ -3688,7 +3833,11 @@
           typeof item?.name === "string" ? item.name : "",
           typeof item?.runes === "string" ? item.runes : "",
           typeof item?.summaryKey === "string" ? item.summaryKey : "",
+          typeof item?.summaryEn === "string" ? item.summaryEn : "",
+          typeof item?.summaryKo === "string" ? item.summaryKo : "",
           typeof item?.summary === "string" ? item.summary : "",
+          typeof item?.detailEn === "string" ? item.detailEn : "",
+          typeof item?.detailKo === "string" ? item.detailKo : "",
           typeof item?.detail === "string" ? item.detail : "",
           typeof item?.baseKey === "string" ? item.baseKey : ""
         ]);
@@ -3712,13 +3861,31 @@
         const previousNode = recipeNodeByToken.get(previousToken);
         if (previousNode) {
           previousNode.classList.remove("selected");
-          previousNode.setAttribute("aria-pressed", "false");
+          previousNode.setAttribute("aria-selected", "false");
         }
 
         const nextNode = recipeNodeByToken.get(nextToken);
         if (nextNode) {
           nextNode.classList.add("selected");
-          nextNode.setAttribute("aria-pressed", "true");
+          nextNode.setAttribute("aria-selected", "true");
+        }
+
+        const visibleOptions = Array.from(recipeList.children).filter(
+          (child) => child instanceof Element && child.getAttribute("role") === "option"
+        );
+        for (const option of visibleOptions) {
+          option.tabIndex = -1;
+        }
+        const focusedOption = recipeList.contains(document.activeElement)
+          ? document.activeElement?.closest?.('[role="option"]')
+          : null;
+        const preferredOption = visibleOptions.includes(focusedOption)
+          ? focusedOption
+          : visibleOptions.includes(nextNode)
+            ? nextNode
+            : visibleOptions[0];
+        if (preferredOption) {
+          preferredOption.tabIndex = 0;
         }
       }
 
@@ -3742,12 +3909,14 @@
 
         optimisticRecipeTokenState = nextToken;
         updateRecipeSelectionDom(previousToken, nextToken);
+        schedulePanelRender(panelRenderSection.tooltipPlacement);
         const pendingNonce = ++optimisticRecipeSelectionNonce;
         window.setTimeout(() => {
           if (pendingNonce !== optimisticRecipeSelectionNonce) return;
           const optimisticToken = getDisplayedRecipeToken();
           optimisticRecipeTokenState = "";
           updateRecipeSelectionDom(optimisticToken, confirmedRecipeTokenState);
+          schedulePanelRender(panelRenderSection.tooltipPlacement);
         }, optimisticRecipeSelectionTimeoutMs);
       }
 
@@ -3759,9 +3928,10 @@
 
       function getSelectedRecipeItem() {
         const items = Array.isArray(recipeItemsState) ? recipeItemsState : [];
-        if (confirmedRecipeTokenState) {
+        const displayedToken = getDisplayedRecipeToken();
+        if (displayedToken) {
           const byToken = items.find(
-            (item) => resolveRecipeToken(item) === confirmedRecipeTokenState
+            (item) => resolveRecipeToken(item) === displayedToken
           );
           if (byToken) {
             return byToken;
@@ -3791,7 +3961,7 @@
         const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
         const base = resolveRecipeBaseBadge(item).text.toLowerCase();
         const summary = resolveRecipeNumericSummaryText(item).toLowerCase();
-        const detail = resolveRecipeFlavorDetailText(item).toLowerCase();
+        const detail = resolveRecipeDetailText(item).toLowerCase();
         const tooltipText = buildRunewordTooltipLikeText(item, {
           includeName: true,
           includeDetail: true
@@ -3879,7 +4049,9 @@
         button.type = "button";
         button.className = selected ? "cpListItem selected" : "cpListItem";
         button.dataset.recipeToken = token;
-        button.setAttribute("aria-pressed", selected ? "true" : "false");
+        button.setAttribute("role", "option");
+        button.setAttribute("aria-selected", selected ? "true" : "false");
+        button.tabIndex = selected ? 0 : -1;
 
         const head = document.createElement("div");
         head.className = "rwRecipeHead";
@@ -3953,6 +4125,17 @@
         }
 
         const selectedToken = getDisplayedRecipeToken();
+        const focusedRecipeToken = recipeList.contains(document.activeElement)
+          ? document.activeElement?.dataset?.recipeToken || ""
+          : "";
+        const visibleTokens = new Set(
+          viewModel.visibleItems.map((item) => resolveRecipeToken(item))
+        );
+        const preferredTabToken = visibleTokens.has(focusedRecipeToken)
+          ? focusedRecipeToken
+          : visibleTokens.has(selectedToken)
+            ? selectedToken
+            : resolveRecipeToken(viewModel.visibleItems[0]);
         const fragment = document.createDocumentFragment();
         for (const item of viewModel.visibleItems) {
           const token = resolveRecipeToken(item);
@@ -3961,7 +4144,8 @@
 
           const selected = token === selectedToken;
           button.classList.toggle("selected", selected);
-          button.setAttribute("aria-pressed", selected ? "true" : "false");
+          button.setAttribute("aria-selected", selected ? "true" : "false");
+          button.tabIndex = token === preferredTabToken ? 0 : -1;
           fragment.appendChild(button);
         }
         recipeList.replaceChildren(fragment);
@@ -4554,6 +4738,9 @@ ${buttonHint}`
 
       function setTooltip(raw) {
         const value = typeof raw === "string" ? raw : "";
+        if (value !== tooltipTextState) {
+          tooltipPanel.scrollTop = 0;
+        }
         tooltipTextState = value;
         schedulePanelRender(panelRenderSection.tooltipPlacement);
       }
@@ -4812,6 +4999,64 @@ ${buttonHint}`
         return Boolean(selectedItemNameState);
       }
 
+      function resolveListboxNavigationIndex(currentIndex, key, itemCount) {
+        if (itemCount <= 0 || currentIndex < 0 || currentIndex >= itemCount) {
+          return -1;
+        }
+        switch (key) {
+          case "ArrowDown":
+          case "ArrowRight":
+            return Math.min(itemCount - 1, currentIndex + 1);
+          case "ArrowUp":
+          case "ArrowLeft":
+            return Math.max(0, currentIndex - 1);
+          case "Home":
+            return 0;
+          case "End":
+            return itemCount - 1;
+          default:
+            return -1;
+        }
+      }
+
+      function handleListboxKeydown(event) {
+        if (!(event.target instanceof Element)) {
+          return;
+        }
+
+        const option = event.target.closest('[role="option"]');
+        if (!option) {
+          return;
+        }
+        const listbox = option.parentElement;
+        if (listbox !== inventoryBaseList && listbox !== recipeList) {
+          return;
+        }
+
+        const options = Array.from(listbox.children).filter(
+          (child) => child instanceof Element &&
+            child.getAttribute("role") === "option" &&
+            !child.disabled
+        );
+        const currentIndex = options.indexOf(option);
+        const nextIndex = resolveListboxNavigationIndex(
+          currentIndex,
+          event.key,
+          options.length
+        );
+        if (nextIndex < 0) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        option.tabIndex = -1;
+        const nextOption = options[nextIndex];
+        nextOption.tabIndex = 0;
+        nextOption.focus();
+        nextOption.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+
       function dispatchPanelCommand(button) {
         const command = button.getAttribute(panelCommandAttribute);
         if (!command) {
@@ -4916,6 +5161,7 @@ ${buttonHint}`
       function registerPanelEventHandlers() {
         wireButtons();
         wireMainTabs();
+        controlPanel.addEventListener("keydown", handleListboxKeydown);
         tooltipTitle.addEventListener("pointerdown", beginTooltipDrag);
         tooltipTitle.addEventListener("mousedown", beginTooltipDrag);
         tooltipTitle.addEventListener("dragstart", (event) => event.preventDefault());
@@ -4969,6 +5215,13 @@ ${buttonHint}`
         const SCROLL_WRITE_TOLERANCE_PX = 1;
         const state = new WeakMap();
         const scrollParentCache = new WeakMap();
+        const reducedMotionQuery = typeof window.matchMedia === "function"
+          ? window.matchMedia("(prefers-reduced-motion: reduce)")
+          : null;
+
+        function shouldReduceMotion() {
+          return Boolean(reducedMotionQuery?.matches);
+        }
 
         function getScrollState(element) {
           if (!state.has(element)) {
@@ -5203,6 +5456,17 @@ ${buttonHint}`
 
           event.preventDefault();
           scrollState.targetScrollTop = nextTarget;
+
+          if (shouldReduceMotion()) {
+            if (scrollState.raf) {
+              cancelAnimationFrame(scrollState.raf);
+            }
+            scrollState.raf = 0;
+            scrollState.lastTimestamp = 0;
+            scrollState.lastProgrammaticScrollTop = nextTarget;
+            scroller.scrollTop = nextTarget;
+            return;
+          }
 
           if (!scrollState.raf) {
             scrollState.lastTimestamp = 0;

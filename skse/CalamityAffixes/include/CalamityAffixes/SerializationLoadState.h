@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 #include "CalamityAffixes/AffixRegistryState.h"
@@ -77,6 +78,30 @@ namespace CalamityAffixes::SerializationLoadState
 			const auto oldest = a_state.currencyRollLedgerRecent.front();
 			a_state.currencyRollLedgerRecent.pop_front();
 			a_state.currencyRollLedger.erase(oldest);
+		}
+	}
+
+	inline void RebuildCorpseCurrencyLedgerRecent(
+		LootRuntimeState& a_state,
+		std::size_t a_maxRecentEntries)
+	{
+		std::vector<std::pair<std::uint32_t, std::uint32_t>> chronologicalEntries;
+		chronologicalEntries.reserve(a_state.corpseCurrencyRollLedger.size());
+		for (const auto& [formId, entry] : a_state.corpseCurrencyRollLedger) {
+			if (formId != 0u) {
+				chronologicalEntries.emplace_back(entry.dayStamp, formId);
+			}
+		}
+
+		std::sort(chronologicalEntries.begin(), chronologicalEntries.end());
+		a_state.corpseCurrencyRollLedgerRecent.clear();
+		for (const auto& [_, formId] : chronologicalEntries) {
+			a_state.corpseCurrencyRollLedgerRecent.push_back(formId);
+		}
+		while (a_state.corpseCurrencyRollLedgerRecent.size() > a_maxRecentEntries) {
+			const auto oldest = a_state.corpseCurrencyRollLedgerRecent.front();
+			a_state.corpseCurrencyRollLedgerRecent.pop_front();
+			a_state.corpseCurrencyRollLedger.erase(oldest);
 		}
 	}
 

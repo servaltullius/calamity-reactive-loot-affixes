@@ -128,31 +128,44 @@ fi
 
 imports="$(path_for_compiler "${src_dir}");$(path_for_compiler "${stub_dir}");$(path_for_compiler "${vanilla_src_dir}")"
 flags_arg="$(path_for_compiler "${flags_file}")"
-out_arg="$(path_for_compiler "${out_dir}")"
 
-# Legacy outputs are removed on each build so packaged artifacts only contain active scripts.
+# Compile into a clean temporary directory. Existing staged PEX files are never
+# accepted as a substitute for a failed or incomplete compiler invocation.
+compile_out_dir="$(mktemp -d -p "${cache_dir}" caff-papyrus-out-XXXXXX)"
+cleanup_compile_output() {
+  rm -rf "${compile_out_dir}"
+}
+trap cleanup_compile_output EXIT
+out_arg="$(path_for_compiler "${compile_out_dir}")"
+
+pushd "${src_dir}" >/dev/null
+for i in "${!targets[@]}"; do
+  script="${targets[i]}"
+  generated_output="${compile_out_dir}/${expected_outputs[i]}"
+  if ! "${papyrus_compiler}" "${script}" "-i=${imports}" "-o=${out_arg}" "-f=${flags_arg}" -op; then
+    echo "Papyrus compile failed for ${script}; refusing to reuse an existing PEX." >&2
+    exit 1
+  fi
+  if [[ ! -f "${generated_output}" ]]; then
+    echo "Papyrus compiler reported success but did not produce: ${generated_output}" >&2
+    exit 1
+  fi
+done
+popd >/dev/null
+
+# Remove legacy outputs and replace the active bridge only after all three clean
+# compiles have succeeded.
 stale_outputs=(
   "CalamityAffixes_AffixEffectBase.pex"
   "CalamityAffixes_AffixManager.pex"
   "CalamityAffixes_PlayerAlias.pex"
   "CalamityAffixes_SkseBridge.pex"
 )
-for stale in "${stale_outputs[@]}"; do
+for stale in "${stale_outputs[@]}" "${expected_outputs[@]}"; do
   rm -f "${out_dir}/${stale}"
 done
-
-pushd "${src_dir}" >/dev/null
-for i in "${!targets[@]}"; do
-  script="${targets[i]}"
-  output="${out_dir}/${expected_outputs[i]}"
-  if ! "${papyrus_compiler}" "${script}" "-i=${imports}" "-o=${out_arg}" "-f=${flags_arg}" -op; then
-    if [[ -f "${output}" ]]; then
-      echo "Papyrus compile failed for ${script}; using staged output ${output}" >&2
-      continue
-    fi
-    exit 1
-  fi
+for output in "${expected_outputs[@]}"; do
+  cp -f "${compile_out_dir}/${output}" "${out_dir}/${output}"
 done
-popd >/dev/null
 
 echo "Compiled Papyrus scripts to: ${out_dir}"

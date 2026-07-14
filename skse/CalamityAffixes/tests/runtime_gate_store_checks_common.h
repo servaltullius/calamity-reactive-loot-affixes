@@ -2,6 +2,7 @@
 
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/LootCurrencyLedger.h"
+#include "CalamityAffixes/CorpseCurrencyPolicy.h"
 #include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/LootRerollGuard.h"

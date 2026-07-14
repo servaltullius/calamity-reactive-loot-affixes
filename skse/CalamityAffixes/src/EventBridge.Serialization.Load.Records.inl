@@ -455,6 +455,83 @@
 		}
 	}
 
+	void EventBridge::LoadCorpseCurrencyRuntimeRecord(
+		SKSE::SerializationInterface* a_intfc,
+		std::uint32_t a_version,
+		std::uint32_t a_length)
+	{
+		if (a_version != kCorpseCurrencyRuntimeSerializationVersion) {
+			DrainRecordBytes(a_intfc, a_length, "unsupported-ccrt-version");
+			return;
+		}
+
+		SerializationLoadCursor cursor{ .intfc = a_intfc, .length = a_length };
+		std::uint32_t runewordFailStreak = 0u;
+		std::uint32_t reforgeFailStreak = 0u;
+		std::uint32_t count = 0u;
+		if (!cursor.Read(runewordFailStreak) ||
+			!cursor.Read(reforgeFailStreak) ||
+			!cursor.Read(count)) {
+			SKSE::log::warn("CalamityAffixes: truncated CCRT record header; using empty corpse currency state.");
+			cursor.DrainRemaining("partial-record-recovery");
+			return;
+		}
+
+		_lootState.runewordFragmentFailStreak =
+			std::min(runewordFailStreak, kRunewordFragmentPityFailThreshold);
+		_lootState.reforgeOrbFailStreak =
+			std::min(reforgeFailStreak, kReforgeOrbPityFailThreshold);
+
+		if (count > kLootCurrencyLedgerMaxEntries) {
+			SKSE::log::warn(
+				"CalamityAffixes: corrupt CCRT ledger count {} exceeds limit {}; skipping ledger entries.",
+				count,
+				kLootCurrencyLedgerMaxEntries);
+			cursor.DrainRemaining("ccrt-count-limit");
+			return;
+		}
+
+		for (std::uint32_t i = 0u; i < count; ++i) {
+			RE::FormID corpseFormId = 0u;
+			std::uint32_t dayStamp = 0u;
+			std::uint8_t processedMask = 0u;
+			if (!cursor.Read(corpseFormId) ||
+				!cursor.Read(dayStamp) ||
+				!cursor.Read(processedMask)) {
+				break;
+			}
+
+			RE::FormID resolvedCorpseFormId = 0u;
+			if (!a_intfc->ResolveFormID(corpseFormId, resolvedCorpseFormId) ||
+				resolvedCorpseFormId == 0u) {
+				continue;
+			}
+
+			processedMask &= detail::kCorpseCurrencyAllProcessed;
+			if (processedMask == 0u) {
+				continue;
+			}
+
+			const auto [it, inserted] = _lootState.corpseCurrencyRollLedger.emplace(
+				resolvedCorpseFormId,
+				LootRuntimeState::CorpseCurrencyLedgerEntry{
+					.dayStamp = dayStamp,
+					.processedMask = processedMask
+				});
+			if (!inserted) {
+				it->second.dayStamp = std::max(it->second.dayStamp, dayStamp);
+				it->second.processedMask |= processedMask;
+			}
+		}
+
+		if (!cursor.recordOk) {
+			SKSE::log::warn(
+				"CalamityAffixes: truncated CCRT record; recovered {} corpse entries.",
+				_lootState.corpseCurrencyRollLedger.size());
+			cursor.DrainRemaining("partial-record-recovery");
+		}
+	}
+
 	void EventBridge::LoadLootShuffleBagsRecord(
 		SKSE::SerializationInterface* a_intfc,
 		std::uint32_t a_version,
@@ -546,6 +623,7 @@
 
 		SerializationLoadState::RebuildEvaluatedRecent(_lootState, kLootEvaluatedRecentKeep * 2);
 		SerializationLoadState::RebuildCurrencyLedgerRecent(_lootState, kLootCurrencyLedgerMaxEntries);
+		SerializationLoadState::RebuildCorpseCurrencyLedgerRecent(_lootState, kLootCurrencyLedgerMaxEntries);
 		SerializationLoadState::SanitizeShuffleBagOrders(_affixRegistry, _lootState);
 
 		SanitizeRunewordState();

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using CalamityAffixes.Generator.Spec;
 using CalamityAffixes.Generator.Writers;
+using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Skyrim;
 
 namespace CalamityAffixes.Generator.Tests;
 
@@ -13,9 +15,81 @@ public sealed class RepoSpecRegressionTests
         var specPath = Path.Combine(repoRoot, "affixes", "affixes.json");
         var spec = AffixSpecLoader.Load(specPath);
 
+        AffixSpecLoader.ValidateRunewordContractReferences(spec);
         var mod = KeywordPluginBuilder.Build(spec);
 
         Assert.NotNull(mod);
+        foreach (var editorId in new[]
+                 {
+                     "CAFF_MGEF_RW_COH_PASSIVE_FIRE",
+                     "CAFF_MGEF_RW_COH_PASSIVE_FROST",
+                     "CAFF_MGEF_RW_COH_PASSIVE_SHOCK",
+                 })
+        {
+            var effect = Assert.Single(mod.MagicEffects, record => record.EditorID == editorId);
+            Assert.Equal(CastType.ConstantEffect, effect.CastType);
+            Assert.Equal(TargetType.Self, effect.TargetType);
+        }
+
+        foreach (var editorId in new[]
+                 {
+                     "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
+                     "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
+                     "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
+                 })
+        {
+            var effect = Assert.Single(mod.MagicEffects, record => record.EditorID == editorId);
+            Assert.Equal(CastType.FireAndForget, effect.CastType);
+            Assert.Equal(TargetType.Self, effect.TargetType);
+        }
+    }
+
+    [Fact]
+    public void RepoSpec_DisablesGenericSpidCurrencyDistribution()
+    {
+        var repoRoot = FindRepoRoot();
+        var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
+
+        Assert.Empty(spec.Keywords.SpidRules);
+
+        var distributionPath = Path.Combine(repoRoot, "Data", "CalamityAffixes_DISTR.ini");
+        var distribution = File.ReadAllText(distributionPath);
+        Assert.DoesNotContain("Item =", distribution, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("DeathItem =", distribution, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void RepoSpec_AppendOnlyDragonEffectsPreserveExisting730RecordAllocation()
+    {
+        var repoRoot = FindRepoRoot();
+        var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
+
+        var baselineMod = KeywordPluginBuilder.BuildRecordAllocationSnapshot(
+            spec,
+            includeAppendedMagicEffects: false);
+        var expandedMod = KeywordPluginBuilder.BuildRecordAllocationSnapshot(
+            spec,
+            includeAppendedMagicEffects: true);
+        var baseline = AllocationSignature(baselineMod);
+        var expanded = AllocationSignature(expandedMod);
+
+        Assert.Equal(730, baseline.Length);
+        Assert.Equal(733, expanded.Length);
+        Assert.Equal(baseline, expanded.Take(baseline.Length));
+
+        var appendedEditorIds = expandedMod.MagicEffects
+            .OrderBy(effect => effect.FormKey.ID)
+            .TakeLast(3)
+            .Select(effect => effect.EditorID)
+            .ToArray();
+        Assert.Equal(
+            new[]
+            {
+                "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
+                "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
+                "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
+            },
+            appendedEditorIds);
     }
 
     [Fact]
@@ -653,6 +727,14 @@ public sealed class RepoSpecRegressionTests
                         magicEffects.TryAdd(effect.GetProperty("editorId").GetString()!, effect.Clone());
                     }
                 }
+                if (node.TryGetProperty("appendedMagicEffects", out var appended) &&
+                    appended.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var effect in appended.EnumerateArray())
+                    {
+                        magicEffects.TryAdd(effect.GetProperty("editorId").GetString()!, effect.Clone());
+                    }
+                }
                 foreach (var property in node.EnumerateObject())
                 {
                     CollectMagicEffects(property.Value);
@@ -782,9 +864,9 @@ public sealed class RepoSpecRegressionTests
             ("CAFF_MGEF_RW_HOJ_LIFESTEAL", 40, 0, 0));
         AssertSpell("Dragon", "CAFF_SPEL_RW_DRAGON_SCALE",
             ("CAFF_MGEF_RW_DRAGON_SCALE", 120, 8, 0),
-            ("CAFF_MGEF_RW_COH_PASSIVE_FIRE", 25, 8, 0),
-            ("CAFF_MGEF_RW_COH_PASSIVE_FROST", 25, 8, 0),
-            ("CAFF_MGEF_RW_COH_PASSIVE_SHOCK", 25, 8, 0));
+            ("CAFF_MGEF_RW_DRAGON_RESIST_FIRE", 25, 8, 0),
+            ("CAFF_MGEF_RW_DRAGON_RESIST_FROST", 25, 8, 0),
+            ("CAFF_MGEF_RW_DRAGON_RESIST_SHOCK", 25, 8, 0));
         AssertSpell("Mist", "CAFF_SPEL_RW_MIST_FOG",
             ("CAFF_MGEF_RW_MIST_FOG", 100, 6, 0),
             ("CAFF_MGEF_HIT_SHOCK_OVERLOAD", 75, 0, 0),
@@ -1026,6 +1108,19 @@ public sealed class RepoSpecRegressionTests
             offenders.Count == 0,
             "Expected special actions to use explicit runtime.procChancePercent > 0; offenders: " +
             string.Join(", ", offenders));
+    }
+
+    private static (uint FormId, string RecordType, string? EditorId)[] AllocationSignature(SkyrimMod mod)
+    {
+        return mod
+            .EnumerateMajorRecords()
+            .OrderBy(record => record.FormKey.ID)
+            .Select(record =>
+            {
+                var editorId = record.GetType().GetProperty("EditorID")?.GetValue(record) as string;
+                return (record.FormKey.ID, record.GetType().Name, editorId);
+            })
+            .ToArray();
     }
 
     private static string FindRepoRoot()

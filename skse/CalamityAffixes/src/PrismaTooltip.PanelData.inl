@@ -45,8 +45,12 @@
 					{ "name", entry.displayName },
 					{ "runes", entry.runeSequence },
 					{ "summaryKey", entry.effectSummaryKey },
-					{ "summary", entry.effectSummaryText },
-					{ "detail", entry.effectDetailText },
+					{ "summaryEn", entry.effectSummaryTextEn },
+					{ "summaryKo", entry.effectSummaryTextKo },
+					{ "detailEn", entry.effectDetailTextEn },
+					{ "detailKo", entry.effectDetailTextKo },
+					{ "summary", entry.effectSummaryTextKo },
+					{ "detail", entry.effectDetailTextKo },
 					{ "baseKey", entry.recommendedBaseKey },
 					{ "selected", entry.selected }
 				});

@@ -8,7 +8,7 @@
     "runewordFragmentChancePercent": 8.0,
     "reforgeOrbChancePercent": 5.0,
     "currencyDropMode": "hybrid",
-    "lootSourceChanceMultCorpse": 0.8,
+    "lootSourceChanceMultCorpse": 1.0,
     "lootSourceChanceMultContainer": 1.0,
     "lootSourceChanceMultBossContainer": 1.15,
     "lootSourceChanceMultWorld": 1.0,
@@ -39,5 +39,29 @@
     "bossContainerEditorIdDenyContains": [],
     "nameFormat": "{base}[{affix}]"
   },
-  "keywords": {}
+  "keywords": {
+    "appendedMagicEffects": [
+      {
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
+        "name": "Calamity: Runeword Dragon Fire Resist / 룬워드 드래곤 화염 저항",
+        "actorValue": "ResistFire",
+        "hostile": false,
+        "recover": true
+      },
+      {
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
+        "name": "Calamity: Runeword Dragon Frost Resist / 룬워드 드래곤 냉기 저항",
+        "actorValue": "ResistFrost",
+        "hostile": false,
+        "recover": true
+      },
+      {
+        "editorId": "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
+        "name": "Calamity: Runeword Dragon Shock Resist / 룬워드 드래곤 번개 저항",
+        "actorValue": "ResistShock",
+        "hostile": false,
+        "recover": true
+      }
+    ]
+  }
 }

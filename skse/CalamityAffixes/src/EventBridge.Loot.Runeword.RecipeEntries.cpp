@@ -185,7 +185,23 @@ namespace CalamityAffixes
 			a_out.append(a_part);
 		};
 
-		auto triggerText = [](Trigger a_trigger) -> std::string_view {
+		auto triggerTextEn = [](Trigger a_trigger) -> std::string_view {
+			switch (a_trigger) {
+			case Trigger::kHit:
+				return "On hit";
+			case Trigger::kIncomingHit:
+				return "On taking a hit";
+			case Trigger::kDotApply:
+				return "On DoT apply";
+			case Trigger::kKill:
+				return "On kill";
+			case Trigger::kLowHealth:
+				return "On low health";
+			}
+			return "On trigger";
+		};
+
+		auto triggerTextKo = [](Trigger a_trigger) -> std::string_view {
 			switch (a_trigger) {
 			case Trigger::kHit:
 				return "적중 시";
@@ -212,7 +228,7 @@ namespace CalamityAffixes
 			return std::string(rawName);
 		};
 
-		auto buildSpellProfileText = [&](RE::SpellItem* a_spell, std::string_view a_prefix) -> std::string {
+		auto buildSpellProfileText = [&](RE::SpellItem* a_spell, std::string_view a_prefix, bool a_korean) -> std::string {
 			if (!a_spell) {
 				return {};
 			}
@@ -242,13 +258,20 @@ namespace CalamityAffixes
 
 				std::string metrics;
 				if (std::abs(effect->effectItem.magnitude) >= 0.01f) {
-					appendDelimited(metrics, "위력 " + formatFloat1(effect->effectItem.magnitude));
+					appendDelimited(
+						metrics,
+						std::string(a_korean ? "위력 " : "Magnitude ") + formatFloat1(effect->effectItem.magnitude));
 				}
 				if (effect->effectItem.duration > 0u) {
-					appendDelimited(metrics, "지속 " + std::to_string(effect->effectItem.duration) + "초");
+					appendDelimited(
+						metrics,
+						std::string(a_korean ? "지속 " : "Duration ") + std::to_string(effect->effectItem.duration) +
+							(a_korean ? "초" : "s"));
 				}
 				if (effect->effectItem.area > 0u) {
-					appendDelimited(metrics, "범위 " + std::to_string(effect->effectItem.area));
+					appendDelimited(
+						metrics,
+						std::string(a_korean ? "범위 " : "Area ") + std::to_string(effect->effectItem.area));
 				}
 
 				if (!metrics.empty()) {
@@ -274,15 +297,21 @@ namespace CalamityAffixes
 					profile.append(effectProfiles[i]);
 				}
 				if (totalEffects > effectProfiles.size()) {
-					profile.append(" 외 ");
-					profile.append(std::to_string(totalEffects - effectProfiles.size()));
-					profile.append("개 효과");
+					if (a_korean) {
+						profile.append(" 외 ");
+						profile.append(std::to_string(totalEffects - effectProfiles.size()));
+						profile.append("개 효과");
+					} else {
+						profile.append(" plus ");
+						profile.append(std::to_string(totalEffects - effectProfiles.size()));
+						profile.append(" more effect(s)");
+					}
 				}
 			}
 			return profile;
 		};
 
-		auto actionSummaryText = [&](const Action& a_action) -> std::string {
+		auto actionSummaryTextKo = [&](const Action& a_action) -> std::string {
 			switch (a_action.type) {
 			case ActionType::kCastSpell: {
 				const auto spellName = spellNameOr(a_action.spell, "Spell");
@@ -352,6 +381,67 @@ namespace CalamityAffixes
 			return "효과 발동";
 		};
 
+		auto actionSummaryTextEn = [&](const Action& a_action) -> std::string {
+			switch (a_action.type) {
+			case ActionType::kCastSpell: {
+				const auto spellName = spellNameOr(a_action.spell, "Spell");
+				return a_action.applyToSelf ?
+				       ("self-cast " + spellName) :
+				       ("cast " + spellName);
+			}
+			case ActionType::kCastSpellAdaptiveElement: {
+				std::string elements;
+				if (a_action.adaptiveFire) {
+					elements.append("Fire");
+				}
+				if (a_action.adaptiveFrost) {
+					appendDelimited(elements, "Frost");
+				}
+				if (a_action.adaptiveShock) {
+					appendDelimited(elements, "Shock");
+				}
+				return elements.empty() ?
+				       "cast an adaptive elemental spell" :
+				       ("cast an adaptive elemental spell (" + elements + ")");
+			}
+			case ActionType::kConvertDamage: {
+				std::string_view element = "elemental";
+				switch (a_action.element) {
+				case Element::kFire:
+					element = "Fire";
+					break;
+				case Element::kFrost:
+					element = "Frost";
+					break;
+				case Element::kShock:
+					element = "Shock";
+					break;
+				case Element::kNone:
+				default:
+					break;
+				}
+				return "convert " + formatNumberCompact(std::max(0.0f, a_action.convertPct)) + "% to " +
+				       std::string(element) + " damage";
+			}
+			case ActionType::kMindOverMatter:
+				return "redirect part of incoming damage to Magicka";
+			case ActionType::kArchmage:
+				return "trigger Archmage bonus damage";
+			case ActionType::kSpawnTrap:
+				return "deploy " + spellNameOr(a_action.spell, "Trap");
+			case ActionType::kCorpseExplosion:
+				return "detonate a corpse";
+			case ActionType::kSummonCorpseExplosion:
+				return "detonate a summoned corpse";
+			case ActionType::kCastOnCrit:
+				return "cast " + spellNameOr(a_action.spell, "Spell") + " on critical hit";
+			case ActionType::kDebugNotify:
+				return "show a debug notification";
+			default:
+				return "trigger an effect";
+			}
+		};
+
 		auto maxSpellDurationSeconds = [](RE::SpellItem* a_spell) {
 			if (!a_spell) {
 				return 0.0f;
@@ -396,7 +486,19 @@ namespace CalamityAffixes
 			}
 		};
 
-		auto magnitudeScalingSourceText = [](MagnitudeScaling::Source a_source) -> std::string_view {
+		auto magnitudeScalingSourceTextEn = [](MagnitudeScaling::Source a_source) -> std::string_view {
+			switch (a_source) {
+			case MagnitudeScaling::Source::kHitPhysicalDealt:
+				return "Physical damage dealt (HitPhysicalDealt)";
+			case MagnitudeScaling::Source::kHitTotalDealt:
+				return "Total damage dealt (HitTotalDealt)";
+			case MagnitudeScaling::Source::kNone:
+			default:
+				return "";
+			}
+		};
+
+		auto magnitudeScalingSourceTextKo = [](MagnitudeScaling::Source a_source) -> std::string_view {
 			switch (a_source) {
 			case MagnitudeScaling::Source::kHitPhysicalDealt:
 				return "가한 물리 피해 (HitPhysicalDealt)";
@@ -408,9 +510,9 @@ namespace CalamityAffixes
 			}
 		};
 
-		auto buildEffectSummaryText = [&](const AffixRuntime& a_affix, std::string_view a_summaryKey) {
+		auto buildEffectSummaryTextKo = [&](const AffixRuntime& a_affix, std::string_view a_summaryKey) {
 			std::string summary;
-			summary.append(triggerText(a_affix.trigger));
+			summary.append(triggerTextKo(a_affix.trigger));
 			summary.push_back(' ');
 			const auto chancePct = std::clamp(a_affix.procChancePct, 0.0f, 100.0f);
 			if (chancePct > 0.0f) {
@@ -423,7 +525,7 @@ namespace CalamityAffixes
 			if (!mappedActionText.empty()) {
 				summary.append(mappedActionText);
 			} else {
-				summary.append(actionSummaryText(a_affix.action));
+				summary.append(actionSummaryTextKo(a_affix.action));
 			}
 
 			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
@@ -449,11 +551,47 @@ namespace CalamityAffixes
 			return summary;
 		};
 
-		auto buildEffectDetailText = [&](const AffixRuntime& a_affix) {
+		auto buildEffectSummaryTextEn = [&](const AffixRuntime& a_affix) {
+			std::string summary;
+			summary.append(triggerTextEn(a_affix.trigger));
+			summary.push_back(' ');
+			const auto chancePct = std::clamp(a_affix.procChancePct, 0.0f, 100.0f);
+			if (chancePct > 0.0f) {
+				summary.append(formatNumberCompact(chancePct));
+				summary.append("% chance to ");
+			} else {
+				summary.append("always ");
+			}
+			summary.append(actionSummaryTextEn(a_affix.action));
+
+			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
+			if (icdSeconds > 0.0f) {
+				summary.append(" (Cooldown ");
+				summary.append(formatNumberCompact(icdSeconds));
+				summary.append("s)");
+			}
+
+			const float perTargetIcdSeconds = static_cast<float>(a_affix.perTargetIcd.count()) / 1000.0f;
+			if (perTargetIcdSeconds > 0.0f) {
+				summary.append(" (Per-target cooldown ");
+				summary.append(formatNumberCompact(perTargetIcdSeconds));
+				summary.append("s)");
+			}
+
+			const float durationSeconds = actionDurationSeconds(a_affix.action);
+			if (durationSeconds > 0.0f) {
+				summary.append(" (Duration ");
+				summary.append(formatNumberCompact(durationSeconds));
+				summary.append("s)");
+			}
+			return summary;
+		};
+
+		auto buildEffectDetailTextKo = [&](const AffixRuntime& a_affix) {
 			std::string detail;
 
 			auto appendSpellProfile = [&](std::string_view a_prefix, RE::SpellItem* a_spell) {
-				const auto spellProfile = buildSpellProfileText(a_spell, a_prefix);
+				const auto spellProfile = buildSpellProfileText(a_spell, a_prefix, true);
 				if (!spellProfile.empty()) {
 					appendDelimited(detail, spellProfile);
 				}
@@ -478,6 +616,19 @@ namespace CalamityAffixes
 				}
 				break;
 			}
+			case ActionType::kCastOnCrit:
+				appendSpellProfile("치명타 발동 효과 (Critical Hit)", a_affix.action.spell);
+				break;
+			case ActionType::kConvertDamage:
+				appendSpellProfile("피해 전환 효과 (Conversion)", a_affix.action.spell);
+				break;
+			case ActionType::kArchmage:
+				appendSpellProfile("아크메이지 효과 (Archmage)", a_affix.action.spell);
+				break;
+			case ActionType::kCorpseExplosion:
+			case ActionType::kSummonCorpseExplosion:
+				appendSpellProfile("시체 폭발 효과 (Corpse Explosion)", a_affix.action.spell);
+				break;
 			case ActionType::kSpawnTrap:
 				appendSpellProfile("함정 발동 효과 (Trap Trigger)", a_affix.action.spell);
 				break;
@@ -557,7 +708,7 @@ namespace CalamityAffixes
 
 			if (a_affix.action.magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
 				std::string scalingText = "스케일링 (Scaling): ";
-				const auto sourceText = magnitudeScalingSourceText(a_affix.action.magnitudeScaling.source);
+				const auto sourceText = magnitudeScalingSourceTextKo(a_affix.action.magnitudeScaling.source);
 				if (!sourceText.empty()) {
 					scalingText.append(sourceText);
 					scalingText.push_back(' ');
@@ -580,6 +731,159 @@ namespace CalamityAffixes
 				}
 				if (a_affix.action.magnitudeScaling.spellBaseAsMin) {
 					scalingText.append(" (스펠 기본값 이상 보장 / spell-base min)");
+				}
+				appendDelimited(detail, scalingText);
+			}
+
+			return detail;
+		};
+
+		auto buildEffectDetailTextEn = [&](const AffixRuntime& a_affix) {
+			std::string detail;
+
+			auto appendSpellProfile = [&](std::string_view a_prefix, RE::SpellItem* a_spell) {
+				const auto spellProfile = buildSpellProfileText(a_spell, a_prefix, false);
+				if (!spellProfile.empty()) {
+					appendDelimited(detail, spellProfile);
+				}
+			};
+
+			switch (a_affix.action.type) {
+			case ActionType::kCastSpell:
+				appendSpellProfile(
+					a_affix.action.applyToSelf ? "Self buff" : "Hit effect",
+					a_affix.action.spell);
+				break;
+			case ActionType::kCastSpellAdaptiveElement: {
+				std::unordered_set<RE::SpellItem*> seenSpells;
+				if (a_affix.action.adaptiveFire && seenSpells.insert(a_affix.action.adaptiveFire).second) {
+					appendSpellProfile("Fire effect", a_affix.action.adaptiveFire);
+				}
+				if (a_affix.action.adaptiveFrost && seenSpells.insert(a_affix.action.adaptiveFrost).second) {
+					appendSpellProfile("Frost effect", a_affix.action.adaptiveFrost);
+				}
+				if (a_affix.action.adaptiveShock && seenSpells.insert(a_affix.action.adaptiveShock).second) {
+					appendSpellProfile("Shock effect", a_affix.action.adaptiveShock);
+				}
+				break;
+			}
+			case ActionType::kCastOnCrit:
+				appendSpellProfile("Critical-hit effect", a_affix.action.spell);
+				break;
+			case ActionType::kConvertDamage:
+				appendSpellProfile("Conversion effect", a_affix.action.spell);
+				break;
+			case ActionType::kArchmage:
+				appendSpellProfile("Archmage effect", a_affix.action.spell);
+				break;
+			case ActionType::kCorpseExplosion:
+			case ActionType::kSummonCorpseExplosion:
+				appendSpellProfile("Corpse explosion effect", a_affix.action.spell);
+				break;
+			case ActionType::kSpawnTrap:
+				appendSpellProfile("Trap trigger", a_affix.action.spell);
+				break;
+			default:
+				break;
+			}
+
+			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
+			if (icdSeconds > 0.0f) {
+				appendDelimited(detail, "Internal cooldown (ICD): " + formatFloat1(icdSeconds) + "s");
+			}
+
+			const float perTargetIcdSeconds = static_cast<float>(a_affix.perTargetIcd.count()) / 1000.0f;
+			if (perTargetIcdSeconds > 0.0f) {
+				appendDelimited(detail, "Per-target cooldown: " + formatFloat1(perTargetIcdSeconds) + "s");
+			}
+
+			if (a_affix.luckyHitChancePct > 0.0f) {
+				appendDelimited(detail, "Lucky Hit: " + formatFloat1(a_affix.luckyHitChancePct) + "%");
+			}
+
+			if (std::abs(a_affix.action.effectiveness - 1.0f) >= 0.01f) {
+				appendDelimited(detail, "Effectiveness: x" + formatFloat1(a_affix.action.effectiveness));
+			}
+
+			if (std::abs(a_affix.action.magnitudeOverride) >= 0.01f) {
+				appendDelimited(detail, "Fixed magnitude: " + formatFloat1(a_affix.action.magnitudeOverride));
+			}
+
+			if (a_affix.action.type == ActionType::kMindOverMatter &&
+				a_affix.action.mindOverMatterDamageToMagickaPct > 0.0f) {
+				std::string moMText = "Damage to Magicka: " +
+				                      formatFloat1(a_affix.action.mindOverMatterDamageToMagickaPct) + "%";
+				if (a_affix.action.mindOverMatterMaxRedirectPerHit > 0.0f) {
+					moMText.append(", max ");
+					moMText.append(formatFloat1(a_affix.action.mindOverMatterMaxRedirectPerHit));
+				}
+				appendDelimited(detail, moMText);
+			}
+
+			if (a_affix.action.type == ActionType::kArchmage) {
+				if (a_affix.action.archmageDamagePctOfMaxMagicka > 0.0f) {
+					appendDelimited(
+						detail,
+						"Bonus damage: +" + formatFloat1(a_affix.action.archmageDamagePctOfMaxMagicka) + "% Max Magicka");
+				}
+				if (a_affix.action.archmageCostPctOfMaxMagicka > 0.0f) {
+					appendDelimited(
+						detail,
+						"Additional cost: +" + formatFloat1(a_affix.action.archmageCostPctOfMaxMagicka) + "% Max Magicka");
+				}
+			}
+
+			if (a_affix.action.type == ActionType::kCorpseExplosion ||
+				a_affix.action.type == ActionType::kSummonCorpseExplosion) {
+				if (a_affix.action.corpseExplosionFlatDamage > 0.0f) {
+					appendDelimited(detail, "Flat damage: " + formatFloat1(a_affix.action.corpseExplosionFlatDamage));
+				}
+				if (a_affix.action.corpseExplosionPctOfCorpseMaxHealth > 0.0f) {
+					appendDelimited(
+						detail,
+						"Corpse Max Health damage: " +
+							formatFloat1(a_affix.action.corpseExplosionPctOfCorpseMaxHealth) + "%");
+				}
+				if (a_affix.action.corpseExplosionRadius > 0.0f) {
+					appendDelimited(detail, "Radius: " + formatFloat1(a_affix.action.corpseExplosionRadius));
+				}
+			}
+
+			if (a_affix.action.type == ActionType::kSpawnTrap) {
+				if (a_affix.action.trapRadius > 0.0f) {
+					appendDelimited(detail, "Trap radius: " + formatFloat1(a_affix.action.trapRadius));
+				}
+				if (a_affix.action.trapTtl > std::chrono::milliseconds::zero()) {
+					const float ttlSeconds = static_cast<float>(a_affix.action.trapTtl.count()) / 1000.0f;
+					appendDelimited(detail, "Trap lifetime: " + formatFloat1(ttlSeconds) + "s");
+				}
+			}
+
+			if (a_affix.action.magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
+				std::string scalingText = "Scaling: ";
+				const auto sourceText = magnitudeScalingSourceTextEn(a_affix.action.magnitudeScaling.source);
+				if (!sourceText.empty()) {
+					scalingText.append(sourceText);
+					scalingText.push_back(' ');
+				}
+				scalingText.append("x");
+				scalingText.append(formatFloat1(a_affix.action.magnitudeScaling.mult));
+				if (std::abs(a_affix.action.magnitudeScaling.add) >= 0.01f) {
+					scalingText.append(" + ");
+					scalingText.append(formatFloat1(a_affix.action.magnitudeScaling.add));
+				}
+				if (a_affix.action.magnitudeScaling.min > 0.0f) {
+					scalingText.append(" (min ");
+					scalingText.append(formatFloat1(a_affix.action.magnitudeScaling.min));
+					scalingText.push_back(')');
+				}
+				if (a_affix.action.magnitudeScaling.max > 0.0f) {
+					scalingText.append(" (max ");
+					scalingText.append(formatFloat1(a_affix.action.magnitudeScaling.max));
+					scalingText.push_back(')');
+				}
+				if (a_affix.action.magnitudeScaling.spellBaseAsMin) {
+					scalingText.append(" (at least the spell base value)");
 				}
 				appendDelimited(detail, scalingText);
 			}
@@ -626,8 +930,10 @@ namespace CalamityAffixes
 				.displayName = recipe.displayName,
 				.runeSequence = std::move(runes),
 				.effectSummaryKey = std::string(effectSummaryKey),
-				.effectSummaryText = buildEffectSummaryText(affix, effectSummaryKey),
-				.effectDetailText = buildEffectDetailText(affix),
+				.effectSummaryTextEn = buildEffectSummaryTextEn(affix),
+				.effectSummaryTextKo = buildEffectSummaryTextKo(affix, effectSummaryKey),
+				.effectDetailTextEn = buildEffectDetailTextEn(affix),
+				.effectDetailTextKo = buildEffectDetailTextKo(affix),
 				.recommendedBaseKey = std::string(resolveRecommendedBaseKey(recipe)),
 				.selected = (selectedToken != 0u && selectedToken == recipe.token)
 			});

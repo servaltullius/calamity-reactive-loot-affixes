@@ -19,8 +19,10 @@ namespace CalamityAffixes
 		std::string displayName{};
 		std::string runeSequence{};
 		std::string effectSummaryKey{};
-		std::string effectSummaryText{};
-		std::string effectDetailText{};
+		std::string effectSummaryTextEn{};
+		std::string effectSummaryTextKo{};
+		std::string effectDetailTextEn{};
+		std::string effectDetailTextKo{};
 		std::string recommendedBaseKey{};
 		bool selected{ false };
 	};

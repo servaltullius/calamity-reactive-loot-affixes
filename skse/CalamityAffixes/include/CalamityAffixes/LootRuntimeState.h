@@ -24,6 +24,12 @@ namespace CalamityAffixes
 			LootRerollGuard::InstanceKey detachedWorldKey{ 0 };
 		};
 
+		struct CorpseCurrencyLedgerEntry
+		{
+			std::uint32_t dayStamp{ 0u };
+			std::uint8_t processedMask{ 0u };
+		};
+
 		LootShuffleBagState prefixSharedBag{};
 		LootShuffleBagState prefixWeaponBag{};
 		LootShuffleBagState prefixArmorBag{};
@@ -40,6 +46,8 @@ namespace CalamityAffixes
 
 		std::unordered_map<std::uint64_t, std::uint32_t> currencyRollLedger{};
 		std::deque<std::uint64_t> currencyRollLedgerRecent{};
+		std::unordered_map<std::uint32_t, CorpseCurrencyLedgerEntry> corpseCurrencyRollLedger{};
+		std::deque<std::uint32_t> corpseCurrencyRollLedgerRecent{};
 
 		std::uint32_t lootChanceEligibleFailStreak{ 0 };
 		std::uint32_t runewordFragmentFailStreak{ 0 };
@@ -62,8 +70,6 @@ namespace CalamityAffixes
 			previewAffixes.clear();
 			previewRecent.clear();
 			lootChanceEligibleFailStreak = 0;
-			runewordFragmentFailStreak = 0;
-			reforgeOrbFailStreak = 0;
 			activeSlotPenalty.clear();
 			rerollGuard.Reset();
 			playerContainerStash.clear();
@@ -77,6 +83,10 @@ namespace CalamityAffixes
 			evaluatedInsertionsSincePrune = 0;
 			currencyRollLedger.clear();
 			currencyRollLedgerRecent.clear();
+			corpseCurrencyRollLedger.clear();
+			corpseCurrencyRollLedgerRecent.clear();
+			runewordFragmentFailStreak = 0;
+			reforgeOrbFailStreak = 0;
 			pendingDroppedRefDeletes.clear();
 			dropDeleteDrainScheduled.store(false, std::memory_order_release);
 		}
