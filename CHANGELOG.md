@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-07-14
+
+v1.4.0은 룬워드 조각과 재련 오브의 획득 권한을 플레이어 측 적대 처치의 시체로 일원화하고, 피티·시체 중복 방지를 저장하는 공개 테스트 릴리스입니다. Dragon 효과 레코드 분리, 룬워드·MGEF 생성 계약 강화, Prisma 레시피 상세와 접근성 개선, fail-hard 릴리스 검증도 함께 포함합니다.
+
 ### Added
 
 - 룬 조각/재련 오브 피티 카운터와 시체 FormID·날짜·카테고리 처리 mask를 저장하는 추가 코세이브 레코드 `CCRT v1`을 도입했습니다.
@@ -385,7 +389,8 @@ v1.3.3은 v1.3.2의 패널 성능 개선을 유지하면서, 레시피 탐색기
 - `HealthDamage` stale-window, per-target repeat, low-health snapshot 검증이 문자열 검색에 과도하게 의존하던 상태를 보강했습니다.
 - 룬워드 재련 시 보존해야 하는 runeword token과 regular affix reroll 비교 경로를 분리해 회귀 위험을 낮췄습니다.
 
-[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.3...HEAD
+[Unreleased]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.3...v1.4.0
 [1.3.3]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/servaltullius/calamity-reactive-loot-affixes/compare/v1.3.0...v1.3.1
