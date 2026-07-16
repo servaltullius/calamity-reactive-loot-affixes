@@ -224,10 +224,12 @@ namespace RuntimeGateStoreChecks
 				headerContractsText.find("std::string effectSummaryTextKo{};") == std::string::npos ||
 				headerContractsText.find("std::string effectDetailTextEn{};") == std::string::npos ||
 				headerContractsText.find("std::string effectDetailTextKo{};") == std::string::npos ||
-				recipeEntriesText->find(".effectSummaryTextEn = buildEffectSummaryTextEn(affix)") == std::string::npos ||
+				recipeEntriesText->find(".effectSummaryTextEn = buildEffectSummaryTextEn(affix, effectSummaryKey)") == std::string::npos ||
 				recipeEntriesText->find(".effectSummaryTextKo = buildEffectSummaryTextKo(affix, effectSummaryKey)") == std::string::npos ||
 				recipeEntriesText->find(".effectDetailTextEn = buildEffectDetailTextEn(affix)") == std::string::npos ||
 				recipeEntriesText->find(".effectDetailTextKo = buildEffectDetailTextKo(affix)") == std::string::npos ||
+				recipeEntriesText->find("RunewordSummary::ActionSummaryTextEnByKey") == std::string::npos ||
+				recipeEntriesText->find("a_affix.passiveSpell != a_affix.action.spell") == std::string::npos ||
 				prismaCoreText->find("{ \"summaryEn\", entry.effectSummaryTextEn }") == std::string::npos ||
 				prismaCoreText->find("{ \"summaryKo\", entry.effectSummaryTextKo }") == std::string::npos ||
 				prismaCoreText->find("{ \"detailEn\", entry.effectDetailTextEn }") == std::string::npos ||

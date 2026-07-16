@@ -211,7 +211,7 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "signature_infinity") return "가장 낮은 원소 저항을 더 깎아 약점 피해 증폭";
 		if (a_key == "signature_enigma") return "피격 시 투명화·이동 속도 +45%(4초), 상시 이동 속도 +10%";
 		if (a_key == "signature_call_to_arms") return "적중 시 공격력 +20%(8초), 상시 체력 +50·마나 +30";
-		if (a_key == "signature_spirit") return "집중력 흐름을 올려 전투 리듬 안정화";
+		if (a_key == "signature_spirit") return "주문 흡수 확률 +10%p; 상시 효과로 최대 마나 +30";
 		if (a_key == "signature_insight") return "명상 파동으로 자원 고갈 구간을 완화";
 		if (a_key == "signature_fortitude") return "강철 의지 버프로 난전 생존력 상승";
 		if (a_key == "signature_heart_of_the_oak") return "견고한 저항 축부터 깎아 후속 딜 창출";
@@ -259,7 +259,7 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "aura_fire_shred") return "타격마다 화염 저항을 깎아 후속 화상 극대화";
 		if (a_key == "aura_frost_shred") return "타격마다 냉기 저항을 깎아 후속 동결 극대화";
 		if (a_key == "self_haste") return "가속으로 빈틈을 메워 기동 우위 확보";
-		if (a_key == "self_weapon_fury") return "격노의 흐름으로 무기 공격 속도 상승";
+		if (a_key == "self_weapon_fury") return "공격 속도 +25%·기력 30 즉시 회복";
 		if (a_key == "self_judgment") return "심판의 기세를 실어 공격력을 대폭 끌어올림";
 		if (a_key == "self_stamina_recall") return "전투 기억을 되살려 스태미나 회복 가속";
 		if (a_key == "self_crit_chance") return "연계 리듬을 살려 치명타 확률 상승";
@@ -290,8 +290,8 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "self_phoenix") return "재점화로 반격 타이밍을 다시 잡음";
 		if (a_key == "self_muffle") return "머플로 발소리를 지워 은신 진입 보조";
 		if (a_key == "self_invisibility") return "투명화로 전투를 끊고 각 재설정";
-		if (a_key == "self_smoke_escape") return "연막 속에서 이동 속도를 올려 긴급 이탈";
-		if (a_key == "self_carry_weight") return "부의 축적으로 소지무게를 크게 늘림";
+		if (a_key == "self_smoke_escape") return "공격자 이동 속도 -30%";
+		if (a_key == "self_carry_weight") return "상시 소지 무게 +75·화술 +15";
 		if (a_key == "self_detect_life") return "광채로 주변 생명체를 감지해 정보 우위 확보";
 		if (a_key == "kill_poison_burst") return "처치 시 독성 폭발로 주변 적에게 피해";
 		if (a_key == "kill_restore") return "처치 시 생명력과 마나를 즉시 회복";
@@ -322,6 +322,15 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "debuff_heal_suppress") return "강철 출혈이 적의 상처 회복을 방해";
 		if (a_key == "debuff_stamina_suppress") return "조화의 교란이 적의 기력 재생을 억제";
 		if (a_key == "debuff_magicka_suppress") return "안개가 적의 마력 흐름을 차단";
+		return {};
+	}
+
+	[[nodiscard]] inline std::string_view ActionSummaryTextEnByKey(std::string_view a_key) noexcept
+	{
+		if (a_key == "signature_spirit") return "gain +10 percentage points Spell Absorption; passively gain +30 Max Magicka";
+		if (a_key == "self_weapon_fury") return "gain +25% Attack Speed and restore 30 Stamina";
+		if (a_key == "self_smoke_escape") return "slow the attacker by 30%";
+		if (a_key == "self_carry_weight") return "Always active: +75 Carry Weight and +15 Speechcraft";
 		return {};
 	}
 }

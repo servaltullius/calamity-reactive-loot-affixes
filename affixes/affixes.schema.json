@@ -33,7 +33,33 @@
         },
         "appendedMagicEffects": {
           "type": "array",
-          "items": { "$ref": "#/$defs/magicEffectRecord" },
+          "prefixItems": [
+            {
+              "allOf": [
+                { "$ref": "#/$defs/magicEffectRecord" },
+                { "properties": { "editorId": { "const": "CAFF_MGEF_RW_DRAGON_RESIST_FIRE" } } }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/magicEffectRecord" },
+                { "properties": { "editorId": { "const": "CAFF_MGEF_RW_DRAGON_RESIST_FROST" } } }
+              ]
+            },
+            {
+              "allOf": [
+                { "$ref": "#/$defs/magicEffectRecord" },
+                { "properties": { "editorId": { "const": "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK" } } }
+              ]
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "appendedRecords": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/appendedRecord" },
           "minItems": 1
         }
       }
@@ -184,6 +210,50 @@
         "archetype": { "type": ["string", "null"] },
         "hostile": { "type": "boolean" },
         "recover": { "type": "boolean" }
+      }
+    },
+    "appendedRecord": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "magicEffect"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "MagicEffect" },
+            "magicEffect": { "$ref": "#/$defs/magicEffectRecord" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "spell"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "Spell" },
+            "spell": { "$ref": "#/$defs/spellRecord" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "artObject"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "ArtObject" },
+            "artObject": { "$ref": "#/$defs/artObjectRecord" }
+          }
+        }
+      ]
+    },
+    "artObjectRecord": {
+      "type": "object",
+      "required": ["editorId", "modelPath", "artType"],
+      "additionalProperties": false,
+      "properties": {
+        "editorId": { "type": "string", "minLength": 1 },
+        "modelPath": { "type": "string", "minLength": 1 },
+        "artType": {
+          "type": "string",
+          "enum": ["MagicHitEffect"]
+        }
       }
     },
     "spellRecord": {

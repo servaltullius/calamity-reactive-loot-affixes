@@ -210,7 +210,8 @@ namespace CalamityAffixes
 
 	void EventBridge::ApplyDesiredPassiveSpells(
 		RE::PlayerCharacter* a_player,
-		const std::unordered_set<RE::SpellItem*>& a_desiredPassives)
+		const std::unordered_set<RE::SpellItem*>& a_desiredPassives,
+		bool a_refreshConfiguredPassivesOnPostLoad)
 	{
 		if (!a_player) {
 			return;
@@ -227,8 +228,27 @@ namespace CalamityAffixes
 				knownPassiveSpells.insert(spell);
 			}
 		}
+		std::unordered_set<RE::SpellItem*> refreshRequestedPassives;
+		if (a_refreshConfiguredPassivesOnPostLoad) {
+			for (const auto& affix : _affixes) {
+				if (affix.refreshPassiveSpellOnPostLoad &&
+					affix.passiveSpell &&
+					a_desiredPassives.contains(affix.passiveSpell)) {
+					refreshRequestedPassives.insert(affix.passiveSpell);
+				}
+			}
+		}
 
 		const bool passivesDisabled = _runtimeSettings.disablePassiveSuffixSpells;
+		auto findPassiveAddFeedback = [this](RE::SpellItem* a_spell) -> const Action* {
+			for (const auto& affix : _affixes) {
+				if (affix.passiveSpell == a_spell &&
+					affix.action.feedback.playOn == ActionFeedbackPlayOn::kPassiveAdd) {
+					return std::addressof(affix.action);
+				}
+			}
+			return nullptr;
+		};
 		for (auto* spell : knownPassiveSpells) {
 			if (!spell) {
 				continue;
@@ -236,14 +256,23 @@ namespace CalamityAffixes
 
 			const bool desired = a_desiredPassives.find(spell) != a_desiredPassives.end();
 			const bool present = a_player->HasSpell(spell);
-			switch (detail::ResolvePassiveSpellReconcileAction(desired, present, passivesDisabled)) {
+			const bool refreshRequested = refreshRequestedPassives.contains(spell);
+			switch (detail::ResolvePassiveSpellReconcileAction(desired, present, passivesDisabled, refreshRequested)) {
 			case detail::PassiveSpellReconcileAction::kAdd:
 				a_player->AddSpell(spell);
+				if (const auto* feedbackAction = findPassiveAddFeedback(spell)) {
+					PlayActionFeedback(*feedbackAction, a_player, nullptr, ActionFeedbackPlayOn::kPassiveAdd);
+				}
 				SKSE::log::debug("CalamityAffixes: applied passive spell {:08X}.", spell->GetFormID());
 				break;
 			case detail::PassiveSpellReconcileAction::kRemove:
 				a_player->RemoveSpell(spell);
 				SKSE::log::debug("CalamityAffixes: removed stale passive spell {:08X}.", spell->GetFormID());
+				break;
+			case detail::PassiveSpellReconcileAction::kRefresh:
+				a_player->RemoveSpell(spell);
+				a_player->AddSpell(spell);
+				SKSE::log::debug("CalamityAffixes: refreshed passive spell {:08X} after load.", spell->GetFormID());
 				break;
 			case detail::PassiveSpellReconcileAction::kKeep:
 			default:
@@ -285,7 +314,7 @@ namespace CalamityAffixes
 		}
 	}
 
-	void EventBridge::RebuildActiveCounts()
+	void EventBridge::RebuildActiveCounts(bool a_refreshConfiguredPassivesOnPostLoad)
 	{
 		if (!_configLoaded) {
 			return;
@@ -328,7 +357,7 @@ namespace CalamityAffixes
 		_equippedTokenCacheReady = true;
 
 		LogActiveAffixListDebug();
-		ApplyDesiredPassiveSpells(player, desiredPassives);
+		ApplyDesiredPassiveSpells(player, desiredPassives, a_refreshConfiguredPassivesOnPostLoad);
 		LogRebuildActiveCountsDebugSummary(desiredPassives);
 	}
 

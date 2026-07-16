@@ -3481,6 +3481,32 @@
       }
 
       function resolveRecipeSummaryText(item) {
+        const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
+        switch (key) {
+          case "signature_spirit":
+            return t(
+              "Spirit: +30 Max Magicka; 28% on-hit chance for +10 percentage points Spell Absorption (5s, 10s cooldown)",
+              "스피릿: 최대 마나 +30, 적중 시 28% 확률로 주문 흡수 확률 +10%p(5초, 재사용 10초)"
+            );
+          case "self_weapon_fury":
+            return t(
+              "Fury: 24% on-hit chance for +25% Attack Speed (6s) and 30 Stamina (12s cooldown)",
+              "퓨리: 적중 시 24% 확률로 공격 속도 +25%(6초)·기력 30 회복(재사용 12초)"
+            );
+          case "self_smoke_escape":
+            return t(
+              "Smoke: 22% chance on taking a hit to slow the attacker by 30% (5s, 12s cooldown)",
+              "스모크: 피격 시 22% 확률로 공격자 이동 속도 -30%(5초, 재사용 12초)"
+            );
+          case "self_carry_weight":
+            return t(
+              "Wealth: passive +75 Carry Weight and +15 Speechcraft",
+              "웰스: 상시 소지 무게 +75·화술 +15"
+            );
+          default:
+            break;
+        }
+
         const localizedSummary = resolveLocalizedRecipeText(
           item,
           "summary",
@@ -3491,7 +3517,6 @@
           return localizedSummary;
         }
         const fallbackSummary = typeof item?.summary === "string" ? item.summary.trim() : "";
-        const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
         switch (key) {
           case "adaptive_strike":
             return t("Adaptive elemental strike", "적응형 원소 참격");
@@ -3529,8 +3554,6 @@
             return t("Enigma: emergency phase shift", "에니그마: 긴급 위상 전환");
           case "signature_call_to_arms":
             return t("Call to Arms: battle-cry haste", "콜 투 암스: 전투 함성 가속");
-          case "signature_spirit":
-            return t("Spirit: flowing focus lattice", "스피릿: 흐름의 집중 격자");
           case "signature_insight":
             return t("Insight: meditation pulse engine", "인사이트: 명상 맥동 엔진");
           case "signature_fortitude":
@@ -3713,6 +3736,25 @@
               "위험 구간을 버티기 위한 피해 완화 효과입니다."
             );
           case "signature_spirit":
+            return t(
+              "Passively grants +30 Max Magicka. On hit, has a 28% chance to gain 10 percentage points of Spell Absorption for 5s (10s cooldown).",
+              "최대 마나 +30이 상시 적용됩니다. 적중 시 28% 확률로 주문 흡수 확률이 10%p 증가합니다(5초, 재사용 10초)."
+            );
+          case "self_weapon_fury":
+            return t(
+              "On hit, has a 24% chance to gain +25% Attack Speed for 6s and immediately restore 30 Stamina (12s cooldown).",
+              "적중 시 24% 확률로 공격 속도가 25% 증가하고 기력 30을 즉시 회복합니다(6초, 재사용 12초)."
+            );
+          case "self_smoke_escape":
+            return t(
+              "On taking a hit, has a 22% chance to reduce the attacker's Move Speed by 30% for 5s (12s cooldown).",
+              "피격 시 22% 확률로 공격자의 이동 속도를 30% 낮춥니다(5초, 재사용 12초)."
+            );
+          case "self_carry_weight":
+            return t(
+              "Passively grants +75 Carry Weight and +15 Speechcraft.",
+              "소지 무게 +75와 화술 +15가 상시 적용됩니다."
+            );
           case "signature_insight":
             return t(
               "Hybrid sustain effect supporting both combat flow and resource recovery.",

@@ -177,6 +177,13 @@ namespace CalamityAffixes
 					a_out.id, passiveSpellId);
 			}
 		}
+		a_out.refreshPassiveSpellOnPostLoad =
+			a_action.value("refreshPassiveSpellOnPostLoad", false) && a_out.passiveSpell != nullptr;
+		if (a_action.value("refreshPassiveSpellOnPostLoad", false) && !a_out.passiveSpell) {
+			SKSE::log::warn(
+				"CalamityAffixes: passive refresh ignored without a resolved passive spell (affixId={}, spellEditorId={}).",
+				a_out.id, passiveSpellId);
+		}
 
 		if (a_out.slot == AffixSlot::kSuffix) {
 			a_out.trigger = Trigger::kHit;
@@ -186,6 +193,85 @@ namespace CalamityAffixes
 		}
 
 		return ApplyRuntimeTriggerConfigFromJson(a_runtime, a_actionType, a_out);
+	}
+
+	void EventBridge::ParseActionFeedbackFromJson(
+		const nlohmann::json& a_action,
+		RE::TESDataHandler* a_handler,
+		AffixRuntime& a_out) const
+	{
+		const auto feedbackIt = a_action.find("feedback");
+		if (feedbackIt == a_action.end()) {
+			return;
+		}
+		if (!feedbackIt->is_object()) {
+			SKSE::log::warn(
+				"CalamityAffixes: runtime.action.feedback must be an object; feedback disabled (affixId={}).",
+				a_out.id);
+			return;
+		}
+
+		const auto& feedback = *feedbackIt;
+		auto readString = [&feedback](std::string_view a_key) -> std::string {
+			const auto it = feedback.find(std::string(a_key));
+			return (it != feedback.end() && it->is_string()) ? it->get<std::string>() : std::string{};
+		};
+
+		const auto playOn = readString("playOn");
+		if (playOn == "Proc") {
+			a_out.action.feedback.playOn = ActionFeedbackPlayOn::kProc;
+		} else if (playOn == "PassiveAdd") {
+			a_out.action.feedback.playOn = ActionFeedbackPlayOn::kPassiveAdd;
+		} else {
+			SKSE::log::warn(
+				"CalamityAffixes: unknown feedback.playOn '{}'; feedback disabled (affixId={}).",
+				playOn,
+				a_out.id);
+			return;
+		}
+
+		const auto target = readString("target");
+		if (target == "Owner") {
+			a_out.action.feedback.target = ActionFeedbackTarget::kOwner;
+		} else if (target == "Target") {
+			a_out.action.feedback.target = ActionFeedbackTarget::kTarget;
+		} else {
+			SKSE::log::warn(
+				"CalamityAffixes: unknown feedback.target '{}'; feedback disabled (affixId={}).",
+				target,
+				a_out.id);
+			a_out.action.feedback.playOn = ActionFeedbackPlayOn::kNone;
+			return;
+		}
+
+		float durationSeconds = 0.25f;
+		if (const auto durationIt = feedback.find("durationSeconds");
+			durationIt != feedback.end() && durationIt->is_number()) {
+			durationSeconds = durationIt->get<float>();
+		}
+		a_out.action.feedback.durationSeconds = std::clamp(durationSeconds, 0.05f, 2.0f);
+
+		const auto artSpec = readString("artObjectEditorId");
+		if (!artSpec.empty()) {
+			a_out.action.feedback.art = ConfigShared::LookupFormFromSpec<RE::BGSArtObject>(artSpec, a_handler);
+			if (!a_out.action.feedback.art) {
+				SKSE::log::warn(
+					"CalamityAffixes: feedback ArtObject not found; visual feedback skipped (affixId={}, art={}).",
+					a_out.id,
+					artSpec);
+			}
+		}
+
+		const auto soundSpec = readString("soundForm");
+		if (!soundSpec.empty()) {
+			a_out.action.feedback.sound = ConfigShared::LookupFormFromSpec<RE::BGSSoundDescriptorForm>(soundSpec, a_handler);
+			if (!a_out.action.feedback.sound) {
+				SKSE::log::warn(
+					"CalamityAffixes: feedback sound not found; audio feedback skipped (affixId={}, sound={}).",
+					a_out.id,
+					soundSpec);
+			}
+		}
 	}
 
 	void EventBridge::ApplyScrollNoConsumeChanceFromJson(const nlohmann::json& a_action, AffixRuntime& a_out) const
@@ -288,6 +374,7 @@ namespace CalamityAffixes
 				if (!ParseRuntimeActionFromJson(action, type, a_handler, out)) {
 					continue;
 				}
+				ParseActionFeedbackFromJson(action, a_handler, out);
 
 				NormalizeParsedAffixRuntimePolicy(out, type);
 

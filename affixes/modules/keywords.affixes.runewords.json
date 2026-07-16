@@ -329,9 +329,9 @@
   {
     "id": "runeword_spirit_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPIRIT",
-    "name": "룬워드 영혼 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 마나 회복 강화. 마나 재생 +30. 9초마다 발동.",
-    "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 9s - Magicka Recovery boost + Magicka Regen +30",
-    "nameKo": "룬워드 영혼 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 마나 회복 강화. 마나 재생 +30. 9초마다 발동.",
+    "name": "룬워드 영혼 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 주문 흡수 확률 +10%p (5초). 최대 마나 +30. 10초마다 발동.",
+    "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 10s - Absorb Chance +10 points for 5s + Max Magicka +30",
+    "nameKo": "룬워드 영혼 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 주문 흡수 확률 +10%p (5초). 최대 마나 +30. 10초마다 발동.",
     "records": {
       "magicEffects": [
         {
@@ -343,8 +343,8 @@
         },
         {
           "editorId": "CAFF_MGEF_RW_SPIRIT_PASSIVE_MPREGEN",
-          "name": "Calamity: Runeword Spirit Passive Magicka Regen / 룬워드 영혼 마나 재생",
-          "actorValue": "MagickaRate",
+          "name": "Calamity: Runeword Spirit Passive Max Magicka / 룬워드 영혼 최대 마나",
+          "actorValue": "Magicka",
           "hostile": false,
           "recover": true
         }
@@ -386,13 +386,21 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 28.0,
-      "icdSeconds": 9.0,
+      "icdSeconds": 10.0,
       "action": {
         "type": "CastSpell",
-        "spellEditorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
+        "spellEditorId": "CAFF_SPEL_RW_SPIRIT_ABSORPTION",
         "applyTo": "Self",
         "noHitEffectArt": true,
-        "passiveSpellEditorId": "CAFF_SPEL_RW_SPIRIT_PASSIVE"
+        "passiveSpellEditorId": "CAFF_SPEL_RW_SPIRIT_PASSIVE",
+        "refreshPassiveSpellOnPostLoad": true,
+        "feedback": {
+          "artObjectEditorId": "CAFF_ARTO_VFX_SPIRIT_ABSORB",
+          "soundForm": "Skyrim.esm|0x0003D119",
+          "target": "Owner",
+          "durationSeconds": 0.45,
+          "playOn": "Proc"
+        }
       }
     },
     "slot": "prefix"
@@ -2933,9 +2941,9 @@
   {
     "id": "runeword_fury_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FURY",
-    "name": "룬워드 분노 [Jah-Gul-Eth]: 적중 시 24% 확률로 격노의 흐름(공격속도 +15%, 8초). 3.5초마다 발동.",
-    "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 3.5s - Weapon Fury (Attack Speed +15%, 8s)",
-    "nameKo": "룬워드 분노 [Jah-Gul-Eth]: 적중 시 24% 확률로 격노의 흐름(공격속도 +15%, 8초). 3.5초마다 발동.",
+    "name": "룬워드 분노 [Jah-Gul-Eth]: 적중 시 24% 확률로 공격속도 +25% (6초) 및 기력 30 즉시 회복. 12초마다 발동.",
+    "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 12s - Attack Speed +25% for 6s and restore 30 Stamina",
+    "nameKo": "룬워드 분노 [Jah-Gul-Eth]: 적중 시 24% 확률로 공격속도 +25% (6초) 및 기력 30 즉시 회복. 12초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
@@ -2948,12 +2956,20 @@
         "editorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
         "name": "Calamity: Runeword Fury Weapon Fury / 룬워드 분노 격노의 흐름",
         "delivery": "Self",
-        "effect": {
-          "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
-          "magnitude": 0.15,
-          "duration": 8,
-          "area": 0
-        }
+        "effects": [
+          {
+            "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
+            "magnitude": 0.25,
+            "duration": 6,
+            "area": 0
+          },
+          {
+            "magicEffectEditorId": "CAFF_MGEF_RW_FURY_RESTORE_STAMINA",
+            "magnitude": 30,
+            "duration": 0,
+            "area": 0
+          }
+        ]
       }
     },
     "kid": {
@@ -2966,12 +2982,19 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 24.0,
-      "icdSeconds": 3.5,
+      "icdSeconds": 12.0,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": {
+          "artObjectEditorId": "CAFF_ARTO_VFX_FURY_SURGE",
+          "soundForm": "Skyrim.esm|0x000A28C4",
+          "target": "Owner",
+          "durationSeconds": 0.45,
+          "playOn": "Proc"
+        }
       }
     },
     "slot": "prefix"
@@ -4133,24 +4156,24 @@
   {
     "id": "runeword_smoke_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SMOKE",
-    "name": "룬워드 스모크 [Nef-Lum]: 피격 시 22% 확률로 연막의 이동(이동속도 +22%, 5초). 12초마다 발동.",
-    "nameEn": "Runeword Smoke (Nef-Lum): 22% on hit taken / ICD 12s - Smoke Screen (Move Speed +22%, 5s)",
-    "nameKo": "룬워드 스모크 [Nef-Lum]: 피격 시 22% 확률로 연막의 이동(이동속도 +22%, 5초). 12초마다 발동.",
+    "name": "룬워드 스모크 [Nef-Lum]: 피격 시 22% 확률로 공격자의 이동속도 -30% (5초). 12초마다 발동.",
+    "nameEn": "Runeword Smoke (Nef-Lum): 22% on hit taken / ICD 12s - Slow the attacker by 30% for 5s",
+    "nameKo": "룬워드 스모크 [Nef-Lum]: 피격 시 22% 확률로 공격자의 이동속도 -30% (5초). 12초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_SMOKE_SCREEN",
         "name": "Calamity: Runeword Smoke / 룬워드 스모크",
         "actorValue": "SpeedMult",
-        "hostile": false,
+        "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_SMOKE_SCREEN",
         "name": "Calamity: Runeword Smoke / 룬워드 스모크",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_SMOKE_SCREEN",
-          "magnitude": 22,
+          "magnitude": 30,
           "duration": 5,
           "area": 0
         }
@@ -4170,8 +4193,15 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_SMOKE_SCREEN",
-        "applyTo": "Self",
-        "noHitEffectArt": true
+        "applyTo": "Target",
+        "noHitEffectArt": true,
+        "feedback": {
+          "artObjectEditorId": "CAFF_ARTO_VFX_SMOKE_SLOW",
+          "soundForm": "Skyrim.esm|0x0006A165",
+          "target": "Target",
+          "durationSeconds": 0.75,
+          "playOn": "Proc"
+        }
       }
     },
     "slot": "prefix"
@@ -4343,9 +4373,9 @@
   {
     "id": "runeword_wealth_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WEALTH",
-    "name": "룬워드 웰스 [Lem-Ko-Tir]: 피격 시 20% 확률로 부의 축적(소지무게 +100, 15초). 18초마다 발동.",
-    "nameEn": "Runeword Wealth (Lem-Ko-Tir): 20% on hit taken / ICD 18s - Wealth (Carry Weight +100, 15s)",
-    "nameKo": "룬워드 웰스 [Lem-Ko-Tir]: 피격 시 20% 확률로 부의 축적(소지무게 +100, 15초). 18초마다 발동.",
+    "name": "룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 화술 +15.",
+    "nameEn": "Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight +75 and Speechcraft +15",
+    "nameKo": "룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 화술 +15.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_WEALTH_VIGOR",
@@ -4374,14 +4404,18 @@
       "chance": 0
     },
     "runtime": {
-      "trigger": "IncomingHit",
-      "procChancePercent": 20.0,
-      "icdSeconds": 18.0,
+      "trigger": "Hit",
+      "procChancePercent": 0,
       "action": {
-        "type": "CastSpell",
-        "spellEditorId": "CAFF_SPEL_RW_WEALTH_VIGOR",
-        "applyTo": "Self",
-        "noHitEffectArt": true
+        "type": "DebugNotify",
+        "passiveSpellEditorId": "CAFF_SPEL_RW_WEALTH_PASSIVE",
+        "feedback": {
+          "artObjectEditorId": "CAFF_ARTO_VFX_WEALTH_PASSIVE",
+          "soundForm": "Skyrim.esm|0x0003E952",
+          "target": "Owner",
+          "durationSeconds": 0.6,
+          "playOn": "PassiveAdd"
+        }
       }
     },
     "slot": "prefix"

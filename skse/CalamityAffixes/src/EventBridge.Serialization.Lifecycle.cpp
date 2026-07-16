@@ -58,7 +58,7 @@ namespace CalamityAffixes
 		(void)PruneOrphanedPlayerInstanceKeys();
 		// Serialization Load runs before inventory restoration. Always rebuild at
 		// PostLoadGame so normal saves cannot retain an empty/stale equipped cache.
-		RebuildActiveCounts();
+		RebuildActiveCounts(true);
 		MaybeMigrateMiscCurrency();
 	}
 

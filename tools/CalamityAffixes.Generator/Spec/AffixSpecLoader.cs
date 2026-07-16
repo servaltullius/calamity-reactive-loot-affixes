@@ -11,12 +11,19 @@ public static class AffixSpecLoader
     private static readonly RunewordContractCatalog.Snapshot RunewordContract = RunewordContractCatalog.Load();
     private static readonly HashSet<string> SupportedTriggers = Contract.SupportedTriggers;
     private static readonly HashSet<string> SupportedActionTypes = Contract.SupportedActionTypes;
+    private static readonly string[] SealedLegacyDragonMagicEffectEditorIds =
+    [
+        "CAFF_MGEF_RW_DRAGON_RESIST_FIRE",
+        "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
+        "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
+    ];
 
     public static AffixSpec Load(string path)
     {
         var json = File.ReadAllText(path);
         using var rootDoc = JsonDocument.Parse(json);
         ValidateRemovedLegacyLootFields(rootDoc.RootElement);
+        ValidateAppendedRecordJsonShape(rootDoc.RootElement);
 
         var options = new JsonSerializerOptions
         {
@@ -111,6 +118,7 @@ public static class AffixSpecLoader
         ValidateModKey(spec.ModKey);
         ValidateLootPolicy(spec.Loot);
         ValidateSpidRulePolicy(spec.Keywords);
+        ValidateAppendOnlyRecordAllocationContract(spec.Keywords);
 
         if (!spec.ModKey.EndsWith(".esp", StringComparison.OrdinalIgnoreCase) &&
             !spec.ModKey.EndsWith(".esm", StringComparison.OrdinalIgnoreCase) &&
@@ -122,6 +130,7 @@ public static class AffixSpecLoader
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenMagicEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenArtObjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var spellDefinitions = new List<SpellRecordSpec>();
         foreach (var kw in spec.Keywords.Tags)
         {
@@ -212,6 +221,105 @@ public static class AffixSpecLoader
             {
                 throw new InvalidDataException(
                     $"Unknown ActorValue: {magicEffect.ActorValue} (appended MagicEffect: {magicEffect.EditorId})");
+            }
+        }
+
+        foreach (var appendedRecord in spec.Keywords.AppendedRecords)
+        {
+            switch (appendedRecord.Type)
+            {
+                case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null:
+                {
+                    var magicEffect = appendedRecord.MagicEffect;
+                    if (!seenMagicEffects.Add(magicEffect.EditorId))
+                    {
+                        throw new InvalidDataException(
+                            $"Duplicate appended MagicEffect editorId: {magicEffect.EditorId}");
+                    }
+
+                    if (!Enum.TryParse<ActorValue>(magicEffect.ActorValue, ignoreCase: true, out _))
+                    {
+                        throw new InvalidDataException(
+                            $"Unknown ActorValue: {magicEffect.ActorValue} (appended MagicEffect: {magicEffect.EditorId})");
+                    }
+                    break;
+                }
+                case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null:
+                {
+                    var spell = appendedRecord.Spell;
+                    if (!seenSpells.Add(spell.EditorId))
+                    {
+                        throw new InvalidDataException($"Duplicate appended Spell editorId: {spell.EditorId}");
+                    }
+
+                    if (spell.Delivery is not ("Self" or "TargetActor"))
+                    {
+                        throw new InvalidDataException(
+                            $"Unknown Spell delivery: {spell.Delivery} (appended Spell: {spell.EditorId})");
+                    }
+
+                    if (spell.SpellType is not (null or "Spell" or "Ability"))
+                    {
+                        throw new InvalidDataException(
+                            $"Unknown Spell spellType: {spell.SpellType} (appended Spell: {spell.EditorId}). Valid: Spell, Ability.");
+                    }
+
+                    if (spell.CastType is not (null or "FireAndForget" or "ConstantEffect"))
+                    {
+                        throw new InvalidDataException(
+                            $"Unknown Spell castType: {spell.CastType} (appended Spell: {spell.EditorId}). Valid: FireAndForget, ConstantEffect.");
+                    }
+
+                    var effects = spell.ResolveEffects();
+                    if (effects.Count == 0)
+                    {
+                        throw new InvalidDataException(
+                            $"Appended Spell {spell.EditorId} requires at least one effect via effect or effects[].");
+                    }
+
+                    for (var i = 0; i < effects.Count; i += 1)
+                    {
+                        if (string.IsNullOrWhiteSpace(effects[i].MagicEffectEditorId))
+                        {
+                            throw new InvalidDataException(
+                                $"Appended Spell {spell.EditorId} has an empty magicEffectEditorId at effect index {i}.");
+                        }
+                    }
+
+                    spellDefinitions.Add(spell);
+                    break;
+                }
+                case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null:
+                {
+                    var artObject = appendedRecord.ArtObject;
+                    if (!seenArtObjects.Add(artObject.EditorId))
+                    {
+                        throw new InvalidDataException($"Duplicate appended ArtObject editorId: {artObject.EditorId}");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(artObject.EditorId))
+                    {
+                        throw new InvalidDataException("Appended ArtObject requires a non-empty editorId.");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(artObject.ModelPath))
+                    {
+                        throw new InvalidDataException(
+                            $"Appended ArtObject requires a non-empty modelPath (ArtObject: {artObject.EditorId}).");
+                    }
+
+                    if (artObject.ArtType is not "MagicHitEffect")
+                    {
+                        throw new InvalidDataException(
+                            $"Unsupported ArtObject artType: {artObject.ArtType} " +
+                            $"(ArtObject: {artObject.EditorId}). Valid: MagicHitEffect.");
+                    }
+                    break;
+                }
+                default:
+                    throw new InvalidDataException(
+                        "keywords.appendedRecords entries must use type MagicEffect with only magicEffect, " +
+                        "type Spell with only spell, or type ArtObject with only artObject.");
             }
         }
 
@@ -355,6 +463,126 @@ public static class AffixSpecLoader
                 "loot.currencyLeveledListAutoDiscoverDeathItems was removed. " +
                 "Use hybrid policy only (corpse=SPID, container/world=runtime).");
         }
+    }
+
+    private static void ValidateAppendedRecordJsonShape(JsonElement root)
+    {
+        if (!TryGetUniquePropertyIgnoreCase(root, "keywords", out var keywords) ||
+            keywords.ValueKind != JsonValueKind.Object ||
+            !TryGetUniquePropertyIgnoreCase(keywords, "appendedRecords", out var appendedRecords))
+        {
+            return;
+        }
+
+        if (appendedRecords.ValueKind != JsonValueKind.Array)
+        {
+            throw new InvalidDataException("keywords.appendedRecords must be an array.");
+        }
+
+        var index = 0;
+        foreach (var item in appendedRecords.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object)
+            {
+                throw new InvalidDataException($"keywords.appendedRecords[{index}] must be an object.");
+            }
+
+            var seenProperties = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var property in item.EnumerateObject())
+            {
+                if (!seenProperties.Add(property.Name))
+                {
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] contains duplicate property '{property.Name}'.");
+                }
+
+                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject"))
+                {
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] contains unsupported property '{property.Name}'.");
+                }
+            }
+
+            if (!item.TryGetProperty("type", out var typeElement) || typeElement.ValueKind != JsonValueKind.String)
+            {
+                throw new InvalidDataException($"keywords.appendedRecords[{index}].type must be a string.");
+            }
+
+            var type = typeElement.GetString();
+            var hasMagicEffect = item.TryGetProperty("magicEffect", out var magicEffectElement);
+            var hasSpell = item.TryGetProperty("spell", out var spellElement);
+            var hasArtObject = item.TryGetProperty("artObject", out var artObjectElement);
+            switch (type)
+            {
+                case "MagicEffect" when hasMagicEffect && !hasSpell && !hasArtObject && magicEffectElement.ValueKind == JsonValueKind.Object:
+                case "Spell" when hasSpell && !hasMagicEffect && !hasArtObject && spellElement.ValueKind == JsonValueKind.Object:
+                case "ArtObject" when hasArtObject && !hasMagicEffect && !hasSpell && artObjectElement.ValueKind == JsonValueKind.Object:
+                    break;
+                case "MagicEffect":
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] type MagicEffect requires only an object magicEffect payload.");
+                case "Spell":
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] type Spell requires only an object spell payload.");
+                case "ArtObject":
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] type ArtObject requires only an object artObject payload.");
+                default:
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, or ArtObject (got: {type ?? "<null>"}).");
+            }
+
+            index += 1;
+        }
+    }
+
+    internal static void ValidateAppendOnlyRecordAllocationContract(KeywordSpec keywords)
+    {
+        if (keywords.AppendedMagicEffects.Count == 0 && keywords.AppendedRecords.Count == 0)
+        {
+            return;
+        }
+
+        var actualEditorIds = keywords.AppendedMagicEffects.Select(record => record.EditorId).ToArray();
+        if (!actualEditorIds.SequenceEqual(SealedLegacyDragonMagicEffectEditorIds, StringComparer.Ordinal))
+        {
+            throw new InvalidDataException(
+                "keywords.appendedMagicEffects is the sealed v1.4.0 Dragon allocation block and must contain " +
+                "exactly these three EditorIDs in order: " +
+                string.Join(", ", SealedLegacyDragonMagicEffectEditorIds));
+        }
+    }
+
+    private static bool TryGetUniquePropertyIgnoreCase(
+        JsonElement parent,
+        string propertyName,
+        out JsonElement value)
+    {
+        value = default;
+        if (parent.ValueKind != JsonValueKind.Object)
+        {
+            return false;
+        }
+
+        var found = false;
+        foreach (var property in parent.EnumerateObject())
+        {
+            if (!property.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (found)
+            {
+                throw new InvalidDataException(
+                    $"JSON contains multiple case-insensitive matches for property '{propertyName}'.");
+            }
+
+            found = true;
+            value = property.Value;
+        }
+
+        return found;
     }
 
     private static void ValidateRuntimeShape(AffixDefinition affix)

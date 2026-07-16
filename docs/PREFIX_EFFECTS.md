@@ -1,6 +1,6 @@
 # 프리픽스 효과 정리 (공개용)
 
-> 업데이트: 2026-07-13
+> 업데이트: 2026-07-16
 > 기준 버전: `v1.3.0`
 > 기준 코드:
 > - 효과 정의: `affixes/modules/keywords.affixes.core.json`
@@ -372,12 +372,12 @@
 
 ## Thu'um (외침) — 신규
 
-> v1.2.21 신규 추가 — freed slot 활용, 기존 스펠만 참조
+> v1.2.21 신규 추가 — freed slot 활용
 
 - **`voice_of_power`** [Armor]
-  - 한글 표시: 힘의 외침: 피격 시 25% 확률로 무기 공격속도 +15% (4초). 6초마다 발동.
-  - 영문 표시: Voice of Power (25% on hit taken / ICD 6s): Weapon Attack Speed +15% (4s)
-  - 대표 스펠: `CAFF_SPEL_SWAP_JACKPOT_HASTE`
+  - 한글 표시: 힘의 외침: 피격 시 25% 확률로 기력 30 즉시 회복 및 공격력 +15% (5초). 8초마다 발동.
+  - 영문 표시: Voice of Power (25% on hit taken / ICD 8s): Restore 30 Stamina and gain +15% Attack Damage for 5s
+  - 대표 스펠: `CAFF_SPEL_INCOMING_VOICE_POWER`
 
 - **`death_mark`** [Weapon]
   - 한글 표시: 죽음의 표식: 25% 확률로 방어력 -200 (6초). 1초마다 발동. 같은 대상 10초.
@@ -401,7 +401,7 @@
 
 ## 마법학파 — 신규
 
-> v1.2.21 신규 추가 — freed slot 활용, 기존 스펠만 참조
+> v1.2.21 신규 추가 — freed slot 활용
 
 - **`spell_breach`** [Weapon]
   - 한글 표시: 마법 약화: 12% 확률로 마법 저항 감소. 10초마다 발동.

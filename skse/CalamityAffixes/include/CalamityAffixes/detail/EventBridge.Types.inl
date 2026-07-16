@@ -61,6 +61,28 @@
 			kShock,
 		};
 
+		enum class ActionFeedbackTarget : std::uint8_t
+		{
+			kOwner,
+			kTarget,
+		};
+
+		enum class ActionFeedbackPlayOn : std::uint8_t
+		{
+			kNone,
+			kProc,
+			kPassiveAdd,
+		};
+
+		struct ActionFeedback
+		{
+			RE::BGSArtObject* art{ nullptr };
+			RE::BGSSoundDescriptorForm* sound{ nullptr };
+			float durationSeconds{ 0.0f };
+			ActionFeedbackTarget target{ ActionFeedbackTarget::kOwner };
+			ActionFeedbackPlayOn playOn{ ActionFeedbackPlayOn::kNone };
+		};
+
 		// Internal domain structs.
 		//
 		// Action — tagged union discriminated by ActionType.
@@ -99,6 +121,7 @@
 			bool noHitEffectArt{ false };
 			bool debugNotify{ false };
 			bool applyToSelf{ false };
+			ActionFeedback feedback{};
 
 			// CastSpellAdaptiveElement
 			AdaptiveElementMode adaptiveMode{ AdaptiveElementMode::kWeakestResist };
@@ -394,6 +417,7 @@
 			std::string family{};            // suffix family grouping (e.g., "max_health")
 			std::uint8_t weaponSubtypeMask{ 0u };  // 0 = unrestricted; applied only while rolling new weapon suffixes
 			RE::SpellItem* passiveSpell{ nullptr };  // suffix: Ability spell to add/remove on equip
+			bool refreshPassiveSpellOnPostLoad{ false };  // refresh configured desired passives after save-load
 			float critDamageBonusPct{ 0.0f };        // suffix: crit damage bonus (applied in HandleHealthDamage hook)
 			float scrollNoConsumeChancePct{ 0.0f };  // equipped: additive chance to preserve consumed scrolls
 

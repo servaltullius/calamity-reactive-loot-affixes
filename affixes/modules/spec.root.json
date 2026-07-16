@@ -62,6 +62,168 @@
         "hostile": false,
         "recover": true
       }
+    ],
+    "appendedRecords": [
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA",
+          "name": "Calamity: Voice of Power Stamina / 힘의 외침 기력 회복",
+          "actorValue": "Stamina",
+          "hostile": false,
+          "recover": false
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE",
+          "name": "Calamity: Voice of Power Attack Damage / 힘의 외침 공격력",
+          "actorValue": "AttackDamageMult",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_INCOMING_VOICE_POWER",
+          "name": "Calamity: Voice of Power / 힘의 외침",
+          "delivery": "Self",
+          "effects": [
+            {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA",
+              "magnitude": 30,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE",
+              "magnitude": 0.15,
+              "duration": 5,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_SPIRIT_ABSORB_CHANCE",
+          "name": "Calamity: Runeword Spirit Absorb Chance / 룬워드 영혼 주문 흡수",
+          "actorValue": "AbsorbChance",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_SPIRIT_ABSORPTION",
+          "name": "Calamity: Runeword Spirit Absorption / 룬워드 영혼 주문 흡수",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_ABSORB_CHANCE",
+            "magnitude": 10,
+            "duration": 5,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_FURY_RESTORE_STAMINA",
+          "name": "Calamity: Runeword Fury Stamina / 룬워드 분노 기력 회복",
+          "actorValue": "Stamina",
+          "hostile": false,
+          "recover": false
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT",
+          "name": "Calamity: Runeword Wealth Carry Weight / 룬워드 부 소지 무게",
+          "actorValue": "CarryWeight",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT",
+          "name": "Calamity: Runeword Wealth Speechcraft / 룬워드 부 화술",
+          "actorValue": "SpeechcraftModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_WEALTH_PASSIVE",
+          "name": "Calamity: Runeword Wealth Passive / 룬워드 부 패시브",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effects": [
+            {
+              "magicEffectEditorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT",
+              "magnitude": 75,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectEditorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_VOICE_OF_POWER",
+          "modelPath": "Meshes\\Magic\\ShoutSelfAreaEffect01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_SPIRIT_ABSORB",
+          "modelPath": "Meshes\\Magic\\AbsorbSpellHitEffect01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_SMOKE_SLOW",
+          "modelPath": "Meshes\\Actors\\Wisp\\Character Assets\\FXWispParticleAttach.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_FURY_SURGE",
+          "modelPath": "Meshes\\Magic\\IllusionMassRedCastBodyFX.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_WEALTH_PASSIVE",
+          "modelPath": "Meshes\\Magic\\HealRitualCastBodyFX.nif",
+          "artType": "MagicHitEffect"
+        }
+      }
     ]
   }
 }

@@ -74,7 +74,7 @@ _VALID_ACTOR_VALUES: Set[str] = {
     "HealRate", "MagickaRate", "StaminaRate",
     "HealRateMult", "MagickaRateMult", "StaminaRateMult",
     # Combat
-    "AttackDamageMult", "WeaponSpeedMult", "CriticalChance",
+    "AttackDamageMult", "WeaponSpeedMult", "CriticalChance", "AbsorbChance",
     "SpeedMult", "CarryWeight", "BowSpeedBonus",
     "ReflectDamage", "ShoutRecoveryMult",
     # Resistances
@@ -305,6 +305,18 @@ def _lint_spec(
     generated_spells: Set[str] = set()
     spell_refs: List[Tuple[str, str]] = []
     suffix_family_avs: Dict[str, Set[str]] = {}
+
+    appended_records = _as_list(keywords.get("appendedRecords")) or []
+    for idx, raw_record in enumerate(appended_records):
+        record = _as_dict(raw_record)
+        if not record or record.get("type") != "Spell":
+            continue
+        spell = _as_dict(record.get("spell"))
+        if not spell:
+            continue
+        spell_edid = spell.get("editorId")
+        if isinstance(spell_edid, str) and spell_edid.strip():
+            generated_spells.add(spell_edid.strip())
 
     for idx, raw in enumerate(affixes):
         affix = _as_dict(raw)
@@ -695,7 +707,7 @@ def _lint_spec(
         if ref.startswith("CAFF_") and ref not in generated_spells:
             errors.append(
                 f"Missing generated spell for reference '{ref}' ({ctx}). "
-                "Define it under records.spell or records.spells[]."
+                "Define it under records.spell, records.spells[], or keywords.appendedRecords."
             )
 
     # Suffix families must each use exactly one actorValue.

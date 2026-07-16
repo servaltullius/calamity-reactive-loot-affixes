@@ -1644,9 +1644,9 @@
       {
         "id": "voice_of_power",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_25",
-        "name": "\uD798\uC758 \uC678\uCE68: \uD53C\uACA9 \uC2DC 25% \uD655\uB960\uB85C \uBB34\uAE30 \uACF5\uACA9\uC18D\uB3C4 \u002B15% (4\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Voice of Power (25% on hit taken / ICD 6s): Weapon Attack Speed \u002B15% (4s)",
-        "nameKo": "\uD798\uC758 \uC678\uCE68: \uD53C\uACA9 \uC2DC 25% \uD655\uB960\uB85C \uBB34\uAE30 \uACF5\uACA9\uC18D\uB3C4 \u002B15% (4\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uD798\uC758 \uC678\uCE68: \uD53C\uACA9 \uC2DC 25% \uD655\uB960\uB85C \uAE30\uB825 30 \uC989\uC2DC \uD68C\uBCF5 \uBC0F \uACF5\uACA9\uB825 \u002B15% (5\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Voice of Power (25% on hit taken / ICD 8s): Restore 30 Stamina and gain \u002B15% Attack Damage for 5s",
+        "nameKo": "\uD798\uC758 \uC678\uCE68: \uD53C\uACA9 \uC2DC 25% \uD655\uB960\uB85C \uAE30\uB825 30 \uC989\uC2DC \uD68C\uBCF5 \uBC0F \uACF5\uACA9\uB825 \u002B15% (5\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
@@ -1680,13 +1680,20 @@
         "runtime": {
           "trigger": "IncomingHit",
           "procChancePercent": 25,
-          "icdSeconds": 6,
+          "icdSeconds": 8,
           "lootWeight": 1,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
+            "spellEditorId": "CAFF_SPEL_INCOMING_VOICE_POWER",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "feedback": {
+              "artObjectEditorId": "CAFF_ARTO_VFX_VOICE_OF_POWER",
+              "soundForm": "Skyrim.esm|0x000A0F52",
+              "target": "Owner",
+              "durationSeconds": 0.35,
+              "playOn": "Proc"
+            }
           }
         }
       },
@@ -3796,9 +3803,9 @@
       {
         "id": "runeword_spirit_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SPIRIT",
-        "name": "\uB8EC\uC6CC\uB4DC \uC601\uD63C [Tal-Thul-Ort-Amn]: \uC801\uC911 \uC2DC 28% \uD655\uB960\uB85C \uB9C8\uB098 \uD68C\uBCF5 \uAC15\uD654. \uB9C8\uB098 \uC7AC\uC0DD \u002B30. 9\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 9s - Magicka Recovery boost \u002B Magicka Regen \u002B30",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC601\uD63C [Tal-Thul-Ort-Amn]: \uC801\uC911 \uC2DC 28% \uD655\uB960\uB85C \uB9C8\uB098 \uD68C\uBCF5 \uAC15\uD654. \uB9C8\uB098 \uC7AC\uC0DD \u002B30. 9\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC601\uD63C [Tal-Thul-Ort-Amn]: \uC801\uC911 \uC2DC 28% \uD655\uB960\uB85C \uC8FC\uBB38 \uD761\uC218 \uD655\uB960 \u002B10%p (5\uCD08). \uCD5C\uB300 \uB9C8\uB098 \u002B30. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 10s - Absorb Chance \u002B10 points for 5s \u002B Max Magicka \u002B30",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC601\uD63C [Tal-Thul-Ort-Amn]: \uC801\uC911 \uC2DC 28% \uD655\uB960\uB85C \uC8FC\uBB38 \uD761\uC218 \uD655\uB960 \u002B10%p (5\uCD08). \uCD5C\uB300 \uB9C8\uB098 \u002B30. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffects": [
             {
@@ -3810,8 +3817,8 @@
             },
             {
               "editorId": "CAFF_MGEF_RW_SPIRIT_PASSIVE_MPREGEN",
-              "name": "Calamity: Runeword Spirit Passive Magicka Regen / \uB8EC\uC6CC\uB4DC \uC601\uD63C \uB9C8\uB098 \uC7AC\uC0DD",
-              "actorValue": "MagickaRate",
+              "name": "Calamity: Runeword Spirit Passive Max Magicka / \uB8EC\uC6CC\uB4DC \uC601\uD63C \uCD5C\uB300 \uB9C8\uB098",
+              "actorValue": "Magicka",
               "hostile": false,
               "recover": true
             }
@@ -3854,13 +3861,21 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 28,
-          "icdSeconds": 9,
+          "icdSeconds": 10,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_SPIRIT_MEDITATION",
+            "spellEditorId": "CAFF_SPEL_RW_SPIRIT_ABSORPTION",
             "applyTo": "Self",
             "noHitEffectArt": true,
-            "passiveSpellEditorId": "CAFF_SPEL_RW_SPIRIT_PASSIVE"
+            "passiveSpellEditorId": "CAFF_SPEL_RW_SPIRIT_PASSIVE",
+            "refreshPassiveSpellOnPostLoad": true,
+            "feedback": {
+              "artObjectEditorId": "CAFF_ARTO_VFX_SPIRIT_ABSORB",
+              "soundForm": "Skyrim.esm|0x0003D119",
+              "target": "Owner",
+              "durationSeconds": 0.45,
+              "playOn": "Proc"
+            }
           }
         }
       },
@@ -6401,9 +6416,9 @@
       {
         "id": "runeword_fury_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FURY",
-        "name": "\uB8EC\uC6CC\uB4DC \uBD84\uB178 [Jah-Gul-Eth]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uACA9\uB178\uC758 \uD750\uB984(\uACF5\uACA9\uC18D\uB3C4 \u002B15%, 8\uCD08). 3.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 3.5s - Weapon Fury (Attack Speed \u002B15%, 8s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uBD84\uB178 [Jah-Gul-Eth]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uACA9\uB178\uC758 \uD750\uB984(\uACF5\uACA9\uC18D\uB3C4 \u002B15%, 8\uCD08). 3.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uBD84\uB178 [Jah-Gul-Eth]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uACF5\uACA9\uC18D\uB3C4 \u002B25% (6\uCD08) \uBC0F \uAE30\uB825 30 \uC989\uC2DC \uD68C\uBCF5. 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 12s - Attack Speed \u002B25% for 6s and restore 30 Stamina",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uBD84\uB178 [Jah-Gul-Eth]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uACF5\uACA9\uC18D\uB3C4 \u002B25% (6\uCD08) \uBC0F \uAE30\uB825 30 \uC989\uC2DC \uD68C\uBCF5. 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
@@ -6416,12 +6431,20 @@
             "editorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
             "name": "Calamity: Runeword Fury Weapon Fury / \uB8EC\uC6CC\uB4DC \uBD84\uB178 \uACA9\uB178\uC758 \uD750\uB984",
             "delivery": "Self",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
-              "magnitude": 0.15,
-              "duration": 8,
-              "area": 0
-            }
+            "effects": [
+              {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
+                "magnitude": 0.25,
+                "duration": 6,
+                "area": 0
+              },
+              {
+                "magicEffectEditorId": "CAFF_MGEF_RW_FURY_RESTORE_STAMINA",
+                "magnitude": 30,
+                "duration": 0,
+                "area": 0
+              }
+            ]
           }
         },
         "kid": {
@@ -6435,12 +6458,19 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 24,
-          "icdSeconds": 3.5,
+          "icdSeconds": 12,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
             "applyTo": "Self",
-            "noHitEffectArt": true
+            "noHitEffectArt": true,
+            "feedback": {
+              "artObjectEditorId": "CAFF_ARTO_VFX_FURY_SURGE",
+              "soundForm": "Skyrim.esm|0x000A28C4",
+              "target": "Owner",
+              "durationSeconds": 0.45,
+              "playOn": "Proc"
+            }
           }
         }
       },
@@ -7601,24 +7631,24 @@
       {
         "id": "runeword_smoke_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SMOKE",
-        "name": "\uB8EC\uC6CC\uB4DC \uC2A4\uBAA8\uD06C [Nef-Lum]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uC5F0\uB9C9\uC758 \uC774\uB3D9(\uC774\uB3D9\uC18D\uB3C4 \u002B22%, 5\uCD08). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Smoke (Nef-Lum): 22% on hit taken / ICD 12s - Smoke Screen (Move Speed \u002B22%, 5s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC2A4\uBAA8\uD06C [Nef-Lum]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uC5F0\uB9C9\uC758 \uC774\uB3D9(\uC774\uB3D9\uC18D\uB3C4 \u002B22%, 5\uCD08). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC2A4\uBAA8\uD06C [Nef-Lum]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uACF5\uACA9\uC790\uC758 \uC774\uB3D9\uC18D\uB3C4 -30% (5\uCD08). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Smoke (Nef-Lum): 22% on hit taken / ICD 12s - Slow the attacker by 30% for 5s",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC2A4\uBAA8\uD06C [Nef-Lum]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uACF5\uACA9\uC790\uC758 \uC774\uB3D9\uC18D\uB3C4 -30% (5\uCD08). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_SMOKE_SCREEN",
             "name": "Calamity: Runeword Smoke / \uB8EC\uC6CC\uB4DC \uC2A4\uBAA8\uD06C",
             "actorValue": "SpeedMult",
-            "hostile": false,
+            "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_SMOKE_SCREEN",
             "name": "Calamity: Runeword Smoke / \uB8EC\uC6CC\uB4DC \uC2A4\uBAA8\uD06C",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_SMOKE_SCREEN",
-              "magnitude": 22,
+              "magnitude": 30,
               "duration": 5,
               "area": 0
             }
@@ -7639,8 +7669,15 @@
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_SMOKE_SCREEN",
-            "applyTo": "Self",
-            "noHitEffectArt": true
+            "applyTo": "Target",
+            "noHitEffectArt": true,
+            "feedback": {
+              "artObjectEditorId": "CAFF_ARTO_VFX_SMOKE_SLOW",
+              "soundForm": "Skyrim.esm|0x0006A165",
+              "target": "Target",
+              "durationSeconds": 0.75,
+              "playOn": "Proc"
+            }
           }
         }
       },
@@ -7811,9 +7848,9 @@
       {
         "id": "runeword_wealth_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WEALTH",
-        "name": "\uB8EC\uC6CC\uB4DC \uC6F0\uC2A4 [Lem-Ko-Tir]: \uD53C\uACA9 \uC2DC 20% \uD655\uB960\uB85C \uBD80\uC758 \uCD95\uC801(\uC18C\uC9C0\uBB34\uAC8C \u002B100, 15\uCD08). 18\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Wealth (Lem-Ko-Tir): 20% on hit taken / ICD 18s - Wealth (Carry Weight \u002B100, 15s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC6F0\uC2A4 [Lem-Ko-Tir]: \uD53C\uACA9 \uC2DC 20% \uD655\uB960\uB85C \uBD80\uC758 \uCD95\uC801(\uC18C\uC9C0\uBB34\uAC8C \u002B100, 15\uCD08). 18\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC6F0\uC2A4 [Lem-Ko-Tir]: \uC0C1\uC2DC \uC18C\uC9C0 \uBB34\uAC8C \u002B75 \uBC0F \uD654\uC220 \u002B15.",
+        "nameEn": "Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight \u002B75 and Speechcraft \u002B15",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC6F0\uC2A4 [Lem-Ko-Tir]: \uC0C1\uC2DC \uC18C\uC9C0 \uBB34\uAC8C \u002B75 \uBC0F \uD654\uC220 \u002B15.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WEALTH_VIGOR",
@@ -7843,14 +7880,18 @@
         },
         "slot": "prefix",
         "runtime": {
-          "trigger": "IncomingHit",
-          "procChancePercent": 20,
-          "icdSeconds": 18,
+          "trigger": "Hit",
+          "procChancePercent": 0,
           "action": {
-            "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_WEALTH_VIGOR",
-            "applyTo": "Self",
-            "noHitEffectArt": true
+            "type": "DebugNotify",
+            "passiveSpellEditorId": "CAFF_SPEL_RW_WEALTH_PASSIVE",
+            "feedback": {
+              "artObjectEditorId": "CAFF_ARTO_VFX_WEALTH_PASSIVE",
+              "soundForm": "Skyrim.esm|0x0003E952",
+              "target": "Owner",
+              "durationSeconds": 0.6,
+              "playOn": "PassiveAdd"
+            }
           }
         }
       },
@@ -11787,6 +11828,168 @@
         "actorValue": "ResistShock",
         "hostile": false,
         "recover": true
+      }
+    ],
+    "appendedRecords": [
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA",
+          "name": "Calamity: Voice of Power Stamina / \uD798\uC758 \uC678\uCE68 \uAE30\uB825 \uD68C\uBCF5",
+          "actorValue": "Stamina",
+          "hostile": false,
+          "recover": false
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE",
+          "name": "Calamity: Voice of Power Attack Damage / \uD798\uC758 \uC678\uCE68 \uACF5\uACA9\uB825",
+          "actorValue": "AttackDamageMult",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_INCOMING_VOICE_POWER",
+          "name": "Calamity: Voice of Power / \uD798\uC758 \uC678\uCE68",
+          "delivery": "Self",
+          "effects": [
+            {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA",
+              "magnitude": 30,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectEditorId": "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE",
+              "magnitude": 0.15,
+              "duration": 5,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_SPIRIT_ABSORB_CHANCE",
+          "name": "Calamity: Runeword Spirit Absorb Chance / \uB8EC\uC6CC\uB4DC \uC601\uD63C \uC8FC\uBB38 \uD761\uC218",
+          "actorValue": "AbsorbChance",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_SPIRIT_ABSORPTION",
+          "name": "Calamity: Runeword Spirit Absorption / \uB8EC\uC6CC\uB4DC \uC601\uD63C \uC8FC\uBB38 \uD761\uC218",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_SPIRIT_ABSORB_CHANCE",
+            "magnitude": 10,
+            "duration": 5,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_FURY_RESTORE_STAMINA",
+          "name": "Calamity: Runeword Fury Stamina / \uB8EC\uC6CC\uB4DC \uBD84\uB178 \uAE30\uB825 \uD68C\uBCF5",
+          "actorValue": "Stamina",
+          "hostile": false,
+          "recover": false
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT",
+          "name": "Calamity: Runeword Wealth Carry Weight / \uB8EC\uC6CC\uB4DC \uBD80 \uC18C\uC9C0 \uBB34\uAC8C",
+          "actorValue": "CarryWeight",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT",
+          "name": "Calamity: Runeword Wealth Speechcraft / \uB8EC\uC6CC\uB4DC \uBD80 \uD654\uC220",
+          "actorValue": "SpeechcraftModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_WEALTH_PASSIVE",
+          "name": "Calamity: Runeword Wealth Passive / \uB8EC\uC6CC\uB4DC \uBD80 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effects": [
+            {
+              "magicEffectEditorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT",
+              "magnitude": 75,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectEditorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_VOICE_OF_POWER",
+          "modelPath": "Meshes\\Magic\\ShoutSelfAreaEffect01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_SPIRIT_ABSORB",
+          "modelPath": "Meshes\\Magic\\AbsorbSpellHitEffect01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_SMOKE_SLOW",
+          "modelPath": "Meshes\\Actors\\Wisp\\Character Assets\\FXWispParticleAttach.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_FURY_SURGE",
+          "modelPath": "Meshes\\Magic\\IllusionMassRedCastBodyFX.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_WEALTH_PASSIVE",
+          "modelPath": "Meshes\\Magic\\HealRitualCastBodyFX.nif",
+          "artType": "MagicHitEffect"
+        }
       }
     ]
   }

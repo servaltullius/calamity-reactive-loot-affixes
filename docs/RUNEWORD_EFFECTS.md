@@ -1,6 +1,6 @@
 # 룬워드 효과 정리 (공개용)
 
-> 업데이트: 2026-07-13
+> 업데이트: 2026-07-16
 > 기준 버전: `v1.3.0`
 > 기준 코드: `affixes/modules/keywords.affixes.runewords.json`
 > 룬 조합 기준: `affixes/runeword.contract.json`
@@ -103,8 +103,8 @@
 
 - 룬 조합: `Tal-Thul-Ort-Amn`
 - 추천 베이스: None
-- 한글 표시: 룬워드 영혼 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 마나 회복 강화. 마나 재생 +30. 9초마다 발동.
-- 영문 표시: Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 9s - Magicka Recovery boost + Magicka Regen +30
+- 한글 표시: 룬워드 영혼 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 주문 흡수 확률 +10%p (5초). 최대 마나 +30. 10초마다 발동.
+- 영문 표시: Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 10s - Absorb Chance +10 points for 5s + Max Magicka +30
 
 ### Honor
 
@@ -208,8 +208,8 @@
 
 - 룬 조합: `Nef-Lum`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 스모크 [Nef-Lum]: 피격 시 22% 확률로 연막의 이동(이동속도 +22%, 5초). 12초마다 발동.
-- 영문 표시: Runeword Smoke (Nef-Lum): 22% on hit taken / ICD 12s - Smoke Screen (Move Speed +22%, 5s)
+- 한글 표시: 룬워드 스모크 [Nef-Lum]: 피격 시 22% 확률로 공격자의 이동속도 -30% (5초). 12초마다 발동.
+- 영문 표시: Runeword Smoke (Nef-Lum): 22% on hit taken / ICD 12s - Slow the attacker by 30% for 5s
 
 ### Splendor
 
@@ -271,8 +271,8 @@
 
 - 룬 조합: `Lem-Ko-Tir`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 웰스 [Lem-Ko-Tir]: 피격 시 20% 확률로 부의 축적(소지무게 +100, 15초). 18초마다 발동.
-- 영문 표시: Runeword Wealth (Lem-Ko-Tir): 20% on hit taken / ICD 18s - Wealth (Carry Weight +100, 15s)
+- 한글 표시: 룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 화술 +15.
+- 영문 표시: Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight +75 and Speechcraft +15
 
 ### Passion
 
@@ -544,8 +544,8 @@
 
 - 룬 조합: `Jah-Gul-Eth`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 분노 [Jah-Gul-Eth]: 적중 시 24% 확률로 격노의 흐름(공격속도 +15%, 8초). 3.5초마다 발동.
-- 영문 표시: Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 3.5s - Weapon Fury (Attack Speed +15%, 8s)
+- 한글 표시: 룬워드 분노 [Jah-Gul-Eth]: 적중 시 24% 확률로 공격속도 +25% (6초) 및 기력 30 즉시 회복. 12초마다 발동.
+- 영문 표시: Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 12s - Attack Speed +25% for 6s and restore 30 Stamina
 
 ### Enigma
 

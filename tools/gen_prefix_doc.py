@@ -173,7 +173,7 @@ def main():
         out.append(f"## {cat}")
         if "신규" in cat:
             out.append("")
-            out.append("> v1.2.21 신규 추가 — freed slot 활용, 기존 스펠만 참조")
+            out.append("> v1.2.21 신규 추가 — freed slot 활용")
         out.append("")
         for idx, e in cats[cat]:
             out.append(format_entry(idx, e))

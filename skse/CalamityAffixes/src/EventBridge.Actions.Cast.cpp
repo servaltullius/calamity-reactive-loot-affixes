@@ -247,6 +247,7 @@ namespace CalamityAffixes
 			false,
 			magnitudeOverride,
 			caster);
+		PlayActionFeedback(a_action, a_owner, a_target, ActionFeedbackPlayOn::kProc);
 	}
 
 	void EventBridge::ExecuteCastSpellAdaptiveElementAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
@@ -332,5 +333,6 @@ namespace CalamityAffixes
 			false,
 			magnitudeOverride,
 			caster);
+		PlayActionFeedback(a_action, a_owner, a_target, ActionFeedbackPlayOn::kProc);
 	}
 }

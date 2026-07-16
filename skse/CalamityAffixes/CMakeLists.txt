@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 1.4.0 LANGUAGES CXX)
+project(CalamityAffixes VERSION 1.5.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -108,6 +108,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Actions.cpp
 	    src/EventBridge.Actions.Dispatch.cpp
 	    src/EventBridge.Actions.Cast.cpp
+	    src/EventBridge.Actions.Feedback.cpp
 	    src/EventBridge.Actions.Trap.cpp
 	    src/EventBridge.Actions.Special.cpp
 	    src/EventBridge.Actions.Archmage.cpp

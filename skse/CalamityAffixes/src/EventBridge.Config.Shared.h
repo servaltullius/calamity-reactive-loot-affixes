@@ -61,7 +61,8 @@ namespace CalamityAffixes::ConfigShared
 		}
 	}
 
-	inline RE::SpellItem* LookupSpellFromSpec(std::string_view a_spec, RE::TESDataHandler* a_handler)
+	template <class T>
+	inline T* LookupFormFromSpec(std::string_view a_spec, RE::TESDataHandler* a_handler)
 	{
 		const auto text = Trim(a_spec);
 		if (text.empty()) {
@@ -70,7 +71,7 @@ namespace CalamityAffixes::ConfigShared
 
 		const auto pipe = text.find('|');
 		if (pipe == std::string_view::npos) {
-			return RE::TESForm::LookupByEditorID<RE::SpellItem>(std::string(text));
+			return RE::TESForm::LookupByEditorID<T>(std::string(text));
 		}
 
 		if (!a_handler) {
@@ -92,6 +93,11 @@ namespace CalamityAffixes::ConfigShared
 			return nullptr;
 		}
 
-		return a_handler->LookupForm<RE::SpellItem>(static_cast<RE::FormID>(localID), modName);
+		return a_handler->LookupForm<T>(static_cast<RE::FormID>(localID), modName);
+	}
+
+	inline RE::SpellItem* LookupSpellFromSpec(std::string_view a_spec, RE::TESDataHandler* a_handler)
+	{
+		return LookupFormFromSpec<RE::SpellItem>(a_spec, a_handler);
 	}
 }

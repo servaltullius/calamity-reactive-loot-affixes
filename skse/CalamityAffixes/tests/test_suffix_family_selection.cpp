@@ -47,11 +47,15 @@ static_assert(SelectAssassinCritDamageBonus(2u, 0u, 0u) == 10.0f);
 static_assert(SelectAssassinCritDamageBonus(1u, 1u, 0u) == 20.0f);
 static_assert(SelectAssassinCritDamageBonus(0u, 1u, 1u) == 30.0f);
 
-static_assert(ResolvePassiveSpellReconcileAction(false, true, false) ==
+static_assert(ResolvePassiveSpellReconcileAction(false, true, false, false) ==
 	PassiveSpellReconcileAction::kRemove);
-static_assert(ResolvePassiveSpellReconcileAction(true, false, false) ==
+static_assert(ResolvePassiveSpellReconcileAction(true, false, false, false) ==
 	PassiveSpellReconcileAction::kAdd);
-static_assert(ResolvePassiveSpellReconcileAction(true, true, false) ==
+static_assert(ResolvePassiveSpellReconcileAction(true, true, false, false) ==
 	PassiveSpellReconcileAction::kKeep);
-static_assert(ResolvePassiveSpellReconcileAction(true, true, true) ==
+static_assert(ResolvePassiveSpellReconcileAction(true, true, true, true) ==
+	PassiveSpellReconcileAction::kRemove);
+static_assert(ResolvePassiveSpellReconcileAction(true, true, false, true) ==
+	PassiveSpellReconcileAction::kRefresh);
+static_assert(ResolvePassiveSpellReconcileAction(false, true, false, true) ==
 	PassiveSpellReconcileAction::kRemove);

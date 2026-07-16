@@ -1582,9 +1582,9 @@
   {
     "id": "voice_of_power",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_25",
-    "name": "힘의 외침: 피격 시 25% 확률로 무기 공격속도 +15% (4초). 6초마다 발동.",
-    "nameEn": "Voice of Power (25% on hit taken / ICD 6s): Weapon Attack Speed +15% (4s)",
-    "nameKo": "힘의 외침: 피격 시 25% 확률로 무기 공격속도 +15% (4초). 6초마다 발동.",
+    "name": "힘의 외침: 피격 시 25% 확률로 기력 30 즉시 회복 및 공격력 +15% (5초). 8초마다 발동.",
+    "nameEn": "Voice of Power (25% on hit taken / ICD 8s): Restore 30 Stamina and gain +15% Attack Damage for 5s",
+    "nameKo": "힘의 외침: 피격 시 25% 확률로 기력 30 즉시 회복 및 공격력 +15% (5초). 8초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
@@ -1616,12 +1616,19 @@
     "runtime": {
       "trigger": "IncomingHit",
       "procChancePercent": 25.0,
-      "icdSeconds": 6.0,
+      "icdSeconds": 8.0,
       "action": {
         "type": "CastSpell",
-        "spellEditorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
+        "spellEditorId": "CAFF_SPEL_INCOMING_VOICE_POWER",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": {
+          "artObjectEditorId": "CAFF_ARTO_VFX_VOICE_OF_POWER",
+          "soundForm": "Skyrim.esm|0x000A0F52",
+          "target": "Owner",
+          "durationSeconds": 0.35,
+          "playOn": "Proc"
+        }
       },
       "lootWeight": 1.0
     },

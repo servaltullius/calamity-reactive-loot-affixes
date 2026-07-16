@@ -1,8 +1,11 @@
+using System.Globalization;
 using System.Text.Json;
 using CalamityAffixes.Generator.Spec;
 using CalamityAffixes.Generator.Writers;
+using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 
 namespace CalamityAffixes.Generator.Tests;
 
@@ -45,6 +48,88 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
+    public void RepoSpec_GeneratedEffectRecordsMatchApprovedSemantics()
+    {
+        var repoRoot = FindRepoRoot();
+        var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
+        var mod = KeywordPluginBuilder.Build(spec);
+
+        MagicEffect MagicEffectById(string editorId) =>
+            Assert.Single(mod.MagicEffects, record => record.EditorID == editorId);
+        Spell SpellById(string editorId) =>
+            Assert.Single(mod.Spells, record => record.EditorID == editorId);
+        string EffectEditorId(Effect effect) =>
+            mod.MagicEffects.Single(record => record.FormKey == effect.BaseEffect.FormKey).EditorID!;
+        void AssertActorValue(MagicEffect magicEffect, ActorValue actorValue)
+        {
+            var archetype = Assert.IsType<MagicEffectArchetype>(magicEffect.Archetype);
+            Assert.Equal(MagicEffectArchetype.TypeEnum.ValueModifier, archetype.Type);
+            Assert.Equal(actorValue, archetype.ActorValue);
+        }
+        void AssertSpellEffect(Effect effect, string magicEffectEditorId, float magnitude, int duration)
+        {
+            Assert.Equal(magicEffectEditorId, EffectEditorId(effect));
+            Assert.NotNull(effect.Data);
+            Assert.Equal(magnitude, effect.Data!.Magnitude);
+            Assert.Equal(duration, effect.Data.Duration);
+            Assert.Equal(0, effect.Data.Area);
+        }
+
+        var voiceSpell = SpellById("CAFF_SPEL_INCOMING_VOICE_POWER");
+        Assert.Equal(SpellType.Spell, voiceSpell.Type);
+        Assert.Equal(CastType.FireAndForget, voiceSpell.CastType);
+        Assert.Equal(TargetType.Self, voiceSpell.TargetType);
+        Assert.Equal(2, voiceSpell.Effects.Count);
+        AssertSpellEffect(voiceSpell.Effects[0], "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA", 30.0f, 0);
+        AssertSpellEffect(voiceSpell.Effects[1], "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE", 0.15f, 5);
+
+        var spiritOldEffect = MagicEffectById("CAFF_MGEF_RW_SPIRIT_MEDITATION");
+        AssertActorValue(spiritOldEffect, ActorValue.MagickaRateMult);
+        var spiritOldSpell = SpellById("CAFF_SPEL_RW_SPIRIT_MEDITATION");
+        AssertSpellEffect(Assert.Single(spiritOldSpell.Effects), "CAFF_MGEF_RW_SPIRIT_MEDITATION", 120.0f, 10);
+        var spiritPassiveEffect = MagicEffectById("CAFF_MGEF_RW_SPIRIT_PASSIVE_MPREGEN");
+        AssertActorValue(spiritPassiveEffect, ActorValue.Magicka);
+        var spiritPassiveSpell = SpellById("CAFF_SPEL_RW_SPIRIT_PASSIVE");
+        Assert.Equal(SpellType.Ability, spiritPassiveSpell.Type);
+        Assert.Equal(CastType.ConstantEffect, spiritPassiveSpell.CastType);
+        AssertSpellEffect(Assert.Single(spiritPassiveSpell.Effects), "CAFF_MGEF_RW_SPIRIT_PASSIVE_MPREGEN", 30.0f, 0);
+        var spiritAbsorbEffect = MagicEffectById("CAFF_MGEF_RW_SPIRIT_ABSORB_CHANCE");
+        AssertActorValue(spiritAbsorbEffect, ActorValue.AbsorbChance);
+        Assert.True(spiritAbsorbEffect.Flags.HasFlag(MagicEffect.Flag.Recover));
+        Assert.False(spiritAbsorbEffect.Flags.HasFlag(MagicEffect.Flag.Hostile));
+        var spiritAbsorbSpell = SpellById("CAFF_SPEL_RW_SPIRIT_ABSORPTION");
+        AssertSpellEffect(Assert.Single(spiritAbsorbSpell.Effects), "CAFF_MGEF_RW_SPIRIT_ABSORB_CHANCE", 10.0f, 5);
+
+        var smokeEffect = MagicEffectById("CAFF_MGEF_RW_SMOKE_SCREEN");
+        AssertActorValue(smokeEffect, ActorValue.SpeedMult);
+        Assert.True(smokeEffect.Flags.HasFlag(MagicEffect.Flag.Hostile));
+        Assert.True(smokeEffect.Flags.HasFlag(MagicEffect.Flag.Detrimental));
+        Assert.True(smokeEffect.Flags.HasFlag(MagicEffect.Flag.Recover));
+        var smokeSpell = SpellById("CAFF_SPEL_RW_SMOKE_SCREEN");
+        Assert.Equal(TargetType.TargetActor, smokeSpell.TargetType);
+        AssertSpellEffect(Assert.Single(smokeSpell.Effects), "CAFF_MGEF_RW_SMOKE_SCREEN", 30.0f, 5);
+
+        var furyEffect = MagicEffectById("CAFF_MGEF_RW_FURY_LIFESTEAL");
+        AssertActorValue(furyEffect, ActorValue.WeaponSpeedMult);
+        var furySpell = SpellById("CAFF_SPEL_RW_FURY_LIFESTEAL");
+        Assert.Equal(2, furySpell.Effects.Count);
+        AssertSpellEffect(furySpell.Effects[0], "CAFF_MGEF_RW_FURY_LIFESTEAL", 0.25f, 6);
+        AssertSpellEffect(furySpell.Effects[1], "CAFF_MGEF_RW_FURY_RESTORE_STAMINA", 30.0f, 0);
+
+        var wealthOldEffect = MagicEffectById("CAFF_MGEF_RW_WEALTH_VIGOR");
+        AssertActorValue(wealthOldEffect, ActorValue.CarryWeight);
+        var wealthOldSpell = SpellById("CAFF_SPEL_RW_WEALTH_VIGOR");
+        AssertSpellEffect(Assert.Single(wealthOldSpell.Effects), "CAFF_MGEF_RW_WEALTH_VIGOR", 100.0f, 15);
+        var wealthPassiveSpell = SpellById("CAFF_SPEL_RW_WEALTH_PASSIVE");
+        Assert.Equal(SpellType.Ability, wealthPassiveSpell.Type);
+        Assert.Equal(CastType.ConstantEffect, wealthPassiveSpell.CastType);
+        Assert.Equal(TargetType.Self, wealthPassiveSpell.TargetType);
+        Assert.Equal(2, wealthPassiveSpell.Effects.Count);
+        AssertSpellEffect(wealthPassiveSpell.Effects[0], "CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT", 75.0f, 0);
+        AssertSpellEffect(wealthPassiveSpell.Effects[1], "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT", 15.0f, 0);
+    }
+
+    [Fact]
     public void RepoSpec_DisablesGenericSpidCurrencyDistribution()
     {
         var repoRoot = FindRepoRoot();
@@ -59,29 +144,148 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RepoSpec_AppendOnlyDragonEffectsPreserveExisting730RecordAllocation()
+    public void FrozenV140AllocationFixture_IsSealedAndSelfConsistent()
+    {
+        var repoRoot = FindRepoRoot();
+        var fixture = ReadV140AllocationFixture(repoRoot);
+
+        Assert.Equal(1, fixture.FixtureVersion);
+        Assert.Equal("Data/CalamityAffixes.esp", fixture.SourcePlugin);
+        Assert.Equal("v1.4.0", fixture.ReleaseTag);
+        Assert.Equal("c5845765e7af5d13804476785db0204c08e2397e", fixture.Commit);
+        Assert.Equal("Mutagen.Bethesda.Skyrim", fixture.GeneratorPackage);
+        Assert.Equal("0.52.0", fixture.GeneratorVersion);
+        Assert.Equal("85e62c696c2635a6b0adaf4402df44e5593569bd217da706a8588b4a48b4a655", fixture.SourceEspSha256);
+        Assert.Equal(733, fixture.MajorRecordCount);
+        Assert.Equal(733, fixture.Records.Length);
+        Assert.Equal(0x000ADDu, fixture.NextObjectId);
+        Assert.Equal(new AllocationRecord(0x000800u, "QUST", "CalamityAffixes_MCM"), fixture.Records[0]);
+        Assert.Equal(
+            new AllocationRecord(0x000ADCu, "MGEF", "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK"),
+            fixture.Records[^1]);
+        Assert.Equal(
+            Enumerable.Range(0x000800, fixture.Records.Length).Select(value => (uint)value),
+            fixture.Records.Select(record => record.FormId));
+        Assert.Equal(fixture.Records.Length, fixture.Records.Select(record => record.FormId).Distinct().Count());
+        Assert.Equal(
+            fixture.Records.Length,
+            fixture.Records.Select(record => record.EditorId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
+    [Fact]
+    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFourteenTypedRecords()
+    {
+        var repoRoot = FindRepoRoot();
+        var fixture = ReadV140AllocationFixture(repoRoot);
+        var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
+        var mod = KeywordPluginBuilder.Build(spec);
+        var actual = AllocationSignature(mod);
+
+        Assert.Equal(747, actual.Length);
+        Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
+        Assert.Equal(
+            new[]
+            {
+                new AllocationRecord(0x000ADDu, "MGEF", "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA"),
+                new AllocationRecord(0x000ADEu, "MGEF", "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE"),
+                new AllocationRecord(0x000ADFu, "SPEL", "CAFF_SPEL_INCOMING_VOICE_POWER"),
+                new AllocationRecord(0x000AE0u, "MGEF", "CAFF_MGEF_RW_SPIRIT_ABSORB_CHANCE"),
+                new AllocationRecord(0x000AE1u, "SPEL", "CAFF_SPEL_RW_SPIRIT_ABSORPTION"),
+                new AllocationRecord(0x000AE2u, "MGEF", "CAFF_MGEF_RW_FURY_RESTORE_STAMINA"),
+                new AllocationRecord(0x000AE3u, "MGEF", "CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT"),
+                new AllocationRecord(0x000AE4u, "MGEF", "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT"),
+                new AllocationRecord(0x000AE5u, "SPEL", "CAFF_SPEL_RW_WEALTH_PASSIVE"),
+                new AllocationRecord(0x000AE6u, "ARTO", "CAFF_ARTO_VFX_VOICE_OF_POWER"),
+                new AllocationRecord(0x000AE7u, "ARTO", "CAFF_ARTO_VFX_SPIRIT_ABSORB"),
+                new AllocationRecord(0x000AE8u, "ARTO", "CAFF_ARTO_VFX_SMOKE_SLOW"),
+                new AllocationRecord(0x000AE9u, "ARTO", "CAFF_ARTO_VFX_FURY_SURGE"),
+                new AllocationRecord(0x000AEAu, "ARTO", "CAFF_ARTO_VFX_WEALTH_PASSIVE"),
+            },
+            actual.TakeLast(14));
+        Assert.True(mod.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
+        Assert.Equal(0x000AEBu, ((IModGetter)mod).NextFormID);
+        Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
+        Assert.Equal(
+            actual.Length,
+            actual.Select(record => record.EditorId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
+    [Fact]
+    public void RepoSpec_ExportReimportPreservesFrozenPrefixAndTypedTail()
+    {
+        var repoRoot = FindRepoRoot();
+        var fixture = ReadV140AllocationFixture(repoRoot);
+        var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
+        var generated = KeywordPluginBuilder.Build(spec);
+        var generatedAllocation = AllocationSignature(generated);
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        var pluginPath = Path.Combine(tempRoot, spec.ModKey);
+        Directory.CreateDirectory(tempRoot);
+
+        try
+        {
+            ((IModGetter)generated).WriteToBinary(new FilePath(pluginPath));
+            using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
+            var reimportedAllocation = AllocationSignature(reimported);
+
+            Assert.Equal(747, generatedAllocation.Length);
+            Assert.Equal(generatedAllocation, reimportedAllocation);
+            Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
+            Assert.Equal(generatedAllocation.TakeLast(14), reimportedAllocation.TakeLast(14));
+            Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
+            Assert.Equal(0x000AEBu, reimported.NextFormID);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void GeneratedDataEsp_PreservesFrozenPrefixAndTypedTail()
+    {
+        var repoRoot = FindRepoRoot();
+        var fixture = ReadV140AllocationFixture(repoRoot);
+        var pluginPath = Path.Combine(repoRoot, "Data", "CalamityAffixes.esp");
+        using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
+        var actual = AllocationSignature(mod);
+
+        Assert.Equal(747, actual.Length);
+        Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
+        Assert.Equal(
+            new[]
+            {
+                new AllocationRecord(0x000ADDu, "MGEF", "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA"),
+                new AllocationRecord(0x000ADEu, "MGEF", "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE"),
+                new AllocationRecord(0x000ADFu, "SPEL", "CAFF_SPEL_INCOMING_VOICE_POWER"),
+                new AllocationRecord(0x000AE0u, "MGEF", "CAFF_MGEF_RW_SPIRIT_ABSORB_CHANCE"),
+                new AllocationRecord(0x000AE1u, "SPEL", "CAFF_SPEL_RW_SPIRIT_ABSORPTION"),
+                new AllocationRecord(0x000AE2u, "MGEF", "CAFF_MGEF_RW_FURY_RESTORE_STAMINA"),
+                new AllocationRecord(0x000AE3u, "MGEF", "CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT"),
+                new AllocationRecord(0x000AE4u, "MGEF", "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT"),
+                new AllocationRecord(0x000AE5u, "SPEL", "CAFF_SPEL_RW_WEALTH_PASSIVE"),
+                new AllocationRecord(0x000AE6u, "ARTO", "CAFF_ARTO_VFX_VOICE_OF_POWER"),
+                new AllocationRecord(0x000AE7u, "ARTO", "CAFF_ARTO_VFX_SPIRIT_ABSORB"),
+                new AllocationRecord(0x000AE8u, "ARTO", "CAFF_ARTO_VFX_SMOKE_SLOW"),
+                new AllocationRecord(0x000AE9u, "ARTO", "CAFF_ARTO_VFX_FURY_SURGE"),
+                new AllocationRecord(0x000AEAu, "ARTO", "CAFF_ARTO_VFX_WEALTH_PASSIVE"),
+            },
+            actual.TakeLast(14));
+        Assert.True(mod.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
+        Assert.Equal(0x000AEBu, mod.NextFormID);
+        Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
+        Assert.Equal(
+            actual.Length,
+            actual.Select(record => record.EditorId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
+    [Fact]
+    public void RepoSpec_LegacyDragonAppendArrayIsSealedToThreeRecords()
     {
         var repoRoot = FindRepoRoot();
         var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
 
-        var baselineMod = KeywordPluginBuilder.BuildRecordAllocationSnapshot(
-            spec,
-            includeAppendedMagicEffects: false);
-        var expandedMod = KeywordPluginBuilder.BuildRecordAllocationSnapshot(
-            spec,
-            includeAppendedMagicEffects: true);
-        var baseline = AllocationSignature(baselineMod);
-        var expanded = AllocationSignature(expandedMod);
-
-        Assert.Equal(730, baseline.Length);
-        Assert.Equal(733, expanded.Length);
-        Assert.Equal(baseline, expanded.Take(baseline.Length));
-
-        var appendedEditorIds = expandedMod.MagicEffects
-            .OrderBy(effect => effect.FormKey.ID)
-            .TakeLast(3)
-            .Select(effect => effect.EditorID)
-            .ToArray();
+        Assert.Equal(3, spec.Keywords.AppendedMagicEffects.Count);
         Assert.Equal(
             new[]
             {
@@ -89,7 +293,7 @@ public sealed class RepoSpecRegressionTests
                 "CAFF_MGEF_RW_DRAGON_RESIST_FROST",
                 "CAFF_MGEF_RW_DRAGON_RESIST_SHOCK",
             },
-            appendedEditorIds);
+            spec.Keywords.AppendedMagicEffects.Select(effect => effect.EditorId));
     }
 
     [Fact]
@@ -1110,18 +1314,98 @@ public sealed class RepoSpecRegressionTests
             string.Join(", ", offenders));
     }
 
-    private static (uint FormId, string RecordType, string? EditorId)[] AllocationSignature(SkyrimMod mod)
+    private static AllocationRecord[] AllocationSignature(IModGetter mod)
     {
         return mod
             .EnumerateMajorRecords()
             .OrderBy(record => record.FormKey.ID)
-            .Select(record =>
-            {
-                var editorId = record.GetType().GetProperty("EditorID")?.GetValue(record) as string;
-                return (record.FormKey.ID, record.GetType().Name, editorId);
-            })
+            .Select(record => new AllocationRecord(
+                record.FormKey.ID,
+                RecordSignature(record),
+                RecordEditorId(record)))
             .ToArray();
     }
+
+    private static string RecordSignature(IMajorRecordGetter record) => record switch
+    {
+        IQuestGetter => "QUST",
+        IMiscItemGetter => "MISC",
+        IKeywordGetter => "KYWD",
+        IMagicEffectGetter => "MGEF",
+        ISpellGetter => "SPEL",
+        IArtObjectGetter => "ARTO",
+        ILeveledItemGetter => "LVLI",
+        _ => throw new InvalidDataException($"Unsupported allocation fixture record type: {record.GetType().Name}"),
+    };
+
+    private static string RecordEditorId(IMajorRecordGetter record) => record switch
+    {
+        IQuestGetter value => value.EditorID,
+        IMiscItemGetter value => value.EditorID,
+        IKeywordGetter value => value.EditorID,
+        IMagicEffectGetter value => value.EditorID,
+        ISpellGetter value => value.EditorID,
+        IArtObjectGetter value => value.EditorID,
+        ILeveledItemGetter value => value.EditorID,
+        _ => throw new InvalidDataException($"Unsupported allocation fixture record type: {record.GetType().Name}"),
+    } ?? throw new InvalidDataException($"Record {record.FormKey} is missing EditorID.");
+
+    private static AllocationFixture ReadV140AllocationFixture(string repoRoot)
+    {
+        var fixturePath = Path.Combine(
+            repoRoot,
+            "tools",
+            "CalamityAffixes.Generator.Tests",
+            "Fixtures",
+            "v1.4.0-c584576-allocation.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(fixturePath));
+        var fixtureVersion = document.RootElement.GetProperty("fixtureVersion").GetInt32();
+        var source = document.RootElement.GetProperty("source");
+        var records = document.RootElement.GetProperty("records")
+            .EnumerateArray()
+            .Select(record => new AllocationRecord(
+                ParseLocalFormId(record.GetProperty("localFormId").GetString()),
+                record.GetProperty("signature").GetString()!,
+                record.GetProperty("editorId").GetString()!))
+            .ToArray();
+
+        return new AllocationFixture(
+            fixtureVersion,
+            source.GetProperty("plugin").GetString()!,
+            source.GetProperty("releaseTag").GetString()!,
+            source.GetProperty("commit").GetString()!,
+            source.GetProperty("generatorPackage").GetString()!,
+            source.GetProperty("generatorVersion").GetString()!,
+            source.GetProperty("sourceEspSha256").GetString()!,
+            source.GetProperty("majorRecordCount").GetInt32(),
+            ParseLocalFormId(source.GetProperty("nextObjectId").GetString()),
+            records);
+    }
+
+    private static uint ParseLocalFormId(string? value)
+    {
+        if (value is null || !value.StartsWith("0x", StringComparison.Ordinal) ||
+            !uint.TryParse(value.AsSpan(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var parsed))
+        {
+            throw new InvalidDataException($"Invalid local FormID in allocation fixture: {value ?? "<null>"}");
+        }
+
+        return parsed;
+    }
+
+    private sealed record AllocationFixture(
+        int FixtureVersion,
+        string SourcePlugin,
+        string ReleaseTag,
+        string Commit,
+        string GeneratorPackage,
+        string GeneratorVersion,
+        string SourceEspSha256,
+        int MajorRecordCount,
+        uint NextObjectId,
+        AllocationRecord[] Records);
+
+    private sealed record AllocationRecord(uint FormId, string RecordType, string EditorId);
 
     private static string FindRepoRoot()
     {

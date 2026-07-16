@@ -510,7 +510,28 @@ namespace CalamityAffixes
 			}
 		};
 
+		auto isPassiveOnlySentinel = [](const AffixRuntime& a_affix) noexcept {
+			return a_affix.procChancePct <= 0.0f &&
+			       a_affix.action.type == ActionType::kDebugNotify &&
+			       a_affix.passiveSpell != nullptr;
+		};
+		auto passiveEffectName = [&](const AffixRuntime& a_affix, bool a_korean) {
+			const auto& localizedName = a_korean ? a_affix.displayNameKo : a_affix.displayNameEn;
+			if (!localizedName.empty()) {
+				return localizedName;
+			}
+			if (!a_affix.displayName.empty()) {
+				return a_affix.displayName;
+			}
+			return spellNameOr(a_affix.passiveSpell, a_korean ? "상시 효과" : "passive effect");
+		};
+
 		auto buildEffectSummaryTextKo = [&](const AffixRuntime& a_affix, std::string_view a_summaryKey) {
+			if (isPassiveOnlySentinel(a_affix)) {
+				const auto mappedActionText = RunewordSummary::ActionSummaryTextByKey(a_summaryKey);
+				return mappedActionText.empty() ? passiveEffectName(a_affix, true) : std::string(mappedActionText);
+			}
+
 			std::string summary;
 			summary.append(triggerTextKo(a_affix.trigger));
 			summary.push_back(' ');
@@ -551,7 +572,12 @@ namespace CalamityAffixes
 			return summary;
 		};
 
-		auto buildEffectSummaryTextEn = [&](const AffixRuntime& a_affix) {
+		auto buildEffectSummaryTextEn = [&](const AffixRuntime& a_affix, std::string_view a_summaryKey) {
+			if (isPassiveOnlySentinel(a_affix)) {
+				const auto mappedActionText = RunewordSummary::ActionSummaryTextEnByKey(a_summaryKey);
+				return mappedActionText.empty() ? passiveEffectName(a_affix, false) : std::string(mappedActionText);
+			}
+
 			std::string summary;
 			summary.append(triggerTextEn(a_affix.trigger));
 			summary.push_back(' ');
@@ -562,7 +588,12 @@ namespace CalamityAffixes
 			} else {
 				summary.append("always ");
 			}
-			summary.append(actionSummaryTextEn(a_affix.action));
+			const auto mappedActionText = RunewordSummary::ActionSummaryTextEnByKey(a_summaryKey);
+			if (!mappedActionText.empty()) {
+				summary.append(mappedActionText);
+			} else {
+				summary.append(actionSummaryTextEn(a_affix.action));
+			}
 
 			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
 			if (icdSeconds > 0.0f) {
@@ -634,6 +665,9 @@ namespace CalamityAffixes
 				break;
 			default:
 				break;
+			}
+			if (a_affix.passiveSpell && a_affix.passiveSpell != a_affix.action.spell) {
+				appendSpellProfile("상시 효과 (Passive)", a_affix.passiveSpell);
 			}
 
 			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
@@ -786,6 +820,9 @@ namespace CalamityAffixes
 			default:
 				break;
 			}
+			if (a_affix.passiveSpell && a_affix.passiveSpell != a_affix.action.spell) {
+				appendSpellProfile("Passive effect", a_affix.passiveSpell);
+			}
 
 			const float icdSeconds = static_cast<float>(a_affix.icd.count()) / 1000.0f;
 			if (icdSeconds > 0.0f) {
@@ -930,7 +967,7 @@ namespace CalamityAffixes
 				.displayName = recipe.displayName,
 				.runeSequence = std::move(runes),
 				.effectSummaryKey = std::string(effectSummaryKey),
-				.effectSummaryTextEn = buildEffectSummaryTextEn(affix),
+				.effectSummaryTextEn = buildEffectSummaryTextEn(affix, effectSummaryKey),
 				.effectSummaryTextKo = buildEffectSummaryTextKo(affix, effectSummaryKey),
 				.effectDetailTextEn = buildEffectDetailTextEn(affix),
 				.effectDetailTextKo = buildEffectDetailTextKo(affix),

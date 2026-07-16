@@ -241,6 +241,8 @@ namespace RuntimeGateStoreChecks
 		const fs::path handlerFile = repoRoot / "src" / "EventBridge.Triggers.ModCallback.Handlers.cpp";
 		const fs::path lifecycleFile = repoRoot / "src" / "EventBridge.Serialization.Lifecycle.cpp";
 		const fs::path trapsFile = repoRoot / "src" / "EventBridge.Traps.cpp";
+		const fs::path affixParsingFile = repoRoot / "src" / "EventBridge.Config.AffixParsing.cpp";
+		const fs::path typesFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Types.inl";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
@@ -258,8 +260,11 @@ namespace RuntimeGateStoreChecks
 		const auto handlerText = loadText(handlerFile);
 		const auto lifecycleText = loadText(lifecycleFile);
 		const auto trapsText = loadText(trapsFile);
+		const auto affixParsingText = loadText(affixParsingFile);
+		const auto typesText = loadText(typesFile);
 		if (!privateApiText.has_value() || !sourceText.has_value() || !mainText.has_value() ||
-			!handlerText.has_value() || !lifecycleText.has_value() || !trapsText.has_value()) {
+			!handlerText.has_value() || !lifecycleText.has_value() || !trapsText.has_value() ||
+			!affixParsingText.has_value() || !typesText.has_value()) {
 			std::cerr << "rebuild_active_counts_extraction: failed to load source files\n";
 			return false;
 		}
@@ -288,12 +293,13 @@ namespace RuntimeGateStoreChecks
 			privateApiText->find("void ResetActiveCountsStateForRebuild();") == std::string::npos ||
 			privateApiText->find("void RefreshInventoryInstanceActiveState(") == std::string::npos ||
 			privateApiText->find("void AccumulateEquippedAffixState(") == std::string::npos ||
+			privateApiText->find("void RebuildActiveCounts(bool a_refreshConfiguredPassivesOnPostLoad = false);") == std::string::npos ||
 			privateApiText->find("void ApplyDesiredPassiveSpells(") == std::string::npos ||
 			privateApiText->find("void LogRebuildActiveCountsDebugSummary(") == std::string::npos ||
 			sourceText->find("ResetActiveCountsStateForRebuild();") == std::string::npos ||
 			sourceText->find("RefreshInventoryInstanceActiveState(entry, xList, desiredPassives);") == std::string::npos ||
 			sourceText->find("AccumulateEquippedAffixState(key, slots, a_desiredPassives);") == std::string::npos ||
-			sourceText->find("ApplyDesiredPassiveSpells(player, desiredPassives);") == std::string::npos ||
+			sourceText->find("ApplyDesiredPassiveSpells(player, desiredPassives, a_refreshConfiguredPassivesOnPostLoad);") == std::string::npos ||
 			sourceText->find("LogActiveAffixListDebug();") == std::string::npos ||
 			sourceText->find("LogRebuildActiveCountsDebugSummary(desiredPassives);") == std::string::npos ||
 			sourceText->find("void EventBridge::DeactivateRuntimeState()") == std::string::npos ||
@@ -301,7 +307,10 @@ namespace RuntimeGateStoreChecks
 			sourceText->find("_appliedPassiveSpells.insert(affix.passiveSpell);") == std::string::npos ||
 			sourceText->find("std::unordered_set<RE::SpellItem*> knownPassiveSpells = _appliedPassiveSpells;") == std::string::npos ||
 			sourceText->find("a_player->HasSpell(spell)") == std::string::npos ||
-			sourceText->find("detail::ResolvePassiveSpellReconcileAction(desired, present, passivesDisabled)") == std::string::npos ||
+			sourceText->find("affix.refreshPassiveSpellOnPostLoad") == std::string::npos ||
+			sourceText->find("a_desiredPassives.contains(affix.passiveSpell)") == std::string::npos ||
+			sourceText->find("detail::ResolvePassiveSpellReconcileAction(desired, present, passivesDisabled, refreshRequested)") == std::string::npos ||
+			sourceText->find("PassiveSpellReconcileAction::kRefresh") == std::string::npos ||
 			sourceText->find("a_player->RemoveSpell(spell);") == std::string::npos ||
 			sourceText->find("ApplyDesiredPassiveSpells(player, {});") == std::string::npos ||
 			sourceText->find("_trapState.Reset();") == std::string::npos ||
@@ -312,7 +321,9 @@ namespace RuntimeGateStoreChecks
 			handlerText->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
 			handlerText->find("DeactivateRuntimeState();") == std::string::npos ||
 			lifecycleText->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
-			lifecycleText->find("RebuildActiveCounts();") == std::string::npos ||
+			lifecycleText->find("RebuildActiveCounts(true);") == std::string::npos ||
+			affixParsingText->find("refreshPassiveSpellOnPostLoad") == std::string::npos ||
+			typesText->find("bool refreshPassiveSpellOnPostLoad{ false };") == std::string::npos ||
 			trapsText->find("if (!_runtimeSettings.enabled) {") == std::string::npos) {
 			std::cerr << "rebuild_active_counts_extraction: expected rebuild flow to stay decomposed into focused helpers\n";
 			return false;

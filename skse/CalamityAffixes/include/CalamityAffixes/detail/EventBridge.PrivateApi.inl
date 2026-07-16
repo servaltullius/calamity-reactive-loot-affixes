@@ -6,7 +6,7 @@
 		void ResetRuntimeStateForConfigReload();
 		void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);
 		void DeactivateRuntimeState();
-		void RebuildActiveCounts();
+		void RebuildActiveCounts(bool a_refreshConfiguredPassivesOnPostLoad = false);
 		void FinalizeLoadedSerializationState();
 		void LoadInstanceAffixesRecord(
 			SKSE::SerializationInterface* a_intfc,
@@ -54,7 +54,8 @@
 		void LogActiveAffixListDebug() const;
 		void ApplyDesiredPassiveSpells(
 			RE::PlayerCharacter* a_player,
-			const std::unordered_set<RE::SpellItem*>& a_desiredPassives);
+			const std::unordered_set<RE::SpellItem*>& a_desiredPassives,
+			bool a_refreshConfiguredPassivesOnPostLoad = false);
 		void LogRebuildActiveCountsDebugSummary(
 			const std::unordered_set<RE::SpellItem*>& a_desiredPassives) const;
 		void RebuildActiveTriggerIndexCaches();
@@ -146,6 +147,10 @@
 			const nlohmann::json& a_action,
 			float a_kidChancePct,
 			std::string_view a_actionType,
+			AffixRuntime& a_out) const;
+		void ParseActionFeedbackFromJson(
+			const nlohmann::json& a_action,
+			RE::TESDataHandler* a_handler,
 			AffixRuntime& a_out) const;
 		void ApplyScrollNoConsumeChanceFromJson(const nlohmann::json& a_action, AffixRuntime& a_out) const;
 		void NormalizeParsedAffixRuntimePolicy(AffixRuntime& a_out, std::string_view a_actionType) const;
@@ -589,6 +594,11 @@
 		void EmitHudNotification(const char* a_message) const;
 		void EmitDebugHudNotification(const char* a_message) const;
 		void ExecuteDebugNotifyAction(const Action& a_action);
+		void PlayActionFeedback(
+			const Action& a_action,
+			RE::Actor* a_owner,
+			RE::Actor* a_target,
+			ActionFeedbackPlayOn a_playOn) const noexcept;
 		[[nodiscard]] RE::TESObjectREFR* ResolveSpellCastTarget(const Action& a_action, RE::Actor* a_target) const;
 		[[nodiscard]] float ResolveSpellMagnitudeOverride(
 			const Action& a_action,

@@ -137,6 +137,43 @@ public sealed class KeywordSpec
     /// </summary>
     [JsonPropertyName("appendedMagicEffects")]
     public List<MagicEffectRecordSpec> AppendedMagicEffects { get; init; } = [];
+
+    /// <summary>
+    /// Typed records allocated after the sealed legacy appendedMagicEffects block.
+    /// Array order is a persistent FormID allocation contract.
+    /// </summary>
+    [JsonPropertyName("appendedRecords")]
+    public List<AppendedRecordSpec> AppendedRecords { get; init; } = [];
+}
+
+public sealed class AppendedRecordSpec
+{
+    [JsonPropertyName("type")]
+    public required string Type { get; init; }
+
+    [JsonPropertyName("magicEffect")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public MagicEffectRecordSpec? MagicEffect { get; init; }
+
+    [JsonPropertyName("spell")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SpellRecordSpec? Spell { get; init; }
+
+    [JsonPropertyName("artObject")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ArtObjectRecordSpec? ArtObject { get; init; }
+}
+
+public sealed class ArtObjectRecordSpec
+{
+    [JsonPropertyName("editorId")]
+    public required string EditorId { get; init; }
+
+    [JsonPropertyName("modelPath")]
+    public required string ModelPath { get; init; }
+
+    [JsonPropertyName("artType")]
+    public required string ArtType { get; init; }
 }
 
 public sealed class KeywordDefinition

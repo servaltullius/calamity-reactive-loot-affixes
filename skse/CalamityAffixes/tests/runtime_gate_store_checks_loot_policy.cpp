@@ -684,7 +684,7 @@ namespace RuntimeGateStoreChecks
 			lifecycleSource->find("bool EventBridge::NormalizeLegacyPlayerInstanceKeys()") == std::string::npos ||
 			lifecycleSource->find("bool EventBridge::PruneOrphanedPlayerInstanceKeys()") == std::string::npos ||
 			lifecycleSource->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
-			lifecycleSource->find("RebuildActiveCounts();") == std::string::npos ||
+			lifecycleSource->find("RebuildActiveCounts(true);") == std::string::npos ||
 			lifecycleSource->find("IsOrphanedPlayerInstanceKey(") == std::string::npos ||
 			lifecycleSource->find("uidUseCounts[uid->uniqueID]") == std::string::npos ||
 			lifecycleSource->find("if (duplicateUID)") == std::string::npos ||

@@ -87,19 +87,21 @@ public static class KeywordPluginBuilder
 
     public static SkyrimMod Build(AffixSpec spec)
     {
-        return BuildCore(spec, includeAppendedMagicEffects: true, populateSpellEffects: true);
+        return BuildCore(spec, includeAppendOnlyRecords: true, populateSpellEffects: true);
     }
 
     internal static SkyrimMod BuildRecordAllocationSnapshot(
         AffixSpec spec,
         bool includeAppendedMagicEffects)
     {
+        // Retain the legacy parameter name for existing test callers. The compatibility
+        // boundary now includes both the sealed Dragon array and the typed record tail.
         return BuildCore(spec, includeAppendedMagicEffects, populateSpellEffects: false);
     }
 
     private static SkyrimMod BuildCore(
         AffixSpec spec,
-        bool includeAppendedMagicEffects,
+        bool includeAppendOnlyRecords,
         bool populateSpellEffects)
     {
         var mod = new SkyrimMod(ModKey.FromFileName(spec.ModKey), SkyrimRelease.SkyrimSE);
@@ -121,6 +123,7 @@ public static class KeywordPluginBuilder
 
         var seenMagicEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenArtObjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var magicEffectsByEditorId = new Dictionary<string, MagicEffect>(StringComparer.OrdinalIgnoreCase);
         var pendingSpells = new List<(Spell Record, SpellRecordSpec Spec)>();
         var magicEffectUsagesByEditorId = new Dictionary<string, MagicEffectUsage>(StringComparer.OrdinalIgnoreCase);
@@ -170,8 +173,10 @@ public static class KeywordPluginBuilder
         // Explicit append-only compatibility zone. These records are allocated only
         // after every pre-existing generated record, so the stable prefix keeps its
         // original FormIDs when a new shared effect must be split.
-        if (includeAppendedMagicEffects)
+        if (includeAppendOnlyRecords)
         {
+            AffixSpecLoader.ValidateAppendOnlyRecordAllocationContract(spec.Keywords);
+
             foreach (var magicEffect in spec.Keywords.AppendedMagicEffects)
             {
                 if (!seenMagicEffects.Add(magicEffect.EditorId))
@@ -182,6 +187,54 @@ public static class KeywordPluginBuilder
 
                 var created = AddMagicEffect(mod, magicEffect);
                 magicEffectsByEditorId.Add(magicEffect.EditorId, created);
+            }
+
+            foreach (var appendedRecord in spec.Keywords.AppendedRecords)
+            {
+                switch (appendedRecord.Type)
+                {
+                    case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null:
+                    {
+                        var magicEffect = appendedRecord.MagicEffect;
+                        if (!seenMagicEffects.Add(magicEffect.EditorId))
+                        {
+                            throw new InvalidDataException(
+                                $"Duplicate appended MagicEffect editorId: {magicEffect.EditorId}");
+                        }
+
+                        var created = AddMagicEffect(mod, magicEffect);
+                        magicEffectsByEditorId.Add(magicEffect.EditorId, created);
+                        break;
+                    }
+                    case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null:
+                    {
+                        var spell = appendedRecord.Spell;
+                        if (!seenSpells.Add(spell.EditorId))
+                        {
+                            throw new InvalidDataException(
+                                $"Duplicate appended Spell editorId: {spell.EditorId}");
+                        }
+
+                        var created = AddSpellRecord(mod, spell);
+                        pendingSpells.Add((created, spell));
+                        break;
+                    }
+                    case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null:
+                    {
+                        var artObject = appendedRecord.ArtObject;
+                        if (!seenArtObjects.Add(artObject.EditorId))
+                        {
+                            throw new InvalidDataException(
+                                $"Duplicate appended ArtObject editorId: {artObject.EditorId}");
+                        }
+
+                        AddArtObject(mod, artObject);
+                        break;
+                    }
+                    default:
+                        throw new InvalidDataException(
+                            "Append-only records must be a valid MagicEffect, Spell, or ArtObject tagged union.");
+                }
             }
         }
 
@@ -393,6 +446,22 @@ public static class KeywordPluginBuilder
     {
         var kw = mod.Keywords.AddNew();
         kw.EditorID = editorId;
+    }
+
+    private static ArtObject AddArtObject(SkyrimMod mod, ArtObjectRecordSpec spec)
+    {
+        if (spec.ArtType is not "MagicHitEffect")
+        {
+            throw new InvalidDataException(
+                $"Unsupported ArtObject artType: {spec.ArtType} " +
+                $"(ArtObject: {spec.EditorId}). Valid: MagicHitEffect.");
+        }
+
+        var artObject = mod.ArtObjects.AddNew();
+        artObject.EditorID = spec.EditorId;
+        artObject.Model = new Model { File = spec.ModelPath };
+        artObject.Type = ArtObject.TypeEnum.MagicHitEffect;
+        return artObject;
     }
 
     private static MagicEffect AddMagicEffect(SkyrimMod mod, MagicEffectRecordSpec spec)

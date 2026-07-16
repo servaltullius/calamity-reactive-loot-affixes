@@ -70,17 +70,22 @@ namespace CalamityAffixes::detail
 	{
 		kKeep,
 		kAdd,
-		kRemove
+		kRemove,
+		kRefresh
 	};
 
 	[[nodiscard]] constexpr PassiveSpellReconcileAction ResolvePassiveSpellReconcileAction(
 		bool a_desired,
 		bool a_present,
-		bool a_passivesDisabled) noexcept
+		bool a_passivesDisabled,
+		bool a_refreshRequested) noexcept
 	{
 		if (a_passivesDisabled || !a_desired) {
 			return a_present ? PassiveSpellReconcileAction::kRemove : PassiveSpellReconcileAction::kKeep;
 		}
-		return a_present ? PassiveSpellReconcileAction::kKeep : PassiveSpellReconcileAction::kAdd;
+		if (!a_present) {
+			return PassiveSpellReconcileAction::kAdd;
+		}
+		return a_refreshRequested ? PassiveSpellReconcileAction::kRefresh : PassiveSpellReconcileAction::kKeep;
 	}
 }
