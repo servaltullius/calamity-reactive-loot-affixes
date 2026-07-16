@@ -7,6 +7,31 @@
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-07-17
+
+v1.6.0은 게임플레이 수치와 발동 계약을 유지하면서 함정, 시체 폭발, 방어·긴급 발동의 위치와 상태를 알아볼 수 있도록 바닐라 자산 기반 VFX/SFX를 추가하는 공개 테스트 릴리스입니다.
+
+### Added
+
+- Bear Trap, Rune Trap, Plague Spore, Tar Blight, Siphon Spore, Chaos Rune에 설치·무장·발동·자연 만료 피드백과 세계 좌표 고정 마커를 추가했습니다.
+- 화염 6종과 역병 2종 시체 폭발에 시체 중심 custom ArtObject와 위치 기반 일회성 사운드를 추가했습니다.
+- 긴급 회복, 은신·위상, 물리 방벽, 마법·원소 방벽, 반사·가시, 광휘, 용의 비늘로 구분되는 방어 발동 VFX/SFX 7계열을 추가했습니다.
+- `feedback.target=Corpse`, `feedback.spatialSound`와 SpawnTrap 전용 `trapFeedback` 데이터 계약, JSON Schema·Generator·Python lint 회귀 검증을 추가했습니다.
+
+### Changed
+
+- 함정 마커를 임시 object reference 대신 `BSTempEffectParticle`로 실제 판정 중심에 생성하고, 상태 전이에서만 교체하도록 구현했습니다.
+- 함정의 만료·소모·cap 축출·잘못된 상태·설정/로드 reset 제거를 중앙 정리 경로로 통합했습니다.
+- 시체 폭발 custom ARTO가 해석되면 기존 공통 셰이더를 중복 재생하지 않고, 해석 실패 시 기존 셰이더를 fallback으로 유지합니다.
+- 신규 ArtObject 21개를 `0xAEB..0xAFF`에 append-only로 추가해 총 major record 수를 768개, Next Object ID를 `0xB00`으로 갱신했습니다.
+
+### Compatibility
+
+- v1.5.0의 첫 747개 레코드는 FormID, signature, EditorID와 raw record payload를 그대로 유지합니다.
+- 공개 효과 243개의 수치, 발동률, ICD, 타깃, 피해 계산, 함정 판정, 룬 가중치, 드롭 정책과 직렬화 토큰을 변경하지 않았습니다.
+- 신규 VFX/SFX 실패는 주문 시전, RNG, proc/cast budget, trigger count와 재장전 상태에 영향을 주지 않습니다.
+- 활성 함정 저장·로드 후 ghost particle, 바닐라 NIF 지면 가독성, 위치 음향과 48개 마커 밀도는 인게임 공개 테스트가 필요합니다.
+
 ## [1.4.0] - 2026-07-14
 
 v1.4.0은 룬워드 조각과 재련 오브의 획득 권한을 플레이어 측 적대 처치의 시체로 일원화하고, 피티·시체 중복 방지를 저장하는 공개 테스트 릴리스입니다. Dragon 효과 레코드 분리, 룬워드·MGEF 생성 계약 강화, Prisma 레시피 상세와 접근성 개선, fail-hard 릴리스 검증도 함께 포함합니다.

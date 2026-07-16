@@ -18,6 +18,7 @@ namespace CalamityAffixes
 		auto& trapTickCursor = trapState.tickCursor;
 		const auto now = std::chrono::steady_clock::now();
 		if (!_runtimeSettings.enabled) {
+			ClearTrapRuntimeState();
 			return;
 		}
 		if (_runtimeSettings.disableTrapSystemTick) {
@@ -255,11 +256,13 @@ namespace CalamityAffixes
 		}
 
 		// Prune expired/invalid traps.
-		for (auto it = activeTraps.begin(); it != activeTraps.end();) {
-			if (!it->spell || it->radius <= 0.0f || now >= it->expiresAt) {
-				it = activeTraps.erase(it);
+		for (std::size_t index = 0; index < activeTraps.size();) {
+			if (now >= activeTraps[index].expiresAt) {
+				RemoveTrapAt(index, TrapRemovalReason::kExpired);
+			} else if (!activeTraps[index].spell || activeTraps[index].radius <= 0.0f) {
+				RemoveTrapAt(index, TrapRemovalReason::kInvalid);
 			} else {
-				++it;
+				++index;
 			}
 		}
 
@@ -267,6 +270,13 @@ namespace CalamityAffixes
 			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
 			tryResolveStalePlayerCombat();
 			return;
+		}
+
+		for (auto& trap : activeTraps) {
+			if (now >= trap.armedAt && trap.visualState != TrapVisualState::kArmed) {
+				StartTrapMarker(trap, TrapVisualState::kArmed, now);
+				PlayTrapFeedbackCue(trap, trap.feedback.armed);
+			}
 		}
 
 		if (_runtimeSettings.disableTrapCasts) {
@@ -334,10 +344,7 @@ namespace CalamityAffixes
 			auto* ownerForm = RE::TESForm::LookupByID<RE::TESForm>(trapSnapshot.ownerFormID);
 			auto* owner = ownerForm ? ownerForm->As<RE::Actor>() : nullptr;
 			if (!owner) {
-				activeTraps.erase(activeTraps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
-				if (trapTickCursor >= activeTraps.size()) {
-					trapTickCursor = 0;
-				}
+				RemoveTrapAt(trapIndex, TrapRemovalReason::kInvalid);
 				continue;
 			}
 
@@ -443,7 +450,11 @@ namespace CalamityAffixes
 						trapState.playerOwnedCombatCleanupExpiresAt,
 						now + kPlayerOwnedTrapCombatCleanupLease);
 				}
-				ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);
+				if (trap.feedback.configured) {
+					PlayTrapFeedbackCue(trap, trap.feedback.triggered);
+				} else {
+					ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);
+				}
 				if (_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(trapSnapshot.spell)) {
 					const auto note = std::format("Calamity: {} burst", ProcFeedback::ResolveBloomProcDebugLabel(trapSnapshot.spell));
 					EmitDebugHudNotification(note.c_str());
@@ -466,14 +477,12 @@ namespace CalamityAffixes
 				const bool canRearm = (trap.rearmDelay.count() > 0);
 
 				if (!canRearm || outOfTriggers) {
-					activeTraps.erase(activeTraps.begin() + static_cast<std::ptrdiff_t>(trapIndex));
-					if (trapTickCursor >= activeTraps.size()) {
-						trapTickCursor = 0;
-					}
+					RemoveTrapAt(trapIndex, TrapRemovalReason::kConsumed);
 					continue;
 				}
 
 				trap.armedAt = now + trap.rearmDelay;
+				StartTrapMarker(trap, TrapVisualState::kUnarmed, now);
 				if (!activeTraps.empty()) {
 					trapTickCursor = (trapTickCursor + 1u) % activeTraps.size();
 				}

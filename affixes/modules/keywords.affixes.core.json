@@ -662,7 +662,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_INVISIBILITY",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_PHASE", "soundForm": "Skyrim.esm|0x00058E0E", "target": "Owner", "durationSeconds": 0.45, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -709,7 +710,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_INCOMING_WARDEN_SHELL",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_PHYSICAL_BULWARK", "soundForm": "Skyrim.esm|0x000571B2", "target": "Owner", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -756,7 +758,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_INCOMING_RESOLVE_BARRIER",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_MAGIC_WARD", "soundForm": "Skyrim.esm|0x0003D118", "target": "Owner", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1045,7 +1048,8 @@
         "chainWindowSeconds": 1.5,
         "rateLimitWindowSeconds": 1.0,
         "maxExplosionsPerWindow": 4,
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_CORPSE_FIRE", "soundForm": "Skyrim.esm|0x0002518E", "target": "Corpse", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1425,7 +1429,7 @@
         "maxTriggers": 0,
         "requireCritOrPowerAttack": true,
         "requireWeaponHit": true,
-        "spellEditorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
+      "spellEditorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
         "extraSpells": [
           {
             "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON"
@@ -1443,7 +1447,16 @@
             "spellForm": "Skyrim.esm|0004B146"
           }
         ],
-        "noHitEffectArt": true
+      "noHitEffectArt": true,
+      "trapFeedback": {
+        "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER",
+        "unarmedScale": 0.75,
+        "armedScale": 1.0,
+        "placed": { "soundForm": "Skyrim.esm|0x0001828A" },
+        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_BURST", "soundForm": "Skyrim.esm|0x00018289", "durationSeconds": 0.5, "scale": 1.0 },
+        "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
+      }
       },
       "lootWeight": 1.0
     },
@@ -2372,7 +2385,8 @@
         "chainWindowSeconds": 0.9,
         "rateLimitWindowSeconds": 1.0,
         "maxExplosionsPerWindow": 4,
-        "noHitEffectArt": false
+        "noHitEffectArt": false,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_CORPSE_FIRE", "soundForm": "Skyrim.esm|0x0002518E", "target": "Corpse", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 0.2
     },
@@ -2408,7 +2422,8 @@
         "chainWindowSeconds": 0.9,
         "rateLimitWindowSeconds": 1.0,
         "maxExplosionsPerWindow": 4,
-        "noHitEffectArt": false
+        "noHitEffectArt": false,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_CORPSE_FIRE", "soundForm": "Skyrim.esm|0x0002518E", "target": "Corpse", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 0.1
     },
@@ -2444,7 +2459,8 @@
         "chainWindowSeconds": 0.9,
         "rateLimitWindowSeconds": 1.0,
         "maxExplosionsPerWindow": 4,
-        "noHitEffectArt": false
+        "noHitEffectArt": false,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_CORPSE_FIRE", "soundForm": "Skyrim.esm|0x0002518E", "target": "Corpse", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 0.05
     },
@@ -2544,7 +2560,8 @@
         "chainWindowSeconds": 0.9,
         "rateLimitWindowSeconds": 1.0,
         "maxExplosionsPerWindow": 3,
-        "noHitEffectArt": false
+        "noHitEffectArt": false,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_CORPSE_FIRE", "soundForm": "Skyrim.esm|0x0002518E", "target": "Corpse", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 0.2
     },
@@ -2580,7 +2597,8 @@
         "chainWindowSeconds": 0.9,
         "rateLimitWindowSeconds": 1.0,
         "maxExplosionsPerWindow": 3,
-        "noHitEffectArt": false
+        "noHitEffectArt": false,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_CORPSE_FIRE", "soundForm": "Skyrim.esm|0x0002518E", "target": "Corpse", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 0.1
     },
@@ -2662,8 +2680,17 @@
         "maxActive": 3,
         "maxTriggers": 1,
         "requireWeaponHit": true,
-        "spellEditorId": "CAFF_SPEL_MINEFIELD_SNARE",
-        "noHitEffectArt": true
+      "spellEditorId": "CAFF_SPEL_MINEFIELD_SNARE",
+      "noHitEffectArt": true,
+      "trapFeedback": {
+        "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER",
+        "unarmedScale": 0.75,
+        "armedScale": 1.0,
+        "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
+        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_BURST", "soundForm": "Skyrim.esm|0x000639A5", "durationSeconds": 0.5, "scale": 1.0 },
+        "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
+      }
       },
       "lootWeight": 1.0
     },
@@ -2749,8 +2776,17 @@
         "maxTriggers": 1,
         "maxTargetsPerTrigger": 2,
         "requireWeaponHit": true,
-        "spellEditorId": "CAFF_SPEL_DOT_BLOOM_POISON",
-        "noHitEffectArt": true
+      "spellEditorId": "CAFF_SPEL_DOT_BLOOM_POISON",
+      "noHitEffectArt": true,
+      "trapFeedback": {
+        "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER",
+        "unarmedScale": 0.75,
+        "armedScale": 1.0,
+        "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
+        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_BURST", "soundForm": "Skyrim.esm|0x0002518E", "durationSeconds": 0.5, "scale": 1.0 },
+        "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
+      }
       },
       "lootWeight": 1.0
     },
@@ -2803,13 +2839,22 @@
         "maxTriggers": 1,
         "maxTargetsPerTrigger": 2,
         "requireWeaponHit": true,
-        "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
+      "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SLOW",
         "extraSpells": [
           {
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER"
           }
         ],
-        "noHitEffectArt": true
+      "noHitEffectArt": true,
+      "trapFeedback": {
+        "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER",
+        "unarmedScale": 0.75,
+        "armedScale": 1.0,
+        "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
+        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_BURST", "soundForm": "Skyrim.esm|0x0002518E", "durationSeconds": 0.5, "scale": 1.0 },
+        "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
+      }
       },
       "lootWeight": 1.0
     },
@@ -2905,13 +2950,22 @@
         "maxTriggers": 1,
         "maxTargetsPerTrigger": 2,
         "requireWeaponHit": true,
-        "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
+      "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_MAG",
         "extraSpells": [
           {
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA"
           }
         ],
-        "noHitEffectArt": true
+      "noHitEffectArt": true,
+      "trapFeedback": {
+        "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER",
+        "unarmedScale": 0.75,
+        "armedScale": 1.0,
+        "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
+        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_BURST", "soundForm": "Skyrim.esm|0x00056AC5", "durationSeconds": 0.5, "scale": 1.0 },
+        "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
+      }
       },
       "lootWeight": 1.0
     },
@@ -3007,7 +3061,7 @@
         "maxActive": 2,
         "maxTriggers": 1,
         "requireWeaponHit": true,
-        "spellEditorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
+      "spellEditorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
         "extraSpells": [
           {
             "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER"
@@ -3025,7 +3079,16 @@
             "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE"
           }
         ],
-        "noHitEffectArt": true
+      "noHitEffectArt": true,
+      "trapFeedback": {
+        "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER",
+        "unarmedScale": 0.75,
+        "armedScale": 1.0,
+        "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
+        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_BURST", "soundForm": "Skyrim.esm|0x0003F206", "durationSeconds": 0.5, "scale": 1.0 },
+        "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
+      }
       },
       "lootWeight": 1.0
     },

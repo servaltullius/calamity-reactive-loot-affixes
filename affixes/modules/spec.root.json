@@ -223,6 +223,174 @@
           "modelPath": "Meshes\\Magic\\HealRitualCastBodyFX.nif",
           "artType": "MagicHitEffect"
         }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER",
+          "modelPath": "Meshes\\Traps\\BearTrap\\BearTrap01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_BEAR_BURST",
+          "modelPath": "Meshes\\Magic\\ExplosionFrost01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER",
+          "modelPath": "Meshes\\Magic\\RuneFrostProjectile01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_RUNE_BURST",
+          "modelPath": "Meshes\\Magic\\ExplosionFrost01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER",
+          "modelPath": "Meshes\\Effects\\FXPoisonGaswithONOFFDark.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_BURST",
+          "modelPath": "Meshes\\Effects\\FXGasTrapBlast.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER",
+          "modelPath": "Meshes\\Traps\\OilTrapPuddle01\\OilTrapPuddle01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_TAR_BURST",
+          "modelPath": "Meshes\\Effects\\FXGasTrap01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER",
+          "modelPath": "Meshes\\Magic\\SoulTrapTargetPointFX.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_SIPHON_BURST",
+          "modelPath": "Meshes\\Magic\\AbsorbSpellHitEffect01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER",
+          "modelPath": "Meshes\\Magic\\RuneLightningProjectile01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_TRAP_CHAOS_BURST",
+          "modelPath": "Meshes\\Magic\\ExplosionShock01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_CORPSE_FIRE",
+          "modelPath": "Meshes\\Magic\\FireBallExp01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_CORPSE_PLAGUE",
+          "modelPath": "Meshes\\Effects\\FXGasTrapBlast.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_PROC_EMERGENCY_HEAL",
+          "modelPath": "Meshes\\Magic\\HealTargetFX.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_PROC_PHASE",
+          "modelPath": "Meshes\\Magic\\InvisFXBody01.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_PROC_PHYSICAL_BULWARK",
+          "modelPath": "Meshes\\Magic\\ShieldSpellBodyFX.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_PROC_MAGIC_WARD",
+          "modelPath": "Meshes\\Magic\\WardBodyFX.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_PROC_REFLECT",
+          "modelPath": "Meshes\\Actors\\Spriggan\\FXSprigganAttachments.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_PROC_RADIANCE",
+          "modelPath": "Meshes\\Magic\\HealRitualCastBodyFX.nif",
+          "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_PROC_DRAGON_SCALE",
+          "modelPath": "Meshes\\Magic\\FXFireCloak01.nif",
+          "artType": "MagicHitEffect"
+        }
       }
     ]
   }

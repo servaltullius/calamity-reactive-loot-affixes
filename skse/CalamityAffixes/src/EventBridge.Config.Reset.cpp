@@ -13,7 +13,7 @@ namespace CalamityAffixes
 		_appliedPassiveSpells.clear();
 		_equippedInstanceKeysByToken.clear();
 		_equippedTokenCacheReady = false;
-		_trapState.Reset();
+		ClearTrapRuntimeState();
 		_corpseExplosionSeenCorpses.clear();
 		_corpseExplosionState = {};
 		_summonCorpseExplosionSeenCorpses.clear();

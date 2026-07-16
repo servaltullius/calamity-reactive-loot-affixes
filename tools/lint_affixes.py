@@ -303,13 +303,22 @@ def _lint_spec(
     seen_ids: Dict[str, int] = {}
     seen_editor_ids: Dict[str, int] = {}
     generated_spells: Set[str] = set()
+    generated_art_objects: Set[str] = set()
     spell_refs: List[Tuple[str, str]] = []
     suffix_family_avs: Dict[str, Set[str]] = {}
 
     appended_records = _as_list(keywords.get("appendedRecords")) or []
     for idx, raw_record in enumerate(appended_records):
         record = _as_dict(raw_record)
-        if not record or record.get("type") != "Spell":
+        if not record:
+            continue
+        if record.get("type") == "ArtObject":
+            art = _as_dict(record.get("artObject"))
+            art_edid = art.get("editorId") if art else None
+            if isinstance(art_edid, str) and art_edid.strip():
+                generated_art_objects.add(art_edid.strip())
+            continue
+        if record.get("type") != "Spell":
             continue
         spell = _as_dict(record.get("spell"))
         if not spell:
@@ -541,6 +550,87 @@ def _lint_spec(
                     f"{affix_id}: special actions require runtime.procChancePercent > 0 "
                     f"(action.type={action_type})."
                 )
+
+        feedback = action.get("feedback")
+        if feedback is not None:
+            feedback_obj = _as_dict(feedback)
+            if feedback_obj is None:
+                errors.append(f"{affix_id}: action.feedback must be an object.")
+            else:
+                allowed_feedback = {"artObjectEditorId", "soundForm", "target", "durationSeconds", "playOn", "spatialSound"}
+                unknown = sorted(set(feedback_obj) - allowed_feedback)
+                if unknown:
+                    errors.append(f"{affix_id}: action.feedback has unsupported keys: {unknown}.")
+                art_id = feedback_obj.get("artObjectEditorId")
+                sound_form = feedback_obj.get("soundForm")
+                if not isinstance(art_id, str) and not isinstance(sound_form, str):
+                    errors.append(f"{affix_id}: action.feedback requires artObjectEditorId or soundForm.")
+                if isinstance(art_id, str) and art_id.startswith("CAFF_") and art_id not in generated_art_objects:
+                    errors.append(f"{affix_id}: action.feedback references missing ArtObject '{art_id}'.")
+                if isinstance(art_id, str):
+                    duration = feedback_obj.get("durationSeconds")
+                    if not _is_number(duration) or duration < 0.05 or duration > 2.0:
+                        errors.append(f"{affix_id}: action.feedback.durationSeconds must be in range 0.05..2.0.")
+                if isinstance(sound_form, str):
+                    parts = sound_form.rsplit("|", 1)
+                    if len(parts) != 2 or not parts[1].lower().startswith("0x"):
+                        errors.append(f"{affix_id}: action.feedback.soundForm must use Plugin|0xFORMID syntax.")
+                target = feedback_obj.get("target")
+                if target not in {"Owner", "Target", "Corpse"}:
+                    errors.append(f"{affix_id}: action.feedback.target must be Owner, Target, or Corpse.")
+                if target == "Corpse" and action_type not in {"CorpseExplosion", "SummonCorpseExplosion"}:
+                    errors.append(f"{affix_id}: Corpse feedback is restricted to corpse explosion actions.")
+                if action_type in {"CorpseExplosion", "SummonCorpseExplosion"} and target != "Corpse":
+                    errors.append(f"{affix_id}: corpse explosion feedback must target Corpse.")
+                if feedback_obj.get("playOn") not in {"Proc", "PassiveAdd"}:
+                    errors.append(f"{affix_id}: action.feedback.playOn must be Proc or PassiveAdd.")
+                if "spatialSound" in feedback_obj and not isinstance(feedback_obj["spatialSound"], bool):
+                    errors.append(f"{affix_id}: action.feedback.spatialSound must be a boolean.")
+
+        trap_feedback = action.get("trapFeedback")
+        if trap_feedback is not None:
+            trap_obj = _as_dict(trap_feedback)
+            if action_type != "SpawnTrap":
+                errors.append(f"{affix_id}: action.trapFeedback is supported only for SpawnTrap.")
+            if trap_obj is None:
+                errors.append(f"{affix_id}: action.trapFeedback must be an object.")
+            else:
+                allowed_trap = {"markerArtObjectEditorId", "unarmedScale", "armedScale", "placed", "armed", "triggered", "expired"}
+                unknown = sorted(set(trap_obj) - allowed_trap)
+                if unknown:
+                    errors.append(f"{affix_id}: action.trapFeedback has unsupported keys: {unknown}.")
+                marker_id = trap_obj.get("markerArtObjectEditorId")
+                if not isinstance(marker_id, str) or not marker_id:
+                    errors.append(f"{affix_id}: action.trapFeedback.markerArtObjectEditorId is required.")
+                elif marker_id.startswith("CAFF_") and marker_id not in generated_art_objects:
+                    errors.append(f"{affix_id}: action.trapFeedback references missing ArtObject '{marker_id}'.")
+                for scale_key in ("unarmedScale", "armedScale"):
+                    scale = trap_obj.get(scale_key)
+                    if not _is_number(scale) or scale < 0.1 or scale > 4.0:
+                        errors.append(f"{affix_id}: action.trapFeedback.{scale_key} must be in range 0.1..4.0.")
+                for cue_name in ("placed", "armed", "triggered", "expired"):
+                    cue = trap_obj.get(cue_name)
+                    if cue is None:
+                        continue
+                    cue_obj = _as_dict(cue)
+                    if cue_obj is None:
+                        errors.append(f"{affix_id}: action.trapFeedback.{cue_name} must be an object.")
+                        continue
+                    unknown_cue = sorted(set(cue_obj) - {"artObjectEditorId", "soundForm", "durationSeconds", "scale"})
+                    if unknown_cue:
+                        errors.append(f"{affix_id}: action.trapFeedback.{cue_name} has unsupported keys: {unknown_cue}.")
+                    cue_art = cue_obj.get("artObjectEditorId")
+                    cue_sound = cue_obj.get("soundForm")
+                    if not isinstance(cue_art, str) and not isinstance(cue_sound, str):
+                        errors.append(f"{affix_id}: action.trapFeedback.{cue_name} requires artObjectEditorId or soundForm.")
+                    if isinstance(cue_art, str):
+                        if cue_art.startswith("CAFF_") and cue_art not in generated_art_objects:
+                            errors.append(f"{affix_id}: action.trapFeedback.{cue_name} references missing ArtObject '{cue_art}'.")
+                        duration = cue_obj.get("durationSeconds")
+                        if not _is_number(duration) or duration < 0.05 or duration > 2.0:
+                            errors.append(f"{affix_id}: action.trapFeedback.{cue_name}.durationSeconds must be in range 0.05..2.0.")
+                    if "scale" in cue_obj and (not _is_number(cue_obj["scale"]) or cue_obj["scale"] < 0.1 or cue_obj["scale"] > 4.0):
+                        errors.append(f"{affix_id}: action.trapFeedback.{cue_name}.scale must be in range 0.1..4.0.")
 
         if action_type in {"CorpseExplosion", "SummonCorpseExplosion"}:
             selection_priority = action.get("selectionPriority", 0)

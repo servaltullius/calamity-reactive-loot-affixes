@@ -117,14 +117,15 @@ namespace CalamityAffixes
 
 		while (true) {
 			std::size_t count = 0;
-			auto oldestIt = activeTraps.end();
-			for (auto it = activeTraps.begin(); it != activeTraps.end(); ++it) {
-				if (it->sourceToken != a_action.sourceToken) {
+			std::size_t oldestIndex = activeTraps.size();
+			for (std::size_t index = 0; index < activeTraps.size(); ++index) {
+				const auto& trap = activeTraps[index];
+				if (trap.sourceToken != a_action.sourceToken) {
 					continue;
 				}
 				count += 1;
-				if (oldestIt == activeTraps.end() || it->createdAt < oldestIt->createdAt) {
-					oldestIt = it;
+				if (oldestIndex == activeTraps.size() || trap.createdAt < activeTraps[oldestIndex].createdAt) {
+					oldestIndex = index;
 				}
 			}
 
@@ -132,8 +133,8 @@ namespace CalamityAffixes
 				break;
 			}
 
-			if (oldestIt != activeTraps.end()) {
-				activeTraps.erase(oldestIt);
+			if (oldestIndex < activeTraps.size()) {
+				RemoveTrapAt(oldestIndex, TrapRemovalReason::kPerAffixCap);
 			} else {
 				break;
 			}
@@ -153,18 +154,18 @@ namespace CalamityAffixes
 
 		const std::size_t before = activeTraps.size();
 		while (activeTraps.size() >= globalMax) {
-			auto oldestIt = activeTraps.end();
-			for (auto it = activeTraps.begin(); it != activeTraps.end(); ++it) {
-				if (oldestIt == activeTraps.end() || it->createdAt < oldestIt->createdAt) {
-					oldestIt = it;
+			std::size_t oldestIndex = activeTraps.size();
+			for (std::size_t index = 0; index < activeTraps.size(); ++index) {
+				if (oldestIndex == activeTraps.size() || activeTraps[index].createdAt < activeTraps[oldestIndex].createdAt) {
+					oldestIndex = index;
 				}
 			}
 
-			if (oldestIt == activeTraps.end()) {
+			if (oldestIndex >= activeTraps.size()) {
 				break;
 			}
 
-			activeTraps.erase(oldestIt);
+			RemoveTrapAt(oldestIndex, TrapRemovalReason::kGlobalCap);
 		}
 
 		if (_loot.debugLog && before != activeTraps.size()) {
@@ -187,6 +188,7 @@ namespace CalamityAffixes
 		trap.sourceToken = a_action.sourceToken;
 		trap.ownerFormID = a_owner->GetFormID();
 		trap.position = a_spawnTarget->GetPosition();
+		trap.cell = a_spawnTarget->GetParentCell();
 		trap.radius = a_action.trapRadius;
 		trap.spell = a_action.spell;
 		trap.effectiveness = a_action.effectiveness;
@@ -206,6 +208,7 @@ namespace CalamityAffixes
 		trap.maxTriggers = a_action.trapMaxTriggers;
 		trap.triggeredCount = 0;
 		trap.maxTargetsPerTrigger = a_action.trapMaxTargetsPerTrigger;
+		trap.feedback = a_action.trapFeedback;
 		return trap;
 	}
 
@@ -255,18 +258,24 @@ namespace CalamityAffixes
 		EnforceGlobalTrapCap();
 
 		auto trap = BuildSpawnTrapInstance(a_action, a_owner, spawnTarget, magnitudeOverride, now);
-		trapState.activeTraps.push_back(trap);
+		trapState.activeTraps.push_back(std::move(trap));
 		trapState.hasActiveTraps.store(true, std::memory_order_relaxed);
-		const auto armDelaySeconds = static_cast<float>(a_action.trapArmDelay.count()) / 1000.0f;
-		ProcFeedback::PlayBloomProcFeedback(
-			spawnTarget,
-			a_action.spell,
-			std::clamp(armDelaySeconds, 0.18f, 0.75f),
-			true);
+		auto& storedTrap = trapState.activeTraps.back();
+		if (storedTrap.feedback.configured) {
+			StartTrapMarker(storedTrap, TrapVisualState::kUnarmed, now);
+			PlayTrapFeedbackCue(storedTrap, storedTrap.feedback.placed);
+		} else {
+			const auto armDelaySeconds = static_cast<float>(a_action.trapArmDelay.count()) / 1000.0f;
+			ProcFeedback::PlayBloomProcFeedback(
+				spawnTarget,
+				a_action.spell,
+				std::clamp(armDelaySeconds, 0.18f, 0.75f),
+				true);
+		}
 		if (_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(a_action.spell)) {
 			const auto note = std::format("Calamity: {} planted", ProcFeedback::ResolveBloomProcDebugLabel(a_action.spell));
 			EmitDebugHudNotification(note.c_str());
 		}
-		LogSpawnTrapCreated(trap, a_action);
+		LogSpawnTrapCreated(storedTrap, a_action);
 	}
 }

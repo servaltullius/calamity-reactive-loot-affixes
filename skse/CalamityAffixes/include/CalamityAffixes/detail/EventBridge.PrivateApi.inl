@@ -152,6 +152,10 @@
 			const nlohmann::json& a_action,
 			RE::TESDataHandler* a_handler,
 			AffixRuntime& a_out) const;
+		void ParseTrapFeedbackFromJson(
+			const nlohmann::json& a_action,
+			RE::TESDataHandler* a_handler,
+			AffixRuntime& a_out) const;
 		void ApplyScrollNoConsumeChanceFromJson(const nlohmann::json& a_action, AffixRuntime& a_out) const;
 		void NormalizeParsedAffixRuntimePolicy(AffixRuntime& a_out, std::string_view a_actionType) const;
 		void ParseConfiguredAffixesFromJson(const nlohmann::json& a_affixes, RE::TESDataHandler* a_handler);
@@ -598,7 +602,14 @@
 			const Action& a_action,
 			RE::Actor* a_owner,
 			RE::Actor* a_target,
-			ActionFeedbackPlayOn a_playOn) const noexcept;
+			ActionFeedbackPlayOn a_playOn,
+			RE::Actor* a_corpse = nullptr) const noexcept;
+		void PlaySpatialSound(RE::BGSSoundDescriptorForm* a_sound, const RE::NiPoint3& a_position) const noexcept;
+		void PlayTrapFeedbackCue(const TrapInstance& a_trap, const TrapFeedbackCue& a_cue) const noexcept;
+		void StopTrapMarker(TrapInstance& a_trap) const noexcept;
+		void StartTrapMarker(TrapInstance& a_trap, TrapVisualState a_state, std::chrono::steady_clock::time_point a_now) const noexcept;
+		void RemoveTrapAt(std::size_t a_index, TrapRemovalReason a_reason) noexcept;
+		void ClearTrapRuntimeState() noexcept;
 		[[nodiscard]] RE::TESObjectREFR* ResolveSpellCastTarget(const Action& a_action, RE::Actor* a_target) const;
 		[[nodiscard]] float ResolveSpellMagnitudeOverride(
 			const Action& a_action,

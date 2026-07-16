@@ -235,6 +235,8 @@ namespace CalamityAffixes
 			a_out.action.feedback.target = ActionFeedbackTarget::kOwner;
 		} else if (target == "Target") {
 			a_out.action.feedback.target = ActionFeedbackTarget::kTarget;
+		} else if (target == "Corpse") {
+			a_out.action.feedback.target = ActionFeedbackTarget::kCorpse;
 		} else {
 			SKSE::log::warn(
 				"CalamityAffixes: unknown feedback.target '{}'; feedback disabled (affixId={}).",
@@ -250,6 +252,7 @@ namespace CalamityAffixes
 			durationSeconds = durationIt->get<float>();
 		}
 		a_out.action.feedback.durationSeconds = std::clamp(durationSeconds, 0.05f, 2.0f);
+		a_out.action.feedback.spatialSound = feedback.value("spatialSound", false);
 
 		const auto artSpec = readString("artObjectEditorId");
 		if (!artSpec.empty()) {
@@ -272,6 +275,53 @@ namespace CalamityAffixes
 					soundSpec);
 			}
 		}
+	}
+
+	void EventBridge::ParseTrapFeedbackFromJson(
+		const nlohmann::json& a_action,
+		RE::TESDataHandler* a_handler,
+		AffixRuntime& a_out) const
+	{
+		const auto feedbackIt = a_action.find("trapFeedback");
+		if (feedbackIt == a_action.end() || !feedbackIt->is_object() || a_out.action.type != ActionType::kSpawnTrap) {
+			return;
+		}
+
+		const auto& feedback = *feedbackIt;
+		const auto markerSpec = feedback.value("markerArtObjectEditorId", std::string{});
+		a_out.action.trapFeedback.markerArt = ConfigShared::LookupFormFromSpec<RE::BGSArtObject>(markerSpec, a_handler);
+		if (!a_out.action.trapFeedback.markerArt) {
+			SKSE::log::warn(
+				"CalamityAffixes: trap marker ArtObject not found; trap feedback disabled (affixId={}, art={}).",
+				a_out.id,
+				markerSpec);
+			return;
+		}
+		a_out.action.trapFeedback.unarmedScale = std::clamp(feedback.value("unarmedScale", 0.75f), 0.1f, 4.0f);
+		a_out.action.trapFeedback.armedScale = std::clamp(feedback.value("armedScale", 1.0f), 0.1f, 4.0f);
+
+		auto parseCue = [&](std::string_view a_name, TrapFeedbackCue& a_cue) {
+			const auto cueIt = feedback.find(std::string(a_name));
+			if (cueIt == feedback.end() || !cueIt->is_object()) {
+				return;
+			}
+			const auto artSpec = cueIt->value("artObjectEditorId", std::string{});
+			const auto soundSpec = cueIt->value("soundForm", std::string{});
+			if (!artSpec.empty()) {
+				a_cue.art = ConfigShared::LookupFormFromSpec<RE::BGSArtObject>(artSpec, a_handler);
+			}
+			if (!soundSpec.empty()) {
+				a_cue.sound = ConfigShared::LookupFormFromSpec<RE::BGSSoundDescriptorForm>(soundSpec, a_handler);
+			}
+			a_cue.durationSeconds = std::clamp(cueIt->value("durationSeconds", 0.0f), 0.0f, 2.0f);
+			a_cue.scale = std::clamp(cueIt->value("scale", 1.0f), 0.1f, 4.0f);
+		};
+
+		parseCue("placed", a_out.action.trapFeedback.placed);
+		parseCue("armed", a_out.action.trapFeedback.armed);
+		parseCue("triggered", a_out.action.trapFeedback.triggered);
+		parseCue("expired", a_out.action.trapFeedback.expired);
+		a_out.action.trapFeedback.configured = true;
 	}
 
 	void EventBridge::ApplyScrollNoConsumeChanceFromJson(const nlohmann::json& a_action, AffixRuntime& a_out) const
@@ -375,6 +425,7 @@ namespace CalamityAffixes
 					continue;
 				}
 				ParseActionFeedbackFromJson(action, a_handler, out);
+				ParseTrapFeedbackFromJson(action, a_handler, out);
 
 				NormalizeParsedAffixRuntimePolicy(out, type);
 

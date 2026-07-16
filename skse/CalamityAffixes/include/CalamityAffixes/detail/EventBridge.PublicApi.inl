@@ -16,6 +16,7 @@
 		// Called from kPostLoadGame messaging callback — game state (player inventory)
 		// is fully loaded at this point, unlike the Serialization Load callback.
 		void OnPostLoadGame();
+		void OnPreLoadGame();
 
 		// Called from SKSE SerializationInterface form delete callback.
 		// We use this to prune instance-affix entries for player-dropped world refs that are later deleted.

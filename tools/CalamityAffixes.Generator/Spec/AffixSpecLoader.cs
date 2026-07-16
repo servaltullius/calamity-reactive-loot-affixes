@@ -334,6 +334,8 @@ public static class AffixSpecLoader
                 }
             }
         }
+
+        ValidateFeedbackArtObjectReferences(spec, seenArtObjects);
     }
 
     private static void ValidateWeaponSubtypePolicy(AffixDefinition affix)
@@ -626,6 +628,203 @@ public static class AffixSpecLoader
             throw new InvalidDataException($"{affix.Id}: runtime.perTargetICDSeconds must be >= 0 (got: {rt.PerTargetICDSeconds.Value}).");
         }
 
+        ValidateActionFeedbackShape(actionElement, actionType, affix.Id);
+        ValidateTrapFeedbackShape(actionElement, actionType, affix.Id);
+
+    }
+
+    private static void ValidateActionFeedbackShape(JsonElement action, string actionType, string affixId)
+    {
+        if (!action.TryGetProperty("feedback", out var feedback))
+        {
+            return;
+        }
+        if (feedback.ValueKind != JsonValueKind.Object)
+        {
+            throw new InvalidDataException($"{affixId}: runtime.action.feedback must be an object.");
+        }
+
+        var allowed = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "artObjectEditorId", "soundForm", "target", "durationSeconds", "playOn", "spatialSound",
+        };
+        RejectUnknownProperties(feedback, allowed, $"{affixId}: runtime.action.feedback");
+
+        var hasArt = TryGetRequiredString(feedback, "artObjectEditorId", out _);
+        var hasSound = TryGetRequiredString(feedback, "soundForm", out var soundForm);
+        if (!hasArt && !hasSound)
+        {
+            throw new InvalidDataException($"{affixId}: feedback requires artObjectEditorId or soundForm.");
+        }
+        if (hasSound && !IsValidFormSpec(soundForm))
+        {
+            throw new InvalidDataException($"{affixId}: feedback.soundForm must use Plugin|0xFORMID syntax.");
+        }
+        if (hasArt)
+        {
+            ValidateRequiredNumberRange(feedback, "durationSeconds", 0.05, 2.0, $"{affixId}: feedback");
+        }
+        if (!TryGetRequiredString(feedback, "target", out var target) || target is not ("Owner" or "Target" or "Corpse"))
+        {
+            throw new InvalidDataException($"{affixId}: feedback.target must be Owner, Target, or Corpse.");
+        }
+        if (target == "Corpse" && actionType is not ("CorpseExplosion" or "SummonCorpseExplosion"))
+        {
+            throw new InvalidDataException($"{affixId}: feedback target Corpse is restricted to corpse explosion actions.");
+        }
+        if (target != "Corpse" && actionType is "CorpseExplosion" or "SummonCorpseExplosion")
+        {
+            throw new InvalidDataException($"{affixId}: corpse explosion feedback must target Corpse.");
+        }
+        if (!TryGetRequiredString(feedback, "playOn", out var playOn) || playOn is not ("Proc" or "PassiveAdd"))
+        {
+            throw new InvalidDataException($"{affixId}: feedback.playOn must be Proc or PassiveAdd.");
+        }
+        if (feedback.TryGetProperty("spatialSound", out var spatialSound) &&
+            spatialSound.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        {
+            throw new InvalidDataException($"{affixId}: feedback.spatialSound must be a boolean.");
+        }
+    }
+
+    private static void ValidateTrapFeedbackShape(JsonElement action, string actionType, string affixId)
+    {
+        if (!action.TryGetProperty("trapFeedback", out var feedback))
+        {
+            return;
+        }
+        if (actionType != "SpawnTrap")
+        {
+            throw new InvalidDataException($"{affixId}: trapFeedback is supported only for SpawnTrap.");
+        }
+        if (feedback.ValueKind != JsonValueKind.Object)
+        {
+            throw new InvalidDataException($"{affixId}: runtime.action.trapFeedback must be an object.");
+        }
+
+        var allowed = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "markerArtObjectEditorId", "unarmedScale", "armedScale", "placed", "armed", "triggered", "expired",
+        };
+        RejectUnknownProperties(feedback, allowed, $"{affixId}: trapFeedback");
+        if (!TryGetRequiredString(feedback, "markerArtObjectEditorId", out _))
+        {
+            throw new InvalidDataException($"{affixId}: trapFeedback.markerArtObjectEditorId is required.");
+        }
+        ValidateRequiredNumberRange(feedback, "unarmedScale", 0.1, 4.0, $"{affixId}: trapFeedback");
+        ValidateRequiredNumberRange(feedback, "armedScale", 0.1, 4.0, $"{affixId}: trapFeedback");
+
+        foreach (var cueName in new[] { "placed", "armed", "triggered", "expired" })
+        {
+            if (!feedback.TryGetProperty(cueName, out var cue))
+            {
+                continue;
+            }
+            ValidateTrapFeedbackCue(cue, cueName, affixId);
+        }
+    }
+
+    private static void ValidateTrapFeedbackCue(JsonElement cue, string cueName, string affixId)
+    {
+        if (cue.ValueKind != JsonValueKind.Object)
+        {
+            throw new InvalidDataException($"{affixId}: trapFeedback.{cueName} must be an object.");
+        }
+        RejectUnknownProperties(
+            cue,
+            new HashSet<string>(StringComparer.Ordinal) { "artObjectEditorId", "soundForm", "durationSeconds", "scale" },
+            $"{affixId}: trapFeedback.{cueName}");
+        var hasArt = TryGetRequiredString(cue, "artObjectEditorId", out _);
+        var hasSound = TryGetRequiredString(cue, "soundForm", out var soundForm);
+        if (!hasArt && !hasSound)
+        {
+            throw new InvalidDataException($"{affixId}: trapFeedback.{cueName} requires artObjectEditorId or soundForm.");
+        }
+        if (hasSound && !IsValidFormSpec(soundForm))
+        {
+            throw new InvalidDataException($"{affixId}: trapFeedback.{cueName}.soundForm must use Plugin|0xFORMID syntax.");
+        }
+        if (hasArt)
+        {
+            ValidateRequiredNumberRange(cue, "durationSeconds", 0.05, 2.0, $"{affixId}: trapFeedback.{cueName}");
+        }
+        if (cue.TryGetProperty("scale", out _))
+        {
+            ValidateRequiredNumberRange(cue, "scale", 0.1, 4.0, $"{affixId}: trapFeedback.{cueName}");
+        }
+    }
+
+    private static void ValidateFeedbackArtObjectReferences(AffixSpec spec, HashSet<string> artObjects)
+    {
+        foreach (var affix in spec.Keywords.Affixes)
+        {
+            var action = JsonSerializer.SerializeToElement(affix.Runtime.Action);
+            foreach (var editorId in EnumerateFeedbackArtObjectEditorIds(action))
+            {
+                if (editorId.StartsWith("CAFF_", StringComparison.Ordinal) && !artObjects.Contains(editorId))
+                {
+                    throw new InvalidDataException($"{affix.Id}: feedback references missing ArtObject {editorId}.");
+                }
+            }
+        }
+    }
+
+    private static IEnumerable<string> EnumerateFeedbackArtObjectEditorIds(JsonElement action)
+    {
+        if (action.TryGetProperty("feedback", out var feedback) &&
+            TryGetRequiredString(feedback, "artObjectEditorId", out var feedbackArt))
+        {
+            yield return feedbackArt;
+        }
+        if (!action.TryGetProperty("trapFeedback", out var trapFeedback) || trapFeedback.ValueKind != JsonValueKind.Object)
+        {
+            yield break;
+        }
+        if (TryGetRequiredString(trapFeedback, "markerArtObjectEditorId", out var markerArt))
+        {
+            yield return markerArt;
+        }
+        foreach (var cueName in new[] { "placed", "armed", "triggered", "expired" })
+        {
+            if (trapFeedback.TryGetProperty(cueName, out var cue) &&
+                TryGetRequiredString(cue, "artObjectEditorId", out var cueArt))
+            {
+                yield return cueArt;
+            }
+        }
+    }
+
+    private static void RejectUnknownProperties(JsonElement value, HashSet<string> allowed, string path)
+    {
+        foreach (var property in value.EnumerateObject())
+        {
+            if (!allowed.Contains(property.Name))
+            {
+                throw new InvalidDataException($"{path} contains unsupported property '{property.Name}'.");
+            }
+        }
+    }
+
+    private static void ValidateRequiredNumberRange(JsonElement parent, string key, double min, double max, string path)
+    {
+        if (!parent.TryGetProperty(key, out var property) ||
+            property.ValueKind != JsonValueKind.Number ||
+            !property.TryGetDouble(out var value) || value < min || value > max)
+        {
+            throw new InvalidDataException($"{path}.{key} must be a number in range {min}..{max}.");
+        }
+    }
+
+    private static bool IsValidFormSpec(string value)
+    {
+        var separator = value.LastIndexOf('|');
+        if (separator <= 0 || separator >= value.Length - 3)
+        {
+            return false;
+        }
+        var formId = value[(separator + 1)..];
+        return formId.StartsWith("0x", StringComparison.OrdinalIgnoreCase) &&
+               uint.TryParse(formId[2..], System.Globalization.NumberStyles.HexNumber, null, out _);
     }
 
     private static bool IsSpecialActionType(string actionType)

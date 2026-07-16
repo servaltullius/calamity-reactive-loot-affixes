@@ -122,6 +122,9 @@ SKSEPluginInfo(
 		case SKSE::MessagingInterface::kPostLoadGame:
 			CalamityAffixes::EventBridge::GetSingleton()->OnPostLoadGame();
 			break;
+		case SKSE::MessagingInterface::kPreLoadGame:
+			CalamityAffixes::EventBridge::GetSingleton()->OnPreLoadGame();
+			break;
 		default:
 			break;
 		}

@@ -173,7 +173,7 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFourteenTypedRecords()
+    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsThirtyFiveTypedRecords()
     {
         var repoRoot = FindRepoRoot();
         var fixture = ReadV140AllocationFixture(repoRoot);
@@ -181,7 +181,7 @@ public sealed class RepoSpecRegressionTests
         var mod = KeywordPluginBuilder.Build(spec);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(747, actual.Length);
+        Assert.Equal(768, actual.Length);
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -201,9 +201,9 @@ public sealed class RepoSpecRegressionTests
                 new AllocationRecord(0x000AE9u, "ARTO", "CAFF_ARTO_VFX_FURY_SURGE"),
                 new AllocationRecord(0x000AEAu, "ARTO", "CAFF_ARTO_VFX_WEALTH_PASSIVE"),
             },
-            actual.TakeLast(14));
+            actual.Skip(fixture.Records.Length).Take(14));
         Assert.True(mod.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-        Assert.Equal(0x000AEBu, ((IModGetter)mod).NextFormID);
+        Assert.Equal(0x000B00u, ((IModGetter)mod).NextFormID);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
             actual.Length,
@@ -228,12 +228,12 @@ public sealed class RepoSpecRegressionTests
             using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
             var reimportedAllocation = AllocationSignature(reimported);
 
-            Assert.Equal(747, generatedAllocation.Length);
+            Assert.Equal(768, generatedAllocation.Length);
             Assert.Equal(generatedAllocation, reimportedAllocation);
             Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
-            Assert.Equal(generatedAllocation.TakeLast(14), reimportedAllocation.TakeLast(14));
+            Assert.Equal(generatedAllocation.TakeLast(35), reimportedAllocation.TakeLast(35));
             Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-            Assert.Equal(0x000AEBu, reimported.NextFormID);
+            Assert.Equal(0x000B00u, reimported.NextFormID);
         }
         finally
         {
@@ -250,7 +250,7 @@ public sealed class RepoSpecRegressionTests
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(747, actual.Length);
+        Assert.Equal(768, actual.Length);
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -270,9 +270,9 @@ public sealed class RepoSpecRegressionTests
                 new AllocationRecord(0x000AE9u, "ARTO", "CAFF_ARTO_VFX_FURY_SURGE"),
                 new AllocationRecord(0x000AEAu, "ARTO", "CAFF_ARTO_VFX_WEALTH_PASSIVE"),
             },
-            actual.TakeLast(14));
+            actual.Skip(fixture.Records.Length).Take(14));
         Assert.True(mod.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-        Assert.Equal(0x000AEBu, mod.NextFormID);
+        Assert.Equal(0x000B00u, mod.NextFormID);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
             actual.Length,

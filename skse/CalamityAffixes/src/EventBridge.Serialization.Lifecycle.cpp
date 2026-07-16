@@ -35,7 +35,7 @@ namespace CalamityAffixes
 		_activeLowHealthTriggerAffixIndices.clear();
 		_instanceStates.clear();
 		_runewordState.ResetSelectionAndProgress();
-		_trapState.Reset();
+		ClearTrapRuntimeState();
 		_corpseExplosionSeenCorpses.clear();
 		_summonCorpseExplosionSeenCorpses.clear();
 		_corpseExplosionState = {};
@@ -60,6 +60,12 @@ namespace CalamityAffixes
 		// PostLoadGame so normal saves cannot retain an empty/stale equipped cache.
 		RebuildActiveCounts(true);
 		MaybeMigrateMiscCurrency();
+	}
+
+	void EventBridge::OnPreLoadGame()
+	{
+		const std::scoped_lock lock(_stateMutex);
+		ClearTrapRuntimeState();
 	}
 
 	bool EventBridge::NormalizeLegacyPlayerInstanceKeys()

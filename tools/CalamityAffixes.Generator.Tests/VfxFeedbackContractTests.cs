@@ -23,6 +23,27 @@ public sealed class VfxFeedbackContractTests
         new("CAFF_ARTO_VFX_SMOKE_SLOW", @"Meshes\Actors\Wisp\Character Assets\FXWispParticleAttach.nif"),
         new("CAFF_ARTO_VFX_FURY_SURGE", @"Meshes\Magic\IllusionMassRedCastBodyFX.nif"),
         new("CAFF_ARTO_VFX_WEALTH_PASSIVE", @"Meshes\Magic\HealRitualCastBodyFX.nif"),
+        new("CAFF_ARTO_VFX_TRAP_BEAR_MARKER", @"Meshes\Traps\BearTrap\BearTrap01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_BEAR_BURST", @"Meshes\Magic\ExplosionFrost01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_RUNE_MARKER", @"Meshes\Magic\RuneFrostProjectile01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_RUNE_BURST", @"Meshes\Magic\ExplosionFrost01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", @"Meshes\Effects\FXPoisonGaswithONOFFDark.nif"),
+        new("CAFF_ARTO_VFX_TRAP_PLAGUE_BURST", @"Meshes\Effects\FXGasTrapBlast.nif"),
+        new("CAFF_ARTO_VFX_TRAP_TAR_MARKER", @"Meshes\Traps\OilTrapPuddle01\OilTrapPuddle01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_TAR_BURST", @"Meshes\Effects\FXGasTrap01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_SIPHON_MARKER", @"Meshes\Magic\SoulTrapTargetPointFX.nif"),
+        new("CAFF_ARTO_VFX_TRAP_SIPHON_BURST", @"Meshes\Magic\AbsorbSpellHitEffect01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_CHAOS_MARKER", @"Meshes\Magic\RuneLightningProjectile01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_CHAOS_BURST", @"Meshes\Magic\ExplosionShock01.nif"),
+        new("CAFF_ARTO_VFX_CORPSE_FIRE", @"Meshes\Magic\FireBallExp01.nif"),
+        new("CAFF_ARTO_VFX_CORPSE_PLAGUE", @"Meshes\Effects\FXGasTrapBlast.nif"),
+        new("CAFF_ARTO_VFX_PROC_EMERGENCY_HEAL", @"Meshes\Magic\HealTargetFX.nif"),
+        new("CAFF_ARTO_VFX_PROC_PHASE", @"Meshes\Magic\InvisFXBody01.nif"),
+        new("CAFF_ARTO_VFX_PROC_PHYSICAL_BULWARK", @"Meshes\Magic\ShieldSpellBodyFX.nif"),
+        new("CAFF_ARTO_VFX_PROC_MAGIC_WARD", @"Meshes\Magic\WardBodyFX.nif"),
+        new("CAFF_ARTO_VFX_PROC_REFLECT", @"Meshes\Actors\Spriggan\FXSprigganAttachments.nif"),
+        new("CAFF_ARTO_VFX_PROC_RADIANCE", @"Meshes\Magic\HealRitualCastBodyFX.nif"),
+        new("CAFF_ARTO_VFX_PROC_DRAGON_SCALE", @"Meshes\Magic\FXFireCloak01.nif"),
     ];
 
     [Fact]
@@ -42,12 +63,12 @@ public sealed class VfxFeedbackContractTests
     }
 
     [Fact]
-    public void TypedTail_AppendsFiveMagicHitEffectArtObjectsAfterTheNineEffectRecords()
+    public void TypedTail_AppendsTwentySixMagicHitEffectArtObjectsAfterTheNineEffectRecords()
     {
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(14, records.Length);
+        Assert.Equal(35, records.Length);
         for (var index = 0; index < ExpectedArt.Length; index++)
         {
             var record = records[index + 9];
@@ -57,6 +78,26 @@ public sealed class VfxFeedbackContractTests
             Assert.Equal(ExpectedArt[index].ModelPath, art.GetProperty("modelPath").GetString());
             Assert.Equal("MagicHitEffect", art.GetProperty("artType").GetString());
         }
+    }
+
+    [Fact]
+    public void P0P1Feedback_CoversSixTrapsEightCorpseExplosionsAndNineteenDefensiveProcs()
+    {
+        var actions = new List<JsonElement>();
+        foreach (var moduleName in new[] { "keywords.affixes.core.json", "keywords.affixes.runewords.json", "keywords.affixes.suffixes.json" })
+        {
+            var module = ReadJson(Path.Combine("affixes", "modules", moduleName));
+            actions.AddRange(module.EnumerateArray().Select(affix => affix.GetProperty("runtime").GetProperty("action").Clone()));
+        }
+
+        Assert.Equal(6, actions.Count(action => action.TryGetProperty("trapFeedback", out _)));
+        Assert.Equal(8, actions.Count(action =>
+            action.TryGetProperty("feedback", out var feedback) &&
+            feedback.GetProperty("target").GetString() == "Corpse"));
+        Assert.Equal(19, actions.Count(action =>
+            action.TryGetProperty("feedback", out var feedback) &&
+            feedback.GetProperty("target").GetString() == "Owner" &&
+            feedback.TryGetProperty("spatialSound", out var spatial) && spatial.GetBoolean()));
     }
 
     [Fact]

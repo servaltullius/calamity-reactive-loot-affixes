@@ -25,7 +25,7 @@ namespace CalamityAffixes
 			_appliedPassiveSpells.clear();
 		}
 
-		_trapState.Reset();
+		ClearTrapRuntimeState();
 		_combatState.ResetTransientState();
 		Hooks::ClearRuntimeState();
 		_equipResync.nextAtMs = 0u;

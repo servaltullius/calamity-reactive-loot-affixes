@@ -313,7 +313,7 @@ namespace RuntimeGateStoreChecks
 			sourceText->find("PassiveSpellReconcileAction::kRefresh") == std::string::npos ||
 			sourceText->find("a_player->RemoveSpell(spell);") == std::string::npos ||
 			sourceText->find("ApplyDesiredPassiveSpells(player, {});") == std::string::npos ||
-			sourceText->find("_trapState.Reset();") == std::string::npos ||
+			sourceText->find("ClearTrapRuntimeState();") == std::string::npos ||
 			sourceText->find("_combatState.ResetTransientState();") == std::string::npos ||
 			mainText->find("if (bridge->IsRuntimeEnabled()) {") != std::string::npos ||
 			mainText->find("CalamityAffixes::Hooks::Install();") == std::string::npos ||

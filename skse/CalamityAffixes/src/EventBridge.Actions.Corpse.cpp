@@ -447,7 +447,9 @@ namespace CalamityAffixes
 			return 0;
 		}
 
-		if (auto* shader = GetInstantCorpseExplosionShader()) {
+		PlayActionFeedback(a_action, a_owner, nullptr, ActionFeedbackPlayOn::kProc, a_corpse);
+		if (!a_action.feedback.art) {
+			if (auto* shader = GetInstantCorpseExplosionShader()) {
 			a_corpse->InstantiateHitShader(
 				shader,
 				0.35f,
@@ -456,6 +458,7 @@ namespace CalamityAffixes
 				false,
 				nullptr,
 				false);
+			}
 		}
 
 		struct Target

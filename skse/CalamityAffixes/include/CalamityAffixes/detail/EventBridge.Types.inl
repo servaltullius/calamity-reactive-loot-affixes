@@ -65,6 +65,7 @@
 		{
 			kOwner,
 			kTarget,
+			kCorpse,
 		};
 
 		enum class ActionFeedbackPlayOn : std::uint8_t
@@ -81,6 +82,44 @@
 			float durationSeconds{ 0.0f };
 			ActionFeedbackTarget target{ ActionFeedbackTarget::kOwner };
 			ActionFeedbackPlayOn playOn{ ActionFeedbackPlayOn::kNone };
+			bool spatialSound{ false };
+		};
+
+		struct TrapFeedbackCue
+		{
+			RE::BGSArtObject* art{ nullptr };
+			RE::BGSSoundDescriptorForm* sound{ nullptr };
+			float durationSeconds{ 0.0f };
+			float scale{ 1.0f };
+		};
+
+		struct TrapFeedback
+		{
+			RE::BGSArtObject* markerArt{ nullptr };
+			float unarmedScale{ 0.75f };
+			float armedScale{ 1.0f };
+			TrapFeedbackCue placed{};
+			TrapFeedbackCue armed{};
+			TrapFeedbackCue triggered{};
+			TrapFeedbackCue expired{};
+			bool configured{ false };
+		};
+
+		enum class TrapVisualState : std::uint8_t
+		{
+			kNone,
+			kUnarmed,
+			kArmed,
+		};
+
+		enum class TrapRemovalReason : std::uint8_t
+		{
+			kExpired,
+			kConsumed,
+			kPerAffixCap,
+			kGlobalCap,
+			kInvalid,
+			kReset,
 		};
 
 		// Internal domain structs.
@@ -122,6 +161,7 @@
 			bool debugNotify{ false };
 			bool applyToSelf{ false };
 			ActionFeedback feedback{};
+			TrapFeedback trapFeedback{};
 
 			// CastSpellAdaptiveElement
 			AdaptiveElementMode adaptiveMode{ AdaptiveElementMode::kWeakestResist };
@@ -185,6 +225,7 @@
 			std::uint64_t sourceToken{ 0 };
 			RE::FormID ownerFormID{ 0 };
 			RE::NiPoint3 position{};
+			RE::TESObjectCELL* cell{ nullptr };
 			float radius{ 0.0f };
 
 			RE::SpellItem* spell{ nullptr };
@@ -201,6 +242,9 @@
 			std::uint32_t maxTriggers{ 1 };
 			std::uint32_t triggeredCount{ 0 };
 			std::uint32_t maxTargetsPerTrigger{ 1 };
+			TrapFeedback feedback{};
+			TrapVisualState visualState{ TrapVisualState::kNone };
+			RE::NiPointer<RE::BSTempEffectParticle> markerEffect{};
 		};
 
 		struct TrapRuntimeState

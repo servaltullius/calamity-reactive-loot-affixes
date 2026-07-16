@@ -156,8 +156,80 @@
           ]
         },
         "kid": { "$ref": "#/$defs/kid" },
-        "runtime": { "type": "object" }
+        "runtime": { "$ref": "#/$defs/runtime" }
       }
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "action": { "$ref": "#/$defs/runtimeAction" }
+      }
+    },
+    "runtimeAction": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "feedback": { "$ref": "#/$defs/actionFeedback" },
+        "trapFeedback": { "$ref": "#/$defs/trapFeedback" }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["trapFeedback"] },
+          "then": { "properties": { "type": { "const": "SpawnTrap" } } }
+        },
+        {
+          "if": {
+            "required": ["feedback"],
+            "properties": { "feedback": { "properties": { "target": { "const": "Corpse" } } } }
+          },
+          "then": { "properties": { "type": { "enum": ["CorpseExplosion", "SummonCorpseExplosion"] } } }
+        }
+      ]
+    },
+    "actionFeedback": {
+      "type": "object",
+      "required": ["target", "playOn"],
+      "additionalProperties": false,
+      "properties": {
+        "artObjectEditorId": { "type": "string", "minLength": 1 },
+        "soundForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
+        "target": { "type": "string", "enum": ["Owner", "Target", "Corpse"] },
+        "durationSeconds": { "type": "number", "minimum": 0.05, "maximum": 2.0 },
+        "playOn": { "type": "string", "enum": ["Proc", "PassiveAdd"] },
+        "spatialSound": { "type": "boolean" }
+      },
+      "anyOf": [
+        { "required": ["artObjectEditorId", "durationSeconds"] },
+        { "required": ["soundForm"] }
+      ]
+    },
+    "trapFeedback": {
+      "type": "object",
+      "required": ["markerArtObjectEditorId", "unarmedScale", "armedScale"],
+      "additionalProperties": false,
+      "properties": {
+        "markerArtObjectEditorId": { "type": "string", "minLength": 1 },
+        "unarmedScale": { "type": "number", "minimum": 0.1, "maximum": 4.0 },
+        "armedScale": { "type": "number", "minimum": 0.1, "maximum": 4.0 },
+        "placed": { "$ref": "#/$defs/trapFeedbackCue" },
+        "armed": { "$ref": "#/$defs/trapFeedbackCue" },
+        "triggered": { "$ref": "#/$defs/trapFeedbackCue" },
+        "expired": { "$ref": "#/$defs/trapFeedbackCue" }
+      }
+    },
+    "trapFeedbackCue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artObjectEditorId": { "type": "string", "minLength": 1 },
+        "soundForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
+        "durationSeconds": { "type": "number", "minimum": 0.05, "maximum": 2.0 },
+        "scale": { "type": "number", "minimum": 0.1, "maximum": 4.0 }
+      },
+      "anyOf": [
+        { "required": ["artObjectEditorId", "durationSeconds"] },
+        { "required": ["soundForm"] }
+      ]
     },
     "kidRule": {
       "type": "object",
