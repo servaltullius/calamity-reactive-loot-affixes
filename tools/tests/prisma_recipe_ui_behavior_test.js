@@ -107,6 +107,138 @@ const runRecipeBehavior = new Function(
 );
 runRecipeBehavior(assert);
 
+const recipeListViewModelSource = between(
+  "      function resolveRecipeListViewModel()",
+  "      function createRecipeButton(item)"
+);
+const runRecipeFilterBehavior = new Function(
+  "assert",
+  `
+    "use strict";
+    let uiLang = "en";
+    function t(en, ko) {
+      if (uiLang === "en") return en;
+      if (uiLang === "ko") return ko;
+      return en + " / " + ko;
+    }
+    const validRecipeBaseFilters = new Set(["all", "weapon", "armor", "mixed"]);
+    const recipeSearchDocumentByToken = new Map();
+    let recipeItemsState = [
+      { token: "weapon", name: "Steel Fury", baseKey: "weapon" },
+      { token: "armor", name: "Arcane Ward", baseKey: "armor" },
+      { token: "mixed", name: "Hybrid Soul", baseKey: "mixed", selected: true }
+    ];
+    let recipeSearchQuery = "";
+    let recipeBaseFilter = "all";
+    let runewordPanelState = {};
+    let confirmedRecipeTokenState = "mixed";
+    let optimisticRecipeTokenState = "";
+    const panelRenderSection = { recipeItems: "recipeItems" };
+    let filterControlUpdates = 0;
+    let scheduledRecipeRenders = 0;
+    function updateRecipeFilterControls() {
+      filterControlUpdates += 1;
+    }
+    function schedulePanelRender(section) {
+      assert.strictEqual(section, panelRenderSection.recipeItems);
+      scheduledRecipeRenders += 1;
+    }
+    ${recipeLocalization}
+    ${recipeSearch}
+    ${recipeListViewModelSource}
+
+    let view = resolveRecipeListViewModel();
+    assert.strictEqual(view.visibleItems.length, 3);
+    assert.strictEqual(view.countText, "Total 3");
+
+    recipeBaseFilter = "weapon";
+    view = resolveRecipeListViewModel();
+    assert.deepStrictEqual(view.visibleItems.map((item) => item.token), ["weapon"]);
+    assert.strictEqual(view.countText, "Showing 1/3");
+
+    recipeBaseFilter = "armor";
+    recipeSearchQuery = "ward";
+    view = resolveRecipeListViewModel();
+    assert.deepStrictEqual(view.visibleItems.map((item) => item.token), ["armor"]);
+
+    recipeBaseFilter = "weapon";
+    view = resolveRecipeListViewModel();
+    assert.strictEqual(view.visibleItems.length, 0);
+    assert(view.emptyState.title.includes("current filters"));
+    assert.strictEqual(getSelectedRecipeItem().token, "mixed");
+
+    uiLang = "ko";
+    assert.strictEqual(resolveRecipeListViewModel().countText, "표시 0/3");
+
+    assert.strictEqual(setRecipeBaseFilter("mixed"), true);
+    assert.strictEqual(recipeBaseFilter, "mixed");
+    assert.strictEqual(filterControlUpdates, 1);
+    assert.strictEqual(scheduledRecipeRenders, 1);
+    assert.strictEqual(setRecipeBaseFilter("mixed"), false);
+    assert.strictEqual(scheduledRecipeRenders, 1);
+    assert.strictEqual(setRecipeBaseFilter("invalid"), true);
+    assert.strictEqual(recipeBaseFilter, "all");
+  `
+);
+runRecipeFilterBehavior(assert);
+
+const panelLayoutModeSource = between(
+  "      function resolvePanelLayoutMode(width)",
+  "      function updatePanelUiScale()"
+);
+const runPanelLayoutModeBehavior = new Function(
+  "assert",
+  `
+    "use strict";
+    const controlPanel = { dataset: { layout: "wide" } };
+    ${panelLayoutModeSource}
+    assert.strictEqual(resolvePanelLayoutMode(1100), "wide");
+    assert.strictEqual(resolvePanelLayoutMode(1099), "medium");
+    assert.strictEqual(resolvePanelLayoutMode(900), "medium");
+    assert.strictEqual(resolvePanelLayoutMode(899), "narrow");
+    assert.strictEqual(applyPanelLayoutMode(1320), false);
+    assert.strictEqual(applyPanelLayoutMode(1050), true);
+    assert.strictEqual(controlPanel.dataset.layout, "medium");
+    assert.strictEqual(applyPanelLayoutMode(1000), false);
+    assert.strictEqual(applyPanelLayoutMode(850), true);
+    assert.strictEqual(controlPanel.dataset.layout, "narrow");
+  `
+);
+runPanelLayoutModeBehavior(assert);
+
+const runewordStepStateSource = between(
+  "      function triggerRunewordStateShift(element, state)",
+  "      function renderRunewordFlowProgress(actionState, state)"
+);
+const runRunewordStepStateBehavior = new Function(
+  "assert",
+  `
+    "use strict";
+    const window = { setTimeout: (callback) => callback() };
+    const classes = new Set();
+    const attributes = new Map();
+    const element = {
+      dataset: {},
+      classList: {
+        add: (name) => classes.add(name),
+        remove: (name) => classes.delete(name),
+        toggle: (name, enabled) => enabled ? classes.add(name) : classes.delete(name)
+      },
+      setAttribute: (name, value) => attributes.set(name, value),
+      removeAttribute: (name) => attributes.delete(name)
+    };
+    ${runewordStepStateSource}
+    setRunewordStepCardState(element, "active");
+    assert.strictEqual(attributes.get("aria-current"), "step");
+    assert(classes.has("active"));
+    setRunewordStepCardState(element, "complete");
+    assert(!attributes.has("aria-current"));
+    assert(classes.has("complete"));
+    assert(!classes.has("active"));
+  `
+);
+runRunewordStepStateBehavior(assert);
+
 const inspectorMergeSource = between(
   "      function buildSelectedRecipeInspectorText(",
   "      function applyTooltipPlacement()"

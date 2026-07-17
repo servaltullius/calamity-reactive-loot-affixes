@@ -483,10 +483,10 @@
 		struct LootConfig
 		{
 			float chancePercent{ 0.0f };
-			float runewordFragmentChancePercent{ 8.0f };
-			float reforgeOrbChancePercent{ 5.0f };
-			float configuredRunewordFragmentChancePercent{ 8.0f };
-			float configuredReforgeOrbChancePercent{ 5.0f };
+			float runewordFragmentChancePercent{ 12.0f };
+			float reforgeOrbChancePercent{ 7.0f };
+			float configuredRunewordFragmentChancePercent{ 12.0f };
+			float configuredReforgeOrbChancePercent{ 7.0f };
 			CurrencyDropMode currencyDropMode{ CurrencyDropMode::kHybrid };
 			bool runtimeCurrencyDropsEnabled{ false };
 			bool runtimeCorpseDeathCurrencyDropsEnabled{ true };

@@ -1530,23 +1530,27 @@ namespace RuntimeGateStoreChecks
 			const auto cubeDetailsTag = extractElementOpenTagById("runewordCubeDetails");
 			const auto baseListTag = extractElementOpenTagById("inventoryBaseList");
 			const auto recipeListTag = extractElementOpenTagById("recipeList");
+			const auto recipeFiltersTag = extractElementOpenTagById("recipeBaseFilters");
 			const auto cubeGridTag = extractElementOpenTagById("runewordCubeGrid");
 			const auto actionDetailsTag = extractElementOpenTagById("runewordActionDetails");
 			const auto insertButtonTag = extractElementOpenTagById("runewordInsertButton");
+			const auto recoveryDetailsTag = extractElementOpenTagById("runewordRecoveryDetails");
+			const auto recoverySummaryTag = extractElementOpenTagById("runewordRecoverySummary");
+			const auto resetButtonTag = extractElementOpenTagById("runewordResetButton");
 			const auto debugPanelTag = extractElementOpenTagById("debugToolsPanel");
 			const auto debugSummaryTag = extractElementOpenTagById("debugSectionSummary");
 
-			if (uiText->find(":where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary):focus-visible") == std::string::npos ||
+			if (uiText->find(":where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .rwFilterButton, .cpDangerSummary):focus-visible") == std::string::npos ||
 				uiText->find("text-rendering: optimizeLegibility;") == std::string::npos ||
 				uiText->find("-webkit-font-smoothing: antialiased;") == std::string::npos ||
 				!controlPanelTag.has_value() ||
 				controlPanelTag->find("role=\"dialog\"") == std::string::npos ||
+				controlPanelTag->find("data-layout=\"wide\"") == std::string::npos ||
 				uiText->find("class=\"rwWorkspace\"") == std::string::npos ||
 				uiText->find("class=\"rwContextBar\"") == std::string::npos ||
 				uiText->find("class=\"rwWorkbench\"") == std::string::npos ||
 				uiText->find("overflow-y: auto;") == std::string::npos ||
-				!progressTag.has_value() ||
-				!tagHasClassToken(*progressTag, "rwProgressStrip") ||
+				progressTag.has_value() ||
 				!baseStepTag.has_value() ||
 				!tagHasClassToken(*baseStepTag, "cpStepCard") ||
 				!tagHasClassToken(*baseStepTag, "rwBaseRail") ||
@@ -1571,6 +1575,9 @@ namespace RuntimeGateStoreChecks
 				!recipeListTag.has_value() ||
 				!tagHasClassToken(*recipeListTag, "rwRecipeExplorerList") ||
 				!tagHasClassToken(*recipeListTag, "rwRecipeGrid") ||
+				!recipeFiltersTag.has_value() ||
+				!tagHasClassToken(*recipeFiltersTag, "rwRecipeFilters") ||
+				recipeFiltersTag->find("role=\"group\"") == std::string::npos ||
 				!cubeGridTag.has_value() ||
 				!tagHasClassToken(*cubeGridTag, "compact") ||
 				!actionDetailsTag.has_value() ||
@@ -1579,6 +1586,12 @@ namespace RuntimeGateStoreChecks
 				!insertButtonTag.has_value() ||
 				!tagHasClassToken(*insertButtonTag, "cpButton") ||
 				!tagHasClassToken(*insertButtonTag, "cpPrimaryButton") ||
+				!recoveryDetailsTag.has_value() ||
+				!tagHasClassToken(*recoveryDetailsTag, "rwRecoveryDetails") ||
+				!recoverySummaryTag.has_value() ||
+				!tagHasClassToken(*recoverySummaryTag, "cpDangerSummary") ||
+				!resetButtonTag.has_value() ||
+				!tagHasClassToken(*resetButtonTag, "cpDangerButton") ||
 				!debugPanelTag.has_value() ||
 				!tagHasClassToken(*debugPanelTag, "cpDangerDetails") ||
 				!debugSummaryTag.has_value() ||
@@ -1588,6 +1601,9 @@ namespace RuntimeGateStoreChecks
 				uiText->find("id=\"affixSelectedItemLabel\"") == std::string::npos ||
 				uiText->find("id=\"panelTooltipLead\"") == std::string::npos ||
 				uiText->find("function triggerRunewordStateShift(element, state)") == std::string::npos ||
+				uiText->find("function setRunewordStepCardState(element, state)") == std::string::npos ||
+				uiText->find("element.setAttribute(\"aria-current\", \"step\")") == std::string::npos ||
+				uiText->find("element.removeAttribute(\"aria-current\")") == std::string::npos ||
 				uiText->find("@keyframes rwStateShift") == std::string::npos ||
 				uiText->find(".cpPrimaryButton.attention") == std::string::npos ||
 				uiText->find("animation: rwStateShift 160ms ease-out;") == std::string::npos ||
@@ -1595,6 +1611,16 @@ namespace RuntimeGateStoreChecks
 				uiText->find("element.dataset.shiftNonce") == std::string::npos ||
 				uiText->find("window.setTimeout(() =>") == std::string::npos ||
 				uiText->find("function renderRunewordFlowProgress(actionState, state)") == std::string::npos ||
+				uiText->find("function resolvePanelLayoutMode(width)") == std::string::npos ||
+				uiText->find("function applyPanelLayoutMode(width)") == std::string::npos ||
+				uiText->find("#controlPanel[data-layout=\"medium\"] .rwWorkbench") == std::string::npos ||
+				uiText->find("#controlPanel[data-layout=\"narrow\"] .rwWorkbench") == std::string::npos ||
+				uiText->find("function setRecipeBaseFilter(nextFilter)") == std::string::npos ||
+				uiText->find("function handleRecipeFilterClick(event)") == std::string::npos ||
+				uiText->find("resolveRecipeBaseBadge(item).className === activeFilter") == std::string::npos ||
+				uiText->find("data-recipe-filter=\"weapon\"") == std::string::npos ||
+				uiText->find("data-recipe-filter=\"armor\"") == std::string::npos ||
+				uiText->find("data-recipe-filter=\"mixed\"") == std::string::npos ||
 				uiText->find("@keyframes rwPrimaryPulse") != std::string::npos ||
 				uiText->find("void element.offsetWidth") != std::string::npos ||
 				uiText->find("-webkit-line-clamp: 2;") == std::string::npos ||

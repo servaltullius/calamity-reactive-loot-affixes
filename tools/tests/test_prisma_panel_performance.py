@@ -32,6 +32,7 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         for marker in (
             "const recipeNodeByToken = new Map();",
             "const recipeSearchDocumentByToken = new Map();",
+            'const validRecipeBaseFilters = new Set(["all", "weapon", "armor", "mixed"]);',
             "function rebuildRecipeCatalogDom()",
             "const fragment = document.createDocumentFragment();",
             "recipeList.replaceChildren(fragment);",
@@ -51,6 +52,22 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         self.assertIn("if (recipeCatalogDomDirty)", render)
         self.assertIn("recipeNodeByToken.get(token)", render)
         self.assertNotIn("clearChildren(recipeList)", render)
+
+        filter_state = self._between(
+            "function setRecipeBaseFilter(nextFilter)",
+            "function resolveRecipeListViewModel()",
+        )
+        self.assertIn("updateRecipeFilterControls()", filter_state)
+        self.assertIn("schedulePanelRender(panelRenderSection.recipeItems)", filter_state)
+        self.assertNotIn("invalidateRecipePresentationCaches()", filter_state)
+
+        view_model = self._between(
+            "function resolveRecipeListViewModel()",
+            "function createRecipeButton(item)",
+        )
+        self.assertIn("resolveRecipeBaseBadge(item).className === activeFilter", view_model)
+        self.assertIn("resolveRecipeSearchDocument(item).includes(query)", view_model)
+        self.assertIn("hasActiveConstraint", view_model)
 
         setter = self._between(
             "function setRecipeItems(raw)",
@@ -266,7 +283,15 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         ):
             self.assertIn(marker, self.source)
 
-        self.assertNotIn("aria-pressed", self.source)
+        for marker in (
+            'id="recipeBaseFilters"',
+            'data-recipe-filter="all"',
+            'data-recipe-filter="weapon"',
+            'data-recipe-filter="armor"',
+            'data-recipe-filter="mixed"',
+            'button.setAttribute("aria-pressed", filter === recipeBaseFilter ? "true" : "false")',
+        ):
+            self.assertIn(marker, self.source)
 
         signature = self._between(
             "function buildRecipeCatalogSignature(items)",
@@ -295,7 +320,7 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
 
         shift = self._between(
             "function triggerRunewordStateShift(element, state)",
-            "function setRunewordFlowState(element, state)",
+            "function setRunewordStepCardState(element, state)",
         )
         self.assertIn("element.dataset.shiftNonce", shift)
         self.assertIn("window.setTimeout(", shift)
@@ -330,7 +355,34 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         self.assertIn("controlPanelOpen === nextOpen", open_state)
         self.assertIn("controlPanel.style.display === expectedDisplay", open_state)
         self.assertIn('controlPanel.classList.add("is-visible")', open_state)
-        self.assertNotIn("updatePanelUiScale();", open_state)
+        self.assertIn("updatePanelUiScale();", open_state)
+
+        layout_mode = self._between(
+            "function resolvePanelLayoutMode(width)",
+            "function updatePanelUiScale()",
+        )
+        self.assertIn('if (width >= 1100) return "wide";', layout_mode)
+        self.assertIn('if (width >= 900) return "medium";', layout_mode)
+        self.assertIn('return "narrow";', layout_mode)
+        self.assertIn("controlPanel.dataset.layout === nextMode", layout_mode)
+        self.assertIn("return false;", layout_mode)
+
+        update_scale = self._between(
+            "function updatePanelUiScale()",
+            "function setPanelAnchoredPosition(left, top)",
+        )
+        self.assertIn("applyPanelLayoutMode(rect.width)", update_scale)
+
+        for marker in (
+            '#controlPanel[data-layout="medium"] .rwWorkbench',
+            '#controlPanel[data-layout="narrow"] .rwWorkbench',
+            'data-layout="wide"',
+        ):
+            self.assertIn(marker, self.source)
+
+        self.assertNotIn('id="runewordFlowProgress"', self.source)
+        self.assertIn('element.setAttribute("aria-current", "step")', self.source)
+        self.assertIn('element.removeAttribute("aria-current")', self.source)
 
 
 if __name__ == "__main__":

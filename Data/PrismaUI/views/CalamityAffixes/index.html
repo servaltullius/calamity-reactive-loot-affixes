@@ -176,7 +176,7 @@
         transform: translateY(1px);
       }
 
-      :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary):focus-visible {
+      :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .rwFilterButton, .cpDangerSummary):focus-visible {
         outline: none;
         border-color: var(--accent-strong);
         box-shadow:
@@ -262,7 +262,7 @@
         line-height: 1;
       }
 
-      :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary) {
+      :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .rwFilterButton, .cpDangerSummary) {
         transition:
           background-color 120ms ease-out,
           border-color 120ms ease-out,
@@ -745,61 +745,6 @@
         text-overflow: ellipsis;
       }
 
-      .rwProgressStrip {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: calc(8px * var(--panel-ui-scale));
-        margin-bottom: calc(6px * var(--panel-ui-scale));
-      }
-
-      .rwProgressStep {
-        display: flex;
-        align-items: center;
-        gap: calc(8px * var(--panel-ui-scale));
-        padding: calc(7px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        background: rgba(255, 255, 255, 0.03);
-        color: rgba(255, 255, 255, 0.72);
-      }
-
-      .rwProgressStep.active {
-        border-color: rgba(0, 255, 153, 0.32);
-        background: rgba(0, 255, 153, 0.09);
-        color: rgba(230, 255, 243, 0.98);
-      }
-
-      .rwProgressStep.complete {
-        border-color: rgba(173, 255, 219, 0.32);
-        background: rgba(173, 255, 219, 0.11);
-        color: rgba(238, 255, 246, 0.98);
-      }
-
-      .rwProgressDot {
-        width: calc(22px * var(--panel-ui-scale));
-        height: calc(22px * var(--panel-ui-scale));
-        border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: calc(10px * var(--panel-ui-scale));
-        font-weight: 800;
-        background: rgba(255, 255, 255, 0.04);
-      }
-
-      .rwProgressStep.active .rwProgressDot,
-      .rwProgressStep.complete .rwProgressDot {
-        border-color: rgba(0, 255, 153, 0.32);
-        background: rgba(0, 255, 153, 0.12);
-      }
-
-      .rwProgressLabel {
-        font-size: calc(12px * var(--panel-ui-scale));
-        font-weight: 700;
-        line-height: 1.25;
-      }
-
       .cpStepCard {
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 14px;
@@ -853,15 +798,7 @@
         font-weight: 800;
       }
 
-      .cpStepEyebrow {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: calc(10px * var(--panel-ui-scale));
-        letter-spacing: 0.24px;
-        text-transform: uppercase;
-      }
-
       .cpStepTitle {
-        margin-top: calc(2px * var(--panel-ui-scale));
         color: rgba(255, 255, 255, 0.98);
         font-size: calc(15px * var(--panel-ui-scale));
         font-weight: 700;
@@ -1227,29 +1164,47 @@
         color: rgba(255, 255, 255, 0.72);
       }
 
-      .rwTransmuteBar {
-        margin-top: calc(8px * var(--panel-ui-scale));
+      .rwPrimaryAction .cpButton,
+      .rwItemActionGrid .cpButton,
+      .rwRecoveryDetails .cpButton {
+        text-align: center;
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+      }
+
+      .rwPrimaryAction .cpButton {
+        width: 100%;
+      }
+
+      .rwActionSectionLabel {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(11px * var(--panel-ui-scale));
+        font-weight: 700;
+        letter-spacing: 0.18px;
+      }
+
+      .rwItemActions {
+        display: grid;
+        gap: calc(6px * var(--panel-ui-scale));
+      }
+
+      .rwItemActionGrid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: calc(8px * var(--panel-ui-scale));
       }
 
-      .rwTransmuteBar.compact {
+      .rwRecoveryDetails {
         margin-top: 0;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .rwTransmuteBar.compact .cpPrimaryButton {
-        grid-column: 1 / -1;
-      }
-
-      .rwTransmuteBar.compact .cpDangerButton {
-        grid-column: 1 / -1;
-      }
-
-      .rwTransmuteBar.compact .cpButton {
-        text-align: center;
+      .rwRecoveryDetails .cpDangerSummary {
         padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        font-size: calc(12px * var(--panel-ui-scale));
+      }
+
+      .rwRecoveryDetails .cpDangerBody {
+        grid-template-columns: 1fr;
+        padding-top: calc(8px * var(--panel-ui-scale));
       }
 
       .rwActionDetails {
@@ -1282,6 +1237,37 @@
         align-items: center;
         gap: calc(8px * var(--panel-ui-scale));
         margin-bottom: calc(6px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeFilters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: calc(6px * var(--panel-ui-scale));
+        margin-bottom: calc(6px * var(--panel-ui-scale));
+      }
+
+      .rwFilterButton {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.76);
+        padding: calc(4px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        font-family: inherit;
+        font-size: calc(10px * var(--panel-ui-scale));
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .rwFilterButton:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.08);
+      }
+
+      .rwFilterButton[aria-pressed="true"] {
+        border-color: rgba(0, 255, 153, 0.52);
+        background: rgba(0, 255, 153, 0.15);
+        color: rgba(225, 255, 240, 0.98);
       }
 
       .rwSearchInput {
@@ -1427,36 +1413,59 @@
         }
       }
 
-      @media (max-width: 1100px) {
-        .rwContextBar {
-          grid-template-columns: 1fr;
-        }
+      #controlPanel[data-layout="medium"] .rwContextBar,
+      #controlPanel[data-layout="narrow"] .rwContextBar {
+        grid-template-columns: 1fr;
+      }
 
-        .rwWorkbench {
-          width: 100%;
-          margin: 0;
-          grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-          justify-content: stretch;
-        }
+      #controlPanel[data-layout="medium"] .rwWorkbench {
+        width: 100%;
+        margin: 0;
+        grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+        grid-template-rows: minmax(420px, 1fr) auto;
+        justify-content: stretch;
+      }
 
-        .rwActionInspector {
-          grid-column: 1 / -1;
-        }
+      #controlPanel[data-layout="medium"] .rwActionInspector {
+        grid-column: 1 / -1;
+      }
 
-        .rwCubeGrid {
-          --rwCell: calc(56px * var(--panel-ui-scale));
-        }
+      #controlPanel[data-layout="medium"] .rwCubeGrid {
+        --rwCell: calc(56px * var(--panel-ui-scale));
+      }
 
-        .rwRecipeSummary {
-          -webkit-line-clamp: 3;
-        }
+      #controlPanel[data-layout="medium"] .rwRecipeSummary,
+      #controlPanel[data-layout="narrow"] .rwRecipeSummary {
+        -webkit-line-clamp: 3;
+      }
+
+      #controlPanel[data-layout="narrow"] .rwContextSnapshot,
+      #controlPanel[data-layout="narrow"] .rwWorkbench {
+        grid-template-columns: 1fr;
+      }
+
+      #controlPanel[data-layout="narrow"] .rwWorkbench {
+        flex: 0 0 auto;
+        grid-template-rows: none;
+      }
+
+      #controlPanel[data-layout="narrow"] .rwActionInspector {
+        grid-column: auto;
+      }
+
+      #controlPanel[data-layout="narrow"] .rwBaseQuickList {
+        max-height: calc(180px * var(--panel-ui-scale));
+      }
+
+      #controlPanel[data-layout="narrow"] .rwItemActionGrid {
+        grid-template-columns: 1fr;
       }
 
       @media (prefers-reduced-motion: reduce) {
         #controlPanel,
         .cpTabPane:not([hidden]),
         .rwStateShift,
-        :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .cpDangerSummary) {
+        :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .rwFilterButton, .cpDangerSummary) {
           animation: none;
           transition: none;
         }
@@ -1499,23 +1508,6 @@
       }
 
       @media (max-width: 900px) {
-        .rwContextSnapshot,
-        .rwWorkbench {
-          grid-template-columns: 1fr;
-        }
-
-        .rwActionInspector {
-          grid-column: auto;
-        }
-
-        .rwBaseQuickList {
-          max-height: calc(180px * var(--panel-ui-scale));
-        }
-
-        .rwTransmuteBar.compact {
-          grid-template-columns: 1fr;
-        }
-
         #tooltipPanel {
           right: 16px;
           top: 180px;
@@ -1578,6 +1570,7 @@
 
       <div
         id="controlPanel"
+        data-layout="wide"
         role="dialog"
         aria-modal="false"
         aria-labelledby="panelTitle"
@@ -1625,7 +1618,7 @@
             aria-selected="false"
             aria-controls="mainAffixPane"
             tabindex="-1">
-            Affix
+            Item Affixes
           </button>
           <button
             id="mainAdvancedTab"
@@ -1650,7 +1643,7 @@
                 <div class="rwFlowIntro">
                   <div class="cpSectionTitle" id="runewordFlowTitle">Runeword Workbench / 룬워드 작업대</div>
                   <div class="cpContextMeta" id="runewordFlowHint">
-                    Lock in one equipped base, browse recipes in the center explorer, then confirm on the right. / 착용 베이스를 고정한 뒤 중앙 탐색기에서 레시피를 찾고, 오른쪽에서 확인 후 실행하세요.
+                    Start by selecting one equipped base. / 먼저 착용 중인 베이스 아이템 하나를 선택하세요.
                   </div>
                 </div>
                 <div class="rwContextSnapshot" aria-label="Runeword context">
@@ -1668,29 +1661,11 @@
                   </div>
                 </div>
               </div>
-              <div id="runewordFlowProgress" class="rwProgressStrip" aria-label="Runeword progress">
-                <div id="runewordProgressBase" class="rwProgressStep active">
-                  <div class="rwProgressDot">1</div>
-                  <div class="rwProgressLabel">Base / 베이스</div>
-                </div>
-                <div id="runewordProgressRecipe" class="rwProgressStep">
-                  <div class="rwProgressDot">2</div>
-                  <div class="rwProgressLabel">Recipe / 레시피</div>
-                </div>
-                <div id="runewordProgressTransmute" class="rwProgressStep">
-                  <div class="rwProgressDot">3</div>
-                  <div class="rwProgressLabel">Transmute / 변환</div>
-                </div>
-              </div>
-
               <div class="rwWorkbench">
                 <div id="runewordBaseStep" class="cpStepCard rwBaseRail active">
                   <div class="cpStepHeader">
                     <div class="cpStepIndex">1</div>
-                    <div>
-                      <div id="runewordBaseEyebrow" class="cpStepEyebrow">Context</div>
-                      <div id="runewordBaseStepTitle" class="cpStepTitle">Base Rail / 베이스 고정</div>
-                    </div>
+                    <div id="runewordBaseStepTitle" class="cpStepTitle">Base Selection / 베이스 선택</div>
                   </div>
                   <div id="runewordBaseStepHint" class="cpStepHint">
                     Pick one compatible equipped item and keep it locked while you compare recipes. / 호환되는 착용 아이템 하나를 고정한 뒤 레시피를 비교하세요.
@@ -1720,10 +1695,7 @@
                 <div id="runewordRecipeStep" class="cpStepCard rwRecipeExplorer muted">
                   <div class="cpStepHeader">
                     <div class="cpStepIndex">2</div>
-                    <div>
-                      <div id="runewordRecipeEyebrow" class="cpStepEyebrow">Explore</div>
-                      <div id="runewordRecipeStepTitle" class="cpStepTitle">Recipe Explorer / 레시피 탐색기</div>
-                    </div>
+                    <div id="runewordRecipeStepTitle" class="cpStepTitle">Recipe Explorer / 레시피 탐색기</div>
                   </div>
                   <div id="runewordRecipeStepHint" class="cpStepHint">
                     This is the main workspace. Search, compare, and choose the recipe before you commit. / 이곳이 메인 작업 영역입니다. 검색하고 비교한 뒤 적용할 레시피를 고르세요.
@@ -1740,6 +1712,16 @@
                       <div class="rwRecipeCount" id="recipeCountLabel">0</div>
                     </div>
                     <div
+                      id="recipeBaseFilters"
+                      class="rwRecipeFilters"
+                      role="group"
+                      aria-label="Filter recipes by base type">
+                      <button type="button" class="rwFilterButton" data-recipe-filter="all" aria-pressed="true">All / 전체</button>
+                      <button type="button" class="rwFilterButton" data-recipe-filter="weapon" aria-pressed="false">Weapon / 무기</button>
+                      <button type="button" class="rwFilterButton" data-recipe-filter="armor" aria-pressed="false">Armor / 방어구</button>
+                      <button type="button" class="rwFilterButton" data-recipe-filter="mixed" aria-pressed="false">Mixed / 혼합</button>
+                    </div>
+                    <div
                       id="recipeList"
                       class="cpList rwList rwRecipeExplorerList rwRecipeGrid"
                       role="listbox"
@@ -1747,7 +1729,7 @@
                       data-wheel-scroll-mode="smooth"
                     ></div>
                     <div class="cpContextMeta" id="runewordRecipeListHint">
-                      Select a recipe to load its requirements and action controls into the inspector on the right. / 레시피를 선택하면 오른쪽 inspector에 요구 조건과 실행 컨트롤이 표시됩니다.
+                      Select a recipe to load its requirements and actions on the right. / 레시피를 선택하면 오른쪽 검토 영역에 요구 조건과 실행 기능이 표시됩니다.
                     </div>
                   </div>
                 </div>
@@ -1755,13 +1737,10 @@
                 <div id="runewordActionStep" class="cpStepCard cpActionCard rwActionInspector muted">
                   <div class="cpStepHeader">
                     <div class="cpStepIndex">3</div>
-                    <div>
-                      <div id="runewordActionEyebrow" class="cpStepEyebrow">Action</div>
-                      <div id="runewordActionStepTitle" class="cpStepTitle">Review & Action / 검토 및 실행</div>
-                    </div>
+                    <div id="runewordActionStepTitle" class="cpStepTitle">Review & Action / 검토 및 실행</div>
                   </div>
                   <div id="runewordActionStepHint" class="cpStepHint">
-                    Review requirements, check the cube, then execute from this compact inspector. / 이 compact inspector에서 요구 조건과 큐브를 확인한 뒤 실행하세요.
+                    Review the requirements, then execute when ready. / 요구 조건을 확인한 뒤 준비되면 실행하세요.
                   </div>
                   <div class="cpStepBody">
                     <div class="rwActionSummary">
@@ -1779,26 +1758,26 @@
                         </summary>
                         <div class="rwActionDetailsBody">
                           <div class="rwAffixBlock">
-                            <div class="cpSectionSubtle" id="runewordAffixTitle">Selected Recipe Preview / 선택 레시피 미리보기</div>
                             <div id="runewordAffixText" class="cpTooltipBox rwAffixBox"></div>
-                            <div class="cpContextMeta rwAffixHint" id="runewordAffixHint">
-                              Open this section when you want the full tooltip-like preview and extra recipe context. / 전체 툴팁형 미리보기와 추가 레시피 정보를 보고 싶을 때 이 섹션을 여세요.
-                            </div>
                           </div>
                         </div>
                       </details>
                     </div>
                     <div class="rwActionControls">
-                      <div class="rwTransmuteBar compact">
+                      <div class="rwPrimaryAction">
                         <button
                           id="runewordInsertButton"
                           class="cpButton cpPrimaryButton"
                           data-cmd="runeword.insert">
                           Transmute / 변환
                         </button>
-                        <button id="runewordReforgeButton" class="cpButton" data-cmd="runeword.reforge">Reforge / 재련</button>
-                        <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Status / 상태</button>
-                        <button id="runewordResetButton" class="cpButton cpDangerButton" data-cmd="runeword.reset">Reset State / 상태 초기화</button>
+                      </div>
+                      <div class="rwItemActions">
+                        <div id="runewordItemActionsTitle" class="rwActionSectionLabel">Item Actions / 아이템 작업</div>
+                        <div class="rwItemActionGrid">
+                          <button id="runewordReforgeButton" class="cpButton" data-cmd="runeword.reforge">Reforge / 재련</button>
+                          <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Check Status / 상태 확인</button>
+                        </div>
                       </div>
                       <details id="runewordCubeDetails" class="rwRailDetails">
                         <summary id="runewordCubeDetailsSummary" class="rwRailSummary">
@@ -1808,6 +1787,14 @@
                           <div class="rwCubeFrame compact">
                             <div id="runewordCubeGrid" class="rwCubeGrid compact" aria-label="Horadric cube"></div>
                           </div>
+                        </div>
+                      </details>
+                      <details id="runewordRecoveryDetails" class="cpDangerDetails rwRecoveryDetails">
+                        <summary id="runewordRecoverySummary" class="cpDangerSummary">
+                          Recovery &amp; Reset / 복구 및 초기화
+                        </summary>
+                        <div class="cpGrid cpDangerBody">
+                          <button id="runewordResetButton" class="cpButton cpDangerButton" data-cmd="runeword.reset">Reset Selected Base / 선택 베이스 초기화</button>
                         </div>
                       </details>
                     </div>
@@ -1832,7 +1819,7 @@
                 </div>
               </div>
               <div class="cpSection">
-                <div class="cpSectionTitle" id="panelTooltipTitle">Affix Details / 어픽스 상세</div>
+                <div class="cpSectionTitle" id="panelTooltipTitle">Item Affix Details / 아이템 어픽스 상세</div>
                 <div class="cpAffixLead" id="panelTooltipLead">
                   Focus one item at a time to read affix text without opening the full runeword flow. / 한 번에 아이템 하나에 집중해서 어픽스 텍스트를 읽을 수 있습니다.
                 </div>
@@ -1983,15 +1970,9 @@
       const feedback = document.getElementById("feedback");
       const runewordFlowTitle = document.getElementById("runewordFlowTitle");
       const runewordFlowHint = document.getElementById("runewordFlowHint");
-      const runewordProgressBase = document.getElementById("runewordProgressBase");
-      const runewordProgressRecipe = document.getElementById("runewordProgressRecipe");
-      const runewordProgressTransmute = document.getElementById("runewordProgressTransmute");
       const runewordBaseStep = document.getElementById("runewordBaseStep");
       const runewordRecipeStep = document.getElementById("runewordRecipeStep");
       const runewordActionStep = document.getElementById("runewordActionStep");
-      const runewordBaseEyebrow = document.getElementById("runewordBaseEyebrow");
-      const runewordRecipeEyebrow = document.getElementById("runewordRecipeEyebrow");
-      const runewordActionEyebrow = document.getElementById("runewordActionEyebrow");
       const runewordBaseStepTitle = document.getElementById("runewordBaseStepTitle");
       const runewordRecipeStepTitle = document.getElementById("runewordRecipeStepTitle");
       const runewordActionStepTitle = document.getElementById("runewordActionStepTitle");
@@ -2017,17 +1998,19 @@
       const recipeList = document.getElementById("recipeList");
       const recipeSearchInput = document.getElementById("recipeSearchInput");
       const recipeCountLabel = document.getElementById("recipeCountLabel");
+      const recipeBaseFilters = document.getElementById("recipeBaseFilters");
+      const recipeFilterButtons = Array.from(document.querySelectorAll("[data-recipe-filter]"));
       const runewordCubeGrid = document.getElementById("runewordCubeGrid");
       const runewordRecipeListTitle = document.getElementById("runewordRecipeListTitle");
       const runewordRecipeListHint = document.getElementById("runewordRecipeListHint");
       const runewordBaseListTitle = document.getElementById("runewordBaseListTitle");
       const runewordBaseListHint = document.getElementById("runewordBaseListHint");
-      const runewordAffixTitle = document.getElementById("runewordAffixTitle");
       const runewordAffixText = document.getElementById("runewordAffixText");
-      const runewordAffixHint = document.getElementById("runewordAffixHint");
       const runewordPanelStatus = document.getElementById("runewordPanelStatus");
       const runewordActionHint = document.getElementById("runewordActionHint");
       const runewordActionDetailsSummary = document.getElementById("runewordActionDetailsSummary");
+      const runewordItemActionsTitle = document.getElementById("runewordItemActionsTitle");
+      const runewordRecoverySummary = document.getElementById("runewordRecoverySummary");
       const runewordInsertButton = document.getElementById("runewordInsertButton");
       const runewordReforgeButton = document.getElementById("runewordReforgeButton");
       const runewordStatusButton = document.getElementById("runewordStatusButton");
@@ -2083,6 +2066,7 @@
       let inventoryItemsState = [];
       let recipeItemsState = [];
       let recipeSearchQuery = "";
+      let recipeBaseFilter = "all";
       let recipeCatalogSignatureState = "";
       let recipeCatalogDomDirty = true;
       let confirmedRecipeTokenState = "";
@@ -2117,7 +2101,9 @@
       let tooltipLayout = getDefaultTooltipLayout();
       const panelCommandAttribute = "data-cmd";
       const panelOpenTabAttribute = "data-open-tab";
+      const recipeFilterAttribute = "data-recipe-filter";
       const recipeSelectionCommandPrefix = "runeword.recipe.select:";
+      const validRecipeBaseFilters = new Set(["all", "weapon", "armor", "mixed"]);
       const panelRenderSection = Object.freeze({
         hotkeyHints: "hotkeyHints",
         selectedItemContext: "selectedItemContext",
@@ -2476,6 +2462,33 @@
         return true;
       }
 
+      function resolveRecipeFilterLabel(filter) {
+        switch (filter) {
+          case "weapon":
+            return t("Weapon", "무기");
+          case "armor":
+            return t("Armor", "방어구");
+          case "mixed":
+            return t("Mixed", "혼합");
+          default:
+            return t("All", "전체");
+        }
+      }
+
+      function updateRecipeFilterControls() {
+        if (recipeBaseFilters) {
+          recipeBaseFilters.setAttribute(
+            "aria-label",
+            t("Filter recipes by base type", "베이스 유형으로 레시피 필터")
+          );
+        }
+        for (const button of recipeFilterButtons) {
+          const filter = button.getAttribute(recipeFilterAttribute) || "all";
+          button.textContent = resolveRecipeFilterLabel(filter);
+          button.setAttribute("aria-pressed", filter === recipeBaseFilter ? "true" : "false");
+        }
+      }
+
       function initUiText() {
         document.documentElement.lang = uiLang === "ko" ? "ko" : "en";
         tooltipTitle.textContent = t("Affix", "어픽스");
@@ -2509,21 +2522,12 @@
         }
         if (runewordFlowHint) {
           runewordFlowHint.textContent = t(
-            "Lock in one equipped base, browse recipes in the center explorer, then confirm on the right.",
-            "착용 베이스를 고정한 뒤 중앙 탐색기에서 레시피를 찾고, 오른쪽에서 확인 후 실행하세요."
+            "Start by selecting one equipped base.",
+            "먼저 착용 중인 베이스 아이템 하나를 선택하세요."
           );
         }
-        if (runewordBaseEyebrow) {
-          runewordBaseEyebrow.textContent = t("Context", "컨텍스트");
-        }
-        if (runewordRecipeEyebrow) {
-          runewordRecipeEyebrow.textContent = t("Explore", "탐색");
-        }
-        if (runewordActionEyebrow) {
-          runewordActionEyebrow.textContent = t("Action", "실행");
-        }
         if (runewordBaseStepTitle) {
-          runewordBaseStepTitle.textContent = t("Base Rail", "베이스 고정");
+          runewordBaseStepTitle.textContent = t("Base Selection", "베이스 선택");
         }
         if (runewordRecipeStepTitle) {
           runewordRecipeStepTitle.textContent = t("Recipe Explorer", "레시피 탐색기");
@@ -2545,8 +2549,8 @@
         }
         if (runewordActionStepHint) {
           runewordActionStepHint.textContent = t(
-            "Review requirements, check the cube, then execute from this compact inspector.",
-            "이 compact inspector에서 요구 조건과 큐브를 확인한 뒤 실행하세요."
+            "Review the requirements, then execute when ready.",
+            "요구 조건을 확인한 뒤 준비되면 실행하세요."
           );
         }
         if (runewordBaseChooserSummary) {
@@ -2560,15 +2564,6 @@
             "Selected Recipe Preview",
             "선택 레시피 미리보기"
           );
-        }
-        if (runewordProgressBase) {
-          runewordProgressBase.querySelector(".rwProgressLabel").textContent = t("Base", "베이스");
-        }
-        if (runewordProgressRecipe) {
-          runewordProgressRecipe.querySelector(".rwProgressLabel").textContent = t("Recipe", "레시피");
-        }
-        if (runewordProgressTransmute) {
-          runewordProgressTransmute.querySelector(".rwProgressLabel").textContent = t("Transmute", "변환");
         }
         selectedItemLabel.textContent = t("Current Base", "현재 베이스");
         if (runewordContextRecipeLabel) {
@@ -2593,7 +2588,7 @@
           );
         }
         if (panelTooltipTitle) {
-          panelTooltipTitle.textContent = t("Affix Details", "어픽스 상세");
+          panelTooltipTitle.textContent = t("Item Affix Details", "아이템 어픽스 상세");
         }
         if (panelTooltipLead) {
           panelTooltipLead.textContent = t(
@@ -2609,27 +2604,19 @@
         }
         runewordRecipeListTitle.textContent = t("Search And Compare", "검색 및 비교");
         runewordRecipeListHint.textContent = t(
-          "Select a recipe to load its requirements and action controls into the inspector on the right.",
-          "레시피를 선택하면 오른쪽 inspector에 요구 조건과 실행 컨트롤이 표시됩니다."
+          "Select a recipe to load its requirements and actions on the right.",
+          "레시피를 선택하면 오른쪽 검토 영역에 요구 조건과 실행 기능이 표시됩니다."
         );
         if (recipeSearchInput) {
           recipeSearchInput.setAttribute("aria-label", t("Search runeword recipe", "룬워드 레시피 검색"));
           recipeSearchInput.placeholder = t("Search recipe...", "레시피 검색...");
         }
+        updateRecipeFilterControls();
         runewordBaseListTitle.textContent = t("Compatible Equipped Bases", "호환 착용 베이스");
         runewordBaseListHint.textContent = t(
           "Keep this open by default so you can swap the equipped base quickly while comparing recipes.",
           "비교 중에도 빠르게 베이스를 바꿀 수 있도록 기본 상태에서 열어 둡니다."
         );
-        if (runewordAffixTitle) {
-          runewordAffixTitle.textContent = t("Selected Recipe Preview", "선택 레시피 미리보기");
-        }
-        if (runewordAffixHint) {
-          runewordAffixHint.textContent = t(
-            "Open this section when you want the full tooltip-like preview and extra recipe context in the inspector.",
-            "inspector에서 전체 툴팁형 미리보기와 추가 레시피 정보를 보고 싶을 때 이 섹션을 여세요."
-          );
-        }
         if (runewordCubeGrid) {
           runewordCubeGrid.setAttribute("aria-label", t("Horadric cube", "호라드릭 큐브"));
         }
@@ -2637,7 +2624,7 @@
           mainRunewordTab.textContent = t("Runeword", "룬워드");
         }
         if (mainAffixTab) {
-          mainAffixTab.textContent = t("Affix", "어픽스");
+          mainAffixTab.textContent = t("Item Affixes", "아이템 어픽스");
         }
         if (mainAdvancedTab) {
           mainAdvancedTab.textContent = t("Advanced", "고급");
@@ -2671,13 +2658,19 @@
           "이 헤더를 드래그해 패널 위치 이동"
         );
         if (runewordStatusButton) {
-          runewordStatusButton.textContent = t("Status", "상태");
+          runewordStatusButton.textContent = t("Check Status", "상태 확인");
         }
         if (runewordReforgeButton) {
           runewordReforgeButton.textContent = t("Reforge", "재련");
         }
         if (runewordResetButton && Date.now() >= runewordResetArmedUntil) {
-          runewordResetButton.textContent = t("Reset State", "상태 초기화");
+          runewordResetButton.textContent = t("Reset Selected Base", "선택 베이스 초기화");
+        }
+        if (runewordItemActionsTitle) {
+          runewordItemActionsTitle.textContent = t("Item Actions", "아이템 작업");
+        }
+        if (runewordRecoverySummary) {
+          runewordRecoverySummary.textContent = t("Recovery & Reset", "복구 및 초기화");
         }
         if (manualModeTitle) {
           manualModeTitle.textContent = t("Manual Mode", "수동 모드");
@@ -2871,10 +2864,6 @@
               : t("No affix tooltip available.", "어픽스 툴팁이 없습니다.");
         }
 
-        if (runewordAffixHint) {
-          runewordAffixHint.style.display = hasEffectiveRunewordAffix ? "none" : "block";
-        }
-
         if (!hasTooltip) {
           tooltipPanel.style.display = "none";
           tooltipText.textContent = "";
@@ -2999,6 +2988,21 @@
         return { minWidth, minHeight, maxWidth, maxHeight, margin };
       }
 
+      function resolvePanelLayoutMode(width) {
+        if (width >= 1100) return "wide";
+        if (width >= 900) return "medium";
+        return "narrow";
+      }
+
+      function applyPanelLayoutMode(width) {
+        const nextMode = resolvePanelLayoutMode(width);
+        if (controlPanel.dataset.layout === nextMode) {
+          return false;
+        }
+        controlPanel.dataset.layout = nextMode;
+        return true;
+      }
+
       function updatePanelUiScale() {
         const rect = controlPanel.getBoundingClientRect();
         if (!rect.width || !rect.height) {
@@ -3006,6 +3010,7 @@
           return;
         }
 
+        applyPanelLayoutMode(rect.width);
         const widthRatio = rect.width / 1320;
         const heightRatio = rect.height / 860;
         const nextScale = clamp(Math.min(widthRatio, heightRatio) * 1.25, 0.9, 1.75);
@@ -4025,23 +4030,56 @@
         return searchDocument;
       }
 
+      function setRecipeBaseFilter(nextFilter) {
+        const normalized = validRecipeBaseFilters.has(nextFilter) ? nextFilter : "all";
+        if (normalized === recipeBaseFilter) {
+          return false;
+        }
+        recipeBaseFilter = normalized;
+        updateRecipeFilterControls();
+        schedulePanelRender(panelRenderSection.recipeItems);
+        return true;
+      }
+
+      function handleRecipeFilterClick(event) {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        const button = target.closest(`[${recipeFilterAttribute}]`);
+        if (!button || !recipeBaseFilters?.contains(button)) {
+          return;
+        }
+        const nextFilter = button.getAttribute(recipeFilterAttribute) || "all";
+        if (setRecipeBaseFilter(nextFilter)) {
+          event.preventDefault();
+        }
+      }
+
       function resolveRecipeListViewModel() {
         const allItems = Array.isArray(recipeItemsState) ? recipeItemsState : [];
         const query = recipeSearchQuery.trim().toLowerCase();
+        const activeFilter = validRecipeBaseFilters.has(recipeBaseFilter)
+          ? recipeBaseFilter
+          : "all";
         const visibleItems = allItems.filter((item) => {
-          if (!query) return true;
-          return resolveRecipeSearchDocument(item).includes(query);
+          const matchesFilter = activeFilter === "all" ||
+            resolveRecipeBaseBadge(item).className === activeFilter;
+          if (!matchesFilter) return false;
+          return !query || resolveRecipeSearchDocument(item).includes(query);
         });
+        const hasActiveConstraint = Boolean(query) || activeFilter !== "all";
 
         return {
           allItems,
           visibleItems,
+          activeFilter,
           titleText: t(
             `Recipe List (${allItems.length})`,
             `레시피 목록 (${allItems.length})`
           ),
-          countText: query
-            ? t(`Matched ${visibleItems.length}/${allItems.length}`, `검색 ${visibleItems.length}/${allItems.length}`)
+          countText: hasActiveConstraint
+            ? t(`Showing ${visibleItems.length}/${allItems.length}`, `표시 ${visibleItems.length}/${allItems.length}`)
             : t(`Total ${allItems.length}`, `총 ${allItems.length}`),
           emptyState: allItems.length === 0
             ? {
@@ -4055,16 +4093,16 @@
                   "계속 비어 있으면 패널을 다시 열거나 모드 데이터를 다시 불러오세요."
                 )
               }
-            : visibleItems.length === 0
+              : visibleItems.length === 0
               ? {
-                  title: t("No recipe matched your search", "검색과 일치하는 레시피가 없습니다"),
+                  title: t("No recipe matched the current filters", "현재 조건과 일치하는 레시피가 없습니다"),
                   body: t(
-                    "Try a different rune name, base type, or effect keyword.",
-                    "다른 룬 이름, 베이스 타입, 또는 효과 키워드로 다시 검색해 보세요."
+                    "Try another base filter, rune name, or effect keyword.",
+                    "다른 베이스 필터, 룬 이름, 또는 효과 키워드로 다시 찾아보세요."
                   ),
                   hint: t(
-                    "Search checks recipe name, rune order, base badge, and summary text.",
-                    "검색은 레시피 이름, 룬 순서, 베이스 배지, 요약 텍스트를 함께 확인합니다."
+                    "Filters and search are combined; the selected recipe remains active if hidden.",
+                    "필터와 검색은 함께 적용되며, 숨겨져도 선택한 레시피는 유지됩니다."
                   )
                 }
               : null
@@ -4307,19 +4345,17 @@ ${buttonHint}`
         }, 170);
       }
 
-      function setRunewordFlowState(element, state) {
-        if (!element) return;
-        triggerRunewordStateShift(element, state);
-        element.classList.toggle("active", state === "active");
-        element.classList.toggle("complete", state === "complete");
-      }
-
       function setRunewordStepCardState(element, state) {
         if (!element) return;
         triggerRunewordStateShift(element, state);
         element.classList.toggle("active", state === "active");
         element.classList.toggle("complete", state === "complete");
         element.classList.toggle("muted", state === "muted");
+        if (state === "active") {
+          element.setAttribute("aria-current", "step");
+        } else {
+          element.removeAttribute("aria-current");
+        }
       }
 
       function renderRunewordFlowProgress(actionState, state) {
@@ -4327,13 +4363,6 @@ ${buttonHint}`
         const hasRecipe = Boolean(actionState?.hasRecipe);
         const isComplete = Boolean(actionState?.isComplete);
         const canTransmute = Boolean(actionState?.canTransmute);
-
-        setRunewordFlowState(runewordProgressBase, hasBase ? "complete" : "active");
-        setRunewordFlowState(runewordProgressRecipe, hasRecipe ? "complete" : hasBase ? "active" : "pending");
-        setRunewordFlowState(
-          runewordProgressTransmute,
-          isComplete ? "complete" : hasBase && hasRecipe ? "active" : "pending"
-        );
 
         setRunewordStepCardState(runewordBaseStep, hasBase ? "complete" : "active");
         setRunewordStepCardState(runewordRecipeStep, hasRecipe ? "complete" : hasBase ? "active" : "muted");
@@ -4380,8 +4409,8 @@ ${buttonHint}`
 
         if (canTransmute) {
           runewordFlowHint.textContent = t(
-            "Everything is ready. Use the right inspector to transmute and apply the runeword.",
-            "준비가 끝났습니다. 오른쪽 inspector에서 변환을 눌러 룬워드를 적용하세요."
+            "Everything is ready. Use the review area to transmute and apply the runeword.",
+            "준비가 끝났습니다. 검토 영역에서 변환을 눌러 룬워드를 적용하세요."
           );
           return;
         }
@@ -4392,8 +4421,8 @@ ${buttonHint}`
         }
 
         runewordFlowHint.textContent = t(
-          "Review the selected recipe in the right inspector, then transmute when available.",
-          "오른쪽 inspector에서 선택한 레시피를 확인한 뒤, 가능해지면 변환하세요."
+          "Review the selected recipe on the right, then transmute when available.",
+          "오른쪽 검토 영역에서 선택한 레시피를 확인한 뒤, 가능해지면 변환하세요."
         );
       }
 
@@ -4441,13 +4470,13 @@ ${buttonHint}`
             );
           } else if (canTransmute) {
             runewordContextRecipeMeta.textContent = t(
-              "Everything is ready. Open the inspector and transmute when you are ready.",
-              "준비가 끝났습니다. inspector를 확인한 뒤 변환하세요."
+              "Everything is ready. Review the details and transmute when you are ready.",
+              "준비가 끝났습니다. 세부 정보를 확인한 뒤 변환하세요."
             );
           } else {
             runewordContextRecipeMeta.textContent = t(
-              "Review the selected recipe in the inspector and finish the missing requirements.",
-              "inspector에서 선택한 레시피를 검토하고 남은 요구 조건을 채우세요."
+              "Review the selected recipe and finish the missing requirements.",
+              "선택한 레시피를 검토하고 남은 요구 조건을 채우세요."
             );
           }
         }
@@ -4636,7 +4665,7 @@ ${buttonHint}`
           if (!actionState.resetEnabled || Date.now() >= runewordResetArmedUntil) {
             runewordResetArmedUntil = 0;
             runewordResetButton.classList.remove("armed");
-            runewordResetButton.textContent = t("Reset State", "상태 초기화");
+            runewordResetButton.textContent = t("Reset Selected Base", "선택 베이스 초기화");
             runewordResetButton.title = actionState.resetHint;
             runewordResetButton.setAttribute("aria-label", actionState.resetHint);
           }
@@ -4818,6 +4847,7 @@ ${buttonHint}`
             controlPanel.style.right = "auto";
             controlPanel.style.bottom = "auto";
           }
+          updatePanelUiScale();
           keepPanelInViewport();
           requestAnimationFrame(() => {
             if (controlPanelOpen) {
@@ -4983,7 +5013,7 @@ ${buttonHint}`
           return;
         }
         runewordResetButton.classList.remove("armed");
-        runewordResetButton.textContent = t("Reset State", "상태 초기화");
+        runewordResetButton.textContent = t("Reset Selected Base", "선택 베이스 초기화");
         const actionState = resolveRunewordPanelActionState(runewordPanelState);
         runewordResetButton.title = actionState.resetHint;
         runewordResetButton.setAttribute("aria-label", actionState.resetHint);
@@ -5154,6 +5184,10 @@ ${buttonHint}`
 
       function wireButtons() {
         document.addEventListener("click", handleDelegatedPanelCommandClick);
+
+        if (recipeBaseFilters) {
+          recipeBaseFilters.addEventListener("click", handleRecipeFilterClick);
+        }
 
         if (recipeSearchInput) {
           recipeSearchInput.addEventListener("input", () => {
