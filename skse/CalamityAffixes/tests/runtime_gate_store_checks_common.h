@@ -3,6 +3,7 @@
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/LootCurrencyLedger.h"
 #include "CalamityAffixes/CorpseCurrencyPolicy.h"
+#include "CalamityAffixes/CorpseCurrencyRewardPolicy.h"
 #include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/LootRerollGuard.h"
@@ -61,6 +62,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckLootSlotSanitizeHelperExtractionPolicy();
 	bool CheckLootRerollExploitGuardPolicy();
 	bool CheckLootCurrencyLedgerSerializationPolicy();
+	bool CheckCorpseCurrencySpecialRewardPolicy();
 	bool CheckLootEligibilityCleanupSafetyPolicy();
 	bool CheckSuffixProcChanceParsingPolicy();
 	bool CheckSerializationDrainSafetyPolicy();

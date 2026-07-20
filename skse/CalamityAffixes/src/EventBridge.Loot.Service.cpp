@@ -557,4 +557,38 @@ namespace CalamityAffixes
 
 		return result;
 	}
+
+	EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteGuaranteedCorpseCurrencyDrops(
+		RE::Actor* a_corpse,
+		bool a_grantRunewordFragment,
+		bool a_grantReforgeOrb)
+	{
+		CurrencyRollExecutionResult result{};
+		if (a_grantRunewordFragment) {
+			const auto runeToken = PickRunewordFragmentToken();
+			auto* fragmentItem = RunewordDetail::LookupRunewordFragmentItem(
+				_runewordState.runeNameByToken,
+				runeToken);
+			if (!fragmentItem) {
+				SKSE::log::error(
+					"CalamityAffixes: guaranteed runeword fragment item missing (runeToken={:016X}).",
+					runeToken);
+			} else if (TryAddLootCurrencyToCorpseInventory(fragmentItem, a_corpse)) {
+				result.runewordDropGranted = true;
+			}
+		}
+
+		if (a_grantReforgeOrb) {
+			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+			if (!orb) {
+				SKSE::log::error(
+					"CalamityAffixes: guaranteed reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
+			} else if (TryAddLootCurrencyToCorpseInventory(orb, a_corpse)) {
+				result.reforgeDropGranted = true;
+			}
+		}
+
+		// Guaranteed unique/boss rewards are intentionally independent of normal currency pity.
+		return result;
+	}
 }

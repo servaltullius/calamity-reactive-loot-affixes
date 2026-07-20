@@ -132,6 +132,29 @@ namespace CalamityAffixes
 			return give;
 		}
 
+		std::uint64_t EventBridge::PickRunewordFragmentToken()
+		{
+			if (_runewordState.runeTokenPool.empty()) {
+				return 0u;
+			}
+
+			std::uint64_t runeToken = 0u;
+			if (!_runewordState.runeTokenWeights.empty() &&
+				_runewordState.runeTokenWeights.size() == _runewordState.runeTokenPool.size()) {
+				std::discrete_distribution<std::size_t> pick(
+					_runewordState.runeTokenWeights.begin(),
+					_runewordState.runeTokenWeights.end());
+				std::lock_guard<std::mutex> rngLock(_rngMutex);
+				runeToken = _runewordState.runeTokenPool[pick(_rng)];
+			} else {
+				std::uniform_int_distribution<std::size_t> pick(0, _runewordState.runeTokenPool.size() - 1u);
+				std::lock_guard<std::mutex> rngLock(_rngMutex);
+				runeToken = _runewordState.runeTokenPool[pick(_rng)];
+			}
+
+			return runeToken;
+		}
+
 		bool EventBridge::TryRollRunewordFragmentToken(
 			float a_sourceChanceMultiplier,
 			std::uint64_t& a_outRuneToken,
@@ -173,23 +196,7 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			if (!_runewordState.runeTokenWeights.empty() &&
-				_runewordState.runeTokenWeights.size() == _runewordState.runeTokenPool.size()) {
-				std::discrete_distribution<std::size_t> pick(
-					_runewordState.runeTokenWeights.begin(),
-					_runewordState.runeTokenWeights.end());
-				{
-					std::lock_guard<std::mutex> rngLock(_rngMutex);
-					a_outRuneToken = _runewordState.runeTokenPool[pick(_rng)];
-				}
-			} else {
-				std::uniform_int_distribution<std::size_t> pick(0, _runewordState.runeTokenPool.size() - 1u);
-				{
-					std::lock_guard<std::mutex> rngLock(_rngMutex);
-					a_outRuneToken = _runewordState.runeTokenPool[pick(_rng)];
-				}
-			}
-
+			a_outRuneToken = PickRunewordFragmentToken();
 			return a_outRuneToken != 0u;
 		}
 

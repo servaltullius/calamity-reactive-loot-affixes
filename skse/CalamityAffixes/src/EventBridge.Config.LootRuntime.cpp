@@ -81,6 +81,10 @@ namespace CalamityAffixes
 				static_cast<float>(loot.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent)));
 			_loot.reforgeOrbChancePercent =
 				static_cast<float>(loot.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent)));
+			_loot.uniqueActorGuaranteedRunewordChancePercent =
+				static_cast<float>(loot.value(
+					"uniqueActorGuaranteedRunewordChancePercent",
+					static_cast<double>(_loot.uniqueActorGuaranteedRunewordChancePercent)));
 			if (const auto modeIt = loot.find("currencyDropMode"); modeIt != loot.end()) {
 				if (modeIt->is_string()) {
 					const auto modeText = modeIt->get<std::string>();
@@ -209,6 +213,11 @@ namespace CalamityAffixes
 			} else if (_loot.reforgeOrbChancePercent > 100.0f) {
 				_loot.reforgeOrbChancePercent = 100.0f;
 			}
+
+			_loot.uniqueActorGuaranteedRunewordChancePercent = std::clamp(
+				_loot.uniqueActorGuaranteedRunewordChancePercent,
+				0.0f,
+				100.0f);
 
 			_loot.configuredRunewordFragmentChancePercent = _loot.runewordFragmentChancePercent;
 			_loot.configuredReforgeOrbChancePercent = _loot.reforgeOrbChancePercent;

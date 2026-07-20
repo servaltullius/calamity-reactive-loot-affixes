@@ -191,6 +191,7 @@ public sealed class GeneratorRunnerTests
                 ChancePercent = 30.0,
                 RunewordFragmentChancePercent = 40.0,
                 ReforgeOrbChancePercent = 7.0,
+                UniqueActorGuaranteedRunewordChancePercent = 68.0,
                 CurrencyDropMode = "hybrid",
                 LootSourceChanceMultCorpse = 0.75,
                 LootSourceChanceMultContainer = 1.1,
@@ -234,6 +235,7 @@ public sealed class GeneratorRunnerTests
             using var doc = JsonDocument.Parse(File.ReadAllText(runtimeJsonPath, Encoding.UTF8));
             var loot = doc.RootElement.GetProperty("loot");
             Assert.Equal(7.0, loot.GetProperty("reforgeOrbChancePercent").GetDouble());
+            Assert.Equal(68.0, loot.GetProperty("uniqueActorGuaranteedRunewordChancePercent").GetDouble());
             Assert.Equal("hybrid", loot.GetProperty("currencyDropMode").GetString());
             Assert.Equal(0.75, loot.GetProperty("lootSourceChanceMultCorpse").GetDouble());
             Assert.Equal(1.1, loot.GetProperty("lootSourceChanceMultContainer").GetDouble());

@@ -211,6 +211,88 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckCorpseCurrencySpecialRewardPolicy()
+	{
+		namespace fs = std::filesystem;
+		using CalamityAffixes::detail::CorpseCurrencyActorTierInput;
+		using CalamityAffixes::detail::CorpseCurrencyRewardTier;
+		using CalamityAffixes::detail::ResolveCorpseCurrencyRewardPlan;
+		using CalamityAffixes::detail::ResolveCorpseCurrencyRewardTier;
+
+		if (ResolveCorpseCurrencyRewardTier({}) != CorpseCurrencyRewardTier::kNormal ||
+			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .actorBaseIsUnique = true }) != CorpseCurrencyRewardTier::kUnique ||
+			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .hasBossLocationRefType = true }) != CorpseCurrencyRewardTier::kBoss ||
+			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .hasBossLocationRefType = true, .actorBaseIsUnique = true }) != CorpseCurrencyRewardTier::kBoss) {
+			std::cerr << "corpse_currency_special_reward: boss/unique tier precedence is incorrect\n";
+			return false;
+		}
+
+		const auto normal = ResolveCorpseCurrencyRewardPlan(
+			CorpseCurrencyRewardTier::kNormal, true, true, 0.0f, 70.0f);
+		const auto uniqueRune = ResolveCorpseCurrencyRewardPlan(
+			CorpseCurrencyRewardTier::kUnique, true, true, 69.999f, 70.0f);
+		const auto uniqueOrb = ResolveCorpseCurrencyRewardPlan(
+			CorpseCurrencyRewardTier::kUnique, true, true, 70.0f, 70.0f);
+		const auto uniqueRuneOnly = ResolveCorpseCurrencyRewardPlan(
+			CorpseCurrencyRewardTier::kUnique, true, false, 99.0f, 70.0f);
+		const auto uniqueOrbOnly = ResolveCorpseCurrencyRewardPlan(
+			CorpseCurrencyRewardTier::kUnique, false, true, 0.0f, 70.0f);
+		const auto boss = ResolveCorpseCurrencyRewardPlan(
+			CorpseCurrencyRewardTier::kBoss, true, true, 0.0f, 70.0f);
+		const auto blockedBoss = ResolveCorpseCurrencyRewardPlan(
+			CorpseCurrencyRewardTier::kBoss, false, false, 0.0f, 70.0f);
+
+		if (!normal.useNormalRandomRolls || normal.grantRunewordFragment || normal.grantReforgeOrb ||
+			uniqueRune.useNormalRandomRolls || !uniqueRune.grantRunewordFragment || uniqueRune.grantReforgeOrb ||
+			uniqueOrb.useNormalRandomRolls || uniqueOrb.grantRunewordFragment || !uniqueOrb.grantReforgeOrb ||
+			!uniqueRuneOnly.grantRunewordFragment || uniqueRuneOnly.grantReforgeOrb ||
+			uniqueOrbOnly.grantRunewordFragment || !uniqueOrbOnly.grantReforgeOrb ||
+			boss.useNormalRandomRolls || !boss.grantRunewordFragment || !boss.grantReforgeOrb ||
+			blockedBoss.useNormalRandomRolls || blockedBoss.grantRunewordFragment || blockedBoss.grantReforgeOrb) {
+			std::cerr << "corpse_currency_special_reward: guaranteed reward plan is incorrect\n";
+			return false;
+		}
+
+		const fs::path testFile{ __FILE__ };
+		const fs::path repoRoot = testFile.parent_path().parent_path();
+		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
+			std::ifstream in(path);
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string(
+				(std::istreambuf_iterator<char>(in)),
+				std::istreambuf_iterator<char>());
+		};
+
+		const auto deathText = loadText(repoRoot / "src" / "EventBridge.Triggers.DeathEvent.cpp");
+		const auto serviceText = loadText(repoRoot / "src" / "EventBridge.Loot.Service.cpp");
+		if (!deathText || !serviceText ||
+			deathText->find("kLocRefTypeBoss") == std::string::npos ||
+			deathText->find("actorBase->IsUnique()") == std::string::npos ||
+			deathText->find("ResolveCorpseCurrencyRewardPlan(") == std::string::npos ||
+			deathText->find("ExecuteGuaranteedCorpseCurrencyDrops(") == std::string::npos) {
+			std::cerr << "corpse_currency_special_reward: runtime tier/grant integration is incomplete\n";
+			return false;
+		}
+
+		const auto guaranteedStart = serviceText->find(
+			"EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteGuaranteedCorpseCurrencyDrops(");
+		if (guaranteedStart == std::string::npos) {
+			return false;
+		}
+		const auto guaranteedBody = std::string_view(*serviceText).substr(guaranteedStart);
+		if (guaranteedBody.find("CommitRunewordFragmentGrant(") != std::string_view::npos ||
+			guaranteedBody.find("CommitReforgeOrbGrant(") != std::string_view::npos ||
+			guaranteedBody.find("TryRollRunewordFragmentToken(") != std::string_view::npos ||
+			guaranteedBody.find("TryRollReforgeOrbGrant(") != std::string_view::npos) {
+			std::cerr << "corpse_currency_special_reward: guaranteed rewards must not consume normal pity\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckLootServiceExtractionPolicy()
 	{
 		namespace fs = std::filesystem;

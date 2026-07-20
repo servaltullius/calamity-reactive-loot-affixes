@@ -1,15 +1,36 @@
 #include "CalamityAffixes/EventBridge.h"
 
+#include "CalamityAffixes/CorpseCurrencyRewardPolicy.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "EventBridge.Triggers.Events.Detail.h"
 
 #include <chrono>
+#include <mutex>
+#include <random>
 
 
 namespace CalamityAffixes
 {
 	using namespace TriggersDetail;
+
+	namespace
+	{
+		[[nodiscard]] bool HasBossLocationRefType(RE::Actor* a_actor)
+		{
+			if (!a_actor) {
+				return false;
+			}
+
+			auto* defaultObjects = RE::BGSDefaultObjectManager::GetSingleton();
+			auto* bossLocationRefType = defaultObjects ?
+				defaultObjects->GetObject<RE::BGSLocationRefType>(
+					RE::BGSDefaultObjectManager::DefaultObject::kLocRefTypeBoss) :
+				nullptr;
+			auto* locationRefType = a_actor->extraList.GetByType<RE::ExtraLocationRefType>();
+			return bossLocationRefType && locationRefType && locationRefType->locRefType == bossLocationRefType;
+		}
+	}
 
 	static_assert(RuntimePolicy::kAllowCorpseDeathRuntimeCurrencyRoll);
 	RE::BSEventNotifyControl EventBridge::ProcessEvent(
@@ -127,15 +148,38 @@ namespace CalamityAffixes
 				processedMask,
 				hasRunewordCurrency,
 				hasReforgeCurrency);
+			const auto* actorBase = dying->GetActorBase();
+			const auto rewardTier = detail::ResolveCorpseCurrencyRewardTier({
+				.hasBossLocationRefType = HasBossLocationRefType(dying),
+				.actorBaseIsUnique = actorBase && actorBase->IsUnique()
+			});
+
+			float uniqueRunewordRoll = 0.0f;
+			if (rewardTier == detail::CorpseCurrencyRewardTier::kUnique && allowance.runeword && allowance.reforge) {
+				std::uniform_real_distribution<float> rewardChoice(0.0f, 100.0f);
+				std::lock_guard<std::mutex> rngLock(_rngMutex);
+				uniqueRunewordRoll = rewardChoice(_rng);
+			}
+			const auto rewardPlan = detail::ResolveCorpseCurrencyRewardPlan(
+				rewardTier,
+				allowance.runeword,
+				allowance.reforge,
+				uniqueRunewordRoll,
+				_loot.uniqueActorGuaranteedRunewordChancePercent);
 
 			CurrencyRollExecutionResult dropResult{};
-			if (allowance.runeword || allowance.reforge) {
+			if (rewardPlan.useNormalRandomRolls) {
 				dropResult = ExecuteCorpseCurrencyDropRolls(
 					ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier::kCorpse),
 					dying,
 					1u,
 					allowance.runeword,
 					allowance.reforge);
+			} else if (rewardPlan.grantRunewordFragment || rewardPlan.grantReforgeOrb) {
+				dropResult = ExecuteGuaranteedCorpseCurrencyDrops(
+					dying,
+					rewardPlan.grantRunewordFragment,
+					rewardPlan.grantReforgeOrb);
 			}
 
 			const auto newlyProcessedMask = static_cast<std::uint8_t>(
@@ -145,9 +189,10 @@ namespace CalamityAffixes
 			if (_loot.debugLog) {
 				const auto probe = BuildCorpseCurrencyDropProbe(dying);
 				SKSE::log::info(
-					"CalamityAffixes: corpse-only currency roll (dying={}({:08X}), sourceMult={:.2f}, previousMask={}, newlyProcessedMask={}, existing(runeword/reforge)={}/{}, allow(runeword/reforge)={}/{}, granted(runeword/reforge)={}/{}, inventory(runewordFragments/reforgeOrbs/runewordLists/reforgeLists)={}/{}/{}/{}, records(fragment/orb/lists)={}/{}/{}/{}, legacyChanceNone(runeword/reforge)={}/{}).",
+					"CalamityAffixes: corpse-only currency reward (dying={}({:08X}), tier={}, sourceMult={:.2f}, previousMask={}, newlyProcessedMask={}, existing(runeword/reforge)={}/{}, allow(runeword/reforge)={}/{}, guaranteed(runeword/reforge)={}/{}, granted(runeword/reforge)={}/{}, inventory(runewordFragments/reforgeOrbs/runewordLists/reforgeLists)={}/{}/{}/{}, records(fragment/orb/lists)={}/{}/{}/{}, legacyChanceNone(runeword/reforge)={}/{}).",
 					dying->GetName(),
 					corpseFormId,
+					detail::CorpseCurrencyRewardTierLabel(rewardTier),
 					ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier::kCorpse),
 					processedMask,
 					newlyProcessedMask,
@@ -155,6 +200,8 @@ namespace CalamityAffixes
 					hasReforgeCurrency,
 					allowance.runeword,
 					allowance.reforge,
+					rewardPlan.grantRunewordFragment,
+					rewardPlan.grantReforgeOrb,
 					dropResult.runewordDropGranted,
 					dropResult.reforgeDropGranted,
 					snapshot.runewordFragments,

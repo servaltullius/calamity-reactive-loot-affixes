@@ -7,6 +7,7 @@
     "chancePercent": 50.0,
     "runewordFragmentChancePercent": 12.0,
     "reforgeOrbChancePercent": 7.0,
+    "uniqueActorGuaranteedRunewordChancePercent": 70.0,
     "currencyDropMode": "hybrid",
     "lootSourceChanceMultCorpse": 1.0,
     "lootSourceChanceMultContainer": 1.0,

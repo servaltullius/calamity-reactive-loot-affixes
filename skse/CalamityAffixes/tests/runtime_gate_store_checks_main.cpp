@@ -35,6 +35,7 @@ int main()
 	const bool lootSlotSanitizeHelperExtractionOk = CheckLootSlotSanitizeHelperExtractionPolicy();
 	const bool lootRerollExploitGuardOk = CheckLootRerollExploitGuardPolicy();
 	const bool lootCurrencyLedgerPolicyOk = CheckLootCurrencyLedgerSerializationPolicy();
+	const bool corpseCurrencySpecialRewardPolicyOk = CheckCorpseCurrencySpecialRewardPolicy();
 	const bool suffixProcChanceParsingPolicyOk = CheckSuffixProcChanceParsingPolicy();
 	const bool serializationDrainSafetyPolicyOk = CheckSerializationDrainSafetyPolicy();
 	const bool specialActionProcSafetyPolicyOk = CheckSpecialActionProcSafetyPolicy();
@@ -98,6 +99,7 @@ int main()
 	        lootSlotSanitizeHelperExtractionOk &&
 	        lootRerollExploitGuardOk &&
 	        lootCurrencyLedgerPolicyOk &&
+	        corpseCurrencySpecialRewardPolicyOk &&
 	        suffixProcChanceParsingPolicyOk &&
 	        serializationDrainSafetyPolicyOk &&
 	        specialActionProcSafetyPolicyOk &&

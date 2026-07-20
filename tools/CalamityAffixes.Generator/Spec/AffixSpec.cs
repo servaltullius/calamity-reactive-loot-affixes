@@ -32,6 +32,11 @@ public sealed class LootSpec
     [JsonPropertyName("reforgeOrbChancePercent")]
     public double ReforgeOrbChancePercent { get; init; } = 7.0;
 
+    // Guaranteed unique-actor currency rewards choose a runeword fragment at this rate;
+    // the remaining share grants a reforge orb.
+    [JsonPropertyName("uniqueActorGuaranteedRunewordChancePercent")]
+    public double UniqueActorGuaranteedRunewordChancePercent { get; init; } = 70.0;
+
     // Currency drop policy is now hybrid-only.
     // Runtime enforces 'hybrid' even if legacy values are supplied for backward compatibility.
     [JsonPropertyName("currencyDropMode")]

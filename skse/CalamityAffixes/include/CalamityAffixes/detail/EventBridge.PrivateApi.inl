@@ -302,6 +302,7 @@
 			float a_sourceChanceMultiplier,
 			std::uint64_t& a_outRuneToken,
 			bool& a_outPityTriggered);
+		[[nodiscard]] std::uint64_t PickRunewordFragmentToken();
 		void CommitRunewordFragmentGrant(bool a_success);
 		[[nodiscard]] bool TryRollReforgeOrbGrant(
 			float a_sourceChanceMultiplier,
@@ -316,6 +317,10 @@
 			std::uint32_t a_rollCount,
 			bool a_allowRunewordRoll = true,
 			bool a_allowReforgeRoll = true);
+		[[nodiscard]] CurrencyRollExecutionResult ExecuteGuaranteedCorpseCurrencyDrops(
+			RE::Actor* a_corpse,
+			bool a_grantRunewordFragment,
+			bool a_grantReforgeOrb);
 		[[nodiscard]] bool IsRuntimeCurrencyDropRollEnabled(std::string_view a_contextTag) const;
 		[[nodiscard]] float ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier a_sourceTier) const noexcept;
 		[[nodiscard]] bool TryBeginLootCurrencyLedgerRoll(std::uint64_t a_ledgerKey, std::uint32_t a_dayStamp);
