@@ -56,6 +56,7 @@
 - `2026-03-06-loot-runtime-state-extraction-design.md` — loot runtime state ownership 분리 설계
 - `2026-03-06-runeword-runtime-state-extraction-design.md` — runeword runtime state ownership 분리 설계
 - `2026-03-06-serialization-runtime-state-extraction-design.md` — serialization runtime state ownership 분리 설계
+- `2026-07-27-eventbridge-decomposition-status-and-next-steps.md` — 위 상위 설계의 실측 달성도 감사와 수정된 단계 순서
 
 ## references/ — 참조 문서
 
