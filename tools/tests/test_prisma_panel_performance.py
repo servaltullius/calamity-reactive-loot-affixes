@@ -291,6 +291,25 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         )
         self.assertIn("Prisma recipe UI behavior: OK", result.stdout)
 
+    def test_html_script_order_executes_as_separate_classic_scripts(self) -> None:
+        node = self._require_node()
+
+        script = self.repo_root / "tools" / "tests" / "prisma_script_order_test.js"
+        result = subprocess.run(
+            [node, str(script)],
+            cwd=self.repo_root,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("Prisma HTML script order: OK", result.stdout)
+
     def test_recipe_localization_detail_and_selection_semantics_are_connected(self) -> None:
         for marker in (
             'role="listbox"',

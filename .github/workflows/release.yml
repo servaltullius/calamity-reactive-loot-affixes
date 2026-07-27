@@ -151,14 +151,25 @@ jobs:
         run: |
           set -euo pipefail
 
-          # A release can already exist for this tag -- a locally built release
-          # is published first and its tag push lands here. Leave it alone
-          # rather than failing the run or overwriting assets someone
-          # deliberately attached; the artifacts for this run stay available on
-          # the workflow run itself.
-          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
-            echo "A release already exists for ${GITHUB_REF_NAME}; leaving it untouched."
+          # A locally published release can race its tag push into this job. Do
+          # not overwrite it, but do not accept it blindly either: it must be
+          # the same public release this run would have created, down to all
+          # four asset bytes and the commit reached by the tag.
+          verify_status=0
+          python3 tools/verify_existing_release.py \
+            --repo "${GITHUB_REPOSITORY}" \
+            --tag "${GITHUB_REF_NAME}" \
+            --artifacts release-artifacts \
+            --expected-commit "${GITHUB_SHA}" \
+            --expected-prerelease "${{ steps.version.outputs.prerelease }}" \
+            || verify_status=$?
+          if [[ "${verify_status}" -eq 0 ]]; then
+            echo "The existing release is byte-for-byte identical; leaving it untouched."
             exit 0
+          fi
+          if [[ "${verify_status}" -ne 3 ]]; then
+            echo "Existing release verification failed; refusing to create or overwrite anything." >&2
+            exit "${verify_status}"
           fi
 
           # Try rc-specific notes first, then the base release's. An rc usually
@@ -193,6 +204,7 @@ jobs:
           fi
 
           gh release create "${GITHUB_REF_NAME}" \
+            --verify-tag \
             "${release_arg[@]}" \
             --title "Calamity - Reactive Loot & Affixes ${GITHUB_REF_NAME}" \
             "${notes_arg[@]}" \

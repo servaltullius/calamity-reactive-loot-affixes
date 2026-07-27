@@ -70,6 +70,27 @@ class ReleaseVerifyTests(unittest.TestCase):
         source = self.ci_verify_path.read_text(encoding="utf-8")
         self.assertIn("python3 -m unittest discover -s tools/tests -p 'test_*.py'", source)
 
+    def test_ci_verify_runs_required_packaging_e2e_after_plugin_build(self) -> None:
+        source = self.ci_verify_path.read_text(encoding="utf-8")
+        runtime_job = source.split("  runtime-gate-tests:\n", 1)[1]
+        e2e_step = "- name: Run compiler-less Papyrus packaging E2E"
+
+        self.assertIn("uses: actions/setup-dotnet@v4", runtime_job)
+        self.assertIn("python3 -m pip install --upgrade pip jsonschema", runtime_job)
+        self.assertIn('CALAMITY_REQUIRE_PACKAGING_E2E: "1"', runtime_job)
+        self.assertIn(
+            "test_build_mo2_zip_packages_verified_prebuilt_pex_without_a_compiler",
+            runtime_job,
+        )
+        self.assertIn(
+            "test_build_mo2_zip_refuses_to_package_when_the_papyrus_pin_fails",
+            runtime_job,
+        )
+        self.assertLess(
+            runtime_job.index("- name: Build SKSE plugin target"),
+            runtime_job.index(e2e_step),
+        )
+
 
     def test_ci_verify_runs_runtime_contract_sync(self) -> None:
         source = self.ci_verify_path.read_text(encoding="utf-8")
@@ -301,6 +322,15 @@ class ReleaseVerifyTests(unittest.TestCase):
         self.assertIn('"${repo_root}/tools/compile_papyrus.sh" --data "${stage_data_dir}"', source)
         self.assertIn('python3 "${repo_root}/tools/verify_papyrus_pin.py"', source)
 
+    def _require_packaging_e2e_dll(self) -> None:
+        if self.repo_build_dll.is_file():
+            return
+
+        message = "packaging smoke test requires a built CalamityAffixes.dll"
+        if os.environ.get("CALAMITY_REQUIRE_PACKAGING_E2E") == "1":
+            self.fail(message)
+        self.skipTest(message)
+
     def test_build_mo2_zip_packages_verified_prebuilt_pex_without_a_compiler(self) -> None:
         """End-to-end proof of the CI packaging path.
 
@@ -310,8 +340,7 @@ class ReleaseVerifyTests(unittest.TestCase):
         the fallback ever started shipping something else, a hash pin on the
         repository copy alone would not notice.
         """
-        if not self.repo_build_dll.is_file():
-            self.skipTest("packaging smoke test requires a built CalamityAffixes.dll")
+        self._require_packaging_e2e_dll()
 
         package_version = "test-prebuilt-pex"
         out_zip = self._package_zip_path(package_version)
@@ -362,8 +391,7 @@ class ReleaseVerifyTests(unittest.TestCase):
         verifier has to stop packaging. Forced here by shimming python3 to fail
         for that one script, which avoids tampering with the real Data/ tree.
         """
-        if not self.repo_build_dll.is_file():
-            self.skipTest("packaging smoke test requires a built CalamityAffixes.dll")
+        self._require_packaging_e2e_dll()
 
         package_version = "test-pin-refusal"
         out_zip = self._package_zip_path(package_version)

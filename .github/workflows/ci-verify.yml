@@ -130,3 +130,27 @@ jobs:
 
       - name: Execute runtime gate checks
         run: ctest --test-dir skse/CalamityAffixes/tests/build --no-tests=error --output-on-failure
+
+      # These two tests need the real plugin build above. Running them in the
+      # tools job would silently skip because jobs do not share build outputs;
+      # faking the DLL would stop exercising the fresh-build packaging contract.
+      - name: Setup Python for packaging E2E
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup .NET for packaging E2E
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install packaging test dependencies
+        run: python3 -m pip install --upgrade pip jsonschema
+
+      - name: Run compiler-less Papyrus packaging E2E
+        env:
+          CALAMITY_REQUIRE_PACKAGING_E2E: "1"
+        run: |
+          python3 -m unittest -v \
+            tools.tests.test_release_verify.ReleaseVerifyTests.test_build_mo2_zip_packages_verified_prebuilt_pex_without_a_compiler \
+            tools.tests.test_release_verify.ReleaseVerifyTests.test_build_mo2_zip_refuses_to_package_when_the_papyrus_pin_fails
