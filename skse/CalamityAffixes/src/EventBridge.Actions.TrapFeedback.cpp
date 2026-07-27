@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/TrapCellPolicy.h"
 
 #include <algorithm>
 
@@ -8,7 +9,10 @@ namespace CalamityAffixes
 		const TrapInstance& a_trap,
 		const TrapFeedbackCue& a_cue) const noexcept
 	{
-		if (a_cue.art && a_cue.durationSeconds > 0.0f && a_trap.cell) {
+		const bool cellUsable = detail::IsTrapCellUsable(
+			a_trap.cell != nullptr,
+			a_trap.cell && a_trap.cell->IsAttached());
+		if (a_cue.art && a_cue.durationSeconds > 0.0f && cellUsable) {
 			const auto* model = a_cue.art->GetModel();
 			if (model && *model) {
 				RE::BSTempEffectParticle::Spawn(
@@ -30,7 +34,12 @@ namespace CalamityAffixes
 	void EventBridge::StopTrapMarker(TrapInstance& a_trap) const noexcept
 	{
 		if (a_trap.markerEffect) {
-			a_trap.markerEffect->lifetime = std::min(a_trap.markerEffect->lifetime, a_trap.markerEffect->age);
+			const bool cellUsable = detail::IsTrapCellUsable(
+				a_trap.cell != nullptr,
+				a_trap.cell && a_trap.cell->IsAttached());
+			if (cellUsable) {
+				a_trap.markerEffect->lifetime = std::min(a_trap.markerEffect->lifetime, a_trap.markerEffect->age);
+			}
 			a_trap.markerEffect.reset();
 		}
 		a_trap.visualState = TrapVisualState::kNone;
@@ -42,7 +51,10 @@ namespace CalamityAffixes
 		std::chrono::steady_clock::time_point a_now) const noexcept
 	{
 		StopTrapMarker(a_trap);
-		if (!a_trap.feedback.configured || !a_trap.feedback.markerArt || !a_trap.cell) {
+		const bool cellUsable = detail::IsTrapCellUsable(
+			a_trap.cell != nullptr,
+			a_trap.cell && a_trap.cell->IsAttached());
+		if (!a_trap.feedback.configured || !a_trap.feedback.markerArt || !cellUsable) {
 			return;
 		}
 

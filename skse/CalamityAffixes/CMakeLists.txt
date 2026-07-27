@@ -233,6 +233,7 @@ if (BUILD_TESTING)
             tests/test_editor_id_safety.cpp
             tests/test_suffix_family_selection.cpp
             tests/test_corpse_explosion_selection.cpp
+            tests/test_trap_cell_policy.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/ProcFeedback.h"
 #include "CalamityAffixes/CombatContext.h"
+#include "CalamityAffixes/TrapCellPolicy.h"
 
 #include <algorithm>
 #include <format>
@@ -255,11 +256,15 @@ namespace CalamityAffixes
 			return;
 		}
 
-		// Prune expired/invalid traps.
+		// Prune expired/invalid traps, including traps whose original cell unloaded.
 		for (std::size_t index = 0; index < activeTraps.size();) {
-			if (now >= activeTraps[index].expiresAt) {
+			auto& trap = activeTraps[index];
+			const bool cellUsable = detail::IsTrapCellUsable(
+				trap.cell != nullptr,
+				trap.cell && trap.cell->IsAttached());
+			if (now >= trap.expiresAt) {
 				RemoveTrapAt(index, TrapRemovalReason::kExpired);
-			} else if (!activeTraps[index].spell || activeTraps[index].radius <= 0.0f) {
+			} else if (!trap.spell || trap.radius <= 0.0f || !cellUsable) {
 				RemoveTrapAt(index, TrapRemovalReason::kInvalid);
 			} else {
 				++index;

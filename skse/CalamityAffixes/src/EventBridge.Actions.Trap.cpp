@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/ProcFeedback.h"
+#include "CalamityAffixes/TrapCellPolicy.h"
 
 #include <algorithm>
 #include <format>
@@ -258,6 +259,16 @@ namespace CalamityAffixes
 		EnforceGlobalTrapCap();
 
 		auto trap = BuildSpawnTrapInstance(a_action, a_owner, spawnTarget, magnitudeOverride, now);
+		if (!detail::IsTrapCellUsable(
+				trap.cell != nullptr,
+				trap.cell && trap.cell->IsAttached())) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: trap spawn skipped because target cell is unavailable or detached (token={}).",
+					a_action.sourceToken);
+			}
+			return;
+		}
 		trapState.activeTraps.push_back(std::move(trap));
 		trapState.hasActiveTraps.store(true, std::memory_order_relaxed);
 		auto& storedTrap = trapState.activeTraps.back();
