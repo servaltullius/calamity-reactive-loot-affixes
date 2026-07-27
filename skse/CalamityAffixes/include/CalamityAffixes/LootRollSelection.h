@@ -3,6 +3,7 @@
 #include "CalamityAffixes/InstanceAffixSlots.h"
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -12,6 +13,54 @@
 
 namespace CalamityAffixes::detail
 {
+	// Single source of truth for the regular-affix count distribution.
+	// Index i carries the weight of rolling (i + 1) affixes, so { 70, 22, 8 }
+	// means 70% one affix, 22% two, 8% three.  The loot preview path, the live
+	// roll path, and the runtime gate all read this one array; keeping private
+	// copies is what previously let the tests pass while the runtime drifted.
+	inline constexpr std::array<float, kMaxRegularAffixesPerItem> kAffixCountWeights = { 70.0f, 22.0f, 8.0f };
+
+	// Maps a uniform sample in [0, 1] onto an affix count in
+	// [1, kMaxRegularAffixesPerItem] using the weights above.
+	//
+	// Callers own the RNG so this stays deterministic and host-testable: the
+	// preview path feeds it a hashed per-item stream, the live path feeds it
+	// the shared mt19937, and tests feed it whatever they need to assert the
+	// resulting distribution.
+	[[nodiscard]] constexpr std::uint8_t RollAffixCountFromUnit(double a_unit) noexcept
+	{
+		double totalWeight = 0.0;
+		for (const auto weight : kAffixCountWeights) {
+			totalWeight += std::max(0.0, static_cast<double>(weight));
+		}
+		if (totalWeight <= 0.0) {
+			return 1u;
+		}
+
+		const double clamped = (a_unit < 0.0) ? 0.0 : ((a_unit > 1.0) ? 1.0 : a_unit);
+		double roll = clamped * totalWeight;
+		for (std::size_t i = 0; i < kAffixCountWeights.size(); ++i) {
+			const double weight = std::max(0.0, static_cast<double>(kAffixCountWeights[i]));
+			if (weight <= 0.0) {
+				continue;
+			}
+			if (roll < weight) {
+				return static_cast<std::uint8_t>(i + 1u);
+			}
+			roll -= weight;
+		}
+
+		// Reached when a_unit lands exactly on the upper bound, or when trailing
+		// weights are zero.  Fall back to the last positively weighted bucket.
+		for (std::size_t i = kAffixCountWeights.size(); i > 0u; --i) {
+			if (kAffixCountWeights[i - 1u] > 0.0f) {
+				return static_cast<std::uint8_t>(i);
+			}
+		}
+
+		return 1u;
+	}
+
 	[[nodiscard]] constexpr std::uint8_t ResolveReforgeTargetAffixCount(std::uint8_t a_existingAffixCount) noexcept
 	{
 		constexpr std::uint8_t kMaxCount = static_cast<std::uint8_t>(kMaxRegularAffixesPerItem);

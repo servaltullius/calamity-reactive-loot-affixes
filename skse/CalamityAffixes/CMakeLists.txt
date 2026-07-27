@@ -262,18 +262,12 @@ if (BUILD_TESTING)
         )
     endif()
 
-    # Runtime distribution test for affix count rolling and reforge rules.
-    add_executable(test_loot_roll_distribution EXCLUDE_FROM_ALL tests/test_loot_roll_distribution.cpp)
-    target_include_directories(test_loot_roll_distribution PRIVATE include)
-    calamity_add_xwin_libpaths(test_loot_roll_distribution)
-
-    add_test(
-        NAME ${PROJECT_NAME}LootRollDistribution
-        COMMAND ${CMAKE_COMMAND}
-            --build ${CMAKE_BINARY_DIR}
-            --target test_loot_roll_distribution
-            --config $<CONFIG>
-    )
+    # The affix-count distribution and reforge-target checks live in the host
+    # runtime gate (tests/runtime_gate_store_checks_loot_distribution.cpp).
+    # They used to be a cross-compiled EXCLUDE_FROM_ALL executable registered
+    # with `cmake --build` as its test command, which only ever built the binary
+    # -- the assertions never ran.  Do not reintroduce a build-only add_test:
+    # this target chain cannot execute a Windows PE on the host.
 
     # Micro-benchmark (manual-run only, not registered with ctest).
     add_executable(bench_core_ops EXCLUDE_FROM_ALL tests/bench_core_ops.cpp)

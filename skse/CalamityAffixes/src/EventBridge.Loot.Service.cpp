@@ -353,19 +353,13 @@ namespace CalamityAffixes
 
 	std::uint8_t EventBridge::RollAffixCount()
 	{
-		std::array<double, kMaxRegularAffixesPerItem> weights{};
-		bool hasPositiveWeight = false;
-		for (std::size_t i = 0; i < kAffixCountWeights.size(); ++i) {
-			const double weight = std::max(0.0, static_cast<double>(kAffixCountWeights[i]));
-			weights[i] = weight;
-			hasPositiveWeight = hasPositiveWeight || (weight > 0.0);
-		}
-		if (!hasPositiveWeight) {
-			return 1u;
-		}
-
-		std::discrete_distribution<unsigned int> dist(weights.begin(), weights.end());
-		return static_cast<std::uint8_t>(dist(_rng) + 1);
+		// Shares RollAffixCountFromUnit with the loot preview path so a weight
+		// change cannot land in one and miss the other.  This draws a single
+		// uniform unit instead of the previous std::discrete_distribution: the
+		// resulting distribution is identical, only the consumed RNG sequence
+		// differs (no saved seed or replay depends on that sequence).
+		std::uniform_real_distribution<double> unit(0.0, 1.0);
+		return detail::RollAffixCountFromUnit(unit(_rng));
 	}
 
 	bool EventBridge::RollLootChanceGateForEligibleInstance()

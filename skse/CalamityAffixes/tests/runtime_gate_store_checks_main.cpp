@@ -90,6 +90,11 @@ int main()
 	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
 	const bool serializationLoadStateHelpersOk = CheckSerializationLoadStateHelpers();
 	const bool lowHealthTriggerSnapshotHelpersOk = CheckLowHealthTriggerSnapshotHelpers();
+	const bool affixCountRollDistributionOk = CheckAffixCountRollDistribution();
+	const bool affixCountRollUnitBoundsOk = CheckAffixCountRollUnitBounds();
+	const bool reforgeTargetAffixCountBoundsOk = CheckReforgeTargetAffixCountBounds();
+	const bool reforgeTargetWithRunewordSlotsOk = CheckReforgeTargetWithRunewordSlots();
+	const bool affixCountWeightsAllowMultiAffixOk = CheckAffixCountWeightsAllowMultiAffix();
 	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && healthDamageGuardHelperFlowOk && tesHitFallbackSourceValidationOk && bloomTrapProcFeedbackOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
@@ -152,6 +157,11 @@ int main()
 	        lootRerollCircularOverflowOk &&
 	        lootRerollEdgeCasesOk &&
 	        serializationLoadStateHelpersOk &&
-	        lowHealthTriggerSnapshotHelpersOk) ? 0 :
+	        lowHealthTriggerSnapshotHelpersOk &&
+	        affixCountRollDistributionOk &&
+	        affixCountRollUnitBoundsOk &&
+	        reforgeTargetAffixCountBoundsOk &&
+	        reforgeTargetWithRunewordSlotsOk &&
+	        affixCountWeightsAllowMultiAffixOk) ? 0 :
 		                                1;
 }

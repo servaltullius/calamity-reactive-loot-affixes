@@ -121,4 +121,10 @@ namespace RuntimeGateStoreChecks
 	bool CheckLootRerollGuardEdgeCases();
 	bool CheckSerializationLoadStateHelpers();
 	bool CheckLowHealthTriggerSnapshotHelpers();
+
+	bool CheckAffixCountRollDistribution();
+	bool CheckAffixCountRollUnitBounds();
+	bool CheckReforgeTargetAffixCountBounds();
+	bool CheckReforgeTargetWithRunewordSlots();
+	bool CheckAffixCountWeightsAllowMultiAffix();
 }

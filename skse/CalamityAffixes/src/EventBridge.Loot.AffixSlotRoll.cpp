@@ -74,28 +74,10 @@ namespace CalamityAffixes
 			return slots;
 		}
 
+		// Shared with EventBridge::RollAffixCount and the runtime gate so the
+		// preview cannot drift from the roll it is previewing.
 		const auto rollAffixCount = [&]() -> std::uint8_t {
-			double totalWeight = 0.0;
-			for (const auto weight : kAffixCountWeights) {
-				totalWeight += std::max(0.0, static_cast<double>(weight));
-			}
-			if (totalWeight <= 0.0) {
-				return 1u;
-			}
-
-			double roll = NextPreviewUnit(rngState) * totalWeight;
-			for (std::size_t i = 0; i < kAffixCountWeights.size(); ++i) {
-				const double weight = std::max(0.0, static_cast<double>(kAffixCountWeights[i]));
-				if (weight <= 0.0) {
-					continue;
-				}
-				if (roll < weight) {
-					return static_cast<std::uint8_t>(i + 1u);
-				}
-				roll -= weight;
-			}
-
-			return static_cast<std::uint8_t>(kAffixCountWeights.size());
+			return detail::RollAffixCountFromUnit(NextPreviewUnit(rngState));
 		};
 
 		const auto pickWeightedIndex = [&](const std::vector<std::size_t>& a_pool, auto&& a_isEligible) -> std::optional<std::size_t> {
