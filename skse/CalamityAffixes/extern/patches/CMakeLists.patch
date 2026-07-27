@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a5d7285b..a7f9bd04 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -78,6 +78,7 @@ if (MSVC)
+ 	target_compile_options(
+ 		"${PROJECT_NAME}"
+ 		PUBLIC
++			/EHsc
+ 			# warnings -> errors
+ 			/we4715	# 'function' : not all control paths return a value
+ 

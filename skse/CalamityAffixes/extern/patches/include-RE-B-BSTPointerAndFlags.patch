@@ -1,0 +1,24 @@
+diff --git a/include/RE/B/BSTPointerAndFlags.h b/include/RE/B/BSTPointerAndFlags.h
+index 4bb7f5e5..33731a61 100644
+--- a/include/RE/B/BSTPointerAndFlags.h
++++ b/include/RE/B/BSTPointerAndFlags.h
+@@ -41,13 +41,13 @@ namespace RE
+ 		BSTPointerAndFlags& operator=(BSTPointerAndFlags&& a_rhs) noexcept
+ 		{
+ 			if (this != std::addressof(a_rhs)) {
+-				clear_flags();
+-				a_rhs.clear_flags();
+-				_storage.address = a_rhs._storage.address;
+-				a_rhs.storage.address = 0;
++					clear_flags();
++					a_rhs.clear_flags();
++					_storage.address = a_rhs._storage.address;
++					a_rhs._storage.address = 0;
++				}
++				return *this;
+ 			}
+-			return *this;
+-		}
+ 
+ 		void reset() noexcept
+ 		{

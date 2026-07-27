@@ -1,0 +1,25 @@
+diff --git a/include/RE/G/GHashSetBase.h b/include/RE/G/GHashSetBase.h
+index e348a79b..17bafb44 100644
+--- a/include/RE/G/GHashSetBase.h
++++ b/include/RE/G/GHashSetBase.h
+@@ -208,14 +208,14 @@ namespace RE
+ 
+ 		void Assign(void* a_memAddr, const SelfType& a_src)
+ 		{
+-			Clear();
+-			if (a_src.IsEmpty() == false) {
+-				SetCapacity(a_memAddr, a_src.GetSize());
+-				for (const_iterator it = a_src.Begin(); it != a_src.End(); ++it) {
+-					Add(a_memAddr, *it);
++				Clear();
++				if (a_src.IsEmpty() == false) {
++					SetCapacity(a_memAddr, a_src.GetSize());
++					for (const_iterator it = a_src.begin(); it != a_src.end(); ++it) {
++						Add(a_memAddr, *it);
++					}
+ 				}
+ 			}
+-		}
+ 
+ 		void Clear()
+ 		{
