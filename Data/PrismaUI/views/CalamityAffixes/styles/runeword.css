@@ -1,0 +1,781 @@
+      #runewordPanelStatus {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        margin-bottom: calc(8px * var(--panel-ui-scale));
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+      }
+
+      .rwStatusHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwBadge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: calc(4px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
+        border-radius: 999px;
+        font-size: calc(11px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.92);
+        white-space: nowrap;
+      }
+
+      .rwBadge.ready {
+        border-color: rgba(0, 255, 153, 0.45);
+        background: rgba(0, 255, 153, 0.12);
+        color: rgba(173, 255, 219, 0.98);
+      }
+
+      .rwBadge.missing {
+        border-color: rgba(255, 120, 120, 0.45);
+        background: rgba(255, 90, 90, 0.08);
+        color: rgba(255, 210, 210, 0.98);
+      }
+
+      .rwBadge.complete {
+        border-color: rgba(160, 200, 255, 0.45);
+        background: rgba(120, 170, 255, 0.10);
+        color: rgba(220, 235, 255, 0.98);
+      }
+
+      .rwBadge.warning {
+        border-color: rgba(255, 188, 86, 0.72);
+        background: rgba(255, 155, 45, 0.16);
+        color: rgba(255, 231, 184, 0.98);
+      }
+
+      .rwMetaLine {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.74);
+        line-height: 1.4;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+      }
+
+      .rwMetaLine.warning {
+        color: rgba(255, 211, 142, 0.98);
+        font-weight: 700;
+      }
+
+      .rwContextBar {
+        display: grid;
+        grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.1fr);
+        gap: calc(8px * var(--panel-ui-scale));
+        align-items: center;
+      }
+
+      .rwFlowIntro {
+        min-width: 0;
+      }
+
+      .rwFlowIntro .cpSectionTitle {
+        font-size: calc(15px * var(--panel-ui-scale));
+        margin-bottom: calc(2px * var(--panel-ui-scale));
+      }
+
+      .rwFlowIntro .cpContextMeta {
+        font-size: calc(11px * var(--panel-ui-scale));
+        line-height: 1.25;
+      }
+
+      .rwContextSnapshot {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwContextChip {
+        min-width: 0;
+        padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.02);
+      }
+
+      .rwContextChipLabel {
+        color: rgba(255, 255, 255, 0.66);
+        font-size: calc(10px * var(--panel-ui-scale));
+        letter-spacing: 0.22px;
+        text-transform: uppercase;
+      }
+
+      .rwContextChipValue {
+        margin-top: calc(3px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.98);
+        font-size: calc(13px * var(--panel-ui-scale));
+        font-weight: 700;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .rwContextChipMeta {
+        margin-top: calc(2px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.68);
+        font-size: calc(10px * var(--panel-ui-scale));
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .cpStepCard {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.02);
+        padding: calc(12px * var(--panel-ui-scale));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+
+      .cpStepCard + .cpStepCard {
+        margin-top: calc(10px * var(--panel-ui-scale));
+      }
+
+      .cpStepCard.active {
+        border-color: rgba(0, 255, 153, 0.26);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.03),
+          0 0 0 1px rgba(0, 255, 153, 0.1);
+      }
+
+      .cpStepCard.complete {
+        border-color: rgba(173, 255, 219, 0.22);
+        background:
+          linear-gradient(180deg, rgba(173, 255, 219, 0.08), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.02);
+      }
+
+      .cpStepCard.muted {
+        opacity: 0.88;
+      }
+
+      .cpStepHeader {
+        display: flex;
+        align-items: flex-start;
+        gap: calc(10px * var(--panel-ui-scale));
+      }
+
+      .cpStepIndex {
+        flex: 0 0 auto;
+        width: calc(28px * var(--panel-ui-scale));
+        height: calc(28px * var(--panel-ui-scale));
+        border-radius: 999px;
+        background: rgba(0, 255, 153, 0.12);
+        border: 1px solid rgba(0, 255, 153, 0.24);
+        color: rgba(230, 255, 243, 0.98);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: calc(12px * var(--panel-ui-scale));
+        font-weight: 800;
+      }
+
+      .cpStepTitle {
+        color: rgba(255, 255, 255, 0.98);
+        font-size: calc(15px * var(--panel-ui-scale));
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      .cpStepHint {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.45;
+      }
+
+      .cpStepBody {
+        margin-top: calc(10px * var(--panel-ui-scale));
+      }
+
+      .cpPrimaryButton {
+        background: rgba(0, 255, 153, 0.12);
+        border-color: rgba(0, 255, 153, 0.28);
+        font-weight: 800;
+      }
+
+      .cpPrimaryButton:hover {
+        background: rgba(0, 255, 153, 0.18);
+        border-color: rgba(0, 255, 153, 0.4);
+      }
+
+      .cpPrimaryButton.attention {
+        box-shadow: 0 0 0 2px rgba(0, 255, 153, 0.12);
+      }
+
+      .rwStateShift {
+        animation: rwStateShift 160ms ease-out;
+      }
+
+      .rwRecipeEffectLine {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        padding: calc(7px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
+        border-radius: 8px;
+        border: 1px solid rgba(0, 255, 153, 0.28);
+        background: rgba(0, 255, 153, 0.08);
+        color: rgba(215, 255, 236, 0.98);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.45;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+      }
+
+      .rwRecipeDetailLine {
+        border-left: 2px solid rgba(0, 255, 153, 0.22);
+        padding-left: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwWorkspace {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: calc(12px * var(--panel-ui-scale));
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: calc(4px * var(--panel-ui-scale));
+      }
+
+      .rwWorkbench {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: grid;
+        width: 100%;
+        margin: 0;
+        grid-template-columns: minmax(290px, 1.08fr) minmax(0, 1.6fr) minmax(340px, 1.15fr);
+        grid-template-rows: minmax(0, 1fr);
+        gap: calc(10px * var(--panel-ui-scale));
+        align-items: stretch;
+      }
+
+      .rwWorkbench .cpStepCard + .cpStepCard {
+        margin-top: 0;
+      }
+
+      .rwBaseRail,
+      .rwRecipeExplorer,
+      .rwActionInspector {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .rwBaseRail .cpStepHint,
+      .rwRecipeExplorer .cpStepHint,
+      .rwActionInspector .cpStepHint {
+        display: none;
+      }
+
+      .rwBaseRail .cpStepBody,
+      .rwActionInspector .cpStepBody {
+        margin-top: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwBaseRail .cpStepBody {
+        display: flex;
+        flex-direction: column;
+        gap: calc(8px * var(--panel-ui-scale));
+        min-height: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+        height: 100%;
+      }
+
+      .rwBaseChooser {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        overflow: hidden;
+        height: 100%;
+      }
+
+      .rwRailDetails {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        flex: 1 1 auto;
+        height: 100%;
+      }
+
+      .rwRailDetailsStatic {
+        overflow: hidden;
+      }
+
+      .rwRailDetails[open] {
+        height: 100%;
+      }
+
+      .rwRailSummary {
+        list-style: none;
+        cursor: pointer;
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        color: rgba(235, 255, 244, 0.92);
+        font-size: calc(13px * var(--panel-ui-scale));
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      .rwRailSummary::-webkit-details-marker {
+        display: none;
+      }
+
+      .rwRailSummaryStatic {
+        cursor: default;
+      }
+
+      .rwRailBody {
+        padding: 0 calc(10px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+      }
+
+      .rwBaseQuickList {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: calc(6px * var(--panel-ui-scale));
+        flex: 1 1 0;
+        min-height: 0;
+        overflow-y: auto;
+        max-height: none;
+        height: 100%;
+        padding-right: calc(4px * var(--panel-ui-scale));
+        overscroll-behavior: contain;
+      }
+
+      .rwBaseQuickList .cpListItem {
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.28;
+        min-height: calc(44px * var(--panel-ui-scale));
+        font-weight: 600;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .rwBaseRail .cpSectionSubtle {
+        font-size: calc(12px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      #runewordBaseListHint {
+        display: none;
+      }
+
+      .rwRecipeExplorer {
+        min-width: 0;
+      }
+
+      .rwRecipeExplorer .cpStepBody {
+        display: flex;
+        flex-direction: column;
+        gap: calc(8px * var(--panel-ui-scale));
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .rwRecipeExplorerList {
+        flex: 1 1 0;
+        min-height: 0;
+        max-height: none;
+        height: 100%;
+        align-self: stretch;
+        padding-bottom: calc(10px * var(--panel-ui-scale));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+
+      .rwRecipeGrid {
+        grid-template-columns: 1fr;
+        align-content: start;
+        grid-auto-rows: min-content;
+      }
+
+      #runewordRecipeListHint {
+        display: none;
+      }
+
+      .rwActionInspector .cpStepBody {
+        display: flex;
+        flex-direction: column;
+        gap: calc(10px * var(--panel-ui-scale));
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      .rwActionSummary,
+      .rwActionControls {
+        min-width: 0;
+      }
+
+      .rwActionControls {
+        display: flex;
+        flex-direction: column;
+        gap: calc(8px * var(--panel-ui-scale));
+        margin-top: auto;
+      }
+
+      .rwActionHintBox {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        padding: calc(6px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        font-size: calc(11px * var(--panel-ui-scale));
+        line-height: 1.35;
+      }
+
+      .rwAffixBox {
+        margin-top: calc(6px * var(--panel-ui-scale));
+        max-height: calc(120px * var(--panel-ui-scale));
+        overflow-y: auto;
+      }
+
+      .rwAffixHint {
+        margin-top: calc(6px * var(--panel-ui-scale));
+      }
+
+      .rwCubeFrame {
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 12px;
+        background:
+          radial-gradient(120% 120% at 50% 20%, rgba(255, 255, 255, 0.05), transparent 55%),
+          linear-gradient(180deg, rgba(20, 24, 28, 0.85), rgba(8, 10, 12, 0.88));
+        box-shadow:
+          inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+          0 14px 30px rgba(0, 0, 0, 0.35);
+        padding: calc(10px * var(--panel-ui-scale));
+      }
+
+      .rwCubeFrame.compact {
+        padding: calc(5px * var(--panel-ui-scale));
+      }
+
+      .rwCubeGrid {
+        --rwCell: calc(62px * var(--panel-ui-scale));
+        display: grid;
+        grid-template-columns: repeat(3, var(--rwCell));
+        grid-template-rows: repeat(4, var(--rwCell));
+        gap: calc(6px * var(--panel-ui-scale));
+        justify-content: center;
+      }
+
+      .rwCubeGrid.compact {
+        --rwCell: calc(38px * var(--panel-ui-scale));
+      }
+
+      .rwCell {
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 10px;
+        background:
+          repeating-linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.04) 0,
+            rgba(255, 255, 255, 0.04) 6px,
+            rgba(0, 0, 0, 0.0) 6px,
+            rgba(0, 0, 0, 0.0) 12px
+          ),
+          rgba(0, 0, 0, 0.2);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+        padding: calc(6px * var(--panel-ui-scale)) calc(7px * var(--panel-ui-scale));
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: calc(2px * var(--panel-ui-scale));
+        overflow: hidden;
+      }
+
+      .rwCell.empty {
+        opacity: 0.5;
+      }
+
+      .rwCell.base {
+        border-color: rgba(0, 255, 153, 0.28);
+        background: rgba(0, 255, 153, 0.06);
+      }
+
+      .rwCell.ready {
+        border-color: rgba(0, 255, 153, 0.32);
+        background: rgba(0, 255, 153, 0.08);
+      }
+
+      .rwCell.missing {
+        border-color: rgba(255, 120, 120, 0.38);
+        background: rgba(255, 90, 90, 0.06);
+      }
+
+      .rwCellTitle {
+        font-size: calc(10px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.72);
+        letter-spacing: 0.2px;
+      }
+
+      .rwCellName {
+        font-size: calc(12px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 600;
+        line-height: 1.15;
+        word-break: break-word;
+      }
+
+      .rwCellCounts {
+        font-size: calc(10px * var(--panel-ui-scale));
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .rwPrimaryAction .cpButton,
+      .rwItemActionGrid .cpButton,
+      .rwRecoveryDetails .cpButton {
+        text-align: center;
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+      }
+
+      .rwPrimaryAction .cpButton {
+        width: 100%;
+      }
+
+      .rwActionSectionLabel {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(11px * var(--panel-ui-scale));
+        font-weight: 700;
+        letter-spacing: 0.18px;
+      }
+
+      .rwItemActions {
+        display: grid;
+        gap: calc(6px * var(--panel-ui-scale));
+      }
+
+      .rwItemActionGrid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwRecoveryDetails {
+        margin-top: 0;
+      }
+
+      .rwRecoveryDetails .cpDangerSummary {
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        font-size: calc(12px * var(--panel-ui-scale));
+      }
+
+      .rwRecoveryDetails .cpDangerBody {
+        grid-template-columns: 1fr;
+        padding-top: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwActionDetails {
+        margin-top: calc(8px * var(--panel-ui-scale));
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        overflow: hidden;
+      }
+
+      .rwActionDetailsSummary {
+        list-style: none;
+        cursor: pointer;
+        padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        color: rgba(225, 255, 240, 0.9);
+        font-size: calc(12px * var(--panel-ui-scale));
+        font-weight: 700;
+      }
+
+      .rwActionDetailsSummary::-webkit-details-marker {
+        display: none;
+      }
+
+      .rwActionDetailsBody {
+        padding: 0 calc(10px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeTools {
+        display: flex;
+        align-items: center;
+        gap: calc(8px * var(--panel-ui-scale));
+        margin-bottom: calc(6px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeFilters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: calc(6px * var(--panel-ui-scale));
+        margin-bottom: calc(6px * var(--panel-ui-scale));
+      }
+
+      .rwFilterButton {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.76);
+        padding: calc(4px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        font-family: inherit;
+        font-size: calc(10px * var(--panel-ui-scale));
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .rwFilterButton:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.08);
+      }
+
+      .rwFilterButton[aria-pressed="true"] {
+        border-color: rgba(0, 255, 153, 0.52);
+        background: rgba(0, 255, 153, 0.15);
+        color: rgba(225, 255, 240, 0.98);
+      }
+
+      .rwSearchInput {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
+        font-size: calc(12px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeCount {
+        flex: 0 0 auto;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(11px * var(--panel-ui-scale));
+        white-space: nowrap;
+      }
+
+      .rwList {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        min-height: 0;
+        max-height: none;
+        height: 100%;
+        padding-right: calc(4px * var(--panel-ui-scale));
+      }
+
+      [data-wheel-scroll-mode="smooth"] {
+        scroll-behavior: auto;
+      }
+
+      .rwRecipeName {
+        font-size: calc(12px * var(--panel-ui-scale));
+        font-weight: 600;
+        line-height: 1.2;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .rwRecipeHead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: calc(8px * var(--panel-ui-scale));
+      }
+
+      .rwRecipeBaseBadge {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        padding: calc(1px * var(--panel-ui-scale)) calc(6px * var(--panel-ui-scale));
+        font-size: calc(9px * var(--panel-ui-scale));
+        line-height: 1.4;
+        white-space: nowrap;
+        color: rgba(255, 255, 255, 0.88);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .rwRecipeBaseBadge.weapon {
+        border-color: rgba(255, 197, 118, 0.55);
+        background: rgba(255, 178, 79, 0.14);
+      }
+
+      .rwRecipeBaseBadge.armor {
+        border-color: rgba(124, 204, 255, 0.55);
+        background: rgba(74, 169, 255, 0.14);
+      }
+
+      .rwRecipeBaseBadge.mixed {
+        border-color: rgba(181, 255, 142, 0.55);
+        background: rgba(125, 235, 99, 0.14);
+      }
+
+      .rwRecipeSummary {
+        margin-top: calc(1px * var(--panel-ui-scale));
+        font-size: calc(10px * var(--panel-ui-scale));
+        line-height: 1.25;
+        color: rgba(255, 255, 255, 0.72);
+        white-space: normal;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+      }
+
+      .rwRecipeListItem {
+        padding: calc(7px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
+        border-radius: 10px;
+      }
+
+      .cpListItem.selected .rwRecipeSummary {
+        color: rgba(225, 255, 240, 0.92);
+      }
+
+      .cpAffixPane {
+        display: grid;
+        gap: calc(12px * var(--panel-ui-scale));
+      }
+
+      .cpAffixOverview {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: calc(12px * var(--panel-ui-scale));
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.02);
+      }
+
+      .cpAffixLead {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: calc(12px * var(--panel-ui-scale));
+        line-height: 1.45;
+      }
+
+      .cpTooltipBox.compact {
+        font-size: calc(13px * var(--panel-ui-scale));
+        line-height: 1.55;
+      }
+

@@ -1,19 +1,17 @@
 "use strict";
 
 const assert = require("assert");
-const fs = require("fs");
-const path = require("path");
 
-const viewPath = path.resolve(
-  __dirname,
-  "../../Data/PrismaUI/views/CalamityAffixes/index.html"
+// The scroll controller is a file of its own now, so take the whole file
+// instead of slicing it out by marker. The old end marker was the literal
+// "      })();" -- an indentation pin that would silently swallow the rest of
+// the program the moment the indentation changed.
+const { loadScript } = require("../prisma_view_source.js");
+const controller = loadScript("scripts/scroll.js");
+assert(
+  controller.includes("(function initFramePacedScroll() {"),
+  "scroll controller not found"
 );
-const source = fs.readFileSync(viewPath, "utf8");
-const start = source.indexOf("(function initFramePacedScroll() {");
-const endMarker = "      })();";
-const end = source.indexOf(endMarker, start);
-assert(start >= 0 && end > start, "scroll controller not found");
-const controller = source.slice(start, end + endMarker.length);
 
 const handlers = new Map();
 const rafQueue = new Map();

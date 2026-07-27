@@ -1,0 +1,126 @@
+      #tooltipPanel {
+        position: fixed;
+        right: 70px;
+        top: 255px;
+        max-width: 720px;
+        max-height: 560px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        border-radius: 12px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(8px);
+        display: none;
+        pointer-events: none;
+        transform: scale(var(--scale));
+        transform-origin: top right;
+      }
+
+      #tooltipTitle {
+        font-size: calc(16px * var(--tooltip-font-scale));
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: var(--accent);
+        margin-bottom: 6px;
+        pointer-events: auto;
+        cursor: grab;
+        touch-action: none;
+      }
+
+      #tooltipTitle.dragging {
+        cursor: grabbing;
+      }
+
+      #tooltipText {
+        font-size: calc(18px * var(--tooltip-font-scale));
+        line-height: 1.4;
+        color: var(--text);
+        white-space: pre-wrap;
+        pointer-events: auto;
+      }
+
+      #tooltipHint {
+        margin-top: 8px;
+        font-size: calc(12px * var(--tooltip-font-scale));
+        color: var(--muted);
+        display: none;
+      }
+
+      #tooltipActions {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tpPill {
+        pointer-events: auto;
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: calc(12px * var(--tooltip-font-scale));
+        line-height: 1.2;
+        font-family: inherit;
+        cursor: pointer;
+      }
+
+      .tpPill:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.1);
+      }
+
+      .tpPill:active {
+        transform: translateY(1px);
+      }
+
+      #quickLaunch {
+        position: fixed;
+        right: 70px;
+        top: 220px;
+        display: none;
+        gap: 8px;
+        align-items: center;
+        pointer-events: none;
+        transform: scale(var(--scale));
+        transform-origin: top right;
+      }
+
+      .qpPill {
+        pointer-events: auto;
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(0, 0, 0, 0.4);
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 999px;
+        font-size: calc(12px * var(--tooltip-font-scale));
+        line-height: 1.2;
+        font-family: inherit;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+      }
+
+      .qpPill:hover {
+        border-color: var(--accent-soft);
+        background: rgba(0, 255, 153, 0.12);
+      }
+
+      .qpPill:active {
+        transform: translateY(1px);
+      }
+
+      :where(.tpPill, .qpPill, .cpIconButton, .cpTabButton, .cpButton, .cpListItem, .rwSearchInput, .rwFilterButton, .cpDangerSummary):focus-visible {
+        outline: none;
+        border-color: var(--accent-strong);
+        box-shadow:
+          0 0 0 1px rgba(0, 255, 153, 0.38),
+          0 0 0 3px rgba(173, 255, 219, 0.14);
+      }
+
