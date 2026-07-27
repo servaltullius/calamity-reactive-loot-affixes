@@ -4,8 +4,14 @@ name: release
 # that is not "clone the repo". Data/ stays tracked, so the clone-and-play
 # workflow is unaffected -- this only adds a distribution path.
 #
-# The release is created as a DRAFT. Nothing becomes public until a human opens
-# it and clicks publish.
+# Tagging publishes. The release goes out on the tag push rather than waiting in
+# a draft for someone to click publish -- every release here is a public test
+# build, so the extra step only delayed the download without adding a decision.
+# Pre-release tags (`-rc`) are still marked as pre-releases.
+#
+# The gate is therefore the tag, not the draft. Everything a release asserts is
+# checked before the artifacts are built: the tag must agree with the version
+# compiled into the DLL, and both vendored pins must hold.
 #
 # Papyrus on a runner: a runner has no PapyrusCompiler.exe (it ships with the
 # Creation Kit and cannot be installed here), so build_mo2_zip.sh packages the
@@ -138,18 +144,18 @@ jobs:
           path: release-artifacts/
           if-no-files-found: error
 
-      - name: Create draft release
+      - name: Publish release
         if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          # A release can already exist for this tag -- publishing a draft that
-          # was built locally is what creates the tag in the first place, and
-          # that push lands here. Leave it alone rather than failing the run or
-          # overwriting assets someone deliberately attached; the artifacts for
-          # this run stay available on the workflow run itself.
+          # A release can already exist for this tag -- a locally built release
+          # is published first and its tag push lands here. Leave it alone
+          # rather than failing the run or overwriting assets someone
+          # deliberately attached; the artifacts for this run stay available on
+          # the workflow run itself.
           if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
             echo "A release already exists for ${GITHUB_REF_NAME}; leaving it untouched."
             exit 0
@@ -177,7 +183,11 @@ jobs:
             notes_arg=(--generate-notes)
           fi
 
-          release_arg=(--draft)
+          # Deliberately empty by default: the tag is the decision to release,
+          # so the artifacts go public with it rather than waiting in a draft.
+          # `-rc` tags stay marked as pre-releases, which is what keeps them
+          # off the "Latest release" badge.
+          release_arg=()
           if [[ "${{ steps.version.outputs.prerelease }}" == "true" ]]; then
             release_arg+=(--prerelease)
           fi

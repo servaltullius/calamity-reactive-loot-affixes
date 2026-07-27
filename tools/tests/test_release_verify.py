@@ -263,6 +263,30 @@ class ReleaseVerifyTests(unittest.TestCase):
             for stem in target_stems:
                 self.assertEqual((output_dir / f"{stem}.pex").read_bytes(), b"stale-pex")
 
+    def test_release_workflow_publishes_instead_of_drafting(self) -> None:
+        """Tagging is the decision to release; nothing should wait on a click.
+
+        Every release here is a public test build, so a draft only delayed the
+        download. Pinned because the regression is silent -- a release that
+        quietly went back to draft would look like a successful run, and the
+        first sign would be someone asking where the download went.
+        """
+        source = (self.repo_root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        self.assertNotIn("--draft", source)
+        self.assertIn("--prerelease", source)
+        self.assertIn("gh release create", source)
+
+    def test_release_workflow_still_marks_prerelease_tags(self) -> None:
+        """`--prerelease` is what keeps an rc off the "Latest release" badge.
+
+        Publishing directly makes this the only thing separating a candidate
+        from a final release, so the tag -> prerelease derivation has to hold.
+        """
+        source = (self.repo_root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        self.assertIn('base_version="${version%%[-+]*}"', source)
+        self.assertIn('echo "prerelease=true" >> "$GITHUB_OUTPUT"', source)
+        self.assertIn('echo "prerelease=false" >> "$GITHUB_OUTPUT"', source)
+
     def test_build_mo2_zip_falls_back_only_when_the_compiler_is_absent(self) -> None:
         """The fallback must key on "no compiler", not on "compile failed".
 
