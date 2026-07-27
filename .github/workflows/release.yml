@@ -1,0 +1,134 @@
+name: release
+
+# Publishes the built artifacts to a GitHub Release so users have a download
+# that is not "clone the repo". Data/ stays tracked, so the clone-and-play
+# workflow is unaffected -- this only adds a distribution path.
+#
+# The release is created as a DRAFT. Nothing becomes public until a human opens
+# it and clicks publish.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build (no leading v). Dry run: no release is created."
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version="${{ inputs.version }}"
+          else
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Building version ${version}"
+
+      # Refuse to build a tag that disagrees with what the plugin will actually
+      # report to SKSE. Tagging v1.8.0 while CMakeLists.txt still says 1.7.2
+      # would otherwise produce a release whose DLL identifies as the old one.
+      - name: Verify tag matches declared version
+        run: python3 tools/verify_version_consistency.py --expect "${{ steps.version.outputs.version }}"
+
+      - name: Verify CommonLibSSE-NG pin
+        run: python3 tools/verify_commonlib_pin.py
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install Python tool dependencies
+        run: python3 -m pip install --upgrade pip jsonschema
+
+      # Same definition ci-verify uses, so a release is built with the exact
+      # toolchain the tests ran against.
+      - name: Setup cross-build toolchain
+        uses: ./.github/actions/setup-cross-build
+
+      # Builds the DLL, runs ctest and the Generator tests, packages the MO2
+      # zip, verifies its structure, and writes a SHA256 sidecar.
+      - name: Run release build pipeline
+        run: python3 tools/release_build.py --version "${{ steps.version.outputs.version }}"
+
+      - name: Collect artifacts
+        id: collect
+        run: |
+          set -euo pipefail
+          mkdir -p release-artifacts
+
+          zip_path="$(ls -t dist/CalamityAffixes_MO2_*.zip | head -1)"
+          echo "Packaged: ${zip_path}"
+          cp "${zip_path}" "${zip_path}.sha256" release-artifacts/
+
+          # Pull the standalone DLL and ESP out of the zip rather than out of
+          # Data/. build_mo2_zip.sh stages a freshly built DLL into the package,
+          # but nothing copies it back into the working tree -- reading Data/
+          # here would attach the DLL committed at this tag while the zip
+          # carried the newly built one, and the two would silently disagree.
+          unzip -j -o "${zip_path}" \
+            'CalamityAffixes/SKSE/Plugins/CalamityAffixes.dll' \
+            'CalamityAffixes/CalamityAffixes.esp' \
+            -d release-artifacts/
+
+          test -f release-artifacts/CalamityAffixes.dll
+          test -f release-artifacts/CalamityAffixes.esp
+          ls -la release-artifacts/
+
+      # Keep the build output reachable even on a dry run, where no release is
+      # created.
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: calamity-affixes-${{ steps.version.outputs.version }}
+          path: release-artifacts/
+          if-no-files-found: error
+
+      - name: Create draft release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # `|| true`: with `set -e` a no-match grep inside the substitution
+          # would abort the step, which is the normal case for a version with
+          # no prepared notes.
+          notes_name="$(ls docs/releases | grep -- "-v${{ steps.version.outputs.version }}\.md$" | tail -1 || true)"
+          notes_file="docs/releases/${notes_name}"
+          if [[ -n "$notes_name" && -f "$notes_file" ]]; then
+            echo "Using release notes: $notes_file"
+            notes_arg=(--notes-file "$notes_file")
+          else
+            echo "No prepared notes for v${{ steps.version.outputs.version }}; generating from commits"
+            notes_arg=(--generate-notes)
+          fi
+
+          gh release create "${GITHUB_REF_NAME}" \
+            --draft \
+            --title "Calamity - Reactive Loot & Affixes ${GITHUB_REF_NAME}" \
+            "${notes_arg[@]}" \
+            release-artifacts/*
