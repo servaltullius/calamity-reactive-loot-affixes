@@ -1,530 +1,530 @@
-      function applyTooltipPlacement() {
-        const hasTooltip = Boolean(tooltipTextState);
-        const hasRunewordAffix = Boolean(runewordAffixTextState);
-        const recipePreviewText = buildRecipePreviewTooltipText(
-          getSelectedRecipeItem()
-        );
-        const effectiveRunewordAffixText = buildSelectedRecipeInspectorText(
-          recipePreviewText,
-          hasRunewordAffix ? runewordAffixTextState : ""
-        );
-        const hasEffectiveRunewordAffix = Boolean(effectiveRunewordAffixText);
+function applyTooltipPlacement() {
+  const hasTooltip = Boolean(tooltipTextState);
+  const hasRunewordAffix = Boolean(runewordAffixTextState);
+  const recipePreviewText = buildRecipePreviewTooltipText(
+    getSelectedRecipeItem()
+  );
+  const effectiveRunewordAffixText = buildSelectedRecipeInspectorText(
+    recipePreviewText,
+    hasRunewordAffix ? runewordAffixTextState : ""
+  );
+  const hasEffectiveRunewordAffix = Boolean(effectiveRunewordAffixText);
 
-        if (panelTooltipText) {
-          if (hasTooltip) {
-            panelTooltipText.textContent = tooltipTextState;
-          } else {
-            appendEmptyState(
-              panelTooltipText,
-              t("Select one item to inspect affixes", "어픽스를 확인할 아이템 하나를 선택하세요"),
-              t(
-                "The Affix tab mirrors the currently highlighted inventory item and shows its tooltip text in a calmer layout.",
-                "Affix 탭은 현재 인벤토리에서 강조한 아이템의 툴팁을 더 차분한 레이아웃으로 보여줍니다."
-              ),
-              t(
-                "When you hover or select an item, its affix text will appear here.",
-                "아이템을 가리키거나 선택하면 어픽스 텍스트가 여기 표시됩니다."
-              )
-            );
-          }
-        }
+  if (panelTooltipText) {
+    if (hasTooltip) {
+      panelTooltipText.textContent = tooltipTextState;
+    } else {
+      appendEmptyState(
+        panelTooltipText,
+        t("Select one item to inspect affixes", "어픽스를 확인할 아이템 하나를 선택하세요"),
+        t(
+          "The Affix tab mirrors the currently highlighted inventory item and shows its tooltip text in a calmer layout.",
+          "Affix 탭은 현재 인벤토리에서 강조한 아이템의 툴팁을 더 차분한 레이아웃으로 보여줍니다."
+        ),
+        t(
+          "When you hover or select an item, its affix text will appear here.",
+          "아이템을 가리키거나 선택하면 어픽스 텍스트가 여기 표시됩니다."
+        )
+      );
+    }
+  }
 
-        if (panelTooltipHint) {
-          panelTooltipHint.style.display = hasTooltip ? "none" : "block";
-        }
+  if (panelTooltipHint) {
+    panelTooltipHint.style.display = hasTooltip ? "none" : "block";
+  }
 
-        if (runewordAffixText) {
-          runewordAffixText.textContent = hasEffectiveRunewordAffix
-            ? effectiveRunewordAffixText
-            : runewordAffixPendingState
-              ? t("Refreshing affix preview...", "어픽스 미리보기를 갱신 중입니다.")
-              : t("No affix tooltip available.", "어픽스 툴팁이 없습니다.");
-        }
+  if (runewordAffixText) {
+    runewordAffixText.textContent = hasEffectiveRunewordAffix
+      ? effectiveRunewordAffixText
+      : runewordAffixPendingState
+        ? t("Refreshing affix preview...", "어픽스 미리보기를 갱신 중입니다.")
+        : t("No affix tooltip available.", "어픽스 툴팁이 없습니다.");
+  }
 
-        if (!hasTooltip) {
-          tooltipPanel.style.display = "none";
-          tooltipText.textContent = "";
-          applyQuickLaunchVisibility();
-          return;
-        }
+  if (!hasTooltip) {
+    tooltipPanel.style.display = "none";
+    tooltipText.textContent = "";
+    applyQuickLaunchVisibility();
+    return;
+  }
 
-        if (controlPanelOpen) {
-          tooltipPanel.style.display = "none";
-          tooltipText.textContent = "";
-          applyQuickLaunchVisibility();
-          return;
-        }
+  if (controlPanelOpen) {
+    tooltipPanel.style.display = "none";
+    tooltipText.textContent = "";
+    applyQuickLaunchVisibility();
+    return;
+  }
 
-        tooltipPanel.style.display = "block";
-        tooltipText.textContent = tooltipTextState;
-        applyTooltipLayout();
-        applyQuickLaunchVisibility();
+  tooltipPanel.style.display = "block";
+  tooltipText.textContent = tooltipTextState;
+  applyTooltipLayout();
+  applyQuickLaunchVisibility();
+}
+
+function setMainTab(nextTab) {
+  const tab =
+    nextTab === "affix"
+      ? "affix"
+      : nextTab === "advanced"
+        ? "advanced"
+        : "runeword";
+  mainTabState = tab;
+
+  const isRuneword = tab === "runeword";
+  const isAffix = tab === "affix";
+  const isAdvanced = tab === "advanced";
+
+  if (mainRunewordTab && mainRunewordPane) {
+    mainRunewordTab.setAttribute("aria-selected", isRuneword ? "true" : "false");
+    mainRunewordTab.tabIndex = isRuneword ? 0 : -1;
+    mainRunewordPane.hidden = !isRuneword;
+  }
+
+  if (mainAffixTab && mainAffixPane) {
+    mainAffixTab.setAttribute("aria-selected", isAffix ? "true" : "false");
+    mainAffixTab.tabIndex = isAffix ? 0 : -1;
+    mainAffixPane.hidden = !isAffix;
+  }
+
+  if (mainAdvancedTab && mainAdvancedPane) {
+    mainAdvancedTab.setAttribute("aria-selected", isAdvanced ? "true" : "false");
+    mainAdvancedTab.tabIndex = isAdvanced ? 0 : -1;
+    mainAdvancedPane.hidden = !isAdvanced;
+  }
+}
+
+function wireMainTabs() {
+  const tabs = [
+    { id: "runeword", button: mainRunewordTab },
+    { id: "affix", button: mainAffixTab },
+    { id: "advanced", button: mainAdvancedTab }
+  ];
+
+  for (const item of tabs) {
+    if (!item.button) continue;
+    item.button.addEventListener("click", () => setMainTab(item.id));
+  }
+
+  const onTabKeydown = (event) => {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      const order = ["runeword", "affix", "advanced"];
+      const currentIndex = Math.max(0, order.indexOf(mainTabState));
+      const delta = event.key === "ArrowRight" ? 1 : -1;
+      const nextIndex = (currentIndex + delta + order.length) % order.length;
+      const next = order[nextIndex];
+      setMainTab(next);
+
+      const nextButton =
+        next === "runeword"
+          ? mainRunewordTab
+          : next === "affix"
+            ? mainAffixTab
+            : mainAdvancedTab;
+      if (nextButton && typeof nextButton.focus === "function") {
+        nextButton.focus();
       }
+      return;
+    }
 
-      function setMainTab(nextTab) {
-        const tab =
-          nextTab === "affix"
-            ? "affix"
-            : nextTab === "advanced"
-              ? "advanced"
-              : "runeword";
-        mainTabState = tab;
-
-        const isRuneword = tab === "runeword";
-        const isAffix = tab === "affix";
-        const isAdvanced = tab === "advanced";
-
-        if (mainRunewordTab && mainRunewordPane) {
-          mainRunewordTab.setAttribute("aria-selected", isRuneword ? "true" : "false");
-          mainRunewordTab.tabIndex = isRuneword ? 0 : -1;
-          mainRunewordPane.hidden = !isRuneword;
-        }
-
-        if (mainAffixTab && mainAffixPane) {
-          mainAffixTab.setAttribute("aria-selected", isAffix ? "true" : "false");
-          mainAffixTab.tabIndex = isAffix ? 0 : -1;
-          mainAffixPane.hidden = !isAffix;
-        }
-
-        if (mainAdvancedTab && mainAdvancedPane) {
-          mainAdvancedTab.setAttribute("aria-selected", isAdvanced ? "true" : "false");
-          mainAdvancedTab.tabIndex = isAdvanced ? 0 : -1;
-          mainAdvancedPane.hidden = !isAdvanced;
-        }
+    if (event.key === "Home") {
+      event.preventDefault();
+      setMainTab("runeword");
+      if (mainRunewordTab && typeof mainRunewordTab.focus === "function") {
+        mainRunewordTab.focus();
       }
+      return;
+    }
 
-      function wireMainTabs() {
-        const tabs = [
-          { id: "runeword", button: mainRunewordTab },
-          { id: "affix", button: mainAffixTab },
-          { id: "advanced", button: mainAdvancedTab }
-        ];
-
-        for (const item of tabs) {
-          if (!item.button) continue;
-          item.button.addEventListener("click", () => setMainTab(item.id));
-        }
-
-        const onTabKeydown = (event) => {
-          if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-            event.preventDefault();
-            const order = ["runeword", "affix", "advanced"];
-            const currentIndex = Math.max(0, order.indexOf(mainTabState));
-            const delta = event.key === "ArrowRight" ? 1 : -1;
-            const nextIndex = (currentIndex + delta + order.length) % order.length;
-            const next = order[nextIndex];
-            setMainTab(next);
-
-            const nextButton =
-              next === "runeword"
-                ? mainRunewordTab
-                : next === "affix"
-                  ? mainAffixTab
-                  : mainAdvancedTab;
-            if (nextButton && typeof nextButton.focus === "function") {
-              nextButton.focus();
-            }
-            return;
-          }
-
-          if (event.key === "Home") {
-            event.preventDefault();
-            setMainTab("runeword");
-            if (mainRunewordTab && typeof mainRunewordTab.focus === "function") {
-              mainRunewordTab.focus();
-            }
-            return;
-          }
-
-          if (event.key === "End") {
-            event.preventDefault();
-            setMainTab("advanced");
-            if (mainAdvancedTab && typeof mainAdvancedTab.focus === "function") {
-              mainAdvancedTab.focus();
-            }
-          }
-        };
-
-        if (mainRunewordTab) {
-          mainRunewordTab.addEventListener("keydown", onTabKeydown);
-        }
-        if (mainAffixTab) {
-          mainAffixTab.addEventListener("keydown", onTabKeydown);
-        }
-        if (mainAdvancedTab) {
-          mainAdvancedTab.addEventListener("keydown", onTabKeydown);
-        }
+    if (event.key === "End") {
+      event.preventDefault();
+      setMainTab("advanced");
+      if (mainAdvancedTab && typeof mainAdvancedTab.focus === "function") {
+        mainAdvancedTab.focus();
       }
+    }
+  };
 
-      function panelSizeBounds() {
-        const margin = 8;
-        const minWidth = window.innerWidth <= 900 ? 360 : 760;
-        const minHeight = window.innerWidth <= 900 ? 260 : 500;
-        const maxWidth = Math.max(minWidth, window.innerWidth - margin * 2);
-        const maxHeight = Math.max(minHeight, window.innerHeight - margin * 2);
-        return { minWidth, minHeight, maxWidth, maxHeight, margin };
-      }
+  if (mainRunewordTab) {
+    mainRunewordTab.addEventListener("keydown", onTabKeydown);
+  }
+  if (mainAffixTab) {
+    mainAffixTab.addEventListener("keydown", onTabKeydown);
+  }
+  if (mainAdvancedTab) {
+    mainAdvancedTab.addEventListener("keydown", onTabKeydown);
+  }
+}
 
-      function resolvePanelLayoutMode(width) {
-        if (width >= 1100) return "wide";
-        if (width >= 900) return "medium";
-        return "narrow";
-      }
+function panelSizeBounds() {
+  const margin = 8;
+  const minWidth = window.innerWidth <= 900 ? 360 : 760;
+  const minHeight = window.innerWidth <= 900 ? 260 : 500;
+  const maxWidth = Math.max(minWidth, window.innerWidth - margin * 2);
+  const maxHeight = Math.max(minHeight, window.innerHeight - margin * 2);
+  return { minWidth, minHeight, maxWidth, maxHeight, margin };
+}
 
-      function applyPanelLayoutMode(width) {
-        const nextMode = resolvePanelLayoutMode(width);
-        if (controlPanel.dataset.layout === nextMode) {
-          return false;
-        }
-        controlPanel.dataset.layout = nextMode;
-        return true;
-      }
+function resolvePanelLayoutMode(width) {
+  if (width >= 1100) return "wide";
+  if (width >= 900) return "medium";
+  return "narrow";
+}
 
-      function updatePanelUiScale() {
-        const rect = controlPanel.getBoundingClientRect();
-        if (!rect.width || !rect.height) {
-          document.documentElement.style.setProperty("--panel-ui-scale", "1");
-          return;
-        }
+function applyPanelLayoutMode(width) {
+  const nextMode = resolvePanelLayoutMode(width);
+  if (controlPanel.dataset.layout === nextMode) {
+    return false;
+  }
+  controlPanel.dataset.layout = nextMode;
+  return true;
+}
 
-        applyPanelLayoutMode(rect.width);
-        const widthRatio = rect.width / 1320;
-        const heightRatio = rect.height / 860;
-        const nextScale = clamp(Math.min(widthRatio, heightRatio) * 1.25, 0.9, 1.75);
-        document.documentElement.style.setProperty("--panel-ui-scale", nextScale.toFixed(3));
-      }
+function updatePanelUiScale() {
+  const rect = controlPanel.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    document.documentElement.style.setProperty("--panel-ui-scale", "1");
+    return;
+  }
 
-      function setPanelAnchoredPosition(left, top) {
-        controlPanel.style.left = `${Math.round(left)}px`;
-        controlPanel.style.top = `${Math.round(top)}px`;
-        controlPanel.style.right = "auto";
-        controlPanel.style.bottom = "auto";
-      }
+  applyPanelLayoutMode(rect.width);
+  const widthRatio = rect.width / 1320;
+  const heightRatio = rect.height / 860;
+  const nextScale = clamp(Math.min(widthRatio, heightRatio) * 1.25, 0.9, 1.75);
+  document.documentElement.style.setProperty("--panel-ui-scale", nextScale.toFixed(3));
+}
 
-      function clearPanelDragVisualState() {
-        controlPanel.style.transform = "";
-        controlPanel.style.willChange = "";
-      }
+function setPanelAnchoredPosition(left, top) {
+  controlPanel.style.left = `${Math.round(left)}px`;
+  controlPanel.style.top = `${Math.round(top)}px`;
+  controlPanel.style.right = "auto";
+  controlPanel.style.bottom = "auto";
+}
 
-      function schedulePanelDragFrame() {
-        if (!panelDragState || panelDragState.framePending) {
-          return;
-        }
+function clearPanelDragVisualState() {
+  controlPanel.style.transform = "";
+  controlPanel.style.willChange = "";
+}
 
-        panelDragState.framePending = true;
-        requestAnimationFrame(() => {
-          if (!panelDragState) {
-            clearPanelDragVisualState();
-            return;
-          }
+function schedulePanelDragFrame() {
+  if (!panelDragState || panelDragState.framePending) {
+    return;
+  }
 
-          panelDragState.framePending = false;
-          const deltaX = Math.round(panelDragState.nextLeft) - panelDragState.baseLeft;
-          const deltaY = Math.round(panelDragState.nextTop) - panelDragState.baseTop;
-          controlPanel.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
-        });
-      }
+  panelDragState.framePending = true;
+  requestAnimationFrame(() => {
+    if (!panelDragState) {
+      clearPanelDragVisualState();
+      return;
+    }
 
-      function applyPendingPanelResize() {
-        if (!panelResizeState) return;
-        panelResizeState.framePending = false;
-        controlPanel.style.width = Math.round(panelResizeState.nextWidth) + "px";
-        controlPanel.style.height = Math.round(panelResizeState.nextHeight) + "px";
-        updatePanelUiScale();
-      }
+    panelDragState.framePending = false;
+    const deltaX = Math.round(panelDragState.nextLeft) - panelDragState.baseLeft;
+    const deltaY = Math.round(panelDragState.nextTop) - panelDragState.baseTop;
+    controlPanel.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
+  });
+}
 
-      function schedulePanelResizeFrame() {
-        if (!panelResizeState || panelResizeState.framePending) {
-          return;
-        }
-        panelResizeState.framePending = true;
-        requestAnimationFrame(applyPendingPanelResize);
-      }
+function applyPendingPanelResize() {
+  if (!panelResizeState) return;
+  panelResizeState.framePending = false;
+  controlPanel.style.width = Math.round(panelResizeState.nextWidth) + "px";
+  controlPanel.style.height = Math.round(panelResizeState.nextHeight) + "px";
+  updatePanelUiScale();
+}
 
-      function keepPanelInViewport() {
-        if (!controlPanelOpen) return;
-        if (!controlPanel.style.left || !controlPanel.style.top) return;
+function schedulePanelResizeFrame() {
+  if (!panelResizeState || panelResizeState.framePending) {
+    return;
+  }
+  panelResizeState.framePending = true;
+  requestAnimationFrame(applyPendingPanelResize);
+}
 
-        const rect = controlPanel.getBoundingClientRect();
-        const { minWidth, minHeight, maxWidth, maxHeight, margin } = panelSizeBounds();
+function keepPanelInViewport() {
+  if (!controlPanelOpen) return;
+  if (!controlPanel.style.left || !controlPanel.style.top) return;
 
-        const safeWidth = clamp(rect.width, minWidth, maxWidth);
-        const safeHeight = clamp(rect.height, minHeight, maxHeight);
-        if (Math.abs(safeWidth - rect.width) > 0.5) {
-          controlPanel.style.width = `${Math.round(safeWidth)}px`;
-        }
-        if (Math.abs(safeHeight - rect.height) > 0.5) {
-          controlPanel.style.height = `${Math.round(safeHeight)}px`;
-        }
+  const rect = controlPanel.getBoundingClientRect();
+  const { minWidth, minHeight, maxWidth, maxHeight, margin } = panelSizeBounds();
 
-        const maxLeft = Math.max(margin, window.innerWidth - safeWidth - margin);
-        const maxTop = Math.max(margin, window.innerHeight - safeHeight - margin);
-        const nextLeft = clamp(rect.left, margin, maxLeft);
-        const nextTop = clamp(rect.top, margin, maxTop);
+  const safeWidth = clamp(rect.width, minWidth, maxWidth);
+  const safeHeight = clamp(rect.height, minHeight, maxHeight);
+  if (Math.abs(safeWidth - rect.width) > 0.5) {
+    controlPanel.style.width = `${Math.round(safeWidth)}px`;
+  }
+  if (Math.abs(safeHeight - rect.height) > 0.5) {
+    controlPanel.style.height = `${Math.round(safeHeight)}px`;
+  }
 
-        setPanelAnchoredPosition(nextLeft, nextTop);
-        updatePanelUiScale();
-      }
+  const maxLeft = Math.max(margin, window.innerWidth - safeWidth - margin);
+  const maxTop = Math.max(margin, window.innerHeight - safeHeight - margin);
+  const nextLeft = clamp(rect.left, margin, maxLeft);
+  const nextTop = clamp(rect.top, margin, maxTop);
 
-      function persistPanelLayout() {
-        if (!controlPanel.style.left || !controlPanel.style.top) {
-          return;
-        }
+  setPanelAnchoredPosition(nextLeft, nextTop);
+  updatePanelUiScale();
+}
 
-        const rect = controlPanel.getBoundingClientRect();
-        const left = Math.round(rect.left);
-        const top = Math.round(rect.top);
-        const width = Math.round(rect.width);
-        const height = Math.round(rect.height);
-        if (width <= 0 || height <= 0) {
-          return;
-        }
+function persistPanelLayout() {
+  if (!controlPanel.style.left || !controlPanel.style.top) {
+    return;
+  }
 
-        sendCommand(`ui.layout.save:${left},${top},${width},${height}`);
-      }
+  const rect = controlPanel.getBoundingClientRect();
+  const left = Math.round(rect.left);
+  const top = Math.round(rect.top);
+  const width = Math.round(rect.width);
+  const height = Math.round(rect.height);
+  if (width <= 0 || height <= 0) {
+    return;
+  }
 
-      function beginPanelDrag(event) {
-        if (!controlPanelOpen) return;
-        if (panelResizeState) return;
-        if (event.button !== undefined && event.button !== 0) return;
-        if (event.target && typeof event.target.closest === "function") {
-          if (event.target.closest("[data-nodrag]")) {
-            return;
-          }
-        }
+  sendCommand(`ui.layout.save:${left},${top},${width},${height}`);
+}
 
-        const rect = controlPanel.getBoundingClientRect();
-        const baseLeft = Math.round(rect.left);
-        const baseTop = Math.round(rect.top);
-        setPanelAnchoredPosition(baseLeft, baseTop);
-        controlPanel.style.willChange = "transform";
-        controlPanel.style.transform = "translate3d(0, 0, 0)";
+function beginPanelDrag(event) {
+  if (!controlPanelOpen) return;
+  if (panelResizeState) return;
+  if (event.button !== undefined && event.button !== 0) return;
+  if (event.target && typeof event.target.closest === "function") {
+    if (event.target.closest("[data-nodrag]")) {
+      return;
+    }
+  }
 
-        panelDragState = {
-          pointerId: event.pointerId,
-          offsetX: event.clientX - rect.left,
-          offsetY: event.clientY - rect.top,
-          baseLeft,
-          baseTop,
-          width: rect.width,
-          height: rect.height,
-          nextLeft: baseLeft,
-          nextTop: baseTop,
-          framePending: false
-        };
+  const rect = controlPanel.getBoundingClientRect();
+  const baseLeft = Math.round(rect.left);
+  const baseTop = Math.round(rect.top);
+  setPanelAnchoredPosition(baseLeft, baseTop);
+  controlPanel.style.willChange = "transform";
+  controlPanel.style.transform = "translate3d(0, 0, 0)";
 
-        if (typeof panelDragHandle.setPointerCapture === "function") {
-          panelDragHandle.setPointerCapture(event.pointerId);
-        }
-        event.preventDefault();
-      }
+  panelDragState = {
+    pointerId: event.pointerId,
+    offsetX: event.clientX - rect.left,
+    offsetY: event.clientY - rect.top,
+    baseLeft,
+    baseTop,
+    width: rect.width,
+    height: rect.height,
+    nextLeft: baseLeft,
+    nextTop: baseTop,
+    framePending: false
+  };
 
-      function beginPanelResize(mode, event) {
-        if (!controlPanelOpen) return;
-        if (panelDragState) return;
-        if (event.button !== undefined && event.button !== 0) return;
+  if (typeof panelDragHandle.setPointerCapture === "function") {
+    panelDragHandle.setPointerCapture(event.pointerId);
+  }
+  event.preventDefault();
+}
 
-        const rect = controlPanel.getBoundingClientRect();
-        setPanelAnchoredPosition(rect.left, rect.top);
-        controlPanel.style.width = `${Math.round(rect.width)}px`;
-        controlPanel.style.height = `${Math.round(rect.height)}px`;
+function beginPanelResize(mode, event) {
+  if (!controlPanelOpen) return;
+  if (panelDragState) return;
+  if (event.button !== undefined && event.button !== 0) return;
 
-        panelResizeState = {
-          mode,
-          pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          startLeft: rect.left,
-          startTop: rect.top,
-          startWidth: rect.width,
-          startHeight: rect.height,
-          nextWidth: rect.width,
-          nextHeight: rect.height,
-          framePending: false
-        };
+  const rect = controlPanel.getBoundingClientRect();
+  setPanelAnchoredPosition(rect.left, rect.top);
+  controlPanel.style.width = `${Math.round(rect.width)}px`;
+  controlPanel.style.height = `${Math.round(rect.height)}px`;
 
-        const target = event.currentTarget;
-        if (target && typeof target.setPointerCapture === "function") {
-          target.setPointerCapture(event.pointerId);
-        }
-        event.preventDefault();
-        event.stopPropagation();
-      }
+  panelResizeState = {
+    mode,
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    startLeft: rect.left,
+    startTop: rect.top,
+    startWidth: rect.width,
+    startHeight: rect.height,
+    nextWidth: rect.width,
+    nextHeight: rect.height,
+    framePending: false
+  };
 
-      function beginTooltipDrag(event) {
-        if (controlPanelOpen) return;
-        if (!tooltipTextState) return;
-        if (tooltipDragState) return;
-        if (panelDragState || panelResizeState) return;
-        if (event.button !== undefined && event.button !== 0) return;
+  const target = event.currentTarget;
+  if (target && typeof target.setPointerCapture === "function") {
+    target.setPointerCapture(event.pointerId);
+  }
+  event.preventDefault();
+  event.stopPropagation();
+}
 
-        tooltipLayout = normalizeTooltipLayout(tooltipLayout);
-        tooltipDragState = {
-          pointerId: typeof event.pointerId === "number" ? event.pointerId : null,
-          startX: event.clientX,
-          startY: event.clientY,
-          startRight: tooltipLayout.right,
-          startTop: tooltipLayout.top
-        };
+function beginTooltipDrag(event) {
+  if (controlPanelOpen) return;
+  if (!tooltipTextState) return;
+  if (tooltipDragState) return;
+  if (panelDragState || panelResizeState) return;
+  if (event.button !== undefined && event.button !== 0) return;
 
-        tooltipTitle.classList.add("dragging");
-        if (
-          tooltipDragState.pointerId !== null &&
-          typeof tooltipTitle.setPointerCapture === "function"
-        ) {
+  tooltipLayout = normalizeTooltipLayout(tooltipLayout);
+  tooltipDragState = {
+    pointerId: typeof event.pointerId === "number" ? event.pointerId : null,
+    startX: event.clientX,
+    startY: event.clientY,
+    startRight: tooltipLayout.right,
+    startTop: tooltipLayout.top
+  };
+
+  tooltipTitle.classList.add("dragging");
+  if (
+    tooltipDragState.pointerId !== null &&
+    typeof tooltipTitle.setPointerCapture === "function"
+  ) {
+    try {
+      tooltipTitle.setPointerCapture(tooltipDragState.pointerId);
+    } catch (_) {}
+  }
+
+  setActionFeedback(t("Drag to move tooltip.", "드래그해서 툴팁 위치를 이동하세요."));
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function movePanel(event) {
+  if (tooltipDragState) {
+    if (tooltipDragState.pointerId !== null) {
+      if (event.pointerId !== tooltipDragState.pointerId) return;
+    } else if (event.type.startsWith("pointer")) {
+      return;
+    }
+
+    const deltaX = event.clientX - tooltipDragState.startX;
+    const deltaY = event.clientY - tooltipDragState.startY;
+    tooltipLayout = {
+      ...tooltipLayout,
+      right: tooltipDragState.startRight - deltaX,
+      top: tooltipDragState.startTop + deltaY
+    };
+    applyTooltipLayout();
+    event.preventDefault();
+    return;
+  }
+
+  if (panelResizeState) {
+    if (event.pointerId !== panelResizeState.pointerId) return;
+
+    const { minWidth, minHeight, maxWidth, maxHeight } = panelSizeBounds();
+    const deltaX = event.clientX - panelResizeState.startX;
+    const deltaY = event.clientY - panelResizeState.startY;
+
+    let nextWidth = panelResizeState.startWidth;
+    let nextHeight = panelResizeState.startHeight;
+
+    if (panelResizeState.mode === "x" || panelResizeState.mode === "xy") {
+      nextWidth = panelResizeState.startWidth + deltaX;
+    }
+    if (panelResizeState.mode === "y" || panelResizeState.mode === "xy") {
+      nextHeight = panelResizeState.startHeight + deltaY;
+    }
+
+    const limitWidth = Math.min(maxWidth, window.innerWidth - panelResizeState.startLeft - 8);
+    const limitHeight = Math.min(maxHeight, window.innerHeight - panelResizeState.startTop - 8);
+    nextWidth = clamp(nextWidth, minWidth, Math.max(minWidth, limitWidth));
+    nextHeight = clamp(nextHeight, minHeight, Math.max(minHeight, limitHeight));
+
+    panelResizeState.nextWidth = nextWidth;
+    panelResizeState.nextHeight = nextHeight;
+    schedulePanelResizeFrame();
+    event.preventDefault();
+    return;
+  }
+
+  if (!panelDragState) return;
+  if (event.pointerId !== panelDragState.pointerId) return;
+
+  const margin = 8;
+  const maxLeft = Math.max(margin, window.innerWidth - panelDragState.width - margin);
+  const maxTop = Math.max(margin, window.innerHeight - panelDragState.height - margin);
+
+  panelDragState.nextLeft = clamp(event.clientX - panelDragState.offsetX, margin, maxLeft);
+  panelDragState.nextTop = clamp(event.clientY - panelDragState.offsetY, margin, maxTop);
+  schedulePanelDragFrame();
+  event.preventDefault();
+}
+
+function endPanelDrag(event) {
+  if (tooltipDragState) {
+    if (tooltipDragState.pointerId !== null) {
+      if (event && event.pointerId !== tooltipDragState.pointerId) return;
+    } else if (event && event.type.startsWith("pointer")) {
+      return;
+    }
+
+    const wasCancel = Boolean(event && event.type === "pointercancel");
+    const dragStart = {
+      right: tooltipDragState.startRight,
+      top: tooltipDragState.startTop
+    };
+    const dragPointerId = tooltipDragState.pointerId;
+    if (
+      dragPointerId !== null &&
+      typeof tooltipTitle.releasePointerCapture === "function"
+    ) {
+      try {
+        tooltipTitle.releasePointerCapture(dragPointerId);
+      } catch (_) {}
+    }
+
+    tooltipDragState = null;
+    tooltipTitle.classList.remove("dragging");
+    applyTooltipLayout();
+
+    const moved =
+      Math.abs(tooltipLayout.right - dragStart.right) >= 1 ||
+      Math.abs(tooltipLayout.top - dragStart.top) >= 1;
+
+    if (wasCancel) {
+      setActionFeedback(t("Tooltip move canceled.", "툴팁 이동이 취소되었습니다."));
+      return;
+    }
+
+    if (!moved) {
+      return;
+    }
+
+    persistTooltipLayout();
+    setActionFeedback(
+      t(
+        `Tooltip moved (right ${tooltipLayout.right}px, top ${tooltipLayout.top}px).`,
+        `툴팁 이동됨 (우측 ${tooltipLayout.right}px, 상단 ${tooltipLayout.top}px).`
+      )
+    );
+    return;
+  }
+
+  if (panelResizeState) {
+    if (!event || event.pointerId === panelResizeState.pointerId) {
+      applyPendingPanelResize();
+      const id = panelResizeState.pointerId;
+      const targets = [panelResizeRight, panelResizeBottom, panelResizeCorner];
+      for (const target of targets) {
+        if (target && typeof target.releasePointerCapture === "function") {
           try {
-            tooltipTitle.setPointerCapture(tooltipDragState.pointerId);
+            target.releasePointerCapture(id);
           } catch (_) {}
         }
-
-        setActionFeedback(t("Drag to move tooltip.", "드래그해서 툴팁 위치를 이동하세요."));
-        event.preventDefault();
-        event.stopPropagation();
       }
+      panelResizeState = null;
+      keepPanelInViewport();
+      persistPanelLayout();
+    }
+    return;
+  }
 
-      function movePanel(event) {
-        if (tooltipDragState) {
-          if (tooltipDragState.pointerId !== null) {
-            if (event.pointerId !== tooltipDragState.pointerId) return;
-          } else if (event.type.startsWith("pointer")) {
-            return;
-          }
+  if (!panelDragState) return;
+  if (event && event.pointerId !== panelDragState.pointerId) return;
 
-          const deltaX = event.clientX - tooltipDragState.startX;
-          const deltaY = event.clientY - tooltipDragState.startY;
-          tooltipLayout = {
-            ...tooltipLayout,
-            right: tooltipDragState.startRight - deltaX,
-            top: tooltipDragState.startTop + deltaY
-          };
-          applyTooltipLayout();
-          event.preventDefault();
-          return;
-        }
-
-        if (panelResizeState) {
-          if (event.pointerId !== panelResizeState.pointerId) return;
-
-          const { minWidth, minHeight, maxWidth, maxHeight } = panelSizeBounds();
-          const deltaX = event.clientX - panelResizeState.startX;
-          const deltaY = event.clientY - panelResizeState.startY;
-
-          let nextWidth = panelResizeState.startWidth;
-          let nextHeight = panelResizeState.startHeight;
-
-          if (panelResizeState.mode === "x" || panelResizeState.mode === "xy") {
-            nextWidth = panelResizeState.startWidth + deltaX;
-          }
-          if (panelResizeState.mode === "y" || panelResizeState.mode === "xy") {
-            nextHeight = panelResizeState.startHeight + deltaY;
-          }
-
-          const limitWidth = Math.min(maxWidth, window.innerWidth - panelResizeState.startLeft - 8);
-          const limitHeight = Math.min(maxHeight, window.innerHeight - panelResizeState.startTop - 8);
-          nextWidth = clamp(nextWidth, minWidth, Math.max(minWidth, limitWidth));
-          nextHeight = clamp(nextHeight, minHeight, Math.max(minHeight, limitHeight));
-
-          panelResizeState.nextWidth = nextWidth;
-          panelResizeState.nextHeight = nextHeight;
-          schedulePanelResizeFrame();
-          event.preventDefault();
-          return;
-        }
-
-        if (!panelDragState) return;
-        if (event.pointerId !== panelDragState.pointerId) return;
-
-        const margin = 8;
-        const maxLeft = Math.max(margin, window.innerWidth - panelDragState.width - margin);
-        const maxTop = Math.max(margin, window.innerHeight - panelDragState.height - margin);
-
-        panelDragState.nextLeft = clamp(event.clientX - panelDragState.offsetX, margin, maxLeft);
-        panelDragState.nextTop = clamp(event.clientY - panelDragState.offsetY, margin, maxTop);
-        schedulePanelDragFrame();
-        event.preventDefault();
-      }
-
-      function endPanelDrag(event) {
-        if (tooltipDragState) {
-          if (tooltipDragState.pointerId !== null) {
-            if (event && event.pointerId !== tooltipDragState.pointerId) return;
-          } else if (event && event.type.startsWith("pointer")) {
-            return;
-          }
-
-          const wasCancel = Boolean(event && event.type === "pointercancel");
-          const dragStart = {
-            right: tooltipDragState.startRight,
-            top: tooltipDragState.startTop
-          };
-          const dragPointerId = tooltipDragState.pointerId;
-          if (
-            dragPointerId !== null &&
-            typeof tooltipTitle.releasePointerCapture === "function"
-          ) {
-            try {
-              tooltipTitle.releasePointerCapture(dragPointerId);
-            } catch (_) {}
-          }
-
-          tooltipDragState = null;
-          tooltipTitle.classList.remove("dragging");
-          applyTooltipLayout();
-
-          const moved =
-            Math.abs(tooltipLayout.right - dragStart.right) >= 1 ||
-            Math.abs(tooltipLayout.top - dragStart.top) >= 1;
-
-          if (wasCancel) {
-            setActionFeedback(t("Tooltip move canceled.", "툴팁 이동이 취소되었습니다."));
-            return;
-          }
-
-          if (!moved) {
-            return;
-          }
-
-          persistTooltipLayout();
-          setActionFeedback(
-            t(
-              `Tooltip moved (right ${tooltipLayout.right}px, top ${tooltipLayout.top}px).`,
-              `툴팁 이동됨 (우측 ${tooltipLayout.right}px, 상단 ${tooltipLayout.top}px).`
-            )
-          );
-          return;
-        }
-
-        if (panelResizeState) {
-          if (!event || event.pointerId === panelResizeState.pointerId) {
-            applyPendingPanelResize();
-            const id = panelResizeState.pointerId;
-            const targets = [panelResizeRight, panelResizeBottom, panelResizeCorner];
-            for (const target of targets) {
-              if (target && typeof target.releasePointerCapture === "function") {
-                try {
-                  target.releasePointerCapture(id);
-                } catch (_) {}
-              }
-            }
-            panelResizeState = null;
-            keepPanelInViewport();
-            persistPanelLayout();
-          }
-          return;
-        }
-
-        if (!panelDragState) return;
-        if (event && event.pointerId !== panelDragState.pointerId) return;
-
-        if (typeof panelDragHandle.releasePointerCapture === "function") {
-          try {
-            panelDragHandle.releasePointerCapture(panelDragState.pointerId);
-          } catch (_) {}
-        }
-        setPanelAnchoredPosition(panelDragState.nextLeft, panelDragState.nextTop);
-        clearPanelDragVisualState();
-        panelDragState = null;
-        keepPanelInViewport();
-        persistPanelLayout();
-      }
+  if (typeof panelDragHandle.releasePointerCapture === "function") {
+    try {
+      panelDragHandle.releasePointerCapture(panelDragState.pointerId);
+    } catch (_) {}
+  }
+  setPanelAnchoredPosition(panelDragState.nextLeft, panelDragState.nextTop);
+  clearPanelDragVisualState();
+  panelDragState = null;
+  keepPanelInViewport();
+  persistPanelLayout();
+}
 

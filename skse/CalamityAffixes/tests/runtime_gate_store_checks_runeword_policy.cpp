@@ -1212,7 +1212,10 @@ namespace RuntimeGateStoreChecks
 					return std::nullopt;
 				}
 
-				const auto nextFunction = uiText->find("\n      function ", bodyStart + 1);
+				// Top-level functions start at column 0 in scripts/*.js; nested
+				// ones are indented, so this bounds the body at the next
+				// sibling without matching anything inside it.
+				const auto nextFunction = uiText->find("\nfunction ", bodyStart + 1);
 				if (nextFunction == std::string::npos) {
 					return std::string_view(*uiText).substr(bodyStart + 1);
 				}
@@ -1366,7 +1369,10 @@ namespace RuntimeGateStoreChecks
 					return std::nullopt;
 				}
 
-				const auto nextFunction = uiText->find("\n      function ", bodyStart + 1);
+				// Top-level functions start at column 0 in scripts/*.js; nested
+				// ones are indented, so this bounds the body at the next
+				// sibling without matching anything inside it.
+				const auto nextFunction = uiText->find("\nfunction ", bodyStart + 1);
 				if (nextFunction == std::string::npos) {
 					return std::string_view(*uiText).substr(bodyStart + 1);
 				}
@@ -1418,7 +1424,10 @@ namespace RuntimeGateStoreChecks
 					return std::nullopt;
 				}
 
-				const auto nextFunction = uiText->find("\n      function ", bodyStart + 1);
+				// Top-level functions start at column 0 in scripts/*.js; nested
+				// ones are indented, so this bounds the body at the next
+				// sibling without matching anything inside it.
+				const auto nextFunction = uiText->find("\nfunction ", bodyStart + 1);
 				if (nextFunction == std::string::npos) {
 					return std::string_view(*uiText).substr(bodyStart + 1);
 				}

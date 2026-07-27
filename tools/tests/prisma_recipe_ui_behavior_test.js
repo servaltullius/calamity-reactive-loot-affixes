@@ -20,12 +20,12 @@ function between(startMarker, endMarker) {
 }
 
 const recipeLocalization = between(
-  "      function resolveLocalizedRecipeText(",
-  "      function resolveRecipeBaseBadge(item)"
+  "\nfunction resolveLocalizedRecipeText(",
+  "\nfunction resolveRecipeBaseBadge(item)"
 );
 const recipeSearch = between(
-  "      function resolveRecipeBaseBadge(item)",
-  "      function resolveRecipeListViewModel()"
+  "\nfunction resolveRecipeBaseBadge(item)",
+  "\nfunction resolveRecipeListViewModel()"
 );
 
 const runRecipeBehavior = new Function(
@@ -103,8 +103,8 @@ const runRecipeBehavior = new Function(
 runRecipeBehavior(assert);
 
 const recipeListViewModelSource = between(
-  "      function resolveRecipeListViewModel()",
-  "      function createRecipeButton(item)"
+  "\nfunction resolveRecipeListViewModel()",
+  "\nfunction createRecipeButton(item)"
 );
 const runRecipeFilterBehavior = new Function(
   "assert",
@@ -178,8 +178,8 @@ const runRecipeFilterBehavior = new Function(
 runRecipeFilterBehavior(assert);
 
 const panelLayoutModeSource = between(
-  "      function resolvePanelLayoutMode(width)",
-  "      function updatePanelUiScale()"
+  "\nfunction resolvePanelLayoutMode(width)",
+  "\nfunction updatePanelUiScale()"
 );
 const runPanelLayoutModeBehavior = new Function(
   "assert",
@@ -202,8 +202,8 @@ const runPanelLayoutModeBehavior = new Function(
 runPanelLayoutModeBehavior(assert);
 
 const runewordStepStateSource = between(
-  "      function triggerRunewordStateShift(element, state)",
-  "      function renderRunewordFlowProgress(actionState, state)"
+  "\nfunction triggerRunewordStateShift(element, state)",
+  "\nfunction renderRunewordFlowProgress(actionState, state)"
 );
 const runRunewordStepStateBehavior = new Function(
   "assert",
@@ -235,8 +235,8 @@ const runRunewordStepStateBehavior = new Function(
 runRunewordStepStateBehavior(assert);
 
 const inspectorMergeSource = between(
-  "      function buildSelectedRecipeInspectorText(",
-  "      function applyTooltipPlacement()"
+  "\nfunction buildSelectedRecipeInspectorText(",
+  "\nfunction applyTooltipPlacement()"
 );
 const runInspectorMergeBehavior = new Function(
   "assert",
@@ -254,12 +254,12 @@ const runInspectorMergeBehavior = new Function(
 runInspectorMergeBehavior(assert);
 
 const maxHeightSource = between(
-  "      function getTooltipMaxLogicalHeight()",
-  "      function fitTooltipLayoutToViewport(rawLayout, rect)"
+  "\nfunction getTooltipMaxLogicalHeight()",
+  "\nfunction fitTooltipLayoutToViewport(rawLayout, rect)"
 );
 const fitLayoutSource = between(
-  "      function fitTooltipLayoutToViewport(rawLayout, rect)",
-  "      function measureTooltipRect()"
+  "\nfunction fitTooltipLayoutToViewport(rawLayout, rect)",
+  "\nfunction measureTooltipRect()"
 );
 
 const runTooltipLayoutBehavior = new Function(
@@ -293,8 +293,8 @@ const runTooltipLayoutBehavior = new Function(
 runTooltipLayoutBehavior(assert);
 
 const tooltipSetterSource = between(
-  "      function setTooltip(raw)",
-  "      function parseControlPanelOpenState(raw)"
+  "\nfunction setTooltip(raw)",
+  "\nfunction parseControlPanelOpenState(raw)"
 );
 const runTooltipSetterBehavior = new Function(
   "assert",
@@ -321,8 +321,8 @@ const runTooltipSetterBehavior = new Function(
 runTooltipSetterBehavior(assert);
 
 const listboxNavigationSource = between(
-  "      function resolveListboxNavigationIndex(",
-  "      function handleListboxKeydown(event)"
+  "\nfunction resolveListboxNavigationIndex(",
+  "\nfunction handleListboxKeydown(event)"
 );
 const runListboxNavigationBehavior = new Function(
   "assert",
