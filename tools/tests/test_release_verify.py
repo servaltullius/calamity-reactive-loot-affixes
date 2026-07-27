@@ -462,6 +462,56 @@ class ReleaseVerifyTests(unittest.TestCase):
         self.assertIn("MISSING: CalamityAffixes/SKSE/Plugins/CalamityAffixes/runtime_contract.json", result.stdout)
         self.assertIn("UNEXPECTED PEX: CalamityAffixes/Scripts/CalamityAffixes_AffixManager.pex", result.stdout)
 
+    def test_verify_mo2_zip_rejects_a_panel_view_missing_a_file_it_loads(self) -> None:
+        """A dropped stylesheet or script leaves the panel unstyled or dead in
+        game, and nothing in the log says so -- packaging is the last place it
+        can still be caught."""
+        with tempfile.TemporaryDirectory(prefix="caff-verify-zip-view-") as temp_dir:
+            zip_path = Path(temp_dir) / "CalamityAffixes_MO2_v1.2.3_2026-07-14.zip"
+            self._write_minimal_mo2_zip(
+                zip_path,
+                omit={"CalamityAffixes/PrismaUI/views/CalamityAffixes/scripts/dom.js"},
+            )
+
+            result = subprocess.run(
+                ["python3", str(self.verify_mo2_zip_path), str(zip_path)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "MISSING VIEW ASSET: CalamityAffixes/PrismaUI/views/CalamityAffixes/scripts/dom.js",
+            result.stdout,
+        )
+
+    def test_verify_mo2_zip_rejects_a_panel_view_file_nothing_loads(self) -> None:
+        """The other direction: a file shipped but never referenced is either
+        dead weight or the trace of a dropped <script src>."""
+        with tempfile.TemporaryDirectory(prefix="caff-verify-zip-orphan-") as temp_dir:
+            zip_path = Path(temp_dir) / "CalamityAffixes_MO2_v1.2.3_2026-07-14.zip"
+            self._write_minimal_mo2_zip(
+                zip_path,
+                extra={
+                    "CalamityAffixes/PrismaUI/views/CalamityAffixes/scripts/orphan.js": b"//"
+                },
+            )
+
+            result = subprocess.run(
+                ["python3", str(self.verify_mo2_zip_path), str(zip_path)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "UNREFERENCED VIEW ASSET: "
+            "CalamityAffixes/PrismaUI/views/CalamityAffixes/scripts/orphan.js",
+            result.stdout,
+        )
+
     def test_verify_mo2_zip_rejects_dll_hash_and_package_version_mismatch(self) -> None:
         with tempfile.TemporaryDirectory(prefix="caff-verify-zip-identity-") as temp_dir:
             temp_root = Path(temp_dir)
@@ -508,7 +558,15 @@ class ReleaseVerifyTests(unittest.TestCase):
             "CalamityAffixes/MCM/Config/CalamityAffixes/settings.ini": b"[Settings]",
             "CalamityAffixes/MCM/Config/CalamityAffixes/config.json": b"{}",
             "CalamityAffixes/MCM/Config/CalamityAffixes/keybinds.json": b"{}",
-            "CalamityAffixes/PrismaUI/views/CalamityAffixes/index.html": b"<html></html>",
+            # The panel view is index.html plus the files it loads. The fixture
+            # carries a stylesheet and a script so the packaging check for those
+            # references is exercised instead of passing on an empty view.
+            "CalamityAffixes/PrismaUI/views/CalamityAffixes/index.html": (
+                b'<html><head><link rel="stylesheet" href="styles/base.css" /></head>'
+                b'<body><script src="scripts/dom.js"></script></body></html>'
+            ),
+            "CalamityAffixes/PrismaUI/views/CalamityAffixes/styles/base.css": b":root{}",
+            "CalamityAffixes/PrismaUI/views/CalamityAffixes/scripts/dom.js": b'"use strict";',
             "CalamityAffixes/Scripts/CalamityAffixes_ModeControl.pex": b"pex-mode",
             "CalamityAffixes/Scripts/CalamityAffixes_ModEventEmitter.pex": b"pex-events",
             "CalamityAffixes/Scripts/CalamityAffixes_MCMConfig.pex": b"pex-mcm",

@@ -22,6 +22,15 @@ import zipfile
 MOD_ROOT = "CalamityAffixes"
 DLL_RELATIVE_PATH = "SKSE/Plugins/CalamityAffixes.dll"
 
+PRISMA_VIEW_DIR = "PrismaUI/views/CalamityAffixes"
+# The panel view is index.html plus the stylesheets and scripts it loads. Listing
+# those by hand here would go stale the next time the view is re-split, so the
+# packaged index.html is asked what it needs. Both directions are checked: a
+# reference with no file would leave the panel unstyled or dead in-game, and a
+# file with no reference means either dead weight or a dropped <script src>.
+VIEW_LINK_RE = re.compile(r"""<link\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>""", re.IGNORECASE)
+VIEW_SCRIPT_RE = re.compile(r"""<script\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>""", re.IGNORECASE)
+
 REQUIRED_FILES: tuple[str, ...] = (
     "CalamityAffixes.esp",
     "CalamityAffixes_KID.ini",
@@ -57,6 +66,33 @@ def sha256_file(path: pathlib.Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def prisma_view_errors(archive: zipfile.ZipFile, names: set[str]) -> list[str]:
+    """Check the packaged panel view loads every file it ships, and ships every
+    file it loads."""
+    root = f"{MOD_ROOT}/{PRISMA_VIEW_DIR}"
+    index_name = f"{root}/index.html"
+    if index_name not in names:
+        # REQUIRED_FILES already reports the missing entry point; do not repeat it.
+        return []
+
+    source = archive.read(index_name).decode("utf-8")
+    referenced = {
+        f"{root}/{relative}"
+        for relative in VIEW_LINK_RE.findall(source) + VIEW_SCRIPT_RE.findall(source)
+        if ":" not in relative and not relative.startswith("/")
+    }
+    packaged = {
+        name
+        for name in names
+        # A trailing slash is a directory entry, not a file the view can load.
+        if name.startswith(f"{root}/") and name != index_name and not name.endswith("/")
+    }
+
+    errors = [f"MISSING VIEW ASSET: {name}" for name in sorted(referenced - packaged)]
+    errors += [f"UNREFERENCED VIEW ASSET: {name}" for name in sorted(packaged - referenced)]
+    return errors
 
 
 def find_latest_zip(repo_root: pathlib.Path) -> pathlib.Path | None:
@@ -108,6 +144,8 @@ def verify(
                 full_path = f"{MOD_ROOT}/{relative_path}"
                 if full_path not in names:
                     errors.append(f"MISSING: {full_path}")
+
+            errors.extend(prisma_view_errors(archive, names))
 
             for name in names:
                 for pattern, message in BAD_PATTERNS:

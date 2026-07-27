@@ -49,6 +49,12 @@ jobs:
       - name: Verify Papyrus pin
         run: python3 tools/verify_papyrus_pin.py
 
+      # The panel view is index.html plus styles/*.css and scripts/*.js. A
+      # broken reference does not fail the build or the log -- the panel just
+      # comes up unstyled or empty in-game -- so it has to be caught here.
+      - name: Verify Prisma view structure
+        run: python3 tools/verify_prisma_view.py
+
   generator-tests:
     name: Generator tests
     runs-on: ubuntu-latest
