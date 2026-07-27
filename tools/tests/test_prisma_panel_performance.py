@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import os
 import re
 import shutil
 import subprocess
@@ -217,10 +218,29 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         self.assertEqual(current, target)
         self.assertLess(frame, 30)
 
-    def test_scroll_controller_behavior_in_node(self) -> None:
+
+    def _require_node(self) -> str:
+        """Locate the node binary, or skip -- unless the environment forbids skipping.
+
+        Local checkouts should not be forced to install Node just to run the
+        Python suite, so a missing binary skips.  CI is different: a silent skip
+        there means these two behaviour tests report success while never having
+        run.  CI sets CALAMITY_REQUIRE_NODE=1 so the absence of Node is a
+        failure rather than a quiet pass.
+        """
         node = shutil.which("node")
-        if node is None:
-            self.skipTest("Node.js is unavailable")
+        if node is not None:
+            return node
+        if os.environ.get("CALAMITY_REQUIRE_NODE") == "1":
+            self.fail(
+                "Node.js is unavailable but CALAMITY_REQUIRE_NODE=1 -- the JS "
+                "behaviour tests must actually run in this environment"
+            )
+        self.skipTest("Node.js is unavailable")
+        raise AssertionError("unreachable")  # pragma: no cover
+
+    def test_scroll_controller_behavior_in_node(self) -> None:
+        node = self._require_node()
 
         script = self.repo_root / "tools" / "tests" / "prisma_scroll_behavior_test.js"
         result = subprocess.run(
@@ -239,9 +259,7 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         self.assertIn("Prisma scroll behavior: OK", result.stdout)
 
     def test_recipe_content_and_tooltip_layout_behavior_in_node(self) -> None:
-        node = shutil.which("node")
-        if node is None:
-            self.skipTest("Node.js is unavailable")
+        node = self._require_node()
 
         script = self.repo_root / "tools" / "tests" / "prisma_recipe_ui_behavior_test.js"
         result = subprocess.run(

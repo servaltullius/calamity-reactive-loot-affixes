@@ -64,10 +64,21 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      # Two Prisma behaviour tests shell out to node. Without this they call
+      # skipTest() and the job reports success having never run them.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Install Python tool dependencies
         run: python3 -m pip install --upgrade pip jsonschema
 
       - name: Run tools workflow tests
+        # CALAMITY_REQUIRE_NODE turns a missing node from a silent skip into a
+        # failure, so this job cannot go green with those tests unexecuted.
+        env:
+          CALAMITY_REQUIRE_NODE: "1"
         run: python3 -m unittest discover -s tools/tests -p 'test_*.py'
 
       - name: Verify runtime contract snapshot sync
