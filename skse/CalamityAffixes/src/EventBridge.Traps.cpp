@@ -2,10 +2,12 @@
 #include "CalamityAffixes/ProcFeedback.h"
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
+#include "CalamityAffixes/TrapTickSelection.h"
 
 #include <algorithm>
 #include <format>
 #include <mutex>
+#include <vector>
 
 #include <RE/P/ProcessLists.h>
 
@@ -309,8 +311,28 @@ namespace CalamityAffixes
 		std::size_t trapCastsConsumed = 0u;
 		bool loggedBudgetExhausted = false;
 		const auto hasTrapCastBudget = [&](std::size_t a_cost = 1u) noexcept {
-			return trapCastBudgetPerTick == 0u || (trapCastsConsumed + a_cost) <= trapCastBudgetPerTick;
+			return detail::HasTrapCastBudget(trapCastsConsumed, trapCastBudgetPerTick, a_cost);
 		};
+
+		// One high-actor snapshot per tick, shared by every trap.
+		//
+		// ProcessLists::ForEachHighActor walks the engine's actor list and takes
+		// its own locks; running it once per trap made the traversal cost scale
+		// with (traps x actors) even though every trap sees the same set.  The
+		// strong NiPointers keep those actors alive for the whole tick.
+		//
+		// Only the traversal is hoisted: liveness, hostility, and position are
+		// still read per trap below, so a target killed by an earlier trap this
+		// tick is skipped by the later ones exactly as before.
+		std::vector<RE::NiPointer<RE::Actor>> highActors;
+		{
+			lock.unlock();
+			processLists->ForEachHighActor([&](RE::Actor& a) {
+				highActors.emplace_back(std::addressof(a));
+				return RE::BSContainer::ForEachResult::kContinue;
+			});
+			lock.lock();
+		}
 
 		if (trapTickCursor >= activeTraps.size()) {
 			trapTickCursor = 0;
@@ -368,34 +390,37 @@ namespace CalamityAffixes
 			const float radiusSq = trapSnapshot.radius * trapSnapshot.radius;
 
 			lock.unlock();
-			processLists->ForEachHighActor([&](RE::Actor& a) {
+			for (const auto& candidate : highActors) {
+				auto* candidateActor = candidate.get();
+				if (!candidateActor) {
+					continue;
+				}
+				auto& a = *candidateActor;
+
 				if (!hasTrapCastBudget()) {
-					return RE::BSContainer::ForEachResult::kStop;
+					break;
 				}
 
-				if (&a == owner) {
-					return RE::BSContainer::ForEachResult::kContinue;
-				}
-
-				if (a.IsDead()) {
-					return RE::BSContainer::ForEachResult::kContinue;
-				}
-
-				if (!owner->IsHostileToActor(std::addressof(a))) {
-					return RE::BSContainer::ForEachResult::kContinue;
+				// Re-read per trap: an earlier trap this tick may have killed
+				// the actor, and hostility is relative to this trap's owner.
+				if (!detail::IsTrapTickTargetEligible(
+						std::addressof(a) == owner,
+						a.IsDead(),
+						owner->IsHostileToActor(std::addressof(a)))) {
+					continue;
 				}
 
 				const auto targetPos = a.GetPosition();
-				const float dx = targetPos.x - trapSnapshot.position.x;
-				const float dy = targetPos.y - trapSnapshot.position.y;
-				const float dz = targetPos.z - trapSnapshot.position.z;
-				const float distSq = (dx * dx) + (dy * dy) + (dz * dz);
-				if (distSq > radiusSq) {
-					return RE::BSContainer::ForEachResult::kContinue;
+				const float distSq = detail::TrapTargetDistanceSq(
+					targetPos.x - trapSnapshot.position.x,
+					targetPos.y - trapSnapshot.position.y,
+					targetPos.z - trapSnapshot.position.z);
+				if (!detail::IsWithinTrapRadiusSq(distSq, radiusSq)) {
+					continue;
 				}
 
 				if (!hasTrapCastBudget()) {
-					return RE::BSContainer::ForEachResult::kStop;
+					break;
 				}
 				magicCaster->CastSpellImmediate(
 					trapSnapshot.spell,
@@ -426,13 +451,12 @@ namespace CalamityAffixes
 				triggeredTargets += 1u;
 
 				if (triggeredTargets >= maxTargetsPerTrigger) {
-					return RE::BSContainer::ForEachResult::kStop;
+					break;
 				}
 				if (!hasTrapCastBudget()) {
-					return RE::BSContainer::ForEachResult::kStop;
+					break;
 				}
-				return RE::BSContainer::ForEachResult::kContinue;
-			});
+			}
 			lock.lock();
 
 			if (trapIndex >= activeTraps.size()) {
