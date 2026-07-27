@@ -43,6 +43,12 @@ jobs:
       - name: Verify CommonLibSSE-NG pin
         run: python3 tools/verify_commonlib_pin.py
 
+      # A runner has no Papyrus compiler, so a release packages the committed
+      # .pex. Check here that they still match their .psc -- otherwise the first
+      # sign of a forgotten recompile would be a shipped, stale script.
+      - name: Verify Papyrus pin
+        run: python3 tools/verify_papyrus_pin.py
+
   generator-tests:
     name: Generator tests
     runs-on: ubuntu-latest

@@ -8,7 +8,7 @@
 - Install command: `dotnet restore tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj`
 - Dev server command: `N/A (게임 모드 프로젝트 특성상 상시 dev server 없음)`
 - Unit test command: `python3 tools/ensure_skse_build.py --lane plugin --lane runtime-gate && dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release && ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --no-tests=error --output-on-failure`
-- Lint/format command: `python3 tools/compose_affixes.py --check && python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json && python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null && python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null && python3 tools/audit_source_string_tests.py --max-brittle 353 && python3 tools/verify_commonlib_pin.py && python3 tools/verify_version_consistency.py`
+- Lint/format command: `python3 tools/compose_affixes.py --check && python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json && python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null && python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null && python3 tools/audit_source_string_tests.py --max-brittle 353 && python3 tools/verify_commonlib_pin.py && python3 tools/verify_papyrus_pin.py && python3 tools/verify_version_consistency.py`
 - Typecheck/build command: `python3 tools/ensure_skse_build.py --lane plugin && cmake --build skse/CalamityAffixes/build.linux-clangcl-rel --target CalamityAffixes`
 - Primary entrypoint path: `skse/CalamityAffixes/src/main.cpp`
 
@@ -27,6 +27,25 @@
 - Run SKSE tests: `python3 tools/ensure_skse_build.py --lane plugin --lane runtime-gate && ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --no-tests=error --output-on-failure`
 - Copy built DLL: `cp -f skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll Data/SKSE/Plugins/CalamityAffixes.dll`
 - Verify DLL hashes: `sha256sum skse/CalamityAffixes/build.linux-clangcl-rel/CalamityAffixes.dll Data/SKSE/Plugins/CalamityAffixes.dll`
+
+## Papyrus (`Data/Scripts/*.psc`)
+
+`PapyrusCompiler.exe` ships with the Creation Kit, so CI cannot compile these.
+The `.pex` are committed and CI packages them, gated on
+`tools/verify_papyrus_pin.py`. After editing any `.psc`, any stub under
+`tools/papyrus-stubs/`, or the flags file, run:
+
+```
+python3 tools/verify_papyrus_pin.py --update
+```
+
+It recompiles first, then records the hashes; commit the regenerated `.pex`
+together with the pin. Skipping it fails the lint command and the release.
+
+Note that `.pex` output is not reproducible — the compiler emits its string
+table in hash-map order and stamps a compile time — so recompiling always
+produces a diff even when the source is unchanged. That is expected, and it is
+why the pin cannot verify itself by recompiling.
 
 ## Packaging
 

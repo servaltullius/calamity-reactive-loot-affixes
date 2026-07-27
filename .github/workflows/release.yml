@@ -7,34 +7,20 @@ name: release
 # The release is created as a DRAFT. Nothing becomes public until a human opens
 # it and clicks publish.
 #
-# BLOCKED: the tag trigger is deliberately disabled.
+# Papyrus on a runner: a runner has no PapyrusCompiler.exe (it ships with the
+# Creation Kit and cannot be installed here), so build_mo2_zip.sh packages the
+# .pex committed under Data/Scripts/ instead of compiling them. That is gated on
+# tools/verify_papyrus_pin.py, which proves those .pex still match the .psc,
+# stubs, and flags file they were built from. A forgotten recompile fails the
+# release rather than shipping a stale script.
 #
-# The first dry run (v1.7.3-rc1) got all the way through the DLL build and ESP
-# generation and then failed in `build_mo2_zip.sh`, which unconditionally calls
-# `compile_papyrus.sh`. That needs PapyrusCompiler.exe from the Creation Kit --
-# a proprietary local binary that cannot be installed on a GitHub runner:
-#
-#   Papyrus compiler not found: .../Papyrus Compiler/PapyrusCompiler.exe
-#
-# The three .pex outputs ARE committed under Data/Scripts/, so packaging could
-# use them. But compile_papyrus.sh deliberately refuses that ("Existing staged
-# PEX files are never accepted as a substitute for a failed or incomplete
-# compiler invocation"), and quietly reintroducing the fallback would let a
-# release ship a .pex that no longer matches its .psc.
-#
-# The fix is to make the committed .pex provably current: a manifest recording
-# the hashes of the .psc sources, tools/papyrus-stubs/*, and the flags file they
-# were built from, verified before packaging reuses them -- the same shape as
-# skse/CalamityAffixes/extern/CommonLibSSE-NG.pin.json. Until that exists,
-# releases are built locally, where the compiler is present.
-#
-# workflow_dispatch stays enabled: everything up to packaging is real
-# verification and worth being able to run on demand.
+# workflow_dispatch stays enabled as a dry run: it builds and verifies
+# everything but creates no release.
 
 on:
-  # push:
-  #   tags:
-  #     - "v*"
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       version:
@@ -90,6 +76,11 @@ jobs:
 
       - name: Verify CommonLibSSE-NG pin
         run: python3 tools/verify_commonlib_pin.py
+
+      # Packaging will reuse the committed .pex, so fail here rather than after
+      # a full cross-compile if they no longer match their sources.
+      - name: Verify Papyrus pin
+        run: python3 tools/verify_papyrus_pin.py
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -153,6 +144,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          # A release can already exist for this tag -- publishing a draft that
+          # was built locally is what creates the tag in the first place, and
+          # that push lands here. Leave it alone rather than failing the run or
+          # overwriting assets someone deliberately attached; the artifacts for
+          # this run stay available on the workflow run itself.
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            echo "A release already exists for ${GITHUB_REF_NAME}; leaving it untouched."
+            exit 0
+          fi
 
           # Try rc-specific notes first, then the base release's. An rc usually
           # reuses the notes written for the version it is a candidate for, but
