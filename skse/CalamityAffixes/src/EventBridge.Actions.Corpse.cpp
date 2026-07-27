@@ -301,9 +301,12 @@ namespace CalamityAffixes
 				chainMultiplier);
 		}
 
-		_combatState.procDepth += 1;
-		const std::uint32_t targetsHit = ExecuteCorpseExplosion(bestAffix.action, a_owner, a_corpse, finalDamage);
-		_combatState.procDepth -= 1;
+		std::uint32_t targetsHit = 0u;
+		{
+			const ScopedProcDepth procDepthGuard{ _combatState };
+			(void)procDepthGuard;
+			targetsHit = ExecuteCorpseExplosion(bestAffix.action, a_owner, a_corpse, finalDamage);
+		}
 		if (selection.bestUsesPerTargetIcd && targetsHit > 0u) {
 			// Consume per-target ICD only when the explosion actually hit at least one target.
 			CommitPerTargetCooldown(selection.bestPerTargetKey, bestAffix.perTargetIcd, now);

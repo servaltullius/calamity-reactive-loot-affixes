@@ -90,6 +90,7 @@ int main()
 	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
 	const bool serializationLoadStateHelpersOk = CheckSerializationLoadStateHelpers();
 	const bool lowHealthTriggerSnapshotHelpersOk = CheckLowHealthTriggerSnapshotHelpers();
+	const bool scopedProcDepthGuardOk = CheckScopedProcDepthGuard();
 	const bool affixCountRollDistributionOk = CheckAffixCountRollDistribution();
 	const bool affixCountRollUnitBoundsOk = CheckAffixCountRollUnitBounds();
 	const bool reforgeTargetAffixCountBoundsOk = CheckReforgeTargetAffixCountBounds();
@@ -158,6 +159,7 @@ int main()
 	        lootRerollEdgeCasesOk &&
 	        serializationLoadStateHelpersOk &&
 	        lowHealthTriggerSnapshotHelpersOk &&
+	        scopedProcDepthGuardOk &&
 	        affixCountRollDistributionOk &&
 	        affixCountRollUnitBoundsOk &&
 	        reforgeTargetAffixCountBoundsOk &&

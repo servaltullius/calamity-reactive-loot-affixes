@@ -112,4 +112,46 @@ namespace CalamityAffixes
 			ResetTransientState();
 		}
 	};
+
+	// RAII guard for CombatRuntimeState::procDepth.
+	//
+	// Proc actions re-enter the engine (spell casts, trap spawns, corpse
+	// explosions) and the trigger path refuses to run while procDepth > 0, which
+	// is what stops a proc from observing its own side effects.  Raising and
+	// lowering the counter by hand around those calls means any early exit or
+	// escaping exception leaks the depth permanently -- and because procDepth is
+	// unsigned, an unbalanced decrement wraps to ~4e9 instead of going negative.
+	// Either way every affix proc stays disabled for the rest of the session.
+	class ScopedProcDepth
+	{
+	public:
+		explicit ScopedProcDepth(CombatRuntimeState& a_state) noexcept :
+			_state(&a_state)
+		{
+			_state->procDepth.fetch_add(1u, std::memory_order_relaxed);
+		}
+
+		~ScopedProcDepth() noexcept
+		{
+			// Compare-exchange rather than a bare fetch_sub so a concurrent
+			// ResetTransientState (save/load, config reload) cannot make this
+			// decrement underflow.
+			auto current = _state->procDepth.load(std::memory_order_relaxed);
+			while (current > 0u &&
+				   !_state->procDepth.compare_exchange_weak(
+					   current,
+					   current - 1u,
+					   std::memory_order_relaxed,
+					   std::memory_order_relaxed)) {
+			}
+		}
+
+		ScopedProcDepth(const ScopedProcDepth&) = delete;
+		ScopedProcDepth(ScopedProcDepth&&) = delete;
+		ScopedProcDepth& operator=(const ScopedProcDepth&) = delete;
+		ScopedProcDepth& operator=(ScopedProcDepth&&) = delete;
+
+	private:
+		CombatRuntimeState* _state;
+	};
 }

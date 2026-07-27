@@ -1,6 +1,9 @@
 #include "runtime_gate_store_checks_common.h"
+#include "CalamityAffixes/CombatRuntimeState.h"
 #include "CalamityAffixes/LootRerollGuard.h"
 #include "CalamityAffixes/SerializationLoadState.h"
+
+#include <stdexcept>
 
 namespace RuntimeGateStoreChecks
 {
@@ -501,6 +504,88 @@ namespace RuntimeGateStoreChecks
 			active.currentPct != 35.0f ||
 			active.previousPct != 62.0f) {
 			std::cerr << "low_health_trigger_snapshot_helpers: active trigger snapshot values regressed\n";
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckScopedProcDepthGuard()
+	{
+		CalamityAffixes::CombatRuntimeState state{};
+		if (state.procDepth.load() != 0u) {
+			std::cerr << "scoped_proc_depth: fresh CombatRuntimeState did not start at depth 0\n";
+			return false;
+		}
+
+		// Ordinary scope raises the depth and restores it.
+		{
+			const CalamityAffixes::ScopedProcDepth guard{ state };
+			(void)guard;
+			if (state.procDepth.load() != 1u) {
+				std::cerr << "scoped_proc_depth: guard did not raise depth to 1\n";
+				return false;
+			}
+		}
+		if (state.procDepth.load() != 0u) {
+			std::cerr << "scoped_proc_depth: guard did not restore depth after normal exit\n";
+			return false;
+		}
+
+		// Procs can re-enter, so nesting must accumulate and unwind symmetrically.
+		{
+			const CalamityAffixes::ScopedProcDepth outer{ state };
+			(void)outer;
+			{
+				const CalamityAffixes::ScopedProcDepth inner{ state };
+				(void)inner;
+				if (state.procDepth.load() != 2u) {
+					std::cerr << "scoped_proc_depth: nested guard did not raise depth to 2\n";
+					return false;
+				}
+			}
+			if (state.procDepth.load() != 1u) {
+				std::cerr << "scoped_proc_depth: inner guard did not restore depth to 1\n";
+				return false;
+			}
+		}
+		if (state.procDepth.load() != 0u) {
+			std::cerr << "scoped_proc_depth: outer guard did not restore depth to 0\n";
+			return false;
+		}
+
+		// The regression this guard exists for: an escaping exception used to skip
+		// the manual decrement, pinning procDepth above zero for the rest of the
+		// session and silently disabling every affix proc.
+		try {
+			const CalamityAffixes::ScopedProcDepth guard{ state };
+			(void)guard;
+			throw std::runtime_error("proc action failed");
+		} catch (const std::runtime_error&) {
+		}
+		if (state.procDepth.load() != 0u) {
+			std::cerr << "scoped_proc_depth: exception leaked proc depth (" << state.procDepth.load()
+					  << "); all affix procs would stay disabled\n";
+			return false;
+		}
+
+		// procDepth is unsigned, so a mid-scope reset must not wrap the decrement
+		// around to ~4e9 -- which would fail the `procDepth > 0` gate forever.
+		{
+			const CalamityAffixes::ScopedProcDepth guard{ state };
+			(void)guard;
+			state.procDepth.store(0u);
+		}
+		if (state.procDepth.load() != 0u) {
+			std::cerr << "scoped_proc_depth: decrement underflowed to " << state.procDepth.load() << "\n";
+			return false;
+		}
+
+		// ResetTransientState clears the depth for save/load and config reloads.
+		state.procDepth.store(3u);
+		state.ResetTransientState();
+		if (state.procDepth.load() != 0u) {
+			std::cerr << "scoped_proc_depth: ResetTransientState left depth at " << state.procDepth.load() << "\n";
 			return false;
 		}
 

@@ -122,6 +122,8 @@ namespace RuntimeGateStoreChecks
 	bool CheckSerializationLoadStateHelpers();
 	bool CheckLowHealthTriggerSnapshotHelpers();
 
+	bool CheckScopedProcDepthGuard();
+
 	bool CheckAffixCountRollDistribution();
 	bool CheckAffixCountRollUnitBounds();
 	bool CheckReforgeTargetAffixCountBounds();
