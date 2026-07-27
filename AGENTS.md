@@ -8,7 +8,7 @@
 - Install command: `dotnet restore tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj`
 - Dev server command: `N/A (게임 모드 프로젝트 특성상 상시 dev server 없음)`
 - Unit test command: `python3 tools/ensure_skse_build.py --lane plugin --lane runtime-gate && dotnet test tools/CalamityAffixes.Generator.Tests/CalamityAffixes.Generator.Tests.csproj -c Release && ctest --test-dir skse/CalamityAffixes/build.linux-clangcl-rel --no-tests=error --output-on-failure`
-- Lint/format command: `python3 tools/compose_affixes.py --check && python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json && python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null && python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null && python3 tools/audit_source_string_tests.py --max-brittle 376 && python3 tools/verify_commonlib_pin.py`
+- Lint/format command: `python3 tools/compose_affixes.py --check && python3 tools/lint_affixes.py --spec affixes/affixes.json --manifest affixes/affixes.modules.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json && python3 -m json.tool Data/MCM/Config/CalamityAffixes/config.json >/dev/null && python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null && python3 tools/audit_source_string_tests.py --max-brittle 353 && python3 tools/verify_commonlib_pin.py`
 - Typecheck/build command: `python3 tools/ensure_skse_build.py --lane plugin && cmake --build skse/CalamityAffixes/build.linux-clangcl-rel --target CalamityAffixes`
 - Primary entrypoint path: `skse/CalamityAffixes/src/main.cpp`
 

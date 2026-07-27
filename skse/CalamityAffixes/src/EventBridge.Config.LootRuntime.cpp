@@ -1,4 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
+
+#include "CalamityAffixes/CurrencyDropRuntimePolicy.h"
 #include "CalamityAffixes/LootEligibility.h"
 #include "CalamityAffixes/RuntimePaths.h"
 #include "EventBridge.Config.Shared.h"
@@ -72,8 +74,9 @@ namespace CalamityAffixes
 		_loot.bossContainerEditorIdDenyContains.clear();
 		_loot.nameMarkerPosition = LootNameMarkerPosition::kTrailing;
 		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
-		_loot.runtimeCurrencyDropsEnabled = false;
-		_loot.runtimeCorpseDeathCurrencyDropsEnabled = true;
+		const auto currencyPolicy = detail::ResolveCorpseDeathOnlyCurrencyDropPolicy();
+		_loot.runtimeCurrencyDropsEnabled = currencyPolicy.broadRuntimeDropsEnabled;
+		_loot.runtimeCorpseDeathCurrencyDropsEnabled = currencyPolicy.corpseDeathRuntimeDropsEnabled;
 		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
 		if (loot.is_object()) {
 			_loot.chancePercent = loot.value("chancePercent", 0.0f);
@@ -100,8 +103,8 @@ namespace CalamityAffixes
 				}
 			}
 			_loot.currencyDropMode = CurrencyDropMode::kHybrid;
-			_loot.runtimeCurrencyDropsEnabled = false;
-			_loot.runtimeCorpseDeathCurrencyDropsEnabled = true;
+			_loot.runtimeCurrencyDropsEnabled = currencyPolicy.broadRuntimeDropsEnabled;
+			_loot.runtimeCorpseDeathCurrencyDropsEnabled = currencyPolicy.corpseDeathRuntimeDropsEnabled;
 			_loot.lootSourceChanceMultCorpse =
 				static_cast<float>(loot.value("lootSourceChanceMultCorpse", static_cast<double>(_loot.lootSourceChanceMultCorpse)));
 			_loot.lootSourceChanceMultContainer =
@@ -274,8 +277,9 @@ namespace CalamityAffixes
 		// Keep the legacy "hybrid" token for config compatibility. The broad runtime
 		// gate remains off; only eligible hostile deaths use the isolated corpse path.
 		_loot.currencyDropMode = CurrencyDropMode::kHybrid;
-		_loot.runtimeCurrencyDropsEnabled = false;
-		_loot.runtimeCorpseDeathCurrencyDropsEnabled = true;
+		const auto currencyPolicy = detail::ResolveCorpseDeathOnlyCurrencyDropPolicy();
+		_loot.runtimeCurrencyDropsEnabled = currencyPolicy.broadRuntimeDropsEnabled;
+		_loot.runtimeCorpseDeathCurrencyDropsEnabled = currencyPolicy.corpseDeathRuntimeDropsEnabled;
 
 		// MCM chances drive only the death-event roll and serialized pity counters.
 		// Container activation, pickup, world placement, and new SPID distribution stay off.

@@ -259,8 +259,7 @@ namespace RuntimeGateStoreChecks
 			}
 
 			if (typesText->find("bool allowPlayerHealthDamageHook{ true };") == std::string::npos ||
-				typesText->find("allowPlayerHealthDamageHook = true;") == std::string::npos ||
-				runtimeText->find("_runtimeSettings.allowPlayerHealthDamageHook = true;") == std::string::npos ||
+				runtimeText->find("detail::ResolvePlayerHealthDamageHookEnabled(") == std::string::npos ||
 				runtimeText->find("runtime override 'allowPlayerHealthDamageHook' is ignored") == std::string::npos) {
 				std::cerr << "player_health_damage_hook_default: player health-damage hook must stay enabled by default and ignore legacy runtime overrides\n";
 				return false;

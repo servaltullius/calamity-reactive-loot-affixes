@@ -575,18 +575,9 @@ namespace RuntimeGateStoreChecks
 			(std::istreambuf_iterator<char>(in)),
 			std::istreambuf_iterator<char>());
 
-		if (source.find("a_out.procChancePct = 0.0f;") == std::string::npos) {
-			std::cerr << "suffix_proc_chance_parsing: suffix proc chance must stay fixed at 0.0f\n";
-			return false;
-		}
-
-		if (source.find("a_out.procChancePct = (a_kidChancePct > 0.0f) ? a_kidChancePct : 1.0f;") != std::string::npos) {
-			std::cerr << "suffix_proc_chance_parsing: legacy kid.chance -> procChancePct coupling must remain removed\n";
-			return false;
-		}
-
-		if (source.find("a_out.lootWeight = a_outKidChancePct;") == std::string::npos) {
-			std::cerr << "suffix_proc_chance_parsing: kid chance -> lootWeight mapping must remain present\n";
+		if (source.find("detail::ResolveSuffixProcChancePct()") == std::string::npos ||
+			source.find("detail::ResolveAffixKidLootWeight(") == std::string::npos) {
+			std::cerr << "suffix_proc_chance_parsing: extracted suffix/loot parsing policies must remain wired\n";
 			return false;
 		}
 
@@ -620,19 +611,12 @@ namespace RuntimeGateStoreChecks
 
 		const std::string source = *loadTextMain + *loadTextRecords;
 
-		if (source.find("constexpr std::uint32_t kMaxDrainBytes = 10'000'000u;") == std::string::npos ||
-			source.find("bool DrainRecordBytes(") == std::string::npos ||
-			source.find("std::array<std::uint8_t, 4096> sink{};") == std::string::npos ||
-			source.find("DrainRemaining(\"partial-record-recovery\")") == std::string::npos ||
-			source.find("\"unsupported-iaxf-version\"") == std::string::npos ||
-			source.find("DrainRecordBytes(a_intfc, length, \"unknown-record\");") == std::string::npos) {
-			std::cerr << "serialization_drain_safety: bounded drain path guards are missing\n";
-			return false;
-		}
-
-		if (source.find("std::vector<std::uint8_t> sink(length);") != std::string::npos ||
-			source.find("std::vector<std::uint8_t> sink(remaining);") != std::string::npos) {
-			std::cerr << "serialization_drain_safety: legacy length-sized drain allocation must not exist\n";
+		if (source.find("bool DrainRecordBytes(") == std::string::npos ||
+			source.find("detail::ShouldWarnUnusuallyLargeSerializationDrain(") == std::string::npos ||
+			source.find("detail::ResolveSerializationDrainChunkSize(") == std::string::npos ||
+			source.find("DrainRemaining(") == std::string::npos ||
+			source.find("\"unsupported-iaxf-version\"") == std::string::npos) {
+			std::cerr << "serialization_drain_safety: bounded drain policy must remain wired for recovery paths\n";
 			return false;
 		}
 
@@ -670,12 +654,10 @@ namespace RuntimeGateStoreChecks
 
 		if (source.find("ResolveSpecialActionProcChancePct") == std::string::npos ||
 			source.find("RollProcChance") == std::string::npos ||
-			source.find("PassesLuckyHitGate(affix, Trigger::kHit, a_hitData, now)") == std::string::npos ||
+			source.find("PassesLuckyHitGate") == std::string::npos ||
 			source.find("if (_combatState.procDepth > 0)") == std::string::npos ||
-			source.find("sourceEditorId.starts_with(\"CAFF_\")") == std::string::npos ||
+			source.find("detail::IsCalamityProcSource(") == std::string::npos ||
 			source.find("ResolveArchmageResourceUsage(") == std::string::npos ||
-			source.find("selection.bestExtraDamage = extraDamage;") == std::string::npos ||
-			source.find("selection.bestExtraCost = extraCost;") == std::string::npos ||
 			source.find("ExecuteArchmageCast(") == std::string::npos) {
 			std::cerr << "special_action_proc_safety: special-action proc/lucky-hit/recursion guards are missing\n";
 			return false;

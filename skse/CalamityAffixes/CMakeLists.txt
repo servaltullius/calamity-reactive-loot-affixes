@@ -236,6 +236,12 @@ if (BUILD_TESTING)
             tests/test_trap_cell_policy.cpp
             tests/test_trap_tick_selection.cpp
             tests/test_tes_hit_fallback_policy.cpp
+            tests/test_affix_parsing_policy.cpp
+            tests/test_serialization_drain_policy.cpp
+            tests/test_special_action_safety_policy.cpp
+            tests/test_currency_drop_runtime_policy.cpp
+            tests/test_player_health_damage_hook_policy.cpp
+            tests/test_synthesized_affix_display_name_policy.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

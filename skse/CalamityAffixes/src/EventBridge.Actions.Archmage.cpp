@@ -2,6 +2,7 @@
 
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
+#include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
 #include <string_view>
@@ -9,15 +10,6 @@
 
 namespace CalamityAffixes
 {
-	namespace
-	{
-		float ResolveSpecialActionProcChancePct_Archmage(float a_configuredChancePct)
-		{
-			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
-		}
-
-	}
-
 	EventBridge::ArchmageSelection EventBridge::SelectBestArchmageAction(
 		std::chrono::steady_clock::time_point a_now,
 		RE::Actor* a_owner,
@@ -48,7 +40,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct_Archmage(affix.procChancePct * _runtimeSettings.procChanceMult);
+			const float chancePct = detail::ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
@@ -171,7 +163,7 @@ namespace CalamityAffixes
 		}
 
 		const auto sourceEditorId = SafeCStringView(a_sourceSpell->GetFormEditorID());
-		if (sourceEditorId.starts_with("CAFF_")) {
+		if (detail::IsCalamityProcSource(sourceEditorId)) {
 			// Avoid recursive stacking on our own proc spells.
 			return;
 		}

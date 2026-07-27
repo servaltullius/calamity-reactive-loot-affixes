@@ -66,15 +66,34 @@ class SuffixFamilyContractTests(unittest.TestCase):
                 )
 
     def test_loader_keeps_kid_chance_as_suffix_runtime_loot_weight(self) -> None:
-        assignment = "a_out.lootWeight = a_outKidChancePct;"
-        suffix_gate = "if (a_out.slot == AffixSlot::kSuffix) {"
+        """The kid.chance fallback must land before the suffix runtime gate.
 
-        self.assertIn(assignment, self.loader_source)
-        self.assertIn(suffix_gate, self.loader_source)
+        ApplyAffixRuntimeGateFromJson returns early for suffixes, so anything
+        that runs after it never executes for a suffix affix. lootWeight is
+        derived in ApplyAffixKidLootFromJson, and it only reaches suffixes
+        because that call precedes the gate. Swapping the two would silently
+        leave every suffix at lootWeight 0.
+
+        This used to pin the literal `a_out.lootWeight = a_outKidChancePct;`,
+        which broke the moment the expression moved into
+        detail::ResolveAffixKidLootWeight -- while the invariant it claimed to
+        guard was untouched. Pin the call order instead: that IS the invariant,
+        and the value logic is covered by static_assert in
+        tests/test_affix_parsing_policy.cpp.
+        """
+        weight_call = "ApplyAffixKidLootFromJson(a, out, kidChancePct);"
+        gate_call = "ApplyAffixRuntimeGateFromJson(runtime, action, kidChancePct, type, out)"
+        suffix_early_return = "if (a_out.slot == AffixSlot::kSuffix) {"
+
+        self.assertIn(weight_call, self.loader_source)
+        self.assertIn(gate_call, self.loader_source)
+        # The early return is what makes the ordering load-bearing rather than
+        # merely conventional.
+        self.assertIn(suffix_early_return, self.loader_source)
         self.assertLess(
-            self.loader_source.index(assignment),
-            self.loader_source.index(suffix_gate),
-            "kid.chance fallback must be assigned before the suffix runtime gate returns",
+            self.loader_source.index(weight_call),
+            self.loader_source.index(gate_call),
+            "kid.chance fallback must be applied before the suffix runtime gate returns",
         )
 
     def test_assassin_suffix_discloses_critical_chance_and_damage(self) -> None:

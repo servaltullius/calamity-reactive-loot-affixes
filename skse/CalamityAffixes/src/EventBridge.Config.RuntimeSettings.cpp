@@ -1,4 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
+
+#include "CalamityAffixes/PlayerHealthDamageHookPolicy.h"
 #include "CalamityAffixes/UserSettingsPersistence.h"
 
 #include <algorithm>
@@ -65,7 +67,9 @@ namespace CalamityAffixes
 			_loot.dotTagSafetyAutoDisable = runtime.value("dotSafetyAutoDisable", _loot.dotTagSafetyAutoDisable);
 			_runtimeSettings.disableCombatEvidenceLease = runtime.value("disableCombatEvidenceLease", _runtimeSettings.disableCombatEvidenceLease);
 			_runtimeSettings.disableHealthDamageRouting = runtime.value("disableHealthDamageRouting", _runtimeSettings.disableHealthDamageRouting);
-			_runtimeSettings.allowPlayerHealthDamageHook = true;
+			// hadLegacyPlayerHookOverride is intentionally NOT passed here: it only
+			// drives the deprecation warning below. The hook is unconditional.
+			_runtimeSettings.allowPlayerHealthDamageHook = detail::ResolvePlayerHealthDamageHookEnabled();
 			_runtimeSettings.disablePassiveSuffixSpells = runtime.value("disablePassiveSuffixSpells", _runtimeSettings.disablePassiveSuffixSpells);
 			_runtimeSettings.disableTrapSystemTick = runtime.value("disableTrapSystemTick", _runtimeSettings.disableTrapSystemTick);
 			_runtimeSettings.disableTrapCasts = runtime.value("disableTrapCasts", _runtimeSettings.disableTrapCasts);

@@ -4,6 +4,7 @@
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
+#include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
 #include <string_view>
@@ -29,13 +30,8 @@ namespace CalamityAffixes
 			}
 			return maxMagnitude;
 		}
-
-		float ResolveSpecialActionProcChancePct(float a_configuredChancePct)
-		{
-			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
-		}
-
 	}
+
 	EventBridge::ConversionResults EventBridge::EvaluateConversion(
 		RE::Actor* a_attacker,
 		RE::Actor* a_target,
@@ -136,7 +132,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
+			const float chancePct = detail::ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
@@ -315,7 +311,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
+			const float chancePct = detail::ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}
@@ -485,7 +481,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
+			const float chancePct = detail::ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}

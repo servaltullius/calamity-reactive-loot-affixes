@@ -2,6 +2,7 @@
 
 #include "CalamityAffixes/CorpseExplosionSelectionPolicy.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
+#include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -34,13 +35,8 @@ namespace CalamityAffixes
 			static RE::TESEffectShader* shader = RE::TESForm::LookupByID<RE::TESEffectShader>(0x0001B212);
 			return shader;
 		}
-
-		float ResolveSpecialActionProcChancePct(float a_configuredChancePct)
-		{
-			return std::clamp(a_configuredChancePct, 0.0f, 100.0f);
-		}
-
 	}
+
 	EventBridge::CorpseExplosionSelection EventBridge::SelectBestCorpseExplosionAffix(
 		RE::Actor* a_owner,
 		RE::Actor* a_corpse,
@@ -96,7 +92,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			const float chancePct = ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
+			const float chancePct = detail::ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
 			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
 				continue;
 			}

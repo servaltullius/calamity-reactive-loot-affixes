@@ -615,13 +615,9 @@ namespace RuntimeGateStoreChecks
 			(std::istreambuf_iterator<char>(in)),
 			std::istreambuf_iterator<char>());
 
-		if (source.find("_loot.currencyDropMode = CurrencyDropMode::kHybrid;") == std::string::npos ||
-			source.find("_loot.runtimeCurrencyDropsEnabled = false;") == std::string::npos ||
-			source.find("_loot.runtimeCurrencyDropsEnabled = true;") != std::string::npos ||
-			source.find("_loot.runtimeCorpseDeathCurrencyDropsEnabled = true;") == std::string::npos ||
+		if (source.find("detail::ResolveCorpseDeathOnlyCurrencyDropPolicy()") == std::string::npos ||
 			source.find("only eligible hostile deaths use the isolated corpse path") == std::string::npos ||
 			source.find("Container activation, pickup, world placement, and new SPID distribution stay off") == std::string::npos ||
-			source.find("corpseAuthority={}") == std::string::npos ||
 			source.find("SKSE death event (corpse inventory only)") == std::string::npos) {
 			std::cerr << "corpse_currency_drop_policy: expected legacy hybrid token with hostile-corpse-only SKSE authority\n";
 			return false;

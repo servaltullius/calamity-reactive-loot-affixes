@@ -1,4 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
+
+#include "CalamityAffixes/AffixParsingPolicy.h"
 #include "EventBridge.Config.Shared.h"
 
 #include <algorithm>
@@ -146,11 +148,9 @@ namespace CalamityAffixes
 			static_cast<float>(kid.value("chance", 0.0)) :
 			0.0f;
 
-		if (a_outKidChancePct > 0.0f) {
-			// Loot-time drop weighting is sourced from explicit loot weight or legacy kid.chance.
-			// Keep this independent from runtime trigger proc chance.
-			a_out.lootWeight = a_outKidChancePct;
-		}
+		// Loot-time drop weighting is sourced from explicit loot weight or legacy kid.chance.
+		// Keep this independent from runtime trigger proc chance.
+		a_out.lootWeight = detail::ResolveAffixKidLootWeight(a_out.lootWeight, a_outKidChancePct);
 
 		if (!kid.is_object()) {
 			return;
@@ -187,7 +187,7 @@ namespace CalamityAffixes
 
 		if (a_out.slot == AffixSlot::kSuffix) {
 			a_out.trigger = Trigger::kHit;
-			a_out.procChancePct = 0.0f;
+			a_out.procChancePct = detail::ResolveSuffixProcChancePct();
 			a_out.critDamageBonusPct = static_cast<float>(a_action.value("critDamageBonusPct", 0.0));
 			return true;
 		}

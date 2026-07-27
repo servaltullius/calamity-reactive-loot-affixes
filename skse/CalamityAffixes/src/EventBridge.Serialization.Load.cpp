@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/SerializationDrainPolicy.h"
 #include "CalamityAffixes/SerializationLoadState.h"
 
 #include <algorithm>
@@ -12,7 +13,6 @@ namespace CalamityAffixes
 {
 	namespace
 	{
-		constexpr std::uint32_t kMaxDrainBytes = 10'000'000u;
 		constexpr std::uint32_t kMaxV1AffixIdLength = 1024u;
 		constexpr std::uint32_t kMaxShuffleBagSize = 100'000u;
 
@@ -25,17 +25,17 @@ namespace CalamityAffixes
 				return true;
 			}
 
-			if (a_length > kMaxDrainBytes) {
+			if (detail::ShouldWarnUnusuallyLargeSerializationDrain(a_length)) {
 				SKSE::log::warn(
 					"CalamityAffixes: draining unusually large serialization record segment (context={}, bytes={}).",
 					a_context,
 					a_length);
 			}
 
-			std::array<std::uint8_t, 4096> sink{};
+			std::array<std::uint8_t, detail::kSerializationDrainChunkBytes> sink{};
 			std::uint32_t remaining = a_length;
 			while (remaining > 0u) {
-				const auto chunk = std::min<std::uint32_t>(remaining, static_cast<std::uint32_t>(sink.size()));
+				const auto chunk = detail::ResolveSerializationDrainChunkSize(remaining);
 				const auto read = a_intfc->ReadRecordData(sink.data(), chunk);
 				if (read != chunk) {
 					SKSE::log::warn(

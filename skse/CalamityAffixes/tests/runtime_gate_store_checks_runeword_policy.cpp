@@ -824,11 +824,8 @@ namespace RuntimeGateStoreChecks
 				(std::istreambuf_iterator<char>(in)),
 				std::istreambuf_iterator<char>());
 
-			if (source.find("if (a_affix.displayName.empty()) {") == std::string::npos ||
-				source.find("if (a_affix.displayNameEn.empty()) {") == std::string::npos ||
-				source.find("if (a_affix.displayNameKo.empty()) {") == std::string::npos ||
-				source.find("a_affix.displayNameEn = a_affix.displayName;") == std::string::npos ||
-				source.find("a_affix.displayNameKo = a_affix.displayName;") == std::string::npos) {
+			if (source.find("detail::ResolveSynthesizedAffixDisplayName(") == std::string::npos ||
+				source.find("detail::ResolveSynthesizedLocalizedDisplayName(") == std::string::npos) {
 				std::cerr << "synthesized_affix_displayname_fallback: synthesized affix tooltip-name fallback guard is missing\n";
 				return false;
 			}
