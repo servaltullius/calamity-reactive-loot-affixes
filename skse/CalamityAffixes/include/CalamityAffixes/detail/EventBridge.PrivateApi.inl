@@ -455,11 +455,15 @@
 		[[nodiscard]] const std::vector<std::size_t>* ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept;
 		void ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);
 		void RecordRecentCombatEvent(Trigger a_trigger, RE::Actor* a_owner, std::chrono::steady_clock::time_point a_now);
+		// Fills a_outIndices with a copy of the active indices for a_trigger.
+		// Deliberately not a pointer into the live cache: the dispatch loop
+		// re-enters the engine and a re-entrant RebuildActiveCounts would
+		// reallocate that cache.  See TriggerDispatchSnapshot.h.
 		[[nodiscard]] bool CanProcessTriggerDispatch(
 			Trigger a_trigger,
 			RE::Actor* a_owner,
 			RE::Actor* a_target,
-			const std::vector<std::size_t>*& a_outIndices) const noexcept;
+			std::vector<std::size_t>& a_outIndices) const;
 		[[nodiscard]] bool TryProcessTriggerAffix(
 			std::size_t a_affixIndex,
 			Trigger a_trigger,

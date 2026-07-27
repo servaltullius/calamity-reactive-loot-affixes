@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <mutex>
 
 
 namespace CalamityAffixes
@@ -29,7 +30,7 @@ namespace CalamityAffixes
 		if (!causeRef || !targetRef) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		const std::scoped_lock lock(_stateMutex);
+		std::unique_lock<std::recursive_mutex> lock(_stateMutex);
 		const auto now = std::chrono::steady_clock::now();
 		MaybeFlushRuntimeUserSettings(now, false);
 
@@ -241,6 +242,7 @@ namespace CalamityAffixes
 		// processing is handled in C++ (via the hook → OnHealthDamage path).
 		// Sending the ModEvent unconditionally caused Papyrus AffixManager to
 		// fire a second, duplicate proc spell for every hit.
+		bool sendPapyrusHitEvent = false;
 		if (!hookRouted) {
 			if (ShouldSendPlayerOwnedHitEvent(
 					relation.attackerIsPlayerOwned,
@@ -254,10 +256,19 @@ namespace CalamityAffixes
 					.target = target->GetFormID(),
 					.source = a_event->source
 				};
-				if (!ShouldSuppressPapyrusHitEvent(key, now)) {
-					SendModEvent("CalamityAffixes_Hit", target);
-				}
+				// ShouldSuppressPapyrusHitEvent commits the dedup timestamp,
+				// so the decision has to be taken while we still hold the lock.
+				sendPapyrusHitEvent = !ShouldSuppressPapyrusHitEvent(key, now);
 			}
+		}
+
+		// Terminal engine re-entry: dispatching the ModEvent reads no
+		// EventBridge state and nothing follows it, so hand the lock back
+		// before crossing into the Papyrus VM.  Same shape as the
+		// ForEachHighActor hand-off in TickTraps.
+		lock.unlock();
+		if (sendPapyrusHitEvent) {
+			SendModEvent("CalamityAffixes_Hit", target);
 		}
 
 		return RE::BSEventNotifyControl::kContinue;

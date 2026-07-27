@@ -18,6 +18,7 @@ if(BUILD_TESTING)
         runtime_gate_store_checks_settings_policy.cpp
         runtime_gate_store_checks_stateful.cpp
         runtime_gate_store_checks_loot_distribution.cpp
+        runtime_gate_store_checks_trigger_dispatch.cpp
     )
 
     target_include_directories(

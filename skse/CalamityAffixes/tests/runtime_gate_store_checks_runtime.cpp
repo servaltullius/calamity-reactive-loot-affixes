@@ -798,7 +798,11 @@ namespace RuntimeGateStoreChecks
 			snapshotText->find("constexpr LowHealthTriggerSnapshot BuildLowHealthTriggerSnapshot(") == std::string::npos ||
 			triggersText->find("#include \"CalamityAffixes/LowHealthTriggerSnapshot.h\"") == std::string::npos ||
 			triggersText->find("const auto lowHealthSnapshot = BuildLowHealthTriggerSnapshot(") == std::string::npos ||
-			triggersText->find("CanProcessTriggerDispatch(a_trigger, a_owner, a_target, indices)") == std::string::npos ||
+			// Pin that the dispatch gate is still called, not how its arguments
+			// happen to be spelled.  The re-entrancy contract it carries (the
+			// caller iterates its own copy of the index list) is covered
+			// behaviourally by CheckTriggerDispatchSnapshot* instead.
+			triggersText->find("CanProcessTriggerDispatch(") == std::string::npos ||
 			triggersText->find("TryProcessTriggerAffix(") == std::string::npos ||
 			triggersText->find("FinalizeTriggerDispatch(") == std::string::npos) {
 			std::cerr << "process_trigger_extraction: expected ProcessTrigger flow to stay decomposed into trigger helpers\n";

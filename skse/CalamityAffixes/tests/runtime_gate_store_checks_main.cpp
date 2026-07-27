@@ -91,6 +91,9 @@ int main()
 	const bool serializationLoadStateHelpersOk = CheckSerializationLoadStateHelpers();
 	const bool lowHealthTriggerSnapshotHelpersOk = CheckLowHealthTriggerSnapshotHelpers();
 	const bool scopedProcDepthGuardOk = CheckScopedProcDepthGuard();
+	const bool triggerDispatchSnapshotIsolationOk = CheckTriggerDispatchSnapshotIsolation();
+	const bool triggerDispatchSnapshotNullSourceOk = CheckTriggerDispatchSnapshotNullSource();
+	const bool triggerDispatchSnapshotBufferReuseOk = CheckTriggerDispatchSnapshotBufferReuse();
 	const bool affixCountRollDistributionOk = CheckAffixCountRollDistribution();
 	const bool affixCountRollUnitBoundsOk = CheckAffixCountRollUnitBounds();
 	const bool reforgeTargetAffixCountBoundsOk = CheckReforgeTargetAffixCountBounds();
@@ -160,6 +163,9 @@ int main()
 	        serializationLoadStateHelpersOk &&
 	        lowHealthTriggerSnapshotHelpersOk &&
 	        scopedProcDepthGuardOk &&
+	        triggerDispatchSnapshotIsolationOk &&
+	        triggerDispatchSnapshotNullSourceOk &&
+	        triggerDispatchSnapshotBufferReuseOk &&
 	        affixCountRollDistributionOk &&
 	        affixCountRollUnitBoundsOk &&
 	        reforgeTargetAffixCountBoundsOk &&

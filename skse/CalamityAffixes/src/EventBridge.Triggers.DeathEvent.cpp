@@ -42,7 +42,7 @@ namespace CalamityAffixes
 		RE::BSTEventSource<RE::TESDeathEvent>*)
 	{
 		const auto now = std::chrono::steady_clock::now();
-		const std::scoped_lock lock(_stateMutex);
+		std::unique_lock<std::recursive_mutex> lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!a_event) {
@@ -239,6 +239,11 @@ namespace CalamityAffixes
 			ProcessCorpseExplosionKill(owner, dying);
 		}
 
+		// Terminal engine re-entry: the Papyrus ModEvent dispatch reads no
+		// EventBridge state and nothing follows it, so hand the lock back
+		// before crossing into the VM.  Same shape as the ForEachHighActor
+		// hand-off in TickTraps.
+		lock.unlock();
 		SendModEvent("CalamityAffixes_Kill", dying);
 
 		return RE::BSEventNotifyControl::kContinue;

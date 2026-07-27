@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LowHealthTriggerSnapshot.h"
+#include "CalamityAffixes/TriggerDispatchSnapshot.h"
 
 #include <chrono>
 #include <cstdint>
@@ -12,9 +13,9 @@ namespace CalamityAffixes
 		Trigger a_trigger,
 		RE::Actor* a_owner,
 		RE::Actor* a_target,
-		const std::vector<std::size_t>*& a_outIndices) const noexcept
+		std::vector<std::size_t>& a_outIndices) const
 	{
-		a_outIndices = nullptr;
+		a_outIndices.clear();
 		if (!_configLoaded || !_runtimeSettings.enabled || !a_owner || !a_target) {
 			return false;
 		}
@@ -23,7 +24,11 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		a_outIndices = ResolveActiveTriggerIndices(a_trigger);
+		// Hand back a copy rather than a pointer into the live cache: the
+		// dispatch loop re-enters the engine, and a re-entrant
+		// RebuildActiveCounts would reallocate that cache underneath it.
+		// See TriggerDispatchSnapshot.h.
+		(void)detail::SnapshotTriggerIndices(ResolveActiveTriggerIndices(a_trigger), a_outIndices);
 		return true;
 	}
 
@@ -136,7 +141,10 @@ namespace CalamityAffixes
 
 	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
-		const std::vector<std::size_t>* indices = nullptr;
+		// Owned by this frame: the loop below dispatches affix actions that
+		// re-enter the engine, and a re-entrant RebuildActiveCounts rebuilds
+		// the live index caches.  Iterating our own copy keeps the pass valid.
+		std::vector<std::size_t> indices;
 		if (!CanProcessTriggerDispatch(a_trigger, a_owner, a_target, indices)) {
 			return;
 		}
@@ -149,7 +157,7 @@ namespace CalamityAffixes
 			lowHealthOwnerFormID != 0u ? ResolveLowHealthTriggerCurrentPct(a_trigger, a_owner) : 100.0f,
 			ResolveLowHealthTriggerPreviousPct(lowHealthOwnerFormID));
 
-		if (!indices || indices->empty()) {
+		if (indices.empty()) {
 			FinalizeTriggerDispatch(
 				a_trigger,
 				a_owner,
@@ -161,7 +169,7 @@ namespace CalamityAffixes
 		}
 
 		bool loggedProcBudgetDenied = false;
-		for (const auto i : *indices) {
+		for (const auto i : indices) {
 			(void)TryProcessTriggerAffix(
 				i,
 				a_trigger,

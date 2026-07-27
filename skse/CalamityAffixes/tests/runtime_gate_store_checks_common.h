@@ -124,6 +124,10 @@ namespace RuntimeGateStoreChecks
 
 	bool CheckScopedProcDepthGuard();
 
+	bool CheckTriggerDispatchSnapshotIsolation();
+	bool CheckTriggerDispatchSnapshotNullSource();
+	bool CheckTriggerDispatchSnapshotBufferReuse();
+
 	bool CheckAffixCountRollDistribution();
 	bool CheckAffixCountRollUnitBounds();
 	bool CheckReforgeTargetAffixCountBounds();
