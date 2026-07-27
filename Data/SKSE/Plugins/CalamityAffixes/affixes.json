@@ -4,9 +4,9 @@
   "eslFlag": true,
   "loot": {
     "chancePercent": 50,
-    "runewordFragmentChancePercent": 12,
-    "reforgeOrbChancePercent": 7,
-    "uniqueActorGuaranteedRunewordChancePercent": 70,
+    "runewordFragmentChancePercent": 8,
+    "reforgeOrbChancePercent": 12,
+    "uniqueActorGuaranteedRunewordChancePercent": 40,
     "currencyDropMode": "hybrid",
     "lootSourceChanceMultCorpse": 1,
     "lootSourceChanceMultContainer": 1,
@@ -12372,7 +12372,7 @@
         "type": "ArtObject",
         "artObject": {
           "editorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER",
-          "modelPath": "Meshes\\Magic\\RuneFrostProjectile01.nif",
+          "modelPath": "Meshes\\CalamityAffixes\\VFX\\RuneTrapMarker_Calamity.nif",
           "artType": "MagicHitEffect"
         }
       },

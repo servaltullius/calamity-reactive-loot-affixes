@@ -9,8 +9,9 @@ public sealed class LootDefaultsTests
     {
         var defaults = new LootSpec();
 
-        Assert.Equal(12.0, defaults.RunewordFragmentChancePercent);
-        Assert.Equal(7.0, defaults.ReforgeOrbChancePercent);
+        Assert.Equal(8.0, defaults.RunewordFragmentChancePercent);
+        Assert.Equal(12.0, defaults.ReforgeOrbChancePercent);
+        Assert.Equal(40.0, defaults.UniqueActorGuaranteedRunewordChancePercent);
         Assert.Equal(1.0, defaults.LootSourceChanceMultCorpse);
         Assert.Equal(1.0, defaults.LootSourceChanceMultContainer);
         Assert.Equal(1.15, defaults.LootSourceChanceMultBossContainer);
@@ -24,19 +25,20 @@ public sealed class LootDefaultsTests
         var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
         var loot = Assert.IsType<LootSpec>(spec.Loot);
 
-        Assert.Equal(12.0, loot.RunewordFragmentChancePercent);
-        Assert.Equal(7.0, loot.ReforgeOrbChancePercent);
+        Assert.Equal(8.0, loot.RunewordFragmentChancePercent);
+        Assert.Equal(12.0, loot.ReforgeOrbChancePercent);
+        Assert.Equal(40.0, loot.UniqueActorGuaranteedRunewordChancePercent);
         Assert.Equal(1.0, loot.LootSourceChanceMultCorpse);
         Assert.Equal(1.15, loot.LootSourceChanceMultBossContainer);
 
         var papyrusSource = File.ReadAllText(
             Path.Combine(repoRoot, "Data", "Scripts", "Source", "CalamityAffixes_MCMConfig.psc"));
         Assert.Contains(
-            "RunewordFragmentChanceDefault = 12.0",
+            "RunewordFragmentChanceDefault = 8.0",
             papyrusSource,
             StringComparison.Ordinal);
         Assert.Contains(
-            "ReforgeOrbChanceDefault = 7.0",
+            "ReforgeOrbChanceDefault = 12.0",
             papyrusSource,
             StringComparison.Ordinal);
     }

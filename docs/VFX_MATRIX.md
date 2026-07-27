@@ -9,7 +9,7 @@ This document lists the always-on, data-driven P0–P1 feedback added without ch
 | Effects / 효과 | Persistent marker / 지속 마커 | Trigger burst / 발동 폭발 | Positional sounds / 위치 음향 |
 |---|---|---|---|
 | `bear_trap` | Bear trap model | Frost burst | Bear trap place/trigger |
-| `rune_trap` | Frost rune | Frost burst | Magic place/rune trigger |
+| `rune_trap` | Calamity teal particle marker (prototype) | Frost burst | Magic place/rune trigger |
 | `plague_spore` | Dark poison gas | Gas blast | Magic place/poison trigger |
 | `tar_blight` | Oil puddle | Gas pulse | Magic place/poison trigger |
 | `siphon_spore` | Soul trap point | Absorb hit | Magic place/absorb trigger |
@@ -18,6 +18,10 @@ This document lists the always-on, data-driven P0–P1 feedback added without ch
 Markers show location and armed state; they are not exact radius telegraphs. Placement and trigger use one-shot positional sound. Arming and natural expiration use visual pulses only. Cap eviction, invalidation, reload, disable, load, and revert cleanup are silent.
 
 마커는 위치와 무장 상태를 나타내며 정확한 판정 반경 원이 아닙니다. 설치와 발동에는 위치 기반 일회성 사운드를 사용하고, 무장과 자연 만료에는 시각 pulse만 사용합니다. cap 축출, 잘못된 상태, 설정 재적용, 비활성화, 로드, Revert 정리는 조용히 수행합니다.
+
+The `rune_trap` marker is the first Calamity-owned NIF prototype. It uses only vanilla Skyrim effect textures; its ground readability, orientation, density, and save/load cleanup remain subject to the in-game smoke test.
+
+`rune_trap` 마커는 첫 Calamity 전용 NIF 프로토타입입니다. 스카이림 기본 효과 텍스처만 사용하며, 지면 가독성·방향·밀도·저장/로드 정리는 인게임 smoke test 대상으로 남습니다.
 
 ## Corpse explosions / 시체 폭발
 

@@ -22,7 +22,7 @@
 | 소스/행동 | 통화 판정 | 설명 |
 |---|---:|---|
 | 플레이어가 일반 적대 대상을 처치 | 예 | SKSE death event에서 룬 조각/재련 오브 독립 확률 판정 |
-| 플레이어가 `Unique` 고유·네임드 적을 처치 | 예 | 룬 조각 70%/재련 오브 30% 중 1개 확정 |
+| 플레이어가 `Unique` 고유·네임드 적을 처치 | 예 | 룬 조각 40%/재련 오브 60% 중 1개 확정 |
 | 플레이어가 `LocRefTypeBoss` 보스를 처치 | 예 | 룬 조각 1개와 재련 오브 1개를 각각 확정 |
 | player-owned summon/proxy가 적대 대상을 처치 | 예 | `IsPlayerOwned(killer)`로 플레이어 측 처치에 포함 |
 | 일반 상자/보스 상자 활성화 | 아니요 | 컨테이너 종류와 무관하게 판정 없음 |
@@ -52,7 +52,7 @@
 3. 시체의 기존 룬 조각/재련 오브와 구 SPID 레벨드 리스트 존재 여부를 카테고리별로 스냅샷한다.
 4. 시체 ledger와 전환 스냅샷을 합쳐 룬 조각·재련 오브 각각의 판정 허용 여부를 정한다.
 5. `LocRefTypeBoss`를 먼저 확인하고, 아니면 Actor Base의 `Unique` 여부를 확인한다.
-6. 일반 적은 허용된 카테고리만 기존 확률 판정한다. 고유 적은 허용된 통화 중 1개를 70:30으로 선택하고, 보스는 허용된 두 통화를 각각 확정 지급한다.
+6. 일반 적은 허용된 두 통화를 각각 독립 확률 판정한다. 고유 적은 허용된 통화 중 1개를 40:60으로 선택하고, 보스는 허용된 두 통화를 각각 확정 지급한다.
 7. 고유·보스 확정 보상은 일반 확률 판정과 피티를 증가·초기화하지 않는다.
 8. 성공한 아이템을 시체 인벤토리에 직접 추가하고 실제 수량 증가를 확인한다.
 9. 시체 FormID·게임 날짜·처리 카테고리 mask와 피티 상태를 코세이브에 기록한다.
@@ -61,9 +61,9 @@
 
 ## 확률과 룬 분포
 
-- 룬워드 조각 기본 판정: `12%`
-- 재련 오브 기본 판정: `7%`
-- `Unique` 고유·네임드 적: 룬 조각 `70%` / 재련 오브 `30%` 중 1개 확정
+- 룬워드 조각 기본 판정: `8%`
+- 재련 오브 기본 판정: `12%`
+- `Unique` 고유·네임드 적: 룬 조각 `40%` / 재련 오브 `60%` 중 1개 확정
 - `LocRefTypeBoss` 보스: 룬 조각 1개 + 재련 오브 1개 확정
 - 보스 판정은 `Unique` 판정보다 우선하며 보상을 중첩하지 않음
 - 고유·보스 확정 보상은 일반 확률 판정 및 피티와 독립
@@ -121,14 +121,14 @@ MCM에서 확률을 바꾸면 다음 적격 일반 적 death event부터 적용�
 - 기존 보유 룬 조각/재련 오브 유지
 - 완성 룬워드와 룬워드 재련 시 보존 규칙 유지
 - 기존 룬워드/어픽스 ID와 기존 직렬화 레코드 유지
-- 기존 룬 가중치 `4/3/2/1`, 일반 적 기본 `12%/7%`, 99회 룬 피티 유지
-- 고유 적 70:30 단일 확정 보상과 보스 룬 조각/재련 오브 각 1개 확정 보상 추가
+- 기존 룬 가중치 `4/3/2/1`, 일반 적 기본 `8%/12%`, 99회 룬 피티 유지
+- 고유 적 40:60 단일 확정 보상과 보스 룬 조각/재련 오브 각 1개 확정 보상 유지
 - 새 `CCRT` 레코드만 추가
 
 ## English summary
 
 `loot.currencyDropMode=hybrid` remains only as a legacy compatibility token. Actual currency authority is the SKSE death-event eligible-hostile-corpse-only path. A hostile victim killed by the player or a player-owned summon/proxy can receive a successful fragment/orb roll directly in its corpse inventory. Generic containers, corpse activation, pickup rolls, world spawning, direct player grants, and new SPID currency distribution are disabled.
 
-Follower/teammate, summoned/commanded, child, player-owned, or non-hostile victims are excluded. Environmental-object kills and kills by independent non-player-owned NPCs/followers are also excluded. Normal-enemy defaults are 12% fragments and 7% orbs. Unique actors receive one guaranteed reward selected as 70% fragment / 30% orb, while `LocRefTypeBoss` actors receive one of each. Special guarantees do not run normal rolls or modify normal pity. Rune weights remain 4/3/2/1 and the 99-failure fragment pity remains. `CCRT v1` persists pity counters and the per-corpse category ledger. Existing gear, currencies, completed runewords, and prior serialization records remain compatible.
+Follower/teammate, summoned/commanded, child, player-owned, or non-hostile victims are excluded. Environmental-object kills and kills by independent non-player-owned NPCs/followers are also excluded. Normal-enemy defaults are 8% fragments and 12% orbs, rolled independently. Unique actors receive one guaranteed reward selected as 40% fragment / 60% orb, while `LocRefTypeBoss` actors receive one of each. Special guarantees do not run normal rolls or modify normal pity. Rune weights remain 4/3/2/1 and the 99-failure fragment pity remains. `CCRT v1` persists pity counters and the per-corpse category ledger. Existing gear, currencies, completed runewords, and prior serialization records remain compatible.
 
 When upgrading in MO2, replace/overwrite the existing mod or disable the old DISTR file. Enabling the new build as a separate layer can let the older `CalamityAffixes_DISTR.ini` override the new empty compatibility file when conflict priority is wrong.

@@ -89,7 +89,7 @@
 - (기본값) `loot.renameItem=true` : 아이템 이름에 **짧은 어픽스 라벨**을 붙여(좌측 리스트) 빠르게 식별합니다.
   - `loot.nameMarkerPosition=trailing`이면 이름 마커를 뒤에 붙입니다. 예: `철검*` (정렬 안정화)
 
-기본값: `loot.runewordFragmentChancePercent=12`, `loot.reforgeOrbChancePercent=7`, `loot.uniqueActorGuaranteedRunewordChancePercent=70`, `loot.currencyDropMode=hybrid` (레거시 설정 호환 토큰; 실제 드랍 권한은 SKSE death-event corpse-only), `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
+기본값: `loot.runewordFragmentChancePercent=8`, `loot.reforgeOrbChancePercent=12`, `loot.uniqueActorGuaranteedRunewordChancePercent=40`, `loot.currencyDropMode=hybrid` (레거시 설정 호환 토큰; 실제 드랍 권한은 SKSE death-event corpse-only), `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
 참고: `loot.chancePercent`는 현재 기본 정책에서 실질적으로 사용되지 않는 레거시 호환 필드입니다.
 추가 안전장치(권장): `loot.trapGlobalMaxActive=64` (전역 트랩 하드캡, 0=무제한)
 
@@ -273,13 +273,13 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
   - 일반 상자/컨테이너 활성화, 아이템 픽업, 월드 생성과 새 SPID 통화 분배는 모두 사용하지 않습니다.
   - 피해자가 팔로워/동료, 소환·지휘된 액터, 아동, player-owned 또는 비적대 대상이면 제외합니다. 환경 오브젝트나 player-owned가 아닌 독립 NPC/팔로워가 낸 처치도 제외합니다.
   - 룬 종류는 저급 `El-Amn=4`, 중급 `Sol-Um=3`, 고급 `Mal-Lo=2`, 최상급 `Sur-Zod=1`의 4단계 가중치로 선택됩니다(최고:최저 4:1).
-  - 기본 파편 판정은 `12%`이고 99회 연속 실패 뒤 보장하는 피티를 유지합니다. 피티 카운터와 시체별 카테고리 ledger는 `CCRT` 코세이브 레코드에 저장됩니다.
+  - 기본 파편 판정은 `8%`이고 99회 연속 실패 뒤 보장하는 피티를 유지합니다. 피티 카운터와 시체별 카테고리 ledger는 `CCRT` 코세이브 레코드에 저장됩니다.
   - 업데이트 전에 SPID로 통화 또는 해당 레벨드 리스트가 이미 들어간 전환 시체는 룬 조각/재련 오브 카테고리별로 감지해 같은 카테고리의 런타임 중복 롤을 건너뜁니다.
   - MCM 확률 변경은 다음 eligible hostile death 판정부터 적용됩니다.
   - Prisma 디버그 버튼: `+1 next fragment`, `+1 recipe set`
 - 재련 오브(리포지):
   - 룬 조각과 같은 eligible hostile corpse-only 경로로 획득합니다.
-  - 기본 확률은 `loot.reforgeOrbChancePercent=7`입니다.
+  - 기본 확률은 `loot.reforgeOrbChancePercent=12`입니다.
   - 룬워드 패널 `Reforge / 재련` 버튼으로 **선택된 장착 장비**에 1개를 소모해 재련합니다.
   - 일반 장비 재련: 일반 어픽스를 재굴림합니다.
   - 완성 룬워드 장비 재련: **룬워드 효과는 보존**하고, 일반 어픽스만 재롤합니다.
@@ -322,8 +322,8 @@ dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.j
 - `loot.currencyDropMode=hybrid`는 기존 설정 파일을 깨지 않기 위한 레거시 토큰일 뿐이며, 실제 통화 판정 권한은 **플레이어 또는 player-owned summon/proxy의 적대 처치를 받는 SKSE death event**에만 있습니다.
 - 성공한 룬 조각/재련 오브는 사망한 대상의 인벤토리에 직접 추가됩니다. `PlaceAtMe` 월드 생성, 플레이어 인벤토리 직행, 일반 컨테이너 활성화, 픽업 롤과 새 SPID 분배는 사용하지 않습니다.
 - 피해자가 팔로워/동료, 소환·지휘 액터, 아동, player-owned/비적대 대상이면 제외하며, 환경 오브젝트와 player-owned가 아닌 독립 NPC/팔로워의 처치도 제외합니다.
-- 일반 적은 기존 룬 조각 `12%`와 재련 오브 `7%` 독립 판정을 사용합니다.
-- Actor Base가 `Unique`인 고유·네임드 적은 두 통화 중 1개를 확정 지급합니다. 기본 선택 비율은 룬 조각 `70%`, 재련 오브 `30%`입니다.
+- 일반 적은 룬 조각 `8%`와 재련 오브 `12%` 독립 판정을 사용합니다.
+- Actor Base가 `Unique`인 고유·네임드 적은 두 통화 중 1개를 확정 지급합니다. 기본 선택 비율은 룬 조각 `40%`, 재련 오브 `60%`입니다.
 - `LocRefTypeBoss`가 지정된 보스는 룬 조각 1개와 재련 오브 1개를 각각 확정 지급하며, 보스 판정이 `Unique` 판정보다 우선합니다.
 - 고유·보스 확정 보상은 일반 확률 판정을 추가로 실행하거나 일반 피티를 증가·초기화하지 않습니다.
 - 시체 FormID·날짜·통화 카테고리 mask와 룬/오브 피티를 새 `CCRT` 코세이브 레코드에 저장해 재로드 후 중복 롤과 피티 초기화를 막습니다.

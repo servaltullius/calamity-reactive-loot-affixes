@@ -228,19 +228,19 @@ namespace RuntimeGateStoreChecks
 		}
 
 		const auto normal = ResolveCorpseCurrencyRewardPlan(
-			CorpseCurrencyRewardTier::kNormal, true, true, 0.0f, 70.0f);
+			CorpseCurrencyRewardTier::kNormal, true, true, 0.0f, 40.0f);
 		const auto uniqueRune = ResolveCorpseCurrencyRewardPlan(
-			CorpseCurrencyRewardTier::kUnique, true, true, 69.999f, 70.0f);
+			CorpseCurrencyRewardTier::kUnique, true, true, 39.999f, 40.0f);
 		const auto uniqueOrb = ResolveCorpseCurrencyRewardPlan(
-			CorpseCurrencyRewardTier::kUnique, true, true, 70.0f, 70.0f);
+			CorpseCurrencyRewardTier::kUnique, true, true, 40.0f, 40.0f);
 		const auto uniqueRuneOnly = ResolveCorpseCurrencyRewardPlan(
-			CorpseCurrencyRewardTier::kUnique, true, false, 99.0f, 70.0f);
+			CorpseCurrencyRewardTier::kUnique, true, false, 99.0f, 40.0f);
 		const auto uniqueOrbOnly = ResolveCorpseCurrencyRewardPlan(
-			CorpseCurrencyRewardTier::kUnique, false, true, 0.0f, 70.0f);
+			CorpseCurrencyRewardTier::kUnique, false, true, 0.0f, 40.0f);
 		const auto boss = ResolveCorpseCurrencyRewardPlan(
-			CorpseCurrencyRewardTier::kBoss, true, true, 0.0f, 70.0f);
+			CorpseCurrencyRewardTier::kBoss, true, true, 0.0f, 40.0f);
 		const auto blockedBoss = ResolveCorpseCurrencyRewardPlan(
-			CorpseCurrencyRewardTier::kBoss, false, false, 0.0f, 70.0f);
+			CorpseCurrencyRewardTier::kBoss, false, false, 0.0f, 40.0f);
 
 		if (!normal.useNormalRandomRolls || normal.grantRunewordFragment || normal.grantReforgeOrb ||
 			uniqueRune.useNormalRandomRolls || !uniqueRune.grantRunewordFragment || uniqueRune.grantReforgeOrb ||
@@ -275,12 +275,31 @@ namespace RuntimeGateStoreChecks
 			std::cerr << "corpse_currency_special_reward: runtime tier/grant integration is incomplete\n";
 			return false;
 		}
-
-		const auto guaranteedStart = serviceText->find(
-			"EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteGuaranteedCorpseCurrencyDrops(");
-		if (guaranteedStart == std::string::npos) {
+		if (deathText->find("defaultObjects->GetObject") != std::string::npos ||
+			deathText->find("defaultObjects->objects[bossObjectIndex]") == std::string::npos) {
+			std::cerr << "corpse_currency_special_reward: boss probe must bypass the unsafe default-object initialization helper\n";
 			return false;
 		}
+
+		const auto normalRollStart = serviceText->find(
+			"EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteCorpseCurrencyDropRolls(");
+		const auto guaranteedStart = serviceText->find(
+			"EventBridge::CurrencyRollExecutionResult EventBridge::ExecuteGuaranteedCorpseCurrencyDrops(");
+		if (normalRollStart == std::string::npos ||
+			guaranteedStart == std::string::npos ||
+			normalRollStart >= guaranteedStart) {
+			return false;
+		}
+		const auto normalRollBody = std::string_view(*serviceText).substr(
+			normalRollStart,
+			guaranteedStart - normalRollStart);
+		if (normalRollBody.find("if (a_allowRunewordRoll)") == std::string_view::npos ||
+			normalRollBody.find("if (a_allowReforgeRoll)") == std::string_view::npos ||
+			normalRollBody.find("else if (a_allowReforgeRoll)") != std::string_view::npos) {
+			std::cerr << "corpse_currency_special_reward: normal fragment and orb rolls must remain independent\n";
+			return false;
+		}
+
 		const auto guaranteedBody = std::string_view(*serviceText).substr(guaranteedStart);
 		if (guaranteedBody.find("CommitRunewordFragmentGrant(") != std::string_view::npos ||
 			guaranteedBody.find("CommitReforgeOrbGrant(") != std::string_view::npos ||

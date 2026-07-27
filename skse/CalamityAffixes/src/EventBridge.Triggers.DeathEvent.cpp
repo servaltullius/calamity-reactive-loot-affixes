@@ -6,6 +6,7 @@
 #include "EventBridge.Triggers.Events.Detail.h"
 
 #include <chrono>
+#include <cstddef>
 #include <mutex>
 #include <random>
 
@@ -23,10 +24,13 @@ namespace CalamityAffixes
 			}
 
 			auto* defaultObjects = RE::BGSDefaultObjectManager::GetSingleton();
-			auto* bossLocationRefType = defaultObjects ?
-				defaultObjects->GetObject<RE::BGSLocationRefType>(
-					RE::BGSDefaultObjectManager::DefaultObject::kLocRefTypeBoss) :
-				nullptr;
+			constexpr auto bossObjectIndex = static_cast<std::size_t>(
+				RE::BGSDefaultObjectManager::DefaultObject::kLocRefTypeBoss);
+			// The vendored CommonLib GetObject(DefaultObject) path reads objectInit through
+			// RelocateMember<bool*>, which can reinterpret initialized flag bytes as a pointer.
+			// The default-object form array itself is stable and null until populated.
+			auto* bossObject = defaultObjects ? defaultObjects->objects[bossObjectIndex] : nullptr;
+			auto* bossLocationRefType = bossObject ? bossObject->As<RE::BGSLocationRefType>() : nullptr;
 			auto* locationRefType = a_actor->extraList.GetByType<RE::ExtraLocationRefType>();
 			return bossLocationRefType && locationRefType && locationRefType->locRefType == bossLocationRefType;
 		}

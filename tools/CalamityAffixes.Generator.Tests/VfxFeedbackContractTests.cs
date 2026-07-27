@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using CalamityAffixes.Generator.Spec;
 using CalamityAffixes.Generator.Writers;
@@ -25,7 +26,7 @@ public sealed class VfxFeedbackContractTests
         new("CAFF_ARTO_VFX_WEALTH_PASSIVE", @"Meshes\Magic\HealRitualCastBodyFX.nif"),
         new("CAFF_ARTO_VFX_TRAP_BEAR_MARKER", @"Meshes\Traps\BearTrap\BearTrap01.nif"),
         new("CAFF_ARTO_VFX_TRAP_BEAR_BURST", @"Meshes\Magic\ExplosionFrost01.nif"),
-        new("CAFF_ARTO_VFX_TRAP_RUNE_MARKER", @"Meshes\Magic\RuneFrostProjectile01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_RUNE_MARKER", @"Meshes\CalamityAffixes\VFX\RuneTrapMarker_Calamity.nif"),
         new("CAFF_ARTO_VFX_TRAP_RUNE_BURST", @"Meshes\Magic\ExplosionFrost01.nif"),
         new("CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", @"Meshes\Effects\FXPoisonGaswithONOFFDark.nif"),
         new("CAFF_ARTO_VFX_TRAP_PLAGUE_BURST", @"Meshes\Effects\FXGasTrapBlast.nif"),
@@ -101,7 +102,7 @@ public sealed class VfxFeedbackContractTests
     }
 
     [Fact]
-    public void GeneratedPlugin_UsesApprovedVanillaModelsAndMagicHitEffectType()
+    public void GeneratedPlugin_UsesApprovedModelsAndMagicHitEffectType()
     {
         var repoRoot = FindRepoRoot();
         var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
@@ -118,7 +119,7 @@ public sealed class VfxFeedbackContractTests
     }
 
     [Fact]
-    public void GeneratedDataEsp_PersistsApprovedVanillaModelsAndMagicHitEffectType()
+    public void GeneratedDataEsp_PersistsApprovedModelsAndMagicHitEffectType()
     {
         var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
@@ -131,6 +132,39 @@ public sealed class VfxFeedbackContractTests
             Assert.Equal(ExpectedArt[index].ModelPath, artObjects[index].Model?.File);
             Assert.Equal(ArtObject.TypeEnum.MagicHitEffect, artObjects[index].Type);
         }
+    }
+
+    [Fact]
+    public void CustomRuneTrapMarker_IsOwnedByCalamityAndDoesNotOverrideVanillaArt()
+    {
+        var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
+        using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
+        var marker = Assert.Single(mod.ArtObjects, record =>
+            record.EditorID == "CAFF_ARTO_VFX_TRAP_RUNE_MARKER");
+
+        Assert.Equal(mod.ModKey, marker.FormKey.ModKey);
+        Assert.Equal(0x000AEDu, marker.FormKey.ID);
+        Assert.Equal(@"Meshes\CalamityAffixes\VFX\RuneTrapMarker_Calamity.nif", marker.Model?.File);
+    }
+
+    [Fact]
+    public void CustomRuneTrapMarker_IsPackagedAndUsesVanillaEffectTextures()
+    {
+        var markerPath = Path.Combine(
+            FindRepoRoot(),
+            "Data",
+            "Meshes",
+            "CalamityAffixes",
+            "VFX",
+            "RuneTrapMarker_Calamity.nif");
+
+        Assert.True(File.Exists(markerPath), $"Custom rune trap marker not found: {markerPath}");
+
+        var nifText = Encoding.ASCII.GetString(File.ReadAllBytes(markerPath));
+        Assert.Contains("Gamebryo File Format", nifText, StringComparison.Ordinal);
+        Assert.Contains(@"effects\fxglowspotlinearalpha.dds", nifText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(@"effects\gradients\gradhealmagic.dds", nifText, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("vfxeditor", nifText, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
