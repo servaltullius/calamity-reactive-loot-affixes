@@ -464,12 +464,24 @@ namespace RuntimeGateStoreChecks
 			(std::istreambuf_iterator<char>(in)),
 			std::istreambuf_iterator<char>());
 
+		// What this still pins is structural and cheap to keep true across
+		// refactors: the fallback consults the shared commit policy, honours the
+		// proc-recursion guard, and resets duplicate tracking when the data is
+		// not yet committed (otherwise the follow-up event carrying the real
+		// data gets suppressed as a duplicate and the proc is lost).
+		//
+		// The decision itself -- which combinations of (hasHitData,
+		// matchesActors, hasHitLikeSource) may drive a proc -- used to be
+		// asserted here by pinning the exact call text of each HitDataUtil
+		// helper.  That blocked any rewording of the condition while proving
+		// nothing about the outcome, so it now lives in
+		// IsCommittedFallbackHitData and is covered by
+		// tests/test_tes_hit_fallback_policy.cpp.
 		if (source.find("if (_combatState.procDepth > 0)") == std::string::npos ||
-			source.find("HitDataUtil::HitDataMatchesActors(hitData, target, aggressor)") == std::string::npos ||
-			source.find("HitDataUtil::HasHitLikeSource(hitData, aggressor)") == std::string::npos ||
+			source.find("detail::IsCommittedFallbackHitData(") == std::string::npos ||
 			source.find("if (!hasCommittedHitData)") == std::string::npos ||
-			source.find("ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);") == std::string::npos ||
-			source.find("ProcessTrigger(Trigger::kLowHealth, target, aggressor, hitData);") == std::string::npos) {
+			source.find("Trigger::kIncomingHit") == std::string::npos ||
+			source.find("Trigger::kLowHealth") == std::string::npos) {
 			std::cerr << "tes_hit_fallback_source_validation: TESHitEvent fallback must validate committed hit-like source data\n";
 			return false;
 		}

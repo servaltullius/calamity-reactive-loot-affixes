@@ -235,6 +235,7 @@ if (BUILD_TESTING)
             tests/test_corpse_explosion_selection.cpp
             tests/test_trap_cell_policy.cpp
             tests/test_trap_tick_selection.cpp
+            tests/test_tes_hit_fallback_policy.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

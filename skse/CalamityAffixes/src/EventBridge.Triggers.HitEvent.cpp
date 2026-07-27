@@ -4,6 +4,7 @@
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/PointerSafety.h"
+#include "CalamityAffixes/TesHitFallbackPolicy.h"
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include "EventBridge.Triggers.Events.Detail.h"
@@ -126,10 +127,10 @@ namespace CalamityAffixes
 
 						if (!ShouldSuppressDuplicateHit(key, now)) {
 							const auto* hitData = HitDataUtil::GetLastHitData(target);
-							const bool hasCommittedHitData =
-								hitData &&
-								HitDataUtil::HitDataMatchesActors(hitData, target, aggressor) &&
-								HitDataUtil::HasHitLikeSource(hitData, aggressor);
+							const bool hasCommittedHitData = detail::IsCommittedFallbackHitData(
+								hitData != nullptr,
+								hitData && HitDataUtil::HitDataMatchesActors(hitData, target, aggressor),
+								hitData && HitDataUtil::HasHitLikeSource(hitData, aggressor));
 
 							// Some weapon types (especially modded weapons with custom
 							// animations) raise TESHitEvent before HitData is fully
@@ -187,10 +188,10 @@ namespace CalamityAffixes
 
 					if (!ShouldSuppressDuplicateHit(key, now)) {
 						const auto* hitData = HitDataUtil::GetLastHitData(target);
-						const bool hasCommittedHitData =
-							hitData &&
-							HitDataUtil::HitDataMatchesActors(hitData, target, aggressor) &&
-							HitDataUtil::HasHitLikeSource(hitData, aggressor);
+						const bool hasCommittedHitData = detail::IsCommittedFallbackHitData(
+							hitData != nullptr,
+							hitData && HitDataUtil::HitDataMatchesActors(hitData, target, aggressor),
+							hitData && HitDataUtil::HasHitLikeSource(hitData, aggressor));
 
 						// Some weapon types (especially modded weapons with custom
 						// animations) raise TESHitEvent before HitData is fully
