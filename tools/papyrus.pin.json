@@ -1,0 +1,49 @@
+{
+  "description": "Hashes proving Data/Scripts/*.pex were compiled from the committed sources. Regenerate with tools/verify_papyrus_pin.py --update, which recompiles first. Do not hand-edit.",
+  "targets": [
+    {
+      "source": "Data/Scripts/Source/CalamityAffixes_ModeControl.psc",
+      "output": "Data/Scripts/CalamityAffixes_ModeControl.pex",
+      "source_sha256": "83b057119dd07cd17d43646a54b307762f2ea7a8e114d69308aacace77c4ac5f",
+      "output_sha256": "21678f22c757607d08e0e707c84cbe1c8da472e49cb8c30881e0648062e0e956"
+    },
+    {
+      "source": "Data/Scripts/Source/CalamityAffixes_ModEventEmitter.psc",
+      "output": "Data/Scripts/CalamityAffixes_ModEventEmitter.pex",
+      "source_sha256": "04c13aecd278b06d2f393938a596e804c4a80bdfe61aafaef404b3b36d67fcc1",
+      "output_sha256": "542459448277bd3319b9da9c50e6e071e185e1eb57cf06a132c2a2e6b4d767c7"
+    },
+    {
+      "source": "Data/Scripts/Source/CalamityAffixes_MCMConfig.psc",
+      "output": "Data/Scripts/CalamityAffixes_MCMConfig.pex",
+      "source_sha256": "546b606a16d87befd19f7213e5acffaeca213727e2c64425651412ab73ff68e4",
+      "output_sha256": "3c7f0417fe8c4fa2b6b5ec0c3c3c5165bc3237a05878fab77aa5a9d98275d409"
+    }
+  ],
+  "shared_inputs": [
+    {
+      "path": "tools/papyrus-stubs/Calamity_Papyrus_Flags.flg",
+      "sha256": "d5824a9b0a37f5fbb3473f18ac0bbea9c0f3e89f725803e62afc63348206e12a"
+    },
+    {
+      "path": "tools/papyrus-stubs/MCM_ConfigBase.psc",
+      "sha256": "034511bbf2dc5d7d52d774b4a15fcf37cea099d7fab6f56a39cb0bc7bfd5d925"
+    },
+    {
+      "path": "tools/papyrus-stubs/ModEvent.psc",
+      "sha256": "50593f3b135f46acfc09e889d98a033945ce178a19827e10c0faa1c35c7d3c09"
+    },
+    {
+      "path": "tools/papyrus-stubs/SKI_ConfigBase.psc",
+      "sha256": "7cde90cf4a7eb61c2bb152a90b3683c3ffa0d434d952b57a726a77ec3faafec0"
+    },
+    {
+      "path": "tools/papyrus-stubs/SKI_ConfigManager.psc",
+      "sha256": "a817e7893f2f3cfbbedbf1bde2ccd8f56d25e63caecb8037fc8f9059a63d63b4"
+    },
+    {
+      "path": "tools/papyrus-stubs/SKI_QuestBase.psc",
+      "sha256": "6be3b60c2d7515edffa91f1c60485684269e1209236fb80326028db671cba9bc"
+    }
+  ]
+}
