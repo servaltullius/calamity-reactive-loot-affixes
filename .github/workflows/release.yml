@@ -6,11 +6,35 @@ name: release
 #
 # The release is created as a DRAFT. Nothing becomes public until a human opens
 # it and clicks publish.
+#
+# BLOCKED: the tag trigger is deliberately disabled.
+#
+# The first dry run (v1.7.3-rc1) got all the way through the DLL build and ESP
+# generation and then failed in `build_mo2_zip.sh`, which unconditionally calls
+# `compile_papyrus.sh`. That needs PapyrusCompiler.exe from the Creation Kit --
+# a proprietary local binary that cannot be installed on a GitHub runner:
+#
+#   Papyrus compiler not found: .../Papyrus Compiler/PapyrusCompiler.exe
+#
+# The three .pex outputs ARE committed under Data/Scripts/, so packaging could
+# use them. But compile_papyrus.sh deliberately refuses that ("Existing staged
+# PEX files are never accepted as a substitute for a failed or incomplete
+# compiler invocation"), and quietly reintroducing the fallback would let a
+# release ship a .pex that no longer matches its .psc.
+#
+# The fix is to make the committed .pex provably current: a manifest recording
+# the hashes of the .psc sources, tools/papyrus-stubs/*, and the flags file they
+# were built from, verified before packaging reuses them -- the same shape as
+# skse/CalamityAffixes/extern/CommonLibSSE-NG.pin.json. Until that exists,
+# releases are built locally, where the compiler is present.
+#
+# workflow_dispatch stays enabled: everything up to packaging is real
+# verification and worth being able to run on demand.
 
 on:
-  push:
-    tags:
-      - "v*"
+  # push:
+  #   tags:
+  #     - "v*"
   workflow_dispatch:
     inputs:
       version:
