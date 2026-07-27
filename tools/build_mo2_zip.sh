@@ -135,7 +135,39 @@ generator_args=(
 )
 
 # Compile required Papyrus scripts into staged Data/Scripts/*.pex.
-"${repo_root}/tools/compile_papyrus.sh" --data "${stage_data_dir}"
+#
+# PapyrusCompiler.exe ships with the Creation Kit and cannot be installed on a
+# GitHub runner, so CI has to package the .pex committed under Data/Scripts/ --
+# already staged by the `cp -a` above. Reusing them is only sound while they
+# still match their sources, which is what the pin proves.
+#
+# The fallback is keyed on the compiler being absent, not on a compile failing.
+# Any other problem (missing Scripts.zip, a .psc that no longer builds) still
+# aborts the package, because compile_papyrus.sh's rule holds: a staged PEX is
+# never a substitute for a failed compile. Where the compiler exists it stays
+# authoritative -- it catches a broken .psc, which a hash pin cannot see.
+if [[ -f "${papyrus_compiler}" ]]; then
+  "${repo_root}/tools/compile_papyrus.sh" --data "${stage_data_dir}"
+else
+  echo "Papyrus compiler not present; verifying the committed .pex instead of compiling."
+  if ! python3 "${repo_root}/tools/verify_papyrus_pin.py"; then
+    echo "Refusing to package: no Papyrus compiler, and the committed .pex are not provably current." >&2
+    exit 1
+  fi
+
+  # The pin describes the repository tree; the zip is built from the staging
+  # copy. Nothing between the `cp -a` and here is supposed to write into
+  # Scripts/, so confirm that rather than assume it -- otherwise the pin would
+  # be vouching for bytes that are not the ones shipped.
+  for pex in "${data_dir}"/Scripts/*.pex; do
+    staged_pex="${stage_data_dir}/Scripts/$(basename "${pex}")"
+    if ! cmp -s "${pex}" "${staged_pex}"; then
+      echo "Staged PEX differs from the verified repository copy: ${staged_pex}" >&2
+      exit 1
+    fi
+  done
+  echo "Using verified prebuilt Papyrus scripts from Data/Scripts/."
+fi
 
 # Lint spec + ensure generated runtime config is up to date (prevents shipping stale Data/*).
 python3 "${repo_root}/tools/lint_affixes.py" \

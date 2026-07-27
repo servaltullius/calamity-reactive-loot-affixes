@@ -263,6 +263,130 @@ class ReleaseVerifyTests(unittest.TestCase):
             for stem in target_stems:
                 self.assertEqual((output_dir / f"{stem}.pex").read_bytes(), b"stale-pex")
 
+    def test_build_mo2_zip_falls_back_only_when_the_compiler_is_absent(self) -> None:
+        """The fallback must key on "no compiler", not on "compile failed".
+
+        PapyrusCompiler.exe cannot be installed on a GitHub runner, so CI has to
+        package the committed .pex. But a compile that runs and fails is a very
+        different signal from a compiler that was never there, and
+        compile_papyrus.sh refuses to substitute a staged PEX for the former --
+        a fallback keyed on failure would quietly undo that.
+        """
+        source = self.build_mo2_zip_path.read_text(encoding="utf-8")
+        self.assertIn('if [[ -f "${papyrus_compiler}" ]]; then', source)
+        self.assertIn('"${repo_root}/tools/compile_papyrus.sh" --data "${stage_data_dir}"', source)
+        self.assertIn('python3 "${repo_root}/tools/verify_papyrus_pin.py"', source)
+
+    def test_build_mo2_zip_packages_verified_prebuilt_pex_without_a_compiler(self) -> None:
+        """End-to-end proof of the CI packaging path.
+
+        Runs the real packaging script with the compiler pointed at a path that
+        does not exist -- the exact condition on a GitHub runner -- and requires
+        the .pex inside the zip to be byte-identical to the committed ones. If
+        the fallback ever started shipping something else, a hash pin on the
+        repository copy alone would not notice.
+        """
+        if not self.repo_build_dll.is_file():
+            self.skipTest("packaging smoke test requires a built CalamityAffixes.dll")
+
+        package_version = "test-prebuilt-pex"
+        out_zip = self._package_zip_path(package_version)
+        out_zip.unlink(missing_ok=True)
+
+        with tempfile.TemporaryDirectory(prefix="caff-papyrus-prebuilt-") as temp_dir:
+            temp_root = Path(temp_dir)
+            env = self._build_mo2_zip_env(
+                temp_root=temp_root,
+                package_version=package_version,
+                # _build_mo2_zip_env installs a fake compiler; point past it so
+                # the absent-compiler branch is the one under test.
+                extra_env={"PAPYRUS_COMPILER_EXE": str(temp_root / "no-such-PapyrusCompiler.exe")},
+            )
+
+            try:
+                result = subprocess.run(
+                    [str(self.build_mo2_zip_path)],
+                    cwd=self.repo_root,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                    env=env,
+                )
+                self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+                self.assertIn("Using verified prebuilt Papyrus scripts", result.stdout)
+
+                with zipfile.ZipFile(out_zip) as archive:
+                    shipped = {
+                        Path(name).name: archive.read(name)
+                        for name in archive.namelist()
+                        if name.endswith(".pex")
+                    }
+                committed = {
+                    path.name: path.read_bytes()
+                    for path in (self.repo_root / "Data" / "Scripts").glob("*.pex")
+                }
+                self.assertEqual(committed, shipped)
+                self.assertEqual(3, len(shipped))
+            finally:
+                out_zip.unlink(missing_ok=True)
+
+    def test_build_mo2_zip_refuses_to_package_when_the_papyrus_pin_fails(self) -> None:
+        """No compiler AND an unverifiable .pex must abort, not ship anyway.
+
+        The pin is the only thing standing between a compiler-less runner and a
+        .pex that no longer matches its .psc, so a non-zero exit from the
+        verifier has to stop packaging. Forced here by shimming python3 to fail
+        for that one script, which avoids tampering with the real Data/ tree.
+        """
+        if not self.repo_build_dll.is_file():
+            self.skipTest("packaging smoke test requires a built CalamityAffixes.dll")
+
+        package_version = "test-pin-refusal"
+        out_zip = self._package_zip_path(package_version)
+        out_zip.unlink(missing_ok=True)
+
+        with tempfile.TemporaryDirectory(prefix="caff-papyrus-pin-fail-") as temp_dir:
+            temp_root = Path(temp_dir)
+            bin_dir = temp_root / "bin"
+            bin_dir.mkdir(parents=True)
+            real_python = shutil.which("python3")
+            self.assertIsNotNone(real_python)
+            shim = bin_dir / "python3"
+            shim.write_text(
+                "#!/usr/bin/env bash\n"
+                'if [[ "${1:-}" == */verify_papyrus_pin.py ]]; then\n'
+                '  echo "simulated pin mismatch" >&2\n'
+                "  exit 1\n"
+                "fi\n"
+                f'exec "{real_python}" "$@"\n',
+                encoding="utf-8",
+            )
+            shim.chmod(0o755)
+
+            env = self._build_mo2_zip_env(
+                temp_root=temp_root,
+                package_version=package_version,
+                extra_env={
+                    "PAPYRUS_COMPILER_EXE": str(temp_root / "no-such-PapyrusCompiler.exe"),
+                    "PATH": f"{bin_dir}:{os.environ['PATH']}",
+                },
+            )
+
+            try:
+                result = subprocess.run(
+                    [str(self.build_mo2_zip_path)],
+                    cwd=self.repo_root,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                    env=env,
+                )
+                self.assertNotEqual(result.returncode, 0, msg=f"stdout={result.stdout}")
+                self.assertIn("Refusing to package", result.stderr)
+                self.assertFalse(out_zip.exists(), "an unverifiable .pex must not produce a package")
+            finally:
+                out_zip.unlink(missing_ok=True)
+
     def test_verify_mo2_zip_accepts_exact_release_payload_and_matching_identity(self) -> None:
         with tempfile.TemporaryDirectory(prefix="caff-verify-zip-valid-") as temp_dir:
             temp_root = Path(temp_dir)
