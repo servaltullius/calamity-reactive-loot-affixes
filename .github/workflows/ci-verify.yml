@@ -34,6 +34,15 @@ jobs:
       - name: Lint affix spec and generated snapshot
         run: python3 tools/lint_affixes.py --spec affixes/affixes.json --generated Data/SKSE/Plugins/CalamityAffixes/affixes.json
 
+      # CMakeLists.txt is authoritative; vcpkg.json sat eleven releases behind
+      # it because nothing read that field at build time.
+      - name: Verify declared versions agree
+        run: python3 tools/verify_version_consistency.py
+
+      # The vendored CommonLibSSE-NG tree must still match its recorded pin.
+      - name: Verify CommonLibSSE-NG pin
+        run: python3 tools/verify_commonlib_pin.py
+
   generator-tests:
     name: Generator tests
     runs-on: ubuntu-latest
