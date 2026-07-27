@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import importlib.util
 import math
 import re
 import unittest
 from pathlib import Path
+
+
+def _load_view_source_module():
+    path = Path(__file__).resolve().parents[2] / "tools" / "prisma_view_source.py"
+    spec = importlib.util.spec_from_file_location("prisma_view_source", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class PrismaTooltipScalingTests(unittest.TestCase):
@@ -12,7 +22,10 @@ class PrismaTooltipScalingTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.repo_root = Path(__file__).resolve().parents[2]
         cls.view_path = cls.repo_root / "Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html"
-        cls.source = cls.view_path.read_text(encoding="utf-8")
+        # This suite pins a JS constant and the CSS rules that consume it, which
+        # end up in different files once the view is split. Read the whole view
+        # so the pair stays in one buffer.
+        cls.source = _load_view_source_module().load_view_source()
 
     def _desktop_reference(self) -> tuple[int, int, int, int, float, float]:
         match = re.search(

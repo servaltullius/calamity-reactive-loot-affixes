@@ -1,11 +1,22 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import unittest
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _load_view_source() -> str:
+    """The Prisma view as one buffer, across however many files it is split."""
+    path = REPO_ROOT / "tools" / "prisma_view_source.py"
+    spec = importlib.util.spec_from_file_location("prisma_view_source", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.load_view_source()
 
 
 class ItemSubtypePolicyTests(unittest.TestCase):
@@ -61,7 +72,7 @@ class ItemSubtypePolicyTests(unittest.TestCase):
         self.assertNotIn("IsSuffixWeaponSubtypeEligible(", assign)
 
     def test_specialized_runeword_warning_is_non_blocking(self) -> None:
-        ui = (REPO_ROOT / "Data/PrismaUI/views/CalamityAffixes/index.html").read_text(encoding="utf-8")
+        ui = _load_view_source()
         panel = (REPO_ROOT / "skse/CalamityAffixes/src/EventBridge.Loot.Runeword.PanelState.cpp").read_text(
             encoding="utf-8"
         )

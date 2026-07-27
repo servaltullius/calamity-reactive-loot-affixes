@@ -58,6 +58,13 @@ MEMBER_DECL_RE = re.compile(
     r"^[A-Za-z_][\w:]*(?:\s*<[^;]*>)?(?:\s*[*&])?\s+[A-Za-z_]\w*\s*(?:\{[^;]*\})?\s*;$"
 )
 
+# How a check gets hold of source text.  Most open the file themselves with
+# ifstream; the Prisma panel checks call a shared helper instead, because the
+# view is spread over several files.  Recognising only ifstream would drop those
+# checks -- and their pins -- out of the report without any error, which is the
+# failure mode --max-brittle exists to prevent.
+SOURCE_TEXT_MARKERS = ("ifstream", "LoadPrismaViewSource")
+
 
 def classify(literal: str) -> str:
     """Return 'structural' or 'brittle' for one pinned literal."""
@@ -90,7 +97,7 @@ def scan() -> list[dict]:
         for i, header in enumerate(headers):
             end = headers[i + 1].start() if i + 1 < len(headers) else len(text)
             body = text[header.end() : end]
-            if "ifstream" not in body:
+            if not any(marker in body for marker in SOURCE_TEXT_MARKERS):
                 continue
 
             pins = [(literal, classify(literal)) for literal in FIND_RE.findall(body)]

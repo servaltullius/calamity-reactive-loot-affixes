@@ -1,19 +1,14 @@
 "use strict";
 
 const assert = require("assert");
-const fs = require("fs");
-const path = require("path");
 
-const viewPath = path.resolve(
-  __dirname,
-  "../../Data/PrismaUI/views/CalamityAffixes/index.html"
-);
-const source = fs.readFileSync(viewPath, "utf8");
-const scriptOpen = source.indexOf("<script>");
-const scriptClose = source.indexOf("</script>", scriptOpen);
-assert(scriptOpen >= 0 && scriptClose > scriptOpen, "main script block missing");
+// The view's JS lives in scripts/*.js; read it as one buffer so the slices
+// below span the whole program rather than whichever file they happen to hit.
+const { loadScripts } = require("../prisma_view_source.js");
+const source = loadScripts();
+assert(source.length > 0, "main script block missing");
 assert.doesNotThrow(
-  () => new Function(source.slice(scriptOpen + "<script>".length, scriptClose)),
+  () => new Function(source),
   "main Prisma script contains invalid JavaScript"
 );
 

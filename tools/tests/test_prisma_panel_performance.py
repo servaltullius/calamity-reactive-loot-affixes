@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import importlib.util
 import math
 import os
 import re
@@ -8,6 +9,15 @@ import shutil
 import subprocess
 import unittest
 from pathlib import Path
+
+
+def _load_view_source_module():
+    path = Path(__file__).resolve().parents[2] / "tools" / "prisma_view_source.py"
+    spec = importlib.util.spec_from_file_location("prisma_view_source", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class PrismaPanelPerformanceTests(unittest.TestCase):
@@ -22,7 +32,11 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
             / "CalamityAffixes"
             / "index.html"
         )
-        cls.source = cls.view_path.read_text(encoding="utf-8")
+        # Read through the loader, not the file. Several tests below assert that
+        # a string is ABSENT; against index.html alone those would start passing
+        # the moment the text they forbid moved into a stylesheet or script
+        # file, and nothing would fail to say coverage had been lost.
+        cls.source = _load_view_source_module().load_view_source()
 
     def _between(self, start: str, end: str) -> str:
         start_index = self.source.index(start)

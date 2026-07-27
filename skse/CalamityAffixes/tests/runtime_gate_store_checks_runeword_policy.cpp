@@ -174,8 +174,6 @@ namespace RuntimeGateStoreChecks
 			const fs::path recipeEntriesFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.RecipeEntries.cpp";
 			const fs::path prismaCoreFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.cpp";
 			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
-			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
-				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
 
 			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 				std::ifstream in(path);
@@ -213,9 +211,9 @@ namespace RuntimeGateStoreChecks
 				prismaCoreTextCombined += *part;
 			}
 			const auto prismaCoreText = std::optional<std::string>(std::move(prismaCoreTextCombined));
-			const auto prismaUiText = loadText(prismaUiFile);
+			const auto prismaUiText = LoadPrismaViewSource();
 			if (!prismaUiText.has_value()) {
-				std::cerr << "runeword_recipe_tooltip_text: failed to open prisma ui file: " << prismaUiFile << "\n";
+				std::cerr << "runeword_recipe_tooltip_text: failed to read the prisma view source\n";
 				return false;
 			}
 
@@ -1123,8 +1121,6 @@ namespace RuntimeGateStoreChecks
 			const fs::path prismaPanelDataFile = testFile.parent_path().parent_path() / "src" / "PrismaTooltip.PanelData.inl";
 			const fs::path runtimeTooltipFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.TooltipResolution.cpp";
 			const fs::path runewordPanelStateFile = testFile.parent_path().parent_path() / "src" / "EventBridge.Loot.Runeword.PanelState.cpp";
-			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
-				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
 
 			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 				std::ifstream in(path);
@@ -1152,9 +1148,9 @@ namespace RuntimeGateStoreChecks
 				coreTextCombined += *part;
 			}
 			const auto coreText = std::optional<std::string>(std::move(coreTextCombined));
-			const auto uiText = loadText(prismaUiFile);
+			const auto uiText = LoadPrismaViewSource();
 			if (!uiText.has_value()) {
-				std::cerr << "prisma_tooltip_refresh: failed to open ui source: " << prismaUiFile << "\n";
+				std::cerr << "prisma_tooltip_refresh: failed to read the prisma view source\n";
 				return false;
 			}
 			const auto runtimeText = loadText(runtimeTooltipFile);
@@ -1199,24 +1195,9 @@ namespace RuntimeGateStoreChecks
 
 		bool CheckPrismaPanelUiBootstrapExtractionPolicy()
 		{
-			namespace fs = std::filesystem;
-			const fs::path testFile{ __FILE__ };
-			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
-				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
-
-			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
-				std::ifstream in(path);
-				if (!in.is_open()) {
-					return std::nullopt;
-				}
-				return std::string(
-					(std::istreambuf_iterator<char>(in)),
-					std::istreambuf_iterator<char>());
-			};
-
-			const auto uiText = loadText(prismaUiFile);
+			const auto uiText = LoadPrismaViewSource();
 			if (!uiText.has_value()) {
-				std::cerr << "prisma_panel_ui_bootstrap: failed to open ui source: " << prismaUiFile << "\n";
+				std::cerr << "prisma_panel_ui_bootstrap: failed to read the prisma view source\n";
 				return false;
 			}
 
@@ -1368,24 +1349,9 @@ namespace RuntimeGateStoreChecks
 
 		bool CheckPrismaPanelRenderViewModelExtractionPolicy()
 		{
-			namespace fs = std::filesystem;
-			const fs::path testFile{ __FILE__ };
-			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
-				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
-
-			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
-				std::ifstream in(path);
-				if (!in.is_open()) {
-					return std::nullopt;
-				}
-				return std::string(
-					(std::istreambuf_iterator<char>(in)),
-					std::istreambuf_iterator<char>());
-			};
-
-			const auto uiText = loadText(prismaUiFile);
+			const auto uiText = LoadPrismaViewSource();
 			if (!uiText.has_value()) {
-				std::cerr << "prisma_panel_render_view_model: failed to open ui source: " << prismaUiFile << "\n";
+				std::cerr << "prisma_panel_render_view_model: failed to read the prisma view source\n";
 				return false;
 			}
 
@@ -1435,24 +1401,9 @@ namespace RuntimeGateStoreChecks
 
 		bool CheckPrismaPanelUxFlowPolicy()
 		{
-			namespace fs = std::filesystem;
-			const fs::path testFile{ __FILE__ };
-			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
-				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
-
-			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
-				std::ifstream in(path);
-				if (!in.is_open()) {
-					return std::nullopt;
-				}
-				return std::string(
-					(std::istreambuf_iterator<char>(in)),
-					std::istreambuf_iterator<char>());
-			};
-
-			const auto uiText = loadText(prismaUiFile);
+			const auto uiText = LoadPrismaViewSource();
 			if (!uiText.has_value()) {
-				std::cerr << "prisma_panel_ux_flow: failed to open ui source: " << prismaUiFile << "\n";
+				std::cerr << "prisma_panel_ux_flow: failed to read the prisma view source\n";
 				return false;
 			}
 
@@ -1649,24 +1600,9 @@ namespace RuntimeGateStoreChecks
 
 		bool CheckPrismaPanelRecipeScrollPerformancePolicy()
 		{
-			namespace fs = std::filesystem;
-			const fs::path testFile{ __FILE__ };
-			const fs::path prismaUiFile = testFile.parent_path().parent_path().parent_path().parent_path() /
-				"Data" / "PrismaUI" / "views" / "CalamityAffixes" / "index.html";
-
-			auto loadText = [](const fs::path& path) -> std::optional<std::string> {
-				std::ifstream in(path);
-				if (!in.is_open()) {
-					return std::nullopt;
-				}
-				return std::string(
-					(std::istreambuf_iterator<char>(in)),
-					std::istreambuf_iterator<char>());
-			};
-
-			const auto uiText = loadText(prismaUiFile);
+			const auto uiText = LoadPrismaViewSource();
 			if (!uiText.has_value()) {
-				std::cerr << "prisma_panel_recipe_scroll_performance: failed to open ui source: " << prismaUiFile << "\n";
+				std::cerr << "prisma_panel_recipe_scroll_performance: failed to read the prisma view source\n";
 				return false;
 			}
 
