@@ -35,13 +35,28 @@ jobs:
       - name: Resolve version
         id: version
         run: |
+          set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             version="${{ inputs.version }}"
           else
             version="${GITHUB_REF_NAME#v}"
           fi
+
+          # This repo ships pre-releases as `-rc` tags (23 of them). The plugin
+          # version never carries that suffix -- CMake only knows
+          # MAJOR.MINOR.PATCH -- so the two are compared and looked up
+          # separately. `version` names the package; `base_version` is what the
+          # DLL reports.
+          base_version="${version%%[-+]*}"
+
           echo "version=${version}" >> "$GITHUB_OUTPUT"
-          echo "Building version ${version}"
+          echo "base_version=${base_version}" >> "$GITHUB_OUTPUT"
+          if [[ "${version}" == "${base_version}" ]]; then
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Building version ${version} (declared ${base_version})"
 
       # Refuse to build a tag that disagrees with what the plugin will actually
       # report to SKSE. Tagging v1.8.0 while CMakeLists.txt still says 1.7.2
@@ -114,12 +129,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          # Try rc-specific notes first, then the base release's. An rc usually
+          # reuses the notes written for the version it is a candidate for, but
+          # allowing an exact match means a candidate CAN carry its own.
           # `|| true`: with `set -e` a no-match grep inside the substitution
-          # would abort the step, which is the normal case for a version with
-          # no prepared notes.
-          notes_name="$(ls docs/releases | grep -- "-v${{ steps.version.outputs.version }}\.md$" | tail -1 || true)"
-          notes_file="docs/releases/${notes_name}"
-          if [[ -n "$notes_name" && -f "$notes_file" ]]; then
+          # would abort the step, and "no prepared notes" is a normal case.
+          notes_file=""
+          for candidate in "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.base_version }}"; do
+            name="$(ls docs/releases | grep -- "-v${candidate}\.md$" | tail -1 || true)"
+            if [[ -n "$name" && -f "docs/releases/${name}" ]]; then
+              notes_file="docs/releases/${name}"
+              break
+            fi
+          done
+
+          if [[ -n "$notes_file" ]]; then
             echo "Using release notes: $notes_file"
             notes_arg=(--notes-file "$notes_file")
           else
@@ -127,8 +152,13 @@ jobs:
             notes_arg=(--generate-notes)
           fi
 
+          release_arg=(--draft)
+          if [[ "${{ steps.version.outputs.prerelease }}" == "true" ]]; then
+            release_arg+=(--prerelease)
+          fi
+
           gh release create "${GITHUB_REF_NAME}" \
-            --draft \
+            "${release_arg[@]}" \
             --title "Calamity - Reactive Loot & Affixes ${GITHUB_REF_NAME}" \
             "${notes_arg[@]}" \
             release-artifacts/*

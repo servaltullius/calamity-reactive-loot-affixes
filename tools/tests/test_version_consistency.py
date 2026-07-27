@@ -74,6 +74,55 @@ class VersionConsistencyTests(unittest.TestCase):
                 path.write_text(json.dumps({"name": "x", key: "2.3.4"}), encoding="utf-8")
                 self.assertEqual(self.mod.read_vcpkg_version(path), "2.3.4")
 
+    # --- release-tag normalization ------------------------------------------
+
+    def test_release_tag_normalization_strips_v_and_prerelease(self) -> None:
+        """An `-rc` tag must satisfy the plain declared version.
+
+        This repo ships pre-releases as `-rc` tags (23 of them). The plugin
+        version has no such suffix, so comparing the raw tag rejected every
+        pre-release -- the exact case where tag and declared version are
+        supposed to differ.
+        """
+        for raw, expected in [
+            ("v1.7.3", "1.7.3"),
+            ("1.7.3", "1.7.3"),
+            ("v1.7.3-rc1", "1.7.3"),
+            ("v1.2.20-rc18", "1.2.20"),
+            ("1.7.3+build5", "1.7.3"),
+            ("v1.7.3-rc1+build5", "1.7.3"),
+        ]:
+            with self.subTest(raw=raw):
+                self.assertEqual(expected, self.mod.normalize_release_tag(raw))
+
+    def test_release_tag_normalization_still_catches_a_wrong_base_version(self) -> None:
+        # Stripping the suffix must not make the check permissive: a tag for a
+        # different release still has to fail.
+        self.assertEqual("1.8.0", self.mod.normalize_release_tag("v1.8.0-rc1"))
+        self.assertNotEqual(
+            self.mod.normalize_release_tag("v1.8.0-rc1"),
+            self.mod.read_cmake_version(),
+        )
+
+    def test_prerelease_tag_passes_end_to_end_against_the_real_repo(self) -> None:
+        import subprocess
+
+        declared = self.mod.read_cmake_version()
+        script = REPO_ROOT / "tools" / "verify_version_consistency.py"
+
+        ok = subprocess.run(
+            ["python3", str(script), "--expect", f"v{declared}-rc1", "--quiet"],
+            capture_output=True,
+        )
+        self.assertEqual(0, ok.returncode, msg=ok.stderr.decode())
+
+        # And the guard is not vacuous.
+        bad = subprocess.run(
+            ["python3", str(script), "--expect", "v99.0.0-rc1", "--quiet"],
+            capture_output=True,
+        )
+        self.assertEqual(1, bad.returncode, msg="a mismatched rc tag must fail")
+
     def test_changelog_reader_takes_the_newest_release_not_unreleased(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "CHANGELOG.md"
