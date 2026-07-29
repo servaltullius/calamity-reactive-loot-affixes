@@ -126,29 +126,12 @@ namespace CalamityAffixes
 		CombatRuntimeState _combatState{};
 
 		AffixRuntimeCacheState _affixRuntimeState{};
-		std::vector<AffixRuntime>& _affixes{ _affixRuntimeState.affixes };
-		std::vector<std::uint32_t>& _activeCounts{ _affixRuntimeState.activeCounts };
-		float& _activeCritDamageBonusPct{ _affixRuntimeState.activeCritDamageBonusPct };
-		AffixRegistryState& _affixRegistry{ _affixRuntimeState.affixRegistry };
-		// Trigger dispatch caches — all affixes of each trigger type (config-time).
-
-		// Active trigger caches — subset currently equipped on the player (runtime).
-		std::vector<std::size_t>& _activeHitTriggerAffixIndices{ _affixRuntimeState.activeHitTriggerAffixIndices };
-		std::vector<std::size_t>& _activeIncomingHitTriggerAffixIndices{ _affixRuntimeState.activeIncomingHitTriggerAffixIndices };
-		std::vector<std::size_t>& _activeDotApplyTriggerAffixIndices{ _affixRuntimeState.activeDotApplyTriggerAffixIndices };
-		std::vector<std::size_t>& _activeKillTriggerAffixIndices{ _affixRuntimeState.activeKillTriggerAffixIndices };
-		std::vector<std::size_t>& _activeLowHealthTriggerAffixIndices{ _affixRuntimeState.activeLowHealthTriggerAffixIndices };
 
 		// Special action caches — affixes with non-standard action types.
 		AffixSpecialActionState _affixSpecialActions{};
 
 		LootRuntimeState _lootState{};
 		InstanceTrackingState _instanceTrackingState{};
-		std::unordered_set<RE::SpellItem*>& _appliedPassiveSpells{ _instanceTrackingState.appliedPassiveSpells };
-		std::unordered_map<std::uint64_t, InstanceAffixSlots>& _instanceAffixes{ _instanceTrackingState.instanceAffixes };
-		std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash>& _instanceStates{ _instanceTrackingState.instanceStates };
-		std::unordered_map<std::uint64_t, std::vector<std::uint64_t>>& _equippedInstanceKeysByToken{ _instanceTrackingState.equippedInstanceKeysByToken };
-		bool& _equippedTokenCacheReady{ _instanceTrackingState.equippedTokenCacheReady };
 		RunewordRuntimeState _runewordState{};
 		TrapRuntimeState _trapState{};
 		LootConfig _loot{};

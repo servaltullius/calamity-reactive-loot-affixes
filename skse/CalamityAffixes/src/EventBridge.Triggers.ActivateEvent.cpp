@@ -17,7 +17,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeSettings.enabled || !a_event || !a_event->actionRef || !a_event->objectActivated) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || !a_event || !a_event->actionRef || !a_event->objectActivated) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 

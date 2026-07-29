@@ -72,12 +72,12 @@ namespace CalamityAffixes
 
 	const std::vector<std::uint64_t>* EventBridge::FindEquippedInstanceKeysForAffixTokenCached(std::uint64_t a_affixToken) const
 	{
-		if (a_affixToken == 0u || !_equippedTokenCacheReady) {
+		if (a_affixToken == 0u || !_instanceTrackingState.equippedTokenCacheReady) {
 			return nullptr;
 		}
 
-		const auto it = _equippedInstanceKeysByToken.find(a_affixToken);
-		if (it == _equippedInstanceKeysByToken.end()) {
+		const auto it = _instanceTrackingState.equippedInstanceKeysByToken.find(a_affixToken);
+		if (it == _instanceTrackingState.equippedInstanceKeysByToken.end()) {
 			return nullptr;
 		}
 
@@ -94,7 +94,7 @@ namespace CalamityAffixes
 		if (const auto* cached = FindEquippedInstanceKeysForAffixTokenCached(a_affixToken); cached) {
 			return *cached;
 		}
-		if (_equippedTokenCacheReady) {
+		if (_instanceTrackingState.equippedTokenCacheReady) {
 			return keys;
 		}
 
@@ -129,8 +129,8 @@ namespace CalamityAffixes
 				}
 
 				const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-				const auto it = _instanceAffixes.find(key);
-				if (it == _instanceAffixes.end() || !it->second.HasToken(a_affixToken)) {
+				const auto it = _instanceTrackingState.instanceAffixes.find(key);
+				if (it == _instanceTrackingState.instanceAffixes.end() || !it->second.HasToken(a_affixToken)) {
 					continue;
 				}
 
@@ -201,12 +201,12 @@ namespace CalamityAffixes
 
 		std::unordered_set<std::uint64_t> keep;
 		keep.reserve(
-			_instanceAffixes.size() +
+			_instanceTrackingState.instanceAffixes.size() +
 			_runewordState.instanceStates.size() +
 			kLootEvaluatedRecentKeep + 64);
 
 		// Always keep explicit runtime states.
-		for (const auto& [key, _] : _instanceAffixes) {
+		for (const auto& [key, _] : _instanceTrackingState.instanceAffixes) {
 			keep.insert(key);
 		}
 		for (const auto& [key, _] : _runewordState.instanceStates) {
@@ -276,19 +276,19 @@ namespace CalamityAffixes
 
 	float EventBridge::ComputeActiveScrollNoConsumeChancePct() const
 	{
-		if (_affixes.empty() || _activeCounts.empty()) {
+		if (_affixRuntimeState.affixes.empty() || _affixRuntimeState.activeCounts.empty()) {
 			return 0.0f;
 		}
 
-		const auto limit = std::min(_affixes.size(), _activeCounts.size());
+		const auto limit = std::min(_affixRuntimeState.affixes.size(), _affixRuntimeState.activeCounts.size());
 		double totalChancePct = 0.0;
 		for (std::size_t i = 0; i < limit; ++i) {
-			const auto stacks = _activeCounts[i];
+			const auto stacks = _affixRuntimeState.activeCounts[i];
 			if (stacks == 0) {
 				continue;
 			}
 
-			const float perAffixChancePct = _affixes[i].scrollNoConsumeChancePct;
+			const float perAffixChancePct = _affixRuntimeState.affixes[i].scrollNoConsumeChancePct;
 			if (perAffixChancePct <= 0.0f) {
 				continue;
 			}
@@ -332,7 +332,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeSettings.enabled) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -792,11 +792,11 @@ namespace CalamityAffixes
 		}
 
 		const bool hasRuntimeState = std::ranges::any_of(
-			_instanceStates,
+			_instanceTrackingState.instanceStates,
 			[a_instanceKey](const auto& entry) {
 				return entry.first.instanceKey == a_instanceKey;
 			});
-		return _instanceAffixes.contains(a_instanceKey) ||
+		return _instanceTrackingState.instanceAffixes.contains(a_instanceKey) ||
 		       hasRuntimeState ||
 		       _runewordState.instanceStates.contains(a_instanceKey) ||
 		       (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == a_instanceKey);
@@ -815,7 +815,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		_instanceAffixes.erase(a_instanceKey);
+		_instanceTrackingState.instanceAffixes.erase(a_instanceKey);
 		ForgetLootEvaluatedInstance(a_instanceKey);
 		ForgetLootPreviewSlots(a_instanceKey);
 		EraseInstanceRuntimeStates(a_instanceKey);
@@ -823,7 +823,7 @@ namespace CalamityAffixes
 		if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == a_instanceKey) {
 			_runewordState.selectedBaseKey.reset();
 		}
-		_equippedTokenCacheReady = false;
+		_instanceTrackingState.equippedTokenCacheReady = false;
 	}
 
 	void EventBridge::RemapInstanceKey(std::uint64_t a_oldKey, std::uint64_t a_newKey)
@@ -854,25 +854,25 @@ namespace CalamityAffixes
 			RememberLootPreviewSlots(a_newKey, preview);
 		}
 
-		if (auto affixNode = _instanceAffixes.extract(a_oldKey); !affixNode.empty()) {
+		if (auto affixNode = _instanceTrackingState.instanceAffixes.extract(a_oldKey); !affixNode.empty()) {
 			affixNode.key() = a_newKey;
-			_instanceAffixes.insert(std::move(affixNode));
+			_instanceTrackingState.instanceAffixes.insert(std::move(affixNode));
 		}
 
 		std::vector<std::pair<InstanceStateKey, InstanceRuntimeState>> remappedStates;
-		for (auto it = _instanceStates.begin(); it != _instanceStates.end();) {
+		for (auto it = _instanceTrackingState.instanceStates.begin(); it != _instanceTrackingState.instanceStates.end();) {
 			if (it->first.instanceKey != a_oldKey) {
 				++it;
 				continue;
 			}
 
 			remappedStates.emplace_back(it->first, it->second);
-			it = _instanceStates.erase(it);
+			it = _instanceTrackingState.instanceStates.erase(it);
 		}
 
 		for (const auto& [oldStateKey, state] : remappedStates) {
 			const auto newStateKey = MakeInstanceStateKey(a_newKey, oldStateKey.affixToken);
-			_instanceStates.emplace(newStateKey, state);
+			_instanceTrackingState.instanceStates.emplace(newStateKey, state);
 		}
 
 		if (auto rwNode = _runewordState.instanceStates.extract(a_oldKey); !rwNode.empty()) {
@@ -885,7 +885,7 @@ namespace CalamityAffixes
 		if (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == a_oldKey) {
 			_runewordState.selectedBaseKey = a_newKey;
 		}
-		_equippedTokenCacheReady = false;
+		_instanceTrackingState.equippedTokenCacheReady = false;
 	}
 
 

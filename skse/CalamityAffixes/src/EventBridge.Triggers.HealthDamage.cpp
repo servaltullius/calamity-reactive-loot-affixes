@@ -19,7 +19,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeSettings.enabled || !a_target) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || !a_target) {
 			return;
 		}
 

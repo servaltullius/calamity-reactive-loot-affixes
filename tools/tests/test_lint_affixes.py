@@ -23,6 +23,12 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         cls.lint_affixes = module
+        cls.schema = json.loads(
+            (cls.repo_root / "affixes" / "affixes.schema.json").read_text(encoding="utf-8")
+        )
+        cls.repo_spec = json.loads(
+            (cls.repo_root / "affixes" / "affixes.json").read_text(encoding="utf-8")
+        )
 
     def _lint(self, affixes: list[dict]) -> tuple[list[str], list[str]]:
         errors: list[str] = []
@@ -173,6 +179,189 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
             any("keywords.affixes[0].nameKo" in error for error in errors),
             msg=f"expected authored content mismatch, got errors={errors} warnings={warnings}",
         )
+
+    def test_generated_sync_detects_deleted_field_still_present(self) -> None:
+        spec_payload = {
+            "keywords": {
+                "affixes": [
+                    {
+                        "id": "affix_test",
+                        "editorId": "CAFF_AFFIX_TEST",
+                        "runtime": {
+                            "trigger": "Hit",
+                            "action": {"type": "DebugNotify"},
+                        },
+                    }
+                ]
+            }
+        }
+        generated_payload = json.loads(json.dumps(spec_payload))
+        generated_payload["keywords"]["affixes"][0]["runtime"]["procChancePercent"] = 35.0
+
+        errors: list[str] = []
+        warnings: list[str] = []
+        self.lint_affixes._check_generated_sync(
+            spec_payload,
+            generated_payload,
+            spec_path=Path("missing-spec.json"),
+            generated_path=Path("missing-generated.json"),
+            errors=errors,
+            warnings=warnings,
+        )
+
+        self.assertTrue(
+            any(
+                "$.keywords.affixes[0].runtime.procChancePercent (unexpected key in generated)"
+                in error
+                for error in errors
+            ),
+            msg=f"expected deleted-field mismatch, got errors={errors} warnings={warnings}",
+        )
+
+    def test_generated_sync_normalizes_generator_defaults(self) -> None:
+        spec_payload = {
+            "version": 1,
+            "modKey": "CalamityAffixes.esp",
+            "eslFlag": True,
+            "loot": {},
+            "keywords": {
+                "tags": [],
+                "affixes": [
+                    {
+                        "id": "affix_test",
+                        "editorId": "CAFF_AFFIX_TEST",
+                        "records": {
+                            "magicEffect": {
+                                "editorId": "CAFF_MGEF_TEST",
+                                "actorValue": "Health",
+                            }
+                        },
+                        "runtime": {
+                            "trigger": "Hit",
+                            "action": {"type": "DebugNotify"},
+                        },
+                    }
+                ],
+                "kidRules": [],
+                "spidRules": [],
+            },
+        }
+        generated_payload = json.loads(json.dumps(spec_payload))
+        generated_payload["loot"].update(
+            {
+                "chancePercent": 0.0,
+                "runewordFragmentChancePercent": 8.0,
+                "reforgeOrbChancePercent": 12.0,
+                "uniqueActorGuaranteedRunewordChancePercent": 40.0,
+                "currencyDropMode": "hybrid",
+                "lootSourceChanceMultCorpse": 1.0,
+                "lootSourceChanceMultContainer": 1.0,
+                "lootSourceChanceMultBossContainer": 1.15,
+                "lootSourceChanceMultWorld": 1.0,
+                "renameItem": False,
+                "sharedPool": False,
+                "debugLog": False,
+                "dotTagSafetyAutoDisable": False,
+                "dotTagSafetyUniqueEffectThreshold": 96,
+                "trapGlobalMaxActive": 64,
+                "trapCastBudgetPerTick": 8,
+                "triggerProcBudgetPerWindow": 12,
+                "triggerProcBudgetWindowMs": 100,
+                "cleanupInvalidLegacyAffixes": True,
+                "stripTrackedSuffixSlots": True,
+            }
+        )
+        generated_payload["keywords"]["appendedMagicEffects"] = []
+        generated_payload["keywords"]["appendedRecords"] = []
+        generated_payload["keywords"]["affixes"][0]["records"]["magicEffect"].update(
+            {"hostile": False, "recover": False}
+        )
+
+        errors: list[str] = []
+        warnings: list[str] = []
+        self.lint_affixes._check_generated_sync(
+            spec_payload,
+            generated_payload,
+            spec_path=Path("missing-spec.json"),
+            generated_path=Path("missing-generated.json"),
+            errors=errors,
+            warnings=warnings,
+        )
+
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+    def test_schema_rejects_runtime_and_action_typos(self) -> None:
+        mutations = {
+            "runtime typo": ("runtime", "procChnacePercent", 100.0),
+            "action typo": ("action", "magnitudeScalling", {}),
+        }
+        for label, (target, key, value) in mutations.items():
+            with self.subTest(label=label):
+                payload = json.loads(json.dumps(self.repo_spec))
+                runtime = payload["keywords"]["affixes"][0]["runtime"]
+                destination = runtime if target == "runtime" else runtime["action"]
+                destination[key] = value
+                errors: list[str] = []
+                self.lint_affixes._validate_schema(
+                    instance=payload,
+                    schema=self.schema,
+                    label="test",
+                    errors=errors,
+                )
+                self.assertTrue(
+                    any("Additional properties are not allowed" in error and key in error for error in errors),
+                    msg=f"expected schema rejection for {key}, got errors={errors}",
+                )
+
+    def test_schema_rejects_wrong_runtime_type_and_missing_action_type(self) -> None:
+        wrong_type = json.loads(json.dumps(self.repo_spec))
+        wrong_type["keywords"]["affixes"][0]["runtime"]["procChancePercent"] = "100"
+        wrong_action_type = json.loads(json.dumps(self.repo_spec))
+        wrong_action_type["keywords"]["affixes"][0]["runtime"]["action"]["magnitudeScaling"] = "scaled"
+        missing_type = json.loads(json.dumps(self.repo_spec))
+        del missing_type["keywords"]["affixes"][0]["runtime"]["action"]["type"]
+        missing_cast_spell = json.loads(json.dumps(self.repo_spec))
+        del missing_cast_spell["keywords"]["affixes"][0]["runtime"]["action"]["spellEditorId"]
+
+        for label, payload, expected_fragment in (
+            ("wrong type", wrong_type, "is not of type 'number'"),
+            ("wrong action type", wrong_action_type, "is not of type 'object'"),
+            ("missing type", missing_type, "'type' is a required property"),
+            ("missing CastSpell spell", missing_cast_spell, "is not valid under any of the given schemas"),
+        ):
+            with self.subTest(label=label):
+                errors: list[str] = []
+                self.lint_affixes._validate_schema(
+                    instance=payload,
+                    schema=self.schema,
+                    label="test",
+                    errors=errors,
+                )
+                self.assertTrue(
+                    any(expected_fragment in error for error in errors),
+                    msg=f"expected {label} schema rejection, got errors={errors}",
+                )
+
+    def test_schema_accepts_corpse_explosion_runtime_default_max_targets(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        corpse_action = next(
+            affix["runtime"]["action"]
+            for affix in payload["keywords"]["affixes"]
+            if affix.get("runtime", {}).get("action", {}).get("type")
+            in {"CorpseExplosion", "SummonCorpseExplosion"}
+        )
+        corpse_action.pop("maxTargets", None)
+
+        errors: list[str] = []
+        self.lint_affixes._validate_schema(
+            instance=payload,
+            schema=self.schema,
+            label="test",
+            errors=errors,
+        )
+
+        self.assertEqual([], errors)
 
     def test_module_sync_uses_composed_content_instead_of_timestamps(self) -> None:
         with tempfile.TemporaryDirectory(prefix="caff-lint-modules-") as temp_dir:

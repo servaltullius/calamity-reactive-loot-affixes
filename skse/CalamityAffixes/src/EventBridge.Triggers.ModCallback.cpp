@@ -41,7 +41,7 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		if (!_runtimeSettings.enabled) {
+		if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -79,7 +79,7 @@ namespace CalamityAffixes
 
 	void EventBridge::MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now)
 	{
-		if (!_configLoaded || !_runtimeSettings.enabled) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			return;
 		}
 

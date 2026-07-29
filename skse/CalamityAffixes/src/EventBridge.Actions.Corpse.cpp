@@ -48,17 +48,17 @@ namespace CalamityAffixes
 		CorpseExplosionSelection selection{};
 
 		for (const auto idx : a_affixIndices) {
-			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
+			if (idx >= _affixRuntimeState.affixes.size() || idx >= _affixRuntimeState.activeCounts.size()) {
 				continue;
 			}
 
-			if (_activeCounts[idx] == 0) {
+			if (_affixRuntimeState.activeCounts[idx] == 0) {
 				continue;
 			}
 
 			selection.activeAffixes += 1;
 
-			const auto& affix = _affixes[idx];
+			const auto& affix = _affixRuntimeState.affixes[idx];
 			if (affix.action.type != a_expectedActionType) {
 				continue;
 			}
@@ -238,7 +238,7 @@ namespace CalamityAffixes
 		const char* a_actionName,
 		bool a_summonMode)
 	{
-		if (!_configLoaded || !_runtimeSettings.enabled || !a_owner || !a_corpse) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || !a_owner || !a_corpse) {
 			return;
 		}
 		if (a_affixIndices.empty()) {
@@ -260,7 +260,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		auto& bestAffix = _affixes[*selection.bestIdx];
+		auto& bestAffix = _affixRuntimeState.affixes[*selection.bestIdx];
 
 		std::uint32_t chainDepth = 0;
 		float chainMultiplier = 1.0f;

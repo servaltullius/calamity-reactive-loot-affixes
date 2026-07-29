@@ -136,42 +136,9 @@ namespace CalamityAffixes
 		}
 	}
 
-	void EventBridge::RebuildActiveTriggerIndexCaches()
-	{
-		const auto rebuildFor = [&](const std::vector<std::size_t>& a_source, std::vector<std::size_t>& a_out) {
-			a_out.clear();
-			a_out.reserve(a_source.size());
-			for (const auto idx : a_source) {
-				if (idx >= _activeCounts.size() || _activeCounts[idx] == 0) {
-					continue;
-				}
-				a_out.push_back(idx);
-			}
-		};
-
-		rebuildFor(_affixRegistry.hitTriggerAffixIndices, _activeHitTriggerAffixIndices);
-		rebuildFor(_affixRegistry.incomingHitTriggerAffixIndices, _activeIncomingHitTriggerAffixIndices);
-		rebuildFor(_affixRegistry.dotApplyTriggerAffixIndices, _activeDotApplyTriggerAffixIndices);
-		rebuildFor(_affixRegistry.killTriggerAffixIndices, _activeKillTriggerAffixIndices);
-		rebuildFor(_affixRegistry.lowHealthTriggerAffixIndices, _activeLowHealthTriggerAffixIndices);
-	}
-
 	const std::vector<std::size_t>* EventBridge::ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept
 	{
-		switch (a_trigger) {
-		case Trigger::kHit:
-			return &_activeHitTriggerAffixIndices;
-		case Trigger::kIncomingHit:
-			return &_activeIncomingHitTriggerAffixIndices;
-		case Trigger::kDotApply:
-			return &_activeDotApplyTriggerAffixIndices;
-		case Trigger::kKill:
-			return &_activeKillTriggerAffixIndices;
-		case Trigger::kLowHealth:
-			return &_activeLowHealthTriggerAffixIndices;
-		default:
-			return nullptr;
-		}
+		return _affixRuntimeState.ResolveActiveTriggerIndices(a_trigger);
 	}
 
 	void EventBridge::MarkPlayerCombatEvidence(

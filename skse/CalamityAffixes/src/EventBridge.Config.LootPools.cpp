@@ -14,14 +14,14 @@ namespace CalamityAffixes
 			}
 		};
 
-		_affixRegistry.lootSharedAffixes.clear();
-		_affixRegistry.lootSharedAffixes.reserve(_affixRegistry.lootWeaponAffixes.size() + _affixRegistry.lootArmorAffixes.size());
-		appendUnique(_affixRegistry.lootSharedAffixes, _affixRegistry.lootWeaponAffixes);
-		appendUnique(_affixRegistry.lootSharedAffixes, _affixRegistry.lootArmorAffixes);
+		_affixRuntimeState.affixRegistry.lootSharedAffixes.clear();
+		_affixRuntimeState.affixRegistry.lootSharedAffixes.reserve(_affixRuntimeState.affixRegistry.lootWeaponAffixes.size() + _affixRuntimeState.affixRegistry.lootArmorAffixes.size());
+		appendUnique(_affixRuntimeState.affixRegistry.lootSharedAffixes, _affixRuntimeState.affixRegistry.lootWeaponAffixes);
+		appendUnique(_affixRuntimeState.affixRegistry.lootSharedAffixes, _affixRuntimeState.affixRegistry.lootArmorAffixes);
 
-		_affixRegistry.lootSharedSuffixes.clear();
-		_affixRegistry.lootSharedSuffixes.reserve(_affixRegistry.lootWeaponSuffixes.size() + _affixRegistry.lootArmorSuffixes.size());
-		appendUnique(_affixRegistry.lootSharedSuffixes, _affixRegistry.lootWeaponSuffixes);
-		appendUnique(_affixRegistry.lootSharedSuffixes, _affixRegistry.lootArmorSuffixes);
+		_affixRuntimeState.affixRegistry.lootSharedSuffixes.clear();
+		_affixRuntimeState.affixRegistry.lootSharedSuffixes.reserve(_affixRuntimeState.affixRegistry.lootWeaponSuffixes.size() + _affixRuntimeState.affixRegistry.lootArmorSuffixes.size());
+		appendUnique(_affixRuntimeState.affixRegistry.lootSharedSuffixes, _affixRuntimeState.affixRegistry.lootWeaponSuffixes);
+		appendUnique(_affixRuntimeState.affixRegistry.lootSharedSuffixes, _affixRuntimeState.affixRegistry.lootArmorSuffixes);
 	}
 }

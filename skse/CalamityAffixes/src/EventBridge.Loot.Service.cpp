@@ -267,9 +267,9 @@ namespace CalamityAffixes
 
 		const std::vector<std::size_t>* sourcePool = nullptr;
 		if (_loot.sharedPool) {
-			sourcePool = &_affixRegistry.lootSharedAffixes;
+			sourcePool = &_affixRuntimeState.affixRegistry.lootSharedAffixes;
 		} else {
-			sourcePool = (a_itemType == LootItemType::kWeapon) ? &_affixRegistry.lootWeaponAffixes : &_affixRegistry.lootArmorAffixes;
+			sourcePool = (a_itemType == LootItemType::kWeapon) ? &_affixRuntimeState.affixRegistry.lootWeaponAffixes : &_affixRuntimeState.affixRegistry.lootArmorAffixes;
 		}
 
 		LootShuffleBagState& bagState = _loot.sharedPool ?
@@ -281,22 +281,22 @@ namespace CalamityAffixes
 			bagState.order,
 			bagState.cursor,
 			[&](std::size_t a_idx) {
-				if (a_idx >= _affixes.size()) {
+				if (a_idx >= _affixRuntimeState.affixes.size()) {
 					return false;
 				}
-				if (_affixes[a_idx].slot == AffixSlot::kSuffix) {
+				if (_affixRuntimeState.affixes[a_idx].slot == AffixSlot::kSuffix) {
 					return false;
 				}
 				if (a_exclude && std::find(a_exclude->begin(), a_exclude->end(), a_idx) != a_exclude->end()) {
 					return false;
 				}
-				return _affixes[a_idx].EffectiveLootWeight() > 0.0f;
+				return _affixRuntimeState.affixes[a_idx].EffectiveLootWeight() > 0.0f;
 			},
 			[&](std::size_t a_idx) {
-				if (a_idx >= _affixes.size()) {
+				if (a_idx >= _affixRuntimeState.affixes.size()) {
 					return 0.0f;
 				}
-				return _affixes[a_idx].EffectiveLootWeight();
+				return _affixRuntimeState.affixes[a_idx].EffectiveLootWeight();
 			});
 		return picked;
 	}
@@ -308,9 +308,9 @@ namespace CalamityAffixes
 	{
 		const std::vector<std::size_t>* sourcePool = nullptr;
 		if (_loot.sharedPool) {
-			sourcePool = &_affixRegistry.lootSharedSuffixes;
+			sourcePool = &_affixRuntimeState.affixRegistry.lootSharedSuffixes;
 		} else {
-			sourcePool = (a_itemType == LootItemType::kWeapon) ? &_affixRegistry.lootWeaponSuffixes : &_affixRegistry.lootArmorSuffixes;
+			sourcePool = (a_itemType == LootItemType::kWeapon) ? &_affixRuntimeState.affixRegistry.lootWeaponSuffixes : &_affixRuntimeState.affixRegistry.lootArmorSuffixes;
 		}
 
 		LootShuffleBagState& bagState = _loot.sharedPool ?
@@ -322,10 +322,10 @@ namespace CalamityAffixes
 			bagState.order,
 			bagState.cursor,
 			[&](std::size_t a_idx) {
-				if (a_idx >= _affixes.size()) {
+				if (a_idx >= _affixRuntimeState.affixes.size()) {
 					return false;
 				}
-				const auto& affix = _affixes[a_idx];
+				const auto& affix = _affixRuntimeState.affixes[a_idx];
 				if (affix.slot != AffixSlot::kSuffix || affix.EffectiveLootWeight() <= 0.0f) {
 					return false;
 				}
@@ -343,10 +343,10 @@ namespace CalamityAffixes
 				return true;
 			},
 			[&](std::size_t a_idx) {
-				if (a_idx >= _affixes.size()) {
+				if (a_idx >= _affixRuntimeState.affixes.size()) {
 					return 0.0f;
 				}
-				return _affixes[a_idx].EffectiveLootWeight();
+				return _affixRuntimeState.affixes[a_idx].EffectiveLootWeight();
 			});
 		return picked;
 	}
@@ -404,7 +404,7 @@ namespace CalamityAffixes
 		RE::FormID a_oldContainer,
 		bool a_allowRunewordFragmentRoll)
 	{
-		if (!_configLoaded || !_runtimeSettings.enabled) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			return;
 		}
 

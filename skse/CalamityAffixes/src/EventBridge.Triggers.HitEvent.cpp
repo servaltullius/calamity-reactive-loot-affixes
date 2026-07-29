@@ -35,7 +35,7 @@ namespace CalamityAffixes
 		const auto now = std::chrono::steady_clock::now();
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_runtimeSettings.enabled) {
+		if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 

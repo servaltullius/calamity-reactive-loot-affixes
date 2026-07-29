@@ -16,7 +16,7 @@ namespace CalamityAffixes
 		std::vector<std::size_t>& a_outIndices) const
 	{
 		a_outIndices.clear();
-		if (!_configLoaded || !_runtimeSettings.enabled || !a_owner || !a_target) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || !a_owner || !a_target) {
 			return false;
 		}
 
@@ -43,11 +43,11 @@ namespace CalamityAffixes
 		float a_lowHealthCurrentPct,
 		bool& a_loggedProcBudgetDenied)
 	{
-		if (a_affixIndex >= _affixes.size() || a_affixIndex >= _activeCounts.size() || _activeCounts[a_affixIndex] == 0) {
+		if (a_affixIndex >= _affixRuntimeState.affixes.size() || a_affixIndex >= _affixRuntimeState.activeCounts.size() || _affixRuntimeState.activeCounts[a_affixIndex] == 0) {
 			return false;
 		}
 
-		auto& affix = _affixes[a_affixIndex];
+		auto& affix = _affixRuntimeState.affixes[a_affixIndex];
 		PerTargetCooldownKey perTargetKey{};
 		if (!PassesTriggerProcPreconditions(
 				affix,
@@ -82,6 +82,18 @@ namespace CalamityAffixes
 				}
 				return false;
 			}
+		}
+
+		// Validate every failure-prone action prerequisite before chance, proc
+		// budget, ICD, evolution XP, or low-health state is committed.
+		if (!CanExecuteAction(affix, a_owner, a_target, a_hitData)) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: action preflight skipped before proc state commit (affixId={}, actionType={}).",
+					affix.id,
+					static_cast<std::uint32_t>(affix.action.type));
+			}
+			return false;
 		}
 
 		const float chance = ResolveTriggerProcChancePct(affix, a_affixIndex);

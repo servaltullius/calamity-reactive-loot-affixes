@@ -65,7 +65,7 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		if (!_configLoaded || !_runtimeSettings.enabled) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 

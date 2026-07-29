@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import sys
 from pathlib import Path
@@ -815,7 +816,86 @@ def _check_generated_sync(
     errors: List[str],
     warnings: List[str],
 ) -> None:
-    def compare_subset(expected: Any, actual: Any, *, path_tokens: List[Any], out: List[str], max_mismatches: int = 20) -> None:
+    def normalize_generator_defaults(payload: Dict[str, Any]) -> Dict[str, Any]:
+        normalized = copy.deepcopy(payload)
+        normalized.pop("$schema", None)
+
+        def remove_nulls(value: Any) -> Any:
+            if isinstance(value, dict):
+                return {
+                    key: remove_nulls(child)
+                    for key, child in value.items()
+                    if child is not None
+                }
+            if isinstance(value, list):
+                return [remove_nulls(child) for child in value]
+            return value
+
+        normalized = remove_nulls(normalized)
+
+        # These defaults mirror the non-nullable C# model fields emitted by
+        # GeneratorRunner. Normalizing both sides keeps implicit and explicit
+        # defaults semantically equivalent without accepting unrelated stale keys.
+        loot = _as_dict(normalized.get("loot"))
+        if loot is not None:
+            loot_defaults = {
+                "chancePercent": 0.0,
+                "runewordFragmentChancePercent": 8.0,
+                "reforgeOrbChancePercent": 12.0,
+                "uniqueActorGuaranteedRunewordChancePercent": 40.0,
+                "currencyDropMode": "hybrid",
+                "lootSourceChanceMultCorpse": 1.0,
+                "lootSourceChanceMultContainer": 1.0,
+                "lootSourceChanceMultBossContainer": 1.15,
+                "lootSourceChanceMultWorld": 1.0,
+                "renameItem": False,
+                "sharedPool": False,
+                "debugLog": False,
+                "dotTagSafetyAutoDisable": False,
+                "dotTagSafetyUniqueEffectThreshold": 96,
+                "trapGlobalMaxActive": 64,
+                "trapCastBudgetPerTick": 8,
+                "triggerProcBudgetPerWindow": 12,
+                "triggerProcBudgetWindowMs": 100,
+                "cleanupInvalidLegacyAffixes": True,
+                "stripTrackedSuffixSlots": True,
+            }
+            for key, value in loot_defaults.items():
+                loot.setdefault(key, value)
+
+        keywords = _as_dict(normalized.get("keywords"))
+        if keywords is None:
+            return normalized
+
+        keywords.setdefault("appendedMagicEffects", [])
+        keywords.setdefault("appendedRecords", [])
+
+        def normalize_magic_effect(record: Any) -> None:
+            obj = _as_dict(record)
+            if obj is None:
+                return
+            obj.setdefault("hostile", False)
+            obj.setdefault("recover", False)
+
+        for affix_value in _as_list(keywords.get("affixes")) or []:
+            affix = _as_dict(affix_value)
+            records = _as_dict(affix.get("records")) if affix is not None else None
+            if records is None:
+                continue
+            normalize_magic_effect(records.get("magicEffect"))
+            for magic_effect in _as_list(records.get("magicEffects")) or []:
+                normalize_magic_effect(magic_effect)
+
+        for magic_effect in _as_list(keywords.get("appendedMagicEffects")) or []:
+            normalize_magic_effect(magic_effect)
+        for appended_value in _as_list(keywords.get("appendedRecords")) or []:
+            appended = _as_dict(appended_value)
+            if appended is not None:
+                normalize_magic_effect(appended.get("magicEffect"))
+
+        return normalized
+
+    def compare_exact(expected: Any, actual: Any, *, path_tokens: List[Any], out: List[str], max_mismatches: int = 20) -> None:
         if len(out) >= max_mismatches:
             return
 
@@ -825,15 +905,18 @@ def _check_generated_sync(
             if not isinstance(actual, dict):
                 out.append(f"{path} (expected object, got {type(actual).__name__})")
                 return
+            for key in sorted(expected.keys() - actual.keys()):
+                out.append(f"{_format_json_path([*path_tokens, key])} (missing key in generated)")
+                if len(out) >= max_mismatches:
+                    return
+            for key in sorted(actual.keys() - expected.keys()):
+                out.append(f"{_format_json_path([*path_tokens, key])} (unexpected key in generated)")
+                if len(out) >= max_mismatches:
+                    return
             for key, value in expected.items():
                 if key not in actual:
-                    if value is None:
-                        continue
-                    out.append(f"{_format_json_path([*path_tokens, key])} (missing key in generated)")
-                    if len(out) >= max_mismatches:
-                        return
                     continue
-                compare_subset(value, actual[key], path_tokens=[*path_tokens, key], out=out, max_mismatches=max_mismatches)
+                compare_exact(value, actual[key], path_tokens=[*path_tokens, key], out=out, max_mismatches=max_mismatches)
                 if len(out) >= max_mismatches:
                     return
             return
@@ -849,7 +932,7 @@ def _check_generated_sync(
             for idx, value in enumerate(expected):
                 if idx >= len(actual):
                     break
-                compare_subset(value, actual[idx], path_tokens=[*path_tokens, idx], out=out, max_mismatches=max_mismatches)
+                compare_exact(value, actual[idx], path_tokens=[*path_tokens, idx], out=out, max_mismatches=max_mismatches)
                 if len(out) >= max_mismatches:
                     return
             return
@@ -889,17 +972,18 @@ def _check_generated_sync(
             + " Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
         )
 
-    # The generator may add defaulted fields, so compare every authored field as a subset
-    # instead of relying on checkout-dependent file timestamps. The authoring-only schema
-    # reference is intentionally absent from the runtime snapshot.
-    authored_spec = {key: value for key, value in spec.items() if key != "$schema"}
-    subset_mismatches: List[str] = []
-    compare_subset(authored_spec, generated, path_tokens=[], out=subset_mismatches)
+    # Compare normalized semantic snapshots exactly. A subset comparison misses
+    # fields deleted from the authored spec but still present in the checked-in
+    # runtime JSON.
+    authored_spec = normalize_generator_defaults(spec)
+    generated_spec = normalize_generator_defaults(generated)
+    content_mismatches: List[str] = []
+    compare_exact(authored_spec, generated_spec, path_tokens=[], out=content_mismatches)
 
-    if subset_mismatches:
+    if content_mismatches:
         errors.append(
             "Generated runtime config content mismatch. "
-            + " ; ".join(subset_mismatches)
+            + " ; ".join(content_mismatches)
             + " Re-run: dotnet run --project tools/CalamityAffixes.Generator -- --spec affixes/affixes.json --data Data"
         )
 

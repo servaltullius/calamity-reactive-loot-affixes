@@ -1,8 +1,17 @@
 # EventBridge 분해: 현황 감사와 다음 단계
 
 Date: 2026-07-27
-Status: proposed
+Updated: 2026-07-29
+Status: in-progress
 Supersedes-sequencing-of: [2026-03-06-eventbridge-state-ownership-extraction-design.md](2026-03-06-eventbridge-state-ownership-extraction-design.md)
+
+## 2026-07-29 실행 결과
+
+- Step 1 완료: `EventBridge.h`의 상태 참조 별칭 14개를 제거하고 모든 호출부가
+  `AffixRuntimeCacheState` 또는 `InstanceTrackingState` 소유 객체를 직접 사용한다.
+- Step 2 완료: 활성 트리거 캐시 재구축과 읽기 선택을 `AffixRuntimeCacheState` 내부로 옮겼다.
+  `EventBridge`는 const 결과만 전달한다.
+- Phase 2의 serialize/deserialize 책임 이동과 이후 facade 축소는 아직 남아 있다.
 
 ## 이 문서의 위치
 

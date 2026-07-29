@@ -21,7 +21,7 @@ namespace CalamityAffixes
 		if (!a_event || !a_event->caster || !a_event->target || !a_event->magicEffect) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		if (!_runtimeSettings.enabled) {
+		if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 

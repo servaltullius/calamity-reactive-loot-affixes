@@ -277,11 +277,11 @@ namespace RuntimeGateStoreChecks
 			sourceText->find("if (!deferTieredSuffix)") == std::string::npos ||
 			sourceText->find("a_desiredPassives.insert(affix.passiveSpell);") == std::string::npos ||
 			sourceText->find("bestAffixByFamily[affix.family].Consider(affix.id, affixIdx);") == std::string::npos ||
-			sourceText->find("_activeCritDamageBonusPct += affix.critDamageBonusPct;") == std::string::npos ||
+			sourceText->find("_affixRuntimeState.activeCritDamageBonusPct += affix.critDamageBonusPct;") == std::string::npos ||
 			sourceText->find("affix.slot == AffixSlot::kSuffix &&") == std::string::npos ||
 			sourceText->find("affix.family.empty() &&") == std::string::npos ||
 			sourceText->find("if (!_runtimeSettings.disablePassiveSuffixSpells && affix.passiveSpell)") == std::string::npos ||
-			sourceText->find("_activeCritDamageBonusPct += _affixes[affixIdx].critDamageBonusPct;") != std::string::npos ||
+			sourceText->find("_affixRuntimeState.activeCritDamageBonusPct += _affixRuntimeState.affixes[affixIdx].critDamageBonusPct;") != std::string::npos ||
 			slotRollText->find("std::vector<std::string> chosenPrefixFamilies;") == std::string::npos ||
 			slotRollText->find("std::find(chosenPrefixFamilies.begin(), chosenPrefixFamilies.end(), affix.family)") == std::string::npos ||
 			slotRollText->find("chosenPrefixFamilies.push_back(affix.family);") == std::string::npos) {
@@ -303,9 +303,9 @@ namespace RuntimeGateStoreChecks
 			sourceText->find("LogActiveAffixListDebug();") == std::string::npos ||
 			sourceText->find("LogRebuildActiveCountsDebugSummary(desiredPassives);") == std::string::npos ||
 			sourceText->find("void EventBridge::DeactivateRuntimeState()") == std::string::npos ||
-			sourceText->find("for (const auto& affix : _affixes)") == std::string::npos ||
-			sourceText->find("_appliedPassiveSpells.insert(affix.passiveSpell);") == std::string::npos ||
-			sourceText->find("std::unordered_set<RE::SpellItem*> knownPassiveSpells = _appliedPassiveSpells;") == std::string::npos ||
+			sourceText->find("for (const auto& affix : _affixRuntimeState.affixes)") == std::string::npos ||
+			sourceText->find("_instanceTrackingState.appliedPassiveSpells.insert(affix.passiveSpell);") == std::string::npos ||
+			sourceText->find("std::unordered_set<RE::SpellItem*> knownPassiveSpells = _instanceTrackingState.appliedPassiveSpells;") == std::string::npos ||
 			sourceText->find("a_player->HasSpell(spell)") == std::string::npos ||
 			sourceText->find("affix.refreshPassiveSpellOnPostLoad") == std::string::npos ||
 			sourceText->find("a_desiredPassives.contains(affix.passiveSpell)") == std::string::npos ||
@@ -315,6 +315,7 @@ namespace RuntimeGateStoreChecks
 			sourceText->find("ApplyDesiredPassiveSpells(player, {});") == std::string::npos ||
 			sourceText->find("ClearTrapRuntimeState();") == std::string::npos ||
 			sourceText->find("_combatState.ResetTransientState();") == std::string::npos ||
+			sourceText->find("_affixRuntimeState.RebuildActiveTriggerIndexCaches();") == std::string::npos ||
 			mainText->find("if (bridge->IsRuntimeEnabled()) {") != std::string::npos ||
 			mainText->find("CalamityAffixes::Hooks::Install();") == std::string::npos ||
 			mainText->find("CalamityAffixes::TrapSystem::Install();") == std::string::npos ||
@@ -324,7 +325,7 @@ namespace RuntimeGateStoreChecks
 			lifecycleText->find("RebuildActiveCounts(true);") == std::string::npos ||
 			affixParsingText->find("refreshPassiveSpellOnPostLoad") == std::string::npos ||
 			typesText->find("bool refreshPassiveSpellOnPostLoad{ false };") == std::string::npos ||
-			trapsText->find("if (!_runtimeSettings.enabled) {") == std::string::npos) {
+			trapsText->find("if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {") == std::string::npos) {
 			std::cerr << "rebuild_active_counts_extraction: expected rebuild flow to stay decomposed into focused helpers\n";
 			return false;
 		}
@@ -586,12 +587,12 @@ namespace RuntimeGateStoreChecks
 			configText->find("IndexConfiguredAffixes();") != std::string::npos ||
 			configText->find("SynthesizeRunewordRuntimeAffixes();") != std::string::npos ||
 			configText->find("RebuildSharedLootPools();") != std::string::npos ||
-			configText->find("_activeCounts.assign(_affixes.size(), 0);") != std::string::npos ||
+			configText->find("_affixRuntimeState.activeCounts.assign(_affixRuntimeState.affixes.size(), 0);") != std::string::npos ||
 			pipelineText->find("ParseConfiguredAffixesFromJson(a_affixes, a_handler);") == std::string::npos ||
 			pipelineText->find("IndexConfiguredAffixes();") == std::string::npos ||
 			pipelineText->find("SynthesizeRunewordRuntimeAffixes();") == std::string::npos ||
 			pipelineText->find("RebuildSharedLootPools();") == std::string::npos ||
-			pipelineText->find("_activeCounts.assign(_affixes.size(), 0);") == std::string::npos) {
+			pipelineText->find("_affixRuntimeState.activeCounts.assign(_affixRuntimeState.affixes.size(), 0);") == std::string::npos) {
 			std::cerr << "config_load_pipeline_extraction: config load pipeline extraction is incomplete\n";
 			return false;
 		}
@@ -669,8 +670,8 @@ namespace RuntimeGateStoreChecks
 			eventBridgeHeaderText->find("AffixSpecialActionState _affixSpecialActions{};") == std::string::npos ||
 			eventBridgeHeaderText->find("AffixRuntimeCacheState _affixRuntimeState{};") == std::string::npos ||
 			eventBridgeHeaderText->find("InstanceTrackingState _instanceTrackingState{};") == std::string::npos ||
-			eventBridgeHeaderText->find("std::vector<AffixRuntime> _affixes;") != std::string::npos ||
-			eventBridgeHeaderText->find("std::unordered_map<std::uint64_t, InstanceAffixSlots> _instanceAffixes;") != std::string::npos ||
+			eventBridgeHeaderText->find("std::vector<AffixRuntime>& _affixes") != std::string::npos ||
+			eventBridgeHeaderText->find("std::unordered_map<std::uint64_t, InstanceAffixSlots>& _instanceAffixes") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _castOnCritAffixIndices;") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _convertAffixIndices;") != std::string::npos ||
 			eventBridgeHeaderText->find("std::vector<std::size_t> _mindOverMatterAffixIndices;") != std::string::npos ||

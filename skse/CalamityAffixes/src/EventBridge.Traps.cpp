@@ -20,7 +20,7 @@ namespace CalamityAffixes
 		auto& activeTraps = trapState.activeTraps;
 		auto& trapTickCursor = trapState.tickCursor;
 		const auto now = std::chrono::steady_clock::now();
-		if (!_runtimeSettings.enabled) {
+		if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			ClearTrapRuntimeState();
 			return;
 		}

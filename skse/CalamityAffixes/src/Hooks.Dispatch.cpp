@@ -1,6 +1,7 @@
 #include "Hooks.Dispatch.h"
 
 #include <array>
+#include <atomic>
 #include <bit>
 #include <cmath>
 #include <memory>
@@ -224,6 +225,7 @@ namespace CalamityAffixes::Hooks::detail
 
 		std::unordered_map<std::uint64_t, ProcDispatchRecord> s_procDispatch;
 		std::mutex s_procDispatchMutex;
+		std::atomic_uint64_t s_runtimeGeneration{ 1u };
 
 		// Guards against proc-on-proc chain reactions across deferred SKSE tasks.
 		// Set to true while ExecutePostHealthDamageActions runs; any HandleHealthDamage
@@ -447,11 +449,15 @@ namespace CalamityAffixes::Hooks::detail
 		if (auto* tasks = SKSE::GetTaskInterface()) {
 			const RE::FormID targetFormID = a_target->GetFormID();
 			const RE::FormID attackerFormID = a_attacker ? a_attacker->GetFormID() : 0u;
+			const auto runtimeGeneration = s_runtimeGeneration.load(std::memory_order_acquire);
 			const auto deferredConversions = a_adjustment.conversions;
 			const auto conversionCount = a_adjustment.conversionCount;
 			const float adjustedDamage = a_adjustment.adjustedDamage;
 			const float originalDamage = a_adjustment.originalDamage;
-			tasks->AddTask([targetFormID, attackerFormID, adjustedDamage, originalDamage, deferredConversions, conversionCount, a_now, capturedHitData]() {
+			tasks->AddTask([targetFormID, attackerFormID, runtimeGeneration, adjustedDamage, originalDamage, deferredConversions, conversionCount, a_now, capturedHitData]() {
+				if (s_runtimeGeneration.load(std::memory_order_acquire) != runtimeGeneration) {
+					return;
+				}
 				auto* target = RE::TESForm::LookupByID<RE::Actor>(targetFormID);
 				auto* attacker = attackerFormID != 0u ?
 					                 RE::TESForm::LookupByID<RE::Actor>(attackerFormID) :
@@ -479,6 +485,11 @@ namespace CalamityAffixes::Hooks::detail
 			a_adjustment.conversionCount,
 			a_now,
 			a_preHitData);
+	}
+
+	void InvalidateDeferredTasks() noexcept
+	{
+		s_runtimeGeneration.fetch_add(1u, std::memory_order_acq_rel);
 	}
 
 	void ClearDispatchRuntimeState() noexcept

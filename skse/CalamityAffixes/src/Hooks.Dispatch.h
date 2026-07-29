@@ -50,5 +50,6 @@ namespace CalamityAffixes::Hooks::detail
 		const DamageAdjustmentResult& a_adjustment,
 		std::chrono::steady_clock::time_point a_now,
 		const RE::HitData* a_preHitData) noexcept;
+	void InvalidateDeferredTasks() noexcept;
 	void ClearDispatchRuntimeState() noexcept;
 }

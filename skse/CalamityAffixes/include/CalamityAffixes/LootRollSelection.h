@@ -147,6 +147,26 @@ namespace CalamityAffixes::detail
 		return AreInstanceAffixSlotsEqual(a_previousRegularSlots, a_rolledRegularSlots);
 	}
 
+	[[nodiscard]] constexpr bool DidConsumeExactInventoryCount(
+		std::uint32_t a_ownedBefore,
+		std::uint32_t a_ownedAfter,
+		std::uint32_t a_expectedConsumed) noexcept
+	{
+		return a_expectedConsumed > 0u &&
+		       a_ownedBefore >= a_ownedAfter &&
+		       (a_ownedBefore - a_ownedAfter) == a_expectedConsumed;
+	}
+
+	[[nodiscard]] constexpr bool DidRestoreExactInventoryCount(
+		std::uint32_t a_ownedBefore,
+		std::uint32_t a_ownedAfter,
+		std::uint32_t a_expectedRestored) noexcept
+	{
+		return a_expectedRestored > 0u &&
+		       a_ownedAfter >= a_ownedBefore &&
+		       (a_ownedAfter - a_ownedBefore) == a_expectedRestored;
+	}
+
 	constexpr bool TryPromotePreservedRunewordPrimary(
 		InstanceAffixSlots& a_slots,
 		std::uint64_t a_preservedRunewordToken) noexcept

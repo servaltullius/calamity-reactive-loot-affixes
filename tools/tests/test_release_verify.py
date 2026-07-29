@@ -70,6 +70,25 @@ class ReleaseVerifyTests(unittest.TestCase):
         source = self.ci_verify_path.read_text(encoding="utf-8")
         self.assertIn("python3 -m unittest discover -s tools/tests -p 'test_*.py'", source)
 
+    def test_release_workflow_runs_static_gates_before_build_and_packaging_e2e_after(self) -> None:
+        source = (self.repo_root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        release_build = source.index("python3 tools/release_build.py --version")
+        required_pre_build_gates = (
+            "uses: actions/setup-node@v4",
+            "python3 tools/verify_prisma_view.py",
+            "python3 tools/verify_runtime_contract_sync.py",
+        )
+
+        for gate in required_pre_build_gates:
+            self.assertIn(gate, source)
+            self.assertLess(source.index(gate), release_build)
+
+        tools_suite = "python3 -m unittest discover -s tools/tests -p 'test_*.py'"
+        self.assertIn(tools_suite, source)
+        self.assertGreater(source.index(tools_suite), release_build)
+        self.assertIn('CALAMITY_REQUIRE_NODE: "1"', source)
+        self.assertIn('CALAMITY_REQUIRE_PACKAGING_E2E: "1"', source)
+
     def test_ci_verify_runs_required_packaging_e2e_after_plugin_build(self) -> None:
         source = self.ci_verify_path.read_text(encoding="utf-8")
         runtime_job = source.split("  runtime-gate-tests:\n", 1)[1]

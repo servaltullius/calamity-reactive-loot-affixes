@@ -17,23 +17,23 @@ namespace CalamityAffixes
 		// Remove any active passive suffix spells before clearing
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (player) {
-			for (auto* spell : _appliedPassiveSpells) {
+			for (auto* spell : _instanceTrackingState.appliedPassiveSpells) {
 				player->RemoveSpell(spell);
 			}
 		}
-		_appliedPassiveSpells.clear();
-		_instanceAffixes.clear();
-		_equippedInstanceKeysByToken.clear();
-		_equippedTokenCacheReady = false;
+		_instanceTrackingState.appliedPassiveSpells.clear();
+		_instanceTrackingState.instanceAffixes.clear();
+		_instanceTrackingState.equippedInstanceKeysByToken.clear();
+		_instanceTrackingState.equippedTokenCacheReady = false;
 		_lootState.ResetForLoadOrRevert();
-		_activeCounts.clear();
-		_activeCritDamageBonusPct = 0.0f;
-		_activeHitTriggerAffixIndices.clear();
-		_activeIncomingHitTriggerAffixIndices.clear();
-		_activeDotApplyTriggerAffixIndices.clear();
-		_activeKillTriggerAffixIndices.clear();
-		_activeLowHealthTriggerAffixIndices.clear();
-		_instanceStates.clear();
+		_affixRuntimeState.activeCounts.clear();
+		_affixRuntimeState.activeCritDamageBonusPct = 0.0f;
+		_affixRuntimeState.activeHitTriggerAffixIndices.clear();
+		_affixRuntimeState.activeIncomingHitTriggerAffixIndices.clear();
+		_affixRuntimeState.activeDotApplyTriggerAffixIndices.clear();
+		_affixRuntimeState.activeKillTriggerAffixIndices.clear();
+		_affixRuntimeState.activeLowHealthTriggerAffixIndices.clear();
+		_instanceTrackingState.instanceStates.clear();
 		_runewordState.ResetSelectionAndProgress();
 		ClearTrapRuntimeState();
 		_corpseExplosionSeenCorpses.clear();
@@ -41,13 +41,14 @@ namespace CalamityAffixes
 		_corpseExplosionState = {};
 		_summonCorpseExplosionState = {};
 		_combatState.ResetTransientState();
-			_miscCurrencyMigrated = false;
+		_miscCurrencyMigrated = false;
 		_miscCurrencyRecovered = false;
 
-		for (auto& affix : _affixes) {
+		for (auto& affix : _affixRuntimeState.affixes) {
 			affix.nextAllowed = {};
 		}
 
+		Hooks::InvalidateDeferredTasks();
 		Hooks::ClearRuntimeState();
 	}
 
@@ -66,6 +67,8 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 		ClearTrapRuntimeState();
+		Hooks::InvalidateDeferredTasks();
+		Hooks::ClearRuntimeState();
 	}
 
 	bool EventBridge::NormalizeLegacyPlayerInstanceKeys()
@@ -199,10 +202,10 @@ namespace CalamityAffixes
 		}
 
 		std::unordered_set<std::uint64_t> materialKeys;
-		for (const auto& [key, _] : _instanceAffixes) {
+		for (const auto& [key, _] : _instanceTrackingState.instanceAffixes) {
 			materialKeys.insert(key);
 		}
-		for (const auto& [stateKey, _] : _instanceStates) {
+		for (const auto& [stateKey, _] : _instanceTrackingState.instanceStates) {
 			materialKeys.insert(stateKey.instanceKey);
 		}
 		for (const auto& [key, _] : _runewordState.instanceStates) {
@@ -320,7 +323,7 @@ namespace CalamityAffixes
 
 	void EventBridge::EraseInstanceRuntimeStates(std::uint64_t a_instanceKey)
 	{
-		std::erase_if(_instanceStates, [a_instanceKey](const auto& entry) {
+		std::erase_if(_instanceTrackingState.instanceStates, [a_instanceKey](const auto& entry) {
 			return entry.first.instanceKey == a_instanceKey;
 		});
 	}

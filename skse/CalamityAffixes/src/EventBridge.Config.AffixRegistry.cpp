@@ -17,9 +17,9 @@ namespace CalamityAffixes
 			a_affix.displayNameKo,
 			a_affix.displayName);
 
-		_affixes.push_back(std::move(a_affix));
-		const auto idx = _affixes.size() - 1;
-		const auto& affix = _affixes[idx];
+		_affixRuntimeState.affixes.push_back(std::move(a_affix));
+		const auto idx = _affixRuntimeState.affixes.size() - 1;
+		const auto& affix = _affixRuntimeState.affixes[idx];
 
 		IndexAffixTriggerBucket(affix, idx);
 		IndexAffixSpecialActionBucket(affix, idx);

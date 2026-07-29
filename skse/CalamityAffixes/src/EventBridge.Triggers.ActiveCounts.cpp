@@ -15,34 +15,34 @@ namespace CalamityAffixes
 		ResetActiveCountsStateForRebuild();
 
 		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
-			for (const auto& affix : _affixes) {
+			for (const auto& affix : _affixRuntimeState.affixes) {
 				if (affix.passiveSpell) {
-					_appliedPassiveSpells.insert(affix.passiveSpell);
+					_instanceTrackingState.appliedPassiveSpells.insert(affix.passiveSpell);
 				}
 			}
 			ApplyDesiredPassiveSpells(player, {});
 		} else {
-			_appliedPassiveSpells.clear();
+			_instanceTrackingState.appliedPassiveSpells.clear();
 		}
 
 		ClearTrapRuntimeState();
 		_combatState.ResetTransientState();
 		Hooks::ClearRuntimeState();
 		_equipResync.nextAtMs = 0u;
-		for (auto& affix : _affixes) {
+		for (auto& affix : _affixRuntimeState.affixes) {
 			affix.nextAllowed = {};
 		}
 	}
 
 	void EventBridge::ResetActiveCountsStateForRebuild()
 	{
-		_activeCounts.assign(_affixes.size(), 0);
-		_lootState.activeSlotPenalty.assign(_affixes.size(), 0.0f);
-		_activeCritDamageBonusPct = 0.0f;
-		RebuildActiveTriggerIndexCaches();
-		_equippedInstanceKeysByToken.clear();
-		_equippedTokenCacheReady = false;
-		_equippedInstanceKeysByToken.reserve(_affixRegistry.affixIndexByToken.size());
+		_affixRuntimeState.activeCounts.assign(_affixRuntimeState.affixes.size(), 0);
+		_lootState.activeSlotPenalty.assign(_affixRuntimeState.affixes.size(), 0.0f);
+		_affixRuntimeState.activeCritDamageBonusPct = 0.0f;
+		_affixRuntimeState.RebuildActiveTriggerIndexCaches();
+		_instanceTrackingState.equippedInstanceKeysByToken.clear();
+		_instanceTrackingState.equippedTokenCacheReady = false;
+		_instanceTrackingState.equippedInstanceKeysByToken.reserve(_affixRuntimeState.affixRegistry.affixIndexByToken.size());
 	}
 
 	void EventBridge::RefreshInventoryInstanceActiveState(
@@ -60,8 +60,8 @@ namespace CalamityAffixes
 		}
 
 		const auto key = MakeInstanceKey(uid->baseID, uid->uniqueID);
-		const auto it = _instanceAffixes.find(key);
-		if (it == _instanceAffixes.end()) {
+		const auto it = _instanceTrackingState.instanceAffixes.find(key);
+		if (it == _instanceTrackingState.instanceAffixes.end()) {
 			return;
 		}
 
@@ -82,7 +82,7 @@ namespace CalamityAffixes
 
 		// Use primary affix for display name.
 		if (slots.count > 0) {
-			if (const auto idxIt = _affixRegistry.affixIndexByToken.find(slots.tokens[0]); idxIt != _affixRegistry.affixIndexByToken.end() && idxIt->second < _affixes.size()) {
+			if (const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(slots.tokens[0]); idxIt != _affixRuntimeState.affixRegistry.affixIndexByToken.end() && idxIt->second < _affixRuntimeState.affixes.size()) {
 				EnsureMultiAffixDisplayName(a_entry, a_xList, slots);
 			}
 		}
@@ -109,13 +109,13 @@ namespace CalamityAffixes
 		for (std::uint8_t slot = 0; slot < a_slots.count; ++slot) {
 			const auto token = a_slots.tokens[slot];
 			if (token != 0u) {
-				_equippedInstanceKeysByToken[token].push_back(a_instanceKey);
+				_instanceTrackingState.equippedInstanceKeysByToken[token].push_back(a_instanceKey);
 			}
 
-			const auto idxIt = _affixRegistry.affixIndexByToken.find(token);
-			if (idxIt == _affixRegistry.affixIndexByToken.end()) {
+			const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(token);
+			if (idxIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end()) {
 				SKSE::log::warn(
-					"CalamityAffixes: RebuildActiveCounts — worn token {:016X} not found in _affixRegistry.affixIndexByToken (instance={:016X}, slot={}).",
+					"CalamityAffixes: RebuildActiveCounts — worn token {:016X} not found in _affixRuntimeState.affixRegistry.affixIndexByToken (instance={:016X}, slot={}).",
 					token,
 					a_instanceKey,
 					slot);
@@ -123,16 +123,16 @@ namespace CalamityAffixes
 			}
 			const auto affixIdx = idxIt->second;
 
-			if (affixIdx < _activeCounts.size()) {
-				_activeCounts[affixIdx] += 1;
+			if (affixIdx < _affixRuntimeState.activeCounts.size()) {
+				_affixRuntimeState.activeCounts[affixIdx] += 1;
 			}
 
 			// Family-less passives (including runewords) keep their existing behavior.
 			// Tiered suffix families are selected once, after all worn items are counted.
 			if (!_runtimeSettings.disablePassiveSuffixSpells &&
-				affixIdx < _affixes.size() &&
-				_affixes[affixIdx].passiveSpell) {
-				const auto& affix = _affixes[affixIdx];
+				affixIdx < _affixRuntimeState.affixes.size() &&
+				_affixRuntimeState.affixes[affixIdx].passiveSpell) {
+				const auto& affix = _affixRuntimeState.affixes[affixIdx];
 				const bool deferTieredSuffix =
 					affix.slot == AffixSlot::kSuffix && !affix.family.empty();
 				if (!deferTieredSuffix) {
@@ -142,17 +142,17 @@ namespace CalamityAffixes
 
 			// Family-less suffix values keep their legacy additive behavior.
 			// Tiered families are resolved once after all worn items are counted.
-			if (affixIdx < _affixes.size()) {
-				const auto& affix = _affixes[affixIdx];
+			if (affixIdx < _affixRuntimeState.affixes.size()) {
+				const auto& affix = _affixRuntimeState.affixes[affixIdx];
 				if (affix.slot == AffixSlot::kSuffix &&
 					affix.family.empty() &&
 					affix.critDamageBonusPct > 0.0f) {
-					_activeCritDamageBonusPct += affix.critDamageBonusPct;
+					_affixRuntimeState.activeCritDamageBonusPct += affix.critDamageBonusPct;
 				}
 			}
 
 			// "Best Slot Wins" penalty only for prefixes.
-			if (affixIdx < _affixes.size() && _affixes[affixIdx].slot != AffixSlot::kSuffix) {
+			if (affixIdx < _affixRuntimeState.affixes.size() && _affixRuntimeState.affixes[affixIdx].slot != AffixSlot::kSuffix) {
 				if (affixIdx < _lootState.activeSlotPenalty.size()) {
 					_lootState.activeSlotPenalty[affixIdx] = std::max(_lootState.activeSlotPenalty[affixIdx], penalty);
 				}
@@ -164,9 +164,9 @@ namespace CalamityAffixes
 		std::unordered_set<RE::SpellItem*>& a_desiredPassives)
 	{
 		std::unordered_map<std::string_view, detail::SuffixFamilyBestCandidate> bestAffixByFamily;
-		for (std::size_t affixIdx = 0; affixIdx < _affixes.size() && affixIdx < _activeCounts.size(); ++affixIdx) {
-			const auto& affix = _affixes[affixIdx];
-			if (_activeCounts[affixIdx] == 0 ||
+		for (std::size_t affixIdx = 0; affixIdx < _affixRuntimeState.affixes.size() && affixIdx < _affixRuntimeState.activeCounts.size(); ++affixIdx) {
+			const auto& affix = _affixRuntimeState.affixes[affixIdx];
+			if (_affixRuntimeState.activeCounts[affixIdx] == 0 ||
 				affix.slot != AffixSlot::kSuffix ||
 				affix.family.empty()) {
 				continue;
@@ -176,12 +176,12 @@ namespace CalamityAffixes
 		}
 
 		for (const auto& [_, best] : bestAffixByFamily) {
-			if (!best.selected || best.index >= _affixes.size()) {
+			if (!best.selected || best.index >= _affixRuntimeState.affixes.size()) {
 				continue;
 			}
 
-			const auto& affix = _affixes[best.index];
-			_activeCritDamageBonusPct += affix.critDamageBonusPct;
+			const auto& affix = _affixRuntimeState.affixes[best.index];
+			_affixRuntimeState.activeCritDamageBonusPct += affix.critDamageBonusPct;
 			if (!_runtimeSettings.disablePassiveSuffixSpells && affix.passiveSpell) {
 				a_desiredPassives.insert(affix.passiveSpell);
 			}
@@ -192,11 +192,11 @@ namespace CalamityAffixes
 	{
 		if (_loot.debugLog) {
 			std::uint32_t shown = 0;
-			for (std::size_t i = 0; i < _affixes.size() && i < _activeCounts.size(); i++) {
-				if (_activeCounts[i] == 0) {
+			for (std::size_t i = 0; i < _affixRuntimeState.affixes.size() && i < _affixRuntimeState.activeCounts.size(); i++) {
+				if (_affixRuntimeState.activeCounts[i] == 0) {
 					continue;
 				}
-				SKSE::log::debug("CalamityAffixes: active affix (id={}, count={})", _affixes[i].id, _activeCounts[i]);
+				SKSE::log::debug("CalamityAffixes: active affix (id={}, count={})", _affixRuntimeState.affixes[i].id, _affixRuntimeState.activeCounts[i]);
 				shown += 1;
 				if (shown >= 50) {
 					break;
@@ -217,8 +217,8 @@ namespace CalamityAffixes
 			return;
 		}
 
-		std::unordered_set<RE::SpellItem*> knownPassiveSpells = _appliedPassiveSpells;
-		for (const auto& affix : _affixes) {
+		std::unordered_set<RE::SpellItem*> knownPassiveSpells = _instanceTrackingState.appliedPassiveSpells;
+		for (const auto& affix : _affixRuntimeState.affixes) {
 			if (affix.passiveSpell) {
 				knownPassiveSpells.insert(affix.passiveSpell);
 			}
@@ -230,7 +230,7 @@ namespace CalamityAffixes
 		}
 		std::unordered_set<RE::SpellItem*> refreshRequestedPassives;
 		if (a_refreshConfiguredPassivesOnPostLoad) {
-			for (const auto& affix : _affixes) {
+			for (const auto& affix : _affixRuntimeState.affixes) {
 				if (affix.refreshPassiveSpellOnPostLoad &&
 					affix.passiveSpell &&
 					a_desiredPassives.contains(affix.passiveSpell)) {
@@ -241,7 +241,7 @@ namespace CalamityAffixes
 
 		const bool passivesDisabled = _runtimeSettings.disablePassiveSuffixSpells;
 		auto findPassiveAddFeedback = [this](RE::SpellItem* a_spell) -> const Action* {
-			for (const auto& affix : _affixes) {
+			for (const auto& affix : _affixRuntimeState.affixes) {
 				if (affix.passiveSpell == a_spell &&
 					affix.action.feedback.playOn == ActionFeedbackPlayOn::kPassiveAdd) {
 					return std::addressof(affix.action);
@@ -280,11 +280,11 @@ namespace CalamityAffixes
 			}
 		}
 
-		_appliedPassiveSpells.clear();
+		_instanceTrackingState.appliedPassiveSpells.clear();
 		if (!passivesDisabled) {
 			for (auto* spell : a_desiredPassives) {
 				if (spell) {
-					_appliedPassiveSpells.insert(spell);
+					_instanceTrackingState.appliedPassiveSpells.insert(spell);
 				}
 			}
 		}
@@ -296,12 +296,12 @@ namespace CalamityAffixes
 		if (_loot.debugLog) {
 			std::uint32_t totalActive = 0;
 			std::uint32_t totalWornInstances = 0;
-			for (std::size_t i = 0; i < _activeCounts.size(); ++i) {
-				if (_activeCounts[i] > 0) {
+			for (std::size_t i = 0; i < _affixRuntimeState.activeCounts.size(); ++i) {
+				if (_affixRuntimeState.activeCounts[i] > 0) {
 					++totalActive;
 				}
 			}
-			for (const auto& [token, keys] : _equippedInstanceKeysByToken) {
+			for (const auto& [token, keys] : _instanceTrackingState.equippedInstanceKeysByToken) {
 				totalWornInstances += static_cast<std::uint32_t>(keys.size());
 			}
 			SKSE::log::debug(
@@ -309,8 +309,8 @@ namespace CalamityAffixes
 				totalActive,
 				totalWornInstances,
 				a_desiredPassives.size(),
-				_appliedPassiveSpells.size(),
-				_affixes.size());
+				_instanceTrackingState.appliedPassiveSpells.size(),
+				_affixRuntimeState.affixes.size());
 		}
 	}
 
@@ -319,7 +319,7 @@ namespace CalamityAffixes
 		if (!_configLoaded) {
 			return;
 		}
-		if (!_runtimeSettings.enabled) {
+		if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			DeactivateRuntimeState();
 			return;
 		}
@@ -349,12 +349,12 @@ namespace CalamityAffixes
 
 		CollectBestSuffixFamilyState(desiredPassives);
 
-		for (auto& [_, keys] : _equippedInstanceKeysByToken) {
+		for (auto& [_, keys] : _instanceTrackingState.equippedInstanceKeysByToken) {
 			std::sort(keys.begin(), keys.end());
 			keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
 		}
-		RebuildActiveTriggerIndexCaches();
-		_equippedTokenCacheReady = true;
+		_affixRuntimeState.RebuildActiveTriggerIndexCaches();
+		_instanceTrackingState.equippedTokenCacheReady = true;
 
 		LogActiveAffixListDebug();
 		ApplyDesiredPassiveSpells(player, desiredPassives, a_refreshConfiguredPassivesOnPostLoad);

@@ -162,18 +162,208 @@
     },
     "runtime": {
       "type": "object",
+      "required": ["trigger", "action"],
+      "additionalProperties": false,
       "properties": {
+        "trigger": {
+          "type": "string",
+          "enum": ["Hit", "IncomingHit", "DotApply", "Kill", "LowHealth"]
+        },
+        "procChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "luckyHitChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "luckyHitProcCoefficient": { "type": "number", "minimum": 0.0, "maximum": 5.0 },
+        "icdSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "perTargetICDSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "lootWeight": { "type": "number", "minimum": 0.0 },
+        "requireRecentlyHitSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "requireRecentlyKillSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "requireNotHitRecentlySeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "lowHealthThresholdPercent": { "type": "number", "minimum": 1.0, "maximum": 95.0 },
+        "lowHealthRearmPercent": { "type": "number", "minimum": 1.0, "maximum": 100.0 },
+        "conditions": { "$ref": "#/$defs/runtimeConditions" },
         "action": { "$ref": "#/$defs/runtimeAction" }
+      }
+    },
+    "runtimeConditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requireRecentlyHitSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "requireRecentlyKillSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "requireNotHitRecentlySeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "lowHealthThresholdPercent": { "type": "number", "minimum": 1.0, "maximum": 95.0 },
+        "lowHealthRearmPercent": { "type": "number", "minimum": 1.0, "maximum": 100.0 },
+        "luckyHitChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "luckyHitProcCoefficient": { "type": "number", "minimum": 0.0, "maximum": 5.0 }
       }
     },
     "runtimeAction": {
       "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
       "properties": {
-        "type": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "DebugNotify",
+            "CastSpell",
+            "CastSpellAdaptiveElement",
+            "CastOnCrit",
+            "ConvertDamage",
+            "MindOverMatter",
+            "Archmage",
+            "CorpseExplosion",
+            "SummonCorpseExplosion",
+            "SpawnTrap"
+          ]
+        },
+        "spellEditorId": { "type": "string", "minLength": 1 },
+        "spellForm": { "$ref": "#/$defs/formSpec" },
+        "applyTo": { "type": "string", "enum": ["Self", "Target"] },
+        "effectiveness": { "type": "number", "minimum": 0.0 },
+        "magnitudeOverride": { "type": "number" },
+        "magnitudeScaling": { "$ref": "#/$defs/magnitudeScaling" },
+        "noHitEffectArt": { "type": "boolean" },
+        "passiveSpellEditorId": { "type": "string", "minLength": 1 },
+        "refreshPassiveSpellOnPostLoad": { "type": "boolean" },
+        "scrollNoConsumeChancePct": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "critDamageBonusPct": { "type": "number", "minimum": 0.0 },
+        "debugNotify": { "type": "boolean" },
+        "text": { "type": "string" },
+        "element": { "type": "string", "enum": ["Fire", "Frost", "Shock"] },
+        "percent": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 100.0 },
+        "damageToMagickaPct": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 100.0 },
+        "maxRedirectPerHit": { "type": "number", "minimum": 0.0 },
+        "damagePctOfMaxMagicka": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 100.0 },
+        "costPctOfMaxMagicka": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 100.0 },
+        "flatDamage": { "type": "number", "minimum": 0.0 },
+        "pctOfCorpseMaxHealth": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "radius": { "type": "number", "exclusiveMinimum": 0.0 },
+        "maxTargets": { "type": "integer", "minimum": 1 },
+        "maxChainDepth": { "type": "integer", "minimum": 1 },
+        "chainFalloff": { "type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0 },
+        "chainWindowSeconds": { "type": "number", "minimum": 0.0 },
+        "rateLimitWindowSeconds": { "type": "number", "exclusiveMinimum": 0.0 },
+        "maxExplosionsPerWindow": { "type": "integer", "minimum": 1 },
+        "selectionPriority": { "type": "integer" },
+        "spawnAt": {
+          "type": "string",
+          "enum": ["Target", "Self", "Owner", "OwnerFeet"]
+        },
+        "ttlSeconds": { "type": "number", "exclusiveMinimum": 0.0 },
+        "armDelaySeconds": { "type": "number", "minimum": 0.0 },
+        "rearmDelaySeconds": { "type": "number", "minimum": 0.0 },
+        "maxActive": { "type": "integer", "minimum": 1 },
+        "maxTriggers": { "type": "integer", "minimum": 0 },
+        "maxTargetsPerTrigger": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "requireCritOrPowerAttack": { "type": "boolean" },
+        "requireWeaponHit": { "type": "boolean" },
+        "extraSpells": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/spellReference" }
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["WeakestResist", "StrongestResist", "Strongest"]
+        },
+        "spells": { "$ref": "#/$defs/adaptiveSpellSet" },
+        "evolution": { "$ref": "#/$defs/actionEvolution" },
+        "modeCycle": { "$ref": "#/$defs/actionModeCycle" },
         "feedback": { "$ref": "#/$defs/actionFeedback" },
         "trapFeedback": { "$ref": "#/$defs/trapFeedback" }
       },
       "allOf": [
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "enum": ["CastSpell", "CastOnCrit"] } }
+          },
+          "then": {
+            "anyOf": [
+              { "required": ["spellEditorId"] },
+              { "required": ["spellForm"] }
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "CastSpellAdaptiveElement" } }
+          },
+          "then": { "required": ["spells"] }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "ConvertDamage" } }
+          },
+          "then": {
+            "required": ["element", "percent"],
+            "anyOf": [
+              { "required": ["spellEditorId"] },
+              { "required": ["spellForm"] }
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "MindOverMatter" } }
+          },
+          "then": { "required": ["damageToMagickaPct"] }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "Archmage" } }
+          },
+          "then": {
+            "required": ["damagePctOfMaxMagicka", "costPctOfMaxMagicka"],
+            "anyOf": [
+              { "required": ["spellEditorId"] },
+              { "required": ["spellForm"] }
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": {
+              "type": { "enum": ["CorpseExplosion", "SummonCorpseExplosion"] }
+            }
+          },
+          "then": {
+            "required": ["radius"],
+            "allOf": [
+              {
+                "anyOf": [
+                  { "required": ["spellEditorId"] },
+                  { "required": ["spellForm"] }
+                ]
+              },
+              {
+                "anyOf": [
+                  { "required": ["flatDamage"] },
+                  { "required": ["pctOfCorpseMaxHealth"] }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "SpawnTrap" } }
+          },
+          "then": {
+            "required": ["radius", "ttlSeconds"],
+            "anyOf": [
+              { "required": ["spellEditorId"] },
+              { "required": ["spellForm"] }
+            ]
+          }
+        },
         {
           "if": { "required": ["trapFeedback"] },
           "then": { "properties": { "type": { "const": "SpawnTrap" } } }
@@ -186,6 +376,90 @@
           "then": { "properties": { "type": { "enum": ["CorpseExplosion", "SummonCorpseExplosion"] } } }
         }
       ]
+    },
+    "formSpec": {
+      "type": "string",
+      "pattern": "^[^|]+\\|(0[xX])?[0-9A-Fa-f]+$"
+    },
+    "spellReference": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "spellEditorId": { "type": "string", "minLength": 1 },
+            "spellForm": { "$ref": "#/$defs/formSpec" }
+          },
+          "anyOf": [
+            { "required": ["spellEditorId"] },
+            { "required": ["spellForm"] }
+          ]
+        }
+      ]
+    },
+    "magnitudeScaling": {
+      "type": "object",
+      "required": ["source"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["HitPhysicalDealt", "HitTotalDealt"]
+        },
+        "mult": { "type": "number" },
+        "add": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "spellBaseAsMin": { "type": "boolean" }
+      }
+    },
+    "adaptiveSpellSet": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "Fire": { "$ref": "#/$defs/spellReference" },
+        "Frost": { "$ref": "#/$defs/spellReference" },
+        "Shock": { "$ref": "#/$defs/spellReference" }
+      }
+    },
+    "actionEvolution": {
+      "type": "object",
+      "required": ["thresholds", "multipliers"],
+      "additionalProperties": false,
+      "properties": {
+        "xpPerProc": { "type": "integer", "minimum": 1 },
+        "thresholds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 0 }
+        },
+        "multipliers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "number", "exclusiveMinimum": 0.0 }
+        }
+      }
+    },
+    "actionModeCycle": {
+      "type": "object",
+      "required": ["spells"],
+      "additionalProperties": false,
+      "properties": {
+        "spells": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/spellReference" }
+        },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "switchEveryProcs": { "type": "integer", "minimum": 1 },
+        "manualOnly": { "type": "boolean" }
+      }
     },
     "actionFeedback": {
       "type": "object",

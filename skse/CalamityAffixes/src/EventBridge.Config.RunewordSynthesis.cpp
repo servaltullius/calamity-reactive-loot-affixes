@@ -26,7 +26,7 @@ namespace CalamityAffixes
 
 		std::string runewordTemplateKeywordEditorId;
 		RE::BGSKeyword* runewordTemplateKeyword = nullptr;
-		for (const auto& affix : _affixes) {
+		for (const auto& affix : _affixRuntimeState.affixes) {
 			if (affix.id.rfind("runeword_", 0) == 0 && affix.keyword) {
 				runewordTemplateKeywordEditorId = affix.keywordEditorId;
 				runewordTemplateKeyword = affix.keyword;
@@ -36,12 +36,12 @@ namespace CalamityAffixes
 
 		if (!_runewordState.recipes.empty()) {
 			// Runeword synthesis appends many entries; reserve once to reduce realloc churn.
-			_affixes.reserve(_affixes.size() + _runewordState.recipes.size());
+			_affixRuntimeState.affixes.reserve(_affixRuntimeState.affixes.size() + _runewordState.recipes.size());
 		}
 
 		std::uint32_t synthesizedRunewordAffixes = 0u;
 		for (const auto& recipe : _runewordState.recipes) {
-			if (recipe.resultAffixToken == 0u || _affixRegistry.affixIndexByToken.contains(recipe.resultAffixToken)) {
+			if (recipe.resultAffixToken == 0u || _affixRuntimeState.affixRegistry.affixIndexByToken.contains(recipe.resultAffixToken)) {
 				continue;
 			}
 

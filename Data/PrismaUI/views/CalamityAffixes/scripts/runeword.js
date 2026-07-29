@@ -55,8 +55,8 @@ ${buttonHint}`
   const reforgeHint = reforgeEnabled ?
     (isComplete ?
       t(
-        "Consume 1 Reforge Orb and reroll the runeword effect + affixes on the selected base.",
-        "재련 오브 1개를 소모해 선택 베이스의 룬워드 효과와 어픽스를 함께 재굴림합니다."
+        "Consume 1 Reforge Orb and reroll only the regular affixes on the selected base. The completed runeword is preserved.",
+        "재련 오브 1개를 소모해 선택 베이스의 일반 어픽스만 재굴림합니다. 완성된 룬워드는 유지됩니다."
       ) :
       t(
         "Consume 1 Reforge Orb and reroll affixes on the selected base.",
@@ -168,8 +168,8 @@ function renderRunewordFlowProgress(actionState, state) {
 
   if (isComplete) {
     runewordFlowHint.textContent = t(
-      "This base already has a completed runeword. Reforge if you want a new result.",
-      "이 베이스에는 이미 룬워드가 완성되어 있습니다. 결과를 바꾸고 싶다면 재련하세요."
+      "This base already has a completed runeword. Reforge rerolls only its regular affixes; the runeword stays.",
+      "이 베이스에는 이미 룬워드가 완성되어 있습니다. 재련해도 일반 어픽스만 바뀌고 룬워드는 유지됩니다."
     );
     return;
   }
@@ -232,8 +232,8 @@ function renderRunewordPanelState() {
       runewordContextRecipeMeta.textContent = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
     } else if (isComplete) {
       runewordContextRecipeMeta.textContent = t(
-        "This base already has a completed runeword. Reforge to change the result.",
-        "이 베이스에는 이미 룬워드가 완성되어 있습니다. 결과를 바꾸려면 재련하세요."
+        "This base already has a completed runeword. Reforge changes only its regular affixes.",
+        "이 베이스에는 이미 룬워드가 완성되어 있습니다. 재련은 일반 어픽스만 변경합니다."
       );
     } else if (canTransmute) {
       runewordContextRecipeMeta.textContent = t(
@@ -438,4 +438,3 @@ function renderRunewordPanelState() {
     }
   }
 }
-

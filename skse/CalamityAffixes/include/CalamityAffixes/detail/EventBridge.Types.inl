@@ -283,7 +283,7 @@
 
 		struct RuntimeSettingsState
 		{
-			bool enabled{ true };
+			std::atomic_bool enabled{ true };
 			float procChanceMult{ 1.0f };
 			std::atomic_bool allowNonHostilePlayerOwnedOutgoingProcs{ false };
 			bool combatDebugLog{ false };
@@ -298,7 +298,7 @@
 
 			void Reset() noexcept
 			{
-				enabled = true;
+				enabled.store(true, std::memory_order_relaxed);
 				procChanceMult = 1.0f;
 				allowNonHostilePlayerOwnedOutgoingProcs.store(false, std::memory_order_relaxed);
 				combatDebugLog = false;

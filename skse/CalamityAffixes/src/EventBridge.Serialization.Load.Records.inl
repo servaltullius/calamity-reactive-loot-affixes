@@ -100,14 +100,14 @@
 				InstanceAffixSlots slots;
 				slots.count = std::min<std::uint8_t>(affixCount, static_cast<std::uint8_t>(kMaxAffixesPerItem));
 				slots.tokens = tokens;
-				_instanceAffixes.emplace(key, slots);
+				_instanceTrackingState.instanceAffixes.emplace(key, slots);
 			}
 			if (!cursor.recordOk) {
-				SKSE::log::warn("CalamityAffixes: truncated IAXF v7 record; recovered {} entries.", _instanceAffixes.size());
+				SKSE::log::warn("CalamityAffixes: truncated IAXF v7 record; recovered {} entries.", _instanceTrackingState.instanceAffixes.size());
 				cursor.DrainRemaining("partial-record-recovery");
 			}
 
-			SKSE::log::info("CalamityAffixes: IAXF v7 — loaded {} instance entries from co-save.", _instanceAffixes.size());
+			SKSE::log::info("CalamityAffixes: IAXF v7 — loaded {} instance entries from co-save.", _instanceTrackingState.instanceAffixes.size());
 			return;
 		}
 
@@ -151,10 +151,10 @@
 				for (std::uint8_t s = 0; s < slots.count; ++s) {
 					slots.tokens[s] = legacyTokens[s];
 				}
-				_instanceAffixes.emplace(key, slots);
+				_instanceTrackingState.instanceAffixes.emplace(key, slots);
 			}
 			if (!cursor.recordOk) {
-				SKSE::log::warn("CalamityAffixes: truncated IAXF v6 record; recovered {} entries.", _instanceAffixes.size());
+				SKSE::log::warn("CalamityAffixes: truncated IAXF v6 record; recovered {} entries.", _instanceTrackingState.instanceAffixes.size());
 				cursor.DrainRemaining("partial-record-recovery");
 			}
 			return;
@@ -230,19 +230,19 @@
 			if (supplementalToken != 0u) {
 				slots.AddToken(supplementalToken);
 			}
-			_instanceAffixes.emplace(key, slots);
+			_instanceTrackingState.instanceAffixes.emplace(key, slots);
 			if (a_version == kSerializationVersionV5 ||
 				a_version == kSerializationVersionV4 ||
 				a_version == kSerializationVersionV3) {
 				const auto stateToken = (token != 0u) ? token : supplementalToken;
 				if (stateToken != 0u) {
-					_instanceStates[MakeInstanceStateKey(key, stateToken)] = state;
+					_instanceTrackingState.instanceStates[MakeInstanceStateKey(key, stateToken)] = state;
 				}
 			}
 		}
 
 		if (!cursor.recordOk) {
-			SKSE::log::warn("CalamityAffixes: truncated IAXF v1-v5 record; recovered {} entries.", _instanceAffixes.size());
+			SKSE::log::warn("CalamityAffixes: truncated IAXF v1-v5 record; recovered {} entries.", _instanceTrackingState.instanceAffixes.size());
 			cursor.DrainRemaining("partial-record-recovery");
 		}
 	}
@@ -286,10 +286,10 @@
 				continue;
 			}
 			const auto key = MakeInstanceKey(resolvedBaseID, uniqueID);
-			_instanceStates[MakeInstanceStateKey(key, affixToken)] = state;
+			_instanceTrackingState.instanceStates[MakeInstanceStateKey(key, affixToken)] = state;
 		}
 		if (!cursor.recordOk) {
-			SKSE::log::warn("CalamityAffixes: truncated IRST record; recovered {} entries.", _instanceStates.size());
+			SKSE::log::warn("CalamityAffixes: truncated IRST record; recovered {} entries.", _instanceTrackingState.instanceStates.size());
 			cursor.DrainRemaining("partial-record-recovery");
 		}
 	}
@@ -612,19 +612,19 @@
 
 	void EventBridge::FinalizeLoadedSerializationState()
 	{
-		SKSE::log::info("CalamityAffixes: Load() — deserialized {} instance entries, {} runtime states.", _instanceAffixes.size(), _instanceStates.size());
-		if (!_affixRegistry.affixIndexByToken.empty() && !_affixes.empty()) {
+		SKSE::log::info("CalamityAffixes: Load() — deserialized {} instance entries, {} runtime states.", _instanceTrackingState.instanceAffixes.size(), _instanceTrackingState.instanceStates.size());
+		if (!_affixRuntimeState.affixRegistry.affixIndexByToken.empty() && !_affixRuntimeState.affixes.empty()) {
 			SanitizeAllTrackedLootInstancesForCurrentLootRules("Serialization.Load");
 		}
 
-		for (const auto& [key, _] : _instanceAffixes) {
+		for (const auto& [key, _] : _instanceTrackingState.instanceAffixes) {
 			_lootState.evaluatedInstances.insert(key);
 		}
 
 		SerializationLoadState::RebuildEvaluatedRecent(_lootState, kLootEvaluatedRecentKeep * 2);
 		SerializationLoadState::RebuildCurrencyLedgerRecent(_lootState, kLootCurrencyLedgerMaxEntries);
 		SerializationLoadState::RebuildCorpseCurrencyLedgerRecent(_lootState, kLootCurrencyLedgerMaxEntries);
-		SerializationLoadState::SanitizeShuffleBagOrders(_affixRegistry, _lootState);
+		SerializationLoadState::SanitizeShuffleBagOrders(_affixRuntimeState.affixRegistry, _lootState);
 
 		SanitizeRunewordState();
 		RebuildActiveCounts();

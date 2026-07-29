@@ -255,9 +255,6 @@ namespace CalamityAffixes
 		const float magnitudeOverride = ResolveSpawnTrapMagnitudeOverride(a_action, a_hitData);
 		const auto now = std::chrono::steady_clock::now();
 
-		EnforcePerAffixTrapCap(a_action);
-		EnforceGlobalTrapCap();
-
 		auto trap = BuildSpawnTrapInstance(a_action, a_owner, spawnTarget, magnitudeOverride, now);
 		if (!detail::IsTrapCellUsable(
 				trap.cell != nullptr,
@@ -269,6 +266,8 @@ namespace CalamityAffixes
 			}
 			return;
 		}
+		EnforcePerAffixTrapCap(a_action);
+		EnforceGlobalTrapCap();
 		trapState.activeTraps.push_back(std::move(trap));
 		trapState.hasActiveTraps.store(true, std::memory_order_relaxed);
 		auto& storedTrap = trapState.activeTraps.back();

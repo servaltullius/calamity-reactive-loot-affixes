@@ -98,8 +98,19 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Install Python tool dependencies
         run: python3 -m pip install --upgrade pip jsonschema
+
+      - name: Verify Prisma view structure
+        run: python3 tools/verify_prisma_view.py
+
+      - name: Verify runtime contract snapshot sync
+        run: python3 tools/verify_runtime_contract_sync.py
 
       # Same definition ci-verify uses, so a release is built with the exact
       # toolchain the tests ran against.
@@ -110,6 +121,14 @@ jobs:
       # zip, verifies its structure, and writes a SHA256 sidecar.
       - name: Run release build pipeline
         run: python3 tools/release_build.py --version "${{ steps.version.outputs.version }}"
+
+      # Run the full tools suite after the DLL exists so its real packaging
+      # E2E tests cannot silently skip on a clean tag runner.
+      - name: Run tools workflow tests
+        env:
+          CALAMITY_REQUIRE_NODE: "1"
+          CALAMITY_REQUIRE_PACKAGING_E2E: "1"
+        run: python3 -m unittest discover -s tools/tests -p 'test_*.py'
 
       - name: Collect artifacts
         id: collect

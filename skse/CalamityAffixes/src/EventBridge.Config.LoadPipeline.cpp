@@ -8,6 +8,6 @@ namespace CalamityAffixes
 		IndexConfiguredAffixes();
 		SynthesizeRunewordRuntimeAffixes();
 		RebuildSharedLootPools();
-		_activeCounts.assign(_affixes.size(), 0);
+		_affixRuntimeState.activeCounts.assign(_affixRuntimeState.affixes.size(), 0);
 	}
 }

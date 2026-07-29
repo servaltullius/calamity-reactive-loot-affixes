@@ -58,7 +58,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 
-		if (!_configLoaded || !_runtimeSettings.enabled || _affixSpecialActions.convertAffixIndices.empty()) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || _affixSpecialActions.convertAffixIndices.empty()) {
 			return {};
 		}
 
@@ -90,7 +90,7 @@ namespace CalamityAffixes
 
 		bool hasAnyConversion = false;
 		for (const auto idx : _affixSpecialActions.convertAffixIndices) {
-			if (idx < _activeCounts.size() && _activeCounts[idx] > 0) {
+			if (idx < _affixRuntimeState.activeCounts.size() && _affixRuntimeState.activeCounts[idx] > 0) {
 				hasAnyConversion = true;
 				break;
 			}
@@ -113,14 +113,14 @@ namespace CalamityAffixes
 		std::array<ConversionCandidate, kMaxConversionsPerHit> candidates{};
 
 		for (const auto idx : _affixSpecialActions.convertAffixIndices) {
-			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
+			if (idx >= _affixRuntimeState.affixes.size() || idx >= _affixRuntimeState.activeCounts.size()) {
 				continue;
 			}
-			if (_activeCounts[idx] == 0) {
+			if (_affixRuntimeState.activeCounts[idx] == 0) {
 				continue;
 			}
 
-			auto& affix = _affixes[idx];
+			auto& affix = _affixRuntimeState.affixes[idx];
 			const auto& candidate = affix.action;
 			if (candidate.type != ActionType::kConvertDamage || !candidate.spell || candidate.convertPct <= 0.0f) {
 				continue;
@@ -258,7 +258,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 
 		MindOverMatterResult result{};
-		if (!_configLoaded || !_runtimeSettings.enabled || _affixSpecialActions.mindOverMatterAffixIndices.empty()) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || _affixSpecialActions.mindOverMatterAffixIndices.empty()) {
 			return result;
 		}
 		if (!a_target || !a_attacker || !a_target->IsPlayerRef()) {
@@ -282,7 +282,7 @@ namespace CalamityAffixes
 
 		bool hasAnyMindOverMatter = false;
 		for (const auto idx : _affixSpecialActions.mindOverMatterAffixIndices) {
-			if (idx < _activeCounts.size() && _activeCounts[idx] > 0) {
+			if (idx < _affixRuntimeState.activeCounts.size() && _affixRuntimeState.activeCounts[idx] > 0) {
 				hasAnyMindOverMatter = true;
 				break;
 			}
@@ -299,14 +299,14 @@ namespace CalamityAffixes
 		float bestRedirectPct = 0.0f;
 
 		for (const auto idx : _affixSpecialActions.mindOverMatterAffixIndices) {
-			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
+			if (idx >= _affixRuntimeState.affixes.size() || idx >= _affixRuntimeState.activeCounts.size()) {
 				continue;
 			}
-			if (_activeCounts[idx] == 0) {
+			if (_affixRuntimeState.activeCounts[idx] == 0) {
 				continue;
 			}
 
-			auto& affix = _affixes[idx];
+			auto& affix = _affixRuntimeState.affixes[idx];
 			const auto& candidate = affix.action;
 			if (candidate.type != ActionType::kMindOverMatter || candidate.mindOverMatterDamageToMagickaPct <= 0.0f) {
 				continue;
@@ -406,7 +406,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 
-		if (!_configLoaded || !_runtimeSettings.enabled || _affixSpecialActions.castOnCritAffixIndices.empty()) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || _affixSpecialActions.castOnCritAffixIndices.empty()) {
 			return {};
 		}
 
@@ -467,15 +467,15 @@ namespace CalamityAffixes
 		pool.reserve(_affixSpecialActions.castOnCritAffixIndices.size());
 
 		for (const auto idx : _affixSpecialActions.castOnCritAffixIndices) {
-			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
+			if (idx >= _affixRuntimeState.affixes.size() || idx >= _affixRuntimeState.activeCounts.size()) {
 				continue;
 			}
 
-			if (_activeCounts[idx] == 0) {
+			if (_affixRuntimeState.activeCounts[idx] == 0) {
 				continue;
 			}
 
-			auto& affix = _affixes[idx];
+			auto& affix = _affixRuntimeState.affixes[idx];
 			const auto& action = affix.action;
 			if (action.type != ActionType::kCastOnCrit || !action.spell) {
 				continue;
@@ -511,7 +511,7 @@ namespace CalamityAffixes
 		}
 
 		const auto pickedIdx = pool[_combatState.castOnCritCycleCursor % pool.size()];
-		auto& pickedAffix = _affixes[pickedIdx];
+		auto& pickedAffix = _affixRuntimeState.affixes[pickedIdx];
 		const auto* pick = std::addressof(pickedAffix.action);
 		_combatState.castOnCritCycleCursor += 1;
 		_combatState.castOnCritNextAllowed = now + kCastOnCritICD;
@@ -562,7 +562,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 
-		if (!_configLoaded || !_runtimeSettings.enabled || _activeCritDamageBonusPct <= 0.0f) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || _affixRuntimeState.activeCritDamageBonusPct <= 0.0f) {
 			return 1.0f;
 		}
 
@@ -574,9 +574,9 @@ namespace CalamityAffixes
 			return 1.0f;
 		}
 
-		const float mult = 1.0f + (_activeCritDamageBonusPct / 100.0f);
+		const float mult = 1.0f + (_affixRuntimeState.activeCritDamageBonusPct / 100.0f);
 		if (_loot.debugLog) {
-			SKSE::log::debug("CalamityAffixes: crit damage bonus {:.0f}% -> multiplier {:.2f}", _activeCritDamageBonusPct, mult);
+			SKSE::log::debug("CalamityAffixes: crit damage bonus {:.0f}% -> multiplier {:.2f}", _affixRuntimeState.activeCritDamageBonusPct, mult);
 		}
 		return mult;
 	}

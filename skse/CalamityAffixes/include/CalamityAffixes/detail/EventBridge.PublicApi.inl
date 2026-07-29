@@ -26,7 +26,7 @@
 		// Tick lightweight runtime systems that need polling (e.g., ground traps).
 		void TickTraps();
 		[[nodiscard]] bool HasActiveTraps() const noexcept { return _trapState.hasActiveTraps.load(std::memory_order_relaxed); }
-		[[nodiscard]] bool IsRuntimeEnabled() const noexcept { return _runtimeSettings.enabled; }
+		[[nodiscard]] bool IsRuntimeEnabled() const noexcept { return _runtimeSettings.enabled.load(std::memory_order_relaxed); }
 		[[nodiscard]] bool IsHealthDamageRoutingDisabled() const noexcept { return _runtimeSettings.disableHealthDamageRouting; }
 		[[nodiscard]] bool IsTrapSystemTickDisabled() const noexcept { return _runtimeSettings.disableTrapSystemTick; }
 		[[nodiscard]] bool AllowsPlayerHealthDamageHook() const noexcept { return _runtimeSettings.allowPlayerHealthDamageHook; }
@@ -42,7 +42,7 @@
 
 		// UI-facing helpers.
 		// UI helper: returns the affix tooltip text for this entry (if any).
-		// Instance affixes are stored per item instance (ExtraUniqueID -> _instanceAffixes).
+		// Instance affixes are stored per item instance (ExtraUniqueID -> _instanceTrackingState.instanceAffixes).
 		[[nodiscard]] std::optional<std::string> GetInstanceAffixTooltip(
 			const RE::InventoryEntryData* a_item,
 			std::string_view a_selectedDisplayName = {},

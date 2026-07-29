@@ -58,7 +58,6 @@
 			bool a_refreshConfiguredPassivesOnPostLoad = false);
 		void LogRebuildActiveCountsDebugSummary(
 			const std::unordered_set<RE::SpellItem*>& a_desiredPassives) const;
-		void RebuildActiveTriggerIndexCaches();
 		void MarkLootEvaluatedInstance(std::uint64_t a_instanceKey);
 		void ForgetLootEvaluatedInstance(std::uint64_t a_instanceKey);
 		void PruneLootEvaluatedInstances();
@@ -387,7 +386,7 @@
 				InstanceAffixSlots& a_slots,
 				std::string_view a_context);
 		[[nodiscard]] bool SanitizeTrackedLootInstanceForCurrentLootRules(
-			std::remove_reference_t<decltype(_instanceAffixes)>::iterator& a_it,
+			std::remove_reference_t<decltype(_instanceTrackingState.instanceAffixes)>::iterator& a_it,
 			std::string_view a_context,
 			std::uint32_t& a_sanitizedInstances,
 			std::uint32_t& a_erasedInstances);
@@ -645,6 +644,11 @@
 			std::chrono::steady_clock::time_point a_now);
 		void LogSpawnTrapCreated(const TrapInstance& a_trap, const Action& a_action) const;
 		void ExecuteSpawnTrapAction(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
+		[[nodiscard]] bool CanExecuteAction(
+			const AffixRuntime& a_affix,
+			RE::Actor* a_owner,
+			RE::Actor* a_target,
+			const RE::HitData* a_hitData);
 		void DispatchActionByType(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
 		void ExecuteActionWithProcDepthGuard(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
 		void ExecuteAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);

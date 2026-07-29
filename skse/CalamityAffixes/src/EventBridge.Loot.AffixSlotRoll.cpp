@@ -47,11 +47,11 @@ namespace CalamityAffixes
 		const std::vector<std::size_t>* prefixPool = nullptr;
 		const std::vector<std::size_t>* suffixPool = nullptr;
 		if (_loot.sharedPool) {
-			prefixPool = std::addressof(_affixRegistry.lootSharedAffixes);
-			suffixPool = std::addressof(_affixRegistry.lootSharedSuffixes);
+			prefixPool = std::addressof(_affixRuntimeState.affixRegistry.lootSharedAffixes);
+			suffixPool = std::addressof(_affixRuntimeState.affixRegistry.lootSharedSuffixes);
 		} else {
-			prefixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_affixRegistry.lootWeaponAffixes) : std::addressof(_affixRegistry.lootArmorAffixes);
-			suffixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_affixRegistry.lootWeaponSuffixes) : std::addressof(_affixRegistry.lootArmorSuffixes);
+			prefixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_affixRuntimeState.affixRegistry.lootWeaponAffixes) : std::addressof(_affixRuntimeState.affixRegistry.lootArmorAffixes);
+			suffixPool = (a_itemType == LootItemType::kWeapon) ? std::addressof(_affixRuntimeState.affixRegistry.lootWeaponSuffixes) : std::addressof(_affixRuntimeState.affixRegistry.lootArmorSuffixes);
 		}
 
 		if (!prefixPool || prefixPool->empty()) {
@@ -83,13 +83,13 @@ namespace CalamityAffixes
 		const auto pickWeightedIndex = [&](const std::vector<std::size_t>& a_pool, auto&& a_isEligible) -> std::optional<std::size_t> {
 			double totalWeight = 0.0;
 			for (const auto idx : a_pool) {
-				if (idx >= _affixes.size()) {
+				if (idx >= _affixRuntimeState.affixes.size()) {
 					continue;
 				}
 				if (!a_isEligible(idx)) {
 					continue;
 				}
-				const double weight = std::max(0.0, static_cast<double>(_affixes[idx].EffectiveLootWeight()));
+				const double weight = std::max(0.0, static_cast<double>(_affixRuntimeState.affixes[idx].EffectiveLootWeight()));
 				totalWeight += weight;
 			}
 
@@ -100,13 +100,13 @@ namespace CalamityAffixes
 			double roll = NextPreviewUnit(rngState) * totalWeight;
 			std::optional<std::size_t> lastEligible;
 			for (const auto idx : a_pool) {
-				if (idx >= _affixes.size()) {
+				if (idx >= _affixRuntimeState.affixes.size()) {
 					continue;
 				}
 				if (!a_isEligible(idx)) {
 					continue;
 				}
-				const double weight = std::max(0.0, static_cast<double>(_affixes[idx].EffectiveLootWeight()));
+				const double weight = std::max(0.0, static_cast<double>(_affixRuntimeState.affixes[idx].EffectiveLootWeight()));
 				if (weight <= 0.0) {
 					continue;
 				}
@@ -139,7 +139,7 @@ namespace CalamityAffixes
 					return false;
 				}
 
-				const auto& affix = _affixes[a_idx];
+				const auto& affix = _affixRuntimeState.affixes[a_idx];
 				if (affix.slot == AffixSlot::kSuffix) {
 					return false;
 				}
@@ -154,7 +154,7 @@ namespace CalamityAffixes
 			}
 
 			chosenPrefixIndices.push_back(*idx);
-			const auto& affix = _affixes[*idx];
+			const auto& affix = _affixRuntimeState.affixes[*idx];
 			if (!affix.family.empty()) {
 				chosenPrefixFamilies.push_back(affix.family);
 			}
@@ -169,7 +169,7 @@ namespace CalamityAffixes
 			}
 
 			const auto idx = pickWeightedIndex(*suffixPool, [&](std::size_t a_idx) {
-				const auto& affix = _affixes[a_idx];
+				const auto& affix = _affixRuntimeState.affixes[a_idx];
 				if (affix.slot != AffixSlot::kSuffix) {
 					return false;
 				}
@@ -189,7 +189,7 @@ namespace CalamityAffixes
 				break;
 			}
 
-			const auto& affix = _affixes[*idx];
+			const auto& affix = _affixRuntimeState.affixes[*idx];
 			if (!affix.family.empty()) {
 				chosenFamilies.push_back(affix.family);
 			}

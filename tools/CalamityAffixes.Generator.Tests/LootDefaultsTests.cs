@@ -43,6 +43,28 @@ public sealed class LootDefaultsTests
             StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void RepoMcmScript_ReducesEslFormIdToLowerTwelveBitsBeforeLookup()
+    {
+        var papyrusSource = File.ReadAllText(
+            Path.Combine(FindRepoRoot(), "Data", "Scripts", "Source", "CalamityAffixes_MCMConfig.psc"));
+
+        var lowerTwentyFourBitNormalization = papyrusSource.IndexOf(
+            "localFormId = localFormId % LocalFormIdModulo",
+            StringComparison.Ordinal);
+        var lowerTwelveBitNormalization = papyrusSource.IndexOf(
+            "localFormId = localFormId % LightLocalFormIdModulo",
+            StringComparison.Ordinal);
+        var canonicalLookup = papyrusSource.IndexOf(
+            "Game.GetFormFromFile(localFormId, PluginFileName)",
+            StringComparison.Ordinal);
+
+        Assert.Contains("LightLocalFormIdModulo = 4096", papyrusSource, StringComparison.Ordinal);
+        Assert.True(lowerTwentyFourBitNormalization >= 0);
+        Assert.True(lowerTwelveBitNormalization > lowerTwentyFourBitNormalization);
+        Assert.True(canonicalLookup > lowerTwelveBitNormalization);
+    }
+
     private static string FindRepoRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);

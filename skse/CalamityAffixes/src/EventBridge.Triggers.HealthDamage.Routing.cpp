@@ -213,7 +213,7 @@ namespace CalamityAffixes
 		RE::Actor* a_attacker,
 		const RE::HitData* a_hitData)
 	{
-		if (!_configLoaded || !_runtimeSettings.enabled || !a_target || _affixRegistry.lowHealthTriggerAffixIndices.empty()) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || !a_target || _affixRuntimeState.affixRegistry.lowHealthTriggerAffixIndices.empty()) {
 			return;
 		}
 		if (!a_target->IsPlayerRef()) {

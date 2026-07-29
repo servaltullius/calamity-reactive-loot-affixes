@@ -14,7 +14,7 @@ namespace CalamityAffixes
 		std::uint64_t a_instanceKey,
 		std::uint64_t a_affixToken)
 	{
-		return _instanceStates[MakeInstanceStateKey(a_instanceKey, a_affixToken)];
+		return _instanceTrackingState.instanceStates[MakeInstanceStateKey(a_instanceKey, a_affixToken)];
 	}
 
 	const EventBridge::InstanceRuntimeState* EventBridge::FindInstanceRuntimeState(
@@ -25,8 +25,8 @@ namespace CalamityAffixes
 			return nullptr;
 		}
 
-		const auto it = _instanceStates.find(MakeInstanceStateKey(a_instanceKey, a_affixToken));
-		return (it != _instanceStates.end()) ? std::addressof(it->second) : nullptr;
+		const auto it = _instanceTrackingState.instanceStates.find(MakeInstanceStateKey(a_instanceKey, a_affixToken));
+		return (it != _instanceTrackingState.instanceStates.end()) ? std::addressof(it->second) : nullptr;
 	}
 
 	std::size_t EventBridge::ResolveEvolutionStageIndex(const Action& a_action, const InstanceRuntimeState* a_state) const
@@ -116,7 +116,7 @@ namespace CalamityAffixes
 		}
 
 		std::uint32_t switched = 0u;
-		for (const auto& affix : _affixes) {
+		for (const auto& affix : _affixRuntimeState.affixes) {
 			const auto& action = affix.action;
 			if ((action.type != ActionType::kCastSpell &&
 				 action.type != ActionType::kCastSpellAdaptiveElement) ||

@@ -106,4 +106,55 @@ assert.strictEqual(
   "bootstrap did not register the runeword-state fallback"
 );
 
+const compatibilityPayload = {
+  hasBase: true,
+  hasRecipe: true,
+  isComplete: true,
+  baseCompatibilityWarning: true,
+  baseCompatibilityMessageEn: "Recommended base: Armor. Selected base: Weapon.",
+  baseCompatibilityMessageKo: "권장 베이스: 방어구. 선택 베이스: 무기."
+};
+sandbox.setRunewordPanelState(JSON.stringify(compatibilityPayload));
+
+const storedRunewordState = new vm.Script(
+  "runewordPanelState",
+  { filename: "runeword-state-contract-test.js" }
+).runInContext(context);
+assert.strictEqual(storedRunewordState.baseCompatibilityWarning, true);
+assert.strictEqual(
+  storedRunewordState.baseCompatibilityMessageEn,
+  compatibilityPayload.baseCompatibilityMessageEn
+);
+assert.strictEqual(
+  storedRunewordState.baseCompatibilityMessageKo,
+  compatibilityPayload.baseCompatibilityMessageKo
+);
+
+const completedRunewordActionState = new vm.Script(
+  "resolveRunewordPanelActionState(runewordPanelState)",
+  { filename: "runeword-reforge-contract-test.js" }
+).runInContext(context);
+assert(
+  completedRunewordActionState.baseCompatibilityMessage.includes(
+    compatibilityPayload.baseCompatibilityMessageEn
+  ),
+  "base compatibility warning was not preserved through the action-state resolver"
+);
+assert(
+  completedRunewordActionState.reforgeHint.includes(
+    "reroll only the regular affixes"
+  ),
+  "completed-runeword Reforge hint must describe the regular-affix-only runtime contract"
+);
+assert(
+  completedRunewordActionState.reforgeHint.includes(
+    "완성된 룬워드는 유지됩니다"
+  ),
+  "completed-runeword Reforge hint must say the runeword is preserved"
+);
+assert(
+  !completedRunewordActionState.reforgeHint.includes("runeword effect + affixes"),
+  "completed-runeword Reforge hint still promises to reroll the runeword"
+);
+
 console.log("Prisma HTML script order: OK");

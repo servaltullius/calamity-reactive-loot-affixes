@@ -950,8 +950,8 @@ namespace CalamityAffixes
 			if (!HasRunewordRuntimeEffect(recipe)) {
 				continue;
 			}
-			const auto affixIt = _affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
-			const auto& affix = _affixes[affixIt->second];
+			const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(recipe.resultAffixToken);
+			const auto& affix = _affixRuntimeState.affixes[affixIt->second];
 			const auto effectSummaryKey = resolveRecipeEffectSummaryKey(recipe);
 
 			std::string runes;

@@ -13,6 +13,44 @@
 			std::vector<std::size_t> activeDotApplyTriggerAffixIndices{};
 			std::vector<std::size_t> activeKillTriggerAffixIndices{};
 			std::vector<std::size_t> activeLowHealthTriggerAffixIndices{};
+
+			void RebuildActiveTriggerIndexCaches()
+			{
+				const auto rebuildFor = [&](const std::vector<std::size_t>& a_source, std::vector<std::size_t>& a_out) {
+					a_out.clear();
+					a_out.reserve(a_source.size());
+					for (const auto idx : a_source) {
+						if (idx >= activeCounts.size() || activeCounts[idx] == 0u) {
+							continue;
+						}
+						a_out.push_back(idx);
+					}
+				};
+
+				rebuildFor(affixRegistry.hitTriggerAffixIndices, activeHitTriggerAffixIndices);
+				rebuildFor(affixRegistry.incomingHitTriggerAffixIndices, activeIncomingHitTriggerAffixIndices);
+				rebuildFor(affixRegistry.dotApplyTriggerAffixIndices, activeDotApplyTriggerAffixIndices);
+				rebuildFor(affixRegistry.killTriggerAffixIndices, activeKillTriggerAffixIndices);
+				rebuildFor(affixRegistry.lowHealthTriggerAffixIndices, activeLowHealthTriggerAffixIndices);
+			}
+
+			[[nodiscard]] const std::vector<std::size_t>* ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept
+			{
+				switch (a_trigger) {
+				case Trigger::kHit:
+					return &activeHitTriggerAffixIndices;
+				case Trigger::kIncomingHit:
+					return &activeIncomingHitTriggerAffixIndices;
+				case Trigger::kDotApply:
+					return &activeDotApplyTriggerAffixIndices;
+				case Trigger::kKill:
+					return &activeKillTriggerAffixIndices;
+				case Trigger::kLowHealth:
+					return &activeLowHealthTriggerAffixIndices;
+				default:
+					return nullptr;
+				}
+			}
 		};
 
 		struct InstanceTrackingState

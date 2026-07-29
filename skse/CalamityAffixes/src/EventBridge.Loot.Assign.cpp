@@ -130,7 +130,7 @@ namespace CalamityAffixes
 		std::uint64_t a_key,
 		std::string_view a_reason)
 	{
-		const auto erasedAffixCount = _instanceAffixes.erase(a_key);
+		const auto erasedAffixCount = _instanceTrackingState.instanceAffixes.erase(a_key);
 		EraseInstanceRuntimeStates(a_key);
 		ForgetLootEvaluatedInstance(a_key);
 		ForgetLootPreviewSlots(a_key);
@@ -152,15 +152,15 @@ namespace CalamityAffixes
 
 	bool EventBridge::ShouldKeepTrackedLootAffixToken(std::uint64_t a_token) const
 	{
-		const auto idxIt = _affixRegistry.affixIndexByToken.find(a_token);
-		if (idxIt == _affixRegistry.affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
+		const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(a_token);
+		if (idxIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() || idxIt->second >= _affixRuntimeState.affixes.size()) {
 			if (_loot.debugLog) {
 				SKSE::log::warn("CalamityAffixes: cleanup skipping unknown affix token {:016X}.", a_token);
 			}
 			return false;
 		}
 
-		if (_loot.stripTrackedSuffixSlots && _affixes[idxIt->second].slot == AffixSlot::kSuffix) {
+		if (_loot.stripTrackedSuffixSlots && _affixRuntimeState.affixes[idxIt->second].slot == AffixSlot::kSuffix) {
 			return false;
 		}
 
@@ -197,7 +197,7 @@ namespace CalamityAffixes
 			if (removedToken == 0u || a_slots.HasToken(removedToken)) {
 				continue;
 			}
-			_instanceStates.erase(MakeInstanceStateKey(a_instanceKey, removedToken));
+			_instanceTrackingState.instanceStates.erase(MakeInstanceStateKey(a_instanceKey, removedToken));
 		}
 
 		if (a_slots.count == 0) {
@@ -243,7 +243,7 @@ namespace CalamityAffixes
 	}
 
 	bool EventBridge::SanitizeTrackedLootInstanceForCurrentLootRules(
-		std::remove_reference_t<decltype(_instanceAffixes)>::iterator& a_it,
+		std::remove_reference_t<decltype(_instanceTrackingState.instanceAffixes)>::iterator& a_it,
 		std::string_view a_context,
 		std::uint32_t& a_sanitizedInstances,
 		std::uint32_t& a_erasedInstances)
@@ -256,7 +256,7 @@ namespace CalamityAffixes
 
 		if (slots.count == 0) {
 			ForgetLootEvaluatedInstance(a_it->first);
-			a_it = _instanceAffixes.erase(a_it);
+			a_it = _instanceTrackingState.instanceAffixes.erase(a_it);
 			++a_erasedInstances;
 			return true;
 		}
@@ -283,13 +283,13 @@ namespace CalamityAffixes
 
 	void EventBridge::SanitizeAllTrackedLootInstancesForCurrentLootRules(std::string_view a_context)
 	{
-		if (_affixes.empty() || _affixRegistry.affixIndexByToken.empty()) {
+		if (_affixRuntimeState.affixes.empty() || _affixRuntimeState.affixRegistry.affixIndexByToken.empty()) {
 			return;
 		}
 
 		std::uint32_t sanitizedInstances = 0u;
 		std::uint32_t erasedInstances = 0u;
-		for (auto it = _instanceAffixes.begin(); it != _instanceAffixes.end();) {
+		for (auto it = _instanceTrackingState.instanceAffixes.begin(); it != _instanceTrackingState.instanceAffixes.end();) {
 			(void)SanitizeTrackedLootInstanceForCurrentLootRules(it, a_context, sanitizedInstances, erasedInstances);
 		}
 
@@ -354,7 +354,7 @@ namespace CalamityAffixes
 			if (a_label.empty()) {
 				return false;
 			}
-			return _affixRegistry.affixLabelSet.contains(std::string(a_label));
+			return _affixRuntimeState.affixRegistry.affixLabelSet.contains(std::string(a_label));
 		};
 
 		std::string cleaned;

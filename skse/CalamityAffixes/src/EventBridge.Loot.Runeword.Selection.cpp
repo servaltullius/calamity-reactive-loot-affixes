@@ -67,8 +67,8 @@ namespace CalamityAffixes
 
 	bool EventBridge::HasRunewordRuntimeEffect(const RunewordRecipe& a_recipe) const noexcept
 	{
-		const auto affixIt = _affixRegistry.affixIndexByToken.find(a_recipe.resultAffixToken);
-		return affixIt != _affixRegistry.affixIndexByToken.end() && affixIt->second < _affixes.size();
+		const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(a_recipe.resultAffixToken);
+		return affixIt != _affixRuntimeState.affixRegistry.affixIndexByToken.end() && affixIt->second < _affixRuntimeState.affixes.size();
 	}
 
 	const EventBridge::RunewordRecipe* EventBridge::ResolveSelectedRunewordRecipe(

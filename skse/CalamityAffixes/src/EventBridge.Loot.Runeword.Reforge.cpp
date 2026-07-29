@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -61,8 +62,14 @@ namespace CalamityAffixes
 		}
 
 		InstanceAffixSlots previousSlots{};
-		if (const auto it = _instanceAffixes.find(instanceKey); it != _instanceAffixes.end()) {
+		if (const auto it = _instanceTrackingState.instanceAffixes.find(instanceKey); it != _instanceTrackingState.instanceAffixes.end()) {
 			previousSlots = it->second;
+		}
+		std::optional<InstanceRuntimeState> preservedRunewordRuntimeState;
+		if (preservedRunewordToken != 0u) {
+			if (const auto* state = FindInstanceRuntimeState(instanceKey, preservedRunewordToken)) {
+				preservedRunewordRuntimeState = *state;
+			}
 		}
 
 		const InstanceAffixSlots previousRegularSlots =
@@ -89,16 +96,16 @@ namespace CalamityAffixes
 					if (std::find(chosenPrefixIndices.begin(), chosenPrefixIndices.end(), *idx) != chosenPrefixIndices.end()) {
 						continue;
 					}
-					if (*idx >= _affixes.size() || _affixes[*idx].id.empty()) {
+					if (*idx >= _affixRuntimeState.affixes.size() || _affixRuntimeState.affixes[*idx].id.empty()) {
 						continue;
 					}
 					// Skip the preserved runeword affix — it occupies its own slot.
-					if (preservedRunewordToken != 0u && _affixes[*idx].token == preservedRunewordToken) {
+					if (preservedRunewordToken != 0u && _affixRuntimeState.affixes[*idx].token == preservedRunewordToken) {
 						continue;
 					}
 					chosenPrefixIndices.push_back(*idx);
 					chosenIndices.push_back(*idx);
-					slots.AddToken(_affixes[*idx].token);
+					slots.AddToken(_affixRuntimeState.affixes[*idx].token);
 					found = true;
 					break;
 				}
@@ -117,21 +124,21 @@ namespace CalamityAffixes
 				if (!idx) {
 					break;
 				}
-				if (*idx >= _affixes.size() || _affixes[*idx].id.empty()) {
+				if (*idx >= _affixRuntimeState.affixes.size() || _affixRuntimeState.affixes[*idx].id.empty()) {
 					continue;
 				}
-				if (!_affixes[*idx].family.empty()) {
-					chosenFamilies.push_back(_affixes[*idx].family);
+				if (!_affixRuntimeState.affixes[*idx].family.empty()) {
+					chosenFamilies.push_back(_affixRuntimeState.affixes[*idx].family);
 				}
 				chosenIndices.push_back(*idx);
-				slots.AddToken(_affixes[*idx].token);
+				slots.AddToken(_affixRuntimeState.affixes[*idx].token);
 			}
 
 			if (slots.count == 0) {
 				if (const auto fallback = RollLootAffixIndex(*lootType, nullptr, /*a_skipChanceCheck=*/true);
-					fallback && *fallback < _affixes.size() && !_affixes[*fallback].id.empty() &&
-					(preservedRunewordToken == 0u || _affixes[*fallback].token != preservedRunewordToken)) {
-					slots.AddToken(_affixes[*fallback].token);
+					fallback && *fallback < _affixRuntimeState.affixes.size() && !_affixRuntimeState.affixes[*fallback].id.empty() &&
+					(preservedRunewordToken == 0u || _affixRuntimeState.affixes[*fallback].token != preservedRunewordToken)) {
+					slots.AddToken(_affixRuntimeState.affixes[*fallback].token);
 				}
 			}
 
@@ -169,9 +176,9 @@ namespace CalamityAffixes
 
 			if (_loot.debugLog) {
 				for (std::uint8_t di = 0; di < rolled.count; ++di) {
-					const auto dit = _affixRegistry.affixIndexByToken.find(rolled.tokens[di]);
-					const auto& did = (dit != _affixRegistry.affixIndexByToken.end() && dit->second < _affixes.size())
-						? _affixes[dit->second].id : std::string{"?"};
+					const auto dit = _affixRuntimeState.affixRegistry.affixIndexByToken.find(rolled.tokens[di]);
+					const auto& did = (dit != _affixRuntimeState.affixRegistry.affixIndexByToken.end() && dit->second < _affixRuntimeState.affixes.size())
+						? _affixRuntimeState.affixes[dit->second].id : std::string{"?"};
 					SKSE::log::info("CalamityAffixes: reforge rolled slot[{}] = {} (token={:016X}).",
 						di, did, rolled.tokens[di]);
 				}
@@ -185,6 +192,36 @@ namespace CalamityAffixes
 		}
 
 		player->RemoveItem(orb, 1, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+		const auto ownedAfter = std::max(0, player->GetItemCount(orb));
+		if (!detail::DidConsumeExactInventoryCount(
+				static_cast<std::uint32_t>(ownedBefore),
+				static_cast<std::uint32_t>(ownedAfter),
+				1u)) {
+			const auto refundBefore = ownedAfter;
+			auto refundAfter = refundBefore;
+			if (ownedAfter < ownedBefore) {
+				player->AddObjectToContainer(orb, nullptr, 1, nullptr);
+				refundAfter = std::max(0, player->GetItemCount(orb));
+			}
+			const bool refundConfirmed =
+				ownedAfter < ownedBefore &&
+				detail::DidRestoreExactInventoryCount(
+					static_cast<std::uint32_t>(refundBefore),
+					static_cast<std::uint32_t>(refundAfter),
+					1u);
+			result.message = refundConfirmed
+				? "Reforge failed: Reforge Orb consumption was not confirmed; one Orb was restored."
+				: "Reforge failed: Reforge Orb consumption was not confirmed; check inventory.";
+			SKSE::log::error(
+				"CalamityAffixes: reforge aborted because orb inventory delta was not exactly one "
+				"(before={}, after={}, refundAfter={}, refundConfirmed={}, instance={:016X}).",
+				ownedBefore,
+				ownedAfter,
+				refundAfter,
+				refundConfirmed,
+				instanceKey);
+			return result;
+		}
 
 		EraseInstanceRuntimeStates(instanceKey);
 		if (preservedRunewordToken == 0u) {
@@ -206,17 +243,20 @@ namespace CalamityAffixes
 			}
 		}
 
-		_instanceAffixes[instanceKey] = newSlots;
+		_instanceTrackingState.instanceAffixes[instanceKey] = newSlots;
 		MarkLootEvaluatedInstance(instanceKey);
 
 		for (std::uint8_t i = 0; i < newSlots.count; ++i) {
 			EnsureInstanceRuntimeState(instanceKey, newSlots.tokens[i]);
 		}
+		if (preservedRunewordRuntimeState && preservedRunewordToken != 0u) {
+			EnsureInstanceRuntimeState(instanceKey, preservedRunewordToken) =
+				*preservedRunewordRuntimeState;
+		}
 
 		EnsureMultiAffixDisplayName(entry, xList, newSlots);
 		RebuildActiveCounts();
 
-		const auto ownedAfter = std::max(0, player->GetItemCount(orb));
 		std::string itemName = ResolveInventoryDisplayName(entry, xList);
 		if (itemName.empty()) {
 			itemName = "Selected base";
@@ -263,9 +303,9 @@ namespace CalamityAffixes
 			itemName = "Selected base";
 		}
 
-		const bool hadAffixes = _instanceAffixes.erase(instanceKey) > 0u;
+		const bool hadAffixes = _instanceTrackingState.instanceAffixes.erase(instanceKey) > 0u;
 		const bool hadRuntimeState = std::ranges::any_of(
-			_instanceStates,
+			_instanceTrackingState.instanceStates,
 			[instanceKey](const auto& stateEntry) {
 				return stateEntry.first.instanceKey == instanceKey;
 			});

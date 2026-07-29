@@ -66,15 +66,16 @@ namespace CalamityAffixes
 		static auto s_lastReforgeChanceNotificationAt = std::chrono::steady_clock::time_point{};
 
 		if (a_eventName == kMcmSetEnabledEvent) {
-			_runtimeSettings.enabled = (a_numArg > kMcmBoolThreshold);
-			if (_runtimeSettings.enabled) {
+			const bool enabled = (a_numArg > kMcmBoolThreshold);
+			_runtimeSettings.enabled.store(enabled, std::memory_order_relaxed);
+			if (enabled) {
 				(void)PruneOrphanedPlayerInstanceKeys();
 				RebuildActiveCounts();
 			} else {
 				DeactivateRuntimeState();
 			}
 			QueueRuntimeUserSettingsPersist();
-			EmitHudNotification(_runtimeSettings.enabled ? "Calamity: enabled" : "Calamity: disabled");
+			EmitHudNotification(enabled ? "Calamity: enabled" : "Calamity: disabled");
 			return true;
 		}
 
@@ -229,26 +230,26 @@ namespace CalamityAffixes
 		if (a_eventName == kMcmForceRebuildEvent) {
 			auto* rebuildPlayer = RE::PlayerCharacter::GetSingleton();
 			if (rebuildPlayer) {
-				for (auto* spell : _appliedPassiveSpells) {
+				for (auto* spell : _instanceTrackingState.appliedPassiveSpells) {
 					rebuildPlayer->RemoveSpell(spell);
 				}
 			}
-			_appliedPassiveSpells.clear();
+			_instanceTrackingState.appliedPassiveSpells.clear();
 			RebuildActiveCounts();
 			std::uint32_t activeCount = 0;
-			for (std::size_t i = 0; i < _activeCounts.size(); ++i) {
-				if (_activeCounts[i] > 0) {
+			for (std::size_t i = 0; i < _affixRuntimeState.activeCounts.size(); ++i) {
+				if (_affixRuntimeState.activeCounts[i] > 0) {
 					++activeCount;
 				}
 			}
 			std::string note = "Calamity: rebuilt (";
 			note += std::to_string(activeCount);
 			note += " active, ";
-			note += std::to_string(_appliedPassiveSpells.size());
+			note += std::to_string(_instanceTrackingState.appliedPassiveSpells.size());
 			note += " passive)";
 			EmitHudNotification(note.c_str());
 			SKSE::log::info("CalamityAffixes: force-rebuild — {} active affixes, {} passive spells applied.",
-				activeCount, _appliedPassiveSpells.size());
+				activeCount, _instanceTrackingState.appliedPassiveSpells.size());
 			return true;
 		}
 

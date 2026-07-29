@@ -7,6 +7,7 @@ Scriptname CalamityAffixes_MCMConfig extends MCM_ConfigBase
 ; Only the canonical quest instance that still exists in the currently loaded plugin should register.
 ; This filters stale quest instances left in saves after generated FormID churn.
 int Property LocalFormIdModulo = 16777216 AutoReadOnly Hidden ; 0x01000000
+int Property LightLocalFormIdModulo = 4096 AutoReadOnly Hidden ; 0x00001000
 string Property PluginFileName = "CalamityAffixes.esp" AutoReadOnly Hidden
 string Property LeaderTokenSettingName = "iMcmLeaderToken:General" AutoReadOnly Hidden
 string Property RunewordFragmentChanceSettingName = "fRunewordFragmentChancePercent:General" AutoReadOnly Hidden
@@ -25,6 +26,10 @@ bool Function IsCanonicalMcmQuest()
 		localFormId += LocalFormIdModulo
 	endWhile
 	localFormId = localFormId % LocalFormIdModulo
+	; CalamityAffixes.esp is ESL-flagged. The lower 24 bits still include the
+	; 12-bit light-plugin index, while GetFormFromFile expects only the lower
+	; 12-bit local FormID (for example FE001800 -> 00000800).
+	localFormId = localFormId % LightLocalFormIdModulo
 
 	Form resolved = Game.GetFormFromFile(localFormId, PluginFileName)
 	Quest resolvedQuest = resolved as Quest

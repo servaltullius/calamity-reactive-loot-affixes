@@ -19,14 +19,14 @@ namespace CalamityAffixes
 		ArchmageSelection selection{};
 
 		for (const auto idx : _affixSpecialActions.archmageAffixIndices) {
-			if (idx >= _affixes.size() || idx >= _activeCounts.size()) {
+			if (idx >= _affixRuntimeState.affixes.size() || idx >= _affixRuntimeState.activeCounts.size()) {
 				continue;
 			}
-			if (_activeCounts[idx] == 0) {
+			if (_affixRuntimeState.activeCounts[idx] == 0) {
 				continue;
 			}
 
-			auto& affix = _affixes[idx];
+			auto& affix = _affixRuntimeState.affixes[idx];
 			if (a_now < affix.nextAllowed) {
 				continue;
 			}
@@ -152,7 +152,7 @@ namespace CalamityAffixes
 
 	void EventBridge::ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell, const RE::HitData* a_hitData)
 	{
-		if (!_configLoaded || !_runtimeSettings.enabled || !a_caster || !a_target || !a_sourceSpell) {
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || !a_caster || !a_target || !a_sourceSpell) {
 			return;
 		}
 		if (!a_caster->IsPlayerRef()) {
@@ -185,7 +185,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		auto& affix = _affixes[*selection.bestIdx];
+		auto& affix = _affixRuntimeState.affixes[*selection.bestIdx];
 		if (affix.icd.count() > 0) {
 			affix.nextAllowed = now + affix.icd;
 		}

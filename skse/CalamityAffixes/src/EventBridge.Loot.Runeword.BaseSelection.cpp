@@ -96,8 +96,8 @@ namespace CalamityAffixes
 
 	const EventBridge::RunewordRecipe* EventBridge::ResolveCompletedRunewordRecipe(std::uint64_t a_instanceKey) const
 	{
-		const auto it = _instanceAffixes.find(a_instanceKey);
-		if (it == _instanceAffixes.end()) {
+		const auto it = _instanceTrackingState.instanceAffixes.find(a_instanceKey);
+		if (it == _instanceTrackingState.instanceAffixes.end()) {
 			return nullptr;
 		}
 

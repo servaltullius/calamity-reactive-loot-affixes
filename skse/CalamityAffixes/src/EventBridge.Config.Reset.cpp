@@ -4,15 +4,15 @@ namespace CalamityAffixes
 {
 	void EventBridge::ResetRuntimeStateForConfigReload()
 	{
-			_affixes.clear();
-			_activeCounts.clear();
-			_activeCritDamageBonusPct = 0.0f;
-			_affixRegistry = {};
-			_affixSpecialActions = {};
+		_affixRuntimeState.affixes.clear();
+		_affixRuntimeState.activeCounts.clear();
+		_affixRuntimeState.activeCritDamageBonusPct = 0.0f;
+		_affixRuntimeState.affixRegistry = {};
+		_affixSpecialActions = {};
 		_lootState.ResetForConfigReload();
-		_appliedPassiveSpells.clear();
-		_equippedInstanceKeysByToken.clear();
-		_equippedTokenCacheReady = false;
+		_instanceTrackingState.appliedPassiveSpells.clear();
+		_instanceTrackingState.equippedInstanceKeysByToken.clear();
+		_instanceTrackingState.equippedTokenCacheReady = false;
 		ClearTrapRuntimeState();
 		_corpseExplosionSeenCorpses.clear();
 		_corpseExplosionState = {};

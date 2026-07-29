@@ -9,7 +9,7 @@ namespace CalamityAffixes
 		bool a_warnOnDuplicate)
 	{
 		if (!a_affix.id.empty()) {
-			const auto [it, inserted] = _affixRegistry.affixIndexById.emplace(a_affix.id, a_index);
+			const auto [it, inserted] = _affixRuntimeState.affixRegistry.affixIndexById.emplace(a_affix.id, a_index);
 			if (!inserted) {
 				if (a_useSynthesizedDuplicateLogFormat) {
 					if (a_warnOnDuplicate) {
@@ -30,11 +30,11 @@ namespace CalamityAffixes
 		}
 
 		if (!a_affix.label.empty()) {
-			_affixRegistry.affixLabelSet.insert(a_affix.label);
+			_affixRuntimeState.affixRegistry.affixLabelSet.insert(a_affix.label);
 		}
 
 		if (a_affix.token != 0u) {
-			const auto [it, inserted] = _affixRegistry.affixIndexByToken.emplace(a_affix.token, a_index);
+			const auto [it, inserted] = _affixRuntimeState.affixRegistry.affixIndexByToken.emplace(a_affix.token, a_index);
 			if (!inserted) {
 				if (a_useSynthesizedDuplicateLogFormat) {
 					if (a_warnOnDuplicate) {
@@ -63,13 +63,13 @@ namespace CalamityAffixes
 
 		if (a_affix.slot == AffixSlot::kSuffix) {
 			// Suffixes are passive AV bonuses — always eligible for both weapons and armor.
-			_affixRegistry.lootWeaponSuffixes.push_back(a_index);
-			_affixRegistry.lootArmorSuffixes.push_back(a_index);
+			_affixRuntimeState.affixRegistry.lootWeaponSuffixes.push_back(a_index);
+			_affixRuntimeState.affixRegistry.lootArmorSuffixes.push_back(a_index);
 		} else {
 			if (*a_affix.lootType == LootItemType::kWeapon) {
-				_affixRegistry.lootWeaponAffixes.push_back(a_index);
+				_affixRuntimeState.affixRegistry.lootWeaponAffixes.push_back(a_index);
 			} else if (*a_affix.lootType == LootItemType::kArmor) {
-				_affixRegistry.lootArmorAffixes.push_back(a_index);
+				_affixRuntimeState.affixRegistry.lootArmorAffixes.push_back(a_index);
 			}
 		}
 	}
@@ -87,19 +87,19 @@ namespace CalamityAffixes
 
 		switch (a_affix.trigger) {
 		case Trigger::kHit:
-			_affixRegistry.hitTriggerAffixIndices.push_back(a_index);
+			_affixRuntimeState.affixRegistry.hitTriggerAffixIndices.push_back(a_index);
 			break;
 		case Trigger::kIncomingHit:
-			_affixRegistry.incomingHitTriggerAffixIndices.push_back(a_index);
+			_affixRuntimeState.affixRegistry.incomingHitTriggerAffixIndices.push_back(a_index);
 			break;
 		case Trigger::kDotApply:
-			_affixRegistry.dotApplyTriggerAffixIndices.push_back(a_index);
+			_affixRuntimeState.affixRegistry.dotApplyTriggerAffixIndices.push_back(a_index);
 			break;
 		case Trigger::kKill:
-			_affixRegistry.killTriggerAffixIndices.push_back(a_index);
+			_affixRuntimeState.affixRegistry.killTriggerAffixIndices.push_back(a_index);
 			break;
 		case Trigger::kLowHealth:
-			_affixRegistry.lowHealthTriggerAffixIndices.push_back(a_index);
+			_affixRuntimeState.affixRegistry.lowHealthTriggerAffixIndices.push_back(a_index);
 			break;
 		}
 	}

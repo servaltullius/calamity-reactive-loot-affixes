@@ -444,7 +444,7 @@ namespace RuntimeGateStoreChecks
 		}
 
 		if (source.find("ForgetLootEvaluatedInstance(it->first);", aggregatePos) != std::string::npos ||
-			source.find("_instanceAffixes.erase(it);", aggregatePos) != std::string::npos ||
+			source.find("_instanceTrackingState.instanceAffixes.erase(it);", aggregatePos) != std::string::npos ||
 			source.find("sanitized tracked loot instances (context={}, changed={}, erased={}).", aggregatePos) != std::string::npos) {
 			std::cerr << "loot_tracked_sanitize_extraction: aggregate sanitize function regained inline erase/logging responsibilities\n";
 			return false;
@@ -494,9 +494,9 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
-		if (source.find("const auto idxIt = _affixRegistry.affixIndexByToken.find(a_token);", sanitizePos) != std::string::npos ||
+		if (source.find("const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(a_token);", sanitizePos) != std::string::npos ||
 			source.find("for (std::uint8_t i = 0; i < a_slots.count; ++i)", sanitizePos) != std::string::npos ||
-			source.find("_instanceStates.erase(MakeInstanceStateKey(a_instanceKey, removedToken));", sanitizePos) != std::string::npos) {
+			source.find("_instanceTrackingState.instanceStates.erase(MakeInstanceStateKey(a_instanceKey, removedToken));", sanitizePos) != std::string::npos) {
 			std::cerr << "loot_slot_sanitize_helper_extraction: sanitize function regained inline token/equality/apply responsibilities\n";
 			return false;
 		}
@@ -544,8 +544,8 @@ namespace RuntimeGateStoreChecks
 		};
 
 		const std::array<std::string_view, 3> requiredBothLoadAndRevert{
-			"_activeCounts.clear();",
-			"_activeHitTriggerAffixIndices.clear();",
+			"_affixRuntimeState.activeCounts.clear();",
+			"_affixRuntimeState.activeHitTriggerAffixIndices.clear();",
 			"_combatState.ResetTransientState();",
 		};
 

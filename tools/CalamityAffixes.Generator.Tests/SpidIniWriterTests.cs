@@ -36,7 +36,12 @@ public sealed class SpidIniWriterTests
         {
             AffixSpec spec = AffixSpecLoader.Load(specPath);
             var ini = SpidIniWriter.Render(spec);
+            var secondRender = SpidIniWriter.Render(spec);
 
+            Assert.Equal(ini, secondRender);
+            Assert.DoesNotContain("; Generated:", ini);
+            Assert.DoesNotContain("\r", ini);
+            Assert.EndsWith("\n", ini);
             Assert.Contains("; Test SPID rule from JSON", ini);
             Assert.Contains("Item = CAFF_LItem_RunewordFragmentDrops|ActorTypeNPC|NONE|NONE|NONE|1|100", ini);
         }

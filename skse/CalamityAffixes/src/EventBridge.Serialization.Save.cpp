@@ -17,7 +17,7 @@ namespace CalamityAffixes
 		PruneLootEvaluatedInstances();
 
 		// --- IAXF v7: fixed 4-token slots ---
-		const std::uint32_t count = static_cast<std::uint32_t>(_instanceAffixes.size());
+		const std::uint32_t count = static_cast<std::uint32_t>(_instanceTrackingState.instanceAffixes.size());
 		if (!a_intfc->OpenRecord(kSerializationRecordInstanceAffixes, kSerializationVersion)) {
 			return;
 		}
@@ -25,7 +25,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		for (const auto& [key, slots] : _instanceAffixes) {
+		for (const auto& [key, slots] : _instanceTrackingState.instanceAffixes) {
 			const auto baseID = static_cast<RE::FormID>(key >> 16);
 			const auto uniqueID = static_cast<std::uint16_t>(key & 0xFFFFu);
 
@@ -52,11 +52,11 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const std::uint32_t runtimeStateCount = static_cast<std::uint32_t>(_instanceStates.size());
+		const std::uint32_t runtimeStateCount = static_cast<std::uint32_t>(_instanceTrackingState.instanceStates.size());
 		if (!a_intfc->WriteRecordData(runtimeStateCount)) {
 			return;
 		}
-		for (const auto& [stateKey, state] : _instanceStates) {
+		for (const auto& [stateKey, state] : _instanceTrackingState.instanceStates) {
 			const auto baseID = static_cast<RE::FormID>(stateKey.instanceKey >> 16);
 			const auto uniqueID = static_cast<std::uint16_t>(stateKey.instanceKey & 0xFFFFu);
 			if (!a_intfc->WriteRecordData(baseID)) {

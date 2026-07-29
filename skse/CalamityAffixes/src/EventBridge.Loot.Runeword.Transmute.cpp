@@ -51,8 +51,8 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		const auto affixIt = _affixRegistry.affixIndexByToken.find(a_recipe.resultAffixToken);
-		if (affixIt == _affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixes.size()) {
+		const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(a_recipe.resultAffixToken);
+		if (affixIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixRuntimeState.affixes.size()) {
 			if (a_outFailureReason) {
 				*a_outFailureReason = "result-affix-invalidated";
 			}
@@ -64,7 +64,7 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		auto& slots = _instanceAffixes[a_instanceKey];
+		auto& slots = _instanceTrackingState.instanceAffixes[a_instanceKey];
 		const InstanceAffixSlots previousSlots = slots;
 		if (replacedResultToken != 0u && replacedResultToken != a_recipe.resultAffixToken) {
 			slots.RemoveToken(replacedResultToken);
@@ -85,7 +85,7 @@ namespace CalamityAffixes
 		}
 
 		if (replacedResultToken != 0u && replacedResultToken != a_recipe.resultAffixToken) {
-			_instanceStates.erase(MakeInstanceStateKey(a_instanceKey, replacedResultToken));
+			_instanceTrackingState.instanceStates.erase(MakeInstanceStateKey(a_instanceKey, replacedResultToken));
 		}
 		EnsureInstanceRuntimeState(a_instanceKey, a_recipe.resultAffixToken);
 		_runewordState.instanceStates.erase(a_instanceKey);
@@ -104,7 +104,7 @@ namespace CalamityAffixes
 		SKSE::log::info(
 			"CalamityAffixes: runeword completed (recipe={}, resultAffix={}).",
 			a_recipe.id,
-			_affixes[affixIt->second].id);
+			_affixRuntimeState.affixes[affixIt->second].id);
 		return true;
 	}
 

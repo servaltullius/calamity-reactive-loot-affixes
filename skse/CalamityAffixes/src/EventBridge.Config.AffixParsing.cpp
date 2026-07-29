@@ -429,11 +429,11 @@ namespace CalamityAffixes
 
 				NormalizeParsedAffixRuntimePolicy(out, type);
 
-				_affixes.push_back(std::move(out));
-				const auto idx = _affixes.size() - 1;
+				_affixRuntimeState.affixes.push_back(std::move(out));
+				const auto idx = _affixRuntimeState.affixes.size() - 1;
 
-				IndexAffixTriggerBucket(_affixes[idx], idx);
-				IndexAffixSpecialActionBucket(_affixes[idx], idx);
+				IndexAffixTriggerBucket(_affixRuntimeState.affixes[idx], idx);
+				IndexAffixSpecialActionBucket(_affixRuntimeState.affixes[idx], idx);
 			} catch (const nlohmann::json::exception& e) {
 				SKSE::log::error(
 					"CalamityAffixes: JSON error while parsing affix entry; skipping. ({})",

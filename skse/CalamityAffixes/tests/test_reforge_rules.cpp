@@ -2,6 +2,8 @@
 
 using CalamityAffixes::detail::DetermineLootPrefixSuffixTargets;
 using CalamityAffixes::detail::BuildRegularOnlyAffixSlots;
+using CalamityAffixes::detail::DidConsumeExactInventoryCount;
+using CalamityAffixes::detail::DidRestoreExactInventoryCount;
 using CalamityAffixes::detail::ShouldRetryRegularAffixReforgeRoll;
 using CalamityAffixes::detail::ResolveReforgeTargetAffixCount;
 static constexpr auto kMaxSlots = static_cast<std::uint8_t>(CalamityAffixes::kMaxRegularAffixesPerItem);
@@ -55,3 +57,19 @@ static_assert([] {
 	return !ShouldRetryRegularAffixReforgeRoll(previous, rolled, 3u, 4u);
 }(),
 	"ShouldRetryRegularAffixReforgeRoll: accepts same-slot reroll on final attempt");
+
+static_assert(DidConsumeExactInventoryCount(3u, 2u, 1u),
+	"DidConsumeExactInventoryCount: accepts exactly one consumed reforge orb");
+static_assert(!DidConsumeExactInventoryCount(3u, 3u, 1u),
+	"DidConsumeExactInventoryCount: rejects a failed removal");
+static_assert(!DidConsumeExactInventoryCount(3u, 1u, 1u),
+	"DidConsumeExactInventoryCount: rejects an unexpected multi-item delta");
+static_assert(!DidConsumeExactInventoryCount(2u, 3u, 1u),
+	"DidConsumeExactInventoryCount: rejects an inventory count increase");
+
+static_assert(DidRestoreExactInventoryCount(1u, 2u, 1u),
+	"DidRestoreExactInventoryCount: accepts exactly one restored reforge orb");
+static_assert(!DidRestoreExactInventoryCount(1u, 1u, 1u),
+	"DidRestoreExactInventoryCount: rejects a failed compensation");
+static_assert(!DidRestoreExactInventoryCount(1u, 3u, 1u),
+	"DidRestoreExactInventoryCount: rejects an unexpected multi-item compensation");

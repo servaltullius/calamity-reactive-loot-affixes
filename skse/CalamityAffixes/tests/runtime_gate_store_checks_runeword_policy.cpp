@@ -552,10 +552,10 @@ namespace RuntimeGateStoreChecks
 			}
 
 			if (eventBridgeHeaderText->find("#include \"CalamityAffixes/AffixRegistryState.h\"") == std::string::npos ||
-				eventBridgeHeaderText->find("AffixRegistryState& _affixRegistry{ _affixRuntimeState.affixRegistry };") == std::string::npos ||
+				eventBridgeHeaderText->find("AffixRegistryState& _affixRegistry") != std::string::npos ||
 				eventBridgeHeaderText->find("AffixRuntimeCacheState _affixRuntimeState{};") == std::string::npos ||
-				eventBridgeHeaderText->find("std::unordered_map<std::string, std::size_t> _affixIndexById;") != std::string::npos ||
-				eventBridgeHeaderText->find("std::unordered_map<std::uint64_t, std::size_t> _affixIndexByToken;") != std::string::npos ||
+				eventBridgeHeaderText->find("{ _affixRuntimeState.") != std::string::npos ||
+				eventBridgeHeaderText->find("{ _instanceTrackingState.") != std::string::npos ||
 				eventBridgeHeaderText->find("std::unordered_set<std::string> _affixLabelSet;") != std::string::npos ||
 				eventBridgeHeaderText->find("std::vector<std::size_t> _hitTriggerAffixIndices;") != std::string::npos ||
 				eventBridgeHeaderText->find("std::vector<std::size_t> _lootWeaponAffixes;") != std::string::npos ||
@@ -563,10 +563,10 @@ namespace RuntimeGateStoreChecks
 				registryHeaderText->find("affixIndexByToken") == std::string::npos ||
 				registryHeaderText->find("hitTriggerAffixIndices") == std::string::npos ||
 				registryHeaderText->find("lootWeaponAffixes") == std::string::npos ||
-				indexingText->find("_affixRegistry.affixIndexById") == std::string::npos ||
-				indexingText->find("_affixRegistry.affixIndexByToken") == std::string::npos ||
-				indexingText->find("_affixRegistry.hitTriggerAffixIndices") == std::string::npos ||
-				indexingText->find("_affixRegistry.lootWeaponAffixes") == std::string::npos) {
+				indexingText->find("_affixRuntimeState.affixRegistry.affixIndexById") == std::string::npos ||
+				indexingText->find("_affixRuntimeState.affixRegistry.affixIndexByToken") == std::string::npos ||
+				indexingText->find("_affixRuntimeState.affixRegistry.hitTriggerAffixIndices") == std::string::npos ||
+				indexingText->find("_affixRuntimeState.affixRegistry.lootWeaponAffixes") == std::string::npos) {
 				std::cerr << "affix_registry_state_extraction: affix registry extraction is incomplete\n";
 				return false;
 			}
@@ -672,7 +672,7 @@ namespace RuntimeGateStoreChecks
 			const auto recipeUiCursorUpdatePos = recipeUiText->find("_runewordState.recipeCycleCursor = static_cast<std::uint32_t>(idx);");
 
 			if (selectionText->find("bool EventBridge::HasRunewordRuntimeEffect(") == std::string::npos ||
-				selectionText->find("return affixIt != _affixRegistry.affixIndexByToken.end() && affixIt->second < _affixes.size();") == std::string::npos ||
+				selectionText->find("return affixIt != _affixRuntimeState.affixRegistry.affixIndexByToken.end() && affixIt->second < _affixRuntimeState.affixes.size();") == std::string::npos ||
 				recipeEntriesText->find("if (!HasRunewordRuntimeEffect(recipe))") == std::string::npos ||
 				recipeUiText->find("Runeword Recipe: runtime effect not available.") == std::string::npos ||
 				recipeUiText->find("if (!HasRunewordRuntimeEffect(recipe))") == std::string::npos ||
@@ -1074,17 +1074,15 @@ namespace RuntimeGateStoreChecks
 
 			if (selectionSource.find("bool EventBridge::ResolveSelectedRunewordBaseInstance(") == std::string::npos ||
 				reforgeSource.find("ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)") == std::string::npos ||
-				reforgeSource.find("preservedRunewordToken") == std::string::npos ||
 				reforgeSource.find("BuildRegularOnlyAffixSlots(previousSlots, preservedRunewordToken)") == std::string::npos ||
 				reforgeSource.find("TryPromotePreservedRunewordPrimary(rolled, preservedRunewordToken)") == std::string::npos ||
-				reforgeSource.find("_runewordState.instanceStates.erase(instanceKey);") == std::string::npos ||
 				reforgeSource.find("Reforge blocked: completed runeword base.") != std::string::npos) {
 				std::cerr << "runeword_reforge_safety: completed-base reroll integration guard is missing\n";
 				return false;
 			}
 
 			// Verify runeword token exclusion from regular roll pool.
-			if (reforgeSource.find("_affixes[*idx].token == preservedRunewordToken") == std::string::npos) {
+			if (reforgeSource.find("_affixRuntimeState.affixes[*idx].token == preservedRunewordToken") == std::string::npos) {
 				std::cerr << "runeword_reforge_safety: runeword token exclusion from regular roll pool is missing\n";
 				return false;
 			}
@@ -1095,11 +1093,29 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
-			if (reforgeSource.find("EventBridge::OperationResult EventBridge::ResetSelectedRunewordBaseCalamityState()") == std::string::npos ||
+			const auto preservedStateCapturePos =
+				reforgeSource.find("preservedRunewordRuntimeState = *state;");
+			const auto orbPostcheckPos = reforgeSource.find("DidConsumeExactInventoryCount(");
+			const auto orbRefundPos =
+				reforgeSource.find("player->AddObjectToContainer(orb, nullptr, 1, nullptr);", orbPostcheckPos);
+			const auto stateCommitPos = reforgeSource.find("EraseInstanceRuntimeStates(instanceKey);");
+			const auto ensureRolledStatePos =
+				reforgeSource.find("EnsureInstanceRuntimeState(instanceKey, newSlots.tokens[i]);", stateCommitPos);
+			const auto preservedStateRestorePos =
+				reforgeSource.find("EnsureInstanceRuntimeState(instanceKey, preservedRunewordToken) =", ensureRolledStatePos);
+			if (preservedStateCapturePos == std::string::npos ||
+				orbPostcheckPos == std::string::npos ||
+				orbRefundPos == std::string::npos ||
+				stateCommitPos == std::string::npos ||
+				ensureRolledStatePos == std::string::npos ||
+				preservedStateRestorePos == std::string::npos ||
+				preservedStateCapturePos >= stateCommitPos ||
+				orbPostcheckPos >= stateCommitPos ||
+				orbRefundPos >= stateCommitPos ||
+				ensureRolledStatePos >= preservedStateRestorePos ||
+				reforgeSource.find("EventBridge::OperationResult EventBridge::ResetSelectedRunewordBaseCalamityState()") == std::string::npos ||
 				reforgeSource.find("if (_runewordState.transmuteInProgress)") == std::string::npos ||
-				reforgeSource.find("ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)") == std::string::npos ||
-				reforgeSource.find("_instanceAffixes.erase(instanceKey)") == std::string::npos ||
-				reforgeSource.find("EraseInstanceRuntimeStates(instanceKey);") == std::string::npos ||
+				reforgeSource.find("_instanceTrackingState.instanceAffixes.erase(instanceKey)") == std::string::npos ||
 				reforgeSource.find("_runewordState.instanceStates.erase(instanceKey)") == std::string::npos ||
 				reforgeSource.find("ForgetLootPreviewSlots(instanceKey);") == std::string::npos ||
 				reforgeSource.find("MarkLootEvaluatedInstance(instanceKey);") == std::string::npos ||
@@ -1970,7 +1986,6 @@ namespace RuntimeGateStoreChecks
 				combinedCore.find("recipeRefreshes={}") == std::string::npos ||
 				combinedCore.find("CalamityAffixes: slow Prisma tick") == std::string::npos ||
 				combinedCore.find("\"recipeToken\"") == std::string::npos ||
-				combinedCore.find("g_tickTaskPending.store(false, std::memory_order_release);") == std::string::npos ||
 				combinedCore.find("if (!g_runewordPanelDynamicDirty && !g_runewordRecipeListDirty && !safetyRefreshDue)") == std::string::npos ||
 				combinedCore.find("if (a_includeRecipes) {") == std::string::npos ||
 				combinedCore.find("RefreshRunewordPanelBindings(*bridge);") != std::string::npos ||

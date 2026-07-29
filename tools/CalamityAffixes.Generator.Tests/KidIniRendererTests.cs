@@ -65,7 +65,12 @@ public sealed class KidIniRendererTests
         };
 
         var ini = KidIniWriter.Render(spec);
+        var secondRender = KidIniWriter.Render(spec);
 
+        Assert.Equal(ini, secondRender);
+        Assert.DoesNotContain("; Generated:", ini);
+        Assert.DoesNotContain("\r", ini);
+        Assert.EndsWith("\n", ini);
         Assert.Contains("Instance mode: affix keywords are NOT distributed via KID.", ini);
         Assert.DoesNotContain("ExclusiveGroup = CalamityAffixes_Affixes|", ini);
         Assert.DoesNotContain("Keyword = LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING|", ini);

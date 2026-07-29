@@ -299,6 +299,11 @@ namespace CalamityAffixes::Hooks
 		return ActorHandleHealthDamageHook::IsHooked(a_actor);
 	}
 
+	void InvalidateDeferredTasks() noexcept
+	{
+		detail::InvalidateDeferredTasks();
+	}
+
 	void ClearRuntimeState() noexcept
 	{
 		detail::ClearDispatchRuntimeState();

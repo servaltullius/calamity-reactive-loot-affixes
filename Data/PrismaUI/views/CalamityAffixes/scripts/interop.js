@@ -98,6 +98,13 @@ function setRunewordPanelState(raw) {
     nextRuneOwned: Number.isFinite(Number(data.nextRuneOwned)) ? Number(data.nextRuneOwned) : 0,
     canInsert: Boolean(data.canInsert),
     missingSummary: typeof data.missingSummary === "string" ? data.missingSummary : "",
+    baseCompatibilityWarning: Boolean(data.baseCompatibilityWarning),
+    baseCompatibilityMessageEn: typeof data.baseCompatibilityMessageEn === "string"
+      ? data.baseCompatibilityMessageEn
+      : "",
+    baseCompatibilityMessageKo: typeof data.baseCompatibilityMessageKo === "string"
+      ? data.baseCompatibilityMessageKo
+      : "",
     requiredRunes: Array.isArray(data.requiredRunes)
       ? data.requiredRunes
           .map((entry) => {
@@ -297,4 +304,3 @@ function setSelectedItemSource(raw) {
   selectedItemSourceState = value;
   schedulePanelRender(panelRenderSection.selectedItemContext);
 }
-

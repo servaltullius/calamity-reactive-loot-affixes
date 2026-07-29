@@ -110,7 +110,7 @@ namespace CalamityAffixes
 			candidate.preview = false;
 			candidate.slots.Clear();
 
-			if (const auto mappedIt = _instanceAffixes.find(key); mappedIt != _instanceAffixes.end()) {
+			if (const auto mappedIt = _instanceTrackingState.instanceAffixes.find(key); mappedIt != _instanceTrackingState.instanceAffixes.end()) {
 				candidate.slots = mappedIt->second;
 			}
 
@@ -484,12 +484,12 @@ namespace CalamityAffixes
 
 			for (std::uint8_t s = 0; s < a_candidate.slots.count; ++s) {
 				const auto token = a_candidate.slots.tokens[s];
-				const auto idxIt = _affixRegistry.affixIndexByToken.find(token);
-				if (idxIt == _affixRegistry.affixIndexByToken.end() || idxIt->second >= _affixes.size()) {
+				const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(token);
+				if (idxIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() || idxIt->second >= _affixRuntimeState.affixes.size()) {
 					continue;
 				}
 
-				const auto& affix = _affixes[idxIt->second];
+				const auto& affix = _affixRuntimeState.affixes[idxIt->second];
 				auto resolvedName = resolveDisplayName(affix);
 				if (resolvedName.empty()) {
 					continue;

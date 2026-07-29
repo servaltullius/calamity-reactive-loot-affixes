@@ -16,5 +16,6 @@ namespace CalamityAffixes::Hooks
 
 	void Install();
 	[[nodiscard]] bool IsHandleHealthDamageHooked(const RE::Actor* a_actor) noexcept;
+	void InvalidateDeferredTasks() noexcept;
 	void ClearRuntimeState() noexcept;
 }

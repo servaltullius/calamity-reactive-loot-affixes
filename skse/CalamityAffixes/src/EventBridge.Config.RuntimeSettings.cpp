@@ -52,7 +52,11 @@ namespace CalamityAffixes
 				useLegacyDebugNotifications
 					? runtime.value("debugNotifications", _loot.debugLog)
 					: false;
-			_runtimeSettings.enabled = runtime.value("enabled", _runtimeSettings.enabled);
+			_runtimeSettings.enabled.store(
+				runtime.value(
+					"enabled",
+					_runtimeSettings.enabled.load(std::memory_order_relaxed)),
+				std::memory_order_relaxed);
 			if (hasDebugHudNotifications) {
 				_loot.debugHudNotifications = runtime.value("debugHudNotifications", _loot.debugHudNotifications);
 			} else if (useLegacyDebugNotifications) {
@@ -121,7 +125,7 @@ namespace CalamityAffixes
 		SKSE::log::info(
 			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, broadRuntimeCurrencyDropsEnabled={}, corpseDeathCurrencyDropsEnabled={}, debugHud={}, debugVerbose={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
 			std::string(kUserSettingsRelativePath),
-			_runtimeSettings.enabled,
+			_runtimeSettings.enabled.load(std::memory_order_relaxed),
 			_runtimeSettings.procChanceMult,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
@@ -144,7 +148,7 @@ namespace CalamityAffixes
 	nlohmann::json EventBridge::BuildRuntimeUserSettingsJson() const
 	{
 		nlohmann::json runtime = nlohmann::json::object();
-		runtime["enabled"] = _runtimeSettings.enabled;
+		runtime["enabled"] = _runtimeSettings.enabled.load(std::memory_order_relaxed);
 		runtime["debugHudNotifications"] = _loot.debugHudNotifications;
 		runtime["debugVerboseLogging"] = _loot.debugLog;
 		runtime["debugCombat"] = _runtimeSettings.combatDebugLog;

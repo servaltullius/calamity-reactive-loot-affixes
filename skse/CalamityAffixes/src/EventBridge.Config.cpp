@@ -137,9 +137,9 @@ namespace CalamityAffixes
 
 		SKSE::log::info(
 			"CalamityAffixes: runtime config loaded (affixes={}, prefixWeapon={}, prefixArmor={}, suffixWeapon={}, suffixArmor={}, lootChance={}%, runeFragChance={}%, reforgeOrbChance={}%, uniqueRewardRuneChance={}%, broadRuntimeCurrencyDropsEnabled={}, corpseDeathCurrencyDropsEnabled={}, sourceMult(corpse/container/boss/world)={:.2f}/{:.2f}/{:.2f}/{:.2f}, triggerBudget={}/{}, trapCastBudgetPerTick={}).",
-			_affixes.size(),
-			_affixRegistry.lootWeaponAffixes.size(), _affixRegistry.lootArmorAffixes.size(),
-			_affixRegistry.lootWeaponSuffixes.size(), _affixRegistry.lootArmorSuffixes.size(),
+			_affixRuntimeState.affixes.size(),
+			_affixRuntimeState.affixRegistry.lootWeaponAffixes.size(), _affixRuntimeState.affixRegistry.lootArmorAffixes.size(),
+			_affixRuntimeState.affixRegistry.lootWeaponSuffixes.size(), _affixRuntimeState.affixRegistry.lootArmorSuffixes.size(),
 			_loot.chancePercent,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
@@ -162,7 +162,7 @@ namespace CalamityAffixes
 				_affixSpecialActions.archmageAffixIndices.size(),
 				_affixSpecialActions.corpseExplosionAffixIndices.size());
 
-		if (_affixes.empty()) {
+		if (_affixRuntimeState.affixes.empty()) {
 			SKSE::log::error("CalamityAffixes: no affixes loaded. Is the generated CalamityAffixes plugin enabled?");
 		}
 	}
