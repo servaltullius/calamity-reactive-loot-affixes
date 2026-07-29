@@ -452,7 +452,7 @@
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.1,
-              "add": 0.0,
+              "add": 10.0,
               "min": 0.0,
               "max": 0.0,
               "spellBaseAsMin": true
@@ -508,7 +508,7 @@
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.1,
-              "add": 0.0,
+              "add": 6.0,
               "min": 0.0,
               "max": 0.0,
               "spellBaseAsMin": true
@@ -563,7 +563,7 @@
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.1,
-              "add": 0.0,
+              "add": 6.0,
               "min": 0.0,
               "max": 0.0,
               "spellBaseAsMin": true
@@ -618,7 +618,7 @@
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.1,
-              "add": 0.0,
+              "add": 6.0,
               "min": 0.0,
               "max": 0.0,
               "spellBaseAsMin": true
@@ -1436,7 +1436,7 @@
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.04,
-              "add": 0.0,
+              "add": 4.0,
               "min": 0.0,
               "max": 0.0,
               "spellBaseAsMin": true
@@ -2577,9 +2577,9 @@
       {
         "id": "crit_cast_firebolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_FIREBOLT",
-        "name": "치명 시전: 파이어볼트: 치명타/강공 시 파이어볼트 시전 (적중의 30%). 0.15초마다 발동.",
-        "nameEn": "Crit Cast: Firebolt (Crit/Power Attack, ICD 0.15s): Firebolt + 30% of Hit Damage",
-        "nameKo": "치명 시전: 파이어볼트: 치명타/강공 시 파이어볼트 시전 (적중의 30%). 0.15초마다 발동.",
+        "name": "치명 시전: 파이어볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 파이어볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
+        "nameEn": "Crit Cast: Firebolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Firebolt; damage is the greater of the spell's base damage and 30% of physical hit damage.",
+        "nameKo": "치명 시전: 파이어볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 파이어볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2610,9 +2610,9 @@
       {
         "id": "crit_cast_ice_spike",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_SPIKE",
-        "name": "치명 시전: 아이스 스파이크: 치명타/강공 시 아이스 스파이크 시전 (적중의 30%). 0.15초마다 발동.",
-        "nameEn": "Crit Cast: Ice Spike (Crit/Power Attack, ICD 0.15s): Ice Spike + 30% of Hit Damage",
-        "nameKo": "치명 시전: 아이스 스파이크: 치명타/강공 시 아이스 스파이크 시전 (적중의 30%). 0.15초마다 발동.",
+        "name": "치명 시전: 아이스 스파이크: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이스 스파이크 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
+        "nameEn": "Crit Cast: Ice Spike (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Ice Spike; damage is the greater of the spell's base damage and 30% of physical hit damage.",
+        "nameKo": "치명 시전: 아이스 스파이크: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이스 스파이크 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2643,9 +2643,9 @@
       {
         "id": "crit_cast_lightning_bolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_LIGHTNING_BOLT",
-        "name": "치명 시전: 라이트닝 볼트: 치명타/강공 시 라이트닝 볼트 시전 (적중의 30%). 0.15초마다 발동.",
-        "nameEn": "Crit Cast: Lightning Bolt (Crit/Power Attack, ICD 0.15s): Lightning Bolt + 30% of Hit Damage",
-        "nameKo": "치명 시전: 라이트닝 볼트: 치명타/강공 시 라이트닝 볼트 시전 (적중의 30%). 0.15초마다 발동.",
+        "name": "치명 시전: 라이트닝 볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 라이트닝 볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
+        "nameEn": "Crit Cast: Lightning Bolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Lightning Bolt; damage is the greater of the spell's base damage and 30% of physical hit damage.",
+        "nameKo": "치명 시전: 라이트닝 볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 라이트닝 볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2676,9 +2676,9 @@
       {
         "id": "crit_cast_thunderbolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_THUNDERBOLT",
-        "name": "치명 시전: 썬더볼트: 치명타/강공 시 썬더볼트 시전 (적중의 30%). 0.15초마다 발동.",
-        "nameEn": "Crit Cast: Thunderbolt (Crit/Power Attack, ICD 0.15s): Thunderbolt + 30% of Hit Damage",
-        "nameKo": "치명 시전: 썬더볼트: 치명타/강공 시 썬더볼트 시전 (적중의 30%). 0.15초마다 발동.",
+        "name": "치명 시전: 썬더볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 썬더볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
+        "nameEn": "Crit Cast: Thunderbolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Thunderbolt; damage is the greater of the spell's base damage and 30% of physical hit damage.",
+        "nameKo": "치명 시전: 썬더볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 썬더볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2709,9 +2709,9 @@
       {
         "id": "crit_cast_icy_spear",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICY_SPEAR",
-        "name": "치명 시전: 아이시 스피어: 치명타/강공 시 아이시 스피어 시전 (적중의 30%). 0.15초마다 발동.",
-        "nameEn": "Crit Cast: Icy Spear (Crit/Power Attack, ICD 0.15s): Icy Spear + 30% of Hit Damage",
-        "nameKo": "치명 시전: 아이시 스피어: 치명타/강공 시 아이시 스피어 시전 (적중의 30%). 0.15초마다 발동.",
+        "name": "치명 시전: 아이시 스피어: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이시 스피어 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
+        "nameEn": "Crit Cast: Icy Spear (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Icy Spear; damage is the greater of the spell's base damage and 30% of physical hit damage.",
+        "nameKo": "치명 시전: 아이시 스피어: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이시 스피어 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2742,9 +2742,9 @@
       {
         "id": "crit_cast_chain_lightning",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_CHAIN_LIGHTNING",
-        "name": "치명 시전: 체인 라이트닝: 치명타/강공 시 체인 라이트닝 시전 (적중의 30%). 0.15초마다 발동.",
-        "nameEn": "Crit Cast: Chain Lightning (Crit/Power Attack, ICD 0.15s): Chain Lightning + 30% of Hit Damage",
-        "nameKo": "치명 시전: 체인 라이트닝: 치명타/강공 시 체인 라이트닝 시전 (적중의 30%). 0.15초마다 발동.",
+        "name": "치명 시전: 체인 라이트닝: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 체인 라이트닝 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
+        "nameEn": "Crit Cast: Chain Lightning (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Chain Lightning; damage is the greater of the spell's base damage and 30% of physical hit damage.",
+        "nameKo": "치명 시전: 체인 라이트닝: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 체인 라이트닝 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2775,9 +2775,9 @@
       {
         "id": "crit_cast_ice_storm",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_STORM",
-        "name": "치명 시전: 아이스 스톰: 치명타/강공 시 아이스 스톰 시전 (적중의 30%). 0.15초마다 발동.",
-        "nameEn": "Crit Cast: Ice Storm (Crit/Power Attack, ICD 0.15s): Ice Storm + 30% of Hit Damage",
-        "nameKo": "치명 시전: 아이스 스톰: 치명타/강공 시 아이스 스톰 시전 (적중의 30%). 0.15초마다 발동.",
+        "name": "치명 시전: 아이스 스톰: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이스 스톰 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
+        "nameEn": "Crit Cast: Ice Storm (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Ice Storm; damage is the greater of the spell's base damage and 30% of physical hit damage.",
+        "nameKo": "치명 시전: 아이스 스톰: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이스 스톰 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",

@@ -149,6 +149,59 @@ class CoreIdentityWaveTwoTests(unittest.TestCase):
         self.assertEqual(10, runtime["icdSeconds"])
         self.assertEqual("CAFF_SPEL_TRAP_IRONJAW_SNARE", runtime["action"]["spellEditorId"])
 
+    def test_direct_hit_damage_affixes_add_the_displayed_base_damage(self) -> None:
+        expected = {
+            "storm_call": {"add": 10, "mult": 0.10},
+            "flame_strike": {"add": 6, "mult": 0.10},
+            "frost_strike": {"add": 6, "mult": 0.10},
+            "spark_strike": {"add": 6, "mult": 0.10},
+            "ember_brand": {"add": 4, "mult": 0.04},
+        }
+        for affix_id, contract in expected.items():
+            with self.subTest(affix_id=affix_id):
+                entry = self.by_id[affix_id]
+                action = entry["runtime"]["action"]
+                scaling = action["magnitudeScaling"]
+                self.assertEqual("CastSpell", action["type"])
+                self.assertEqual("HitPhysicalDealt", scaling["source"])
+                self.assertEqual(contract["mult"], scaling["mult"])
+                self.assertEqual(contract["add"], scaling["add"])
+                self.assertIs(True, scaling["spellBaseAsMin"])
+                self.assertEqual(
+                    contract["add"],
+                    entry["records"]["spell"]["effect"]["magnitude"],
+                )
+
+    def test_crit_cast_contract_describes_trigger_and_damage_floor(self) -> None:
+        affix_ids = (
+            "crit_cast_firebolt",
+            "crit_cast_ice_spike",
+            "crit_cast_lightning_bolt",
+            "crit_cast_thunderbolt",
+            "crit_cast_icy_spear",
+            "crit_cast_chain_lightning",
+            "crit_cast_ice_storm",
+        )
+        for affix_id in affix_ids:
+            with self.subTest(affix_id=affix_id):
+                entry = self.by_id[affix_id]
+                runtime = entry["runtime"]
+                action = runtime["action"]
+                scaling = action["magnitudeScaling"]
+                self.assertEqual(entry["name"], entry["nameKo"])
+                self.assertIn("근접 치명타/강공", entry["nameKo"])
+                self.assertIn("활·석궁은 일반 적중", entry["nameKo"])
+                self.assertIn("주문 기본 피해와 물리 적중 피해의 30% 중 큰 값", entry["nameKo"])
+                self.assertIn("Melee Crit/Power Attack", entry["nameEn"])
+                self.assertIn("any Bow/Crossbow Hit", entry["nameEn"])
+                self.assertIn("greater of the spell's base damage and 30% of physical hit damage", entry["nameEn"])
+                self.assertEqual("CastOnCrit", action["type"])
+                self.assertEqual(100, runtime["procChancePercent"])
+                self.assertEqual("HitPhysicalDealt", scaling["source"])
+                self.assertEqual(0.3, scaling["mult"])
+                self.assertEqual(0, scaling["add"])
+                self.assertIs(True, scaling["spellBaseAsMin"])
+
     def test_all_wave_two_display_strings_are_synchronized(self) -> None:
         for affix_id in (
             "shadow_stride",

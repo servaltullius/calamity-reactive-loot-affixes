@@ -10,6 +10,7 @@ namespace
 }
 
 using CalamityAffixes::MagnitudeScaling;
+using CalamityAffixes::DirectElementalDamageMagnitudeSelector;
 using CalamityAffixes::ResolveMagnitudeOverride;
 
 // 1) spellBaseAsMin=true keeps baseline when hit damage is low.
@@ -155,3 +156,37 @@ static_assert(FloatEq(
 					  }),
 				  15.0f),
 	"add_only");
+
+// 9) Crit Cast uses the direct shock damage, not the larger Disintegrate magnitude.
+static_assert([] {
+	DirectElementalDamageMagnitudeSelector selector;
+	selector.Consider(200.0f, true, true, true, 1u);
+	selector.Consider(25.0f, true, true, true, 0u);
+	return FloatEq(selector.Resolve(), 25.0f);
+}());
+
+// 10) Slow/Fear-style utility effects do not become the spell damage baseline.
+static_assert([] {
+	DirectElementalDamageMagnitudeSelector selector;
+	selector.Consider(50.0f, true, false, true, 3u);
+	selector.Consider(99.0f, false, false, false, 15u);
+	selector.Consider(40.0f, true, true, true, 0u);
+	return FloatEq(selector.Resolve(), 40.0f);
+}());
+
+// 11) No matching direct elemental damage effect produces no spell-base floor.
+static_assert([] {
+	DirectElementalDamageMagnitudeSelector selector;
+	selector.Consider(200.0f, false, true, true, 1u);
+	selector.Consider(50.0f, true, false, true, 3u);
+	return FloatEq(selector.Resolve(), 0.0f);
+}());
+
+// 12) Invalid magnitudes are ignored.
+static_assert([] {
+	DirectElementalDamageMagnitudeSelector selector;
+	selector.Consider(-25.0f, true, true, true, 0u);
+	selector.Consider(std::numeric_limits<float>::infinity(), true, true, true, 0u);
+	selector.Consider(std::numeric_limits<float>::quiet_NaN(), true, true, true, 0u);
+	return FloatEq(selector.Resolve(), 0.0f);
+}());

@@ -2,9 +2,41 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 
 namespace CalamityAffixes
 {
+	class DirectElementalDamageMagnitudeSelector
+	{
+	public:
+		constexpr void Consider(
+			float a_magnitude,
+			bool a_isValueModifier,
+			bool a_affectsHealth,
+			bool a_usesElementalResistance,
+			std::uint32_t a_duration) noexcept
+		{
+			if (!a_isValueModifier ||
+				!a_affectsHealth ||
+				!a_usesElementalResistance ||
+				a_duration != 0u ||
+				!(a_magnitude > 0.0f) ||
+				a_magnitude > std::numeric_limits<float>::max()) {
+				return;
+			}
+
+			_magnitude = std::max(_magnitude, a_magnitude);
+		}
+
+		[[nodiscard]] constexpr float Resolve() const noexcept
+		{
+			return _magnitude;
+		}
+
+	private:
+		float _magnitude{ 0.0f };
+	};
+
 	struct MagnitudeScaling
 	{
 		enum class Source : std::uint8_t

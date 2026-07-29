@@ -15,20 +15,37 @@ namespace CalamityAffixes
 {
 	namespace
 	{
-		float GetSpellBaseMagnitude(const RE::SpellItem* a_spell)
+		float GetCritCastDirectDamageMagnitude(const RE::SpellItem* a_spell)
 		{
 			if (!a_spell) {
 				return 0.0f;
 			}
 
-			float maxMagnitude = 0.0f;
+			DirectElementalDamageMagnitudeSelector selector;
 			for (const auto* effect : a_spell->effects) {
-				if (!effect) {
+				if (!effect || !effect->baseEffect) {
 					continue;
 				}
-				maxMagnitude = std::max(maxMagnitude, effect->effectItem.magnitude);
+
+				const auto archetype = effect->baseEffect->GetArchetype();
+				const bool isValueModifier =
+					archetype == RE::EffectSetting::Archetype::kValueModifier ||
+					archetype == RE::EffectSetting::Archetype::kDualValueModifier;
+				const auto primaryAV = effect->baseEffect->data.primaryAV;
+				const auto resistAV = effect->baseEffect->data.resistVariable;
+				const bool usesElementalResistance =
+					resistAV == RE::ActorValue::kResistFire ||
+					resistAV == RE::ActorValue::kResistFrost ||
+					resistAV == RE::ActorValue::kResistShock;
+
+				selector.Consider(
+					effect->effectItem.magnitude,
+					isValueModifier,
+					primaryAV == RE::ActorValue::kHealth,
+					usesElementalResistance,
+					effect->effectItem.duration);
 			}
-			return maxMagnitude;
+			return selector.Resolve();
 		}
 	}
 
@@ -522,7 +539,7 @@ namespace CalamityAffixes
 		if (pick->magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
 			const float hitPhysicalDealt = std::max(0.0f, a_hitData->physicalDamage - a_hitData->resistedPhysicalDamage);
 			const float hitTotalDealt = std::max(0.0f, a_hitData->totalDamage - a_hitData->resistedPhysicalDamage - a_hitData->resistedTypedDamage);
-			const float spellBaseMagnitude = GetSpellBaseMagnitude(pick->spell);
+			const float spellBaseMagnitude = GetCritCastDirectDamageMagnitude(pick->spell);
 			magnitudeOverride = ResolveMagnitudeOverride(
 				pick->magnitudeOverride,
 				spellBaseMagnitude,

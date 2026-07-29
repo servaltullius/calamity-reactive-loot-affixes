@@ -1,6 +1,6 @@
 # 프리픽스 효과 정리 (공개용)
 
-> 업데이트: 2026-07-16
+> 업데이트: 2026-07-29
 > 기준 버전: `v1.3.0`
 > 기준 코드:
 > - 효과 정의: `affixes/modules/keywords.affixes.core.json`
@@ -281,32 +281,32 @@
 ## 치명 시전 (Crit Cast)
 
 - **`crit_cast_firebolt`** [Armor]
-  - 한글 표시: 치명 시전: 파이어볼트: 치명타/강공 시 파이어볼트 시전 (적중의 30%). 0.15초마다 발동.
-  - 영문 표시: Crit Cast: Firebolt (Crit/Power Attack, ICD 0.15s): Firebolt + 30% of Hit Damage
+  - 한글 표시: 치명 시전: 파이어볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 파이어볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
+  - 영문 표시: Crit Cast: Firebolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Firebolt; damage is the greater of the spell's base damage and 30% of physical hit damage.
 
 - **`crit_cast_ice_spike`** [Armor]
-  - 한글 표시: 치명 시전: 아이스 스파이크: 치명타/강공 시 아이스 스파이크 시전 (적중의 30%). 0.15초마다 발동.
-  - 영문 표시: Crit Cast: Ice Spike (Crit/Power Attack, ICD 0.15s): Ice Spike + 30% of Hit Damage
+  - 한글 표시: 치명 시전: 아이스 스파이크: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이스 스파이크 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
+  - 영문 표시: Crit Cast: Ice Spike (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Ice Spike; damage is the greater of the spell's base damage and 30% of physical hit damage.
 
 - **`crit_cast_lightning_bolt`** [Armor]
-  - 한글 표시: 치명 시전: 라이트닝 볼트: 치명타/강공 시 라이트닝 볼트 시전 (적중의 30%). 0.15초마다 발동.
-  - 영문 표시: Crit Cast: Lightning Bolt (Crit/Power Attack, ICD 0.15s): Lightning Bolt + 30% of Hit Damage
+  - 한글 표시: 치명 시전: 라이트닝 볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 라이트닝 볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
+  - 영문 표시: Crit Cast: Lightning Bolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Lightning Bolt; damage is the greater of the spell's base damage and 30% of physical hit damage.
 
 - **`crit_cast_thunderbolt`** [Armor]
-  - 한글 표시: 치명 시전: 썬더볼트: 치명타/강공 시 썬더볼트 시전 (적중의 30%). 0.15초마다 발동.
-  - 영문 표시: Crit Cast: Thunderbolt (Crit/Power Attack, ICD 0.15s): Thunderbolt + 30% of Hit Damage
+  - 한글 표시: 치명 시전: 썬더볼트: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 썬더볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
+  - 영문 표시: Crit Cast: Thunderbolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Thunderbolt; damage is the greater of the spell's base damage and 30% of physical hit damage.
 
 - **`crit_cast_icy_spear`** [Armor]
-  - 한글 표시: 치명 시전: 아이시 스피어: 치명타/강공 시 아이시 스피어 시전 (적중의 30%). 0.15초마다 발동.
-  - 영문 표시: Crit Cast: Icy Spear (Crit/Power Attack, ICD 0.15s): Icy Spear + 30% of Hit Damage
+  - 한글 표시: 치명 시전: 아이시 스피어: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이시 스피어 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
+  - 영문 표시: Crit Cast: Icy Spear (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Icy Spear; damage is the greater of the spell's base damage and 30% of physical hit damage.
 
 - **`crit_cast_chain_lightning`** [Armor]
-  - 한글 표시: 치명 시전: 체인 라이트닝: 치명타/강공 시 체인 라이트닝 시전 (적중의 30%). 0.15초마다 발동.
-  - 영문 표시: Crit Cast: Chain Lightning (Crit/Power Attack, ICD 0.15s): Chain Lightning + 30% of Hit Damage
+  - 한글 표시: 치명 시전: 체인 라이트닝: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 체인 라이트닝 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
+  - 영문 표시: Crit Cast: Chain Lightning (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Chain Lightning; damage is the greater of the spell's base damage and 30% of physical hit damage.
 
 - **`crit_cast_ice_storm`** [Armor]
-  - 한글 표시: 치명 시전: 아이스 스톰: 치명타/강공 시 아이스 스톰 시전 (적중의 30%). 0.15초마다 발동.
-  - 영문 표시: Crit Cast: Ice Storm (Crit/Power Attack, ICD 0.15s): Ice Storm + 30% of Hit Damage
+  - 한글 표시: 치명 시전: 아이스 스톰: 근접 치명타/강공 시, 활·석궁은 일반 적중 시 아이스 스톰 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
+  - 영문 표시: Crit Cast: Ice Storm (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Ice Storm; damage is the greater of the spell's base damage and 30% of physical hit damage.
 
 ## 시체 소각 (죽음의 화장)
 
