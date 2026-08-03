@@ -1118,6 +1118,89 @@ namespace RuntimeGateStoreChecks
 		return true;
 	}
 
+	bool CheckImmediateHealthReadback()
+	{
+		int readCount = 0;
+		int castCount = 0;
+		const auto disabled = CalamityAffixes::ObserveImmediateHealthChange(
+			false,
+			[&]() -> std::optional<float> {
+				++readCount;
+				return 100.0f;
+			},
+			[&]() { ++castCount; });
+		if (readCount != 0 || castCount != 1 || disabled.healthChange.has_value()) {
+			std::cerr << "health_readback: disabled observation must cast once without reading\n";
+			return false;
+		}
+
+		std::vector<int> order;
+		readCount = 0;
+		castCount = 0;
+		const auto damage = CalamityAffixes::ObserveImmediateHealthChange(
+			true,
+			[&]() -> std::optional<float> {
+				order.push_back(readCount == 0 ? 1 : 3);
+				return readCount++ == 0 ? 100.0f : 86.425f;
+			},
+			[&]() {
+				order.push_back(2);
+				++castCount;
+			});
+		if (order != std::vector<int>{ 1, 2, 3 } || castCount != 1 ||
+			!damage.healthChange || std::abs(*damage.healthChange - (-13.575f)) > 0.001f) {
+			std::cerr << "health_readback: damage ordering or delta is incorrect\n";
+			return false;
+		}
+
+		readCount = 0;
+		const auto healing = CalamityAffixes::ObserveImmediateHealthChange(
+			true,
+			[&]() -> std::optional<float> { return readCount++ == 0 ? 50.0f : 60.0f; },
+			[]() {});
+		if (!healing.healthChange || *healing.healthChange != 10.0f) {
+			std::cerr << "health_readback: healing delta must stay positive\n";
+			return false;
+		}
+
+		const auto unchanged = CalamityAffixes::ObserveImmediateHealthChange(
+			true,
+			[]() -> std::optional<float> { return 100.0f; },
+			[]() {});
+		if (!unchanged.healthChange || *unchanged.healthChange != 0.0f) {
+			std::cerr << "health_readback: a sampled zero delta must remain distinguishable\n";
+			return false;
+		}
+
+		readCount = 0;
+		const auto unavailable = CalamityAffixes::ObserveImmediateHealthChange(
+			true,
+			[&]() -> std::optional<float> {
+				return readCount++ == 0 ? std::optional<float>{} : std::optional<float>{ 100.0f };
+			},
+			[]() {});
+		if (unavailable.healthChange.has_value()) {
+			std::cerr << "health_readback: missing samples must not fabricate a delta\n";
+			return false;
+		}
+
+		readCount = 0;
+		const auto nonFinite = CalamityAffixes::ObserveImmediateHealthChange(
+			true,
+			[&]() -> std::optional<float> {
+				return readCount++ == 0 ?
+					std::optional<float>{ std::numeric_limits<float>::infinity() } :
+					std::optional<float>{ 100.0f };
+			},
+			[]() {});
+		if (nonFinite.healthBefore.has_value() || nonFinite.healthChange.has_value()) {
+			std::cerr << "health_readback: non-finite samples must be rejected\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckRecentlyAndLuckyHitGuards()
 	{
 		// Recently window semantics.

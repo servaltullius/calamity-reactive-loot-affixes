@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/ProcChancePolicy.h"
 
 #include "CalamityAffixes/TriggerGuards.h"
 
@@ -228,7 +229,7 @@ namespace CalamityAffixes
 			(a_affixIndex < _lootState.activeSlotPenalty.size() && _lootState.activeSlotPenalty[a_affixIndex] > 0.0f) ?
 				_lootState.activeSlotPenalty[a_affixIndex] :
 				1.0f;
-		return std::clamp(a_affix.procChancePct * _runtimeSettings.procChanceMult * penalty, 0.0f, 100.0f);
+		return ResolveEffectiveProcChancePct(a_affix.procChancePct, _runtimeSettings.procChanceMult, penalty);
 	}
 
 	bool EventBridge::RollTriggerProcChance(float a_chancePct)

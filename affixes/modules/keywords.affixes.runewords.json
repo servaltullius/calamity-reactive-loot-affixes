@@ -1227,7 +1227,15 @@
           "max": 0.0,
           "spellBaseAsMin": true
         },
-        "passiveSpellEditorId": "CAFF_SPEL_RW_DREAM_PASSIVE"
+        "passiveSpellEditorId": "CAFF_SPEL_RW_DREAM_PASSIVE",
+        "feedback": {
+          "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_BURST",
+          "soundForm": "Skyrim.esm|0x0003F206",
+          "target": "Target",
+          "durationSeconds": 0.15,
+          "playOn": "Proc",
+          "spatialSound": true
+        }
       }
     },
     "slot": "prefix"

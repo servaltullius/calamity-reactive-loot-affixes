@@ -26,6 +26,7 @@ int main()
 	const bool shuffleBagConstraintsOk = CheckShuffleBagSanitizeAndRollConstraints();
 	const bool slotSanitizerOk = CheckLootSlotSanitizer();
 	const bool fixedWindowBudgetOk = CheckFixedWindowBudget();
+	const bool immediateHealthReadbackOk = CheckImmediateHealthReadback();
 	const bool recentlyLuckyOk = CheckRecentlyAndLuckyHitGuards();
 	const bool tooltipPolicyOk = CheckRunewordTooltipOverlayPolicy();
 	const bool lootPreviewPolicyOk = CheckLootPreviewRuntimePolicy();
@@ -100,7 +101,7 @@ int main()
 	const bool reforgeTargetWithRunewordSlotsOk = CheckReforgeTargetWithRunewordSlots();
 	const bool affixCountWeightsAllowMultiAffixOk = CheckAffixCountWeightsAllowMultiAffix();
 	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && healthDamageGuardHelperFlowOk && tesHitFallbackSourceValidationOk && bloomTrapProcFeedbackOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
-	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && recentlyLuckyOk && tooltipPolicyOk &&
+	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && immediateHealthReadbackOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
 	        lootServiceExtractionOk &&
 	        lootDisplayNameExtractionOk &&

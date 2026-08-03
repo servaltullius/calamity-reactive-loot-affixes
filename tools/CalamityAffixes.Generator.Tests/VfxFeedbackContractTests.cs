@@ -13,6 +13,7 @@ public sealed class VfxFeedbackContractTests
         new("keywords.affixes.core.json", "voice_of_power", "CAFF_ARTO_VFX_VOICE_OF_POWER", "Skyrim.esm|0x000A0F52", "Owner", 0.35, "Proc"),
         new("keywords.affixes.runewords.json", "runeword_spirit_final", "CAFF_ARTO_VFX_SPIRIT_ABSORB", "Skyrim.esm|0x0003D119", "Owner", 0.45, "Proc"),
         new("keywords.affixes.runewords.json", "runeword_smoke_final", "CAFF_ARTO_VFX_SMOKE_SLOW", "Skyrim.esm|0x0006A165", "Target", 0.75, "Proc"),
+        new("keywords.affixes.runewords.json", "runeword_dream_final", "CAFF_ARTO_VFX_TRAP_CHAOS_BURST", "Skyrim.esm|0x0003F206", "Target", 0.15, "Proc", true),
         new("keywords.affixes.runewords.json", "runeword_fury_final", "CAFF_ARTO_VFX_FURY_SURGE", "Skyrim.esm|0x000A28C4", "Owner", 0.45, "Proc"),
         new("keywords.affixes.runewords.json", "runeword_wealth_final", "CAFF_ARTO_VFX_WEALTH_PASSIVE", "Skyrim.esm|0x0003E952", "Owner", 0.60, "PassiveAdd"),
     ];
@@ -60,6 +61,8 @@ public sealed class VfxFeedbackContractTests
             Assert.Equal(expected.Target, feedback.GetProperty("target").GetString());
             Assert.Equal(expected.DurationSeconds, feedback.GetProperty("durationSeconds").GetDouble(), precision: 6);
             Assert.Equal(expected.PlayOn, feedback.GetProperty("playOn").GetString());
+            var actualSpatialSound = feedback.TryGetProperty("spatialSound", out var spatialSound) && spatialSound.GetBoolean();
+            Assert.Equal(expected.SpatialSound, actualSpatialSound);
         }
     }
 
@@ -95,6 +98,9 @@ public sealed class VfxFeedbackContractTests
         Assert.Equal(8, actions.Count(action =>
             action.TryGetProperty("feedback", out var feedback) &&
             feedback.GetProperty("target").GetString() == "Corpse"));
+        Assert.Equal(2, actions.Count(action =>
+            action.TryGetProperty("feedback", out var feedback) &&
+            feedback.GetProperty("target").GetString() == "Target"));
         Assert.Equal(19, actions.Count(action =>
             action.TryGetProperty("feedback", out var feedback) &&
             feedback.GetProperty("target").GetString() == "Owner" &&
@@ -176,6 +182,8 @@ public sealed class VfxFeedbackContractTests
 
         Assert.Contains("InstantiateHitArt(", feedbackSource, StringComparison.Ordinal);
         Assert.DoesNotContain("InstantiateHitShader(", feedbackSource, StringComparison.Ordinal);
+        Assert.Contains("recipient->Is3DLoaded()", feedbackSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("recipient->IsDead()", feedbackSource, StringComparison.Ordinal);
         Assert.Contains("BSAudioManager::GetSingleton", feedbackSource, StringComparison.Ordinal);
         Assert.Equal(2, CountOccurrences(castSource, "ActionFeedbackPlayOn::kProc"));
 
@@ -249,7 +257,8 @@ public sealed class VfxFeedbackContractTests
         string SoundForm,
         string Target,
         double DurationSeconds,
-        string PlayOn);
+        string PlayOn,
+        bool SpatialSound = false);
 
     private sealed record ArtExpectation(string EditorId, string ModelPath);
 }

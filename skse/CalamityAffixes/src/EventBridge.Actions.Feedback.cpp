@@ -20,8 +20,8 @@ namespace CalamityAffixes
 			return;
 		}
 
-		if (feedback.art && feedback.durationSeconds > 0.0f) {
-			recipient->InstantiateHitArt(
+		if (feedback.art && feedback.durationSeconds > 0.0f && recipient->Is3DLoaded()) {
+			const auto* instantiated = recipient->InstantiateHitArt(
 				feedback.art,
 				feedback.durationSeconds,
 				nullptr,
@@ -29,6 +29,19 @@ namespace CalamityAffixes
 				false,
 				nullptr,
 				false);
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: action feedback art (art=0x{:X}, recipient=0x{:X}, instantiated={}).",
+					feedback.art->GetFormID(),
+					recipient->GetFormID(),
+					instantiated != nullptr);
+			}
+		} else if (feedback.art && _loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: action feedback art skipped (art=0x{:X}, recipient=0x{:X}, is3DLoaded={}).",
+				feedback.art->GetFormID(),
+				recipient->GetFormID(),
+				recipient->Is3DLoaded());
 		}
 
 		if (!feedback.sound) {

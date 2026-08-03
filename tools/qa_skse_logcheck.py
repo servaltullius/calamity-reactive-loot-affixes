@@ -132,12 +132,12 @@ def main(argv: list[str]) -> int:
         PatternGroup(
             name="plugin_loaded",
             desc="Plugin loaded and waiting for DataLoaded",
-            any_of=[re.compile(r"CalamityAffixes: plugin loaded, waiting for kDataLoaded\\.", re.IGNORECASE)],
+            any_of=[re.compile(r"CalamityAffixes: plugin loaded, waiting for kDataLoaded\.", re.IGNORECASE)],
         ),
         PatternGroup(
             name="runtime_config_loaded",
             desc="Runtime config loaded (affixes count etc.)",
-            any_of=[re.compile(r"CalamityAffixes: runtime config loaded \\(affixes=", re.IGNORECASE)],
+            any_of=[re.compile(r"CalamityAffixes: runtime config loaded \(affixes=", re.IGNORECASE)],
         ),
         PatternGroup(
             name="hit_pipeline",
@@ -153,7 +153,7 @@ def main(argv: list[str]) -> int:
             desc="Prisma overlay enabled and PrismaUI API acquired",
             any_of=[
                 re.compile(r"Prisma tooltip/control overlay enabled", re.IGNORECASE),
-                re.compile(r"PrismaUI API acquired\\.", re.IGNORECASE),
+                re.compile(r"PrismaUI API acquired\.", re.IGNORECASE),
             ],
         ),
         PatternGroup(
@@ -167,13 +167,13 @@ def main(argv: list[str]) -> int:
     error_pats: list[tuple[str, re.Pattern[str]]] = [
         ("runtime_config_missing", re.compile(r"CalamityAffixes: runtime config not found:", re.IGNORECASE)),
         ("runtime_config_parse_fail", re.compile(r"CalamityAffixes: failed to parse runtime config", re.IGNORECASE)),
-        ("no_affixes_loaded", re.compile(r"CalamityAffixes: no affixes loaded\\.", re.IGNORECASE)),
+        ("no_affixes_loaded", re.compile(r"CalamityAffixes: no affixes loaded\.", re.IGNORECASE)),
         ("prismaui_missing", re.compile(r"CalamityAffixes: PrismaUI API not available", re.IGNORECASE)),
         ("dotapply_auto_disabled", re.compile(r"DotApply safety auto-disabled", re.IGNORECASE)),
-        ("generic_error", re.compile(r"\\[error\\]\\s+CalamityAffixes:", re.IGNORECASE)),
+        ("generic_error", re.compile(r"\[error\]\s+CalamityAffixes:", re.IGNORECASE)),
     ]
     warn_pats: list[tuple[str, re.Pattern[str]]] = [
-        ("generic_warn", re.compile(r"\\[warn\\]\\s+CalamityAffixes:", re.IGNORECASE)),
+        ("generic_warn", re.compile(r"\[warn\]\s+CalamityAffixes:", re.IGNORECASE)),
         ("dotapply_safety_warning", re.compile(r"DotApply safety warning", re.IGNORECASE)),
     ]
 
@@ -236,4 +236,3 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-

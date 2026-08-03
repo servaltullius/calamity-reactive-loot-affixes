@@ -1,6 +1,10 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/ImmediateHealthReadback.h"
 
 #include <algorithm>
+#include <cmath>
+#include <optional>
+#include <string_view>
 #include <vector>
 
 
@@ -43,6 +47,72 @@ namespace CalamityAffixes
 			}
 
 			return false;
+		}
+
+		[[nodiscard]] bool HasImmediateHealthValueModifier(const RE::SpellItem* a_spell) noexcept
+		{
+			if (!a_spell) {
+				return false;
+			}
+
+			for (const auto* effect : a_spell->effects) {
+				if (!effect || !effect->baseEffect || effect->effectItem.duration != 0u) {
+					continue;
+				}
+				if (effect->baseEffect->GetArchetype() == RE::EffectSetting::Archetype::kValueModifier &&
+					effect->baseEffect->data.primaryAV == RE::ActorValue::kHealth) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		[[nodiscard]] std::optional<float> ReadCurrentHealth(RE::Actor* a_actor) noexcept
+		{
+			if (!a_actor) {
+				return std::nullopt;
+			}
+
+			auto* actorValueOwner = skyrim_cast<RE::ActorValueOwner*>(a_actor);
+			if (!actorValueOwner) {
+				return std::nullopt;
+			}
+
+			const float health = actorValueOwner->GetActorValue(RE::ActorValue::kHealth);
+			return std::isfinite(health) ? std::optional<float>{ health } : std::nullopt;
+		}
+
+		void LogImmediateHealthReadback(
+			std::string_view a_lane,
+			std::string_view a_affixId,
+			const RE::SpellItem* a_spell,
+			const RE::Actor* a_target,
+			float a_magnitudeOverride,
+			const ImmediateHealthReadbackResult& a_result)
+		{
+			if (a_result.healthBefore && a_result.healthAfter && a_result.healthChange) {
+				SKSE::log::debug(
+					"CalamityAffixes: immediate health readback (affix={}, lane={}, spell={}, target={}, magnitudeOverride={}, healthBefore={}, healthAfter={}, healthChangeAfterMinusBefore={}).",
+					a_affixId,
+					a_lane,
+					a_spell ? a_spell->GetName() : "<none>",
+					a_target ? a_target->GetName() : "<none>",
+					a_magnitudeOverride,
+					*a_result.healthBefore,
+					*a_result.healthAfter,
+					*a_result.healthChange);
+				return;
+			}
+
+			SKSE::log::debug(
+				"CalamityAffixes: immediate health readback unavailable (affix={}, lane={}, spell={}, target={}, sampledBefore={}, sampledAfter={}).",
+				a_affixId,
+				a_lane,
+				a_spell ? a_spell->GetName() : "<none>",
+				a_target ? a_target->GetName() : "<none>",
+				a_result.healthBefore.has_value(),
+				a_result.healthAfter.has_value());
 		}
 	}
 
@@ -239,14 +309,33 @@ namespace CalamityAffixes
 				modeIndex);
 		}
 
-		magicCaster->CastSpellImmediate(
-			spell,
-			a_action.noHitEffectArt,
-			castTarget,
-			a_action.effectiveness,
-			false,
-			magnitudeOverride,
-			caster);
+		auto* healthTarget = _loot.debugLog ?
+			(a_action.applyToSelf ? caster : (castTarget ? castTarget->As<RE::Actor>() : nullptr)) :
+			nullptr;
+		const bool observeImmediateHealth =
+			_loot.debugLog && healthTarget && HasImmediateHealthValueModifier(spell);
+		const auto healthReadback = ObserveImmediateHealthChange(
+			observeImmediateHealth,
+			[healthTarget]() { return ReadCurrentHealth(healthTarget); },
+			[&]() {
+				magicCaster->CastSpellImmediate(
+					spell,
+					a_action.noHitEffectArt,
+					castTarget,
+					a_action.effectiveness,
+					false,
+					magnitudeOverride,
+					caster);
+			});
+		if (observeImmediateHealth) {
+			LogImmediateHealthReadback(
+				"CastSpell",
+				a_affix.id,
+				spell,
+				healthTarget,
+				magnitudeOverride,
+				healthReadback);
+		}
 		PlayActionFeedback(a_action, a_owner, a_target, ActionFeedbackPlayOn::kProc);
 	}
 
@@ -325,14 +414,33 @@ namespace CalamityAffixes
 				evolutionMultiplier);
 		}
 
-		magicCaster->CastSpellImmediate(
-			spell,
-			a_action.noHitEffectArt,
-			castTarget,
-			a_action.effectiveness,
-			false,
-			magnitudeOverride,
-			caster);
+		auto* healthTarget = _loot.debugLog ?
+			(a_action.applyToSelf ? caster : (castTarget ? castTarget->As<RE::Actor>() : nullptr)) :
+			nullptr;
+		const bool observeImmediateHealth =
+			_loot.debugLog && healthTarget && HasImmediateHealthValueModifier(spell);
+		const auto healthReadback = ObserveImmediateHealthChange(
+			observeImmediateHealth,
+			[healthTarget]() { return ReadCurrentHealth(healthTarget); },
+			[&]() {
+				magicCaster->CastSpellImmediate(
+					spell,
+					a_action.noHitEffectArt,
+					castTarget,
+					a_action.effectiveness,
+					false,
+					magnitudeOverride,
+					caster);
+			});
+		if (observeImmediateHealth) {
+			LogImmediateHealthReadback(
+				"CastSpellAdaptiveElement",
+				a_affix.id,
+				spell,
+				healthTarget,
+				magnitudeOverride,
+				healthReadback);
+		}
 		PlayActionFeedback(a_action, a_owner, a_target, ActionFeedbackPlayOn::kProc);
 	}
 }

@@ -44,7 +44,6 @@
 		// Policy constants.
 		// kAffixCountWeights now lives in CalamityAffixes::detail (LootRollSelection.h)
 		// so the preview path, the live roll, and the runtime gate share one array.
-		static constexpr std::array<float, kMaxAffixesPerItem> kMultiAffixProcPenalty = { 1.0f, 0.8f, 0.65f, 0.5f };
 		static constexpr std::uint32_t kLootChancePityFailThreshold = 3u;
 		static constexpr std::uint32_t kRunewordFragmentPityFailThreshold = 99u;
 		static constexpr std::uint32_t kReforgeOrbPityFailThreshold = 39u;

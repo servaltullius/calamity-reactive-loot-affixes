@@ -12,6 +12,7 @@
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 #include "CalamityAffixes/RuntimeUserSettingsDebounce.h"
 #include "CalamityAffixes/Hooks.h"
+#include "CalamityAffixes/ImmediateHealthReadback.h"
 #include "CalamityAffixes/RuntimePolicy.h"
 #include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/TriggerGuards.h"
@@ -23,6 +24,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <optional>
 #include <random>
 #include <string>
@@ -152,6 +154,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckShuffleBagLootRollSelection();
 	bool CheckWeightedShuffleBagLootRollSelection();
 	bool CheckFixedWindowBudget();
+	bool CheckImmediateHealthReadback();
 	bool CheckRecentlyAndLuckyHitGuards();
 	bool CheckShuffleBagSanitizeAndRollConstraints();
 	bool CheckLootSlotSanitizer();

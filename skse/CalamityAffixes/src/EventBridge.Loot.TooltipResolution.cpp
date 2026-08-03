@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootUiGuards.h"
+#include "CalamityAffixes/ProcChancePolicy.h"
 #include "EventBridge.Loot.Runeword.SummaryText.h"
 
 #include <algorithm>
@@ -75,6 +76,7 @@ namespace CalamityAffixes
 			std::string rowName{};
 			InstanceAffixSlots slots{};
 			bool preview{ false };
+			bool worn{ false };
 		};
 
 		std::vector<TooltipCandidate> candidates;
@@ -108,6 +110,7 @@ namespace CalamityAffixes
 			TooltipCandidate candidate{};
 			candidate.instanceKey = key;
 			candidate.preview = false;
+			candidate.worn = xList->HasType<RE::ExtraWorn>() || xList->HasType<RE::ExtraWornLeft>();
 			candidate.slots.Clear();
 
 			if (const auto mappedIt = _instanceTrackingState.instanceAffixes.find(key); mappedIt != _instanceTrackingState.instanceAffixes.end()) {
@@ -147,9 +150,13 @@ namespace CalamityAffixes
 			return std::nullopt;
 		}
 
-		auto formatAffixDetail = [&](const AffixRuntime& a_affix, std::uint64_t a_instanceKey) -> std::string {
+		auto formatAffixDetail = [
+			this,
+			a_uiLanguageMode,
+			itemType
+		](const AffixRuntime& a_affix, std::size_t a_affixIndex, const TooltipCandidate& a_candidate) -> std::string {
 			std::string detail;
-			const auto* state = FindInstanceRuntimeState(a_instanceKey, a_affix.token);
+			const auto* state = FindInstanceRuntimeState(a_candidate.instanceKey, a_affix.token);
 			const auto& action = a_affix.action;
 
 			if (action.modeCycleEnabled && !action.modeCycleSpells.empty()) {
@@ -448,6 +455,85 @@ namespace CalamityAffixes
 				detail.append(autoSummary);
 			}
 
+			const bool usesStandardTriggerProcLane =
+				a_affix.action.type == ActionType::kCastSpell ||
+				a_affix.action.type == ActionType::kCastSpellAdaptiveElement ||
+				a_affix.action.type == ActionType::kSpawnTrap;
+			const bool usesSpecialProcLane =
+				a_affix.action.type == ActionType::kCastOnCrit ||
+				a_affix.action.type == ActionType::kConvertDamage ||
+				a_affix.action.type == ActionType::kMindOverMatter ||
+				a_affix.action.type == ActionType::kArchmage ||
+				a_affix.action.type == ActionType::kCorpseExplosion ||
+				a_affix.action.type == ActionType::kSummonCorpseExplosion;
+			if ((usesStandardTriggerProcLane || usesSpecialProcLane) &&
+				a_affix.procChancePct > 0.0f &&
+				a_affix.luckyHitChancePct <= 0.0f &&
+				a_affix.slot != AffixSlot::kSuffix) {
+				bool exactInstanceCached = false;
+				if (const auto equippedIt = _instanceTrackingState.equippedInstanceKeysByToken.find(a_affix.token);
+					equippedIt != _instanceTrackingState.equippedInstanceKeysByToken.end()) {
+					exactInstanceCached = std::find(
+						equippedIt->second.begin(),
+						equippedIt->second.end(),
+						a_candidate.instanceKey) != equippedIt->second.end();
+				}
+
+				const bool affixActive =
+					a_affixIndex < _affixRuntimeState.activeCounts.size() &&
+					_affixRuntimeState.activeCounts[a_affixIndex] > 0u;
+				const auto displayMode = ResolveProcChanceDisplayMode(
+					_runtimeSettings.enabled.load(std::memory_order_relaxed),
+					a_candidate.worn,
+					_instanceTrackingState.equippedTokenCacheReady,
+					exactInstanceCached,
+					affixActive);
+
+				const bool useCurrentChance = displayMode == ProcChanceDisplayMode::kCurrent;
+				const float currentTriggerChance = useCurrentChance && usesStandardTriggerProcLane ?
+					ResolveTriggerProcChancePct(a_affix, a_affixIndex) :
+					0.0f;
+				const float effectiveChance = ResolveDisplayedProcChancePct(
+					displayMode,
+					usesStandardTriggerProcLane,
+					a_affix.procChancePct,
+					_runtimeSettings.procChanceMult,
+					ResolveMultiAffixProcPenalty(a_candidate.slots.count),
+					currentTriggerChance);
+
+				const bool inactive = displayMode == ProcChanceDisplayMode::kInactive;
+				if (inactive || ShouldShowAdjustedProcChance(a_affix.procChancePct, effectiveChance)) {
+					const auto baseText = formatNumberCompact(std::clamp(a_affix.procChancePct, 0.0f, 100.0f));
+					const auto effectiveText = formatNumberCompact(effectiveChance);
+					const std::string chanceEn = inactive ?
+						("Currently inactive (base proc chance " + baseText + "%)") :
+						(useCurrentChance ?
+							("Current effective proc chance " + effectiveText + "% (base " + baseText + "%)") :
+							("If equipped alone: effective proc chance " + effectiveText + "% (base " + baseText + "%)"));
+					const std::string chanceKo = inactive ?
+						("현재 비활성 (기본 발동률 " + baseText + "%)") :
+						(useCurrentChance ?
+							("현재 유효 발동률 " + effectiveText + "% (기본 " + baseText + "%)") :
+							("단독 장착 시 예상 발동률 " + effectiveText + "% (기본 " + baseText + "%)"));
+
+					if (!detail.empty()) {
+						detail.push_back('\n');
+					}
+					switch (a_uiLanguageMode) {
+					case 0:
+						detail.append(chanceEn);
+						break;
+					case 1:
+						detail.append(chanceKo);
+						break;
+					case 2:
+					default:
+						detail.append(chanceKo + " / " + chanceEn);
+						break;
+					}
+				}
+			}
+
 			return detail;
 		};
 
@@ -514,7 +600,7 @@ namespace CalamityAffixes
 
 				tooltip.append(resolvedName);
 
-				const auto detail = formatAffixDetail(affix, a_candidate.instanceKey);
+				const auto detail = formatAffixDetail(affix, idxIt->second, a_candidate);
 				if (!detail.empty()) {
 					tooltip.push_back('\n');
 					tooltip.append(detail);

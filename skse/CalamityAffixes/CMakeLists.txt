@@ -24,6 +24,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/detail/EventBridge.Constants.inl
 	    include/CalamityAffixes/HitDataUtil.h
 	    include/CalamityAffixes/Hooks.h
+	    include/CalamityAffixes/ImmediateHealthReadback.h
 	    include/CalamityAffixes/InstanceKeyTransferPolicy.h
 	    include/CalamityAffixes/InstanceStateKey.h
 	    include/CalamityAffixes/ItemSubtypePolicy.h
@@ -36,6 +37,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/Papyrus.h
 	    include/CalamityAffixes/PerTargetCooldownStore.h
 	    include/CalamityAffixes/PluginLogging.h
+	    include/CalamityAffixes/ProcChancePolicy.h
 	    include/CalamityAffixes/PointerSafety.h
 		    include/CalamityAffixes/PlayerOwnership.h
 		    include/CalamityAffixes/PrismaLayoutPersistence.h
@@ -241,6 +243,7 @@ if (BUILD_TESTING)
             tests/test_special_action_safety_policy.cpp
             tests/test_currency_drop_runtime_policy.cpp
             tests/test_player_health_damage_hook_policy.cpp
+            tests/test_proc_chance_policy.cpp
             tests/test_synthesized_affix_display_name_policy.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)

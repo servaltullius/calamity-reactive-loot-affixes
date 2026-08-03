@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/Hooks.h"
+#include "CalamityAffixes/ProcChancePolicy.h"
 #include "CalamityAffixes/SuffixFamilySelection.h"
 
 #include <algorithm>
@@ -104,7 +105,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const auto penalty = kMultiAffixProcPenalty[std::min<std::uint8_t>(a_slots.count, static_cast<std::uint8_t>(kMaxAffixesPerItem)) - 1];
+		const auto penalty = ResolveMultiAffixProcPenalty(a_slots.count);
 
 		for (std::uint8_t slot = 0; slot < a_slots.count; ++slot) {
 			const auto token = a_slots.tokens[slot];
