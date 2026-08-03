@@ -49,6 +49,7 @@
 			std::uint64_t a_instanceKey,
 			const InstanceAffixSlots& a_slots,
 			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
+		[[nodiscard]] std::uint8_t CountProcPenaltySlots(const InstanceAffixSlots& a_slots) const;
 		void CollectBestSuffixFamilyState(
 			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
 		void LogActiveAffixListDebug() const;

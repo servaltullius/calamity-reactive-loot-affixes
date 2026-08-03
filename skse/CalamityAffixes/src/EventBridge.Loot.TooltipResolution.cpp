@@ -498,7 +498,7 @@ namespace CalamityAffixes
 					usesStandardTriggerProcLane,
 					a_affix.procChancePct,
 					_runtimeSettings.procChanceMult,
-					ResolveMultiAffixProcPenalty(a_candidate.slots.count),
+					ResolveMultiAffixProcPenalty(CountProcPenaltySlots(a_candidate.slots)),
 					currentTriggerChance);
 
 				const bool inactive = displayMode == ProcChanceDisplayMode::kInactive;

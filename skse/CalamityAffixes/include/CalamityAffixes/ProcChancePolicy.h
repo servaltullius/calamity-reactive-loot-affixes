@@ -22,6 +22,10 @@ namespace CalamityAffixes
 		0.5f
 	};
 
+	// The tier input is the item's PROC-CAPABLE (non-suffix) slot count. The penalty
+	// exists to damp proc-affix stacking on a single item; passive suffix slots on the
+	// same item must not raise the tier (a lone proc prefix next to three passive
+	// suffixes stays at 100%).
 	[[nodiscard]] constexpr float ResolveMultiAffixProcPenalty(std::uint8_t a_slotCount) noexcept
 	{
 		if (a_slotCount == 0u) {
@@ -32,6 +36,20 @@ namespace CalamityAffixes
 			a_slotCount,
 			static_cast<std::uint8_t>(kMaxAffixesPerItem));
 		return kMultiAffixProcPenalty[clampedCount - 1u];
+	}
+
+	template <class IsProcCapableSlotFn>
+	[[nodiscard]] constexpr std::uint8_t CountProcCapableSlots(
+		std::uint8_t a_slotCount,
+		IsProcCapableSlotFn&& a_isProcCapableSlot) noexcept
+	{
+		std::uint8_t procSlots = 0u;
+		for (std::uint8_t i = 0u; i < a_slotCount; ++i) {
+			if (a_isProcCapableSlot(i)) {
+				++procSlots;
+			}
+		}
+		return procSlots;
 	}
 
 	[[nodiscard]] constexpr float ResolveEffectiveProcChancePct(

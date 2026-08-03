@@ -7,6 +7,20 @@ static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(3u) == 0.65f);
 static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(4u) == 0.5f);
 static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(7u) == 0.5f);
 
+static_assert(CalamityAffixes::CountProcCapableSlots(0u, [](std::uint8_t) { return true; }) == 0u);
+static_assert(CalamityAffixes::CountProcCapableSlots(4u, [](std::uint8_t) { return false; }) == 0u);
+static_assert(CalamityAffixes::CountProcCapableSlots(4u, [](std::uint8_t) { return true; }) == 4u);
+static_assert(CalamityAffixes::CountProcCapableSlots(4u, [](std::uint8_t a_slot) { return a_slot == 0u; }) == 1u);
+// One proc prefix sharing an item with three passive suffixes keeps its full chance:
+// the penalty tier counts proc-capable slots only.
+static_assert(
+	CalamityAffixes::ResolveMultiAffixProcPenalty(
+		CalamityAffixes::CountProcCapableSlots(4u, [](std::uint8_t a_slot) { return a_slot == 0u; })) == 1.0f);
+// Two proc prefixes on one item still get the 2-slot tier regardless of suffix padding.
+static_assert(
+	CalamityAffixes::ResolveMultiAffixProcPenalty(
+		CalamityAffixes::CountProcCapableSlots(4u, [](std::uint8_t a_slot) { return a_slot < 2u; })) == 0.8f);
+
 static_assert(CalamityAffixes::ResolveEffectiveProcChancePct(30.0f, 1.0f, 0.5f) == 15.0f);
 static_assert(CalamityAffixes::ResolveEffectiveProcChancePct(30.0f, 3.0f, 0.5f) == 45.0f);
 static_assert(CalamityAffixes::ResolveEffectiveProcChancePct(30.0f, 1.2f, 1.0f) == 36.0f);

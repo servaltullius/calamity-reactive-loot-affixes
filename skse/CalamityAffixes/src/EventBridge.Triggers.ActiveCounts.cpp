@@ -96,6 +96,26 @@ namespace CalamityAffixes
 		AccumulateEquippedAffixState(key, slots, a_desiredPassives);
 	}
 
+	std::uint8_t EventBridge::CountProcPenaltySlots(const InstanceAffixSlots& a_slots) const
+	{
+		// The multi-affix proc penalty damps proc stacking, so its tier counts only
+		// proc-capable (non-suffix) tokens on the item; passive suffix slots must not
+		// drag down the proc affixes sharing the item. Unresolved tokens cannot proc
+		// and are excluded as well.
+		return CountProcCapableSlots(a_slots.count, [&](std::uint8_t a_slot) {
+			const auto token = a_slots.tokens[a_slot];
+			if (token == 0u) {
+				return false;
+			}
+			const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(token);
+			if (idxIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() ||
+				idxIt->second >= _affixRuntimeState.affixes.size()) {
+				return false;
+			}
+			return _affixRuntimeState.affixes[idxIt->second].slot != AffixSlot::kSuffix;
+		});
+	}
+
 	void EventBridge::AccumulateEquippedAffixState(
 		std::uint64_t a_instanceKey,
 		const InstanceAffixSlots& a_slots,
@@ -105,7 +125,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const auto penalty = ResolveMultiAffixProcPenalty(a_slots.count);
+		const auto penalty = ResolveMultiAffixProcPenalty(CountProcPenaltySlots(a_slots));
 
 		for (std::uint8_t slot = 0; slot < a_slots.count; ++slot) {
 			const auto token = a_slots.tokens[slot];

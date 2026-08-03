@@ -47,7 +47,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 [b]전투 시스템[/b]
 [list]
 [*]Proc 발동 + ICD(내부 쿨다운) + 중복 히트 방지
-[*]Best Slot Wins: 1어픽스=100%, 2어픽스=80%, 3어픽스=65%
+[*]Best Slot Wins: 아이템의 발동형 어픽스 수 기준 1개=100%, 2개=80%, 3개=65%, 4개=50% (패시브 접미사는 미포함)
 [*]크리티컬 히트 추가 증폭(SKSE 훅 기반)
 [/list]
 
@@ -146,7 +146,7 @@ It tracks item instances via ExtraUniqueID, and the current build is [b]Reforge-
 [b]Combat System[/b]
 [list]
 [*]Proc chance + ICD (internal cooldown) + duplicate-hit protection
-[*]Best Slot Wins: 1 affix=100%, 2 affixes=80%, 3 affixes=65%
+[*]Best Slot Wins: tiered by proc affix count per item, 1=100%, 2=80%, 3=65%, 4=50% (passive suffixes excluded)
 [*]Critical hit amplification via SKSE hook
 [/list]
 
