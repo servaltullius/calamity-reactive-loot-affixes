@@ -1218,7 +1218,7 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_DREAM_SHOCK_STRIKE",
         "applyTo": "Target",
-        "noHitEffectArt": false,
+        "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
           "mult": 0.14,
@@ -1229,10 +1229,10 @@
         },
         "passiveSpellEditorId": "CAFF_SPEL_RW_DREAM_PASSIVE",
         "feedback": {
-          "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_BURST",
+          "artObjectEditorId": "Skyrim.esm|0x0005B1BC",
           "soundForm": "Skyrim.esm|0x0003F206",
           "target": "Target",
-          "durationSeconds": 0.15,
+          "durationSeconds": 0.55,
           "playOn": "Proc",
           "spatialSound": true
         }

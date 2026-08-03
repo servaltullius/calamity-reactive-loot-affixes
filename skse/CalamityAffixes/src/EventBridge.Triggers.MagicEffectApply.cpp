@@ -41,6 +41,26 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		// Observation only: confirm engine-side application of this plugin's magic effects.
+		// CastSpellImmediate has no success signal, so this apply event is the authoritative
+		// "the effect actually landed" trace. Must stay before the DoT keyword filter and
+		// must not alter proc behavior.
+		if (_loot.debugLog) {
+			static const RE::TESFile* selfFile = []() -> const RE::TESFile* {
+				auto* handler = RE::TESDataHandler::GetSingleton();
+				return handler ? handler->LookupModByName("CalamityAffixes.esp") : nullptr;
+			}();
+			if (selfFile && mgef->GetFile(0) == selfFile) {
+				SKSE::log::debug(
+					"CalamityAffixes: magic effect apply observed (mgef=0x{:08X}, caster={} (0x{:08X}), target={} (0x{:08X})).",
+					mgef->GetFormID(),
+					caster->GetName(),
+					caster->GetFormID(),
+					target->GetName(),
+					target->GetFormID());
+			}
+		}
+
 		static RE::BGSKeyword* dotKeyword = nullptr;
 		if (!dotKeyword) {
 			dotKeyword = RE::TESForm::LookupByEditorID<RE::BGSKeyword>(kDotKeywordEditorID);

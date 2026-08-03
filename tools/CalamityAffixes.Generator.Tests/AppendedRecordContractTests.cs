@@ -17,6 +17,7 @@ public sealed class AppendedRecordContractTests
         """{"type":"ArtObject","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"Meshes\\Magic\\Test.nif","artType":"MagicHitEffect"},"spell":{"editorId":"CAFF_SPEL_TEST","delivery":"Self","effect":{"magicEffectEditorId":"CAFF_MGEF_TEST","magnitude":1,"duration":0,"area":0}}}""",
         """{"type":"ArtObject","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"Meshes\\Magic\\Test.nif","artType":"Unknown"}}""",
         """{"type":"ArtObject","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"Meshes\\Magic\\Test.nif","artType":"MagicCasting"}}""",
+        """{"type":"ArtObject","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"Meshes\\Magic\\Test.nif","artType":"MagicHitEffect"}}""",
         """{"type":"ArtObject","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"","artType":"MagicHitEffect"}}""",
     };
 
@@ -67,7 +68,7 @@ public sealed class AppendedRecordContractTests
           "type": "ArtObject",
           "artObject": {
             "editorId": "CAFF_ARTO_TEST",
-            "modelPath": "Meshes\\Magic\\Test.nif",
+            "modelPath": "Magic\\Test.nif",
             "artType": "MagicHitEffect"
           }
         }
@@ -100,7 +101,7 @@ public sealed class AppendedRecordContractTests
                 {
                     Assert.Equal("ArtObject", record.Type);
                     Assert.Equal("CAFF_ARTO_TEST", record.ArtObject?.EditorId);
-                    Assert.Equal(@"Meshes\Magic\Test.nif", record.ArtObject?.ModelPath);
+                    Assert.Equal(@"Magic\Test.nif", record.ArtObject?.ModelPath);
                     Assert.Equal("MagicHitEffect", record.ArtObject?.ArtType);
                     Assert.Null(record.MagicEffect);
                     Assert.Null(record.Spell);

@@ -91,9 +91,12 @@ namespace CalamityAffixes
 			float a_magnitudeOverride,
 			const ImmediateHealthReadbackResult& a_result)
 		{
+			// Same-call sample only: the engine may apply the effect after this call
+			// returns, so a 0 delta here is NOT evidence that the damage failed. The
+			// authoritative applied-signal is the TESMagicEffectApplyEvent observation.
 			if (a_result.healthBefore && a_result.healthAfter && a_result.healthChange) {
 				SKSE::log::debug(
-					"CalamityAffixes: immediate health readback (affix={}, lane={}, spell={}, target={}, magnitudeOverride={}, healthBefore={}, healthAfter={}, healthChangeAfterMinusBefore={}).",
+					"CalamityAffixes: immediate health readback (same-call sample, not a damage verdict) (affix={}, lane={}, spell={}, target={}, magnitudeOverride={}, healthBefore={}, healthAfter={}, healthChangeAfterMinusBefore={}).",
 					a_affixId,
 					a_lane,
 					a_spell ? a_spell->GetName() : "<none>",
@@ -106,7 +109,7 @@ namespace CalamityAffixes
 			}
 
 			SKSE::log::debug(
-				"CalamityAffixes: immediate health readback unavailable (affix={}, lane={}, spell={}, target={}, sampledBefore={}, sampledAfter={}).",
+				"CalamityAffixes: immediate health readback unavailable (same-call sample, not a damage verdict) (affix={}, lane={}, spell={}, target={}, sampledBefore={}, sampledAfter={}).",
 				a_affixId,
 				a_lane,
 				a_spell ? a_spell->GetName() : "<none>",

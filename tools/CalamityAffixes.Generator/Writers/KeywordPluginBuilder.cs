@@ -259,7 +259,7 @@ public static class KeywordPluginBuilder
     {
         // Rune fragment records are generated from the shared runeword contract data.
         // This keeps generator output in sync with runtime contract snapshots.
-        const string sharedFragmentModel = @"Meshes\Clutter\SoulGem\SoulGemPiece01.nif";
+        const string sharedFragmentModel = @"Clutter\SoulGem\SoulGemPiece01.nif";
         var runes = AffixSpecLoader.GetRunewordRuneLadder();
 
         foreach (var rune in runes)
@@ -278,7 +278,7 @@ public static class KeywordPluginBuilder
     {
         // Runtime uses this exact EditorID in SKSE reforge grant/consume paths.
         // Keep visual consistency with rune fragments (soul gem shard style).
-        const string sharedFragmentModel = @"Meshes\Clutter\SoulGem\SoulGemPiece01.nif";
+        const string sharedFragmentModel = @"Clutter\SoulGem\SoulGemPiece01.nif";
         var item = mod.MiscItems.AddNew();
         item.EditorID = "CAFF_Misc_ReforgeOrb";
         item.Name = "Reforge Orb";
@@ -448,6 +448,13 @@ public static class KeywordPluginBuilder
         kw.EditorID = editorId;
     }
 
+    // Skyrim.esm stores ARTO DNAM as: 0 = Magic Casting (hand FX), 1 = Magic Hit Effect
+    // (actor-attached hit/body FX), 2 = Enchantment Effect (bound-weapon overlays).
+    // Mutagen 0.52.0's ArtObject.TypeEnum.MagicHitEffect serializes as raw DNAM=2, which
+    // the engine reads as Enchantment Effect, so write the verified raw value instead of
+    // trusting the named enum. Guarded by VfxFeedbackContractTests raw-DNAM assertions.
+    private const uint MagicHitEffectRawDnam = 1;
+
     private static ArtObject AddArtObject(SkyrimMod mod, ArtObjectRecordSpec spec)
     {
         if (spec.ArtType is not "MagicHitEffect")
@@ -457,10 +464,20 @@ public static class KeywordPluginBuilder
                 $"(ArtObject: {spec.EditorId}). Valid: MagicHitEffect.");
         }
 
+        // MODL paths are resolved relative to Data\Meshes; a "Meshes\" prefix makes the
+        // engine look for Data\Meshes\Meshes\... and the model silently fails to load.
+        var normalizedModelPath = spec.ModelPath.Replace('/', '\\').TrimStart();
+        if (normalizedModelPath.StartsWith("Meshes\\", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException(
+                $"ArtObject modelPath must be relative to Data\\Meshes and must not start " +
+                $"with 'Meshes\\' (ArtObject: {spec.EditorId}, path: {spec.ModelPath}).");
+        }
+
         var artObject = mod.ArtObjects.AddNew();
         artObject.EditorID = spec.EditorId;
         artObject.Model = new Model { File = spec.ModelPath };
-        artObject.Type = ArtObject.TypeEnum.MagicHitEffect;
+        artObject.Type = (ArtObject.TypeEnum)MagicHitEffectRawDnam;
         return artObject;
     }
 

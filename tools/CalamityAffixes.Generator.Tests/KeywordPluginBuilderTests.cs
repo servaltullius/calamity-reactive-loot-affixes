@@ -77,7 +77,7 @@ public sealed class KeywordPluginBuilderTests
 
         var mod = KeywordPluginBuilder.Build(spec);
 
-        const string expectedModel = @"Meshes\Clutter\SoulGem\SoulGemPiece01.nif";
+        const string expectedModel = @"Clutter\SoulGem\SoulGemPiece01.nif";
 
         var expected = new (string EditorId, string Rune)[]
         {
@@ -121,7 +121,9 @@ public sealed class KeywordPluginBuilderTests
             var item = Assert.Single(mod.MiscItems, misc => misc.EditorID == editorId);
             Assert.Equal($"Rune Fragment: {rune}", item.Name?.String);
             Assert.NotNull(item.Model);
-            Assert.Equal(NormalizeModelPath(expectedModel), NormalizeModelPath(item.Model!.File.ToString()));
+            // Compare GivenPath (the value persisted to MODL); AssetLink.ToString() yields the
+            // Meshes-prefixed data-relative path and would mask a double "Meshes\" prefix.
+            Assert.Equal(NormalizeModelPath(expectedModel), NormalizeModelPath(item.Model!.File.GivenPath));
         }
     }
 
@@ -148,8 +150,8 @@ public sealed class KeywordPluginBuilderTests
         Assert.Equal("Reforge Orb", orb.Name?.String);
         Assert.NotNull(orb.Model);
         Assert.Equal(
-            NormalizeModelPath(@"Meshes\Clutter\SoulGem\SoulGemPiece01.nif"),
-            NormalizeModelPath(orb.Model!.File.ToString()));
+            NormalizeModelPath(@"Clutter\SoulGem\SoulGemPiece01.nif"),
+            NormalizeModelPath(orb.Model!.File.GivenPath));
     }
 
     [Fact]

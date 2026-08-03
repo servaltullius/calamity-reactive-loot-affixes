@@ -318,6 +318,15 @@ def _lint_spec(
             art_edid = art.get("editorId") if art else None
             if isinstance(art_edid, str) and art_edid.strip():
                 generated_art_objects.add(art_edid.strip())
+            model_path = art.get("modelPath") if art else None
+            if (
+                isinstance(model_path, str)
+                and model_path.lstrip().replace("/", "\\").casefold().startswith("meshes\\")
+            ):
+                errors.append(
+                    f"keywords.appendedRecords[{idx}].artObject.modelPath must be relative to "
+                    "Data\\Meshes and must not start with 'Meshes\\'."
+                )
             continue
         if record.get("type") != "Spell":
             continue

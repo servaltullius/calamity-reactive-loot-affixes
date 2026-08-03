@@ -308,6 +308,14 @@ public static class AffixSpecLoader
                             $"Appended ArtObject requires a non-empty modelPath (ArtObject: {artObject.EditorId}).");
                     }
 
+                    var normalizedModelPath = artObject.ModelPath.Replace('/', '\\').TrimStart();
+                    if (normalizedModelPath.StartsWith("Meshes\\", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidDataException(
+                            $"Appended ArtObject modelPath must be relative to Skyrim's Data\\Meshes directory " +
+                            $"and must not start with 'Meshes\\' (ArtObject: {artObject.EditorId}, path: {artObject.ModelPath}).");
+                    }
+
                     if (artObject.ArtType is not "MagicHitEffect")
                     {
                         throw new InvalidDataException(

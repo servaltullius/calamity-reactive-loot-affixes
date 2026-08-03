@@ -51,7 +51,13 @@ namespace CalamityAffixes
 		if (feedback.spatialSound) {
 			PlaySpatialSound(feedback.sound, recipient->GetPosition());
 		} else if (auto* audioManager = RE::BSAudioManager::GetSingleton()) {
-			audioManager->Play(feedback.sound->GetFormID());
+			const bool played = audioManager->Play(feedback.sound->GetFormID());
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: action feedback sound (sound=0x{:X}, spatial=false, played={}).",
+					feedback.sound->GetFormID(),
+					played);
+			}
 		}
 	}
 
@@ -65,10 +71,22 @@ namespace CalamityAffixes
 		}
 
 		RE::BSSoundHandle handle{};
-		if (!audioManager->BuildSoundDataFromDescriptor(handle, a_sound)) {
+		const bool built = audioManager->BuildSoundDataFromDescriptor(handle, a_sound);
+		if (!built) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: action feedback sound (sound=0x{:X}, spatial=true, built=false).",
+					a_sound->GetFormID());
+			}
 			return;
 		}
 		handle.SetPosition(a_position);
-		handle.Play();
+		const bool played = handle.Play();
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: action feedback sound (sound=0x{:X}, spatial=true, built=true, played={}).",
+				a_sound->GetFormID(),
+				played);
+		}
 	}
 }
