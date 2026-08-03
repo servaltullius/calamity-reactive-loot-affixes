@@ -562,6 +562,14 @@ def _lint_spec(
                 )
 
         feedback = action.get("feedback")
+        if feedback is None and action_type in {"CastSpell", "CastSpellAdaptiveElement"}:
+            # Instant CastSpell procs have no projectile, no cast art, and a
+            # duration-0 hit shader, so a proc without declared feedback is
+            # invisible in-game. Feedback is a data contract for these lanes.
+            errors.append(
+                f"{affix_id}: {action_type} actions must declare action.feedback "
+                "(art and/or sound) so the proc is visible in-game."
+            )
         if feedback is not None:
             feedback_obj = _as_dict(feedback)
             if feedback_obj is None:

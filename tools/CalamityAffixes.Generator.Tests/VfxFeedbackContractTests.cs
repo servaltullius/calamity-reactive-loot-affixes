@@ -85,7 +85,7 @@ public sealed class VfxFeedbackContractTests
     }
 
     [Fact]
-    public void P0P1Feedback_CoversSixTrapsEightCorpseExplosionsAndNineteenDefensiveProcs()
+    public void FeedbackCoverage_CountsTrapsCorpsesTargetAndOwnerProcLanes()
     {
         var actions = new List<JsonElement>();
         foreach (var moduleName in new[] { "keywords.affixes.core.json", "keywords.affixes.runewords.json", "keywords.affixes.suffixes.json" })
@@ -98,13 +98,38 @@ public sealed class VfxFeedbackContractTests
         Assert.Equal(8, actions.Count(action =>
             action.TryGetProperty("feedback", out var feedback) &&
             feedback.GetProperty("target").GetString() == "Corpse"));
-        Assert.Equal(2, actions.Count(action =>
+        Assert.Equal(59, actions.Count(action =>
             action.TryGetProperty("feedback", out var feedback) &&
             feedback.GetProperty("target").GetString() == "Target"));
-        Assert.Equal(19, actions.Count(action =>
+        Assert.Equal(67, actions.Count(action =>
             action.TryGetProperty("feedback", out var feedback) &&
             feedback.GetProperty("target").GetString() == "Owner" &&
             feedback.TryGetProperty("spatialSound", out var spatial) && spatial.GetBoolean()));
+    }
+
+    [Fact]
+    public void EveryCastSpellProcLane_DeclaresFeedback()
+    {
+        foreach (var moduleName in new[] { "keywords.affixes.core.json", "keywords.affixes.runewords.json", "keywords.affixes.suffixes.json" })
+        {
+            var module = ReadJson(Path.Combine("affixes", "modules", moduleName));
+            foreach (var affix in module.EnumerateArray())
+            {
+                var action = affix.GetProperty("runtime").GetProperty("action");
+                var type = action.GetProperty("type").GetString();
+                if (type is not ("CastSpell" or "CastSpellAdaptiveElement"))
+                {
+                    continue;
+                }
+
+                // A CastSpell proc without a feedback block is invisible in-game for
+                // instant effects (no projectile, no cast art, duration-0 hit shader),
+                // so declaring feedback is a data contract, not a nicety.
+                Assert.True(
+                    action.TryGetProperty("feedback", out _),
+                    $"{affix.GetProperty("id").GetString()}: CastSpell-lane action must declare feedback.");
+            }
+        }
     }
 
     [Fact]

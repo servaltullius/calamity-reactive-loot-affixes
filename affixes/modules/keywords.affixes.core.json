@@ -50,7 +50,8 @@
           "min": 0.0,
           "max": 0.0,
           "spellBaseAsMin": true
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0005B1BC", "soundForm": "Skyrim.esm|0x0003F206", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -106,7 +107,8 @@
           "min": 0.0,
           "max": 0.0,
           "spellBaseAsMin": true
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0002ACD7", "soundForm": "Skyrim.esm|0x0003C8FC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -161,7 +163,8 @@
           "min": 0.0,
           "max": 0.0,
           "spellBaseAsMin": true
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0004253F", "soundForm": "Skyrim.esm|0x0003E5CC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -216,7 +219,8 @@
           "min": 0.0,
           "max": 0.0,
           "spellBaseAsMin": true
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0005B1BC", "soundForm": "Skyrim.esm|0x0003F206", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -263,7 +267,8 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_FIRE_SHRED",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0002ACD7", "soundForm": "Skyrim.esm|0x0003C8FC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -310,7 +315,8 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_FROST_SHRED",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0004253F", "soundForm": "Skyrim.esm|0x0003E5CC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -359,7 +365,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
         "applyTo": "Target",
-        "magnitudeOverride": 25.0
+        "magnitudeOverride": 25.0,
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0005B1BC", "soundForm": "Skyrim.esm|0x0003F206", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -385,7 +392,8 @@
       "action": {
         "type": "CastSpell",
         "spellForm": "Skyrim.esm|000640B6",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0003F811", "soundForm": "Skyrim.esm|0x0003F26A", "target": "Owner", "durationSeconds": 0.6, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -413,7 +421,8 @@
       "action": {
         "type": "CastSpell",
         "spellForm": "Skyrim.esm|0009CE26",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0003F811", "soundForm": "Skyrim.esm|0x0003F26A", "target": "Owner", "durationSeconds": 0.6, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -441,7 +450,8 @@
       "action": {
         "type": "CastSpell",
         "spellForm": "Skyrim.esm|000204C3",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0003F811", "soundForm": "Skyrim.esm|0x0003F26A", "target": "Owner", "durationSeconds": 0.6, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -469,7 +479,8 @@
       "action": {
         "type": "CastSpell",
         "spellForm": "Skyrim.esm|000204C4",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0003F811", "soundForm": "Skyrim.esm|0x0003F26A", "target": "Owner", "durationSeconds": 0.6, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -497,7 +508,8 @@
       "action": {
         "type": "CastSpell",
         "spellForm": "Skyrim.esm|000204C5",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0003F811", "soundForm": "Skyrim.esm|0x0003F26A", "target": "Owner", "durationSeconds": 0.6, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -525,7 +537,8 @@
       "action": {
         "type": "CastSpell",
         "spellForm": "Skyrim.esm|0010DDEC",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0003F811", "soundForm": "Skyrim.esm|0x0003F26A", "target": "Owner", "durationSeconds": 0.6, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -598,7 +611,8 @@
           "min": 8.0,
           "max": 24.0,
           "spellBaseAsMin": true
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000531B0", "soundForm": "Skyrim.esm|0x0003D119", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -806,7 +820,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_INCOMING_VITAL_REBOUND",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_EMERGENCY_HEAL", "soundForm": "Skyrim.esm|0x0003F361", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1013,7 +1028,8 @@
           "min": 0.0,
           "max": 0.0,
           "spellBaseAsMin": true
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0002ACD7", "soundForm": "Skyrim.esm|0x0003C8FC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1097,7 +1113,8 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_HIT_FROSTLOCK_SNARE",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0004253F", "soundForm": "Skyrim.esm|0x0003E5CC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1146,7 +1163,8 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_HIT_SHOCK_OVERLOAD",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF0E", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1204,7 +1222,8 @@
           "min": 4.0,
           "max": 24.0,
           "spellBaseAsMin": true
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABEFA", "soundForm": "Skyrim.esm|0x0003D119", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1251,7 +1270,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_KILL_SOUL_SURGE",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABEFA", "soundForm": "Skyrim.esm|0x0003D119", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1311,7 +1331,8 @@
             1.2,
             1.4
           ]
-        }
+        },
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_PHASE", "soundForm": "Skyrim.esm|0x00058E0E", "target": "Owner", "durationSeconds": 0.45, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1375,7 +1396,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_STEALTH_ASSAULT",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_PHASE", "soundForm": "Skyrim.esm|0x00058E0E", "target": "Owner", "durationSeconds": 0.45, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1699,7 +1721,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER",
         "applyTo": "Target",
-        "magnitudeOverride": 200.0
+        "magnitudeOverride": 200.0,
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x00074795", "soundForm": "Skyrim.esm|0x0006A165", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1776,7 +1799,8 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0004253F", "soundForm": "Skyrim.esm|0x0003E5CC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1832,7 +1856,8 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x00074795", "soundForm": "Skyrim.esm|0x0006A165", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1923,7 +1948,8 @@
             1.55,
             2.0
           ]
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0007331C", "soundForm": "Skyrim.esm|0x00081971", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -1979,7 +2005,8 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF0E", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -2489,7 +2516,8 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA",
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF12", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -2525,7 +2553,8 @@
           "min": 6.0,
           "max": 50.0,
           "spellBaseAsMin": true
-        }
+        },
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_EMERGENCY_HEAL", "soundForm": "Skyrim.esm|0x0003F361", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -2628,7 +2657,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
         "applyTo": "Target",
-        "magnitudeOverride": 100.0
+        "magnitudeOverride": 100.0,
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF0E", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -2722,7 +2752,8 @@
           "Frost": "CAFF_SPEL_FROST_SHRED",
           "Shock": "CAFF_SPEL_SHOCK_SHRED"
         },
-        "applyTo": "Target"
+        "applyTo": "Target",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF0E", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -3350,7 +3381,8 @@
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_SWAP_JACKPOT_HASTE",
         "applyTo": "Self",
-        "noHitEffectArt": true
+        "noHitEffectArt": true,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_FURY_SURGE", "soundForm": "Skyrim.esm|0x000A28C4", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -3399,7 +3431,8 @@
             1.6,
             2.1
           ]
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0005B1BC", "soundForm": "Skyrim.esm|0x0003F206", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -3462,7 +3495,8 @@
             "CAFF_SPEL_FROST_DAMAGE",
             "CAFF_SPEL_SHOCK_DAMAGE"
           ]
-        }
+        },
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF0E", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
