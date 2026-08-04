@@ -337,6 +337,13 @@ public sealed class MagicEffectRecordSpec
 
     [JsonPropertyName("archetype")]
     public string? Archetype { get; init; }
+
+    // Optional "Plugin|0xFORMID" sound descriptor played when the effect applies
+    // (SNDD raw type 5, "On Hit"). Vanilla uses this slot for effects applied
+    // without a casting cycle (potions, apparel enchants), which matches the
+    // CastSpellImmediate lanes this project uses.
+    [JsonPropertyName("hitSoundForm")]
+    public string? HitSoundForm { get; init; }
 }
 
 public sealed class SpellRecordSpec

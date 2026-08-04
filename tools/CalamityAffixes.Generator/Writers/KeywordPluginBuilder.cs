@@ -569,7 +569,38 @@ public static class KeywordPluginBuilder
 
         mgef.Flags = flags;
 
+        if (!string.IsNullOrWhiteSpace(spec.HitSoundForm))
+        {
+            var soundKey = ParseFormSpec(spec.HitSoundForm, $"MagicEffect.hitSoundForm: {spec.EditorId}");
+            // SNDD raw type 5 is Skyrim.esm's "On Hit" slot: it plays when the effect
+            // applies, including apply paths with no casting cycle (vanilla uses it for
+            // potions and apparel enchants — 18 records). Written as the verified raw
+            // value, same policy as ARTO DNAM; pinned by the raw-bytes SNDD test.
+            mgef.Sounds ??= new();
+            mgef.Sounds.Add(new MagicEffectSound
+            {
+                // MagicEffect.SoundType.OnHit was reflection-verified to equal raw 5
+                // in Mutagen 0.52.0 (unlike ArtObject.TypeEnum, whose named value
+                // mismatched the game). The raw-bytes SNDD test pins it regardless.
+                Type = MagicEffect.SoundType.OnHit,
+                Sound = soundKey.ToLink<ISoundDescriptorGetter>(),
+            });
+        }
+
         return mgef;
+    }
+
+    private static FormKey ParseFormSpec(string spec, string context)
+    {
+        var parts = spec.Split('|');
+        if (parts.Length == 2 &&
+            parts[1].StartsWith("0x", StringComparison.OrdinalIgnoreCase) &&
+            uint.TryParse(parts[1][2..], System.Globalization.NumberStyles.HexNumber, null, out var localId))
+        {
+            return new FormKey(ModKey.FromNameAndExtension(parts[0]), localId);
+        }
+
+        throw new InvalidDataException($"Invalid form spec '{spec}' ({context}). Expected Plugin|0xFORMID.");
     }
 
     private static Spell AddSpellRecord(SkyrimMod mod, SpellRecordSpec spec)

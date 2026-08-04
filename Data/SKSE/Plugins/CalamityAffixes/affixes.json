@@ -1888,7 +1888,8 @@
             "resistValue": "ResistFire",
             "magicSkill": "Destruction",
             "hostile": true,
-            "recover": false
+            "recover": false,
+            "hitSoundForm": "Skyrim.esm|0x0003C8FC"
           },
           "spell": {
             "editorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",

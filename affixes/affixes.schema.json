@@ -556,7 +556,8 @@
         "magicSkill": { "type": ["string", "null"] },
         "archetype": { "type": ["string", "null"] },
         "hostile": { "type": "boolean" },
-        "recover": { "type": "boolean" }
+        "recover": { "type": "boolean" },
+        "hitSoundForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" }
       }
     },
     "appendedRecord": {

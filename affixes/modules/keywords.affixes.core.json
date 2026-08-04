@@ -1627,7 +1627,8 @@
         "actorValue": "Health",
         "resistValue": "ResistFire",
         "magicSkill": "Destruction",
-        "hostile": true
+        "hostile": true,
+        "hitSoundForm": "Skyrim.esm|0x0003C8FC"
       },
       "spell": {
         "editorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",

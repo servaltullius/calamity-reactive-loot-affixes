@@ -59,10 +59,14 @@ class CoreIdentityWaveTwoTests(unittest.TestCase):
             sort_keys=True,
             separators=(",", ":"),
         ).encode("utf-8")
+        # Pin of the full records payload: catches accidental record mutation.
+        # An INTENTIONAL record change must update this hash in the same commit
+        # (2026-08-04: fire conversion MGEF gained hitSoundForm for the B1
+        # on-hit sound prototype).
         self.assertEqual(
-            "e17f11cf71414ec4d1ad9ff887a2662baf5208e26f492a9a81e8b8c3b350cdca",
+            "0584f43d5fd3cf60125e40c29cc264e6e6fc2080c55dc4954d80ed645b5c7989",
             hashlib.sha256(records_payload).hexdigest(),
-            "wave two must not mutate any shared or owned record payload",
+            "records payload changed — if intentional, update this pin in the same commit",
         )
 
     def test_shadow_stride_is_a_kill_haste_with_three_growth_stages(self) -> None:

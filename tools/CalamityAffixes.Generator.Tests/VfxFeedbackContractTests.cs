@@ -284,6 +284,91 @@ public sealed class VfxFeedbackContractTests
         return text[startIndex..endIndex];
     }
 
+    [Fact]
+    public void FireConversionMagicEffect_StoresRawOnHitSound_PrototypeScopeOnly()
+    {
+        var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
+        var sounds = ReadRawMagicEffectSounds(pluginPath);
+
+        // B1 prototype scope: fire conversion only. SNDD raw type 5 is Skyrim.esm's
+        // "On Hit" slot — it plays on effect application without a casting cycle
+        // (vanilla: potions, apparel enchants). 0x0003C8FC = MAGFireboltImpactSD.
+        Assert.True(sounds.TryGetValue("CAFF_MGEF_DMG_FIRE_DYNAMIC", out var fireSounds), "fire dynamic MGEF missing");
+        var entry = Assert.Single(fireSounds!);
+        Assert.Equal(5u, entry.Type);
+        Assert.Equal(0x0003C8FCu, entry.Sound);
+
+        // Frost/shock stay silent until the fire prototype passes the in-game listen
+        // test; expanding them must be a deliberate decision, not a drive-by edit.
+        Assert.True(sounds.TryGetValue("CAFF_MGEF_DMG_FROST_DYNAMIC", out var frostSounds), "frost dynamic MGEF missing");
+        Assert.True(sounds.TryGetValue("CAFF_MGEF_DMG_SHOCK_DYNAMIC", out var shockSounds), "shock dynamic MGEF missing");
+        Assert.Empty(frostSounds!);
+        Assert.Empty(shockSounds!);
+    }
+
+    // Minimal TES5 plugin reader: walks GRUPs and collects MGEF (EDID, raw SNDD pairs).
+    private static Dictionary<string, List<(uint Type, uint Sound)>> ReadRawMagicEffectSounds(string pluginPath)
+    {
+        var buffer = File.ReadAllBytes(pluginPath);
+        var result = new Dictionary<string, List<(uint, uint)>>();
+        var tes4DataSize = BitConverter.ToInt32(buffer, 4);
+        WalkRawMagicEffects(buffer, 24 + tes4DataSize, buffer.Length, result);
+        return result;
+    }
+
+    private static void WalkRawMagicEffects(byte[] buffer, int start, int end, Dictionary<string, List<(uint, uint)>> result)
+    {
+        var pos = start;
+        while (pos + 24 <= end)
+        {
+            var recordType = Encoding.ASCII.GetString(buffer, pos, 4);
+            if (recordType == "GRUP")
+            {
+                var groupSize = BitConverter.ToInt32(buffer, pos + 4);
+                Assert.True(groupSize >= 24, "Malformed GRUP size.");
+                WalkRawMagicEffects(buffer, pos + 24, pos + groupSize, result);
+                pos += groupSize;
+                continue;
+            }
+
+            var dataSize = BitConverter.ToInt32(buffer, pos + 4);
+            if (recordType == "MGEF")
+            {
+                var flags = BitConverter.ToUInt32(buffer, pos + 8);
+                Assert.True((flags & 0x00040000u) == 0, "Compressed MGEF records are not expected.");
+                var editorId = string.Empty;
+                var entries = new List<(uint, uint)>();
+                var subPos = pos + 24;
+                var subEnd = pos + 24 + dataSize;
+                while (subPos + 6 <= subEnd)
+                {
+                    var subType = Encoding.ASCII.GetString(buffer, subPos, 4);
+                    int subSize = BitConverter.ToUInt16(buffer, subPos + 4);
+                    subPos += 6;
+                    if (subType == "EDID")
+                    {
+                        editorId = ReadZString(buffer, subPos, subSize);
+                    }
+                    else if (subType == "SNDD")
+                    {
+                        for (var i = 0; i + 8 <= subSize; i += 8)
+                        {
+                            entries.Add((
+                                BitConverter.ToUInt32(buffer, subPos + i),
+                                BitConverter.ToUInt32(buffer, subPos + i + 4)));
+                        }
+                    }
+                    subPos += subSize;
+                }
+                if (editorId.Length > 0)
+                {
+                    result[editorId] = entries;
+                }
+            }
+            pos += 24 + dataSize;
+        }
+    }
+
     // Minimal TES5 plugin reader: walks GRUPs and collects ARTO (EDID, MODL, raw DNAM).
     // Deliberately independent of Mutagen so DNAM assertions observe the persisted bytes.
     private static List<(string EditorId, string ModelPath, uint Dnam)> ReadRawArtObjects(string pluginPath)
