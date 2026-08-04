@@ -58,6 +58,43 @@ class QaSkseLogcheckTests(unittest.TestCase):
         self.assertIn("no_affixes_loaded", result.stdout)
         self.assertIn("RESULT: FAIL", result.stdout)
 
+    def test_observational_groups_report_counts_without_gating_result(self) -> None:
+        result = self._run(
+            "[debug] CalamityAffixes: proc (affixId=runeword_dream_final, trigger=0, chancePct=30, target=Troll, hasHitData=true)",
+            "[debug] CalamityAffixes: CastSpellImmediate (affix=runeword_dream_final, spell=Shock Strike, magnitudeOverride=13.5, target=Troll).",
+            "[debug] CalamityAffixes: magic effect apply observed (mgef=0xFE401915, caster=Prisoner (0x00000014), target=Troll (0x00107CAD)).",
+            "[debug] CalamityAffixes: action feedback art (art=0x5B1BC, recipient=0x107CAD, instantiated=true).",
+            "[debug] CalamityAffixes: action feedback sound (sound=0x3F206, spatial=true, built=true, played=true).",
+        )
+
+        self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+        self.assertIn("proc_dispatch: OBSERVED (1)", result.stdout)
+        self.assertIn("magic_effect_apply: OBSERVED (1)", result.stdout)
+        self.assertIn("feedback_art_accepted: OBSERVED (1)", result.stdout)
+        self.assertIn("feedback_sound_accepted: OBSERVED (1)", result.stdout)
+        # Engine-path observation must never be presented as a visual/audio verdict.
+        self.assertIn("engine-path only; NOT an on-screen visual or audible-audio verdict", result.stdout)
+        self.assertIn("RESULT: PASS", result.stdout)
+
+    def test_missing_observational_groups_do_not_fail_the_run(self) -> None:
+        result = self._run()
+
+        self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+        self.assertIn("proc_dispatch: NOT OBSERVED", result.stdout)
+        self.assertIn("no proc activity in scanned tail", result.stdout)
+        self.assertIn("RESULT: PASS", result.stdout)
+
+    def test_feedback_engine_rejections_are_surfaced_but_nonfatal(self) -> None:
+        result = self._run(
+            "[debug] CalamityAffixes: action feedback sound (sound=0x3F206, spatial=true, built=false).",
+            "[debug] CalamityAffixes: action feedback art skipped (art=0x5B1BC, recipient=0x107CAD, is3DLoaded=false).",
+        )
+
+        self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+        self.assertIn("feedback_sound_rejected: 1 sample(s)", result.stdout)
+        self.assertIn("feedback_art_skipped_no3d: 1 sample(s)", result.stdout)
+        self.assertIn("RESULT: PASS", result.stdout)
+
     def test_warning_is_nonfatal_unless_strict(self) -> None:
         relaxed = self._run("[warn] CalamityAffixes: synthetic warning")
         strict = self._run("[warn] CalamityAffixes: synthetic warning", strict=True)

@@ -177,6 +177,48 @@ def main(argv: list[str]) -> int:
         ("dotapply_safety_warning", re.compile(r"DotApply safety warning", re.IGNORECASE)),
     ]
 
+    # Observational groups: engine-path telemetry emitted by debug logging.
+    # These confirm that the proc/feedback pipeline RAN — they must never gate
+    # the result: a session without combat legitimately produces none of them,
+    # and none of them prove that a visual rendered on screen or that a sound
+    # was audible. Eyes-on gameplay is the only visual/audio verdict
+    # (see docs/QA_SMOKE_CHECKLIST.md).
+    observational = [
+        PatternGroup(
+            name="proc_dispatch",
+            desc="Affix proc rolled and dispatched",
+            any_of=[re.compile(r"CalamityAffixes: proc \(affixId=", re.IGNORECASE)],
+        ),
+        PatternGroup(
+            name="cast_spell_immediate",
+            desc="CastSpell lane executed",
+            any_of=[re.compile(r"CalamityAffixes: CastSpellImmediate \(affix=", re.IGNORECASE)],
+        ),
+        PatternGroup(
+            name="magic_effect_apply",
+            desc="Engine apply event observed for a CalamityAffixes magic effect",
+            any_of=[re.compile(r"CalamityAffixes: magic effect apply observed \(mgef=", re.IGNORECASE)],
+        ),
+        PatternGroup(
+            name="feedback_art_accepted",
+            desc="Feedback art instantiation accepted by the engine",
+            any_of=[re.compile(r"CalamityAffixes: action feedback art \(.*instantiated=true", re.IGNORECASE)],
+        ),
+        PatternGroup(
+            name="feedback_sound_accepted",
+            desc="Feedback sound handle accepted by the engine",
+            any_of=[re.compile(r"CalamityAffixes: action feedback sound \(.*played=true", re.IGNORECASE)],
+        ),
+    ]
+    # Engine-path refusals worth surfacing. Still observational — they do not
+    # change the exit code — but a nonzero count is a real engine-side rejection
+    # that deserves eyes during the in-game session.
+    observational_reject_pats: list[tuple[str, re.Pattern[str]]] = [
+        ("feedback_art_rejected", re.compile(r"action feedback art \(.*instantiated=false", re.IGNORECASE)),
+        ("feedback_art_skipped_no3d", re.compile(r"action feedback art skipped \(", re.IGNORECASE)),
+        ("feedback_sound_rejected", re.compile(r"action feedback sound \(.*(?:built=false|played=false)", re.IGNORECASE)),
+    ]
+
     missing: list[str] = []
     ok: list[str] = []
     for g in required:
@@ -219,6 +261,35 @@ def main(argv: list[str]) -> int:
                 print(f"    - {s}")
     else:
         print("- warnings: 0")
+
+    observed: list[tuple[str, int]] = []
+    not_observed: list[str] = []
+    for g in observational:
+        count = sum(1 for line in lines if any(p.search(line) for p in g.any_of))
+        if count:
+            observed.append((g.name, count))
+        else:
+            not_observed.append(g.name)
+
+    print("- feedback pipeline observation (engine-path only; NOT an on-screen visual or audible-audio verdict):")
+    for name, count in observed:
+        print(f"  - {name}: OBSERVED ({count})")
+    for name in not_observed:
+        print(f"  - {name}: NOT OBSERVED")
+    if not observed:
+        print("  - note: no proc activity in scanned tail (no combat, or debugVerbose disabled)")
+
+    reject_hits = []
+    for name, pat in observational_reject_pats:
+        hits = _find_matches(lines, pat, limit=3)
+        if hits:
+            reject_hits.append((name, hits))
+    if reject_hits:
+        print("- feedback pipeline engine-path rejections (observational, non-fatal):")
+        for name, samples in reject_hits:
+            print(f"  - {name}: {len(samples)} sample(s)")
+            for s in samples:
+                print(f"    - {s}")
 
     if errors or missing:
         print("[logcheck] RESULT: FAIL")
