@@ -141,7 +141,27 @@
 			const RE::MenuOpenCloseEvent* a_event,
 			RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override
 		{
-			if (!a_event || !IsRelevantMenuEvent(*a_event)) {
+			if (!a_event) {
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+			// MCM edits happen inside the Journal Menu, but the worker that re-reads
+			// the MCM settings files sleeps until a relevant menu or the panel has
+			// been open at least once. On a fresh install that left a rebound panel
+			// hotkey (and the UI language) cached at their startup values until the
+			// panel was first opened manually, so re-read both when the Journal
+			// closes. Both refreshers are thread-safe and cheap (mtime-sourced file
+			// read at menu-close frequency).
+			if (!a_event->opening) {
+				const char* rawName = a_event->menuName.c_str();
+				const std::string_view menuName = rawName ? std::string_view(rawName) : std::string_view{};
+				if (menuName == RE::JournalMenu::MENU_NAME) {
+					RefreshControlPanelHotkeyFromMcm(true);
+					RefreshUiLanguageFromMcm(true);
+				}
+			}
+
+			if (!IsRelevantMenuEvent(*a_event)) {
 				return RE::BSEventNotifyControl::kContinue;
 			}
 
