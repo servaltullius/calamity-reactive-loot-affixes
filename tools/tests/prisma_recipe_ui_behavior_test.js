@@ -234,24 +234,28 @@ const runRunewordStepStateBehavior = new Function(
 );
 runRunewordStepStateBehavior(assert);
 
-const inspectorMergeSource = between(
-  "\nfunction buildSelectedRecipeInspectorText(",
+const inspectorSplitSource = between(
+  "\nfunction resolveRunewordInspectorTexts(",
   "\nfunction applyTooltipPlacement()"
 );
-const runInspectorMergeBehavior = new Function(
+const runInspectorSplitBehavior = new Function(
   "assert",
   `
     "use strict";
     const t = (en) => en;
-    ${inspectorMergeSource}
-    const recipe = "Recipe summary\\nNative recipe detail";
-    const base = "Existing base affix";
-    const merged = buildSelectedRecipeInspectorText(recipe, base);
-    assert(merged.startsWith(recipe));
-    assert(merged.includes("Selected base affixes\\n" + base));
+    ${inspectorSplitSource}
+    const filled = resolveRunewordInspectorTexts("Recipe detail", "Existing base affix", false);
+    assert.strictEqual(filled.recipeText, "Recipe detail");
+    assert.strictEqual(filled.baseText, "Existing base affix");
+    assert(!filled.recipeText.includes(filled.baseText));
+    const empty = resolveRunewordInspectorTexts("", "", false);
+    assert(empty.recipeText.includes("Select a recipe"));
+    assert(empty.baseText.includes("Select an equipped base"));
+    const pending = resolveRunewordInspectorTexts("", "", true);
+    assert(pending.baseText.includes("Refreshing"));
   `
 );
-runInspectorMergeBehavior(assert);
+runInspectorSplitBehavior(assert);
 
 const maxHeightSource = between(
   "\nfunction getTooltipMaxLogicalHeight()",

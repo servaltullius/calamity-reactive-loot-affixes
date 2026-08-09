@@ -327,7 +327,7 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
             "const detailText = resolveRecipeDetailText(item);",
             "const detail = resolveRecipeDetailText(item).toLowerCase();",
             "buildRecipePreviewTooltipText(\n    getSelectedRecipeItem()",
-            "function buildSelectedRecipeInspectorText(",
+            "function resolveRunewordInspectorTexts(",
             "schedulePanelRender(panelRenderSection.tooltipPlacement);",
             "if (value !== tooltipTextState)",
             "tooltipPanel.scrollTop = 0;",

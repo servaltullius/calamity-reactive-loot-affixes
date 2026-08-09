@@ -1,14 +1,31 @@
+function resolveRunewordInspectorTexts(recipePreviewText, baseAffixText, pending) {
+  // Base affixes and the recipe preview are separate boxes: merging them into
+  // one scroll area forced players to scroll past the recipe to read their own
+  // item, so each box resolves its own text and fallback.
+  return {
+    baseText: baseAffixText
+      ? baseAffixText
+      : pending
+        ? t("Refreshing affix preview...", "어픽스 미리보기를 갱신 중입니다.")
+        : t(
+            "Select an equipped base to see its current affixes.",
+            "착용 베이스를 선택하면 현재 어픽스가 표시됩니다."
+          ),
+    recipeText: recipePreviewText
+      ? recipePreviewText
+      : t(
+          "Select a recipe to preview its effect.",
+          "레시피를 선택하면 효과 미리보기가 표시됩니다."
+        )
+  };
+}
+
 function applyTooltipPlacement() {
   const hasTooltip = Boolean(tooltipTextState);
   const hasRunewordAffix = Boolean(runewordAffixTextState);
   const recipePreviewText = buildRecipePreviewTooltipText(
     getSelectedRecipeItem()
   );
-  const effectiveRunewordAffixText = buildSelectedRecipeInspectorText(
-    recipePreviewText,
-    hasRunewordAffix ? runewordAffixTextState : ""
-  );
-  const hasEffectiveRunewordAffix = Boolean(effectiveRunewordAffixText);
 
   if (panelTooltipText) {
     if (hasTooltip) {
@@ -38,12 +55,16 @@ function applyTooltipPlacement() {
     panelTooltipHint.style.display = hasTooltip || hasRunewordAffix ? "none" : "block";
   }
 
+  const inspectorTexts = resolveRunewordInspectorTexts(
+    recipePreviewText,
+    hasRunewordAffix ? runewordAffixTextState : "",
+    runewordAffixPendingState
+  );
+  if (runewordBaseAffixText) {
+    runewordBaseAffixText.textContent = inspectorTexts.baseText;
+  }
   if (runewordAffixText) {
-    runewordAffixText.textContent = hasEffectiveRunewordAffix
-      ? effectiveRunewordAffixText
-      : runewordAffixPendingState
-        ? t("Refreshing affix preview...", "어픽스 미리보기를 갱신 중입니다.")
-        : t("No affix tooltip available.", "어픽스 툴팁이 없습니다.");
+    runewordAffixText.textContent = inspectorTexts.recipeText;
   }
 
   if (!hasTooltip) {

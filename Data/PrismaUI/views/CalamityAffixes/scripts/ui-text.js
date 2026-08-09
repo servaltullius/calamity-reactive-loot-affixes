@@ -101,6 +101,12 @@ function initUiText() {
       "선택 레시피 미리보기"
     );
   }
+  if (runewordBaseAffixSummary) {
+    runewordBaseAffixSummary.textContent = t(
+      "Selected Base Affixes",
+      "선택 베이스 어픽스"
+    );
+  }
   selectedItemLabel.textContent = t("Current Base", "현재 베이스");
   if (runewordContextRecipeLabel) {
     runewordContextRecipeLabel.textContent = t("Selected Recipe", "선택 레시피");
@@ -347,19 +353,4 @@ function invalidateRunewordAffixPreview(pending) {
   }, runewordAffixPendingTimeoutMs);
 }
 
-function buildSelectedRecipeInspectorText(
-  recipePreviewText,
-  selectedBaseAffixText
-) {
-  const recipeText = typeof recipePreviewText === "string"
-    ? recipePreviewText.trim()
-    : "";
-  const baseText = typeof selectedBaseAffixText === "string"
-    ? selectedBaseAffixText.trim()
-    : "";
-  const baseSection = baseText
-    ? `${t("Selected base affixes", "선택 베이스 어픽스")}\n${baseText}`
-    : "";
-  return [recipeText, baseSection].filter(Boolean).join("\n\n");
-}
 
