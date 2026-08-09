@@ -2380,7 +2380,8 @@
             "actorValue": "Health",
             "resistValue": "ResistFrost",
             "magicSkill": "Destruction",
-            "hostile": true
+            "hostile": true,
+            "hitSoundForm": "Skyrim.esm|0x0003E5CC"
           },
           "spell": {
             "editorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
@@ -2529,7 +2530,8 @@
             "actorValue": "Health",
             "resistValue": "ResistShock",
             "magicSkill": "Destruction",
-            "hostile": true
+            "hostile": true,
+            "hitSoundForm": "Skyrim.esm|0x0003F20D"
           },
           "spell": {
             "editorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",

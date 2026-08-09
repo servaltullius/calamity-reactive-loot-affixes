@@ -2039,7 +2039,8 @@
             "resistValue": "ResistFrost",
             "magicSkill": "Destruction",
             "hostile": true,
-            "recover": false
+            "recover": false,
+            "hitSoundForm": "Skyrim.esm|0x0003E5CC"
           },
           "spell": {
             "editorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
@@ -2189,7 +2190,8 @@
             "resistValue": "ResistShock",
             "magicSkill": "Destruction",
             "hostile": true,
-            "recover": false
+            "recover": false,
+            "hitSoundForm": "Skyrim.esm|0x0003F20D"
           },
           "spell": {
             "editorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",

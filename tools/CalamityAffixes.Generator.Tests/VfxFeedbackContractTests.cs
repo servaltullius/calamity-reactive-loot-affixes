@@ -285,25 +285,29 @@ public sealed class VfxFeedbackContractTests
     }
 
     [Fact]
-    public void FireConversionMagicEffect_StoresRawOnHitSound_PrototypeScopeOnly()
+    public void ConversionMagicEffects_StoreRawOnHitSoundsPerElement()
     {
         var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
         var sounds = ReadRawMagicEffectSounds(pluginPath);
 
-        // B1 prototype scope: fire conversion only. SNDD raw type 5 is Skyrim.esm's
-        // "On Hit" slot — it plays on effect application without a casting cycle
-        // (vanilla: potions, apparel enchants). 0x0003C8FC = MAGFireboltImpactSD.
-        Assert.True(sounds.TryGetValue("CAFF_MGEF_DMG_FIRE_DYNAMIC", out var fireSounds), "fire dynamic MGEF missing");
-        var entry = Assert.Single(fireSounds!);
-        Assert.Equal(5u, entry.Type);
-        Assert.Equal(0x0003C8FCu, entry.Sound);
-
-        // Frost/shock stay silent until the fire prototype passes the in-game listen
-        // test; expanding them must be a deliberate decision, not a drive-by edit.
-        Assert.True(sounds.TryGetValue("CAFF_MGEF_DMG_FROST_DYNAMIC", out var frostSounds), "frost dynamic MGEF missing");
-        Assert.True(sounds.TryGetValue("CAFF_MGEF_DMG_SHOCK_DYNAMIC", out var shockSounds), "shock dynamic MGEF missing");
-        Assert.Empty(frostSounds!);
-        Assert.Empty(shockSounds!);
+        // SNDD raw type 5 is Skyrim.esm's "On Hit" slot — it plays on effect
+        // application without a casting cycle (vanilla: potions, apparel enchants).
+        // Fire shipped first as the B1 prototype and passed the in-game listen test;
+        // frost/shock were then extended with their own verified SNDR records.
+        // The shock spell is also cast by the Archmage lane, which rides along.
+        var expected = new (string EditorId, uint Sndr)[]
+        {
+            ("CAFF_MGEF_DMG_FIRE_DYNAMIC", 0x0003C8FCu),   // MAGFireboltImpactSD
+            ("CAFF_MGEF_DMG_FROST_DYNAMIC", 0x0003E5CCu),  // MAGFrostBiteImpactSD
+            ("CAFF_MGEF_DMG_SHOCK_DYNAMIC", 0x0003F20Du),  // MAGShockImpactSD
+        };
+        foreach (var (editorId, sndr) in expected)
+        {
+            Assert.True(sounds.TryGetValue(editorId, out var mgefSounds), $"{editorId} missing");
+            var entry = Assert.Single(mgefSounds!);
+            Assert.Equal(5u, entry.Type);
+            Assert.Equal(sndr, entry.Sound);
+        }
     }
 
     // Minimal TES5 plugin reader: walks GRUPs and collects MGEF (EDID, raw SNDD pairs).
