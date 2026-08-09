@@ -68,6 +68,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 		RunewordPanelState panelState{};
+		panelState.debugTools = _loot.debugHudNotifications || _loot.debugLog;
 		if (!_configLoaded) {
 			return panelState;
 		}

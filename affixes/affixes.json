@@ -2066,6 +2066,7 @@
                 "soundForm": "Skyrim.esm|0x0001828A"
               },
               "armed": {
+                "soundForm": "Skyrim.esm|0x0001828A",
                 "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER",
                 "durationSeconds": 0.2,
                 "scale": 1.15
@@ -3417,6 +3418,7 @@
                 "soundForm": "Skyrim.esm|0x000639A4"
               },
               "armed": {
+                "soundForm": "Skyrim.esm|0x0001828A",
                 "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER",
                 "durationSeconds": 0.2,
                 "scale": 1.15
@@ -3536,6 +3538,7 @@
                 "soundForm": "Skyrim.esm|0x000639A4"
               },
               "armed": {
+                "soundForm": "Skyrim.esm|0x0001828A",
                 "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER",
                 "durationSeconds": 0.2,
                 "scale": 1.15
@@ -3619,6 +3622,7 @@
                 "soundForm": "Skyrim.esm|0x000639A4"
               },
               "armed": {
+                "soundForm": "Skyrim.esm|0x0001828A",
                 "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER",
                 "durationSeconds": 0.2,
                 "scale": 1.15
@@ -3745,6 +3749,7 @@
                 "soundForm": "Skyrim.esm|0x000639A4"
               },
               "armed": {
+                "soundForm": "Skyrim.esm|0x0001828A",
                 "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER",
                 "durationSeconds": 0.2,
                 "scale": 1.15
@@ -3883,6 +3888,7 @@
                 "soundForm": "Skyrim.esm|0x000639A4"
               },
               "armed": {
+                "soundForm": "Skyrim.esm|0x0001828A",
                 "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER",
                 "durationSeconds": 0.2,
                 "scale": 1.15

@@ -101,7 +101,8 @@
 				{ "baseCompatibilityWarning", a_state.baseCompatibilityWarning },
 				{ "baseCompatibilityMessageEn", a_state.baseCompatibilityMessageEn },
 				{ "baseCompatibilityMessageKo", a_state.baseCompatibilityMessageKo },
-				{ "requiredRunes", requiredRunes }
+				{ "requiredRunes", requiredRunes },
+				{ "debugTools", a_state.debugTools }
 			};
 
 			return payload;

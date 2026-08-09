@@ -260,7 +260,7 @@ function setTooltipLayout(raw) {
 
 function setActionFeedback(raw) {
   const value = typeof raw === "string" ? raw : "";
-  feedback.textContent = value;
+  feedback.textContent = localizeEngineFeedback(value);
   if (runewordAffixPendingState) {
     runewordAffixPendingState = false;
     schedulePanelRender(panelRenderSection.tooltipPlacement);

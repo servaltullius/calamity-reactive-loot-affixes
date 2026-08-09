@@ -134,8 +134,8 @@ function initUiText() {
   }
   if (panelTooltipHint) {
     panelTooltipHint.textContent = t(
-      "Select an item in inventory to view affixes.",
-      "인벤토리에서 아이템을 선택하면 어픽스를 표시합니다."
+      "Open your inventory (Tab) and hover an item, or select a base in the Runeword tab.",
+      "인벤토리(Tab)를 열어 아이템을 가리키거나, 룬워드 탭에서 베이스를 선택하세요."
     );
   }
   runewordRecipeListTitle.textContent = t("Search And Compare", "검색 및 비교");
@@ -150,8 +150,8 @@ function initUiText() {
   updateRecipeFilterControls();
   runewordBaseListTitle.textContent = t("Compatible Equipped Bases", "호환 착용 베이스");
   runewordBaseListHint.textContent = t(
-    "Keep this open by default so you can swap the equipped base quickly while comparing recipes.",
-    "비교 중에도 빠르게 베이스를 바꿀 수 있도록 기본 상태에서 열어 둡니다."
+    "Asterisks after a name show its affix count: * one, ** two, *** three or more.",
+    "이름 뒤 별표는 어픽스 수입니다: * 1개 · ** 2개 · *** 3개 이상."
   );
   if (runewordCubeGrid) {
     runewordCubeGrid.setAttribute("aria-label", t("Horadric cube", "호라드릭 큐브"));
@@ -207,6 +207,12 @@ function initUiText() {
   }
   if (runewordRecoverySummary) {
     runewordRecoverySummary.textContent = t("Recovery & Reset", "복구 및 초기화");
+  }
+  if (manualModeMeta) {
+    manualModeMeta.textContent = t(
+      "Cycles the element of adaptive-element affixes by hand instead of auto-picking by enemy resistances.",
+      "적응 원소 어픽스의 원소를 적 저항 자동 선택 대신 수동으로 순환합니다."
+    );
   }
   if (manualModeTitle) {
     manualModeTitle.textContent = t("Manual Mode", "수동 모드");

@@ -13,24 +13,29 @@ function applyTooltipPlacement() {
   if (panelTooltipText) {
     if (hasTooltip) {
       panelTooltipText.textContent = tooltipTextState;
+    } else if (hasRunewordAffix) {
+      // No inventory hover, but a runeword base is selected: show that item's
+      // affix text instead of a dead-end empty state.
+      panelTooltipText.textContent =
+        t("[Selected base]", "[선택된 베이스 기준]") + "\n" + runewordAffixTextState;
     } else {
       appendEmptyState(
         panelTooltipText,
-        t("Select one item to inspect affixes", "어픽스를 확인할 아이템 하나를 선택하세요"),
+        t("No item focused yet", "확인할 아이템이 아직 없습니다"),
         t(
-          "The Affix tab mirrors the currently highlighted inventory item and shows its tooltip text in a calmer layout.",
-          "Affix 탭은 현재 인벤토리에서 강조한 아이템의 툴팁을 더 차분한 레이아웃으로 보여줍니다."
+          "Open your inventory (Tab) while this panel is open, then hover an item — its affix text appears here.",
+          "패널을 연 채로 인벤토리(Tab)를 열고 아이템에 마우스를 올리면 어픽스 텍스트가 여기 표시됩니다."
         ),
         t(
-          "When you hover or select an item, its affix text will appear here.",
-          "아이템을 가리키거나 선택하면 어픽스 텍스트가 여기 표시됩니다."
+          "Selecting a runeword base in the Runeword tab also shows that item's affixes here.",
+          "룬워드 탭에서 베이스를 선택해도 그 아이템의 어픽스가 여기 표시됩니다."
         )
       );
     }
   }
 
   if (panelTooltipHint) {
-    panelTooltipHint.style.display = hasTooltip ? "none" : "block";
+    panelTooltipHint.style.display = hasTooltip || hasRunewordAffix ? "none" : "block";
   }
 
   if (runewordAffixText) {

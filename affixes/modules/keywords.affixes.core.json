@@ -1475,7 +1475,7 @@
         "unarmedScale": 0.75,
         "armedScale": 1.0,
         "placed": { "soundForm": "Skyrim.esm|0x0001828A" },
-        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "armed": { "soundForm": "Skyrim.esm|0x0001828A", "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
         "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_BURST", "soundForm": "Skyrim.esm|0x00018289", "durationSeconds": 0.5, "scale": 1.0 },
         "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
       }
@@ -2720,7 +2720,7 @@
         "unarmedScale": 0.75,
         "armedScale": 1.0,
         "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
-        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "armed": { "soundForm": "Skyrim.esm|0x0001828A", "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
         "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_BURST", "soundForm": "Skyrim.esm|0x000639A5", "durationSeconds": 0.5, "scale": 1.0 },
         "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
       }
@@ -2817,7 +2817,7 @@
         "unarmedScale": 0.75,
         "armedScale": 1.0,
         "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
-        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "armed": { "soundForm": "Skyrim.esm|0x0001828A", "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
         "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_BURST", "soundForm": "Skyrim.esm|0x0002518E", "durationSeconds": 0.5, "scale": 1.0 },
         "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
       }
@@ -2885,7 +2885,7 @@
         "unarmedScale": 0.75,
         "armedScale": 1.0,
         "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
-        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "armed": { "soundForm": "Skyrim.esm|0x0001828A", "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
         "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_BURST", "soundForm": "Skyrim.esm|0x0002518E", "durationSeconds": 0.5, "scale": 1.0 },
         "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
       }
@@ -2996,7 +2996,7 @@
         "unarmedScale": 0.75,
         "armedScale": 1.0,
         "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
-        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "armed": { "soundForm": "Skyrim.esm|0x0001828A", "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
         "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_BURST", "soundForm": "Skyrim.esm|0x00056AC5", "durationSeconds": 0.5, "scale": 1.0 },
         "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
       }
@@ -3119,7 +3119,7 @@
         "unarmedScale": 0.75,
         "armedScale": 1.0,
         "placed": { "soundForm": "Skyrim.esm|0x000639A4" },
-        "armed": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
+        "armed": { "soundForm": "Skyrim.esm|0x0001828A", "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER", "durationSeconds": 0.2, "scale": 1.15 },
         "triggered": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_BURST", "soundForm": "Skyrim.esm|0x0003F206", "durationSeconds": 0.5, "scale": 1.0 },
         "expired": { "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER", "durationSeconds": 0.2, "scale": 0.6 }
       }

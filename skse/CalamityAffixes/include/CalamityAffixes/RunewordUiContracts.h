@@ -51,6 +51,9 @@ namespace CalamityAffixes
 		std::string baseCompatibilityMessageEn{};
 		std::string baseCompatibilityMessageKo{};
 		std::vector<RunewordRuneRequirement> requiredRunes{};
+		// Gates the panel's cheat-adjacent debug tools; true only while a debug
+		// toggle (HUD notifications or verbose logging) is enabled.
+		bool debugTools{ false };
 	};
 
 	struct OperationResult

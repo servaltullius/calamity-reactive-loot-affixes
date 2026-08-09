@@ -228,14 +228,30 @@ namespace CalamityAffixes
 			return std::string(rawName);
 		};
 
+		// Generated records carry developer-facing names ("Calamity: <EN> / <KO>");
+		// the recipe preview is player-facing, so strip the prefix and keep only the
+		// half matching the requested language.
+		auto pickLocalizedRecordName = [](std::string_view a_name, bool a_korean) -> std::string {
+			std::string name(a_name);
+			constexpr std::string_view kCalamityPrefix = "Calamity: ";
+			if (name.rfind(kCalamityPrefix.data(), 0) == 0) {
+				name.erase(0, kCalamityPrefix.size());
+			}
+			if (const auto sep = name.find(" / "); sep != std::string::npos) {
+				name = a_korean ? name.substr(sep + 3) : name.substr(0, sep);
+			}
+			return name;
+		};
+
 		auto buildSpellProfileText = [&](RE::SpellItem* a_spell, std::string_view a_prefix, bool a_korean) -> std::string {
 			if (!a_spell) {
 				return {};
 			}
 
-			const auto spellName = spellNameOr(a_spell, "Spell");
+			const auto spellName = pickLocalizedRecordName(spellNameOr(a_spell, "Spell"), a_korean);
 			std::vector<std::string> effectProfiles;
 			effectProfiles.reserve(3);
+			std::string firstEffectName;
 			std::size_t totalEffects = 0u;
 
 			for (const auto* effect : a_spell->effects) {
@@ -251,9 +267,12 @@ namespace CalamityAffixes
 				std::string effectProfile;
 				const char* effectNameRaw = effect->baseEffect->GetName();
 				if (effectNameRaw && effectNameRaw[0] != '\0') {
-					effectProfile.append(effectNameRaw);
+					effectProfile.append(pickLocalizedRecordName(effectNameRaw, a_korean));
 				} else {
 					effectProfile.append("Effect");
+				}
+				if (effectProfiles.empty()) {
+					firstEffectName = effectProfile;
 				}
 
 				std::string metrics;
@@ -287,9 +306,17 @@ namespace CalamityAffixes
 				profile.append(a_prefix);
 				profile.append(": ");
 			}
-			profile.append(spellName);
+			// "Nadir -> Nadir (…)" reads like a bug; skip the spell name whenever the
+			// first effect already carries the same display name.
+			const bool spellNameRedundant =
+				!effectProfiles.empty() && firstEffectName == spellName;
+			if (!spellNameRedundant) {
+				profile.append(spellName);
+			}
 			if (!effectProfiles.empty()) {
-				profile.append(" -> ");
+				if (!spellNameRedundant) {
+					profile.append(" -> ");
+				}
 				for (std::size_t i = 0; i < effectProfiles.size(); ++i) {
 					if (i > 0u) {
 						profile.append("; ");

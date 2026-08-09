@@ -31,7 +31,10 @@ function resolveRunewordPanelActionState(state) {
       "룬워드 레시피를 먼저 선택하세요."
     );
   } else if (!canTransmute && state.missingSummary) {
-    buttonHint = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
+    buttonHint = t(
+      "Fragments are missing — check the rune list above.",
+      "룬조각이 부족합니다 — 위 룬 목록을 확인하세요."
+    );
   } else if (!canTransmute) {
     buttonHint = t(
       "Transmute is not available yet.",
@@ -183,7 +186,10 @@ function renderRunewordFlowProgress(actionState, state) {
   }
 
   if (state?.missingSummary) {
-    runewordFlowHint.textContent = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
+    runewordFlowHint.textContent = t(
+      "Fragments are missing — details in step 3 on the right.",
+      "룬조각이 부족합니다 — 상세는 우측 3단계에서 확인하세요."
+    );
     return;
   }
 
@@ -196,6 +202,11 @@ function renderRunewordFlowProgress(actionState, state) {
 function renderRunewordPanelState() {
   const state = runewordPanelState || {};
   const actionState = resolveRunewordPanelActionState(state);
+  if (debugToolsPanel) {
+    // Cheat-adjacent tools stay hidden unless the runtime reports a debug
+    // toggle enabled (debug HUD or verbose logging).
+    debugToolsPanel.style.display = state.debugTools ? "" : "none";
+  }
   const hasBase = actionState.hasBase;
   const hasRecipe = actionState.hasRecipe;
   const isComplete = actionState.isComplete;
