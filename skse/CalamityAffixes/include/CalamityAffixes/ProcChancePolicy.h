@@ -38,6 +38,19 @@ namespace CalamityAffixes
 		return kMultiAffixProcPenalty[clampedCount - 1u];
 	}
 
+	// An affix occupies a proc-penalty slot only if it can actually proc. The
+	// anti-stacking tier must ignore non-suffix affixes that never roll: passive
+	// prefixes (runeword auras, scroll mastery tiers) and internal helper entries
+	// carry procChancePct == 0 or a DebugNotify action and must not drag down the
+	// real proc affixes sharing their item.
+	[[nodiscard]] constexpr bool IsProcPenaltyEligible(
+		bool a_isSuffixSlot,
+		float a_procChancePct,
+		bool a_isProcCapableAction) noexcept
+	{
+		return !a_isSuffixSlot && a_procChancePct > 0.0f && a_isProcCapableAction;
+	}
+
 	template <class IsProcCapableSlotFn>
 	[[nodiscard]] constexpr std::uint8_t CountProcCapableSlots(
 		std::uint8_t a_slotCount,

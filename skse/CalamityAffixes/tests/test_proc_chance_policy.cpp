@@ -7,6 +7,11 @@ static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(3u) == 0.65f);
 static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(4u) == 0.5f);
 static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(7u) == 0.5f);
 
+static_assert(CalamityAffixes::IsProcPenaltyEligible(false, 30.0f, true));
+static_assert(!CalamityAffixes::IsProcPenaltyEligible(true, 30.0f, true));   // suffixes never count
+static_assert(!CalamityAffixes::IsProcPenaltyEligible(false, 0.0f, true));   // 0%-chance passive prefix
+static_assert(!CalamityAffixes::IsProcPenaltyEligible(false, 30.0f, false)); // DebugNotify-style action
+
 static_assert(CalamityAffixes::CountProcCapableSlots(0u, [](std::uint8_t) { return true; }) == 0u);
 static_assert(CalamityAffixes::CountProcCapableSlots(4u, [](std::uint8_t) { return false; }) == 0u);
 static_assert(CalamityAffixes::CountProcCapableSlots(4u, [](std::uint8_t) { return true; }) == 4u);

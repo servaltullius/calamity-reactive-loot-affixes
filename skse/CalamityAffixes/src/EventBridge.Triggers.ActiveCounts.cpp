@@ -99,9 +99,9 @@ namespace CalamityAffixes
 	std::uint8_t EventBridge::CountProcPenaltySlots(const InstanceAffixSlots& a_slots) const
 	{
 		// The multi-affix proc penalty damps proc stacking, so its tier counts only
-		// proc-capable (non-suffix) tokens on the item; passive suffix slots must not
-		// drag down the proc affixes sharing the item. Unresolved tokens cannot proc
-		// and are excluded as well.
+		// tokens that can actually proc (IsProcPenaltyEligible): suffixes, 0%-chance
+		// passive prefixes, DebugNotify entries, and unresolved tokens must not drag
+		// down the real proc affixes sharing the item.
 		return CountProcCapableSlots(a_slots.count, [&](std::uint8_t a_slot) {
 			const auto token = a_slots.tokens[a_slot];
 			if (token == 0u) {
@@ -112,7 +112,11 @@ namespace CalamityAffixes
 				idxIt->second >= _affixRuntimeState.affixes.size()) {
 				return false;
 			}
-			return _affixRuntimeState.affixes[idxIt->second].slot != AffixSlot::kSuffix;
+			const auto& affix = _affixRuntimeState.affixes[idxIt->second];
+			return IsProcPenaltyEligible(
+				affix.slot == AffixSlot::kSuffix,
+				affix.procChancePct,
+				affix.action.type != ActionType::kDebugNotify);
 		});
 	}
 
