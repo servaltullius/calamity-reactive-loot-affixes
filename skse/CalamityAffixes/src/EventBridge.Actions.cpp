@@ -9,6 +9,12 @@ namespace CalamityAffixes
 	void EventBridge::ApplyVerboseLoggingLevel() const
 	{
 		spdlog::set_level(_loot.debugLog ? spdlog::level::debug : spdlog::level::info);
+		// Verbose sessions flush on a fixed cadence so a freeze or forced kill
+		// loses at most a few seconds of tail — the 2026-08-07 freeze lost the
+		// whole combat window to buffering (flush_on is warn+). Interval zero
+		// tears the periodic flusher back down; the sink is basic_file_sink_mt,
+		// so the flusher thread's cross-thread flush is safe.
+		spdlog::flush_every(_loot.debugLog ? std::chrono::seconds(5) : std::chrono::seconds(0));
 	}
 
 	void EventBridge::EmitHudNotification(const char* a_message) const

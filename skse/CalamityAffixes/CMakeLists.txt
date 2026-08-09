@@ -162,6 +162,16 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX)
 
 if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /EHsc)
+    # Emit CodeView debug info and a linker PDB even for release builds: crash
+    # tooling reports Module+Offset only, and without the matching PDB those
+    # frames stay unresolvable (the 2026-07-23 CalamityAffixes.dll+0xe8978 crash
+    # is a cold case for exactly this reason). /Z7 keeps the info in the objects
+    # (no compiler-side PDB), lld-link writes CalamityAffixes.pdb next to the
+    # DLL, and /PDBALTPATH strips local build paths from the embedded reference.
+    # /DEBUG silently flips the linker defaults to /OPT:NOREF,NOICF; re-enable
+    # both so the shipped binary keeps release dead-code elimination and folding.
+    target_compile_options(${PROJECT_NAME} PRIVATE /Z7)
+    target_link_options(${PROJECT_NAME} PRIVATE /DEBUG:FULL /PDBALTPATH:CalamityAffixes.pdb /OPT:REF /OPT:ICF)
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE CommonLibSSE::CommonLibSSE nlohmann_json::nlohmann_json)

@@ -198,6 +198,18 @@ cp -a "${repo_root}/docs/design/데이터주도_생성기_워크플로우.md" "$
   zip -r "${out_zip}" "${mod_name}" >/dev/null
 )
 
+# Archive the PDB next to the zip (not inside it — players don't need symbols).
+# Crash tooling reports Module+Offset only; keeping the matching PDB per package
+# is what makes those frames resolvable later.
+out_pdb="${dist_dir}/${mod_name}_MO2_v${version}_${date_tag}.pdb"
+src_pdb="${skse_build_dir}/CalamityAffixes.pdb"
+if [[ -f "${src_pdb}" ]]; then
+  cp -f "${src_pdb}" "${out_pdb}"
+  echo "Wrote: ${out_pdb}"
+else
+  echo "WARN: no PDB at ${src_pdb} — package will not be symbolizable." >&2
+fi
+
 echo "Wrote: ${out_zip}"
 if [[ -n "${CAFF_PACKAGE_OUTPUT_FILE:-}" ]]; then
   printf '%s\n' "${out_zip}" > "${CAFF_PACKAGE_OUTPUT_FILE}"
