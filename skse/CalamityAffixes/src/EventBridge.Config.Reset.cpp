@@ -8,6 +8,7 @@ namespace CalamityAffixes
 		_affixRuntimeState.activeCounts.clear();
 		_affixRuntimeState.activeCritDamageBonusPct = 0.0f;
 		_affixRuntimeState.affixRegistry = {};
+		_affixRuntimeState.recordDisplayNames.clear();
 		_affixSpecialActions = {};
 		_lootState.ResetForConfigReload();
 		_instanceTrackingState.appliedPassiveSpells.clear();

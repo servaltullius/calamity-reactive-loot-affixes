@@ -50,6 +50,11 @@
 			const InstanceAffixSlots& a_slots,
 			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
 		[[nodiscard]] std::uint8_t CountProcPenaltySlots(const InstanceAffixSlots& a_slots) const;
+		void HarvestRecordDisplayNames(const nlohmann::json& a_affix, RE::TESDataHandler* a_handler);
+		[[nodiscard]] std::string ResolveRecordDisplayName(
+			const RE::TESForm* a_form,
+			std::string_view a_fallback,
+			bool a_korean) const;
 		void CollectBestSuffixFamilyState(
 			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
 		void LogActiveAffixListDebug() const;

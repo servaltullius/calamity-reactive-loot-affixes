@@ -1751,7 +1751,7 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
-            "name": "Calamity: Bear Trap (Poison)",
+            "name": "Calamity: Bear Trap (Poison) / \uACF0 \uB36B (\uB3C5)",
             "actorValue": "Health",
             "resistValue": "PoisonResist",
             "magicSkill": "Destruction",
@@ -1760,7 +1760,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON",
-            "name": "Calamity: Bear Trap (Poison)",
+            "name": "Calamity: Bear Trap (Poison) / \uACF0 \uB36B (\uB3C5)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
@@ -1796,7 +1796,7 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
-            "name": "Calamity: Bear Trap (Drain Magicka)",
+            "name": "Calamity: Bear Trap (Drain Magicka) / \uACF0 \uB36B (\uB9E4\uC9C0\uCE74 \uD761\uC218)",
             "actorValue": "Magicka",
             "magicSkill": "Destruction",
             "hostile": true,
@@ -1804,7 +1804,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
-            "name": "Calamity: Bear Trap (Drain Magicka)",
+            "name": "Calamity: Bear Trap (Drain Magicka) / \uACF0 \uB36B (\uB9E4\uC9C0\uCE74 \uD761\uC218)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
@@ -1840,7 +1840,7 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
-            "name": "Calamity: Bear Trap (Drain Stamina)",
+            "name": "Calamity: Bear Trap (Drain Stamina) / \uACF0 \uB36B (\uAE30\uB825 \uD761\uC218)",
             "actorValue": "Stamina",
             "magicSkill": "Destruction",
             "hostile": true,
@@ -1848,7 +1848,7 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA",
-            "name": "Calamity: Bear Trap (Drain Stamina)",
+            "name": "Calamity: Bear Trap (Drain Stamina) / \uACF0 \uB36B (\uAE30\uB825 \uD761\uC218)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
@@ -3314,14 +3314,14 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
-            "name": "Calamity: Tar Blight (DamageResist)",
+            "name": "Calamity: Tar Blight (Sunder Armor) / \uD0C0\uB974 \uC5ED\uBCD1 (\uBC29\uC5B4 \uBD84\uC1C4)",
             "actorValue": "DamageResist",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER",
-            "name": "Calamity: Tar Blight (Sunder Armor)",
+            "name": "Calamity: Tar Blight (Sunder Armor) / \uD0C0\uB974 \uC5ED\uBCD1 (\uBC29\uC5B4 \uBD84\uC1C4)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
@@ -3441,14 +3441,14 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
-            "name": "Calamity: Siphon Spore (StaminaRateMult)",
+            "name": "Calamity: Siphon Spore (Stamina Regen Down) / \uD761\uC218 \uD3EC\uC790 (\uAE30\uB825 \uC7AC\uC0DD \uAC10\uC18C)",
             "actorValue": "StaminaRateMult",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA",
-            "name": "Calamity: Siphon Spore (Stamina Regen Down)",
+            "name": "Calamity: Siphon Spore (Stamina Regen Down) / \uD761\uC218 \uD3EC\uC790 (\uAE30\uB825 \uC7AC\uC0DD \uAC10\uC18C)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
@@ -3580,14 +3580,14 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
-            "name": "Calamity: Chaos Rune (Sunder Armor)",
+            "name": "Calamity: Chaos Rune (Sunder Armor) / \uD63C\uB3C8\uC758 \uB8EC (\uBC29\uC5B4 \uBD84\uC1C4)",
             "actorValue": "DamageResist",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER",
-            "name": "Calamity: Chaos Rune (Sunder Armor)",
+            "name": "Calamity: Chaos Rune (Sunder Armor) / \uD63C\uB3C8\uC758 \uB8EC (\uBC29\uC5B4 \uBD84\uC1C4)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
@@ -3623,14 +3623,14 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
-            "name": "Calamity: Chaos Rune (MagickaRateMult)",
+            "name": "Calamity: Chaos Rune (Magicka Regen Down) / \uD63C\uB3C8\uC758 \uB8EC (\uB9E4\uC9C0\uCE74 \uC7AC\uC0DD \uAC10\uC18C)",
             "actorValue": "MagickaRateMult",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
-            "name": "Calamity: Chaos Rune (Magicka Regen Down)",
+            "name": "Calamity: Chaos Rune (Magicka Regen Down) / \uD63C\uB3C8\uC758 \uB8EC (\uB9E4\uC9C0\uCE74 \uC7AC\uC0DD \uAC10\uC18C)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
@@ -3666,14 +3666,14 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
-            "name": "Calamity: Chaos Rune (StaminaRateMult)",
+            "name": "Calamity: Chaos Rune (Stamina Regen Down) / \uD63C\uB3C8\uC758 \uB8EC (\uAE30\uB825 \uC7AC\uC0DD \uAC10\uC18C)",
             "actorValue": "StaminaRateMult",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN",
-            "name": "Calamity: Chaos Rune (Stamina Regen Down)",
+            "name": "Calamity: Chaos Rune (Stamina Regen Down) / \uD63C\uB3C8\uC758 \uB8EC (\uAE30\uB825 \uC7AC\uC0DD \uAC10\uC18C)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
@@ -3709,14 +3709,14 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
-            "name": "Calamity: Chaos Rune (WeaponSpeedMult)",
+            "name": "Calamity: Chaos Rune (Slow Attack Speed) / \uD63C\uB3C8\uC758 \uB8EC (\uACF5\uACA9 \uC18D\uB3C4 \uC800\uD558)",
             "actorValue": "WeaponSpeedMult",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK",
-            "name": "Calamity: Chaos Rune (Slow Attack Speed)",
+            "name": "Calamity: Chaos Rune (Slow Attack Speed) / \uD63C\uB3C8\uC758 \uB8EC (\uACF5\uACA9 \uC18D\uB3C4 \uC800\uD558)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
@@ -3752,14 +3752,14 @@
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
-            "name": "Calamity: Chaos Rune (Resist Magic)",
+            "name": "Calamity: Chaos Rune (Fragile Magic Resist) / \uD63C\uB3C8\uC758 \uB8EC (\uB9C8\uBC95 \uC800\uD56D \uC57D\uD654)",
             "actorValue": "ResistMagic",
             "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE",
-            "name": "Calamity: Chaos Rune (Fragile Magic Resist)",
+            "name": "Calamity: Chaos Rune (Fragile Magic Resist) / \uD63C\uB3C8\uC758 \uB8EC (\uB9C8\uBC95 \uC800\uD56D \uC57D\uD654)",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",

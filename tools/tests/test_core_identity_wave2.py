@@ -62,10 +62,10 @@ class CoreIdentityWaveTwoTests(unittest.TestCase):
         # Pin of the full records payload: catches accidental record mutation.
         # An INTENTIONAL record change must update this hash in the same commit
         # (2026-08-04: fire conversion MGEF gained hitSoundForm for the B1
-        # prototype; 2026-08-09: frost/shock conversion MGEFs gained theirs
-        # after the fire listen test passed).
+        # prototype; 2026-08-09: frost/shock conversion sounds, then internal trap
+        # record names gained Korean halves for the localized preview map).
         self.assertEqual(
-            "25a62448f26ab7dc2c0e760ff0ff0b677554d6727cae74a450aac92ac05b13db",
+            "bcc766b420898acc15eb35e387c68696c4c429052388b84c23bbdb565fb2de03",
             hashlib.sha256(records_payload).hexdigest(),
             "records payload changed — if intentional, update this pin in the same commit",
         )

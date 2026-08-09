@@ -377,6 +377,84 @@ namespace CalamityAffixes
 		}
 	}
 
+	void EventBridge::HarvestRecordDisplayNames(const nlohmann::json& a_affix, RE::TESDataHandler* a_handler)
+	{
+		// ESP FULL names are ASCII-only by design (ToPluginSafeName strips the Korean
+		// half), so player-facing text that wants localized record names has to read
+		// them from the config's records specs instead of the loaded forms.
+		const auto recordsIt = a_affix.find("records");
+		if (recordsIt == a_affix.end() || !recordsIt->is_object()) {
+			return;
+		}
+
+		auto harvest = [&](const nlohmann::json& a_record, bool a_isSpell) {
+			if (!a_record.is_object()) {
+				return;
+			}
+			const auto name = a_record.value("name", std::string{});
+			const auto editorId = a_record.value("editorId", std::string{});
+			if (name.empty() || editorId.empty()) {
+				return;
+			}
+
+			std::string english = name;
+			std::string korean;
+			if (const auto sep = name.find(" / "); sep != std::string::npos) {
+				english = name.substr(0, sep);
+				korean = name.substr(sep + 3);
+			}
+			constexpr std::string_view kCalamityPrefix = "Calamity: ";
+			if (english.rfind(kCalamityPrefix.data(), 0) == 0) {
+				english.erase(0, kCalamityPrefix.size());
+			}
+
+			const RE::TESForm* form = a_isSpell ?
+				static_cast<const RE::TESForm*>(ConfigShared::LookupFormFromSpec<RE::SpellItem>(editorId, a_handler)) :
+				static_cast<const RE::TESForm*>(ConfigShared::LookupFormFromSpec<RE::EffectSetting>(editorId, a_handler));
+			if (!form) {
+				return;
+			}
+			_affixRuntimeState.recordDisplayNames[form->GetFormID()] = { std::move(english), std::move(korean) };
+		};
+
+		if (const auto it = recordsIt->find("magicEffect"); it != recordsIt->end()) {
+			harvest(*it, false);
+		}
+		if (const auto it = recordsIt->find("spell"); it != recordsIt->end()) {
+			harvest(*it, true);
+		}
+		if (const auto it = recordsIt->find("magicEffects"); it != recordsIt->end() && it->is_array()) {
+			for (const auto& record : *it) {
+				harvest(record, false);
+			}
+		}
+		if (const auto it = recordsIt->find("spells"); it != recordsIt->end() && it->is_array()) {
+			for (const auto& record : *it) {
+				harvest(record, true);
+			}
+		}
+	}
+
+	std::string EventBridge::ResolveRecordDisplayName(
+		const RE::TESForm* a_form,
+		std::string_view a_fallback,
+		bool a_korean) const
+	{
+		if (a_form) {
+			if (const auto it = _affixRuntimeState.recordDisplayNames.find(a_form->GetFormID());
+				it != _affixRuntimeState.recordDisplayNames.end()) {
+				const auto& [english, korean] = it->second;
+				if (a_korean && !korean.empty()) {
+					return korean;
+				}
+				if (!english.empty()) {
+					return english;
+				}
+			}
+		}
+		return std::string(a_fallback);
+	}
+
 	void EventBridge::ParseConfiguredAffixesFromJson(const nlohmann::json& a_affixes, RE::TESDataHandler* a_handler)
 	{
 		// Strip null values from all affix entries before parsing.
@@ -388,6 +466,8 @@ namespace CalamityAffixes
 			if (!a.is_object()) {
 				continue;
 			}
+
+			HarvestRecordDisplayNames(a, a_handler);
 
 			try {
 				AffixRuntime out{};

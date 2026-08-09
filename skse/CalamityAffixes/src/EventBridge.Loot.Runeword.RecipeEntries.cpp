@@ -248,7 +248,12 @@ namespace CalamityAffixes
 				return {};
 			}
 
-			const auto spellName = pickLocalizedRecordName(spellNameOr(a_spell, "Spell"), a_korean);
+			// Config-sourced names carry the Korean halves that ToPluginSafeName strips
+			// from the ESP; the pickLocalizedRecordName fallback covers vanilla forms.
+			const auto spellName = ResolveRecordDisplayName(
+				a_spell,
+				pickLocalizedRecordName(spellNameOr(a_spell, "Spell"), a_korean),
+				a_korean);
 			std::vector<std::string> effectProfiles;
 			effectProfiles.reserve(3);
 			std::string firstEffectName;
@@ -267,7 +272,10 @@ namespace CalamityAffixes
 				std::string effectProfile;
 				const char* effectNameRaw = effect->baseEffect->GetName();
 				if (effectNameRaw && effectNameRaw[0] != '\0') {
-					effectProfile.append(pickLocalizedRecordName(effectNameRaw, a_korean));
+					effectProfile.append(ResolveRecordDisplayName(
+						effect->baseEffect,
+						pickLocalizedRecordName(effectNameRaw, a_korean),
+						a_korean));
 				} else {
 					effectProfile.append("Effect");
 				}

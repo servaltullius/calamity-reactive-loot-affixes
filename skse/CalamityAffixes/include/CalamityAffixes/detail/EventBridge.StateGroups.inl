@@ -6,6 +6,10 @@
 		{
 			std::vector<AffixRuntime> affixes{};
 			std::vector<std::uint32_t> activeCounts{};
+			// ESP FULL names are ASCII-only by design (ToPluginSafeName), so localized
+			// record display names come from the runtime config's records specs:
+			// formID -> { english, korean } halves of "Calamity: EN / KO".
+			std::unordered_map<RE::FormID, std::pair<std::string, std::string>> recordDisplayNames{};
 			float activeCritDamageBonusPct{ 0.0f };
 			AffixRegistryState affixRegistry{};
 			std::vector<std::size_t> activeHitTriggerAffixIndices{};

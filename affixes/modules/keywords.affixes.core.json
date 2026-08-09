@@ -1493,7 +1493,7 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
-        "name": "Calamity: Bear Trap (Poison)",
+        "name": "Calamity: Bear Trap (Poison) / 곰 덫 (독)",
         "actorValue": "Health",
         "resistValue": "PoisonResist",
         "magicSkill": "Destruction",
@@ -1501,7 +1501,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_POISON",
-        "name": "Calamity: Bear Trap (Poison)",
+        "name": "Calamity: Bear Trap (Poison) / 곰 덫 (독)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_POISON",
@@ -1537,14 +1537,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
-        "name": "Calamity: Bear Trap (Drain Magicka)",
+        "name": "Calamity: Bear Trap (Drain Magicka) / 곰 덫 (매지카 흡수)",
         "actorValue": "Magicka",
         "magicSkill": "Destruction",
         "hostile": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
-        "name": "Calamity: Bear Trap (Drain Magicka)",
+        "name": "Calamity: Bear Trap (Drain Magicka) / 곰 덫 (매지카 흡수)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_MAGICKA",
@@ -1580,14 +1580,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
-        "name": "Calamity: Bear Trap (Drain Stamina)",
+        "name": "Calamity: Bear Trap (Drain Stamina) / 곰 덫 (기력 흡수)",
         "actorValue": "Stamina",
         "magicSkill": "Destruction",
         "hostile": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA",
-        "name": "Calamity: Bear Trap (Drain Stamina)",
+        "name": "Calamity: Bear Trap (Drain Stamina) / 곰 덫 (기력 흡수)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA",
@@ -2903,14 +2903,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
-        "name": "Calamity: Tar Blight (DamageResist)",
+        "name": "Calamity: Tar Blight (Sunder Armor) / 타르 역병 (방어 분쇄)",
         "actorValue": "DamageResist",
         "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_DOT_BLOOM_TAR_SUNDER",
-        "name": "Calamity: Tar Blight (Sunder Armor)",
+        "name": "Calamity: Tar Blight (Sunder Armor) / 타르 역병 (방어 분쇄)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
@@ -3014,14 +3014,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
-        "name": "Calamity: Siphon Spore (StaminaRateMult)",
+        "name": "Calamity: Siphon Spore (Stamina Regen Down) / 흡수 포자 (기력 재생 감소)",
         "actorValue": "StaminaRateMult",
         "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_DOT_BLOOM_SIPHON_STA",
-        "name": "Calamity: Siphon Spore (Stamina Regen Down)",
+        "name": "Calamity: Siphon Spore (Stamina Regen Down) / 흡수 포자 (기력 재생 감소)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
@@ -3137,14 +3137,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
-        "name": "Calamity: Chaos Rune (Sunder Armor)",
+        "name": "Calamity: Chaos Rune (Sunder Armor) / 혼돈의 룬 (방어 분쇄)",
         "actorValue": "DamageResist",
         "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER",
-        "name": "Calamity: Chaos Rune (Sunder Armor)",
+        "name": "Calamity: Chaos Rune (Sunder Armor) / 혼돈의 룬 (방어 분쇄)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SUNDER",
@@ -3180,14 +3180,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
-        "name": "Calamity: Chaos Rune (MagickaRateMult)",
+        "name": "Calamity: Chaos Rune (Magicka Regen Down) / 혼돈의 룬 (매지카 재생 감소)",
         "actorValue": "MagickaRateMult",
         "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN",
-        "name": "Calamity: Chaos Rune (Magicka Regen Down)",
+        "name": "Calamity: Chaos Rune (Magicka Regen Down) / 혼돈의 룬 (매지카 재생 감소)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_MAGREGEN",
@@ -3223,14 +3223,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
-        "name": "Calamity: Chaos Rune (StaminaRateMult)",
+        "name": "Calamity: Chaos Rune (Stamina Regen Down) / 혼돈의 룬 (기력 재생 감소)",
         "actorValue": "StaminaRateMult",
         "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_STAMREGEN",
-        "name": "Calamity: Chaos Rune (Stamina Regen Down)",
+        "name": "Calamity: Chaos Rune (Stamina Regen Down) / 혼돈의 룬 (기력 재생 감소)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_DRAIN_STAMREGEN",
@@ -3266,14 +3266,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
-        "name": "Calamity: Chaos Rune (WeaponSpeedMult)",
+        "name": "Calamity: Chaos Rune (Slow Attack Speed) / 혼돈의 룬 (공격 속도 저하)",
         "actorValue": "WeaponSpeedMult",
         "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK",
-        "name": "Calamity: Chaos Rune (Slow Attack Speed)",
+        "name": "Calamity: Chaos Rune (Slow Attack Speed) / 혼돈의 룬 (공격 속도 저하)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
@@ -3309,14 +3309,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
-        "name": "Calamity: Chaos Rune (Resist Magic)",
+        "name": "Calamity: Chaos Rune (Fragile Magic Resist) / 혼돈의 룬 (마법 저항 약화)",
         "actorValue": "ResistMagic",
         "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE",
-        "name": "Calamity: Chaos Rune (Fragile Magic Resist)",
+        "name": "Calamity: Chaos Rune (Fragile Magic Resist) / 혼돈의 룬 (마법 저항 약화)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_FRAGILE",
