@@ -97,6 +97,7 @@ function setRunewordPanelState(raw) {
     nextRuneName: typeof data.nextRuneName === "string" ? data.nextRuneName : "",
     nextRuneOwned: Number.isFinite(Number(data.nextRuneOwned)) ? Number(data.nextRuneOwned) : 0,
     canInsert: Boolean(data.canInsert),
+    debugTools: Boolean(data.debugTools),
     missingSummary: typeof data.missingSummary === "string" ? data.missingSummary : "",
     baseCompatibilityWarning: Boolean(data.baseCompatibilityWarning),
     baseCompatibilityMessageEn: typeof data.baseCompatibilityMessageEn === "string"
