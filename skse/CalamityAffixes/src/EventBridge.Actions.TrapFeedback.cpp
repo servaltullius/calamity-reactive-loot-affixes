@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <vector>
 
 namespace CalamityAffixes
 {
@@ -50,6 +51,64 @@ namespace CalamityAffixes
 		{
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			return player ? player->Get3D(false) : nullptr;
+		}
+
+		// ---- render-probe self-diagnosis -----------------------------------
+		// Every 2026-08-10 session had Spawn accept our calls while nothing
+		// reached the screen, and the async BGSParticleObjectCloneTask means the
+		// return value cannot say why. So the probe holds its spawned particles
+		// and reads them back on later frames: did the model clone complete, did
+		// it get a scene-graph parent, is it app-culled, and where did its world
+		// transform end up. Main-thread only (spawn task + chained tasks).
+		struct ProbeRecord
+		{
+			const char* tag;
+			RE::NiPointer<RE::BSTempEffectParticle> particle;
+		};
+		std::vector<ProbeRecord> g_probeRecords;
+		bool g_probeChainActive = false;
+
+		void InspectProbeRecords(std::uint32_t a_frame)
+		{
+			for (const auto& record : g_probeRecords) {
+				auto* particle = record.particle.get();
+				if (!particle) {
+					continue;
+				}
+				auto* object = particle->particleObject.get();
+				auto* parent = object ? object->parent : nullptr;
+				SKSE::log::info(
+					"CalamityAffixes: probe inspect (tag={}, frame={}, age={:.2f}, lifetime={:.2f}, initialized={}, clone={}, parent={}, culled={}, worldPos=({:.1f}, {:.1f}, {:.1f}), worldScale={:.2f}).",
+					record.tag,
+					a_frame,
+					particle->age,
+					particle->lifetime,
+					particle->initialized,
+					object != nullptr,
+					parent ? (parent->name.empty() ? "<unnamed>" : parent->name.c_str()) : "<none>",
+					object ? object->GetAppCulled() : false,
+					object ? object->world.translate.x : 0.0f,
+					object ? object->world.translate.y : 0.0f,
+					object ? object->world.translate.z : 0.0f,
+					object ? object->world.scale : 0.0f);
+			}
+		}
+
+		void ChainProbeInspection(std::uint32_t a_frame)
+		{
+			// ~0.5s / 2s / 5s at 60 fps: early enough to catch the clone task,
+			// late enough to see expiry behaviour before the 10s lifetime ends.
+			constexpr std::array<std::uint32_t, 3> kCheckFrames{ 30u, 120u, 300u };
+			if (std::find(kCheckFrames.begin(), kCheckFrames.end(), a_frame) != kCheckFrames.end()) {
+				InspectProbeRecords(a_frame);
+			}
+			auto* tasks = SKSE::GetTaskInterface();
+			if (a_frame >= kCheckFrames.back() || !tasks) {
+				g_probeRecords.clear();
+				g_probeChainActive = false;
+				return;
+			}
+			tasks->AddTask([a_frame]() { ChainProbeInspection(a_frame + 1u); });
 		}
 	}
 
@@ -206,36 +265,39 @@ namespace CalamityAffixes
 				return;
 			}
 
-			// Variant matrix: 2 BSA-verified vanilla models x {free, anchored},
-			// plus one exact replica of po3's call (anchored + the node's world
-			// rotation). Whichever column renders names the missing ingredient.
+			// Close the address question with data: the on-disk exe is SteamStub
+			// encrypted, so log the module-relative RVAs the relocation actually
+			// resolved for both Spawn overloads at runtime instead.
+			const auto moduleBase = REL::Module::get().base();
+			const REL::Relocation<std::uintptr_t> spawnEuler{ RELOCATION_ID(29218, 30071) };
+			const REL::Relocation<std::uintptr_t> spawnMatrix{ RELOCATION_ID(29219, 30072) };
+			SKSE::log::info(
+				"CalamityAffixes: probe spawn fn (euler rva={:#x}, matrix rva={:#x}).",
+				spawnEuler.address() - moduleBase,
+				spawnMatrix.address() - moduleBase);
+
 			struct ProbeVariant
 			{
 				const char* tag;
 				const char* model;
 				bool anchored;
-				bool nodeRotation;
 			};
-			static constexpr std::array<ProbeVariant, 5> kProbeVariants{{
-				{ "beartrap-free", "Traps\\BearTrap\\BearTrap01.nif", false, false },
-				{ "beartrap-anchored", "Traps\\BearTrap\\BearTrap01.nif", true, false },
-				{ "soultrap-free", "Magic\\SoulTrapTargetPointFX.nif", false, false },
-				{ "soultrap-anchored", "Magic\\SoulTrapTargetPointFX.nif", true, false },
-				{ "soultrap-po3exact", "Magic\\SoulTrapTargetPointFX.nif", true, true },
+			static constexpr std::array<ProbeVariant, 3> kProbeVariants{{
+				{ "beartrap-free", "Traps\\BearTrap\\BearTrap01.nif", false },
+				{ "soultrap-free", "Magic\\SoulTrapTargetPointFX.nif", false },
+				{ "soultrap-anchored", "Magic\\SoulTrapTargetPointFX.nif", true },
 			}};
 
 			auto* root = player->Get3D(false);
-			const auto base = player->GetPosition();
+			const auto basePos = player->GetPosition();
+			g_probeRecords.clear();
 			float offset = 0.0f;
 			for (const auto& variant : kProbeVariants) {
-				RE::NiPoint3 position = base;
+				RE::NiPoint3 position = basePos;
 				position.x += offset;
 				offset += 96.0f;
 				auto* anchor = variant.anchored ? root : nullptr;
-				const RE::NiMatrix3 rotation = (variant.nodeRotation && root) ?
-					root->world.rotate : RE::NiMatrix3{};
-				const auto* particle = SpawnTrapParticle(
-					cell, 10.0f, variant.model, position, 1.5f, anchor, rotation);
+				auto* particle = SpawnTrapParticle(cell, 10.0f, variant.model, position, 1.5f, anchor);
 				SKSE::log::info(
 					"CalamityAffixes: trap marker probe (variant={}, model={}, anchored={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
 					variant.tag,
@@ -245,8 +307,16 @@ namespace CalamityAffixes
 					position.y,
 					position.z,
 					particle != nullptr);
+				if (particle) {
+					g_probeRecords.push_back(
+						ProbeRecord{ variant.tag, RE::NiPointer<RE::BSTempEffectParticle>{ particle } });
+				}
 			}
-			EmitHudNotification("Calamity: marker probe spawned 5 variants at your feet (10s).");
+			if (!g_probeRecords.empty() && !g_probeChainActive) {
+				g_probeChainActive = true;
+				ChainProbeInspection(0u);
+			}
+			EmitHudNotification("Calamity: marker probe spawned; self-inspection logging for 5s.");
 		});
 	}
 
