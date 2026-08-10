@@ -2,9 +2,19 @@
 #include "CalamityAffixes/TrapCellPolicy.h"
 
 #include <algorithm>
+#include <cstdint>
 
 namespace CalamityAffixes
 {
+	namespace
+	{
+		// BSTempEffectParticle flag semantics are undocumented, but the engine's
+		// own impact-effect callers and shipping SKSE mods pass 7 — and with 0
+		// every spawn in the 2026-08-10 session returned non-null while nothing
+		// ever rendered on screen. Match the known-working value.
+		constexpr std::uint32_t kTempEffectParticleFlags = 7u;
+	}
+
 	void EventBridge::PlayTrapFeedbackCue(
 		const TrapInstance& a_trap,
 		const TrapFeedbackCue& a_cue) const noexcept
@@ -22,7 +32,7 @@ namespace CalamityAffixes
 					RE::NiPoint3{},
 					a_trap.position,
 					a_cue.scale,
-					0u,
+					kTempEffectParticleFlags,
 					nullptr);
 				if (_loot.debugLog) {
 					SKSE::log::debug(
@@ -88,19 +98,22 @@ namespace CalamityAffixes
 			RE::NiPoint3{},
 			a_trap.position,
 			scale,
-			0u,
+			kTempEffectParticleFlags,
 			nullptr);
 		if (_loot.debugLog) {
 			// The marker layer has never been confirmed on screen (every earlier
 			// session predated the MODL prefix fix), so log the engine's answer:
 			// spawned=false means the temp-effect path rejected this model,
-			// spawned=true with nothing visible means the NIF itself is the problem.
+			// spawned=true with nothing visible points at flags/position/NIF.
 			SKSE::log::debug(
-				"CalamityAffixes: trap marker spawn (model={}, state={}, lifetime={}, scale={}, spawned={}).",
+				"CalamityAffixes: trap marker spawn (model={}, state={}, lifetime={}, scale={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
 				model,
 				a_state == TrapVisualState::kUnarmed ? "unarmed" : "armed",
 				lifetime,
 				scale,
+				a_trap.position.x,
+				a_trap.position.y,
+				a_trap.position.z,
 				particle != nullptr);
 		}
 		if (particle) {
