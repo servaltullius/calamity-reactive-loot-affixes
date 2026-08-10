@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <utility>
 
 namespace CalamityAffixes
 {
@@ -16,26 +15,41 @@ namespace CalamityAffixes
 		// ever rendered on screen. Match the known-working value.
 		constexpr std::uint32_t kTempEffectParticleFlags = 7u;
 
-		// Mirror the exact call shape of callers that demonstrably render:
-		// the NiMatrix3 (identity) overload — engine id 29219 — not the euler
-		// NiPoint3 variant (29218), which still produced accepted-but-invisible
-		// spawns with flags=7 in the 2026-08-10 follow-up session.
+		// Mirror the call shape of po3's Papyrus Extender SpawnParticleEffect —
+		// the one BSTempEffectParticle caller known to render in shipping mods:
+		// NiMatrix3 overload (engine id 29219), flags 7, and a NON-NULL attach
+		// node (the reference's 3D root). Overload, flags, model paths (BSA
+		// verified), position (player's feet), and thread (task queue) were all
+		// eliminated across the 2026-08-10 sessions with spawns accepted but
+		// never drawn; the null attach node is the last remaining difference.
 		[[nodiscard]] RE::BSTempEffectParticle* SpawnTrapParticle(
 			RE::TESObjectCELL* a_cell,
 			float a_lifetime,
 			const char* a_model,
 			const RE::NiPoint3& a_position,
-			float a_scale)
+			float a_scale,
+			RE::NiAVObject* a_attachNode,
+			const RE::NiMatrix3& a_rotation = RE::NiMatrix3{})
 		{
 			return RE::BSTempEffectParticle::Spawn(
 				a_cell,
 				a_lifetime,
 				a_model,
-				RE::NiMatrix3{},
+				a_rotation,
 				a_position,
 				a_scale,
 				kTempEffectParticleFlags,
-				nullptr);
+				a_attachNode);
+		}
+
+		// Traps only exist in cells near the player, so the player's world model
+		// is a valid anchor for every marker. If the probe shows anchored spawns
+		// following the player instead of staying put, revert to positional
+		// spawning and keep hunting.
+		[[nodiscard]] RE::NiAVObject* ResolvePlayerAnchor3D()
+		{
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			return player ? player->Get3D(false) : nullptr;
 		}
 	}
 
@@ -49,18 +63,21 @@ namespace CalamityAffixes
 		if (a_cue.art && a_cue.durationSeconds > 0.0f && cellUsable) {
 			const auto* model = a_cue.art->GetModel();
 			if (model && *model) {
+				auto* anchor = ResolvePlayerAnchor3D();
 				const auto* particle = SpawnTrapParticle(
 					a_trap.cell,
 					a_cue.durationSeconds,
 					model,
 					a_trap.position,
-					a_cue.scale);
+					a_cue.scale,
+					anchor);
 				if (_loot.debugLog) {
 					SKSE::log::debug(
-						"CalamityAffixes: trap cue spawn (model={}, duration={}, scale={}, spawned={}).",
+						"CalamityAffixes: trap cue spawn (model={}, duration={}, scale={}, anchored={}, spawned={}).",
 						model,
 						a_cue.durationSeconds,
 						a_cue.scale,
+						anchor != nullptr,
 						particle != nullptr);
 				}
 			}
@@ -112,19 +129,21 @@ namespace CalamityAffixes
 			std::chrono::duration_cast<std::chrono::duration<float>>(endAt - a_now).count());
 		const float scale = a_state == TrapVisualState::kUnarmed ?
 			a_trap.feedback.unarmedScale : a_trap.feedback.armedScale;
+		auto* anchor = ResolvePlayerAnchor3D();
 		auto* particle = SpawnTrapParticle(
 			a_trap.cell,
 			lifetime,
 			model,
 			a_trap.position,
-			scale);
+			scale,
+			anchor);
 		if (_loot.debugLog) {
 			// The marker layer has never been confirmed on screen (every earlier
 			// session predated the MODL prefix fix), so log the engine's answer:
 			// spawned=false means the temp-effect path rejected this model,
 			// spawned=true with nothing visible points at flags/position/NIF.
 			SKSE::log::debug(
-				"CalamityAffixes: trap marker spawn (model={}, state={}, lifetime={}, scale={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
+				"CalamityAffixes: trap marker spawn (model={}, state={}, lifetime={}, scale={}, pos=({:.1f}, {:.1f}, {:.1f}), anchored={}, spawned={}).",
 				model,
 				a_state == TrapVisualState::kUnarmed ? "unarmed" : "armed",
 				lifetime,
@@ -132,6 +151,7 @@ namespace CalamityAffixes
 				a_trap.position.x,
 				a_trap.position.y,
 				a_trap.position.z,
+				anchor != nullptr,
 				particle != nullptr);
 		}
 		if (particle) {
@@ -186,26 +206,47 @@ namespace CalamityAffixes
 				return;
 			}
 
-			static constexpr std::array<std::pair<const char*, float>, 3> kProbeModels{{
-				{ "Traps\\BearTrap\\BearTrap01.nif", 0.0f },
-				{ "Magic\\SoulTrapTargetPointFX.nif", 96.0f },
-				{ "CalamityAffixes\\VFX\\RuneTrapMarker_Calamity.nif", 192.0f },
+			// Variant matrix: 2 BSA-verified vanilla models x {free, anchored},
+			// plus one exact replica of po3's call (anchored + the node's world
+			// rotation). Whichever column renders names the missing ingredient.
+			struct ProbeVariant
+			{
+				const char* tag;
+				const char* model;
+				bool anchored;
+				bool nodeRotation;
+			};
+			static constexpr std::array<ProbeVariant, 5> kProbeVariants{{
+				{ "beartrap-free", "Traps\\BearTrap\\BearTrap01.nif", false, false },
+				{ "beartrap-anchored", "Traps\\BearTrap\\BearTrap01.nif", true, false },
+				{ "soultrap-free", "Magic\\SoulTrapTargetPointFX.nif", false, false },
+				{ "soultrap-anchored", "Magic\\SoulTrapTargetPointFX.nif", true, false },
+				{ "soultrap-po3exact", "Magic\\SoulTrapTargetPointFX.nif", true, true },
 			}};
 
+			auto* root = player->Get3D(false);
 			const auto base = player->GetPosition();
-			for (const auto& [model, offset] : kProbeModels) {
+			float offset = 0.0f;
+			for (const auto& variant : kProbeVariants) {
 				RE::NiPoint3 position = base;
 				position.x += offset;
-				const auto* particle = SpawnTrapParticle(cell, 10.0f, model, position, 1.5f);
+				offset += 96.0f;
+				auto* anchor = variant.anchored ? root : nullptr;
+				const RE::NiMatrix3 rotation = (variant.nodeRotation && root) ?
+					root->world.rotate : RE::NiMatrix3{};
+				const auto* particle = SpawnTrapParticle(
+					cell, 10.0f, variant.model, position, 1.5f, anchor, rotation);
 				SKSE::log::info(
-					"CalamityAffixes: trap marker probe (model={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
-					model,
+					"CalamityAffixes: trap marker probe (variant={}, model={}, anchored={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
+					variant.tag,
+					variant.model,
+					anchor != nullptr,
 					position.x,
 					position.y,
 					position.z,
 					particle != nullptr);
 			}
-			EmitHudNotification("Calamity: marker probe spawned at your feet (10s).");
+			EmitHudNotification("Calamity: marker probe spawned 5 variants at your feet (10s).");
 		});
 	}
 
