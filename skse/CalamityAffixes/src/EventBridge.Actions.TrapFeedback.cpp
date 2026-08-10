@@ -291,25 +291,26 @@ namespace CalamityAffixes
 				spawnEuler.address() - moduleBase,
 				spawnMatrix.address() - moduleBase);
 
-			// The registered variants replicate MuImpactFramework's persistence
-			// trick: manually adding the particle to ProcessLists'
-			// globalTempEffects so the engine's global updater owns it. If only
-			// those render (or only their age advances), the cell-list path is
-			// what's broken for us and the fix is known.
+			// qa7 data killed the previous model class: static world meshes
+			// (BearTrap01) clone but never receive a world transform (stuck at
+			// origin, lifetime forced to 1s), and art-object FX
+			// (SoulTrapTargetPointFX) attach healthily but stay invisible
+			// because the magic system, not the NIF, drives their sequences.
+			// These four are the opposite breed: rune-projectile glyphs and
+			// ground hazards are self-playing FX that vanilla renders with no
+			// external driver - exactly what a trap marker needs.
 			struct ProbeVariant
 			{
 				const char* tag;
 				const char* model;
-				bool registerGlobal;
 			};
 			static constexpr std::array<ProbeVariant, 4> kProbeVariants{{
-				{ "beartrap-free", "Traps\\BearTrap\\BearTrap01.nif", false },
-				{ "soultrap-free", "Magic\\SoulTrapTargetPointFX.nif", false },
-				{ "beartrap-registered", "Traps\\BearTrap\\BearTrap01.nif", true },
-				{ "soultrap-registered", "Magic\\SoulTrapTargetPointFX.nif", true },
+				{ "runefire", "Magic\\RuneFireProjectile01.nif" },
+				{ "runefrost", "Magic\\RuneFrostProjectile01.nif" },
+				{ "runeshock", "Magic\\RuneLightningProjectile01.nif" },
+				{ "icehazard", "Magic\\IceHazard01.nif" },
 			}};
 
-			auto* processLists = RE::ProcessLists::GetSingleton();
 			const auto basePos = player->GetPosition();
 			auto records = std::make_shared<std::vector<ProbeRecord>>();
 			float offset = 0.0f;
@@ -318,17 +319,10 @@ namespace CalamityAffixes
 				position.x += offset;
 				offset += 96.0f;
 				auto* particle = SpawnTrapParticle(cell, 10.0f, variant.model, position, 1.5f, nullptr);
-				bool registered = false;
-				if (particle && variant.registerGlobal && processLists) {
-					RE::BSSpinLockGuard locker(processLists->globalEffectsLock);
-					processLists->globalTempEffects.emplace_back(particle);
-					registered = true;
-				}
 				SKSE::log::info(
-					"CalamityAffixes: trap marker probe (variant={}, model={}, registered={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
+					"CalamityAffixes: trap marker probe (variant={}, model={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
 					variant.tag,
 					variant.model,
-					registered,
 					position.x,
 					position.y,
 					position.z,
