@@ -313,6 +313,11 @@
 					a_outFeedback = "Spawned test item request";
 					return true;
 				}
+				if (a_command == "spawn.trapaffix") {
+					a_outSent = EmitModEvent(EventNames::kMcmGrantTrapAffix, {}, 1.0f);
+					a_outFeedback = "Trap affix grant requested";
+					return true;
+				}
 
 				return false;
 			}

@@ -118,6 +118,7 @@ const debugGrantNextButton = document.getElementById("debugGrantNextButton");
 const debugGrantSetButton = document.getElementById("debugGrantSetButton");
 const debugGrantStarterOrbsButton = document.getElementById("debugGrantStarterOrbsButton");
 const debugSpawnTestButton = document.getElementById("debugSpawnTestButton");
+const debugGrantTrapAffixButton = document.getElementById("debugGrantTrapAffixButton");
 const currencyRecoverButton = document.getElementById("currencyRecoverButton");
 const footerCloseButton = document.getElementById("footerCloseButton");
 const controlPanelCloseX = document.getElementById("controlPanelCloseX");

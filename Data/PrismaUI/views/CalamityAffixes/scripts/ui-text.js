@@ -253,6 +253,12 @@ function initUiText() {
       "스타트 재련 오브 +3"
     );
   }
+  if (debugGrantTrapAffixButton) {
+    debugGrantTrapAffixButton.textContent = t(
+      "Grant Trap Affix to Selected Base",
+      "선택 베이스에 함정 어픽스"
+    );
+  }
   if (debugSpawnTestButton) {
     debugSpawnTestButton.textContent = t("Spawn Test Item", "테스트 아이템 지급");
   }

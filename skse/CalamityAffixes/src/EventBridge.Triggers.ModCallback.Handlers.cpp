@@ -211,13 +211,21 @@ namespace CalamityAffixes
 			return true;
 		}
 
+		if (a_eventName == kMcmGrantTrapAffixEvent) {
+			GrantTrapAffixToSelectedBase();
+			return true;
+		}
+
 		if (a_eventName == kRunewordGrantStarterOrbsEvent) {
 			// One-time starter grant: skip if the player already owns any reforge orbs.
+			// Debug sessions bypass the one-time gate so QA can farm reforge rolls
+			// (the panel already hides this button unless a debug toggle is on).
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			auto* orb = player
 				? RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")
 				: nullptr;
-			if (player && orb && player->GetItemCount(orb) > 0) {
+			const bool debugSession = _loot.debugHudNotifications || _loot.debugLog;
+			if (!debugSession && player && orb && player->GetItemCount(orb) > 0) {
 				EmitHudNotification("Reforge Orbs: already owned.");
 				return true;
 			}

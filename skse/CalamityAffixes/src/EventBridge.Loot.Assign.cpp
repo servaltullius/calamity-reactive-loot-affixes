@@ -3,6 +3,7 @@
 #include "CalamityAffixes/LootUiGuards.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <string>
 #include <string_view>
@@ -400,6 +401,71 @@ namespace CalamityAffixes
 			return "**";
 		}
 		return "*";
+	}
+
+	void EventBridge::GrantTrapAffixToSelectedBase()
+	{
+		// QA helper behind the debug toggles: assigns trap affixes to the runeword
+		// panel's selected base so the stability scenarios (S1/S3) do not require
+		// farming trap prefixes. One affix per press, cycling bear -> rune ->
+		// plague -> tar -> siphon -> chaos and skipping ones already on the item.
+		if (!(_loot.debugHudNotifications || _loot.debugLog)) {
+			return;
+		}
+		if (!_configLoaded) {
+			EmitHudNotification("Calamity: config not loaded.");
+			return;
+		}
+
+		std::uint64_t instanceKey = 0u;
+		RE::InventoryEntryData* entry = nullptr;
+		RE::ExtraDataList* xList = nullptr;
+		std::string failure;
+		if (!ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &failure, false)) {
+			std::string note = "Calamity: select a base in the panel first";
+			if (!failure.empty()) {
+				note.append(" (").append(failure).append(")");
+			}
+			EmitHudNotification(note.c_str());
+			return;
+		}
+
+		static constexpr std::array<std::string_view, 6> kTrapAffixIds{
+			"bear_trap", "rune_trap", "plague_spore", "tar_blight", "siphon_spore", "chaos_rune"
+		};
+
+		auto& slots = _instanceTrackingState.instanceAffixes[instanceKey];
+		for (const auto trapId : kTrapAffixIds) {
+			const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexById.find(std::string(trapId));
+			if (idxIt == _affixRuntimeState.affixRegistry.affixIndexById.end() ||
+				idxIt->second >= _affixRuntimeState.affixes.size()) {
+				continue;
+			}
+			const auto& affix = _affixRuntimeState.affixes[idxIt->second];
+			if (slots.HasToken(affix.token)) {
+				continue;
+			}
+			if (!slots.AddToken(affix.token)) {
+				EmitHudNotification("Calamity: affix slots full on selected base.");
+				return;
+			}
+
+			// The instance now carries hand-assigned affixes; mark it evaluated so
+			// the loot pipeline never rolls over them on a later pickup.
+			MarkLootEvaluatedInstance(instanceKey);
+			EnsureMultiAffixDisplayName(entry, xList, slots);
+			RebuildActiveCounts();
+
+			std::string note = "Calamity: granted ";
+			note.append(trapId);
+			note.append(" (");
+			note.append(std::to_string(slots.count));
+			note.append("/4 slots)");
+			EmitHudNotification(note.c_str());
+			return;
+		}
+
+		EmitHudNotification("Calamity: all trap affixes already on this base.");
 	}
 
 	void EventBridge::EnsureMultiAffixDisplayName(
