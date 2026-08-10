@@ -3,7 +3,10 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstdint>
+#include <memory>
+#include <thread>
 #include <vector>
 
 namespace CalamityAffixes
@@ -57,20 +60,19 @@ namespace CalamityAffixes
 		// Every 2026-08-10 session had Spawn accept our calls while nothing
 		// reached the screen, and the async BGSParticleObjectCloneTask means the
 		// return value cannot say why. So the probe holds its spawned particles
-		// and reads them back on later frames: did the model clone complete, did
-		// it get a scene-graph parent, is it app-culled, and where did its world
-		// transform end up. Main-thread only (spawn task + chained tasks).
+		// and reads them back later: did the clone task run, did the model get a
+		// scene-graph parent, is it app-culled, and does age advance at all (a
+		// stuck age means the effect never entered the manager's update list).
 		struct ProbeRecord
 		{
 			const char* tag;
 			RE::NiPointer<RE::BSTempEffectParticle> particle;
 		};
-		std::vector<ProbeRecord> g_probeRecords;
-		bool g_probeChainActive = false;
+		using ProbeRecordsPtr = std::shared_ptr<std::vector<ProbeRecord>>;
 
-		void InspectProbeRecords(std::uint32_t a_frame)
+		void InspectProbeRecords(const ProbeRecordsPtr& a_records, float a_afterSeconds)
 		{
-			for (const auto& record : g_probeRecords) {
+			for (const auto& record : *a_records) {
 				auto* particle = record.particle.get();
 				if (!particle) {
 					continue;
@@ -78,12 +80,13 @@ namespace CalamityAffixes
 				auto* object = particle->particleObject.get();
 				auto* parent = object ? object->parent : nullptr;
 				SKSE::log::info(
-					"CalamityAffixes: probe inspect (tag={}, frame={}, age={:.2f}, lifetime={:.2f}, initialized={}, clone={}, parent={}, culled={}, worldPos=({:.1f}, {:.1f}, {:.1f}), worldScale={:.2f}).",
+					"CalamityAffixes: probe inspect (tag={}, after={:.1f}s, age={:.2f}, lifetime={:.2f}, initialized={}, cloneTask={}, clone={}, parent={}, culled={}, worldPos=({:.1f}, {:.1f}, {:.1f}), worldScale={:.2f}).",
 					record.tag,
-					a_frame,
+					a_afterSeconds,
 					particle->age,
 					particle->lifetime,
 					particle->initialized,
+					particle->cloneTask.get() != nullptr,
 					object != nullptr,
 					parent ? (parent->name.empty() ? "<unnamed>" : parent->name.c_str()) : "<none>",
 					object ? object->GetAppCulled() : false,
@@ -94,21 +97,33 @@ namespace CalamityAffixes
 			}
 		}
 
-		void ChainProbeInspection(std::uint32_t a_frame)
+		void StartProbeInspectionTimer(ProbeRecordsPtr a_records)
 		{
-			// ~0.5s / 2s / 5s at 60 fps: early enough to catch the clone task,
-			// late enough to see expiry behaviour before the 10s lifetime ends.
-			constexpr std::array<std::uint32_t, 3> kCheckFrames{ 30u, 120u, 300u };
-			if (std::find(kCheckFrames.begin(), kCheckFrames.end(), a_frame) != kCheckFrames.end()) {
-				InspectProbeRecords(a_frame);
-			}
-			auto* tasks = SKSE::GetTaskInterface();
-			if (a_frame >= kCheckFrames.back() || !tasks) {
-				g_probeRecords.clear();
-				g_probeChainActive = false;
-				return;
-			}
-			tasks->AddTask([a_frame]() { ChainProbeInspection(a_frame + 1u); });
+			// The previous revision chained SKSE tasks to count frames, but the
+			// task queue drains until empty, so every checkpoint ran inside the
+			// spawn frame (all log lines shared one timestamp). Use a real-time
+			// worker instead, mirroring TrapSystem's poll pattern; each
+			// checkpoint marshals the actual inspection back to the main thread.
+			std::thread([records = std::move(a_records)]() mutable {
+				constexpr std::array<float, 4> kCheckSeconds{ 0.5f, 2.0f, 5.0f, 9.0f };
+				float elapsed = 0.0f;
+				for (const float checkpoint : kCheckSeconds) {
+					std::this_thread::sleep_for(
+						std::chrono::duration<float>(checkpoint - elapsed));
+					elapsed = checkpoint;
+					auto* tasks = SKSE::GetTaskInterface();
+					if (!tasks) {
+						return;
+					}
+					tasks->AddTask([records, checkpoint]() {
+						InspectProbeRecords(records, checkpoint);
+					});
+				}
+				if (auto* tasks = SKSE::GetTaskInterface()) {
+					// Release the NiPointers on the main thread.
+					tasks->AddTask([records]() { records->clear(); });
+				}
+			}).detach();
 		}
 	}
 
@@ -276,47 +291,57 @@ namespace CalamityAffixes
 				spawnEuler.address() - moduleBase,
 				spawnMatrix.address() - moduleBase);
 
+			// The registered variants replicate MuImpactFramework's persistence
+			// trick: manually adding the particle to ProcessLists'
+			// globalTempEffects so the engine's global updater owns it. If only
+			// those render (or only their age advances), the cell-list path is
+			// what's broken for us and the fix is known.
 			struct ProbeVariant
 			{
 				const char* tag;
 				const char* model;
-				bool anchored;
+				bool registerGlobal;
 			};
-			static constexpr std::array<ProbeVariant, 3> kProbeVariants{{
+			static constexpr std::array<ProbeVariant, 4> kProbeVariants{{
 				{ "beartrap-free", "Traps\\BearTrap\\BearTrap01.nif", false },
 				{ "soultrap-free", "Magic\\SoulTrapTargetPointFX.nif", false },
-				{ "soultrap-anchored", "Magic\\SoulTrapTargetPointFX.nif", true },
+				{ "beartrap-registered", "Traps\\BearTrap\\BearTrap01.nif", true },
+				{ "soultrap-registered", "Magic\\SoulTrapTargetPointFX.nif", true },
 			}};
 
-			auto* root = player->Get3D(false);
+			auto* processLists = RE::ProcessLists::GetSingleton();
 			const auto basePos = player->GetPosition();
-			g_probeRecords.clear();
+			auto records = std::make_shared<std::vector<ProbeRecord>>();
 			float offset = 0.0f;
 			for (const auto& variant : kProbeVariants) {
 				RE::NiPoint3 position = basePos;
 				position.x += offset;
 				offset += 96.0f;
-				auto* anchor = variant.anchored ? root : nullptr;
-				auto* particle = SpawnTrapParticle(cell, 10.0f, variant.model, position, 1.5f, anchor);
+				auto* particle = SpawnTrapParticle(cell, 10.0f, variant.model, position, 1.5f, nullptr);
+				bool registered = false;
+				if (particle && variant.registerGlobal && processLists) {
+					RE::BSSpinLockGuard locker(processLists->globalEffectsLock);
+					processLists->globalTempEffects.emplace_back(particle);
+					registered = true;
+				}
 				SKSE::log::info(
-					"CalamityAffixes: trap marker probe (variant={}, model={}, anchored={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
+					"CalamityAffixes: trap marker probe (variant={}, model={}, registered={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
 					variant.tag,
 					variant.model,
-					anchor != nullptr,
+					registered,
 					position.x,
 					position.y,
 					position.z,
 					particle != nullptr);
 				if (particle) {
-					g_probeRecords.push_back(
+					records->push_back(
 						ProbeRecord{ variant.tag, RE::NiPointer<RE::BSTempEffectParticle>{ particle } });
 				}
 			}
-			if (!g_probeRecords.empty() && !g_probeChainActive) {
-				g_probeChainActive = true;
-				ChainProbeInspection(0u);
+			if (!records->empty()) {
+				StartProbeInspectionTimer(records);
 			}
-			EmitHudNotification("Calamity: marker probe spawned; self-inspection logging for 5s.");
+			EmitHudNotification("Calamity: marker probe spawned; inspections log for 9s.");
 		});
 	}
 
