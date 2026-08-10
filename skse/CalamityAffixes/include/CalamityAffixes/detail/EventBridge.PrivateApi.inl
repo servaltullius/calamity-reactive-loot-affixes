@@ -52,6 +52,7 @@
 		[[nodiscard]] std::uint8_t CountProcPenaltySlots(const InstanceAffixSlots& a_slots) const;
 		void HarvestRecordDisplayNames(const nlohmann::json& a_affix, RE::TESDataHandler* a_handler);
 		void GrantTrapAffixToSelectedBase();
+		void SpawnTrapMarkerProbe();
 		[[nodiscard]] std::string ResolveRecordDisplayName(
 			const RE::TESForm* a_form,
 			std::string_view a_fallback,

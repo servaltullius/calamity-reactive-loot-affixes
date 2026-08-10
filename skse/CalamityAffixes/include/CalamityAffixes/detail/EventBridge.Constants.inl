@@ -26,6 +26,7 @@
 		static constexpr std::string_view kUiSetPanelEvent = EventNames::kUiSetPanel;
 		static constexpr std::string_view kUiTogglePanelEvent = EventNames::kUiTogglePanel;
 		static constexpr std::string_view kMcmGrantTrapAffixEvent = EventNames::kMcmGrantTrapAffix;
+		static constexpr std::string_view kMcmTrapMarkerProbeEvent = EventNames::kMcmTrapMarkerProbe;
 		static constexpr std::string_view kUiStatusEvent = EventNames::kUiStatus;
 		static constexpr std::string_view kMcmSetEnabledEvent = RuntimePolicy::kMcmSetEnabledEvent;
 		static constexpr std::string_view kLegacyMcmSetDebugNotificationsEvent = RuntimePolicy::kLegacyMcmSetDebugNotificationsEvent;

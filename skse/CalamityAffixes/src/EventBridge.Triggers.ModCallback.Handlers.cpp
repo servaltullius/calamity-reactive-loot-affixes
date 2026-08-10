@@ -216,6 +216,11 @@ namespace CalamityAffixes
 			return true;
 		}
 
+		if (a_eventName == kMcmTrapMarkerProbeEvent) {
+			SpawnTrapMarkerProbe();
+			return true;
+		}
+
 		if (a_eventName == kRunewordGrantStarterOrbsEvent) {
 			// One-time starter grant: skip if the player already owns any reforge orbs.
 			// Debug sessions bypass the one-time gate so QA can farm reforge rolls

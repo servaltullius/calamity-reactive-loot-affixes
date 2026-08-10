@@ -2,7 +2,9 @@
 #include "CalamityAffixes/TrapCellPolicy.h"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
+#include <utility>
 
 namespace CalamityAffixes
 {
@@ -13,6 +15,28 @@ namespace CalamityAffixes
 		// every spawn in the 2026-08-10 session returned non-null while nothing
 		// ever rendered on screen. Match the known-working value.
 		constexpr std::uint32_t kTempEffectParticleFlags = 7u;
+
+		// Mirror the exact call shape of callers that demonstrably render:
+		// the NiMatrix3 (identity) overload — engine id 29219 — not the euler
+		// NiPoint3 variant (29218), which still produced accepted-but-invisible
+		// spawns with flags=7 in the 2026-08-10 follow-up session.
+		[[nodiscard]] RE::BSTempEffectParticle* SpawnTrapParticle(
+			RE::TESObjectCELL* a_cell,
+			float a_lifetime,
+			const char* a_model,
+			const RE::NiPoint3& a_position,
+			float a_scale)
+		{
+			return RE::BSTempEffectParticle::Spawn(
+				a_cell,
+				a_lifetime,
+				a_model,
+				RE::NiMatrix3{},
+				a_position,
+				a_scale,
+				kTempEffectParticleFlags,
+				nullptr);
+		}
 	}
 
 	void EventBridge::PlayTrapFeedbackCue(
@@ -25,15 +49,12 @@ namespace CalamityAffixes
 		if (a_cue.art && a_cue.durationSeconds > 0.0f && cellUsable) {
 			const auto* model = a_cue.art->GetModel();
 			if (model && *model) {
-				const auto* particle = RE::BSTempEffectParticle::Spawn(
+				const auto* particle = SpawnTrapParticle(
 					a_trap.cell,
 					a_cue.durationSeconds,
 					model,
-					RE::NiPoint3{},
 					a_trap.position,
-					a_cue.scale,
-					kTempEffectParticleFlags,
-					nullptr);
+					a_cue.scale);
 				if (_loot.debugLog) {
 					SKSE::log::debug(
 						"CalamityAffixes: trap cue spawn (model={}, duration={}, scale={}, spawned={}).",
@@ -91,15 +112,12 @@ namespace CalamityAffixes
 			std::chrono::duration_cast<std::chrono::duration<float>>(endAt - a_now).count());
 		const float scale = a_state == TrapVisualState::kUnarmed ?
 			a_trap.feedback.unarmedScale : a_trap.feedback.armedScale;
-		auto* particle = RE::BSTempEffectParticle::Spawn(
+		auto* particle = SpawnTrapParticle(
 			a_trap.cell,
 			lifetime,
 			model,
-			RE::NiPoint3{},
 			a_trap.position,
-			scale,
-			kTempEffectParticleFlags,
-			nullptr);
+			scale);
 		if (_loot.debugLog) {
 			// The marker layer has never been confirmed on screen (every earlier
 			// session predated the MODL prefix fix), so log the engine's answer:
@@ -142,6 +160,53 @@ namespace CalamityAffixes
 			_trapState.tickCursor = 0u;
 		}
 		_trapState.hasActiveTraps.store(!activeTraps.empty(), std::memory_order_relaxed);
+	}
+
+	void EventBridge::SpawnTrapMarkerProbe()
+	{
+		// Debug-only render probe: spawns the three marker model families at the
+		// player's feet with a fat scale and lifetime, removing every gameplay
+		// variable (target position, arm timing, TTL) from the "does this path
+		// draw at all?" question. Look down; results also land in the log.
+		if (!(_loot.debugHudNotifications || _loot.debugLog)) {
+			return;
+		}
+		auto* tasks = SKSE::GetTaskInterface();
+		if (!tasks) {
+			return;
+		}
+		// Every rendering Spawn in this codebase runs on the main thread via the
+		// task queue (trap ticks are marshalled in TrapSystem.cpp); the probe
+		// must not introduce a new thread context as an extra variable.
+		tasks->AddTask([this]() {
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			auto* cell = player ? player->GetParentCell() : nullptr;
+			if (!player || !cell) {
+				EmitHudNotification("Calamity: probe needs a loaded player cell.");
+				return;
+			}
+
+			static constexpr std::array<std::pair<const char*, float>, 3> kProbeModels{{
+				{ "Traps\\BearTrap\\BearTrap01.nif", 0.0f },
+				{ "Magic\\SoulTrapTargetPointFX.nif", 96.0f },
+				{ "CalamityAffixes\\VFX\\RuneTrapMarker_Calamity.nif", 192.0f },
+			}};
+
+			const auto base = player->GetPosition();
+			for (const auto& [model, offset] : kProbeModels) {
+				RE::NiPoint3 position = base;
+				position.x += offset;
+				const auto* particle = SpawnTrapParticle(cell, 10.0f, model, position, 1.5f);
+				SKSE::log::info(
+					"CalamityAffixes: trap marker probe (model={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
+					model,
+					position.x,
+					position.y,
+					position.z,
+					particle != nullptr);
+			}
+			EmitHudNotification("Calamity: marker probe spawned at your feet (10s).");
+		});
 	}
 
 	void EventBridge::ClearTrapRuntimeState() noexcept

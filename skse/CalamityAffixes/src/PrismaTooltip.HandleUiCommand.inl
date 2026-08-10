@@ -318,6 +318,11 @@
 					a_outFeedback = "Trap affix grant requested";
 					return true;
 				}
+				if (a_command == "spawn.trapprobe") {
+					a_outSent = EmitModEvent(EventNames::kMcmTrapMarkerProbe, {}, 1.0f);
+					a_outFeedback = "Trap marker probe requested";
+					return true;
+				}
 
 				return false;
 			}

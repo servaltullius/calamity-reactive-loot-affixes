@@ -259,6 +259,12 @@ function initUiText() {
       "선택 베이스에 함정 어픽스"
     );
   }
+  if (debugTrapProbeButton) {
+    debugTrapProbeButton.textContent = t(
+      "Trap Marker Probe at Feet",
+      "발밑 함정 마커 프로브"
+    );
+  }
   if (debugSpawnTestButton) {
     debugSpawnTestButton.textContent = t("Spawn Test Item", "테스트 아이템 지급");
   }
