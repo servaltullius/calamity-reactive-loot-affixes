@@ -291,24 +291,22 @@ namespace CalamityAffixes
 				spawnEuler.address() - moduleBase,
 				spawnMatrix.address() - moduleBase);
 
-			// qa7 data killed the previous model class: static world meshes
-			// (BearTrap01) clone but never receive a world transform (stuck at
-			// origin, lifetime forced to 1s), and art-object FX
-			// (SoulTrapTargetPointFX) attach healthily but stay invisible
-			// because the magic system, not the NIF, drives their sequences.
-			// These four are the opposite breed: rune-projectile glyphs and
-			// ground hazards are self-playing FX that vanilla renders with no
-			// external driver - exactly what a trap marker needs.
+			// qa8 proved the self-playing glyph breed renders through this call
+			// (shock arcs confirmed on screen; all four healthy in telemetry).
+			// The probe now previews the exact six models the trap markers ship
+			// with, in trap-cycle order, so one press reviews the real mapping.
 			struct ProbeVariant
 			{
 				const char* tag;
 				const char* model;
 			};
-			static constexpr std::array<ProbeVariant, 4> kProbeVariants{{
-				{ "runefire", "Magic\\RuneFireProjectile01.nif" },
-				{ "runefrost", "Magic\\RuneFrostProjectile01.nif" },
-				{ "runeshock", "Magic\\RuneLightningProjectile01.nif" },
-				{ "icehazard", "Magic\\IceHazard01.nif" },
+			static constexpr std::array<ProbeVariant, 6> kProbeVariants{{
+				{ "bear:runefrost", "Magic\\RuneFrostProjectile01.nif" },
+				{ "rune:runefire", "Magic\\RuneFireProjectile01.nif" },
+				{ "plague:runepoison", "DLC02\\Effects\\RunePoisonProjectile.nif" },
+				{ "tar:ashrune", "DLC02\\Effects\\AshRuneProjectile01.nif" },
+				{ "siphon:runefrenzy", "DLC02\\Effects\\RuneFrenzyProjectile.nif" },
+				{ "chaos:runeshock", "Magic\\RuneLightningProjectile01.nif" },
 			}};
 
 			const auto basePos = player->GetPosition();

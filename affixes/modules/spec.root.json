@@ -229,7 +229,7 @@
         "type": "ArtObject",
         "artObject": {
           "editorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER",
-          "modelPath": "Traps\\BearTrap\\BearTrap01.nif",
+          "modelPath": "Magic\\RuneFrostProjectile01.nif",
           "artType": "MagicHitEffect"
         }
       },
@@ -245,7 +245,7 @@
         "type": "ArtObject",
         "artObject": {
           "editorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER",
-          "modelPath": "CalamityAffixes\\VFX\\RuneTrapMarker_Calamity.nif",
+          "modelPath": "Magic\\RuneFireProjectile01.nif",
           "artType": "MagicHitEffect"
         }
       },
@@ -261,7 +261,7 @@
         "type": "ArtObject",
         "artObject": {
           "editorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER",
-          "modelPath": "Effects\\FXPoisonGaswithONOFFDark.nif",
+          "modelPath": "DLC02\\Effects\\RunePoisonProjectile.nif",
           "artType": "MagicHitEffect"
         }
       },
@@ -277,7 +277,7 @@
         "type": "ArtObject",
         "artObject": {
           "editorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER",
-          "modelPath": "Traps\\OilTrapPuddle01\\OilTrapPuddle01.nif",
+          "modelPath": "DLC02\\Effects\\AshRuneProjectile01.nif",
           "artType": "MagicHitEffect"
         }
       },
@@ -293,7 +293,7 @@
         "type": "ArtObject",
         "artObject": {
           "editorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER",
-          "modelPath": "Magic\\SoulTrapTargetPointFX.nif",
+          "modelPath": "DLC02\\Effects\\RuneFrenzyProjectile.nif",
           "artType": "MagicHitEffect"
         }
       },

@@ -283,6 +283,14 @@ namespace CalamityAffixes
 			if (now >= trap.armedAt && trap.visualState != TrapVisualState::kArmed) {
 				StartTrapMarker(trap, TrapVisualState::kArmed, now);
 				PlayTrapFeedbackCue(trap, trap.feedback.armed);
+			} else if (
+				trap.visualState != TrapVisualState::kNone && trap.markerEffect &&
+				trap.markerEffect->age >= trap.markerEffect->lifetime) {
+				// Self-playing FX NIFs override the requested lifetime with their
+				// own sequence length (rune glyphs: 5.33s measured in-game), so a
+				// marker can expire while its trap phase is still running.
+				// Respawn it for the remainder of the phase.
+				StartTrapMarker(trap, trap.visualState, now);
 			}
 		}
 

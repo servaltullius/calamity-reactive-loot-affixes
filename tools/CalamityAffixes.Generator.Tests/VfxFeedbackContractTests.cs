@@ -25,15 +25,19 @@ public sealed class VfxFeedbackContractTests
         new("CAFF_ARTO_VFX_SMOKE_SLOW", @"Actors\Wisp\Character Assets\FXWispParticleAttach.nif"),
         new("CAFF_ARTO_VFX_FURY_SURGE", @"Magic\IllusionMassRedCastBodyFX.nif"),
         new("CAFF_ARTO_VFX_WEALTH_PASSIVE", @"Magic\HealRitualCastBodyFX.nif"),
-        new("CAFF_ARTO_VFX_TRAP_BEAR_MARKER", @"Traps\BearTrap\BearTrap01.nif"),
+        // Trap markers must be self-playing FX NIFs (rune glyphs / hazards):
+        // the 2026-08-10 in-game probes proved BSTempEffectParticle never
+        // applies a world transform to static world meshes and never animates
+        // externally-driven art-object FX, so those breeds render nothing.
+        new("CAFF_ARTO_VFX_TRAP_BEAR_MARKER", @"Magic\RuneFrostProjectile01.nif"),
         new("CAFF_ARTO_VFX_TRAP_BEAR_BURST", @"Magic\ExplosionFrost01.nif"),
-        new("CAFF_ARTO_VFX_TRAP_RUNE_MARKER", @"CalamityAffixes\VFX\RuneTrapMarker_Calamity.nif"),
+        new("CAFF_ARTO_VFX_TRAP_RUNE_MARKER", @"Magic\RuneFireProjectile01.nif"),
         new("CAFF_ARTO_VFX_TRAP_RUNE_BURST", @"Magic\ExplosionFrost01.nif"),
-        new("CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", @"Effects\FXPoisonGaswithONOFFDark.nif"),
+        new("CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", @"DLC02\Effects\RunePoisonProjectile.nif"),
         new("CAFF_ARTO_VFX_TRAP_PLAGUE_BURST", @"Effects\FXGasTrapBlast.nif"),
-        new("CAFF_ARTO_VFX_TRAP_TAR_MARKER", @"Traps\OilTrapPuddle01\OilTrapPuddle01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_TAR_MARKER", @"DLC02\Effects\AshRuneProjectile01.nif"),
         new("CAFF_ARTO_VFX_TRAP_TAR_BURST", @"Effects\FXGasTrap01.nif"),
-        new("CAFF_ARTO_VFX_TRAP_SIPHON_MARKER", @"Magic\SoulTrapTargetPointFX.nif"),
+        new("CAFF_ARTO_VFX_TRAP_SIPHON_MARKER", @"DLC02\Effects\RuneFrenzyProjectile.nif"),
         new("CAFF_ARTO_VFX_TRAP_SIPHON_BURST", @"Magic\AbsorbSpellHitEffect01.nif"),
         new("CAFF_ARTO_VFX_TRAP_CHAOS_MARKER", @"Magic\RuneLightningProjectile01.nif"),
         new("CAFF_ARTO_VFX_TRAP_CHAOS_BURST", @"Magic\ExplosionShock01.nif"),
@@ -190,7 +194,7 @@ public sealed class VfxFeedbackContractTests
     }
 
     [Fact]
-    public void CustomRuneTrapMarker_IsOwnedByCalamityAndDoesNotOverrideVanillaArt()
+    public void RuneTrapMarker_KeepsFormIdAndSelfPlayingGlyphModel()
     {
         var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
@@ -199,27 +203,7 @@ public sealed class VfxFeedbackContractTests
 
         Assert.Equal(mod.ModKey, marker.FormKey.ModKey);
         Assert.Equal(0x000AEDu, marker.FormKey.ID);
-        Assert.Equal(@"CalamityAffixes\VFX\RuneTrapMarker_Calamity.nif", marker.Model?.File);
-    }
-
-    [Fact]
-    public void CustomRuneTrapMarker_IsPackagedAndUsesVanillaEffectTextures()
-    {
-        var markerPath = Path.Combine(
-            FindRepoRoot(),
-            "Data",
-            "Meshes",
-            "CalamityAffixes",
-            "VFX",
-            "RuneTrapMarker_Calamity.nif");
-
-        Assert.True(File.Exists(markerPath), $"Custom rune trap marker not found: {markerPath}");
-
-        var nifText = Encoding.ASCII.GetString(File.ReadAllBytes(markerPath));
-        Assert.Contains("Gamebryo File Format", nifText, StringComparison.Ordinal);
-        Assert.Contains(@"effects\fxglowspotlinearalpha.dds", nifText, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains(@"effects\gradients\gradhealmagic.dds", nifText, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("vfxeditor", nifText, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(@"Magic\RuneFireProjectile01.nif", marker.Model?.File);
     }
 
     [Fact]
