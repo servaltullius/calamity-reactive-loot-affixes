@@ -195,7 +195,7 @@ jobs:
           # reuses the notes written for the version it is a candidate for, but
           # allowing an exact match means a candidate CAN carry its own.
           # `|| true`: with `set -e` a no-match grep inside the substitution
-          # would abort the step, and "no prepared notes" is a normal case.
+          # would abort the step so the missing-notes error below can explain.
           notes_file=""
           for candidate in "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.base_version }}"; do
             name="$(ls docs/releases | grep -- "-v${candidate}\.md$" | tail -1 || true)"
@@ -205,13 +205,18 @@ jobs:
             fi
           done
 
-          if [[ -n "$notes_file" ]]; then
-            echo "Using release notes: $notes_file"
-            notes_arg=(--notes-file "$notes_file")
-          else
-            echo "No prepared notes for v${{ steps.version.outputs.version }}; generating from commits"
-            notes_arg=(--generate-notes)
+          # Prepared notes are part of the release contract: v1.7.4-rc1 shipped
+          # with an empty body because the old silent fallback masked a missing
+          # file. Refuse to publish rather than publish undocumented.
+          if [[ -z "$notes_file" ]]; then
+            echo "No prepared release notes found for v${{ steps.version.outputs.version }}." >&2
+            echo "Write docs/releases/<YYYY-MM-DD>-github-release-body-v${{ steps.version.outputs.version }}.md" >&2
+            echo "(or ...-v${{ steps.version.outputs.base_version }}.md) before pushing the tag." >&2
+            exit 1
           fi
+
+          echo "Using release notes: $notes_file"
+          notes_arg=(--notes-file "$notes_file")
 
           # Deliberately empty by default: the tag is the decision to release,
           # so the artifacts go public with it rather than waiting in a draft.

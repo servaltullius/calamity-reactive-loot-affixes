@@ -75,3 +75,19 @@ to another file — a silent loss of coverage rather than a failure.
 - Build MO2 zip: `tools/build_mo2_zip.sh`
 - Release verification: `tools/release_verify.sh`
 - Output zip: `dist/CalamityAffixes_MO2_vX.Y.Z_<YYYY-MM-DD>.zip`
+
+## Release procedure
+
+`release.yml`은 태그 푸시로 기동하며, **준비된 노트 파일이 없으면 게시를 거부**합니다
+(v1.7.4-rc1이 빈 본문으로 게시된 사고 이후의 계약). 태그 전에 순서대로:
+
+1. 버전 선언 3곳 상향 — `skse/CalamityAffixes/CMakeLists.txt`의 `project(... VERSION)`,
+   `skse/CalamityAffixes/vcpkg.json`의 `version-string`, `CHANGELOG.md` 최신 섹션 헤더.
+   `python3 tools/verify_version_consistency.py`로 확인.
+2. `CHANGELOG.md`: `[Unreleased]` 내용을 `## [X.Y.Z] - 날짜` 섹션으로 확정.
+3. **릴리스 노트 작성**: `docs/releases/<YYYY-MM-DD>-github-release-body-v<태그>.md`.
+   rc 태그는 rc 전용 파일이 우선이고, 없으면 기본 버전(`-vX.Y.Z.md`) 파일을 재사용한다.
+4. DLL 리빌드(버전이 컴파일되어 들어감) 후 `tools/release_verify.sh` exit 0 확인.
+5. 릴리스 준비 커밋 → annotated 태그 `vX.Y.Z[-rcN]` → `git push origin main <태그>`.
+6. `gh run list`로 release 워크플로 성공을 확인하고, 릴리스 본문과 공개 자산 4종
+   (DLL, ESP, MO2 zip, zip sha256)을 눈으로 확인한다.
