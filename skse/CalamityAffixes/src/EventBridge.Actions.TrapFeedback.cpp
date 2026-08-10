@@ -15,7 +15,7 @@ namespace CalamityAffixes
 		if (a_cue.art && a_cue.durationSeconds > 0.0f && cellUsable) {
 			const auto* model = a_cue.art->GetModel();
 			if (model && *model) {
-				RE::BSTempEffectParticle::Spawn(
+				const auto* particle = RE::BSTempEffectParticle::Spawn(
 					a_trap.cell,
 					a_cue.durationSeconds,
 					model,
@@ -24,7 +24,20 @@ namespace CalamityAffixes
 					a_cue.scale,
 					0u,
 					nullptr);
+				if (_loot.debugLog) {
+					SKSE::log::debug(
+						"CalamityAffixes: trap cue spawn (model={}, duration={}, scale={}, spawned={}).",
+						model,
+						a_cue.durationSeconds,
+						a_cue.scale,
+						particle != nullptr);
+				}
 			}
+		} else if (a_cue.art && _loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: trap cue spawn skipped (duration={}, cellUsable={}).",
+				a_cue.durationSeconds,
+				cellUsable);
 		}
 		if (a_cue.sound) {
 			PlaySpatialSound(a_cue.sound, a_trap.position);
@@ -68,15 +81,29 @@ namespace CalamityAffixes
 			std::chrono::duration_cast<std::chrono::duration<float>>(endAt - a_now).count());
 		const float scale = a_state == TrapVisualState::kUnarmed ?
 			a_trap.feedback.unarmedScale : a_trap.feedback.armedScale;
-		if (auto* particle = RE::BSTempEffectParticle::Spawn(
-				a_trap.cell,
-				lifetime,
+		auto* particle = RE::BSTempEffectParticle::Spawn(
+			a_trap.cell,
+			lifetime,
+			model,
+			RE::NiPoint3{},
+			a_trap.position,
+			scale,
+			0u,
+			nullptr);
+		if (_loot.debugLog) {
+			// The marker layer has never been confirmed on screen (every earlier
+			// session predated the MODL prefix fix), so log the engine's answer:
+			// spawned=false means the temp-effect path rejected this model,
+			// spawned=true with nothing visible means the NIF itself is the problem.
+			SKSE::log::debug(
+				"CalamityAffixes: trap marker spawn (model={}, state={}, lifetime={}, scale={}, spawned={}).",
 				model,
-				RE::NiPoint3{},
-				a_trap.position,
+				a_state == TrapVisualState::kUnarmed ? "unarmed" : "armed",
+				lifetime,
 				scale,
-				0u,
-				nullptr)) {
+				particle != nullptr);
+		}
+		if (particle) {
 			a_trap.markerEffect = RE::NiPointer<RE::BSTempEffectParticle>{ particle };
 			a_trap.visualState = a_state;
 		}

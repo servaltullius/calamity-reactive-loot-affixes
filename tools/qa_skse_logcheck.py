@@ -209,6 +209,11 @@ def main(argv: list[str]) -> int:
             desc="Feedback sound handle accepted by the engine",
             any_of=[re.compile(r"CalamityAffixes: action feedback sound \(.*played=true", re.IGNORECASE)],
         ),
+        PatternGroup(
+            name="trap_marker_spawned",
+            desc="Trap ground marker accepted by the temp-effect path",
+            any_of=[re.compile(r"CalamityAffixes: trap marker spawn \(.*spawned=true", re.IGNORECASE)],
+        ),
     ]
     # Engine-path refusals worth surfacing. Still observational — they do not
     # change the exit code — but a nonzero count is a real engine-side rejection
@@ -217,6 +222,7 @@ def main(argv: list[str]) -> int:
         ("feedback_art_rejected", re.compile(r"action feedback art \(.*instantiated=false", re.IGNORECASE)),
         ("feedback_art_skipped_no3d", re.compile(r"action feedback art skipped \(", re.IGNORECASE)),
         ("feedback_sound_rejected", re.compile(r"action feedback sound \(.*(?:built=false|played=false)", re.IGNORECASE)),
+        ("trap_marker_rejected", re.compile(r"trap (?:marker|cue) spawn \(.*spawned=false", re.IGNORECASE)),
     ]
 
     missing: list[str] = []
