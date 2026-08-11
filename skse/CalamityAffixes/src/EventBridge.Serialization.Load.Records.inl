@@ -543,47 +543,34 @@
 		}
 
 		SerializationLoadCursor cursor{ .intfc = a_intfc, .length = a_length };
-		std::uint8_t bagCount = 0;
-		if (!cursor.Read(bagCount)) {
+		auto readScalar = [&cursor]<std::unsigned_integral T>(T& a_value) {
+			return cursor.Read(a_value);
+		};
+		auto applyBag = [this](SerializationWire::LootShuffleBagEntry a_entry) {
+			if (auto* bag = SerializationLoadState::ResolveShuffleBag(_lootState, a_entry.id)) {
+				bag->order.clear();
+				bag->order.reserve(a_entry.order.size());
+				for (const auto index : a_entry.order) {
+					bag->order.push_back(static_cast<std::size_t>(index));
+				}
+				bag->cursor = std::min<std::size_t>(a_entry.cursor, bag->order.size());
+			}
+		};
+		const auto result = SerializationWire::ReadCurrentLootShuffleBagsPayload(
+			readScalar,
+			applyBag);
+		if (result.status == SerializationWire::CurrentShuffleBagReadStatus::kTruncatedHeader) {
 			SKSE::log::warn("CalamityAffixes: truncated LSBG record header; skipping.");
 			cursor.DrainRemaining("partial-record-recovery");
 			return;
 		}
-
-		for (std::uint8_t i = 0; i < bagCount; ++i) {
-			std::uint8_t id = 0;
-			std::uint32_t cursorValue = 0;
-			std::uint32_t size = 0;
-			if (!cursor.Read(id) || !cursor.Read(cursorValue) || !cursor.Read(size)) {
-				break;
-			}
-
-			std::vector<std::size_t> order;
-			if (size > kMaxShuffleBagSize) {
-				SKSE::log::error("CalamityAffixes: corrupt save — shuffle bag size {} exceeds limit.", size);
-				cursor.recordOk = false;
-				break;
-			}
-			order.reserve(size);
-			bool orderOk = true;
-			for (std::uint32_t n = 0; n < size; ++n) {
-				std::uint32_t rawIdx = 0;
-				if (!cursor.Read(rawIdx)) {
-					orderOk = false;
-					break;
-				}
-				order.push_back(static_cast<std::size_t>(rawIdx));
-			}
-			if (!orderOk) {
-				break;
-			}
-
-			if (auto* bag = SerializationLoadState::ResolveShuffleBag(_lootState, id)) {
-				bag->order = std::move(order);
-				bag->cursor = std::min<std::size_t>(cursorValue, bag->order.size());
-			}
+		if (result.status == SerializationWire::CurrentShuffleBagReadStatus::kSizeLimitExceeded) {
+			SKSE::log::error(
+				"CalamityAffixes: corrupt save — shuffle bag size {} exceeds limit.",
+				result.invalidBagSize);
+			cursor.recordOk = false;
 		}
-		if (!cursor.recordOk) {
+		if (result.status != SerializationWire::CurrentShuffleBagReadStatus::kComplete) {
 			SKSE::log::warn("CalamityAffixes: truncated LSBG record; recovered partial shuffle bags.");
 			cursor.DrainRemaining("partial-record-recovery");
 		}
@@ -600,8 +587,11 @@
 		}
 
 		SerializationLoadCursor cursor{ .intfc = a_intfc, .length = a_length };
-		std::uint8_t flags = 0;
-		if (!cursor.Read(flags)) {
+		auto readScalar = [&cursor]<std::unsigned_integral T>(T& a_value) {
+			return cursor.Read(a_value);
+		};
+		std::uint8_t flags = 0u;
+		if (!SerializationWire::ReadCurrentMigrationFlagsPayload(readScalar, flags)) {
 			SKSE::log::warn("CalamityAffixes: truncated MFLG record; skipping.");
 			cursor.DrainRemaining("partial-record-recovery");
 			return;

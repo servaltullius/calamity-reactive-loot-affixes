@@ -3,23 +3,37 @@
 
 from __future__ import annotations
 
+import argparse
+import difflib
 import json
 import subprocess
 import sys
-from datetime import date
+import tempfile
 from pathlib import Path
+
+from public_doc_metadata import PublicDocMetadata, load_public_doc_metadata
 
 REPO = Path(__file__).resolve().parent.parent
 DOCS = REPO / "docs"
 AFFIXES_PATH = REPO / "affixes" / "affixes.json"
+GENERATED_DOCS = (
+    "PREFIX_EFFECTS.md",
+    "SUFFIX_EFFECTS.md",
+    "RUNEWORD_EFFECTS.md",
+    "AFFIX_CATALOG.md",
+)
 
 
-def run_generator(script_name: str) -> None:
+def run_generator(script_name: str, output_path: Path) -> None:
     script_path = REPO / "tools" / script_name
-    subprocess.run([sys.executable, str(script_path)], check=True, cwd=REPO)
+    subprocess.run(
+        [sys.executable, str(script_path), "--output", str(output_path)],
+        check=True,
+        cwd=REPO,
+    )
 
 
-def regenerate_affix_catalog() -> None:
+def regenerate_affix_catalog(output_path: Path, metadata: PublicDocMetadata) -> None:
     payload = json.loads(AFFIXES_PATH.read_text(encoding="utf-8"))
     affixes = payload["keywords"]["affixes"]
 
@@ -129,8 +143,8 @@ def regenerate_affix_catalog() -> None:
     lines = [
         "# 어픽스 카탈로그",
         "",
-        f"> 업데이트: {date.today().isoformat()}",
-        "> 기준 버전: `v1.3.0`",
+        f"> 업데이트: {metadata.release_date}",
+        f"> 기준 버전: `v{metadata.version}`",
         "> 기준 파일: `affixes/affixes.json`",
         "> INTERNAL 항목은 공개 문서에서 숨김",
         "",
@@ -221,19 +235,76 @@ def regenerate_affix_catalog() -> None:
         ]
     )
 
-    path = DOCS / "AFFIX_CATALOG.md"
-    path.write_text("\n".join(lines), encoding="utf-8")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
     print(f"  AFFIX_CATALOG.md 재생성 완료 ({len(prefixes)}P + {len(suffixes)}S + {len(runewords)}R)")
 
 
-def main() -> None:
-    print("=== 공개 문서 재생성 ===")
-    run_generator("gen_prefix_doc.py")
-    run_generator("gen_suffix_doc.py")
-    run_generator("gen_runeword_doc.py")
-    regenerate_affix_catalog()
+def generate_docs(output_dir: Path, metadata: PublicDocMetadata) -> None:
+    print("=== 공개 문서 재생성 ===", flush=True)
+    run_generator("gen_prefix_doc.py", output_dir / "PREFIX_EFFECTS.md")
+    run_generator("gen_suffix_doc.py", output_dir / "SUFFIX_EFFECTS.md")
+    run_generator("gen_runeword_doc.py", output_dir / "RUNEWORD_EFFECTS.md")
+    regenerate_affix_catalog(output_dir / "AFFIX_CATALOG.md", metadata)
     print("\n완료!")
 
 
+def check_generated_docs(generated_dir: Path) -> bool:
+    mismatches: list[str] = []
+    for filename in GENERATED_DOCS:
+        expected_path = DOCS / filename
+        generated_path = generated_dir / filename
+        expected = expected_path.read_text(encoding="utf-8") if expected_path.exists() else ""
+        generated = generated_path.read_text(encoding="utf-8")
+        if expected == generated:
+            continue
+
+        mismatches.append(filename)
+        try:
+            expected_label = str(expected_path.relative_to(REPO))
+        except ValueError:
+            expected_label = str(expected_path)
+        diff = difflib.unified_diff(
+            expected.splitlines(),
+            generated.splitlines(),
+            fromfile=expected_label,
+            tofile=f"generated/{filename}",
+            lineterm="",
+        )
+        for line in list(diff)[:80]:
+            print(line, file=sys.stderr)
+
+    if mismatches:
+        print(
+            "ERROR: generated public docs are stale: " + ", ".join(mismatches),
+            file=sys.stderr,
+        )
+        print("Run: python3 tools/update_docs.py", file=sys.stderr)
+        return False
+
+    print(f"public docs sync OK: {len(GENERATED_DOCS)} generated files")
+    return True
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="regenerate into a temporary directory and fail if checked-in docs differ",
+    )
+    args = parser.parse_args(argv)
+    metadata = load_public_doc_metadata()
+
+    if args.check:
+        with tempfile.TemporaryDirectory(prefix="caff-public-docs-") as temp_dir:
+            generated_dir = Path(temp_dir)
+            generate_docs(generated_dir, metadata)
+            return 0 if check_generated_docs(generated_dir) else 2
+
+    generate_docs(DOCS, metadata)
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

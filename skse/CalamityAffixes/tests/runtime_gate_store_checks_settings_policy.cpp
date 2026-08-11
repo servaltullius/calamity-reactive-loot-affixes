@@ -308,6 +308,11 @@ namespace RuntimeGateStoreChecks
 			state.triggerProcBudgetConsumed = 3u;
 			state.castOnCritNextAllowed = steady_clock::time_point{ milliseconds(700) };
 			state.castOnCritCycleCursor = 5u;
+			state.corpseExplosionState.lastExplosionAt = steady_clock::time_point{ milliseconds(800) };
+			state.corpseExplosionState.chainDepth = 2u;
+			state.corpseExplosionSeenCorpses.emplace(0x18u, steady_clock::time_point{ milliseconds(900) });
+			state.summonCorpseExplosionState.explosionsInWindow = 3u;
+			state.summonCorpseExplosionSeenCorpses.emplace(0x19u, steady_clock::time_point{ milliseconds(1000) });
 
 			state.Reset();
 
@@ -326,6 +331,14 @@ namespace RuntimeGateStoreChecks
 				state.castOnCritNextAllowed.time_since_epoch().count() != 0 ||
 				state.castOnCritCycleCursor != 0u) {
 				std::cerr << "combat_runtime_state_reset: expected scalar runtime state to reset to defaults\n";
+				return false;
+			}
+			if (state.corpseExplosionState.lastExplosionAt.time_since_epoch().count() != 0 ||
+				state.corpseExplosionState.chainDepth != 0u ||
+				!state.corpseExplosionSeenCorpses.empty() ||
+				state.summonCorpseExplosionState.explosionsInWindow != 0u ||
+				!state.summonCorpseExplosionSeenCorpses.empty()) {
+				std::cerr << "combat_runtime_state_reset: expected corpse-explosion runtime state to reset to defaults\n";
 				return false;
 			}
 

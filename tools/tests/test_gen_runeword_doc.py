@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
@@ -11,6 +12,7 @@ class GenRunewordDocTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.repo_root = Path(__file__).resolve().parents[2]
         module_path = cls.repo_root / "tools" / "gen_runeword_doc.py"
+        sys.path.insert(0, str(module_path.parent))
         spec = importlib.util.spec_from_file_location("gen_runeword_doc", module_path)
         if spec is None or spec.loader is None:
             raise RuntimeError(f"Unable to load module: {module_path}")

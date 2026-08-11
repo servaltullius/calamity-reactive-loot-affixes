@@ -1,5 +1,6 @@
 #include "runtime_gate_store_checks_common.h"
 
+#include "CalamityAffixes/SerializationCurrentRecordReader.h"
 #include "CalamityAffixes/SerializationWireContract.h"
 
 #include <array>
@@ -325,33 +326,24 @@ namespace RuntimeGateStoreChecks
 
 			{
 				WireReader reader(a_records[6].payload);
-				std::uint8_t count = 0u;
-				if (!reader.Read(count) || count > 16u) {
-					return false;
-				}
-				for (std::uint8_t i = 0u; i < count; ++i) {
-					LootShuffleBagEntry entry{};
-					std::uint32_t size = 0u;
-					if (!reader.Read(entry.id) || !reader.Read(entry.cursor) || !reader.Read(size) || size > 64u) {
-						return false;
-					}
-					for (std::uint32_t n = 0u; n < size; ++n) {
-						std::uint32_t index = 0u;
-						if (!reader.Read(index)) {
-							return false;
-						}
-						entry.order.push_back(index);
-					}
-					decoded.lootShuffleBags.push_back(std::move(entry));
-				}
-				if (!reader.AtEnd()) {
+				auto readScalar = [&reader]<std::unsigned_integral T>(T& a_value) {
+					return reader.Read(a_value);
+				};
+				auto applyBag = [&decoded](LootShuffleBagEntry a_entry) {
+					decoded.lootShuffleBags.push_back(std::move(a_entry));
+				};
+				const auto result = ReadCurrentLootShuffleBagsPayload(readScalar, applyBag);
+				if (result.status != CurrentShuffleBagReadStatus::kComplete || !reader.AtEnd()) {
 					return false;
 				}
 			}
 
 			{
 				WireReader reader(a_records[7].payload);
-				if (!reader.Read(decoded.migrationFlags) || !reader.AtEnd()) {
+				auto readScalar = [&reader]<std::unsigned_integral T>(T& a_value) {
+					return reader.Read(a_value);
+				};
+				if (!ReadCurrentMigrationFlagsPayload(readScalar, decoded.migrationFlags) || !reader.AtEnd()) {
 					return false;
 				}
 			}
@@ -412,6 +404,58 @@ namespace RuntimeGateStoreChecks
 		}
 		if (EncodeCurrentRecords(decoded) != encoded) {
 			std::cerr << "serialization_wire_contract: re-encoded bytes changed after round-trip\n";
+			return false;
+		}
+
+		auto truncatedShufflePayload = encoded[6].payload;
+		truncatedShufflePayload.pop_back();
+		WireReader truncatedShuffleReader(truncatedShufflePayload);
+		auto readTruncatedShuffle = [&truncatedShuffleReader]<std::unsigned_integral T>(T& a_value) {
+			return truncatedShuffleReader.Read(a_value);
+		};
+		std::vector<LootShuffleBagEntry> recoveredShuffleBags;
+		auto recoverShuffleBag = [&recoveredShuffleBags](LootShuffleBagEntry a_entry) {
+			recoveredShuffleBags.push_back(std::move(a_entry));
+		};
+		const auto truncatedShuffleResult = ReadCurrentLootShuffleBagsPayload(
+			readTruncatedShuffle,
+			recoverShuffleBag);
+		if (truncatedShuffleResult.status != CurrentShuffleBagReadStatus::kTruncatedPayload ||
+			recoveredShuffleBags.size() != fixture.lootShuffleBags.size() - 1u) {
+			std::cerr << "serialization_wire_contract: production LSBG reader lost partial-recovery semantics\n";
+			return false;
+		}
+
+		std::vector<std::uint8_t> oversizedShufflePayload;
+		AppendLittleEndian(oversizedShufflePayload, std::uint8_t{ 1u });
+		AppendLittleEndian(oversizedShufflePayload, std::uint8_t{ 0u });
+		AppendLittleEndian(oversizedShufflePayload, std::uint32_t{ 0u });
+		AppendLittleEndian(oversizedShufflePayload, kMaxCurrentShuffleBagSize + 1u);
+		WireReader oversizedShuffleReader(oversizedShufflePayload);
+		auto readOversizedShuffle = [&oversizedShuffleReader]<std::unsigned_integral T>(T& a_value) {
+			return oversizedShuffleReader.Read(a_value);
+		};
+		bool oversizedShuffleApplied = false;
+		auto rejectOversizedShuffle = [&oversizedShuffleApplied](LootShuffleBagEntry) {
+			oversizedShuffleApplied = true;
+		};
+		const auto oversizedShuffleResult = ReadCurrentLootShuffleBagsPayload(
+			readOversizedShuffle,
+			rejectOversizedShuffle);
+		if (oversizedShuffleResult.status != CurrentShuffleBagReadStatus::kSizeLimitExceeded ||
+			oversizedShuffleResult.invalidBagSize != kMaxCurrentShuffleBagSize + 1u ||
+			oversizedShuffleApplied) {
+			std::cerr << "serialization_wire_contract: production LSBG reader lost its size limit\n";
+			return false;
+		}
+
+		WireReader truncatedMigrationReader(std::span<const std::uint8_t>{});
+		auto readTruncatedMigration = [&truncatedMigrationReader]<std::unsigned_integral T>(T& a_value) {
+			return truncatedMigrationReader.Read(a_value);
+		};
+		std::uint8_t migrationFlags = 0xA5u;
+		if (ReadCurrentMigrationFlagsPayload(readTruncatedMigration, migrationFlags) || migrationFlags != 0xA5u) {
+			std::cerr << "serialization_wire_contract: production MFLG reader accepted a truncated payload\n";
 			return false;
 		}
 

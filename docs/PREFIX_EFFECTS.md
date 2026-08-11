@@ -1,7 +1,7 @@
 # 프리픽스 효과 정리 (공개용)
 
-> 업데이트: 2026-07-29
-> 기준 버전: `v1.3.0`
+> 업데이트: 2026-08-11
+> 기준 버전: `v1.7.5`
 > 기준 코드:
 > - 효과 정의: `affixes/modules/keywords.affixes.core.json`
 > - 변환 스크립트: `tools/transform_prefixes.py`
@@ -215,13 +215,13 @@
   - 대표 스펠: `CAFF_SPEL_TRAP_IRONJAW_SNARE`
 
 - **`rune_trap`** [Weapon]
-  - 한글 표시: 룬 함정: 적중 시 12% 확률로 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 둔화(-40%, 2초). 1.5초마다 발동.
-  - 영문 표시: Rune Trap (12% on hit / ICD 1.5s): Deploy mine at target (0.6s delay, 8s, 1 charge) -> Radius 150 Slow (-40%, 2s)
+  - 한글 표시: 룬 함정: 적중 시 12% 확률로 대상 위치에 지뢰 설치(0.6초 후, 8초, 1회) → 반경 150 내 적 최대 2명 둔화(-40%, 2초). 1.5초마다 발동.
+  - 영문 표시: Rune Trap (12% on hit / ICD 1.5s): Deploy mine at target (0.6s delay, 8s, 1 charge) -> Slow up to 2 enemies within radius 150 (-40%, 2s)
   - 대표 스펠: `CAFF_SPEL_MINEFIELD_SNARE`
 
 - **`chaos_rune`** [Weapon]
-  - 한글 표시: 혼돈의 룬: 적중 시 12% 확률로 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 둔화 + 무작위 저주. 2초마다 발동. 같은 대상 8초.
-  - 영문 표시: Chaos Rune (12% on hit / ICD 2s / per-target ICD 8s): Deploy mine at target (0.8s delay, 10s, 1 charge) -> Slow + Random curse
+  - 한글 표시: 혼돈의 룬: 적중 시 12% 확률로 대상 위치에 지뢰 설치(0.8초 후, 10초, 1회) → 반경 150 내 적 최대 2명 둔화 + 무작위 저주. 2초마다 발동. 같은 대상 8초.
+  - 영문 표시: Chaos Rune (12% on hit / ICD 2s / per-target ICD 8s): Deploy mine at target (0.8s delay, 10s, 1 charge) -> Slow and curse up to 2 enemies within radius 150
   - 대표 스펠: `CAFF_SPEL_CHAOS_MINE_SNARE`
 
 ## 원소 주입 (전환)
@@ -344,18 +344,18 @@
   - 영문 표시: Elemental Bane (20% on hit / ICD 1s / per-target ICD 12s): Highest elemental resist -15 (4s)
 
 - **`plague_spore`** [Weapon]
-  - 한글 표시: 역병 포자: 적중 시 20% 확률로 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초). 1.5초마다 발동.
-  - 영문 표시: Plague Spore (20% on hit / ICD 1.5s): Spore burst after 0.6s (Radius 150, Poison 3/s, 4s)
+  - 한글 표시: 역병 포자: 적중 시 20% 확률로 0.6초 후 포자 폭발(반경 150 내 적 최대 2명, 독 피해 3/s, 4초). 1.5초마다 발동.
+  - 영문 표시: Plague Spore (20% on hit / ICD 1.5s): Spore burst after 0.6s (Up to 2 enemies within radius 150, Poison 3/s, 4s)
   - 대표 스펠: `CAFF_SPEL_DOT_BLOOM_POISON`
 
 - **`tar_blight`** [Weapon]
-  - 한글 표시: 역청 황폐: 적중 시 18% 확률로 0.6초 후 타르 폭발(반경 170, 둔화 -35% + 방어 -150, 4초). 2초마다 발동.
-  - 영문 표시: Tar Blight (18% on hit / ICD 2s): Tar burst after 0.6s (Radius 170, Slow -35% + Armor -150, 4s)
+  - 한글 표시: 역청 황폐: 적중 시 18% 확률로 0.6초 후 타르 폭발(반경 170 내 적 최대 2명, 둔화 -35% + 방어 -150, 4초). 2초마다 발동.
+  - 영문 표시: Tar Blight (18% on hit / ICD 2s): Tar burst after 0.6s (Up to 2 enemies within radius 170, Slow -35% + Armor -150, 4s)
   - 대표 스펠: `CAFF_SPEL_DOT_BLOOM_TAR_SLOW`
 
 - **`siphon_spore`** [Weapon]
-  - 한글 표시: 흡수 포자: 적중 시 18% 확률로 0.6초 후 흡수 폭발(반경 170, 매지카/스태미나 재생 -60%, 6초). 2초마다 발동.
-  - 영문 표시: Siphon Spore (18% on hit / ICD 2s): Siphon burst after 0.6s (Radius 170, Magicka/Stamina Regen -60%, 6s)
+  - 한글 표시: 흡수 포자: 적중 시 18% 확률로 0.6초 후 흡수 폭발(반경 170 내 적 최대 2명, 매지카/스태미나 재생 -60%, 6초). 2초마다 발동.
+  - 영문 표시: Siphon Spore (18% on hit / ICD 2s): Siphon burst after 0.6s (Up to 2 enemies within radius 170, Magicka/Stamina Regen -60%, 6s)
   - 대표 스펠: `CAFF_SPEL_DOT_BLOOM_SIPHON_MAG`
 
 ## 성장형

@@ -36,10 +36,7 @@ namespace CalamityAffixes
 		_instanceTrackingState.instanceStates.clear();
 		_runewordState.ResetSelectionAndProgress();
 		ClearTrapRuntimeState("revert", true);
-		_corpseExplosionSeenCorpses.clear();
-		_summonCorpseExplosionSeenCorpses.clear();
-		_corpseExplosionState = {};
-		_summonCorpseExplosionState = {};
+		_combatState.ResetCorpseExplosionState();
 		_combatState.ResetTransientState();
 		_miscCurrencyMigrated = false;
 		_miscCurrencyRecovered = false;

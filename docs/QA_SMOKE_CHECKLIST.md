@@ -87,10 +87,13 @@ python3 tools/qa_skse_logcheck.py
 증가하지 않는지와 generated REFR/change-form 누적이 없는지도 확인합니다. 이 검증은
 자동 테스트나 `spawned=true` 로그로 대체할 수 없습니다.
 
-### 나머지 5종 물리 마커와 동료 보호
+### 나머지 5종 물리 마커 회귀와 동료 보호
 
-다음 항목은 새 레코드·타기팅 계약의 자동 검증과 별개인 **인게임 미검증** 항목입니다.
+5종 모델의 지면 가시성은 2026-08-11 인게임에서 확인했습니다. 아래 가시성 항목은 다음 빌드용 반복 체크이며, 충돌·정리·동료/중립 보호·밀도 항목은 아직 완료되지 않은 인게임 검증입니다.
 
+- [ ] 디버그 패널의 `Production Trap World-Ref Probe`를 한 번 눌러 실사용 6종 마커가 플레이어 앞 두 줄에 나타나고 약 3초 뒤 모두 사라지는지 확인
+- [ ] probe 직후 `qa_skse_logcheck.py`에서 `trap world marker probe contracts: OBSERVED 6/6`과 `trap_world_marker_spawn`, `trap_world_marker_cleanup`의 `OBSERVED`를 확인(화면 가시성 판정은 별도)
+- [ ] probe를 다시 실행한 직후 퀵세이브해 6종이 즉시 정리되고 `trap_pre_save_state_clean`과 `trap_serialization_state_clean`이 `OBSERVED`인지 확인
 - [ ] 디버그 패널로 `rune_trap`, `plague_spore`, `tar_blight`, `siphon_spore`, `chaos_rune`을 차례로 부여해 각 함정을 최소 한 번씩 설치·발동
 - [ ] `rune_trap`: 적 발밑에 화염 룬 글리프가 아니라 바닐라 석재 압력판(`TrapStonePressurePlate01.nif`)이 보임
 - [ ] `plague_spore`: 독 룬 글리프가 아니라 바닐라 독거미 주머니(`spidersackdead.nif`)가 보임
@@ -106,9 +109,9 @@ python3 tools/qa_skse_logcheck.py
 - [ ] 적과 동료/중립 NPC를 같은 함정 반경 안에 둔 A/B에서 적대 대상은 최대 2명까지만 설정 효과를 받고, 동료·중립 NPC는 피해·감속·방어 저하·재생 저하·저주를 받지 않음
 - [ ] `magic effect apply observed`의 함정 MGEF 대상이 직접 선택된 적대 액터로만 기록되고, 동료 FormID가 나타나지 않음
 
-`spawned=true`와 `Effect.Area=0` 정적 검증만으로 가시성·지면 배치·동료 무영향을
-통과 처리하지 않습니다. 위 육안 및 동료 동반 전투 A/B가 모두 끝난 뒤에만 새 5종
-마커와 hostile-direct 계약을 인게임 확인 완료로 기록합니다.
+`spawned=true`와 `Effect.Area=0` 정적 검증만으로 충돌 차단·정리·동료 무영향을
+통과 처리하지 않습니다. 동료 동반 전투 A/B와 저장/로드·셀 전환 검증이 모두 끝난
+뒤에만 hostile-direct 및 월드 레퍼런스 수명 계약을 인게임 확인 완료로 기록합니다.
 
 ## 7. 안정성 시나리오
 

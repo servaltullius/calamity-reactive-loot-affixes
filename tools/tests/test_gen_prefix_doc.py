@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
@@ -11,6 +12,7 @@ class GenPrefixDocTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.repo_root = Path(__file__).resolve().parents[2]
         module_path = cls.repo_root / "tools" / "gen_prefix_doc.py"
+        sys.path.insert(0, str(module_path.parent))
         spec = importlib.util.spec_from_file_location("gen_prefix_doc", module_path)
         if spec is None or spec.loader is None:
             raise RuntimeError(f"Unable to load module: {module_path}")
@@ -61,8 +63,8 @@ class GenPrefixDocTests(unittest.TestCase):
     def test_format_entry_uses_spawn_trap_arm_delay_and_ttl(self) -> None:
         entry = {
             "id": "plague_spore",
-            "nameKo": "역병 포자: 적중 시 20% 확률로 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초). 1.5초마다 발동.",
-            "nameEn": "Plague Spore: 20% chance on hit to trigger a spore burst after 0.6s (radius 150, poison 3/s, 4s). Triggers every 1.5s.",
+            "nameKo": "역병 포자: 적중 시 20% 확률로 0.6초 후 포자 폭발(반경 150 내 적 최대 2명, 독 피해 3/s, 4초). 1.5초마다 발동.",
+            "nameEn": "Plague Spore: 20% chance on hit to trigger a spore burst after 0.6s (up to 2 enemies within radius 150, poison 3/s, 4s). Triggers every 1.5s.",
             "kid": {"type": "Weapon"},
             "runtime": {
                 "trigger": "Hit",
@@ -83,7 +85,7 @@ class GenPrefixDocTests(unittest.TestCase):
 
         rendered = self.gen_prefix_doc.format_entry(0, entry)
 
-        self.assertIn("한글 표시: 역병 포자: 적중 시 20% 확률로 0.6초 후 포자 폭발(반경 150, 독 피해 3/s, 4초). 1.5초마다 발동.", rendered)
+        self.assertIn("한글 표시: 역병 포자: 적중 시 20% 확률로 0.6초 후 포자 폭발(반경 150 내 적 최대 2명, 독 피해 3/s, 4초). 1.5초마다 발동.", rendered)
         self.assertNotIn("0초 후, 0초 유지", rendered)
 
     def test_format_entry_expands_fractional_corpse_health_pct(self) -> None:

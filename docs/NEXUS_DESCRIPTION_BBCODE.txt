@@ -34,8 +34,8 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 [*]플레이어 또는 player-owned summon/proxy가 처치한 적대 시체 인벤토리에 성공한 통화를 조용히 직접 추가
 [*]팔로워/동료, 소환·지휘 액터, 아동, player-owned/비적대 피해자와 환경 오브젝트·player-owned가 아닌 독립 NPC/팔로워 처치는 제외
 [*][b]일반 상자/컨테이너 활성화, 픽업, 월드 생성, 새 SPID 통화 분배 없음[/b]
-[*]일반 적 기본 확률: 룬워드 조각 [b]12%[/b], 재련 오브 [b]7%[/b] (MCM 변경은 다음 적격 일반 적 사망부터 반영)
-[*][code]Unique[/code] 고유·네임드 적: 룬워드 조각 [b]70%[/b] / 재련 오브 [b]30%[/b] 중 1개 확정
+[*]일반 적 기본 확률: 룬워드 조각 [b]8%[/b], 재련 오브 [b]12%[/b] (MCM 변경은 다음 적격 일반 적 사망부터 반영)
+[*][code]Unique[/code] 고유·네임드 적: 룬워드 조각 [b]40%[/b] / 재련 오브 [b]60%[/b] 중 1개 확정
 [*][code]LocRefTypeBoss[/code] 보스: 룬워드 조각 1개 + 재련 오브 1개 확정 ([code]Boss[/code]가 [code]Unique[/code]보다 우선)
 [*]고유·보스 확정 보상은 일반 확률 판정과 피티를 소비하거나 초기화하지 않음
 [*]룬 가중치: [code]El-Amn=4 / Sol-Um=3 / Mal-Lo=2 / Sur-Zod=1[/code] (최대 4:1)
@@ -133,8 +133,8 @@ It tracks item instances via ExtraUniqueID, and the current build is [b]Reforge-
 [*]Successful currency is silently inserted into a hostile corpse killed by the player or a player-owned summon/proxy
 [*]Followers/teammates, summoned or commanded victims, children, player-owned/non-hostile victims, environmental-object kills, and kills by independent non-player-owned NPCs/followers are excluded
 [*][b]No generic container activation, pickup roll, world spawn, or new SPID currency distribution[/b]
-[*]Normal-enemy rates: runeword fragment [b]12%[/b], reforge orb [b]7%[/b] (MCM changes apply to the next eligible normal-enemy death)
-[*]Unique/named actors: one guaranteed currency reward, selected as [b]70%[/b] fragment / [b]30%[/b] reforge orb
+[*]Normal-enemy rates: runeword fragment [b]8%[/b], reforge orb [b]12%[/b] (MCM changes apply to the next eligible normal-enemy death)
+[*]Unique/named actors: one guaranteed currency reward, selected as [b]40%[/b] fragment / [b]60%[/b] reforge orb
 [*][code]LocRefTypeBoss[/code] actors: one guaranteed fragment plus one guaranteed reforge orb ([code]Boss[/code] overrides [code]Unique[/code])
 [*]Unique/boss guarantees neither run additional normal rolls nor advance/reset normal pity
 [*]Rune weights: [code]El-Amn=4 / Sol-Um=3 / Mal-Lo=2 / Sur-Zod=1[/code] (maximum 4:1)

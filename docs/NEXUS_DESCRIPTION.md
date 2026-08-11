@@ -30,8 +30,8 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - 플레이어 또는 player-owned summon/proxy가 처치한 적대 대상의 시체 인벤토리에 성공한 통화를 조용히 직접 추가합니다.
 - 피해자가 팔로워/동료, 소환·지휘 액터, 아동, player-owned/비적대 대상이면 제외합니다. 환경 오브젝트와 player-owned가 아닌 독립 NPC/팔로워의 처치도 제외합니다.
 - **일반 상자/컨테이너 활성화, 픽업, 월드 생성, 새 SPID 통화 분배는 모두 없습니다.**
-- 일반 적 기본 확률: 룬워드 조각 `12%`, 재련 오브 `7%` (MCM 변경은 다음 적격 일반 적 사망부터 반영)
-- `Unique` 고유·네임드 적: 룬워드 조각 `70%` / 재련 오브 `30%` 중 1개 확정
+- 일반 적 기본 확률: 룬워드 조각 `8%`, 재련 오브 `12%` (MCM 변경은 다음 적격 일반 적 사망부터 반영)
+- `Unique` 고유·네임드 적: 룬워드 조각 `40%` / 재련 오브 `60%` 중 1개 확정
 - `LocRefTypeBoss` 보스: 룬워드 조각 1개 + 재련 오브 1개 확정 (`Boss`가 `Unique`보다 우선)
 - 고유·보스 확정 보상은 일반 확률 판정과 피티를 소비하거나 초기화하지 않음
 - 룬 가중치: `El-Amn=4`, `Sol-Um=3`, `Mal-Lo=2`, `Sur-Zod=1` (최대 `4:1`)
@@ -110,8 +110,8 @@ It tracks item instances via ExtraUniqueID, and the current build is **Reforge-c
 - Successful currency is inserted silently and directly into a hostile corpse killed by the player or a player-owned summon/proxy.
 - Followers/teammates, summoned or commanded victims, children, player-owned/non-hostile victims, environmental-object kills, and kills by independent non-player-owned NPCs/followers are excluded.
 - **No generic container activation, pickup roll, world spawn, or new SPID currency distribution.**
-- Normal-enemy rates: runeword fragment `12%`, reforge orb `7%` (MCM changes apply to the next eligible normal-enemy death)
-- Unique/named actors: one guaranteed currency reward, selected as `70%` fragment / `30%` reforge orb
+- Normal-enemy rates: runeword fragment `8%`, reforge orb `12%` (MCM changes apply to the next eligible normal-enemy death)
+- Unique/named actors: one guaranteed currency reward, selected as `40%` fragment / `60%` reforge orb
 - `LocRefTypeBoss` actors: one guaranteed fragment plus one guaranteed reforge orb (`Boss` overrides `Unique`)
 - Unique/boss guarantees neither run additional normal rolls nor advance/reset normal pity
 - Rune weights: `El-Amn=4`, `Sol-Um=3`, `Mal-Lo=2`, `Sur-Zod=1` (maximum `4:1`)

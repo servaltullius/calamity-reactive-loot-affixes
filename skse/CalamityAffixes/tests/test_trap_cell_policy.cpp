@@ -3,6 +3,7 @@
 
 using CalamityAffixes::detail::IsTrapCellUsable;
 using CalamityAffixes::detail::CanSpawnPlacedTrapMarker;
+using CalamityAffixes::detail::CanReserveLogicalTrapSlots;
 using CalamityAffixes::detail::ResolvePlacedTrapMarkerCleanupPolicy;
 using CalamityAffixes::detail::ShouldDeferUnresolvedPlacedTrapMarker;
 using CalamityAffixes::detail::ShouldReusePlacedTrapMarker;
@@ -12,6 +13,7 @@ using CalamityAffixes::detail::ShouldRetryTrapMarkerAnimation;
 using CalamityAffixes::detail::ExtendTrapArmedAtForAcceptedOpenAnimation;
 using CalamityAffixes::detail::ShouldStartTrapMarkerRearmAnimation;
 using CalamityAffixes::detail::ShouldBlockTrapCastForMarkerAnimation;
+using CalamityAffixes::detail::BuildTrapWorldMarkerProbeWindow;
 using CalamityAffixes::detail::kMaxTrapMarkerAnimationAttempts;
 
 static_assert(!IsTrapCellUsable(false, false),
@@ -31,6 +33,12 @@ static_assert(CanSpawnPlacedTrapMarker(kMaxPlacedTrapMarkers - 2u, 1u),
 	"Pending cleanup handles and live markers must share the fixed budget");
 static_assert(!CanSpawnPlacedTrapMarker(kMaxPlacedTrapMarkers - 1u, 1u),
 	"A deferred cleanup handle must consume the final placed-reference slot");
+static_assert(CanReserveLogicalTrapSlots(100u, 0u, 6u),
+	"A configured logical trap cap of zero remains unlimited");
+static_assert(CanReserveLogicalTrapSlots(42u, 48u, 6u),
+	"A six-marker diagnostic probe may fill the remaining logical trap slots exactly");
+static_assert(!CanReserveLogicalTrapSlots(43u, 48u, 6u),
+	"A diagnostic probe must not overrun the configured logical trap cap");
 static_assert(ShouldDeferUnresolvedPlacedTrapMarker(true, false),
 	"An allocated but unresolved handle must enter fail-closed cleanup ownership");
 static_assert(!ShouldDeferUnresolvedPlacedTrapMarker(false, false),
@@ -64,6 +72,14 @@ static_assert(!ShouldRetryTrapMarkerAnimation(true, true, 1u),
 	"An accepted graph event must not be delivered twice");
 
 constexpr auto kAnimationEpoch = std::chrono::steady_clock::time_point{};
+constexpr auto kProbeWindow = BuildTrapWorldMarkerProbeWindow(kAnimationEpoch);
+static_assert(kProbeWindow.armedAt > kProbeWindow.expiresAt,
+	"Diagnostic trap probes must expire before their gameplay cast window opens");
+static_assert(ShouldBlockTrapCastForMarkerAnimation(
+		kProbeWindow.expiresAt - std::chrono::milliseconds(1),
+		kProbeWindow.armedAt,
+		false),
+	"A live diagnostic trap probe must remain unable to cast gameplay spells");
 static_assert(
 	ExtendTrapArmedAtForAcceptedOpenAnimation(
 		kAnimationEpoch + std::chrono::milliseconds(1000),

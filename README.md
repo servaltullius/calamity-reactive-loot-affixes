@@ -19,7 +19,7 @@
 
 1. 위 “필수” 모드를 설치합니다.
 2. GitHub Releases에서 `CalamityAffixes_MO2_vX.Y.Z_YYYY-MM-DD.zip`을 다운로드합니다.
-3. MO2에서 “Install a new mod from an archive”로 ZIP을 설치하고 Enable 합니다.
+3. MO2에서 “Install a new mod from an archive”로 ZIP을 설치하고 Enable 합니다. 기존 버전 업데이트라면 같은 모드에 **Replace**로 설치하고, Merge하거나 구·신 버전을 동시에 활성화하지 않습니다.
 4. SKSE로 실행합니다.
 5. 정상 동작 확인: `Documents/My Games/Skyrim Special Edition/SKSE/CalamityAffixes.log`가 생성됩니다.
 
@@ -66,8 +66,7 @@
 ## 목표(요약)
 
 - 아이템(무기/아머)에 **어픽스(확률 발동 효과)**를 붙이고
-- 중앙 Papyrus 매니저가 **프로크/ICD/가드**를 처리하며
-- (권장) SKSE 플러그인이 **모든 무기/마법/소환수/DoT 적용(=틱 X)** 트리거를 안정적으로 공급합니다.
+- SKSE 플러그인의 EventBridge가 **프로크/ICD/가드**와 무기·마법·소환수·DoT 적용(=틱 X) 트리거를 처리합니다.
 
 ## 적용 범위(현재)
 
@@ -91,7 +90,7 @@
 
 기본값: `loot.runewordFragmentChancePercent=8`, `loot.reforgeOrbChancePercent=12`, `loot.uniqueActorGuaranteedRunewordChancePercent=40`, `loot.currencyDropMode=hybrid` (레거시 설정 호환 토큰; 실제 드랍 권한은 SKSE death-event corpse-only), `loot.renameItem=true`, `loot.nameMarkerPosition=trailing`, `loot.sharedPool=true`
 참고: `loot.chancePercent`는 현재 기본 정책에서 실질적으로 사용되지 않는 레거시 호환 필드입니다.
-추가 안전장치(권장): `loot.trapGlobalMaxActive=64` (전역 트랩 하드캡, 0=무제한)
+추가 안전장치(기본값·권장): `loot.trapGlobalMaxActive=48` (전역 논리 함정 상한). 물리 월드 마커도 안전상 최대 48개이므로 `0=무제한`은 논리 함정만 늘리고 48개를 넘는 마커 표시를 보장하지 않아 권장하지 않습니다.
 
 ## 제작 아이템(대장간/제작)에서는 어픽스가 어떻게 붙나요?
 
@@ -129,7 +128,7 @@
 
 ### 게임/런타임
 
-- Skyrim SE 1.5.97 포함 지원(그리고 AE 1.6.x까지 확장 가능)
+- 단일 CommonLibSSE-NG/Address Library 빌드로 Skyrim SE 1.5.97 및 AE 1.6.x를 대상으로 합니다. 자동 테스트는 Skyrim 실행 파일을 구동하지 않으므로, 실제 인게임 호환성은 사용 중인 런타임·SKSE·Address Library 조합에서 확인해야 합니다.
 - SKSE64: 런타임에 맞는 버전 설치 (SE/AE 빌드가 분리됨) ([skse.silverlock.org](https://skse.silverlock.org/))
 - Address Library for SKSE Plugins: 런타임(1.5.x vs 1.6.x)에 맞는 파일 설치 ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/32444))
 
@@ -164,7 +163,7 @@
 ### 의존성(선택)
 
 - MCM Helper ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/53000))
-  - 본 모드 설정(향후)을 위해 사용합니다.
+  - 런타임 확률, 패널 단축키·언어와 안전 옵션을 MCM에서 조정할 때 사용합니다.
 - Inventory Interface Information Injector (I4) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/85702))
   - 본 모드는 `Data/SKSE/Plugins/InventoryInjector/CalamityAffixes.json`를 **빈 placeholder**로 동봉합니다(`rules: []`).
   - 툴팁/효과 표시 자체에 필수는 아닙니다.

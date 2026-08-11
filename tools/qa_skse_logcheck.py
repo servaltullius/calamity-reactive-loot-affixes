@@ -18,6 +18,21 @@ class PatternGroup:
     any_of: list[re.Pattern[str]]
 
 
+TRAP_WORLD_MARKER_PROBE_AFFIX_IDS = (
+    "bear_trap",
+    "rune_trap",
+    "plague_spore",
+    "tar_blight",
+    "siphon_spore",
+    "chaos_rune",
+)
+TRAP_WORLD_MARKER_PROBE_RESOLVED = re.compile(
+    r"CalamityAffixes: trap world marker probe observation "
+    r"\(affixId=([^,]+),.*configured=true.*handleAllocated=true.*resolved=true",
+    re.IGNORECASE,
+)
+
+
 def _is_wsl() -> bool:
     try:
         return "microsoft" in Path("/proc/version").read_text(encoding="utf-8", errors="ignore").lower()
@@ -210,14 +225,62 @@ def main(argv: list[str]) -> int:
             any_of=[re.compile(r"CalamityAffixes: action feedback sound \(.*played=true", re.IGNORECASE)],
         ),
         PatternGroup(
-            name="trap_marker_spawned",
-            desc="Trap ground marker accepted by the temp-effect path",
-            any_of=[re.compile(r"CalamityAffixes: trap marker spawn \(.*spawned=true", re.IGNORECASE)],
+            name="trap_world_marker_spawn",
+            desc="Production placed world-reference creation resolved in the engine path",
+            any_of=[re.compile(r"CalamityAffixes: trap world marker spawn \(.*spawned=true", re.IGNORECASE)],
         ),
         PatternGroup(
-            name="trap_marker_probe",
-            desc="Debug probe spawn at player feet accepted by the temp-effect path",
-            any_of=[re.compile(r"CalamityAffixes: trap marker probe \(.*spawned=true", re.IGNORECASE)],
+            name="trap_world_marker_probe",
+            desc="Production-contract probe resolved a configured placed world reference",
+            any_of=[TRAP_WORLD_MARKER_PROBE_RESOLVED],
+        ),
+        PatternGroup(
+            name="trap_world_marker_animation_accepted",
+            desc="A production marker animation event was accepted by its graph",
+            any_of=[re.compile(r"CalamityAffixes: trap world marker animation \(.*accepted=true", re.IGNORECASE)],
+        ),
+        PatternGroup(
+            name="trap_world_marker_cleanup",
+            desc="A placed world reference entered direct or deferred cleanup",
+            any_of=[
+                re.compile(
+                    r"CalamityAffixes: trap world marker cleanup \(.*(?:deleteIssued=true|deferredQueued=true)",
+                    re.IGNORECASE,
+                )
+            ],
+        ),
+        PatternGroup(
+            name="trap_world_marker_deferred_cleanup",
+            desc="A previously unresolved placed world reference completed deferred cleanup",
+            any_of=[
+                re.compile(
+                    r"CalamityAffixes: trap world marker deferred cleanup resolved "
+                    r"\(.*deleteIssued=true",
+                    re.IGNORECASE,
+                )
+            ],
+        ),
+        PatternGroup(
+            name="trap_pre_save_state_clean",
+            desc="Pre-save lifecycle cleanup observed no live or unresolved trap references",
+            any_of=[
+                re.compile(
+                    r"CalamityAffixes: pre-save trap cleanup complete "
+                    r"\(activeTraps=0, unresolvedDeferred=0\)",
+                    re.IGNORECASE,
+                )
+            ],
+        ),
+        PatternGroup(
+            name="trap_serialization_state_clean",
+            desc="Serialization observed no live or unresolved trap references",
+            any_of=[
+                re.compile(
+                    r"CalamityAffixes: serialization save trap state "
+                    r"\(activeTraps=0, unresolvedDeferred=0\)",
+                    re.IGNORECASE,
+                )
+            ],
         ),
     ]
     # Engine-path refusals worth surfacing. Still observational — they do not
@@ -227,8 +290,44 @@ def main(argv: list[str]) -> int:
         ("feedback_art_rejected", re.compile(r"action feedback art \(.*instantiated=false", re.IGNORECASE)),
         ("feedback_art_skipped_no3d", re.compile(r"action feedback art skipped \(", re.IGNORECASE)),
         ("feedback_sound_rejected", re.compile(r"action feedback sound \(.*(?:built=false|played=false)", re.IGNORECASE)),
-        ("trap_marker_rejected", re.compile(r"trap (?:marker|cue) spawn \(.*spawned=false", re.IGNORECASE)),
-        ("trap_marker_probe_rejected", re.compile(r"trap marker probe \(.*spawned=false", re.IGNORECASE)),
+        ("trap_world_marker_spawn_rejected", re.compile(r"trap world marker spawn \(.*spawned=false", re.IGNORECASE)),
+        ("trap_world_marker_spawn_skipped", re.compile(r"trap world marker spawn skipped \(", re.IGNORECASE)),
+        (
+            "trap_world_marker_probe_unresolved",
+            re.compile(
+                r"trap world marker probe observation \(.*(?:configured=false|handleAllocated=false|resolved=false)",
+                re.IGNORECASE,
+            ),
+        ),
+        (
+            "trap_world_marker_probe_skipped",
+            re.compile(r"trap world marker probe skipped \(", re.IGNORECASE),
+        ),
+        ("trap_world_marker_animation_abandoned", re.compile(r"trap world marker animation abandoned \(", re.IGNORECASE)),
+        (
+            "trap_world_marker_cleanup_unresolved",
+            re.compile(r"trap world marker cleanup \(.*resolved=false", re.IGNORECASE),
+        ),
+        (
+            "trap_world_marker_cleanup_queue_failed",
+            re.compile(r"unresolved trap world marker could not enter the fixed cleanup queue", re.IGNORECASE),
+        ),
+        (
+            "trap_pre_save_state_not_clean",
+            re.compile(
+                r"pre-save trap cleanup complete "
+                r"\((?:activeTraps=(?!0\b)\d+|activeTraps=\d+, unresolvedDeferred=(?!0\b)\d+)",
+                re.IGNORECASE,
+            ),
+        ),
+        (
+            "trap_serialization_state_not_clean",
+            re.compile(
+                r"serialization save trap state "
+                r"\((?:activeTraps=(?!0\b)\d+|activeTraps=\d+, unresolvedDeferred=(?!0\b)\d+)",
+                re.IGNORECASE,
+            ),
+        ),
     ]
 
     missing: list[str] = []
@@ -283,7 +382,7 @@ def main(argv: list[str]) -> int:
         else:
             not_observed.append(g.name)
 
-    print("- feedback pipeline observation (engine-path only; NOT an on-screen visual or audible-audio verdict):")
+    print("- proc/feedback/trap observation (engine-path only; NOT an on-screen visual or audible-audio verdict):")
     for name, count in observed:
         print(f"  - {name}: OBSERVED ({count})")
     for name in not_observed:
@@ -291,13 +390,29 @@ def main(argv: list[str]) -> int:
     if not observed:
         print("  - note: no proc activity in scanned tail (no combat, or debugVerbose disabled)")
 
+    expected_probe_ids = set(TRAP_WORLD_MARKER_PROBE_AFFIX_IDS)
+    observed_probe_ids: set[str] = set()
+    for line in lines:
+        match = TRAP_WORLD_MARKER_PROBE_RESOLVED.search(line)
+        if match:
+            affix_id = match.group(1).casefold()
+            if affix_id in expected_probe_ids:
+                observed_probe_ids.add(affix_id)
+    missing_probe_ids = sorted(expected_probe_ids - observed_probe_ids)
+    print(
+        "- trap world marker probe contracts: "
+        f"OBSERVED {len(observed_probe_ids)}/{len(expected_probe_ids)}"
+    )
+    if missing_probe_ids:
+        print("  - missing: " + ", ".join(missing_probe_ids))
+
     reject_hits = []
     for name, pat in observational_reject_pats:
         hits = _find_matches(lines, pat, limit=3)
         if hits:
             reject_hits.append((name, hits))
     if reject_hits:
-        print("- feedback pipeline engine-path rejections (observational, non-fatal):")
+        print("- proc/feedback/trap engine-path rejections (observational, non-fatal):")
         for name, samples in reject_hits:
             print(f"  - {name}: {len(samples)} sample(s)")
             for s in samples:

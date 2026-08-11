@@ -341,8 +341,12 @@ namespace CalamityAffixes
 			*a_outDenyReason = CorpseExplosionBudgetDenyReason::kNone;
 		}
 
-		auto& explosionState = a_summonMode ? _summonCorpseExplosionState : _corpseExplosionState;
-		auto& seenCorpses = a_summonMode ? _summonCorpseExplosionSeenCorpses : _corpseExplosionSeenCorpses;
+		auto& explosionState = a_summonMode ?
+			_combatState.summonCorpseExplosionState :
+			_combatState.corpseExplosionState;
+		auto& seenCorpses = a_summonMode ?
+			_combatState.summonCorpseExplosionSeenCorpses :
+			_combatState.corpseExplosionSeenCorpses;
 
 		// Per-corpse guard: avoid double-processing the same dying reference.
 		static constexpr auto corpseTTL = std::chrono::seconds(60);

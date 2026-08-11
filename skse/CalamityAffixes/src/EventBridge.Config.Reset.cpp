@@ -15,13 +15,10 @@ namespace CalamityAffixes
 		_instanceTrackingState.equippedInstanceKeysByToken.clear();
 		_instanceTrackingState.equippedTokenCacheReady = false;
 		ClearTrapRuntimeState();
-		_corpseExplosionSeenCorpses.clear();
-		_corpseExplosionState = {};
-		_summonCorpseExplosionSeenCorpses.clear();
-		_summonCorpseExplosionState = {};
-			_combatState.ResetTransientState();
-			_equipResync.nextAtMs = 0;
-			_equipResync.intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count());
+		_combatState.ResetCorpseExplosionState();
+		_combatState.ResetTransientState();
+		_equipResync.nextAtMs = 0;
+		_equipResync.intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count());
 		_loot = {};
 		_runtimeSettings.Reset();
 		_configLoaded = false;

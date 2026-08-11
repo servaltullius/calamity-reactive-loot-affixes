@@ -261,8 +261,8 @@ function initUiText() {
   }
   if (debugTrapProbeButton) {
     debugTrapProbeButton.textContent = t(
-      "Trap Marker Probe at Feet",
-      "발밑 함정 마커 프로브"
+      "Production Trap World-Ref Probe",
+      "실사용 함정 월드 참조 프로브"
     );
   }
   if (debugSpawnTestButton) {
@@ -364,5 +364,4 @@ function invalidateRunewordAffixPreview(pending) {
     schedulePanelRender(panelRenderSection.tooltipPlacement);
   }, runewordAffixPendingTimeoutMs);
 }
-
 

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Generate public prefix effects documentation markdown."""
 
+import argparse
 import json
-from datetime import date
 from pathlib import Path
+
+from public_doc_metadata import load_public_doc_metadata
 
 CORE_JSON = Path("affixes/modules/keywords.affixes.core.json")
 OUTPUT = Path("docs/PREFIX_EFFECTS.md")
@@ -130,7 +132,12 @@ def format_entry(idx, e):
     return "\n".join(lines)
 
 
-def main():
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=OUTPUT)
+    args = parser.parse_args(argv)
+    metadata = load_public_doc_metadata()
+
     with open(CORE_JSON) as f:
         entries = json.load(f)
 
@@ -140,8 +147,8 @@ def main():
     out = []
     out.append("# 프리픽스 효과 정리 (공개용)")
     out.append("")
-    out.append(f"> 업데이트: {date.today().isoformat()}")
-    out.append("> 기준 버전: `v1.3.0`")
+    out.append(f"> 업데이트: {metadata.release_date}")
+    out.append(f"> 기준 버전: `v{metadata.version}`")
     out.append("> 기준 코드:")
     out.append("> - 효과 정의: `affixes/modules/keywords.affixes.core.json`")
     out.append("> - 변환 스크립트: `tools/transform_prefixes.py`")
@@ -179,10 +186,11 @@ def main():
             out.append(format_entry(idx, e))
             out.append("")
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text("\n".join(out).rstrip() + "\n", encoding="utf-8")
-    print(f"Wrote {OUTPUT} ({len(out)} lines)")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text("\n".join(out).rstrip() + "\n", encoding="utf-8")
+    print(f"Wrote {args.output} ({len(out)} lines)")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

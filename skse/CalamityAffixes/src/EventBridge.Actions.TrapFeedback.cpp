@@ -5,11 +5,10 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <memory>
 #include <string_view>
-#include <thread>
-#include <vector>
 
 namespace CalamityAffixes
 {
@@ -58,75 +57,6 @@ namespace CalamityAffixes
 			return player ? player->Get3D(false) : nullptr;
 		}
 
-		// ---- render-probe self-diagnosis -----------------------------------
-		// Every 2026-08-10 session had Spawn accept our calls while nothing
-		// reached the screen, and the async BGSParticleObjectCloneTask means the
-		// return value cannot say why. So the probe holds its spawned particles
-		// and reads them back later: did the clone task run, did the model get a
-		// scene-graph parent, is it app-culled, and does age advance at all (a
-		// stuck age means the effect never entered the manager's update list).
-		struct ProbeRecord
-		{
-			const char* tag;
-			RE::NiPointer<RE::BSTempEffectParticle> particle;
-		};
-		using ProbeRecordsPtr = std::shared_ptr<std::vector<ProbeRecord>>;
-
-		void InspectProbeRecords(const ProbeRecordsPtr& a_records, float a_afterSeconds)
-		{
-			for (const auto& record : *a_records) {
-				auto* particle = record.particle.get();
-				if (!particle) {
-					continue;
-				}
-				auto* object = particle->particleObject.get();
-				auto* parent = object ? object->parent : nullptr;
-				SKSE::log::info(
-					"CalamityAffixes: probe inspect (tag={}, after={:.1f}s, age={:.2f}, lifetime={:.2f}, initialized={}, cloneTask={}, clone={}, parent={}, culled={}, worldPos=({:.1f}, {:.1f}, {:.1f}), worldScale={:.2f}).",
-					record.tag,
-					a_afterSeconds,
-					particle->age,
-					particle->lifetime,
-					particle->initialized,
-					particle->cloneTask.get() != nullptr,
-					object != nullptr,
-					parent ? (parent->name.empty() ? "<unnamed>" : parent->name.c_str()) : "<none>",
-					object ? object->GetAppCulled() : false,
-					object ? object->world.translate.x : 0.0f,
-					object ? object->world.translate.y : 0.0f,
-					object ? object->world.translate.z : 0.0f,
-					object ? object->world.scale : 0.0f);
-			}
-		}
-
-		void StartProbeInspectionTimer(ProbeRecordsPtr a_records)
-		{
-			// The previous revision chained SKSE tasks to count frames, but the
-			// task queue drains until empty, so every checkpoint ran inside the
-			// spawn frame (all log lines shared one timestamp). Use a real-time
-			// worker instead, mirroring TrapSystem's poll pattern; each
-			// checkpoint marshals the actual inspection back to the main thread.
-			std::thread([records = std::move(a_records)]() mutable {
-				constexpr std::array<float, 4> kCheckSeconds{ 0.5f, 2.0f, 5.0f, 9.0f };
-				float elapsed = 0.0f;
-				for (const float checkpoint : kCheckSeconds) {
-					std::this_thread::sleep_for(
-						std::chrono::duration<float>(checkpoint - elapsed));
-					elapsed = checkpoint;
-					auto* tasks = SKSE::GetTaskInterface();
-					if (!tasks) {
-						return;
-					}
-					tasks->AddTask([records, checkpoint]() {
-						InspectProbeRecords(records, checkpoint);
-					});
-				}
-				if (auto* tasks = SKSE::GetTaskInterface()) {
-					// Release the NiPointers on the main thread.
-					tasks->AddTask([records]() { records->clear(); });
-				}
-			}).detach();
-		}
 	}
 
 	void EventBridge::PlayTrapFeedbackCue(
@@ -682,10 +612,10 @@ namespace CalamityAffixes
 
 	void EventBridge::SpawnTrapMarkerProbe()
 	{
-		// Debug-only render probe: spawns the three marker model families at the
-		// player's feet with a fat scale and lifetime, removing every gameplay
-		// variable (target position, arm timing, TTL) from the "does this path
-		// draw at all?" question. Look down; results also land in the log.
+		// Debug-only production-contract probe. It resolves the six shipping trap
+		// feedback definitions and drives the same placed-reference, animation,
+		// and cleanup functions as live traps. Logs are engine-path observations;
+		// only an eyes-on game session can decide whether a marker was visible.
 		if (!(_loot.debugHudNotifications || _loot.debugLog)) {
 			return;
 		}
@@ -693,71 +623,152 @@ namespace CalamityAffixes
 		if (!tasks) {
 			return;
 		}
-		// Every rendering Spawn in this codebase runs on the main thread via the
-		// task queue (trap ticks are marshalled in TrapSystem.cpp); the probe
-		// must not introduce a new thread context as an extra variable.
+		// Placed-reference creation and animation graph access are main-thread
+		// operations. Normal TrapSystem ticks remain the sole retry/cleanup owner.
 		tasks->AddTask([this]() {
+			const std::scoped_lock lock(_stateMutex);
+			if (_runtimeSettings.disableTrapSystemTick) {
+				SKSE::log::warn(
+					"CalamityAffixes: trap world marker probe skipped (reason=trap-system-tick-disabled).");
+				EmitHudNotification("Calamity: world-ref probe needs TrapSystem tick enabled.");
+				return;
+			}
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			auto* cell = player ? player->GetParentCell() : nullptr;
-			if (!player || !cell) {
-				EmitHudNotification("Calamity: probe needs a loaded player cell.");
+			if (!player || !cell || !cell->IsAttached()) {
+				EmitHudNotification("Calamity: world-ref probe needs an attached player cell.");
 				return;
 			}
 
-			// Close the address question with data: the on-disk exe is SteamStub
-			// encrypted, so log the module-relative RVAs the relocation actually
-			// resolved for both Spawn overloads at runtime instead.
-			const auto moduleBase = REL::Module::get().base();
-			const REL::Relocation<std::uintptr_t> spawnEuler{ RELOCATION_ID(29218, 30071) };
-			const REL::Relocation<std::uintptr_t> spawnMatrix{ RELOCATION_ID(29219, 30072) };
-			SKSE::log::info(
-				"CalamityAffixes: probe spawn fn (euler rva={:#x}, matrix rva={:#x}).",
-				spawnEuler.address() - moduleBase,
-				spawnMatrix.address() - moduleBase);
-
-			// qa8 proved the self-playing glyph breed renders through this call
-			// (shock arcs confirmed on screen; all four healthy in telemetry).
-			// The probe now previews the exact six models the trap markers ship
-			// with, in trap-cycle order, so one press reviews the real mapping.
-			struct ProbeVariant
+			struct ProbeContract
 			{
-				const char* tag;
-				const char* model;
+				std::string_view affixId;
+				std::uint64_t sourceToken;
 			};
-			static constexpr std::array<ProbeVariant, 6> kProbeVariants{{
-				{ "bear:runefrost", "Magic\\RuneFrostProjectile01.nif" },
-				{ "rune:runefire", "Magic\\RuneFireProjectile01.nif" },
-				{ "plague:runepoison", "DLC02\\Effects\\RunePoisonProjectile.nif" },
-				{ "tar:ashrune", "DLC02\\Effects\\AshRuneProjectile01.nif" },
-				{ "siphon:runefrenzy", "DLC02\\Effects\\RuneFrenzyProjectile.nif" },
-				{ "chaos:runeshock", "Magic\\RuneLightningProjectile01.nif" },
+			static constexpr std::array<ProbeContract, 6> kProbeContracts{{
+				{ "bear_trap", 0x4341464650524F01ull },
+				{ "rune_trap", 0x4341464650524F02ull },
+				{ "plague_spore", 0x4341464650524F03ull },
+				{ "tar_blight", 0x4341464650524F04ull },
+				{ "siphon_spore", 0x4341464650524F05ull },
+				{ "chaos_rune", 0x4341464650524F06ull },
 			}};
+			const auto probeAlreadyRunning = std::any_of(
+				_trapState.activeTraps.begin(),
+				_trapState.activeTraps.end(),
+				[](const TrapInstance& a_trap) {
+					return std::any_of(
+						kProbeContracts.begin(),
+						kProbeContracts.end(),
+						[&](const ProbeContract& a_contract) {
+							return a_trap.sourceToken == a_contract.sourceToken;
+						});
+				});
+			if (probeAlreadyRunning) {
+				EmitHudNotification("Calamity: production trap world-ref probe is already running.");
+				return;
+			}
+
+			ProcessPendingTrapMarkerCleanup();
+			const auto logicalTrapCount = _trapState.activeTraps.size();
+			if (!detail::CanReserveLogicalTrapSlots(
+					logicalTrapCount,
+					static_cast<std::size_t>(_loot.trapGlobalMaxActive),
+					kProbeContracts.size())) {
+				SKSE::log::warn(
+					"CalamityAffixes: trap world marker probe skipped (reason=logical-trap-headroom, active={}, requested={}, cap={}).",
+					logicalTrapCount,
+					kProbeContracts.size(),
+					_loot.trapGlobalMaxActive);
+				EmitHudNotification("Calamity: world-ref probe skipped; logical trap cap has insufficient headroom.");
+				return;
+			}
+			const auto activePlacedCount = static_cast<std::size_t>(std::count_if(
+				_trapState.activeTraps.begin(),
+				_trapState.activeTraps.end(),
+				[](const TrapInstance& a_trap) { return static_cast<bool>(a_trap.markerReference); }));
+			const auto pendingCleanupCount = _trapState.PendingMarkerCleanupCount();
+			if (activePlacedCount + pendingCleanupCount + kProbeContracts.size() >
+				detail::kMaxPlacedTrapMarkers) {
+				SKSE::log::warn(
+					"CalamityAffixes: trap world marker probe skipped (reason=placed-ref-headroom, active={}, pendingCleanup={}, requested={}, cap={}).",
+					activePlacedCount,
+					pendingCleanupCount,
+					kProbeContracts.size(),
+					detail::kMaxPlacedTrapMarkers);
+				EmitHudNotification("Calamity: world-ref probe skipped; marker cap has insufficient headroom.");
+				return;
+			}
 
 			const auto basePos = player->GetPosition();
-			auto records = std::make_shared<std::vector<ProbeRecord>>();
-			float offset = 0.0f;
-			for (const auto& variant : kProbeVariants) {
-				RE::NiPoint3 position = basePos;
-				position.x += offset;
-				offset += 96.0f;
-				auto* particle = SpawnTrapParticle(cell, 10.0f, variant.model, position, 1.5f, nullptr);
-				SKSE::log::info(
-					"CalamityAffixes: trap marker probe (variant={}, model={}, pos=({:.1f}, {:.1f}, {:.1f}), spawned={}).",
-					variant.tag,
-					variant.model,
-					position.x,
-					position.y,
-					position.z,
-					particle != nullptr);
-				if (particle) {
-					records->push_back(
-						ProbeRecord{ variant.tag, RE::NiPointer<RE::BSTempEffectParticle>{ particle } });
+			const auto heading = player->GetAngleZ();
+			const auto headingSin = std::sin(heading);
+			const auto headingCos = std::cos(heading);
+			const auto now = std::chrono::steady_clock::now();
+			const auto probeWindow = detail::BuildTrapWorldMarkerProbeWindow(now);
+			std::size_t configuredCount = 0u;
+			for (std::size_t index = 0; index < kProbeContracts.size(); ++index) {
+				const auto& contract = kProbeContracts[index];
+				const auto affixId = contract.affixId;
+				const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexById.find(std::string(affixId));
+				const bool affixResolved = affixIt != _affixRuntimeState.affixRegistry.affixIndexById.end() &&
+					affixIt->second < _affixRuntimeState.affixes.size();
+				const auto* affix = affixResolved ? std::addressof(_affixRuntimeState.affixes[affixIt->second]) : nullptr;
+				const bool configured = affix &&
+					affix->action.type == ActionType::kSpawnTrap &&
+					affix->action.spell &&
+					affix->action.trapRadius > 0.0f &&
+					affix->action.trapFeedback.configured &&
+					affix->action.trapFeedback.markerWorldObject;
+				if (!configured) {
+					SKSE::log::info(
+						"CalamityAffixes: trap world marker probe observation (affixId={}, configured=false, handleAllocated=false, resolved=false, animationConfigured=false).",
+						affixId);
+					continue;
 				}
+
+				TrapInstance probe{};
+				probe.sourceToken = contract.sourceToken;
+				probe.ownerFormID = player->GetFormID();
+				probe.position = basePos;
+				const auto rightOffset = (static_cast<float>(index % 3u) - 1.0f) * 128.0f;
+				const auto forwardOffset = (static_cast<float>(index / 3u) + 1.0f) * 128.0f;
+				probe.position.x += headingCos * rightOffset + headingSin * forwardOffset;
+				probe.position.y += -headingSin * rightOffset + headingCos * forwardOffset;
+				probe.cell = cell;
+				probe.radius = affix->action.trapRadius;
+				probe.spell = affix->action.spell;
+				// The normal trap tick owns animation retries and cleanup. Its prune
+				// pass runs before casts, and this probe's arm time is deliberately
+				// after expiry, so no gameplay spell can fire in its live window.
+				probe.expiresAt = probeWindow.expiresAt;
+				probe.armedAt = probeWindow.armedAt;
+				probe.createdAt = now + std::chrono::nanoseconds(index);
+				probe.feedback = affix->action.trapFeedback;
+				_trapState.activeTraps.push_back(std::move(probe));
+				_trapState.hasActiveTraps.store(true, std::memory_order_relaxed);
+				auto& storedProbe = _trapState.activeTraps.back();
+				StartTrapMarker(storedProbe, TrapVisualState::kUnarmed, now);
+
+				const bool handleAllocated = static_cast<bool>(storedProbe.markerReference);
+				const bool resolved = storedProbe.markerReferenceOwner != nullptr ||
+					(handleAllocated && storedProbe.markerReference.get() != nullptr);
+				const auto* markerEditorId = storedProbe.feedback.markerWorldObject->GetFormEditorID();
+				SKSE::log::info(
+					"CalamityAffixes: trap world marker probe observation (affixId={}, marker={}, configured=true, handleAllocated={}, resolved={}, animationConfigured={}).",
+					affixId,
+					markerEditorId ? markerEditorId : "<none>",
+					handleAllocated,
+					resolved,
+					storedProbe.feedback.worldMarkerAnimation.has_value());
+				++configuredCount;
 			}
-			if (!records->empty()) {
-				StartProbeInspectionTimer(records);
+
+			if (configuredCount == 0u) {
+				EmitHudNotification("Calamity: world-ref probe found no configured production traps.");
+				return;
 			}
-			EmitHudNotification("Calamity: marker probe spawned; inspections log for 9s.");
+			EmitHudNotification("Calamity: production trap world-ref probe started; auto-cleanup in 3s.");
 		});
 	}
 

@@ -7,6 +7,24 @@ namespace CalamityAffixes::detail
 {
 	inline constexpr std::uint8_t kMaxTrapMarkerAnimationAttempts = 8u;
 	inline constexpr auto kTrapMarkerAnimationRetryDelay = std::chrono::milliseconds(250);
+	inline constexpr auto kTrapWorldMarkerProbeLifetime = std::chrono::seconds(3);
+	inline constexpr auto kTrapWorldMarkerProbeArmAfterExpiry = std::chrono::milliseconds(1);
+
+	struct TrapWorldMarkerProbeWindow
+	{
+		std::chrono::steady_clock::time_point expiresAt{};
+		std::chrono::steady_clock::time_point armedAt{};
+	};
+
+	[[nodiscard]] constexpr TrapWorldMarkerProbeWindow BuildTrapWorldMarkerProbeWindow(
+		std::chrono::steady_clock::time_point a_now) noexcept
+	{
+		const auto expiresAt = a_now + kTrapWorldMarkerProbeLifetime;
+		return {
+			expiresAt,
+			expiresAt + kTrapWorldMarkerProbeArmAfterExpiry,
+		};
+	}
 
 	[[nodiscard]] constexpr bool IsTrapMarkerAnimationGraphReady(
 		bool a_has3D,

@@ -160,11 +160,6 @@ namespace CalamityAffixes
 
 		ResyncScheduler _equipResync{ .nextAtMs = 0, .intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count()) };
 
-		CorpseExplosionState _corpseExplosionState{};
-		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _corpseExplosionSeenCorpses;
-		CorpseExplosionState _summonCorpseExplosionState{};
-		std::unordered_map<RE::FormID, std::chrono::steady_clock::time_point> _summonCorpseExplosionSeenCorpses;
-
 		#define CALAMITYAFFIXES_EVENTBRIDGE_PRIVATE_API_INL_CONTEXT 1
 		#include "detail/EventBridge.PrivateApi.inl"
 		#undef CALAMITYAFFIXES_EVENTBRIDGE_PRIVATE_API_INL_CONTEXT

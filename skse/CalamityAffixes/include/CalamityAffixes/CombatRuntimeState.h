@@ -40,6 +40,15 @@ namespace CalamityAffixes
 		}
 	};
 
+	struct CorpseExplosionRuntimeState
+	{
+		std::chrono::steady_clock::time_point lastExplosionAt{};
+		std::chrono::steady_clock::time_point chainAnchorAt{};
+		std::chrono::steady_clock::time_point rateWindowStartAt{};
+		std::uint32_t chainDepth{ 0u };
+		std::uint32_t explosionsInWindow{ 0u };
+	};
+
 	struct CombatRuntimeState
 	{
 		std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> dotCooldowns{};
@@ -74,6 +83,10 @@ namespace CalamityAffixes
 		LastHitKey lastPapyrusHit{};
 		std::unordered_map<LowHealthTriggerKey, bool, LowHealthTriggerKeyHash> lowHealthTriggerConsumed{};
 		std::unordered_map<std::uint32_t, float> lowHealthLastObservedPct{};
+		CorpseExplosionRuntimeState corpseExplosionState{};
+		std::unordered_map<std::uint32_t, std::chrono::steady_clock::time_point> corpseExplosionSeenCorpses{};
+		CorpseExplosionRuntimeState summonCorpseExplosionState{};
+		std::unordered_map<std::uint32_t, std::chrono::steady_clock::time_point> summonCorpseExplosionSeenCorpses{};
 
 		void ResetTransientState() noexcept
 		{
@@ -107,9 +120,18 @@ namespace CalamityAffixes
 			lowHealthLastObservedPct.clear();
 		}
 
+		void ResetCorpseExplosionState() noexcept
+		{
+			corpseExplosionState = {};
+			corpseExplosionSeenCorpses.clear();
+			summonCorpseExplosionState = {};
+			summonCorpseExplosionSeenCorpses.clear();
+		}
+
 		void Reset() noexcept
 		{
 			ResetTransientState();
+			ResetCorpseExplosionState();
 		}
 	};
 

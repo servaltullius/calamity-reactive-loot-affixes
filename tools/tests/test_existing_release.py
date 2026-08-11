@@ -99,6 +99,26 @@ class ExistingReleaseVerifierTests(unittest.TestCase):
         self.assertIn("--verify-tag", source)
         self.assertNotIn('if gh release view "${GITHUB_REF_NAME}" >/dev/null', source)
 
+    def test_workflow_archives_matching_pdb_outside_public_release_assets(self) -> None:
+        source = self.workflow.read_text(encoding="utf-8")
+
+        self.assertIn('pdb_path="${zip_path%.zip}.pdb"', source)
+        self.assertIn('cp "${pdb_path}" symbol-artifacts/', source)
+        self.assertIn("path: symbol-artifacts/", source)
+        self.assertIn(
+            "name: calamity-affixes-symbols-${{ steps.version.outputs.version }}-${{ github.sha }}",
+            source,
+        )
+        self.assertIn("symbol-artifacts/CalamityAffixes.dll.sha256", source)
+        self.assertIn("symbol-artifacts/build-identity.txt", source)
+        self.assertIn("release-artifacts/*", source)
+        self.assertNotIn('cp "${pdb_path}" release-artifacts/', source)
+
+    def test_release_workflow_rejects_stale_generated_public_docs(self) -> None:
+        source = self.workflow.read_text(encoding="utf-8")
+
+        self.assertIn("python3 tools/update_docs.py --check", source)
+
     def _fixture(self, temp_root: Path) -> dict[str, object]:
         local_dir = temp_root / "local"
         remote_dir = temp_root / "remote"

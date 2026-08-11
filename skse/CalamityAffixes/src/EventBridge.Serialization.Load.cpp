@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/SerializationCurrentRecordReader.h"
 #include "CalamityAffixes/SerializationDrainPolicy.h"
 #include "CalamityAffixes/SerializationLoadState.h"
 
@@ -14,7 +15,6 @@ namespace CalamityAffixes
 	namespace
 	{
 		constexpr std::uint32_t kMaxV1AffixIdLength = 1024u;
-		constexpr std::uint32_t kMaxShuffleBagSize = 100'000u;
 
 		bool DrainRecordBytes(
 			SKSE::SerializationInterface* a_intfc,
@@ -78,10 +78,7 @@ namespace CalamityAffixes
 		_combatState.ResetTransientState();
 		ClearTrapRuntimeState("load");
 		_runewordState.ResetSelectionAndProgress();
-		_corpseExplosionSeenCorpses.clear();
-		_corpseExplosionState = {};
-		_summonCorpseExplosionSeenCorpses.clear();
-		_summonCorpseExplosionState = {};
+		_combatState.ResetCorpseExplosionState();
 
 		std::uint32_t type = 0;
 		std::uint32_t version = 0;

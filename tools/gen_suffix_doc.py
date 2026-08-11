@@ -2,10 +2,12 @@
 """공개용 서픽스 효과 문서 생성."""
 from __future__ import annotations
 
+import argparse
 import json
 import sys
-from datetime import date
 from pathlib import Path
+
+from public_doc_metadata import load_public_doc_metadata
 
 SUFFIXES_PATH = Path("affixes/modules/keywords.affixes.suffixes.json")
 OUTPUT_PATH = Path("docs/SUFFIX_EFFECTS.md")
@@ -19,7 +21,12 @@ def display_magnitude(actor_value: str, magnitude: float | int) -> str:
     return str(magnitude)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=OUTPUT_PATH)
+    args = parser.parse_args(argv)
+    metadata = load_public_doc_metadata()
+
     if not SUFFIXES_PATH.exists():
         print(f"[ERROR] {SUFFIXES_PATH} not found", file=sys.stderr)
         return 1
@@ -36,8 +43,8 @@ def main() -> int:
     lines = [
         "# 서픽스 효과 정리 (공개용)",
         "",
-        f"> 업데이트: {date.today().isoformat()}",
-        "> 기준 버전: `v1.3.0`",
+        f"> 업데이트: {metadata.release_date}",
+        f"> 기준 버전: `v{metadata.version}`",
         f"> 기준 코드: `{SUFFIXES_PATH}`",
         "",
         f"- 총 서픽스 패밀리: **{len(families)}개**",
@@ -114,9 +121,9 @@ def main() -> int:
             )
         lines.append("")
 
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
-    print(f"[OK] Wrote {OUTPUT_PATH} ({len(data)} entries, {len(families)} families)")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    print(f"[OK] Wrote {args.output} ({len(data)} entries, {len(families)} families)")
     return 0
 
 

@@ -27,6 +27,16 @@ namespace CalamityAffixes::detail
 			a_pendingCleanupCount < kMaxPlacedTrapMarkers - a_activeMarkerCount;
 	}
 
+	[[nodiscard]] constexpr bool CanReserveLogicalTrapSlots(
+		std::size_t a_activeTrapCount,
+		std::size_t a_configuredCap,
+		std::size_t a_requestedSlots) noexcept
+	{
+		return a_configuredCap == 0u ||
+			(a_activeTrapCount <= a_configuredCap &&
+				a_requestedSlots <= a_configuredCap - a_activeTrapCount);
+	}
+
 	[[nodiscard]] constexpr bool ShouldDeferUnresolvedPlacedTrapMarker(
 		bool a_handleAllocated,
 		bool a_referenceResolved) noexcept

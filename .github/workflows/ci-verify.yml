@@ -39,6 +39,12 @@ jobs:
       - name: Verify declared versions agree
         run: python3 tools/verify_version_consistency.py
 
+      # Public effect docs are generated from the same affix JSON shown in game.
+      # Generate into a temporary directory so CI detects drift without editing
+      # the checkout or depending on the runner's current date.
+      - name: Verify generated public docs are up-to-date
+        run: python3 tools/update_docs.py --check
+
       # The vendored CommonLibSSE-NG tree must still match its recorded pin.
       - name: Verify CommonLibSSE-NG pin
         run: python3 tools/verify_commonlib_pin.py

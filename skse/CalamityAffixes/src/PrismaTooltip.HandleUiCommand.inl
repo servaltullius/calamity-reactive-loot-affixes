@@ -318,9 +318,9 @@
 					a_outFeedback = "Trap affix grant requested";
 					return true;
 				}
-				if (a_command == "spawn.trapprobe") {
+				if (a_command == "spawn.trapworldprobe" || a_command == "spawn.trapprobe") {
 					a_outSent = EmitModEvent(EventNames::kMcmTrapMarkerProbe, {}, 1.0f);
-					a_outFeedback = "Trap marker probe requested";
+					a_outFeedback = "Production trap world-ref probe requested";
 					return true;
 				}
 

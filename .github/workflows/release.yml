@@ -112,6 +112,11 @@ jobs:
       - name: Verify runtime contract snapshot sync
         run: python3 tools/verify_runtime_contract_sync.py
 
+      # A tag must not publish stale effect tables even if the branch CI was
+      # skipped, cancelled, or raced the tag push.
+      - name: Verify generated public docs are up-to-date
+        run: python3 tools/update_docs.py --check
+
       # Same definition ci-verify uses, so a release is built with the exact
       # toolchain the tests ran against.
       - name: Setup cross-build toolchain
@@ -134,11 +139,19 @@ jobs:
         id: collect
         run: |
           set -euo pipefail
-          mkdir -p release-artifacts
+          mkdir -p release-artifacts symbol-artifacts
 
           zip_path="$(ls -t dist/CalamityAffixes_MO2_*.zip | head -1)"
+          pdb_path="${zip_path%.zip}.pdb"
           echo "Packaged: ${zip_path}"
           cp "${zip_path}" "${zip_path}.sha256" release-artifacts/
+
+          # Preserve the PDB produced by the same CI link as the packaged DLL.
+          # It deliberately stays out of both the MO2 archive and the public
+          # GitHub Release, but remains downloadable as a separate Actions
+          # artifact for exact module+offset symbolization.
+          test -f "${pdb_path}"
+          cp "${pdb_path}" symbol-artifacts/
 
           # Pull the standalone DLL and ESP out of the zip rather than out of
           # Data/. build_mo2_zip.sh stages a freshly built DLL into the package,
@@ -152,7 +165,18 @@ jobs:
 
           test -f release-artifacts/CalamityAffixes.dll
           test -f release-artifacts/CalamityAffixes.esp
+          dll_sha256="$(sha256sum release-artifacts/CalamityAffixes.dll | awk '{print $1}')"
+          pdb_name="$(basename "${pdb_path}")"
+          pdb_sha256="$(sha256sum "symbol-artifacts/${pdb_name}" | awk '{print $1}')"
+          printf '%s  CalamityAffixes.dll\n' "${dll_sha256}" \
+            > symbol-artifacts/CalamityAffixes.dll.sha256
+          printf '%s  %s\n' "${pdb_sha256}" "${pdb_name}" \
+            > symbol-artifacts/CalamityAffixes.pdb.sha256
+          printf 'commit=%s\nversion=%s\n' \
+            "${GITHUB_SHA}" "${{ steps.version.outputs.version }}" \
+            > symbol-artifacts/build-identity.txt
           ls -la release-artifacts/
+          ls -la symbol-artifacts/
 
       # Keep the build output reachable even on a dry run, where no release is
       # created.
@@ -162,6 +186,17 @@ jobs:
           name: calamity-affixes-${{ steps.version.outputs.version }}
           path: release-artifacts/
           if-no-files-found: error
+
+      # Public releases intentionally contain exactly four player-facing
+      # assets. Keep symbols in a separately named CI artifact so the matching
+      # PDB is retained without inviting players to install it.
+      - name: Upload matching debug symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: calamity-affixes-symbols-${{ steps.version.outputs.version }}-${{ github.sha }}
+          path: symbol-artifacts/
+          if-no-files-found: error
+          retention-days: 90
 
       - name: Publish release
         if: github.event_name == 'push'

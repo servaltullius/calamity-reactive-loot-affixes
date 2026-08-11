@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+import argparse
 import json
-from datetime import date
 from pathlib import Path
+
+from public_doc_metadata import load_public_doc_metadata
 
 CONTRACT_PATH = Path("affixes/runeword.contract.json")
 RUNEWORDS_PATH = Path("affixes/modules/keywords.affixes.runewords.json")
@@ -34,14 +36,18 @@ def render_entry(recipe: dict, affix: dict) -> str:
     return "\n".join(lines)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=OUTPUT_PATH)
+    args = parser.parse_args(argv)
+    metadata = load_public_doc_metadata()
     recipes, affix_by_id = load_payload()
 
     lines = [
         "# 룬워드 효과 정리 (공개용)",
         "",
-        f"> 업데이트: {date.today().isoformat()}",
-        "> 기준 버전: `v1.3.0`",
+        f"> 업데이트: {metadata.release_date}",
+        f"> 기준 버전: `v{metadata.version}`",
         f"> 기준 코드: `{RUNEWORDS_PATH}`",
         f"> 룬 조합 기준: `{CONTRACT_PATH}`",
         "",
@@ -55,9 +61,9 @@ def main() -> int:
         lines.append(render_entry(recipe, affix))
         lines.append("")
 
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
-    print(f"[OK] Wrote {OUTPUT_PATH} ({len(recipes)} runewords)")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    print(f"[OK] Wrote {args.output} ({len(recipes)} runewords)")
     return 0
 
 

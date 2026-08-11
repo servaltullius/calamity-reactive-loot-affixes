@@ -602,15 +602,6 @@
 		};
 
 		// Special-action selection/runtime structs.
-		struct CorpseExplosionState
-		{
-			std::chrono::steady_clock::time_point lastExplosionAt{};
-			std::chrono::steady_clock::time_point chainAnchorAt{};
-			std::chrono::steady_clock::time_point rateWindowStartAt{};
-			std::uint32_t chainDepth{ 0 };
-			std::uint32_t explosionsInWindow{ 0 };
-		};
-
 		enum class CorpseExplosionBudgetDenyReason : std::uint8_t
 		{
 			kNone = 0,
