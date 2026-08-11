@@ -305,6 +305,7 @@ def _lint_spec(
     seen_editor_ids: Dict[str, int] = {}
     generated_spells: Set[str] = set()
     generated_art_objects: Set[str] = set()
+    generated_movable_static_objects: Set[str] = set()
     spell_refs: List[Tuple[str, str]] = []
     suffix_family_avs: Dict[str, Set[str]] = {}
 
@@ -327,6 +328,28 @@ def _lint_spec(
                     f"keywords.appendedRecords[{idx}].artObject.modelPath must be relative to "
                     "Data\\Meshes and must not start with 'Meshes\\'."
                 )
+            continue
+        if record.get("type") == "MovableStatic":
+            movable_static = _as_dict(record.get("movableStatic"))
+            movable_static_edid = movable_static.get("editorId") if movable_static else None
+            if isinstance(movable_static_edid, str) and movable_static_edid.strip():
+                generated_movable_static_objects.add(movable_static_edid.strip())
+            model_path = movable_static.get("modelPath") if movable_static else None
+            if (
+                isinstance(model_path, str)
+                and model_path.lstrip().replace("/", "\\").casefold().startswith("meshes\\")
+            ):
+                errors.append(
+                    f"keywords.appendedRecords[{idx}].movableStatic.modelPath must be relative to "
+                    "Data\\Meshes and must not start with 'Meshes\\'."
+                )
+            if movable_static and "mustUpdateAnimations" in movable_static:
+                must_update_animations = movable_static["mustUpdateAnimations"]
+                if not isinstance(must_update_animations, bool):
+                    errors.append(
+                        f"keywords.appendedRecords[{idx}].movableStatic.mustUpdateAnimations "
+                        "must be a boolean."
+                    )
             continue
         if record.get("type") != "Spell":
             continue
@@ -613,15 +636,91 @@ def _lint_spec(
             if trap_obj is None:
                 errors.append(f"{affix_id}: action.trapFeedback must be an object.")
             else:
-                allowed_trap = {"markerArtObjectEditorId", "unarmedScale", "armedScale", "placed", "armed", "triggered", "expired"}
+                allowed_trap = {
+                    "markerArtObjectEditorId",
+                    "markerWorldObjectEditorId",
+                    "worldMarkerAnimation",
+                    "unarmedScale",
+                    "armedScale",
+                    "placed",
+                    "armed",
+                    "triggered",
+                    "expired",
+                }
                 unknown = sorted(set(trap_obj) - allowed_trap)
                 if unknown:
                     errors.append(f"{affix_id}: action.trapFeedback has unsupported keys: {unknown}.")
                 marker_id = trap_obj.get("markerArtObjectEditorId")
-                if not isinstance(marker_id, str) or not marker_id:
-                    errors.append(f"{affix_id}: action.trapFeedback.markerArtObjectEditorId is required.")
-                elif marker_id.startswith("CAFF_") and marker_id not in generated_art_objects:
+                marker_world_id = trap_obj.get("markerWorldObjectEditorId")
+                has_marker_art = isinstance(marker_id, str) and bool(marker_id)
+                has_marker_world = isinstance(marker_world_id, str) and bool(marker_world_id)
+                if has_marker_art == has_marker_world:
+                    errors.append(
+                        f"{affix_id}: action.trapFeedback requires exactly one of "
+                        "markerArtObjectEditorId or markerWorldObjectEditorId."
+                    )
+                elif has_marker_art and marker_id.startswith("CAFF_") and marker_id not in generated_art_objects:
                     errors.append(f"{affix_id}: action.trapFeedback references missing ArtObject '{marker_id}'.")
+                elif (
+                    has_marker_world
+                    and "|" in marker_world_id
+                ):
+                    errors.append(
+                        f"{affix_id}: action.trapFeedback.markerWorldObjectEditorId must be "
+                        "an EditorID, not Plugin|FormID syntax."
+                    )
+                elif (
+                    has_marker_world
+                    and marker_world_id.startswith("CAFF_")
+                    and marker_world_id not in generated_movable_static_objects
+                ):
+                    errors.append(
+                        f"{affix_id}: action.trapFeedback references missing MovableStatic '{marker_world_id}'."
+                    )
+                if "worldMarkerAnimation" in trap_obj:
+                    animation_obj = _as_dict(trap_obj.get("worldMarkerAnimation"))
+                    if not has_marker_world:
+                        errors.append(
+                            f"{affix_id}: action.trapFeedback.worldMarkerAnimation is supported "
+                            "only with markerWorldObjectEditorId."
+                        )
+                    if animation_obj is None:
+                        errors.append(
+                            f"{affix_id}: action.trapFeedback.worldMarkerAnimation must be an object."
+                        )
+                    else:
+                        unknown_animation = sorted(
+                            set(animation_obj)
+                            - {
+                                "initialEvent",
+                                "triggerEvent",
+                                "rearmEvent",
+                                "openGateMilliseconds",
+                            }
+                        )
+                        if unknown_animation:
+                            errors.append(
+                                f"{affix_id}: action.trapFeedback.worldMarkerAnimation has "
+                                f"unsupported keys: {unknown_animation}."
+                            )
+                        for event_name in ("initialEvent", "triggerEvent", "rearmEvent"):
+                            event_value = animation_obj.get(event_name)
+                            if not isinstance(event_value, str) or not event_value.strip():
+                                errors.append(
+                                    f"{affix_id}: action.trapFeedback.worldMarkerAnimation."
+                                    f"{event_name} must be a non-empty string."
+                                )
+                        open_gate = animation_obj.get("openGateMilliseconds")
+                        if (
+                            not isinstance(open_gate, int)
+                            or isinstance(open_gate, bool)
+                            or open_gate < 0
+                            or open_gate > 5000
+                        ):
+                            errors.append(
+                                f"{affix_id}: action.trapFeedback.worldMarkerAnimation."
+                                "openGateMilliseconds must be an integer in range 0..5000."
+                            )
                 for scale_key in ("unarmedScale", "armedScale"):
                     scale = trap_obj.get(scale_key)
                     if not _is_number(scale) or scale < 0.1 or scale > 4.0:

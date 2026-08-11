@@ -1715,28 +1715,22 @@
             ],
             "noHitEffectArt": true,
             "trapFeedback": {
-              "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER",
-              "unarmedScale": 0.75,
+              "markerWorldObjectEditorId": "CAFF_MSTT_TRAP_BEAR_VISUAL",
+              "worldMarkerAnimation": {
+                "initialEvent": "StartOpen",
+                "triggerEvent": "Trigger01",
+                "rearmEvent": "Reset01",
+                "openGateMilliseconds": 900
+              },
+              "unarmedScale": 1.0,
               "armedScale": 1.0,
               "placed": {
                 "soundForm": "Skyrim.esm|0x0001828A"
               },
-              "armed": {
-                "soundForm": "Skyrim.esm|0x0001828A",
-                "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER",
-                "durationSeconds": 0.2,
-                "scale": 1.15
-              },
               "triggered": {
                 "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_BURST",
-                "soundForm": "Skyrim.esm|0x00018289",
                 "durationSeconds": 0.5,
                 "scale": 1.0
-              },
-              "expired": {
-                "artObjectEditorId": "CAFF_ARTO_VFX_TRAP_BEAR_MARKER",
-                "durationSeconds": 0.2,
-                "scale": 0.6
               }
             }
           }
@@ -3025,9 +3019,9 @@
       {
         "id": "rune_trap",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MINEFIELD",
-        "name": "\uB8EC \uD568\uC815: \uC801\uC911 \uC2DC 12% \uD655\uB960\uB85C \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.6\uCD08 \uD6C4, 8\uCD08, 1\uD68C) \u2192 \uBC18\uACBD 150 \uB454\uD654(-40%, 2\uCD08). 1.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Rune Trap (12% on hit / ICD 1.5s): Deploy mine at target (0.6s delay, 8s, 1 charge) -\u003E Radius 150 Slow (-40%, 2s)",
-        "nameKo": "\uB8EC \uD568\uC815: \uC801\uC911 \uC2DC 12% \uD655\uB960\uB85C \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.6\uCD08 \uD6C4, 8\uCD08, 1\uD68C) \u2192 \uBC18\uACBD 150 \uB454\uD654(-40%, 2\uCD08). 1.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC \uD568\uC815: \uC801\uC911 \uC2DC 12% \uD655\uB960\uB85C \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.6\uCD08 \uD6C4, 8\uCD08, 1\uD68C) \u2192 \uBC18\uACBD 150 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85 \uB454\uD654(-40%, 2\uCD08). 1.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Rune Trap (12% on hit / ICD 1.5s): Deploy mine at target (0.6s delay, 8s, 1 charge) -\u003E Slow up to 2 enemies within radius 150 (-40%, 2s)",
+        "nameKo": "\uB8EC \uD568\uC815: \uC801\uC911 \uC2DC 12% \uD655\uB960\uB85C \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.6\uCD08 \uD6C4, 8\uCD08, 1\uD68C) \u2192 \uBC18\uACBD 150 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85 \uB454\uD654(-40%, 2\uCD08). 1.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_MINEFIELD_SNARE",
@@ -3044,7 +3038,7 @@
               "magicEffectEditorId": "CAFF_MGEF_MINEFIELD_SNARE",
               "magnitude": 40,
               "duration": 2,
-              "area": 150
+              "area": 0
             }
           }
         },
@@ -3064,17 +3058,18 @@
           "action": {
             "type": "SpawnTrap",
             "spawnAt": "Target",
-            "radius": 160.0,
+            "radius": 150.0,
             "ttlSeconds": 8.0,
             "armDelaySeconds": 0.6,
             "maxActive": 3,
             "maxTriggers": 1,
+            "maxTargetsPerTrigger": 2,
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_MINEFIELD_SNARE",
             "noHitEffectArt": true,
             "trapFeedback": {
-              "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_RUNE_MARKER",
-              "unarmedScale": 0.75,
+              "markerWorldObjectEditorId": "CAFF_MSTT_TRAP_RUNE_VISUAL",
+              "unarmedScale": 1.0,
               "armedScale": 1.0,
               "placed": {
                 "soundForm": "Skyrim.esm|0x000639A4"
@@ -3143,9 +3138,9 @@
       {
         "id": "plague_spore",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM",
-        "name": "\uC5ED\uBCD1 \uD3EC\uC790: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD3EC\uC790 \uD3ED\uBC1C(\uBC18\uACBD 150, \uB3C5 \uD53C\uD574 3/s, 4\uCD08). 1.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Plague Spore (20% on hit / ICD 1.5s): Spore burst after 0.6s (Radius 150, Poison 3/s, 4s)",
-        "nameKo": "\uC5ED\uBCD1 \uD3EC\uC790: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD3EC\uC790 \uD3ED\uBC1C(\uBC18\uACBD 150, \uB3C5 \uD53C\uD574 3/s, 4\uCD08). 1.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uC5ED\uBCD1 \uD3EC\uC790: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD3EC\uC790 \uD3ED\uBC1C(\uBC18\uACBD 150 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85, \uB3C5 \uD53C\uD574 3/s, 4\uCD08). 1.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Plague Spore (20% on hit / ICD 1.5s): Spore burst after 0.6s (Up to 2 enemies within radius 150, Poison 3/s, 4s)",
+        "nameKo": "\uC5ED\uBCD1 \uD3EC\uC790: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD3EC\uC790 \uD3ED\uBC1C(\uBC18\uACBD 150 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85, \uB3C5 \uD53C\uD574 3/s, 4\uCD08). 1.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_POISON",
@@ -3164,7 +3159,7 @@
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_POISON",
               "magnitude": 3,
               "duration": 4,
-              "area": 150
+              "area": 0
             }
           }
         },
@@ -3184,7 +3179,7 @@
           "action": {
             "type": "SpawnTrap",
             "spawnAt": "Target",
-            "radius": 160.0,
+            "radius": 150.0,
             "ttlSeconds": 3.0,
             "armDelaySeconds": 0.6,
             "maxActive": 1,
@@ -3194,8 +3189,8 @@
             "spellEditorId": "CAFF_SPEL_DOT_BLOOM_POISON",
             "noHitEffectArt": true,
             "trapFeedback": {
-              "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER",
-              "unarmedScale": 0.75,
+              "markerWorldObjectEditorId": "CAFF_MSTT_TRAP_PLAGUE_VISUAL",
+              "unarmedScale": 1.0,
               "armedScale": 1.0,
               "placed": {
                 "soundForm": "Skyrim.esm|0x000639A4"
@@ -3224,9 +3219,9 @@
       {
         "id": "tar_blight",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_TAR",
-        "name": "\uC5ED\uCCAD \uD669\uD3D0: \uC801\uC911 \uC2DC 18% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD0C0\uB974 \uD3ED\uBC1C(\uBC18\uACBD 170, \uB454\uD654 -35% \u002B \uBC29\uC5B4 -150, 4\uCD08). 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Tar Blight (18% on hit / ICD 2s): Tar burst after 0.6s (Radius 170, Slow -35% \u002B Armor -150, 4s)",
-        "nameKo": "\uC5ED\uCCAD \uD669\uD3D0: \uC801\uC911 \uC2DC 18% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD0C0\uB974 \uD3ED\uBC1C(\uBC18\uACBD 170, \uB454\uD654 -35% \u002B \uBC29\uC5B4 -150, 4\uCD08). 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uC5ED\uCCAD \uD669\uD3D0: \uC801\uC911 \uC2DC 18% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD0C0\uB974 \uD3ED\uBC1C(\uBC18\uACBD 170 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85, \uB454\uD654 -35% \u002B \uBC29\uC5B4 -150, 4\uCD08). 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Tar Blight (18% on hit / ICD 2s): Tar burst after 0.6s (Up to 2 enemies within radius 170, Slow -35% \u002B Armor -150, 4s)",
+        "nameKo": "\uC5ED\uCCAD \uD669\uD3D0: \uC801\uC911 \uC2DC 18% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD0C0\uB974 \uD3ED\uBC1C(\uBC18\uACBD 170 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85, \uB454\uD654 -35% \u002B \uBC29\uC5B4 -150, 4\uCD08). 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
@@ -3243,7 +3238,7 @@
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SLOW",
               "magnitude": 35,
               "duration": 4,
-              "area": 170
+              "area": 0
             }
           }
         },
@@ -3263,7 +3258,7 @@
           "action": {
             "type": "SpawnTrap",
             "spawnAt": "Target",
-            "radius": 160.0,
+            "radius": 170.0,
             "ttlSeconds": 3.0,
             "armDelaySeconds": 0.6,
             "maxActive": 1,
@@ -3278,8 +3273,8 @@
             ],
             "noHitEffectArt": true,
             "trapFeedback": {
-              "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_TAR_MARKER",
-              "unarmedScale": 0.75,
+              "markerWorldObjectEditorId": "CAFF_MSTT_TRAP_TAR_VISUAL",
+              "unarmedScale": 1.0,
               "armedScale": 1.0,
               "placed": {
                 "soundForm": "Skyrim.esm|0x000639A4"
@@ -3327,7 +3322,7 @@
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_TAR_SUNDER",
               "magnitude": 150,
               "duration": 4,
-              "area": 170
+              "area": 0
             }
           }
         },
@@ -3351,9 +3346,9 @@
       {
         "id": "siphon_spore",
         "editorId": "LoreBox_CAFF_AFFIX_DOT_BLOOM_SIPHON",
-        "name": "\uD761\uC218 \uD3EC\uC790: \uC801\uC911 \uC2DC 18% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD761\uC218 \uD3ED\uBC1C(\uBC18\uACBD 170, \uB9E4\uC9C0\uCE74/\uC2A4\uD0DC\uBBF8\uB098 \uC7AC\uC0DD -60%, 6\uCD08). 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Siphon Spore (18% on hit / ICD 2s): Siphon burst after 0.6s (Radius 170, Magicka/Stamina Regen -60%, 6s)",
-        "nameKo": "\uD761\uC218 \uD3EC\uC790: \uC801\uC911 \uC2DC 18% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD761\uC218 \uD3ED\uBC1C(\uBC18\uACBD 170, \uB9E4\uC9C0\uCE74/\uC2A4\uD0DC\uBBF8\uB098 \uC7AC\uC0DD -60%, 6\uCD08). 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uD761\uC218 \uD3EC\uC790: \uC801\uC911 \uC2DC 18% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD761\uC218 \uD3ED\uBC1C(\uBC18\uACBD 170 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85, \uB9E4\uC9C0\uCE74/\uC2A4\uD0DC\uBBF8\uB098 \uC7AC\uC0DD -60%, 6\uCD08). 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Siphon Spore (18% on hit / ICD 2s): Siphon burst after 0.6s (Up to 2 enemies within radius 170, Magicka/Stamina Regen -60%, 6s)",
+        "nameKo": "\uD761\uC218 \uD3EC\uC790: \uC801\uC911 \uC2DC 18% \uD655\uB960\uB85C 0.6\uCD08 \uD6C4 \uD761\uC218 \uD3ED\uBC1C(\uBC18\uACBD 170 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85, \uB9E4\uC9C0\uCE74/\uC2A4\uD0DC\uBBF8\uB098 \uC7AC\uC0DD -60%, 6\uCD08). 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
@@ -3370,7 +3365,7 @@
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_MAG",
               "magnitude": 60,
               "duration": 6,
-              "area": 170
+              "area": 0
             }
           }
         },
@@ -3390,7 +3385,7 @@
           "action": {
             "type": "SpawnTrap",
             "spawnAt": "Target",
-            "radius": 160.0,
+            "radius": 170.0,
             "ttlSeconds": 3.0,
             "armDelaySeconds": 0.6,
             "maxActive": 1,
@@ -3405,8 +3400,8 @@
             ],
             "noHitEffectArt": true,
             "trapFeedback": {
-              "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_SIPHON_MARKER",
-              "unarmedScale": 0.75,
+              "markerWorldObjectEditorId": "CAFF_MSTT_TRAP_SIPHON_VISUAL",
+              "unarmedScale": 1.0,
               "armedScale": 1.0,
               "placed": {
                 "soundForm": "Skyrim.esm|0x000639A4"
@@ -3454,7 +3449,7 @@
               "magicEffectEditorId": "CAFF_MGEF_DOT_BLOOM_SIPHON_STA",
               "magnitude": 60,
               "duration": 6,
-              "area": 170
+              "area": 0
             }
           }
         },
@@ -3478,9 +3473,9 @@
       {
         "id": "chaos_rune",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CHAOS_MINE",
-        "name": "\uD63C\uB3C8\uC758 \uB8EC: \uC801\uC911 \uC2DC 12% \uD655\uB960\uB85C \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.8\uCD08 \uD6C4, 10\uCD08, 1\uD68C) \u2192 \uB454\uD654 \u002B \uBB34\uC791\uC704 \uC800\uC8FC. 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 8\uCD08.",
-        "nameEn": "Chaos Rune (12% on hit / ICD 2s / per-target ICD 8s): Deploy mine at target (0.8s delay, 10s, 1 charge) -\u003E Slow \u002B Random curse",
-        "nameKo": "\uD63C\uB3C8\uC758 \uB8EC: \uC801\uC911 \uC2DC 12% \uD655\uB960\uB85C \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.8\uCD08 \uD6C4, 10\uCD08, 1\uD68C) \u2192 \uB454\uD654 \u002B \uBB34\uC791\uC704 \uC800\uC8FC. 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 8\uCD08.",
+        "name": "\uD63C\uB3C8\uC758 \uB8EC: \uC801\uC911 \uC2DC 12% \uD655\uB960\uB85C \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.8\uCD08 \uD6C4, 10\uCD08, 1\uD68C) \u2192 \uBC18\uACBD 150 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85 \uB454\uD654 \u002B \uBB34\uC791\uC704 \uC800\uC8FC. 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 8\uCD08.",
+        "nameEn": "Chaos Rune (12% on hit / ICD 2s / per-target ICD 8s): Deploy mine at target (0.8s delay, 10s, 1 charge) -\u003E Slow and curse up to 2 enemies within radius 150",
+        "nameKo": "\uD63C\uB3C8\uC758 \uB8EC: \uC801\uC911 \uC2DC 12% \uD655\uB960\uB85C \uB300\uC0C1 \uC704\uCE58\uC5D0 \uC9C0\uB8B0 \uC124\uCE58(0.8\uCD08 \uD6C4, 10\uCD08, 1\uD68C) \u2192 \uBC18\uACBD 150 \uB0B4 \uC801 \uCD5C\uB300 2\uBA85 \uB454\uD654 \u002B \uBB34\uC791\uC704 \uC800\uC8FC. 2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 8\uCD08.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
@@ -3497,7 +3492,7 @@
               "magicEffectEditorId": "CAFF_MGEF_CHAOS_MINE_SNARE",
               "magnitude": 30,
               "duration": 3,
-              "area": 150
+              "area": 0
             }
           }
         },
@@ -3518,11 +3513,12 @@
           "action": {
             "type": "SpawnTrap",
             "spawnAt": "Target",
-            "radius": 160.0,
+            "radius": 150.0,
             "ttlSeconds": 10.0,
             "armDelaySeconds": 0.8,
             "maxActive": 2,
             "maxTriggers": 1,
+            "maxTargetsPerTrigger": 2,
             "requireWeaponHit": true,
             "spellEditorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
             "extraSpells": [
@@ -3544,8 +3540,8 @@
             ],
             "noHitEffectArt": true,
             "trapFeedback": {
-              "markerArtObjectEditorId": "CAFF_ARTO_VFX_TRAP_CHAOS_MARKER",
-              "unarmedScale": 0.75,
+              "markerWorldObjectEditorId": "CAFF_MSTT_TRAP_CHAOS_VISUAL",
+              "unarmedScale": 1.0,
               "armedScale": 1.0,
               "placed": {
                 "soundForm": "Skyrim.esm|0x000639A4"
@@ -13375,6 +13371,54 @@
           "editorId": "CAFF_ARTO_VFX_PROC_DRAGON_SCALE",
           "modelPath": "Magic\\FXFireCloak01.nif",
           "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_BEAR_VISUAL",
+          "modelPath": "Traps\\BearTrap\\BearTrap01.nif",
+          "mustUpdateAnimations": true
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_RUNE_VISUAL",
+          "modelPath": "Traps\\PressurePlate\\TrapStonePressurePlate01.nif",
+          "mustUpdateAnimations": true
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_PLAGUE_VISUAL",
+          "modelPath": "actors\\DLC02\\Spider_poison\\CharacterAssets\\spidersackdead.nif",
+          "mustUpdateAnimations": false
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_TAR_VISUAL",
+          "modelPath": "Traps\\OilTrapPuddle01\\OilTrapPuddle01.nif",
+          "mustUpdateAnimations": true
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_SIPHON_VISUAL",
+          "modelPath": "Actors\\DLC02\\Spider_poison\\CharacterAssets\\ExpSpiderEggsAlbino.nif",
+          "mustUpdateAnimations": false
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_CHAOS_VISUAL",
+          "modelPath": "Traps\\PressurePlateMetal\\TrapPressurePlateMetal01.nif",
+          "mustUpdateAnimations": true
         }
       }
     ]

@@ -11,6 +11,16 @@ namespace CalamityAffixes.Generator.Tests;
 
 public sealed class RepoSpecRegressionTests
 {
+    private static readonly WorldMarkerExpectation[] ExpectedWorldMarkers =
+    [
+        new(0x000B00u, "CAFF_MSTT_TRAP_BEAR_VISUAL", @"Traps\BearTrap\BearTrap01.nif", true),
+        new(0x000B01u, "CAFF_MSTT_TRAP_RUNE_VISUAL", @"Traps\PressurePlate\TrapStonePressurePlate01.nif", true),
+        new(0x000B02u, "CAFF_MSTT_TRAP_PLAGUE_VISUAL", @"actors\DLC02\Spider_poison\CharacterAssets\spidersackdead.nif", false),
+        new(0x000B03u, "CAFF_MSTT_TRAP_TAR_VISUAL", @"Traps\OilTrapPuddle01\OilTrapPuddle01.nif", true),
+        new(0x000B04u, "CAFF_MSTT_TRAP_SIPHON_VISUAL", @"Actors\DLC02\Spider_poison\CharacterAssets\ExpSpiderEggsAlbino.nif", false),
+        new(0x000B05u, "CAFF_MSTT_TRAP_CHAOS_VISUAL", @"Traps\PressurePlateMetal\TrapPressurePlateMetal01.nif", true),
+    ];
+
     [Fact]
     public void RepoSpec_GeneratorBuildsWithoutForwardMagicEffectReferences()
     {
@@ -173,7 +183,7 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsThirtyFiveTypedRecords()
+    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFortyOneTypedRecords()
     {
         var repoRoot = FindRepoRoot();
         var fixture = ReadV140AllocationFixture(repoRoot);
@@ -181,7 +191,7 @@ public sealed class RepoSpecRegressionTests
         var mod = KeywordPluginBuilder.Build(spec);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(768, actual.Length);
+        Assert.Equal(774, actual.Length);
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -203,7 +213,11 @@ public sealed class RepoSpecRegressionTests
             },
             actual.Skip(fixture.Records.Length).Take(14));
         Assert.True(mod.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-        Assert.Equal(0x000B00u, ((IModGetter)mod).NextFormID);
+        Assert.Equal(
+            ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
+            actual.TakeLast(ExpectedWorldMarkers.Length));
+        Assert.Equal(0x000B06u, ((IModGetter)mod).NextFormID);
+        AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
             actual.Length,
@@ -228,12 +242,13 @@ public sealed class RepoSpecRegressionTests
             using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
             var reimportedAllocation = AllocationSignature(reimported);
 
-            Assert.Equal(768, generatedAllocation.Length);
+            Assert.Equal(774, generatedAllocation.Length);
             Assert.Equal(generatedAllocation, reimportedAllocation);
             Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
-            Assert.Equal(generatedAllocation.TakeLast(35), reimportedAllocation.TakeLast(35));
+            Assert.Equal(generatedAllocation.TakeLast(41), reimportedAllocation.TakeLast(41));
             Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-            Assert.Equal(0x000B00u, reimported.NextFormID);
+            Assert.Equal(0x000B06u, reimported.NextFormID);
+            AssertWorldMarkers(reimported);
         }
         finally
         {
@@ -250,7 +265,7 @@ public sealed class RepoSpecRegressionTests
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(768, actual.Length);
+        Assert.Equal(774, actual.Length);
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -272,7 +287,11 @@ public sealed class RepoSpecRegressionTests
             },
             actual.Skip(fixture.Records.Length).Take(14));
         Assert.True(mod.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-        Assert.Equal(0x000B00u, mod.NextFormID);
+        Assert.Equal(
+            ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
+            actual.TakeLast(ExpectedWorldMarkers.Length));
+        Assert.Equal(0x000B06u, mod.NextFormID);
+        AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
             actual.Length,
@@ -1326,6 +1345,23 @@ public sealed class RepoSpecRegressionTests
             .ToArray();
     }
 
+    private static void AssertWorldMarkers(ISkyrimModGetter mod)
+    {
+        var markers = mod.MoveableStatics.OrderBy(record => record.FormKey.ID).ToArray();
+        Assert.Equal(ExpectedWorldMarkers.Length, markers.Length);
+        for (var index = 0; index < ExpectedWorldMarkers.Length; index++)
+        {
+            var expected = ExpectedWorldMarkers[index];
+            var actual = markers[index];
+            Assert.Equal(expected.FormId, actual.FormKey.ID);
+            Assert.Equal(expected.EditorId, actual.EditorID);
+            Assert.Equal(expected.ModelPath, actual.Model?.File);
+            Assert.Equal(
+                expected.MustUpdateAnimations,
+                actual.MajorFlags.HasFlag(MoveableStatic.MajorFlag.MustUpdateAnims));
+        }
+    }
+
     private static string RecordSignature(IMajorRecordGetter record) => record switch
     {
         IQuestGetter => "QUST",
@@ -1334,6 +1370,8 @@ public sealed class RepoSpecRegressionTests
         IMagicEffectGetter => "MGEF",
         ISpellGetter => "SPEL",
         IArtObjectGetter => "ARTO",
+        IMoveableStaticGetter => "MSTT",
+        IStaticGetter => "STAT",
         ILeveledItemGetter => "LVLI",
         _ => throw new InvalidDataException($"Unsupported allocation fixture record type: {record.GetType().Name}"),
     };
@@ -1346,6 +1384,8 @@ public sealed class RepoSpecRegressionTests
         IMagicEffectGetter value => value.EditorID,
         ISpellGetter value => value.EditorID,
         IArtObjectGetter value => value.EditorID,
+        IMoveableStaticGetter value => value.EditorID,
+        IStaticGetter value => value.EditorID,
         ILeveledItemGetter value => value.EditorID,
         _ => throw new InvalidDataException($"Unsupported allocation fixture record type: {record.GetType().Name}"),
     } ?? throw new InvalidDataException($"Record {record.FormKey} is missing EditorID.");
@@ -1406,6 +1446,12 @@ public sealed class RepoSpecRegressionTests
         AllocationRecord[] Records);
 
     private sealed record AllocationRecord(uint FormId, string RecordType, string EditorId);
+
+    private sealed record WorldMarkerExpectation(
+        uint FormId,
+        string EditorId,
+        string ModelPath,
+        bool MustUpdateAnimations);
 
     private static string FindRepoRoot()
     {

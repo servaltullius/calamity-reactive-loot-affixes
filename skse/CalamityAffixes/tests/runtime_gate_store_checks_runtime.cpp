@@ -498,7 +498,12 @@ namespace RuntimeGateStoreChecks
 		const fs::path feedbackHeaderFile = repoRoot / "include" / "CalamityAffixes" / "ProcFeedback.h";
 		const fs::path eventBridgeTypesFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Types.inl";
 		const fs::path trapActionFile = repoRoot / "src" / "EventBridge.Actions.Trap.cpp";
+		const fs::path trapFeedbackFile = repoRoot / "src" / "EventBridge.Actions.TrapFeedback.cpp";
+		const fs::path trapConfigFile = repoRoot / "src" / "EventBridge.Config.AffixParsing.cpp";
 		const fs::path trapsFile = repoRoot / "src" / "EventBridge.Traps.cpp";
+		const fs::path mainFile = repoRoot / "src" / "main.cpp";
+		const fs::path lifecycleFile = repoRoot / "src" / "EventBridge.Serialization.Lifecycle.cpp";
+		const fs::path saveFile = repoRoot / "src" / "EventBridge.Serialization.Save.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
@@ -513,9 +518,16 @@ namespace RuntimeGateStoreChecks
 		const auto feedbackHeaderText = loadText(feedbackHeaderFile);
 		const auto eventBridgeTypesText = loadText(eventBridgeTypesFile);
 		const auto trapActionText = loadText(trapActionFile);
+		const auto trapFeedbackText = loadText(trapFeedbackFile);
+		const auto trapConfigText = loadText(trapConfigFile);
 		const auto trapsText = loadText(trapsFile);
+		const auto mainText = loadText(mainFile);
+		const auto lifecycleText = loadText(lifecycleFile);
+		const auto saveText = loadText(saveFile);
 		if (!feedbackHeaderText.has_value() || !eventBridgeTypesText.has_value() ||
-			!trapActionText.has_value() || !trapsText.has_value()) {
+			!trapActionText.has_value() || !trapFeedbackText.has_value() ||
+			!trapConfigText.has_value() || !trapsText.has_value() || !mainText.has_value() ||
+			!lifecycleText.has_value() || !saveText.has_value()) {
 			std::cerr << "bloom_trap_proc_feedback: failed to load source files\n";
 			return false;
 		}
@@ -541,6 +553,24 @@ namespace RuntimeGateStoreChecks
 			trapsText->find("if (cleanupLeaseExpiresAt.time_since_epoch().count() == 0 || now > cleanupLeaseExpiresAt)") == std::string::npos ||
 			trapsText->find("if (IsPlayerOwned(owner))") == std::string::npos) {
 			std::cerr << "bloom_trap_proc_feedback: expected bloom trap proc feedback helper to stay wired at spawn and trigger time\n";
+			return false;
+		}
+
+		if (eventBridgeTypesText->find("RE::TESObjectSTAT* markerWorldObject{ nullptr };") == std::string::npos ||
+			eventBridgeTypesText->find("RE::ObjectRefHandle markerReference{};") == std::string::npos ||
+			eventBridgeTypesText->find("RE::NiPointer<RE::TESObjectREFR> markerReferenceOwner{};") == std::string::npos ||
+			eventBridgeTypesText->find("pendingMarkerCleanup") == std::string::npos ||
+			trapConfigText->find("markerWorldObjectEditorId") == std::string::npos ||
+			trapConfigText->find("LookupFormFromSpec<RE::TESObjectSTAT>") == std::string::npos ||
+			trapFeedbackText->find("CreateReferenceAtLocation(") == std::string::npos ||
+			trapFeedbackText->find("CanSpawnPlacedTrapMarker(") == std::string::npos ||
+			trapFeedbackText->find("ShouldReusePlacedTrapMarker(") == std::string::npos ||
+			trapFeedbackText->find("ProcessPendingTrapMarkerCleanup(") == std::string::npos ||
+			mainText->find("SKSE::MessagingInterface::kSaveGame") == std::string::npos ||
+			mainText->find("OnPreSaveGame()") == std::string::npos ||
+			lifecycleText->find("void EventBridge::OnPreSaveGame()") == std::string::npos ||
+			saveText->find("ClearTrapRuntimeState(") != std::string::npos) {
+			std::cerr << "trap_world_marker_contract: expected scriptless temporary-reference spawn, reuse, cap, and cleanup wiring\n";
 			return false;
 		}
 

@@ -115,6 +115,10 @@ fi
 mkdir -p "${stage_data_dir}"
 cp -a "${data_dir}/." "${stage_data_dir}/"
 
+# A locally archived debug database may exist beside the tracked plugin DLL.
+# Keep symbols as the companion file written below, never inside the player ZIP.
+rm -f "${stage_data_dir}/SKSE/Plugins/CalamityAffixes.pdb"
+
 mkdir -p "$(dirname "${stage_dll}")"
 cp -f "${linux_cross_dll}" "${stage_dll}"
 echo "Staged freshly built DLL: ${linux_cross_dll} -> ${stage_dll}"

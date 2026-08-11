@@ -167,6 +167,10 @@ public sealed class AppendedRecordSpec
     [JsonPropertyName("artObject")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ArtObjectRecordSpec? ArtObject { get; init; }
+
+    [JsonPropertyName("movableStatic")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public MovableStaticRecordSpec? MovableStatic { get; init; }
 }
 
 public sealed class ArtObjectRecordSpec
@@ -179,6 +183,18 @@ public sealed class ArtObjectRecordSpec
 
     [JsonPropertyName("artType")]
     public required string ArtType { get; init; }
+}
+
+public sealed class MovableStaticRecordSpec
+{
+    [JsonPropertyName("editorId")]
+    public required string EditorId { get; init; }
+
+    [JsonPropertyName("modelPath")]
+    public required string ModelPath { get; init; }
+
+    [JsonPropertyName("mustUpdateAnimations")]
+    public bool MustUpdateAnimations { get; init; }
 }
 
 public sealed class KeywordDefinition

@@ -125,6 +125,9 @@ SKSEPluginInfo(
 		case SKSE::MessagingInterface::kPreLoadGame:
 			CalamityAffixes::EventBridge::GetSingleton()->OnPreLoadGame();
 			break;
+		case SKSE::MessagingInterface::kSaveGame:
+			CalamityAffixes::EventBridge::GetSingleton()->OnPreSaveGame();
+			break;
 		default:
 			break;
 		}

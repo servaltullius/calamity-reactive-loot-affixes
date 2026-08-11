@@ -131,6 +131,7 @@ public static class AffixSpecLoader
         var seenMagicEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenArtObjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenMovableStatics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var spellDefinitions = new List<SpellRecordSpec>();
         foreach (var kw in spec.Keywords.Tags)
         {
@@ -228,7 +229,7 @@ public static class AffixSpecLoader
         {
             switch (appendedRecord.Type)
             {
-                case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null:
+                case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
                 {
                     var magicEffect = appendedRecord.MagicEffect;
                     if (!seenMagicEffects.Add(magicEffect.EditorId))
@@ -244,7 +245,7 @@ public static class AffixSpecLoader
                     }
                     break;
                 }
-                case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null:
+                case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
                 {
                     var spell = appendedRecord.Spell;
                     if (!seenSpells.Add(spell.EditorId))
@@ -289,7 +290,7 @@ public static class AffixSpecLoader
                     spellDefinitions.Add(spell);
                     break;
                 }
-                case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null:
+                case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.MovableStatic is null:
                 {
                     var artObject = appendedRecord.ArtObject;
                     if (!seenArtObjects.Add(artObject.EditorId))
@@ -324,10 +325,25 @@ public static class AffixSpecLoader
                     }
                     break;
                 }
+                case "MovableStatic" when appendedRecord.MovableStatic is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null:
+                {
+                    var movableStatic = appendedRecord.MovableStatic;
+                    if (!seenMovableStatics.Add(movableStatic.EditorId))
+                    {
+                        throw new InvalidDataException($"Duplicate appended MovableStatic editorId: {movableStatic.EditorId}");
+                    }
+
+                    ValidateWorldObjectModelPath(
+                        movableStatic.EditorId,
+                        movableStatic.ModelPath,
+                        "MovableStatic");
+                    break;
+                }
                 default:
                     throw new InvalidDataException(
                         "keywords.appendedRecords entries must use type MagicEffect with only magicEffect, " +
-                        "type Spell with only spell, or type ArtObject with only artObject.");
+                        "type Spell with only spell, type ArtObject with only artObject, " +
+                        "or type MovableStatic with only movableStatic.");
             }
         }
 
@@ -344,6 +360,32 @@ public static class AffixSpecLoader
         }
 
         ValidateFeedbackArtObjectReferences(spec, seenArtObjects);
+        ValidateTrapFeedbackWorldObjectReferences(spec, seenMovableStatics);
+    }
+
+    private static void ValidateWorldObjectModelPath(
+        string editorId,
+        string modelPath,
+        string recordType)
+    {
+        if (string.IsNullOrWhiteSpace(editorId))
+        {
+            throw new InvalidDataException($"Appended {recordType} requires a non-empty editorId.");
+        }
+
+        if (string.IsNullOrWhiteSpace(modelPath))
+        {
+            throw new InvalidDataException(
+                $"Appended {recordType} requires a non-empty modelPath ({recordType}: {editorId}).");
+        }
+
+        var normalizedModelPath = modelPath.Replace('/', '\\').TrimStart();
+        if (normalizedModelPath.StartsWith("Meshes\\", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException(
+                $"Appended {recordType} modelPath must be relative to Skyrim's Data\\Meshes directory " +
+                $"and must not start with 'Meshes\\' ({recordType}: {editorId}, path: {modelPath}).");
+        }
     }
 
     private static void ValidateWeaponSubtypePolicy(AffixDefinition affix)
@@ -506,7 +548,7 @@ public static class AffixSpecLoader
                         $"keywords.appendedRecords[{index}] contains duplicate property '{property.Name}'.");
                 }
 
-                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject"))
+                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject" or "movableStatic"))
                 {
                     throw new InvalidDataException(
                         $"keywords.appendedRecords[{index}] contains unsupported property '{property.Name}'.");
@@ -522,11 +564,20 @@ public static class AffixSpecLoader
             var hasMagicEffect = item.TryGetProperty("magicEffect", out var magicEffectElement);
             var hasSpell = item.TryGetProperty("spell", out var spellElement);
             var hasArtObject = item.TryGetProperty("artObject", out var artObjectElement);
+            var hasMovableStatic = item.TryGetProperty("movableStatic", out var movableStaticElement);
             switch (type)
             {
-                case "MagicEffect" when hasMagicEffect && !hasSpell && !hasArtObject && magicEffectElement.ValueKind == JsonValueKind.Object:
-                case "Spell" when hasSpell && !hasMagicEffect && !hasArtObject && spellElement.ValueKind == JsonValueKind.Object:
-                case "ArtObject" when hasArtObject && !hasMagicEffect && !hasSpell && artObjectElement.ValueKind == JsonValueKind.Object:
+                case "MagicEffect" when hasMagicEffect && !hasSpell && !hasArtObject && !hasMovableStatic && magicEffectElement.ValueKind == JsonValueKind.Object:
+                case "Spell" when hasSpell && !hasMagicEffect && !hasArtObject && !hasMovableStatic && spellElement.ValueKind == JsonValueKind.Object:
+                case "ArtObject" when hasArtObject && !hasMagicEffect && !hasSpell && !hasMovableStatic && artObjectElement.ValueKind == JsonValueKind.Object:
+                    break;
+                case "MovableStatic" when hasMovableStatic && !hasMagicEffect && !hasSpell && !hasArtObject && movableStaticElement.ValueKind == JsonValueKind.Object:
+                    if (movableStaticElement.TryGetProperty("mustUpdateAnimations", out var mustUpdateAnimationsElement) &&
+                        mustUpdateAnimationsElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+                    {
+                        throw new InvalidDataException(
+                            $"keywords.appendedRecords[{index}].movableStatic.mustUpdateAnimations must be a boolean.");
+                    }
                     break;
                 case "MagicEffect":
                     throw new InvalidDataException(
@@ -537,9 +588,12 @@ public static class AffixSpecLoader
                 case "ArtObject":
                     throw new InvalidDataException(
                         $"keywords.appendedRecords[{index}] type ArtObject requires only an object artObject payload.");
+                case "MovableStatic":
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] type MovableStatic requires only an object movableStatic payload.");
                 default:
                     throw new InvalidDataException(
-                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, or ArtObject (got: {type ?? "<null>"}).");
+                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, ArtObject, or MovableStatic (got: {type ?? "<null>"}).");
             }
 
             index += 1;
@@ -712,15 +766,26 @@ public static class AffixSpecLoader
 
         var allowed = new HashSet<string>(StringComparer.Ordinal)
         {
-            "markerArtObjectEditorId", "unarmedScale", "armedScale", "placed", "armed", "triggered", "expired",
+            "markerArtObjectEditorId", "markerWorldObjectEditorId", "worldMarkerAnimation", "unarmedScale", "armedScale", "placed", "armed", "triggered", "expired",
         };
         RejectUnknownProperties(feedback, allowed, $"{affixId}: trapFeedback");
-        if (!TryGetRequiredString(feedback, "markerArtObjectEditorId", out _))
+        var hasMarkerArt = TryGetRequiredString(feedback, "markerArtObjectEditorId", out _);
+        var hasMarkerWorldObject = TryGetRequiredString(feedback, "markerWorldObjectEditorId", out _);
+        if (hasMarkerArt == hasMarkerWorldObject)
         {
-            throw new InvalidDataException($"{affixId}: trapFeedback.markerArtObjectEditorId is required.");
+            throw new InvalidDataException(
+                $"{affixId}: trapFeedback requires exactly one of markerArtObjectEditorId or markerWorldObjectEditorId.");
         }
         ValidateRequiredNumberRange(feedback, "unarmedScale", 0.1, 4.0, $"{affixId}: trapFeedback");
         ValidateRequiredNumberRange(feedback, "armedScale", 0.1, 4.0, $"{affixId}: trapFeedback");
+
+        if (feedback.TryGetProperty("worldMarkerAnimation", out var worldMarkerAnimation))
+        {
+            ValidateTrapWorldMarkerAnimation(
+                worldMarkerAnimation,
+                hasMarkerWorldObject,
+                affixId);
+        }
 
         foreach (var cueName in new[] { "placed", "armed", "triggered", "expired" })
         {
@@ -730,6 +795,42 @@ public static class AffixSpecLoader
             }
             ValidateTrapFeedbackCue(cue, cueName, affixId);
         }
+    }
+
+    private static void ValidateTrapWorldMarkerAnimation(
+        JsonElement animation,
+        bool hasMarkerWorldObject,
+        string affixId)
+    {
+        if (!hasMarkerWorldObject)
+        {
+            throw new InvalidDataException(
+                $"{affixId}: trapFeedback.worldMarkerAnimation is supported only with markerWorldObjectEditorId.");
+        }
+        if (animation.ValueKind != JsonValueKind.Object)
+        {
+            throw new InvalidDataException(
+                $"{affixId}: trapFeedback.worldMarkerAnimation must be an object.");
+        }
+
+        RejectUnknownProperties(
+            animation,
+            new HashSet<string>(StringComparer.Ordinal) { "initialEvent", "triggerEvent", "rearmEvent", "openGateMilliseconds" },
+            $"{affixId}: trapFeedback.worldMarkerAnimation");
+        foreach (var eventName in new[] { "initialEvent", "triggerEvent", "rearmEvent" })
+        {
+            if (!TryGetRequiredString(animation, eventName, out _))
+            {
+                throw new InvalidDataException(
+                    $"{affixId}: trapFeedback.worldMarkerAnimation.{eventName} must be a non-empty string.");
+            }
+        }
+        ValidateRequiredIntegerRange(
+            animation,
+            "openGateMilliseconds",
+            0,
+            5000,
+            $"{affixId}: trapFeedback.worldMarkerAnimation");
     }
 
     private static void ValidateTrapFeedbackCue(JsonElement cue, string cueName, string affixId)
@@ -777,6 +878,38 @@ public static class AffixSpecLoader
         }
     }
 
+    private static void ValidateTrapFeedbackWorldObjectReferences(
+        AffixSpec spec,
+        HashSet<string> movableStaticRecords)
+    {
+        foreach (var affix in spec.Keywords.Affixes)
+        {
+            var action = JsonSerializer.SerializeToElement(affix.Runtime.Action);
+            if (!action.TryGetProperty("trapFeedback", out var trapFeedback) ||
+                trapFeedback.ValueKind != JsonValueKind.Object ||
+                !TryGetRequiredString(trapFeedback, "markerWorldObjectEditorId", out var editorId))
+            {
+                continue;
+            }
+
+            // The runtime intentionally stores the common TESObjectSTAT base pointer.
+            // CommonLib's editor-ID lookup uses TESForm::As<T> and accepts the
+            // BGSMovableStatic subclass, while Plugin|FormID lookup compares the exact
+            // form type and would reject MSTT when T is TESObjectSTAT.
+            if (editorId.Contains('|', StringComparison.Ordinal))
+            {
+                throw new InvalidDataException(
+                    $"{affix.Id}: markerWorldObjectEditorId must be an EditorID, not Plugin|FormID syntax.");
+            }
+
+            if (editorId.StartsWith("CAFF_", StringComparison.Ordinal) && !movableStaticRecords.Contains(editorId))
+            {
+                throw new InvalidDataException(
+                    $"{affix.Id}: trapFeedback references missing MovableStatic {editorId}.");
+            }
+        }
+    }
+
     private static IEnumerable<string> EnumerateFeedbackArtObjectEditorIds(JsonElement action)
     {
         if (action.TryGetProperty("feedback", out var feedback) &&
@@ -820,6 +953,16 @@ public static class AffixSpecLoader
             !property.TryGetDouble(out var value) || value < min || value > max)
         {
             throw new InvalidDataException($"{path}.{key} must be a number in range {min}..{max}.");
+        }
+    }
+
+    private static void ValidateRequiredIntegerRange(JsonElement parent, string key, int min, int max, string path)
+    {
+        if (!parent.TryGetProperty(key, out var property) ||
+            property.ValueKind != JsonValueKind.Number ||
+            !property.TryGetInt32(out var value) || value < min || value > max)
+        {
+            throw new InvalidDataException($"{path}.{key} must be an integer in range {min}..{max}.");
         }
     }
 

@@ -25,10 +25,12 @@ public sealed class VfxFeedbackContractTests
         new("CAFF_ARTO_VFX_SMOKE_SLOW", @"Actors\Wisp\Character Assets\FXWispParticleAttach.nif"),
         new("CAFF_ARTO_VFX_FURY_SURGE", @"Magic\IllusionMassRedCastBodyFX.nif"),
         new("CAFF_ARTO_VFX_WEALTH_PASSIVE", @"Magic\HealRitualCastBodyFX.nif"),
-        // Trap markers must be self-playing FX NIFs (rune glyphs / hazards):
+        // Particle-backed trap markers must be self-playing FX NIFs (rune glyphs / hazards):
         // the 2026-08-10 in-game probes proved BSTempEffectParticle never
         // applies a world transform to static world meshes and never animates
         // externally-driven art-object FX, so those breeds render nothing.
+        // Retained as an unused append-only tombstone so every existing FormID and
+        // record signature stays stable after the bear marker moves to a world object.
         new("CAFF_ARTO_VFX_TRAP_BEAR_MARKER", @"Magic\RuneFrostProjectile01.nif"),
         new("CAFF_ARTO_VFX_TRAP_BEAR_BURST", @"Magic\ExplosionFrost01.nif"),
         new("CAFF_ARTO_VFX_TRAP_RUNE_MARKER", @"Magic\RuneFireProjectile01.nif"),
@@ -52,6 +54,16 @@ public sealed class VfxFeedbackContractTests
         new("CAFF_ARTO_VFX_PROC_DRAGON_SCALE", @"Magic\FXFireCloak01.nif"),
     ];
 
+    private static readonly WorldMarkerExpectation[] ExpectedWorldMarkers =
+    [
+        new(0x000B00u, "bear_trap", "CAFF_MSTT_TRAP_BEAR_VISUAL", @"Traps\BearTrap\BearTrap01.nif", true),
+        new(0x000B01u, "rune_trap", "CAFF_MSTT_TRAP_RUNE_VISUAL", @"Traps\PressurePlate\TrapStonePressurePlate01.nif", true),
+        new(0x000B02u, "plague_spore", "CAFF_MSTT_TRAP_PLAGUE_VISUAL", @"actors\DLC02\Spider_poison\CharacterAssets\spidersackdead.nif", false),
+        new(0x000B03u, "tar_blight", "CAFF_MSTT_TRAP_TAR_VISUAL", @"Traps\OilTrapPuddle01\OilTrapPuddle01.nif", true),
+        new(0x000B04u, "siphon_spore", "CAFF_MSTT_TRAP_SIPHON_VISUAL", @"Actors\DLC02\Spider_poison\CharacterAssets\ExpSpiderEggsAlbino.nif", false),
+        new(0x000B05u, "chaos_rune", "CAFF_MSTT_TRAP_CHAOS_VISUAL", @"Traps\PressurePlateMetal\TrapPressurePlateMetal01.nif", true),
+    ];
+
     [Fact]
     public void ApprovedEffects_DeclareDataDrivenFeedbackWithCorrectRecipientAndTiming()
     {
@@ -71,20 +83,82 @@ public sealed class VfxFeedbackContractTests
     }
 
     [Fact]
-    public void TypedTail_AppendsTwentySixMagicHitEffectArtObjectsAfterTheNineEffectRecords()
+    public void TypedTail_AppendsTwentySixMagicHitEffectArtObjectsAndSixWorldMarkersAfterTheNineEffectRecords()
     {
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(35, records.Length);
+        Assert.Equal(41, records.Length);
+        var artRecords = records
+            .Where(record => record.GetProperty("type").GetString() == "ArtObject")
+            .ToArray();
+        Assert.Equal(ExpectedArt.Length, artRecords.Length);
         for (var index = 0; index < ExpectedArt.Length; index++)
         {
-            var record = records[index + 9];
+            var record = artRecords[index];
             Assert.Equal("ArtObject", record.GetProperty("type").GetString());
             var art = record.GetProperty("artObject");
             Assert.Equal(ExpectedArt[index].EditorId, art.GetProperty("editorId").GetString());
             Assert.Equal(ExpectedArt[index].ModelPath, art.GetProperty("modelPath").GetString());
             Assert.Equal("MagicHitEffect", art.GetProperty("artType").GetString());
+        }
+
+        var worldObjects = records
+            .Where(record => record.GetProperty("type").GetString() == "MovableStatic")
+            .ToArray();
+        Assert.Equal(ExpectedWorldMarkers.Length, worldObjects.Length);
+        for (var index = 0; index < ExpectedWorldMarkers.Length; index++)
+        {
+            var expected = ExpectedWorldMarkers[index];
+            var movableStatic = worldObjects[index].GetProperty("movableStatic");
+            Assert.Equal(expected.EditorId, movableStatic.GetProperty("editorId").GetString());
+            Assert.Equal(expected.ModelPath, movableStatic.GetProperty("modelPath").GetString());
+            Assert.Equal(expected.MustUpdateAnimations, movableStatic.GetProperty("mustUpdateAnimations").GetBoolean());
+        }
+    }
+
+    [Fact]
+    public void BearTrapFeedback_UsesVanillaAnimationEventsWithoutDuplicateTriggerOrRearmSounds()
+    {
+        var affix = ReadAffix("keywords.affixes.core.json", "bear_trap");
+        var feedback = affix.GetProperty("runtime").GetProperty("action").GetProperty("trapFeedback");
+
+        var markerEditorId = feedback.GetProperty("markerWorldObjectEditorId").GetString();
+        Assert.Equal("CAFF_MSTT_TRAP_BEAR_VISUAL", markerEditorId);
+        Assert.DoesNotContain('|', markerEditorId!);
+        Assert.Equal(1.0, feedback.GetProperty("unarmedScale").GetDouble());
+        Assert.Equal(1.0, feedback.GetProperty("armedScale").GetDouble());
+        Assert.False(feedback.TryGetProperty("markerArtObjectEditorId", out _));
+        Assert.False(feedback.TryGetProperty("expired", out _));
+
+        var animation = feedback.GetProperty("worldMarkerAnimation");
+        Assert.Equal("StartOpen", animation.GetProperty("initialEvent").GetString());
+        Assert.Equal("Trigger01", animation.GetProperty("triggerEvent").GetString());
+        Assert.Equal("Reset01", animation.GetProperty("rearmEvent").GetString());
+        Assert.Equal(900.0, animation.GetProperty("openGateMilliseconds").GetDouble());
+
+        var placed = feedback.GetProperty("placed");
+        Assert.Equal("Skyrim.esm|0x0001828A", placed.GetProperty("soundForm").GetString());
+        Assert.False(feedback.TryGetProperty("armed", out _));
+
+        var triggered = feedback.GetProperty("triggered");
+        Assert.Equal("CAFF_ARTO_VFX_TRAP_BEAR_BURST", triggered.GetProperty("artObjectEditorId").GetString());
+        Assert.False(triggered.TryGetProperty("soundForm", out _));
+    }
+
+    [Fact]
+    public void RemainingTrapFeedback_UsesUnitScaleWorldMarkersWithoutAnimationEvents()
+    {
+        foreach (var expected in ExpectedWorldMarkers.Skip(1))
+        {
+            var affix = ReadAffix("keywords.affixes.core.json", expected.AffixId);
+            var feedback = affix.GetProperty("runtime").GetProperty("action").GetProperty("trapFeedback");
+
+            Assert.Equal(expected.EditorId, feedback.GetProperty("markerWorldObjectEditorId").GetString());
+            Assert.Equal(1.0, feedback.GetProperty("unarmedScale").GetDouble());
+            Assert.Equal(1.0, feedback.GetProperty("armedScale").GetDouble());
+            Assert.False(feedback.TryGetProperty("markerArtObjectEditorId", out _));
+            Assert.False(feedback.TryGetProperty("worldMarkerAnimation", out _));
         }
     }
 
@@ -154,6 +228,20 @@ public sealed class VfxFeedbackContractTests
             // so the builder writes the raw value and tests assert numerically.
             Assert.Equal((ArtObject.TypeEnum)1, artObjects[index].Type);
         }
+
+        var worldMarkers = mod.MoveableStatics.OrderBy(record => record.FormKey.ID).ToArray();
+        Assert.Equal(ExpectedWorldMarkers.Length, worldMarkers.Length);
+        for (var index = 0; index < ExpectedWorldMarkers.Length; index++)
+        {
+            var expected = ExpectedWorldMarkers[index];
+            var actual = worldMarkers[index];
+            Assert.Equal(expected.FormId, actual.FormKey.ID);
+            Assert.Equal(expected.EditorId, actual.EditorID);
+            Assert.Equal(expected.ModelPath, actual.Model?.File);
+            Assert.Equal(
+                expected.MustUpdateAnimations,
+                actual.MajorFlags.HasFlag(MoveableStatic.MajorFlag.MustUpdateAnims));
+        }
     }
 
     [Fact]
@@ -169,6 +257,19 @@ public sealed class VfxFeedbackContractTests
             Assert.Equal(ExpectedArt[index].EditorId, artObjects[index].EditorID);
             Assert.Equal(ExpectedArt[index].ModelPath, artObjects[index].Model?.File);
             Assert.Equal((ArtObject.TypeEnum)1, artObjects[index].Type);
+        }
+        var worldMarkers = mod.MoveableStatics.OrderBy(record => record.FormKey.ID).ToArray();
+        Assert.Equal(ExpectedWorldMarkers.Length, worldMarkers.Length);
+        for (var index = 0; index < ExpectedWorldMarkers.Length; index++)
+        {
+            var expected = ExpectedWorldMarkers[index];
+            var actual = worldMarkers[index];
+            Assert.Equal(expected.FormId, actual.FormKey.ID);
+            Assert.Equal(expected.EditorId, actual.EditorID);
+            Assert.Equal(expected.ModelPath, actual.Model?.File);
+            Assert.Equal(
+                expected.MustUpdateAnimations,
+                actual.MajorFlags.HasFlag(MoveableStatic.MajorFlag.MustUpdateAnims));
         }
     }
 
@@ -190,6 +291,28 @@ public sealed class VfxFeedbackContractTests
             Assert.False(
                 modelPath.Replace('/', '\\').TrimStart().StartsWith(@"Meshes\", StringComparison.OrdinalIgnoreCase),
                 $"{editorId}: MODL must be Data\\Meshes-relative, got '{modelPath}'.");
+        }
+    }
+
+    [Fact]
+    public void GeneratedDataEsp_WorldMarkersAreScriptlessMovableStaticsAtAppendOnlyTail()
+    {
+        var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
+        var worldMarkers = ReadRawMovableStatics(pluginPath)
+            .OrderBy(record => record.FormId & 0x00FFFFFFu)
+            .ToArray();
+
+        Assert.Equal(ExpectedWorldMarkers.Length, worldMarkers.Length);
+        for (var index = 0; index < ExpectedWorldMarkers.Length; index++)
+        {
+            var expected = ExpectedWorldMarkers[index];
+            var actual = worldMarkers[index];
+            // Raw plugin FormIDs encode the owning file index in the high byte.
+            Assert.Equal(expected.FormId, actual.FormId & 0x00FFFFFFu);
+            Assert.Equal(expected.EditorId, actual.EditorId);
+            Assert.Equal(expected.ModelPath, actual.ModelPath);
+            Assert.Equal(expected.MustUpdateAnimations, (actual.RecordFlags & 0x00000100u) != 0);
+            Assert.DoesNotContain("VMAD", actual.Subrecords);
         }
     }
 
@@ -424,6 +547,67 @@ public sealed class VfxFeedbackContractTests
         return (editorId, modelPath, dnam);
     }
 
+    private static List<(uint FormId, uint RecordFlags, string EditorId, string ModelPath, string[] Subrecords)> ReadRawMovableStatics(string pluginPath)
+    {
+        var buffer = File.ReadAllBytes(pluginPath);
+        var results = new List<(uint, uint, string, string, string[])>();
+        var tes4DataSize = BitConverter.ToInt32(buffer, 4);
+        WalkRawMovableStatics(buffer, 24 + tes4DataSize, buffer.Length, results);
+        return results;
+    }
+
+    private static void WalkRawMovableStatics(
+        byte[] buffer,
+        int start,
+        int end,
+        List<(uint FormId, uint RecordFlags, string EditorId, string ModelPath, string[] Subrecords)> results)
+    {
+        var pos = start;
+        while (pos + 24 <= end)
+        {
+            var recordType = Encoding.ASCII.GetString(buffer, pos, 4);
+            if (recordType == "GRUP")
+            {
+                var groupSize = BitConverter.ToInt32(buffer, pos + 4);
+                Assert.True(groupSize >= 24, "Malformed GRUP size.");
+                WalkRawMovableStatics(buffer, pos + 24, pos + groupSize, results);
+                pos += groupSize;
+                continue;
+            }
+
+            var dataSize = BitConverter.ToInt32(buffer, pos + 4);
+            if (recordType == "MSTT")
+            {
+                var flags = BitConverter.ToUInt32(buffer, pos + 8);
+                Assert.True((flags & 0x00040000u) == 0, "Compressed MSTT records are not expected.");
+                var formId = BitConverter.ToUInt32(buffer, pos + 12);
+                var editorId = string.Empty;
+                var modelPath = string.Empty;
+                var subrecords = new List<string>();
+                var subPos = pos + 24;
+                var subEnd = subPos + dataSize;
+                while (subPos + 6 <= subEnd)
+                {
+                    var subType = Encoding.ASCII.GetString(buffer, subPos, 4);
+                    int subSize = BitConverter.ToUInt16(buffer, subPos + 4);
+                    subrecords.Add(subType);
+                    subPos += 6;
+                    if (subType == "EDID")
+                    {
+                        editorId = ReadZString(buffer, subPos, subSize);
+                    }
+                    else if (subType == "MODL")
+                    {
+                        modelPath = ReadZString(buffer, subPos, subSize);
+                    }
+                    subPos += subSize;
+                }
+                results.Add((formId, flags, editorId, modelPath, subrecords.ToArray()));
+            }
+            pos += 24 + dataSize;
+        }
+    }
+
     private static string ReadZString(byte[] buffer, int start, int size)
     {
         var text = Encoding.ASCII.GetString(buffer, start, size);
@@ -457,4 +641,11 @@ public sealed class VfxFeedbackContractTests
         bool SpatialSound = false);
 
     private sealed record ArtExpectation(string EditorId, string ModelPath);
+
+    private sealed record WorldMarkerExpectation(
+        uint FormId,
+        string AffixId,
+        string EditorId,
+        string ModelPath,
+        bool MustUpdateAnimations);
 }

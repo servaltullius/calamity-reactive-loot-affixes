@@ -1,11 +1,13 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
+#include "CalamityAffixes/TrapMarkerAnimationPolicy.h"
 
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <string_view>
 #include <thread>
 #include <vector>
 
@@ -166,8 +168,228 @@ namespace CalamityAffixes
 		}
 	}
 
-	void EventBridge::StopTrapMarker(TrapInstance& a_trap) const noexcept
+	void EventBridge::QueueTrapMarkerAnimation(
+		TrapInstance& a_trap,
+		TrapMarkerAnimationPhase a_phase,
+		std::chrono::steady_clock::time_point a_now) const noexcept
 	{
+		if (a_phase == TrapMarkerAnimationPhase::kNone ||
+			!a_trap.feedback.worldMarkerAnimation || !a_trap.markerReference) {
+			if (a_phase == TrapMarkerAnimationPhase::kRearm) {
+				a_trap.markerRearmAnimationResolved = true;
+			}
+			return;
+		}
+		if (a_trap.markerAnimationPhase != TrapMarkerAnimationPhase::kNone) {
+			// Preserve phase order. A late Trigger01 retry must settle before
+			// Reset01 can be queued, and an initial StartOpen retry cannot be
+			// overwritten by an early trigger scan.
+			return;
+		}
+
+		a_trap.markerAnimationPhase = a_phase;
+		a_trap.markerAnimationAttempts = 0u;
+		a_trap.markerAnimationNextAttemptAt = a_now;
+		if (a_phase == TrapMarkerAnimationPhase::kRearm) {
+			a_trap.markerRearmAnimationResolved = false;
+		}
+	}
+
+	void EventBridge::ProcessTrapMarkerAnimation(
+		TrapInstance& a_trap,
+		std::chrono::steady_clock::time_point a_now) const noexcept
+	{
+		const auto phase = a_trap.markerAnimationPhase;
+		if (phase == TrapMarkerAnimationPhase::kNone ||
+			(a_trap.markerAnimationNextAttemptAt.time_since_epoch().count() != 0 &&
+				a_now < a_trap.markerAnimationNextAttemptAt)) {
+			return;
+		}
+		std::string_view phaseName{ "none" };
+		switch (phase) {
+		case TrapMarkerAnimationPhase::kInitial:
+			phaseName = "initial";
+			break;
+		case TrapMarkerAnimationPhase::kTrigger:
+			phaseName = "trigger";
+			break;
+		case TrapMarkerAnimationPhase::kRearm:
+			phaseName = "rearm";
+			break;
+		case TrapMarkerAnimationPhase::kNone:
+		default:
+			break;
+		}
+
+		const auto clearPending = [&]() noexcept {
+			a_trap.markerAnimationPhase = TrapMarkerAnimationPhase::kNone;
+			a_trap.markerAnimationAttempts = 0u;
+			a_trap.markerAnimationNextAttemptAt = {};
+		};
+		const auto* animation = a_trap.feedback.worldMarkerAnimation ?
+			std::addressof(*a_trap.feedback.worldMarkerAnimation) : nullptr;
+		const std::string* event = nullptr;
+		if (animation) {
+			switch (phase) {
+			case TrapMarkerAnimationPhase::kInitial:
+				event = std::addressof(animation->initialEvent);
+				break;
+			case TrapMarkerAnimationPhase::kTrigger:
+				event = std::addressof(animation->triggerEvent);
+				break;
+			case TrapMarkerAnimationPhase::kRearm:
+				event = std::addressof(animation->rearmEvent);
+				break;
+			case TrapMarkerAnimationPhase::kNone:
+			default:
+				break;
+			}
+		}
+		if (!event || event->empty()) {
+			if (phase == TrapMarkerAnimationPhase::kRearm) {
+				a_trap.markerRearmAnimationResolved = true;
+			}
+			clearPending();
+			return;
+		}
+
+		auto marker = a_trap.markerReferenceOwner;
+		if (!marker && a_trap.markerReference) {
+			marker = a_trap.markerReference.get();
+		}
+		auto* markerCell = marker ? marker->GetParentCell() : nullptr;
+		const bool cellAttached = markerCell && markerCell->IsAttached();
+		const bool referenceUsable = marker &&
+			detail::ShouldReusePlacedTrapMarker(
+				true,
+				marker->IsDisabled(),
+				marker->IsMarkedForDeletion());
+		const bool referenceRetryable = referenceUsable && (!markerCell || cellAttached);
+		auto* marker3D = referenceRetryable ? marker->Get3D(false) : nullptr;
+		const bool has3D = marker3D != nullptr;
+		RE::BSTSmartPointer<RE::BSAnimationGraphManager> graphManager{};
+		const bool hasGraphManager = has3D && marker->GetAnimationGraphManager(graphManager) && graphManager;
+		const bool hasLoadedGraph = hasGraphManager &&
+			(!graphManager->graphs.empty() || !graphManager->subManagers.empty());
+		const bool graphReady = detail::IsTrapMarkerAnimationGraphReady(
+			has3D,
+			hasGraphManager,
+			hasLoadedGraph);
+		const bool accepted = graphReady && marker->NotifyAnimationGraph(RE::BSFixedString{ event->c_str() });
+		const auto attempt = static_cast<std::uint8_t>(a_trap.markerAnimationAttempts + 1u);
+		const bool retryScheduled = detail::ShouldRetryTrapMarkerAnimation(
+			referenceRetryable,
+			accepted,
+			attempt);
+
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: trap world marker animation (phase={}, event={}, ref=0x{:X}, cellAttached={}, has3D={}, graphReady={}, accepted={}, attempt={} / {}, retryScheduled={}).",
+				phaseName,
+				*event,
+				marker ? marker->GetFormID() : 0u,
+				cellAttached,
+				has3D,
+				graphReady,
+				accepted,
+				attempt,
+				detail::kMaxTrapMarkerAnimationAttempts,
+				retryScheduled);
+		}
+
+		if (accepted) {
+			if (phase == TrapMarkerAnimationPhase::kInitial) {
+				// Keep StartOpen visible for the configured gate before the first
+				// gameplay trigger can deliver Trigger01.
+				a_trap.armedAt = detail::ExtendTrapArmedAtForAcceptedOpenAnimation(
+					a_trap.armedAt,
+					a_now,
+					std::chrono::milliseconds(animation->openGateMilliseconds));
+			} else if (phase == TrapMarkerAnimationPhase::kRearm) {
+				a_trap.markerRearmAnimationResolved = true;
+				const auto openGate = std::chrono::milliseconds(animation->openGateMilliseconds);
+				a_trap.armedAt = detail::ExtendTrapArmedAtForAcceptedOpenAnimation(
+					a_trap.armedAt,
+					a_now,
+					openGate);
+			}
+			clearPending();
+			return;
+		}
+		if (retryScheduled) {
+			a_trap.markerAnimationAttempts = attempt;
+			a_trap.markerAnimationNextAttemptAt = a_now + detail::kTrapMarkerAnimationRetryDelay;
+			return;
+		}
+
+		if (phase == TrapMarkerAnimationPhase::kRearm) {
+			// Animation is presentation only. Never leave the gameplay trap stuck
+			// disarmed if its visual graph cannot accept Reset01.
+			a_trap.markerRearmAnimationResolved = true;
+		}
+		SKSE::log::warn(
+			"CalamityAffixes: trap world marker animation abandoned (phase={}, event={}, ref=0x{:X}, attempt={}, reason={}); gameplay continues fail-open.",
+			phaseName,
+			*event,
+			marker ? marker->GetFormID() : 0u,
+			attempt,
+			referenceRetryable ? "attempt-cap" : "reference-unusable");
+		clearPending();
+	}
+
+	void EventBridge::ProcessPendingTrapMarkerCleanup() noexcept
+	{
+		for (auto& pendingHandle : _trapState.pendingMarkerCleanup) {
+			if (!pendingHandle) {
+				continue;
+			}
+			const auto nativeHandle = pendingHandle.native_handle();
+			auto marker = pendingHandle.get();
+			if (!marker) {
+				continue;
+			}
+
+			auto* markerCell = marker->GetParentCell();
+			const bool cellAttached = markerCell && markerCell->IsAttached();
+			bool safetyIssued = false;
+			// Apply interaction/physics safety while 3D is valid. A detached cell
+			// permits only the non-3D SetDelete retirement path.
+			if (!markerCell || cellAttached) {
+				marker->SetActivationBlocked(true);
+				marker->SetCollision(false);
+				safetyIssued = true;
+			}
+			const auto cleanupPolicy = detail::ResolvePlacedTrapMarkerCleanupPolicy(
+				true,
+				markerCell != nullptr,
+				cellAttached);
+			bool disableIssued = false;
+			if (cleanupPolicy.disable) {
+				marker->Disable();
+				disableIssued = true;
+			}
+			marker->SetDelete(true);
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: trap world marker deferred cleanup resolved (reason=deferred-resolved, handle=0x{:X}, resolved=true, ref=0x{:X}, cellAttached={}, activationBlockIssued={}, collisionDisableIssued={}, disableIssued={}, deleteIssued=true).",
+					nativeHandle,
+					marker->GetFormID(),
+					cellAttached,
+					safetyIssued,
+					safetyIssued,
+					disableIssued);
+			}
+			pendingHandle.reset();
+		}
+		_trapState.RefreshRuntimeWorkFlag();
+	}
+
+	void EventBridge::StopTrapMarker(TrapInstance& a_trap, std::string_view a_reason) noexcept
+	{
+		a_trap.markerAnimationPhase = TrapMarkerAnimationPhase::kNone;
+		a_trap.markerAnimationAttempts = 0u;
+		a_trap.markerAnimationNextAttemptAt = {};
+		a_trap.markerRearmAnimationResolved = false;
 		if (a_trap.markerEffect) {
 			const bool cellUsable = detail::IsTrapCellUsable(
 				a_trap.cell != nullptr,
@@ -177,21 +399,202 @@ namespace CalamityAffixes
 			}
 			a_trap.markerEffect.reset();
 		}
+
+		if (a_trap.markerReference || a_trap.markerReferenceOwner) {
+			const auto nativeHandle = a_trap.markerReference ? a_trap.markerReference.native_handle() : 0u;
+			auto marker = a_trap.markerReferenceOwner;
+			if (!marker && a_trap.markerReference) {
+				marker = a_trap.markerReference.get();
+			}
+			const bool resolved = marker != nullptr;
+			const bool strongOwnerRetained = a_trap.markerReferenceOwner != nullptr;
+			const RE::FormID referenceFormID = marker ? marker->GetFormID() : 0u;
+			bool cellAttached = false;
+			bool disableIssued = false;
+			bool deleteIssued = false;
+			RE::TESObjectCELL* markerCell = nullptr;
+			if (marker) {
+				markerCell = marker->GetParentCell();
+				cellAttached = markerCell && markerCell->IsAttached();
+			}
+			const auto cleanupPolicy = detail::ResolvePlacedTrapMarkerCleanupPolicy(
+				resolved,
+				markerCell != nullptr,
+				cellAttached);
+			if (marker) {
+				// Disable touches the loaded 3D, so avoid it after a cell has detached.
+				// SetDelete is still required to retire the generated reference and keep
+				// it out of future saves if the handle remains resolvable.
+				if (cleanupPolicy.disable) {
+					marker->Disable();
+					disableIssued = true;
+				}
+				if (cleanupPolicy.markForDeletion) {
+					marker->SetDelete(true);
+					deleteIssued = true;
+				}
+			}
+			const bool deferredQueued = detail::ShouldDeferUnresolvedPlacedTrapMarker(
+				static_cast<bool>(a_trap.markerReference),
+				resolved) &&
+				_trapState.QueuePendingMarkerCleanup(a_trap.markerReference);
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: trap world marker cleanup (reason={}, handle=0x{:X}, resolved={}, strongOwnerRetained={}, ref=0x{:X}, cellAttached={}, disableIssued={}, deleteIssued={}, deferredQueued={}).",
+					a_reason,
+					nativeHandle,
+					resolved,
+					strongOwnerRetained,
+					referenceFormID,
+					cellAttached,
+					disableIssued,
+					deleteIssued,
+					deferredQueued);
+			}
+			if (a_trap.markerReference && !resolved && !deferredQueued) {
+				SKSE::log::critical(
+					"CalamityAffixes: unresolved trap world marker could not enter the fixed cleanup queue (reason={}, handle=0x{:X}); retaining it on the trap fail-closed.",
+					a_reason,
+					nativeHandle);
+				a_trap.visualState = TrapVisualState::kNone;
+				return;
+			}
+			a_trap.markerReferenceOwner.reset();
+			a_trap.markerReference.reset();
+		}
 		a_trap.visualState = TrapVisualState::kNone;
 	}
 
 	void EventBridge::StartTrapMarker(
 		TrapInstance& a_trap,
 		TrapVisualState a_state,
-		std::chrono::steady_clock::time_point a_now) const noexcept
+		std::chrono::steady_clock::time_point a_now) noexcept
 	{
-		StopTrapMarker(a_trap);
 		const bool cellUsable = detail::IsTrapCellUsable(
 			a_trap.cell != nullptr,
 			a_trap.cell && a_trap.cell->IsAttached());
-		if (!a_trap.feedback.configured || !a_trap.feedback.markerArt || !cellUsable) {
+		if (!a_trap.feedback.configured ||
+			(!a_trap.feedback.markerWorldObject && !a_trap.feedback.markerArt) ||
+			!cellUsable) {
 			return;
 		}
+
+		if (a_trap.feedback.markerWorldObject) {
+			ProcessPendingTrapMarkerCleanup();
+			// A placed world marker is phase-independent. Arming/rearming only
+			// updates logical state; recreating the REFR would churn handles and
+			// unnecessarily enlarge the save-change surface.
+			if (a_trap.markerReference) {
+				auto existing = a_trap.markerReferenceOwner;
+				if (!existing) {
+					existing = a_trap.markerReference.get();
+					if (existing) {
+						a_trap.markerReferenceOwner = existing;
+						existing->SetActivationBlocked(true);
+						existing->SetCollision(false);
+					}
+				}
+				if (detail::ShouldReusePlacedTrapMarker(
+						existing != nullptr,
+						existing && existing->IsDisabled(),
+						existing && existing->IsMarkedForDeletion())) {
+					a_trap.visualState = a_state;
+					if (_loot.debugLog) {
+						SKSE::log::debug(
+							"CalamityAffixes: trap world marker reused for state transition (ref=0x{:X}, state={}).",
+							existing->GetFormID(),
+							a_state == TrapVisualState::kUnarmed ? "unarmed" : "armed");
+					}
+					return;
+				}
+				StopTrapMarker(a_trap, "stale-world-reference");
+			} else if (a_trap.markerEffect) {
+				StopTrapMarker(a_trap, "switch-to-world-reference");
+			}
+
+			const auto placedCount = static_cast<std::size_t>(std::count_if(
+				_trapState.activeTraps.begin(),
+				_trapState.activeTraps.end(),
+				[](const TrapInstance& a_activeTrap) { return static_cast<bool>(a_activeTrap.markerReference); }));
+			const auto pendingCleanupCount = _trapState.PendingMarkerCleanupCount();
+			if (!detail::CanSpawnPlacedTrapMarker(placedCount, pendingCleanupCount)) {
+				a_trap.visualState = a_state;
+				if (_loot.debugLog) {
+					SKSE::log::warn(
+						"CalamityAffixes: trap world marker spawn skipped (reason=placed-ref-cap, cap={}, active={}, pendingCleanup={}).",
+						detail::kMaxPlacedTrapMarkers,
+						placedCount,
+						pendingCleanupCount);
+				}
+				return;
+			}
+
+			auto* dataHandler = RE::TESDataHandler::GetSingleton();
+			auto* worldspace = a_trap.cell->IsExteriorCell() ? a_trap.cell->GetRuntimeData().worldSpace : nullptr;
+			RE::ObjectRefHandle markerHandle{};
+			if (dataHandler) {
+				markerHandle = dataHandler->CreateReferenceAtLocation(
+					a_trap.feedback.markerWorldObject,
+					a_trap.position,
+					RE::NiPoint3{},
+					a_trap.cell,
+					worldspace,
+					nullptr,
+					nullptr,
+					RE::ObjectRefHandle{},
+					false,
+					true);
+			}
+			auto marker = markerHandle.get();
+			const bool spawned = marker != nullptr;
+			const bool handleAllocated = static_cast<bool>(markerHandle);
+			bool deferredCleanupQueued = false;
+			if (marker) {
+				a_trap.markerReference = markerHandle;
+				a_trap.markerReferenceOwner = marker;
+				marker->SetActivationBlocked(true);
+				marker->SetCollision(false);
+				QueueTrapMarkerAnimation(a_trap, TrapMarkerAnimationPhase::kInitial, a_now);
+				ProcessTrapMarkerAnimation(a_trap, a_now);
+			} else if (detail::ShouldDeferUnresolvedPlacedTrapMarker(handleAllocated, spawned)) {
+				deferredCleanupQueued = _trapState.QueuePendingMarkerCleanup(markerHandle);
+				if (!deferredCleanupQueued) {
+					// The cap calculation guarantees a free queue slot. Preserve the
+					// handle on the live trap if that invariant is ever violated.
+					a_trap.markerReference = markerHandle;
+					SKSE::log::critical(
+						"CalamityAffixes: unresolved newly-created trap marker could not enter the fixed cleanup queue (handle=0x{:X}); retaining it on the trap fail-closed.",
+						markerHandle.native_handle());
+				}
+			}
+			// Record the attempted phase even when allocation is capped or fails.
+			// This permits one unarmed attempt and one armed attempt without retrying
+			// CreateReferenceAtLocation every trap tick.
+			a_trap.visualState = a_state;
+			if (_loot.debugLog) {
+				const auto* baseEditorID = a_trap.feedback.markerWorldObject->GetFormEditorID();
+				SKSE::log::debug(
+					"CalamityAffixes: trap world marker spawn (base={}, baseForm=0x{:X}, ref=0x{:X}, handle=0x{:X}, pos=({:.1f}, {:.1f}, {:.1f}), forcePersist=false, handleAllocated={}, resolved={}, strongOwnerRetained={}, deferredCleanupQueued={}, retainedForCleanup={}, activationBlockIssued={}, collisionDisableIssued={}, spawned={}).",
+					baseEditorID ? baseEditorID : "<none>",
+					a_trap.feedback.markerWorldObject->GetFormID(),
+					marker ? marker->GetFormID() : 0u,
+					markerHandle ? markerHandle.native_handle() : 0u,
+					a_trap.position.x,
+					a_trap.position.y,
+					a_trap.position.z,
+					handleAllocated,
+					spawned,
+					static_cast<bool>(a_trap.markerReferenceOwner),
+					deferredCleanupQueued,
+					static_cast<bool>(a_trap.markerReference) || deferredCleanupQueued,
+					spawned,
+					spawned,
+					spawned);
+			}
+			return;
+		}
+
+		StopTrapMarker(a_trap, "particle-state-transition");
 
 		const auto* model = a_trap.feedback.markerArt->GetModel();
 		if (!model || !*model) {
@@ -242,7 +645,28 @@ namespace CalamityAffixes
 		}
 
 		auto& trap = activeTraps[a_index];
-		StopTrapMarker(trap);
+		std::string_view removalReason{ "unknown" };
+		switch (a_reason) {
+		case TrapRemovalReason::kExpired:
+			removalReason = "expired";
+			break;
+		case TrapRemovalReason::kConsumed:
+			removalReason = "consumed";
+			break;
+		case TrapRemovalReason::kPerAffixCap:
+			removalReason = "per-affix-cap";
+			break;
+		case TrapRemovalReason::kGlobalCap:
+			removalReason = "global-cap";
+			break;
+		case TrapRemovalReason::kInvalid:
+			removalReason = "invalid";
+			break;
+		case TrapRemovalReason::kReset:
+			removalReason = "reset";
+			break;
+		}
+		StopTrapMarker(trap, removalReason);
 		if (a_reason == TrapRemovalReason::kExpired) {
 			PlayTrapFeedbackCue(trap, trap.feedback.expired);
 		}
@@ -253,7 +677,7 @@ namespace CalamityAffixes
 		if (_trapState.tickCursor >= activeTraps.size()) {
 			_trapState.tickCursor = 0u;
 		}
-		_trapState.hasActiveTraps.store(!activeTraps.empty(), std::memory_order_relaxed);
+		_trapState.RefreshRuntimeWorkFlag();
 	}
 
 	void EventBridge::SpawnTrapMarkerProbe()
@@ -337,11 +761,35 @@ namespace CalamityAffixes
 		});
 	}
 
-	void EventBridge::ClearTrapRuntimeState() noexcept
+	void EventBridge::ClearTrapRuntimeState(
+		std::string_view a_reason,
+		bool a_discardUnresolvedForWorldTransition) noexcept
 	{
+		ProcessPendingTrapMarkerCleanup();
 		for (auto& trap : _trapState.activeTraps) {
-			StopTrapMarker(trap);
+			StopTrapMarker(trap, a_reason);
 		}
 		_trapState.Reset();
+		ProcessPendingTrapMarkerCleanup();
+		if (a_discardUnresolvedForWorldTransition) {
+			const auto discardedCount = _trapState.PendingMarkerCleanupCount();
+			if (_loot.debugLog) {
+				for (auto& pendingHandle : _trapState.pendingMarkerCleanup) {
+					if (pendingHandle) {
+						SKSE::log::debug(
+							"CalamityAffixes: trap world marker cleanup (reason={}, handle=0x{:X}, resolved=false, discardedForWorldTransition=true).",
+							a_reason,
+							pendingHandle.native_handle());
+					}
+				}
+				if (discardedCount != 0u) {
+					SKSE::log::debug(
+						"CalamityAffixes: discarded unresolved trap marker handles for world transition (reason={}, count={}).",
+						a_reason,
+						discardedCount);
+				}
+			}
+			_trapState.DiscardPendingMarkerCleanup();
+		}
 	}
 }

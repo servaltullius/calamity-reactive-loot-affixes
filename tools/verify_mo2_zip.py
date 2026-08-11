@@ -59,6 +59,17 @@ BAD_PATTERNS: tuple[tuple[str, str], ...] = (
     ("Data/MCM/", "Data/ prefix should not appear inside mod root"),
 )
 
+FORBIDDEN_BUNDLED_VANILLA_ASSETS: frozenset[str] = frozenset(
+    {
+        f"{MOD_ROOT}/Meshes/Traps/BearTrap/BearTrap01.nif".casefold(),
+        f"{MOD_ROOT}/Meshes/Traps/PressurePlate/TrapStonePressurePlate01.nif".casefold(),
+        f"{MOD_ROOT}/Meshes/Actors/DLC02/Spider_poison/CharacterAssets/spidersackdead.nif".casefold(),
+        f"{MOD_ROOT}/Meshes/Traps/OilTrapPuddle01/OilTrapPuddle01.nif".casefold(),
+        f"{MOD_ROOT}/Meshes/Actors/DLC02/Spider_poison/CharacterAssets/ExpSpiderEggsAlbino.nif".casefold(),
+        f"{MOD_ROOT}/Meshes/Traps/PressurePlateMetal/TrapPressurePlateMetal01.nif".casefold(),
+    }
+)
+
 
 def sha256_file(path: pathlib.Path) -> str:
     digest = hashlib.sha256()
@@ -148,6 +159,11 @@ def verify(
             errors.extend(prisma_view_errors(archive, names))
 
             for name in names:
+                normalized_name = name.replace("\\", "/").casefold()
+                if normalized_name.endswith(".pdb"):
+                    errors.append(f"UNEXPECTED PDB: {name}")
+                if normalized_name in FORBIDDEN_BUNDLED_VANILLA_ASSETS:
+                    errors.append(f"BUNDLED VANILLA ASSET: {name}")
                 for pattern, message in BAD_PATTERNS:
                     if pattern in name:
                         errors.append(f"BAD PATH ({message}): {name}")

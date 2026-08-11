@@ -480,16 +480,45 @@
     },
     "trapFeedback": {
       "type": "object",
-      "required": ["markerArtObjectEditorId", "unarmedScale", "armedScale"],
+      "required": ["unarmedScale", "armedScale"],
       "additionalProperties": false,
       "properties": {
         "markerArtObjectEditorId": { "type": "string", "minLength": 1 },
+        "markerWorldObjectEditorId": { "type": "string", "minLength": 1, "pattern": "^[^|]+$" },
+        "worldMarkerAnimation": { "$ref": "#/$defs/trapWorldMarkerAnimation" },
         "unarmedScale": { "type": "number", "minimum": 0.1, "maximum": 4.0 },
         "armedScale": { "type": "number", "minimum": 0.1, "maximum": 4.0 },
         "placed": { "$ref": "#/$defs/trapFeedbackCue" },
         "armed": { "$ref": "#/$defs/trapFeedbackCue" },
         "triggered": { "$ref": "#/$defs/trapFeedbackCue" },
         "expired": { "$ref": "#/$defs/trapFeedbackCue" }
+      },
+      "oneOf": [
+        {
+          "required": ["markerArtObjectEditorId"],
+          "not": { "required": ["markerWorldObjectEditorId"] }
+        },
+        {
+          "required": ["markerWorldObjectEditorId"],
+          "not": { "required": ["markerArtObjectEditorId"] }
+        }
+      ],
+      "allOf": [
+        {
+          "if": { "required": ["worldMarkerAnimation"] },
+          "then": { "required": ["markerWorldObjectEditorId"] }
+        }
+      ]
+    },
+    "trapWorldMarkerAnimation": {
+      "type": "object",
+      "required": ["initialEvent", "triggerEvent", "rearmEvent", "openGateMilliseconds"],
+      "additionalProperties": false,
+      "properties": {
+        "initialEvent": { "type": "string", "minLength": 1 },
+        "triggerEvent": { "type": "string", "minLength": 1 },
+        "rearmEvent": { "type": "string", "minLength": 1 },
+        "openGateMilliseconds": { "type": "integer", "minimum": 0, "maximum": 5000 }
       }
     },
     "trapFeedbackCue": {
@@ -588,6 +617,15 @@
             "type": { "const": "ArtObject" },
             "artObject": { "$ref": "#/$defs/artObjectRecord" }
           }
+        },
+        {
+          "type": "object",
+          "required": ["type", "movableStatic"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "MovableStatic" },
+            "movableStatic": { "$ref": "#/$defs/movableStaticRecord" }
+          }
         }
       ]
     },
@@ -602,6 +640,16 @@
           "type": "string",
           "enum": ["MagicHitEffect"]
         }
+      }
+    },
+    "movableStaticRecord": {
+      "type": "object",
+      "required": ["editorId", "modelPath"],
+      "additionalProperties": false,
+      "properties": {
+        "editorId": { "type": "string", "minLength": 1 },
+        "modelPath": { "type": "string", "minLength": 1 },
+        "mustUpdateAnimations": { "type": "boolean", "default": false }
       }
     },
     "spellRecord": {

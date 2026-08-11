@@ -12,6 +12,15 @@ namespace CalamityAffixes
 		}
 
 		const std::scoped_lock lock(_stateMutex);
+		// World-reference cleanup is intentionally forbidden here: SKSE invokes
+		// this callback from inside SkyrimVM::SaveGlobalData. kSaveGame messaging
+		// calls OnPreSaveGame synchronously before the engine save hook instead.
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: serialization save trap state (activeTraps={}, unresolvedDeferred={}).",
+				_trapState.activeTraps.size(),
+				_trapState.PendingMarkerCleanupCount());
+		}
 
 		MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::now(), true);
 		PruneLootEvaluatedInstances();

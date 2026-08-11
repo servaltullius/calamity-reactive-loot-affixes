@@ -43,6 +43,180 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
         )
         return errors, warnings
 
+    def _lint_payload(self, payload: dict) -> tuple[list[str], list[str]]:
+        errors: list[str] = []
+        warnings: list[str] = []
+        supported_triggers, supported_action_types = self.lint_affixes._load_validation_contract()
+        self.lint_affixes._lint_spec(
+            payload,
+            errors=errors,
+            warnings=warnings,
+            supported_triggers=supported_triggers,
+            supported_action_types=supported_action_types,
+        )
+        return errors, warnings
+
+    def test_repo_bear_trap_accepts_append_only_movable_static_world_marker(self) -> None:
+        errors, warnings = self._lint_payload(self.repo_spec)
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+        bear = next(
+            affix for affix in self.repo_spec["keywords"]["affixes"] if affix["id"] == "bear_trap"
+        )
+        feedback = bear["runtime"]["action"]["trapFeedback"]
+        self.assertEqual(
+            {
+                "initialEvent": "StartOpen",
+                "triggerEvent": "Trigger01",
+                "rearmEvent": "Reset01",
+                "openGateMilliseconds": 900,
+            },
+            feedback["worldMarkerAnimation"],
+        )
+        self.assertEqual("Skyrim.esm|0x0001828A", feedback["placed"]["soundForm"])
+        self.assertNotIn("armed", feedback)
+        self.assertNotIn("soundForm", feedback["triggered"])
+
+    def test_source_bear_movable_static_explicitly_enables_animation_updates(self) -> None:
+        root_module = json.loads(
+            (self.repo_root / "affixes" / "modules" / "spec.root.json").read_text(encoding="utf-8")
+        )
+        bear_marker = next(
+            record["movableStatic"]
+            for record in root_module["keywords"]["appendedRecords"]
+            if record.get("type") == "MovableStatic"
+            and record.get("movableStatic", {}).get("editorId") == "CAFF_MSTT_TRAP_BEAR_VISUAL"
+        )
+
+        self.assertIs(bear_marker.get("mustUpdateAnimations"), True)
+
+    def test_movable_static_animation_update_flag_defaults_off_and_requires_boolean(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        bear_marker = next(
+            record["movableStatic"]
+            for record in payload["keywords"]["appendedRecords"]
+            if record.get("type") == "MovableStatic"
+            and record.get("movableStatic", {}).get("editorId") == "CAFF_MSTT_TRAP_BEAR_VISUAL"
+        )
+        bear_marker.pop("mustUpdateAnimations", None)
+
+        errors, warnings = self._lint_payload(payload)
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+        bear_marker["mustUpdateAnimations"] = False
+        errors, warnings = self._lint_payload(payload)
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+        bear_marker["mustUpdateAnimations"] = "true"
+        errors, _ = self._lint_payload(payload)
+        self.assertTrue(
+            any("movableStatic.mustUpdateAnimations must be a boolean" in error for error in errors),
+            msg=f"expected boolean contract error, got {errors}",
+        )
+
+    def test_trap_feedback_rejects_both_marker_authorities(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        bear = next(
+            affix for affix in payload["keywords"]["affixes"] if affix["id"] == "bear_trap"
+        )
+        bear["runtime"]["action"]["trapFeedback"]["markerArtObjectEditorId"] = (
+            "CAFF_ARTO_VFX_TRAP_BEAR_MARKER"
+        )
+
+        errors, _ = self._lint_payload(payload)
+        self.assertTrue(
+            any("requires exactly one of markerArtObjectEditorId or markerWorldObjectEditorId" in error for error in errors),
+            msg=f"expected exclusive marker authority error, got {errors}",
+        )
+
+    def test_trap_feedback_rejects_missing_movable_static_world_marker(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        payload["keywords"]["appendedRecords"] = [
+            record
+            for record in payload["keywords"]["appendedRecords"]
+            if not (
+                record.get("type") == "MovableStatic"
+                and record.get("movableStatic", {}).get("editorId") == "CAFF_MSTT_TRAP_BEAR_VISUAL"
+            )
+        ]
+
+        errors, _ = self._lint_payload(payload)
+        self.assertTrue(
+            any("references missing MovableStatic 'CAFF_MSTT_TRAP_BEAR_VISUAL'" in error for error in errors),
+            msg=f"expected missing movable static marker error, got {errors}",
+        )
+
+    def test_trap_feedback_rejects_form_spec_for_movable_static_world_marker(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        bear = next(
+            affix for affix in payload["keywords"]["affixes"] if affix["id"] == "bear_trap"
+        )
+        bear["runtime"]["action"]["trapFeedback"]["markerWorldObjectEditorId"] = (
+            "CalamityAffixes.esp|0x000B00"
+        )
+
+        errors, _ = self._lint_payload(payload)
+        self.assertTrue(
+            any("markerWorldObjectEditorId must be an EditorID" in error for error in errors),
+            msg=f"expected EditorID-only marker lookup error, got {errors}",
+        )
+
+    def test_world_marker_animation_requires_world_object_marker(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        bear = next(
+            affix for affix in payload["keywords"]["affixes"] if affix["id"] == "bear_trap"
+        )
+        feedback = bear["runtime"]["action"]["trapFeedback"]
+        feedback["markerArtObjectEditorId"] = "CAFF_ARTO_VFX_TRAP_BEAR_MARKER"
+        del feedback["markerWorldObjectEditorId"]
+
+        errors, _ = self._lint_payload(payload)
+        self.assertTrue(
+            any("worldMarkerAnimation is supported only with markerWorldObjectEditorId" in error for error in errors),
+            msg=f"expected world marker animation authority error, got {errors}",
+        )
+
+    def test_world_marker_animation_requires_complete_valid_payload(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        bear = next(
+            affix for affix in payload["keywords"]["affixes"] if affix["id"] == "bear_trap"
+        )
+        animation = bear["runtime"]["action"]["trapFeedback"]["worldMarkerAnimation"]
+        animation.pop("rearmEvent")
+        animation["triggerEvent"] = "  "
+        animation["openGateMilliseconds"] = 5001
+
+        errors, _ = self._lint_payload(payload)
+        self.assertTrue(
+            any("triggerEvent must be a non-empty string" in error for error in errors),
+            msg=f"expected empty trigger event error, got {errors}",
+        )
+        self.assertTrue(
+            any("rearmEvent must be a non-empty string" in error for error in errors),
+            msg=f"expected missing rearm event error, got {errors}",
+        )
+        self.assertTrue(
+            any("openGateMilliseconds must be an integer in range 0..5000" in error for error in errors),
+            msg=f"expected open gate range error, got {errors}",
+        )
+
+    def test_world_marker_animation_rejects_fractional_open_gate(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        bear = next(
+            affix for affix in payload["keywords"]["affixes"] if affix["id"] == "bear_trap"
+        )
+        animation = bear["runtime"]["action"]["trapFeedback"]["worldMarkerAnimation"]
+        animation["openGateMilliseconds"] = 900.5
+
+        errors, _ = self._lint_payload(payload)
+        self.assertTrue(
+            any("openGateMilliseconds must be an integer in range 0..5000" in error for error in errors),
+            msg=f"expected fractional open gate error, got {errors}",
+        )
+
     @staticmethod
     def _debug_runtime() -> dict:
         return {
@@ -342,6 +516,33 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
                     any(expected_fragment in error for error in errors),
                     msg=f"expected {label} schema rejection, got errors={errors}",
                 )
+
+    def test_schema_rejects_non_boolean_movable_static_animation_update_flag(self) -> None:
+        payload = json.loads(json.dumps(self.repo_spec))
+        bear_marker = next(
+            record["movableStatic"]
+            for record in payload["keywords"]["appendedRecords"]
+            if record.get("type") == "MovableStatic"
+            and record.get("movableStatic", {}).get("editorId") == "CAFF_MSTT_TRAP_BEAR_VISUAL"
+        )
+        bear_marker["mustUpdateAnimations"] = "true"
+
+        errors: list[str] = []
+        self.lint_affixes._validate_schema(
+            instance=payload,
+            schema=self.schema,
+            label="test",
+            errors=errors,
+        )
+
+        self.assertTrue(
+            any(
+                "mustUpdateAnimations" in error
+                and ("is not of type 'boolean'" in error or "is not valid under any" in error)
+                for error in errors
+            ),
+            msg=f"expected schema boolean rejection, got errors={errors}",
+        )
 
     def test_schema_accepts_corpse_explosion_runtime_default_max_targets(self) -> None:
         payload = json.loads(json.dumps(self.repo_spec))

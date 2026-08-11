@@ -392,6 +392,54 @@
           "modelPath": "Magic\\FXFireCloak01.nif",
           "artType": "MagicHitEffect"
         }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_BEAR_VISUAL",
+          "modelPath": "Traps\\BearTrap\\BearTrap01.nif",
+          "mustUpdateAnimations": true
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_RUNE_VISUAL",
+          "modelPath": "Traps\\PressurePlate\\TrapStonePressurePlate01.nif",
+          "mustUpdateAnimations": true
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_PLAGUE_VISUAL",
+          "modelPath": "actors\\DLC02\\Spider_poison\\CharacterAssets\\spidersackdead.nif",
+          "mustUpdateAnimations": false
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_TAR_VISUAL",
+          "modelPath": "Traps\\OilTrapPuddle01\\OilTrapPuddle01.nif",
+          "mustUpdateAnimations": true
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_SIPHON_VISUAL",
+          "modelPath": "Actors\\DLC02\\Spider_poison\\CharacterAssets\\ExpSpiderEggsAlbino.nif",
+          "mustUpdateAnimations": false
+        }
+      },
+      {
+        "type": "MovableStatic",
+        "movableStatic": {
+          "editorId": "CAFF_MSTT_TRAP_CHAOS_VISUAL",
+          "modelPath": "Traps\\PressurePlateMetal\\TrapPressurePlateMetal01.nif",
+          "mustUpdateAnimations": true
+        }
       }
     ]
   }

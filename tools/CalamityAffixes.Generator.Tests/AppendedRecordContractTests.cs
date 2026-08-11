@@ -1,4 +1,9 @@
 using CalamityAffixes.Generator.Spec;
+using CalamityAffixes.Generator.Writers;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Skyrim;
+using Noggog;
 
 namespace CalamityAffixes.Generator.Tests;
 
@@ -19,6 +24,11 @@ public sealed class AppendedRecordContractTests
         """{"type":"ArtObject","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"Meshes\\Magic\\Test.nif","artType":"MagicCasting"}}""",
         """{"type":"ArtObject","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"Meshes\\Magic\\Test.nif","artType":"MagicHitEffect"}}""",
         """{"type":"ArtObject","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"","artType":"MagicHitEffect"}}""",
+        """{"type":"MovableStatic"}""",
+        """{"type":"MovableStatic","artObject":{"editorId":"CAFF_ARTO_TEST","modelPath":"Magic\\Test.nif","artType":"MagicHitEffect"}}""",
+        """{"type":"MovableStatic","movableStatic":{"editorId":"CAFF_MSTT_TEST","modelPath":"Meshes\\Traps\\Test.nif"}}""",
+        """{"type":"MovableStatic","movableStatic":{"editorId":"CAFF_MSTT_TEST","modelPath":""}}""",
+        """{"type":"MovableStatic","movableStatic":{"editorId":"CAFF_MSTT_TEST","modelPath":"Traps\\Test.nif","mustUpdateAnimations":"true"}}""",
     };
 
     public static TheoryData<string> InvalidLegacyDragonBlocks => new()
@@ -71,6 +81,14 @@ public sealed class AppendedRecordContractTests
             "modelPath": "Magic\\Test.nif",
             "artType": "MagicHitEffect"
           }
+        },
+        {
+          "type": "MovableStatic",
+          "movableStatic": {
+            "editorId": "CAFF_MSTT_TEST",
+            "modelPath": "Traps\\Test.nif",
+            "mustUpdateAnimations": true
+          }
         }
         """;
         var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
@@ -105,7 +123,79 @@ public sealed class AppendedRecordContractTests
                     Assert.Equal("MagicHitEffect", record.ArtObject?.ArtType);
                     Assert.Null(record.MagicEffect);
                     Assert.Null(record.Spell);
+                    Assert.Null(record.MovableStatic);
+                },
+                record =>
+                {
+                    Assert.Equal("MovableStatic", record.Type);
+                    Assert.Equal("CAFF_MSTT_TEST", record.MovableStatic?.EditorId);
+                    Assert.Equal(@"Traps\Test.nif", record.MovableStatic?.ModelPath);
+                    Assert.True(record.MovableStatic?.MustUpdateAnimations);
+                    Assert.Null(record.MagicEffect);
+                    Assert.Null(record.Spell);
+                    Assert.Null(record.ArtObject);
                 });
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void BuildAndReimport_MovableStaticAnimationUpdatesAreOptInAndDefaultOff()
+    {
+        const string records = """
+        {
+          "type": "MovableStatic",
+          "movableStatic": {
+            "editorId": "CAFF_MSTT_STATIC",
+            "modelPath": "Clutter\\StaticMarker.nif"
+          }
+        },
+        {
+          "type": "MovableStatic",
+          "movableStatic": {
+            "editorId": "CAFF_MSTT_EXPLICIT_FALSE",
+            "modelPath": "Clutter\\StaticMarkerFalse.nif",
+            "mustUpdateAnimations": false
+          }
+        },
+        {
+          "type": "MovableStatic",
+          "movableStatic": {
+            "editorId": "CAFF_MSTT_ANIMATED",
+            "modelPath": "Traps\\AnimatedMarker.nif",
+            "mustUpdateAnimations": true
+          }
+        }
+        """;
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        var pluginPath = Path.Combine(tempRoot, "CalamityAffixes.esp");
+        File.WriteAllText(specPath, MinimalSpec(records));
+
+        try
+        {
+            var spec = AffixSpecLoader.Load(specPath);
+            var generated = KeywordPluginBuilder.Build(spec);
+            ((IModGetter)generated).WriteToBinary(new FilePath(pluginPath));
+
+            using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
+            var staticMarker = Assert.Single(reimported.MoveableStatics, record =>
+                record.EditorID == "CAFF_MSTT_STATIC");
+            var explicitFalseMarker = Assert.Single(reimported.MoveableStatics, record =>
+                record.EditorID == "CAFF_MSTT_EXPLICIT_FALSE");
+            var animatedMarker = Assert.Single(reimported.MoveableStatics, record =>
+                record.EditorID == "CAFF_MSTT_ANIMATED");
+
+            Assert.Equal(0u, (uint)staticMarker.MajorFlags & 0x00000100u);
+            Assert.Equal(0u, (uint)explicitFalseMarker.MajorFlags & 0x00000100u);
+            Assert.Equal(0x00000100u, (uint)animatedMarker.MajorFlags & 0x00000100u);
+            Assert.False(staticMarker.MajorFlags.HasFlag(MoveableStatic.MajorFlag.MustUpdateAnims));
+            Assert.False(explicitFalseMarker.MajorFlags.HasFlag(MoveableStatic.MajorFlag.MustUpdateAnims));
+            Assert.True(animatedMarker.MajorFlags.HasFlag(MoveableStatic.MajorFlag.MustUpdateAnims));
         }
         finally
         {

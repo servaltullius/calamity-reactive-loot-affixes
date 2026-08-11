@@ -24,6 +24,10 @@ namespace
 	static_assert(!IsTrapTickTargetEligible(false, false, false)); // not hostile
 	static_assert(!IsTrapTickTargetEligible(true, true, false));
 
+	// Paired main/extra effects are budgeted atomically per target.
+	static_assert(TrapTargetCastCost(false) == 1u);
+	static_assert(TrapTargetCastCost(true) == 2u);
+
 	// Budget 0 means unmetered, not "no casts allowed".
 	static_assert(HasTrapCastBudget(0u, 0u));
 	static_assert(HasTrapCastBudget(9999u, 0u));

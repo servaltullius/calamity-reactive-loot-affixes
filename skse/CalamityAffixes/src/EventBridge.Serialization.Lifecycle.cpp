@@ -35,7 +35,7 @@ namespace CalamityAffixes
 		_affixRuntimeState.activeLowHealthTriggerAffixIndices.clear();
 		_instanceTrackingState.instanceStates.clear();
 		_runewordState.ResetSelectionAndProgress();
-		ClearTrapRuntimeState();
+		ClearTrapRuntimeState("revert", true);
 		_corpseExplosionSeenCorpses.clear();
 		_summonCorpseExplosionSeenCorpses.clear();
 		_corpseExplosionState = {};
@@ -66,9 +66,27 @@ namespace CalamityAffixes
 	void EventBridge::OnPreLoadGame()
 	{
 		const std::scoped_lock lock(_stateMutex);
-		ClearTrapRuntimeState();
+		ClearTrapRuntimeState("pre-load", true);
 		Hooks::InvalidateDeferredTasks();
 		Hooks::ClearRuntimeState();
+	}
+
+	void EventBridge::OnPreSaveGame()
+	{
+		const std::scoped_lock lock(_stateMutex);
+		// Ground traps are transient and are not serialized: saving deliberately
+		// cancels every active trap together with its visual reference. SKSE
+		// dispatches kSaveGame before the engine SaveGame hook target. This
+		// is the only save lifecycle point where mutating dynamic world references
+		// is allowed; the SerializationInterface Save callback is already inside
+		// SkyrimVM::SaveGlobalData and must remain read/write-co-save only.
+		ClearTrapRuntimeState("pre-save");
+		if (_loot.debugLog) {
+			SKSE::log::debug(
+				"CalamityAffixes: pre-save trap cleanup complete (activeTraps={}, unresolvedDeferred={}).",
+				_trapState.activeTraps.size(),
+				_trapState.PendingMarkerCleanupCount());
+		}
 	}
 
 	bool EventBridge::NormalizeLegacyPlayerInstanceKeys()

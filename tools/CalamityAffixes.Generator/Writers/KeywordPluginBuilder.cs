@@ -124,6 +124,7 @@ public static class KeywordPluginBuilder
         var seenMagicEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenArtObjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenMovableStatics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var magicEffectsByEditorId = new Dictionary<string, MagicEffect>(StringComparer.OrdinalIgnoreCase);
         var pendingSpells = new List<(Spell Record, SpellRecordSpec Spec)>();
         var magicEffectUsagesByEditorId = new Dictionary<string, MagicEffectUsage>(StringComparer.OrdinalIgnoreCase);
@@ -193,7 +194,7 @@ public static class KeywordPluginBuilder
             {
                 switch (appendedRecord.Type)
                 {
-                    case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null:
+                    case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
                     {
                         var magicEffect = appendedRecord.MagicEffect;
                         if (!seenMagicEffects.Add(magicEffect.EditorId))
@@ -206,7 +207,7 @@ public static class KeywordPluginBuilder
                         magicEffectsByEditorId.Add(magicEffect.EditorId, created);
                         break;
                     }
-                    case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null:
+                    case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
                     {
                         var spell = appendedRecord.Spell;
                         if (!seenSpells.Add(spell.EditorId))
@@ -219,7 +220,7 @@ public static class KeywordPluginBuilder
                         pendingSpells.Add((created, spell));
                         break;
                     }
-                    case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null:
+                    case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.MovableStatic is null:
                     {
                         var artObject = appendedRecord.ArtObject;
                         if (!seenArtObjects.Add(artObject.EditorId))
@@ -231,9 +232,21 @@ public static class KeywordPluginBuilder
                         AddArtObject(mod, artObject);
                         break;
                     }
+                    case "MovableStatic" when appendedRecord.MovableStatic is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null:
+                    {
+                        var movableStatic = appendedRecord.MovableStatic;
+                        if (!seenMovableStatics.Add(movableStatic.EditorId))
+                        {
+                            throw new InvalidDataException(
+                                $"Duplicate appended MovableStatic editorId: {movableStatic.EditorId}");
+                        }
+
+                        AddMovableStatic(mod, movableStatic);
+                        break;
+                    }
                     default:
                         throw new InvalidDataException(
-                            "Append-only records must be a valid MagicEffect, Spell, or ArtObject tagged union.");
+                            "Append-only records must be a valid MagicEffect, Spell, ArtObject, or MovableStatic tagged union.");
                 }
             }
         }
@@ -479,6 +492,26 @@ public static class KeywordPluginBuilder
         artObject.Model = new Model { File = spec.ModelPath };
         artObject.Type = (ArtObject.TypeEnum)MagicHitEffectRawDnam;
         return artObject;
+    }
+
+    private static MoveableStatic AddMovableStatic(SkyrimMod mod, MovableStaticRecordSpec spec)
+    {
+        var normalizedModelPath = spec.ModelPath.Replace('/', '\\').TrimStart();
+        if (normalizedModelPath.StartsWith("Meshes\\", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException(
+                $"MovableStatic modelPath must be relative to Data\\Meshes and must not start " +
+                $"with 'Meshes\\' (MovableStatic: {spec.EditorId}, path: {spec.ModelPath}).");
+        }
+
+        var movableStatic = mod.MoveableStatics.AddNew();
+        movableStatic.EditorID = spec.EditorId;
+        movableStatic.Model = new Model { File = normalizedModelPath };
+        if (spec.MustUpdateAnimations)
+        {
+            movableStatic.MajorFlags = MoveableStatic.MajorFlag.MustUpdateAnims;
+        }
+        return movableStatic;
     }
 
     private static MagicEffect AddMagicEffect(SkyrimMod mod, MagicEffectRecordSpec spec)

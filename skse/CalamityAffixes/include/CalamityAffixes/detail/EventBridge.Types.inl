@@ -93,9 +93,22 @@
 			float scale{ 1.0f };
 		};
 
+		struct TrapWorldMarkerAnimation
+		{
+			std::string initialEvent{};
+			std::string triggerEvent{};
+			std::string rearmEvent{};
+			std::uint32_t openGateMilliseconds{ 0u };
+		};
+
 		struct TrapFeedback
 		{
 			RE::BGSArtObject* markerArt{ nullptr };
+			// Optional scriptless static-family world object used when a trap needs
+			// a stable, physical vanilla-shaped marker. TESObjectSTAT also accepts
+			// BGSMovableStatic, while excluding scripted activators from this path.
+			RE::TESObjectSTAT* markerWorldObject{ nullptr };
+			std::optional<TrapWorldMarkerAnimation> worldMarkerAnimation{};
 			float unarmedScale{ 0.75f };
 			float armedScale{ 1.0f };
 			TrapFeedbackCue placed{};
@@ -110,6 +123,14 @@
 			kNone,
 			kUnarmed,
 			kArmed,
+		};
+
+		enum class TrapMarkerAnimationPhase : std::uint8_t
+		{
+			kNone,
+			kInitial,
+			kTrigger,
+			kRearm,
 		};
 
 		enum class TrapRemovalReason : std::uint8_t
@@ -245,11 +266,18 @@
 			TrapFeedback feedback{};
 			TrapVisualState visualState{ TrapVisualState::kNone };
 			RE::NiPointer<RE::BSTempEffectParticle> markerEffect{};
+			RE::ObjectRefHandle markerReference{};
+			RE::NiPointer<RE::TESObjectREFR> markerReferenceOwner{};
+			TrapMarkerAnimationPhase markerAnimationPhase{ TrapMarkerAnimationPhase::kNone };
+			std::uint8_t markerAnimationAttempts{ 0u };
+			std::chrono::steady_clock::time_point markerAnimationNextAttemptAt{};
+			bool markerRearmAnimationResolved{ false };
 		};
 
 		struct TrapRuntimeState
 		{
 			std::vector<TrapInstance> activeTraps{};
+			std::array<RE::ObjectRefHandle, detail::kMaxPlacedTrapMarkers> pendingMarkerCleanup{};
 			std::size_t tickCursor{ 0 };
 			std::atomic_bool hasActiveTraps{ false };
 			std::chrono::steady_clock::time_point staleCombatLastClearAt{};
@@ -258,11 +286,58 @@
 			std::chrono::steady_clock::time_point forceStopLastPulseAt{};
 			std::chrono::steady_clock::time_point playerOwnedCombatCleanupExpiresAt{};
 
+			[[nodiscard]] std::size_t PendingMarkerCleanupCount() const noexcept
+			{
+				std::size_t count = 0u;
+				for (const auto& handle : pendingMarkerCleanup) {
+					count += handle ? 1u : 0u;
+				}
+				return count;
+			}
+
+			[[nodiscard]] bool HasRuntimeWork() const noexcept
+			{
+				return !activeTraps.empty() || PendingMarkerCleanupCount() != 0u;
+			}
+
+			void RefreshRuntimeWorkFlag() noexcept
+			{
+				hasActiveTraps.store(HasRuntimeWork(), std::memory_order_relaxed);
+			}
+
+			[[nodiscard]] bool QueuePendingMarkerCleanup(const RE::ObjectRefHandle& a_handle) noexcept
+			{
+				if (!a_handle) {
+					return false;
+				}
+				for (const auto& handle : pendingMarkerCleanup) {
+					if (handle && handle == a_handle) {
+						return true;
+					}
+				}
+				for (auto& handle : pendingMarkerCleanup) {
+					if (!handle) {
+						handle = a_handle;
+						RefreshRuntimeWorkFlag();
+						return true;
+					}
+				}
+				return false;
+			}
+
+			void DiscardPendingMarkerCleanup() noexcept
+			{
+				for (auto& handle : pendingMarkerCleanup) {
+					handle.reset();
+				}
+				RefreshRuntimeWorkFlag();
+			}
+
 			void ClearTrapQueue() noexcept
 			{
 				activeTraps.clear();
 				tickCursor = 0u;
-				hasActiveTraps.store(false, std::memory_order_relaxed);
+				RefreshRuntimeWorkFlag();
 			}
 
 			void ClearStaleCombatTracking() noexcept

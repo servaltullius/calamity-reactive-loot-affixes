@@ -2,6 +2,7 @@
 #include "CalamityAffixes/ProcFeedback.h"
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
+#include "CalamityAffixes/TrapMarkerAnimationPolicy.h"
 #include "CalamityAffixes/TrapTickSelection.h"
 
 #include <algorithm>
@@ -20,12 +21,13 @@ namespace CalamityAffixes
 		auto& activeTraps = trapState.activeTraps;
 		auto& trapTickCursor = trapState.tickCursor;
 		const auto now = std::chrono::steady_clock::now();
+		ProcessPendingTrapMarkerCleanup();
 		if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
-			ClearTrapRuntimeState();
+			ClearTrapRuntimeState("runtime-disabled");
 			return;
 		}
 		if (_runtimeSettings.disableTrapSystemTick) {
-			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
+			ClearTrapRuntimeState("tick-disabled");
 			if (_runtimeSettings.combatDebugLog) {
 				static auto nextLogAt = std::chrono::steady_clock::time_point{};
 				if (nextLogAt.time_since_epoch().count() == 0 || now >= nextLogAt) {
@@ -253,7 +255,7 @@ namespace CalamityAffixes
 		};
 
 		if (activeTraps.empty()) {
-			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
+			trapState.RefreshRuntimeWorkFlag();
 			tryResolveStalePlayerCombat();
 			return;
 		}
@@ -274,12 +276,41 @@ namespace CalamityAffixes
 		}
 
 		if (activeTraps.empty()) {
-			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
+			trapState.RefreshRuntimeWorkFlag();
 			tryResolveStalePlayerCombat();
 			return;
 		}
 
 		for (auto& trap : activeTraps) {
+			const auto animationPhaseAtTickStart = trap.markerAnimationPhase;
+			ProcessTrapMarkerAnimation(trap, now);
+			if (trap.markerAnimationPhase == TrapMarkerAnimationPhase::kInitial) {
+				// StartOpen must either be accepted or exhaust its bounded retries
+				// before gameplay can arm the trap.
+				continue;
+			}
+			const bool animatedRearmPending =
+				trap.triggeredCount > 0u && trap.feedback.worldMarkerAnimation &&
+				trap.visualState != TrapVisualState::kArmed;
+			if (animatedRearmPending && !trap.markerRearmAnimationResolved &&
+				animationPhaseAtTickStart == TrapMarkerAnimationPhase::kNone &&
+				trap.markerAnimationPhase == TrapMarkerAnimationPhase::kNone) {
+				const auto openGate = std::chrono::milliseconds(
+					trap.feedback.worldMarkerAnimation->openGateMilliseconds);
+				if (detail::ShouldStartTrapMarkerRearmAnimation(now, trap.armedAt, openGate)) {
+					// Pre-roll Reset01 inside the existing rearm delay. The accepted
+					// event's gate is then measured from its actual acceptance time.
+					QueueTrapMarkerAnimation(trap, TrapMarkerAnimationPhase::kRearm, now);
+					ProcessTrapMarkerAnimation(trap, now);
+				}
+			}
+			if (animatedRearmPending &&
+				(trap.markerAnimationPhase == TrapMarkerAnimationPhase::kRearm ||
+					(now >= trap.armedAt && !trap.markerRearmAnimationResolved))) {
+				// A pending Trigger01 keeps phase priority; a pending Reset01 keeps
+				// gameplay disarmed. Exhaustion clears the phase and fails open.
+				continue;
+			}
 			if (now >= trap.armedAt && trap.visualState != TrapVisualState::kArmed) {
 				StartTrapMarker(trap, TrapVisualState::kArmed, now);
 				PlayTrapFeedbackCue(trap, trap.feedback.armed);
@@ -295,7 +326,7 @@ namespace CalamityAffixes
 		}
 
 		if (_runtimeSettings.disableTrapCasts) {
-			trapState.hasActiveTraps.store(!activeTraps.empty(), std::memory_order_relaxed);
+			trapState.RefreshRuntimeWorkFlag();
 			if (_runtimeSettings.combatDebugLog) {
 				static auto nextLogAt = std::chrono::steady_clock::time_point{};
 				if (nextLogAt.time_since_epoch().count() == 0 || now >= nextLogAt) {
@@ -368,8 +399,16 @@ namespace CalamityAffixes
 			}
 			const auto trapIndex = trapTickCursor;
 			++visitedTraps;
-			const TrapInstance trapSnapshot = activeTraps[trapIndex];
-			if (now < trapSnapshot.armedAt) {
+			TrapInstance trapSnapshot = activeTraps[trapIndex];
+			const bool requiredMarkerAnimationPending =
+				trapSnapshot.feedback.worldMarkerAnimation &&
+				(trapSnapshot.visualState != TrapVisualState::kArmed ||
+					trapSnapshot.markerAnimationPhase == TrapMarkerAnimationPhase::kInitial ||
+					trapSnapshot.markerAnimationPhase == TrapMarkerAnimationPhase::kRearm);
+			if (detail::ShouldBlockTrapCastForMarkerAnimation(
+					now,
+					trapSnapshot.armedAt,
+					requiredMarkerAnimationPending)) {
 				if (!activeTraps.empty()) {
 					trapTickCursor = (trapTickCursor + 1u) % activeTraps.size();
 				}
@@ -395,6 +434,7 @@ namespace CalamityAffixes
 			RE::Actor* triggeredTarget = nullptr;
 			std::uint32_t triggeredTargets = 0u;
 			const std::uint32_t maxTargetsPerTrigger = std::max(1u, trapSnapshot.maxTargetsPerTrigger);
+			const std::size_t targetCastCost = detail::TrapTargetCastCost(trapSnapshot.extraSpell != nullptr);
 			const float radiusSq = trapSnapshot.radius * trapSnapshot.radius;
 
 			lock.unlock();
@@ -405,7 +445,7 @@ namespace CalamityAffixes
 				}
 				auto& a = *candidateActor;
 
-				if (!hasTrapCastBudget()) {
+				if (!hasTrapCastBudget(targetCastCost)) {
 					break;
 				}
 
@@ -427,8 +467,15 @@ namespace CalamityAffixes
 					continue;
 				}
 
-				if (!hasTrapCastBudget()) {
+				if (!hasTrapCastBudget(targetCastCost)) {
 					break;
+				}
+				if (!triggered) {
+					// The graph event must precede the first gameplay cast. If the
+					// graph is still loading, the bounded pending state is copied
+					// back below and retried by later trap polls.
+					QueueTrapMarkerAnimation(trapSnapshot, TrapMarkerAnimationPhase::kTrigger, now);
+					ProcessTrapMarkerAnimation(trapSnapshot, now);
 				}
 				magicCaster->CastSpellImmediate(
 					trapSnapshot.spell,
@@ -440,7 +487,7 @@ namespace CalamityAffixes
 					owner);
 				trapCastsConsumed += 1u;
 
-				if (trapSnapshot.extraSpell && hasTrapCastBudget()) {
+				if (trapSnapshot.extraSpell) {
 					magicCaster->CastSpellImmediate(
 						trapSnapshot.extraSpell,
 						false,
@@ -461,7 +508,7 @@ namespace CalamityAffixes
 				if (triggeredTargets >= maxTargetsPerTrigger) {
 					break;
 				}
-				if (!hasTrapCastBudget()) {
+				if (!hasTrapCastBudget(targetCastCost)) {
 					break;
 				}
 			}
@@ -481,6 +528,10 @@ namespace CalamityAffixes
 			}
 
 			if (triggered) {
+				trap.markerAnimationPhase = trapSnapshot.markerAnimationPhase;
+				trap.markerAnimationAttempts = trapSnapshot.markerAnimationAttempts;
+				trap.markerAnimationNextAttemptAt = trapSnapshot.markerAnimationNextAttemptAt;
+				trap.markerRearmAnimationResolved = false;
 				if (IsPlayerOwned(owner)) {
 					constexpr auto kPlayerOwnedTrapCombatCleanupLease = std::chrono::seconds(45);
 					trapState.playerOwnedCombatCleanupExpiresAt = std::max(
@@ -531,9 +582,7 @@ namespace CalamityAffixes
 			}
 		}
 
-		if (activeTraps.empty()) {
-			trapState.hasActiveTraps.store(false, std::memory_order_relaxed);
-		}
+		trapState.RefreshRuntimeWorkFlag();
 
 		tryResolveStalePlayerCombat();
 	}

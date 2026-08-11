@@ -76,7 +76,7 @@ namespace CalamityAffixes
 		_affixRuntimeState.activeKillTriggerAffixIndices.clear();
 		_affixRuntimeState.activeLowHealthTriggerAffixIndices.clear();
 		_combatState.ResetTransientState();
-		ClearTrapRuntimeState();
+		ClearTrapRuntimeState("load");
 		_runewordState.ResetSelectionAndProgress();
 		_corpseExplosionSeenCorpses.clear();
 		_corpseExplosionState = {};

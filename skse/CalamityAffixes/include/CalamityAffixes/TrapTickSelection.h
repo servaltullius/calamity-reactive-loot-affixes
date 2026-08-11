@@ -32,6 +32,14 @@ namespace CalamityAffixes::detail
 		return !a_isTrapOwner && !a_isDead && a_hostileToOwner;
 	}
 
+	// A trap target is an atomic gameplay step: when an action has a paired
+	// extra spell, both casts must fit in the current tick budget. Otherwise a
+	// one-shot trap could be consumed after applying only half of its contract.
+	[[nodiscard]] constexpr std::size_t TrapTargetCastCost(bool a_hasExtraSpell) noexcept
+	{
+		return a_hasExtraSpell ? 2u : 1u;
+	}
+
 	// Whether a trap may spend a_cost more casts this tick.
 	//
 	// A budget of 0 means "unmetered", matching the runtime setting where 0

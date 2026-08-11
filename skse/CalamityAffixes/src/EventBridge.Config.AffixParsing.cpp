@@ -289,13 +289,65 @@ namespace CalamityAffixes
 
 		const auto& feedback = *feedbackIt;
 		const auto markerSpec = feedback.value("markerArtObjectEditorId", std::string{});
-		a_out.action.trapFeedback.markerArt = ConfigShared::LookupFormFromSpec<RE::BGSArtObject>(markerSpec, a_handler);
-		if (!a_out.action.trapFeedback.markerArt) {
+		const auto markerWorldObjectSpec = feedback.value("markerWorldObjectEditorId", std::string{});
+		if (!markerSpec.empty()) {
+			a_out.action.trapFeedback.markerArt = ConfigShared::LookupFormFromSpec<RE::BGSArtObject>(markerSpec, a_handler);
+		}
+		if (!markerWorldObjectSpec.empty()) {
+			a_out.action.trapFeedback.markerWorldObject =
+				ConfigShared::LookupFormFromSpec<RE::TESObjectSTAT>(markerWorldObjectSpec, a_handler);
+		}
+		if (!markerSpec.empty() && !a_out.action.trapFeedback.markerArt) {
 			SKSE::log::warn(
-				"CalamityAffixes: trap marker ArtObject not found; trap feedback disabled (affixId={}, art={}).",
+				"CalamityAffixes: trap marker ArtObject not found; particle marker unavailable (affixId={}, art={}).",
 				a_out.id,
 				markerSpec);
+		}
+		if (!markerWorldObjectSpec.empty() && !a_out.action.trapFeedback.markerWorldObject) {
+			SKSE::log::warn(
+				"CalamityAffixes: trap marker world object not found or not Static-compatible (STAT/MSTT); placed marker unavailable (affixId={}, object={}).",
+				a_out.id,
+				markerWorldObjectSpec);
+		}
+		if (!a_out.action.trapFeedback.markerArt && !a_out.action.trapFeedback.markerWorldObject) {
+			SKSE::log::warn(
+				"CalamityAffixes: trap feedback has no usable marker; trap feedback disabled (affixId={}).",
+				a_out.id);
 			return;
+		}
+
+		if (const auto animationIt = feedback.find("worldMarkerAnimation");
+			animationIt != feedback.end() && animationIt->is_object()) {
+			const auto readAnimationEvent = [&](std::string_view a_name) {
+				const auto eventIt = animationIt->find(std::string(a_name));
+				return eventIt != animationIt->end() && eventIt->is_string() ?
+					eventIt->get<std::string>() : std::string{};
+			};
+			TrapWorldMarkerAnimation animation{
+				.initialEvent = readAnimationEvent("initialEvent"),
+				.triggerEvent = readAnimationEvent("triggerEvent"),
+				.rearmEvent = readAnimationEvent("rearmEvent")
+			};
+			if (const auto gateIt = animationIt->find("openGateMilliseconds");
+				gateIt != animationIt->end() && gateIt->is_number_integer()) {
+				const auto rawGate = gateIt->get<std::int64_t>();
+				animation.openGateMilliseconds = static_cast<std::uint32_t>(
+					std::clamp<std::int64_t>(rawGate, 0, 5000));
+			}
+
+			const bool complete = !animation.initialEvent.empty() &&
+				!animation.triggerEvent.empty() && !animation.rearmEvent.empty();
+			if (!a_out.action.trapFeedback.markerWorldObject) {
+				SKSE::log::warn(
+					"CalamityAffixes: trap world-marker animation ignored without a Static-compatible world marker (affixId={}).",
+					a_out.id);
+			} else if (!complete) {
+				SKSE::log::warn(
+					"CalamityAffixes: incomplete trap world-marker animation ignored (affixId={}).",
+					a_out.id);
+			} else {
+				a_out.action.trapFeedback.worldMarkerAnimation = std::move(animation);
+			}
 		}
 		a_out.action.trapFeedback.unarmedScale = std::clamp(feedback.value("unarmedScale", 0.75f), 0.1f, 4.0f);
 		a_out.action.trapFeedback.armedScale = std::clamp(feedback.value("armedScale", 1.0f), 0.1f, 4.0f);

@@ -128,7 +128,7 @@ public sealed class EffectReworkContractTests
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(35, records.Length);
+        Assert.Equal(41, records.Length);
         AssertMagicEffect(records[0], "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA", "Stamina", hostile: false, recover: false);
         AssertMagicEffect(records[1], "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE", "AttackDamageMult", hostile: false, recover: true);
         AssertSpellEffects(records[2], "CAFF_SPEL_INCOMING_VOICE_POWER",
@@ -146,6 +146,63 @@ public sealed class EffectReworkContractTests
         AssertSpellEffects(records[8], "CAFF_SPEL_RW_WEALTH_PASSIVE",
             ("CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT", 75.0, 0),
             ("CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT", 15.0, 0));
+    }
+
+    [Fact]
+    public void SpawnTrapSpells_UseRuntimeHostileSelectionWithoutEngineAreaSplash()
+    {
+        var module = ReadJson(Path.Combine("affixes", "modules", "keywords.affixes.core.json"));
+        var affixes = module.EnumerateArray().Select(affix => affix.Clone()).ToArray();
+        var spells = affixes
+            .Where(affix => affix.TryGetProperty("records", out var records) &&
+                (records.TryGetProperty("spell", out _) || records.TryGetProperty("spells", out _)))
+            .SelectMany(affix =>
+            {
+                var records = affix.GetProperty("records");
+                if (records.TryGetProperty("spells", out var spellArray))
+                {
+                    return spellArray.EnumerateArray().Select(spell => spell.Clone());
+                }
+                return new[] { records.GetProperty("spell").Clone() };
+            })
+            .ToDictionary(spell => spell.GetProperty("editorId").GetString()!);
+
+        var expectedTraps = new (string AffixId, double Radius)[]
+        {
+            ("rune_trap", 150.0),
+            ("plague_spore", 150.0),
+            ("tar_blight", 170.0),
+            ("siphon_spore", 170.0),
+            ("chaos_rune", 150.0),
+        };
+
+        foreach (var expected in expectedTraps)
+        {
+            var affix = affixes.Single(candidate => candidate.GetProperty("id").GetString() == expected.AffixId);
+            var action = affix.GetProperty("runtime").GetProperty("action");
+            Assert.Equal("SpawnTrap", action.GetProperty("type").GetString());
+            Assert.Equal(expected.Radius, action.GetProperty("radius").GetDouble());
+            Assert.Equal(2, action.GetProperty("maxTargetsPerTrigger").GetInt32());
+
+            var spellEditorIds = new List<string>
+            {
+                action.GetProperty("spellEditorId").GetString()!,
+            };
+            if (action.TryGetProperty("extraSpells", out var extraSpells))
+            {
+                spellEditorIds.AddRange(extraSpells.EnumerateArray()
+                    .Select(extra => extra.GetProperty("spellEditorId").GetString()!));
+            }
+
+            foreach (var spellEditorId in spellEditorIds)
+            {
+                Assert.True(spells.TryGetValue(spellEditorId, out var spell), $"Missing trap spell: {spellEditorId}");
+                var effects = spell.TryGetProperty("effects", out var effectArray)
+                    ? effectArray.EnumerateArray().ToArray()
+                    : new[] { spell.GetProperty("effect") };
+                Assert.All(effects, effect => Assert.Equal(0, effect.GetProperty("area").GetInt32()));
+            }
+        }
     }
 
     [Fact]

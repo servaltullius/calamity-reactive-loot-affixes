@@ -363,7 +363,9 @@ class ReleaseVerifyTests(unittest.TestCase):
 
         package_version = "test-prebuilt-pex"
         out_zip = self._package_zip_path(package_version)
+        out_pdb = out_zip.with_suffix(".pdb")
         out_zip.unlink(missing_ok=True)
+        out_pdb.unlink(missing_ok=True)
 
         with tempfile.TemporaryDirectory(prefix="caff-papyrus-prebuilt-") as temp_dir:
             temp_root = Path(temp_dir)
@@ -393,14 +395,20 @@ class ReleaseVerifyTests(unittest.TestCase):
                         for name in archive.namelist()
                         if name.endswith(".pex")
                     }
+                    packaged_pdbs = [
+                        name for name in archive.namelist() if name.casefold().endswith(".pdb")
+                    ]
                 committed = {
                     path.name: path.read_bytes()
                     for path in (self.repo_root / "Data" / "Scripts").glob("*.pex")
                 }
                 self.assertEqual(committed, shipped)
                 self.assertEqual(3, len(shipped))
+                self.assertEqual([], packaged_pdbs, "PDB must remain a companion file outside the MO2 ZIP")
+                self.assertTrue(out_pdb.is_file(), "matching PDB must be archived beside the MO2 ZIP")
             finally:
                 out_zip.unlink(missing_ok=True)
+                out_pdb.unlink(missing_ok=True)
 
     def test_build_mo2_zip_refuses_to_package_when_the_papyrus_pin_fails(self) -> None:
         """No compiler AND an unverifiable .pex must abort, not ship anyway.
@@ -508,6 +516,53 @@ class ReleaseVerifyTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("MISSING: CalamityAffixes/SKSE/Plugins/CalamityAffixes/runtime_contract.json", result.stdout)
         self.assertIn("UNEXPECTED PEX: CalamityAffixes/Scripts/CalamityAffixes_AffixManager.pex", result.stdout)
+
+    def test_verify_mo2_zip_rejects_embedded_pdb_case_insensitively(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="caff-verify-zip-pdb-") as temp_dir:
+            zip_path = Path(temp_dir) / "CalamityAffixes_MO2_v1.2.3_2026-07-14.zip"
+            self._write_minimal_mo2_zip(
+                zip_path,
+                extra={"CalamityAffixes/SKSE/Plugins/CalamityAffixes.PdB": b"symbols"},
+            )
+
+            result = subprocess.run(
+                ["python3", str(self.verify_mo2_zip_path), str(zip_path)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "UNEXPECTED PDB: CalamityAffixes/SKSE/Plugins/CalamityAffixes.PdB",
+            result.stdout,
+        )
+
+    def test_verify_mo2_zip_rejects_bundled_vanilla_trap_assets_case_insensitively(self) -> None:
+        bundled_meshes = (
+            "CalamityAffixes/mEsHeS/TrApS/BeArTrAp/BeArTrAp01.NiF",
+            "CalamityAffixes/Meshes/Traps/PressurePlate/TrapStonePressurePlate01.nif",
+            "CalamityAffixes/Meshes/Actors/DLC02/Spider_poison/CharacterAssets/spidersackdead.nif",
+            "CalamityAffixes/Meshes/Traps/OilTrapPuddle01/OilTrapPuddle01.nif",
+            "CalamityAffixes/Meshes/Actors/DLC02/Spider_poison/CharacterAssets/ExpSpiderEggsAlbino.nif",
+            "CalamityAffixes/Meshes/Traps/PressurePlateMetal/TrapPressurePlateMetal01.nif",
+        )
+
+        for index, bundled_mesh in enumerate(bundled_meshes):
+            with self.subTest(bundled_mesh=bundled_mesh):
+                with tempfile.TemporaryDirectory(prefix=f"caff-verify-zip-trap-{index}-") as temp_dir:
+                    zip_path = Path(temp_dir) / "CalamityAffixes_MO2_v1.2.3_2026-07-14.zip"
+                    self._write_minimal_mo2_zip(zip_path, extra={bundled_mesh: b"vanilla-mesh"})
+
+                    result = subprocess.run(
+                        ["python3", str(self.verify_mo2_zip_path), str(zip_path)],
+                        text=True,
+                        capture_output=True,
+                        check=False,
+                    )
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(f"BUNDLED VANILLA ASSET: {bundled_mesh}", result.stdout)
 
     def test_verify_mo2_zip_rejects_a_panel_view_missing_a_file_it_loads(self) -> None:
         """A dropped stylesheet or script leaves the panel unstyled or dead in
