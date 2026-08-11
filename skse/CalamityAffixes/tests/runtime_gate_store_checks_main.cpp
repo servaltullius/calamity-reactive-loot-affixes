@@ -11,6 +11,7 @@ int main()
 	const bool pluginLoggingExceptionSafetyOk = CheckPluginLoggingExceptionSafetyPolicy();
 	const bool rebuildActiveCountsLoggingOk = CheckRebuildActiveCountsLoggingPolicy();
 	const bool rebuildActiveCountsExtractionOk = CheckRebuildActiveCountsExtractionPolicy();
+	const bool equippedBuildSummaryPolicyOk = CheckEquippedBuildSummaryPolicy();
 	const bool healthDamageSignatureWindowOk = CheckHealthDamageSignatureWindowPolicy();
 	const bool healthDamageGuardHelperFlowOk = CheckHealthDamageGuardHelperFlow();
 	const bool tesHitFallbackSourceValidationOk = CheckTesHitFallbackSourceValidationPolicy();
@@ -101,7 +102,7 @@ int main()
 	const bool reforgeTargetAffixCountBoundsOk = CheckReforgeTargetAffixCountBounds();
 	const bool reforgeTargetWithRunewordSlotsOk = CheckReforgeTargetWithRunewordSlots();
 	const bool affixCountWeightsAllowMultiAffixOk = CheckAffixCountWeightsAllowMultiAffix();
-	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && healthDamageSignatureWindowOk && healthDamageGuardHelperFlowOk && tesHitFallbackSourceValidationOk && bloomTrapProcFeedbackOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
+	return (gateOk && storeOk && hookIndexPolicyOk && hooksDispatchExtractionOk && pluginLoggingExceptionSafetyOk && rebuildActiveCountsLoggingOk && rebuildActiveCountsExtractionOk && equippedBuildSummaryPolicyOk && healthDamageSignatureWindowOk && healthDamageGuardHelperFlowOk && tesHitFallbackSourceValidationOk && bloomTrapProcFeedbackOk && configLoadPipelineExtractionOk && hybridCurrencyDropPolicyOk && affixSpecialActionStateExtractionOk && triggerProcPolicyExtractionOk && processTriggerExtractionOk && lootSelectionOk && shuffleBagSelectionOk && weightedShuffleBagSelectionOk &&
 	        shuffleBagConstraintsOk && slotSanitizerOk && fixedWindowBudgetOk && immediateHealthReadbackOk && recentlyLuckyOk && tooltipPolicyOk &&
 	        lootPreviewPolicyOk &&
 	        lootServiceExtractionOk &&

@@ -11,32 +11,52 @@ const {
 } = require("../prisma_view_source.js");
 
 class FakeClassList {
-  add() {}
-  remove() {}
-  toggle(_name, enabled) { return Boolean(enabled); }
-  contains() { return false; }
+  constructor() { this.values = new Set(); }
+  add(...names) { for (const name of names) this.values.add(name); }
+  remove(...names) { for (const name of names) this.values.delete(name); }
+  toggle(name, enabled) {
+    const next = enabled === undefined ? !this.values.has(name) : Boolean(enabled);
+    if (next) this.values.add(name);
+    else this.values.delete(name);
+    return next;
+  }
+  contains(name) { return this.values.has(name); }
 }
 
 class FakeElement {
-  constructor() {
+  constructor(tagName = "div") {
+    this.tagName = tagName.toUpperCase();
     this.classList = new FakeClassList();
+    this.className = "";
+    this.children = [];
+    this.attributes = new Map();
     this.dataset = {};
+    this.hidden = false;
     this.style = { setProperty() {} };
     this.scrollTop = 0;
     this.scrollHeight = 0;
     this.clientHeight = 0;
+    this.textContent = "";
+    this.title = "";
   }
 
   addEventListener() {}
-  appendChild(child) { return child; }
+  appendChild(child) { this.children.push(child); return child; }
   contains() { return false; }
   focus() {}
-  getAttribute() { return null; }
+  get firstChild() { return this.children[0] || null; }
+  getAttribute(name) { return this.attributes.has(name) ? this.attributes.get(name) : null; }
   getBoundingClientRect() {
     return { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
   }
-  removeAttribute() {}
-  setAttribute() {}
+  removeAttribute(name) { this.attributes.delete(name); }
+  removeChild(child) {
+    const index = this.children.indexOf(child);
+    if (index >= 0) this.children.splice(index, 1);
+    return child;
+  }
+  replaceChildren(...children) { this.children = [...children]; }
+  setAttribute(name, value) { this.attributes.set(name, String(value)); }
 }
 
 const elements = new Map();
@@ -52,8 +72,8 @@ const document = {
   body: element("body"),
   documentElement: element("documentElement"),
   addEventListener() {},
-  createDocumentFragment: () => new FakeElement(),
-  createElement: () => new FakeElement(),
+  createDocumentFragment: () => new FakeElement("fragment"),
+  createElement: (tagName) => new FakeElement(tagName),
   getElementById: element,
   querySelectorAll: () => []
 };
@@ -129,6 +149,262 @@ assert.strictEqual(
   storedRunewordState.baseCompatibilityMessageKo,
   compatibilityPayload.baseCompatibilityMessageKo
 );
+
+const buildSummaryPayload = {
+  ready: true,
+  runtimeEnabled: true,
+  equippedAffixSlots: 8,
+  entries: [
+    {
+      token: "18446744073709551613",
+      displayNameEn: "Storm Brand",
+      displayNameKo: "폭풍 낙인",
+      group: "offense",
+      triggerKey: "hit",
+      slotKind: "prefix",
+      suffixState: "none",
+      equippedCount: 2,
+      hasPassiveContribution: true,
+      passiveContributionActive: true,
+      passiveSpellDisabled: false,
+      hasProcRoll: true,
+      procRollChancePct: 24.5,
+      hasLuckyHitGate: true,
+      luckyHitGateChancePct: 30
+    },
+    {
+      token: "18446744073709551612",
+      displayNameEn: "Last Shelter",
+      displayNameKo: "마지막 피난처",
+      group: "defense",
+      triggerKey: "lowHealth",
+      slotKind: "runeword",
+      suffixState: "none",
+      equippedCount: 1,
+      hasProcRoll: false,
+      procRollChancePct: 0,
+      hasLuckyHitGate: false,
+      luckyHitGateChancePct: 0
+    },
+    {
+      token: "18446744073709551611",
+      displayNameEn: "Grave Spark",
+      displayNameKo: "무덤 불꽃",
+      group: "kill",
+      triggerKey: "kill",
+      slotKind: "prefix",
+      suffixState: "none",
+      equippedCount: 1,
+      hasProcRoll: true,
+      procRollChancePct: 120,
+      hasLuckyHitGate: false,
+      luckyHitGateChancePct: 0
+    },
+    {
+      token: "18446744073709551610",
+      displayNameEn: "Vitality III",
+      displayNameKo: "활력 III",
+      group: "passive",
+      triggerKey: "passive",
+      slotKind: "suffix",
+      suffixState: "highest",
+      equippedCount: 1,
+      hasPassiveContribution: true,
+      passiveContributionActive: true,
+      passiveSpellDisabled: true,
+      hasProcRoll: false,
+      procRollChancePct: 0,
+      hasLuckyHitGate: false,
+      luckyHitGateChancePct: 0
+    },
+    {
+      token: "18446744073709551609",
+      displayNameEn: "Vitality I",
+      displayNameKo: "활력 I",
+      group: "passive",
+      triggerKey: "passive",
+      slotKind: "suffix",
+      suffixState: "suppressed",
+      equippedCount: 1,
+      hasPassiveContribution: true,
+      passiveContributionActive: false,
+      passiveSpellDisabled: true,
+      hasProcRoll: false,
+      procRollChancePct: 0,
+      hasLuckyHitGate: false,
+      luckyHitGateChancePct: 0
+    },
+    {
+      token: "18446744073709551608",
+      displayNameEn: "Traveler",
+      displayNameKo: "여행자",
+      group: "passive",
+      triggerKey: "passive",
+      slotKind: "suffix",
+      suffixState: "stacking",
+      equippedCount: 1,
+      hasPassiveContribution: true,
+      passiveContributionActive: false,
+      passiveSpellDisabled: true,
+      hasProcRoll: false,
+      procRollChancePct: 0,
+      hasLuckyHitGate: false,
+      luckyHitGateChancePct: 0
+    },
+    {
+      token: "18446744073709551607",
+      displayNameEn: "Scrollkeeper I",
+      displayNameKo: "두루마리 수호자 I",
+      group: "passive",
+      triggerKey: "passive",
+      slotKind: "suffix",
+      suffixState: "suppressed",
+      equippedCount: 1,
+      hasPassiveContribution: true,
+      passiveContributionActive: true,
+      passiveSpellDisabled: true,
+      hasProcRoll: false,
+      procRollChancePct: 0,
+      hasLuckyHitGate: false,
+      luckyHitGateChancePct: 0
+    },
+    // Numeric 64-bit tokens are unsafe and must not enter the summary state.
+    {
+      token: 18446744073709551606,
+      displayNameEn: "Unsafe number",
+      displayNameKo: "안전하지 않은 숫자",
+      group: "offense",
+      triggerKey: "hit",
+      slotKind: "prefix",
+      suffixState: "none",
+      equippedCount: 1,
+      hasProcRoll: true,
+      procRollChancePct: 10,
+      hasLuckyHitGate: false,
+      luckyHitGateChancePct: 0
+    }
+  ]
+};
+
+sandbox.setRunewordPanelState(JSON.stringify({
+  ...compatibilityPayload,
+  equippedBuild: buildSummaryPayload
+}));
+const storedEquippedBuildState = new vm.Script(
+  "equippedBuildState",
+  { filename: "equipped-build-state-contract-test.js" }
+).runInContext(context);
+assert.strictEqual(storedEquippedBuildState.received, true);
+assert.strictEqual(storedEquippedBuildState.ready, true);
+assert.strictEqual(storedEquippedBuildState.entries.length, 7);
+assert.strictEqual(storedEquippedBuildState.entries[0].token, "18446744073709551613");
+assert.strictEqual(storedEquippedBuildState.entries[0].hasPassiveContribution, true);
+assert.strictEqual(storedEquippedBuildState.entries[0].passiveContributionActive, true);
+assert.strictEqual(storedEquippedBuildState.entries[0].passiveSpellDisabled, false);
+assert.strictEqual(storedEquippedBuildState.entries[1].hasPassiveContribution, false);
+assert.strictEqual(storedEquippedBuildState.entries[1].passiveContributionActive, false);
+assert.strictEqual(storedEquippedBuildState.entries[1].passiveSpellDisabled, false);
+assert.strictEqual(storedEquippedBuildState.entries[2].procRollChancePct, 100);
+assert.strictEqual(sandbox.resolveEquippedBuildViewState(storedEquippedBuildState), "ready");
+
+sandbox.renderEquippedBuildSummary();
+assert.strictEqual(element("equippedBuildGroups").hidden, false);
+assert.strictEqual(element("equippedBuildChanceHint").hidden, false);
+assert.strictEqual(element("equippedBuildGroups").getAttribute("aria-busy"), "false");
+assert.strictEqual(element("equippedBuildOffenseCount").textContent, "2");
+assert.strictEqual(element("equippedBuildDefenseCount").textContent, "1");
+assert.strictEqual(element("equippedBuildKillCount").textContent, "1");
+assert.strictEqual(element("equippedBuildPassiveCount").textContent, "6");
+assert(
+  element("equippedBuildPassiveCount").getAttribute("aria-label").includes(
+    "6 effect copies shown in this group"
+  )
+);
+assert.strictEqual(element("equippedBuildOffenseList").children.length, 1);
+assert.strictEqual(element("equippedBuildPassiveList").children.length, 5);
+assert.strictEqual(element("equippedBuildSlotCount").textContent, "8 slots / 슬롯 8개");
+
+function collectFakeElementText(node) {
+  return [node.textContent, ...node.children.map(collectFakeElementText)].join(" ");
+}
+
+const offenseText = collectFakeElementText(element("equippedBuildOffenseList"));
+assert(offenseText.includes("On hit"));
+assert(offenseText.includes("Conditional proc roll 24.5%"));
+assert(offenseText.includes("Shared single roll"));
+assert(offenseText.includes("Lucky Hit gate 30%"));
+assert(offenseText.includes("Passive also active"));
+const passiveText = collectFakeElementText(element("equippedBuildPassiveList"));
+assert(passiveText.includes("Storm Brand"));
+assert(passiveText.includes("Highest tier selected"));
+assert(passiveText.includes("Suppressed by higher tier"));
+assert(passiveText.includes("Independent suffix"));
+assert(passiveText.includes("Passive active"));
+assert(passiveText.includes("Stat passive active · spell off"));
+assert(passiveText.includes("Passive spell disabled by runtime setting"));
+assert(passiveText.includes("Other passive contribution active"));
+const suppressedPassiveEntry = element("equippedBuildPassiveList").children.find(
+  (child) => child.children[0]?.children[0]?.textContent.startsWith("Vitality I /")
+);
+assert(suppressedPassiveEntry);
+assert.strictEqual(suppressedPassiveEntry.className, "ebEntry suppressed");
+assert(
+  !collectFakeElementText(suppressedPassiveEntry).includes(
+    "Passive spell disabled by runtime setting"
+  )
+);
+const partiallySuppressedPassiveEntry = element("equippedBuildPassiveList").children.find(
+  (child) => child.children[0]?.children[0]?.textContent.startsWith("Scrollkeeper I /")
+);
+assert(partiallySuppressedPassiveEntry);
+assert.strictEqual(partiallySuppressedPassiveEntry.className, "ebEntry suppressed-partial");
+assert(
+  collectFakeElementText(partiallySuppressedPassiveEntry).includes(
+    "Other passive contribution active"
+  )
+);
+assert(
+  element("equippedBuildChanceHint").textContent.includes(
+    "Hybrid effects may appear in both their trigger group and Passives"
+  )
+);
+
+sandbox.setRunewordPanelState(JSON.stringify({
+  equippedBuild: { ready: true, runtimeEnabled: false, equippedAffixSlots: 0, entries: [] }
+}));
+sandbox.renderEquippedBuildSummary();
+assert.strictEqual(sandbox.resolveEquippedBuildViewState(), "runtime-disabled");
+assert.strictEqual(element("equippedBuildGroups").hidden, true);
+assert.strictEqual(element("equippedBuildChanceHint").hidden, true);
+assert(collectFakeElementText(element("equippedBuildStatus")).includes("Calamity effects are disabled"));
+
+sandbox.setRunewordPanelState(JSON.stringify({
+  equippedBuild: { ready: false, runtimeEnabled: false, equippedAffixSlots: 0, entries: [] }
+}));
+sandbox.renderEquippedBuildSummary();
+assert.strictEqual(
+  sandbox.resolveEquippedBuildViewState(),
+  "syncing",
+  "startup/cache-not-ready state must not be presented as an explicit runtime disable"
+);
+
+sandbox.setRunewordPanelState(JSON.stringify({
+  equippedBuild: { ready: false, runtimeEnabled: true, equippedAffixSlots: 0, entries: [] }
+}));
+sandbox.renderEquippedBuildSummary();
+assert.strictEqual(sandbox.resolveEquippedBuildViewState(), "syncing");
+assert.strictEqual(element("equippedBuildGroups").getAttribute("aria-busy"), "true");
+assert(collectFakeElementText(element("equippedBuildStatus")).includes("Synchronizing equipped effects"));
+
+sandbox.setRunewordPanelState(JSON.stringify({
+  equippedBuild: { ready: true, runtimeEnabled: true, equippedAffixSlots: 0, entries: [] }
+}));
+sandbox.renderEquippedBuildSummary();
+assert.strictEqual(sandbox.resolveEquippedBuildViewState(), "empty");
+assert(collectFakeElementText(element("equippedBuildStatus")).includes("No Calamity affixes equipped"));
+
+// Restore the original fixture before the existing runeword action assertions.
+sandbox.setRunewordPanelState(JSON.stringify(compatibilityPayload));
 
 const completedRunewordActionState = new vm.Script(
   "resolveRunewordPanelActionState(runewordPanelState)",

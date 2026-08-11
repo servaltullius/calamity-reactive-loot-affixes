@@ -66,6 +66,7 @@
 			bool a_refreshConfiguredPassivesOnPostLoad = false);
 		void LogRebuildActiveCountsDebugSummary(
 			const std::unordered_set<RE::SpellItem*>& a_desiredPassives) const;
+		void PopulateEquippedBuildSummary(RunewordPanelState& a_panelState) const;
 		void MarkLootEvaluatedInstance(std::uint64_t a_instanceKey);
 		void ForgetLootEvaluatedInstance(std::uint64_t a_instanceKey);
 		void PruneLootEvaluatedInstances();

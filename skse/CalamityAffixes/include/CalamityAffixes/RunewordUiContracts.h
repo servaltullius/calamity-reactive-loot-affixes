@@ -42,6 +42,33 @@ namespace CalamityAffixes
 		std::string slotKind{};
 	};
 
+	struct EquippedBuildEntry
+	{
+		std::uint64_t token{ 0 };
+		std::string displayNameEn{};
+		std::string displayNameKo{};
+		std::string group{};
+		std::string triggerKey{};
+		std::string slotKind{};
+		std::string suffixState{};
+		std::uint32_t equippedCount{ 0 };
+		bool hasPassiveContribution{ false };
+		bool passiveContributionActive{ false };
+		bool passiveSpellDisabled{ false };
+		bool hasProcRoll{ false };
+		float procRollChancePct{ 0.0f };
+		bool hasLuckyHitGate{ false };
+		float luckyHitGateChancePct{ 0.0f };
+	};
+
+	struct EquippedBuildSummary
+	{
+		bool ready{ false };
+		bool runtimeEnabled{ false };
+		std::uint32_t equippedAffixSlots{ 0 };
+		std::vector<EquippedBuildEntry> entries{};
+	};
+
 	struct RunewordPanelState
 	{
 		bool hasBase{ false };
@@ -64,6 +91,7 @@ namespace CalamityAffixes
 		std::uint32_t standardReforgeCost{ 0 };
 		std::uint32_t lockedReforgeCost{ 0 };
 		std::vector<RunewordReforgeLockCandidate> reforgeLockCandidates{};
+		EquippedBuildSummary equippedBuild{};
 		// Gates the panel's cheat-adjacent debug tools; true only while a debug
 		// toggle (HUD notifications or verbose logging) is enabled.
 		bool debugTools{ false };

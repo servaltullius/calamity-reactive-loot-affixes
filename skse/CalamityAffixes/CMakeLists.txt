@@ -38,6 +38,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/PerTargetCooldownStore.h
 	    include/CalamityAffixes/PluginLogging.h
 	    include/CalamityAffixes/ProcChancePolicy.h
+	    include/CalamityAffixes/EquippedBuildSummaryPolicy.h
 	    include/CalamityAffixes/PointerSafety.h
 		    include/CalamityAffixes/PlayerOwnership.h
 		    include/CalamityAffixes/PrismaLayoutPersistence.h
@@ -256,6 +257,7 @@ if (BUILD_TESTING)
             tests/test_player_health_damage_hook_policy.cpp
             tests/test_proc_chance_policy.cpp
             tests/test_synthesized_affix_display_name_policy.cpp
+            tests/test_equipped_build_summary_policy.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

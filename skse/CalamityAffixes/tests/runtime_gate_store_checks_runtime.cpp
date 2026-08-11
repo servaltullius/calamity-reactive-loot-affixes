@@ -7,6 +7,122 @@
 
 namespace RuntimeGateStoreChecks
 {
+	bool CheckEquippedBuildSummaryPolicy()
+	{
+		using namespace CalamityAffixes::detail;
+		if (!ResolveEquippedBuildSummaryReady(true, false, false, false) ||
+			ResolveEquippedBuildSummaryReady(true, true, false, true) ||
+			!ResolveEquippedBuildSummaryReady(true, true, true, true)) {
+			std::cerr << "equipped_build_summary: ready-state policy drifted\n";
+			return false;
+		}
+
+		const auto disabledPassiveSpell = ResolveEquippedBuildPassiveContributionState({
+			.hasPassiveSpell = true,
+			.passiveSpellsDisabled = true,
+		});
+		const auto suppressedCrit = ResolveEquippedBuildPassiveContributionState({
+			.hasCritContribution = true,
+			.suffixFamilySuppressed = true,
+		});
+		const auto suppressedScroll = ResolveEquippedBuildPassiveContributionState({
+			.hasScrollContribution = true,
+			.suffixFamilySuppressed = true,
+		});
+		if (!disabledPassiveSpell.hasPassiveContribution ||
+			disabledPassiveSpell.passiveContributionActive ||
+			!disabledPassiveSpell.passiveSpellDisabled ||
+			suppressedCrit.passiveContributionActive ||
+			!suppressedScroll.passiveContributionActive) {
+			std::cerr << "equipped_build_summary: passive contribution state drifted\n";
+			return false;
+		}
+
+		const EquippedBuildPolicyInput offense{
+			.trigger = EquippedBuildTriggerKind::kDotApply,
+			.slot = EquippedBuildSlotKind::kPrefix,
+			.procLane = EquippedBuildProcLane::kStandard,
+			.configuredProcChancePct = 30.0f,
+		};
+		if (!ShouldShowEquippedBuildEntry(offense) ||
+			!HasEquippedBuildProcRoll(offense) ||
+			ResolveEquippedBuildGroup(offense) != EquippedBuildGroup::kOffense ||
+			ResolveEquippedBuildTriggerKey(offense) != EquippedBuildTriggerKey::kDotApply) {
+			std::cerr << "equipped_build_summary: offense proc classification drifted\n";
+			return false;
+		}
+
+		const EquippedBuildPolicyInput defense{
+			.trigger = EquippedBuildTriggerKind::kLowHealth,
+			.slot = EquippedBuildSlotKind::kPrefix,
+			.procLane = EquippedBuildProcLane::kSpecial,
+			.configuredProcChancePct = 45.0f,
+		};
+		if (ResolveEquippedBuildGroup(defense) != EquippedBuildGroup::kDefense ||
+			ResolveEquippedBuildTriggerKey(defense) != EquippedBuildTriggerKey::kLowHealth) {
+			std::cerr << "equipped_build_summary: defense classification drifted\n";
+			return false;
+		}
+
+		const EquippedBuildPolicyInput hiddenDebug{
+			.trigger = EquippedBuildTriggerKind::kHit,
+			.slot = EquippedBuildSlotKind::kPrefix,
+			.procLane = EquippedBuildProcLane::kNone,
+			.isDebugNotify = true,
+		};
+		const auto visibleDebug = EquippedBuildPolicyInput{
+			.trigger = EquippedBuildTriggerKind::kHit,
+			.slot = EquippedBuildSlotKind::kSuffix,
+			.procLane = EquippedBuildProcLane::kNone,
+			.hasPassiveContribution = true,
+			.isDebugNotify = true,
+		};
+		if (ShouldShowEquippedBuildEntry(hiddenDebug) ||
+			!ShouldShowEquippedBuildEntry(visibleDebug) ||
+			ResolveEquippedBuildGroup(visibleDebug) != EquippedBuildGroup::kPassive) {
+			std::cerr << "equipped_build_summary: debug-helper visibility drifted\n";
+			return false;
+		}
+
+		const auto hybridRuneword = EquippedBuildPolicyInput{
+			.trigger = EquippedBuildTriggerKind::kHit,
+			.slot = EquippedBuildSlotKind::kRuneword,
+			.procLane = EquippedBuildProcLane::kSpecial,
+			.hasPassiveContribution = true,
+			.configuredProcChancePct = 35.0f,
+		};
+		if (!HasEquippedBuildProcRoll(hybridRuneword) ||
+			IsEquippedBuildPassive(hybridRuneword) ||
+			ResolveEquippedBuildGroup(hybridRuneword) != EquippedBuildGroup::kOffense) {
+			std::cerr << "equipped_build_summary: hybrid proc/passive classification drifted\n";
+			return false;
+		}
+
+		const auto hitLucky = EquippedBuildPolicyInput{
+			.trigger = EquippedBuildTriggerKind::kHit,
+			.luckyHitChancePct = 20.0f,
+		};
+		const auto killLucky = EquippedBuildPolicyInput{
+			.trigger = EquippedBuildTriggerKind::kKill,
+			.luckyHitChancePct = 20.0f,
+		};
+		if (!HasEquippedBuildLuckyHitGate(hitLucky) || HasEquippedBuildLuckyHitGate(killLucky)) {
+			std::cerr << "equipped_build_summary: lucky-hit applicability drifted\n";
+			return false;
+		}
+
+		if (DescribeEquippedBuildGroup(EquippedBuildGroup::kKill) != "kill" ||
+			DescribeEquippedBuildTriggerKey(EquippedBuildTriggerKey::kPassive) != "passive" ||
+			DescribeEquippedBuildSlotKind(EquippedBuildSlotKind::kRuneword) != "runeword" ||
+			DescribeEquippedBuildSuffixState(
+				ResolveEquippedBuildSuffixState(true, true, false)) != "suppressed") {
+			std::cerr << "equipped_build_summary: wire keys drifted\n";
+			return false;
+		}
+
+		return true;
+	}
+
 	bool CheckNonHostileFirstHitGate()
 	{
 		using namespace std::chrono;

@@ -75,6 +75,38 @@
 				std::string(a_text));
 		}
 
+		[[nodiscard]] nlohmann::json BuildEquippedBuildSummaryPayload(
+			const EquippedBuildSummary& a_summary)
+		{
+			nlohmann::json entries = nlohmann::json::array();
+			for (const auto& entry : a_summary.entries) {
+				entries.push_back({
+					{ "token", entry.token == 0u ? std::string{} : std::to_string(entry.token) },
+					{ "displayNameEn", entry.displayNameEn },
+					{ "displayNameKo", entry.displayNameKo },
+					{ "group", entry.group },
+					{ "triggerKey", entry.triggerKey },
+					{ "slotKind", entry.slotKind },
+					{ "suffixState", entry.suffixState },
+					{ "equippedCount", entry.equippedCount },
+					{ "hasPassiveContribution", entry.hasPassiveContribution },
+					{ "passiveContributionActive", entry.passiveContributionActive },
+					{ "passiveSpellDisabled", entry.passiveSpellDisabled },
+					{ "hasProcRoll", entry.hasProcRoll },
+					{ "procRollChancePct", entry.procRollChancePct },
+					{ "hasLuckyHitGate", entry.hasLuckyHitGate },
+					{ "luckyHitGateChancePct", entry.luckyHitGateChancePct },
+				});
+			}
+
+			return {
+				{ "ready", a_summary.ready },
+				{ "runtimeEnabled", a_summary.runtimeEnabled },
+				{ "equippedAffixSlots", a_summary.equippedAffixSlots },
+				{ "entries", std::move(entries) },
+			};
+		}
+
 		[[nodiscard]] nlohmann::json BuildRunewordPanelStatePayload(const RunewordPanelState& a_state)
 		{
 			nlohmann::json requiredRunes = nlohmann::json::array();
@@ -117,6 +149,7 @@
 				{ "standardReforgeCost", a_state.standardReforgeCost },
 				{ "lockedReforgeCost", a_state.lockedReforgeCost },
 				{ "reforgeLockCandidates", reforgeLockCandidates },
+				{ "equippedBuild", BuildEquippedBuildSummaryPayload(a_state.equippedBuild) },
 				{ "debugTools", a_state.debugTools }
 			};
 

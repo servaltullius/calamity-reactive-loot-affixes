@@ -25,6 +25,13 @@ const recipeNodeByToken = new Map();
 const recipeSearchDocumentByToken = new Map();
 let mainTabState = "runeword";
 let pendingOpenMainTab = null;
+let equippedBuildState = {
+  received: false,
+  ready: false,
+  runtimeEnabled: false,
+  equippedAffixSlots: 0,
+  entries: []
+};
 let runewordPanelState = {
   hasBase: false,
   hasRecipe: false,
@@ -65,6 +72,7 @@ const panelRenderSection = Object.freeze({
   inventoryItems: "inventoryItems",
   recipeItems: "recipeItems",
   runewordPanelState: "runewordPanelState",
+  equippedBuild: "equippedBuild",
   tooltipLayout: "tooltipLayout",
   tooltipPlacement: "tooltipPlacement",
   quickLaunch: "quickLaunch"
@@ -101,6 +109,7 @@ const panelRenderState = {
     inventoryItems: false,
     recipeItems: false,
     runewordPanelState: false,
+    equippedBuild: false,
     tooltipLayout: false,
     tooltipPlacement: false,
     quickLaunch: false
@@ -128,6 +137,9 @@ function flushPanelRender() {
   }
   if (next.runewordPanelState) {
     renderRunewordPanelState();
+  }
+  if (next.equippedBuild) {
+    renderEquippedBuildSummary();
   }
   if (next.tooltipLayout) {
     applyTooltipLayout();

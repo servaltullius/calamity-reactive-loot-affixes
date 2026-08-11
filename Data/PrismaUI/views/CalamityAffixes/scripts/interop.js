@@ -141,6 +141,7 @@ function setRecipeItems(raw) {
 function setRunewordPanelState(raw) {
   const data = parseInteropObjectPayload(raw) || {};
   const ownedRaw = Number(data.reforgeOrbsOwned);
+  equippedBuildState = normalizeEquippedBuildState(data.equippedBuild);
 
   runewordPanelState = {
     hasBase: Boolean(data.hasBase),
@@ -195,6 +196,7 @@ function setRunewordPanelState(raw) {
   }
   schedulePanelRender(
     panelRenderSection.runewordPanelState,
+    panelRenderSection.equippedBuild,
     panelRenderSection.tooltipPlacement
   );
 }

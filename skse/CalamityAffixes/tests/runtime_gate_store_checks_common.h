@@ -4,6 +4,7 @@
 #include "CalamityAffixes/LootCurrencyLedger.h"
 #include "CalamityAffixes/CorpseCurrencyPolicy.h"
 #include "CalamityAffixes/CorpseCurrencyRewardPolicy.h"
+#include "CalamityAffixes/EquippedBuildSummaryPolicy.h"
 #include "CalamityAffixes/LootSlotSanitizer.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/LootRerollGuard.h"
@@ -141,6 +142,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckPluginLoggingExceptionSafetyPolicy();
 	bool CheckRebuildActiveCountsLoggingPolicy();
 	bool CheckRebuildActiveCountsExtractionPolicy();
+	bool CheckEquippedBuildSummaryPolicy();
 	bool CheckHealthDamageSignatureWindowPolicy();
 	bool CheckHealthDamageGuardHelperFlow();
 	bool CheckTesHitFallbackSourceValidationPolicy();

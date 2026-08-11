@@ -129,6 +129,7 @@ function initUiText() {
       "인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다."
     );
   }
+  updateEquippedBuildStaticText();
   if (panelTooltipTitle) {
     panelTooltipTitle.textContent = t("Item Affix Details", "아이템 어픽스 상세");
   }
@@ -281,6 +282,7 @@ function initUiText() {
     panelRenderSection.recipeItems,
     panelRenderSection.inventoryItems,
     panelRenderSection.runewordPanelState,
+    panelRenderSection.equippedBuild,
     panelRenderSection.tooltipLayout,
     panelRenderSection.tooltipPlacement,
     panelRenderSection.quickLaunch
@@ -364,4 +366,3 @@ function invalidateRunewordAffixPreview(pending) {
     schedulePanelRender(panelRenderSection.tooltipPlacement);
   }, runewordAffixPendingTimeoutMs);
 }
-

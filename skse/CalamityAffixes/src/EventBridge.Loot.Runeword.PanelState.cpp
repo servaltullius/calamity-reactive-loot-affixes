@@ -1,14 +1,20 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/EquippedBuildSummaryPolicy.h"
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/RunewordUtil.h"
+#include "CalamityAffixes/SpecialActionSafetyPolicy.h"
+#include "CalamityAffixes/SuffixFamilySelection.h"
+#include "CalamityAffixes/TriggerGuards.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <span>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 namespace CalamityAffixes
@@ -66,6 +72,155 @@ namespace CalamityAffixes
 		}
 	}
 
+	void EventBridge::PopulateEquippedBuildSummary(RunewordPanelState& a_panelState) const
+	{
+		auto& summary = a_panelState.equippedBuild;
+		summary.runtimeEnabled = _runtimeSettings.enabled.load(std::memory_order_relaxed);
+		summary.ready = detail::ResolveEquippedBuildSummaryReady(
+			_configLoaded,
+			summary.runtimeEnabled,
+			_instanceTrackingState.equippedTokenCacheReady,
+			_affixRuntimeState.activeCounts.size() == _affixRuntimeState.affixes.size());
+		if (!summary.ready || !summary.runtimeEnabled) {
+			return;
+		}
+
+		std::unordered_map<std::string_view, detail::SuffixFamilyBestCandidate> bestSuffixByFamily;
+		for (std::size_t i = 0; i < _affixRuntimeState.affixes.size(); ++i) {
+			if (_affixRuntimeState.activeCounts[i] == 0u) {
+				continue;
+			}
+
+			const auto& affix = _affixRuntimeState.affixes[i];
+			if (affix.slot == AffixSlot::kSuffix && !affix.family.empty()) {
+				bestSuffixByFamily[affix.family].Consider(affix.id, i);
+			}
+		}
+
+		const auto resolveTrigger = [](Trigger a_trigger) noexcept {
+			switch (a_trigger) {
+			case Trigger::kIncomingHit:
+				return detail::EquippedBuildTriggerKind::kIncomingHit;
+			case Trigger::kDotApply:
+				return detail::EquippedBuildTriggerKind::kDotApply;
+			case Trigger::kKill:
+				return detail::EquippedBuildTriggerKind::kKill;
+			case Trigger::kLowHealth:
+				return detail::EquippedBuildTriggerKind::kLowHealth;
+			case Trigger::kHit:
+			default:
+				return detail::EquippedBuildTriggerKind::kHit;
+			}
+		};
+
+		const auto resolveProcLane = [](ActionType a_actionType) noexcept {
+			switch (a_actionType) {
+			case ActionType::kCastSpell:
+			case ActionType::kCastSpellAdaptiveElement:
+			case ActionType::kSpawnTrap:
+				return detail::EquippedBuildProcLane::kStandard;
+			case ActionType::kCastOnCrit:
+			case ActionType::kConvertDamage:
+			case ActionType::kMindOverMatter:
+			case ActionType::kArchmage:
+			case ActionType::kCorpseExplosion:
+			case ActionType::kSummonCorpseExplosion:
+				return detail::EquippedBuildProcLane::kSpecial;
+			case ActionType::kDebugNotify:
+			default:
+				return detail::EquippedBuildProcLane::kNone;
+			}
+		};
+
+		summary.entries.reserve(_affixRuntimeState.affixes.size());
+		std::uint64_t visibleSlotCount = 0u;
+		for (std::size_t i = 0; i < _affixRuntimeState.affixes.size(); ++i) {
+			const auto equippedCount = _affixRuntimeState.activeCounts[i];
+			if (equippedCount == 0u) {
+				continue;
+			}
+
+			const auto& affix = _affixRuntimeState.affixes[i];
+			const auto slot = affix.slot == AffixSlot::kSuffix ?
+				detail::EquippedBuildSlotKind::kSuffix :
+				(_runewordState.recipeIndexByResultAffixToken.contains(affix.token) ?
+					detail::EquippedBuildSlotKind::kRuneword :
+					detail::EquippedBuildSlotKind::kPrefix);
+			const auto procLane = resolveProcLane(affix.action.type);
+
+			bool isSuffixFamilyWinner = false;
+			if (affix.slot == AffixSlot::kSuffix && !affix.family.empty()) {
+				const auto bestIt = bestSuffixByFamily.find(affix.family);
+				isSuffixFamilyWinner = bestIt != bestSuffixByFamily.end() &&
+					bestIt->second.selected && bestIt->second.index == i;
+			}
+			const bool suffixFamilySuppressed =
+				affix.slot == AffixSlot::kSuffix &&
+				!affix.family.empty() &&
+				!isSuffixFamilyWinner;
+			const auto passiveContribution = detail::ResolveEquippedBuildPassiveContributionState({
+				.hasPassiveSpell = affix.passiveSpell != nullptr,
+				.passiveSpellsDisabled = _runtimeSettings.disablePassiveSuffixSpells,
+				.hasCritContribution = affix.critDamageBonusPct != 0.0f,
+				.hasScrollContribution = affix.scrollNoConsumeChancePct != 0.0f,
+				.suffixFamilySuppressed = suffixFamilySuppressed,
+			});
+			const detail::EquippedBuildPolicyInput policyInput{
+				.trigger = resolveTrigger(affix.trigger),
+				.slot = slot,
+				.procLane = procLane,
+				.hasPassiveContribution = passiveContribution.hasPassiveContribution,
+				.isDebugNotify = affix.action.type == ActionType::kDebugNotify,
+				.configuredProcChancePct = affix.procChancePct,
+				.luckyHitChancePct = affix.luckyHitChancePct,
+			};
+			if (!detail::ShouldShowEquippedBuildEntry(policyInput)) {
+				continue;
+			}
+
+			EquippedBuildEntry entry{};
+			entry.token = affix.token;
+			entry.displayNameEn = !affix.displayNameEn.empty() ? affix.displayNameEn :
+				(!affix.displayName.empty() ? affix.displayName : affix.id);
+			entry.displayNameKo = !affix.displayNameKo.empty() ? affix.displayNameKo :
+				(!affix.displayName.empty() ? affix.displayName : affix.id);
+			entry.group = detail::DescribeEquippedBuildGroup(
+				detail::ResolveEquippedBuildGroup(policyInput));
+			entry.triggerKey = detail::DescribeEquippedBuildTriggerKey(
+				detail::ResolveEquippedBuildTriggerKey(policyInput));
+			entry.slotKind = detail::DescribeEquippedBuildSlotKind(slot);
+			entry.suffixState = detail::DescribeEquippedBuildSuffixState(
+				detail::ResolveEquippedBuildSuffixState(
+					affix.slot == AffixSlot::kSuffix,
+					!affix.family.empty(),
+					isSuffixFamilyWinner));
+			entry.equippedCount = equippedCount;
+			entry.hasPassiveContribution = passiveContribution.hasPassiveContribution;
+			entry.passiveContributionActive = passiveContribution.passiveContributionActive;
+			entry.passiveSpellDisabled = passiveContribution.passiveSpellDisabled;
+			entry.hasProcRoll = detail::HasEquippedBuildProcRoll(policyInput);
+			if (entry.hasProcRoll) {
+				entry.procRollChancePct = procLane == detail::EquippedBuildProcLane::kStandard ?
+					ResolveTriggerProcChancePct(affix, i) :
+					detail::ResolveSpecialActionProcChancePct(
+						affix.procChancePct * _runtimeSettings.procChanceMult);
+			}
+			entry.hasLuckyHitGate = detail::HasEquippedBuildLuckyHitGate(policyInput);
+			if (entry.hasLuckyHitGate) {
+				entry.luckyHitGateChancePct = ResolveLuckyHitEffectiveChancePct(
+					affix.luckyHitChancePct,
+					affix.luckyHitProcCoefficient);
+			}
+
+			visibleSlotCount += equippedCount;
+			summary.entries.push_back(std::move(entry));
+		}
+
+		summary.equippedAffixSlots = static_cast<std::uint32_t>(std::min<std::uint64_t>(
+			visibleSlotCount,
+			std::numeric_limits<std::uint32_t>::max()));
+	}
+
 	EventBridge::RunewordPanelState EventBridge::GetRunewordPanelState()
 	{
 		const std::scoped_lock lock(_stateMutex);
@@ -73,6 +228,7 @@ namespace CalamityAffixes
 		panelState.standardReforgeCost = detail::kStandardReforgeOrbCost;
 		panelState.lockedReforgeCost = detail::kLockedReforgeOrbCost;
 		panelState.debugTools = _loot.debugHudNotifications || _loot.debugLog;
+		PopulateEquippedBuildSummary(panelState);
 		if (!_configLoaded) {
 			return panelState;
 		}
