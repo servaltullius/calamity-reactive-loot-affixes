@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/SerializationWireContract.h"
 
 #include <array>
 #include <cstdint>
@@ -7,6 +8,23 @@ namespace CalamityAffixes
 {
 	void EventBridge::Save(SKSE::SerializationInterface* a_intfc)
 	{
+		static_assert(kSerializationRecordInstanceAffixes == SerializationWire::kInstanceAffixes.type);
+		static_assert(kSerializationVersion == SerializationWire::kInstanceAffixes.version);
+		static_assert(kSerializationRecordInstanceRuntimeStates == SerializationWire::kInstanceRuntimeStates.type);
+		static_assert(kInstanceRuntimeStateSerializationVersion == SerializationWire::kInstanceRuntimeStates.version);
+		static_assert(kSerializationRecordRunewordState == SerializationWire::kRunewordState.type);
+		static_assert(kRunewordSerializationVersion == SerializationWire::kRunewordState.version);
+		static_assert(kSerializationRecordLootEvaluated == SerializationWire::kLootEvaluated.type);
+		static_assert(kLootEvaluatedSerializationVersion == SerializationWire::kLootEvaluated.version);
+		static_assert(kSerializationRecordLootCurrencyLedger == SerializationWire::kLootCurrencyLedger.type);
+		static_assert(kLootCurrencyLedgerSerializationVersion == SerializationWire::kLootCurrencyLedger.version);
+		static_assert(kSerializationRecordCorpseCurrencyRuntime == SerializationWire::kCorpseCurrencyRuntime.type);
+		static_assert(kCorpseCurrencyRuntimeSerializationVersion == SerializationWire::kCorpseCurrencyRuntime.version);
+		static_assert(kSerializationRecordLootShuffleBags == SerializationWire::kLootShuffleBags.type);
+		static_assert(kLootShuffleBagSerializationVersion == SerializationWire::kLootShuffleBags.version);
+		static_assert(kSerializationRecordMigrationFlags == SerializationWire::kMigrationFlags.type);
+		static_assert(kMigrationFlagsVersion == SerializationWire::kMigrationFlags.version);
+
 		if (!a_intfc) {
 			return;
 		}
@@ -25,221 +43,74 @@ namespace CalamityAffixes
 		MaybeFlushRuntimeUserSettings(std::chrono::steady_clock::now(), true);
 		PruneLootEvaluatedInstances();
 
-		// --- IAXF v7: fixed 4-token slots ---
-		const std::uint32_t count = static_cast<std::uint32_t>(_instanceTrackingState.instanceAffixes.size());
-		if (!a_intfc->OpenRecord(kSerializationRecordInstanceAffixes, kSerializationVersion)) {
-			return;
-		}
-		if (!a_intfc->WriteRecordData(count)) {
-			return;
-		}
-
+		SerializationWire::CurrentSaveSnapshot snapshot{};
+		snapshot.instanceAffixes.reserve(_instanceTrackingState.instanceAffixes.size());
 		for (const auto& [key, slots] : _instanceTrackingState.instanceAffixes) {
-			const auto baseID = static_cast<RE::FormID>(key >> 16);
-			const auto uniqueID = static_cast<std::uint16_t>(key & 0xFFFFu);
-
-			if (!a_intfc->WriteRecordData(baseID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(uniqueID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(slots.count)) {
-				return;
-			}
-			for (std::size_t s = 0; s < kMaxAffixesPerItem; ++s) {
-				if (!a_intfc->WriteRecordData(slots.tokens[s])) {
-					return;
-				}
-			}
+			snapshot.instanceAffixes.push_back(SerializationWire::InstanceAffixEntry{
+				.baseFormId = static_cast<std::uint32_t>(key >> 16),
+				.uniqueId = static_cast<std::uint16_t>(key & 0xFFFFu),
+				.affixCount = slots.count,
+				.tokens = slots.tokens,
+			});
 		}
 
-		// --- IRST ---
-		if (!a_intfc->OpenRecord(
-				kSerializationRecordInstanceRuntimeStates,
-				kInstanceRuntimeStateSerializationVersion)) {
-			return;
-		}
-
-		const std::uint32_t runtimeStateCount = static_cast<std::uint32_t>(_instanceTrackingState.instanceStates.size());
-		if (!a_intfc->WriteRecordData(runtimeStateCount)) {
-			return;
-		}
+		snapshot.instanceRuntimeStates.reserve(_instanceTrackingState.instanceStates.size());
 		for (const auto& [stateKey, state] : _instanceTrackingState.instanceStates) {
-			const auto baseID = static_cast<RE::FormID>(stateKey.instanceKey >> 16);
-			const auto uniqueID = static_cast<std::uint16_t>(stateKey.instanceKey & 0xFFFFu);
-			if (!a_intfc->WriteRecordData(baseID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(uniqueID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(stateKey.affixToken)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(state.evolutionXp)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(state.modeCycleCounter)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(state.modeIndex)) {
-				return;
-			}
+			snapshot.instanceRuntimeStates.push_back(SerializationWire::InstanceRuntimeStateEntry{
+				.baseFormId = static_cast<std::uint32_t>(stateKey.instanceKey >> 16),
+				.uniqueId = static_cast<std::uint16_t>(stateKey.instanceKey & 0xFFFFu),
+				.affixToken = stateKey.affixToken,
+				.evolutionXp = state.evolutionXp,
+				.modeCycleCounter = state.modeCycleCounter,
+				.modeIndex = state.modeIndex,
+			});
 		}
 
-		// --- RWRD ---
-		if (!a_intfc->OpenRecord(kSerializationRecordRunewordState, kRunewordSerializationVersion)) {
-			return;
-		}
-
-		RE::FormID selectedBaseID = 0;
-		std::uint16_t selectedUniqueID = 0;
 		if (_runewordState.selectedBaseKey) {
-			selectedBaseID = static_cast<RE::FormID>(*_runewordState.selectedBaseKey >> 16);
-			selectedUniqueID = static_cast<std::uint16_t>(*_runewordState.selectedBaseKey & 0xFFFFu);
+			snapshot.selectedRunewordBaseFormId =
+				static_cast<std::uint32_t>(*_runewordState.selectedBaseKey >> 16);
+			snapshot.selectedRunewordUniqueId =
+				static_cast<std::uint16_t>(*_runewordState.selectedBaseKey & 0xFFFFu);
 		}
-
-		if (!a_intfc->WriteRecordData(selectedBaseID)) {
-			return;
-		}
-		if (!a_intfc->WriteRecordData(selectedUniqueID)) {
-			return;
-		}
-		if (!a_intfc->WriteRecordData(_runewordState.recipeCycleCursor)) {
-			return;
-		}
-		if (!a_intfc->WriteRecordData(_runewordState.baseCycleCursor)) {
-			return;
-		}
-
-		const std::uint32_t fragmentCount = static_cast<std::uint32_t>(_runewordState.runeFragments.size());
-		if (!a_intfc->WriteRecordData(fragmentCount)) {
-			return;
-		}
+		snapshot.runewordRecipeCycleCursor = _runewordState.recipeCycleCursor;
+		snapshot.runewordBaseCycleCursor = _runewordState.baseCycleCursor;
+		snapshot.runewordFragments.reserve(_runewordState.runeFragments.size());
 		for (const auto& [runeToken, amount] : _runewordState.runeFragments) {
-			if (!a_intfc->WriteRecordData(runeToken)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(amount)) {
-				return;
-			}
+			snapshot.runewordFragments.push_back({ .runeToken = runeToken, .amount = amount });
 		}
-
-		const std::uint32_t runewordStateCount = static_cast<std::uint32_t>(_runewordState.instanceStates.size());
-		if (!a_intfc->WriteRecordData(runewordStateCount)) {
-			return;
-		}
+		snapshot.runewordInstances.reserve(_runewordState.instanceStates.size());
 		for (const auto& [instanceKey, state] : _runewordState.instanceStates) {
-			const auto baseID = static_cast<RE::FormID>(instanceKey >> 16);
-			const auto uniqueID = static_cast<std::uint16_t>(instanceKey & 0xFFFFu);
-			if (!a_intfc->WriteRecordData(baseID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(uniqueID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(state.recipeToken)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(state.insertedRunes)) {
-				return;
-			}
+			snapshot.runewordInstances.push_back(SerializationWire::RunewordInstanceEntry{
+				.baseFormId = static_cast<std::uint32_t>(instanceKey >> 16),
+				.uniqueId = static_cast<std::uint16_t>(instanceKey & 0xFFFFu),
+				.recipeToken = state.recipeToken,
+				.insertedRunes = state.insertedRunes,
+			});
 		}
 
-		// --- LRLD ---
-		if (!a_intfc->OpenRecord(kSerializationRecordLootEvaluated, kLootEvaluatedSerializationVersion)) {
-			return;
-		}
-
-		const std::uint32_t lootEvaluatedCount = static_cast<std::uint32_t>(_lootState.evaluatedInstances.size());
-		if (!a_intfc->WriteRecordData(lootEvaluatedCount)) {
-			return;
-		}
+		snapshot.lootEvaluated.reserve(_lootState.evaluatedInstances.size());
 		for (const auto key : _lootState.evaluatedInstances) {
-			const auto baseID = static_cast<RE::FormID>(key >> 16);
-			const auto uniqueID = static_cast<std::uint16_t>(key & 0xFFFFu);
-			if (!a_intfc->WriteRecordData(baseID)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(uniqueID)) {
-				return;
-			}
+			snapshot.lootEvaluated.push_back({
+				.baseFormId = static_cast<std::uint32_t>(key >> 16),
+				.uniqueId = static_cast<std::uint16_t>(key & 0xFFFFu),
+			});
 		}
 
-		// --- LCLD ---
-		if (!a_intfc->OpenRecord(
-				kSerializationRecordLootCurrencyLedger,
-				kLootCurrencyLedgerSerializationVersion)) {
-			return;
-		}
-
-		const std::uint32_t lootCurrencyLedgerCount = static_cast<std::uint32_t>(_lootState.currencyRollLedger.size());
-		if (!a_intfc->WriteRecordData(lootCurrencyLedgerCount)) {
-			return;
-		}
+		snapshot.lootCurrencyLedger.reserve(_lootState.currencyRollLedger.size());
 		for (const auto& [key, dayStamp] : _lootState.currencyRollLedger) {
-			if (!a_intfc->WriteRecordData(key)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(dayStamp)) {
-				return;
-			}
+			snapshot.lootCurrencyLedger.push_back({ .instanceKey = key, .dayStamp = dayStamp });
 		}
 
-		// --- CCRT: corpse-only currency ledger + persisted pity ---
-		if (!a_intfc->OpenRecord(
-				kSerializationRecordCorpseCurrencyRuntime,
-				kCorpseCurrencyRuntimeSerializationVersion)) {
-			return;
-		}
-		if (!a_intfc->WriteRecordData(_lootState.runewordFragmentFailStreak) ||
-			!a_intfc->WriteRecordData(_lootState.reforgeOrbFailStreak)) {
-			return;
-		}
-
-		const auto corpseCurrencyLedgerCount =
-			static_cast<std::uint32_t>(_lootState.corpseCurrencyRollLedger.size());
-		if (!a_intfc->WriteRecordData(corpseCurrencyLedgerCount)) {
-			return;
-		}
+		snapshot.runewordFragmentFailStreak = _lootState.runewordFragmentFailStreak;
+		snapshot.reforgeOrbFailStreak = _lootState.reforgeOrbFailStreak;
+		snapshot.corpseCurrencyLedger.reserve(_lootState.corpseCurrencyRollLedger.size());
 		for (const auto& [corpseFormId, entry] : _lootState.corpseCurrencyRollLedger) {
-			if (!a_intfc->WriteRecordData(corpseFormId)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(entry.dayStamp)) {
-				return;
-			}
-			if (!a_intfc->WriteRecordData(entry.processedMask)) {
-				return;
-			}
+			snapshot.corpseCurrencyLedger.push_back({
+				.corpseFormId = corpseFormId,
+				.dayStamp = entry.dayStamp,
+				.processedMask = entry.processedMask,
+			});
 		}
-
-		// --- LSBG ---
-		if (!a_intfc->OpenRecord(kSerializationRecordLootShuffleBags, kLootShuffleBagSerializationVersion)) {
-			return;
-		}
-
-		auto writeBag = [&](std::uint8_t a_id, const LootShuffleBagState& a_bag) -> bool {
-			const auto bagSize = static_cast<std::uint32_t>(a_bag.order.size());
-			const auto bagCursor = static_cast<std::uint32_t>(std::min<std::size_t>(a_bag.cursor, a_bag.order.size()));
-			if (!a_intfc->WriteRecordData(a_id)) {
-				return false;
-			}
-			if (!a_intfc->WriteRecordData(bagCursor)) {
-				return false;
-			}
-			if (!a_intfc->WriteRecordData(bagSize)) {
-				return false;
-			}
-			for (const auto idx : a_bag.order) {
-				const auto raw = static_cast<std::uint32_t>(idx);
-				if (!a_intfc->WriteRecordData(raw)) {
-					return false;
-				}
-			}
-			return true;
-		};
 
 		const std::array<std::pair<std::uint8_t, const LootShuffleBagState*>, 6> kBags{ {
 			{ 0u, &_lootState.prefixSharedBag },
@@ -249,23 +120,32 @@ namespace CalamityAffixes
 			{ 4u, &_lootState.suffixWeaponBag },
 			{ 5u, &_lootState.suffixArmorBag },
 		} };
-		const auto bagCount = static_cast<std::uint8_t>(kBags.size());
-		if (!a_intfc->WriteRecordData(bagCount)) {
-			return;
-		}
+		snapshot.lootShuffleBags.reserve(kBags.size());
 		for (const auto& [id, bag] : kBags) {
-			if (!bag || !writeBag(id, *bag)) {
+			if (!bag) {
 				return;
 			}
+			SerializationWire::LootShuffleBagEntry wireBag{
+				.id = id,
+				.cursor = static_cast<std::uint32_t>(std::min<std::size_t>(bag->cursor, bag->order.size())),
+			};
+			wireBag.order.reserve(bag->order.size());
+			for (const auto index : bag->order) {
+				wireBag.order.push_back(static_cast<std::uint32_t>(index));
+			}
+			snapshot.lootShuffleBags.push_back(std::move(wireBag));
 		}
 
-		// --- MFLG ---
-		if (!a_intfc->OpenRecord(kSerializationRecordMigrationFlags, kMigrationFlagsVersion)) {
-			return;
-		}
-		const std::uint8_t migrationFlags = (_miscCurrencyMigrated ? 1u : 0u)
+		snapshot.migrationFlags = (_miscCurrencyMigrated ? 1u : 0u)
 			| (_miscCurrencyRecovered ? 2u : 0u);
-		if (!a_intfc->WriteRecordData(migrationFlags)) {
+
+		auto openRecord = [a_intfc](std::uint32_t a_type, std::uint32_t a_version) {
+			return a_intfc->OpenRecord(a_type, a_version);
+		};
+		auto writeScalar = [a_intfc]<std::unsigned_integral T>(T a_value) {
+			return a_intfc->WriteRecordData(a_value);
+		};
+		if (!SerializationWire::WriteCurrentRecords(snapshot, openRecord, writeScalar)) {
 			return;
 		}
 	}

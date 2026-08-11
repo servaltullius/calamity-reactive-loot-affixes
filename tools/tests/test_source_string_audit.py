@@ -4,7 +4,7 @@
 `audit_source_string_tests.py` finds those checks by looking for how they read
 the source. When the Prisma panel checks stopped calling ifstream directly and
 started calling a shared loader, the auditor stopped recognising them: 80 pins
-left the report, `--max-brittle 353` passed with room to spare, and nothing went
+left the report, the then-current ratchet passed with room to spare, and nothing went
 red. A ratchet that quietly loosens is worse than no ratchet, so the recognition
 rule gets its own test.
 """
@@ -19,6 +19,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TESTS_DIR = REPO_ROOT / "skse" / "CalamityAffixes" / "tests"
+MAX_BRITTLE_PINS = 316
 
 
 def _load_audit_module():
@@ -63,6 +64,16 @@ class SourceStringAuditTests(unittest.TestCase):
         self.assertTrue(
             pins["brittle"] or pins["structural"],
             "the check was recognised but none of its pins were collected",
+        )
+
+    def test_brittle_pin_count_does_not_increase(self) -> None:
+        findings = _load_audit_module().scan()
+        brittle_total = sum(len(finding["brittle"]) for finding in findings)
+        self.assertLessEqual(
+            brittle_total,
+            MAX_BRITTLE_PINS,
+            "replace source-statement pins with behavior or structural checks; "
+            "do not raise the ratchet",
         )
 
     def test_every_marker_is_a_way_a_check_actually_reads_source(self) -> None:

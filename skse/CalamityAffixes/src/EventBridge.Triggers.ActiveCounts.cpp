@@ -158,8 +158,10 @@ namespace CalamityAffixes
 				affixIdx < _affixRuntimeState.affixes.size() &&
 				_affixRuntimeState.affixes[affixIdx].passiveSpell) {
 				const auto& affix = _affixRuntimeState.affixes[affixIdx];
-				const bool deferTieredSuffix =
-					affix.slot == AffixSlot::kSuffix && !affix.family.empty();
+				const bool deferTieredSuffix = detail::ShouldDeferTieredSuffixFamily({
+					.isSuffix = affix.slot == AffixSlot::kSuffix,
+					.hasFamily = !affix.family.empty(),
+				});
 				if (!deferTieredSuffix) {
 					a_desiredPassives.insert(affix.passiveSpell);
 				}
@@ -169,8 +171,10 @@ namespace CalamityAffixes
 			// Tiered families are resolved once after all worn items are counted.
 			if (affixIdx < _affixRuntimeState.affixes.size()) {
 				const auto& affix = _affixRuntimeState.affixes[affixIdx];
-				if (affix.slot == AffixSlot::kSuffix &&
-					affix.family.empty() &&
+				if (detail::ShouldAccumulateFamilylessSuffixValue({
+						.isSuffix = affix.slot == AffixSlot::kSuffix,
+						.hasFamily = !affix.family.empty(),
+					}) &&
 					affix.critDamageBonusPct > 0.0f) {
 					_affixRuntimeState.activeCritDamageBonusPct += affix.critDamageBonusPct;
 				}
@@ -282,7 +286,12 @@ namespace CalamityAffixes
 			const bool desired = a_desiredPassives.find(spell) != a_desiredPassives.end();
 			const bool present = a_player->HasSpell(spell);
 			const bool refreshRequested = refreshRequestedPassives.contains(spell);
-			switch (detail::ResolvePassiveSpellReconcileAction(desired, present, passivesDisabled, refreshRequested)) {
+			switch (detail::ResolvePassiveSpellReconcileAction(detail::PassiveSpellReconcileInput{
+				.desired = desired,
+				.present = present,
+				.passivesDisabled = passivesDisabled,
+				.refreshRequested = refreshRequested,
+			})) {
 			case detail::PassiveSpellReconcileAction::kAdd:
 				a_player->AddSpell(spell);
 				if (const auto* feedbackAction = findPassiveAddFeedback(spell)) {

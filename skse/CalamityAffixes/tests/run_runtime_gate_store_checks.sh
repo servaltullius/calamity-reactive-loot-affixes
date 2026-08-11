@@ -46,6 +46,7 @@ sources=(
   "${script_dir}/runtime_gate_store_checks_stateful.cpp"
   "${script_dir}/runtime_gate_store_checks_loot_distribution.cpp"
   "${script_dir}/runtime_gate_store_checks_trigger_dispatch.cpp"
+  "${script_dir}/runtime_gate_store_checks_serialization.cpp"
 )
 
 "${cxx}" \

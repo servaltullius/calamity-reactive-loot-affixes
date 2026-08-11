@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/SuffixFamilySelection.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -143,8 +144,7 @@ namespace CalamityAffixes
 				if (affix.slot == AffixSlot::kSuffix) {
 					return false;
 				}
-				if (!affix.family.empty() &&
-					std::find(chosenPrefixFamilies.begin(), chosenPrefixFamilies.end(), affix.family) != chosenPrefixFamilies.end()) {
+				if (!detail::IsAffixFamilyAvailable(chosenPrefixFamilies, affix.family)) {
 					return false;
 				}
 				return true;
@@ -155,9 +155,7 @@ namespace CalamityAffixes
 
 			chosenPrefixIndices.push_back(*idx);
 			const auto& affix = _affixRuntimeState.affixes[*idx];
-			if (!affix.family.empty()) {
-				chosenPrefixFamilies.push_back(affix.family);
-			}
+			detail::RecordSelectedAffixFamily(chosenPrefixFamilies, affix.family);
 			slots.AddToken(affix.token);
 		}
 
@@ -179,8 +177,7 @@ namespace CalamityAffixes
 						a_weaponSubtype)) {
 					return false;
 				}
-				if (!affix.family.empty() &&
-					std::find(chosenFamilies.begin(), chosenFamilies.end(), affix.family) != chosenFamilies.end()) {
+				if (!detail::IsAffixFamilyAvailable(chosenFamilies, affix.family)) {
 					return false;
 				}
 				return true;
@@ -190,9 +187,7 @@ namespace CalamityAffixes
 			}
 
 			const auto& affix = _affixRuntimeState.affixes[*idx];
-			if (!affix.family.empty()) {
-				chosenFamilies.push_back(affix.family);
-			}
+			detail::RecordSelectedAffixFamily(chosenFamilies, affix.family);
 			slots.AddToken(affix.token);
 		}
 

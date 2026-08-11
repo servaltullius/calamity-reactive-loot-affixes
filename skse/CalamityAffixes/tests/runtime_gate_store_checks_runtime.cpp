@@ -1,6 +1,7 @@
 #include "runtime_gate_store_checks_common.h"
 
 #include "CalamityAffixes/PluginLogging.h"
+#include "CalamityAffixes/SuffixFamilySelection.h"
 
 #include <stdexcept>
 
@@ -232,17 +233,105 @@ namespace RuntimeGateStoreChecks
 
 	bool CheckRebuildActiveCountsExtractionPolicy()
 	{
+		using CalamityAffixes::detail::IsAffixFamilyAvailable;
+		using CalamityAffixes::detail::PassiveSpellReconcileInput;
+		using CalamityAffixes::detail::PassiveSpellReconcileAction;
+		using CalamityAffixes::detail::RecordSelectedAffixFamily;
+		using CalamityAffixes::detail::ResolvePassiveSpellReconcileAction;
+		using CalamityAffixes::detail::ShouldAccumulateFamilylessSuffixValue;
+		using CalamityAffixes::detail::ShouldDeferTieredSuffixFamily;
+		using CalamityAffixes::detail::SuffixFamilyBestCandidate;
+		using CalamityAffixes::detail::SuffixFamilyClassification;
+
+		// Exercise the production policies that RebuildActiveCounts delegates to.
+		// These assertions survive harmless statement rewrites in EventBridge while
+		// still proving the tier winner and passive reconciliation outcomes.
+		SuffixFamilyBestCandidate tieredBest;
+		tieredBest.Consider("suffix_assassin_t1", 4u);
+		tieredBest.Consider("suffix_assassin_t3", 9u);
+		tieredBest.Consider("suffix_assassin_t2", 1u);
+		if (!tieredBest.selected || tieredBest.id != "suffix_assassin_t3" || tieredBest.index != 9u) {
+			std::cerr << "rebuild_active_counts: highest suffix tier did not win\n";
+			return false;
+		}
+
+		SuffixFamilyBestCandidate stableTieBreak;
+		stableTieBreak.Consider("legacy_family_late", 7u);
+		stableTieBreak.Consider("legacy_family_early", 2u);
+		if (!stableTieBreak.selected || stableTieBreak.index != 2u) {
+			std::cerr << "rebuild_active_counts: same-rank suffix did not use config order\n";
+			return false;
+		}
+
+		struct SuffixClassificationCase
+		{
+			SuffixFamilyClassification classification;
+			bool shouldDefer;
+			bool shouldAccumulate;
+		};
+		constexpr std::array suffixClassifications{
+			SuffixClassificationCase{ { .isSuffix = false, .hasFamily = false }, false, false },
+			SuffixClassificationCase{ { .isSuffix = false, .hasFamily = true }, false, false },
+			SuffixClassificationCase{ { .isSuffix = true, .hasFamily = false }, false, true },
+			SuffixClassificationCase{ { .isSuffix = true, .hasFamily = true }, true, false },
+		};
+		for (const auto& testCase : suffixClassifications) {
+			if (ShouldDeferTieredSuffixFamily(testCase.classification) != testCase.shouldDefer ||
+				ShouldAccumulateFamilylessSuffixValue(testCase.classification) != testCase.shouldAccumulate) {
+				std::cerr << "rebuild_active_counts: suffix family deferral policy drifted\n";
+				return false;
+			}
+		}
+
+		std::vector<std::string> selectedFamilies;
+		RecordSelectedAffixFamily(selectedFamilies, {});
+		RecordSelectedAffixFamily(selectedFamilies, "assassin");
+		RecordSelectedAffixFamily(selectedFamilies, "vitality");
+		if (selectedFamilies != std::vector<std::string>{ "assassin", "vitality" } ||
+			!IsAffixFamilyAvailable(selectedFamilies, {}) ||
+			!IsAffixFamilyAvailable(selectedFamilies, "resistance") ||
+			IsAffixFamilyAvailable(selectedFamilies, "assassin")) {
+			std::cerr << "rebuild_active_counts: affix family duplicate exclusion drifted\n";
+			return false;
+		}
+
+		struct PassiveCase
+		{
+			bool desired;
+			bool present;
+			bool disabled;
+			bool refreshRequested;
+			PassiveSpellReconcileAction expected;
+		};
+		constexpr std::array passiveCases{
+			PassiveCase{ false, false, false, false, PassiveSpellReconcileAction::kKeep },
+			PassiveCase{ false, true, false, false, PassiveSpellReconcileAction::kRemove },
+			PassiveCase{ true, false, false, false, PassiveSpellReconcileAction::kAdd },
+			PassiveCase{ true, true, false, false, PassiveSpellReconcileAction::kKeep },
+			PassiveCase{ true, true, false, true, PassiveSpellReconcileAction::kRefresh },
+			PassiveCase{ true, true, true, true, PassiveSpellReconcileAction::kRemove },
+		};
+		for (const auto& testCase : passiveCases) {
+			if (ResolvePassiveSpellReconcileAction(PassiveSpellReconcileInput{
+					.desired = testCase.desired,
+					.present = testCase.present,
+					.passivesDisabled = testCase.disabled,
+					.refreshRequested = testCase.refreshRequested,
+				}) != testCase.expected) {
+				std::cerr << "rebuild_active_counts: passive reconciliation decision drifted\n";
+				return false;
+			}
+		}
+
 		namespace fs = std::filesystem;
 		const fs::path testFile{ __FILE__ };
 		const fs::path repoRoot = testFile.parent_path().parent_path();
-		const fs::path privateApiFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.PrivateApi.inl";
 		const fs::path sourceFile = repoRoot / "src" / "EventBridge.Triggers.ActiveCounts.cpp";
 		const fs::path mainFile = repoRoot / "src" / "main.cpp";
-		const fs::path handlerFile = repoRoot / "src" / "EventBridge.Triggers.ModCallback.Handlers.cpp";
-		const fs::path lifecycleFile = repoRoot / "src" / "EventBridge.Serialization.Lifecycle.cpp";
 		const fs::path trapsFile = repoRoot / "src" / "EventBridge.Traps.cpp";
 		const fs::path affixParsingFile = repoRoot / "src" / "EventBridge.Config.AffixParsing.cpp";
 		const fs::path typesFile = repoRoot / "include" / "CalamityAffixes" / "detail" / "EventBridge.Types.inl";
+		const fs::path slotRollFile = repoRoot / "src" / "EventBridge.Loot.AffixSlotRoll.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
@@ -254,79 +343,148 @@ namespace RuntimeGateStoreChecks
 				std::istreambuf_iterator<char>());
 		};
 
-		const auto privateApiText = loadText(privateApiFile);
 		const auto sourceText = loadText(sourceFile);
 		const auto mainText = loadText(mainFile);
-		const auto handlerText = loadText(handlerFile);
-		const auto lifecycleText = loadText(lifecycleFile);
 		const auto trapsText = loadText(trapsFile);
 		const auto affixParsingText = loadText(affixParsingFile);
 		const auto typesText = loadText(typesFile);
-		if (!privateApiText.has_value() || !sourceText.has_value() || !mainText.has_value() ||
-			!handlerText.has_value() || !lifecycleText.has_value() || !trapsText.has_value() ||
-			!affixParsingText.has_value() || !typesText.has_value()) {
+		const auto slotRollText = loadText(slotRollFile);
+		if (!sourceText.has_value() || !mainText.has_value() || !trapsText.has_value() ||
+			!affixParsingText.has_value() || !typesText.has_value() || !slotRollText.has_value()) {
 			std::cerr << "rebuild_active_counts_extraction: failed to load source files\n";
 			return false;
 		}
 
-		const auto slotRollText = loadText(repoRoot / "src" / "EventBridge.Loot.AffixSlotRoll.cpp");
-		if (!slotRollText.has_value() ||
-			privateApiText->find("void CollectBestSuffixFamilyState(") == std::string::npos ||
-			sourceText->find("CollectBestSuffixFamilyState(desiredPassives);") == std::string::npos ||
-			sourceText->find("affix.slot == AffixSlot::kSuffix && !affix.family.empty()") == std::string::npos ||
-			sourceText->find("if (!deferTieredSuffix)") == std::string::npos ||
-			sourceText->find("a_desiredPassives.insert(affix.passiveSpell);") == std::string::npos ||
-			sourceText->find("bestAffixByFamily[affix.family].Consider(affix.id, affixIdx);") == std::string::npos ||
-			sourceText->find("_affixRuntimeState.activeCritDamageBonusPct += affix.critDamageBonusPct;") == std::string::npos ||
-			sourceText->find("affix.slot == AffixSlot::kSuffix &&") == std::string::npos ||
-			sourceText->find("affix.family.empty() &&") == std::string::npos ||
-			sourceText->find("if (!_runtimeSettings.disablePassiveSuffixSpells && affix.passiveSpell)") == std::string::npos ||
-			sourceText->find("_affixRuntimeState.activeCritDamageBonusPct += _affixRuntimeState.affixes[affixIdx].critDamageBonusPct;") != std::string::npos ||
-			slotRollText->find("std::vector<std::string> chosenPrefixFamilies;") == std::string::npos ||
-			slotRollText->find("std::find(chosenPrefixFamilies.begin(), chosenPrefixFamilies.end(), affix.family)") == std::string::npos ||
-			slotRollText->find("chosenPrefixFamilies.push_back(affix.family);") == std::string::npos) {
-			std::cerr << "suffix_family_selection: expected highest-tier passive/crit selection and prefix family exclusion\n";
+		const auto extractFunctionBody = [](const std::string& a_text, std::string_view a_signature)
+			-> std::optional<std::string_view> {
+			const auto signaturePos = a_text.find(a_signature);
+			if (signaturePos == std::string::npos) {
+				return std::nullopt;
+			}
+			const auto openBrace = a_text.find('{', signaturePos + a_signature.size());
+			if (openBrace == std::string::npos) {
+				return std::nullopt;
+			}
+
+			std::size_t depth = 0u;
+			for (std::size_t i = openBrace; i < a_text.size(); ++i) {
+				if (a_text[i] == '{') {
+					++depth;
+				} else if (a_text[i] == '}') {
+					if (--depth == 0u) {
+						return std::string_view(a_text).substr(openBrace + 1u, i - openBrace - 1u);
+					}
+				}
+			}
+			return std::nullopt;
+		};
+
+		const auto deactivateBody = extractFunctionBody(*sourceText, "void EventBridge::DeactivateRuntimeState()");
+		const auto refreshBody = extractFunctionBody(*sourceText, "void EventBridge::RefreshInventoryInstanceActiveState(");
+		const auto accumulateBody = extractFunctionBody(*sourceText, "void EventBridge::AccumulateEquippedAffixState(");
+		const auto collectBody = extractFunctionBody(*sourceText, "void EventBridge::CollectBestSuffixFamilyState(");
+		const auto passiveBody = extractFunctionBody(*sourceText, "void EventBridge::ApplyDesiredPassiveSpells(");
+		const auto rebuildBody = extractFunctionBody(*sourceText, "void EventBridge::RebuildActiveCounts(");
+		const auto tickTrapsBody = extractFunctionBody(*trapsText, "void EventBridge::TickTraps()");
+		const auto previewBody = extractFunctionBody(*slotRollText, "std::optional<InstanceAffixSlots> EventBridge::BuildLootPreviewAffixSlots(");
+		if (!deactivateBody || !refreshBody || !accumulateBody || !collectBody || !passiveBody || !rebuildBody ||
+			!tickTrapsBody || !previewBody) {
+			std::cerr << "rebuild_active_counts_extraction: focused helper body is missing\n";
+			return false;
+		}
+		if (refreshBody->find("AccumulateEquippedAffixState") == std::string::npos) {
+			std::cerr << "rebuild_active_counts_extraction: equipped instance refresh no longer reaches accumulation\n";
 			return false;
 		}
 
-		if (privateApiText->find("void DeactivateRuntimeState();") == std::string::npos ||
-			privateApiText->find("void ResetActiveCountsStateForRebuild();") == std::string::npos ||
-			privateApiText->find("void RefreshInventoryInstanceActiveState(") == std::string::npos ||
-			privateApiText->find("void AccumulateEquippedAffixState(") == std::string::npos ||
-			privateApiText->find("void RebuildActiveCounts(bool a_refreshConfiguredPassivesOnPostLoad = false);") == std::string::npos ||
-			privateApiText->find("void ApplyDesiredPassiveSpells(") == std::string::npos ||
-			privateApiText->find("void LogRebuildActiveCountsDebugSummary(") == std::string::npos ||
-			sourceText->find("ResetActiveCountsStateForRebuild();") == std::string::npos ||
-			sourceText->find("RefreshInventoryInstanceActiveState(entry, xList, desiredPassives);") == std::string::npos ||
-			sourceText->find("AccumulateEquippedAffixState(key, slots, a_desiredPassives);") == std::string::npos ||
-			sourceText->find("ApplyDesiredPassiveSpells(player, desiredPassives, a_refreshConfiguredPassivesOnPostLoad);") == std::string::npos ||
-			sourceText->find("LogActiveAffixListDebug();") == std::string::npos ||
-			sourceText->find("LogRebuildActiveCountsDebugSummary(desiredPassives);") == std::string::npos ||
-			sourceText->find("void EventBridge::DeactivateRuntimeState()") == std::string::npos ||
-			sourceText->find("for (const auto& affix : _affixRuntimeState.affixes)") == std::string::npos ||
-			sourceText->find("_instanceTrackingState.appliedPassiveSpells.insert(affix.passiveSpell);") == std::string::npos ||
-			sourceText->find("std::unordered_set<RE::SpellItem*> knownPassiveSpells = _instanceTrackingState.appliedPassiveSpells;") == std::string::npos ||
-			sourceText->find("a_player->HasSpell(spell)") == std::string::npos ||
-			sourceText->find("affix.refreshPassiveSpellOnPostLoad") == std::string::npos ||
-			sourceText->find("a_desiredPassives.contains(affix.passiveSpell)") == std::string::npos ||
-			sourceText->find("detail::ResolvePassiveSpellReconcileAction(desired, present, passivesDisabled, refreshRequested)") == std::string::npos ||
-			sourceText->find("PassiveSpellReconcileAction::kRefresh") == std::string::npos ||
-			sourceText->find("a_player->RemoveSpell(spell);") == std::string::npos ||
-			sourceText->find("ApplyDesiredPassiveSpells(player, {});") == std::string::npos ||
-			sourceText->find("ClearTrapRuntimeState();") == std::string::npos ||
-			sourceText->find("_combatState.ResetTransientState();") == std::string::npos ||
-			sourceText->find("_affixRuntimeState.RebuildActiveTriggerIndexCaches();") == std::string::npos ||
-			mainText->find("if (bridge->IsRuntimeEnabled()) {") != std::string::npos ||
-			mainText->find("CalamityAffixes::Hooks::Install();") == std::string::npos ||
-			mainText->find("CalamityAffixes::TrapSystem::Install();") == std::string::npos ||
-			handlerText->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
-			handlerText->find("DeactivateRuntimeState();") == std::string::npos ||
-			lifecycleText->find("(void)PruneOrphanedPlayerInstanceKeys();") == std::string::npos ||
-			lifecycleText->find("RebuildActiveCounts(true);") == std::string::npos ||
+		const auto rebuildReset = rebuildBody->find("ResetActiveCountsStateForRebuild");
+		const auto rebuildRefresh = rebuildBody->find("RefreshInventoryInstanceActiveState");
+		const auto rebuildCollect = rebuildBody->find("CollectBestSuffixFamilyState");
+		const auto rebuildIndex = rebuildBody->find("RebuildActiveTriggerIndexCaches");
+		const auto rebuildApply = rebuildBody->find("ApplyDesiredPassiveSpells");
+		const auto rebuildSummary = rebuildBody->find("LogRebuildActiveCountsDebugSummary");
+		if (rebuildBody->find("_configLoaded") == std::string::npos ||
+			rebuildBody->find("_runtimeSettings.enabled") == std::string::npos ||
+			rebuildBody->find("DeactivateRuntimeState") == std::string::npos ||
+			rebuildBody->find("equippedTokenCacheReady") == std::string::npos ||
+			rebuildReset == std::string::npos || rebuildRefresh == std::string::npos ||
+			rebuildCollect == std::string::npos || rebuildIndex == std::string::npos ||
+			rebuildApply == std::string::npos || rebuildSummary == std::string::npos ||
+			!(rebuildReset < rebuildRefresh && rebuildRefresh < rebuildCollect &&
+				rebuildCollect < rebuildIndex && rebuildIndex < rebuildApply && rebuildApply < rebuildSummary)) {
+			std::cerr << "rebuild_active_counts_extraction: rebuild orchestration order drifted\n";
+			return false;
+		}
+
+		const auto deactivateReset = deactivateBody->find("ResetActiveCountsStateForRebuild");
+		const auto deactivatePassives = deactivateBody->find("ApplyDesiredPassiveSpells");
+		const auto deactivateTraps = deactivateBody->find("ClearTrapRuntimeState");
+		const auto deactivateCombat = deactivateBody->find("ResetTransientState");
+		const auto deactivateHooks = deactivateBody->find("Hooks::ClearRuntimeState");
+		if (deactivateBody->find("appliedPassiveSpells") == std::string::npos ||
+			deactivateBody->find("nextAllowed") == std::string::npos ||
+			deactivateReset == std::string::npos || deactivatePassives == std::string::npos ||
+			deactivateTraps == std::string::npos || deactivateCombat == std::string::npos ||
+			deactivateHooks == std::string::npos ||
+			!(deactivateReset < deactivatePassives && deactivatePassives < deactivateTraps &&
+				deactivateTraps < deactivateCombat && deactivateCombat < deactivateHooks)) {
+			std::cerr << "rebuild_active_counts_extraction: deactivate cleanup order drifted\n";
+			return false;
+		}
+
+		const auto familyCrit = accumulateBody->find("activeCritDamageBonusPct");
+		if (accumulateBody->find("CountProcPenaltySlots") == std::string::npos ||
+			accumulateBody->find("equippedInstanceKeysByToken") == std::string::npos ||
+			accumulateBody->find("activeCounts") == std::string::npos ||
+			accumulateBody->find("passiveSpell") == std::string::npos ||
+			accumulateBody->find("ShouldDeferTieredSuffixFamily") == std::string::npos ||
+			accumulateBody->find("ShouldAccumulateFamilylessSuffixValue") == std::string::npos ||
+			familyCrit == std::string::npos ||
+			accumulateBody->find("activeCritDamageBonusPct", familyCrit + 1u) != std::string::npos ||
+			accumulateBody->find("activeSlotPenalty") == std::string::npos ||
+			collectBody->find("SuffixFamilyBestCandidate") == std::string::npos ||
+			collectBody->find("activeCounts") == std::string::npos ||
+			collectBody->find("activeCritDamageBonusPct") == std::string::npos ||
+			collectBody->find("disablePassiveSuffixSpells") == std::string::npos ||
+			collectBody->find("passiveSpell") == std::string::npos) {
+			std::cerr << "rebuild_active_counts_extraction: suffix accumulation structure drifted\n";
+			return false;
+		}
+
+		if (passiveBody->find("appliedPassiveSpells") == std::string::npos ||
+			passiveBody->find("refreshPassiveSpellOnPostLoad") == std::string::npos ||
+			passiveBody->find("PassiveSpellReconcileInput") == std::string::npos ||
+			passiveBody->find("ResolvePassiveSpellReconcileAction") == std::string::npos ||
+			passiveBody->find("PassiveSpellReconcileAction::kAdd") == std::string::npos ||
+			passiveBody->find("PassiveSpellReconcileAction::kRemove") == std::string::npos ||
+			passiveBody->find("PassiveSpellReconcileAction::kRefresh") == std::string::npos ||
+			passiveBody->find("AddSpell") == std::string::npos ||
+			passiveBody->find("RemoveSpell") == std::string::npos ||
+			passiveBody->find("PlayActionFeedback") == std::string::npos) {
+			std::cerr << "rebuild_active_counts_extraction: passive application structure drifted\n";
+			return false;
+		}
+
+		const auto hooksInstall = mainText->find("Hooks::Install");
+		const auto trapsInstall = mainText->find("TrapSystem::Install");
+		const auto enabledStatus = mainText->find("IsRuntimeEnabled");
+		const auto trapEnabledGate = tickTrapsBody->find("_runtimeSettings.enabled");
+		const auto trapTickDisableGate = tickTrapsBody->find("disableTrapSystemTick");
+		const auto prefixFamilyPolicy = previewBody->find("IsAffixFamilyAvailable");
+		const auto prefixFamilyRecord = previewBody->find("RecordSelectedAffixFamily");
+		const auto suffixFamilySelection = previewBody->find("chosenFamilies");
+		if (hooksInstall == std::string::npos || trapsInstall == std::string::npos ||
+			enabledStatus == std::string::npos || !(hooksInstall < enabledStatus && trapsInstall < enabledStatus) ||
+			trapEnabledGate == std::string::npos || trapTickDisableGate == std::string::npos ||
+			trapEnabledGate >= trapTickDisableGate ||
 			affixParsingText->find("refreshPassiveSpellOnPostLoad") == std::string::npos ||
-			typesText->find("bool refreshPassiveSpellOnPostLoad{ false };") == std::string::npos ||
-			trapsText->find("if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {") == std::string::npos) {
-			std::cerr << "rebuild_active_counts_extraction: expected rebuild flow to stay decomposed into focused helpers\n";
+			typesText->find("refreshPassiveSpellOnPostLoad") == std::string::npos ||
+			previewBody->find("chosenPrefixIndices") == std::string::npos ||
+			previewBody->find("chosenPrefixFamilies") == std::string::npos ||
+			prefixFamilyPolicy == std::string::npos || prefixFamilyRecord == std::string::npos ||
+			suffixFamilySelection == std::string::npos ||
+			prefixFamilyPolicy >= suffixFamilySelection || prefixFamilyRecord >= suffixFamilySelection) {
+			std::cerr << "rebuild_active_counts_extraction: surrounding runtime structure drifted\n";
 			return false;
 		}
 

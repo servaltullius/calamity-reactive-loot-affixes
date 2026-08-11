@@ -63,9 +63,11 @@ class CoreIdentityWaveTwoTests(unittest.TestCase):
         # An INTENTIONAL record change must update this hash in the same commit
         # (2026-08-04: fire conversion MGEF gained hitSoundForm for the B1
         # prototype; 2026-08-09: frost/shock conversion sounds, then internal trap
-        # record names gained Korean halves for the localized preview map).
+        # record names gained Korean halves for the localized preview map;
+        # 2026-08-11: the five non-bear trap spells moved engine Effect.Area to
+        # zero so the runtime hostile-only selector owns the full radius contract).
         self.assertEqual(
-            "bcc766b420898acc15eb35e387c68696c4c429052388b84c23bbdb565fb2de03",
+            "16af97c056f77f2b31d1e03c3c6d4f6726b9f5b4a855fcc44d05dc474b59ad0d",
             hashlib.sha256(records_payload).hexdigest(),
             "records payload changed — if intentional, update this pin in the same commit",
         )

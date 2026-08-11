@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <RE/M/Misc.h>
@@ -462,9 +463,12 @@ namespace CalamityAffixes
 
 		struct Target
 		{
-			RE::Actor* actor{ nullptr };
+			// CastSpellImmediate can re-enter gameplay code. Keep every selected
+			// actor alive until the complete cast loop has finished.
+			RE::NiPointer<RE::Actor> actor{};
 			float distanceSq{ 0.0f };
 		};
+		static_assert(std::is_same_v<decltype(Target::actor), RE::NiPointer<RE::Actor>>);
 
 		std::vector<Target> targets;
 		targets.reserve(std::min<std::size_t>(targetCap, 48u));
@@ -491,7 +495,7 @@ namespace CalamityAffixes
 			}
 
 			if (targets.size() < targetCap) {
-				targets.push_back(Target{ std::addressof(a), distSq });
+				targets.push_back(Target{ RE::NiPointer<RE::Actor>{ std::addressof(a) }, distSq });
 				return RE::BSContainer::ForEachResult::kContinue;
 			}
 
@@ -503,7 +507,7 @@ namespace CalamityAffixes
 					return lhs.distanceSq < rhs.distanceSq;
 				});
 			if (farthestIt != targets.end() && distSq < farthestIt->distanceSq) {
-				*farthestIt = Target{ std::addressof(a), distSq };
+				*farthestIt = Target{ RE::NiPointer<RE::Actor>{ std::addressof(a) }, distSq };
 			}
 			return RE::BSContainer::ForEachResult::kContinue;
 		});
@@ -525,14 +529,15 @@ namespace CalamityAffixes
 
 		std::uint32_t hitCount = 0;
 		for (const auto& t : targets) {
-			if (!t.actor || t.actor->IsDead()) {
+			auto* actor = t.actor.get();
+			if (!actor || actor->IsDead()) {
 				continue;
 			}
 
 			magicCaster->CastSpellImmediate(
 				a_action.spell,
 				a_action.noHitEffectArt,
-				t.actor,
+				actor,
 				a_action.effectiveness,
 				false,
 				a_baseDamage,

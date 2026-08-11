@@ -1,7 +1,7 @@
 # EventBridge 분해: 현황 감사와 다음 단계
 
 Date: 2026-07-27
-Updated: 2026-07-29
+Updated: 2026-08-11
 Status: in-progress
 Supersedes-sequencing-of: [2026-03-06-eventbridge-state-ownership-extraction-design.md](2026-03-06-eventbridge-state-ownership-extraction-design.md)
 
@@ -12,6 +12,18 @@ Supersedes-sequencing-of: [2026-03-06-eventbridge-state-ownership-extraction-des
 - Step 2 완료: 활성 트리거 캐시 재구축과 읽기 선택을 `AffixRuntimeCacheState` 내부로 옮겼다.
   `EventBridge`는 const 결과만 전달한다.
 - Phase 2의 serialize/deserialize 책임 이동과 이후 facade 축소는 아직 남아 있다.
+
+## 2026-08-11 실행 결과
+
+- Step 3의 선행 조건을 완료했다. 실제 `EventBridge::Save()`가 사용하는 공용 wire writer를
+  추출하고, 현재 8개 co-save 레코드의 타입·버전·순서·scalar 폭·바이트 배열을 golden
+  gate로 고정했다. 잘린 payload 거부와 writer 실패 시 즉시 중단도 행동 테스트로 확인한다.
+- production `Load()`의 FormID 해석, 레거시 버전, 부분 복구 책임은 아직 이동하지 않았다.
+  따라서 Step 3은 **안전망 완료 / 책임 이전 미완료** 상태다.
+- `RebuildActiveCounts` 검사의 문장 단위 brittle pin 37개를 production policy 행동 테스트와
+  함수 경계·호출 순서 검증으로 전환했다. 전체 brittle 상한은 353에서 316으로 낮췄다.
+- 현재 구현 스냅샷은 EventBridge 구현 64파일/약 18.3k LOC, private API 선언 243개다.
+  아래 2026-07-27 수치는 당시 기준선으로 보존한다.
 
 ## 이 문서의 위치
 

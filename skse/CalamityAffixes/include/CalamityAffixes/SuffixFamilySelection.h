@@ -1,9 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <span>
+#include <string>
 #include <string_view>
+#include <vector>
 
 namespace CalamityAffixes::detail
 {
@@ -66,6 +70,42 @@ namespace CalamityAffixes::detail
 		}
 	};
 
+	struct SuffixFamilyClassification
+	{
+		bool isSuffix{ false };
+		bool hasFamily{ false };
+	};
+
+	[[nodiscard]] constexpr bool ShouldDeferTieredSuffixFamily(
+		SuffixFamilyClassification a_classification) noexcept
+	{
+		return a_classification.isSuffix && a_classification.hasFamily;
+	}
+
+	[[nodiscard]] constexpr bool ShouldAccumulateFamilylessSuffixValue(
+		SuffixFamilyClassification a_classification) noexcept
+	{
+		return a_classification.isSuffix && !a_classification.hasFamily;
+	}
+
+	[[nodiscard]] inline bool IsAffixFamilyAvailable(
+		std::span<const std::string> a_selectedFamilies,
+		std::string_view a_candidateFamily) noexcept
+	{
+		return a_candidateFamily.empty() ||
+		       std::find(a_selectedFamilies.begin(), a_selectedFamilies.end(), a_candidateFamily) ==
+			       a_selectedFamilies.end();
+	}
+
+	inline void RecordSelectedAffixFamily(
+		std::vector<std::string>& a_selectedFamilies,
+		std::string_view a_selectedFamily)
+	{
+		if (!a_selectedFamily.empty()) {
+			a_selectedFamilies.emplace_back(a_selectedFamily);
+		}
+	}
+
 	enum class PassiveSpellReconcileAction : std::uint8_t
 	{
 		kKeep,
@@ -74,18 +114,23 @@ namespace CalamityAffixes::detail
 		kRefresh
 	};
 
-	[[nodiscard]] constexpr PassiveSpellReconcileAction ResolvePassiveSpellReconcileAction(
-		bool a_desired,
-		bool a_present,
-		bool a_passivesDisabled,
-		bool a_refreshRequested) noexcept
+	struct PassiveSpellReconcileInput
 	{
-		if (a_passivesDisabled || !a_desired) {
-			return a_present ? PassiveSpellReconcileAction::kRemove : PassiveSpellReconcileAction::kKeep;
+		bool desired{ false };
+		bool present{ false };
+		bool passivesDisabled{ false };
+		bool refreshRequested{ false };
+	};
+
+	[[nodiscard]] constexpr PassiveSpellReconcileAction ResolvePassiveSpellReconcileAction(
+		PassiveSpellReconcileInput a_input) noexcept
+	{
+		if (a_input.passivesDisabled || !a_input.desired) {
+			return a_input.present ? PassiveSpellReconcileAction::kRemove : PassiveSpellReconcileAction::kKeep;
 		}
-		if (!a_present) {
+		if (!a_input.present) {
 			return PassiveSpellReconcileAction::kAdd;
 		}
-		return a_refreshRequested ? PassiveSpellReconcileAction::kRefresh : PassiveSpellReconcileAction::kKeep;
+		return a_input.refreshRequested ? PassiveSpellReconcileAction::kRefresh : PassiveSpellReconcileAction::kKeep;
 	}
 }

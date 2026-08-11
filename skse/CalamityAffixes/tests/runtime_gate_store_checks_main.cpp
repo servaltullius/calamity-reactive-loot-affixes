@@ -90,6 +90,7 @@ int main()
 	const bool lootRerollCircularOverflowOk = CheckLootRerollGuardCircularOverflow();
 	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
 	const bool serializationLoadStateHelpersOk = CheckSerializationLoadStateHelpers();
+	const bool serializationWireContractOk = CheckSerializationWireContract();
 	const bool lowHealthTriggerSnapshotHelpersOk = CheckLowHealthTriggerSnapshotHelpers();
 	const bool scopedProcDepthGuardOk = CheckScopedProcDepthGuard();
 	const bool triggerDispatchSnapshotIsolationOk = CheckTriggerDispatchSnapshotIsolation();
@@ -162,6 +163,7 @@ int main()
 	        lootRerollCircularOverflowOk &&
 	        lootRerollEdgeCasesOk &&
 	        serializationLoadStateHelpersOk &&
+	        serializationWireContractOk &&
 	        lowHealthTriggerSnapshotHelpersOk &&
 	        scopedProcDepthGuardOk &&
 	        triggerDispatchSnapshotIsolationOk &&
