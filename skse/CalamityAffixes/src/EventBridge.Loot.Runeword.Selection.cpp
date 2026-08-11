@@ -48,7 +48,9 @@ namespace CalamityAffixes
 	{
 		auto& state = _runewordState.instanceStates[a_instanceKey];
 		if (state.recipeToken == 0u) {
-			if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
+			if (const auto* completedRecipe = ResolveCompletedRunewordRecipe(a_instanceKey)) {
+				state.recipeToken = completedRecipe->token;
+			} else if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
 				state.recipeToken = currentRecipe->token;
 			}
 		}
@@ -84,6 +86,10 @@ namespace CalamityAffixes
 			if (const auto* recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken)) {
 				return recipe;
 			}
+		}
+
+		if (const auto* completedRecipe = ResolveCompletedRunewordRecipe(a_selectedBaseKey)) {
+			return completedRecipe;
 		}
 
 		return GetCurrentRunewordRecipe();

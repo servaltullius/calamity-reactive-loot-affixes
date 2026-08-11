@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/RunewordUiPolicy.h"
 
 #include <cstdint>
 #include <string>
@@ -12,6 +13,13 @@ namespace CalamityAffixes
 		const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(a_recipe.resultAffixToken);
 		if (affixIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixRuntimeState.affixes.size()) {
 			return RunewordApplyBlockReason::kMissingResultAffix;
+		}
+
+		const auto* completed = ResolveCompletedRunewordRecipe(a_instanceKey);
+		if (IsSameCompletedRuneword(
+				completed ? completed->resultAffixToken : 0u,
+				a_recipe.resultAffixToken)) {
+			return RunewordApplyBlockReason::kAlreadyComplete;
 		}
 
 		if (const auto it = _instanceTrackingState.instanceAffixes.find(a_instanceKey); it != _instanceTrackingState.instanceAffixes.end()) {
@@ -41,6 +49,8 @@ namespace CalamityAffixes
 		switch (a_reason) {
 		case RunewordApplyBlockReason::kMissingResultAffix:
 			return "Runeword result affix missing";
+		case RunewordApplyBlockReason::kAlreadyComplete:
+			return "Selected base already has this runeword";
 		case RunewordApplyBlockReason::kAffixSlotsFull: {
 			std::string reason = "Affix slots full (max ";
 			reason.append(std::to_string(kMaxAffixesPerItem));

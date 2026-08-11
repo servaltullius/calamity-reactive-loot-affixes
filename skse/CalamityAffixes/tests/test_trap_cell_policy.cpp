@@ -1,5 +1,6 @@
 #include "CalamityAffixes/TrapCellPolicy.h"
 #include "CalamityAffixes/TrapMarkerAnimationPolicy.h"
+#include "CalamityAffixes/TrapWeaponHitPolicy.h"
 
 using CalamityAffixes::detail::IsTrapCellUsable;
 using CalamityAffixes::detail::CanSpawnPlacedTrapMarker;
@@ -15,6 +16,37 @@ using CalamityAffixes::detail::ShouldStartTrapMarkerRearmAnimation;
 using CalamityAffixes::detail::ShouldBlockTrapCastForMarkerAnimation;
 using CalamityAffixes::detail::BuildTrapWorldMarkerProbeWindow;
 using CalamityAffixes::detail::kMaxTrapMarkerAnimationAttempts;
+using CalamityAffixes::detail::IsTrapWeaponHitEvidence;
+using CalamityAffixes::detail::ResolveTrapWeaponFallbackSource;
+using CalamityAffixes::detail::TrapWeaponFallbackSource;
+
+static_assert(
+	ResolveTrapWeaponFallbackSource(true, true, true) ==
+		TrapWeaponFallbackSource::kReportedAggressor,
+	"A player-owned summon hit must inspect the reported summon, not the routed player's equipment");
+static_assert(
+	ResolveTrapWeaponFallbackSource(true, false, true) ==
+		TrapWeaponFallbackSource::kRoutedOwner,
+	"Incomplete genuine player projectile HitData must retain its bow/crossbow compatibility fallback");
+static_assert(
+	ResolveTrapWeaponFallbackSource(false, false, true) ==
+		TrapWeaponFallbackSource::kNone,
+	"Missing HitData cannot borrow the routed owner's weapon");
+
+static_assert(IsTrapWeaponHitEvidence(true, true, true, false, false, false),
+	"A direct weapon record remains authoritative even when the attack also carries a spell");
+static_assert(IsTrapWeaponHitEvidence(true, false, false, true, false, false),
+	"Genuine melee hit flags remain trap-eligible when the direct weapon pointer is absent");
+static_assert(IsTrapWeaponHitEvidence(true, false, false, false, false, true),
+	"A bow/crossbow resolved from the actual hit source remains trap-eligible");
+static_assert(!IsTrapWeaponHitEvidence(true, false, true, false, false, true),
+	"A summon spell hit cannot become weapon-like merely because an actor has a ranged weapon equipped");
+static_assert(!IsTrapWeaponHitEvidence(true, false, true, false, true, false),
+	"A spell explosion must not bypass the weapon-hit requirement");
+static_assert(!IsTrapWeaponHitEvidence(true, false, false, false, false, false),
+	"An unrelated equipped melee weapon is insufficient fallback evidence for a projectile hit");
+static_assert(!IsTrapWeaponHitEvidence(false, true, false, true, false, true),
+	"No weapon evidence is usable without HitData");
 
 static_assert(!IsTrapCellUsable(false, false),
 	"Trap cells must exist before runtime effects can use them");

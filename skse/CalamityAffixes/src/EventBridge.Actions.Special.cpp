@@ -422,14 +422,11 @@ namespace CalamityAffixes
 			MaybeResyncEquippedAffixes(std::chrono::steady_clock::now());
 		}
 
-		// CoC requires a DIRECT weapon reference in the hitData.
-		// Do NOT use ResolveHitWeapon (which falls back to equipped weapon),
-		// because CoC spell projectile hits (Fire Bolt, Ice Spike, etc.) have
-		// hitData->weapon == NULL, and the fallback would return the equipped
-		// bow — causing an infinite proc-on-proc chain for ranged weapons.
-		const auto* hitWeapon = a_hitData->weapon
-			? SanitizeObjectPointer(a_hitData->weapon)
-			: nullptr;
+		// Bow/crossbow projectile HitData may omit the direct weapon pointer.
+		// Resolve only from weapon-origin evidence carried by this hit; the
+		// resolver deliberately rejects spell HitData and never falls back to a
+		// merely equipped bow, preventing proc-on-proc spell projectile chains.
+		const auto* hitWeapon = HitDataUtil::ResolveCastOnCritHitWeapon(a_hitData, a_attacker);
 		if (!hitWeapon) {
 			return {};
 		}
@@ -439,9 +436,7 @@ namespace CalamityAffixes
 
 		// Bow/crossbow: kPowerAttack is never set and kCritical is rare,
 		// so skip the crit/power gate and let procChancePct control activation.
-		const bool isRangedWeapon =
-			(hitWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow ||
-			 hitWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow);
+		const bool isRangedWeapon = HitDataUtil::IsBowOrCrossbow(hitWeapon);
 
 		if (!isRangedWeapon && !isCrit && !isPowerAttack) {
 			return {};

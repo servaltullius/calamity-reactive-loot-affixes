@@ -37,6 +37,17 @@ namespace CalamityAffixes
 				a_recipe.resultAffixToken);
 			return false;
 		}
+		if (blockReason == RunewordApplyBlockReason::kAlreadyComplete) {
+			if (a_outFailureReason) {
+				*a_outFailureReason = "already-complete";
+			}
+			EmitHudNotification("Runeword blocked: selected base already has this runeword.");
+			SKSE::log::info(
+				"CalamityAffixes: runeword apply blocked (instance={:016X}, recipe={}, reason=already-complete).",
+				a_instanceKey,
+				a_recipe.id);
+			return false;
+		}
 		if (blockReason == RunewordApplyBlockReason::kAffixSlotsFull) {
 			if (a_outFailureReason) {
 				*a_outFailureReason = "affix-slots-full";
@@ -163,6 +174,14 @@ namespace CalamityAffixes
 				"CalamityAffixes: runeword result affix missing before transmute (recipe={}, resultToken={:016X}).",
 				recipe->id,
 				recipe->resultAffixToken);
+			return;
+		}
+		if (blockReason == RunewordApplyBlockReason::kAlreadyComplete) {
+			EmitHudNotification("Runeword blocked: selected base already has this runeword.");
+			SKSE::log::info(
+				"CalamityAffixes: runeword transmute blocked before fragment consumption (instance={:016X}, recipe={}, reason=already-complete).",
+				instanceKey,
+				recipe->id);
 			return;
 		}
 		if (blockReason == RunewordApplyBlockReason::kAffixSlotsFull) {

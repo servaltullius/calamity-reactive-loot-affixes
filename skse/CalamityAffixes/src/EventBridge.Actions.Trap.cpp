@@ -1,7 +1,9 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HitDataUtil.h"
+#include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/ProcFeedback.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
+#include "CalamityAffixes/TrapWeaponHitPolicy.h"
 
 #include <algorithm>
 #include <format>
@@ -14,6 +16,59 @@ namespace CalamityAffixes
 {
 	namespace
 	{
+		bool IsTrapWeaponLikeHit(
+			const RE::HitData* a_hitData,
+			RE::Actor* a_routedOwner) noexcept
+		{
+			if (!a_hitData) {
+				return false;
+			}
+
+			const bool hasDirectWeapon = SanitizeObjectPointer(a_hitData->weapon) != nullptr;
+			const bool hasAttackSpell = SanitizeObjectPointer(a_hitData->attackDataSpell) != nullptr;
+			const bool hasMeleeFlag = a_hitData->flags.any(RE::HitData::Flag::kMeleeAttack);
+			const bool hasExplosionFlag = a_hitData->flags.any(RE::HitData::Flag::kExplosion);
+
+			bool fallbackWeaponIsRanged = false;
+			if (!hasDirectWeapon && !hasAttackSpell && !hasMeleeFlag && !hasExplosionFlag) {
+				// Keep the handle resolution's NiPointer alive until every use of
+				// the reported aggressor has completed. Returning only its raw
+				// pointer from a helper would release the strong reference first.
+				const auto reportedAggressorHolder = a_hitData->aggressor.get();
+				auto* reportedAggressor = SanitizeObjectPointer(reportedAggressorHolder.get());
+				RE::Actor* hitSourceActor = nullptr;
+				switch (detail::ResolveTrapWeaponFallbackSource(
+					true,
+					reportedAggressor != nullptr,
+					a_routedOwner != nullptr)) {
+				case detail::TrapWeaponFallbackSource::kReportedAggressor:
+					hitSourceActor = reportedAggressor;
+					break;
+				case detail::TrapWeaponFallbackSource::kRoutedOwner:
+					hitSourceActor = SanitizeObjectPointer(a_routedOwner);
+					break;
+				case detail::TrapWeaponFallbackSource::kNone:
+				default:
+					break;
+				}
+				auto* fallbackWeapon = HitDataUtil::ResolveHitWeapon(a_hitData, hitSourceActor);
+				if (fallbackWeapon) {
+					const auto weaponType = fallbackWeapon->GetWeaponType();
+					fallbackWeaponIsRanged =
+						weaponType == RE::WEAPON_TYPE::kBow ||
+						weaponType == RE::WEAPON_TYPE::kCrossbow;
+				}
+			}
+
+			return detail::IsTrapWeaponHitEvidence(
+				true,
+				hasDirectWeapon,
+				hasAttackSpell,
+				hasMeleeFlag,
+				hasExplosionFlag,
+				fallbackWeaponIsRanged);
+		}
+
 		float GetTrapSpellBaseMagnitude(const RE::SpellItem* a_spell)
 		{
 			if (!a_spell) {
@@ -50,7 +105,7 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		if (a_action.trapRequireWeaponHit && !HitDataUtil::IsWeaponLikeHit(a_hitData, a_owner)) {
+		if (a_action.trapRequireWeaponHit && !IsTrapWeaponLikeHit(a_hitData, a_owner)) {
 			setFailureReason("needs weapon hit");
 			return false;
 		}

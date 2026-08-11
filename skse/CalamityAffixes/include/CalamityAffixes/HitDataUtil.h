@@ -1,11 +1,76 @@
 #pragma once
 
 #include "CalamityAffixes/PointerSafety.h"
+#include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 
 #include <RE/Skyrim.h>
 
 namespace CalamityAffixes::HitDataUtil
 {
+	[[nodiscard]] inline bool IsBowOrCrossbow(const RE::TESObjectWEAP* a_weapon) noexcept
+	{
+		return a_weapon &&
+		       (a_weapon->GetWeaponType() == RE::WEAPON_TYPE::kBow ||
+		        a_weapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow);
+	}
+
+	[[nodiscard]] inline RE::TESObjectWEAP* ResolveCastOnCritHitWeapon(
+		const RE::HitData* a_hitData,
+		RE::Actor* a_attacker) noexcept
+	{
+		if (!a_hitData) {
+			return nullptr;
+		}
+
+		auto* directWeapon = a_hitData->weapon ? SanitizeObjectPointer(a_hitData->weapon) : nullptr;
+		const bool hasSourceReference = static_cast<bool>(a_hitData->sourceRef);
+
+		RE::TESObjectWEAP* projectileWeapon = nullptr;
+		bool sourceIsProjectile = false;
+		if (!directWeapon && !a_hitData->attackDataSpell && hasSourceReference) {
+			const auto sourceHolder = a_hitData->sourceRef.get();
+			auto* sourceRef = SanitizeObjectPointer(sourceHolder.get());
+			auto* projectile = sourceRef ? SanitizeObjectPointer(sourceRef->AsProjectile()) : nullptr;
+			if (projectile) {
+				sourceIsProjectile = true;
+				projectileWeapon = SanitizeObjectPointer(projectile->GetProjectileRuntimeData().weaponSource);
+			}
+		}
+
+		RE::TESObjectWEAP* activeAttackWeapon = nullptr;
+		if (!directWeapon && !a_hitData->attackDataSpell && !hasSourceReference && a_hitData->attackData) {
+			a_attacker = SanitizeObjectPointer(a_attacker);
+			if (a_attacker) {
+				if (auto* entry = a_attacker->GetAttackingWeapon()) {
+					auto* object = SanitizeObjectPointer(entry->GetObject());
+					activeAttackWeapon = object ? object->As<RE::TESObjectWEAP>() : nullptr;
+				}
+			}
+		}
+
+		using detail::CastOnCritWeaponSource;
+		const auto source = detail::ResolveCastOnCritWeaponSource(
+			directWeapon != nullptr,
+			a_hitData->attackDataSpell != nullptr,
+			hasSourceReference,
+			sourceIsProjectile,
+			IsBowOrCrossbow(projectileWeapon),
+			a_hitData->attackData != nullptr,
+			IsBowOrCrossbow(activeAttackWeapon));
+
+		switch (source) {
+		case CastOnCritWeaponSource::kHitDataWeapon:
+			return directWeapon;
+		case CastOnCritWeaponSource::kProjectileWeapon:
+			return projectileWeapon;
+		case CastOnCritWeaponSource::kActiveRangedAttack:
+			return activeAttackWeapon;
+		case CastOnCritWeaponSource::kNone:
+		default:
+			return nullptr;
+		}
+	}
+
 	[[nodiscard]] inline const RE::HitData* GetLastHitData(RE::Actor* a_target)
 	{
 		if (!a_target) {

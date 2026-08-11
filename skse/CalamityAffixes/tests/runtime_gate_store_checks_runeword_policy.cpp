@@ -1024,6 +1024,13 @@ namespace RuntimeGateStoreChecks
 
 		bool CheckRunewordUiPolicyHelpers()
 		{
+			if (!CalamityAffixes::IsSameCompletedRuneword(0xA11CEu, 0xA11CEu) ||
+				CalamityAffixes::IsSameCompletedRuneword(0u, 0u) ||
+				CalamityAffixes::IsSameCompletedRuneword(0xA11CEu, 0xBEEFu)) {
+				std::cerr << "runeword_ui_policy: completed-runeword relationship mismatch\n";
+				return false;
+			}
+
 			if (!CalamityAffixes::ShouldClearRunewordInProgressState(true) ||
 				CalamityAffixes::ShouldClearRunewordInProgressState(false)) {
 				std::cerr << "runeword_ui_policy: completed-base clear policy helper mismatch\n";

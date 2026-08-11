@@ -4,6 +4,7 @@ using CalamityAffixes::detail::DetermineLootPrefixSuffixTargets;
 using CalamityAffixes::detail::BuildRegularOnlyAffixSlots;
 using CalamityAffixes::detail::DidConsumeExactInventoryCount;
 using CalamityAffixes::detail::DidRestoreExactInventoryCount;
+using CalamityAffixes::detail::HasCompleteRegularAffixReforgeRoll;
 using CalamityAffixes::detail::ShouldRetryRegularAffixReforgeRoll;
 using CalamityAffixes::detail::ResolveReforgeTargetAffixCount;
 static constexpr auto kMaxSlots = static_cast<std::uint8_t>(CalamityAffixes::kMaxRegularAffixesPerItem);
@@ -20,6 +21,13 @@ static_assert(ResolveReforgeTargetAffixCount(kMaxSlots) == kMaxSlots,
 static_assert(ResolveReforgeTargetAffixCount(7u) == kMaxSlots,
 	"ResolveReforgeTargetAffixCount: clamp corrupted legacy counts to max slots");
 
+static_assert(HasCompleteRegularAffixReforgeRoll(3u, 3u),
+	"HasCompleteRegularAffixReforgeRoll: accepts an exact count-preserving roll");
+static_assert(!HasCompleteRegularAffixReforgeRoll(3u, 2u),
+	"HasCompleteRegularAffixReforgeRoll: rejects a partial roll");
+static_assert(!HasCompleteRegularAffixReforgeRoll(1u, 0u),
+	"HasCompleteRegularAffixReforgeRoll: rejects an empty roll");
+
 static_assert([] {
 	const auto targets = DetermineLootPrefixSuffixTargets(ResolveReforgeTargetAffixCount(0u));
 	return targets.prefixTarget == 1u && targets.suffixTarget == 0u;
@@ -33,10 +41,19 @@ static_assert([] {
 	(void)slots.AddToken(0xCCu);
 	const auto regularSlots = BuildRegularOnlyAffixSlots(slots, 0xAAu);
 	return regularSlots.count == 2u &&
+	       ResolveReforgeTargetAffixCount(regularSlots.count) == 2u &&
 	       regularSlots.tokens[0] == 0xBBu &&
 	       regularSlots.tokens[1] == 0xCCu;
 }(),
-	"BuildRegularOnlyAffixSlots: removes preserved runeword token while keeping regular slot order");
+	"Reforge target: excludes the preserved runeword token and keeps the regular affix count");
+
+static_assert([] {
+	CalamityAffixes::InstanceAffixSlots slots{};
+	(void)slots.AddToken(0xAAu);
+	const auto regularSlots = BuildRegularOnlyAffixSlots(slots, 0xAAu);
+	return regularSlots.count == 0u && ResolveReforgeTargetAffixCount(regularSlots.count) == 1u;
+}(),
+	"Reforge target: a runeword-only base receives one regular affix roll");
 
 static_assert([] {
 	CalamityAffixes::InstanceAffixSlots previous{};

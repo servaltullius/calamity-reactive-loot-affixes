@@ -115,6 +115,11 @@ namespace CalamityAffixes
 		}
 
 		const auto applyBlockReason = ResolveRunewordApplyBlockReason(*_runewordState.selectedBaseKey, *recipe);
+		panelState.isComplete = applyBlockReason == RunewordApplyBlockReason::kAlreadyComplete;
+		if (panelState.isComplete) {
+			panelState.insertedRunes = panelState.totalRunes;
+			return panelState;
+		}
 		const bool canApplyResult = applyBlockReason == RunewordApplyBlockReason::kNone;
 
 		if (panelState.insertedRunes >= panelState.totalRunes) {

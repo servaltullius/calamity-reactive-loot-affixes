@@ -4,6 +4,14 @@
 
 namespace CalamityAffixes
 {
+	[[nodiscard]] constexpr bool IsSameCompletedRuneword(
+		std::uint64_t a_completedResultAffixToken,
+		std::uint64_t a_selectedResultAffixToken) noexcept
+	{
+		return a_completedResultAffixToken != 0u &&
+		       a_completedResultAffixToken == a_selectedResultAffixToken;
+	}
+
 	[[nodiscard]] constexpr bool ShouldClearRunewordInProgressState(bool a_isCompletedBase) noexcept
 	{
 		return a_isCompletedBase;

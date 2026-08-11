@@ -71,6 +71,13 @@ namespace CalamityAffixes::detail
 		return (a_existingAffixCount > kMaxCount) ? kMaxCount : a_existingAffixCount;
 	}
 
+	[[nodiscard]] constexpr bool HasCompleteRegularAffixReforgeRoll(
+		std::uint8_t a_targetAffixCount,
+		std::uint8_t a_rolledAffixCount) noexcept
+	{
+		return a_targetAffixCount > 0u && a_rolledAffixCount == a_targetAffixCount;
+	}
+
 	struct LootPrefixSuffixTargets
 	{
 		std::uint8_t prefixTarget{ 0u };

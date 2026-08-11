@@ -58,12 +58,12 @@ ${buttonHint}`
   const reforgeHint = reforgeEnabled ?
     (isComplete ?
       t(
-        "Consume 1 Reforge Orb and reroll only the regular affixes on the selected base. The completed runeword is preserved.",
-        "재련 오브 1개를 소모해 선택 베이스의 일반 어픽스만 재굴림합니다. 완성된 룬워드는 유지됩니다."
+        "Consume 1 Reforge Orb and reroll only the regular affixes on the selected base. The completed runeword and current regular-affix count are preserved; a base with none gains one.",
+        "재련 오브 1개를 소모해 선택 베이스의 일반 어픽스만 재굴림합니다. 완성된 룬워드는 유지됩니다. 현재 일반 어픽스 개수도 유지되며, 없으면 1개가 생깁니다."
       ) :
       t(
-        "Consume 1 Reforge Orb and reroll affixes on the selected base.",
-        "재련 오브 1개를 소모해 선택 베이스의 어픽스를 재굴림합니다."
+        "Consume 1 Reforge Orb and reroll the same number of regular affixes on the selected base. A base with none gains one; any completed runeword is preserved.",
+        "재련 오브 1개를 소모해 선택 베이스의 일반 어픽스를 같은 개수로 재굴림합니다. 일반 어픽스가 없으면 1개가 생기며, 완성된 룬워드는 유지됩니다."
       )) :
     t(
       "Select a base first.",

@@ -18,7 +18,9 @@ namespace RuntimeGateStoreChecks
 	{
 		using CalamityAffixes::InstanceAffixSlots;
 		using CalamityAffixes::kMaxRegularAffixesPerItem;
+		using CalamityAffixes::detail::BuildRegularOnlyAffixSlots;
 		using CalamityAffixes::detail::DetermineLootPrefixSuffixTargets;
+		using CalamityAffixes::detail::HasCompleteRegularAffixReforgeRoll;
 		using CalamityAffixes::detail::kAffixCountWeights;
 		using CalamityAffixes::detail::ResolveReforgeTargetAffixCount;
 		using CalamityAffixes::detail::RollAffixCountFromUnit;
@@ -135,8 +137,7 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
-		InstanceAffixSlots regularSlots = slots;
-		regularSlots.RemoveToken(kRunewordToken);
+		const InstanceAffixSlots regularSlots = BuildRegularOnlyAffixSlots(slots, kRunewordToken);
 		if (regularSlots.count != 2u) {
 			std::cerr << "reforge_runeword_slots: expected 2 regular tokens after removal, got "
 					  << static_cast<unsigned>(regularSlots.count) << "\n";
@@ -156,12 +157,18 @@ namespace RuntimeGateStoreChecks
 					  << static_cast<unsigned>(targets.suffixTarget) << " }, expected { 1, 1 }\n";
 			return false;
 		}
+		if (!HasCompleteRegularAffixReforgeRoll(target, regularSlots.count) ||
+			HasCompleteRegularAffixReforgeRoll(target, regularSlots.count - 1u)) {
+			std::cerr << "reforge_runeword_slots: exact-count completion guard mismatch\n";
+			return false;
+		}
 
 		// Runeword + a single regular affix collapses to the 1-affix case.
-		InstanceAffixSlots singleRegular{};
-		singleRegular.AddToken(kRunewordToken);
-		singleRegular.AddToken(kRegularA);
-		singleRegular.RemoveToken(kRunewordToken);
+		InstanceAffixSlots singleRegularWithRuneword{};
+		singleRegularWithRuneword.AddToken(kRunewordToken);
+		singleRegularWithRuneword.AddToken(kRegularA);
+		const InstanceAffixSlots singleRegular =
+			BuildRegularOnlyAffixSlots(singleRegularWithRuneword, kRunewordToken);
 		if (singleRegular.count != 1u) {
 			std::cerr << "reforge_runeword_slots: expected 1 regular token, got "
 					  << static_cast<unsigned>(singleRegular.count) << "\n";
@@ -169,6 +176,14 @@ namespace RuntimeGateStoreChecks
 		}
 		if (ResolveReforgeTargetAffixCount(singleRegular.count) != 1u) {
 			std::cerr << "reforge_runeword_slots: single-regular target did not collapse to 1\n";
+			return false;
+		}
+
+		InstanceAffixSlots runewordOnly{};
+		runewordOnly.AddToken(kRunewordToken);
+		const InstanceAffixSlots emptyRegular = BuildRegularOnlyAffixSlots(runewordOnly, kRunewordToken);
+		if (emptyRegular.count != 0u || ResolveReforgeTargetAffixCount(emptyRegular.count) != 1u) {
+			std::cerr << "reforge_runeword_slots: runeword-only base did not receive one regular target\n";
 			return false;
 		}
 

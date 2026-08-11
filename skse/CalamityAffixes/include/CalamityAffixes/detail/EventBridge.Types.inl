@@ -647,5 +647,6 @@
 		{
 			kNone = 0,
 			kMissingResultAffix,
+			kAlreadyComplete,
 			kAffixSlotsFull,
 		};

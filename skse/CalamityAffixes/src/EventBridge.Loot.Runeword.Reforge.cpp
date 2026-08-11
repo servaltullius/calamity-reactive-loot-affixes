@@ -74,6 +74,8 @@ namespace CalamityAffixes
 
 		const InstanceAffixSlots previousRegularSlots =
 			detail::BuildRegularOnlyAffixSlots(previousSlots, preservedRunewordToken);
+		const std::uint8_t targetRegularAffixCount =
+			detail::ResolveReforgeTargetAffixCount(previousRegularSlots.count);
 
 		auto rollRegularAffixSlots = [&](std::uint8_t a_rollCount) -> InstanceAffixSlots {
 			InstanceAffixSlots slots{};
@@ -148,11 +150,9 @@ namespace CalamityAffixes
 		InstanceAffixSlots newSlots{};
 		static constexpr std::uint8_t kReforgeMaxAttempts = 4;
 		for (std::uint8_t attempt = 0; attempt < kReforgeMaxAttempts; ++attempt) {
-			// Re-roll affix count fresh (same 70/22/8% distribution as new loot drops).
-			const std::uint8_t targetCount = std::max<std::uint8_t>(1u, RollAffixCount());
-			InstanceAffixSlots rolled = rollRegularAffixSlots(targetCount);
+			InstanceAffixSlots rolled = rollRegularAffixSlots(targetRegularAffixCount);
 
-			if (rolled.count == 0) {
+			if (!detail::HasCompleteRegularAffixReforgeRoll(targetRegularAffixCount, rolled.count)) {
 				continue;
 			}
 			if (detail::ShouldRetryRegularAffixReforgeRoll(previousRegularSlots, rolled, attempt, kReforgeMaxAttempts)) {
