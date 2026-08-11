@@ -345,6 +345,9 @@
 			const RunewordRecipe& a_recipe,
 			std::string* a_outFailureReason = nullptr);
 		void LogRunewordStatus() const;
+		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseImpl(
+			std::optional<std::uint64_t> a_expectedInstanceKey,
+			std::optional<std::uint64_t> a_lockedAffixToken);
 		InstanceRuntimeState& EnsureInstanceRuntimeState(std::uint64_t a_instanceKey, std::uint64_t a_affixToken);
 		[[nodiscard]] const InstanceRuntimeState* FindInstanceRuntimeState(std::uint64_t a_instanceKey, std::uint64_t a_affixToken) const;
 		[[nodiscard]] std::size_t ResolveEvolutionStageIndex(const Action& a_action, const InstanceRuntimeState* a_state) const;
@@ -366,7 +369,8 @@
 			[[nodiscard]] std::optional<std::size_t> RollSuffixIndex(
 				LootItemType a_itemType,
 				detail::WeaponSubtypeGroup a_weaponSubtype,
-				const std::vector<std::string>* a_excludeFamilies = nullptr);
+				const std::vector<std::string>* a_excludeFamilies = nullptr,
+				const std::vector<std::size_t>* a_excludeIndices = nullptr);
 			[[nodiscard]] std::uint8_t RollAffixCount();
 			[[nodiscard]] bool RollLootChanceGateForEligibleInstance();
 			[[nodiscard]] std::string ResolveStoredLootDisplayBaseName(

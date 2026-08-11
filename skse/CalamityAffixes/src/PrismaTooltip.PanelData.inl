@@ -86,6 +86,16 @@
 				});
 			}
 
+			nlohmann::json reforgeLockCandidates = nlohmann::json::array();
+			for (const auto& candidate : a_state.reforgeLockCandidates) {
+				reforgeLockCandidates.push_back({
+					{ "affixToken", candidate.affixToken == 0u ? std::string{} : std::to_string(candidate.affixToken) },
+					{ "displayNameEn", candidate.displayNameEn },
+					{ "displayNameKo", candidate.displayNameKo },
+					{ "slotKind", candidate.slotKind },
+				});
+			}
+
 			const nlohmann::json payload{
 				{ "hasBase", a_state.hasBase },
 				{ "hasRecipe", a_state.hasRecipe },
@@ -102,6 +112,11 @@
 				{ "baseCompatibilityMessageEn", a_state.baseCompatibilityMessageEn },
 				{ "baseCompatibilityMessageKo", a_state.baseCompatibilityMessageKo },
 				{ "requiredRunes", requiredRunes },
+				{ "regularAffixCount", a_state.regularAffixCount },
+				{ "reforgeOrbsOwned", a_state.reforgeOrbsOwned },
+				{ "standardReforgeCost", a_state.standardReforgeCost },
+				{ "lockedReforgeCost", a_state.lockedReforgeCost },
+				{ "reforgeLockCandidates", reforgeLockCandidates },
 				{ "debugTools", a_state.debugTools }
 			};
 

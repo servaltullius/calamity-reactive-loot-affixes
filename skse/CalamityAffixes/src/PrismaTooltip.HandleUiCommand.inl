@@ -207,6 +207,29 @@
 					return true;
 				}
 
+				if (a_command.rfind(kRunewordLockedReforgePrefix, 0) == 0) {
+					const auto payload = a_command.substr(kRunewordLockedReforgePrefix.size());
+					const auto keys = CalamityAffixes::ParseLockedReforgeCommandKeys(payload);
+					if (!keys) {
+						PushUiFeedback("Invalid locked-reforge base or affix key.");
+						return true;
+					}
+
+					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+					if (!bridge) {
+						PushUiFeedback("Reforge system unavailable.");
+						return true;
+					}
+
+					const auto outcome = bridge->ReforgeSelectedRunewordBaseWithLockedAffix(
+						keys->expectedInstanceKey,
+						keys->affixToken);
+					RefreshRunewordPanelBindings(*bridge, false);
+					PushSelectedTooltipSnapshot(true);
+					PushUiFeedback(outcome.message.empty() ? "Locked reforge action processed." : outcome.message);
+					return true;
+				}
+
 				if (a_command == "runeword.reforge") {
 					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 					if (!bridge) {

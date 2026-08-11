@@ -13,6 +13,9 @@
 
 namespace CalamityAffixes::detail
 {
+	inline constexpr std::uint32_t kStandardReforgeOrbCost = 1u;
+	inline constexpr std::uint32_t kLockedReforgeOrbCost = 2u;
+
 	// Single source of truth for the regular-affix count distribution.
 	// Index i carries the weight of rolling (i + 1) affixes, so { 70, 22, 8 }
 	// means 70% one affix, 22% two, 8% three.  The loot preview path, the live
@@ -98,6 +101,33 @@ namespace CalamityAffixes::detail
 		}
 	}
 
+	[[nodiscard]] constexpr bool CanLockRegularAffixForReforge(std::uint8_t a_regularAffixCount) noexcept
+	{
+		return a_regularAffixCount >= 2u;
+	}
+
+	[[nodiscard]] constexpr bool IsExpectedLockedReforgeInstance(
+		std::uint64_t a_expectedInstanceKey,
+		std::uint64_t a_resolvedInstanceKey) noexcept
+	{
+		return a_expectedInstanceKey != 0u && a_expectedInstanceKey == a_resolvedInstanceKey;
+	}
+
+	[[nodiscard]] constexpr LootPrefixSuffixTargets DetermineLockedReforgeRerollTargets(
+		std::uint8_t a_targetAffixCount,
+		bool a_lockedAffixIsPrefix) noexcept
+	{
+		auto targets = DetermineLootPrefixSuffixTargets(a_targetAffixCount);
+		if (a_lockedAffixIsPrefix) {
+			if (targets.prefixTarget > 0u) {
+				--targets.prefixTarget;
+			}
+		} else if (targets.suffixTarget > 0u) {
+			--targets.suffixTarget;
+		}
+		return targets;
+	}
+
 	[[nodiscard]] constexpr bool ShouldConsumeSuffixRollForSingleAffixTarget(
 		std::uint8_t a_targetAffixCount,
 		std::uint8_t a_currentAssignedCount) noexcept
@@ -124,6 +154,21 @@ namespace CalamityAffixes::detail
 		return true;
 	}
 
+	[[nodiscard]] constexpr bool AreInstanceAffixTokenSetsEqual(
+		const InstanceAffixSlots& a_left,
+		const InstanceAffixSlots& a_right) noexcept
+	{
+		if (a_left.count != a_right.count) {
+			return false;
+		}
+		for (std::uint8_t i = 0; i < a_left.count; ++i) {
+			if (!a_right.HasToken(a_left.tokens[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	[[nodiscard]] constexpr InstanceAffixSlots BuildRegularOnlyAffixSlots(
 		const InstanceAffixSlots& a_slots,
 		std::uint64_t a_preservedRunewordToken) noexcept
@@ -137,6 +182,32 @@ namespace CalamityAffixes::detail
 			(void)regularSlots.AddToken(token);
 		}
 		return regularSlots;
+	}
+
+	[[nodiscard]] constexpr bool HasUniqueAffixTokens(const InstanceAffixSlots& a_slots) noexcept
+	{
+		for (std::uint8_t i = 0; i < a_slots.count; ++i) {
+			if (a_slots.tokens[i] == 0u) {
+				return false;
+			}
+			for (std::uint8_t j = static_cast<std::uint8_t>(i + 1u); j < a_slots.count; ++j) {
+				if (a_slots.tokens[i] == a_slots.tokens[j]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	[[nodiscard]] constexpr bool HasCompleteLockedRegularAffixReforgeRoll(
+		std::uint8_t a_targetAffixCount,
+		const InstanceAffixSlots& a_rolledRegularSlots,
+		std::uint64_t a_lockedAffixToken) noexcept
+	{
+		return a_lockedAffixToken != 0u &&
+		       a_rolledRegularSlots.count == a_targetAffixCount &&
+		       a_rolledRegularSlots.HasToken(a_lockedAffixToken) &&
+		       HasUniqueAffixTokens(a_rolledRegularSlots);
 	}
 
 	[[nodiscard]] constexpr bool ShouldRetryRegularAffixReforgeRoll(
@@ -172,6 +243,13 @@ namespace CalamityAffixes::detail
 		return a_expectedRestored > 0u &&
 		       a_ownedAfter >= a_ownedBefore &&
 		       (a_ownedAfter - a_ownedBefore) == a_expectedRestored;
+	}
+
+	[[nodiscard]] constexpr std::uint32_t ResolveObservedInventoryConsumption(
+		std::uint32_t a_ownedBefore,
+		std::uint32_t a_ownedAfter) noexcept
+	{
+		return (a_ownedBefore >= a_ownedAfter) ? (a_ownedBefore - a_ownedAfter) : 0u;
 	}
 
 	constexpr bool TryPromotePreservedRunewordPrimary(

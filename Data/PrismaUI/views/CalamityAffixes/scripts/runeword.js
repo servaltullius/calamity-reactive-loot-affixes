@@ -1,3 +1,96 @@
+function resolveReforgeCandidateName(candidate, language) {
+  const en = typeof candidate?.displayNameEn === "string"
+    ? candidate.displayNameEn.trim()
+    : "";
+  const ko = typeof candidate?.displayNameKo === "string"
+    ? candidate.displayNameKo.trim()
+    : "";
+  if (language === "ko") {
+    return ko || en || "알 수 없는 어픽스";
+  }
+  return en || ko || "Unknown affix";
+}
+
+function resolveReforgeLockCandidates(state) {
+  const regularAffixCount = Number.isFinite(Number(state?.regularAffixCount))
+    ? Math.max(0, Math.trunc(Number(state.regularAffixCount)))
+    : 0;
+  if (regularAffixCount < 2 || !Array.isArray(state?.reforgeLockCandidates)) {
+    return [];
+  }
+  return state.reforgeLockCandidates;
+}
+
+function resolveActiveReforgeLockCandidate(state) {
+  if (!reforgeLockTokenState) {
+    return null;
+  }
+
+  const selectedBaseKey = resolveSelectedRunewordBaseKey();
+  if (!selectedBaseKey || selectedBaseKey !== reforgeLockBaseKeyState) {
+    return null;
+  }
+
+  return resolveReforgeLockCandidates(state).find(
+    (candidate) => candidate?.affixToken === reforgeLockTokenState
+  ) || null;
+}
+
+function clearReforgeLockSelection(scheduleRender = true) {
+  const changed = Boolean(reforgeLockTokenState || reforgeLockBaseKeyState);
+  reforgeLockTokenState = "";
+  reforgeLockBaseKeyState = "";
+  if (changed && scheduleRender) {
+    schedulePanelRender(panelRenderSection.runewordPanelState);
+  }
+  return changed;
+}
+
+function selectReforgeLockCandidate(affixToken, scheduleRender = true) {
+  const token = typeof affixToken === "string" ? affixToken.trim() : "";
+  if (!token) {
+    clearReforgeLockSelection(scheduleRender);
+    return true;
+  }
+
+  const selectedBaseKey = resolveSelectedRunewordBaseKey();
+  const candidate = resolveReforgeLockCandidates(runewordPanelState).find(
+    (entry) => entry?.affixToken === token
+  );
+  if (!selectedBaseKey || !runewordPanelState.hasBase || !candidate) {
+    return false;
+  }
+
+  const changed = token !== reforgeLockTokenState || selectedBaseKey !== reforgeLockBaseKeyState;
+  reforgeLockTokenState = token;
+  reforgeLockBaseKeyState = selectedBaseKey;
+  if (changed && scheduleRender) {
+    schedulePanelRender(panelRenderSection.runewordPanelState);
+  }
+  return true;
+}
+
+function reconcileReforgeLockSelection(scheduleRender = true) {
+  if (!reforgeLockTokenState) {
+    if (reforgeLockBaseKeyState) {
+      reforgeLockBaseKeyState = "";
+    }
+    return false;
+  }
+
+  if (resolveActiveReforgeLockCandidate(runewordPanelState)) {
+    return false;
+  }
+  return clearReforgeLockSelection(scheduleRender);
+}
+
+function buildReforgeCommand(state = runewordPanelState) {
+  const lockedCandidate = resolveActiveReforgeLockCandidate(state);
+  return lockedCandidate
+    ? `${lockedReforgeCommandPrefix}${reforgeLockBaseKeyState}:${lockedCandidate.affixToken}`
+    : "runeword.reforge";
+}
+
 function resolveRunewordPanelActionState(state) {
   const hasBase = Boolean(state.hasBase);
   const hasRecipe = Boolean(state.hasRecipe);
@@ -54,21 +147,136 @@ ${buttonHint}`
       : baseCompatibilityMessage;
   }
 
-  const reforgeEnabled = hasBase;
-  const reforgeHint = reforgeEnabled ?
-    (isComplete ?
-      t(
-        "Consume 1 Reforge Orb and reroll only the regular affixes on the selected base. The completed runeword and current regular-affix count are preserved; a base with none gains one.",
-        "재련 오브 1개를 소모해 선택 베이스의 일반 어픽스만 재굴림합니다. 완성된 룬워드는 유지됩니다. 현재 일반 어픽스 개수도 유지되며, 없으면 1개가 생깁니다."
-      ) :
-      t(
-        "Consume 1 Reforge Orb and reroll the same number of regular affixes on the selected base. A base with none gains one; any completed runeword is preserved.",
-        "재련 오브 1개를 소모해 선택 베이스의 일반 어픽스를 같은 개수로 재굴림합니다. 일반 어픽스가 없으면 1개가 생기며, 완성된 룬워드는 유지됩니다."
-      )) :
-    t(
-      "Select a base first.",
-      "베이스를 먼저 선택하세요."
+  const regularAffixCount = Number.isFinite(Number(state.regularAffixCount))
+    ? Math.max(0, Math.trunc(Number(state.regularAffixCount)))
+    : 0;
+  const standardReforgeCost = Number.isFinite(Number(state.standardReforgeCost)) && Number(state.standardReforgeCost) > 0
+    ? Math.trunc(Number(state.standardReforgeCost))
+    : 1;
+  const lockedReforgeCost = Number.isFinite(Number(state.lockedReforgeCost)) && Number(state.lockedReforgeCost) > 0
+    ? Math.trunc(Number(state.lockedReforgeCost))
+    : 2;
+  const hasKnownReforgeOrbCount = state.reforgeOrbsOwned !== null &&
+    state.reforgeOrbsOwned !== undefined &&
+    Number.isFinite(Number(state.reforgeOrbsOwned)) &&
+    Number(state.reforgeOrbsOwned) >= 0;
+  const reforgeOrbsOwned = hasKnownReforgeOrbCount
+    ? Math.trunc(Number(state.reforgeOrbsOwned))
+    : null;
+  const reforgeLockCandidates = resolveReforgeLockCandidates(state);
+  const lockedReforgeCandidate = resolveActiveReforgeLockCandidate(state);
+  const reforgeCost = lockedReforgeCandidate ? lockedReforgeCost : standardReforgeCost;
+  const hasEnoughReforgeOrbs = reforgeOrbsOwned === null || reforgeOrbsOwned >= reforgeCost;
+  const reforgeEnabled = hasBase && hasEnoughReforgeOrbs;
+  const reforgeCommand = buildReforgeCommand(state);
+
+  const lockedNameEn = lockedReforgeCandidate
+    ? resolveReforgeCandidateName(lockedReforgeCandidate, "en")
+    : "";
+  const lockedNameKo = lockedReforgeCandidate
+    ? resolveReforgeCandidateName(lockedReforgeCandidate, "ko")
+    : "";
+  let reforgeHint = "";
+  if (!hasBase) {
+    reforgeHint = t("Select a base first.", "베이스를 먼저 선택하세요.");
+  } else if (lockedReforgeCandidate) {
+    reforgeHint = t(
+      `Consume ${reforgeCost} Reforge Orbs, keep ${lockedNameEn}, and reroll the remaining regular affixes. The current regular-affix count and any completed runeword are preserved.`,
+      `재련 오브 ${reforgeCost}개를 소모해 ${lockedNameKo} 어픽스를 유지하고 나머지 일반 어픽스를 재굴림합니다. 현재 일반 어픽스 개수와 완성된 룬워드는 유지됩니다.`
     );
+  } else if (isComplete) {
+    reforgeHint = t(
+      `Consume ${reforgeCost} Reforge Orb${reforgeCost === 1 ? "" : "s"} and reroll only the regular affixes on the selected base. The completed runeword and current regular-affix count are preserved; a base with none gains one.`,
+      `재련 오브 ${reforgeCost}개를 소모해 선택 베이스의 일반 어픽스만 재굴림합니다. 완성된 룬워드는 유지됩니다. 현재 일반 어픽스 개수도 유지되며, 없으면 1개가 생깁니다.`
+    );
+  } else {
+    reforgeHint = t(
+      `Consume ${reforgeCost} Reforge Orb${reforgeCost === 1 ? "" : "s"} and reroll the same number of regular affixes on the selected base. A base with none gains one; any completed runeword is preserved.`,
+      `재련 오브 ${reforgeCost}개를 소모해 선택 베이스의 일반 어픽스를 같은 개수로 재굴림합니다. 일반 어픽스가 없으면 1개가 생기며, 완성된 룬워드는 유지됩니다.`
+    );
+  }
+
+  if (hasBase && reforgeOrbsOwned !== null) {
+    const inventoryLine = t(
+      `Reforge Orbs owned: ${reforgeOrbsOwned}.`,
+      `보유 재련 오브: ${reforgeOrbsOwned}개.`
+    );
+    reforgeHint = `${reforgeHint}\n${inventoryLine}`;
+    if (!hasEnoughReforgeOrbs) {
+      const shortfall = reforgeCost - reforgeOrbsOwned;
+      reforgeHint = `${reforgeHint}\n${t(
+        `You need ${shortfall} more Reforge Orb${shortfall === 1 ? "" : "s"}.`,
+        `재련 오브가 ${shortfall}개 더 필요합니다.`
+      )}`;
+    }
+  }
+
+  const reforgeButtonLabel = lockedReforgeCandidate
+    ? t(
+        `Protect & Reforge (${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"})`,
+        `잠금 재련 (오브 ${reforgeCost}개)`
+      )
+    : t(
+        `Reforge (${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"})`,
+        `재련 (오브 ${reforgeCost}개)`
+      );
+  const reforgeSummary = lockedReforgeCandidate
+    ? t(
+        `Protected: ${lockedNameEn} · ${reforgeCost} Orbs`,
+        `잠금: ${lockedNameKo} · 오브 ${reforgeCost}개`
+      )
+    : t(
+        `Reforge: reroll all · ${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"}`,
+        `재련: 모두 재굴림 · 오브 ${reforgeCost}개`
+      );
+
+  let reforgeLockHint = "";
+  if (!hasBase) {
+    reforgeLockHint = t(
+      "Select an equipped base to configure affix protection.",
+      "어픽스 잠금을 설정하려면 착용 베이스를 선택하세요."
+    );
+  } else if (regularAffixCount === 0) {
+    reforgeLockHint = t(
+      "This base has no regular affix yet. Standard reforge adds one; there is nothing to lock.",
+      "이 베이스에는 아직 일반 어픽스가 없습니다. 기본 재련으로 1개가 생기며, 잠글 대상은 없습니다."
+    );
+  } else if (regularAffixCount === 1) {
+    reforgeLockHint = t(
+      "At least two regular affixes are needed to lock one. Standard reforge rerolls the current affix.",
+      "어픽스 하나를 잠그려면 일반 어픽스가 최소 2개 필요합니다. 기본 재련은 현재 어픽스를 재굴림합니다."
+    );
+  } else if (reforgeLockCandidates.length === 0) {
+    reforgeLockHint = t(
+      "No eligible regular affix can be locked. Standard reforge remains available.",
+      "잠글 수 있는 일반 어픽스가 없습니다. 기본 재련은 계속 사용할 수 있습니다."
+    );
+  } else {
+    reforgeLockHint = t(
+      "Only regular affixes can be locked. A completed runeword is preserved automatically and is never a lock candidate.",
+      "일반 어픽스만 잠글 수 있습니다. 완성된 룬워드는 자동으로 유지되며 잠금 후보에서 제외됩니다."
+    );
+  }
+
+  let reforgeCostSummary = hasBase
+    ? t(
+        `Cost: ${reforgeCost} Reforge Orb${reforgeCost === 1 ? "" : "s"}`,
+        `비용: 재련 오브 ${reforgeCost}개`
+      )
+    : t("Select a base to see the cost.", "비용을 확인하려면 베이스를 선택하세요.");
+  if (hasBase && reforgeOrbsOwned !== null) {
+    reforgeCostSummary += t(
+      ` · Owned: ${reforgeOrbsOwned}`,
+      ` · 보유: ${reforgeOrbsOwned}개`
+    );
+    if (!hasEnoughReforgeOrbs) {
+      const shortfall = reforgeCost - reforgeOrbsOwned;
+      reforgeCostSummary += t(
+        ` · Need ${shortfall} more`,
+        ` · ${shortfall}개 부족`
+      );
+    }
+  }
 
   const resetEnabled = hasBase;
   const resetHint = resetEnabled ?
@@ -92,6 +300,18 @@ ${buttonHint}`
     buttonHint,
     reforgeEnabled,
     reforgeHint,
+    reforgeButtonLabel,
+    reforgeSummary,
+    reforgeLockHint,
+    reforgeCostSummary,
+    reforgeCommand,
+    reforgeCost,
+    reforgeOrbsOwned,
+    regularAffixCount,
+    standardReforgeCost,
+    lockedReforgeCost,
+    reforgeLockCandidates,
+    lockedReforgeCandidate,
     resetEnabled,
     resetHint
   };
@@ -197,6 +417,118 @@ function renderRunewordFlowProgress(actionState, state) {
     "Review the selected recipe on the right, then transmute when available.",
     "오른쪽 검토 영역에서 선택한 레시피를 확인한 뒤, 가능해지면 변환하세요."
   );
+}
+
+function renderReforgeLockOptions(actionState) {
+  if (!runewordReforgeLockList) {
+    return;
+  }
+
+  if (runewordReforgeSummary && runewordReforgeSummary.textContent !== actionState.reforgeSummary) {
+    runewordReforgeSummary.textContent = actionState.reforgeSummary;
+  }
+  if (runewordReforgeLockHint && runewordReforgeLockHint.textContent !== actionState.reforgeLockHint) {
+    runewordReforgeLockHint.textContent = actionState.reforgeLockHint;
+  }
+  if (runewordReforgeCostSummary && runewordReforgeCostSummary.textContent !== actionState.reforgeCostSummary) {
+    runewordReforgeCostSummary.textContent = actionState.reforgeCostSummary;
+  }
+  if (runewordReforgeDetails) {
+    runewordReforgeDetails.classList.toggle("muted", !actionState.hasBase);
+  }
+  runewordReforgeLockList.setAttribute(
+    "aria-label",
+    t("Affix protection for reforge", "재련 어픽스 잠금")
+  );
+
+  const hadFocus = runewordReforgeLockList.contains(document.activeElement);
+  const focusedToken = hadFocus && document.activeElement
+    ? document.activeElement.getAttribute(reforgeLockTokenAttribute)
+    : null;
+  clearChildren(runewordReforgeLockList);
+
+  if (!actionState.hasBase) {
+    runewordReforgeLockList.setAttribute("aria-disabled", "true");
+    appendEmptyState(
+      runewordReforgeLockList,
+      t("No base selected", "선택된 베이스 없음"),
+      t(
+        "Select an equipped base before configuring affix protection.",
+        "어픽스 잠금을 설정하기 전에 착용 베이스를 선택하세요."
+      )
+    );
+    return;
+  }
+  runewordReforgeLockList.setAttribute("aria-disabled", "false");
+
+  const renderedOptions = [];
+  const appendOption = (token, label, accessibleLabel, selected) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = selected
+      ? "cpListItem rwReforgeLockOption selected"
+      : "cpListItem rwReforgeLockOption";
+    button.textContent = label;
+    button.title = accessibleLabel;
+    button.setAttribute("role", "option");
+    button.setAttribute("aria-label", accessibleLabel);
+    button.setAttribute("aria-selected", selected ? "true" : "false");
+    button.setAttribute(reforgeLockTokenAttribute, token);
+    button.dataset.reforgeLockToken = token;
+    button.tabIndex = -1;
+    runewordReforgeLockList.appendChild(button);
+    renderedOptions.push({ button, token, selected });
+  };
+
+  const noLockSelected = !actionState.lockedReforgeCandidate;
+  appendOption(
+    "",
+    t(
+      `No lock — reroll all · ${actionState.standardReforgeCost} Orb${actionState.standardReforgeCost === 1 ? "" : "s"}`,
+      `잠금 없음 — 모두 재굴림 · 오브 ${actionState.standardReforgeCost}개`
+    ),
+    t(
+      `No affix protection. Reroll all regular affixes for ${actionState.standardReforgeCost} Reforge Orb${actionState.standardReforgeCost === 1 ? "" : "s"}.`,
+      `어픽스를 잠그지 않습니다. 재련 오브 ${actionState.standardReforgeCost}개로 모든 일반 어픽스를 재굴림합니다.`
+    ),
+    noLockSelected
+  );
+
+  for (const candidate of actionState.reforgeLockCandidates) {
+    const isPrefix = candidate.slotKind === "prefix";
+    const slotEn = isPrefix ? "Prefix" : "Suffix";
+    const slotKo = isPrefix ? "접두" : "접미";
+    const marker = isPrefix ? "P" : "S";
+    const nameEn = resolveReforgeCandidateName(candidate, "en");
+    const nameKo = resolveReforgeCandidateName(candidate, "ko");
+    const selected = actionState.lockedReforgeCandidate?.affixToken === candidate.affixToken;
+    appendOption(
+      candidate.affixToken,
+      t(
+        `[${marker}] ${nameEn} · ${actionState.lockedReforgeCost} Orbs`,
+        `[${slotKo}] ${nameKo} · 오브 ${actionState.lockedReforgeCost}개`
+      ),
+      t(
+        `Lock ${slotEn} affix ${nameEn}. Reforge cost: ${actionState.lockedReforgeCost} Orbs.`,
+        `${slotKo} 어픽스 ${nameKo} 잠금. 재련 비용: 오브 ${actionState.lockedReforgeCost}개.`
+      ),
+      selected
+    );
+  }
+
+  const preferredOption = (focusedToken !== null
+    ? renderedOptions.find((entry) => entry.token === focusedToken)
+    : null) || renderedOptions.find((entry) => entry.selected) || renderedOptions[0];
+  if (preferredOption) {
+    preferredOption.button.tabIndex = 0;
+    if (hadFocus && typeof preferredOption.button.focus === "function") {
+      try {
+        preferredOption.button.focus({ preventScroll: true });
+      } catch (_) {
+        preferredOption.button.focus();
+      }
+    }
+  }
 }
 
 function renderRunewordPanelState() {
@@ -433,8 +765,12 @@ function renderRunewordPanelState() {
     runewordActionHint.textContent = actionState.buttonHint;
   }
 
+  renderReforgeLockOptions(actionState);
+
   if (runewordReforgeButton) {
     runewordReforgeButton.disabled = !actionState.reforgeEnabled;
+    runewordReforgeButton.textContent = actionState.reforgeButtonLabel;
+    runewordReforgeButton.setAttribute(panelCommandAttribute, actionState.reforgeCommand);
     runewordReforgeButton.title = actionState.reforgeHint;
     runewordReforgeButton.setAttribute("aria-label", actionState.reforgeHint);
   }

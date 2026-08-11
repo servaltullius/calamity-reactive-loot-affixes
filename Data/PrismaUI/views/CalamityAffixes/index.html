@@ -256,8 +256,36 @@
                       </div>
                       <div class="rwItemActions">
                         <div id="runewordItemActionsTitle" class="rwActionSectionLabel">Item Actions / 아이템 작업</div>
+                        <details id="runewordReforgeDetails" class="rwActionDetails rwReforgeDetails">
+                          <summary id="runewordReforgeSummary" class="rwActionDetailsSummary">
+                            Reforge: reroll all · 1 Orb / 재련: 모두 재굴림 · 오브 1개
+                          </summary>
+                          <div class="rwActionDetailsBody rwReforgeDetailsBody">
+                            <div id="runewordReforgeLockHint" class="cpContextMeta rwReforgeLockHint">
+                              Only regular affixes can be locked. A completed runeword is preserved automatically. / 일반 어픽스만 잠글 수 있습니다. 완성된 룬워드는 자동으로 유지됩니다.
+                            </div>
+                            <div
+                              id="runewordReforgeLockList"
+                              class="cpList rwReforgeLockList"
+                              role="listbox"
+                              aria-label="Affix protection for reforge / 재련 어픽스 잠금"
+                            ></div>
+                            <div
+                              id="runewordReforgeCostSummary"
+                              class="cpContextMeta rwReforgeCostSummary"
+                              role="status"
+                              aria-live="polite"
+                              aria-atomic="true"
+                            >Cost: 1 Reforge Orb / 비용: 재련 오브 1개</div>
+                          </div>
+                        </details>
                         <div class="rwItemActionGrid">
-                          <button id="runewordReforgeButton" class="cpButton" data-cmd="runeword.reforge">Reforge / 재련</button>
+                          <button
+                            id="runewordReforgeButton"
+                            class="cpButton"
+                            data-cmd="runeword.reforge"
+                            aria-describedby="runewordReforgeLockHint runewordReforgeCostSummary"
+                          >Reforge (1 Orb) / 재련 (오브 1개)</button>
                           <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Check Status / 상태 확인</button>
                         </div>
                       </div>

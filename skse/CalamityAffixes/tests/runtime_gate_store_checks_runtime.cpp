@@ -1489,6 +1489,22 @@ namespace RuntimeGateStoreChecks
 		}
 
 		{
+			if (CalamityAffixes::detail::kStandardReforgeOrbCost != 1u ||
+				CalamityAffixes::detail::kLockedReforgeOrbCost != 2u) {
+				std::cerr << "reforge: standard/locked orb costs drifted from 1/2\n";
+				return false;
+			}
+			if (CalamityAffixes::detail::CanLockRegularAffixForReforge(1u) ||
+				!CalamityAffixes::detail::CanLockRegularAffixForReforge(2u)) {
+				std::cerr << "reforge: locked mode must require at least two regular affixes\n";
+				return false;
+			}
+			if (!CalamityAffixes::detail::IsExpectedLockedReforgeInstance(0x100u, 0x100u) ||
+				CalamityAffixes::detail::IsExpectedLockedReforgeInstance(0x100u, 0x200u) ||
+				CalamityAffixes::detail::IsExpectedLockedReforgeInstance(0u, 0u)) {
+				std::cerr << "reforge: locked command must stay bound to the selected instance\n";
+				return false;
+			}
 			if (CalamityAffixes::detail::ResolveReforgeTargetAffixCount(0u) != 1u) {
 				std::cerr << "reforge: zero-affix bases should reroll with one target slot\n";
 				return false;
@@ -1517,6 +1533,21 @@ namespace RuntimeGateStoreChecks
 			const auto three = CalamityAffixes::detail::DetermineLootPrefixSuffixTargets(3u);
 			if (three.prefixTarget != 1u || three.suffixTarget != 2u) {
 				std::cerr << "shuffle_bag: target=3 composition should be (1P/2S)\n";
+				return false;
+			}
+			const auto lockedPrefixTwo =
+				CalamityAffixes::detail::DetermineLockedReforgeRerollTargets(2u, true);
+			const auto lockedSuffixTwo =
+				CalamityAffixes::detail::DetermineLockedReforgeRerollTargets(2u, false);
+			const auto lockedPrefixThree =
+				CalamityAffixes::detail::DetermineLockedReforgeRerollTargets(3u, true);
+			const auto lockedSuffixThree =
+				CalamityAffixes::detail::DetermineLockedReforgeRerollTargets(3u, false);
+			if (lockedPrefixTwo.prefixTarget != 0u || lockedPrefixTwo.suffixTarget != 1u ||
+				lockedSuffixTwo.prefixTarget != 1u || lockedSuffixTwo.suffixTarget != 0u ||
+				lockedPrefixThree.prefixTarget != 0u || lockedPrefixThree.suffixTarget != 2u ||
+				lockedSuffixThree.prefixTarget != 1u || lockedSuffixThree.suffixTarget != 1u) {
+				std::cerr << "reforge: locked P/S target subtraction is inconsistent\n";
 				return false;
 			}
 
@@ -1554,6 +1585,23 @@ namespace RuntimeGateStoreChecks
 					std::cerr << "reforge: identical regular reroll should stop retrying on final attempt\n";
 					return false;
 				}
+				CalamityAffixes::InstanceAffixSlots reordered{};
+				(void)reordered.AddToken(0xC0u);
+				(void)reordered.AddToken(0xB0u);
+				if (!CalamityAffixes::detail::AreInstanceAffixTokenSetsEqual(regular, reordered) ||
+					!CalamityAffixes::detail::HasCompleteLockedRegularAffixReforgeRoll(2u, reordered, 0xB0u)) {
+					std::cerr << "reforge: locked exact-count/no-effect set policy mismatch\n";
+					return false;
+				}
+			}
+			if (!CalamityAffixes::detail::DidConsumeExactInventoryCount(
+					5u, 3u, CalamityAffixes::detail::kLockedReforgeOrbCost) ||
+				CalamityAffixes::detail::DidConsumeExactInventoryCount(
+					5u, 4u, CalamityAffixes::detail::kLockedReforgeOrbCost) ||
+				CalamityAffixes::detail::ResolveObservedInventoryConsumption(5u, 4u) != 1u ||
+				CalamityAffixes::detail::ResolveObservedInventoryConsumption(5u, 6u) != 0u) {
+				std::cerr << "reforge: locked two-orb exact-delta/refund policy mismatch\n";
+				return false;
 			}
 		}
 

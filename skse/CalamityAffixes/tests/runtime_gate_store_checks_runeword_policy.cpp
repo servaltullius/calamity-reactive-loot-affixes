@@ -1024,6 +1024,15 @@ namespace RuntimeGateStoreChecks
 
 		bool CheckRunewordUiPolicyHelpers()
 		{
+			const auto lockedKeys = CalamityAffixes::ParseLockedReforgeCommandKeys(
+				"4294967297:18446744073709551614");
+			if (!lockedKeys || lockedKeys->expectedInstanceKey != 4294967297u ||
+				lockedKeys->affixToken != 18446744073709551614u ||
+				CalamityAffixes::ParseLockedReforgeCommandKeys("4294967297:0") ||
+				CalamityAffixes::ParseLockedReforgeCommandKeys("4294967297:2:3")) {
+				std::cerr << "runeword_ui_policy: locked reforge base/token parser mismatch\n";
+				return false;
+			}
 			if (!CalamityAffixes::IsSameCompletedRuneword(0xA11CEu, 0xA11CEu) ||
 				CalamityAffixes::IsSameCompletedRuneword(0u, 0u) ||
 				CalamityAffixes::IsSameCompletedRuneword(0xA11CEu, 0xBEEFu)) {
@@ -1082,44 +1091,54 @@ namespace RuntimeGateStoreChecks
 			if (selectionSource.find("bool EventBridge::ResolveSelectedRunewordBaseInstance(") == std::string::npos ||
 				reforgeSource.find("ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)") == std::string::npos ||
 				reforgeSource.find("BuildRegularOnlyAffixSlots(previousSlots, preservedRunewordToken)") == std::string::npos ||
-				reforgeSource.find("TryPromotePreservedRunewordPrimary(rolled, preservedRunewordToken)") == std::string::npos ||
 				reforgeSource.find("Reforge blocked: completed runeword base.") != std::string::npos) {
 				std::cerr << "runeword_reforge_safety: completed-base reroll integration guard is missing\n";
 				return false;
 			}
 
-			// Verify runeword token exclusion from regular roll pool.
-			if (reforgeSource.find("_affixRuntimeState.affixes[*idx].token == preservedRunewordToken") == std::string::npos) {
+			// Every runeword result token is excluded from the regular roll pool, not
+			// only the currently completed recipe's token.
+			if (reforgeSource.find("recipeIndexByResultAffixToken.contains(affix.token)") == std::string::npos) {
 				std::cerr << "runeword_reforge_safety: runeword token exclusion from regular roll pool is missing\n";
-				return false;
-			}
-
-			// Verify final safety net for runeword token survival.
-			if (reforgeSource.find("newSlots.HasToken(preservedRunewordToken)") == std::string::npos) {
-				std::cerr << "runeword_reforge_safety: post-roll runeword token verification is missing\n";
 				return false;
 			}
 
 			const auto preservedStateCapturePos =
 				reforgeSource.find("preservedRunewordRuntimeState = *state;");
+			const auto preservedLockedStateCapturePos =
+				reforgeSource.find("preservedLockedAffixRuntimeState = *state;");
+			const auto expectedBaseValidationPos =
+				reforgeSource.find("IsExpectedLockedReforgeInstance(*a_expectedInstanceKey, instanceKey)");
 			const auto orbPostcheckPos = reforgeSource.find("DidConsumeExactInventoryCount(");
+			const auto observedConsumptionPos =
+				reforgeSource.find("ResolveObservedInventoryConsumption(", orbPostcheckPos);
 			const auto orbRefundPos =
-				reforgeSource.find("player->AddObjectToContainer(orb, nullptr, 1, nullptr);", orbPostcheckPos);
+				reforgeSource.find("player->AddObjectToContainer(", observedConsumptionPos);
 			const auto stateCommitPos = reforgeSource.find("EraseInstanceRuntimeStates(instanceKey);");
 			const auto ensureRolledStatePos =
 				reforgeSource.find("EnsureInstanceRuntimeState(instanceKey, newSlots.tokens[i]);", stateCommitPos);
 			const auto preservedStateRestorePos =
 				reforgeSource.find("EnsureInstanceRuntimeState(instanceKey, preservedRunewordToken) =", ensureRolledStatePos);
+			const auto preservedLockedStateRestorePos =
+				reforgeSource.find("EnsureInstanceRuntimeState(instanceKey, *a_lockedAffixToken) =", ensureRolledStatePos);
 			if (preservedStateCapturePos == std::string::npos ||
+				preservedLockedStateCapturePos == std::string::npos ||
+				expectedBaseValidationPos == std::string::npos ||
 				orbPostcheckPos == std::string::npos ||
+				observedConsumptionPos == std::string::npos ||
 				orbRefundPos == std::string::npos ||
 				stateCommitPos == std::string::npos ||
 				ensureRolledStatePos == std::string::npos ||
 				preservedStateRestorePos == std::string::npos ||
+				preservedLockedStateRestorePos == std::string::npos ||
 				preservedStateCapturePos >= stateCommitPos ||
+				preservedLockedStateCapturePos >= stateCommitPos ||
+				expectedBaseValidationPos >= orbPostcheckPos ||
 				orbPostcheckPos >= stateCommitPos ||
+				observedConsumptionPos >= stateCommitPos ||
 				orbRefundPos >= stateCommitPos ||
 				ensureRolledStatePos >= preservedStateRestorePos ||
+				ensureRolledStatePos >= preservedLockedStateRestorePos ||
 				reforgeSource.find("EventBridge::OperationResult EventBridge::ResetSelectedRunewordBaseCalamityState()") == std::string::npos ||
 				reforgeSource.find("if (_runewordState.transmuteInProgress)") == std::string::npos ||
 				reforgeSource.find("_instanceTrackingState.instanceAffixes.erase(instanceKey)") == std::string::npos ||

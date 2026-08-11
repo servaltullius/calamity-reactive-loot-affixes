@@ -34,6 +34,14 @@ namespace CalamityAffixes
 		std::uint32_t owned{ 0 };
 	};
 
+	struct RunewordReforgeLockCandidate
+	{
+		std::uint64_t affixToken{ 0 };
+		std::string displayNameEn{};
+		std::string displayNameKo{};
+		std::string slotKind{};
+	};
+
 	struct RunewordPanelState
 	{
 		bool hasBase{ false };
@@ -51,6 +59,11 @@ namespace CalamityAffixes
 		std::string baseCompatibilityMessageEn{};
 		std::string baseCompatibilityMessageKo{};
 		std::vector<RunewordRuneRequirement> requiredRunes{};
+		std::uint32_t regularAffixCount{ 0 };
+		std::uint32_t reforgeOrbsOwned{ 0 };
+		std::uint32_t standardReforgeCost{ 0 };
+		std::uint32_t lockedReforgeCost{ 0 };
+		std::vector<RunewordReforgeLockCandidate> reforgeLockCandidates{};
 		// Gates the panel's cheat-adjacent debug tools; true only while a debug
 		// toggle (HUD notifications or verbose logging) is enabled.
 		bool debugTools{ false };

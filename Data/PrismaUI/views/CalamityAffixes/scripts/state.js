@@ -6,6 +6,8 @@ let runewordAffixTextState = "";
 let runewordAffixPendingState = false;
 let runewordAffixPendingNonce = 0;
 const runewordAffixPendingTimeoutMs = 1200;
+let reforgeLockTokenState = "";
+let reforgeLockBaseKeyState = "";
 let panelHotkeyTextState = "F11";
 let selectedItemNameState = "";
 let selectedItemSourceState = "";
@@ -34,7 +36,12 @@ let runewordPanelState = {
   nextRuneOwned: 0,
   canInsert: false,
   missingSummary: "",
-  requiredRunes: []
+  requiredRunes: [],
+  regularAffixCount: 0,
+  reforgeOrbsOwned: null,
+  standardReforgeCost: 1,
+  lockedReforgeCost: 2,
+  reforgeLockCandidates: []
 };
 let runewordResetArmedUntil = 0;
 let runewordResetArmedBaseKey = "";
@@ -49,6 +56,8 @@ const panelCommandAttribute = "data-cmd";
 const panelOpenTabAttribute = "data-open-tab";
 const recipeFilterAttribute = "data-recipe-filter";
 const recipeSelectionCommandPrefix = "runeword.recipe.select:";
+const lockedReforgeCommandPrefix = "runeword.reforge:";
+const reforgeLockTokenAttribute = "data-reforge-lock-token";
 const validRecipeBaseFilters = new Set(["all", "weapon", "armor", "mixed"]);
 const panelRenderSection = Object.freeze({
   hotkeyHints: "hotkeyHints",
@@ -81,7 +90,8 @@ const previewInvalidatingCommands = new Set([
   "runeword.reset"
 ]);
 const previewInvalidatingCommandPrefixes = Object.freeze([
-  "runeword.base.select:"
+  "runeword.base.select:",
+  lockedReforgeCommandPrefix
 ]);
 const panelRenderState = {
   queued: false,
@@ -147,4 +157,3 @@ function schedulePanelRender(...a_sections) {
   panelRenderState.queued = true;
   requestAnimationFrame(flushPanelRender);
 }
-

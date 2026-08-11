@@ -304,7 +304,8 @@ namespace CalamityAffixes
 	std::optional<std::size_t> EventBridge::RollSuffixIndex(
 		LootItemType a_itemType,
 		detail::WeaponSubtypeGroup a_weaponSubtype,
-		const std::vector<std::string>* a_excludeFamilies)
+		const std::vector<std::string>* a_excludeFamilies,
+		const std::vector<std::size_t>* a_excludeIndices)
 	{
 		const std::vector<std::size_t>* sourcePool = nullptr;
 		if (_loot.sharedPool) {
@@ -333,6 +334,10 @@ namespace CalamityAffixes
 						affix.weaponSubtypeMask,
 						a_itemType == LootItemType::kWeapon,
 						a_weaponSubtype)) {
+					return false;
+				}
+				if (a_excludeIndices &&
+					std::find(a_excludeIndices->begin(), a_excludeIndices->end(), a_idx) != a_excludeIndices->end()) {
 					return false;
 				}
 				if (a_excludeFamilies && !affix.family.empty()) {

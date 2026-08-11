@@ -24,6 +24,7 @@
 #include "CalamityAffixes/EventNames.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/PrismaLayoutPersistence.h"
+#include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/UserSettingsPersistence.h"
 
 #include "PrismaUI_API.h"

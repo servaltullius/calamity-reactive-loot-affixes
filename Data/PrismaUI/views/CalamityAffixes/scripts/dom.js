@@ -84,6 +84,11 @@ const runewordPanelStatus = document.getElementById("runewordPanelStatus");
 const runewordActionHint = document.getElementById("runewordActionHint");
 const runewordActionDetailsSummary = document.getElementById("runewordActionDetailsSummary");
 const runewordItemActionsTitle = document.getElementById("runewordItemActionsTitle");
+const runewordReforgeDetails = document.getElementById("runewordReforgeDetails");
+const runewordReforgeSummary = document.getElementById("runewordReforgeSummary");
+const runewordReforgeLockHint = document.getElementById("runewordReforgeLockHint");
+const runewordReforgeLockList = document.getElementById("runewordReforgeLockList");
+const runewordReforgeCostSummary = document.getElementById("runewordReforgeCostSummary");
 const runewordRecoverySummary = document.getElementById("runewordRecoverySummary");
 const runewordInsertButton = document.getElementById("runewordInsertButton");
 const runewordReforgeButton = document.getElementById("runewordReforgeButton");
@@ -129,4 +134,3 @@ const panelResizeRight = document.getElementById("panelResizeRight");
 const panelResizeBottom = document.getElementById("panelResizeBottom");
 const panelResizeCorner = document.getElementById("panelResizeCorner");
 const tooltipRunewordHint = document.getElementById("tooltipRunewordHint");
-

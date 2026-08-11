@@ -127,7 +127,7 @@ function handleListboxKeydown(event) {
     return;
   }
   const listbox = option.parentElement;
-  if (listbox !== inventoryBaseList && listbox !== recipeList) {
+  if (listbox !== inventoryBaseList && listbox !== recipeList && listbox !== runewordReforgeLockList) {
     return;
   }
 
@@ -153,6 +153,24 @@ function handleListboxKeydown(event) {
   nextOption.tabIndex = 0;
   nextOption.focus();
   nextOption.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
+function handleReforgeLockOptionClick(event) {
+  const target = event.target;
+  if (!(target instanceof Element) || !runewordReforgeLockList) {
+    return false;
+  }
+
+  const option = target.closest(`[${reforgeLockTokenAttribute}]`);
+  if (!option || option.disabled || !runewordReforgeLockList.contains(option)) {
+    return false;
+  }
+
+  if (runewordResetArmedUntil !== 0) {
+    clearRunewordResetConfirmation();
+  }
+  const token = option.getAttribute(reforgeLockTokenAttribute) || "";
+  return selectReforgeLockCandidate(token);
 }
 
 function dispatchPanelCommand(button) {
@@ -193,6 +211,11 @@ function dispatchPanelCommand(button) {
 }
 
 function handleDelegatedPanelCommandClick(event) {
+  if (handleReforgeLockOptionClick(event)) {
+    event.preventDefault();
+    return;
+  }
+
   const target = event.target;
   if (!(target instanceof Element)) {
     return;
@@ -207,4 +230,3 @@ function handleDelegatedPanelCommandClick(event) {
     event.preventDefault();
   }
 }
-

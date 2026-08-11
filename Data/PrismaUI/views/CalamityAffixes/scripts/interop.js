@@ -32,6 +32,57 @@ function parseInteropObjectPayload(raw) {
   }
 }
 
+function parseNonNegativeInteger(value, fallback = 0) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+  return Math.trunc(parsed);
+}
+
+function parsePositiveInteger(value, fallback) {
+  const parsed = parseNonNegativeInteger(value, fallback);
+  return parsed > 0 ? parsed : fallback;
+}
+
+function normalizeReforgeLockCandidates(raw) {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  const seenTokens = new Set();
+  const candidates = [];
+  for (const entry of raw) {
+    const affixToken = typeof entry?.affixToken === "string"
+      ? entry.affixToken.trim()
+      : "";
+    const displayNameEn = typeof entry?.displayNameEn === "string"
+      ? entry.displayNameEn.trim()
+      : "";
+    const displayNameKo = typeof entry?.displayNameKo === "string"
+      ? entry.displayNameKo.trim()
+      : "";
+    const slotKind = entry?.slotKind === "prefix" || entry?.slotKind === "suffix"
+      ? entry.slotKind
+      : "";
+
+    // 64-bit affix tokens must remain decimal strings. Accepting a JS number
+    // here would silently round values above Number.MAX_SAFE_INTEGER.
+    if (!/^[0-9]+$/.test(affixToken) || affixToken === "0" || !slotKind || seenTokens.has(affixToken)) {
+      continue;
+    }
+
+    seenTokens.add(affixToken);
+    candidates.push({
+      affixToken,
+      displayNameEn,
+      displayNameKo,
+      slotKind
+    });
+  }
+  return candidates;
+}
+
 function setInventoryItems(raw) {
   const prevSelectedItemName = selectedItemNameState;
   const prevSelectedBaseKey = resolveSelectedRunewordBaseKey();
@@ -39,6 +90,9 @@ function setInventoryItems(raw) {
 
   inventoryItemsState = items;
   const nextSelectedBaseKey = resolveSelectedRunewordBaseKey();
+  if (nextSelectedBaseKey !== prevSelectedBaseKey) {
+    clearReforgeLockSelection(false);
+  }
   if (runewordResetArmedUntil !== 0 && nextSelectedBaseKey !== prevSelectedBaseKey) {
     clearRunewordResetConfirmation();
   }
@@ -86,6 +140,7 @@ function setRecipeItems(raw) {
 
 function setRunewordPanelState(raw) {
   const data = parseInteropObjectPayload(raw) || {};
+  const ownedRaw = Number(data.reforgeOrbsOwned);
 
   runewordPanelState = {
     hasBase: Boolean(data.hasBase),
@@ -106,6 +161,13 @@ function setRunewordPanelState(raw) {
     baseCompatibilityMessageKo: typeof data.baseCompatibilityMessageKo === "string"
       ? data.baseCompatibilityMessageKo
       : "",
+    regularAffixCount: parseNonNegativeInteger(data.regularAffixCount, 0),
+    reforgeOrbsOwned: Number.isFinite(ownedRaw) && ownedRaw >= 0
+      ? Math.trunc(ownedRaw)
+      : null,
+    standardReforgeCost: parsePositiveInteger(data.standardReforgeCost, 1),
+    lockedReforgeCost: parsePositiveInteger(data.lockedReforgeCost, 2),
+    reforgeLockCandidates: normalizeReforgeLockCandidates(data.reforgeLockCandidates),
     requiredRunes: Array.isArray(data.requiredRunes)
       ? data.requiredRunes
           .map((entry) => {
@@ -118,6 +180,8 @@ function setRunewordPanelState(raw) {
           .filter(Boolean)
       : []
   };
+
+  reconcileReforgeLockSelection(false);
 
   if (Object.prototype.hasOwnProperty.call(data, "recipeToken")) {
     const recipeToken = typeof data.recipeToken === "string"

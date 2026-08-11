@@ -65,6 +65,9 @@
 		// UI helper: affix tooltip for currently selected runeword base.
 		[[nodiscard]] std::optional<std::string> GetSelectedRunewordBaseAffixTooltip(int a_uiLanguageMode = 2);
 		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseWithOrb();
+		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseWithLockedAffix(
+			std::uint64_t a_expectedInstanceKey,
+			std::uint64_t a_lockedAffixToken);
 		[[nodiscard]] OperationResult ResetSelectedRunewordBaseCalamityState();
 
 		// MCM manual recovery: grant starter orbs + missing rune fragments.

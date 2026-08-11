@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/RunewordUtil.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
@@ -8,6 +9,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <utility>
 
 namespace CalamityAffixes
 {
@@ -68,9 +70,18 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 		RunewordPanelState panelState{};
+		panelState.standardReforgeCost = detail::kStandardReforgeOrbCost;
+		panelState.lockedReforgeCost = detail::kLockedReforgeOrbCost;
 		panelState.debugTools = _loot.debugHudNotifications || _loot.debugLog;
 		if (!_configLoaded) {
 			return panelState;
+		}
+
+		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
+			if (auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")) {
+				panelState.reforgeOrbsOwned = static_cast<std::uint32_t>(
+					std::max(0, player->GetItemCount(orb)));
+			}
 		}
 
 		SanitizeRunewordState();
@@ -82,6 +93,47 @@ namespace CalamityAffixes
 			return panelState;
 		}
 		panelState.hasBase = true;
+
+		if (const auto slotsIt = _instanceTrackingState.instanceAffixes.find(*_runewordState.selectedBaseKey);
+			slotsIt != _instanceTrackingState.instanceAffixes.end()) {
+			const auto* completedRecipe = ResolveCompletedRunewordRecipe(*_runewordState.selectedBaseKey);
+			const auto completedToken = completedRecipe ? completedRecipe->resultAffixToken : 0u;
+			panelState.reforgeLockCandidates.reserve(slotsIt->second.count);
+			for (std::uint8_t i = 0; i < slotsIt->second.count; ++i) {
+				const auto token = slotsIt->second.tokens[i];
+				if (token == 0u || token == completedToken ||
+					_runewordState.recipeIndexByResultAffixToken.contains(token)) {
+					continue;
+				}
+
+				const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(token);
+				if (affixIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() ||
+					affixIt->second >= _affixRuntimeState.affixes.size()) {
+					continue;
+				}
+
+				const auto& affix = _affixRuntimeState.affixes[affixIt->second];
+				if (affix.slot != AffixSlot::kPrefix && affix.slot != AffixSlot::kSuffix) {
+					continue;
+				}
+
+				std::string nameEn = affix.displayNameEn;
+				if (nameEn.empty()) {
+					nameEn = affix.displayName.empty() ? affix.id : affix.displayName;
+				}
+				std::string nameKo = affix.displayNameKo;
+				if (nameKo.empty()) {
+					nameKo = affix.displayName.empty() ? affix.id : affix.displayName;
+				}
+				panelState.reforgeLockCandidates.push_back(RunewordReforgeLockCandidate{
+					.affixToken = token,
+					.displayNameEn = std::move(nameEn),
+					.displayNameKo = std::move(nameKo),
+					.slotKind = affix.slot == AffixSlot::kPrefix ? "prefix" : "suffix",
+				});
+				++panelState.regularAffixCount;
+			}
+		}
 
 		// Re-transmutation falls through to the normal recipe selection flow.
 		// The old runeword remains active until the replacement commits successfully.

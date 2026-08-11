@@ -68,7 +68,10 @@ class ItemSubtypePolicyTests(unittest.TestCase):
         self.assertIn("IsSuffixWeaponSubtypeEligible(", preview)
         self.assertIn("IsSuffixWeaponSubtypeEligible(", service)
         self.assertIn("ResolveWeaponSubtype(a_item->object->As<RE::TESObjectWEAP>())", tooltip)
-        self.assertIn("RollSuffixIndex(*lootType, weaponSubtype, &chosenFamilies)", reforge)
+        self.assertIn(
+            "RollSuffixIndex(*lootType, weaponSubtype, &chosenFamilies, &chosenIndices)",
+            reforge,
+        )
         self.assertNotIn("IsSuffixWeaponSubtypeEligible(", assign)
 
     def test_specialized_runeword_warning_is_non_blocking(self) -> None:
