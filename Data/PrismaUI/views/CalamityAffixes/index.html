@@ -195,6 +195,25 @@
                       <button type="button" class="rwFilterButton" data-recipe-filter="mixed" aria-pressed="false">Mixed / 혼합</button>
                     </div>
                     <div
+                      id="recipeMaterialFilters"
+                      class="rwRecipeFilters rwMaterialFilters"
+                      role="group"
+                      aria-label="Filter recipes by current fragment inventory"
+                      aria-describedby="recipeMaterialFilterHint"
+                      aria-disabled="true">
+                      <button type="button" class="rwFilterButton" data-recipe-material-filter="all" aria-pressed="true" disabled>Any fragments / 조각 무관</button>
+                      <button type="button" class="rwFilterButton" data-recipe-material-filter="ready" aria-pressed="false" disabled>Fragments ready / 룬 조각 준비</button>
+                      <button type="button" class="rwFilterButton" data-recipe-material-filter="missing1" aria-pressed="false" disabled>Missing 1 fragment / 룬 조각 1개 부족</button>
+                    </div>
+                    <div
+                      id="recipeMaterialFilterHint"
+                      class="cpContextMeta rwRecipeFilterHint"
+                      role="status"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      Fragment inventory is synchronizing. Material filters use only current inventory counts for each full recipe; they do not include inserted progress or indicate base compatibility or whether transmutation is currently available. / 룬 조각 보유량을 동기화 중입니다. 재료 필터는 전체 레시피 기준 현재 인벤토리 보유량만 계산하며, 기존 삽입 진행을 포함하지 않고 베이스 호환성이나 현재 실제 변환 가능 여부를 뜻하지 않습니다.
+                    </div>
+                    <div
                       id="recipeList"
                       class="cpList rwList rwRecipeExplorerList rwRecipeGrid"
                       role="listbox"

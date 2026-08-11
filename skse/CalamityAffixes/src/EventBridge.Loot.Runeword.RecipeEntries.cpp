@@ -1001,6 +1001,7 @@ namespace CalamityAffixes
 				.recipeToken = recipe.token,
 				.displayName = recipe.displayName,
 				.runeSequence = std::move(runes),
+				.runeTokens = recipe.runeTokens,
 				.effectSummaryKey = std::string(effectSummaryKey),
 				.effectSummaryTextEn = buildEffectSummaryTextEn(affix, effectSummaryKey),
 				.effectSummaryTextKo = buildEffectSummaryTextKo(affix, effectSummaryKey),

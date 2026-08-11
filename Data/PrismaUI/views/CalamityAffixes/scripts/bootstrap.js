@@ -5,6 +5,10 @@ function wireButtons() {
     recipeBaseFilters.addEventListener("click", handleRecipeFilterClick);
   }
 
+  if (recipeMaterialFilters) {
+    recipeMaterialFilters.addEventListener("click", handleRecipeMaterialFilterClick);
+  }
+
   if (recipeSearchInput) {
     recipeSearchInput.addEventListener("input", () => {
       recipeSearchQuery = recipeSearchInput.value || "";

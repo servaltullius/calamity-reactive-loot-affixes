@@ -11,6 +11,17 @@ function resolveRecipeFilterLabel(filter) {
   }
 }
 
+function resolveRecipeMaterialFilterLabel(filter) {
+  switch (filter) {
+    case "ready":
+      return t("Fragments ready", "룬 조각 준비");
+    case "missing1":
+      return t("Missing 1 fragment", "룬 조각 1개 부족");
+    default:
+      return t("Any fragments", "조각 무관");
+  }
+}
+
 function updateRecipeFilterControls() {
   if (recipeBaseFilters) {
     recipeBaseFilters.setAttribute(
@@ -22,6 +33,39 @@ function updateRecipeFilterControls() {
     const filter = button.getAttribute(recipeFilterAttribute) || "all";
     button.textContent = resolveRecipeFilterLabel(filter);
     button.setAttribute("aria-pressed", filter === recipeBaseFilter ? "true" : "false");
+  }
+  if (recipeMaterialFilters) {
+    recipeMaterialFilters.setAttribute(
+      "aria-label",
+      t(
+        "Filter recipes by current fragment inventory",
+        "현재 룬 조각 보유량으로 레시피 필터"
+      )
+    );
+    recipeMaterialFilters.setAttribute(
+      "aria-disabled",
+      runeInventoryKnownState ? "false" : "true"
+    );
+  }
+  for (const button of recipeMaterialFilterButtons) {
+    const filter = button.getAttribute(recipeMaterialFilterAttribute) || "all";
+    button.textContent = resolveRecipeMaterialFilterLabel(filter);
+    button.setAttribute(
+      "aria-pressed",
+      filter === recipeMaterialFilter ? "true" : "false"
+    );
+    button.disabled = !runeInventoryKnownState;
+  }
+  if (recipeMaterialFilterHint) {
+    recipeMaterialFilterHint.textContent = runeInventoryKnownState
+      ? t(
+          "Filters use only current inventory fragment counts for each full recipe. They do not include inserted progress and do not indicate base compatibility or whether transmutation is currently available.",
+          "필터는 전체 레시피 기준 현재 인벤토리의 룬 조각만 계산합니다. 기존 삽입 진행을 포함하지 않으며 베이스 호환성이나 현재 실제 변환 가능 여부를 뜻하지 않습니다."
+        )
+      : t(
+          "Fragment inventory is synchronizing. Material filters remain unavailable and show all recipes. They do not include inserted progress and do not indicate base compatibility or whether transmutation is currently available.",
+          "룬 조각 보유량을 동기화 중입니다. 재료 필터는 사용할 수 없으며 모든 레시피를 표시합니다. 기존 삽입 진행을 포함하지 않고 베이스 호환성이나 현재 실제 변환 가능 여부를 뜻하지 않습니다."
+        );
   }
 }
 

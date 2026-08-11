@@ -564,26 +564,34 @@ namespace RuntimeGateStoreChecks
 		{
 			CalamityAffixes::RunewordBaseInventoryEntry base{};
 			CalamityAffixes::RunewordRecipeEntry recipe{};
+			CalamityAffixes::RunewordRuneInventoryEntry runeInventory{};
 			CalamityAffixes::RunewordPanelState panel{};
 			CalamityAffixes::OperationResult result{};
 
 			if (base.instanceKey != 0u || base.selected ||
-				recipe.recipeToken != 0u || recipe.selected ||
+				recipe.recipeToken != 0u || !recipe.runeTokens.empty() || recipe.selected ||
+				runeInventory.runeToken != 0u || runeInventory.owned != 0u ||
 				panel.hasBase || panel.hasRecipe || panel.isComplete ||
 				panel.insertedRunes != 0u || panel.totalRunes != 0u ||
-				panel.canInsert ||
+				panel.canInsert || panel.runeInventoryKnown || !panel.runeInventory.empty() ||
 				result.success) {
 				std::cerr << "runeword_ui_contract_defaults: expected DTO defaults to remain zero-initialized\n";
 				return false;
 			}
 
 			panel.requiredRunes.push_back({ .runeName = "El", .required = 1u, .owned = 0u });
+			panel.runeInventoryKnown = true;
+			panel.runeInventory.push_back({ .runeToken = 42u, .owned = 3u });
+			recipe.runeTokens = { 42u, 7u, 42u };
 			recipe.effectSummaryTextEn = "summary-en";
 			recipe.effectSummaryTextKo = "summary-ko";
 			recipe.effectDetailTextEn = "detail-en";
 			recipe.effectDetailTextKo = "detail-ko";
 			result.message = "ok";
 			if (panel.requiredRunes.size() != 1u ||
+				!panel.runeInventoryKnown || panel.runeInventory.size() != 1u ||
+				panel.runeInventory.front().runeToken != 42u || panel.runeInventory.front().owned != 3u ||
+				recipe.runeTokens != std::vector<std::uint64_t>{ 42u, 7u, 42u } ||
 				recipe.effectSummaryTextEn != "summary-en" ||
 				recipe.effectSummaryTextKo != "summary-ko" ||
 				recipe.effectDetailTextEn != "detail-en" ||

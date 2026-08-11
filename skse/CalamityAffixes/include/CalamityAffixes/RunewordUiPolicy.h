@@ -1,9 +1,14 @@
 #pragma once
 
+#include "CalamityAffixes/RunewordUiContracts.h"
+
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <optional>
+#include <span>
 #include <string_view>
+#include <vector>
 
 namespace CalamityAffixes
 {
@@ -80,5 +85,33 @@ namespace CalamityAffixes
 	[[nodiscard]] constexpr bool CanInsertRunewordFromPanel(bool a_hasAllRequiredRunes, bool a_canApplyResult) noexcept
 	{
 		return a_hasAllRequiredRunes && a_canApplyResult;
+	}
+
+	[[nodiscard]] constexpr std::vector<std::uint64_t> NormalizeRunewordRuneInventoryTokens(
+		std::span<const std::uint64_t> a_tokens)
+	{
+		std::vector<std::uint64_t> normalized(a_tokens.begin(), a_tokens.end());
+
+		std::ranges::sort(normalized);
+		normalized.erase(std::unique(normalized.begin(), normalized.end()), normalized.end());
+		return normalized;
+	}
+
+	template <class ResolveOwned>
+	[[nodiscard]] std::optional<std::vector<RunewordRuneInventoryEntry>> BuildRunewordRuneInventorySnapshot(
+		std::span<const std::uint64_t> a_referencedTokens,
+		ResolveOwned&& a_resolveOwned)
+	{
+		const auto inventoryTokens = NormalizeRunewordRuneInventoryTokens(a_referencedTokens);
+		std::vector<RunewordRuneInventoryEntry> snapshot;
+		snapshot.reserve(inventoryTokens.size());
+		for (const auto runeToken : inventoryTokens) {
+			const std::optional<std::uint32_t> owned = a_resolveOwned(runeToken);
+			if (!owned) {
+				return std::nullopt;
+			}
+			snapshot.push_back({ .runeToken = runeToken, .owned = *owned });
+		}
+		return snapshot;
 	}
 }

@@ -668,6 +668,18 @@
   margin-bottom: calc(6px * var(--panel-ui-scale));
 }
 
+.rwMaterialFilters {
+  margin-top: calc(-4px * var(--panel-ui-scale));
+  margin-bottom: 0;
+}
+
+.rwRecipeFilterHint {
+  margin-top: calc(-2px * var(--panel-ui-scale));
+  margin-bottom: calc(2px * var(--panel-ui-scale));
+  font-size: calc(9px * var(--panel-ui-scale));
+  line-height: 1.3;
+}
+
 .rwFilterButton {
   appearance: none;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -690,6 +702,18 @@
   border-color: rgba(0, 255, 153, 0.52);
   background: rgba(0, 255, 153, 0.15);
   color: rgba(225, 255, 240, 0.98);
+}
+
+.rwFilterButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.rwFilterButton:disabled:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .rwSearchInput {
@@ -777,6 +801,61 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+}
+
+.rwRecipeMaterial {
+  margin-top: calc(4px * var(--panel-ui-scale));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(7px * var(--panel-ui-scale));
+  min-width: 0;
+}
+
+.rwRecipeMaterialBadge {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: calc(1px * var(--panel-ui-scale)) calc(6px * var(--panel-ui-scale));
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: calc(9px * var(--panel-ui-scale));
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.rwRecipeMaterialBadge.ready {
+  border-color: rgba(0, 255, 153, 0.44);
+  background: rgba(0, 255, 153, 0.12);
+  color: rgba(215, 255, 236, 0.98);
+}
+
+.rwRecipeMaterialBadge.missing1 {
+  border-color: rgba(255, 197, 118, 0.52);
+  background: rgba(255, 178, 79, 0.12);
+  color: rgba(255, 231, 195, 0.98);
+}
+
+.rwRecipeMaterialBadge.missing {
+  border-color: rgba(255, 120, 120, 0.38);
+  background: rgba(255, 90, 90, 0.07);
+  color: rgba(255, 210, 210, 0.94);
+}
+
+.rwRecipeMaterialBadge.unknown {
+  border-style: dashed;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.rwRecipeMaterialCoverage {
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: calc(9px * var(--panel-ui-scale));
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rwRecipeListItem {

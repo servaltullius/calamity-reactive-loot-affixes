@@ -117,14 +117,22 @@ const runRecipeFilterBehavior = new Function(
       return en + " / " + ko;
     }
     const validRecipeBaseFilters = new Set(["all", "weapon", "armor", "mixed"]);
+    const validRecipeMaterialFilters = new Set(["all", "ready", "missing1"]);
     const recipeSearchDocumentByToken = new Map();
     let recipeItemsState = [
-      { token: "weapon", name: "Steel Fury", baseKey: "weapon" },
-      { token: "armor", name: "Arcane Ward", baseKey: "armor" },
-      { token: "mixed", name: "Hybrid Soul", baseKey: "mixed", selected: true }
+      { token: "weapon", name: "Steel Fury", baseKey: "weapon", runeTokens: ["11", "11"] },
+      { token: "armor", name: "Arcane Ward", baseKey: "armor", runeTokens: ["11", "22"] },
+      { token: "mixed", name: "Hybrid Soul", baseKey: "mixed", runeTokens: ["22", "22", "33"], selected: true }
     ];
     let recipeSearchQuery = "";
     let recipeBaseFilter = "all";
+    let recipeMaterialFilter = "all";
+    let runeInventoryKnownState = true;
+    let runeInventoryOwnedByToken = new Map([
+      ["11", 2],
+      ["22", 0],
+      ["33", 0]
+    ]);
     let runewordPanelState = {};
     let confirmedRecipeTokenState = "mixed";
     let optimisticRecipeTokenState = "";
@@ -145,6 +153,27 @@ const runRecipeFilterBehavior = new Function(
     let view = resolveRecipeListViewModel();
     assert.strictEqual(view.visibleItems.length, 3);
     assert.strictEqual(view.countText, "Total 3");
+    assert.strictEqual(resolveRecipeMaterialState(recipeItemsState[0]).key, "ready");
+    assert.strictEqual(resolveRecipeMaterialState(recipeItemsState[1]).key, "missing1");
+    assert.strictEqual(resolveRecipeMaterialState(recipeItemsState[2]).missingFragments, 3);
+
+    const repeatedRune = { runeTokens: ["11", "11", "22"] };
+    runeInventoryOwnedByToken.set("11", 1);
+    runeInventoryOwnedByToken.set("22", 1);
+    const repeatedState = resolveRecipeMaterialState(repeatedRune);
+    assert.strictEqual(repeatedState.requiredFragments, 3);
+    assert.strictEqual(repeatedState.coveredFragments, 2);
+    assert.strictEqual(repeatedState.missingFragments, 1);
+    runeInventoryOwnedByToken.set("11", 2);
+    runeInventoryOwnedByToken.set("22", 0);
+
+    assert.strictEqual(
+      resolveRecipeMaterialState({ runeTokens: ["11", "44"] }).known,
+      false,
+      "an incomplete known inventory snapshot must fail closed per recipe"
+    );
+    assert.strictEqual(normalizeRecipeRuneTokens([11]), null);
+    assert.deepStrictEqual(normalizeRecipeRuneTokens(["11", "11"]), ["11", "11"]);
 
     recipeBaseFilter = "weapon";
     view = resolveRecipeListViewModel();
@@ -153,6 +182,7 @@ const runRecipeFilterBehavior = new Function(
 
     recipeBaseFilter = "armor";
     recipeSearchQuery = "ward";
+    recipeMaterialFilter = "missing1";
     view = resolveRecipeListViewModel();
     assert.deepStrictEqual(view.visibleItems.map((item) => item.token), ["armor"]);
 
@@ -162,8 +192,15 @@ const runRecipeFilterBehavior = new Function(
     assert(view.emptyState.title.includes("current filters"));
     assert.strictEqual(getSelectedRecipeItem().token, "mixed");
 
+    recipeBaseFilter = "all";
+    recipeSearchQuery = "";
+    recipeMaterialFilter = "ready";
+    view = resolveRecipeListViewModel();
+    assert.deepStrictEqual(view.visibleItems.map((item) => item.token), ["weapon"]);
+    assert.strictEqual(getSelectedRecipeItem().token, "mixed");
+
     uiLang = "ko";
-    assert.strictEqual(resolveRecipeListViewModel().countText, "표시 0/3");
+    assert.strictEqual(resolveRecipeListViewModel().countText, "표시 1/3");
 
     assert.strictEqual(setRecipeBaseFilter("mixed"), true);
     assert.strictEqual(recipeBaseFilter, "mixed");
@@ -173,6 +210,17 @@ const runRecipeFilterBehavior = new Function(
     assert.strictEqual(scheduledRecipeRenders, 1);
     assert.strictEqual(setRecipeBaseFilter("invalid"), true);
     assert.strictEqual(recipeBaseFilter, "all");
+
+    uiLang = "en";
+    assert.strictEqual(setRecipeMaterialFilter("missing1"), true);
+    assert.strictEqual(recipeMaterialFilter, "missing1");
+    assert.strictEqual(resolveRecipeListViewModel().visibleItems[0].token, "armor");
+    runeInventoryKnownState = false;
+    assert.strictEqual(setRecipeMaterialFilter("ready"), true);
+    assert.strictEqual(recipeMaterialFilter, "all");
+    view = resolveRecipeListViewModel();
+    assert.strictEqual(view.activeMaterialFilter, "all");
+    assert.strictEqual(view.visibleItems.length, 3);
   `
 );
 runRecipeFilterBehavior(assert);

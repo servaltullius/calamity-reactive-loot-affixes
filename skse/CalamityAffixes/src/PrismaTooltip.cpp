@@ -1,4 +1,5 @@
 #include "CalamityAffixes/PrismaTooltip.h"
+#include "CalamityAffixes/RunewordUiSerialization.h"
 
 #include <array>
 #include <atomic>

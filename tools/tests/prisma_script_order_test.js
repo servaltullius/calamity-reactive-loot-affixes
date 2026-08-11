@@ -584,6 +584,184 @@ assert.strictEqual(
   "explicit no-lock selection did not restore the standard reforge command"
 );
 
+const runeA = "18446744073709551615";
+const runeB = "9223372036854775808";
+const runeC = "4294967297";
+const materialRecipeA = "18446744073709551001";
+const materialRecipeB = "18446744073709551002";
+sandbox.setUiLanguage("en");
+const materialCatalog = [
+  {
+    token: materialRecipeA,
+    name: "Repeated Rune Test",
+    runes: "A-A-B",
+    summaryEn: "Repeated rune requirement",
+    summaryKo: "반복 룬 요구량",
+    baseKey: "weapon",
+    runeTokens: [runeA, runeA, runeB],
+    selected: false
+  },
+  {
+    token: materialRecipeB,
+    name: "Ready Rune Test",
+    runes: "C",
+    summaryEn: "Single rune requirement",
+    summaryKo: "단일 룬 요구량",
+    baseKey: "armor",
+    runeTokens: [runeC],
+    selected: true
+  }
+];
+
+sandbox.setRecipeItems(JSON.stringify(materialCatalog));
+sandbox.renderRecipeItems();
+const materialNodeBefore = new vm.Script(
+  `recipeNodeByToken.get("${materialRecipeA}")`,
+  { filename: "recipe-material-node-before.js" }
+).runInContext(context);
+assert(materialNodeBefore, "material recipe node was not created");
+new vm.Script(
+  "resolveRecipeSearchDocument(recipeItemsState[0])",
+  { filename: "recipe-material-search-cache-prime.js" }
+).runInContext(context);
+const searchCacheSizeBeforeInventory = new vm.Script(
+  "recipeSearchDocumentByToken.size",
+  { filename: "recipe-material-cache-size-before.js" }
+).runInContext(context);
+assert.strictEqual(searchCacheSizeBeforeInventory, 1);
+
+sandbox.setRunewordPanelState(JSON.stringify({
+  runeInventoryKnown: true,
+  runeInventory: [
+    { runeToken: runeA, owned: 1 },
+    { runeToken: runeB, owned: 1 },
+    { runeToken: runeC, owned: 1 }
+  ]
+}));
+assert.strictEqual(
+  new vm.Script("recipeCatalogDomDirty", { filename: "recipe-material-cache-dirty.js" }).runInContext(context),
+  false,
+  "dynamic rune inventory invalidated the static recipe DOM"
+);
+assert.strictEqual(
+  new vm.Script("recipeSearchDocumentByToken.size", { filename: "recipe-material-cache-retained.js" }).runInContext(context),
+  searchCacheSizeBeforeInventory,
+  "dynamic rune inventory cleared the static recipe search cache"
+);
+sandbox.renderRecipeItems();
+const materialNodeAfter = new vm.Script(
+  `recipeNodeByToken.get("${materialRecipeA}")`,
+  { filename: "recipe-material-node-after.js" }
+).runInContext(context);
+assert.strictEqual(
+  materialNodeAfter,
+  materialNodeBefore,
+  "dynamic rune inventory rebuilt the static recipe card"
+);
+
+let repeatedMaterialState = new vm.Script(
+  "resolveRecipeMaterialState(recipeItemsState[0])",
+  { filename: "recipe-material-repeated-rune.js" }
+).runInContext(context);
+assert.strictEqual(repeatedMaterialState.known, true);
+assert.strictEqual(repeatedMaterialState.requiredFragments, 3);
+assert.strictEqual(repeatedMaterialState.coveredFragments, 2);
+assert.strictEqual(repeatedMaterialState.missingFragments, 1);
+assert.strictEqual(repeatedMaterialState.key, "missing1");
+const repeatedMaterialView = new vm.Script(
+  `recipeMaterialViewByToken.get("${materialRecipeA}")`,
+  { filename: "recipe-material-view.js" }
+).runInContext(context);
+assert.strictEqual(repeatedMaterialView.badge.textContent, "Missing 1 fragment");
+assert.strictEqual(repeatedMaterialView.coverage.textContent, "2/3 fragments covered");
+assert(materialNodeAfter.getAttribute("aria-label").includes("Missing 1 fragment"));
+assert(materialNodeAfter.getAttribute("aria-label").includes("2 of 3 required fragments covered"));
+
+assert.strictEqual(sandbox.setRecipeMaterialFilter("missing1"), true);
+let materialFilteredView = sandbox.resolveRecipeListViewModel();
+assert.deepStrictEqual(
+  Array.from(materialFilteredView.visibleItems, (item) => item.token),
+  [materialRecipeA]
+);
+assert.strictEqual(
+  sandbox.getSelectedRecipeItem().token,
+  materialRecipeB,
+  "a selected recipe hidden by the material filter was not retained"
+);
+
+// A dynamic count-only change must update the existing badge without touching
+// the catalog/search identity.
+sandbox.setRunewordPanelState(JSON.stringify({
+  runeInventoryKnown: true,
+  runeInventory: [
+    { runeToken: runeA, owned: 2 },
+    { runeToken: runeB, owned: 1 },
+    { runeToken: runeC, owned: 1 }
+  ]
+}));
+sandbox.renderRecipeItems();
+assert.strictEqual(
+  new vm.Script(`recipeNodeByToken.get("${materialRecipeA}")`, { filename: "recipe-material-node-count-change.js" }).runInContext(context),
+  materialNodeBefore
+);
+assert.strictEqual(repeatedMaterialView.badge.textContent, "Fragments ready");
+assert.strictEqual(repeatedMaterialView.coverage.textContent, "3/3 fragments covered");
+assert.strictEqual(
+  new vm.Script("recipeSearchDocumentByToken.size", { filename: "recipe-material-cache-count-change.js" }).runInContext(context),
+  searchCacheSizeBeforeInventory
+);
+
+// A selected-flag-only refresh keeps the static signature and node identity.
+sandbox.setRecipeItems(JSON.stringify(materialCatalog.map((item) => ({
+  ...item,
+  selected: item.token === materialRecipeA
+}))));
+assert.strictEqual(
+  new vm.Script("recipeCatalogDomDirty", { filename: "recipe-material-selected-signature.js" }).runInContext(context),
+  false
+);
+assert.strictEqual(
+  new vm.Script(`recipeNodeByToken.get("${materialRecipeA}")`, { filename: "recipe-material-selected-node.js" }).runInContext(context),
+  materialNodeBefore
+);
+
+// Rune order and duplicates are part of the static contract even when all
+// display strings stay identical.
+const reorderedMaterialCatalog = materialCatalog.map((item) => item.token === materialRecipeA
+  ? { ...item, runeTokens: [runeA, runeB, runeA] }
+  : item);
+sandbox.setRecipeItems(JSON.stringify(reorderedMaterialCatalog));
+assert.strictEqual(
+  new vm.Script("recipeCatalogDomDirty", { filename: "recipe-material-rune-signature.js" }).runInContext(context),
+  true,
+  "runeTokens-only catalog change did not invalidate the static recipe card"
+);
+
+// Numeric token payloads and incomplete snapshots fail closed. The material
+// filter returns to all, while selection remains independent.
+sandbox.setRunewordPanelState(JSON.stringify({
+  runeInventoryKnown: true,
+  runeInventory: [
+    { runeToken: 18446744073709551615, owned: 99 }
+  ]
+}));
+assert.strictEqual(
+  new vm.Script("runeInventoryKnownState", { filename: "recipe-material-numeric-token.js" }).runInContext(context),
+  false
+);
+assert.strictEqual(
+  new vm.Script("recipeMaterialFilter", { filename: "recipe-material-fail-closed-filter.js" }).runInContext(context),
+  "all"
+);
+assert.strictEqual(sandbox.resolveRecipeListViewModel().activeMaterialFilter, "all");
+
+sandbox.setRecipeItems(JSON.stringify([{ ...materialCatalog[0], runeTokens: [runeA, 17] }]));
+assert.strictEqual(
+  new vm.Script("recipeItemsState[0].runeTokens", { filename: "recipe-material-static-numeric-token.js" }).runInContext(context),
+  null,
+  "numeric static rune token was accepted into the recipe contract"
+);
+
 const viewMarkup = fs.readFileSync(path.join(VIEW_DIR, "index.html"), "utf8");
 assert(
   /id="runewordReforgeLockList"[\s\S]*?role="listbox"/.test(viewMarkup),
@@ -592,6 +770,14 @@ assert(
 assert(
   /id="runewordReforgeCostSummary"[\s\S]*?role="status"[\s\S]*?aria-live="polite"/.test(viewMarkup),
   "reforge cost changes are not exposed through an aria-live status"
+);
+assert(
+  /id="recipeMaterialFilters"[\s\S]*?role="group"[\s\S]*?aria-describedby="recipeMaterialFilterHint"/.test(viewMarkup),
+  "material filters are not exposed as a described button group"
+);
+assert(
+  /id="recipeMaterialFilterHint"[\s\S]*?role="status"[\s\S]*?aria-live="polite"/.test(viewMarkup),
+  "material-filter availability and scope are not announced accessibly"
 );
 
 console.log("Prisma HTML script order: OK");

@@ -1,5 +1,7 @@
 #include "runtime_gate_store_checks_common.h"
 
+#include "CalamityAffixes/RunewordUiSerialization.h"
+
 #include <cstdlib>
 #include <string_view>
 #include <unordered_map>
@@ -1060,6 +1062,61 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
+			const std::array<std::uint64_t, 7> rawTokens{ 42u, 7u, 42u, 0u, 9u, 7u, 1u };
+			const auto normalized = CalamityAffixes::NormalizeRunewordRuneInventoryTokens(rawTokens);
+			if (normalized != std::vector<std::uint64_t>{ 0u, 1u, 7u, 9u, 42u }) {
+				std::cerr << "runeword_ui_policy: inventory tokens must be deterministic and unique\n";
+				return false;
+			}
+
+			std::unordered_map<std::uint64_t, std::uint32_t> resolveCalls;
+			const auto snapshot = CalamityAffixes::BuildRunewordRuneInventorySnapshot(
+				rawTokens,
+				[&](std::uint64_t token) -> std::optional<std::uint32_t> {
+					++resolveCalls[token];
+					return static_cast<std::uint32_t>(token + 10u);
+				});
+			if (!snapshot || snapshot->size() != normalized.size() ||
+				resolveCalls.size() != normalized.size() ||
+				std::ranges::any_of(resolveCalls, [](const auto& entry) { return entry.second != 1u; })) {
+				std::cerr << "runeword_ui_policy: each unique inventory token must resolve exactly once\n";
+				return false;
+			}
+
+			const auto unresolved = CalamityAffixes::BuildRunewordRuneInventorySnapshot(
+				std::array<std::uint64_t, 3>{ 7u, 9u, 42u },
+				[](std::uint64_t token) -> std::optional<std::uint32_t> {
+					return token == 9u ? std::nullopt : std::optional<std::uint32_t>{ 1u };
+				});
+			if (unresolved) {
+				std::cerr << "runeword_ui_policy: one unresolved fragment form must fail the whole snapshot closed\n";
+				return false;
+			}
+
+			constexpr std::uint64_t kLargeToken = 18446744073709551614ull;
+			const std::array<std::uint64_t, 3> recipeTokens{ kLargeToken, 42u, kLargeToken };
+			const auto recipeTokenJson = CalamityAffixes::BuildRunewordRuneTokenArrayJson(recipeTokens);
+			if (!recipeTokenJson.is_array() || recipeTokenJson.size() != 3u ||
+				!recipeTokenJson[0].is_string() || recipeTokenJson[0] != "18446744073709551614" ||
+				recipeTokenJson[1] != "42" || recipeTokenJson[2] != "18446744073709551614") {
+				std::cerr << "runeword_ui_policy: recipe rune-token JSON must preserve order, duplicates, and uint64 precision\n";
+				return false;
+			}
+
+			const std::array<CalamityAffixes::RunewordRuneInventoryEntry, 2> inventory{
+				CalamityAffixes::RunewordRuneInventoryEntry{ .runeToken = 42u, .owned = 3u },
+				CalamityAffixes::RunewordRuneInventoryEntry{ .runeToken = kLargeToken, .owned = 1u },
+			};
+			const auto inventoryJson = CalamityAffixes::BuildRunewordRuneInventoryJson(inventory);
+			if (!inventoryJson.is_array() || inventoryJson.size() != 2u ||
+				inventoryJson[0].value("runeToken", "") != "42" ||
+				inventoryJson[0].value("owned", 0u) != 3u ||
+				inventoryJson[1].value("runeToken", "") != "18446744073709551614" ||
+				inventoryJson[1].value("owned", 0u) != 1u) {
+				std::cerr << "runeword_ui_policy: inventory JSON must preserve deterministic entries and uint64 precision\n";
+				return false;
+			}
+
 			return true;
 		}
 
@@ -1306,7 +1363,7 @@ namespace RuntimeGateStoreChecks
 				bootstrapPos == std::string::npos ||
 				bootstrapCallPos == std::string::npos ||
 				uiText->find("const items = parseInteropArrayPayload(raw);") == std::string::npos ||
-				uiText->find("const nextItems = parseInteropArrayPayload(raw);") == std::string::npos ||
+				uiText->find("const nextItems = normalizeRecipeCatalogItems(parseInteropArrayPayload(raw));") == std::string::npos ||
 				uiText->find("const recipeSelectionCommandPrefix = \"runeword.recipe.select:\";") == std::string::npos ||
 				uiText->find("const data = parseInteropObjectPayload(raw) || {};") == std::string::npos ||
 				!setInventoryItemsBody.has_value() ||

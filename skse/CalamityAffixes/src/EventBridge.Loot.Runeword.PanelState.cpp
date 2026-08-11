@@ -233,14 +233,40 @@ namespace CalamityAffixes
 			return panelState;
 		}
 
-		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
+		SanitizeRunewordState();
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (player) {
 			if (auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")) {
 				panelState.reforgeOrbsOwned = static_cast<std::uint32_t>(
 					std::max(0, player->GetItemCount(orb)));
 			}
+
+			std::vector<std::uint64_t> referencedRuneTokens;
+			for (const auto& recipe : _runewordState.recipes) {
+				if (!HasRunewordRuntimeEffect(recipe)) {
+					continue;
+				}
+				referencedRuneTokens.insert(
+					referencedRuneTokens.end(),
+					recipe.runeTokens.begin(),
+					recipe.runeTokens.end());
+			}
+
+			const auto runeInventory = BuildRunewordRuneInventorySnapshot(
+				referencedRuneTokens,
+				[&](std::uint64_t a_runeToken) -> std::optional<std::uint32_t> {
+					auto* fragment = LookupRunewordFragmentItem(_runewordState.runeNameByToken, a_runeToken);
+					if (!fragment) {
+						return std::nullopt;
+					}
+					return static_cast<std::uint32_t>(std::max(0, player->GetItemCount(fragment)));
+				});
+			if (runeInventory) {
+				panelState.runeInventoryKnown = true;
+				panelState.runeInventory = std::move(*runeInventory);
+			}
 		}
 
-		SanitizeRunewordState();
 		if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
 			panelState.recipeName = currentRecipe->displayName;
 			panelState.recipeToken = currentRecipe->token;
@@ -347,7 +373,6 @@ namespace CalamityAffixes
 			std::span<const std::uint64_t>(recipe->runeTokens.data(), recipe->runeTokens.size()),
 			panelState.insertedRunes);
 
-		auto* player = RE::PlayerCharacter::GetSingleton();
 		bool ready = true;
 		bool firstMissingSet = false;
 		std::string missingSummary;

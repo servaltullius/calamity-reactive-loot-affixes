@@ -18,6 +18,10 @@ namespace CalamityAffixes
 		std::uint64_t recipeToken{ 0 };
 		std::string displayName{};
 		std::string runeSequence{};
+		// Preserve recipe order and duplicates. The Prisma view uses this
+		// authoritative token sequence to compare requirements with the dynamic
+		// inventory snapshot without parsing display text.
+		std::vector<std::uint64_t> runeTokens{};
 		std::string effectSummaryKey{};
 		std::string effectSummaryTextEn{};
 		std::string effectSummaryTextKo{};
@@ -31,6 +35,12 @@ namespace CalamityAffixes
 	{
 		std::string runeName{};
 		std::uint32_t required{ 0 };
+		std::uint32_t owned{ 0 };
+	};
+
+	struct RunewordRuneInventoryEntry
+	{
+		std::uint64_t runeToken{ 0 };
 		std::uint32_t owned{ 0 };
 	};
 
@@ -86,6 +96,10 @@ namespace CalamityAffixes
 		std::string baseCompatibilityMessageEn{};
 		std::string baseCompatibilityMessageKo{};
 		std::vector<RunewordRuneRequirement> requiredRunes{};
+		// False means the snapshot is unavailable and consumers must not treat
+		// the empty vector as an inventory containing zero fragments.
+		bool runeInventoryKnown{ false };
+		std::vector<RunewordRuneInventoryEntry> runeInventory{};
 		std::uint32_t regularAffixCount{ 0 };
 		std::uint32_t reforgeOrbsOwned{ 0 };
 		std::uint32_t standardReforgeCost{ 0 };

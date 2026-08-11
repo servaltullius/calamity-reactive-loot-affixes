@@ -83,6 +83,66 @@ function normalizeReforgeLockCandidates(raw) {
   return candidates;
 }
 
+function normalizeRuneInventorySnapshot(data) {
+  if (data?.runeInventoryKnown !== true || !Array.isArray(data?.runeInventory)) {
+    return {
+      known: false,
+      ownedByToken: new Map(),
+      signature: "unknown"
+    };
+  }
+
+  const ownedByToken = new Map();
+  for (const entry of data.runeInventory) {
+    const runeToken = normalizePositiveUint64DecimalString(entry?.runeToken);
+    const owned = entry?.owned;
+    if (
+      !runeToken ||
+      typeof owned !== "number" ||
+      !Number.isSafeInteger(owned) ||
+      owned < 0 ||
+      ownedByToken.has(runeToken)
+    ) {
+      return {
+        known: false,
+        ownedByToken: new Map(),
+        signature: "unknown"
+      };
+    }
+    ownedByToken.set(runeToken, owned);
+  }
+
+  const sortedEntries = Array.from(ownedByToken.entries()).sort(
+    ([left], [right]) => left.localeCompare(right)
+  );
+  return {
+    known: true,
+    ownedByToken,
+    signature: JSON.stringify(sortedEntries)
+  };
+}
+
+function applyRuneInventorySnapshot(data) {
+  const next = normalizeRuneInventorySnapshot(data);
+  const changed = next.known !== runeInventoryKnownState ||
+    next.signature !== runeInventorySignatureState;
+  if (!changed) {
+    return false;
+  }
+
+  runeInventoryKnownState = next.known;
+  runeInventorySignatureState = next.signature;
+  runeInventoryOwnedByToken = next.ownedByToken;
+  if (!runeInventoryKnownState) {
+    recipeMaterialFilter = "all";
+  }
+  updateRecipeFilterControls();
+  // This is dynamic inventory state. Keep the static recipe DOM and search
+  // caches intact; renderRecipeItems updates existing material badge nodes.
+  schedulePanelRender(panelRenderSection.recipeItems);
+  return true;
+}
+
 function setInventoryItems(raw) {
   const prevSelectedItemName = selectedItemNameState;
   const prevSelectedBaseKey = resolveSelectedRunewordBaseKey();
@@ -117,7 +177,7 @@ function setInventoryItems(raw) {
 }
 
 function setRecipeItems(raw) {
-  const nextItems = parseInteropArrayPayload(raw);
+  const nextItems = normalizeRecipeCatalogItems(parseInteropArrayPayload(raw));
   const nextCatalogSignature = buildRecipeCatalogSignature(nextItems);
   const catalogChanged = nextCatalogSignature !== recipeCatalogSignatureState;
   const nextConfirmedToken = resolveConfirmedRecipeToken(nextItems);
@@ -141,6 +201,7 @@ function setRecipeItems(raw) {
 function setRunewordPanelState(raw) {
   const data = parseInteropObjectPayload(raw) || {};
   const ownedRaw = Number(data.reforgeOrbsOwned);
+  applyRuneInventorySnapshot(data);
   equippedBuildState = normalizeEquippedBuildState(data.equippedBuild);
 
   runewordPanelState = {
