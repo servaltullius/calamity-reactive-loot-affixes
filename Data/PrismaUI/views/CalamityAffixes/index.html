@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="styles/panel.css" />
     <link rel="stylesheet" href="styles/build-summary.css" />
     <link rel="stylesheet" href="styles/runeword.css" />
+    <link rel="stylesheet" href="styles/resource-dashboard.css" />
     <link rel="stylesheet" href="styles/responsive.css" />
   </head>
   <body>
@@ -105,6 +106,49 @@
           </button>
         </div>
 
+        <div id="runewordBaseStep" class="cpStepCard rwBaseRail active wbDock">
+          <div class="wbDockSummary">
+            <div class="cpStepHeader">
+              <div class="cpStepIndex">1</div>
+              <div>
+                <div id="runewordBaseStepTitle" class="cpStepTitle">Base Selection / 베이스 선택</div>
+                <div id="workingBaseName" class="wbDockName">No working base selected / 선택된 작업 베이스 없음</div>
+                <div id="workingBaseMeta" class="wbDockMeta">Choose one compatible equipped item. / 호환 착용 장비 하나를 선택하세요.</div>
+                <span id="selectedItemLabel" class="wbAssistiveLabel">Current Base / 현재 베이스</span>
+                <span id="selectedItemName" class="wbAssistiveLabel">No base selected / 선택된 베이스 없음</span>
+                <span id="selectedItemSource" class="wbAssistiveLabel">Equipped only / 착용 장비 전용</span>
+              </div>
+            </div>
+            <div id="runewordBaseChooserDetails" class="rwRailDetails rwRailDetailsStatic wbChooserDetails">
+              <details id="workingBaseDetails" class="wbChooserDisclosure">
+                <summary
+                  id="runewordBaseChooserSummary"
+                  class="rwRailSummary rwRailSummaryStatic"
+                  aria-haspopup="listbox"
+                  aria-controls="inventoryBaseList"
+                  aria-expanded="false">
+                  Change Base / 베이스 변경
+                </summary>
+                <div class="rwRailBody wbChooserOverlay">
+                  <div class="cpSectionSubtle" id="runewordBaseListTitle">Compatible Equipped Bases / 호환 착용 베이스</div>
+                  <div
+                    id="inventoryBaseList"
+                    class="cpList rwBaseQuickList wbBaseList"
+                    role="listbox"
+                    aria-label="Equipped runeword bases / 착용 룬워드 베이스"
+                  ></div>
+                  <div class="cpContextMeta" id="runewordBaseListHint">
+                    Select one equipped item as the shared working base. / 모든 탭에서 사용할 착용 베이스 하나를 선택하세요.
+                  </div>
+                </div>
+              </details>
+            </div>
+          </div>
+          <div id="runewordBaseStepHint" class="cpStepHint wbDockHint">
+            Pick one compatible equipped item and keep it locked while you compare recipes. / 호환되는 착용 아이템 하나를 고정한 뒤 레시피를 비교하세요.
+          </div>
+        </div>
+
         <div id="mainTabContent" class="cpTabContent">
           <div
             id="mainRunewordPane"
@@ -121,11 +165,6 @@
                 </div>
                 <div class="rwContextSnapshot" aria-label="Runeword context">
                   <div class="rwContextChip">
-                    <div class="rwContextChipLabel" id="selectedItemLabel">Current Base / 현재 베이스</div>
-                    <div class="rwContextChipValue" id="selectedItemName">No base selected / 선택된 베이스 없음</div>
-                    <div class="rwContextChipMeta" id="selectedItemSource">Equipped only / 착용 장비 전용</div>
-                  </div>
-                  <div class="rwContextChip">
                     <div class="rwContextChipLabel" id="runewordContextRecipeLabel">Selected Recipe / 선택 레시피</div>
                     <div class="rwContextChipValue" id="runewordContextRecipeName">No recipe selected / 선택된 레시피 없음</div>
                     <div class="rwContextChipMeta" id="runewordContextRecipeMeta">
@@ -134,37 +173,76 @@
                   </div>
                 </div>
               </div>
-              <div class="rwWorkbench">
-                <div id="runewordBaseStep" class="cpStepCard rwBaseRail active">
-                  <div class="cpStepHeader">
-                    <div class="cpStepIndex">1</div>
-                    <div id="runewordBaseStepTitle" class="cpStepTitle">Base Selection / 베이스 선택</div>
+              <section
+                id="resourceDashboardSection"
+                class="rdSection"
+                aria-labelledby="resourceDashboardTitle"
+                aria-describedby="resourceDashboardLead resourcePityHint"
+                aria-busy="true">
+                <div class="rdHeader">
+                  <div>
+                    <div id="resourceDashboardTitle" class="cpSectionTitle">
+                      Rune Resources &amp; Pity / 룬 자원 및 피티
+                    </div>
+                    <div id="resourceDashboardLead" class="cpContextMeta">
+                      Current crafting resources and ordinary-drop pity streaks. / 현재 제작 자원과 일반 드랍 피티 연속 실패를 표시합니다.
+                    </div>
                   </div>
-                  <div id="runewordBaseStepHint" class="cpStepHint">
-                    Pick one compatible equipped item and keep it locked while you compare recipes. / 호환되는 착용 아이템 하나를 고정한 뒤 레시피를 비교하세요.
+                  <div
+                    id="resourceDashboardSync"
+                    class="rdSync"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true">
+                    Synchronizing / 동기화 중
                   </div>
-                  <div class="cpStepBody">
-                    <div class="rwBaseChooser">
-                      <div id="runewordBaseChooserDetails" class="rwRailDetails rwRailDetailsStatic">
-                        <div id="runewordBaseChooserSummary" class="rwRailSummary rwRailSummaryStatic">
-                          Change Base / 베이스 변경
-                        </div>
-                        <div class="rwRailBody">
-                          <div class="cpSectionSubtle" id="runewordBaseListTitle">Compatible Equipped Bases / 호환 착용 베이스</div>
-                          <div
-                            id="inventoryBaseList"
-                            class="cpList rwBaseQuickList"
-                            role="listbox"
-                            aria-label="Equipped runeword bases / 착용 룬워드 베이스"
-                          ></div>
-                          <div class="cpContextMeta" id="runewordBaseListHint">
-                            Keep this open by default so you can swap the equipped base quickly while comparing recipes. / 비교 중에도 빠르게 베이스를 바꿀 수 있도록 기본 상태에서 열어 둡니다.
-                          </div>
-                        </div>
-                      </div>
+                </div>
+
+                <div class="rdMetricGrid" aria-label="Rune resource summary / 룬 자원 요약">
+                  <div class="rdMetric">
+                    <div id="resourceRuneTotalLabel" class="rdMetricLabel">Rune Fragments / 룬 조각</div>
+                    <div id="resourceRuneTotal" class="rdMetricValue">—</div>
+                    <div id="resourceRuneTotalMeta" class="rdMetricMeta">Total owned / 총 보유량</div>
+                  </div>
+                  <div class="rdMetric">
+                    <div id="resourceRuneKindsLabel" class="rdMetricLabel">Rune Types / 룬 종류</div>
+                    <div id="resourceRuneKinds" class="rdMetricValue">— / —</div>
+                    <div id="resourceRuneKindsMeta" class="rdMetricMeta">Types with at least one / 1개 이상 보유</div>
+                  </div>
+                </div>
+
+                <div class="rdPityGrid">
+                  <div class="rdPityCard">
+                    <div class="rdPityHeader">
+                      <span id="resourceFragmentPityLabel">Rune Fragment Pity / 룬 조각 피티</span>
+                      <strong id="resourceFragmentPityValue">— / —</strong>
+                    </div>
+                    <progress
+                      id="resourceFragmentPityProgress"
+                      class="rdProgress"
+                      max="1"
+                      aria-label="Rune fragment pity is synchronizing / 룬 조각 피티 동기화 중"></progress>
+                    <div id="resourceFragmentPityState" class="rdPityState">
+                      Synchronizing eligible ordinary drop rolls. / 적격 일반 드랍 판정을 동기화 중입니다.
                     </div>
                   </div>
                 </div>
+
+                <div id="resourcePityHint" class="cpContextMeta rdPityHint rdAssistiveText">
+                  Only eligible ordinary drop rolls affect these streaks; unrelated kills and forced rewards do not. At the threshold, the next eligible ordinary drop roll is guaranteed. / 적격 일반 드랍 판정만 연속 실패를 바꾸며, 무관한 처치나 강제 지급은 포함되지 않습니다. 기준치에 도달하면 다음 적격 일반 드랍 판정에서 확정 지급됩니다.
+                </div>
+
+                <details id="resourceRuneDetails" class="rdDetails">
+                  <summary id="resourceRuneDetailsSummary" class="rdDetailsSummary">
+                    Rune Fragment Inventory · Synchronizing / 룬 조각 보유량 · 동기화 중
+                  </summary>
+                  <ul
+                    id="resourceRuneList"
+                    class="rdRuneList"
+                    aria-label="Rune fragment inventory / 룬 조각 보유량"></ul>
+                </details>
+              </section>
+              <div class="rwWorkbench">
                 <div id="runewordRecipeStep" class="cpStepCard rwRecipeExplorer muted">
                   <div class="cpStepHeader">
                     <div class="cpStepIndex">2</div>
@@ -244,16 +322,6 @@
                         Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
                       </div>
 
-                      <details id="runewordBaseAffixDetails" class="rwActionDetails" open>
-                        <summary id="runewordBaseAffixSummary" class="rwActionDetailsSummary">
-                          Selected Base Affixes / 선택 베이스 어픽스
-                        </summary>
-                        <div class="rwActionDetailsBody">
-                          <div class="rwAffixBlock">
-                            <div id="runewordBaseAffixText" class="cpTooltipBox rwAffixBox compact"></div>
-                          </div>
-                        </div>
-                      </details>
                       <details id="runewordActionDetails" class="rwActionDetails" open>
                         <summary id="runewordActionDetailsSummary" class="rwActionDetailsSummary">
                           Selected Recipe Preview / 선택 레시피 미리보기
@@ -266,48 +334,14 @@
                       </details>
                     </div>
                     <div class="rwActionControls">
-                      <div class="rwPrimaryAction">
+                      <div class="rwPrimaryAction rwPrimaryActionGrid">
                         <button
                           id="runewordInsertButton"
                           class="cpButton cpPrimaryButton"
                           data-cmd="runeword.insert">
                           Transmute / 변환
                         </button>
-                      </div>
-                      <div class="rwItemActions">
-                        <div id="runewordItemActionsTitle" class="rwActionSectionLabel">Item Actions / 아이템 작업</div>
-                        <details id="runewordReforgeDetails" class="rwActionDetails rwReforgeDetails">
-                          <summary id="runewordReforgeSummary" class="rwActionDetailsSummary">
-                            Reforge: reroll all · 1 Orb / 재련: 모두 재굴림 · 오브 1개
-                          </summary>
-                          <div class="rwActionDetailsBody rwReforgeDetailsBody">
-                            <div id="runewordReforgeLockHint" class="cpContextMeta rwReforgeLockHint">
-                              Only regular affixes can be locked. A completed runeword is preserved automatically. / 일반 어픽스만 잠글 수 있습니다. 완성된 룬워드는 자동으로 유지됩니다.
-                            </div>
-                            <div
-                              id="runewordReforgeLockList"
-                              class="cpList rwReforgeLockList"
-                              role="listbox"
-                              aria-label="Affix protection for reforge / 재련 어픽스 잠금"
-                            ></div>
-                            <div
-                              id="runewordReforgeCostSummary"
-                              class="cpContextMeta rwReforgeCostSummary"
-                              role="status"
-                              aria-live="polite"
-                              aria-atomic="true"
-                            >Cost: 1 Reforge Orb / 비용: 재련 오브 1개</div>
-                          </div>
-                        </details>
-                        <div class="rwItemActionGrid">
-                          <button
-                            id="runewordReforgeButton"
-                            class="cpButton"
-                            data-cmd="runeword.reforge"
-                            aria-describedby="runewordReforgeLockHint runewordReforgeCostSummary"
-                          >Reforge (1 Orb) / 재련 (오브 1개)</button>
-                          <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Check Status / 상태 확인</button>
-                        </div>
+                        <button id="runewordStatusButton" class="cpButton" data-cmd="runeword.status">Check Status / 상태 확인</button>
                       </div>
                       <details id="runewordCubeDetails" class="rwRailDetails">
                         <summary id="runewordCubeDetailsSummary" class="rwRailSummary">
@@ -319,14 +353,6 @@
                           </div>
                         </div>
                       </details>
-                      <details id="runewordRecoveryDetails" class="cpDangerDetails rwRecoveryDetails">
-                        <summary id="runewordRecoverySummary" class="cpDangerSummary">
-                          Recovery &amp; Reset / 복구 및 초기화
-                        </summary>
-                        <div class="cpGrid cpDangerBody">
-                          <button id="runewordResetButton" class="cpButton cpDangerButton" data-cmd="runeword.reset">Reset Selected Base / 선택 베이스 초기화</button>
-                        </div>
-                      </details>
                     </div>
                   </div>
                 </div>
@@ -336,16 +362,17 @@
 
           <div
             id="mainAffixPane"
-            class="cpTabPane cpMainPane scrollY"
+            class="cpTabPane cpMainPane"
             role="tabpanel"
             aria-labelledby="mainAffixTab"
             hidden>
             <div class="cpAffixPane">
-              <section
-                id="equippedBuildSection"
-                class="cpSection ebSection"
-                aria-labelledby="equippedBuildTitle"
-                aria-describedby="equippedBuildLead equippedBuildChanceHint">
+              <div class="affixBuildColumn">
+                <section
+                  id="equippedBuildSection"
+                  class="cpSection ebSection"
+                  aria-labelledby="equippedBuildTitle"
+                  aria-describedby="equippedBuildLead equippedBuildChanceHint">
                 <div class="ebHeader">
                   <div>
                     <div id="equippedBuildTitle" class="cpSectionTitle">Equipped Build / 장착 빌드</div>
@@ -399,23 +426,113 @@
                 <div id="equippedBuildChanceHint" class="cpContextMeta ebChanceHint" hidden>
                   Shown chance is a condition-qualified roll after current modifiers. ICDs, proc budgets, action preconditions, and Lucky Hit still apply separately. ×N is equipped-copy count, not a guaranteed stack multiplier; duplicate proc entries share one roll, and tiered suffix families apply only the highest tier. Hybrid effects may appear in both their trigger group and Passives without increasing the equipped-slot total. / 표시 확률은 현재 보정 적용 후 조건부 굴림입니다. ICD, 발동 예산, 행동 선행 조건, 행운 적중은 별도로 적용됩니다. ×N은 장착 개수이며 보장된 중첩 배수가 아닙니다. 중복 발동 항목은 한 번만 판정하고, 단계형 접미 계열은 최고 티어만 적용됩니다. 하이브리드 효과는 장착 슬롯 총계를 늘리지 않고 발동 그룹과 패시브 그룹에 함께 표시될 수 있습니다.
                 </div>
-              </section>
-              <div class="cpAffixOverview">
-                <div class="cpContextLabel" id="affixSelectedItemLabel">Selected Item / 선택 아이템</div>
-                <div class="cpContextValue" id="affixSelectedItemName">No item selected / 선택된 아이템 없음</div>
-                <div class="cpContextMeta" id="affixSelectedItemMeta">
-                  Highlight one inventory item to mirror its affix details here. / 인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다.
-                </div>
+                </section>
               </div>
-              <div class="cpSection">
-                <div class="cpSectionTitle" id="panelTooltipTitle">Item Affix Details / 아이템 어픽스 상세</div>
-                <div class="cpAffixLead" id="panelTooltipLead">
-                  Focus one item at a time to read affix text without opening the full runeword flow. / 한 번에 아이템 하나에 집중해서 어픽스 텍스트를 읽을 수 있습니다.
-                </div>
-                <div id="panelTooltipText" class="cpTooltipBox compact"></div>
-                <div class="cpContextMeta" id="panelTooltipHint">
-                  Select an item in inventory to view affixes. / 인벤토리에서 아이템을 선택하면 어픽스를 표시합니다.
-                </div>
+              <div class="affixActionColumn">
+                <section
+                  id="resourceOrbDashboardSection"
+                  class="rdSection rdOrbSection"
+                  aria-label="Reforge resources and pity / 재련 자원 및 피티"
+                  aria-describedby="resourceOrbPityHint"
+                  aria-busy="true">
+                  <div class="rdHeader rdOrbHeader">
+                    <div class="cpSectionTitle">Reforge Resources / 재련 자원</div>
+                  </div>
+                  <div class="rdMetricGrid" aria-label="Reforge resource summary / 재련 자원 요약">
+                    <div class="rdMetric">
+                      <div id="resourceReforgeOrbsLabel" class="rdMetricLabel">Reforge Orbs / 재련 오브</div>
+                      <div id="resourceReforgeOrbs" class="rdMetricValue">—</div>
+                      <div id="resourceReforgeOrbsMeta" class="rdMetricMeta">Current inventory / 현재 보유량</div>
+                    </div>
+                  </div>
+                  <div class="rdPityGrid">
+                    <div class="rdPityCard">
+                      <div class="rdPityHeader">
+                        <span id="resourceOrbPityLabel">Reforge Orb Pity / 재련 오브 피티</span>
+                        <strong id="resourceOrbPityValue">— / —</strong>
+                      </div>
+                      <progress
+                        id="resourceOrbPityProgress"
+                        class="rdProgress"
+                        max="1"
+                        aria-label="Reforge Orb pity is synchronizing / 재련 오브 피티 동기화 중"></progress>
+                      <div id="resourceOrbPityState" class="rdPityState">
+                        Synchronizing eligible ordinary drop rolls. / 적격 일반 드랍 판정을 동기화 중입니다.
+                      </div>
+                    </div>
+                  </div>
+                  <div id="resourceOrbPityHint" class="cpContextMeta rdPityHint rdAssistiveText">
+                    Only eligible ordinary drop rolls affect this streak. At the threshold, the next eligible roll is guaranteed. / 적격 일반 드랍 판정만 연속 실패를 바꿉니다. 기준치에 도달하면 다음 적격 판정에서 확정 지급됩니다.
+                  </div>
+                </section>
+
+                <section class="cpSection affixWorkingActions" aria-labelledby="runewordItemActionsTitle">
+                  <div id="runewordItemActionsTitle" class="cpSectionTitle">Working Base Affixes &amp; Reforge / 작업 베이스 어픽스 및 재련</div>
+                  <details id="runewordBaseAffixDetails" class="rwActionDetails" open>
+                    <summary id="runewordBaseAffixSummary" class="rwActionDetailsSummary">
+                      Selected Base Affixes / 선택 베이스 어픽스
+                    </summary>
+                    <div class="rwActionDetailsBody">
+                      <div class="rwAffixBlock">
+                        <div id="runewordBaseAffixText" class="cpTooltipBox rwAffixBox compact"></div>
+                      </div>
+                    </div>
+                  </details>
+                  <details id="runewordReforgeDetails" class="rwActionDetails rwReforgeDetails">
+                    <summary id="runewordReforgeSummary" class="rwActionDetailsSummary">
+                      Reforge: reroll all · 1 Orb / 재련: 모두 재굴림 · 오브 1개
+                    </summary>
+                    <div class="rwActionDetailsBody rwReforgeDetailsBody">
+                      <div id="runewordReforgeLockHint" class="cpContextMeta rwReforgeLockHint">
+                        Only regular affixes can be locked. A completed runeword is preserved automatically. / 일반 어픽스만 잠글 수 있습니다. 완성된 룬워드는 자동으로 유지됩니다.
+                      </div>
+                      <div
+                        id="runewordReforgeLockList"
+                        class="cpList rwReforgeLockList"
+                        role="listbox"
+                        aria-label="Affix protection for reforge / 재련 어픽스 잠금"
+                      ></div>
+                      <div
+                        id="runewordReforgeCostSummary"
+                        class="cpContextMeta rwReforgeCostSummary"
+                        role="status"
+                        aria-live="polite"
+                        aria-atomic="true"
+                      >Cost: 1 Reforge Orb / 비용: 재련 오브 1개</div>
+                    </div>
+                  </details>
+                  <div class="rwItemActionGrid">
+                    <button
+                      id="runewordReforgeButton"
+                      class="cpButton"
+                      data-cmd="runeword.reforge"
+                      aria-describedby="runewordReforgeLockHint runewordReforgeCostSummary"
+                    >Reforge (1 Orb) / 재련 (오브 1개)</button>
+                  </div>
+                </section>
+
+                <details class="rwActionDetails affixInspectionDetails">
+                  <summary class="rwActionDetailsSummary">Inspect Highlighted Item / 가리킨 아이템 확인</summary>
+                  <div class="rwActionDetailsBody affixInspectionBody">
+                    <div class="cpAffixOverview">
+                      <div class="cpContextLabel" id="affixSelectedItemLabel">Selected Item / 선택 아이템</div>
+                      <div class="cpContextValue" id="affixSelectedItemName">No item selected / 선택된 아이템 없음</div>
+                      <div class="cpContextMeta" id="affixSelectedItemMeta">
+                        Highlight one inventory item to mirror its affix details here. / 인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다.
+                      </div>
+                    </div>
+                    <div class="cpSection">
+                      <div class="cpSectionTitle" id="panelTooltipTitle">Item Affix Details / 아이템 어픽스 상세</div>
+                      <div class="cpAffixLead" id="panelTooltipLead">
+                        Focus one item at a time to read affix text without opening the full runeword flow. / 한 번에 아이템 하나에 집중해서 어픽스 텍스트를 읽을 수 있습니다.
+                      </div>
+                      <div id="panelTooltipText" class="cpTooltipBox compact"></div>
+                      <div class="cpContextMeta" id="panelTooltipHint">
+                        Select an item in inventory to view affixes. / 인벤토리에서 아이템을 선택하면 어픽스를 표시합니다.
+                      </div>
+                    </div>
+                  </div>
+                </details>
               </div>
             </div>
           </div>
@@ -488,6 +605,15 @@
               </div>
             </div>
 
+            <details id="runewordRecoveryDetails" class="cpDangerDetails rwRecoveryDetails">
+              <summary id="runewordRecoverySummary" class="cpDangerSummary">
+                Recovery &amp; Reset / 복구 및 초기화
+              </summary>
+              <div class="cpGrid cpDangerBody">
+                <button id="runewordResetButton" class="cpButton cpDangerButton" data-cmd="runeword.reset">Reset Selected Base / 선택 베이스 초기화</button>
+              </div>
+            </details>
+
             <details id="debugToolsPanel" class="cpDangerDetails">
               <summary id="debugSectionSummary" class="cpDangerSummary">
                 <span id="debugSectionTitle">Debug / 디버그</span>
@@ -529,6 +655,7 @@
     <script src="scripts/recipe-list.js"></script>
     <script src="scripts/runeword.js"></script>
     <script src="scripts/build-summary.js"></script>
+    <script src="scripts/resource-dashboard.js"></script>
     <script src="scripts/interop.js"></script>
     <script src="scripts/commands.js"></script>
     <script src="scripts/bootstrap.js"></script>

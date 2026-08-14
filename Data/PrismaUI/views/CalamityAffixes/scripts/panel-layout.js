@@ -88,13 +88,21 @@ function applyTooltipPlacement() {
 }
 
 function setMainTab(nextTab) {
+  const previousTab = mainTabState;
   const tab =
     nextTab === "affix"
       ? "affix"
       : nextTab === "advanced"
         ? "advanced"
         : "runeword";
+  if (previousTab !== tab) {
+    closeWorkingBaseChooser(false);
+  }
   mainTabState = tab;
+
+  if (previousTab === "advanced" && tab !== "advanced" && runewordResetArmedUntil !== 0) {
+    clearRunewordResetConfirmation();
+  }
 
   const isRuneword = tab === "runeword";
   const isAffix = tab === "affix";
@@ -553,4 +561,3 @@ function endPanelDrag(event) {
   keepPanelInViewport();
   persistPanelLayout();
 }
-

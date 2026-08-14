@@ -41,6 +41,7 @@ namespace CalamityAffixes
 	struct RunewordRuneInventoryEntry
 	{
 		std::uint64_t runeToken{ 0 };
+		std::string runeName{};
 		std::uint32_t owned{ 0 };
 	};
 
@@ -99,9 +100,20 @@ namespace CalamityAffixes
 		// False means the snapshot is unavailable and consumers must not treat
 		// the empty vector as an inventory containing zero fragments.
 		bool runeInventoryKnown{ false };
+		std::uint32_t runeInventoryExpectedCount{ 0 };
 		std::vector<RunewordRuneInventoryEntry> runeInventory{};
 		std::uint32_t regularAffixCount{ 0 };
+		// Counts are authoritative only when their corresponding known flag is
+		// true. This keeps an unavailable snapshot distinct from a real zero.
+		bool reforgeOrbsKnown{ false };
 		std::uint32_t reforgeOrbsOwned{ 0 };
+		bool pityKnown{ false };
+		// A streak equal to its threshold means the next eligible ordinary
+		// currency evaluation is guaranteed. It is not a kill/drop countdown.
+		std::uint32_t runewordFragmentFailStreak{ 0 };
+		std::uint32_t runewordFragmentFailStreakThreshold{ 0 };
+		std::uint32_t reforgeOrbFailStreak{ 0 };
+		std::uint32_t reforgeOrbFailStreakThreshold{ 0 };
 		std::uint32_t standardReforgeCost{ 0 };
 		std::uint32_t lockedReforgeCost{ 0 };
 		std::vector<RunewordReforgeLockCandidate> reforgeLockCandidates{};

@@ -29,6 +29,7 @@ namespace CalamityAffixes
 		for (const auto& entry : a_entries) {
 			payload.push_back({
 				{ "runeToken", std::to_string(entry.runeToken) },
+				{ "runeName", entry.runeName },
 				{ "owned", entry.owned },
 			});
 		}

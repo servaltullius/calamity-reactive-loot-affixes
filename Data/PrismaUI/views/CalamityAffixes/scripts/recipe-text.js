@@ -12,10 +12,42 @@ function resolveSelectedItemContextViewModel() {
   };
 }
 
+function resolveSelectedWorkingBase() {
+  const items = Array.isArray(inventoryItemsState) ? inventoryItemsState : [];
+  const selected = items.find((item) => item && item.selected);
+  const key = typeof selected?.key === "string" ? selected.key.trim() : "";
+  const name = typeof selected?.name === "string" ? selected.name.trim() : "";
+  return key && name ? { key, name } : null;
+}
+
+function renderWorkingBaseContext() {
+  if (!workingBaseName || !workingBaseMeta) {
+    return;
+  }
+
+  const selected = resolveSelectedWorkingBase();
+  workingBaseName.textContent = selected
+    ? selected.name
+    : t("No working base selected", "선택된 작업 베이스 없음");
+  workingBaseMeta.textContent = selected
+    ? t(
+        "This equipped item is the authoritative target for runewords, reforge, and reset.",
+        "이 착용 장비가 룬워드, 재련, 초기화의 실제 작업 대상입니다."
+      )
+    : t(
+        "Choose one compatible equipped item before using item-changing actions.",
+        "아이템을 변경하는 기능을 사용하기 전에 호환 착용 장비를 선택하세요."
+      );
+}
+
 function renderSelectedItemContext() {
   const viewModel = resolveSelectedItemContextViewModel();
-  selectedItemName.textContent = viewModel.name;
-  selectedItemSource.textContent = viewModel.sourceText;
+  if (selectedItemName) {
+    selectedItemName.textContent = viewModel.name;
+  }
+  if (selectedItemSource) {
+    selectedItemSource.textContent = viewModel.sourceText;
+  }
   if (affixSelectedItemName) {
     affixSelectedItemName.textContent = viewModel.hasSelection
       ? viewModel.name
@@ -24,12 +56,12 @@ function renderSelectedItemContext() {
   if (affixSelectedItemMeta) {
     affixSelectedItemMeta.textContent = viewModel.hasSelection
       ? t(
-          "This mirrors the currently highlighted inventory item.",
-          "현재 인벤토리에서 강조된 아이템을 그대로 보여줍니다."
+          "Read-only inspection of the currently highlighted inventory item; item actions still use the working base above.",
+          "현재 인벤토리에서 강조된 아이템을 읽기 전용으로 보여주며, 아이템 작업은 위 작업 베이스를 사용합니다."
         )
       : t(
-          "Highlight one inventory item to mirror its affix details here.",
-          "인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다."
+          "Highlight an inventory item to inspect it here. This does not change the working base.",
+          "인벤토리 아이템을 가리키면 여기에서 확인할 수 있으며 작업 베이스는 바뀌지 않습니다."
         );
   }
 }
@@ -55,6 +87,7 @@ function resolveInventoryListViewModel() {
 }
 
 function renderInventoryItems() {
+  renderWorkingBaseContext();
   const focusedBaseKey = inventoryBaseList.contains(document.activeElement)
     ? document.activeElement?.dataset?.baseKey || ""
     : "";
@@ -516,4 +549,3 @@ function resolveRecipeBaseBadge(item) {
       return { className: "mixed", text: t("Base: Mixed", "베이스: 혼합") };
   }
 }
-

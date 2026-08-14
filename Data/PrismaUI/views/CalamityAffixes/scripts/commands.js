@@ -1,3 +1,67 @@
+function focusWorkingBaseChooserOption() {
+  if (!workingBaseDetails?.open || !inventoryBaseList) {
+    return;
+  }
+
+  const option = inventoryBaseList.querySelector('[role="option"][aria-selected="true"]') ||
+    inventoryBaseList.querySelector('[role="option"]');
+  if (!option) {
+    runewordBaseChooserSummary?.focus();
+    return;
+  }
+
+  option.focus({ preventScroll: true });
+}
+
+function closeWorkingBaseChooser(restoreFocus = false) {
+  if (!workingBaseDetails?.open) {
+    return false;
+  }
+
+  workingBaseDetails.open = false;
+  runewordBaseChooserSummary?.setAttribute("aria-expanded", "false");
+  if (restoreFocus) {
+    runewordBaseChooserSummary?.focus();
+  }
+  return true;
+}
+
+function handleWorkingBaseChooserToggle() {
+  if (!workingBaseDetails || !runewordBaseChooserSummary) {
+    return;
+  }
+
+  runewordBaseChooserSummary.setAttribute(
+    "aria-expanded",
+    workingBaseDetails.open ? "true" : "false"
+  );
+  if (workingBaseDetails.open) {
+    requestAnimationFrame(focusWorkingBaseChooserOption);
+  }
+}
+
+function handleWorkingBaseChooserFocusOut() {
+  setTimeout(() => {
+    if (
+      workingBaseDetails?.open &&
+      document.activeElement &&
+      !workingBaseDetails.contains(document.activeElement)
+    ) {
+      closeWorkingBaseChooser(false);
+    }
+  }, 0);
+}
+
+function handleWorkingBaseOutsidePointerDown(event) {
+  if (
+    workingBaseDetails?.open &&
+    event.target &&
+    !workingBaseDetails.contains(event.target)
+  ) {
+    closeWorkingBaseChooser(false);
+  }
+}
+
 function sendCommand(command) {
   if (typeof window.calamityCommand === "function") {
     window.calamityCommand(command);
@@ -20,6 +84,9 @@ function handlePanelKeydown(event) {
   if (isEscape) {
     event.preventDefault();
     event.stopPropagation();
+    if (closeWorkingBaseChooser(true)) {
+      return;
+    }
     sendCommand("ui.close");
   }
 }
@@ -206,7 +273,12 @@ function dispatchPanelCommand(button) {
     invalidateRunewordAffixPreview(resolvePreviewPendingStateForCommand(command));
   }
 
+  const selectedWorkingBaseOption =
+    workingBaseDetails?.open && inventoryBaseList?.contains(button);
   sendCommand(command);
+  if (selectedWorkingBaseOption) {
+    closeWorkingBaseChooser(true);
+  }
   return true;
 }
 

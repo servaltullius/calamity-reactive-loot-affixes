@@ -629,7 +629,7 @@ function renderRunewordPanelState() {
     addCell(
       hasBase ? "base" : "base empty",
       t("Base", "베이스"),
-      hasBase ? selectedItemNameState || t("Selected", "선택됨") : t("None", "없음"),
+      hasBase ? resolveSelectedWorkingBase()?.name || t("Selected", "선택됨") : t("None", "없음"),
       hasBase ? t("Equipped", "착용") : ""
     );
 

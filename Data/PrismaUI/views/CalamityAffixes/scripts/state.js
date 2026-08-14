@@ -19,6 +19,20 @@ let recipeMaterialFilter = "all";
 let runeInventoryKnownState = false;
 let runeInventorySignatureState = "unknown";
 let runeInventoryOwnedByToken = new Map();
+let resourceDashboardSignatureState = "";
+let resourceDashboardState = {
+  received: false,
+  runeInventoryKnown: false,
+  runeInventoryExpectedCount: 0,
+  runes: [],
+  reforgeOrbsKnown: false,
+  reforgeOrbsOwned: 0,
+  pityKnown: false,
+  runewordFragmentFailStreak: 0,
+  runewordFragmentFailStreakThreshold: 0,
+  reforgeOrbFailStreak: 0,
+  reforgeOrbFailStreakThreshold: 0
+};
 let recipeCatalogSignatureState = "";
 let recipeCatalogDomDirty = true;
 let confirmedRecipeTokenState = "";
@@ -79,6 +93,7 @@ const panelRenderSection = Object.freeze({
   inventoryItems: "inventoryItems",
   recipeItems: "recipeItems",
   runewordPanelState: "runewordPanelState",
+  resourceDashboard: "resourceDashboard",
   equippedBuild: "equippedBuild",
   tooltipLayout: "tooltipLayout",
   tooltipPlacement: "tooltipPlacement",
@@ -116,6 +131,7 @@ const panelRenderState = {
     inventoryItems: false,
     recipeItems: false,
     runewordPanelState: false,
+    resourceDashboard: false,
     equippedBuild: false,
     tooltipLayout: false,
     tooltipPlacement: false,
@@ -144,6 +160,9 @@ function flushPanelRender() {
   }
   if (next.runewordPanelState) {
     renderRunewordPanelState();
+  }
+  if (next.resourceDashboard) {
+    renderResourceDashboard();
   }
   if (next.equippedBuild) {
     renderEquippedBuildSummary();

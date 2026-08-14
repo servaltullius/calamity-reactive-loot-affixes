@@ -84,7 +84,15 @@ function normalizeReforgeLockCandidates(raw) {
 }
 
 function normalizeRuneInventorySnapshot(data) {
-  if (data?.runeInventoryKnown !== true || !Array.isArray(data?.runeInventory)) {
+  const expectedCount = data?.runeInventoryExpectedCount;
+  if (
+    data?.runeInventoryKnown !== true ||
+    !Array.isArray(data?.runeInventory) ||
+    typeof expectedCount !== "number" ||
+    !Number.isSafeInteger(expectedCount) ||
+    expectedCount <= 0 ||
+    data.runeInventory.length !== expectedCount
+  ) {
     return {
       known: false,
       ownedByToken: new Map(),
@@ -202,6 +210,7 @@ function setRunewordPanelState(raw) {
   const data = parseInteropObjectPayload(raw) || {};
   const ownedRaw = Number(data.reforgeOrbsOwned);
   applyRuneInventorySnapshot(data);
+  applyResourceDashboardSnapshot(data);
   equippedBuildState = normalizeEquippedBuildState(data.equippedBuild);
 
   runewordPanelState = {
@@ -293,6 +302,7 @@ function applyControlPanelOpenState(nextOpen) {
 
   controlPanelOpen = nextOpen;
   if (!controlPanelOpen) {
+    closeWorkingBaseChooser(false);
     feedback.textContent = "";
     endPanelDrag();
     persistPanelLayout();

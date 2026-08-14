@@ -25,16 +25,32 @@
   grid-template-columns: 1fr;
 }
 
+#controlPanel[data-layout="medium"] #mainRunewordPane,
+#controlPanel[data-layout="medium"] #mainAffixPane,
+#controlPanel[data-layout="narrow"] #mainRunewordPane,
+#controlPanel[data-layout="narrow"] #mainAffixPane {
+  overflow-y: auto;
+  padding-right: calc(4px * var(--panel-ui-scale));
+}
+
+#controlPanel[data-layout="medium"] .rwWorkspace,
+#controlPanel[data-layout="narrow"] .rwWorkspace {
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+}
+
 #controlPanel[data-layout="medium"] .rwWorkbench {
+  flex: 0 0 auto;
   width: 100%;
   margin: 0;
-  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-  grid-template-rows: minmax(420px, 1fr) auto;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+  grid-template-rows: minmax(520px, auto);
   justify-content: stretch;
 }
 
 #controlPanel[data-layout="medium"] .rwActionInspector {
-  grid-column: 1 / -1;
+  grid-column: auto;
 }
 
 #controlPanel[data-layout="medium"] .rwCubeGrid {
@@ -44,6 +60,50 @@
 #controlPanel[data-layout="medium"] .rwRecipeSummary,
 #controlPanel[data-layout="narrow"] .rwRecipeSummary {
   -webkit-line-clamp: 3;
+}
+
+#controlPanel[data-layout="medium"] .rwActionInspector .cpStepBody,
+#controlPanel[data-layout="medium"] .rwActionSummary,
+#controlPanel[data-layout="narrow"] .rwActionInspector .cpStepBody,
+#controlPanel[data-layout="narrow"] .rwActionSummary {
+  overflow: visible;
+}
+
+#controlPanel[data-layout="medium"] .cpAffixPane,
+#controlPanel[data-layout="narrow"] .cpAffixPane {
+  height: auto;
+  grid-template-columns: 1fr;
+  overflow: visible;
+}
+
+#controlPanel[data-layout="medium"] .affixBuildColumn,
+#controlPanel[data-layout="medium"] .affixActionColumn,
+#controlPanel[data-layout="narrow"] .affixBuildColumn,
+#controlPanel[data-layout="narrow"] .affixActionColumn {
+  overflow: visible;
+}
+
+#controlPanel[data-layout="medium"] .ebSection,
+#controlPanel[data-layout="narrow"] .ebSection {
+  height: auto;
+  overflow: visible;
+}
+
+#controlPanel[data-layout="medium"] .ebGroupGrid,
+#controlPanel[data-layout="narrow"] .ebGroupGrid {
+  overflow: visible;
+}
+
+#controlPanel[data-layout="medium"] #resourceDashboardSection {
+  grid-template-columns: minmax(170px, 0.75fr) minmax(250px, 1.15fr);
+}
+
+#controlPanel[data-layout="medium"] #resourceDashboardSection .rdDetails {
+  justify-self: stretch;
+}
+
+#controlPanel[data-layout="medium"] #resourceDashboardSection .rdDetailsSummary {
+  width: 100%;
 }
 
 #controlPanel[data-layout="narrow"] .rwContextSnapshot,
@@ -66,6 +126,75 @@
 
 #controlPanel[data-layout="narrow"] .rwItemActionGrid {
   grid-template-columns: 1fr;
+}
+
+#controlPanel[data-layout="narrow"] .rwPrimaryActionGrid {
+  grid-template-columns: 1fr;
+}
+
+#controlPanel[data-layout="narrow"] .wbDockSummary {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: calc(6px * var(--panel-ui-scale));
+}
+
+#controlPanel[data-layout="narrow"] .wbDockMeta {
+  display: none;
+}
+
+#controlPanel[data-layout="narrow"] .wbChooserDetails .rwRailSummaryStatic {
+  min-width: 0;
+  padding-inline: calc(8px * var(--panel-ui-scale));
+}
+
+#controlPanel[data-layout="medium"] .wbChooserOverlay {
+  width: min(calc(680px * var(--panel-ui-scale)), calc(100vw - 64px));
+  max-height: none;
+  padding: calc(12px * var(--panel-ui-scale));
+}
+
+#controlPanel[data-layout="medium"] .wbBaseList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-height: none;
+  min-height: 0;
+}
+
+#controlPanel[data-layout="medium"] .wbBaseList .cpListItem {
+  min-height: max(52px, calc(58px * var(--panel-ui-scale)));
+}
+
+#controlPanel[data-layout="narrow"] .wbChooserOverlay {
+  left: calc(8px * var(--panel-ui-scale));
+  right: calc(8px * var(--panel-ui-scale));
+  width: auto;
+  max-height: none;
+  padding: calc(10px * var(--panel-ui-scale));
+}
+
+#controlPanel[data-layout="narrow"] .wbBaseList {
+  grid-template-columns: 1fr;
+  max-height: none;
+  min-height: 0;
+}
+
+#controlPanel[data-layout="narrow"] .wbBaseList .cpListItem {
+  font-size: max(14px, calc(14px * var(--panel-ui-scale)));
+  min-height: max(52px, calc(56px * var(--panel-ui-scale)));
+}
+
+#controlPanel[data-layout="narrow"] #resourceDashboardSection {
+  grid-template-columns: 1fr;
+}
+
+#controlPanel[data-layout="narrow"] #resourceDashboardSection .rdDetailsSummary {
+  width: 100%;
+}
+
+#controlPanel[data-layout="narrow"] .rdOrbSection {
+  grid-template-columns: minmax(100px, 0.7fr) minmax(0, 1.3fr);
+}
+
+#controlPanel[data-layout="narrow"] .rdOrbSection .rdHeader {
+  grid-column: 1 / -1;
 }
 
 @media (prefers-reduced-motion: reduce) {

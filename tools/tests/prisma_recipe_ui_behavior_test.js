@@ -395,4 +395,68 @@ const runListboxNavigationBehavior = new Function(
 );
 runListboxNavigationBehavior(assert);
 
+const workingBaseChooserLifecycleSource = between(
+  "\nfunction focusWorkingBaseChooserOption()",
+  "\nfunction sendCommand(command)"
+);
+const panelKeydownSource = between(
+  "\nfunction handlePanelKeydown(event)",
+  "\nfunction shouldInvalidatePreviewForCommand(command)"
+);
+const runWorkingBaseChooserBehavior = new Function(
+  "assert",
+  `
+    "use strict";
+    let focusCount = 0;
+    let expanded = "true";
+    const workingBaseDetails = {
+      open: true,
+      contains() { return false; }
+    };
+    const runewordBaseChooserSummary = {
+      focus() { focusCount += 1; },
+      setAttribute(name, value) {
+        if (name === "aria-expanded") expanded = value;
+      }
+    };
+    const inventoryBaseList = {};
+    const document = { activeElement: null };
+    function requestAnimationFrame() {}
+    function setTimeout() {}
+    ${workingBaseChooserLifecycleSource}
+
+    assert.strictEqual(closeWorkingBaseChooser(true), true);
+    assert.strictEqual(workingBaseDetails.open, false);
+    assert.strictEqual(expanded, "false");
+    assert.strictEqual(focusCount, 1);
+    assert.strictEqual(closeWorkingBaseChooser(true), false);
+
+    let controlPanelOpen = true;
+    const sent = [];
+    function sendCommand(command) { sent.push(command); }
+    ${panelKeydownSource}
+
+    let prevented = 0;
+    let stopped = 0;
+    const escapeEvent = {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      preventDefault() { prevented += 1; },
+      stopPropagation() { stopped += 1; }
+    };
+    workingBaseDetails.open = true;
+    handlePanelKeydown(escapeEvent);
+    assert.strictEqual(workingBaseDetails.open, false);
+    assert.deepStrictEqual(sent, []);
+    assert.strictEqual(focusCount, 2);
+
+    handlePanelKeydown(escapeEvent);
+    assert.deepStrictEqual(sent, ["ui.close"]);
+    assert.strictEqual(prevented, 2);
+    assert.strictEqual(stopped, 2);
+  `
+);
+runWorkingBaseChooserBehavior(assert);
+
 console.log("Prisma recipe UI behavior: OK");

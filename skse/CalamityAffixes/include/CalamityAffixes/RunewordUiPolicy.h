@@ -97,12 +97,26 @@ namespace CalamityAffixes
 		return normalized;
 	}
 
+	[[nodiscard]] inline std::vector<std::uint64_t> BuildRunewordRuneDashboardTokens(
+		std::span<const std::uint64_t> a_catalogTokens,
+		std::span<const std::uint64_t> a_materialFilterTokens)
+	{
+		std::vector<std::uint64_t> combined;
+		combined.reserve(a_catalogTokens.size() + a_materialFilterTokens.size());
+		combined.insert(combined.end(), a_catalogTokens.begin(), a_catalogTokens.end());
+		combined.insert(combined.end(), a_materialFilterTokens.begin(), a_materialFilterTokens.end());
+		return NormalizeRunewordRuneInventoryTokens(combined);
+	}
+
 	template <class ResolveOwned>
 	[[nodiscard]] std::optional<std::vector<RunewordRuneInventoryEntry>> BuildRunewordRuneInventorySnapshot(
 		std::span<const std::uint64_t> a_referencedTokens,
 		ResolveOwned&& a_resolveOwned)
 	{
 		const auto inventoryTokens = NormalizeRunewordRuneInventoryTokens(a_referencedTokens);
+		if (inventoryTokens.empty()) {
+			return std::nullopt;
+		}
 		std::vector<RunewordRuneInventoryEntry> snapshot;
 		snapshot.reserve(inventoryTokens.size());
 		for (const auto runeToken : inventoryTokens) {
@@ -113,5 +127,20 @@ namespace CalamityAffixes
 			snapshot.push_back({ .runeToken = runeToken, .owned = *owned });
 		}
 		return snapshot;
+	}
+
+	template <class ResolveName>
+	[[nodiscard]] bool PopulateRunewordRuneInventoryNames(
+		std::span<RunewordRuneInventoryEntry> a_entries,
+		ResolveName&& a_resolveName)
+	{
+		for (auto& entry : a_entries) {
+			const std::optional<std::string_view> name = a_resolveName(entry.runeToken);
+			if (!name || name->empty()) {
+				return false;
+			}
+			entry.runeName.assign(*name);
+		}
+		return true;
 	}
 }

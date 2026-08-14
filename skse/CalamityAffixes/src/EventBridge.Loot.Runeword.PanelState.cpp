@@ -232,11 +232,17 @@ namespace CalamityAffixes
 		if (!_configLoaded) {
 			return panelState;
 		}
+		panelState.pityKnown = true;
+		panelState.runewordFragmentFailStreak = _lootState.runewordFragmentFailStreak;
+		panelState.runewordFragmentFailStreakThreshold = kRunewordFragmentPityFailThreshold;
+		panelState.reforgeOrbFailStreak = _lootState.reforgeOrbFailStreak;
+		panelState.reforgeOrbFailStreakThreshold = kReforgeOrbPityFailThreshold;
 
 		SanitizeRunewordState();
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (player) {
 			if (auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")) {
+				panelState.reforgeOrbsKnown = true;
 				panelState.reforgeOrbsOwned = static_cast<std::uint32_t>(
 					std::max(0, player->GetItemCount(orb)));
 			}
@@ -251,9 +257,14 @@ namespace CalamityAffixes
 					recipe.runeTokens.begin(),
 					recipe.runeTokens.end());
 			}
+			const auto dashboardRuneTokens = BuildRunewordRuneDashboardTokens(
+				_runewordState.runeTokenPool,
+				referencedRuneTokens);
+			panelState.runeInventoryExpectedCount = static_cast<std::uint32_t>(
+				std::min<std::size_t>(dashboardRuneTokens.size(), std::numeric_limits<std::uint32_t>::max()));
 
-			const auto runeInventory = BuildRunewordRuneInventorySnapshot(
-				referencedRuneTokens,
+			auto runeInventory = BuildRunewordRuneInventorySnapshot(
+				dashboardRuneTokens,
 				[&](std::uint64_t a_runeToken) -> std::optional<std::uint32_t> {
 					auto* fragment = LookupRunewordFragmentItem(_runewordState.runeNameByToken, a_runeToken);
 					if (!fragment) {
@@ -261,7 +272,15 @@ namespace CalamityAffixes
 					}
 					return static_cast<std::uint32_t>(std::max(0, player->GetItemCount(fragment)));
 				});
-			if (runeInventory) {
+			if (runeInventory && PopulateRunewordRuneInventoryNames(
+					*runeInventory,
+					[&](std::uint64_t a_runeToken) -> std::optional<std::string_view> {
+						const auto nameIt = _runewordState.runeNameByToken.find(a_runeToken);
+						if (nameIt == _runewordState.runeNameByToken.end()) {
+							return std::nullopt;
+						}
+						return nameIt->second;
+					})) {
 				panelState.runeInventoryKnown = true;
 				panelState.runeInventory = std::move(*runeInventory);
 			}

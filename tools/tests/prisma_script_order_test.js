@@ -150,6 +150,168 @@ assert.strictEqual(
   compatibilityPayload.baseCompatibilityMessageKo
 );
 
+// The resource dashboard is independent from base/recipe selection and uses a
+// complete named rune snapshot, explicit orb availability, and serialized pity
+// counters. Zero-owned rune types remain visible.
+const resourceRunes = Array.from({ length: 33 }, (_, index) => ({
+  runeToken: String(1000 + index),
+  runeName: `Rune ${String(33 - index).padStart(2, "0")}`,
+  owned: index % 3 === 0 ? 0 : index
+}));
+const resourceRuneTotalExpected = resourceRunes.reduce((sum, rune) => sum + rune.owned, 0);
+const resourceRuneKindsExpected = resourceRunes.filter((rune) => rune.owned > 0).length;
+const resourcePayload = {
+  runeInventoryKnown: true,
+  runeInventoryExpectedCount: 33,
+  runeInventory: resourceRunes,
+  reforgeOrbsKnown: true,
+  reforgeOrbsOwned: 7,
+  pityKnown: true,
+  runewordFragmentFailStreak: 99,
+  runewordFragmentFailStreakThreshold: 99,
+  reforgeOrbFailStreak: 12,
+  reforgeOrbFailStreakThreshold: 39
+};
+
+sandbox.setRunewordPanelState(JSON.stringify(resourcePayload));
+sandbox.renderResourceDashboard();
+const storedResourceState = new vm.Script(
+  "resourceDashboardState",
+  { filename: "resource-dashboard-state-contract-test.js" }
+).runInContext(context);
+assert.strictEqual(storedResourceState.received, true);
+assert.strictEqual(storedResourceState.runeInventoryKnown, true);
+assert.strictEqual(storedResourceState.runes.length, 33);
+assert.strictEqual(storedResourceState.reforgeOrbsKnown, true);
+assert.strictEqual(storedResourceState.reforgeOrbsOwned, 7);
+assert.strictEqual(storedResourceState.pityKnown, true);
+assert.strictEqual(storedResourceState.runewordFragmentFailStreakThreshold, 99);
+assert.strictEqual(element("resourceDashboardSection").getAttribute("aria-busy"), "false");
+assert.strictEqual(element("resourceOrbDashboardSection").getAttribute("aria-busy"), "false");
+assert.strictEqual(element("resourceRuneTotal").textContent, String(resourceRuneTotalExpected));
+assert.strictEqual(
+  element("resourceRuneKinds").textContent,
+  `${resourceRuneKindsExpected} / 33`
+);
+assert.strictEqual(element("resourceReforgeOrbs").textContent, "7");
+assert.strictEqual(element("resourceRuneList").children.length, 33);
+assert.strictEqual(
+  element("resourceRuneList").children[0].children[0].textContent,
+  "Rune 01",
+  "rune inventory is not sorted by display name"
+);
+assert(
+  element("resourceRuneList").children.some((item) => item.className.includes("empty")),
+  "zero-owned rune types were omitted"
+);
+assert.strictEqual(element("resourceFragmentPityValue").textContent, "99 / 99");
+assert.strictEqual(element("resourceFragmentPityProgress").getAttribute("max"), "99");
+assert.strictEqual(element("resourceFragmentPityProgress").getAttribute("value"), "99");
+assert(
+  element("resourceFragmentPityProgress").getAttribute("aria-valuetext").includes(
+    "the next eligible ordinary drop roll is guaranteed"
+  )
+);
+assert(
+  element("resourceFragmentPityState").textContent.includes(
+    "Next eligible ordinary drop roll: guaranteed"
+  )
+);
+assert.strictEqual(element("resourceOrbPityValue").textContent, "12 / 39");
+assert.strictEqual(element("resourceOrbPityProgress").getAttribute("max"), "39");
+assert.strictEqual(element("resourceOrbPityProgress").getAttribute("value"), "12");
+assert.strictEqual(
+  sandbox.applyResourceDashboardSnapshot(resourcePayload),
+  false,
+  "an unchanged resource snapshot requested another dashboard render"
+);
+
+// The shared working-base picker is authoritative for mutating actions. A
+// separately inspected inventory item must not replace that target label.
+const workingBaseKey = "9001";
+sandbox.setInventoryItems(JSON.stringify([
+  { key: workingBaseKey, name: "Steel Sword · Working Base", selected: true },
+  { key: "9002", name: "Leather Armor", selected: false }
+]));
+sandbox.renderInventoryItems();
+assert.strictEqual(element("workingBaseName").textContent, "Steel Sword · Working Base");
+assert(
+  element("workingBaseMeta").textContent.includes("authoritative target"),
+  "working-base mutation scope is not explicit"
+);
+sandbox.setSelectedItemName("Hovered Iron Helmet");
+sandbox.renderSelectedItemContext();
+assert.strictEqual(
+  element("workingBaseName").textContent,
+  "Steel Sword · Working Base",
+  "hovered inventory item replaced the authoritative working-base label"
+);
+assert.strictEqual(element("affixSelectedItemName").textContent, "Hovered Iron Helmet");
+
+// The equipped-base collector is intentionally unbounded. The picker must
+// render every supplied candidate instead of relying on a scroll-window slice.
+const manyWorkingBases = Array.from({ length: 34 }, (_, index) => ({
+  key: String(9100 + index),
+  name: `Equipped Base ${String(index + 1).padStart(2, "0")}`,
+  selected: index === 33
+}));
+sandbox.setInventoryItems(JSON.stringify(manyWorkingBases));
+sandbox.renderInventoryItems();
+assert.strictEqual(
+  element("inventoryBaseList").children.length,
+  34,
+  "the working-base picker omitted equipped candidates"
+);
+assert.strictEqual(
+  element("inventoryBaseList").children[33].dataset.baseKey,
+  manyWorkingBases[33].key,
+  "the final equipped candidate was not rendered"
+);
+assert.strictEqual(
+  element("inventoryBaseList").children[33].getAttribute("aria-selected"),
+  "true",
+  "selection state was lost at the end of the expanded candidate list"
+);
+
+// Invalid or incomplete dynamic data fails closed after receipt: it is
+// unavailable rather than permanently presented as startup synchronization or
+// fabricated zeroes. A streak past its threshold invalidates the pity pair.
+sandbox.setRunewordPanelState(JSON.stringify({
+  ...resourcePayload,
+  runeInventory: resourceRunes.map((rune, index) => index === 0
+    ? { runeToken: rune.runeToken, owned: rune.owned }
+    : rune),
+  runewordFragmentFailStreak: 100
+}));
+sandbox.renderResourceDashboard();
+assert.strictEqual(
+  new vm.Script("resourceDashboardState.runeInventoryKnown", {
+    filename: "resource-dashboard-missing-name-test.js"
+  }).runInContext(context),
+  false
+);
+assert.strictEqual(
+  new vm.Script("resourceDashboardState.pityKnown", {
+    filename: "resource-dashboard-invalid-pity-test.js"
+  }).runInContext(context),
+  false
+);
+assert.strictEqual(element("resourceDashboardSection").getAttribute("aria-busy"), "false");
+assert(element("resourceDashboardSync").textContent.includes("Partially unavailable"));
+assert.strictEqual(element("resourceRuneTotal").textContent, "—");
+assert.strictEqual(element("resourceRuneKinds").textContent, "— / —");
+assert.strictEqual(element("resourceFragmentPityValue").textContent, "— / —");
+assert.strictEqual(element("resourceFragmentPityProgress").getAttribute("aria-busy"), "false");
+assert(
+  element("resourceFragmentPityState").textContent.includes("unavailable")
+);
+assert(
+  element("resourceRuneDetailsSummary").textContent.includes("Unavailable")
+);
+
+// Restore the fixture used by the following build/runeword tests.
+sandbox.setRunewordPanelState(JSON.stringify(compatibilityPayload));
+
 const buildSummaryPayload = {
   ready: true,
   runtimeEnabled: true,
@@ -632,6 +794,7 @@ assert.strictEqual(searchCacheSizeBeforeInventory, 1);
 
 sandbox.setRunewordPanelState(JSON.stringify({
   runeInventoryKnown: true,
+  runeInventoryExpectedCount: 3,
   runeInventory: [
     { runeToken: runeA, owned: 1 },
     { runeToken: runeB, owned: 1 },
@@ -693,6 +856,7 @@ assert.strictEqual(
 // the catalog/search identity.
 sandbox.setRunewordPanelState(JSON.stringify({
   runeInventoryKnown: true,
+  runeInventoryExpectedCount: 3,
   runeInventory: [
     { runeToken: runeA, owned: 2 },
     { runeToken: runeB, owned: 1 },
@@ -741,6 +905,7 @@ assert.strictEqual(
 // filter returns to all, while selection remains independent.
 sandbox.setRunewordPanelState(JSON.stringify({
   runeInventoryKnown: true,
+  runeInventoryExpectedCount: 1,
   runeInventory: [
     { runeToken: 18446744073709551615, owned: 99 }
   ]
@@ -778,6 +943,15 @@ assert(
 assert(
   /id="recipeMaterialFilterHint"[\s\S]*?role="status"[\s\S]*?aria-live="polite"/.test(viewMarkup),
   "material-filter availability and scope are not announced accessibly"
+);
+assert(
+  /id="resourceDashboardSection"[\s\S]*?aria-busy="true"/.test(viewMarkup),
+  "resource dashboard startup synchronization is not exposed accessibly"
+);
+assert.strictEqual(
+  (viewMarkup.match(/class="rdProgress"/g) || []).length,
+  2,
+  "resource dashboard does not expose both native progress elements"
 );
 
 console.log("Prisma HTML script order: OK");

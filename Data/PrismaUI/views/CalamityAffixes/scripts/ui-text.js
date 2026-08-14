@@ -151,7 +151,9 @@ function initUiText() {
       "선택 베이스 어픽스"
     );
   }
-  selectedItemLabel.textContent = t("Current Base", "현재 베이스");
+  if (selectedItemLabel) {
+    selectedItemLabel.textContent = t("Inspected Item", "확인 중인 아이템");
+  }
   if (runewordContextRecipeLabel) {
     runewordContextRecipeLabel.textContent = t("Selected Recipe", "선택 레시피");
   }
@@ -165,12 +167,12 @@ function initUiText() {
     );
   }
   if (affixSelectedItemLabel) {
-    affixSelectedItemLabel.textContent = t("Selected Item", "선택 아이템");
+    affixSelectedItemLabel.textContent = t("Inspected Inventory Item", "확인 중인 인벤토리 아이템");
   }
   if (affixSelectedItemMeta) {
     affixSelectedItemMeta.textContent = t(
-      "Highlight one inventory item to mirror its affix details here.",
-      "인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다."
+      "Highlight an inventory item to inspect it here. Item actions still use the working base above.",
+      "인벤토리 아이템을 가리키면 여기에서 확인할 수 있으며, 아이템 작업은 위 작업 베이스를 사용합니다."
     );
   }
   updateEquippedBuildStaticText();
@@ -179,14 +181,14 @@ function initUiText() {
   }
   if (panelTooltipLead) {
     panelTooltipLead.textContent = t(
-      "Focus one item at a time to read affix text without opening the full runeword flow.",
-      "한 번에 아이템 하나에 집중해서 어픽스 텍스트를 읽을 수 있습니다."
+      "Read-only details for the item currently highlighted in inventory.",
+      "인벤토리에서 현재 가리킨 아이템의 상세를 읽기 전용으로 표시합니다."
     );
   }
   if (panelTooltipHint) {
     panelTooltipHint.textContent = t(
-      "Open your inventory (Tab) and hover an item, or select a base in the Runeword tab.",
-      "인벤토리(Tab)를 열어 아이템을 가리키거나, 룬워드 탭에서 베이스를 선택하세요."
+      "Open inventory (Tab) and highlight an item. Reforge and reset always use the working base shown above.",
+      "인벤토리(Tab)를 열어 아이템을 가리키세요. 재련과 초기화는 항상 위 작업 베이스를 사용합니다."
     );
   }
   runewordRecipeListTitle.textContent = t("Search And Compare", "검색 및 비교");
@@ -254,7 +256,10 @@ function initUiText() {
     runewordResetButton.textContent = t("Reset Selected Base", "선택 베이스 초기화");
   }
   if (runewordItemActionsTitle) {
-    runewordItemActionsTitle.textContent = t("Item Actions", "아이템 작업");
+    runewordItemActionsTitle.textContent = t(
+      "Working Base Affixes & Reforge",
+      "작업 베이스 어픽스 및 재련"
+    );
   }
   if (runewordRecoverySummary) {
     runewordRecoverySummary.textContent = t("Recovery & Reset", "복구 및 초기화");
@@ -326,6 +331,7 @@ function initUiText() {
     panelRenderSection.recipeItems,
     panelRenderSection.inventoryItems,
     panelRenderSection.runewordPanelState,
+    panelRenderSection.resourceDashboard,
     panelRenderSection.equippedBuild,
     panelRenderSection.tooltipLayout,
     panelRenderSection.tooltipPlacement,

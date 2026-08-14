@@ -1068,6 +1068,15 @@ namespace RuntimeGateStoreChecks
 				std::cerr << "runeword_ui_policy: inventory tokens must be deterministic and unique\n";
 				return false;
 			}
+			const std::array<std::uint64_t, 4> catalogTokens{ 1u, 7u, 9u, 42u };
+			const std::array<std::uint64_t, 4> materialFilterTokens{ 42u, 99u, 7u, 100u };
+			const auto dashboardTokens = CalamityAffixes::BuildRunewordRuneDashboardTokens(
+				catalogTokens,
+				materialFilterTokens);
+			if (dashboardTokens != std::vector<std::uint64_t>{ 1u, 7u, 9u, 42u, 99u, 100u }) {
+				std::cerr << "runeword_ui_policy: dashboard tokens must include the whole catalog and every material-filter token\n";
+				return false;
+			}
 
 			std::unordered_map<std::uint64_t, std::uint32_t> resolveCalls;
 			const auto snapshot = CalamityAffixes::BuildRunewordRuneInventorySnapshot(
@@ -1083,6 +1092,14 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
+			const auto emptySnapshot = CalamityAffixes::BuildRunewordRuneInventorySnapshot(
+				std::span<const std::uint64_t>{},
+				[](std::uint64_t) -> std::optional<std::uint32_t> { return 0u; });
+			if (emptySnapshot) {
+				std::cerr << "runeword_ui_policy: an empty token catalog must keep the inventory snapshot unknown\n";
+				return false;
+			}
+
 			const auto unresolved = CalamityAffixes::BuildRunewordRuneInventorySnapshot(
 				std::array<std::uint64_t, 3>{ 7u, 9u, 42u },
 				[](std::uint64_t token) -> std::optional<std::uint32_t> {
@@ -1090,6 +1107,29 @@ namespace RuntimeGateStoreChecks
 				});
 			if (unresolved) {
 				std::cerr << "runeword_ui_policy: one unresolved fragment form must fail the whole snapshot closed\n";
+				return false;
+			}
+
+			auto namedSnapshot = *snapshot;
+			const bool namesKnown = CalamityAffixes::PopulateRunewordRuneInventoryNames(
+				namedSnapshot,
+				[](std::uint64_t token) -> std::optional<std::string_view> {
+					return token == 42u ? std::optional<std::string_view>{ "El" } :
+						std::optional<std::string_view>{ "Rune" };
+				});
+			if (!namesKnown || namedSnapshot.size() != snapshot->size() ||
+				std::ranges::any_of(namedSnapshot, [](const auto& entry) { return entry.runeName.empty(); })) {
+				std::cerr << "runeword_ui_policy: every inventory entry must receive a resolved rune name\n";
+				return false;
+			}
+
+			auto missingNameSnapshot = *snapshot;
+			if (CalamityAffixes::PopulateRunewordRuneInventoryNames(
+					missingNameSnapshot,
+					[](std::uint64_t token) -> std::optional<std::string_view> {
+						return token == 9u ? std::nullopt : std::optional<std::string_view>{ "Rune" };
+					})) {
+				std::cerr << "runeword_ui_policy: one unresolved rune name must fail the whole snapshot closed\n";
 				return false;
 			}
 
@@ -1104,16 +1144,18 @@ namespace RuntimeGateStoreChecks
 			}
 
 			const std::array<CalamityAffixes::RunewordRuneInventoryEntry, 2> inventory{
-				CalamityAffixes::RunewordRuneInventoryEntry{ .runeToken = 42u, .owned = 3u },
-				CalamityAffixes::RunewordRuneInventoryEntry{ .runeToken = kLargeToken, .owned = 1u },
+				CalamityAffixes::RunewordRuneInventoryEntry{ .runeToken = 42u, .runeName = "El", .owned = 3u },
+				CalamityAffixes::RunewordRuneInventoryEntry{ .runeToken = kLargeToken, .runeName = "Zod", .owned = 1u },
 			};
 			const auto inventoryJson = CalamityAffixes::BuildRunewordRuneInventoryJson(inventory);
 			if (!inventoryJson.is_array() || inventoryJson.size() != 2u ||
 				inventoryJson[0].value("runeToken", "") != "42" ||
+				inventoryJson[0].value("runeName", "") != "El" ||
 				inventoryJson[0].value("owned", 0u) != 3u ||
 				inventoryJson[1].value("runeToken", "") != "18446744073709551614" ||
+				inventoryJson[1].value("runeName", "") != "Zod" ||
 				inventoryJson[1].value("owned", 0u) != 1u) {
-				std::cerr << "runeword_ui_policy: inventory JSON must preserve deterministic entries and uint64 precision\n";
+				std::cerr << "runeword_ui_policy: inventory JSON must preserve names, deterministic entries, and uint64 precision\n";
 				return false;
 			}
 

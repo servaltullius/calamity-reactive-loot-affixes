@@ -58,6 +58,11 @@ function registerPanelEventHandlers() {
   wireButtons();
   wireMainTabs();
   controlPanel.addEventListener("keydown", handleListboxKeydown);
+  if (workingBaseDetails) {
+    workingBaseDetails.addEventListener("toggle", handleWorkingBaseChooserToggle);
+    workingBaseDetails.addEventListener("focusout", handleWorkingBaseChooserFocusOut);
+    document.addEventListener("pointerdown", handleWorkingBaseOutsidePointerDown, true);
+  }
   tooltipTitle.addEventListener("pointerdown", beginTooltipDrag);
   tooltipTitle.addEventListener("mousedown", beginTooltipDrag);
   tooltipTitle.addEventListener("dragstart", (event) => event.preventDefault());

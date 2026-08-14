@@ -570,10 +570,14 @@ namespace RuntimeGateStoreChecks
 
 			if (base.instanceKey != 0u || base.selected ||
 				recipe.recipeToken != 0u || !recipe.runeTokens.empty() || recipe.selected ||
-				runeInventory.runeToken != 0u || runeInventory.owned != 0u ||
+				runeInventory.runeToken != 0u || !runeInventory.runeName.empty() || runeInventory.owned != 0u ||
 				panel.hasBase || panel.hasRecipe || panel.isComplete ||
 				panel.insertedRunes != 0u || panel.totalRunes != 0u ||
-				panel.canInsert || panel.runeInventoryKnown || !panel.runeInventory.empty() ||
+				panel.canInsert || panel.runeInventoryKnown || panel.runeInventoryExpectedCount != 0u ||
+				!panel.runeInventory.empty() ||
+				panel.reforgeOrbsKnown || panel.reforgeOrbsOwned != 0u || panel.pityKnown ||
+				panel.runewordFragmentFailStreak != 0u || panel.runewordFragmentFailStreakThreshold != 0u ||
+				panel.reforgeOrbFailStreak != 0u || panel.reforgeOrbFailStreakThreshold != 0u ||
 				result.success) {
 				std::cerr << "runeword_ui_contract_defaults: expected DTO defaults to remain zero-initialized\n";
 				return false;
@@ -581,7 +585,15 @@ namespace RuntimeGateStoreChecks
 
 			panel.requiredRunes.push_back({ .runeName = "El", .required = 1u, .owned = 0u });
 			panel.runeInventoryKnown = true;
-			panel.runeInventory.push_back({ .runeToken = 42u, .owned = 3u });
+			panel.runeInventoryExpectedCount = 1u;
+			panel.runeInventory.push_back({ .runeToken = 42u, .runeName = "El", .owned = 3u });
+			panel.reforgeOrbsKnown = true;
+			panel.reforgeOrbsOwned = 4u;
+			panel.pityKnown = true;
+			panel.runewordFragmentFailStreak = 7u;
+			panel.runewordFragmentFailStreakThreshold = 99u;
+			panel.reforgeOrbFailStreak = 11u;
+			panel.reforgeOrbFailStreakThreshold = 39u;
 			recipe.runeTokens = { 42u, 7u, 42u };
 			recipe.effectSummaryTextEn = "summary-en";
 			recipe.effectSummaryTextKo = "summary-ko";
@@ -589,8 +601,13 @@ namespace RuntimeGateStoreChecks
 			recipe.effectDetailTextKo = "detail-ko";
 			result.message = "ok";
 			if (panel.requiredRunes.size() != 1u ||
-				!panel.runeInventoryKnown || panel.runeInventory.size() != 1u ||
-				panel.runeInventory.front().runeToken != 42u || panel.runeInventory.front().owned != 3u ||
+				!panel.runeInventoryKnown || panel.runeInventoryExpectedCount != 1u ||
+				panel.runeInventory.size() != 1u ||
+				panel.runeInventory.front().runeToken != 42u || panel.runeInventory.front().runeName != "El" ||
+				panel.runeInventory.front().owned != 3u ||
+				!panel.reforgeOrbsKnown || panel.reforgeOrbsOwned != 4u || !panel.pityKnown ||
+				panel.runewordFragmentFailStreak != 7u || panel.runewordFragmentFailStreakThreshold != 99u ||
+				panel.reforgeOrbFailStreak != 11u || panel.reforgeOrbFailStreakThreshold != 39u ||
 				recipe.runeTokens != std::vector<std::uint64_t>{ 42u, 7u, 42u } ||
 				recipe.effectSummaryTextEn != "summary-en" ||
 				recipe.effectSummaryTextKo != "summary-ko" ||

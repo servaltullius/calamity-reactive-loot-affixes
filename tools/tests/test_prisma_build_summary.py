@@ -62,7 +62,7 @@ class PrismaBuildSummaryTests(unittest.TestCase):
 
         pane_tag, pane_attrs = self.parser.elements["mainAffixPane"]
         self.assertEqual(pane_tag, "div")
-        self.assertIn("scrollY", pane_attrs["class"].split())
+        self.assertNotIn("scrollY", pane_attrs["class"].split())
 
     def test_probability_copy_keeps_independent_gates_explicit(self) -> None:
         self.assertIn(
