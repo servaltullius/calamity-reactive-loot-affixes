@@ -473,6 +473,7 @@
 			std::uint32_t baseCycleCursor{ 0 };
 			std::uint32_t recipeCycleCursor{ 0 };
 			bool transmuteInProgress{ false };
+			bool affixExpansionInProgress{ false };
 
 			void ResetCatalog() noexcept
 			{
@@ -492,6 +493,7 @@
 				baseCycleCursor = 0u;
 				recipeCycleCursor = 0u;
 				transmuteInProgress = false;
+				affixExpansionInProgress = false;
 			}
 
 			void Reset() noexcept

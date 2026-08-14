@@ -1035,6 +1035,15 @@ namespace RuntimeGateStoreChecks
 				std::cerr << "runeword_ui_policy: locked reforge base/token parser mismatch\n";
 				return false;
 			}
+			const auto expandKeys = CalamityAffixes::ParseAffixExpandCommandKeys("4294967297:2");
+			if (!expandKeys || expandKeys->expectedInstanceKey != 4294967297u ||
+				expandKeys->expectedRegularAffixCount != 2u ||
+				CalamityAffixes::ParseAffixExpandCommandKeys("4294967297:0") ||
+				CalamityAffixes::ParseAffixExpandCommandKeys("4294967297:3") ||
+				CalamityAffixes::ParseAffixExpandCommandKeys("4294967297:1:2")) {
+				std::cerr << "runeword_ui_policy: affix expansion base/count parser mismatch\n";
+				return false;
+			}
 			if (!CalamityAffixes::IsSameCompletedRuneword(0xA11CEu, 0xA11CEu) ||
 				CalamityAffixes::IsSameCompletedRuneword(0u, 0u) ||
 				CalamityAffixes::IsSameCompletedRuneword(0xA11CEu, 0xBEEFu)) {

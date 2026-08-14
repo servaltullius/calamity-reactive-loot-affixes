@@ -11,6 +11,9 @@ using CalamityAffixes::detail::HasCompleteLockedRegularAffixReforgeRoll;
 using CalamityAffixes::detail::HasCompleteRegularAffixReforgeRoll;
 using CalamityAffixes::detail::HasUniqueAffixTokens;
 using CalamityAffixes::detail::IsExpectedLockedReforgeInstance;
+using CalamityAffixes::detail::IsCanonicalRegularAffixExpansionLayout;
+using CalamityAffixes::detail::IsExpectedAffixExpansionState;
+using CalamityAffixes::detail::ResolveRegularAffixExpansionPolicy;
 using CalamityAffixes::detail::ResolveObservedInventoryConsumption;
 using CalamityAffixes::detail::ShouldRetryRegularAffixReforgeRoll;
 using CalamityAffixes::detail::TryPromotePreservedRunewordPrimary;
@@ -31,11 +34,28 @@ static_assert(ResolveReforgeTargetAffixCount(7u) == kMaxSlots,
 
 static_assert(CalamityAffixes::detail::kStandardReforgeOrbCost == 1u);
 static_assert(CalamityAffixes::detail::kLockedReforgeOrbCost == 2u);
+static_assert(CalamityAffixes::detail::kExpandAffixOneToTwoOrbCost == 2u);
+static_assert(CalamityAffixes::detail::kExpandAffixTwoToThreeOrbCost == 4u);
 static_assert(!CanLockRegularAffixForReforge(1u));
 static_assert(CanLockRegularAffixForReforge(2u));
 static_assert(IsExpectedLockedReforgeInstance(0x100u, 0x100u));
 static_assert(!IsExpectedLockedReforgeInstance(0u, 0u));
 static_assert(!IsExpectedLockedReforgeInstance(0x100u, 0x200u));
+
+static_assert(!ResolveRegularAffixExpansionPolicy(0u));
+static_assert(ResolveRegularAffixExpansionPolicy(1u)->targetRegularAffixCount == 2u);
+static_assert(ResolveRegularAffixExpansionPolicy(1u)->orbCost == 2u);
+static_assert(ResolveRegularAffixExpansionPolicy(2u)->targetRegularAffixCount == 3u);
+static_assert(ResolveRegularAffixExpansionPolicy(2u)->orbCost == 4u);
+static_assert(!ResolveRegularAffixExpansionPolicy(3u));
+static_assert(IsCanonicalRegularAffixExpansionLayout(1u, 1u, 0u));
+static_assert(IsCanonicalRegularAffixExpansionLayout(2u, 1u, 1u));
+static_assert(!IsCanonicalRegularAffixExpansionLayout(1u, 0u, 1u));
+static_assert(!IsCanonicalRegularAffixExpansionLayout(2u, 2u, 0u));
+static_assert(IsExpectedAffixExpansionState(0x100u, 0x100u, 1u, 1u));
+static_assert(!IsExpectedAffixExpansionState(0x100u, 0x100u, 1u, 2u));
+static_assert(!IsExpectedAffixExpansionState(0x100u, 0x200u, 1u, 1u));
+static_assert(!IsExpectedAffixExpansionState(0x100u, 0x100u, 3u, 3u));
 
 static_assert([] {
 	const auto targets = DetermineLockedReforgeRerollTargets(2u, true);

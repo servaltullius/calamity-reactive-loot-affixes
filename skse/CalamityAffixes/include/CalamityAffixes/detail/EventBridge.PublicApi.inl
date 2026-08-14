@@ -68,6 +68,9 @@
 		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseWithLockedAffix(
 			std::uint64_t a_expectedInstanceKey,
 			std::uint64_t a_lockedAffixToken);
+		[[nodiscard]] OperationResult ExpandSelectedRunewordBaseAffixes(
+			std::uint64_t a_expectedInstanceKey,
+			std::uint8_t a_expectedRegularAffixCount);
 		[[nodiscard]] OperationResult ResetSelectedRunewordBaseCalamityState();
 
 		// MCM manual recovery: grant starter orbs + missing rune fragments.

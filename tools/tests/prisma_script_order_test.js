@@ -565,6 +565,88 @@ sandbox.renderEquippedBuildSummary();
 assert.strictEqual(sandbox.resolveEquippedBuildViewState(), "empty");
 assert(collectFakeElementText(element("equippedBuildStatus")).includes("No Calamity affixes equipped"));
 
+// Affix expansion is driven by one authoritative panel payload and emits an
+// exact decimal uint64 base key plus the expected 1/2 regular-affix count.
+const expansionBaseKey = "18446744073709551615";
+sandbox.setInventoryItems(JSON.stringify([
+  { key: expansionBaseKey, name: "Expansion Base", selected: true }
+]));
+sandbox.setRunewordPanelState(JSON.stringify({
+  hasBase: true,
+  hasRecipe: true,
+  canInsert: true,
+  isComplete: false,
+  regularAffixCount: 1,
+  maxRegularAffixCount: 3,
+  expandAffixCost: 2,
+  canExpandAffix: true,
+  expandAffixUnavailableReason: "",
+  reforgeOrbsKnown: true,
+  reforgeOrbsOwned: 2,
+  standardReforgeCost: 1,
+  lockedReforgeCost: 2
+}));
+sandbox.renderRunewordPanelState();
+let expansionState = new vm.Script(
+  "resolveRunewordPanelActionState(runewordPanelState).affixSlotState",
+  { filename: "affix-expansion-ready-contract-test.js" }
+).runInContext(context);
+assert.strictEqual(expansionState.expandEnabled, true);
+assert.strictEqual(
+  expansionState.expandCommand,
+  `affix.expand:${expansionBaseKey}:1`
+);
+assert.strictEqual(element("affixSlotProgressCount").textContent, "1/3");
+assert.strictEqual(element("affixSlotProgressTrack").getAttribute("aria-valuenow"), "1");
+assert.strictEqual(element("affixExpandButton").disabled, false);
+assert.strictEqual(
+  element("affixExpandButton").getAttribute("data-cmd"),
+  `affix.expand:${expansionBaseKey}:1`
+);
+let expansionActionState = new vm.Script(
+  "resolveRunewordPanelActionState(runewordPanelState)",
+  { filename: "affix-expansion-pending-contract-test.js" }
+).runInContext(context);
+assert.strictEqual(expansionActionState.canTransmute, true);
+assert.strictEqual(
+  sandbox.beginAffixExpandPending(`affix.expand:${expansionBaseKey}:1`),
+  true
+);
+expansionActionState = new vm.Script(
+  "resolveRunewordPanelActionState(runewordPanelState)",
+  { filename: "affix-expansion-pending-block-contract-test.js" }
+).runInContext(context);
+assert.strictEqual(expansionActionState.canTransmute, false);
+assert.strictEqual(expansionActionState.reforgeEnabled, false);
+assert.strictEqual(expansionActionState.resetEnabled, false);
+assert.strictEqual(element("runewordInsertButton").disabled, true);
+assert.strictEqual(element("runewordReforgeButton").disabled, true);
+assert.strictEqual(element("runewordResetButton").disabled, true);
+sandbox.clearAffixExpandPending(false);
+
+sandbox.setRunewordPanelState(JSON.stringify({
+  hasBase: true,
+  regularAffixCount: 2,
+  maxRegularAffixCount: 3,
+  expandAffixCost: 4,
+  canExpandAffix: false,
+  expandAffixUnavailableReason: "insufficient_orbs",
+  reforgeOrbsKnown: true,
+  reforgeOrbsOwned: 3,
+  standardReforgeCost: 1,
+  lockedReforgeCost: 2
+}));
+sandbox.renderRunewordPanelState();
+expansionState = new vm.Script(
+  "resolveRunewordPanelActionState(runewordPanelState).affixSlotState",
+  { filename: "affix-expansion-short-contract-test.js" }
+).runInContext(context);
+assert.strictEqual(expansionState.expandEnabled, false);
+assert.strictEqual(expansionState.unavailableReason, "insufficient_orbs");
+assert(element("affixSlotProgressMeta").textContent.includes("1 more"));
+assert.strictEqual(element("affixExpandButton").disabled, true);
+assert.strictEqual(element("affixExpandButton").getAttribute("data-cmd"), null);
+
 // Restore the original fixture before the existing runeword action assertions.
 sandbox.setRunewordPanelState(JSON.stringify(compatibilityPayload));
 

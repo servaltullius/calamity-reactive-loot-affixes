@@ -407,6 +407,17 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
+		auto maxSlotFixture = fixture;
+		maxSlotFixture.instanceAffixes.front().affixCount = 4u;
+		const auto maxSlotEncoded = EncodeCurrentRecords(maxSlotFixture);
+		CurrentSaveSnapshot maxSlotDecoded{};
+		if (!DecodeCurrentFixture(maxSlotEncoded, maxSlotDecoded) ||
+			maxSlotDecoded != maxSlotFixture ||
+			maxSlotDecoded.instanceAffixes.front().affixCount != 4u) {
+			std::cerr << "serialization_wire_contract: four-token item did not round-trip\n";
+			return false;
+		}
+
 		auto truncatedShufflePayload = encoded[6].payload;
 		truncatedShufflePayload.pop_back();
 		WireReader truncatedShuffleReader(truncatedShufflePayload);

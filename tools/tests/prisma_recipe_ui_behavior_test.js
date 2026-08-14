@@ -463,15 +463,26 @@ const runWorkingBaseChooserBehavior = new Function(
     const panelCommandAttribute = "data-cmd";
     const panelOpenTabAttribute = "data-open-tab";
     const recipeSelectionCommandPrefix = "runeword.recipe.select:";
+    const affixExpandCommandPrefix = "affix.expand:";
     let runewordResetArmedUntil = 0;
     let pendingOpenMainTab = null;
     let previewInvalidations = 0;
+    let affixExpandPendingState = null;
+    const begunAffixExpansions = [];
+    const panelRenderSection = { runewordPanelState: "runewordPanelState" };
     function handleTooltipUiCommand() { return false; }
     function armRunewordResetConfirmation() { return false; }
     function clearRunewordResetConfirmation() {}
     function beginOptimisticRecipeSelection() {}
+    function beginAffixExpandPending(command) {
+      begunAffixExpansions.push(command);
+      return true;
+    }
+    function setActionFeedback() {}
+    function schedulePanelRender() {}
     function shouldInvalidatePreviewForCommand(command) {
-      return command.startsWith("runeword.base.select:");
+      return command.startsWith("runeword.base.select:") ||
+        command.startsWith(affixExpandCommandPrefix);
     }
     function resolvePreviewPendingStateForCommand() { return true; }
     function invalidateRunewordAffixPreview() { previewInvalidations += 1; }
@@ -493,6 +504,19 @@ const runWorkingBaseChooserBehavior = new Function(
     assert.strictEqual(previewInvalidations, 1);
     assert.strictEqual(workingBaseDetails.open, false);
     assert.strictEqual(focusCount, 3);
+
+    const expandCandidate = {
+      getAttribute(name) {
+        return name === panelCommandAttribute ? "affix.expand:42:1" : null;
+      }
+    };
+    assert.strictEqual(dispatchPanelCommand(expandCandidate), true);
+    assert.deepStrictEqual(begunAffixExpansions, ["affix.expand:42:1"]);
+    assert.deepStrictEqual(sent, [
+      "runeword.base.select:18446744073709551615",
+      "affix.expand:42:1"
+    ]);
+    assert.strictEqual(previewInvalidations, 2);
   `
 );
 runWorkingBaseChooserBehavior(assert);

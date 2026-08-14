@@ -91,11 +91,307 @@ function buildReforgeCommand(state = runewordPanelState) {
     : "runeword.reforge";
 }
 
+function buildAffixExpandCommand(selectedBaseKey, expectedRegularAffixCount) {
+  const baseKey = normalizePositiveUint64DecimalString(selectedBaseKey);
+  if (
+    !baseKey ||
+    !Number.isSafeInteger(expectedRegularAffixCount) ||
+    (expectedRegularAffixCount !== 1 && expectedRegularAffixCount !== 2)
+  ) {
+    return "";
+  }
+  return `${affixExpandCommandPrefix}${baseKey}:${expectedRegularAffixCount}`;
+}
+
+function resolveAffixExpandUnavailableText(reason, state) {
+  switch (reason) {
+    case "no_base":
+      return t(
+        "Select a working base to view and expand its regular affix slots.",
+        "작업 베이스를 선택하면 일반 어픽스 슬롯을 확인하고 확장할 수 있습니다."
+      );
+    case "requires_first_affix":
+      return t(
+        "Create the first affix with standard reforge before expanding slots.",
+        "기본 재련으로 첫 어픽스를 만든 뒤 슬롯을 확장할 수 있습니다."
+      );
+    case "max_slots":
+      return t(
+        "All regular affix slots are unlocked.",
+        "모든 일반 어픽스 슬롯이 열렸습니다."
+      );
+    case "invalid_layout":
+      return t(
+        "This base has an affix layout that cannot be expanded.",
+        "현재 베이스의 어픽스 구성은 확장할 수 없습니다."
+      );
+    case "suffix_slots_disabled":
+      return t(
+        "Suffix slot expansion is disabled by the current configuration.",
+        "현재 설정에서 접미 어픽스 슬롯 확장이 비활성화되어 있습니다."
+      );
+    case "insufficient_orbs": {
+      const cost = state.expandAffixCost;
+      const owned = state.reforgeOrbsOwned;
+      if (
+        Number.isSafeInteger(cost) &&
+        cost > 0 &&
+        Number.isSafeInteger(owned) &&
+        owned >= 0 &&
+        owned < cost
+      ) {
+        const shortfall = cost - owned;
+        return t(
+          `You need ${shortfall} more Reforge Orb${shortfall === 1 ? "" : "s"}.`,
+          `재련 오브가 ${shortfall}개 부족합니다.`
+        );
+      }
+      return t(
+        "You do not have enough Reforge Orbs.",
+        "재련 오브가 부족합니다."
+      );
+    }
+    default:
+      return t(
+        "Affix slot expansion is currently unavailable.",
+        "현재 어픽스 슬롯 확장을 사용할 수 없습니다."
+      );
+  }
+}
+
+function resolveAffixSlotProgressState(
+  state,
+  selectedBaseKey = resolveSelectedRunewordBaseKey(),
+  pendingState = affixExpandPendingState
+) {
+  const hasBase = Boolean(state?.hasBase);
+  const baseKey = normalizePositiveUint64DecimalString(selectedBaseKey);
+  const hasValidBase = hasBase && Boolean(baseKey);
+  const regularAffixCountKnown = state?.regularAffixCountKnown === true &&
+    Number.isSafeInteger(state?.regularAffixCount) &&
+    state.regularAffixCount >= 0;
+  const regularAffixCount = regularAffixCountKnown ? state.regularAffixCount : 0;
+  const maxRegularAffixCountKnown = state?.maxRegularAffixCountKnown === true &&
+    state?.maxRegularAffixCount === 3;
+  const maxRegularAffixCount = 3;
+  const expandAffixCost = Number.isSafeInteger(state?.expandAffixCost) &&
+    state.expandAffixCost > 0
+    ? state.expandAffixCost
+    : null;
+  const reforgeOrbsOwned = Number.isSafeInteger(state?.reforgeOrbsOwned) &&
+    state.reforgeOrbsOwned >= 0
+    ? state.reforgeOrbsOwned
+    : null;
+  const reforgeOrbsKnown = state?.reforgeOrbsKnown === true && reforgeOrbsOwned !== null;
+  const expectedRegularAffixCount = regularAffixCount === 1 || regularAffixCount === 2
+    ? regularAffixCount
+    : null;
+  const expandCommand = expectedRegularAffixCount === null
+    ? ""
+    : buildAffixExpandCommand(baseKey, expectedRegularAffixCount);
+  const pending = Boolean(pendingState);
+  const hasEnoughOrbs = expandAffixCost !== null &&
+    reforgeOrbsKnown &&
+    reforgeOrbsOwned >= expandAffixCost;
+  const structurallyReady = hasBase &&
+    Boolean(baseKey) &&
+    regularAffixCountKnown &&
+    maxRegularAffixCountKnown &&
+    expectedRegularAffixCount !== null &&
+    Boolean(expandCommand) &&
+    expandAffixCost !== null;
+  const expandEnabled = state?.canExpandAffix === true &&
+    structurallyReady &&
+    hasEnoughOrbs &&
+    !pending;
+
+  let unavailableReason = normalizeAffixExpandUnavailableReason(
+    state?.expandAffixUnavailableReason
+  );
+  if (!hasBase || !baseKey) {
+    unavailableReason = "no_base";
+  } else if (!regularAffixCountKnown || !maxRegularAffixCountKnown) {
+    unavailableReason = "unavailable";
+  } else if (regularAffixCount === 0) {
+    unavailableReason = "requires_first_affix";
+  } else if (regularAffixCount >= maxRegularAffixCount) {
+    unavailableReason = "max_slots";
+  } else if (expandAffixCost === null) {
+    unavailableReason = "unavailable";
+  } else if (
+    unavailableReason === "invalid_layout" ||
+    unavailableReason === "suffix_slots_disabled"
+  ) {
+    // Preserve the server-authoritative structural reason even when the
+    // inventory snapshot is unavailable or the player also lacks currency.
+  } else if (!reforgeOrbsKnown) {
+    unavailableReason = "unavailable";
+  } else if (!hasEnoughOrbs) {
+    unavailableReason = "insufficient_orbs";
+  }
+
+  const displayCount = regularAffixCountKnown ? regularAffixCount : null;
+  const countText = !hasValidBase
+    ? `—/${maxRegularAffixCount}`
+    : displayCount === null
+      ? `…/${maxRegularAffixCount}`
+      : `${displayCount}/${maxRegularAffixCount}`;
+  const nextSlotNumber = expectedRegularAffixCount === null
+    ? null
+    : expectedRegularAffixCount + 1;
+  const slotLabels = [
+    t("Prefix", "접두"),
+    t("Suffix 1", "접미 1"),
+    t("Suffix 2", "접미 2")
+  ];
+  const ariaValueText = !hasValidBase
+    ? t("No base selected", "선택된 베이스 없음")
+    : displayCount === null
+      ? t("Regular affix slots are synchronizing", "일반 어픽스 슬롯 동기화 중")
+      : t(
+          `${displayCount} of ${maxRegularAffixCount} regular affix slots active`,
+          `일반 어픽스 슬롯 ${maxRegularAffixCount}개 중 ${displayCount}개 활성`
+        );
+
+  let progressMeta = "";
+  let expandButtonLabel = "";
+  let expandHint = "";
+  if (pending) {
+    progressMeta = t(
+      "Unlocking one suffix slot while preserving current affixes and runeword…",
+      "현재 어픽스와 룬워드를 유지하며 접미 슬롯을 여는 중…"
+    );
+    expandButtonLabel = t(
+      `Unlocking Slot ${nextSlotNumber || ""}…`.trim(),
+      `${nextSlotNumber || ""}번 슬롯 여는 중…`.trim()
+    );
+    expandHint = progressMeta;
+  } else if (expandEnabled) {
+    progressMeta = t(
+      "Next: add one suffix while preserving current affixes and runeword.",
+      "다음: 현재 어픽스와 룬워드를 유지하고 접미 1개를 추가합니다."
+    );
+    expandButtonLabel = t(
+      `Unlock Slot ${nextSlotNumber} · ${expandAffixCost} Orb${expandAffixCost === 1 ? "" : "s"}`,
+      `${nextSlotNumber}번 슬롯 열기 · 오브 ${expandAffixCost}개`
+    );
+    expandHint = t(
+      `Consume ${expandAffixCost} Reforge Orb${expandAffixCost === 1 ? "" : "s"} to add one suffix. Existing regular affixes and any completed runeword are preserved.`,
+      `재련 오브 ${expandAffixCost}개를 소모해 접미 1개를 추가합니다. 기존 일반 어픽스와 완성된 룬워드는 유지됩니다.`
+    );
+  } else {
+    progressMeta = resolveAffixExpandUnavailableText(unavailableReason, {
+      expandAffixCost,
+      reforgeOrbsOwned
+    });
+    if (unavailableReason === "no_base") {
+      expandButtonLabel = t("Select Base", "베이스 선택 필요");
+    } else if (unavailableReason === "requires_first_affix") {
+      expandButtonLabel = t("Create First Affix First", "첫 어픽스 먼저 생성");
+    } else if (unavailableReason === "max_slots") {
+      expandButtonLabel = t("Max Slots 3/3", "최대 슬롯 3/3");
+    } else if (
+      unavailableReason === "insufficient_orbs" &&
+      nextSlotNumber !== null &&
+      expandAffixCost !== null
+    ) {
+      expandButtonLabel = t(
+        `Unlock Slot ${nextSlotNumber} · ${expandAffixCost} Orb${expandAffixCost === 1 ? "" : "s"}`,
+        `${nextSlotNumber}번 슬롯 열기 · 오브 ${expandAffixCost}개`
+      );
+    } else {
+      expandButtonLabel = t("Slot Expansion Unavailable", "슬롯 확장 사용 불가");
+    }
+    expandHint = progressMeta;
+  }
+
+  return {
+    hasValidBase,
+    regularAffixCount,
+    regularAffixCountKnown,
+    maxRegularAffixCount,
+    countText,
+    slotLabels,
+    ariaValueText,
+    nextSlotNumber,
+    progressMeta,
+    unavailableReason,
+    expandAffixCost,
+    expandCommand,
+    expandEnabled,
+    expandPending: pending,
+    expandButtonLabel,
+    expandHint
+  };
+}
+
+function clearAffixExpandPending(scheduleRender = true) {
+  if (!affixExpandPendingState) {
+    return false;
+  }
+  affixExpandPendingState = null;
+  affixExpandPendingNonce += 1;
+  if (scheduleRender) {
+    schedulePanelRender(panelRenderSection.runewordPanelState);
+  }
+  return true;
+}
+
+function beginAffixExpandPending(command) {
+  if (affixExpandPendingState) {
+    return false;
+  }
+
+  const actionState = resolveAffixSlotProgressState(runewordPanelState);
+  if (!actionState.expandEnabled || !actionState.expandCommand || command !== actionState.expandCommand) {
+    return false;
+  }
+
+  const pendingNonce = ++affixExpandPendingNonce;
+  affixExpandPendingState = {
+    nonce: pendingNonce,
+    command,
+    expectedRegularAffixCount: actionState.regularAffixCount
+  };
+  clearReforgeLockSelection(false);
+  if (affixExpandButton) {
+    affixExpandButton.disabled = true;
+  }
+  if (runewordReforgeButton) {
+    runewordReforgeButton.disabled = true;
+  }
+  if (runewordInsertButton) {
+    runewordInsertButton.disabled = true;
+  }
+  if (runewordResetButton) {
+    runewordResetButton.disabled = true;
+  }
+  closeWorkingBaseChooser(false);
+  schedulePanelRender(panelRenderSection.runewordPanelState);
+  window.setTimeout(() => {
+    if (affixExpandPendingState?.nonce !== pendingNonce) {
+      return;
+    }
+    clearAffixExpandPending(false);
+    setActionFeedback(t(
+      "Affix slot expansion response timed out. Check the current base state before trying again.",
+      "어픽스 슬롯 확장 응답 시간이 초과되었습니다. 다시 시도하기 전에 현재 베이스 상태를 확인하세요."
+    ));
+    schedulePanelRender(panelRenderSection.runewordPanelState);
+  }, affixExpandPendingTimeoutMs);
+  return true;
+}
+
 function resolveRunewordPanelActionState(state) {
   const hasBase = Boolean(state.hasBase);
   const hasRecipe = Boolean(state.hasRecipe);
   const isComplete = Boolean(state.isComplete);
-  const canTransmute = Boolean(state.canInsert) && hasBase && hasRecipe && !isComplete;
+  const affixExpandPending = Boolean(affixExpandPendingState);
+  const canTransmute = Boolean(state.canInsert) &&
+    hasBase &&
+    hasRecipe &&
+    !isComplete &&
+    !affixExpandPending;
   const baseCompatibilityWarning = Boolean(state.baseCompatibilityWarning);
   const baseCompatibilityMessage = baseCompatibilityWarning
     ? t(
@@ -122,6 +418,11 @@ function resolveRunewordPanelActionState(state) {
     buttonHint = t(
       "Select a runeword recipe first.",
       "룬워드 레시피를 먼저 선택하세요."
+    );
+  } else if (affixExpandPending) {
+    buttonHint = t(
+      "Wait for affix slot expansion to finish.",
+      "어픽스 슬롯 확장이 끝날 때까지 기다려 주세요."
     );
   } else if (!canTransmute && state.missingSummary) {
     buttonHint = t(
@@ -163,11 +464,12 @@ ${buttonHint}`
   const reforgeOrbsOwned = hasKnownReforgeOrbCount
     ? Math.trunc(Number(state.reforgeOrbsOwned))
     : null;
+  const affixSlotState = resolveAffixSlotProgressState(state);
   const reforgeLockCandidates = resolveReforgeLockCandidates(state);
   const lockedReforgeCandidate = resolveActiveReforgeLockCandidate(state);
   const reforgeCost = lockedReforgeCandidate ? lockedReforgeCost : standardReforgeCost;
   const hasEnoughReforgeOrbs = reforgeOrbsOwned === null || reforgeOrbsOwned >= reforgeCost;
-  const reforgeEnabled = hasBase && hasEnoughReforgeOrbs;
+  const reforgeEnabled = hasBase && hasEnoughReforgeOrbs && !affixSlotState.expandPending;
   const reforgeCommand = buildReforgeCommand(state);
 
   const lockedNameEn = lockedReforgeCandidate
@@ -216,6 +518,11 @@ ${buttonHint}`
         `Protect & Reforge (${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"})`,
         `잠금 재련 (오브 ${reforgeCost}개)`
       )
+    : affixSlotState.regularAffixCountKnown && affixSlotState.regularAffixCount === 0
+      ? t(
+          `Create First Affix (${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"})`,
+          `첫 어픽스 생성 (오브 ${reforgeCost}개)`
+        )
     : t(
         `Reforge (${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"})`,
         `재련 (오브 ${reforgeCost}개)`
@@ -278,7 +585,7 @@ ${buttonHint}`
     }
   }
 
-  const resetEnabled = hasBase;
+  const resetEnabled = hasBase && !affixSlotState.expandPending;
   const resetHint = resetEnabled ?
     t(
       "Remove all Calamity affixes, runeword progress, and instance state from the selected base. No material refund.",
@@ -312,6 +619,7 @@ ${buttonHint}`
     lockedReforgeCost,
     reforgeLockCandidates,
     lockedReforgeCandidate,
+    affixSlotState,
     resetEnabled,
     resetHint
   };
@@ -417,6 +725,70 @@ function renderRunewordFlowProgress(actionState, state) {
     "Review the selected recipe on the right, then transmute when available.",
     "오른쪽 검토 영역에서 선택한 레시피를 확인한 뒤, 가능해지면 변환하세요."
   );
+}
+
+function renderAffixSlotProgress(actionState) {
+  const slotState = actionState?.affixSlotState;
+  if (!slotState || !affixSlotProgress || !affixSlotProgressTrack) {
+    return;
+  }
+
+  if (affixSlotProgressTitle) {
+    affixSlotProgressTitle.textContent = t("Regular Affix Slots", "일반 어픽스 슬롯");
+  }
+  if (affixSlotProgressCount) {
+    affixSlotProgressCount.textContent = slotState.countText;
+  }
+  if (affixSlotProgressMeta) {
+    affixSlotProgressMeta.textContent = slotState.progressMeta;
+    affixSlotProgressMeta.title = slotState.progressMeta;
+  }
+
+  const countForProgress = slotState.regularAffixCountKnown
+    ? Math.max(0, Math.min(slotState.maxRegularAffixCount, slotState.regularAffixCount))
+    : 0;
+  affixSlotProgress.classList.toggle(
+    "muted",
+    !slotState.hasValidBase || !slotState.regularAffixCountKnown
+  );
+  affixSlotProgress.classList.toggle("pending", slotState.expandPending);
+  affixSlotProgress.setAttribute("aria-busy", slotState.expandPending ? "true" : "false");
+  affixSlotProgressTrack.setAttribute(
+    "aria-valuemax",
+    String(slotState.maxRegularAffixCount)
+  );
+  if (slotState.hasValidBase && slotState.regularAffixCountKnown) {
+    affixSlotProgressTrack.setAttribute("aria-valuenow", String(countForProgress));
+  } else {
+    affixSlotProgressTrack.removeAttribute("aria-valuenow");
+  }
+  affixSlotProgressTrack.setAttribute("aria-valuetext", slotState.ariaValueText);
+
+  for (let index = 0; index < affixSlotNodes.length; index += 1) {
+    const node = affixSlotNodes[index];
+    const active = slotState.hasValidBase && slotState.regularAffixCountKnown && index < countForProgress;
+    const next = slotState.hasValidBase &&
+      slotState.regularAffixCountKnown &&
+      index === countForProgress &&
+      countForProgress < slotState.maxRegularAffixCount;
+    node.textContent = slotState.slotLabels[index] || "";
+    node.classList.toggle("active", active);
+    node.classList.toggle("next", !active && next);
+    node.dataset.slotState = active ? "active" : next ? "next" : "locked";
+    node.setAttribute("aria-hidden", "true");
+  }
+
+  if (affixExpandButton) {
+    affixExpandButton.disabled = !slotState.expandEnabled;
+    affixExpandButton.textContent = slotState.expandButtonLabel;
+    affixExpandButton.title = slotState.expandHint;
+    affixExpandButton.setAttribute("aria-label", slotState.expandHint);
+    if (slotState.expandEnabled && slotState.expandCommand) {
+      affixExpandButton.setAttribute(panelCommandAttribute, slotState.expandCommand);
+    } else {
+      affixExpandButton.removeAttribute(panelCommandAttribute);
+    }
+  }
 }
 
 function renderReforgeLockOptions(actionState) {
@@ -765,6 +1137,7 @@ function renderRunewordPanelState() {
     runewordActionHint.textContent = actionState.buttonHint;
   }
 
+  renderAffixSlotProgress(actionState);
   renderReforgeLockOptions(actionState);
 
   if (runewordReforgeButton) {

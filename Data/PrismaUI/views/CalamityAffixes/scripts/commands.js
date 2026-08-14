@@ -257,6 +257,19 @@ function dispatchPanelCommand(button) {
     );
   }
 
+  if (command.startsWith(affixExpandCommandPrefix)) {
+    if (!beginAffixExpandPending(command)) {
+      if (!affixExpandPendingState) {
+        setActionFeedback(t(
+          "The working base state changed. Review it before expanding a slot.",
+          "작업 베이스 상태가 바뀌었습니다. 슬롯을 확장하기 전에 다시 확인하세요."
+        ));
+        schedulePanelRender(panelRenderSection.runewordPanelState);
+      }
+      return true;
+    }
+  }
+
   if (shouldInvalidatePreviewForCommand(command)) {
     invalidateRunewordAffixPreview(resolvePreviewPendingStateForCommand(command));
   }

@@ -25,6 +25,20 @@ static_assert(!CalamityAffixes::ParseLockedReforgeCommandKeys("10:0"));
 static_assert(!CalamityAffixes::ParseLockedReforgeCommandKeys("10:20:30"));
 static_assert(!CalamityAffixes::ParseLockedReforgeCommandKeys("10:18446744073709551616"));
 
+static_assert(
+	CalamityAffixes::ParseAffixExpandCommandKeys("4294967297:1") ==
+		CalamityAffixes::AffixExpandCommandKeys{ 4294967297u, 1u },
+	"affix expansion command must bind the expected base and regular-affix count");
+static_assert(
+	CalamityAffixes::ParseAffixExpandCommandKeys("18446744073709551615:2") ==
+		CalamityAffixes::AffixExpandCommandKeys{ 18446744073709551615u, 2u });
+static_assert(!CalamityAffixes::ParseAffixExpandCommandKeys("4294967297"));
+static_assert(!CalamityAffixes::ParseAffixExpandCommandKeys("0:1"));
+static_assert(!CalamityAffixes::ParseAffixExpandCommandKeys("10:0"));
+static_assert(!CalamityAffixes::ParseAffixExpandCommandKeys("10:3"));
+static_assert(!CalamityAffixes::ParseAffixExpandCommandKeys("10:1:2"));
+static_assert(!CalamityAffixes::ParseAffixExpandCommandKeys("18446744073709551616:1"));
+
 static_assert([] {
 	constexpr std::array<std::uint64_t, 7> input{ 42u, 7u, 42u, 0u, 9u, 7u, 1u };
 	const auto normalized = CalamityAffixes::NormalizeRunewordRuneInventoryTokens(input);

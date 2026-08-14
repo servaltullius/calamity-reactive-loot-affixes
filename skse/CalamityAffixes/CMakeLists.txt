@@ -88,6 +88,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Loot.Runeword.Transmute.cpp
 	    src/EventBridge.Loot.Runeword.Transmute.Fragments.cpp
 	    src/EventBridge.Loot.Runeword.Reforge.cpp
+	    src/EventBridge.Loot.Runeword.Expand.cpp
 	    src/EventBridge.Loot.Runeword.Policy.cpp
 	    src/EventBridge.Loot.Runtime.cpp
 	    src/EventBridge.Loot.TooltipResolution.cpp

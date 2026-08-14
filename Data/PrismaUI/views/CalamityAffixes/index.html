@@ -478,6 +478,45 @@
                       </div>
                     </div>
                   </details>
+                  <div
+                    id="affixSlotProgress"
+                    class="affixSlotProgress muted"
+                    aria-labelledby="affixSlotProgressTitle"
+                    aria-describedby="affixSlotProgressMeta"
+                    aria-busy="false">
+                    <div class="affixSlotProgressHeader">
+                      <span id="affixSlotProgressTitle" class="affixSlotProgressTitle">
+                        Regular Affix Slots / 일반 어픽스 슬롯
+                      </span>
+                      <strong id="affixSlotProgressCount" class="affixSlotProgressCount">—/3</strong>
+                    </div>
+                    <div
+                      id="affixSlotProgressTrack"
+                      class="affixSlotProgressTrack"
+                      role="progressbar"
+                      aria-valuemin="0"
+                      aria-valuemax="3"
+                      aria-valuenow="0"
+                      aria-valuetext="No base selected / 선택된 베이스 없음">
+                      <span class="affixSlotNode" data-affix-slot-index="0" data-slot-kind="prefix">
+                        Prefix / 접두
+                      </span>
+                      <span class="affixSlotNode" data-affix-slot-index="1" data-slot-kind="suffix">
+                        Suffix 1 / 접미 1
+                      </span>
+                      <span class="affixSlotNode" data-affix-slot-index="2" data-slot-kind="suffix">
+                        Suffix 2 / 접미 2
+                      </span>
+                    </div>
+                    <div
+                      id="affixSlotProgressMeta"
+                      class="cpContextMeta affixSlotProgressMeta"
+                      role="status"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      Select a base to view its regular slots. / 베이스를 선택하면 일반 슬롯을 표시합니다.
+                    </div>
+                  </div>
                   <details id="runewordReforgeDetails" class="rwActionDetails rwReforgeDetails">
                     <summary id="runewordReforgeSummary" class="rwActionDetailsSummary">
                       Reforge: reroll all · 1 Orb / 재련: 모두 재굴림 · 오브 1개
@@ -501,7 +540,14 @@
                       >Cost: 1 Reforge Orb / 비용: 재련 오브 1개</div>
                     </div>
                   </details>
-                  <div class="rwItemActionGrid">
+                  <div class="rwItemActionGrid affixMutationGrid">
+                    <button
+                      id="affixExpandButton"
+                      class="cpButton affixExpandButton"
+                      type="button"
+                      aria-describedby="affixSlotProgressMeta"
+                      disabled
+                    >Select Base / 베이스 선택 필요</button>
                     <button
                       id="runewordReforgeButton"
                       class="cpButton"

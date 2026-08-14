@@ -45,6 +45,19 @@ function parsePositiveInteger(value, fallback) {
   return parsed > 0 ? parsed : fallback;
 }
 
+function parseStrictPositiveSafeInteger(value) {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
+    ? value
+    : null;
+}
+
+function normalizeAffixExpandUnavailableReason(value) {
+  const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return validAffixExpandUnavailableReasons.has(normalized)
+    ? normalized
+    : "unavailable";
+}
+
 function normalizeReforgeLockCandidates(raw) {
   if (!Array.isArray(raw)) {
     return [];
@@ -209,6 +222,14 @@ function setRecipeItems(raw) {
 function setRunewordPanelState(raw) {
   const data = parseInteropObjectPayload(raw) || {};
   const ownedRaw = Number(data.reforgeOrbsOwned);
+  const regularAffixCountKnown = typeof data.regularAffixCount === "number" &&
+    Number.isSafeInteger(data.regularAffixCount) &&
+    data.regularAffixCount >= 0;
+  const maxRegularAffixCount = parseStrictPositiveSafeInteger(data.maxRegularAffixCount);
+  const expandAffixCost = parseStrictPositiveSafeInteger(data.expandAffixCost);
+  const reforgeOrbsKnown = data.reforgeOrbsKnown === true &&
+    Number.isFinite(ownedRaw) &&
+    ownedRaw >= 0;
   applyRuneInventorySnapshot(data);
   applyResourceDashboardSnapshot(data);
   equippedBuildState = normalizeEquippedBuildState(data.equippedBuild);
@@ -232,7 +253,16 @@ function setRunewordPanelState(raw) {
     baseCompatibilityMessageKo: typeof data.baseCompatibilityMessageKo === "string"
       ? data.baseCompatibilityMessageKo
       : "",
-    regularAffixCount: parseNonNegativeInteger(data.regularAffixCount, 0),
+    regularAffixCount: regularAffixCountKnown ? data.regularAffixCount : 0,
+    regularAffixCountKnown,
+    maxRegularAffixCount: maxRegularAffixCount === 3 ? maxRegularAffixCount : 3,
+    maxRegularAffixCountKnown: maxRegularAffixCount === 3,
+    expandAffixCost,
+    canExpandAffix: data.canExpandAffix === true,
+    expandAffixUnavailableReason: normalizeAffixExpandUnavailableReason(
+      data.expandAffixUnavailableReason
+    ),
+    reforgeOrbsKnown,
     reforgeOrbsOwned: Number.isFinite(ownedRaw) && ownedRaw >= 0
       ? Math.trunc(ownedRaw)
       : null,
@@ -251,6 +281,8 @@ function setRunewordPanelState(raw) {
           .filter(Boolean)
       : []
   };
+
+  clearAffixExpandPending(false);
 
   reconcileReforgeLockSelection(false);
 
@@ -399,9 +431,13 @@ function setTooltipLayout(raw) {
 function setActionFeedback(raw) {
   const value = typeof raw === "string" ? raw : "";
   feedback.textContent = localizeEngineFeedback(value);
+  const clearedAffixExpandPending = clearAffixExpandPending(false);
   if (runewordAffixPendingState) {
     runewordAffixPendingState = false;
     schedulePanelRender(panelRenderSection.tooltipPlacement);
+  }
+  if (clearedAffixExpandPending) {
+    schedulePanelRender(panelRenderSection.runewordPanelState);
   }
 }
 

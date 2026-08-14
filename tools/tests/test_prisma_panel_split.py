@@ -191,10 +191,24 @@ class PrismaPanelSplitTests(unittest.TestCase):
             "resourceOrbDashboardSection",
             "equippedBuildSection",
             "runewordBaseAffixDetails",
+            "affixSlotProgress",
+            "affixSlotProgressTrack",
+            "affixExpandButton",
             "runewordReforgeDetails",
             "runewordReforgeButton",
         ):
             self.assert_descendant(element_id, "mainAffixPane")
+
+        self.assertEqual(
+            self.parser.attrs["affixSlotProgressTrack"]["role"],
+            "progressbar",
+        )
+        self.assertEqual(
+            self.parser.attrs["affixSlotProgressTrack"]["aria-valuemax"],
+            "3",
+        )
+        self.assertIn("disabled", self.parser.attrs["affixExpandButton"])
+        self.assertNotIn("data-cmd", self.parser.attrs["affixExpandButton"])
 
         self.assert_descendant("runewordRecoveryDetails", "mainAdvancedPane")
         self.assert_descendant("runewordResetButton", "mainAdvancedPane")
@@ -210,6 +224,15 @@ class PrismaPanelSplitTests(unittest.TestCase):
         self.assertEqual(
             self.parser.attrs["runewordResetButton"]["data-cmd"],
             "runeword.reset",
+        )
+
+        runeword_css = (
+            INDEX_PATH.parent / "styles" / "runeword.css"
+        ).read_text(encoding="utf-8")
+        self.assert_rule_contains(
+            runeword_css,
+            ".affixWorkingActions .affixMutationGrid",
+            "grid-template-columns: repeat(2, minmax(0, 1fr))",
         )
 
     def test_wide_work_panes_do_not_request_whole_pane_scrolling(self) -> None:

@@ -41,6 +41,10 @@ namespace CalamityAffixes
 			result.message = "Reforge unavailable: runtime config not loaded.";
 			return result;
 		}
+		if (_runewordState.affixExpansionInProgress) {
+			result.message = "Reforge unavailable while affix expansion is in progress.";
+			return result;
+		}
 
 		SanitizeRunewordState();
 		std::uint64_t instanceKey = 0u;
@@ -511,6 +515,10 @@ namespace CalamityAffixes
 		}
 		if (_runewordState.transmuteInProgress) {
 			result.message = "Reset unavailable while runeword transmutation is in progress.";
+			return result;
+		}
+		if (_runewordState.affixExpansionInProgress) {
+			result.message = "Reset unavailable while affix expansion is in progress.";
 			return result;
 		}
 

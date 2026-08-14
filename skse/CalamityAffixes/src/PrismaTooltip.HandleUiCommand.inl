@@ -207,6 +207,29 @@
 					return true;
 				}
 
+				if (a_command.rfind(kAffixExpandPrefix, 0) == 0) {
+					const auto payload = a_command.substr(kAffixExpandPrefix.size());
+					const auto keys = CalamityAffixes::ParseAffixExpandCommandKeys(payload);
+					if (!keys) {
+						PushUiFeedback("Invalid affix-expansion base or expected count.");
+						return true;
+					}
+
+					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+					if (!bridge) {
+						PushUiFeedback("Affix expansion system unavailable.");
+						return true;
+					}
+
+					const auto outcome = bridge->ExpandSelectedRunewordBaseAffixes(
+						keys->expectedInstanceKey,
+						keys->expectedRegularAffixCount);
+					RefreshRunewordPanelBindings(*bridge, false);
+					PushSelectedTooltipSnapshot(true);
+					PushUiFeedback(outcome.message.empty() ? "Affix expansion action processed." : outcome.message);
+					return true;
+				}
+
 				if (a_command.rfind(kRunewordLockedReforgePrefix, 0) == 0) {
 					const auto payload = a_command.substr(kRunewordLockedReforgePrefix.size());
 					const auto keys = CalamityAffixes::ParseLockedReforgeCommandKeys(payload);

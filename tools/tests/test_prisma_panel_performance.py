@@ -291,6 +291,30 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
         )
         self.assertIn("Prisma recipe UI behavior: OK", result.stdout)
 
+    def test_affix_slot_progression_behavior_in_node(self) -> None:
+        node = self._require_node()
+
+        script = (
+            self.repo_root
+            / "tools"
+            / "tests"
+            / "prisma_affix_slot_progression_test.js"
+        )
+        result = subprocess.run(
+            [node, str(script)],
+            cwd=self.repo_root,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("Prisma affix slot progression: OK", result.stdout)
+
     def test_html_script_order_executes_as_separate_classic_scripts(self) -> None:
         node = self._require_node()
 

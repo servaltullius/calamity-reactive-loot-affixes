@@ -20,6 +20,14 @@ namespace CalamityAffixes
 		[[nodiscard]] constexpr bool operator==(const LockedReforgeCommandKeys&) const noexcept = default;
 	};
 
+	struct AffixExpandCommandKeys
+	{
+		std::uint64_t expectedInstanceKey{ 0u };
+		std::uint8_t expectedRegularAffixCount{ 0u };
+
+		[[nodiscard]] constexpr bool operator==(const AffixExpandCommandKeys&) const noexcept = default;
+	};
+
 	[[nodiscard]] constexpr std::optional<std::uint64_t> ParsePositiveDecimalUint64(
 		std::string_view a_text) noexcept
 	{
@@ -58,6 +66,28 @@ namespace CalamityAffixes
 		return LockedReforgeCommandKeys{
 			.expectedInstanceKey = *expectedInstanceKey,
 			.affixToken = *affixToken,
+		};
+	}
+
+	[[nodiscard]] constexpr std::optional<AffixExpandCommandKeys> ParseAffixExpandCommandKeys(
+		std::string_view a_payload) noexcept
+	{
+		const auto separator = a_payload.find(':');
+		if (separator == std::string_view::npos ||
+			a_payload.find(':', separator + 1u) != std::string_view::npos) {
+			return std::nullopt;
+		}
+
+		const auto expectedInstanceKey = ParsePositiveDecimalUint64(a_payload.substr(0u, separator));
+		const auto expectedRegularAffixCount = ParsePositiveDecimalUint64(a_payload.substr(separator + 1u));
+		if (!expectedInstanceKey || !expectedRegularAffixCount ||
+			(*expectedRegularAffixCount != 1u && *expectedRegularAffixCount != 2u)) {
+			return std::nullopt;
+		}
+
+		return AffixExpandCommandKeys{
+			.expectedInstanceKey = *expectedInstanceKey,
+			.expectedRegularAffixCount = static_cast<std::uint8_t>(*expectedRegularAffixCount),
 		};
 	}
 

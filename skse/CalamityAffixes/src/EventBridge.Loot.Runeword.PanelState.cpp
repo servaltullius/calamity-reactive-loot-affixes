@@ -15,6 +15,7 @@
 #include <span>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace CalamityAffixes
@@ -225,6 +226,7 @@ namespace CalamityAffixes
 	{
 		const std::scoped_lock lock(_stateMutex);
 		RunewordPanelState panelState{};
+		panelState.maxRegularAffixCount = static_cast<std::uint32_t>(kMaxRegularAffixesPerItem);
 		panelState.standardReforgeCost = detail::kStandardReforgeOrbCost;
 		panelState.lockedReforgeCost = detail::kLockedReforgeOrbCost;
 		panelState.debugTools = _loot.debugHudNotifications || _loot.debugLog;
@@ -291,31 +293,57 @@ namespace CalamityAffixes
 			panelState.recipeToken = currentRecipe->token;
 		}
 		if (!_runewordState.selectedBaseKey) {
+			panelState.expandAffixUnavailableReason = "no_base";
 			return panelState;
 		}
 		panelState.hasBase = true;
+		bool expansionLayoutValid = true;
+		std::uint8_t expansionPrefixCount = 0u;
+		std::uint8_t expansionSuffixCount = 0u;
+		std::uint8_t expansionRunewordCount = 0u;
+		std::unordered_set<std::string_view> expansionSuffixFamilies;
 
 		if (const auto slotsIt = _instanceTrackingState.instanceAffixes.find(*_runewordState.selectedBaseKey);
 			slotsIt != _instanceTrackingState.instanceAffixes.end()) {
 			const auto* completedRecipe = ResolveCompletedRunewordRecipe(*_runewordState.selectedBaseKey);
 			const auto completedToken = completedRecipe ? completedRecipe->resultAffixToken : 0u;
+			if (!detail::HasUniqueAffixTokens(slotsIt->second)) {
+				expansionLayoutValid = false;
+			}
 			panelState.reforgeLockCandidates.reserve(slotsIt->second.count);
 			for (std::uint8_t i = 0; i < slotsIt->second.count; ++i) {
 				const auto token = slotsIt->second.tokens[i];
-				if (token == 0u || token == completedToken ||
-					_runewordState.recipeIndexByResultAffixToken.contains(token)) {
+				if (token == 0u) {
+					expansionLayoutValid = false;
+					continue;
+				}
+				if (_runewordState.recipeIndexByResultAffixToken.contains(token)) {
+					++expansionRunewordCount;
+					if (token != completedToken) {
+						expansionLayoutValid = false;
+					}
 					continue;
 				}
 
 				const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(token);
 				if (affixIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() ||
 					affixIt->second >= _affixRuntimeState.affixes.size()) {
+					expansionLayoutValid = false;
 					continue;
 				}
 
 				const auto& affix = _affixRuntimeState.affixes[affixIt->second];
 				if (affix.slot != AffixSlot::kPrefix && affix.slot != AffixSlot::kSuffix) {
+					expansionLayoutValid = false;
 					continue;
+				}
+				if (affix.slot == AffixSlot::kPrefix) {
+					++expansionPrefixCount;
+				} else {
+					++expansionSuffixCount;
+					if (affix.family.empty() || !expansionSuffixFamilies.insert(affix.family).second) {
+						expansionLayoutValid = false;
+					}
 				}
 
 				std::string nameEn = affix.displayNameEn;
@@ -334,6 +362,41 @@ namespace CalamityAffixes
 				});
 				++panelState.regularAffixCount;
 			}
+			const auto expectedRunewordCount = completedToken != 0u ? 1u : 0u;
+			if (expansionRunewordCount != expectedRunewordCount ||
+				(completedToken != 0u && slotsIt->second.GetPrimary() != completedToken) ||
+				slotsIt->second.count != panelState.regularAffixCount + expansionRunewordCount) {
+				expansionLayoutValid = false;
+			}
+		}
+
+		const auto regularCount = static_cast<std::uint8_t>(std::min<std::uint32_t>(
+			panelState.regularAffixCount,
+			std::numeric_limits<std::uint8_t>::max()));
+		const auto expansionPolicy = detail::ResolveRegularAffixExpansionPolicy(regularCount);
+		if (expansionPolicy) {
+			panelState.expandAffixCost = expansionPolicy->orbCost;
+		}
+		if (regularCount == 0u) {
+			panelState.expandAffixUnavailableReason = "requires_first_affix";
+		} else if (regularCount == kMaxRegularAffixesPerItem) {
+			panelState.expandAffixUnavailableReason = "max_slots";
+		} else if (_loot.stripTrackedSuffixSlots) {
+			panelState.expandAffixUnavailableReason = "suffix_slots_disabled";
+		} else if (!expansionPolicy || !expansionLayoutValid ||
+			!detail::IsCanonicalRegularAffixExpansionLayout(
+				regularCount,
+				expansionPrefixCount,
+				expansionSuffixCount)) {
+			panelState.expandAffixUnavailableReason = "invalid_layout";
+		} else if (_runewordState.transmuteInProgress || _runewordState.affixExpansionInProgress ||
+			!panelState.reforgeOrbsKnown) {
+			panelState.expandAffixUnavailableReason = "unavailable";
+		} else if (panelState.reforgeOrbsOwned < panelState.expandAffixCost) {
+			panelState.expandAffixUnavailableReason = "insufficient_orbs";
+		} else {
+			panelState.canExpandAffix = true;
+			panelState.expandAffixUnavailableReason.clear();
 		}
 
 		// Re-transmutation falls through to the normal recipe selection flow.

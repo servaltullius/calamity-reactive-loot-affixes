@@ -103,6 +103,10 @@ namespace CalamityAffixes
 		std::uint32_t runeInventoryExpectedCount{ 0 };
 		std::vector<RunewordRuneInventoryEntry> runeInventory{};
 		std::uint32_t regularAffixCount{ 0 };
+		std::uint32_t maxRegularAffixCount{ 0 };
+		std::uint32_t expandAffixCost{ 0 };
+		bool canExpandAffix{ false };
+		std::string expandAffixUnavailableReason{ "unavailable" };
 		// Counts are authoritative only when their corresponding known flag is
 		// true. This keeps an unavailable snapshot distinct from a real zero.
 		bool reforgeOrbsKnown{ false };

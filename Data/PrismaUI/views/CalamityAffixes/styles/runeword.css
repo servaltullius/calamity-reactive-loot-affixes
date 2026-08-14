@@ -929,9 +929,106 @@
   max-height: calc(92px * var(--panel-ui-scale));
 }
 
+.affixSlotProgress {
+  display: grid;
+  gap: calc(4px * var(--panel-ui-scale));
+  margin-top: calc(6px * var(--panel-ui-scale));
+  padding: calc(6px * var(--panel-ui-scale)) calc(7px * var(--panel-ui-scale));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.affixSlotProgress.pending {
+  border-color: rgba(0, 255, 153, 0.36);
+  background: rgba(0, 255, 153, 0.055);
+}
+
+.affixSlotProgress.muted {
+  opacity: 0.72;
+}
+
+.affixSlotProgressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8px * var(--panel-ui-scale));
+}
+
+.affixSlotProgressTitle {
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: calc(10px * var(--panel-ui-scale));
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.affixSlotProgressCount {
+  flex: 0 0 auto;
+  color: rgba(184, 255, 222, 0.96);
+  font-size: calc(10px * var(--panel-ui-scale));
+}
+
+.affixSlotProgressTrack {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(4px * var(--panel-ui-scale));
+}
+
+.affixSlotNode {
+  min-width: 0;
+  padding: calc(3px * var(--panel-ui-scale)) calc(5px * var(--panel-ui-scale));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.46);
+  background: rgba(255, 255, 255, 0.025);
+  font-size: calc(9px * var(--panel-ui-scale));
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.affixSlotNode.active {
+  border-color: rgba(0, 255, 153, 0.34);
+  color: rgba(220, 255, 239, 0.96);
+  background: rgba(0, 255, 153, 0.11);
+}
+
+.affixSlotNode.next {
+  border-color: rgba(255, 210, 110, 0.3);
+  color: rgba(255, 231, 178, 0.9);
+}
+
+.affixSlotProgressMeta {
+  min-width: 0;
+  min-height: calc(12px * var(--panel-ui-scale));
+  font-size: calc(9px * var(--panel-ui-scale));
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .affixWorkingActions .rwItemActionGrid {
   grid-template-columns: 1fr;
   margin-top: calc(7px * var(--panel-ui-scale));
+}
+
+.affixWorkingActions .affixMutationGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.affixMutationGrid .cpButton {
+  min-width: 0;
+  min-height: calc(38px * var(--panel-ui-scale));
+  padding-right: calc(7px * var(--panel-ui-scale));
+  padding-left: calc(7px * var(--panel-ui-scale));
+  line-height: 1.25;
+  white-space: normal;
 }
 
 .cpAffixOverview {

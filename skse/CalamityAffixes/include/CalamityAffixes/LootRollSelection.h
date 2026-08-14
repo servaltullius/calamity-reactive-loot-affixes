@@ -15,6 +15,8 @@ namespace CalamityAffixes::detail
 {
 	inline constexpr std::uint32_t kStandardReforgeOrbCost = 1u;
 	inline constexpr std::uint32_t kLockedReforgeOrbCost = 2u;
+	inline constexpr std::uint32_t kExpandAffixOneToTwoOrbCost = 2u;
+	inline constexpr std::uint32_t kExpandAffixTwoToThreeOrbCost = 4u;
 
 	// Single source of truth for the regular-affix count distribution.
 	// Index i carries the weight of rolling (i + 1) affixes, so { 70, 22, 8 }
@@ -104,6 +106,52 @@ namespace CalamityAffixes::detail
 	[[nodiscard]] constexpr bool CanLockRegularAffixForReforge(std::uint8_t a_regularAffixCount) noexcept
 	{
 		return a_regularAffixCount >= 2u;
+	}
+
+	struct RegularAffixExpansionPolicy
+	{
+		std::uint8_t targetRegularAffixCount{ 0u };
+		std::uint32_t orbCost{ 0u };
+	};
+
+	[[nodiscard]] constexpr std::optional<RegularAffixExpansionPolicy> ResolveRegularAffixExpansionPolicy(
+		std::uint8_t a_currentRegularAffixCount) noexcept
+	{
+		switch (a_currentRegularAffixCount) {
+		case 1u:
+			return RegularAffixExpansionPolicy{
+				.targetRegularAffixCount = 2u,
+				.orbCost = kExpandAffixOneToTwoOrbCost,
+			};
+		case 2u:
+			return RegularAffixExpansionPolicy{
+				.targetRegularAffixCount = 3u,
+				.orbCost = kExpandAffixTwoToThreeOrbCost,
+			};
+		default:
+			return std::nullopt;
+		}
+	}
+
+	[[nodiscard]] constexpr bool IsCanonicalRegularAffixExpansionLayout(
+		std::uint8_t a_regularAffixCount,
+		std::uint8_t a_prefixCount,
+		std::uint8_t a_suffixCount) noexcept
+	{
+		return (a_regularAffixCount == 1u && a_prefixCount == 1u && a_suffixCount == 0u) ||
+		       (a_regularAffixCount == 2u && a_prefixCount == 1u && a_suffixCount == 1u);
+	}
+
+	[[nodiscard]] constexpr bool IsExpectedAffixExpansionState(
+		std::uint64_t a_expectedInstanceKey,
+		std::uint64_t a_resolvedInstanceKey,
+		std::uint8_t a_expectedRegularAffixCount,
+		std::uint8_t a_resolvedRegularAffixCount) noexcept
+	{
+		return a_expectedInstanceKey != 0u &&
+		       a_expectedInstanceKey == a_resolvedInstanceKey &&
+		       a_expectedRegularAffixCount == a_resolvedRegularAffixCount &&
+		       ResolveRegularAffixExpansionPolicy(a_expectedRegularAffixCount).has_value();
 	}
 
 	[[nodiscard]] constexpr bool IsExpectedLockedReforgeInstance(

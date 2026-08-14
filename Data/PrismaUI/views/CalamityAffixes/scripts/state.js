@@ -8,6 +8,9 @@ let runewordAffixPendingNonce = 0;
 const runewordAffixPendingTimeoutMs = 1200;
 let reforgeLockTokenState = "";
 let reforgeLockBaseKeyState = "";
+let affixExpandPendingState = null;
+let affixExpandPendingNonce = 0;
+const affixExpandPendingTimeoutMs = 2500;
 let panelHotkeyTextState = "F11";
 let selectedItemNameState = "";
 let selectedItemSourceState = "";
@@ -64,6 +67,13 @@ let runewordPanelState = {
   missingSummary: "",
   requiredRunes: [],
   regularAffixCount: 0,
+  regularAffixCountKnown: false,
+  maxRegularAffixCount: 3,
+  maxRegularAffixCountKnown: false,
+  expandAffixCost: null,
+  canExpandAffix: false,
+  expandAffixUnavailableReason: "unavailable",
+  reforgeOrbsKnown: false,
   reforgeOrbsOwned: null,
   standardReforgeCost: 1,
   lockedReforgeCost: 2,
@@ -84,7 +94,17 @@ const recipeFilterAttribute = "data-recipe-filter";
 const recipeMaterialFilterAttribute = "data-recipe-material-filter";
 const recipeSelectionCommandPrefix = "runeword.recipe.select:";
 const lockedReforgeCommandPrefix = "runeword.reforge:";
+const affixExpandCommandPrefix = "affix.expand:";
 const reforgeLockTokenAttribute = "data-reforge-lock-token";
+const validAffixExpandUnavailableReasons = new Set([
+  "no_base",
+  "requires_first_affix",
+  "max_slots",
+  "invalid_layout",
+  "suffix_slots_disabled",
+  "insufficient_orbs",
+  "unavailable"
+]);
 const validRecipeBaseFilters = new Set(["all", "weapon", "armor", "mixed"]);
 const validRecipeMaterialFilters = new Set(["all", "ready", "missing1"]);
 const panelRenderSection = Object.freeze({
@@ -121,7 +141,8 @@ const previewInvalidatingCommands = new Set([
 ]);
 const previewInvalidatingCommandPrefixes = Object.freeze([
   "runeword.base.select:",
-  lockedReforgeCommandPrefix
+  lockedReforgeCommandPrefix,
+  affixExpandCommandPrefix
 ]);
 const panelRenderState = {
   queued: false,

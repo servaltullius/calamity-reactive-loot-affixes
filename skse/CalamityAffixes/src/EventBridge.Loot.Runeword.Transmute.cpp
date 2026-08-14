@@ -128,6 +128,10 @@ namespace CalamityAffixes
 			EmitHudNotification("Runeword: transmute already in progress.");
 			return;
 		}
+		if (_runewordState.affixExpansionInProgress) {
+			EmitHudNotification("Runeword: affix expansion is in progress.");
+			return;
+		}
 
 		struct ScopedTransmuteInFlight
 		{
