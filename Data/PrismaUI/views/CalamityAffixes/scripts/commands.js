@@ -40,18 +40,6 @@ function handleWorkingBaseChooserToggle() {
   }
 }
 
-function handleWorkingBaseChooserFocusOut() {
-  setTimeout(() => {
-    if (
-      workingBaseDetails?.open &&
-      document.activeElement &&
-      !workingBaseDetails.contains(document.activeElement)
-    ) {
-      closeWorkingBaseChooser(false);
-    }
-  }, 0);
-}
-
 function handleWorkingBaseOutsidePointerDown(event) {
   if (
     workingBaseDetails?.open &&

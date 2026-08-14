@@ -75,24 +75,24 @@
       <div id="controlPanelBody" class="cpBody">
         <div id="mainTabList" class="cpTabs" role="tablist" aria-label="Calamity tabs">
           <button
-            id="mainRunewordTab"
-            class="cpTabButton"
-            type="button"
-            role="tab"
-            aria-selected="true"
-            aria-controls="mainRunewordPane"
-            tabindex="0">
-            Runeword
-          </button>
-          <button
             id="mainAffixTab"
             class="cpTabButton"
             type="button"
             role="tab"
-            aria-selected="false"
+            aria-selected="true"
             aria-controls="mainAffixPane"
-            tabindex="-1">
+            tabindex="0">
             Item Affixes
+          </button>
+          <button
+            id="mainRunewordTab"
+            class="cpTabButton"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="mainRunewordPane"
+            tabindex="-1">
+            Runeword
           </button>
           <button
             id="mainAdvancedTab"
@@ -154,7 +154,8 @@
             id="mainRunewordPane"
             class="cpTabPane cpMainPane"
             role="tabpanel"
-            aria-labelledby="mainRunewordTab">
+            aria-labelledby="mainRunewordTab"
+            hidden>
             <div class="rwWorkspace">
               <div class="rwContextBar">
                 <div class="rwFlowIntro">
@@ -364,8 +365,7 @@
             id="mainAffixPane"
             class="cpTabPane cpMainPane"
             role="tabpanel"
-            aria-labelledby="mainAffixTab"
-            hidden>
+            aria-labelledby="mainAffixTab">
             <div class="cpAffixPane">
               <div class="affixBuildColumn">
                 <section

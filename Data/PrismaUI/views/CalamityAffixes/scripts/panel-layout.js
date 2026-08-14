@@ -90,11 +90,11 @@ function applyTooltipPlacement() {
 function setMainTab(nextTab) {
   const previousTab = mainTabState;
   const tab =
-    nextTab === "affix"
-      ? "affix"
+    nextTab === "runeword"
+      ? "runeword"
       : nextTab === "advanced"
         ? "advanced"
-        : "runeword";
+        : "affix";
   if (previousTab !== tab) {
     closeWorkingBaseChooser(false);
   }
@@ -129,8 +129,8 @@ function setMainTab(nextTab) {
 
 function wireMainTabs() {
   const tabs = [
-    { id: "runeword", button: mainRunewordTab },
     { id: "affix", button: mainAffixTab },
+    { id: "runeword", button: mainRunewordTab },
     { id: "advanced", button: mainAdvancedTab }
   ];
 
@@ -142,7 +142,7 @@ function wireMainTabs() {
   const onTabKeydown = (event) => {
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       event.preventDefault();
-      const order = ["runeword", "affix", "advanced"];
+      const order = ["affix", "runeword", "advanced"];
       const currentIndex = Math.max(0, order.indexOf(mainTabState));
       const delta = event.key === "ArrowRight" ? 1 : -1;
       const nextIndex = (currentIndex + delta + order.length) % order.length;
@@ -163,9 +163,9 @@ function wireMainTabs() {
 
     if (event.key === "Home") {
       event.preventDefault();
-      setMainTab("runeword");
-      if (mainRunewordTab && typeof mainRunewordTab.focus === "function") {
-        mainRunewordTab.focus();
+      setMainTab("affix");
+      if (mainAffixTab && typeof mainAffixTab.focus === "function") {
+        mainAffixTab.focus();
       }
       return;
     }

@@ -60,7 +60,6 @@ function registerPanelEventHandlers() {
   controlPanel.addEventListener("keydown", handleListboxKeydown);
   if (workingBaseDetails) {
     workingBaseDetails.addEventListener("toggle", handleWorkingBaseChooserToggle);
-    workingBaseDetails.addEventListener("focusout", handleWorkingBaseChooserFocusOut);
     document.addEventListener("pointerdown", handleWorkingBaseOutsidePointerDown, true);
   }
   tooltipTitle.addEventListener("pointerdown", beginTooltipDrag);

@@ -42,7 +42,7 @@ const optimisticRecipeSelectionTimeoutMs = 1200;
 const recipeNodeByToken = new Map();
 const recipeSearchDocumentByToken = new Map();
 const recipeMaterialViewByToken = new Map();
-let mainTabState = "runeword";
+let mainTabState = "affix";
 let pendingOpenMainTab = null;
 let equippedBuildState = {
   received: false,

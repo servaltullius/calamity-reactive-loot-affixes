@@ -403,6 +403,10 @@ const panelKeydownSource = between(
   "\nfunction handlePanelKeydown(event)",
   "\nfunction shouldInvalidatePreviewForCommand(command)"
 );
+const panelCommandDispatchSource = between(
+  "\nfunction dispatchPanelCommand(button)",
+  "\nfunction handleDelegatedPanelCommandClick(event)"
+);
 const runWorkingBaseChooserBehavior = new Function(
   "assert",
   `
@@ -419,7 +423,7 @@ const runWorkingBaseChooserBehavior = new Function(
         if (name === "aria-expanded") expanded = value;
       }
     };
-    const inventoryBaseList = {};
+    const inventoryBaseList = { contains() { return false; } };
     const document = { activeElement: null };
     function requestAnimationFrame() {}
     function setTimeout() {}
@@ -455,6 +459,40 @@ const runWorkingBaseChooserBehavior = new Function(
     assert.deepStrictEqual(sent, ["ui.close"]);
     assert.strictEqual(prevented, 2);
     assert.strictEqual(stopped, 2);
+
+    const panelCommandAttribute = "data-cmd";
+    const panelOpenTabAttribute = "data-open-tab";
+    const recipeSelectionCommandPrefix = "runeword.recipe.select:";
+    let runewordResetArmedUntil = 0;
+    let pendingOpenMainTab = null;
+    let previewInvalidations = 0;
+    function handleTooltipUiCommand() { return false; }
+    function armRunewordResetConfirmation() { return false; }
+    function clearRunewordResetConfirmation() {}
+    function beginOptimisticRecipeSelection() {}
+    function shouldInvalidatePreviewForCommand(command) {
+      return command.startsWith("runeword.base.select:");
+    }
+    function resolvePreviewPendingStateForCommand() { return true; }
+    function invalidateRunewordAffixPreview() { previewInvalidations += 1; }
+    ${panelCommandDispatchSource}
+
+    sent.length = 0;
+    workingBaseDetails.open = true;
+    const candidate = {
+      disabled: false,
+      getAttribute(name) {
+        return name === panelCommandAttribute
+          ? "runeword.base.select:18446744073709551615"
+          : null;
+      }
+    };
+    inventoryBaseList.contains = (button) => button === candidate;
+    assert.strictEqual(dispatchPanelCommand(candidate), true);
+    assert.deepStrictEqual(sent, ["runeword.base.select:18446744073709551615"]);
+    assert.strictEqual(previewInvalidations, 1);
+    assert.strictEqual(workingBaseDetails.open, false);
+    assert.strictEqual(focusCount, 3);
   `
 );
 runWorkingBaseChooserBehavior(assert);

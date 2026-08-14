@@ -236,6 +236,54 @@ class PrismaPanelSplitTests(unittest.TestCase):
             self.assertEqual(self.parser.attrs[tab_id]["aria-controls"], pane_id)
             self.assertEqual(self.parser.attrs[pane_id]["aria-labelledby"], tab_id)
 
+    def test_item_affixes_is_the_first_and_default_main_tab(self) -> None:
+        affix_tab = self.parser.attrs["mainAffixTab"]
+        runeword_tab = self.parser.attrs["mainRunewordTab"]
+        advanced_tab = self.parser.attrs["mainAdvancedTab"]
+        self.assertLess(
+            self.index.index('id="mainAffixTab"'),
+            self.index.index('id="mainRunewordTab"'),
+        )
+        self.assertLess(
+            self.index.index('id="mainRunewordTab"'),
+            self.index.index('id="mainAdvancedTab"'),
+        )
+        self.assertEqual(affix_tab["aria-selected"], "true")
+        self.assertEqual(affix_tab["tabindex"], "0")
+        self.assertEqual(runeword_tab["aria-selected"], "false")
+        self.assertEqual(runeword_tab["tabindex"], "-1")
+        self.assertEqual(advanced_tab["aria-selected"], "false")
+        self.assertNotIn("hidden", self.parser.attrs["mainAffixPane"])
+        self.assertIn("hidden", self.parser.attrs["mainRunewordPane"])
+
+        state_js = (
+            INDEX_PATH.parent / "scripts" / "state.js"
+        ).read_text(encoding="utf-8")
+        layout_js = (
+            INDEX_PATH.parent / "scripts" / "panel-layout.js"
+        ).read_text(encoding="utf-8")
+        self.assertIn('let mainTabState = "affix";', state_js)
+        self.assertIn(
+            'const order = ["affix", "runeword", "advanced"];',
+            layout_js,
+        )
+        self.assertIn('setMainTab("affix");', layout_js)
+
+    def test_working_base_click_is_not_cancelled_by_focusout(self) -> None:
+        commands = (
+            INDEX_PATH.parent / "scripts" / "commands.js"
+        ).read_text(encoding="utf-8")
+        bootstrap = (
+            INDEX_PATH.parent / "scripts" / "bootstrap.js"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("handleWorkingBaseChooserFocusOut", commands)
+        self.assertNotIn(
+            'workingBaseDetails.addEventListener("focusout"',
+            bootstrap,
+        )
+        self.assertIn("handleWorkingBaseOutsidePointerDown", commands)
+        self.assertIn("closeWorkingBaseChooser(true)", commands)
+
 
 if __name__ == "__main__":
     unittest.main()
