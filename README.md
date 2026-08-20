@@ -1,13 +1,51 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Latest Release](https://img.shields.io/github/v/release/servaltullius/calamity-reactive-loot-affixes?label=Latest%20Release)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/latest)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/latest)
+[![Current RC](https://img.shields.io/badge/Current%20RC-v1.7.5--rc5-f28c28)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5-rc5)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc5/CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip)
+
+## 어떤 모드인가요?
+
+**Calamity - Reactive Loot & Affixes**는 Skyrim SE/AE의 기존 전투와 장비 파밍 위에 Diablo/PoE 스타일의 **어픽스·룬워드·통화 성장 루프**를 추가하는 SKSE 장비 빌드 모드입니다. 새 던전이나 퀘스트를 추가하는 대신, 플레이어가 가진 무기·방어구를 개별 인스턴스로 추적해 전투 효과와 성장 상태를 부여합니다.
+
+**핵심 플레이 루프:** `적 처치 → 시체에서 룬 조각·재련 오브 수집 → 원하는 장비 선택 → 재련·슬롯 확장·룬워드 제작 → 나만의 전투 빌드 완성`
+
+장비를 획득하는 순간 무작위 어픽스를 자동으로 붙이지 않습니다. 플레이어가 Prisma UI에서 원하는 베이스 장비를 직접 선택해 성장시키며, 완성된 장비는 적중·피격·처치 같은 조건에 따라 주문, 함정, 원소 전환, 소환, 시체 폭발 등의 효과를 발동합니다. 통화는 일반 상자나 월드에 뿌리지 않고 적격 적대 대상의 시체에서 획득합니다.
+
+현재 적용 범위는 **플레이어 장비와 플레이어가 지휘하는 소환체의 처치** 중심입니다. 일반 NPC·팔로워 장비 전체를 독립적으로 강화하는 NPC 장비 오버홀 모드는 아닙니다.
 
 ## 다운로드 (플레이어)
 
-- GitHub Releases (최신): https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/latest
-- 다운로드 파일: `CalamityAffixes_MO2_vX.Y.Z_YYYY-MM-DD.zip`
-- 변경 이력: `CHANGELOG.md`
+> **현재 공개 테스트 빌드:** [v1.7.5-rc5](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5-rc5)
+
+- MO2 ZIP: [CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc5/CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip)
+- SHA-256: [CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc5/CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip.sha256)
+- 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
+- 변경 이력: [CHANGELOG.md](CHANGELOG.md)
+
+## 주요 기능
+
+스카이림 SE/AE의 개별 장비 인스턴스에 Diablo/PoE 스타일 어픽스와 룬워드를 부여하고, 전투 발동·ICD·통화 수급을 SKSE 런타임에서 처리합니다.
+
+- 일반 접두 73개, 일반 접미 66개(22계열), 룬워드 94개와 룬 33종을 데이터 기반으로 제공합니다.
+- 적중·피격·처치·저체력 조건의 주문, 전환, 함정, 소환, 시체 폭발 등 다양한 전투 효과를 지원합니다.
+- 장비는 owner FormID + UID 단위로 추적하며, 획득 시 자동 롤 대신 플레이어가 원하는 베이스를 선택해 재련합니다.
+- 룬 조각·재련 오브는 적격 적대 대상의 시체에서만 획득하며, 일반 확률·피티와 고유·보스·드래곤 확정 보상을 함께 지원합니다.
+- Prisma UI에서 선택 장비 툴팁, 어픽스 슬롯 진행, 룬워드 검색·제작, 보유 통화와 피티 현황을 한국어·영어로 확인할 수 있습니다.
+
+## v1.7.5-rc5 핵심 변경
+
+신규 장비도 재련 오브를 사용해 일반 어픽스를 `접두 1 + 접미 2` 구성까지 단계적으로 성장시킬 수 있습니다.
+
+| 현재 일반 어픽스 | 다음 결과 | 비용 |
+| --- | --- | ---: |
+| 0개 | 첫 접두 어픽스 부여(일반 재련) | 재련 오브 1개 |
+| 1개 | 접미 1 슬롯 확장 | 재련 오브 2개 |
+| 2개 | 기존 접미와 다른 계열의 접미 2 슬롯 확장 | 재련 오브 4개 |
+
+- 슬롯 확장은 기존 일반 어픽스를 재굴림하지 않으며, 완성 룬워드와 기존 런타임 상태도 보존합니다.
+- 플레이어 또는 player-owned summon/proxy가 적격 적대 드래곤을 처치하면 시체에 **룬 조각 1개와 재련 오브 1개**가 각각 확정 지급됩니다.
+- 슬롯 성장과 드래곤 보상은 인게임에서 확인했습니다.
+- 기존 세이브와 호환되며 새 게임이 필요하지 않습니다. MO2 업데이트는 **Merge가 아니라 Replace**를 사용하세요.
 
 ## 필수/권장 모드
 
@@ -28,7 +66,8 @@
 - 플레이어 또는 player-owned summon/proxy가 적대 대상을 처치하면 해당 **시체 인벤토리**에만 일반 적 확률 보상 또는 고유·보스 확정 보상이 적용됩니다. (어픽스 자동 부여, 일반 상자/컨테이너/월드 드랍 없음)
 - 인벤/루팅/상점에서 아이템을 “선택”하면 Prisma UI 툴팁에 어픽스 설명이 표시됩니다.
 - Prisma 조작 패널 토글: 기본 `F11` (MCM에서 변경 가능)
-- 룬워드 패널에서 **재련 오브(Reforge Orb)** 를 사용해 선택 장비를 재련할 수 있습니다.
+- Prisma 패널에서 **재련 오브(Reforge Orb)** 를 사용해 선택 장비를 재련할 수 있습니다. 첫 일반 어픽스 부여는 오브 1개, 두 번째 슬롯 확장은 2개, 세 번째 슬롯 확장은 4개를 사용합니다.
+- 일반 적은 룬 조각 8%와 재련 오브 12% 독립 판정을 사용하며, 적격 드래곤은 두 통화를 각각 1개씩 확정 지급합니다. 보상은 플레이어에게 바로 들어오지 않고 처치한 대상의 시체에 추가됩니다.
 - 잘못 연결된 어픽스 상태를 지우려면 장비를 착용·선택한 뒤 **Reset State / 상태 초기화**를 두 번 누릅니다. Calamity 어픽스/룬워드/런타임 상태가 제거되며 재료는 환불되지 않습니다.
 - 룬워드 패널에서 레시피를 선택하면 **효과/권장 베이스/룬 순서/상세**가 한국어/영어 설정에 맞춰 상태 영역에 표시되며, 레시피 항목 hover로도 상세 효과를 확인할 수 있습니다.
 - 패널은 화면 경계 안에 자동 배치되고, 레시피 목록은 wheel·스크롤바 드래그·키보드 스크롤과 ARIA 접근성을 함께 지원합니다.
@@ -78,6 +117,8 @@
 
 - SKSE 플러그인은 아이템 **인스턴스(ExtraUniqueID의 owner FormID + UID)** 상태를 코세이브로 추적/저장합니다.
 - 현재 기본 정책은 **획득/제작 시 자동 어픽스 롤링 비활성화**이며, 어픽스는 재련(Reforge)으로 부여/재롤합니다.
+- 일반 어픽스가 없는 장비는 재련 오브 1개로 첫 접두를 얻고, 이후 슬롯 확장으로 `접두 1 + 접미 2`까지 성장합니다. `1→2`는 오브 2개, `2→3`은 오브 4개를 사용합니다.
+- 일반 재련은 현재 일반 어픽스 개수를 유지한 채 재롤하고, 슬롯 확장은 기존 어픽스와 완성 룬워드를 보존한 채 새 접미만 추가합니다.
 - 장기 세이브 안정성을 위해 인스턴스 어픽스는 SKSE 코세이브에 **문자열이 아닌 64-bit 토큰(FNV-1a)**로 저장합니다(`IAXF v7`). *(v1~v6 레코드는 로드 시 호환 처리)*
   - 따라서 `affix.id`는 **리네임 금지**(기존 세이브 매칭이 깨짐). 변경이 필요하면 “새 id 추가”로 버전업합니다.
 - v1.2.22는 구버전이 플레이어 인벤토리에 잘못 만든 `(item FormID, UID)` 키를 현재 인벤토리에서 정확히 확인되는 경우에만 `(player FormID, UID)`로 보정합니다. 이미 다른 아이템에 잘못 붙은 상태는 자동 추정 이동하지 않으며 위 초기화 버튼으로 제거합니다.
@@ -279,7 +320,8 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 - 재련 오브(리포지):
   - 룬 조각과 같은 eligible hostile corpse-only 경로로 획득합니다.
   - 기본 확률은 `loot.reforgeOrbChancePercent=12`입니다.
-  - 룬워드 패널 `Reforge / 재련` 버튼으로 **선택된 장착 장비**에 1개를 소모해 재련합니다.
+  - Prisma 패널 `Reforge / 재련` 버튼으로 **선택된 장착 장비**에 1개를 소모해 현재 일반 어픽스 개수를 유지한 채 재련합니다.
+  - 아이템 어픽스 탭의 슬롯 확장은 일반 어픽스 `1→2`에 2개, `2→3`에 4개를 사용합니다. 기존 어픽스와 완성 룬워드는 보존됩니다.
   - 일반 장비 재련: 일반 어픽스를 재굴림합니다.
   - 완성 룬워드 장비 재련: **룬워드 효과는 보존**하고, 일반 어픽스만 재롤합니다.
   - 룬워드 재변환: 이미 룬워드가 완성된 장비에 새 룬워드를 적용하면 기존 룬워드를 교체합니다.
