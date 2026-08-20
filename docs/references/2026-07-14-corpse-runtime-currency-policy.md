@@ -24,6 +24,7 @@
 | 플레이어가 일반 적대 대상을 처치 | 예 | SKSE death event에서 룬 조각/재련 오브 독립 확률 판정 |
 | 플레이어가 `Unique` 고유·네임드 적을 처치 | 예 | 룬 조각 40%/재련 오브 60% 중 1개 확정 |
 | 플레이어가 `LocRefTypeBoss` 보스를 처치 | 예 | 룬 조각 1개와 재련 오브 1개를 각각 확정 |
+| 플레이어가 `ActorTypeDragon` 드래곤을 처치 | 예 | `LocRefTypeBoss` 지정 여부와 관계없이 룬 조각 1개와 재련 오브 1개를 각각 확정 |
 | player-owned summon/proxy가 적대 대상을 처치 | 예 | `IsPlayerOwned(killer)`로 플레이어 측 처치에 포함 |
 | 일반 상자/보스 상자 활성화 | 아니요 | 컨테이너 종류와 무관하게 판정 없음 |
 | 시체 활성화/열기 | 아니요 | 사망 시 이미 처리하므로 열 때 재판정하지 않음 |
@@ -64,8 +65,8 @@
 - 룬워드 조각 기본 판정: `8%`
 - 재련 오브 기본 판정: `12%`
 - `Unique` 고유·네임드 적: 룬 조각 `40%` / 재련 오브 `60%` 중 1개 확정
-- `LocRefTypeBoss` 보스: 룬 조각 1개 + 재련 오브 1개 확정
-- 보스 판정은 `Unique` 판정보다 우선하며 보상을 중첩하지 않음
+- `LocRefTypeBoss` 보스 또는 `ActorTypeDragon` 드래곤: 룬 조각 1개 + 재련 오브 1개 확정
+- 보스·드래곤 판정은 `Unique` 판정보다 우선하며 보상을 중첩하지 않음
 - 고유·보스 확정 보상은 일반 확률 판정 및 피티와 독립
 - 룬 조각 피티: 99회 연속 실패 뒤 다음 적격 판정을 보장하는 기존 계약 유지
 - 룬 가중치:
@@ -129,6 +130,6 @@ MCM에서 확률을 바꾸면 다음 적격 일반 적 death event부터 적용�
 
 `loot.currencyDropMode=hybrid` remains only as a legacy compatibility token. Actual currency authority is the SKSE death-event eligible-hostile-corpse-only path. A hostile victim killed by the player or a player-owned summon/proxy can receive a successful fragment/orb roll directly in its corpse inventory. Generic containers, corpse activation, pickup rolls, world spawning, direct player grants, and new SPID currency distribution are disabled.
 
-Follower/teammate, summoned/commanded, child, player-owned, or non-hostile victims are excluded. Environmental-object kills and kills by independent non-player-owned NPCs/followers are also excluded. Normal-enemy defaults are 8% fragments and 12% orbs, rolled independently. Unique actors receive one guaranteed reward selected as 40% fragment / 60% orb, while `LocRefTypeBoss` actors receive one of each. Special guarantees do not run normal rolls or modify normal pity. Rune weights remain 4/3/2/1 and the 99-failure fragment pity remains. `CCRT v1` persists pity counters and the per-corpse category ledger. Existing gear, currencies, completed runewords, and prior serialization records remain compatible.
+Follower/teammate, summoned/commanded, child, player-owned, or non-hostile victims are excluded. Environmental-object kills and kills by independent non-player-owned NPCs/followers are also excluded. Normal-enemy defaults are 8% fragments and 12% orbs, rolled independently. Unique actors receive one guaranteed reward selected as 40% fragment / 60% orb, while `LocRefTypeBoss` actors and `ActorTypeDragon` dragons receive one of each. Special guarantees do not run normal rolls or modify normal pity. Rune weights remain 4/3/2/1 and the 99-failure fragment pity remains. `CCRT v1` persists pity counters and the per-corpse category ledger. Existing gear, currencies, completed runewords, and prior serialization records remain compatible.
 
 When upgrading in MO2, replace/overwrite the existing mod or disable the old DISTR file. Enabling the new build as a separate layer can let the older `CalamityAffixes_DISTR.ini` override the new empty compatibility file when conflict priority is wrong.

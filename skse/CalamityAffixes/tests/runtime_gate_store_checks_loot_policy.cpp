@@ -222,8 +222,10 @@ namespace RuntimeGateStoreChecks
 		if (ResolveCorpseCurrencyRewardTier({}) != CorpseCurrencyRewardTier::kNormal ||
 			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .actorBaseIsUnique = true }) != CorpseCurrencyRewardTier::kUnique ||
 			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .hasBossLocationRefType = true }) != CorpseCurrencyRewardTier::kBoss ||
-			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .hasBossLocationRefType = true, .actorBaseIsUnique = true }) != CorpseCurrencyRewardTier::kBoss) {
-			std::cerr << "corpse_currency_special_reward: boss/unique tier precedence is incorrect\n";
+			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .actorIsDragon = true }) != CorpseCurrencyRewardTier::kBoss ||
+			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .hasBossLocationRefType = true, .actorBaseIsUnique = true }) != CorpseCurrencyRewardTier::kBoss ||
+			ResolveCorpseCurrencyRewardTier(CorpseCurrencyActorTierInput{ .actorIsDragon = true, .actorBaseIsUnique = true }) != CorpseCurrencyRewardTier::kBoss) {
+			std::cerr << "corpse_currency_special_reward: boss/dragon/unique tier precedence is incorrect\n";
 			return false;
 		}
 

@@ -155,6 +155,7 @@ namespace CalamityAffixes
 			const auto* actorBase = dying->GetActorBase();
 			const auto rewardTier = detail::ResolveCorpseCurrencyRewardTier({
 				.hasBossLocationRefType = HasBossLocationRefType(dying),
+				.actorIsDragon = dying->HasKeywordString("ActorTypeDragon"),
 				.actorBaseIsUnique = actorBase && actorBase->IsUnique()
 			});
 

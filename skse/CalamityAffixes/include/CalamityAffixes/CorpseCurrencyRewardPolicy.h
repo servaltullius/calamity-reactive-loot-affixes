@@ -16,13 +16,14 @@ namespace CalamityAffixes::detail
 	struct CorpseCurrencyActorTierInput
 	{
 		bool hasBossLocationRefType{ false };
+		bool actorIsDragon{ false };
 		bool actorBaseIsUnique{ false };
 	};
 
 	[[nodiscard]] constexpr CorpseCurrencyRewardTier ResolveCorpseCurrencyRewardTier(
 		const CorpseCurrencyActorTierInput& a_input) noexcept
 	{
-		if (a_input.hasBossLocationRefType) {
+		if (a_input.hasBossLocationRefType || a_input.actorIsDragon) {
 			return CorpseCurrencyRewardTier::kBoss;
 		}
 		if (a_input.actorBaseIsUnique) {

@@ -32,7 +32,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - **일반 상자/컨테이너 활성화, 픽업, 월드 생성, 새 SPID 통화 분배는 모두 없습니다.**
 - 일반 적 기본 확률: 룬워드 조각 `8%`, 재련 오브 `12%` (MCM 변경은 다음 적격 일반 적 사망부터 반영)
 - `Unique` 고유·네임드 적: 룬워드 조각 `40%` / 재련 오브 `60%` 중 1개 확정
-- `LocRefTypeBoss` 보스: 룬워드 조각 1개 + 재련 오브 1개 확정 (`Boss`가 `Unique`보다 우선)
+- `LocRefTypeBoss` 보스 또는 `ActorTypeDragon` 드래곤: 룬워드 조각 1개 + 재련 오브 1개 확정 (`Boss/Dragon`이 `Unique`보다 우선)
 - 고유·보스 확정 보상은 일반 확률 판정과 피티를 소비하거나 초기화하지 않음
 - 룬 가중치: `El-Amn=4`, `Sol-Um=3`, `Mal-Lo=2`, `Sur-Zod=1` (최대 `4:1`)
 - 룬 조각 99회 연속 실패 피티를 유지하며, 피티와 시체별 중복 방지 ledger를 `CCRT` 코세이브 레코드에 저장합니다.
@@ -112,7 +112,7 @@ It tracks item instances via ExtraUniqueID, and the current build is **Reforge-c
 - **No generic container activation, pickup roll, world spawn, or new SPID currency distribution.**
 - Normal-enemy rates: runeword fragment `8%`, reforge orb `12%` (MCM changes apply to the next eligible normal-enemy death)
 - Unique/named actors: one guaranteed currency reward, selected as `40%` fragment / `60%` reforge orb
-- `LocRefTypeBoss` actors: one guaranteed fragment plus one guaranteed reforge orb (`Boss` overrides `Unique`)
+- `LocRefTypeBoss` actors and `ActorTypeDragon` dragons: one guaranteed fragment plus one guaranteed reforge orb (`Boss/Dragon` overrides `Unique`)
 - Unique/boss guarantees neither run additional normal rolls nor advance/reset normal pity
 - Rune weights: `El-Amn=4`, `Sol-Um=3`, `Mal-Lo=2`, `Sur-Zod=1` (maximum `4:1`)
 - The 99-failure rune-fragment pity remains; pity and the per-corpse duplicate ledger are saved in the `CCRT` co-save record.
