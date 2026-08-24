@@ -12,6 +12,7 @@
 #include <SKSE/SKSE.h>
 
 #include "CalamityAffixes/HitDataUtil.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 
 namespace CalamityAffixes::Hooks::detail
 {
@@ -278,12 +279,12 @@ namespace CalamityAffixes::Hooks::detail
 					auto* spell = RE::TESForm::LookupByID<RE::SpellItem>(conv.spellFormID);
 					if (spell) {
 						if (auto* caster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-							caster->CastSpellImmediate(
+							CastHostileOnlySpellImmediate(
+								caster,
 								spell,
 								conv.noHitEffectArt,
 								a_target,
 								conv.effectiveness,
-								false,
 								conv.magnitudeOverride,
 								a_attacker);
 						}
@@ -299,12 +300,12 @@ namespace CalamityAffixes::Hooks::detail
 						if (!coc.spell) {
 							continue;
 						}
-						magicCaster->CastSpellImmediate(
+						CastHostileOnlySpellImmediate(
+							magicCaster,
 							coc.spell,
 							coc.noHitEffectArt,
 							a_target,
 							coc.effectiveness,
-							false,
 							coc.magnitudeOverride,
 							a_attacker);
 						if (!feedbackSpell && coc.noHitEffectArt) {

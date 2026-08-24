@@ -58,6 +58,67 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
+    public void RepoSpec_AllGeneratedHostileMagicEffects_AreHostileToPlayerOnly()
+    {
+        var repoRoot = FindRepoRoot();
+        var spec = AffixSpecLoader.Load(Path.Combine(repoRoot, "affixes", "affixes.json"));
+        var mod = KeywordPluginBuilder.Build(spec);
+        var playerRef = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000014);
+
+        var hostileEffects = mod.MagicEffects
+            .Where(effect => effect.Flags.HasFlag(MagicEffect.Flag.Hostile))
+            .ToArray();
+        Assert.NotEmpty(hostileEffects);
+
+        foreach (var effect in hostileEffects)
+        {
+            Assert.Equal(2, effect.Conditions.Count);
+            var condition = Assert.IsAssignableFrom<IConditionFloatGetter>(effect.Conditions[0]);
+            Assert.Equal(CompareOperator.EqualTo, condition.CompareOperator);
+            Assert.Equal(1.0f, condition.ComparisonValue);
+
+            var data = Assert.IsAssignableFrom<IIsHostileToActorConditionDataGetter>(condition.Data);
+            Assert.Equal(Condition.RunOnType.Subject, data.RunOnType);
+            Assert.Null(data.TargetNpc.Index);
+            Assert.Equal(playerRef, data.TargetNpc.Link.FormKeyNullable);
+            var teammateCondition = Assert.IsAssignableFrom<IConditionFloatGetter>(effect.Conditions[1]);
+            Assert.Equal(CompareOperator.EqualTo, teammateCondition.CompareOperator);
+            Assert.Equal(0.0f, teammateCondition.ComparisonValue);
+            var teammateData = Assert.IsAssignableFrom<IGetPlayerTeammateConditionDataGetter>(teammateCondition.Data);
+            Assert.Equal(Condition.RunOnType.Subject, teammateData.RunOnType);
+        }
+    }
+
+    [Fact]
+    public void GeneratedDataEsp_AllHostileMagicEffects_AreHostileToPlayerOnly()
+    {
+        var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
+        using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
+        var playerRef = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000014);
+        var hostileEffects = mod.MagicEffects
+            .Where(effect => effect.Flags.HasFlag(MagicEffect.Flag.Hostile))
+            .ToArray();
+        Assert.NotEmpty(hostileEffects);
+
+        foreach (var effect in hostileEffects)
+        {
+            Assert.Equal(2, effect.Conditions.Count);
+            var condition = Assert.IsAssignableFrom<IConditionFloatGetter>(effect.Conditions[0]);
+            Assert.Equal(CompareOperator.EqualTo, condition.CompareOperator);
+            Assert.Equal(1.0f, condition.ComparisonValue);
+
+            var data = Assert.IsAssignableFrom<IIsHostileToActorConditionDataGetter>(condition.Data);
+            Assert.Equal(Condition.RunOnType.Subject, data.RunOnType);
+            Assert.Equal(playerRef, data.TargetNpc.Link.FormKeyNullable);
+            var teammateCondition = Assert.IsAssignableFrom<IConditionFloatGetter>(effect.Conditions[1]);
+            Assert.Equal(CompareOperator.EqualTo, teammateCondition.CompareOperator);
+            Assert.Equal(0.0f, teammateCondition.ComparisonValue);
+            var teammateData = Assert.IsAssignableFrom<IGetPlayerTeammateConditionDataGetter>(teammateCondition.Data);
+            Assert.Equal(Condition.RunOnType.Subject, teammateData.RunOnType);
+        }
+    }
+
+    [Fact]
     public void RepoSpec_GeneratedEffectRecordsMatchApprovedSemantics()
     {
         var repoRoot = FindRepoRoot();
@@ -183,7 +244,7 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFortyOneTypedRecords()
+    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFiftyTypedRecords()
     {
         var repoRoot = FindRepoRoot();
         var fixture = ReadV140AllocationFixture(repoRoot);
@@ -191,7 +252,7 @@ public sealed class RepoSpecRegressionTests
         var mod = KeywordPluginBuilder.Build(spec);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(774, actual.Length);
+        Assert.Equal(783, actual.Length);
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -215,8 +276,8 @@ public sealed class RepoSpecRegressionTests
         Assert.True(mod.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
-            actual.TakeLast(ExpectedWorldMarkers.Length));
-        Assert.Equal(0x000B06u, ((IModGetter)mod).NextFormID);
+            actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
+        Assert.Equal(0x000B0Fu, ((IModGetter)mod).NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -242,12 +303,12 @@ public sealed class RepoSpecRegressionTests
             using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
             var reimportedAllocation = AllocationSignature(reimported);
 
-            Assert.Equal(774, generatedAllocation.Length);
+            Assert.Equal(783, generatedAllocation.Length);
             Assert.Equal(generatedAllocation, reimportedAllocation);
             Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
-            Assert.Equal(generatedAllocation.TakeLast(41), reimportedAllocation.TakeLast(41));
+            Assert.Equal(generatedAllocation.TakeLast(50), reimportedAllocation.TakeLast(50));
             Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-            Assert.Equal(0x000B06u, reimported.NextFormID);
+            Assert.Equal(0x000B0Fu, reimported.NextFormID);
             AssertWorldMarkers(reimported);
         }
         finally
@@ -265,7 +326,7 @@ public sealed class RepoSpecRegressionTests
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(774, actual.Length);
+        Assert.Equal(783, actual.Length);
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -289,8 +350,8 @@ public sealed class RepoSpecRegressionTests
         Assert.True(mod.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
-            actual.TakeLast(ExpectedWorldMarkers.Length));
-        Assert.Equal(0x000B06u, mod.NextFormID);
+            actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
+        Assert.Equal(0x000B0Fu, mod.NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(

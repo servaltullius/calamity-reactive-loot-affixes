@@ -283,30 +283,37 @@
 - **`crit_cast_firebolt`** [Armor]
   - 한글 표시: 치명 시전: 파이어볼트: 근접 치명타/강공 시 100%, 근접 일반 공격 시 45%, 활·석궁은 일반 적중 시에도 100% 확률로 파이어볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
   - 영문 표시: Crit Cast: Firebolt (100% Melee Crit/Power Attack; 45% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Firebolt; damage is the greater of the spell's base damage and 30% of physical hit damage.
+  - 대표 스펠: `CAFF_SPEL_COC_FIREBOLT_HOSTILE_ONLY`
 
 - **`crit_cast_ice_spike`** [Armor]
   - 한글 표시: 치명 시전: 아이스 스파이크: 근접 치명타/강공 시 100%, 근접 일반 공격 시 45%, 활·석궁은 일반 적중 시에도 100% 확률로 아이스 스파이크 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
   - 영문 표시: Crit Cast: Ice Spike (100% Melee Crit/Power Attack; 45% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Ice Spike; damage is the greater of the spell's base damage and 30% of physical hit damage.
+  - 대표 스펠: `CAFF_SPEL_COC_ICE_SPIKE_HOSTILE_ONLY`
 
 - **`crit_cast_lightning_bolt`** [Armor]
   - 한글 표시: 치명 시전: 라이트닝 볼트: 근접 치명타/강공 시 100%, 근접 일반 공격 시 45%, 활·석궁은 일반 적중 시에도 100% 확률로 라이트닝 볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
   - 영문 표시: Crit Cast: Lightning Bolt (100% Melee Crit/Power Attack; 45% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Lightning Bolt; damage is the greater of the spell's base damage and 30% of physical hit damage.
+  - 대표 스펠: `CAFF_SPEL_COC_LIGHTNING_BOLT_HOSTILE_ONLY`
 
 - **`crit_cast_thunderbolt`** [Armor]
   - 한글 표시: 치명 시전: 썬더볼트: 근접 치명타/강공 시 100%, 근접 일반 공격 시 35%, 활·석궁은 일반 적중 시에도 100% 확률로 썬더볼트 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
   - 영문 표시: Crit Cast: Thunderbolt (100% Melee Crit/Power Attack; 35% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Thunderbolt; damage is the greater of the spell's base damage and 30% of physical hit damage.
+  - 대표 스펠: `CAFF_SPEL_COC_THUNDERBOLT_HOSTILE_ONLY`
 
 - **`crit_cast_icy_spear`** [Armor]
   - 한글 표시: 치명 시전: 아이시 스피어: 근접 치명타/강공 시 100%, 근접 일반 공격 시 35%, 활·석궁은 일반 적중 시에도 100% 확률로 아이시 스피어 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
   - 영문 표시: Crit Cast: Icy Spear (100% Melee Crit/Power Attack; 35% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Icy Spear; damage is the greater of the spell's base damage and 30% of physical hit damage.
+  - 대표 스펠: `CAFF_SPEL_COC_ICY_SPEAR_HOSTILE_ONLY`
 
 - **`crit_cast_chain_lightning`** [Armor]
   - 한글 표시: 치명 시전: 체인 라이트닝: 근접 치명타/강공 시 100%, 근접 일반 공격 시 35%, 활·석궁은 일반 적중 시에도 100% 확률로 체인 라이트닝 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
   - 영문 표시: Crit Cast: Chain Lightning (100% Melee Crit/Power Attack; 35% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Chain Lightning; damage is the greater of the spell's base damage and 30% of physical hit damage.
+  - 대표 스펠: `CAFF_SPEL_COC_CHAIN_LIGHTNING_HOSTILE_ONLY`
 
 - **`crit_cast_ice_storm`** [Armor]
   - 한글 표시: 치명 시전: 아이스 스톰: 근접 치명타/강공 시 100%, 근접 일반 공격 시 35%, 활·석궁은 일반 적중 시에도 100% 확률로 아이스 스톰 시전. 피해는 주문 기본 피해와 물리 적중 피해의 30% 중 큰 값. 0.15초마다 발동.
   - 영문 표시: Crit Cast: Ice Storm (100% Melee Crit/Power Attack; 35% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Ice Storm; damage is the greater of the spell's base damage and 30% of physical hit damage.
+  - 대표 스펠: `CAFF_SPEL_COC_ICE_STORM_HOSTILE_ONLY`
 
 ## 시체 소각 (죽음의 화장)
 

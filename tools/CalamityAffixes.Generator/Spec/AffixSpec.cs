@@ -383,6 +383,18 @@ public sealed class SpellRecordSpec
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? CastType { get; init; }
 
+    [JsonPropertyName("chargeTime")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? ChargeTime { get; init; }
+
+    [JsonPropertyName("range")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? Range { get; init; }
+
+    [JsonPropertyName("equipTypeForm")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? EquipTypeForm { get; init; }
+
     [JsonPropertyName("effect")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public SpellEffectRecordSpec? Effect { get; init; }
@@ -415,7 +427,16 @@ public sealed class SpellRecordSpec
 public sealed class SpellEffectRecordSpec
 {
     [JsonPropertyName("magicEffectEditorId")]
-    public required string MagicEffectEditorId { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MagicEffectEditorId { get; init; }
+
+    [JsonPropertyName("magicEffectForm")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MagicEffectForm { get; init; }
+
+    [JsonPropertyName("hostileOnly")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool HostileOnly { get; init; }
 
     [JsonPropertyName("magnitude")]
     public double Magnitude { get; init; }

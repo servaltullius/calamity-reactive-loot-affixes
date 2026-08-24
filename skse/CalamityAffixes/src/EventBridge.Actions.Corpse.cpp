@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 
 #include "CalamityAffixes/CorpseExplosionSelectionPolicy.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
@@ -485,7 +486,7 @@ namespace CalamityAffixes
 				return RE::BSContainer::ForEachResult::kContinue;
 			}
 
-			if (!a_owner->IsHostileToActor(std::addressof(a))) {
+			if (!IsHostileEffectTarget(a_owner, std::addressof(a))) {
 				return RE::BSContainer::ForEachResult::kContinue;
 			}
 
@@ -538,12 +539,12 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			magicCaster->CastSpellImmediate(
+			CastHostileOnlySpellImmediate(
+				magicCaster,
 				a_action.spell,
 				a_action.noHitEffectArt,
 				actor,
 				a_action.effectiveness,
-				false,
 				a_baseDamage,
 				a_owner);
 			hitCount += 1;

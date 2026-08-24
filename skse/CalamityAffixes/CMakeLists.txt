@@ -17,6 +17,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 		set(headers
 		    include/CalamityAffixes/CombatContext.h
 		    include/CalamityAffixes/CombatRuntimeState.h
+		    include/CalamityAffixes/HostileEffectDamagePolicy.h
+		    include/CalamityAffixes/HostileEffectGuard.h
 		    include/CalamityAffixes/AffixSpecialActionState.h
 	    include/CalamityAffixes/AffixToken.h
 	    include/CalamityAffixes/EventBridge.h
@@ -122,6 +124,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Serialization.Save.cpp
 	    src/EventBridge.Serialization.Load.cpp
 	    src/EventBridge.Serialization.Lifecycle.cpp
+	    src/HostileEffectGuard.cpp
 	    src/Hooks.cpp
 	    src/Hooks.Dispatch.cpp
 	    src/Papyrus.cpp
@@ -255,6 +258,7 @@ if (BUILD_TESTING)
             tests/test_serialization_drain_policy.cpp
             tests/test_special_action_safety_policy.cpp
             tests/test_currency_drop_runtime_policy.cpp
+            tests/test_hostile_effect_damage_policy.cpp
             tests/test_player_health_damage_hook_policy.cpp
             tests/test_proc_chance_policy.cpp
             tests/test_synthesized_affix_display_name_policy.cpp

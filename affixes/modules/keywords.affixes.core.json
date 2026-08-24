@@ -1464,10 +1464,10 @@
             "spellEditorId": "CAFF_SPEL_TRAP_DRAGONTEETH_DRAIN_STAMINA"
           },
           {
-            "spellForm": "Skyrim.esm|0006D22C"
+            "spellEditorId": "CAFF_SPEL_TRAP_BANISH_DAEDRA_HOSTILE_ONLY"
           },
           {
-            "spellForm": "Skyrim.esm|0004B146"
+            "spellEditorId": "CAFF_SPEL_TRAP_TURN_UNDEAD_HOSTILE_ONLY"
           }
         ],
       "noHitEffectArt": true,
@@ -2179,7 +2179,7 @@
       "normalWeaponHitProcChancePercent": 45.0,
       "action": {
         "type": "CastOnCrit",
-        "spellForm": "Skyrim.esm|00012FD0",
+        "spellEditorId": "CAFF_SPEL_COC_FIREBOLT_HOSTILE_ONLY",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2213,7 +2213,7 @@
       "normalWeaponHitProcChancePercent": 45.0,
       "action": {
         "type": "CastOnCrit",
-        "spellForm": "Skyrim.esm|0002B96C",
+        "spellEditorId": "CAFF_SPEL_COC_ICE_SPIKE_HOSTILE_ONLY",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2247,7 +2247,7 @@
       "normalWeaponHitProcChancePercent": 45.0,
       "action": {
         "type": "CastOnCrit",
-        "spellForm": "Skyrim.esm|0002DD29",
+        "spellEditorId": "CAFF_SPEL_COC_LIGHTNING_BOLT_HOSTILE_ONLY",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2281,7 +2281,7 @@
       "normalWeaponHitProcChancePercent": 35.0,
       "action": {
         "type": "CastOnCrit",
-        "spellForm": "Skyrim.esm|0010F7EE",
+        "spellEditorId": "CAFF_SPEL_COC_THUNDERBOLT_HOSTILE_ONLY",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2315,7 +2315,7 @@
       "normalWeaponHitProcChancePercent": 35.0,
       "action": {
         "type": "CastOnCrit",
-        "spellForm": "Skyrim.esm|0010F7EC",
+        "spellEditorId": "CAFF_SPEL_COC_ICY_SPEAR_HOSTILE_ONLY",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2349,7 +2349,7 @@
       "normalWeaponHitProcChancePercent": 35.0,
       "action": {
         "type": "CastOnCrit",
-        "spellForm": "Skyrim.esm|00045F9D",
+        "spellEditorId": "CAFF_SPEL_COC_CHAIN_LIGHTNING_HOSTILE_ONLY",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2383,7 +2383,7 @@
       "normalWeaponHitProcChancePercent": 35.0,
       "action": {
         "type": "CastOnCrit",
-        "spellForm": "Skyrim.esm|00045F9C",
+        "spellEditorId": "CAFF_SPEL_COC_ICE_STORM_HOSTILE_ONLY",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",

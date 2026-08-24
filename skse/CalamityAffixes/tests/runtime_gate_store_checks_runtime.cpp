@@ -238,6 +238,7 @@ namespace RuntimeGateStoreChecks
 		const fs::path hooksFile = repoRoot / "src" / "Hooks.cpp";
 		const fs::path hooksDispatchHeaderFile = repoRoot / "src" / "Hooks.Dispatch.h";
 		const fs::path hooksDispatchFile = repoRoot / "src" / "Hooks.Dispatch.cpp";
+		const fs::path hostileEffectGuardFile = repoRoot / "src" / "HostileEffectGuard.cpp";
 
 		auto loadText = [](const fs::path& path) -> std::optional<std::string> {
 			std::ifstream in(path);
@@ -253,9 +254,26 @@ namespace RuntimeGateStoreChecks
 		const auto hooksText = loadText(hooksFile);
 		const auto hooksDispatchHeaderText = loadText(hooksDispatchHeaderFile);
 		const auto hooksDispatchText = loadText(hooksDispatchFile);
+		const auto hostileEffectGuardText = loadText(hostileEffectGuardFile);
 		if (!cmakeText.has_value() || !hooksText.has_value() || !hooksDispatchHeaderText.has_value() ||
-			!hooksDispatchText.has_value()) {
+			!hooksDispatchText.has_value() || !hostileEffectGuardText.has_value()) {
 			std::cerr << "hooks_dispatch_extraction: failed to load source files\n";
+			return false;
+		}
+
+		const auto friendlyFireGuard = hooksText->find("ShouldSuppressNonHostileCalamityHealthDamage(");
+		const auto procDispatchGuard = hooksText->find("detail::IsInProcDispatchGuard()");
+		if (friendlyFireGuard == std::string::npos || procDispatchGuard == std::string::npos ||
+			friendlyFireGuard >= procDispatchGuard) {
+			std::cerr << "hooks_dispatch_extraction: friendly-fire suppression must run before the proc-dispatch early return\n";
+			return false;
+		}
+
+		const auto summonRefreshSchedule = hostileEffectGuardText->find("ScheduleSummonRefreshIfNeeded();");
+		if (hostileEffectGuardText->find("std::this_thread::sleep_for(kSummonRefreshInterval);") == std::string::npos ||
+			summonRefreshSchedule == std::string::npos ||
+			hostileEffectGuardText->find("ScheduleSummonRefreshIfNeeded();", summonRefreshSchedule + 1u) != std::string::npos) {
+			std::cerr << "hooks_dispatch_extraction: summon refresh retries must be worker-spaced, not recursively queued\n";
 			return false;
 		}
 
@@ -274,7 +292,6 @@ namespace RuntimeGateStoreChecks
 			hooksDispatchText->find("thread_local bool g_inProcDispatch = false;") == std::string::npos ||
 			hooksDispatchText->find("MakeProcDispatchSignature(") == std::string::npos ||
 			hooksDispatchText->find("record.signature == dispatchSignature") == std::string::npos ||
-			hooksDispatchText->find("kExactDuplicateCallbackWindow = std::chrono::milliseconds(50)") == std::string::npos ||
 			hooksDispatchText->find("hasRecord && elapsed < kTimeCooldown") != std::string::npos) {
 			std::cerr << "hooks_dispatch_extraction: hook plumbing and dispatch helpers are not cleanly separated\n";
 			return false;

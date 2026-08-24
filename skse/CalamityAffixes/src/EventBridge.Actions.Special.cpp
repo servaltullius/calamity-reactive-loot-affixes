@@ -2,6 +2,7 @@
 
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/HitDataUtil.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
 #include "CalamityAffixes/SpecialActionSafetyPolicy.h"
@@ -70,14 +71,7 @@ namespace CalamityAffixes
 			return {};
 		}
 		const auto now = std::chrono::steady_clock::now();
-		const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
-		const bool allowNeutralOutgoing =
-			ShouldResolveNonHostileOutgoingFirstHitAllowance(
-				true,
-				a_target->IsPlayerRef(),
-				AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
-			ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
-		if (!(hostileEitherDirection || allowNeutralOutgoing)) {
+		if (!IsHostileEffectTarget(a_attacker, a_target)) {
 			return {};
 		}
 		if (!HitDataUtil::IsWeaponLikeHit(a_hitData, a_attacker)) {
@@ -451,16 +445,10 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		// Avoid friendly-fire spam.
+		// Offensive proc spells are hostile-only even when the initiating hit is
+		// allowed through the neutral first-hit compatibility lane.
 		const auto now = std::chrono::steady_clock::now();
-		const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
-		const bool allowNeutralOutgoing =
-			ShouldResolveNonHostileOutgoingFirstHitAllowance(
-				true,
-				a_target->IsPlayerRef(),
-				AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
-			ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
-		if (!(hostileEitherDirection || allowNeutralOutgoing)) {
+		if (!IsHostileEffectTarget(a_attacker, a_target)) {
 			return {};
 		}
 		if (now < _combatState.castOnCritNextAllowed) {

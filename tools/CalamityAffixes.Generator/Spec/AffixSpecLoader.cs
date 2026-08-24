@@ -174,7 +174,7 @@ public static class AffixSpecLoader
                     throw new InvalidDataException($"Duplicate Spell editorId: {spell.EditorId}");
                 }
 
-                if (spell.Delivery is not ("Self" or "TargetActor"))
+                if (spell.Delivery is not ("Self" or "TargetActor" or "Aimed"))
                 {
                     throw new InvalidDataException($"Unknown Spell delivery: {spell.Delivery} (Spell: {spell.EditorId})");
                 }
@@ -200,10 +200,13 @@ public static class AffixSpecLoader
 
                 for (var i = 0; i < effects.Count; i += 1)
                 {
-                    if (string.IsNullOrWhiteSpace(effects[i].MagicEffectEditorId))
+                    var hasEditorId = !string.IsNullOrWhiteSpace(effects[i].MagicEffectEditorId);
+                    var hasForm = !string.IsNullOrWhiteSpace(effects[i].MagicEffectForm);
+                    if (hasEditorId == hasForm)
                     {
                         throw new InvalidDataException(
-                            $"Spell {spell.EditorId} has an empty magicEffectEditorId at effect index {i}.");
+                            $"Spell {spell.EditorId} effect index {i} requires exactly one of " +
+                            "magicEffectEditorId or magicEffectForm.");
                     }
                 }
 
@@ -253,7 +256,7 @@ public static class AffixSpecLoader
                         throw new InvalidDataException($"Duplicate appended Spell editorId: {spell.EditorId}");
                     }
 
-                    if (spell.Delivery is not ("Self" or "TargetActor"))
+                    if (spell.Delivery is not ("Self" or "TargetActor" or "Aimed"))
                     {
                         throw new InvalidDataException(
                             $"Unknown Spell delivery: {spell.Delivery} (appended Spell: {spell.EditorId})");
@@ -280,10 +283,13 @@ public static class AffixSpecLoader
 
                     for (var i = 0; i < effects.Count; i += 1)
                     {
-                        if (string.IsNullOrWhiteSpace(effects[i].MagicEffectEditorId))
+                        var hasEditorId = !string.IsNullOrWhiteSpace(effects[i].MagicEffectEditorId);
+                        var hasForm = !string.IsNullOrWhiteSpace(effects[i].MagicEffectForm);
+                        if (hasEditorId == hasForm)
                         {
                             throw new InvalidDataException(
-                                $"Appended Spell {spell.EditorId} has an empty magicEffectEditorId at effect index {i}.");
+                                $"Appended Spell {spell.EditorId} effect index {i} requires exactly one of " +
+                                "magicEffectEditorId or magicEffectForm.");
                         }
                     }
 
@@ -351,7 +357,8 @@ public static class AffixSpecLoader
         {
             foreach (var effect in spell.ResolveEffects())
             {
-                if (!seenMagicEffects.Contains(effect.MagicEffectEditorId))
+                if (!string.IsNullOrWhiteSpace(effect.MagicEffectEditorId) &&
+                    !seenMagicEffects.Contains(effect.MagicEffectEditorId))
                 {
                     throw new InvalidDataException(
                         $"Spell {spell.EditorId} references missing MagicEffect {effect.MagicEffectEditorId}.");

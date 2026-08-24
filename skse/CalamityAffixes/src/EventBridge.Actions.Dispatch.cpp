@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
 
 namespace CalamityAffixes
@@ -21,6 +22,9 @@ namespace CalamityAffixes
 			if (!a_owner->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
 				return false;
 			}
+			if (!action.applyToSelf && !IsHostileEffectTarget(a_owner, a_target)) {
+				return false;
+			}
 			if (!action.modeCycleEnabled || action.modeCycleSpells.empty()) {
 				return action.spell != nullptr;
 			}
@@ -32,6 +36,9 @@ namespace CalamityAffixes
 			return false;
 		case ActionType::kCastSpellAdaptiveElement: {
 			if (!a_owner->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+				return false;
+			}
+			if (!action.applyToSelf && !IsHostileEffectTarget(a_owner, a_target)) {
 				return false;
 			}
 

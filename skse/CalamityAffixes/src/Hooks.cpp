@@ -11,6 +11,7 @@
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HitDataUtil.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/TriggerGuards.h"
 
@@ -208,6 +209,21 @@ namespace CalamityAffixes::Hooks
 						reinterpret_cast<std::uintptr_t>(a_attacker));
 				}
 
+				const auto* rawHitData = HitDataUtil::GetLastHitData(safeTarget);
+				if (!inHook && ShouldSuppressNonHostileCalamityHealthDamage(
+						safeTarget,
+						safeAttacker,
+						rawHitData)) {
+					ScopedFlag guard(inHook);
+					SKSE::log::debug(
+						"CalamityAffixes: suppressed non-hostile Calamity health damage (target={}, attacker={}, damage={}).",
+						safeTarget->GetName(),
+						safeAttacker ? safeAttacker->GetName() : "<none>",
+						a_damage);
+					CallOriginal(a_original, safeTarget, safeAttacker, 0.0f, a_hookLabel);
+					return;
+				}
+
 				if (inHook || detail::IsInProcDispatchGuard()) {
 					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 					return;
@@ -241,7 +257,6 @@ namespace CalamityAffixes::Hooks
 					return;
 				}
 
-				const auto* rawHitData = HitDataUtil::GetLastHitData(safeTarget);
 				const auto* preHitData = detail::ResolveStableHitDataForSpecialActions(
 					rawHitData,
 					safeTarget,
@@ -307,5 +322,6 @@ namespace CalamityAffixes::Hooks
 	void ClearRuntimeState() noexcept
 	{
 		detail::ClearDispatchRuntimeState();
+		ClearHostileEffectGuardRuntimeState();
 	}
 }

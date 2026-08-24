@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
@@ -119,6 +120,10 @@ namespace CalamityAffixes
 		float a_extraCost,
 		float a_extraDamage)
 	{
+		if (!IsHostileEffectTarget(a_caster, a_target)) {
+			return false;
+		}
+
 		auto* magicCaster = a_caster ? a_caster->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) : nullptr;
 			if (!magicCaster) {
 				return false;
@@ -139,12 +144,12 @@ namespace CalamityAffixes
 				a_extraDamage);
 		}
 
-		magicCaster->CastSpellImmediate(
+		CastHostileOnlySpellImmediate(
+			magicCaster,
 			a_action.spell,
 			a_action.noHitEffectArt,
 			a_target,
 			a_action.effectiveness,
-			false,
 			a_extraDamage,
 			a_caster);
 		return true;

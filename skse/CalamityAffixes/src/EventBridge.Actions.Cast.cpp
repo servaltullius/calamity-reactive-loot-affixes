@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/ImmediateHealthReadback.h"
 
 #include <algorithm>
@@ -321,14 +322,25 @@ namespace CalamityAffixes
 			observeImmediateHealth,
 			[healthTarget]() { return ReadCurrentHealth(healthTarget); },
 			[&]() {
-				magicCaster->CastSpellImmediate(
-					spell,
-					a_action.noHitEffectArt,
-					castTarget,
-					a_action.effectiveness,
-					false,
-					magnitudeOverride,
-					caster);
+				if (a_action.applyToSelf && !IsSummonLikeSpell(spell)) {
+					magicCaster->CastSpellImmediate(
+						spell,
+						a_action.noHitEffectArt,
+						castTarget,
+						a_action.effectiveness,
+						false,
+						magnitudeOverride,
+						caster);
+				} else {
+					CastHostileOnlySpellImmediate(
+						magicCaster,
+						spell,
+						a_action.noHitEffectArt,
+						castTarget,
+						a_action.effectiveness,
+						magnitudeOverride,
+						caster);
+				}
 			});
 		if (observeImmediateHealth) {
 			LogImmediateHealthReadback(
@@ -426,14 +438,25 @@ namespace CalamityAffixes
 			observeImmediateHealth,
 			[healthTarget]() { return ReadCurrentHealth(healthTarget); },
 			[&]() {
-				magicCaster->CastSpellImmediate(
-					spell,
-					a_action.noHitEffectArt,
-					castTarget,
-					a_action.effectiveness,
-					false,
-					magnitudeOverride,
-					caster);
+				if (a_action.applyToSelf) {
+					magicCaster->CastSpellImmediate(
+						spell,
+						a_action.noHitEffectArt,
+						castTarget,
+						a_action.effectiveness,
+						false,
+						magnitudeOverride,
+						caster);
+				} else {
+					CastHostileOnlySpellImmediate(
+						magicCaster,
+						spell,
+						a_action.noHitEffectArt,
+						castTarget,
+						a_action.effectiveness,
+						magnitudeOverride,
+						caster);
+				}
 			});
 		if (observeImmediateHealth) {
 			LogImmediateHealthReadback(

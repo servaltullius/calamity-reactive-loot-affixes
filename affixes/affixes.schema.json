@@ -684,9 +684,12 @@
       "properties": {
         "editorId": { "type": "string", "minLength": 1 },
         "name": { "type": "string" },
-        "delivery": { "type": "string", "enum": ["Self", "TargetActor"] },
+        "delivery": { "type": "string", "enum": ["Self", "TargetActor", "Aimed"] },
         "spellType": { "type": ["string", "null"] },
         "castType": { "type": ["string", "null"] },
+        "chargeTime": { "type": ["number", "null"], "minimum": 0.0 },
+        "range": { "type": ["number", "null"], "minimum": 0.0 },
+        "equipTypeForm": { "type": ["string", "null"], "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
         "effect": { "$ref": "#/$defs/spellEffectRecord" },
         "effects": {
           "type": "array",
@@ -701,14 +704,20 @@
     },
     "spellEffectRecord": {
       "type": "object",
-      "required": ["magicEffectEditorId", "magnitude", "duration", "area"],
+      "required": ["magnitude", "duration", "area"],
       "additionalProperties": false,
       "properties": {
         "magicEffectEditorId": { "type": "string", "minLength": 1 },
+        "magicEffectForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
+        "hostileOnly": { "type": "boolean", "default": false },
         "magnitude": { "type": "number" },
         "duration": { "type": "integer", "minimum": 0 },
         "area": { "type": "integer", "minimum": 0 }
-      }
+      },
+      "oneOf": [
+        { "required": ["magicEffectEditorId"] },
+        { "required": ["magicEffectForm"] }
+      ]
     },
     "spidRule": {
       "type": "object",

@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/ProcFeedback.h"
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
@@ -454,7 +455,7 @@ namespace CalamityAffixes
 				if (!detail::IsTrapTickTargetEligible(
 						std::addressof(a) == owner,
 						a.IsDead(),
-						owner->IsHostileToActor(std::addressof(a)))) {
+						IsHostileEffectTarget(owner, std::addressof(a)))) {
 					continue;
 				}
 
@@ -477,23 +478,23 @@ namespace CalamityAffixes
 					QueueTrapMarkerAnimation(trapSnapshot, TrapMarkerAnimationPhase::kTrigger, now);
 					ProcessTrapMarkerAnimation(trapSnapshot, now);
 				}
-				magicCaster->CastSpellImmediate(
+				CastHostileOnlySpellImmediate(
+					magicCaster,
 					trapSnapshot.spell,
 					trapSnapshot.noHitEffectArt,
 					std::addressof(a),
 					trapSnapshot.effectiveness,
-					false,
 					trapSnapshot.magnitudeOverride,
 					owner);
 				trapCastsConsumed += 1u;
 
 				if (trapSnapshot.extraSpell) {
-					magicCaster->CastSpellImmediate(
+					CastHostileOnlySpellImmediate(
+						magicCaster,
 						trapSnapshot.extraSpell,
 						false,
 						std::addressof(a),
 						1.0f,
-						false,
 						0.0f,
 						owner);
 					trapCastsConsumed += 1u;

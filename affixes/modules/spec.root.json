@@ -440,6 +440,152 @@
           "modelPath": "Traps\\PressurePlateMetal\\TrapPressurePlateMetal01.nif",
           "mustUpdateAnimations": true
         }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_FIREBOLT_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Firebolt",
+          "delivery": "Aimed",
+          "chargeTime": 0.5,
+          "range": 0,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x00012F03", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F392D", "hostileOnly": true, "magnitude": 99, "duration": 15, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICE_SPIKE_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Ice Spike",
+          "delivery": "Aimed",
+          "chargeTime": 0.5,
+          "range": 0,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x0001CEA2", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 3, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3932", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_LIGHTNING_BOLT_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Lightning Bolt",
+          "delivery": "Aimed",
+          "chargeTime": 0.5,
+          "range": 0,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x0001CEA8", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3F0D", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_THUNDERBOLT_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Thunderbolt",
+          "delivery": "Aimed",
+          "chargeTime": 0.5,
+          "range": 0,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x0010F7EF", "hostileOnly": true, "magnitude": 60, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3F0D", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICY_SPEAR_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Icy Spear",
+          "delivery": "Aimed",
+          "chargeTime": 0.5,
+          "range": 0,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x0010F7F0", "hostileOnly": true, "magnitude": 60, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 3, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3932", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_CHAIN_LIGHTNING_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Chain Lightning",
+          "delivery": "Aimed",
+          "chargeTime": 0.5,
+          "range": 0,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x0005DBAE", "hostileOnly": true, "magnitude": 40, "duration": 0, "area": 20 },
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3F0F", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 20 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICE_STORM_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Ice Storm",
+          "delivery": "Aimed",
+          "chargeTime": 0.5,
+          "range": 0,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x0001CEA3", "hostileOnly": true, "magnitude": 40, "duration": 0, "area": 15 },
+            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 5, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3935", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 15 },
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_TRAP_BANISH_DAEDRA_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Banish Daedra",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "range": 50,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x0006D22B", "hostileOnly": true, "magnitude": 15, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x0006D22D", "hostileOnly": true, "magnitude": 100, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000173DC", "hostileOnly": true, "magnitude": 20, "duration": 1, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_TRAP_TURN_UNDEAD_HOSTILE_ONLY",
+          "name": "Calamity: Hostile-Only Turn Lesser Undead",
+          "delivery": "Aimed",
+          "chargeTime": 0,
+          "range": 0,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x0004B145", "hostileOnly": true, "magnitude": 6, "duration": 30, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x0004D3F9", "hostileOnly": true, "magnitude": 50, "duration": 0, "area": 0 }
+          ]
+        }
       }
     ]
   }

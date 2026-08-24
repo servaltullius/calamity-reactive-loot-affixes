@@ -593,6 +593,33 @@ public static class KeywordPluginBuilder
         if (spec.Hostile)
         {
             flags |= MagicEffect.Flag.Hostile | MagicEffect.Flag.Detrimental;
+
+            // Generated offensive effects may carry an engine-level area that
+            // reaches beyond the actor selected by the SKSE runtime.  Gate the
+            // effect on the receiving actor's hostility toward PlayerRef so
+            // the caster, followers, summons, and neutral actors cannot be
+            // affected by that collateral area.
+            var playerRef = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000014);
+            var hostileToPlayer = new IsHostileToActorConditionData
+            {
+                RunOnType = Condition.RunOnType.Subject,
+            };
+            hostileToPlayer.TargetNpc = new FormLinkOrIndex<IPlacedNpcGetter>(hostileToPlayer, playerRef);
+            mgef.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1.0f,
+                Data = hostileToPlayer,
+            });
+            mgef.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 0.0f,
+                Data = new GetPlayerTeammateConditionData
+                {
+                    RunOnType = Condition.RunOnType.Subject,
+                },
+            });
         }
 
         if (spec.Recover)
@@ -660,9 +687,22 @@ public static class KeywordPluginBuilder
         {
             "Self" => TargetType.Self,
             "TargetActor" => TargetType.TargetActor,
+            "Aimed" => TargetType.Aimed,
             _ => throw new InvalidDataException($"Unknown Spell delivery: {spec.Delivery} (Spell: {spec.EditorId})"),
         };
-        spell.Range = (spell.TargetType == TargetType.TargetActor && spell.CastType != Mutagen.Bethesda.Skyrim.CastType.ConstantEffect) ? 4096.0f : 0.0f;
+        spell.Range = spec.Range is not null
+            ? (float)spec.Range.Value
+            : (spell.TargetType == TargetType.TargetActor && spell.CastType != Mutagen.Bethesda.Skyrim.CastType.ConstantEffect)
+                ? 4096.0f
+                : 0.0f;
+        if (spec.ChargeTime is not null)
+        {
+            spell.ChargeTime = (float)spec.ChargeTime.Value;
+        }
+        if (!string.IsNullOrWhiteSpace(spec.EquipTypeForm))
+        {
+            spell.EquipmentType.SetTo(ParseFormSpec(spec.EquipTypeForm, $"Spell.equipTypeForm: {spec.EditorId}"));
+        }
         spell.Flags = (SpellDataFlag)0;
 
         return spell;
@@ -683,18 +723,37 @@ public static class KeywordPluginBuilder
 
         foreach (var effectSpec in effectSpecs)
         {
-            if (!magicEffectsByEditorId.TryGetValue(effectSpec.MagicEffectEditorId, out var magicEffect))
+            MagicEffect? magicEffect = null;
+            FormKey baseEffectFormKey;
+            if (!string.IsNullOrWhiteSpace(effectSpec.MagicEffectEditorId))
+            {
+                if (!magicEffectsByEditorId.TryGetValue(effectSpec.MagicEffectEditorId, out magicEffect))
+                {
+                    throw new InvalidDataException(
+                        $"Spell {spec.EditorId} references missing MagicEffect {effectSpec.MagicEffectEditorId}. " +
+                        "Define it in records.magicEffect (or generate it in another affix).");
+                }
+                baseEffectFormKey = magicEffect.FormKey;
+            }
+            else if (!string.IsNullOrWhiteSpace(effectSpec.MagicEffectForm))
+            {
+                baseEffectFormKey = ParseFormSpec(
+                    effectSpec.MagicEffectForm,
+                    $"Spell effect.magicEffectForm: {spec.EditorId}");
+            }
+            else
             {
                 throw new InvalidDataException(
-                    $"Spell {spec.EditorId} references missing MagicEffect {effectSpec.MagicEffectEditorId}. " +
-                    "Define it in records.magicEffect (or generate it in another affix).");
+                    $"Spell {spec.EditorId} effect requires exactly one of magicEffectEditorId or magicEffectForm.");
             }
 
             // MagicEffects are validated (and used for various runtime behaviors) by their own cast/target types.
             // If we leave defaults here, the spell can be cast but silently fail to apply to the intended target.
             // Track assignments explicitly instead of using enum defaults as a sentinel:
             // ConstantEffect and Self can themselves be zero-valued enum members.
-            if (magicEffectUsagesByEditorId.TryGetValue(effectSpec.MagicEffectEditorId, out var priorUsage) &&
+            MagicEffectUsage? priorUsage = null;
+            if (magicEffect is not null &&
+                magicEffectUsagesByEditorId.TryGetValue(effectSpec.MagicEffectEditorId!, out priorUsage) &&
                 (priorUsage.CastType != spell.CastType || priorUsage.TargetType != spell.TargetType))
             {
                 throw new InvalidDataException(
@@ -704,15 +763,18 @@ public static class KeywordPluginBuilder
                     "Use separate MagicEffects per cast/target contract.");
             }
 
-            if (priorUsage is null)
+            if (magicEffect is not null && priorUsage is null)
             {
                 magicEffectUsagesByEditorId.Add(
-                    effectSpec.MagicEffectEditorId,
+                    effectSpec.MagicEffectEditorId!,
                     new MagicEffectUsage(spell.CastType, spell.TargetType, spec.EditorId));
             }
 
-            magicEffect.CastType = spell.CastType;
-            magicEffect.TargetType = spell.TargetType;
+            if (magicEffect is not null)
+            {
+                magicEffect.CastType = spell.CastType;
+                magicEffect.TargetType = spell.TargetType;
+            }
 
             var effect = new Effect
             {
@@ -723,7 +785,31 @@ public static class KeywordPluginBuilder
                     Area = effectSpec.Area,
                 },
             };
-            effect.BaseEffect.SetTo(magicEffect);
+            effect.BaseEffect.SetTo(baseEffectFormKey);
+            if (effectSpec.HostileOnly)
+            {
+                var playerRef = new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000014);
+                var hostileToPlayer = new IsHostileToActorConditionData
+                {
+                    RunOnType = Condition.RunOnType.Subject,
+                };
+                hostileToPlayer.TargetNpc = new FormLinkOrIndex<IPlacedNpcGetter>(hostileToPlayer, playerRef);
+                effect.Conditions.Add(new ConditionFloat
+                {
+                    CompareOperator = CompareOperator.EqualTo,
+                    ComparisonValue = 1.0f,
+                    Data = hostileToPlayer,
+                });
+                effect.Conditions.Add(new ConditionFloat
+                {
+                    CompareOperator = CompareOperator.EqualTo,
+                    ComparisonValue = 0.0f,
+                    Data = new GetPlayerTeammateConditionData
+                    {
+                        RunOnType = Condition.RunOnType.Subject,
+                    },
+                });
+            }
             spell.Effects.Add(effect);
         }
     }

@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/HitDataUtil.h"
@@ -156,12 +157,12 @@ namespace CalamityAffixes
 											if (!coc.spell) {
 												continue;
 											}
-											magicCaster->CastSpellImmediate(
+											CastHostileOnlySpellImmediate(
+												magicCaster,
 												coc.spell,
 												coc.noHitEffectArt,
 												target,
 												coc.effectiveness,
-												false,
 												coc.magnitudeOverride,
 												aggressor);
 										}

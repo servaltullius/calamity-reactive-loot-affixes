@@ -367,6 +367,21 @@ public sealed class KeywordPluginBuilderTests
         Assert.Equal(MagicEffectArchetype.TypeEnum.ValueModifier, archetype.Type);
         Assert.Equal(ActorValue.Health, archetype.ActorValue);
         Assert.True(mgef.Flags.HasFlag(MagicEffect.Flag.Hostile));
+        Assert.Equal(2, mgef.Conditions.Count);
+        var hostilityCondition = Assert.IsType<ConditionFloat>(mgef.Conditions[0]);
+        Assert.Equal(CompareOperator.EqualTo, hostilityCondition.CompareOperator);
+        Assert.Equal(1.0f, hostilityCondition.ComparisonValue);
+        var hostilityData = Assert.IsType<IsHostileToActorConditionData>(hostilityCondition.Data);
+        Assert.Equal(Condition.RunOnType.Subject, hostilityData.RunOnType);
+        Assert.Null(hostilityData.TargetNpc.Index);
+        Assert.Equal(
+            new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x000014),
+            hostilityData.TargetNpc.Link.FormKeyNullable);
+        var teammateCondition = Assert.IsType<ConditionFloat>(mgef.Conditions[1]);
+        Assert.Equal(CompareOperator.EqualTo, teammateCondition.CompareOperator);
+        Assert.Equal(0.0f, teammateCondition.ComparisonValue);
+        var teammateData = Assert.IsType<GetPlayerTeammateConditionData>(teammateCondition.Data);
+        Assert.Equal(Condition.RunOnType.Subject, teammateData.RunOnType);
         Assert.Equal(CastType.FireAndForget, mgef.CastType);
         Assert.Equal(TargetType.TargetActor, mgef.TargetType);
         Assert.Equal(new FormKey(ModKey.FromNameAndExtension("Skyrim.esm"), 0x057C67), mgef.HitShader.FormKey);
@@ -769,6 +784,7 @@ public sealed class KeywordPluginBuilderTests
         Assert.Equal(MagicEffectArchetype.TypeEnum.Invisibility, archetype.Type);
         Assert.Equal(ActorValue.Invisibility, archetype.ActorValue);
         Assert.False(mgef.Flags.HasFlag(MagicEffect.Flag.Hostile));
+        Assert.Empty(mgef.Conditions);
 
         var spell = Assert.Single(mod.Spells, s => s.EditorID == "CAFF_SPEL_TEST_INVIS");
         Assert.Equal(TargetType.Self, spell.TargetType);
