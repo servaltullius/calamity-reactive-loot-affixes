@@ -1648,9 +1648,9 @@
       {
         "id": "bear_trap",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_TRAP_IRONJAW",
-        "name": "\uACF0 \uB36B: \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 20% \uD655\uB960\uB85C \uC801 \uBC1C\uBC11\uC5D0 \uB36B \uC124\uCE58(\uC7AC\uC7A5\uC804 2.5\uCD08) \u2192 \uBC1F\uC740 \uC801 \uC774\uB3D9\uC18D\uB3C4 -100% (2\uCD08) \u002B \uB79C\uB364 \uCD94\uAC00 \uD6A8\uACFC. 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Bear Trap (20% crit/power attack / ICD 6s): Deploy trap at enemy feet (2.5s reload) -\u003E Snare -100% Move Speed (2s) \u002B Random bonus effect",
-        "nameKo": "\uACF0 \uB36B: \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 20% \uD655\uB960\uB85C \uC801 \uBC1C\uBC11\uC5D0 \uB36B \uC124\uCE58(\uC7AC\uC7A5\uC804 2.5\uCD08) \u2192 \uBC1F\uC740 \uC801 \uC774\uB3D9\uC18D\uB3C4 -100% (2\uCD08) \u002B \uB79C\uB364 \uCD94\uAC00 \uD6A8\uACFC. 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uACF0 \uB36B: \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 20%, \uC77C\uBC18 \uBB34\uAE30 \uACF5\uACA9 \uC2DC 40% \uD655\uB960\uB85C \uC801 \uBC1C\uBC11\uC5D0 \uB36B \uC124\uCE58(\uC7AC\uC7A5\uC804 2.5\uCD08) \u2192 \uBC1F\uC740 \uC801 \uC774\uB3D9\uC18D\uB3C4 -100% (2\uCD08) \u002B \uB79C\uB364 \uCD94\uAC00 \uD6A8\uACFC. 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Bear Trap (20% crit/power attack; 40% normal weapon hit / ICD 6s): Deploy trap at enemy feet (2.5s reload) -\u003E Snare -100% Move Speed (2s) \u002B Random bonus effect",
+        "nameKo": "\uACF0 \uB36B: \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 20%, \uC77C\uBC18 \uBB34\uAE30 \uACF5\uACA9 \uC2DC 40% \uD655\uB960\uB85C \uC801 \uBC1C\uBC11\uC5D0 \uB36B \uC124\uCE58(\uC7AC\uC7A5\uC804 2.5\uCD08) \u2192 \uBC1F\uC740 \uC801 \uC774\uB3D9\uC18D\uB3C4 -100% (2\uCD08) \u002B \uB79C\uB364 \uCD94\uAC00 \uD6A8\uACFC. 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_TRAP_IRONJAW_SNARE",
@@ -1682,6 +1682,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 20,
+          "normalWeaponHitProcChancePercent": 40,
           "icdSeconds": 6,
           "lootWeight": 1,
           "action": {
@@ -2451,9 +2452,9 @@
       {
         "id": "crit_cast_firebolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_FIREBOLT",
-        "name": "\uCE58\uBA85 \uC2DC\uC804: \uD30C\uC774\uC5B4\uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uD30C\uC774\uC5B4\uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Crit Cast: Firebolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Firebolt; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
-        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uD30C\uC774\uC5B4\uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uD30C\uC774\uC5B4\uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uCE58\uBA85 \uC2DC\uC804: \uD30C\uC774\uC5B4\uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 45%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uD30C\uC774\uC5B4\uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Crit Cast: Firebolt (100% Melee Crit/Power Attack; 45% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Firebolt; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
+        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uD30C\uC774\uC5B4\uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 45%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uD30C\uC774\uC5B4\uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2465,6 +2466,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100,
+          "normalWeaponHitProcChancePercent": 45,
           "lootWeight": 1,
           "action": {
             "type": "CastOnCrit",
@@ -2484,9 +2486,9 @@
       {
         "id": "crit_cast_ice_spike",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_SPIKE",
-        "name": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Crit Cast: Ice Spike (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Ice Spike; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
-        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 45%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Crit Cast: Ice Spike (100% Melee Crit/Power Attack; 45% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Ice Spike; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
+        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 45%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uC544\uC774\uC2A4 \uC2A4\uD30C\uC774\uD06C \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2498,6 +2500,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100,
+          "normalWeaponHitProcChancePercent": 45,
           "lootWeight": 1,
           "action": {
             "type": "CastOnCrit",
@@ -2517,9 +2520,9 @@
       {
         "id": "crit_cast_lightning_bolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_LIGHTNING_BOLT",
-        "name": "\uCE58\uBA85 \uC2DC\uC804: \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Crit Cast: Lightning Bolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Lightning Bolt; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
-        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uCE58\uBA85 \uC2DC\uC804: \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 45%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Crit Cast: Lightning Bolt (100% Melee Crit/Power Attack; 45% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Lightning Bolt; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
+        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 45%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uB77C\uC774\uD2B8\uB2DD \uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2531,6 +2534,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100,
+          "normalWeaponHitProcChancePercent": 45,
           "lootWeight": 1,
           "action": {
             "type": "CastOnCrit",
@@ -2550,9 +2554,9 @@
       {
         "id": "crit_cast_thunderbolt",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_THUNDERBOLT",
-        "name": "\uCE58\uBA85 \uC2DC\uC804: \uC36C\uB354\uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uC36C\uB354\uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Crit Cast: Thunderbolt (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Thunderbolt; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
-        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uC36C\uB354\uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uC36C\uB354\uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uCE58\uBA85 \uC2DC\uC804: \uC36C\uB354\uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 35%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uC36C\uB354\uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Crit Cast: Thunderbolt (100% Melee Crit/Power Attack; 35% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Thunderbolt; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
+        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uC36C\uB354\uBCFC\uD2B8: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 35%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uC36C\uB354\uBCFC\uD2B8 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2564,6 +2568,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100,
+          "normalWeaponHitProcChancePercent": 35,
           "lootWeight": 1,
           "action": {
             "type": "CastOnCrit",
@@ -2583,9 +2588,9 @@
       {
         "id": "crit_cast_icy_spear",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICY_SPEAR",
-        "name": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Crit Cast: Icy Spear (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Icy Spear; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
-        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 35%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Crit Cast: Icy Spear (100% Melee Crit/Power Attack; 35% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Icy Spear; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
+        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 35%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uC544\uC774\uC2DC \uC2A4\uD53C\uC5B4 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2597,6 +2602,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100,
+          "normalWeaponHitProcChancePercent": 35,
           "lootWeight": 1,
           "action": {
             "type": "CastOnCrit",
@@ -2616,9 +2622,9 @@
       {
         "id": "crit_cast_chain_lightning",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_CHAIN_LIGHTNING",
-        "name": "\uCE58\uBA85 \uC2DC\uC804: \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Crit Cast: Chain Lightning (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Chain Lightning; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
-        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uCE58\uBA85 \uC2DC\uC804: \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 35%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Crit Cast: Chain Lightning (100% Melee Crit/Power Attack; 35% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Chain Lightning; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
+        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 35%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uCCB4\uC778 \uB77C\uC774\uD2B8\uB2DD \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2630,6 +2636,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100,
+          "normalWeaponHitProcChancePercent": 35,
           "lootWeight": 1,
           "action": {
             "type": "CastOnCrit",
@@ -2649,9 +2656,9 @@
       {
         "id": "crit_cast_ice_storm",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_COC_ICE_STORM",
-        "name": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2A4 \uC2A4\uD1B0: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uC544\uC774\uC2A4 \uC2A4\uD1B0 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Crit Cast: Ice Storm (Melee Crit/Power Attack; any Bow/Crossbow Hit; ICD 0.15s): Cast Ice Storm; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
-        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2A4 \uC2A4\uD1B0: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC \uC544\uC774\uC2A4 \uC2A4\uD1B0 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2A4 \uC2A4\uD1B0: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 35%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uC544\uC774\uC2A4 \uC2A4\uD1B0 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Crit Cast: Ice Storm (100% Melee Crit/Power Attack; 35% Normal Melee Hit; any Bow/Crossbow Hit (100%); ICD 0.15s): Cast Ice Storm; damage is the greater of the spell\u0027s base damage and 30% of physical hit damage.",
+        "nameKo": "\uCE58\uBA85 \uC2DC\uC804: \uC544\uC774\uC2A4 \uC2A4\uD1B0: \uADFC\uC811 \uCE58\uBA85\uD0C0/\uAC15\uACF5 \uC2DC 100%, \uADFC\uC811 \uC77C\uBC18 \uACF5\uACA9 \uC2DC 35%, \uD65C\u00B7\uC11D\uAD81\uC740 \uC77C\uBC18 \uC801\uC911 \uC2DC\uC5D0\uB3C4 100% \uD655\uB960\uB85C \uC544\uC774\uC2A4 \uC2A4\uD1B0 \uC2DC\uC804. \uD53C\uD574\uB294 \uC8FC\uBB38 \uAE30\uBCF8 \uD53C\uD574\uC640 \uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 30% \uC911 \uD070 \uAC12. 0.15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2663,6 +2670,7 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 100,
+          "normalWeaponHitProcChancePercent": 35,
           "lootWeight": 1,
           "action": {
             "type": "CastOnCrit",

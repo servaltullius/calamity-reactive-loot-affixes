@@ -528,6 +528,10 @@
 		[[nodiscard]] float ResolveTriggerProcChancePct(
 			const AffixRuntime& a_affix,
 			std::size_t a_affixIndex) const noexcept;
+		[[nodiscard]] float ResolveTriggerProcChancePctFromBase(
+			const AffixRuntime& a_affix,
+			std::size_t a_affixIndex,
+			float a_baseChancePct) const noexcept;
 		[[nodiscard]] bool RollTriggerProcChance(float a_chancePct);
 		void CommitTriggerProcRuntime(
 			AffixRuntime& a_affix,
@@ -655,7 +659,14 @@
 			float a_magnitudeOverride) const;
 		void ExecuteCastSpellAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
 		void ExecuteCastSpellAdaptiveElementAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
-		[[nodiscard]] bool SelectSpawnTrapTarget(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData, RE::Actor*& a_outSpawnTarget, const char** a_outFailureReason = nullptr);
+		[[nodiscard]] bool SelectSpawnTrapTarget(
+			const Action& a_action,
+			RE::Actor* a_owner,
+			RE::Actor* a_target,
+			const RE::HitData* a_hitData,
+			RE::Actor*& a_outSpawnTarget,
+			bool a_allowNormalWeaponHit = false,
+			const char** a_outFailureReason = nullptr);
 		[[nodiscard]] float ResolveSpawnTrapMagnitudeOverride(const Action& a_action, const RE::HitData* a_hitData) const;
 		void EnforcePerAffixTrapCap(const Action& a_action);
 		void EnforceGlobalTrapCap();
@@ -666,7 +677,7 @@
 			float a_magnitudeOverride,
 			std::chrono::steady_clock::time_point a_now);
 		void LogSpawnTrapCreated(const TrapInstance& a_trap, const Action& a_action) const;
-		void ExecuteSpawnTrapAction(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
+		void ExecuteSpawnTrapAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
 		[[nodiscard]] bool CanExecuteAction(
 			const AffixRuntime& a_affix,
 			RE::Actor* a_owner,

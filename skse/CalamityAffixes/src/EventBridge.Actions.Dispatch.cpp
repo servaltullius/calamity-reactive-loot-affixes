@@ -56,7 +56,14 @@ namespace CalamityAffixes
 		}
 		case ActionType::kSpawnTrap: {
 			RE::Actor* spawnTarget = nullptr;
-			if (!SelectSpawnTrapTarget(action, a_owner, a_target, a_hitData, spawnTarget) || !spawnTarget) {
+			if (!SelectSpawnTrapTarget(
+					action,
+					a_owner,
+					a_target,
+					a_hitData,
+					spawnTarget,
+					a_affix.normalWeaponHitProcChancePct > 0.0f) ||
+				!spawnTarget) {
 				return false;
 			}
 			auto* cell = spawnTarget->GetParentCell();
@@ -81,7 +88,7 @@ namespace CalamityAffixes
 			ExecuteCastSpellAdaptiveElementAction(a_affix, a_owner, a_target, a_hitData);
 			break;
 		case ActionType::kSpawnTrap:
-			ExecuteSpawnTrapAction(a_action, a_owner, a_target, a_hitData);
+			ExecuteSpawnTrapAction(a_affix, a_owner, a_target, a_hitData);
 			break;
 		default:
 			SKSE::log::warn("CalamityAffixes: DispatchActionByType unhandled ActionType {}.", static_cast<int>(a_action.type));

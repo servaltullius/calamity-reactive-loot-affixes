@@ -250,6 +250,9 @@ public sealed class RuntimeSpec
     [JsonPropertyName("procChancePercent")]
     public double? ProcChancePercent { get; init; }
 
+    [JsonPropertyName("normalWeaponHitProcChancePercent")]
+    public double? NormalWeaponHitProcChancePercent { get; init; }
+
     [JsonPropertyName("icdSeconds")]
     public double? IcdSeconds { get; init; }
 

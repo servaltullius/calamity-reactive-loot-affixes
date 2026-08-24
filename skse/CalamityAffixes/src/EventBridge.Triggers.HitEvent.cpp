@@ -145,17 +145,26 @@ namespace CalamityAffixes
 								ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
 
 							if (aggressor->IsPlayerRef()) {
-								const auto coc = EvaluateCastOnCrit(aggressor, target, hitData);
-								if (coc.spell) {
+								const auto cocBatch = EvaluateCastOnCrit(aggressor, target, hitData);
+								if (cocBatch.count > 0) {
+									// Keep the whole fallback cast batch under one recursion guard.
+									// Synchronous TESHitEvent reentry is rejected at the top of this handler.
+									const ScopedProcDepth procDepthGuard{ _combatState };
 									if (auto* magicCaster = aggressor->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-										magicCaster->CastSpellImmediate(
-											coc.spell,
-											coc.noHitEffectArt,
-											target,
-											coc.effectiveness,
-											false,
-											coc.magnitudeOverride,
-											aggressor);
+										for (std::size_t i = 0; i < cocBatch.count; ++i) {
+											const auto& coc = cocBatch.entries[i];
+											if (!coc.spell) {
+												continue;
+											}
+											magicCaster->CastSpellImmediate(
+												coc.spell,
+												coc.noHitEffectArt,
+												target,
+												coc.effectiveness,
+												false,
+												coc.magnitudeOverride,
+												aggressor);
+										}
 									}
 								}
 							}

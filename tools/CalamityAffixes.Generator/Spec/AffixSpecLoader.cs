@@ -674,6 +674,26 @@ public static class AffixSpecLoader
             throw new InvalidDataException($"{affix.Id}: runtime.procChancePercent must be in range 0..100 (got: {rt.ProcChancePercent.Value}).");
         }
 
+        if (rt.NormalWeaponHitProcChancePercent.HasValue && rt.NormalWeaponHitProcChancePercent.Value is < 0.0 or > 100.0)
+        {
+            throw new InvalidDataException(
+                $"{affix.Id}: runtime.normalWeaponHitProcChancePercent must be in range 0..100 (got: {rt.NormalWeaponHitProcChancePercent.Value}).");
+        }
+
+        if (rt.NormalWeaponHitProcChancePercent.HasValue)
+        {
+            var isSupportedNormalHitAction = actionType == "CastOnCrit" ||
+                (actionType == "SpawnTrap" &&
+                 actionElement.TryGetProperty("requireCritOrPowerAttack", out var requireCritOrPowerAttack) &&
+                 requireCritOrPowerAttack.ValueKind == JsonValueKind.True);
+            if (!isSupportedNormalHitAction)
+            {
+                throw new InvalidDataException(
+                    $"{affix.Id}: runtime.normalWeaponHitProcChancePercent is only supported for CastOnCrit or " +
+                    "SpawnTrap with requireCritOrPowerAttack=true.");
+            }
+        }
+
         if (IsSpecialActionType(actionType) && (!rt.ProcChancePercent.HasValue || rt.ProcChancePercent.Value <= 0.0))
         {
             throw new InvalidDataException(

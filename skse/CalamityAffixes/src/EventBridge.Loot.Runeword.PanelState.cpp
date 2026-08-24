@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/EquippedBuildSummaryPolicy.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/ProcChancePolicy.h"
 #include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/RunewordUtil.h"
 #include "CalamityAffixes/SpecialActionSafetyPolicy.h"
@@ -86,15 +87,19 @@ namespace CalamityAffixes
 			return;
 		}
 
-		std::unordered_map<std::string_view, detail::SuffixFamilyBestCandidate> bestSuffixByFamily;
+		std::unordered_map<std::string_view, detail::SuffixFamilyRankSelection> suffixFamilySelections;
 		for (std::size_t i = 0; i < _affixRuntimeState.affixes.size(); ++i) {
-			if (_affixRuntimeState.activeCounts[i] == 0u) {
-				continue;
-			}
-
 			const auto& affix = _affixRuntimeState.affixes[i];
 			if (affix.slot == AffixSlot::kSuffix && !affix.family.empty()) {
-				bestSuffixByFamily[affix.family].Consider(affix.id, i);
+				auto& selection = suffixFamilySelections[affix.family];
+				selection.ConsiderDefinition(affix.id);
+				selection.ConsiderEquipped(affix.id, i, _affixRuntimeState.activeCounts[i]);
+			}
+		}
+		for (std::size_t i = 0; i < _affixRuntimeState.affixes.size(); ++i) {
+			const auto& affix = _affixRuntimeState.affixes[i];
+			if (affix.slot == AffixSlot::kSuffix && !affix.family.empty()) {
+				suffixFamilySelections[affix.family].ConsiderEffectiveDefinition(affix.id, i);
 			}
 		}
 
@@ -149,20 +154,42 @@ namespace CalamityAffixes
 					detail::EquippedBuildSlotKind::kPrefix);
 			const auto procLane = resolveProcLane(affix.action.type);
 
+			const detail::SuffixFamilyRankSelection* suffixFamilySelection = nullptr;
+			detail::SuffixFamilyBestCandidate effectiveSuffixCandidate{};
+			const AffixRuntime* effectiveSuffixAffix = nullptr;
 			bool isSuffixFamilyWinner = false;
 			if (affix.slot == AffixSlot::kSuffix && !affix.family.empty()) {
-				const auto bestIt = bestSuffixByFamily.find(affix.family);
-				isSuffixFamilyWinner = bestIt != bestSuffixByFamily.end() &&
-					bestIt->second.selected && bestIt->second.index == i;
+				const auto selectionIt = suffixFamilySelections.find(affix.family);
+				if (selectionIt != suffixFamilySelections.end()) {
+					suffixFamilySelection = &selectionIt->second;
+					isSuffixFamilyWinner = suffixFamilySelection->bestEquipped.selected &&
+						suffixFamilySelection->bestEquipped.index == i;
+					effectiveSuffixCandidate = suffixFamilySelection->ResolveEffectiveCandidate();
+					if (effectiveSuffixCandidate.selected &&
+						effectiveSuffixCandidate.index < _affixRuntimeState.affixes.size()) {
+						effectiveSuffixAffix = &_affixRuntimeState.affixes[effectiveSuffixCandidate.index];
+					}
+				}
 			}
 			const bool suffixFamilySuppressed =
 				affix.slot == AffixSlot::kSuffix &&
 				!affix.family.empty() &&
 				!isSuffixFamilyWinner;
+			// The family representative describes the contribution that runtime
+			// actually selected, which may be an otherwise unequipped promoted tier.
+			// Scroll preservation remains copy-additive and therefore stays sourced
+			// from the equipped affix rather than the family-selected tier.
+			const auto passiveContributionAffixIndex = detail::ResolveSuffixFamilyContributionSourceIndex(
+				isSuffixFamilyWinner,
+				effectiveSuffixCandidate,
+				i);
+			const auto& passiveContributionAffix = passiveContributionAffixIndex < _affixRuntimeState.affixes.size() ?
+				_affixRuntimeState.affixes[passiveContributionAffixIndex] :
+				affix;
 			const auto passiveContribution = detail::ResolveEquippedBuildPassiveContributionState({
-				.hasPassiveSpell = affix.passiveSpell != nullptr,
+				.hasPassiveSpell = passiveContributionAffix.passiveSpell != nullptr,
 				.passiveSpellsDisabled = _runtimeSettings.disablePassiveSuffixSpells,
-				.hasCritContribution = affix.critDamageBonusPct != 0.0f,
+				.hasCritContribution = passiveContributionAffix.critDamageBonusPct != 0.0f,
 				.hasScrollContribution = affix.scrollNoConsumeChancePct != 0.0f,
 				.suffixFamilySuppressed = suffixFamilySuppressed,
 			});
@@ -196,15 +223,50 @@ namespace CalamityAffixes
 					!affix.family.empty(),
 					isSuffixFamilyWinner));
 			entry.equippedCount = equippedCount;
+			if (suffixFamilySelection) {
+				entry.suffixTierRank = detail::ParseSuffixTierRank(affix.id);
+				entry.suffixFamilyRankPoints = suffixFamilySelection->rankPoints;
+				entry.effectiveSuffixTierRank = suffixFamilySelection->ResolvedEffectiveRank();
+				if (effectiveSuffixAffix) {
+					entry.effectiveSuffixDisplayNameEn = !effectiveSuffixAffix->displayNameEn.empty() ?
+						effectiveSuffixAffix->displayNameEn :
+						(!effectiveSuffixAffix->displayName.empty() ? effectiveSuffixAffix->displayName : effectiveSuffixAffix->id);
+					entry.effectiveSuffixDisplayNameKo = !effectiveSuffixAffix->displayNameKo.empty() ?
+						effectiveSuffixAffix->displayNameKo :
+						(!effectiveSuffixAffix->displayName.empty() ? effectiveSuffixAffix->displayName : effectiveSuffixAffix->id);
+				}
+			}
 			entry.hasPassiveContribution = passiveContribution.hasPassiveContribution;
 			entry.passiveContributionActive = passiveContribution.passiveContributionActive;
 			entry.passiveSpellDisabled = passiveContribution.passiveSpellDisabled;
+			entry.castOnCritSelectionLimited = affix.action.type == ActionType::kCastOnCrit;
 			entry.hasProcRoll = detail::HasEquippedBuildProcRoll(policyInput);
 			if (entry.hasProcRoll) {
 				entry.procRollChancePct = procLane == detail::EquippedBuildProcLane::kStandard ?
 					ResolveTriggerProcChancePct(affix, i) :
 					detail::ResolveSpecialActionProcChancePct(
 						affix.procChancePct * _runtimeSettings.procChanceMult);
+				entry.procRollStackCount = 1u;
+				if (procLane == detail::EquippedBuildProcLane::kStandard &&
+					i < _lootState.activeProcSlotPenalties.size()) {
+					entry.procRollStackCount = static_cast<std::uint32_t>(std::max<std::size_t>(
+						1u,
+						std::min(_lootState.activeProcSlotPenalties[i].size(), kMaxEquippedDuplicateProcCopies)));
+				}
+			}
+			entry.hasNormalWeaponHitProcRoll = affix.normalWeaponHitProcChancePct > 0.0f;
+			if (entry.hasNormalWeaponHitProcRoll) {
+				entry.normalWeaponHitProcChancePct = procLane == detail::EquippedBuildProcLane::kStandard ?
+					ResolveTriggerProcChancePctFromBase(affix, i, affix.normalWeaponHitProcChancePct) :
+					detail::ResolveSpecialActionProcChancePct(
+						affix.normalWeaponHitProcChancePct * _runtimeSettings.procChanceMult);
+				entry.normalWeaponHitProcStackCount = 1u;
+				if (procLane == detail::EquippedBuildProcLane::kStandard &&
+					i < _lootState.activeProcSlotPenalties.size()) {
+					entry.normalWeaponHitProcStackCount = static_cast<std::uint32_t>(std::max<std::size_t>(
+						1u,
+						std::min(_lootState.activeProcSlotPenalties[i].size(), kMaxEquippedDuplicateProcCopies)));
+				}
 			}
 			entry.hasLuckyHitGate = detail::HasEquippedBuildLuckyHitGate(policyInput);
 			if (entry.hasLuckyHitGate) {

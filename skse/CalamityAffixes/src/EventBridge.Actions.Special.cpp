@@ -398,12 +398,13 @@ namespace CalamityAffixes
 		return result;
 	}
 
-	EventBridge::CastOnCritResult EventBridge::EvaluateCastOnCrit(
+	EventBridge::CastOnCritResults EventBridge::EvaluateCastOnCrit(
 		RE::Actor* a_attacker,
 		RE::Actor* a_target,
 		const RE::HitData* a_hitData,
 		bool a_allowResync)
 	{
+		static_assert(kMaxCastOnCritPerHit == 2u);
 		const std::scoped_lock lock(_stateMutex);
 
 		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || _affixSpecialActions.castOnCritAffixIndices.empty()) {
@@ -434,29 +435,37 @@ namespace CalamityAffixes
 		const bool isCrit = a_hitData->flags.any(RE::HitData::Flag::kCritical);
 		const bool isPowerAttack = a_hitData->flags.any(RE::HitData::Flag::kPowerAttack);
 
-		// Bow/crossbow: kPowerAttack is never set and kCritical is rare,
-		// so skip the crit/power gate and let procChancePct control activation.
+		// Bow/crossbow: kPowerAttack is never set and kCritical is rare, so keep
+		// the existing procChancePct path and its one-result limit.  A normal melee
+		// hit instead selects one eligible candidate first, then rolls that
+		// candidate's dedicated normal-hit chance exactly once.
 		const bool isRangedWeapon = HitDataUtil::IsBowOrCrossbow(hitWeapon);
-
-		if (!isRangedWeapon && !isCrit && !isPowerAttack) {
+		const bool isNormalMeleeHit = !isRangedWeapon && detail::IsEligibleNormalWeaponHitFlags(
+			isCrit,
+			isPowerAttack,
+			a_hitData->attackDataSpell != nullptr,
+			a_hitData->flags.any(RE::HitData::Flag::kBash),
+			a_hitData->flags.any(RE::HitData::Flag::kTimedBash),
+			a_hitData->flags.any(RE::HitData::Flag::kExplosion));
+		if (!isRangedWeapon && !isCrit && !isPowerAttack && !isNormalMeleeHit) {
 			return {};
 		}
 
-			// Avoid friendly-fire spam.
-			const auto now = std::chrono::steady_clock::now();
-			const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
-			const bool allowNeutralOutgoing =
-				ShouldResolveNonHostileOutgoingFirstHitAllowance(
-					true,
-					a_target->IsPlayerRef(),
-					AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
-				ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
-			if (!(hostileEitherDirection || allowNeutralOutgoing)) {
-				return {};
-			}
-			if (now < _combatState.castOnCritNextAllowed) {
-				return {};
-			}
+		// Avoid friendly-fire spam.
+		const auto now = std::chrono::steady_clock::now();
+		const bool hostileEitherDirection = IsHostileEitherDirection(a_attacker, a_target);
+		const bool allowNeutralOutgoing =
+			ShouldResolveNonHostileOutgoingFirstHitAllowance(
+				true,
+				a_target->IsPlayerRef(),
+				AllowsNonHostilePlayerOwnedOutgoingProcs()) &&
+			ResolveNonHostileOutgoingFirstHitAllowance(a_attacker, a_target, hostileEitherDirection, now);
+		if (!(hostileEitherDirection || allowNeutralOutgoing)) {
+			return {};
+		}
+		if (now < _combatState.castOnCritNextAllowed) {
+			return {};
+		}
 
 		std::vector<std::size_t> pool;
 		pool.reserve(_affixSpecialActions.castOnCritAffixIndices.size());
@@ -473,6 +482,9 @@ namespace CalamityAffixes
 			auto& affix = _affixRuntimeState.affixes[idx];
 			const auto& action = affix.action;
 			if (action.type != ActionType::kCastOnCrit || !action.spell) {
+				continue;
+			}
+			if (isNormalMeleeHit && affix.normalWeaponHitProcChancePct <= 0.0f) {
 				continue;
 			}
 
@@ -492,10 +504,12 @@ namespace CalamityAffixes
 			if (IsPerTargetCooldownBlocked(affix, a_target, now, &perTargetKey)) {
 				continue;
 			}
-
-			const float chancePct = detail::ResolveSpecialActionProcChancePct(affix.procChancePct * _runtimeSettings.procChanceMult);
-			if (!RollProcChance(_rng, _rngMutex, chancePct)) {
-				continue;
+			if (!isNormalMeleeHit) {
+				const float chancePct = detail::ResolveSpecialActionProcChancePct(
+					affix.procChancePct * _runtimeSettings.procChanceMult);
+				if (!RollProcChance(_rng, _rngMutex, chancePct)) {
+					continue;
+				}
 			}
 
 			pool.push_back(idx);
@@ -505,50 +519,97 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		const auto pickedIdx = pool[_combatState.castOnCritCycleCursor % pool.size()];
-		auto& pickedAffix = _affixRuntimeState.affixes[pickedIdx];
-		const auto* pick = std::addressof(pickedAffix.action);
-		_combatState.castOnCritCycleCursor += 1;
-		_combatState.castOnCritNextAllowed = now + kCastOnCritICD;
-		if (pickedAffix.icd.count() > 0) {
-			pickedAffix.nextAllowed = now + pickedAffix.icd;
+		std::array<std::size_t, kMaxCastOnCritPerHit> selectedIndices{};
+		std::size_t selectedCount = 0;
+
+		if (isNormalMeleeHit) {
+			// Advance even on a failed roll so every eligible affix receives an equal
+			// opportunity over repeated normal hits.  Only the selected candidate's
+			// normal-hit chance is rolled, avoiding N independent rolls on one hit.
+			const auto pickedIdx = pool[detail::ResolveCyclicCandidateIndex(
+				pool.size(),
+				_combatState.castOnCritCycleCursor)];
+			_combatState.castOnCritCycleCursor += 1;
+			const auto& pickedAffix = _affixRuntimeState.affixes[pickedIdx];
+			const float normalHitChancePct = detail::ResolveSpecialActionProcChancePct(
+				pickedAffix.normalWeaponHitProcChancePct * _runtimeSettings.procChanceMult);
+			if (!RollProcChance(_rng, _rngMutex, normalHitChancePct)) {
+				return {};
+			}
+			selectedIndices[selectedCount++] = pickedIdx;
+		} else {
+			selectedCount = detail::ResolveCastOnCritSelectionCount(
+				pool.size(),
+				isRangedWeapon,
+				isNormalMeleeHit);
+			for (std::size_t offset = 0; offset < selectedCount; ++offset) {
+				selectedIndices[offset] = pool[detail::ResolveCyclicCandidateIndex(
+					pool.size(),
+					_combatState.castOnCritCycleCursor,
+					offset)];
+			}
+			_combatState.castOnCritCycleCursor += selectedCount;
 		}
-		if (pickedAffix.perTargetIcd.count() > 0 && a_target && pickedAffix.token != 0u) {
-			const PerTargetCooldownKey perTargetKey{
-				.token = pickedAffix.token,
-				.target = a_target->GetFormID()
+
+		if (selectedCount == 0) {
+			return {};
+		}
+
+		// The 150 ms limiter applies once to the original-hit batch.  Individual
+		// and per-target cooldowns are consumed only by candidates actually selected.
+		_combatState.castOnCritNextAllowed = now + kCastOnCritICD;
+		CastOnCritResults results{};
+		for (std::size_t selected = 0; selected < selectedCount; ++selected) {
+			auto& pickedAffix = _affixRuntimeState.affixes[selectedIndices[selected]];
+			const auto& pick = pickedAffix.action;
+
+			if (pickedAffix.icd.count() > 0) {
+				pickedAffix.nextAllowed = now + pickedAffix.icd;
+			}
+			if (pickedAffix.perTargetIcd.count() > 0 && a_target && pickedAffix.token != 0u) {
+				const PerTargetCooldownKey perTargetKey{
+					.token = pickedAffix.token,
+					.target = a_target->GetFormID()
+				};
+				CommitPerTargetCooldown(perTargetKey, pickedAffix.perTargetIcd, now);
+			}
+
+			float magnitudeOverride = pick.magnitudeOverride;
+			if (pick.magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
+				const float hitPhysicalDealt = std::max(
+					0.0f,
+					a_hitData->physicalDamage - a_hitData->resistedPhysicalDamage);
+				const float hitTotalDealt = std::max(
+					0.0f,
+					a_hitData->totalDamage - a_hitData->resistedPhysicalDamage - a_hitData->resistedTypedDamage);
+				const float spellBaseMagnitude = GetCritCastDirectDamageMagnitude(pick.spell);
+				magnitudeOverride = ResolveMagnitudeOverride(
+					pick.magnitudeOverride,
+					spellBaseMagnitude,
+					hitPhysicalDealt,
+					hitTotalDealt,
+					pick.magnitudeScaling);
+			}
+
+			results.entries[results.count++] = CastOnCritResult{
+				.spell = pick.spell,
+				.effectiveness = pick.effectiveness,
+				.magnitudeOverride = magnitudeOverride,
+				.noHitEffectArt = pick.noHitEffectArt,
 			};
-			CommitPerTargetCooldown(perTargetKey, pickedAffix.perTargetIcd, now);
 		}
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
-				"CalamityAffixes: CastOnCrit triggered (crit={}, powerAttack={}, spells={}, picked={}).",
+				"CalamityAffixes: CastOnCrit batch triggered (crit={}, powerAttack={}, ranged={}, candidates={}, selected={}).",
 				isCrit,
 				isPowerAttack,
+				isRangedWeapon,
 				pool.size(),
-				pick->spell->GetName());
+				results.count);
 		}
 
-		float magnitudeOverride = pick->magnitudeOverride;
-		if (pick->magnitudeScaling.source != MagnitudeScaling::Source::kNone) {
-			const float hitPhysicalDealt = std::max(0.0f, a_hitData->physicalDamage - a_hitData->resistedPhysicalDamage);
-			const float hitTotalDealt = std::max(0.0f, a_hitData->totalDamage - a_hitData->resistedPhysicalDamage - a_hitData->resistedTypedDamage);
-			const float spellBaseMagnitude = GetCritCastDirectDamageMagnitude(pick->spell);
-			magnitudeOverride = ResolveMagnitudeOverride(
-				pick->magnitudeOverride,
-				spellBaseMagnitude,
-				hitPhysicalDealt,
-				hitTotalDealt,
-				pick->magnitudeScaling);
-		}
-
-		return CastOnCritResult{
-			.spell = pick->spell,
-			.effectiveness = pick->effectiveness,
-			.magnitudeOverride = magnitudeOverride,
-			.noHitEffectArt = pick->noHitEffectArt,
-		};
+		return results;
 	}
 
 	float EventBridge::GetCritDamageMultiplier(

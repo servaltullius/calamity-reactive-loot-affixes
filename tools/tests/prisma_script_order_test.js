@@ -315,7 +315,7 @@ sandbox.setRunewordPanelState(JSON.stringify(compatibilityPayload));
 const buildSummaryPayload = {
   ready: true,
   runtimeEnabled: true,
-  equippedAffixSlots: 8,
+  equippedAffixSlots: 9,
   entries: [
     {
       token: "18446744073709551613",
@@ -331,6 +331,11 @@ const buildSummaryPayload = {
       passiveSpellDisabled: false,
       hasProcRoll: true,
       procRollChancePct: 24.5,
+      procRollStackCount: 2,
+      castOnCritSelectionLimited: false,
+      hasNormalWeaponHitProcRoll: true,
+      normalWeaponHitProcChancePct: 9.8,
+      normalWeaponHitProcStackCount: 2,
       hasLuckyHitGate: true,
       luckyHitGateChancePct: 30
     },
@@ -363,14 +368,38 @@ const buildSummaryPayload = {
       luckyHitGateChancePct: 0
     },
     {
+      token: "18446744073709551605",
+      displayNameEn: "Crit Cast: Firebolt",
+      displayNameKo: "치명 시전: 파이어볼트",
+      group: "offense",
+      triggerKey: "hit",
+      slotKind: "prefix",
+      suffixState: "none",
+      equippedCount: 1,
+      hasProcRoll: true,
+      procRollChancePct: 100,
+      procRollStackCount: 1,
+      castOnCritSelectionLimited: true,
+      hasNormalWeaponHitProcRoll: true,
+      normalWeaponHitProcChancePct: 45,
+      normalWeaponHitProcStackCount: 1,
+      hasLuckyHitGate: false,
+      luckyHitGateChancePct: 0
+    },
+    {
       token: "18446744073709551610",
-      displayNameEn: "Vitality III",
-      displayNameKo: "활력 III",
+      displayNameEn: "Vitality II",
+      displayNameKo: "활력 II",
       group: "passive",
       triggerKey: "passive",
       slotKind: "suffix",
       suffixState: "highest",
       equippedCount: 1,
+      suffixTierRank: 2,
+      suffixFamilyRankPoints: 3,
+      effectiveSuffixTierRank: 3,
+      effectiveSuffixDisplayNameEn: "Vitality III",
+      effectiveSuffixDisplayNameKo: "활력 III",
       hasPassiveContribution: true,
       passiveContributionActive: true,
       passiveSpellDisabled: true,
@@ -458,7 +487,7 @@ const storedEquippedBuildState = new vm.Script(
 ).runInContext(context);
 assert.strictEqual(storedEquippedBuildState.received, true);
 assert.strictEqual(storedEquippedBuildState.ready, true);
-assert.strictEqual(storedEquippedBuildState.entries.length, 7);
+assert.strictEqual(storedEquippedBuildState.entries.length, 8);
 assert.strictEqual(storedEquippedBuildState.entries[0].token, "18446744073709551613");
 assert.strictEqual(storedEquippedBuildState.entries[0].hasPassiveContribution, true);
 assert.strictEqual(storedEquippedBuildState.entries[0].passiveContributionActive, true);
@@ -467,13 +496,19 @@ assert.strictEqual(storedEquippedBuildState.entries[1].hasPassiveContribution, f
 assert.strictEqual(storedEquippedBuildState.entries[1].passiveContributionActive, false);
 assert.strictEqual(storedEquippedBuildState.entries[1].passiveSpellDisabled, false);
 assert.strictEqual(storedEquippedBuildState.entries[2].procRollChancePct, 100);
+assert.strictEqual(storedEquippedBuildState.entries[0].procRollStackCount, 2);
+assert.strictEqual(storedEquippedBuildState.entries[0].castOnCritSelectionLimited, false);
+assert.strictEqual(storedEquippedBuildState.entries[0].normalWeaponHitProcChancePct, 9.8);
+assert.strictEqual(storedEquippedBuildState.entries[0].normalWeaponHitProcStackCount, 2);
+assert.strictEqual(storedEquippedBuildState.entries[3].castOnCritSelectionLimited, true);
+assert.strictEqual(storedEquippedBuildState.entries[4].effectiveSuffixTierRank, 3);
 assert.strictEqual(sandbox.resolveEquippedBuildViewState(storedEquippedBuildState), "ready");
 
 sandbox.renderEquippedBuildSummary();
 assert.strictEqual(element("equippedBuildGroups").hidden, false);
 assert.strictEqual(element("equippedBuildChanceHint").hidden, false);
 assert.strictEqual(element("equippedBuildGroups").getAttribute("aria-busy"), "false");
-assert.strictEqual(element("equippedBuildOffenseCount").textContent, "2");
+assert.strictEqual(element("equippedBuildOffenseCount").textContent, "3");
 assert.strictEqual(element("equippedBuildDefenseCount").textContent, "1");
 assert.strictEqual(element("equippedBuildKillCount").textContent, "1");
 assert.strictEqual(element("equippedBuildPassiveCount").textContent, "6");
@@ -482,9 +517,9 @@ assert(
     "6 effect copies shown in this group"
   )
 );
-assert.strictEqual(element("equippedBuildOffenseList").children.length, 1);
+assert.strictEqual(element("equippedBuildOffenseList").children.length, 2);
 assert.strictEqual(element("equippedBuildPassiveList").children.length, 5);
-assert.strictEqual(element("equippedBuildSlotCount").textContent, "8 slots / 슬롯 8개");
+assert.strictEqual(element("equippedBuildSlotCount").textContent, "9 slots / 슬롯 9개");
 
 function collectFakeElementText(node) {
   return [node.textContent, ...node.children.map(collectFakeElementText)].join(" ");
@@ -492,13 +527,17 @@ function collectFakeElementText(node) {
 
 const offenseText = collectFakeElementText(element("equippedBuildOffenseList"));
 assert(offenseText.includes("On hit"));
-assert(offenseText.includes("Conditional proc roll 24.5%"));
-assert(offenseText.includes("Shared single roll"));
+assert(offenseText.includes("Effective conditional proc chance 24.5%"));
+assert(offenseText.includes("2-copy diminishing chance · one action"));
+assert(offenseText.includes("Normal weapon hit 9.8% effective"));
+assert(offenseText.includes("Normal-hit 2-copy diminishing chance · one action"));
+assert(offenseText.includes("Per-candidate roll 100% · max 2 melee crit/power, 1 ranged"));
+assert(offenseText.includes("Normal melee: selected candidate rolls 45% · max 1 action"));
 assert(offenseText.includes("Lucky Hit gate 30%"));
 assert(offenseText.includes("Passive also active"));
 const passiveText = collectFakeElementText(element("equippedBuildPassiveList"));
 assert(passiveText.includes("Storm Brand"));
-assert(passiveText.includes("Highest tier selected"));
+assert(passiveText.includes("Promoted to Vitality III · 3 rank points"));
 assert(passiveText.includes("Suppressed by higher tier"));
 assert(passiveText.includes("Independent suffix"));
 assert(passiveText.includes("Passive active"));

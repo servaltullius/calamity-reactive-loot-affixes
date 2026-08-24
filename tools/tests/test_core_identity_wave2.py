@@ -204,6 +204,25 @@ class CoreIdentityWaveTwoTests(unittest.TestCase):
                 self.assertIn("greater of the spell's base damage and 30% of physical hit damage", entry["nameEn"])
                 self.assertEqual("CastOnCrit", action["type"])
                 self.assertEqual(100, runtime["procChancePercent"])
+                expected_normal_chance = 45 if affix_id in {
+                    "crit_cast_firebolt",
+                    "crit_cast_ice_spike",
+                    "crit_cast_lightning_bolt",
+                } else 35
+                self.assertEqual(
+                    expected_normal_chance,
+                    runtime["normalWeaponHitProcChancePercent"],
+                )
+                self.assertIn(
+                    f"근접 일반 공격 시 {expected_normal_chance}%",
+                    entry["nameKo"],
+                )
+                self.assertIn(
+                    f"{expected_normal_chance}% Normal Melee Hit",
+                    entry["nameEn"],
+                )
+                self.assertIn("활·석궁은 일반 적중 시에도 100%", entry["nameKo"])
+                self.assertIn("any Bow/Crossbow Hit (100%)", entry["nameEn"])
                 self.assertEqual("HitPhysicalDealt", scaling["source"])
                 self.assertEqual(0.3, scaling["mult"])
                 self.assertEqual(0, scaling["add"])

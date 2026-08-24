@@ -66,18 +66,24 @@ class PrismaBuildSummaryTests(unittest.TestCase):
 
     def test_probability_copy_keeps_independent_gates_explicit(self) -> None:
         self.assertIn(
-            "Shown chance is a condition-qualified roll after current modifiers.",
+            "Shown chances are condition-qualified rolls after current modifiers",
             self.source,
         )
         self.assertIn(
             "ICDs, proc budgets, action preconditions, and Lucky Hit still apply separately.",
             self.source,
         )
-        self.assertIn("Conditional proc roll", self.source)
+        self.assertIn("Effective conditional proc chance", self.source)
+        self.assertIn("Normal weapon hit", self.source)
+        self.assertIn("Per-candidate roll", self.source)
+        self.assertIn("selected candidate rolls", self.source)
+        self.assertIn("fair cyclic selection executes at most 2 effects", self.source)
+        self.assertIn("normal weapon-hit chances are listed separately", self.source)
         self.assertIn("Lucky Hit gate", self.source)
-        self.assertIn("equipped-copy count, not a guaranteed stack multiplier", self.source)
-        self.assertIn("duplicate proc entries share one roll", self.source)
-        self.assertIn("tiered suffix families apply only the highest tier", self.source)
+        self.assertIn("combine up to 3 item-local chances with diminishing returns", self.source)
+        self.assertIn("special proc duplicates keep their shared single roll", self.source)
+        self.assertIn("Tiered suffix families add rank points up to the T3 cap", self.source)
+        self.assertIn("Scroll preservation keeps its separate additive 100% cap", self.source)
         self.assertIn(
             "Hybrid effects may appear in both their trigger group and Passives",
             self.source,
@@ -90,6 +96,7 @@ class PrismaBuildSummaryTests(unittest.TestCase):
         self.assertIn("Passive spell disabled by runtime setting", self.source)
         self.assertIn("Other passive contribution active", self.source)
         self.assertIn("Highest tier selected", self.source)
+        self.assertIn("Promoted to", self.source)
         self.assertNotIn("Highest tier active", self.source)
         self.assertNotIn("Passive disabled in MCM", self.source)
 

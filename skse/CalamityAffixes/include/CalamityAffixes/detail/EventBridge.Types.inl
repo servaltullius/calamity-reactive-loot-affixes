@@ -516,6 +516,7 @@
 			std::optional<LootItemType> lootType{};
 			Trigger trigger{ Trigger::kHit };
 			float procChancePct{ 0.0f };
+			float normalWeaponHitProcChancePct{ 0.0f };
 			// Weighted loot source:
 			// - lootWeight >= 0 uses that value
 			// - lootWeight < 0 means "not rollable from loot-time pool"

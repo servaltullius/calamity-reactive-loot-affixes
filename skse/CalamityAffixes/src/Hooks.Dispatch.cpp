@@ -264,7 +264,7 @@ namespace CalamityAffixes::Hooks::detail
 			// the engine may clear/overwrite lastHitData before this deferred task runs.
 			const auto* hitData = a_capturedHitData;
 
-			const auto coc = bridge->EvaluateCastOnCrit(
+			const auto cocBatch = bridge->EvaluateCastOnCrit(
 				a_attacker,
 				a_target,
 				hitData,
@@ -291,23 +291,31 @@ namespace CalamityAffixes::Hooks::detail
 				}
 			}
 
-			if (coc.spell && a_attacker) {
-				bool casted = false;
+			const RE::SpellItem* feedbackSpell = nullptr;
+			if (a_attacker) {
 				if (auto* magicCaster = a_attacker->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-					magicCaster->CastSpellImmediate(
-						coc.spell,
-						coc.noHitEffectArt,
-						a_target,
-						coc.effectiveness,
-						false,
-						coc.magnitudeOverride,
-						a_attacker);
-					casted = true;
+					for (std::size_t i = 0; i < cocBatch.count; ++i) {
+						const auto& coc = cocBatch.entries[i];
+						if (!coc.spell) {
+							continue;
+						}
+						magicCaster->CastSpellImmediate(
+							coc.spell,
+							coc.noHitEffectArt,
+							a_target,
+							coc.effectiveness,
+							false,
+							coc.magnitudeOverride,
+							a_attacker);
+						if (!feedbackSpell && coc.noHitEffectArt) {
+							feedbackSpell = coc.spell;
+						}
+					}
 				}
-				if (casted && coc.noHitEffectArt) {
-					PlayCastOnCritProcFeedbackSfx(coc.spell);
-					PlayCastOnCritProcFeedbackVfxSafe(a_target, coc.spell, a_now);
-				}
+			}
+			if (feedbackSpell) {
+				PlayCastOnCritProcFeedbackSfx(feedbackSpell);
+				PlayCastOnCritProcFeedbackVfxSafe(a_target, feedbackSpell, a_now);
 			}
 		}
 	}

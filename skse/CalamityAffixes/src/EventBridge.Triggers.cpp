@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LowHealthTriggerSnapshot.h"
+#include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include "CalamityAffixes/TriggerDispatchSnapshot.h"
 
 #include <chrono>
@@ -73,6 +74,7 @@ namespace CalamityAffixes
 					a_target,
 					a_hitData,
 					ignoredSpawnTarget,
+					affix.normalWeaponHitProcChancePct > 0.0f,
 					&failureReason)) {
 				if (_loot.debugLog) {
 					SKSE::log::debug(
@@ -96,7 +98,24 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		const float chance = ResolveTriggerProcChancePct(affix, a_affixIndex);
+		const bool useNormalWeaponHitChance =
+			affix.action.type == ActionType::kSpawnTrap &&
+			affix.action.trapRequireCritOrPowerAttack &&
+			affix.normalWeaponHitProcChancePct > 0.0f &&
+			a_hitData &&
+			detail::IsEligibleNormalWeaponHitFlags(
+				a_hitData->flags.any(RE::HitData::Flag::kCritical),
+				a_hitData->flags.any(RE::HitData::Flag::kPowerAttack),
+				a_hitData->attackDataSpell != nullptr,
+				a_hitData->flags.any(RE::HitData::Flag::kBash),
+				a_hitData->flags.any(RE::HitData::Flag::kTimedBash),
+				a_hitData->flags.any(RE::HitData::Flag::kExplosion));
+		const float chance = useNormalWeaponHitChance ?
+			ResolveTriggerProcChancePctFromBase(
+				affix,
+				a_affixIndex,
+				affix.normalWeaponHitProcChancePct) :
+			ResolveTriggerProcChancePct(affix, a_affixIndex);
 		if (!RollTriggerProcChance(chance)) {
 			return false;
 		}

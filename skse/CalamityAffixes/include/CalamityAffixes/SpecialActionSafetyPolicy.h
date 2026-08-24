@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string_view>
 
 namespace CalamityAffixes::detail
@@ -60,6 +61,48 @@ namespace CalamityAffixes::detail
 			return 0.0f;
 		}
 		return a_configuredChancePct >= 100.0f ? 100.0f : a_configuredChancePct;
+	}
+
+	// Shared safety contract for an optional normal-weapon-hit proc lane.  The
+	// caller decides whether melee/ranged is allowed; critical/power, spell,
+	// bash, timed-bash, and explosion HitData are never classified as normal.
+	[[nodiscard]] constexpr bool IsEligibleNormalWeaponHitFlags(
+		bool a_isCritical,
+		bool a_isPowerAttack,
+		bool a_hasAttackDataSpell,
+		bool a_isBash,
+		bool a_isTimedBash,
+		bool a_isExplosion) noexcept
+	{
+		return !a_isCritical &&
+		       !a_isPowerAttack &&
+		       !a_hasAttackDataSpell &&
+		       !a_isBash &&
+		       !a_isTimedBash &&
+		       !a_isExplosion;
+	}
+
+	[[nodiscard]] constexpr std::size_t ResolveCyclicCandidateIndex(
+		std::size_t a_candidateCount,
+		std::size_t a_cursor,
+		std::size_t a_offset = 0u) noexcept
+	{
+		if (a_candidateCount == 0u) {
+			return 0u;
+		}
+		const auto start = a_cursor % a_candidateCount;
+		const auto offset = a_offset % a_candidateCount;
+		const auto remaining = a_candidateCount - start;
+		return offset < remaining ? start + offset : offset - remaining;
+	}
+
+	[[nodiscard]] constexpr std::size_t ResolveCastOnCritSelectionCount(
+		std::size_t a_candidateCount,
+		bool a_isRangedWeapon,
+		bool a_isNormalMeleeHit) noexcept
+	{
+		const std::size_t limit = (a_isRangedWeapon || a_isNormalMeleeHit) ? 1u : 2u;
+		return a_candidateCount < limit ? a_candidateCount : limit;
 	}
 
 	[[nodiscard]] constexpr bool IsCalamityProcSource(std::string_view a_sourceEditorId) noexcept

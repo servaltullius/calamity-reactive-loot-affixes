@@ -225,11 +225,20 @@ namespace CalamityAffixes
 		const AffixRuntime& a_affix,
 		std::size_t a_affixIndex) const noexcept
 	{
-		const float penalty =
-			(a_affixIndex < _lootState.activeSlotPenalty.size() && _lootState.activeSlotPenalty[a_affixIndex] > 0.0f) ?
-				_lootState.activeSlotPenalty[a_affixIndex] :
-				1.0f;
-		return ResolveEffectiveProcChancePct(a_affix.procChancePct, _runtimeSettings.procChanceMult, penalty);
+		return ResolveTriggerProcChancePctFromBase(a_affix, a_affixIndex, a_affix.procChancePct);
+	}
+
+	float EventBridge::ResolveTriggerProcChancePctFromBase(
+		const AffixRuntime&,
+		std::size_t a_affixIndex,
+		float a_baseChancePct) const noexcept
+	{
+		if (a_affixIndex >= _lootState.activeProcSlotPenalties.size()) {
+			return ResolveStackedProcChancePct(a_baseChancePct, _runtimeSettings.procChanceMult, {});
+		}
+
+		const auto& penalties = _lootState.activeProcSlotPenalties[a_affixIndex];
+		return ResolveStackedProcChancePct(a_baseChancePct, _runtimeSettings.procChanceMult, penalties);
 	}
 
 	bool EventBridge::RollTriggerProcChance(float a_chancePct)

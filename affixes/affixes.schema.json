@@ -170,6 +170,7 @@
           "enum": ["Hit", "IncomingHit", "DotApply", "Kill", "LowHealth"]
         },
         "procChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "normalWeaponHitProcChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
         "luckyHitChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
         "luckyHitProcCoefficient": { "type": "number", "minimum": 0.0, "maximum": 5.0 },
         "icdSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
@@ -182,7 +183,31 @@
         "lowHealthRearmPercent": { "type": "number", "minimum": 1.0, "maximum": 100.0 },
         "conditions": { "$ref": "#/$defs/runtimeConditions" },
         "action": { "$ref": "#/$defs/runtimeAction" }
-      }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["normalWeaponHitProcChancePercent"] },
+          "then": {
+            "properties": {
+              "action": {
+                "anyOf": [
+                  {
+                    "required": ["type"],
+                    "properties": { "type": { "const": "CastOnCrit" } }
+                  },
+                  {
+                    "required": ["type", "requireCritOrPowerAttack"],
+                    "properties": {
+                      "type": { "const": "SpawnTrap" },
+                      "requireCritOrPowerAttack": { "const": true }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
     },
     "runtimeConditions": {
       "type": "object",

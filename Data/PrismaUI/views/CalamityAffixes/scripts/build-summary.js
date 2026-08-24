@@ -89,11 +89,36 @@ function normalizeEquippedBuildEntries(raw) {
       slotKind,
       suffixState: normalizeEquippedBuildSuffixState(candidate.suffixState, slotKind),
       equippedCount,
+      suffixTierRank: parseNonNegativeInteger(candidate.suffixTierRank, 0),
+      suffixFamilyRankPoints: parseNonNegativeInteger(candidate.suffixFamilyRankPoints, 0),
+      effectiveSuffixTierRank: parseNonNegativeInteger(candidate.effectiveSuffixTierRank, 0),
+      effectiveSuffixDisplayNameEn: typeof candidate.effectiveSuffixDisplayNameEn === "string"
+        ? candidate.effectiveSuffixDisplayNameEn.trim()
+        : "",
+      effectiveSuffixDisplayNameKo: typeof candidate.effectiveSuffixDisplayNameKo === "string"
+        ? candidate.effectiveSuffixDisplayNameKo.trim()
+        : "",
       hasPassiveContribution: Boolean(candidate.hasPassiveContribution),
       passiveContributionActive: Boolean(candidate.passiveContributionActive),
       passiveSpellDisabled: Boolean(candidate.passiveSpellDisabled),
       hasProcRoll: Boolean(candidate.hasProcRoll),
       procRollChancePct: normalizeEquippedBuildChance(candidate.procRollChancePct),
+      procRollStackCount: Math.min(
+        3,
+        parseNonNegativeInteger(candidate.procRollStackCount, candidate.hasProcRoll ? 1 : 0)
+      ),
+      castOnCritSelectionLimited: Boolean(candidate.castOnCritSelectionLimited),
+      hasNormalWeaponHitProcRoll: Boolean(candidate.hasNormalWeaponHitProcRoll),
+      normalWeaponHitProcChancePct: normalizeEquippedBuildChance(
+        candidate.normalWeaponHitProcChancePct
+      ),
+      normalWeaponHitProcStackCount: Math.min(
+        3,
+        parseNonNegativeInteger(
+          candidate.normalWeaponHitProcStackCount,
+          candidate.hasNormalWeaponHitProcRoll ? 1 : 0
+        )
+      ),
       hasLuckyHitGate: Boolean(candidate.hasLuckyHitGate),
       luckyHitGateChancePct: normalizeEquippedBuildChance(candidate.luckyHitGateChancePct)
     });
@@ -153,6 +178,34 @@ function resolveEquippedBuildSlotBadge(entry) {
 function resolveEquippedBuildSuffixBadge(entry) {
   switch (entry.suffixState) {
     case "highest":
+      if (
+        entry.effectiveSuffixTierRank > entry.suffixTierRank &&
+        entry.effectiveSuffixTierRank > 0
+      ) {
+        const effectiveEn = entry.effectiveSuffixDisplayNameEn ||
+          `Tier ${entry.effectiveSuffixTierRank}`;
+        const effectiveKo = entry.effectiveSuffixDisplayNameKo ||
+          `${entry.effectiveSuffixTierRank}단계`;
+        return {
+          text: t(
+            `Promoted to ${effectiveEn} · ${entry.suffixFamilyRankPoints} rank points`,
+            `유효 ${effectiveKo} · 티어 점수 ${entry.suffixFamilyRankPoints}`
+          ),
+          className: "highest"
+        };
+      }
+      if (
+        entry.effectiveSuffixTierRank > 0 &&
+        entry.suffixFamilyRankPoints > entry.effectiveSuffixTierRank
+      ) {
+        return {
+          text: t(
+            `Tier ${entry.effectiveSuffixTierRank} cap · ${entry.suffixFamilyRankPoints} rank points`,
+            `${entry.effectiveSuffixTierRank}단계 상한 · 티어 점수 ${entry.suffixFamilyRankPoints}`
+          ),
+          className: "highest"
+        };
+      }
       return {
         text: t("Highest tier selected", "최고 티어 선택"),
         className: "highest"
@@ -314,16 +367,53 @@ function createEquippedBuildEntry(entry, facetGroupId) {
     const chance = formatEquippedBuildChance(entry.procRollChancePct);
     appendEquippedBuildBadge(
       effectBadges,
-      t(`Conditional proc roll ${chance}%`, `조건부 발동 굴림 ${chance}%`),
+      entry.castOnCritSelectionLimited
+        ? t(
+          `Per-candidate roll ${chance}% · max 2 melee crit/power, 1 ranged`,
+          `후보별 판정 ${chance}% · 근접 치명/강공 최대 2개, 원거리 최대 1개`
+        )
+        : t(`Effective conditional proc chance ${chance}%`, `유효 조건부 발동 확률 ${chance}%`),
       "proc"
     );
   }
-  if (entry.hasProcRoll && entry.equippedCount > 1) {
+  if (entry.hasProcRoll && entry.procRollStackCount > 1) {
     appendEquippedBuildBadge(
       effectBadges,
-      t("Shared single roll", "중복 1회 판정"),
+      t(
+        `${entry.procRollStackCount}-copy diminishing chance · one action`,
+        `${entry.procRollStackCount}개 감쇠 확률 합성 · 효과 1회`
+      ),
       "shared-roll"
     );
+  } else if (entry.hasProcRoll && entry.equippedCount > 1) {
+    appendEquippedBuildBadge(
+      effectBadges,
+      t("Duplicate copies share one roll", "중복 사본은 1회 판정 공유"),
+      "shared-roll"
+    );
+  }
+  if (entry.hasNormalWeaponHitProcRoll) {
+    const chance = formatEquippedBuildChance(entry.normalWeaponHitProcChancePct);
+    appendEquippedBuildBadge(
+      effectBadges,
+      entry.castOnCritSelectionLimited
+        ? t(
+          `Normal melee: selected candidate rolls ${chance}% · max 1 action`,
+          `근접 평타: 선택된 후보 ${chance}% 판정 · 효과 최대 1개`
+        )
+        : t(`Normal weapon hit ${chance}% effective`, `일반 무기 적중 유효 확률 ${chance}%`),
+      "proc"
+    );
+    if (entry.normalWeaponHitProcStackCount > 1) {
+      appendEquippedBuildBadge(
+        effectBadges,
+        t(
+          `Normal-hit ${entry.normalWeaponHitProcStackCount}-copy diminishing chance · one action`,
+          `일반 적중 ${entry.normalWeaponHitProcStackCount}개 감쇠 확률 합성 · 효과 1회`
+        ),
+        "shared-roll"
+      );
+    }
   }
   if (entry.hasLuckyHitGate) {
     const chance = formatEquippedBuildChance(entry.luckyHitGateChancePct);
@@ -430,8 +520,8 @@ function updateEquippedBuildStaticText() {
   }
   if (equippedBuildChanceHint) {
     equippedBuildChanceHint.textContent = t(
-      "Shown chance is a condition-qualified roll after current modifiers. ICDs, proc budgets, action preconditions, and Lucky Hit still apply separately. ×N is equipped-copy count, not a guaranteed stack multiplier; duplicate proc entries share one roll, and tiered suffix families apply only the highest tier. Hybrid effects may appear in both their trigger group and Passives without increasing the equipped-slot total.",
-      "표시 확률은 현재 보정 적용 후 조건부 굴림입니다. ICD, 발동 예산, 행동 선행 조건, 행운 적중은 별도로 적용됩니다. ×N은 장착 개수이며 보장된 중첩 배수가 아닙니다. 중복 발동 항목은 한 번만 판정하고, 단계형 접미 계열은 최고 티어만 적용됩니다. 하이브리드 효과는 장착 슬롯 총계를 늘리지 않고 발동 그룹과 패시브 그룹에 함께 표시될 수 있습니다."
+      "Shown chances are condition-qualified rolls after current modifiers; normal weapon-hit chances are listed separately from critical/power-attack chances. Cast-on-crit values are per-candidate rolls, and fair cyclic selection executes at most 2 effects on a melee critical/power attack and 1 on a ranged or normal melee hit. Standard proc duplicates combine up to 3 item-local chances with diminishing returns and still execute one action; special proc duplicates keep their shared single roll. Tiered suffix families add rank points up to the T3 cap, while Scroll preservation keeps its separate additive 100% cap. ICDs, proc budgets, action preconditions, and Lucky Hit still apply separately. Hybrid effects may appear in both their trigger group and Passives without increasing the equipped-slot total.",
+      "표시 확률은 현재 보정 적용 후 조건부 판정값이며, 일반 무기 적중 확률은 치명타·강공 확률과 별도로 표시됩니다. 치명 시전은 후보별 판정값을 표시하고 공정 순환 선택으로 근접 치명타·강공은 공격당 최대 2개, 원거리와 근접 평타는 최대 1개만 실행합니다. 표준 발동 중복은 아이템별 확률을 최대 3개까지 감쇠 합성하지만 효과는 1회 실행하며, 특수 발동 중복은 기존 1회 판정을 공유합니다. 단계형 접미 계열은 티어 점수를 더해 3단계 상한까지 승급하고, 두루마리 보존은 별도의 합산·100% 상한을 유지합니다. ICD, 발동 예산, 행동 선행 조건, 행운 적중은 별도로 적용됩니다. 하이브리드 효과는 장착 슬롯 총계를 늘리지 않고 발동 그룹과 패시브 그룹에 함께 표시될 수 있습니다."
     );
   }
 

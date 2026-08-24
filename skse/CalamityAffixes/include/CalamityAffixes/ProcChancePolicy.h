@@ -4,7 +4,9 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <span>
 
 namespace CalamityAffixes
 {
@@ -21,6 +23,7 @@ namespace CalamityAffixes
 		0.65f,
 		0.5f
 	};
+	inline constexpr std::size_t kMaxEquippedDuplicateProcCopies = 3u;
 
 	// The tier input is the item's PROC-CAPABLE (non-suffix) slot count. The penalty
 	// exists to damp proc-affix stacking on a single item; passive suffix slots on the
@@ -71,6 +74,32 @@ namespace CalamityAffixes
 		float a_slotPenalty) noexcept
 	{
 		return std::clamp(a_baseChancePct * a_runtimeMultiplier * a_slotPenalty, 0.0f, 100.0f);
+	}
+
+	// Duplicate copies on different equipped items contribute their own item-local
+	// proc penalty. Their success chances are combined as the complement of all
+	// copies failing, while the caller still performs exactly one action/budget/ICD
+	// commit. An empty penalty span preserves the legacy one-copy fallback.
+	[[nodiscard]] constexpr float ResolveStackedProcChancePct(
+		float a_baseChancePct,
+		float a_runtimeMultiplier,
+		std::span<const float> a_slotPenalties) noexcept
+	{
+		if (a_slotPenalties.empty()) {
+			return ResolveEffectiveProcChancePct(a_baseChancePct, a_runtimeMultiplier, 1.0f);
+		}
+
+		float allCopiesFailChance = 1.0f;
+		const auto copyCount = std::min(a_slotPenalties.size(), kMaxEquippedDuplicateProcCopies);
+		for (std::size_t i = 0u; i < copyCount; ++i) {
+			const float copyChance = ResolveEffectiveProcChancePct(
+				a_baseChancePct,
+				a_runtimeMultiplier,
+				a_slotPenalties[i]);
+			allCopiesFailChance *= 1.0f - (copyChance / 100.0f);
+		}
+
+		return std::clamp((1.0f - allCopiesFailChance) * 100.0f, 0.0f, 100.0f);
 	}
 
 	[[nodiscard]] constexpr bool ShouldShowAdjustedProcChance(

@@ -2,6 +2,7 @@
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/ProcFeedback.h"
+#include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
 #include "CalamityAffixes/TrapWeaponHitPolicy.h"
 
@@ -92,6 +93,7 @@ namespace CalamityAffixes
 		RE::Actor* a_target,
 		const RE::HitData* a_hitData,
 		RE::Actor*& a_outSpawnTarget,
+		bool a_allowNormalWeaponHit,
 		const char** a_outFailureReason)
 	{
 		const auto setFailureReason = [&](const char* a_reason) {
@@ -118,8 +120,15 @@ namespace CalamityAffixes
 
 			const bool isCrit = a_hitData->flags.any(RE::HitData::Flag::kCritical);
 			const bool isPowerAttack = a_hitData->flags.any(RE::HitData::Flag::kPowerAttack);
-			if (!isCrit && !isPowerAttack) {
-				setFailureReason("needs crit/power attack");
+			const bool isEligibleNormalWeaponHit = detail::IsEligibleNormalWeaponHitFlags(
+				isCrit,
+				isPowerAttack,
+				a_hitData->attackDataSpell != nullptr,
+				a_hitData->flags.any(RE::HitData::Flag::kBash),
+				a_hitData->flags.any(RE::HitData::Flag::kTimedBash),
+				a_hitData->flags.any(RE::HitData::Flag::kExplosion));
+			if (!isCrit && !isPowerAttack && !(a_allowNormalWeaponHit && isEligibleNormalWeaponHit)) {
+				setFailureReason("needs crit/power attack or eligible normal weapon hit");
 				return false;
 			}
 		}
@@ -290,13 +299,21 @@ namespace CalamityAffixes
 			a_trap.position.z);
 	}
 
-	void EventBridge::ExecuteSpawnTrapAction(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
+	void EventBridge::ExecuteSpawnTrapAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
 	{
+		const auto& a_action = a_affix.action;
 		auto& trapState = _trapState;
 
 		RE::Actor* spawnTarget = nullptr;
 		const char* failureReason = "unknown";
-		if (!SelectSpawnTrapTarget(a_action, a_owner, a_target, a_hitData, spawnTarget, &failureReason)) {
+		if (!SelectSpawnTrapTarget(
+				a_action,
+				a_owner,
+				a_target,
+				a_hitData,
+				spawnTarget,
+				a_affix.normalWeaponHitProcChancePct > 0.0f,
+				&failureReason)) {
 			if (_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(a_action.spell)) {
 				const auto note = std::format(
 					"Calamity: {} skipped ({})",

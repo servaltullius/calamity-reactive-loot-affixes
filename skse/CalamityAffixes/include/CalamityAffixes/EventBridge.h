@@ -90,6 +90,13 @@ namespace CalamityAffixes
 			bool noHitEffectArt{ false };
 		};
 
+		static constexpr std::size_t kMaxCastOnCritPerHit = 2;
+		struct CastOnCritResults
+		{
+			std::array<CastOnCritResult, kMaxCastOnCritPerHit> entries{};
+			std::size_t count{ 0 };
+		};
+
 		struct MindOverMatterResult
 		{
 			float redirectedDamage{ 0.0f };

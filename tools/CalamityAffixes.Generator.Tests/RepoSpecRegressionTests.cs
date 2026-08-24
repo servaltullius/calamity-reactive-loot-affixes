@@ -381,6 +381,55 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
+    public void RepoSpec_NormalWeaponHitProcChancesMatchContract()
+    {
+        var repoRoot = FindRepoRoot();
+        var specPath = Path.Combine(repoRoot, "affixes", "affixes.json");
+        var spec = AffixSpecLoader.Load(specPath);
+        var expected = new Dictionary<string, double>(StringComparer.Ordinal)
+        {
+            ["bear_trap"] = 40.0,
+            ["crit_cast_firebolt"] = 45.0,
+            ["crit_cast_ice_spike"] = 45.0,
+            ["crit_cast_lightning_bolt"] = 45.0,
+            ["crit_cast_thunderbolt"] = 35.0,
+            ["crit_cast_icy_spear"] = 35.0,
+            ["crit_cast_chain_lightning"] = 35.0,
+            ["crit_cast_ice_storm"] = 35.0,
+        };
+
+        var configured = spec.Keywords.Affixes
+            .Where(affix => affix.Runtime.NormalWeaponHitProcChancePercent.HasValue)
+            .ToDictionary(
+                affix => affix.Id,
+                affix => affix.Runtime.NormalWeaponHitProcChancePercent!.Value,
+                StringComparer.Ordinal);
+
+        Assert.Equal(expected.Count, configured.Count);
+        foreach (var (affixId, expectedChance) in expected)
+        {
+            Assert.True(configured.TryGetValue(affixId, out var actualChance), $"Missing normal-hit chance for {affixId}.");
+            Assert.Equal(expectedChance, actualChance);
+
+            var affix = Assert.Single(spec.Keywords.Affixes, candidate => candidate.Id == affixId);
+            Assert.NotNull(affix.NameKo);
+            Assert.NotNull(affix.NameEn);
+            if (affixId == "bear_trap")
+            {
+                Assert.Contains("일반 무기 공격 시 40%", affix.NameKo!, StringComparison.Ordinal);
+                Assert.Contains("40% normal weapon hit", affix.NameEn!, StringComparison.Ordinal);
+            }
+            else
+            {
+                Assert.Contains($"근접 일반 공격 시 {expectedChance:0}%", affix.NameKo!, StringComparison.Ordinal);
+                Assert.Contains($"{expectedChance:0}% Normal Melee Hit", affix.NameEn!, StringComparison.Ordinal);
+                Assert.Contains("활·석궁은 일반 적중 시에도 100%", affix.NameKo!, StringComparison.Ordinal);
+                Assert.Contains("any Bow/Crossbow Hit (100%)", affix.NameEn!, StringComparison.Ordinal);
+            }
+        }
+    }
+
+    [Fact]
     public void RepoSpec_CastOnCritVanillaSpells_SuppressHitEffectArt()
     {
         var repoRoot = FindRepoRoot();
@@ -445,6 +494,21 @@ public sealed class RepoSpecRegressionTests
     {
         var hooksSource = ReadHooksRuntimeSource();
         Assert.Contains(
+            "const RE::SpellItem* feedbackSpell = nullptr;",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "if (!feedbackSpell && coc.noHitEffectArt)",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "PlayCastOnCritProcFeedbackSfx(feedbackSpell);",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.Equal(
+            1,
+            hooksSource.Split("PlayCastOnCritProcFeedbackSfx(feedbackSpell);", StringSplitOptions.None).Length - 1);
+        Assert.DoesNotContain(
             "PlayCastOnCritProcFeedbackSfx(coc.spell);",
             hooksSource,
             StringComparison.Ordinal);
@@ -455,6 +519,13 @@ public sealed class RepoSpecRegressionTests
     {
         var hooksSource = ReadHooksRuntimeSource();
         Assert.Contains(
+            "PlayCastOnCritProcFeedbackVfxSafe(a_target, feedbackSpell, a_now);",
+            hooksSource,
+            StringComparison.Ordinal);
+        Assert.Equal(
+            1,
+            hooksSource.Split("PlayCastOnCritProcFeedbackVfxSafe(a_target, feedbackSpell, a_now);", StringSplitOptions.None).Length - 1);
+        Assert.DoesNotContain(
             "PlayCastOnCritProcFeedbackVfxSafe(a_target, coc.spell, a_now);",
             hooksSource,
             StringComparison.Ordinal);
@@ -1526,6 +1597,9 @@ public sealed class RepoSpecRegressionTests
         {
             case "procChancePercent":
                 if (runtime.ProcChancePercent.HasValue) { value = runtime.ProcChancePercent.Value; return true; }
+                return false;
+            case "normalWeaponHitProcChancePercent":
+                if (runtime.NormalWeaponHitProcChancePercent.HasValue) { value = runtime.NormalWeaponHitProcChancePercent.Value; return true; }
                 return false;
             case "icdSeconds":
                 if (runtime.IcdSeconds.HasValue) { value = runtime.IcdSeconds.Value; return true; }

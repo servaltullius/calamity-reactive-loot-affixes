@@ -517,6 +517,42 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
                     msg=f"expected {label} schema rejection, got errors={errors}",
                 )
 
+    def test_schema_restricts_normal_weapon_hit_chance_to_runtime_consumers(self) -> None:
+        payloads: list[tuple[str, dict]] = []
+
+        debug_payload = json.loads(json.dumps(self.repo_spec))
+        debug_runtime = next(
+            affix["runtime"]
+            for affix in debug_payload["keywords"]["affixes"]
+            if affix.get("runtime", {}).get("action", {}).get("type") == "DebugNotify"
+        )
+        debug_runtime["normalWeaponHitProcChancePercent"] = 5.0
+        payloads.append(("DebugNotify", debug_payload))
+
+        trap_payload = json.loads(json.dumps(self.repo_spec))
+        trap_runtime = next(
+            affix["runtime"]
+            for affix in trap_payload["keywords"]["affixes"]
+            if affix.get("runtime", {}).get("action", {}).get("type") == "SpawnTrap"
+            and not affix["runtime"]["action"].get("requireCritOrPowerAttack", False)
+        )
+        trap_runtime["normalWeaponHitProcChancePercent"] = 5.0
+        payloads.append(("non-crit-gated SpawnTrap", trap_payload))
+
+        for label, payload in payloads:
+            with self.subTest(label=label):
+                errors: list[str] = []
+                self.lint_affixes._validate_schema(
+                    instance=payload,
+                    schema=self.schema,
+                    label="test",
+                    errors=errors,
+                )
+                self.assertTrue(
+                    any("is not valid under any of the given schemas" in error for error in errors),
+                    msg=f"expected schema rejection for {label}, got errors={errors}",
+                )
+
     def test_schema_rejects_non_boolean_movable_static_animation_update_flag(self) -> None:
         payload = json.loads(json.dumps(self.repo_spec))
         bear_marker = next(

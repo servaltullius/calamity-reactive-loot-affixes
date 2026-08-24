@@ -427,7 +427,7 @@ namespace RuntimeGateStoreChecks
 			state.lootChanceEligibleFailStreak = 4u;
 			state.runewordFragmentFailStreak = 5u;
 			state.reforgeOrbFailStreak = 6u;
-			state.activeSlotPenalty.push_back(0.5f);
+			state.activeProcSlotPenalties.push_back({ 0.5f });
 			state.playerContainerStash[{ 0x14u, 0x15u }] = 2;
 
 			state.ResetForConfigReload();
@@ -437,7 +437,7 @@ namespace RuntimeGateStoreChecks
 				state.lootChanceEligibleFailStreak != 0u ||
 				state.runewordFragmentFailStreak != 5u ||
 				state.reforgeOrbFailStreak != 6u ||
-				!state.activeSlotPenalty.empty() ||
+				!state.activeProcSlotPenalties.empty() ||
 				!state.playerContainerStash.empty()) {
 				std::cerr << "loot_runtime_state_reset: config reload must clear transient loot state while preserving serialized currency pity\n";
 				return false;

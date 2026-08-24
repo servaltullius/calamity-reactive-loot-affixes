@@ -358,16 +358,23 @@ namespace RuntimeGateStoreChecks
 		using CalamityAffixes::detail::ShouldDeferTieredSuffixFamily;
 		using CalamityAffixes::detail::SuffixFamilyBestCandidate;
 		using CalamityAffixes::detail::SuffixFamilyClassification;
+		using CalamityAffixes::detail::SuffixFamilyRankSelection;
 
 		// Exercise the production policies that RebuildActiveCounts delegates to.
 		// These assertions survive harmless statement rewrites in EventBridge while
 		// still proving the tier winner and passive reconciliation outcomes.
-		SuffixFamilyBestCandidate tieredBest;
-		tieredBest.Consider("suffix_assassin_t1", 4u);
-		tieredBest.Consider("suffix_assassin_t3", 9u);
-		tieredBest.Consider("suffix_assassin_t2", 1u);
-		if (!tieredBest.selected || tieredBest.id != "suffix_assassin_t3" || tieredBest.index != 9u) {
-			std::cerr << "rebuild_active_counts: highest suffix tier did not win\n";
+		SuffixFamilyRankSelection tieredSelection;
+		tieredSelection.ConsiderDefinition("suffix_assassin_t1");
+		tieredSelection.ConsiderDefinition("suffix_assassin_t2");
+		tieredSelection.ConsiderDefinition("suffix_assassin_t3");
+		tieredSelection.ConsiderEquipped("suffix_assassin_t1", 4u, 2u);
+		tieredSelection.ConsiderEffectiveDefinition("suffix_assassin_t1", 4u);
+		tieredSelection.ConsiderEffectiveDefinition("suffix_assassin_t2", 1u);
+		tieredSelection.ConsiderEffectiveDefinition("suffix_assassin_t3", 9u);
+		const auto tieredBest = tieredSelection.ResolveEffectiveCandidate();
+		if (!tieredBest.selected || tieredBest.id != "suffix_assassin_t2" || tieredBest.index != 1u ||
+			tieredSelection.rankPoints != 2u || tieredSelection.EffectiveRank() != 2u) {
+			std::cerr << "rebuild_active_counts: duplicate suffix rank points did not promote T1+T1 to T2\n";
 			return false;
 		}
 
@@ -557,8 +564,9 @@ namespace RuntimeGateStoreChecks
 			accumulateBody->find("ShouldAccumulateFamilylessSuffixValue") == std::string::npos ||
 			familyCrit == std::string::npos ||
 			accumulateBody->find("activeCritDamageBonusPct", familyCrit + 1u) != std::string::npos ||
-			accumulateBody->find("activeSlotPenalty") == std::string::npos ||
-			collectBody->find("SuffixFamilyBestCandidate") == std::string::npos ||
+			accumulateBody->find("activeProcSlotPenalties") == std::string::npos ||
+			accumulateBody->find("kMaxEquippedDuplicateProcCopies") == std::string::npos ||
+			collectBody->find("SuffixFamilyRankSelection") == std::string::npos ||
 			collectBody->find("activeCounts") == std::string::npos ||
 			collectBody->find("activeCritDamageBonusPct") == std::string::npos ||
 			collectBody->find("disablePassiveSuffixSpells") == std::string::npos ||
@@ -817,7 +825,8 @@ namespace RuntimeGateStoreChecks
 			trapActionText->find("EmitDebugHudNotification(note.c_str());") == std::string::npos ||
 			trapActionText->find("Calamity: {} planted") == std::string::npos ||
 			trapActionText->find("Calamity: {} skipped ({})") == std::string::npos ||
-			trapActionText->find("SelectSpawnTrapTarget(a_action, a_owner, a_target, a_hitData, spawnTarget, &failureReason)") == std::string::npos ||
+			trapActionText->find("SelectSpawnTrapTarget(") == std::string::npos ||
+			trapActionText->find("a_affix.normalWeaponHitProcChancePct > 0.0f") == std::string::npos ||
 			trapsText->find("#include \"CalamityAffixes/ProcFeedback.h\"") == std::string::npos ||
 			trapsText->find("ProcFeedback::PlayBloomProcFeedback(triggeredTarget, trapSnapshot.spell, 0.12f, false);") == std::string::npos ||
 			trapsText->find("_loot.debugHudNotifications && ProcFeedback::IsBloomProcSpell(trapSnapshot.spell)") == std::string::npos ||
@@ -1053,10 +1062,14 @@ namespace RuntimeGateStoreChecks
 				cmakeText->find("src/EventBridge.Triggers.Runtime.cpp") == std::string::npos ||
 				privateApiText->find("bool PassesTriggerProcPreconditions(") == std::string::npos ||
 				privateApiText->find("float ResolveTriggerProcChancePct(") == std::string::npos ||
+				privateApiText->find("float ResolveTriggerProcChancePctFromBase(") == std::string::npos ||
 				privateApiText->find("bool RollTriggerProcChance(float a_chancePct);") == std::string::npos ||
 			privateApiText->find("void CommitTriggerProcRuntime(") == std::string::npos ||
 				triggersText.find("PassesTriggerProcPreconditions(") == std::string::npos ||
 				triggersText.find("ResolveTriggerProcChancePct(affix, a_affixIndex)") == std::string::npos ||
+				triggersText.find("useNormalWeaponHitChance") == std::string::npos ||
+				triggersText.find("affix.normalWeaponHitProcChancePct") == std::string::npos ||
+				triggersText.find("ResolveTriggerProcChancePctFromBase(") == std::string::npos ||
 				triggersText.find("RollTriggerProcChance(chance)") == std::string::npos ||
 				trapEligibilityPos == std::string::npos ||
 				chanceRollPos == std::string::npos ||
@@ -1068,6 +1081,9 @@ namespace RuntimeGateStoreChecks
 				triggersText.find("ResolveTriggerProcCooldownMs(") != std::string::npos ||
 			policyText->find("bool EventBridge::PassesTriggerProcPreconditions(") == std::string::npos ||
 			policyText->find("float EventBridge::ResolveTriggerProcChancePct(") == std::string::npos ||
+			policyText->find("float EventBridge::ResolveTriggerProcChancePctFromBase(") == std::string::npos ||
+			policyText->find("ResolveStackedProcChancePct(") == std::string::npos ||
+			policyText->find("activeProcSlotPenalties") == std::string::npos ||
 			policyText->find("bool EventBridge::RollTriggerProcChance(") == std::string::npos ||
 			policyText->find("void EventBridge::CommitTriggerProcRuntime(") == std::string::npos) {
 			std::cerr << "trigger_proc_policy_extraction: ProcessTrigger policy extraction is incomplete\n";

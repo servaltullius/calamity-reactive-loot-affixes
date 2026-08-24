@@ -38,7 +38,7 @@ namespace CalamityAffixes
 	void EventBridge::ResetActiveCountsStateForRebuild()
 	{
 		_affixRuntimeState.activeCounts.assign(_affixRuntimeState.affixes.size(), 0);
-		_lootState.activeSlotPenalty.assign(_affixRuntimeState.affixes.size(), 0.0f);
+		_lootState.activeProcSlotPenalties.assign(_affixRuntimeState.affixes.size(), {});
 		_affixRuntimeState.activeCritDamageBonusPct = 0.0f;
 		_affixRuntimeState.RebuildActiveTriggerIndexCaches();
 		_instanceTrackingState.equippedInstanceKeysByToken.clear();
@@ -115,7 +115,7 @@ namespace CalamityAffixes
 			const auto& affix = _affixRuntimeState.affixes[idxIt->second];
 			return IsProcPenaltyEligible(
 				affix.slot == AffixSlot::kSuffix,
-				affix.procChancePct,
+				std::max(affix.procChancePct, affix.normalWeaponHitProcChancePct),
 				affix.action.type != ActionType::kDebugNotify);
 		});
 	}
@@ -180,10 +180,27 @@ namespace CalamityAffixes
 				}
 			}
 
-			// "Best Slot Wins" penalty only for prefixes.
-			if (affixIdx < _affixRuntimeState.affixes.size() && _affixRuntimeState.affixes[affixIdx].slot != AffixSlot::kSuffix) {
-				if (affixIdx < _lootState.activeSlotPenalty.size()) {
-					_lootState.activeSlotPenalty[affixIdx] = std::max(_lootState.activeSlotPenalty[affixIdx], penalty);
+			// Standard trigger duplicates on different equipped items retain each
+			// item's local penalty. Keep the strongest three deterministically; the
+			// proc policy combines their failure probabilities but executes once.
+			if (affixIdx < _affixRuntimeState.affixes.size() &&
+				affixIdx < _lootState.activeProcSlotPenalties.size()) {
+				const auto& affix = _affixRuntimeState.affixes[affixIdx];
+				const bool usesStandardTriggerProcLane =
+					affix.action.type == ActionType::kCastSpell ||
+					affix.action.type == ActionType::kCastSpellAdaptiveElement ||
+					affix.action.type == ActionType::kSpawnTrap;
+				if (usesStandardTriggerProcLane &&
+					affix.slot != AffixSlot::kSuffix &&
+					(affix.procChancePct > 0.0f || affix.normalWeaponHitProcChancePct > 0.0f)) {
+					auto& penalties = _lootState.activeProcSlotPenalties[affixIdx];
+					penalties.push_back(std::clamp(penalty, 0.0f, 1.0f));
+					std::sort(penalties.begin(), penalties.end(), [](float a_lhs, float a_rhs) {
+						return a_lhs > a_rhs;
+					});
+					if (penalties.size() > kMaxEquippedDuplicateProcCopies) {
+						penalties.resize(kMaxEquippedDuplicateProcCopies);
+					}
 				}
 			}
 		}
@@ -192,19 +209,29 @@ namespace CalamityAffixes
 	void EventBridge::CollectBestSuffixFamilyState(
 		std::unordered_set<RE::SpellItem*>& a_desiredPassives)
 	{
-		std::unordered_map<std::string_view, detail::SuffixFamilyBestCandidate> bestAffixByFamily;
-		for (std::size_t affixIdx = 0; affixIdx < _affixRuntimeState.affixes.size() && affixIdx < _affixRuntimeState.activeCounts.size(); ++affixIdx) {
+		std::unordered_map<std::string_view, detail::SuffixFamilyRankSelection> suffixFamilySelections;
+		for (std::size_t affixIdx = 0; affixIdx < _affixRuntimeState.affixes.size(); ++affixIdx) {
 			const auto& affix = _affixRuntimeState.affixes[affixIdx];
-			if (_affixRuntimeState.activeCounts[affixIdx] == 0 ||
-				affix.slot != AffixSlot::kSuffix ||
-				affix.family.empty()) {
+			if (affix.slot != AffixSlot::kSuffix || affix.family.empty()) {
 				continue;
 			}
 
-			bestAffixByFamily[affix.family].Consider(affix.id, affixIdx);
+			auto& selection = suffixFamilySelections[affix.family];
+			selection.ConsiderDefinition(affix.id);
+			if (affixIdx < _affixRuntimeState.activeCounts.size()) {
+				selection.ConsiderEquipped(affix.id, affixIdx, _affixRuntimeState.activeCounts[affixIdx]);
+			}
 		}
 
-		for (const auto& [_, best] : bestAffixByFamily) {
+		for (std::size_t affixIdx = 0; affixIdx < _affixRuntimeState.affixes.size(); ++affixIdx) {
+			const auto& affix = _affixRuntimeState.affixes[affixIdx];
+			if (affix.slot == AffixSlot::kSuffix && !affix.family.empty()) {
+				suffixFamilySelections[affix.family].ConsiderEffectiveDefinition(affix.id, affixIdx);
+			}
+		}
+
+		for (const auto& [_, selection] : suffixFamilySelections) {
+			const auto best = selection.ResolveEffectiveCandidate();
 			if (!best.selected || best.index >= _affixRuntimeState.affixes.size()) {
 				continue;
 			}

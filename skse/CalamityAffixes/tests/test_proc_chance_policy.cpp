@@ -1,5 +1,15 @@
 #include "CalamityAffixes/ProcChancePolicy.h"
 
+#include <array>
+
+namespace
+{
+	[[nodiscard]] constexpr bool NearlyEqual(float a_lhs, float a_rhs, float a_epsilon = 0.001f) noexcept
+	{
+		return a_lhs >= a_rhs - a_epsilon && a_lhs <= a_rhs + a_epsilon;
+	}
+}
+
 static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(0u) == 1.0f);
 static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(1u) == 1.0f);
 static_assert(CalamityAffixes::ResolveMultiAffixProcPenalty(2u) == 0.8f);
@@ -31,6 +41,18 @@ static_assert(CalamityAffixes::ResolveEffectiveProcChancePct(30.0f, 3.0f, 0.5f) 
 static_assert(CalamityAffixes::ResolveEffectiveProcChancePct(30.0f, 1.2f, 1.0f) == 36.0f);
 static_assert(CalamityAffixes::ResolveEffectiveProcChancePct(80.0f, 3.0f, 1.0f) == 100.0f);
 static_assert(CalamityAffixes::ResolveEffectiveProcChancePct(-10.0f, 1.0f, 1.0f) == 0.0f);
+
+constexpr std::array kOneFullPenalty{ 1.0f };
+constexpr std::array kTwoFullPenalties{ 1.0f, 1.0f };
+constexpr std::array kThreeMixedPenalties{ 1.0f, 0.8f, 0.5f };
+constexpr std::array kFourPenalties{ 1.0f, 1.0f, 1.0f, 1.0f };
+static_assert(NearlyEqual(CalamityAffixes::ResolveStackedProcChancePct(30.0f, 1.0f, {}), 30.0f));
+static_assert(NearlyEqual(CalamityAffixes::ResolveStackedProcChancePct(30.0f, 1.0f, kOneFullPenalty), 30.0f));
+static_assert(NearlyEqual(CalamityAffixes::ResolveStackedProcChancePct(30.0f, 1.0f, kTwoFullPenalties), 51.0f));
+static_assert(NearlyEqual(CalamityAffixes::ResolveStackedProcChancePct(30.0f, 1.0f, kThreeMixedPenalties), 54.78f));
+static_assert(NearlyEqual(CalamityAffixes::ResolveStackedProcChancePct(30.0f, 1.0f, kFourPenalties), 65.7f));
+static_assert(NearlyEqual(CalamityAffixes::ResolveStackedProcChancePct(100.0f, 1.0f, kTwoFullPenalties), 100.0f));
+static_assert(NearlyEqual(CalamityAffixes::ResolveStackedProcChancePct(0.0f, 1.0f, kTwoFullPenalties), 0.0f));
 
 static_assert(CalamityAffixes::ShouldShowAdjustedProcChance(30.0f, 15.0f));
 static_assert(!CalamityAffixes::ShouldShowAdjustedProcChance(30.0f, 30.0f));

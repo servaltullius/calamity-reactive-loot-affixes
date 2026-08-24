@@ -58,6 +58,25 @@ namespace CalamityAffixes
 		const auto procChanceIt = a_runtime.find("procChancePercent");
 		const bool hasNumericProcChance = (procChanceIt != a_runtime.end() && procChanceIt->is_number());
 		a_out.procChancePct = std::clamp(a_runtime.value("procChancePercent", 0.0f), 0.0f, 100.0f);
+		const auto normalHitChanceIt = a_runtime.find("normalWeaponHitProcChancePercent");
+		if (normalHitChanceIt != a_runtime.end()) {
+			const auto& action = a_runtime.value("action", nlohmann::json::object());
+			const bool supportsNormalWeaponHitChance =
+				a_actionType == RuntimeContract::kActionCastOnCrit ||
+				(a_actionType == RuntimeContract::kActionSpawnTrap &&
+				 action.is_object() &&
+				 action.value("requireCritOrPowerAttack", false));
+			if (!normalHitChanceIt->is_number() || !supportsNormalWeaponHitChance) {
+				SKSE::log::error(
+					"CalamityAffixes: runtime.normalWeaponHitProcChancePercent is only supported for CastOnCrit or SpawnTrap with requireCritOrPowerAttack=true (affixId={}, actionType={}).",
+					a_out.id,
+					a_actionType);
+				return false;
+			}
+			a_out.normalWeaponHitProcChancePct = std::clamp(normalHitChanceIt->get<float>(), 0.0f, 100.0f);
+		} else {
+			a_out.normalWeaponHitProcChancePct = 0.0f;
+		}
 		if (isSpecialActionType(a_actionType) && (!hasNumericProcChance || a_out.procChancePct <= 0.0f)) {
 			SKSE::log::error(
 				"CalamityAffixes: special action requires runtime.procChancePercent > 0 (affixId={}, actionType={}, value={}).",

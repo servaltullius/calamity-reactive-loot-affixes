@@ -53,7 +53,9 @@ namespace CalamityAffixes
 		std::uint32_t runewordFragmentFailStreak{ 0 };
 		std::uint32_t reforgeOrbFailStreak{ 0 };
 
-		std::vector<float> activeSlotPenalty{};
+		// Per-affix item-local proc penalties for equipped duplicate copies. Each
+		// inner vector is kept strongest-first and capped by the proc policy.
+		std::vector<std::vector<float>> activeProcSlotPenalties{};
 		LootRerollGuard rerollGuard{};
 		std::vector<PendingDroppedRefDelete> pendingDroppedRefDeletes{};
 		std::atomic_bool dropDeleteDrainScheduled{ false };
@@ -70,7 +72,7 @@ namespace CalamityAffixes
 			previewAffixes.clear();
 			previewRecent.clear();
 			lootChanceEligibleFailStreak = 0;
-			activeSlotPenalty.clear();
+			activeProcSlotPenalties.clear();
 			rerollGuard.Reset();
 			playerContainerStash.clear();
 		}

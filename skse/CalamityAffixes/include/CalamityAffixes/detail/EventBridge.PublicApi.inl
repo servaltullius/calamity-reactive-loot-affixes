@@ -99,7 +99,9 @@
 			float& a_inOutDamage,
 			bool a_allowResync = true);
 
-		[[nodiscard]] CastOnCritResult EvaluateCastOnCrit(
+		// Returns one original-hit batch: at most two qualifying melee procs, or
+		// one normal-melee/ranged proc.
+		[[nodiscard]] CastOnCritResults EvaluateCastOnCrit(
 			RE::Actor* a_attacker,
 			RE::Actor* a_target,
 			const RE::HitData* a_hitData,
