@@ -125,6 +125,9 @@ jobs:
       # Builds the DLL, runs ctest and the Generator tests, packages the MO2
       # zip, verifies its structure, and writes a SHA256 sidecar.
       - name: Run release build pipeline
+        # Match the local release date used by the prepared MO2 download links.
+        env:
+          TZ: Asia/Seoul
         run: python3 tools/release_build.py --version "${{ steps.version.outputs.version }}"
 
       # Run the full tools suite after the DLL exists so its real packaging

@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Current RC](https://img.shields.io/badge/Current%20RC-v1.7.5--rc5-f28c28)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5-rc5)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc5/CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip)
+[![Current RC](https://img.shields.io/badge/Current%20RC-v1.7.5--rc6-f28c28)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5-rc6)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc6/CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip)
 
 ## 어떤 모드인가요?
 
@@ -15,10 +15,10 @@
 
 ## 다운로드 (플레이어)
 
-> **현재 공개 테스트 빌드:** [v1.7.5-rc5](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5-rc5)
+> **현재 공개 테스트 빌드:** [v1.7.5-rc6](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5-rc6)
 
-- MO2 ZIP: [CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc5/CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip)
-- SHA-256: [CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc5/CalamityAffixes_MO2_v1.7.5-rc5_2026-08-20.zip.sha256)
+- MO2 ZIP: [CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc6/CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip)
+- SHA-256: [CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc6/CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 
@@ -32,7 +32,15 @@
 - 룬 조각·재련 오브는 적격 적대 대상의 시체에서만 획득하며, 일반 확률·피티와 고유·보스·드래곤 확정 보상을 함께 지원합니다.
 - Prisma UI에서 선택 장비 툴팁, 어픽스 슬롯 진행, 룬워드 검색·제작, 보유 통화와 피티 현황을 한국어·영어로 확인할 수 있습니다.
 
-## v1.7.5-rc5 핵심 변경
+## v1.7.5-rc6 핵심 변경
+
+- 전투 중 Calamity 상태 락과 Skyrim 이벤트 락이 서로를 기다리던 교착 경로를 수정했습니다. 테스트 패키지 사용 후 프리징 개선이 보고됐습니다.
+- 치명타·강공 전용 효과에 일반 공격 발동을 추가하고, 중복 표준 발동 어픽스와 단계형 접미가 강화되도록 조정했습니다.
+- 근접 치명타·강공격은 치명 시전 주문을 최대 2개까지 발동하며, 기존 ICD와 재진입 방지는 유지합니다.
+- Calamity 공격 효과와 추적 가능한 소환 폭발의 시전자·아군·중립 피해를 차단했습니다.
+- 자세한 확률·호환성·검증 범위는 [rc6 릴리스 노트](docs/releases/2026-09-05-github-release-body-v1.7.5-rc6.md)를 확인하세요.
+
+## rc5에서 추가된 슬롯 성장과 보상
 
 신규 장비도 재련 오브를 사용해 일반 어픽스를 `접두 1 + 접미 2` 구성까지 단계적으로 성장시킬 수 있습니다.
 
