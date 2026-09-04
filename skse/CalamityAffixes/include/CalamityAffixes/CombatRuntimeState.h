@@ -148,13 +148,16 @@ namespace CalamityAffixes
 	{
 	public:
 		explicit ScopedProcDepth(CombatRuntimeState& a_state) noexcept :
-			_state(&a_state)
+			_state(&a_state),
+			_previousOnThread(_activeOnThread)
 		{
 			_state->procDepth.fetch_add(1u, std::memory_order_relaxed);
+			_activeOnThread = this;
 		}
 
 		~ScopedProcDepth() noexcept
 		{
+			_activeOnThread = _previousOnThread;
 			// Compare-exchange rather than a bare fetch_sub so a concurrent
 			// ResetTransientState (save/load, config reload) cannot make this
 			// decrement underflow.
@@ -168,6 +171,21 @@ namespace CalamityAffixes
 			}
 		}
 
+		// The shared depth can belong to another thread. An engine callback
+		// must capture only its own synchronous proc origin before deferring;
+		// otherwise an unrelated hit would be mistaken for proc recursion.
+		// Keep this lexical RAII chain separate from ResetTransientState: a
+		// reset may clear the counter while the originating scope still exists.
+		[[nodiscard]] static bool IsActiveOnCurrentThread(const CombatRuntimeState& a_state) noexcept
+		{
+			for (auto* guard = _activeOnThread; guard; guard = guard->_previousOnThread) {
+				if (guard->_state == &a_state) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		ScopedProcDepth(const ScopedProcDepth&) = delete;
 		ScopedProcDepth(ScopedProcDepth&&) = delete;
 		ScopedProcDepth& operator=(const ScopedProcDepth&) = delete;
@@ -175,5 +193,7 @@ namespace CalamityAffixes
 
 	private:
 		CombatRuntimeState* _state;
+		const ScopedProcDepth* _previousOnThread;
+		static inline thread_local const ScopedProcDepth* _activeOnThread{ nullptr };
 	};
 }

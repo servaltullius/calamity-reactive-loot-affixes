@@ -16,6 +16,9 @@ namespace CalamityAffixes
 		float a_damage)
 	{
 		const auto now = std::chrono::steady_clock::now();
+		// Keep shared trigger/ICD state protected through proc dispatch. Engine
+		// BSTEvent callbacks use nonblocking admission (EventBridge.Events.cpp),
+		// so they cannot hold an event-source lock while waiting on this mutex.
 		const std::scoped_lock lock(_stateMutex);
 		MaybeFlushRuntimeUserSettings(now, false);
 

@@ -5,12 +5,12 @@
 
 namespace CalamityAffixes
 {
-	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+	RE::BSEventNotifyControl EventBridge::HandleModCallbackEvent(
 		const SKSE::ModCallbackEvent* a_event,
-		RE::BSTEventSource<SKSE::ModCallbackEvent>*)
+		EventStateLock&,
+		const EngineEventContext& a_context)
 	{
-		const auto now = std::chrono::steady_clock::now();
-		const std::scoped_lock lock(_stateMutex);
+		const auto now = a_context.observedAt;
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!a_event) {

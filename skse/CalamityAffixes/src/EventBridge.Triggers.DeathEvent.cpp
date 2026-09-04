@@ -37,12 +37,18 @@ namespace CalamityAffixes
 	}
 
 	static_assert(RuntimePolicy::kAllowCorpseDeathRuntimeCurrencyRoll);
-	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+	RE::BSEventNotifyControl EventBridge::HandleDeathEvent(
 		const RE::TESDeathEvent* a_event,
-		RE::BSTEventSource<RE::TESDeathEvent>*)
+		EventStateLock& lock,
+		const EngineEventContext& a_context)
 	{
-		const auto now = std::chrono::steady_clock::now();
-		std::unique_lock<std::recursive_mutex> lock(_stateMutex);
+		const auto now = a_context.observedAt;
+		std::optional<ScopedProcDepth> originGuard;
+		if (a_context.procOrigin && !ScopedProcDepth::IsActiveOnCurrentThread(_combatState)) {
+			// A proc can still grant corpse currency / chain an explosion; only
+			// the normal Kill trigger is rejected by its existing depth gate.
+			originGuard.emplace(_combatState);
+		}
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!a_event) {
@@ -244,6 +250,9 @@ namespace CalamityAffixes
 		// EventBridge state and nothing follows it, so hand the lock back
 		// before crossing into the VM.  Same shape as the ForEachHighActor
 		// hand-off in TickTraps.
+		// Do not expose the restored shared depth after releasing state: another
+		// thread could otherwise mistake an independent event for this proc.
+		originGuard.reset();
 		lock.unlock();
 		SendModEvent("CalamityAffixes_Kill", dying);
 

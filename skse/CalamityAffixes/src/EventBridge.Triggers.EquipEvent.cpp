@@ -6,12 +6,12 @@
 
 namespace CalamityAffixes
 {
-	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+	RE::BSEventNotifyControl EventBridge::HandleEquipEvent(
 		const RE::TESEquipEvent* a_event,
-		RE::BSTEventSource<RE::TESEquipEvent>*)
+		EventStateLock&,
+		const EngineEventContext& a_context)
 	{
-		const auto now = std::chrono::steady_clock::now();
-		const std::scoped_lock lock(_stateMutex);
+		const auto now = a_context.observedAt;
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || _affixRuntimeState.affixes.empty()) {

@@ -324,12 +324,12 @@ namespace CalamityAffixes
 	}
 
 
-	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+	RE::BSEventNotifyControl EventBridge::HandleContainerChangedEvent(
 		const RE::TESContainerChangedEvent* a_event,
-		RE::BSTEventSource<RE::TESContainerChangedEvent>*)
+		EventStateLock&,
+		const EngineEventContext& a_context)
 	{
-		const auto now = std::chrono::steady_clock::now();
-		const std::scoped_lock lock(_stateMutex);
+		const auto now = a_context.observedAt;
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
@@ -644,12 +644,12 @@ namespace CalamityAffixes
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+	RE::BSEventNotifyControl EventBridge::HandleUniqueIDChangeEvent(
 		const RE::TESUniqueIDChangeEvent* a_event,
-		RE::BSTEventSource<RE::TESUniqueIDChangeEvent>*)
+		EventStateLock&,
+		const EngineEventContext& a_context)
 	{
-		const auto now = std::chrono::steady_clock::now();
-		const std::scoped_lock lock(_stateMutex);
+		const auto now = a_context.observedAt;
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!a_event) {

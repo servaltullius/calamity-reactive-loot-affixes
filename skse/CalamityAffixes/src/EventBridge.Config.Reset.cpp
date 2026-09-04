@@ -4,6 +4,7 @@ namespace CalamityAffixes
 {
 	void EventBridge::ResetRuntimeStateForConfigReload()
 	{
+		_eventDispatcher.Invalidate();
 		_affixRuntimeState.affixes.clear();
 		_affixRuntimeState.activeCounts.clear();
 		_affixRuntimeState.activeCritDamageBonusPct = 0.0f;

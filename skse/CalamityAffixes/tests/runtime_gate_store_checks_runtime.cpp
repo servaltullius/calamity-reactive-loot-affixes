@@ -777,7 +777,9 @@ namespace RuntimeGateStoreChecks
 		// nothing about the outcome, so it now lives in
 		// IsCommittedFallbackHitData and is covered by
 		// tests/test_tes_hit_fallback_policy.cpp.
-		if (source.find("if (_combatState.procDepth > 0)") == std::string::npos ||
+		// Deferred ingress also preserves the callback's original proc context;
+		// current depth alone is zero after that originating scope has unwound.
+		if (source.find("if (a_context.procOrigin || _combatState.procDepth > 0)") == std::string::npos ||
 			source.find("detail::IsCommittedFallbackHitData(") == std::string::npos ||
 			source.find("if (!hasCommittedHitData)") == std::string::npos ||
 			source.find("Trigger::kIncomingHit") == std::string::npos ||

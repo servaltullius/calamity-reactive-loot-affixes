@@ -4,6 +4,7 @@
 #include "CalamityAffixes/SerializationLoadState.h"
 
 #include <stdexcept>
+#include <thread>
 
 namespace RuntimeGateStoreChecks
 {
@@ -512,9 +513,11 @@ namespace RuntimeGateStoreChecks
 
 	bool CheckScopedProcDepthGuard()
 	{
+		using CalamityAffixes::ScopedProcDepth;
 		CalamityAffixes::CombatRuntimeState state{};
-		if (state.procDepth.load() != 0u) {
-			std::cerr << "scoped_proc_depth: fresh CombatRuntimeState did not start at depth 0\n";
+		CalamityAffixes::CombatRuntimeState otherState{};
+		if (state.procDepth.load() != 0u || ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+			std::cerr << "scoped_proc_depth: fresh CombatRuntimeState did not start at depth 0 with no thread origin\n";
 			return false;
 		}
 
@@ -522,13 +525,14 @@ namespace RuntimeGateStoreChecks
 		{
 			const CalamityAffixes::ScopedProcDepth guard{ state };
 			(void)guard;
-			if (state.procDepth.load() != 1u) {
-				std::cerr << "scoped_proc_depth: guard did not raise depth to 1\n";
+			if (state.procDepth.load() != 1u || !ScopedProcDepth::IsActiveOnCurrentThread(state) ||
+				ScopedProcDepth::IsActiveOnCurrentThread(otherState)) {
+				std::cerr << "scoped_proc_depth: guard did not raise depth to 1 with a same-state thread origin\n";
 				return false;
 			}
 		}
-		if (state.procDepth.load() != 0u) {
-			std::cerr << "scoped_proc_depth: guard did not restore depth after normal exit\n";
+		if (state.procDepth.load() != 0u || ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+			std::cerr << "scoped_proc_depth: guard did not restore depth and thread origin after normal exit\n";
 			return false;
 		}
 
@@ -539,19 +543,38 @@ namespace RuntimeGateStoreChecks
 			{
 				const CalamityAffixes::ScopedProcDepth inner{ state };
 				(void)inner;
-				if (state.procDepth.load() != 2u) {
-					std::cerr << "scoped_proc_depth: nested guard did not raise depth to 2\n";
+				if (state.procDepth.load() != 2u || !ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+					std::cerr << "scoped_proc_depth: nested guard did not raise depth to 2 with thread origin\n";
 					return false;
 				}
 			}
-			if (state.procDepth.load() != 1u) {
-				std::cerr << "scoped_proc_depth: inner guard did not restore depth to 1\n";
+			if (state.procDepth.load() != 1u || !ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+				std::cerr << "scoped_proc_depth: inner guard did not restore depth to 1 and preserve the outer origin\n";
 				return false;
 			}
 		}
-		if (state.procDepth.load() != 0u) {
-			std::cerr << "scoped_proc_depth: outer guard did not restore depth to 0\n";
+		if (state.procDepth.load() != 0u || ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+			std::cerr << "scoped_proc_depth: outer guard did not restore depth to 0 and clear thread origin\n";
 			return false;
+		}
+
+		// Nested guards for another state must not hide the outer same-state
+		// origin, and unwinding must restore the previous thread-local chain.
+		{
+			const ScopedProcDepth outer{ state };
+			{
+				const ScopedProcDepth inner{ otherState };
+				if (!ScopedProcDepth::IsActiveOnCurrentThread(state) ||
+					!ScopedProcDepth::IsActiveOnCurrentThread(otherState)) {
+					std::cerr << "scoped_proc_depth: nested other-state guard hid a live thread origin\n";
+					return false;
+				}
+			}
+			if (!ScopedProcDepth::IsActiveOnCurrentThread(state) ||
+				ScopedProcDepth::IsActiveOnCurrentThread(otherState)) {
+				std::cerr << "scoped_proc_depth: other-state unwind failed to restore the previous thread origin\n";
+				return false;
+			}
 		}
 
 		// The regression this guard exists for: an escaping exception used to skip
@@ -563,9 +586,9 @@ namespace RuntimeGateStoreChecks
 			throw std::runtime_error("proc action failed");
 		} catch (const std::runtime_error&) {
 		}
-		if (state.procDepth.load() != 0u) {
-			std::cerr << "scoped_proc_depth: exception leaked proc depth (" << state.procDepth.load()
-					  << "); all affix procs would stay disabled\n";
+		if (state.procDepth.load() != 0u || ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+			std::cerr << "scoped_proc_depth: exception leaked proc depth or thread origin (" << state.procDepth.load()
+					  << "); subsequent affix procs would be suppressed\n";
 			return false;
 		}
 
@@ -575,9 +598,71 @@ namespace RuntimeGateStoreChecks
 			const CalamityAffixes::ScopedProcDepth guard{ state };
 			(void)guard;
 			state.procDepth.store(0u);
+			if (!ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+				std::cerr << "scoped_proc_depth: counter reset erased a still-active thread origin\n";
+				return false;
+			}
 		}
-		if (state.procDepth.load() != 0u) {
-			std::cerr << "scoped_proc_depth: decrement underflowed to " << state.procDepth.load() << "\n";
+		if (state.procDepth.load() != 0u || ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+			std::cerr << "scoped_proc_depth: reset unwind leaked thread origin or underflowed to " << state.procDepth.load() << "\n";
+			return false;
+		}
+
+		// Resetting runtime state during a nested scope must retain lexical
+		// origin until both guards exit, without resurrecting shared depth.
+		{
+			const ScopedProcDepth outer{ state };
+			{
+				const ScopedProcDepth inner{ otherState };
+				state.ResetTransientState();
+				otherState.ResetTransientState();
+				if (state.procDepth.load() != 0u || otherState.procDepth.load() != 0u ||
+					!ScopedProcDepth::IsActiveOnCurrentThread(state) ||
+					!ScopedProcDepth::IsActiveOnCurrentThread(otherState)) {
+					std::cerr << "scoped_proc_depth: runtime reset changed live lexical thread origins\n";
+					return false;
+				}
+			}
+			if (!ScopedProcDepth::IsActiveOnCurrentThread(state) ||
+				ScopedProcDepth::IsActiveOnCurrentThread(otherState)) {
+				std::cerr << "scoped_proc_depth: reset inner unwind did not restore outer origin\n";
+				return false;
+			}
+		}
+		if (state.procDepth.load() != 0u || otherState.procDepth.load() != 0u ||
+			ScopedProcDepth::IsActiveOnCurrentThread(state) ||
+			ScopedProcDepth::IsActiveOnCurrentThread(otherState)) {
+			std::cerr << "scoped_proc_depth: runtime reset unwind leaked depth or thread origins\n";
+			return false;
+		}
+
+		// A callback on another thread must not inherit a globally nonzero
+		// depth. Its own guard is independently visible only on that thread.
+		{
+			const ScopedProcDepth outer{ state };
+			bool workerOk = false;
+			std::thread worker([&]() {
+				if (state.procDepth.load() != 1u || ScopedProcDepth::IsActiveOnCurrentThread(state) ||
+					ScopedProcDepth::IsActiveOnCurrentThread(otherState)) {
+					return;
+				}
+				{
+					const ScopedProcDepth inner{ state };
+					if (state.procDepth.load() != 2u || !ScopedProcDepth::IsActiveOnCurrentThread(state) ||
+						ScopedProcDepth::IsActiveOnCurrentThread(otherState)) {
+						return;
+					}
+				}
+				workerOk = state.procDepth.load() == 1u && !ScopedProcDepth::IsActiveOnCurrentThread(state);
+			});
+			worker.join();
+			if (!workerOk || state.procDepth.load() != 1u || !ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+				std::cerr << "scoped_proc_depth: thread origin was shared across independent callback threads\n";
+				return false;
+			}
+		}
+		if (state.procDepth.load() != 0u || ScopedProcDepth::IsActiveOnCurrentThread(state)) {
+			std::cerr << "scoped_proc_depth: independent thread guards leaked depth or origin\n";
 			return false;
 		}
 

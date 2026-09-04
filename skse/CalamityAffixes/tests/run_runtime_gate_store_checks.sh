@@ -55,6 +55,7 @@ sources=(
   -Wall \
   -Wextra \
   -pedantic \
+  -pthread \
   -I"${project_dir}/include" \
   -I"${project_dir}/extern/vendor/include" \
   "${sources[@]}" \
@@ -62,3 +63,16 @@ sources=(
 
 "${tmp_dir}/runtime_gate_store_checks"
 echo "runtime_gate_store_checks: OK"
+
+"${cxx}" \
+  -std=c++23 \
+  -O2 \
+  -Wall \
+  -Wextra \
+  -pedantic \
+  -pthread \
+  -I"${project_dir}/include" \
+  "${script_dir}/deferred_event_dispatcher_tests.cpp" \
+  -o "${tmp_dir}/deferred_event_dispatcher_tests"
+
+timeout 30s "${tmp_dir}/deferred_event_dispatcher_tests"

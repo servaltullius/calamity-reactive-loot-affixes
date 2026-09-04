@@ -24,6 +24,7 @@
 
 #include "CalamityAffixes/ItemSubtypePolicy.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
+#include "CalamityAffixes/DeferredEventDispatcher.h"
 
 	#include "CalamityAffixes/AdaptiveElement.h"
 	#include "CalamityAffixes/AffixSpecialActionState.h"
@@ -164,6 +165,18 @@ namespace CalamityAffixes
 		// (trigger→loot, loot→serialization, etc.) make fine-grained splitting
 		// deadlock-prone without measurable contention benefit in a game mod.
 		mutable std::recursive_mutex _stateMutex;
+		// BSTEventSource invokes sinks under its engine lock. Sink admission must
+		// never wait for _stateMutex; contended events own their input until a
+		// game task can acquire state outside the engine callback. One inbox also
+		// preserves container/unique-ID ordering across event types.
+		detail::DeferredEventDispatcher _eventDispatcher;
+		using EventStateLock = detail::DeferredEventDispatcher::StateLock;
+		struct EngineEventContext
+		{
+			std::chrono::steady_clock::time_point observedAt{};
+			bool procOrigin{ false };
+			std::optional<RE::HitData> hitData;
+		};
 
 		ResyncScheduler _equipResync{ .nextAtMs = 0, .intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count()) };
 

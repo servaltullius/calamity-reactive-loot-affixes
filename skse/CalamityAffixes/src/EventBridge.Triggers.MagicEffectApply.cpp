@@ -10,12 +10,12 @@ namespace CalamityAffixes
 {
 	using namespace TriggersDetail;
 
-	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+	RE::BSEventNotifyControl EventBridge::HandleMagicEffectApplyEvent(
 		const RE::TESMagicEffectApplyEvent* a_event,
-		RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*)
+		EventStateLock&,
+		const EngineEventContext& a_context)
 	{
-		const auto now = std::chrono::steady_clock::now();
-		const std::scoped_lock lock(_stateMutex);
+		const auto now = a_context.observedAt;
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!a_event || !a_event->caster || !a_event->target || !a_event->magicEffect) {

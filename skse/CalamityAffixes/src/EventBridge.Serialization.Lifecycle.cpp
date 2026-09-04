@@ -13,6 +13,7 @@ namespace CalamityAffixes
 	void EventBridge::Revert(SKSE::SerializationInterface*)
 	{
 		const std::scoped_lock lock(_stateMutex);
+		_eventDispatcher.Invalidate();
 
 		// Remove any active passive suffix spells before clearing
 		auto* player = RE::PlayerCharacter::GetSingleton();
@@ -52,6 +53,9 @@ namespace CalamityAffixes
 	void EventBridge::OnPostLoadGame()
 	{
 		const std::scoped_lock lock(_stateMutex);
+		// Also discard events captured during world restoration, not just tasks
+		// already pending when PreLoad/serialization started.
+		_eventDispatcher.Invalidate();
 		(void)NormalizeLegacyPlayerInstanceKeys();
 		(void)PruneOrphanedPlayerInstanceKeys();
 		// Serialization Load runs before inventory restoration. Always rebuild at
@@ -63,6 +67,7 @@ namespace CalamityAffixes
 	void EventBridge::OnPreLoadGame()
 	{
 		const std::scoped_lock lock(_stateMutex);
+		_eventDispatcher.Invalidate();
 		ClearTrapRuntimeState("pre-load", true);
 		Hooks::InvalidateDeferredTasks();
 		Hooks::ClearRuntimeState();

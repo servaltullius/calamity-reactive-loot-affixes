@@ -9,6 +9,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include(CTest)
 
 if(BUILD_TESTING)
+    find_package(Threads REQUIRED)
+
     add_executable(
         runtime_gate_store_checks
         runtime_gate_store_checks_main.cpp
@@ -28,6 +30,17 @@ if(BUILD_TESTING)
             ${CMAKE_CURRENT_SOURCE_DIR}/../include
             ${CMAKE_CURRENT_SOURCE_DIR}/../extern/vendor/include
     )
+    target_link_libraries(runtime_gate_store_checks PRIVATE Threads::Threads)
+
+    add_executable(deferred_event_dispatcher_tests deferred_event_dispatcher_tests.cpp)
+    target_include_directories(deferred_event_dispatcher_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+    target_link_libraries(deferred_event_dispatcher_tests PRIVATE Threads::Threads)
+
+    add_test(
+        NAME CalamityAffixesDeferredEventDispatcherChecks
+        COMMAND deferred_event_dispatcher_tests
+    )
+    set_tests_properties(CalamityAffixesDeferredEventDispatcherChecks PROPERTIES TIMEOUT 30)
 
     add_test(
         NAME CalamityAffixesRuntimeGateStoreChecks

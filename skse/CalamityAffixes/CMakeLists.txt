@@ -17,6 +17,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 		set(headers
 		    include/CalamityAffixes/CombatContext.h
 		    include/CalamityAffixes/CombatRuntimeState.h
+		    include/CalamityAffixes/DeferredEventDispatcher.h
 		    include/CalamityAffixes/HostileEffectDamagePolicy.h
 		    include/CalamityAffixes/HostileEffectGuard.h
 		    include/CalamityAffixes/AffixSpecialActionState.h
@@ -61,6 +62,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	set(sources
 	    src/main.cpp
 	    src/EventBridge.cpp
+	    src/EventBridge.Events.cpp
 	    src/EventBridge.Config.cpp
 	    src/EventBridge.Config.Reset.cpp
 	    src/EventBridge.Config.LootRuntime.cpp

@@ -2,6 +2,21 @@
 #error "Do not include EventBridge.PrivateApi.inl directly; include CalamityAffixes/EventBridge.h"
 #endif
 
+		// All BSTEvent sinks use the same nonblocking admission boundary.
+		template <class Event>
+		RE::BSEventNotifyControl DispatchEngineEvent(
+			const Event* a_event,
+			RE::BSEventNotifyControl (EventBridge::*a_handler)(const Event*, EventStateLock&, const EngineEventContext&));
+		bool ScheduleEngineEventDrain(detail::DeferredEventDispatcher::Generation a_generation);
+		RE::BSEventNotifyControl HandleHitEvent(const RE::TESHitEvent*, EventStateLock&, const EngineEventContext&);
+		RE::BSEventNotifyControl HandleDeathEvent(const RE::TESDeathEvent*, EventStateLock&, const EngineEventContext&);
+		RE::BSEventNotifyControl HandleEquipEvent(const RE::TESEquipEvent*, EventStateLock&, const EngineEventContext&);
+		RE::BSEventNotifyControl HandleActivateEvent(const RE::TESActivateEvent*, EventStateLock&, const EngineEventContext&);
+		RE::BSEventNotifyControl HandleMagicEffectApplyEvent(const RE::TESMagicEffectApplyEvent*, EventStateLock&, const EngineEventContext&);
+		RE::BSEventNotifyControl HandleContainerChangedEvent(const RE::TESContainerChangedEvent*, EventStateLock&, const EngineEventContext&);
+		RE::BSEventNotifyControl HandleUniqueIDChangeEvent(const RE::TESUniqueIDChangeEvent*, EventStateLock&, const EngineEventContext&);
+		RE::BSEventNotifyControl HandleModCallbackEvent(const SKSE::ModCallbackEvent*, EventStateLock&, const EngineEventContext&);
+
 		// Runtime lifecycle and data maintenance.
 		void ResetRuntimeStateForConfigReload();
 		void MaybeResyncEquippedAffixes(std::chrono::steady_clock::time_point a_now);

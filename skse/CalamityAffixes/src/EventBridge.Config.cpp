@@ -108,6 +108,7 @@ namespace CalamityAffixes
 
 	void EventBridge::LoadConfig()
 	{
+		const std::scoped_lock lock(_stateMutex);
 		ResetRuntimeStateForConfigReload();
 		InitializeRunewordCatalog();
 

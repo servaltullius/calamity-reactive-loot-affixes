@@ -30,5 +30,6 @@ namespace CalamityAffixes
 		if (auto* modCallbackSource = SKSE::GetModCallbackEventSource()) {
 			modCallbackSource->AddEventSink(this);
 		}
+		SKSE::log::info("CalamityAffixes: event ingress uses nonblocking state admission and generation-scoped FIFO deferral (combat-lock test).");
 	}
 }

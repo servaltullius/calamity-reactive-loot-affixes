@@ -61,6 +61,7 @@ namespace CalamityAffixes
 		}
 
 		const std::scoped_lock lock(_stateMutex);
+		_eventDispatcher.Invalidate();
 		SKSE::log::info("CalamityAffixes: Load() — deserializing co-save records.");
 
 		_instanceTrackingState.instanceAffixes.clear();

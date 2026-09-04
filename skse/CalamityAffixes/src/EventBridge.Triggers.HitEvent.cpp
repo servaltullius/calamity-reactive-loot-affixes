@@ -19,9 +19,10 @@ namespace CalamityAffixes
 {
 	using namespace TriggersDetail;
 
-	RE::BSEventNotifyControl EventBridge::ProcessEvent(
+	RE::BSEventNotifyControl EventBridge::HandleHitEvent(
 		const RE::TESHitEvent* a_event,
-		RE::BSTEventSource<RE::TESHitEvent>*)
+		EventStateLock& lock,
+		const EngineEventContext& a_context)
 	{
 		if (!a_event || !a_event->cause || !a_event->target) {
 			return RE::BSEventNotifyControl::kContinue;
@@ -32,8 +33,7 @@ namespace CalamityAffixes
 		if (!causeRef || !targetRef) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		std::unique_lock<std::recursive_mutex> lock(_stateMutex);
-		const auto now = std::chrono::steady_clock::now();
+		const auto now = a_context.observedAt;
 		MaybeFlushRuntimeUserSettings(now, false);
 
 		if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
@@ -43,7 +43,7 @@ namespace CalamityAffixes
 		// Ignore synchronous TESHitEvent reentry caused by proc actions that are already
 		// resolving this hit. Without this, incoming-hit/low-health fallback dispatch can
 		// observe its own proc side effects and spiral into duplicate follow-up work.
-		if (_combatState.procDepth > 0) {
+		if (a_context.procOrigin || _combatState.procDepth > 0) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -62,7 +62,7 @@ namespace CalamityAffixes
 			windowCount += 1;
 
 			if ((now - windowStart) >= std::chrono::seconds(2)) {
-				const auto* hitData = HitDataUtil::GetLastHitData(target);
+				const auto* hitData = a_context.hitData ? &*a_context.hitData : nullptr;
 				const auto sourceFormID = hitData && hitData->weapon ?
 					hitData->weapon->GetFormID() :
 					(hitData && hitData->attackDataSpell ? hitData->attackDataSpell->GetFormID() : 0u);
@@ -127,7 +127,7 @@ namespace CalamityAffixes
 					};
 
 						if (!ShouldSuppressDuplicateHit(key, now)) {
-							const auto* hitData = HitDataUtil::GetLastHitData(target);
+							const auto* hitData = a_context.hitData ? &*a_context.hitData : nullptr;
 							const bool hasCommittedHitData = detail::IsCommittedFallbackHitData(
 								hitData != nullptr,
 								hitData && HitDataUtil::HitDataMatchesActors(hitData, target, aggressor),
@@ -197,7 +197,7 @@ namespace CalamityAffixes
 				};
 
 					if (!ShouldSuppressDuplicateHit(key, now)) {
-						const auto* hitData = HitDataUtil::GetLastHitData(target);
+						const auto* hitData = a_context.hitData ? &*a_context.hitData : nullptr;
 						const bool hasCommittedHitData = detail::IsCommittedFallbackHitData(
 							hitData != nullptr,
 							hitData && HitDataUtil::HitDataMatchesActors(hitData, target, aggressor),
