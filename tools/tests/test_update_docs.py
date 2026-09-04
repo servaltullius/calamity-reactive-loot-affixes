@@ -72,5 +72,51 @@ class UpdateDocsCheckTests(unittest.TestCase):
                 )
 
 
+class GeneratedRuntimeRulesTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.temp_dir = tempfile.TemporaryDirectory(prefix="caff-doc-rules-")
+        cls.addClassCleanup(cls.temp_dir.cleanup)
+        output_dir = Path(cls.temp_dir.name)
+        update_docs.generate_docs(output_dir, public_doc_metadata.load_public_doc_metadata())
+        cls.documents = {
+            name: (output_dir / name).read_text(encoding="utf-8")
+            for name in update_docs.GENERATED_DOCS
+        }
+
+    def test_suffix_docs_explain_rank_sum_cap_and_single_effect(self) -> None:
+        rendered = self.documents["SUFFIX_EFFECTS.md"]
+        for expected in (
+            "티어를 합산", "최대 T3", "T1 + T1 → T2", "T1 + T2 → T3",
+            "T2 + T2 → T3", "능력치 숫자를 단순 합산하는 방식은 아님",
+            "치명타 피해 보너스도 합산 결과 티어의 값 한 번만 적용",
+        ):
+            with self.subTest(expected=expected):
+                self.assertTrue(expected in rendered, f"Missing suffix rule: {expected}")
+        self.assertNotIn("가장 높은 티어 하나만 적용", rendered)
+        self.assertNotIn("추가 중첩되지 않음", rendered)
+
+    def test_prefix_docs_distinguish_duplicate_chance_and_crit_cast_limits(self) -> None:
+        rendered = self.documents["PREFIX_EFFECTS.md"]
+        for expected in (
+            "최대 3개", "40% → 64% → 78.4%", "피해량을 2배·3배",
+            "근접 치명타·강공격은 최대 2개", "일반 근접 공격과 활·석궁은 최대 1개",
+            "0.15초", "이중 판정하지 않음", "근접 일반 공격 시 45%",
+        ):
+            with self.subTest(expected=expected):
+                self.assertTrue(expected in rendered, f"Missing prefix rule: {expected}")
+
+    def test_catalog_links_details_and_mentions_current_proc_and_suffix_rules(self) -> None:
+        rendered = self.documents["AFFIX_CATALOG.md"]
+        for expected in (
+            "[프리픽스 상세](PREFIX_EFFECTS.md)", "[서픽스 상세](SUFFIX_EFFECTS.md)",
+            "[룬워드 상세](RUNEWORD_EFFECTS.md)", "일반 공격 확률 발동",
+            "T1 + T1 → T2", "최대 T3",
+        ):
+            with self.subTest(expected=expected):
+                self.assertTrue(expected in rendered, f"Missing catalog rule: {expected}")
+        self.assertNotIn("치명타/강공 기반 추가 주문 발동 계열", rendered)
+
+
 if __name__ == "__main__":
     unittest.main()
