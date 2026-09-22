@@ -76,3 +76,10 @@ echo "runtime_gate_store_checks: OK"
   -o "${tmp_dir}/deferred_event_dispatcher_tests"
 
 timeout 30s "${tmp_dir}/deferred_event_dispatcher_tests"
+
+"${cxx}" -std=c++23 -O2 -Wall -Wextra -pedantic \
+  -I"${project_dir}/include" \
+  "${script_dir}/summon_protection_tests.cpp" \
+  -o "${tmp_dir}/summon_protection_tests"
+"${tmp_dir}/summon_protection_tests"
+echo "summon_protection_tests: OK"

@@ -1,6 +1,7 @@
 #include "CalamityAffixes/Hooks.h"
 #include "Hooks.Dispatch.h"
 
+#include <atomic>
 #include <chrono>
 #include <cstddef>
 
@@ -11,6 +12,7 @@
 #include "CalamityAffixes/CombatContext.h"
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HitDataUtil.h"
+#include "CalamityAffixes/HealthDamageBoundary.h"
 #include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/TriggerGuards.h"
@@ -19,6 +21,91 @@ namespace CalamityAffixes::Hooks
 {
 	namespace
 	{
+		[[nodiscard]] bool IsLikelySkyrimTextAddress(std::uintptr_t a_address) noexcept
+		{
+			if (a_address == 0u) {
+				return false;
+			}
+
+			const auto& module = REL::Module::get();
+			auto inSegment = [a_address](const REL::Segment& a_segment) {
+				const auto segmentBase = a_segment.address();
+				const auto segmentSize = a_segment.size();
+				if (segmentBase == 0u || segmentSize == 0u) {
+					return false;
+				}
+				const auto segmentEnd = segmentBase + segmentSize;
+				return a_address >= segmentBase && a_address < segmentEnd;
+			};
+
+			return inSegment(module.segment(REL::Segment::textx)) ||
+			       inSegment(module.segment(REL::Segment::textw));
+		}
+
+		// Reject harmful effects at application time. Enchantments and lingering
+		// magic can modify actor values outside HandleHealthDamage, and a late
+		// health-only hook does not prevent those effects from being attached.
+		// Use the named engine tables, never Actor::VTABLE: in our pinned
+		// CommonLib, Actor inherits TESObjectREFR::VTABLE (only four entries).
+		template <const auto& ActorTables>
+		class FriendlyMagicTargetHook
+		{
+			static_assert(ActorTables.size() > 4u, "Actor MagicTarget secondary vtable is required");
+			static constexpr auto kMagicTargetVTable = ActorTables.at(4);
+
+		public:
+			static void Install(const char* a_label)
+			{
+				if (_original) {
+					return;
+				}
+				// Secondary MagicTarget vtable; no runtime-specific this adjustment.
+				REL::Relocation<std::uintptr_t> vtbl{ kMagicTargetVTable };
+				if (vtbl.address() == 0u) {
+					SKSE::log::warn("CalamityAffixes: {} MagicTarget vtable unavailable; skipping friendly magic hook.", a_label);
+					return;
+				}
+				const auto current = reinterpret_cast<std::uintptr_t*>(vtbl.address())[0x01];
+				if (!IsLikelySkyrimTextAddress(current)) {
+					SKSE::log::warn("CalamityAffixes: {} MagicTarget::AddTarget already patched; skipping friendly magic hook.", a_label);
+					return;
+				}
+				_original = reinterpret_cast<Function*>(current);
+				vtbl.write_vfunc(0x01, Thunk);
+				SKSE::log::info("CalamityAffixes: installed {} friendly MagicTarget::AddTarget hook (summonfix3).", a_label);
+			}
+
+		private:
+			using Function = bool(RE::MagicTarget*, RE::MagicTarget::AddTargetData&);
+			static inline Function* _original{ nullptr };
+
+			static bool Thunk(RE::MagicTarget* a_this, RE::MagicTarget::AddTargetData& a_data)
+			{
+				auto* effect = SanitizeObjectPointer(a_data.effect);
+				auto* base = effect ? SanitizeObjectPointer(effect->baseEffect) : nullptr;
+				using Flag = RE::EffectSetting::EffectSettingData::Flag;
+				// Evaluate per effect: a mixed spell's healing/buffs still apply.
+				if (a_this && base && base->data.flags.any(Flag::kHostile, Flag::kDetrimental)) {
+					auto* ref = SanitizeObjectPointer(a_this->GetTargetStatsObject());
+					auto* casterRef = SanitizeObjectPointer(a_data.caster);
+					auto* target = ref ? SanitizeObjectPointer(ref->As<RE::Actor>()) : nullptr;
+					auto* caster = casterRef ? SanitizeObjectPointer(casterRef->As<RE::Actor>()) : nullptr;
+					// Do not infer the caster from stale lastHitData for magic.
+					// Preserve self effects such as a familiar's expiration ability.
+					if (target != caster && ShouldSuppressNonHostileCalamityHealthDamage(target, caster, nullptr)) {
+						static std::atomic_uint32_t logged{ 0u };
+						if (logged.fetch_add(1u, std::memory_order_relaxed) < 32u) {
+							SKSE::log::info(
+								"CalamityAffixes: blocked friendly magic effect (target={:08X}, caster={:08X}, effect={:08X}).",
+								target ? target->GetFormID() : 0u, caster ? caster->GetFormID() : 0u, base->GetFormID());
+						}
+						return false;
+					}
+				}
+				return _original(a_this, a_data);
+			}
+		};
+
 		class ActorHandleHealthDamageHook
 		{
 		public:
@@ -102,27 +189,6 @@ namespace CalamityAffixes::Hooks
 		private:
 			using ThunkFn = void(RE::Actor*, RE::Actor*, float);
 
-			[[nodiscard]] static bool IsLikelySkyrimTextAddress(std::uintptr_t a_address) noexcept
-			{
-				if (a_address == 0u) {
-					return false;
-				}
-
-				const auto& module = REL::Module::get();
-				auto inSegment = [a_address](const REL::Segment& a_segment) {
-					const auto segmentBase = a_segment.address();
-					const auto segmentSize = a_segment.size();
-					if (segmentBase == 0u || segmentSize == 0u) {
-						return false;
-					}
-					const auto segmentEnd = segmentBase + segmentSize;
-					return a_address >= segmentBase && a_address < segmentEnd;
-				};
-
-				return inSegment(module.segment(REL::Segment::textx)) ||
-				       inSegment(module.segment(REL::Segment::textw));
-			}
-
 			[[nodiscard]] static bool TryInstallVfuncHook(
 				REL::Relocation<std::uintptr_t> a_vtbl,
 				std::size_t a_index,
@@ -151,20 +217,6 @@ namespace CalamityAffixes::Hooks
 				a_vtbl.write_vfunc(a_index, a_thunk);
 				return true;
 			}
-
-			struct ScopedFlag
-			{
-				bool& flag;
-				explicit ScopedFlag(bool& a_flag) :
-					flag(a_flag)
-				{
-					flag = true;
-				}
-				~ScopedFlag()
-				{
-					flag = false;
-				}
-			};
 
 			static void CallOriginal(
 				ThunkFn* a_original,
@@ -210,72 +262,69 @@ namespace CalamityAffixes::Hooks
 				}
 
 				const auto* rawHitData = HitDataUtil::GetLastHitData(safeTarget);
-				if (!inHook && ShouldSuppressNonHostileCalamityHealthDamage(
-						safeTarget,
-						safeAttacker,
-						rawHitData)) {
-					ScopedFlag guard(inHook);
-					SKSE::log::debug(
-						"CalamityAffixes: suppressed non-hostile Calamity health damage (target={}, attacker={}, damage={}).",
-						safeTarget->GetName(),
-						safeAttacker ? safeAttacker->GetName() : "<none>",
-						a_damage);
-					CallOriginal(a_original, safeTarget, safeAttacker, 0.0f, a_hookLabel);
-					return;
-				}
+				CalamityAffixes::detail::DispatchHealthDamageBoundary(
+					inHook, detail::IsInProcDispatchGuard(),
+					[&] {
+						if (!ShouldSuppressNonHostileCalamityHealthDamage(safeTarget, safeAttacker, rawHitData)) {
+							return false;
+						}
+						static std::atomic_uint32_t logged{ 0u };
+						if (logged.fetch_add(1u, std::memory_order_relaxed) < 32u) {
+							SKSE::log::info(
+								"CalamityAffixes: blocked friendly health damage (target={:08X}, attacker={:08X}, damage={}, nested={}, health={}).",
+								safeTarget->GetFormID(), safeAttacker ? safeAttacker->GetFormID() : 0u,
+								a_damage, inHook, safeTarget->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth));
+						}
+						return true;
+					},
+					[&] { CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel); },
+					[&] {
+						if (!ShouldProcessHealthDamageHookPointers(safeTarget, safeAttacker)) {
+							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							return;
+						}
 
-				if (inHook || detail::IsInProcDispatchGuard()) {
-					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
-					return;
-				}
+						auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+						if (!bridge || !bridge->IsRuntimeEnabled()) {
+							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							return;
+						}
 
-				ScopedFlag guard(inHook);
+						const auto context = BuildCombatTriggerContext(safeTarget, safeAttacker);
+						const auto now = std::chrono::steady_clock::now();
 
-				if (!ShouldProcessHealthDamageHookPointers(safeTarget, safeAttacker)) {
-					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
-					return;
-				}
+						if (!ShouldProcessHealthDamageProcPath(
+								context.hasTarget,
+								context.hasAttacker,
+								context.targetIsPlayer,
+								context.attackerIsPlayerOwned,
+								context.hasPlayerOwner,
+								context.hostileEitherDirection,
+								bridge->AllowsNonHostilePlayerOwnedOutgoingProcs())) {
+							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							return;
+						}
 
-				auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-				if (!bridge || !bridge->IsRuntimeEnabled()) {
-					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
-					return;
-				}
+						const auto* preHitData = detail::ResolveStableHitDataForSpecialActions(
+							rawHitData,
+							safeTarget,
+							safeAttacker);
 
-				const auto context = BuildCombatTriggerContext(safeTarget, safeAttacker);
-				const auto now = std::chrono::steady_clock::now();
+						if (!detail::ShouldAllowProcDispatch(safeTarget, safeAttacker, preHitData, a_damage, now)) {
+							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							return;
+						}
 
-				if (!ShouldProcessHealthDamageProcPath(
-						context.hasTarget,
-						context.hasAttacker,
-						context.targetIsPlayer,
-						context.attackerIsPlayerOwned,
-						context.hasPlayerOwner,
-						context.hostileEitherDirection,
-						bridge->AllowsNonHostilePlayerOwnedOutgoingProcs())) {
-					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
-					return;
-				}
+						const auto adj = detail::AdjustDamageAndEvaluateSpecials(
+							bridge, safeAttacker, safeTarget, preHitData, a_damage);
 
-				const auto* preHitData = detail::ResolveStableHitDataForSpecialActions(
-					rawHitData,
-					safeTarget,
-					safeAttacker);
+						// Restore original sign for the engine.
+						const bool damageWasNegative = (a_damage < 0.0f);
+						const float finalDamage = damageWasNegative ? -adj.adjustedDamage : adj.adjustedDamage;
+						CallOriginal(a_original, safeTarget, safeAttacker, finalDamage, a_hookLabel);
 
-				if (!detail::ShouldAllowProcDispatch(safeTarget, safeAttacker, preHitData, a_damage, now)) {
-					CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
-					return;
-				}
-
-				const auto adj = detail::AdjustDamageAndEvaluateSpecials(
-					bridge, safeAttacker, safeTarget, preHitData, a_damage);
-
-				// Restore original sign for the engine.
-				const bool damageWasNegative = (a_damage < 0.0f);
-				const float finalDamage = damageWasNegative ? -adj.adjustedDamage : adj.adjustedDamage;
-				CallOriginal(a_original, safeTarget, safeAttacker, finalDamage, a_hookLabel);
-
-				detail::SchedulePostHealthDamageActions(safeTarget, safeAttacker, adj, now, preHitData);
+						detail::SchedulePostHealthDamageActions(safeTarget, safeAttacker, adj, now, preHitData);
+					});
 			}
 
 			static void ThunkActor(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
@@ -307,6 +356,9 @@ namespace CalamityAffixes::Hooks
 	void Install()
 	{
 		ActorHandleHealthDamageHook::Install();
+		FriendlyMagicTargetHook<RE::VTABLE_Actor>::Install("Actor");
+		FriendlyMagicTargetHook<RE::VTABLE_Character>::Install("Character");
+		FriendlyMagicTargetHook<RE::VTABLE_PlayerCharacter>::Install("PlayerCharacter");
 	}
 
 	bool IsHandleHealthDamageHooked(const RE::Actor* a_actor) noexcept

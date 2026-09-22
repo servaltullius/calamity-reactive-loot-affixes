@@ -1,4 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
+#include "CalamityAffixes/SummonProtectionSerialization.h"
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/SerializationCurrentRecordReader.h"
 #include "CalamityAffixes/SerializationDrainPolicy.h"
@@ -87,6 +89,13 @@ namespace CalamityAffixes
 
 		while (a_intfc->GetNextRecordInfo(type, version, length)) {
 			switch (type) {
+			case kCalamitySummonRecord:
+				if (SummonProtectionSerialization::IsValidRecord(version, length)) {
+					LoadCalamitySummons(a_intfc, version, length);
+				} else {
+					DrainRecordBytes(a_intfc, length, "unsupported-summon-record");
+				}
+				break;
 			case kSerializationRecordInstanceAffixes:
 				LoadInstanceAffixesRecord(a_intfc, version, length);
 				break;

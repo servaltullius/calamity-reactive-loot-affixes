@@ -23,6 +23,8 @@ namespace CalamityAffixes::detail
 		bool hostileOnlyCastScopeActive{ false };
 		bool attackerIsRegisteredCalamitySummon{ false };
 		bool sourceExplosionOwnedByRegisteredCalamitySummon{ false };
+		bool targetIsRegisteredCalamitySummon{ false };
+		bool attackerIsPlayerAlly{ false };
 	};
 
 	struct RegisteredSummonExplosionDamageInput
@@ -51,11 +53,15 @@ namespace CalamityAffixes::detail
 	// Suppression is intentionally narrower than player ownership alone.  It
 	// protects the player, allies, and neutral actors only when the incoming
 	// health damage can be attributed to a Calamity hostile-only effect.
-	// Ordinary player attacks, manually cast spells, and unrecognized summons
-	// therefore continue through the engine's normal friendly-fire rules.
+	// A registered Calamity summon is also protected from player/allied attacks.
+	// Other targets and unrecognized summons retain normal friendly-fire rules.
 	[[nodiscard]] constexpr bool ShouldSuppressNonHostileCalamityHealthDamage(
 		HostileEffectDamagePolicyInput a_input) noexcept
 	{
+		if (a_input.hasTarget && a_input.hasAttacker &&
+			a_input.targetIsRegisteredCalamitySummon && a_input.attackerIsPlayerAlly) {
+			return true;
+		}
 		if (!a_input.hasTarget || !a_input.hasPlayerOwner || a_input.targetIsHostileToPlayerOwner) {
 			return false;
 		}

@@ -36,6 +36,10 @@ if(BUILD_TESTING)
     target_include_directories(deferred_event_dispatcher_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
     target_link_libraries(deferred_event_dispatcher_tests PRIVATE Threads::Threads)
 
+    add_executable(summon_protection_tests summon_protection_tests.cpp)
+    target_include_directories(summon_protection_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+    add_test(NAME CalamityAffixesSummonProtectionChecks COMMAND summon_protection_tests)
+
     add_test(
         NAME CalamityAffixesDeferredEventDispatcherChecks
         COMMAND deferred_event_dispatcher_tests

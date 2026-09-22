@@ -1,8 +1,10 @@
 #include "CalamityAffixes/HostileEffectGuard.h"
 
 #include "CalamityAffixes/HostileEffectDamagePolicy.h"
+#include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "CalamityAffixes/PointerSafety.h"
+#include "CalamityAffixes/SummonProtectionSerialization.h"
 
 #include <SKSE/SKSE.h>
 
@@ -19,7 +21,7 @@ namespace CalamityAffixes
 {
 	namespace
 	{
-		constexpr std::size_t kMaxRegisteredSummons = 64u;
+		constexpr std::size_t kMaxRegisteredSummons = SummonProtectionSerialization::kMaxSummons;
 		constexpr std::size_t kMaxPendingSummonCasts = 32u;
 		constexpr std::size_t kMaxExplosionDamageWindows = 256u;
 		constexpr std::uint8_t kMaxSummonRefreshAttempts = 40u;
@@ -58,6 +60,7 @@ namespace CalamityAffixes
 		};
 
 		std::vector<RegisteredSummon> g_registeredSummons;
+		std::vector<RE::FormID> g_loadedSummonFormIDs;
 		std::vector<PendingSummonCast> g_pendingSummonCasts;
 		std::vector<ExplosionDamageWindow> g_explosionDamageWindows;
 		std::mutex g_summonStateMutex;
@@ -125,22 +128,31 @@ namespace CalamityAffixes
 			}
 
 			try {
-				const std::scoped_lock lock(g_summonStateMutex);
-				const auto existing = std::find_if(
-					g_registeredSummons.begin(),
-					g_registeredSummons.end(),
-					[&](const RegisteredSummon& a_entry) {
-						return SameHandle(a_entry.handle, a_handle);
-					});
-				if (existing != g_registeredSummons.end()) {
-					existing->formID = actor->GetFormID();
-					return true;
-				}
+				// Reference-local flag, equivalent to IgnoreFriendlyHits(true).
+				// Health-damage suppression alone is too late to prevent assault AI.
+				// Do not modify the shared TESNPC base used by ordinary summons.
+				actor->formFlags |= RE::TESObjectREFR::RecordFlags::kIgnoreFriendlyHits;
+				{
+					const std::scoped_lock lock(g_summonStateMutex);
+					const auto existing = std::find_if(
+						g_registeredSummons.begin(),
+						g_registeredSummons.end(),
+						[&](const RegisteredSummon& a_entry) {
+							return SameHandle(a_entry.handle, a_handle);
+						});
+					if (existing != g_registeredSummons.end()) {
+						existing->formID = actor->GetFormID();
+						return true;
+					}
 
-				if (g_registeredSummons.size() >= kMaxRegisteredSummons) {
-					g_registeredSummons.erase(g_registeredSummons.begin());
+					if (g_registeredSummons.size() >= kMaxRegisteredSummons) {
+						g_registeredSummons.erase(g_registeredSummons.begin());
+					}
+					g_registeredSummons.push_back({ a_handle, actor->GetFormID() });
 				}
-				g_registeredSummons.push_back({ a_handle, actor->GetFormID() });
+				SKSE::log::info(
+					"CalamityAffixes: protected Calamity summon {} ({:08X}, healthHookDirect={}).",
+					actor->GetName(), actor->GetFormID(), Hooks::IsHandleHealthDamageHooked(actor));
 				return true;
 			} catch (...) {
 				// Exact summon attribution is defensive and must never abort a cast.
@@ -454,6 +466,8 @@ namespace CalamityAffixes
 					if (candidate.attemptsRemaining > 1u) {
 						--candidate.attemptsRemaining;
 						retry.push_back(std::move(candidate));
+					} else {
+						SKSE::log::warn("CalamityAffixes: summon protection registration timed out (spell={:08X}).", candidate.spellFormID);
 					}
 				}
 
@@ -571,7 +585,7 @@ namespace CalamityAffixes
 			a_target != nullptr,
 			a_owner && a_target && a_owner == a_target,
 			a_target && (a_target->IsPlayerRef() || a_target->IsPlayerTeammate() ||
-				ResolvePlayerOwnerActor(a_target) != nullptr),
+				ResolvePlayerOwnerActor(a_target) != nullptr || IsRegisteredSummon(a_target)),
 			a_owner && a_target && a_owner->IsHostileToActor(a_target),
 			a_owner && a_target && a_target->IsHostileToActor(a_owner));
 	}
@@ -642,6 +656,10 @@ namespace CalamityAffixes
 		a_attacker = SanitizeObjectPointer(a_attacker);
 
 		const bool attackerIsRegisteredSummon = IsRegisteredSummon(a_attacker);
+		const bool targetIsRegisteredSummon = IsRegisteredSummon(a_target);
+		const bool attackerIsPlayerAlly = a_attacker &&
+			(a_attacker->IsPlayerRef() || a_attacker->IsPlayerTeammate() ||
+			 ResolvePlayerOwnerActor(a_attacker) != nullptr || attackerIsRegisteredSummon);
 		const bool sourceExplosionOwnedByRegisteredSummon =
 			IsFreshExplosionDamageFromRegisteredSummon(a_target, a_attacker, a_hitData);
 
@@ -662,8 +680,74 @@ namespace CalamityAffixes
 			.hostileOnlyCastScopeActive = g_hostileOnlyCastDepth > 0u,
 			.attackerIsRegisteredCalamitySummon = attackerIsRegisteredSummon,
 			.sourceExplosionOwnedByRegisteredCalamitySummon =
-				sourceExplosionOwnedByRegisteredSummon
+				sourceExplosionOwnedByRegisteredSummon,
+			.targetIsRegisteredCalamitySummon = targetIsRegisteredSummon,
+			.attackerIsPlayerAlly = attackerIsPlayerAlly
 		});
+	}
+
+	void SaveCalamitySummons(SKSE::SerializationInterface* a_intfc)
+	{
+		if (!a_intfc) {
+			return;
+		}
+		std::vector<RegisteredSummon> snapshot;
+		{
+			const std::scoped_lock lock(g_summonStateMutex);
+			snapshot = g_registeredSummons;
+		}
+		SummonProtectionSerialization::Record record;
+		for (const auto& entry : snapshot) {
+			const auto holder = entry.handle.get();
+			const auto* actor = SanitizeObjectPointer(holder.get());
+			if (actor && actor->GetFormID() == entry.formID && !actor->IsDead()) {
+				record.formIDs[record.count++] = entry.formID;
+			}
+		}
+		if (!a_intfc->WriteRecord(kCalamitySummonRecord, SummonProtectionSerialization::kVersion,
+				record.formIDs.data(), record.count * sizeof(std::uint32_t))) {
+			SKSE::log::warn("CalamityAffixes: failed to save summon protection record.");
+		}
+	}
+
+	void LoadCalamitySummons(SKSE::SerializationInterface* a_intfc, std::uint32_t a_version, std::uint32_t a_length)
+	{
+		const auto record = SummonProtectionSerialization::Read(a_version, a_length,
+			[a_intfc](void* a_data, std::uint32_t a_size) { return a_intfc->ReadRecordData(a_data, a_size); });
+		std::vector<RE::FormID> resolved;
+		if (record) {
+			for (std::uint32_t i = 0; i < record->count; ++i) {
+				RE::FormID id = 0u;
+				if (record->formIDs[i] != 0u && a_intfc->ResolveFormID(record->formIDs[i], id) &&
+					id != 0u && std::find(resolved.begin(), resolved.end(), id) == resolved.end()) {
+					resolved.push_back(id);
+				}
+			}
+		} else {
+			SKSE::log::warn("CalamityAffixes: discarded truncated summon protection record.");
+		}
+		const std::scoped_lock lock(g_summonStateMutex);
+		g_loadedSummonFormIDs = std::move(resolved);
+	}
+
+	void RestoreCalamitySummonsAfterLoad()
+	{
+		std::vector<RE::FormID> pending;
+		{
+			const std::scoped_lock lock(g_summonStateMutex);
+			pending.swap(g_loadedSummonFormIDs);
+		}
+		std::size_t restored = 0u;
+		for (const auto id : pending) {
+			auto* actor = SanitizeObjectPointer(RE::TESForm::LookupByID<RE::Actor>(id));
+			if (actor && !actor->IsPlayerRef() && actor->IsSummoned() && !actor->IsDead() &&
+				RegisterSummonActor(actor->GetHandle())) {
+				++restored;
+			}
+		}
+		if (!pending.empty()) {
+			SKSE::log::info("CalamityAffixes: restored summon protection for {}/{} saved references.", restored, pending.size());
+		}
 	}
 
 	void ClearHostileEffectGuardRuntimeState() noexcept
@@ -674,6 +758,7 @@ namespace CalamityAffixes
 		try {
 			const std::scoped_lock lock(g_summonStateMutex);
 			g_registeredSummons.clear();
+			g_loadedSummonFormIDs.clear();
 			g_pendingSummonCasts.clear();
 			g_explosionDamageWindows.clear();
 			g_summonRefreshScheduled = false;

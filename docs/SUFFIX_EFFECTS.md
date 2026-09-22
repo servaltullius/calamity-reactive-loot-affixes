@@ -1,6 +1,6 @@
 # 서픽스 효과 정리 (공개용)
 
-> 업데이트: 2026-09-05
+> 업데이트: 2026-09-22
 > 기준 버전: `v1.7.5`
 > 기준 코드: `affixes/modules/keywords.affixes.suffixes.json`
 

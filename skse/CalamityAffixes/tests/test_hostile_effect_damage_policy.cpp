@@ -56,6 +56,24 @@ static_assert(!ShouldSuppressNonHostileCalamityHealthDamage(kNonHostileDamage),
 static_assert(ShouldSuppressNonHostileCalamityHealthDamage({
 	.hasTarget = true,
 	.hasAttacker = true,
+	.targetIsHostileToPlayerOwner = true,
+	.targetIsRegisteredCalamitySummon = true,
+	.attackerIsPlayerAlly = true }),
+	"a player/allied hit cannot hurt a Calamity summon even after hostility or commander loss");
+static_assert(!ShouldSuppressNonHostileCalamityHealthDamage({
+	.hasTarget = true,
+	.hasAttacker = true,
+	.targetIsRegisteredCalamitySummon = true }),
+	"enemy attacks still hurt Calamity summons");
+static_assert(!ShouldSuppressNonHostileCalamityHealthDamage({
+	.hasTarget = true,
+	.hasAttacker = true,
+	.attackerIsPlayerAlly = true }),
+	"player attacks against manual or enemy summons retain their usual behavior");
+
+static_assert(ShouldSuppressNonHostileCalamityHealthDamage({
+	.hasTarget = true,
+	.hasAttacker = true,
 	.hasPlayerOwner = true,
 	.hostileOnlyCastScopeActive = true }),
 	"a synchronous Calamity hostile-only cast cannot damage a non-hostile actor");
@@ -106,7 +124,7 @@ static_assert(!ShouldSuppressNonHostileCalamityHealthDamage({
 	"suppression requires a resolved player owner");
 
 static_assert([] {
-	for (unsigned mask = 0u; mask < 128u; ++mask) {
+	for (unsigned mask = 0u; mask < 512u; ++mask) {
 		const HostileEffectDamagePolicyInput input{
 			.hasTarget = (mask & (1u << 0u)) != 0u,
 			.hasAttacker = (mask & (1u << 1u)) != 0u,
@@ -114,17 +132,20 @@ static_assert([] {
 			.targetIsHostileToPlayerOwner = (mask & (1u << 3u)) != 0u,
 			.hostileOnlyCastScopeActive = (mask & (1u << 4u)) != 0u,
 			.attackerIsRegisteredCalamitySummon = (mask & (1u << 5u)) != 0u,
-			.sourceExplosionOwnedByRegisteredCalamitySummon = (mask & (1u << 6u)) != 0u
+			.sourceExplosionOwnedByRegisteredCalamitySummon = (mask & (1u << 6u)) != 0u,
+			.targetIsRegisteredCalamitySummon = (mask & (1u << 7u)) != 0u,
+			.attackerIsPlayerAlly = (mask & (1u << 8u)) != 0u
 		};
 		const bool hasCalamityProvenance =
 			input.hostileOnlyCastScopeActive ||
 			(input.hasAttacker && input.attackerIsRegisteredCalamitySummon) ||
 			input.sourceExplosionOwnedByRegisteredCalamitySummon;
-		const bool expected = input.hasTarget && input.hasPlayerOwner &&
-		                      !input.targetIsHostileToPlayerOwner && hasCalamityProvenance;
+		const bool incomingAllyHit = input.hasAttacker && input.targetIsRegisteredCalamitySummon && input.attackerIsPlayerAlly;
+		const bool expected = input.hasTarget && (incomingAllyHit || (input.hasPlayerOwner &&
+		                      !input.targetIsHostileToPlayerOwner && hasCalamityProvenance));
 		if (ShouldSuppressNonHostileCalamityHealthDamage(input) != expected) {
 			return false;
 		}
 	}
 	return true;
-}(), "the policy matches its complete seven-boolean truth table");
+}(), "the policy matches its complete nine-boolean truth table");

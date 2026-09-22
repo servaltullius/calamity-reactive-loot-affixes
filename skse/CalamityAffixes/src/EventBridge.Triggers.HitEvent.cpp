@@ -11,6 +11,7 @@
 #include "EventBridge.Triggers.Events.Detail.h"
 
 #include <chrono>
+#include <atomic>
 #include <cstdint>
 #include <mutex>
 
@@ -52,6 +53,19 @@ namespace CalamityAffixes
 		auto* target = targetRef->As<RE::Actor>();
 		if (!aggressor || !target) {
 			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		// Bounded observations distinguish a visible hit from health loss and
+		// expose later vtable replacements even when our damage thunk is bypassed.
+		if (ShouldSuppressNonHostileCalamityHealthDamage(target, aggressor, nullptr)) {
+			static std::atomic_uint32_t logged{ 0u };
+			if (logged.fetch_add(1u, std::memory_order_relaxed) < 32u) {
+				SKSE::log::info(
+					"CalamityAffixes: friendly hit observed (target={:08X}, attacker={:08X}, source={:08X}, health={}, healthHookDirect={}).",
+					target->GetFormID(), aggressor->GetFormID(), a_event->source,
+					target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth),
+					Hooks::IsHandleHealthDamageHooked(target));
+			}
 		}
 
 		const auto relation = BuildCombatTriggerContext(target, aggressor);

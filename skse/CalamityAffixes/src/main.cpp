@@ -11,6 +11,7 @@
 
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/Hooks.h"
+#include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/Papyrus.h"
 #include "CalamityAffixes/PluginLogging.h"
 #include "CalamityAffixes/PrismaTooltip.h"
@@ -67,6 +68,7 @@ SKSEPluginInfo(
 	void OnSave(SKSE::SerializationInterface* a_intfc)
 	{
 		CalamityAffixes::EventBridge::GetSingleton()->Save(a_intfc);
+		CalamityAffixes::SaveCalamitySummons(a_intfc);
 	}
 
 	void OnLoad(SKSE::SerializationInterface* a_intfc)
@@ -121,6 +123,7 @@ SKSEPluginInfo(
 		}
 		case SKSE::MessagingInterface::kPostLoadGame:
 			CalamityAffixes::EventBridge::GetSingleton()->OnPostLoadGame();
+			CalamityAffixes::RestoreCalamitySummonsAfterLoad();
 			break;
 		case SKSE::MessagingInterface::kPreLoadGame:
 			CalamityAffixes::EventBridge::GetSingleton()->OnPreLoadGame();

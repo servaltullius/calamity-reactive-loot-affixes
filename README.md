@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Current RC](https://img.shields.io/badge/Current%20RC-v1.7.5--rc6-f28c28)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5-rc6)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc6/CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip)
+[![Release](https://img.shields.io/badge/Release-v1.7.5-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5/CalamityAffixes_MO2_v1.7.5_2026-09-22.zip)
 
 ## 어떤 모드인가요?
 
@@ -15,10 +15,10 @@
 
 ## 다운로드 (플레이어)
 
-> **현재 공개 테스트 빌드:** [v1.7.5-rc6](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5-rc6)
+> **현재 정식 릴리스:** [v1.7.5](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5)
 
-- MO2 ZIP: [CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc6/CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip)
-- SHA-256: [CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5-rc6/CalamityAffixes_MO2_v1.7.5-rc6_2026-09-05.zip.sha256)
+- MO2 ZIP: [CalamityAffixes_MO2_v1.7.5_2026-09-22.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5/CalamityAffixes_MO2_v1.7.5_2026-09-22.zip)
+- SHA-256: [CalamityAffixes_MO2_v1.7.5_2026-09-22.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5/CalamityAffixes_MO2_v1.7.5_2026-09-22.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 
@@ -32,13 +32,14 @@
 - 룬 조각·재련 오브는 적격 적대 대상의 시체에서만 획득하며, 일반 확률·피티와 고유·보스·드래곤 확정 보상을 함께 지원합니다.
 - Prisma UI에서 선택 장비 툴팁, 어픽스 슬롯 진행, 룬워드 검색·제작, 보유 통화와 피티 현황을 한국어·영어로 확인할 수 있습니다.
 
-## v1.7.5-rc6 핵심 변경
+## v1.7.5 핵심 변경
 
+- Calamity 자동 소환수의 플레이어·아군 피해와 유해 마법을 차단하고, 보호 정보를 저장·복원합니다. 2026-09-22 사용자 테스트에서 보호가 정상으로 보인다는 확인을 받았습니다.
 - 전투 중 Calamity 상태 락과 Skyrim 이벤트 락이 서로를 기다리던 교착 경로를 수정했습니다. 테스트 패키지 사용 후 프리징 개선이 보고됐습니다.
 - 치명타·강공 전용 효과에 일반 공격 발동을 추가하고, 중복 표준 발동 어픽스와 단계형 접미가 강화되도록 조정했습니다.
 - 근접 치명타·강공격은 치명 시전 주문을 최대 2개까지 발동하며, 기존 ICD와 재진입 방지는 유지합니다.
 - Calamity 공격 효과와 추적 가능한 소환 폭발의 시전자·아군·중립 피해를 차단했습니다.
-- 자세한 확률·호환성·검증 범위는 [rc6 릴리스 노트](docs/releases/2026-09-05-github-release-body-v1.7.5-rc6.md)를 확인하세요.
+- 자세한 확률·호환성·검증 범위는 [정식 릴리스 노트](docs/releases/2026-09-22-github-release-body-v1.7.5.md)를 확인하세요.
 
 ## rc5에서 추가된 슬롯 성장과 보상
 
@@ -66,8 +67,9 @@
 1. 위 “필수” 모드를 설치합니다.
 2. GitHub Releases에서 `CalamityAffixes_MO2_vX.Y.Z_YYYY-MM-DD.zip`을 다운로드합니다.
 3. MO2에서 “Install a new mod from an archive”로 ZIP을 설치하고 Enable 합니다. 기존 버전 업데이트라면 같은 모드에 **Replace**로 설치하고, Merge하거나 구·신 버전을 동시에 활성화하지 않습니다.
-4. SKSE로 실행합니다.
-5. 정상 동작 확인: `Documents/My Games/Skyrim Special Edition/SKSE/CalamityAffixes.log`가 생성됩니다.
+4. SummonFix DLL 테스트 모드를 사용했다면 비활성화해 정식 DLL을 덮어쓰지 않게 합니다. 업데이트 전에 이미 소환된 개체는 사라진 뒤 새로 소환하세요.
+5. SKSE로 실행합니다.
+6. 정상 동작 확인: `Documents/My Games/Skyrim Special Edition/SKSE/CalamityAffixes.log`가 생성됩니다.
 
 ## 사용법 (한 줄 요약)
 
