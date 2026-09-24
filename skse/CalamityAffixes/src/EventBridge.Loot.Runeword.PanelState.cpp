@@ -289,8 +289,8 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		RunewordPanelState panelState{};
 		panelState.maxRegularAffixCount = static_cast<std::uint32_t>(kMaxRegularAffixesPerItem);
-		panelState.standardReforgeCost = detail::kStandardReforgeOrbCost;
-		panelState.lockedReforgeCost = detail::kLockedReforgeOrbCost;
+		panelState.standardReforgeCost = detail::kSelectedReforgeCost;
+		panelState.lockedReforgeCost = detail::kSelectedReforgeCost;
 		panelState.debugTools = _loot.debugHudNotifications || _loot.debugLog;
 		PopulateEquippedBuildSummary(panelState);
 		if (!_configLoaded) {
@@ -310,6 +310,15 @@ namespace CalamityAffixes
 				panelState.reforgeOrbsOwned = static_cast<std::uint32_t>(
 					std::max(0, player->GetItemCount(orb)));
 			}
+
+            if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_IdentifyScroll")) {
+                panelState.identifyScrollsKnown = true;
+                panelState.identifyScrollsOwned = static_cast<std::uint32_t>(std::max(0, player->GetItemCount(item)));
+            }
+            if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ScouringOrb")) {
+                panelState.scouringOrbsKnown = true;
+                panelState.scouringOrbsOwned = static_cast<std::uint32_t>(std::max(0, player->GetItemCount(item)));
+            }
 
 			std::vector<std::uint64_t> referencedRuneTokens;
 			for (const auto& recipe : _runewordState.recipes) {
@@ -387,16 +396,21 @@ namespace CalamityAffixes
 					continue;
 				}
 
+				// Legacy tokens (unknown or unslotted) still occupy a regular slot,
+				// so the panel offers Scour to reroll them. They are never
+				// selected-reforge candidates.
 				const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(token);
 				if (affixIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() ||
 					affixIt->second >= _affixRuntimeState.affixes.size()) {
 					expansionLayoutValid = false;
+					++panelState.regularAffixCount;
 					continue;
 				}
 
 				const auto& affix = _affixRuntimeState.affixes[affixIt->second];
 				if (affix.slot != AffixSlot::kPrefix && affix.slot != AffixSlot::kSuffix) {
 					expansionLayoutValid = false;
+					++panelState.regularAffixCount;
 					continue;
 				}
 				if (affix.slot == AffixSlot::kPrefix) {

@@ -88,7 +88,7 @@ public sealed class VfxFeedbackContractTests
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(50, records.Length);
+        Assert.Equal(52, records.Length);
         var artRecords = records
             .Where(record => record.GetProperty("type").GetString() == "ArtObject")
             .ToArray();

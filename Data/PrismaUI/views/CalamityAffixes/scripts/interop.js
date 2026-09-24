@@ -262,6 +262,10 @@ function setRunewordPanelState(raw) {
     expandAffixUnavailableReason: normalizeAffixExpandUnavailableReason(
       data.expandAffixUnavailableReason
     ),
+    identifyScrollsKnown: data.identifyScrollsKnown === true && Number.isSafeInteger(data.identifyScrollsOwned) && data.identifyScrollsOwned >= 0,
+    identifyScrollsOwned: data.identifyScrollsOwned,
+    scouringOrbsKnown: data.scouringOrbsKnown === true && Number.isSafeInteger(data.scouringOrbsOwned) && data.scouringOrbsOwned >= 0,
+    scouringOrbsOwned: data.scouringOrbsOwned,
     reforgeOrbsKnown,
     reforgeOrbsOwned: Number.isFinite(ownedRaw) && ownedRaw >= 0
       ? Math.trunc(ownedRaw)
@@ -282,6 +286,7 @@ function setRunewordPanelState(raw) {
       : []
   };
 
+  affixCraftPendingState = null;
   clearAffixExpandPending(false);
 
   reconcileReforgeLockSelection(false);

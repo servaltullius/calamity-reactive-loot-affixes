@@ -192,3 +192,7 @@ const panelResizeRight = document.getElementById("panelResizeRight");
 const panelResizeBottom = document.getElementById("panelResizeBottom");
 const panelResizeCorner = document.getElementById("panelResizeCorner");
 const tooltipRunewordHint = document.getElementById("tooltipRunewordHint");
+
+const affixIdentifyButton = document.getElementById("affixIdentifyButton");
+const affixScourButton = document.getElementById("affixScourButton");
+const affixCurrencySummary = document.getElementById("affixCurrencySummary");

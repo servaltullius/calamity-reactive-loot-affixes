@@ -194,7 +194,7 @@ public static class KeywordPluginBuilder
             {
                 switch (appendedRecord.Type)
                 {
-                    case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
+                    case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
                     {
                         var magicEffect = appendedRecord.MagicEffect;
                         if (!seenMagicEffects.Add(magicEffect.EditorId))
@@ -207,7 +207,7 @@ public static class KeywordPluginBuilder
                         magicEffectsByEditorId.Add(magicEffect.EditorId, created);
                         break;
                     }
-                    case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
+                    case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
                     {
                         var spell = appendedRecord.Spell;
                         if (!seenSpells.Add(spell.EditorId))
@@ -220,7 +220,7 @@ public static class KeywordPluginBuilder
                         pendingSpells.Add((created, spell));
                         break;
                     }
-                    case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.MovableStatic is null:
+                    case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
                     {
                         var artObject = appendedRecord.ArtObject;
                         if (!seenArtObjects.Add(artObject.EditorId))
@@ -232,7 +232,7 @@ public static class KeywordPluginBuilder
                         AddArtObject(mod, artObject);
                         break;
                     }
-                    case "MovableStatic" when appendedRecord.MovableStatic is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null:
+                    case "MovableStatic" when appendedRecord.MovableStatic is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MiscItem is null:
                     {
                         var movableStatic = appendedRecord.MovableStatic;
                         if (!seenMovableStatics.Add(movableStatic.EditorId))
@@ -244,9 +244,22 @@ public static class KeywordPluginBuilder
                         AddMovableStatic(mod, movableStatic);
                         break;
                     }
+                    case "MiscItem" when appendedRecord.MiscItem is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
+                    {
+                        var specItem = appendedRecord.MiscItem;
+                        if (mod.MiscItems.Any(item => string.Equals(item.EditorID, specItem.EditorId, StringComparison.OrdinalIgnoreCase)))
+                            throw new InvalidDataException($"Duplicate MiscItem: {specItem.EditorId}");
+                        var item = mod.MiscItems.AddNew();
+                        item.EditorID = specItem.EditorId;
+                        item.Name = ToPluginSafeName(specItem.Name, specItem.EditorId);
+                        item.Weight = 0.0f;
+                        item.Value = 0;
+                        item.Model = new Model { File = specItem.ModelPath };
+                        break;
+                    }
                     default:
                         throw new InvalidDataException(
-                            "Append-only records must be a valid MagicEffect, Spell, ArtObject, or MovableStatic tagged union.");
+                            "Append-only records must be a valid MagicEffect, Spell, ArtObject, MovableStatic, or MiscItem tagged union.");
                 }
             }
         }

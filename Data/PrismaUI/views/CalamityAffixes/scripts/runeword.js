@@ -15,7 +15,7 @@ function resolveReforgeLockCandidates(state) {
   const regularAffixCount = Number.isFinite(Number(state?.regularAffixCount))
     ? Math.max(0, Math.trunc(Number(state.regularAffixCount)))
     : 0;
-  if (regularAffixCount < 2 || !Array.isArray(state?.reforgeLockCandidates)) {
+  if (regularAffixCount < 1 || !Array.isArray(state?.reforgeLockCandidates)) {
     return [];
   }
   return state.reforgeLockCandidates;
@@ -88,7 +88,7 @@ function buildReforgeCommand(state = runewordPanelState) {
   const lockedCandidate = resolveActiveReforgeLockCandidate(state);
   return lockedCandidate
     ? `${lockedReforgeCommandPrefix}${reforgeLockBaseKeyState}:${lockedCandidate.affixToken}`
-    : "runeword.reforge";
+    : "";
 }
 
 function buildAffixExpandCommand(selectedBaseKey, expectedRegularAffixCount) {
@@ -112,8 +112,8 @@ function resolveAffixExpandUnavailableText(reason, state) {
       );
     case "requires_first_affix":
       return t(
-        "Create the first affix with standard reforge before expanding slots.",
-        "기본 재련으로 첫 어픽스를 만든 뒤 슬롯을 확장할 수 있습니다."
+        "Identify this base with a Scroll of Identification before expanding slots.",
+        "확인 스크롤로 어픽스를 부여한 뒤 슬롯을 확장할 수 있습니다."
       );
     case "max_slots":
       return t(
@@ -189,7 +189,7 @@ function resolveAffixSlotProgressState(
   const expandCommand = expectedRegularAffixCount === null
     ? ""
     : buildAffixExpandCommand(baseKey, expectedRegularAffixCount);
-  const pending = Boolean(pendingState);
+  const pending = Boolean(pendingState || affixCraftPendingState);
   const hasEnoughOrbs = expandAffixCost !== null &&
     reforgeOrbsKnown &&
     reforgeOrbsOwned >= expandAffixCost;
@@ -287,7 +287,7 @@ function resolveAffixSlotProgressState(
     if (unavailableReason === "no_base") {
       expandButtonLabel = t("Select Base", "베이스 선택 필요");
     } else if (unavailableReason === "requires_first_affix") {
-      expandButtonLabel = t("Create First Affix First", "첫 어픽스 먼저 생성");
+      expandButtonLabel = t("Identify First", "확인 스크롤 먼저 사용");
     } else if (unavailableReason === "max_slots") {
       expandButtonLabel = t("Max Slots 3/3", "최대 슬롯 3/3");
     } else if (
@@ -386,7 +386,7 @@ function resolveRunewordPanelActionState(state) {
   const hasBase = Boolean(state.hasBase);
   const hasRecipe = Boolean(state.hasRecipe);
   const isComplete = Boolean(state.isComplete);
-  const affixExpandPending = Boolean(affixExpandPendingState);
+  const affixExpandPending = Boolean(affixExpandPendingState || affixCraftPendingState);
   const canTransmute = Boolean(state.canInsert) &&
     hasBase &&
     hasRecipe &&
@@ -448,144 +448,35 @@ ${buttonHint}`
       : baseCompatibilityMessage;
   }
 
-  const regularAffixCount = Number.isFinite(Number(state.regularAffixCount))
-    ? Math.max(0, Math.trunc(Number(state.regularAffixCount)))
-    : 0;
-  const standardReforgeCost = Number.isFinite(Number(state.standardReforgeCost)) && Number(state.standardReforgeCost) > 0
-    ? Math.trunc(Number(state.standardReforgeCost))
-    : 1;
-  const lockedReforgeCost = Number.isFinite(Number(state.lockedReforgeCost)) && Number(state.lockedReforgeCost) > 0
-    ? Math.trunc(Number(state.lockedReforgeCost))
-    : 2;
-  const hasKnownReforgeOrbCount = state.reforgeOrbsOwned !== null &&
-    state.reforgeOrbsOwned !== undefined &&
-    Number.isFinite(Number(state.reforgeOrbsOwned)) &&
-    Number(state.reforgeOrbsOwned) >= 0;
-  const reforgeOrbsOwned = hasKnownReforgeOrbCount
-    ? Math.trunc(Number(state.reforgeOrbsOwned))
-    : null;
+  const regularAffixCount = Number.isSafeInteger(state.regularAffixCount) ? state.regularAffixCount : 0;
+  const standardReforgeCost = 2;
+  const lockedReforgeCost = 2;
   const affixSlotState = resolveAffixSlotProgressState(state);
   const reforgeLockCandidates = resolveReforgeLockCandidates(state);
   const lockedReforgeCandidate = resolveActiveReforgeLockCandidate(state);
-  const reforgeCost = lockedReforgeCandidate ? lockedReforgeCost : standardReforgeCost;
-  const hasEnoughReforgeOrbs = reforgeOrbsOwned === null || reforgeOrbsOwned >= reforgeCost;
-  const reforgeEnabled = hasBase && hasEnoughReforgeOrbs && !affixSlotState.expandPending;
+  const reforgeCost = 2;
+  const reforgeOrbsOwned = state.reforgeOrbsKnown === true && Number.isSafeInteger(state.reforgeOrbsOwned) ? state.reforgeOrbsOwned : null;
   const reforgeCommand = buildReforgeCommand(state);
+  const baseKey = normalizePositiveUint64DecimalString(resolveSelectedRunewordBaseKey());
+  const ready = hasBase && Boolean(baseKey) && state.regularAffixCountKnown === true && !affixSlotState.expandPending;
+  const reforgeEnabled = ready && Boolean(lockedReforgeCandidate) && reforgeOrbsOwned !== null && reforgeOrbsOwned >= reforgeCost;
+  const identifyEnabled = ready && regularAffixCount === 0 && state.identifyScrollsKnown === true && state.identifyScrollsOwned >= 1;
+  const scourEnabled = ready && regularAffixCount > 0 && state.scouringOrbsKnown === true && state.scouringOrbsOwned >= 1;
+  const identifyCommand = baseKey ? `affix.identify:${baseKey}` : "";
+  const scourCommand = baseKey ? `affix.scour:${baseKey}` : "";
+  const selectedName = lockedReforgeCandidate ? t(resolveReforgeCandidateName(lockedReforgeCandidate, "en"), resolveReforgeCandidateName(lockedReforgeCandidate, "ko")) : "";
+  const reforgeHint = t(
+    "Spend 2 Reforge Orbs to replace only the selected regular affix. Other affixes, slot count, and runeword progress stay. No attempt limit.",
+    "재련 오브 2개로 선택한 일반 어픽스 하나만 바꿉니다. 나머지 어픽스·슬롯 수·룬워드 성장 상태는 유지됩니다. 횟수 제한은 없습니다."
+  );
+  const reforgeButtonLabel = t("Reforge Selected (2 Orbs)", "선택 어픽스 재련 (오브 2개)");
+  const reforgeSummary = selectedName ? t(`Replace: ${selectedName}`, `교체 대상: ${selectedName}`) : t("Choose an affix to replace", "바꿀 어픽스 선택");
+  const reforgeLockHint = regularAffixCount === 0
+    ? t("Identify first: 1–3 regular affixes. Expand missing slots later.", "확인 스크롤로 일반 어픽스 1~3개를 부여하세요. 부족한 슬롯은 확장할 수 있습니다.")
+    : t("Choose the one affix to reroll. All other effects are preserved.", "다시 굴릴 어픽스 하나를 선택하세요. 다른 효과는 유지됩니다.");
+  const reforgeCostSummary = t(`Cost: 2 Reforge Orbs · Owned: ${reforgeOrbsOwned ?? "?"}`, `비용: 재련 오브 2개 · 보유: ${reforgeOrbsOwned ?? "?"}개`);
 
-  const lockedNameEn = lockedReforgeCandidate
-    ? resolveReforgeCandidateName(lockedReforgeCandidate, "en")
-    : "";
-  const lockedNameKo = lockedReforgeCandidate
-    ? resolveReforgeCandidateName(lockedReforgeCandidate, "ko")
-    : "";
-  let reforgeHint = "";
-  if (!hasBase) {
-    reforgeHint = t("Select a base first.", "베이스를 먼저 선택하세요.");
-  } else if (lockedReforgeCandidate) {
-    reforgeHint = t(
-      `Consume ${reforgeCost} Reforge Orbs, keep ${lockedNameEn}, and reroll the remaining regular affixes. The current regular-affix count and any completed runeword are preserved.`,
-      `재련 오브 ${reforgeCost}개를 소모해 ${lockedNameKo} 어픽스를 유지하고 나머지 일반 어픽스를 재굴림합니다. 현재 일반 어픽스 개수와 완성된 룬워드는 유지됩니다.`
-    );
-  } else if (isComplete) {
-    reforgeHint = t(
-      `Consume ${reforgeCost} Reforge Orb${reforgeCost === 1 ? "" : "s"} and reroll only the regular affixes on the selected base. The completed runeword and current regular-affix count are preserved; a base with none gains one.`,
-      `재련 오브 ${reforgeCost}개를 소모해 선택 베이스의 일반 어픽스만 재굴림합니다. 완성된 룬워드는 유지됩니다. 현재 일반 어픽스 개수도 유지되며, 없으면 1개가 생깁니다.`
-    );
-  } else {
-    reforgeHint = t(
-      `Consume ${reforgeCost} Reforge Orb${reforgeCost === 1 ? "" : "s"} and reroll the same number of regular affixes on the selected base. A base with none gains one; any completed runeword is preserved.`,
-      `재련 오브 ${reforgeCost}개를 소모해 선택 베이스의 일반 어픽스를 같은 개수로 재굴림합니다. 일반 어픽스가 없으면 1개가 생기며, 완성된 룬워드는 유지됩니다.`
-    );
-  }
-
-  if (hasBase && reforgeOrbsOwned !== null) {
-    const inventoryLine = t(
-      `Reforge Orbs owned: ${reforgeOrbsOwned}.`,
-      `보유 재련 오브: ${reforgeOrbsOwned}개.`
-    );
-    reforgeHint = `${reforgeHint}\n${inventoryLine}`;
-    if (!hasEnoughReforgeOrbs) {
-      const shortfall = reforgeCost - reforgeOrbsOwned;
-      reforgeHint = `${reforgeHint}\n${t(
-        `You need ${shortfall} more Reforge Orb${shortfall === 1 ? "" : "s"}.`,
-        `재련 오브가 ${shortfall}개 더 필요합니다.`
-      )}`;
-    }
-  }
-
-  const reforgeButtonLabel = lockedReforgeCandidate
-    ? t(
-        `Protect & Reforge (${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"})`,
-        `잠금 재련 (오브 ${reforgeCost}개)`
-      )
-    : affixSlotState.regularAffixCountKnown && affixSlotState.regularAffixCount === 0
-      ? t(
-          `Create First Affix (${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"})`,
-          `첫 어픽스 생성 (오브 ${reforgeCost}개)`
-        )
-    : t(
-        `Reforge (${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"})`,
-        `재련 (오브 ${reforgeCost}개)`
-      );
-  const reforgeSummary = lockedReforgeCandidate
-    ? t(
-        `Protected: ${lockedNameEn} · ${reforgeCost} Orbs`,
-        `잠금: ${lockedNameKo} · 오브 ${reforgeCost}개`
-      )
-    : t(
-        `Reforge: reroll all · ${reforgeCost} Orb${reforgeCost === 1 ? "" : "s"}`,
-        `재련: 모두 재굴림 · 오브 ${reforgeCost}개`
-      );
-
-  let reforgeLockHint = "";
-  if (!hasBase) {
-    reforgeLockHint = t(
-      "Select an equipped base to configure affix protection.",
-      "어픽스 잠금을 설정하려면 착용 베이스를 선택하세요."
-    );
-  } else if (regularAffixCount === 0) {
-    reforgeLockHint = t(
-      "This base has no regular affix yet. Standard reforge adds one; there is nothing to lock.",
-      "이 베이스에는 아직 일반 어픽스가 없습니다. 기본 재련으로 1개가 생기며, 잠글 대상은 없습니다."
-    );
-  } else if (regularAffixCount === 1) {
-    reforgeLockHint = t(
-      "At least two regular affixes are needed to lock one. Standard reforge rerolls the current affix.",
-      "어픽스 하나를 잠그려면 일반 어픽스가 최소 2개 필요합니다. 기본 재련은 현재 어픽스를 재굴림합니다."
-    );
-  } else if (reforgeLockCandidates.length === 0) {
-    reforgeLockHint = t(
-      "No eligible regular affix can be locked. Standard reforge remains available.",
-      "잠글 수 있는 일반 어픽스가 없습니다. 기본 재련은 계속 사용할 수 있습니다."
-    );
-  } else {
-    reforgeLockHint = t(
-      "Only regular affixes can be locked. A completed runeword is preserved automatically and is never a lock candidate.",
-      "일반 어픽스만 잠글 수 있습니다. 완성된 룬워드는 자동으로 유지되며 잠금 후보에서 제외됩니다."
-    );
-  }
-
-  let reforgeCostSummary = hasBase
-    ? t(
-        `Cost: ${reforgeCost} Reforge Orb${reforgeCost === 1 ? "" : "s"}`,
-        `비용: 재련 오브 ${reforgeCost}개`
-      )
-    : t("Select a base to see the cost.", "비용을 확인하려면 베이스를 선택하세요.");
-  if (hasBase && reforgeOrbsOwned !== null) {
-    reforgeCostSummary += t(
-      ` · Owned: ${reforgeOrbsOwned}`,
-      ` · 보유: ${reforgeOrbsOwned}개`
-    );
-    if (!hasEnoughReforgeOrbs) {
-      const shortfall = reforgeCost - reforgeOrbsOwned;
-      reforgeCostSummary += t(
-        ` · Need ${shortfall} more`,
-        ` · ${shortfall}개 부족`
-      );
-    }
-  }
-
-  const resetEnabled = hasBase && !affixSlotState.expandPending;
+  const resetEnabled = hasBase && state.debugTools === true && !affixSlotState.expandPending;
   const resetHint = resetEnabled ?
     t(
       "Remove all Calamity affixes, runeword progress, and instance state from the selected base. No material refund.",
@@ -605,6 +496,7 @@ ${buttonHint}`
     baseCompatibilityMessage,
     buttonLabel,
     buttonHint,
+    identifyEnabled, scourEnabled, identifyCommand, scourCommand,
     reforgeEnabled,
     reforgeHint,
     reforgeButtonLabel,
@@ -810,7 +702,7 @@ function renderReforgeLockOptions(actionState) {
   }
   runewordReforgeLockList.setAttribute(
     "aria-label",
-    t("Affix protection for reforge", "재련 어픽스 잠금")
+    t("Select the affix to replace", "교체할 어픽스 선택")
   );
 
   const hadFocus = runewordReforgeLockList.contains(document.activeElement);
@@ -825,8 +717,8 @@ function renderReforgeLockOptions(actionState) {
       runewordReforgeLockList,
       t("No base selected", "선택된 베이스 없음"),
       t(
-        "Select an equipped base before configuring affix protection.",
-        "어픽스 잠금을 설정하기 전에 착용 베이스를 선택하세요."
+        "Select an equipped base before choosing an affix to replace.",
+        "교체할 어픽스를 고르기 전에 착용 베이스를 선택하세요."
       )
     );
     return;
@@ -852,20 +744,6 @@ function renderReforgeLockOptions(actionState) {
     renderedOptions.push({ button, token, selected });
   };
 
-  const noLockSelected = !actionState.lockedReforgeCandidate;
-  appendOption(
-    "",
-    t(
-      `No lock — reroll all · ${actionState.standardReforgeCost} Orb${actionState.standardReforgeCost === 1 ? "" : "s"}`,
-      `잠금 없음 — 모두 재굴림 · 오브 ${actionState.standardReforgeCost}개`
-    ),
-    t(
-      `No affix protection. Reroll all regular affixes for ${actionState.standardReforgeCost} Reforge Orb${actionState.standardReforgeCost === 1 ? "" : "s"}.`,
-      `어픽스를 잠그지 않습니다. 재련 오브 ${actionState.standardReforgeCost}개로 모든 일반 어픽스를 재굴림합니다.`
-    ),
-    noLockSelected
-  );
-
   for (const candidate of actionState.reforgeLockCandidates) {
     const isPrefix = candidate.slotKind === "prefix";
     const slotEn = isPrefix ? "Prefix" : "Suffix";
@@ -881,8 +759,8 @@ function renderReforgeLockOptions(actionState) {
         `[${slotKo}] ${nameKo} · 오브 ${actionState.lockedReforgeCost}개`
       ),
       t(
-        `Lock ${slotEn} affix ${nameEn}. Reforge cost: ${actionState.lockedReforgeCost} Orbs.`,
-        `${slotKo} 어픽스 ${nameKo} 잠금. 재련 비용: 오브 ${actionState.lockedReforgeCost}개.`
+        `Replace ${slotEn} affix ${nameEn}. Reforge cost: ${actionState.lockedReforgeCost} Orbs.`,
+        `${slotKo} 어픽스 ${nameKo} 교체. 재련 비용: 오브 ${actionState.lockedReforgeCost}개.`
       ),
       selected
     );
@@ -906,6 +784,23 @@ function renderReforgeLockOptions(actionState) {
 function renderRunewordPanelState() {
   const state = runewordPanelState || {};
   const actionState = resolveRunewordPanelActionState(state);
+  if (affixIdentifyButton) {
+    affixIdentifyButton.disabled = !actionState.identifyEnabled;
+    affixIdentifyButton.textContent = t("Identify (1 Scroll)", "확인 (스크롤 1개)");
+    affixIdentifyButton.setAttribute(panelCommandAttribute, actionState.identifyCommand);
+    affixIdentifyButton.title = t("Only without regular affixes. Gain 1/2/3 affixes at 60%/30%/10%. Runeword preserved.", "일반 어픽스가 없는 장비에만 사용. 1/2/3개를 60%/30%/10% 확률로 부여합니다. 룬워드는 유지됩니다.");
+  }
+  if (affixScourButton) {
+    affixScourButton.disabled = !actionState.scourEnabled;
+    affixScourButton.textContent = t("Scour (1 Orb)", "정제 (정제 오브 1개)");
+    affixScourButton.setAttribute(panelCommandAttribute, actionState.scourCommand);
+    affixScourButton.title = t("Reroll every regular affix at once, keeping the slot count. Runeword preserved. Also repairs legacy affix layouts.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다. 구버전 어픽스 구성도 정상 구성으로 바꿉니다.");
+  }
+  if (affixCurrencySummary) {
+    const scrolls = state.identifyScrollsKnown ? state.identifyScrollsOwned : "?";
+    const scours = state.scouringOrbsKnown ? state.scouringOrbsOwned : "?";
+    affixCurrencySummary.textContent = t(`Owned: ${scrolls} Identify Scrolls · ${scours} Scouring Orbs`, `보유: 확인 스크롤 ${scrolls}개 · 정제 오브 ${scours}개`);
+  }
   if (debugToolsPanel) {
     // Cheat-adjacent tools stay hidden unless the runtime reports a debug
     // toggle enabled (debug HUD or verbose logging).

@@ -1,3 +1,4 @@
+#include "CalamityAffixes/AffixCraftingPolicy.h"
 #include "runtime_gate_store_checks_common.h"
 
 #include "CalamityAffixes/RunewordUiSerialization.h"
@@ -1196,68 +1197,37 @@ namespace RuntimeGateStoreChecks
 				(std::istreambuf_iterator<char>(reforgeIn)),
 				std::istreambuf_iterator<char>());
 
-			if (selectionSource.find("bool EventBridge::ResolveSelectedRunewordBaseInstance(") == std::string::npos ||
-				reforgeSource.find("ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, true)") == std::string::npos ||
-				reforgeSource.find("BuildRegularOnlyAffixSlots(previousSlots, preservedRunewordToken)") == std::string::npos ||
-				reforgeSource.find("Reforge blocked: completed runeword base.") != std::string::npos) {
-				std::cerr << "runeword_reforge_safety: completed-base reroll integration guard is missing\n";
-				return false;
-			}
-
-			// Every runeword result token is excluded from the regular roll pool, not
-			// only the currently completed recipe's token.
-			if (reforgeSource.find("recipeIndexByResultAffixToken.contains(affix.token)") == std::string::npos) {
-				std::cerr << "runeword_reforge_safety: runeword token exclusion from regular roll pool is missing\n";
-				return false;
-			}
-
-			const auto preservedStateCapturePos =
-				reforgeSource.find("preservedRunewordRuntimeState = *state;");
-			const auto preservedLockedStateCapturePos =
-				reforgeSource.find("preservedLockedAffixRuntimeState = *state;");
-			const auto expectedBaseValidationPos =
-				reforgeSource.find("IsExpectedLockedReforgeInstance(*a_expectedInstanceKey, instanceKey)");
-			const auto orbPostcheckPos = reforgeSource.find("DidConsumeExactInventoryCount(");
-			const auto observedConsumptionPos =
-				reforgeSource.find("ResolveObservedInventoryConsumption(", orbPostcheckPos);
-			const auto orbRefundPos =
-				reforgeSource.find("player->AddObjectToContainer(", observedConsumptionPos);
-			const auto stateCommitPos = reforgeSource.find("EraseInstanceRuntimeStates(instanceKey);");
-			const auto ensureRolledStatePos =
-				reforgeSource.find("EnsureInstanceRuntimeState(instanceKey, newSlots.tokens[i]);", stateCommitPos);
-			const auto preservedStateRestorePos =
-				reforgeSource.find("EnsureInstanceRuntimeState(instanceKey, preservedRunewordToken) =", ensureRolledStatePos);
-			const auto preservedLockedStateRestorePos =
-				reforgeSource.find("EnsureInstanceRuntimeState(instanceKey, *a_lockedAffixToken) =", ensureRolledStatePos);
-			if (preservedStateCapturePos == std::string::npos ||
-				preservedLockedStateCapturePos == std::string::npos ||
-				expectedBaseValidationPos == std::string::npos ||
-				orbPostcheckPos == std::string::npos ||
-				observedConsumptionPos == std::string::npos ||
-				orbRefundPos == std::string::npos ||
-				stateCommitPos == std::string::npos ||
-				ensureRolledStatePos == std::string::npos ||
-				preservedStateRestorePos == std::string::npos ||
-				preservedLockedStateRestorePos == std::string::npos ||
-				preservedStateCapturePos >= stateCommitPos ||
-				preservedLockedStateCapturePos >= stateCommitPos ||
-				expectedBaseValidationPos >= orbPostcheckPos ||
-				orbPostcheckPos >= stateCommitPos ||
-				observedConsumptionPos >= stateCommitPos ||
-				orbRefundPos >= stateCommitPos ||
-				ensureRolledStatePos >= preservedStateRestorePos ||
-				ensureRolledStatePos >= preservedLockedStateRestorePos ||
-				reforgeSource.find("EventBridge::OperationResult EventBridge::ResetSelectedRunewordBaseCalamityState()") == std::string::npos ||
-				reforgeSource.find("if (_runewordState.transmuteInProgress)") == std::string::npos ||
-				reforgeSource.find("_instanceTrackingState.instanceAffixes.erase(instanceKey)") == std::string::npos ||
-				reforgeSource.find("_runewordState.instanceStates.erase(instanceKey)") == std::string::npos ||
-				reforgeSource.find("ForgetLootPreviewSlots(instanceKey);") == std::string::npos ||
-				reforgeSource.find("MarkLootEvaluatedInstance(instanceKey);") == std::string::npos ||
-				reforgeSource.find("RebuildActiveCounts();") == std::string::npos ||
-				reforgeSource.find("ForgetLootEvaluatedInstance(instanceKey)") != std::string::npos) {
-				std::cerr << "runeword_reforge_safety: destructive reset recovery policy is incomplete\n";
-				return false;
-			}
+            const auto baseCheck = reforgeSource.find("instanceKey != a_expectedInstanceKey");
+            const auto candidateCheck = reforgeSource.find("IsValidCraftResult(a_action, previous, next, runewordToken, a_selectedToken)");
+            const auto charge = reforgeSource.find("player->RemoveItem(");
+            const auto revalidate = reforgeSource.find("currentKey != instanceKey", charge);
+            const auto commit = reforgeSource.find("std::erase_if(_instanceTrackingState.instanceStates");
+            if (baseCheck == std::string::npos || candidateCheck == std::string::npos ||
+                charge == std::string::npos || revalidate == std::string::npos || commit == std::string::npos ||
+                !(baseCheck < candidateCheck && candidateCheck < charge && charge < revalidate && revalidate < commit) ||
+                reforgeSource.find("DidConsumeExactInventoryCount") == std::string::npos ||
+                reforgeSource.find("ResolveObservedInventoryConsumption") == std::string::npos ||
+                reforgeSource.find("!next.HasToken(pair.first.affixToken)") == std::string::npos ||
+                reforgeSource.find("recipeIndexByResultAffixToken.contains(affix.token)") == std::string::npos ||
+                reforgeSource.find("ForgetLootEvaluatedInstance(instanceKey)") != std::string::npos) {
+                std::cerr << "crafting_safety: expected-base, currency rollback, or selective state preservation missing\n";
+                return false;
+            }
+            // The expansion-only layout check rejects finished 3-affix gear; crafting
+            // must use the full-layout gate that the static tests cover.
+            const auto layoutGate = reforgeSource.find("detail::CanCraftAffixLayout(a_action, regular.count");
+            if (layoutGate == std::string::npos || layoutGate > charge ||
+                reforgeSource.find("IsCanonicalRegularAffixExpansionLayout") != std::string::npos) {
+                std::cerr << "crafting_safety: crafting must gate layouts with CanCraftAffixLayout\n";
+                return false;
+            }
+            CalamityAffixes::InstanceAffixSlots before{};
+            before.AddToken(99u); before.AddToken(1u); before.AddToken(2u); before.AddToken(3u);
+            auto after = before;
+            if (!CalamityAffixes::detail::ReplaceSelectedAffix(after, 2u, 4u) ||
+                !CalamityAffixes::detail::IsValidCraftResult(CalamityAffixes::AffixCraftAction::kReforge, before, after, 99u, 2u)) return false;
+            after.tokens[3] = 5u;
+            if (CalamityAffixes::detail::IsValidCraftResult(CalamityAffixes::AffixCraftAction::kReforge, before, after, 99u, 2u)) return false;
 
 			return true;
 		}

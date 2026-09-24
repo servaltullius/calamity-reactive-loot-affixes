@@ -217,10 +217,8 @@ class PrismaPanelSplitTests(unittest.TestCase):
             self.parser.attrs["runewordInsertButton"]["data-cmd"],
             "runeword.insert",
         )
-        self.assertEqual(
-            self.parser.attrs["runewordReforgeButton"]["data-cmd"],
-            "runeword.reforge",
-        )
+        self.assertIn("disabled", self.parser.attrs["runewordReforgeButton"])
+        self.assertNotIn("data-cmd", self.parser.attrs["runewordReforgeButton"])
         self.assertEqual(
             self.parser.attrs["runewordResetButton"]["data-cmd"],
             "runeword.reset",

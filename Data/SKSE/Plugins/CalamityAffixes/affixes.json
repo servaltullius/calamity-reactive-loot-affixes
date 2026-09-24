@@ -13748,6 +13748,22 @@
             }
           ]
         }
+      },
+      {
+        "miscItem": {
+          "editorId": "CAFF_Misc_IdentifyScroll",
+          "name": "Scroll of Identification",
+          "modelPath": "Clutter\\Common\\Scroll01.nif"
+        },
+        "type": "MiscItem"
+      },
+      {
+        "miscItem": {
+          "editorId": "CAFF_Misc_ScouringOrb",
+          "name": "Scouring Orb",
+          "modelPath": "Clutter\\SoulGem\\SoulGemPiece02.nif"
+        },
+        "type": "MiscItem"
       }
     ]
   }

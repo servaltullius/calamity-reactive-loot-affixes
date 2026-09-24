@@ -132,6 +132,8 @@ public static class AffixSpecLoader
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenArtObjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenMovableStatics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenMiscItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "CAFF_Misc_ReforgeOrb" };
+        foreach (var rune in GetRunewordRuneLadder()) seenMiscItems.Add($"CAFF_RuneFrag_{rune}");
         var spellDefinitions = new List<SpellRecordSpec>();
         foreach (var kw in spec.Keywords.Tags)
         {
@@ -232,7 +234,7 @@ public static class AffixSpecLoader
         {
             switch (appendedRecord.Type)
             {
-                case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
+                case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
                 {
                     var magicEffect = appendedRecord.MagicEffect;
                     if (!seenMagicEffects.Add(magicEffect.EditorId))
@@ -248,7 +250,7 @@ public static class AffixSpecLoader
                     }
                     break;
                 }
-                case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
+                case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
                 {
                     var spell = appendedRecord.Spell;
                     if (!seenSpells.Add(spell.EditorId))
@@ -296,7 +298,7 @@ public static class AffixSpecLoader
                     spellDefinitions.Add(spell);
                     break;
                 }
-                case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.MovableStatic is null:
+                case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
                 {
                     var artObject = appendedRecord.ArtObject;
                     if (!seenArtObjects.Add(artObject.EditorId))
@@ -331,7 +333,7 @@ public static class AffixSpecLoader
                     }
                     break;
                 }
-                case "MovableStatic" when appendedRecord.MovableStatic is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null:
+                case "MovableStatic" when appendedRecord.MovableStatic is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MiscItem is null:
                 {
                     var movableStatic = appendedRecord.MovableStatic;
                     if (!seenMovableStatics.Add(movableStatic.EditorId))
@@ -345,11 +347,17 @@ public static class AffixSpecLoader
                         "MovableStatic");
                     break;
                 }
+                case "MiscItem" when appendedRecord.MiscItem is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
+                    ValidateWorldObjectModelPath(appendedRecord.MiscItem.EditorId, appendedRecord.MiscItem.ModelPath, "MiscItem");
+                    if (string.IsNullOrWhiteSpace(appendedRecord.MiscItem.Name) ||
+                        !seenMiscItems.Add(appendedRecord.MiscItem.EditorId))
+                        throw new InvalidDataException("Appended MiscItem requires a name and unique editorId.");
+                    break;
                 default:
                     throw new InvalidDataException(
                         "keywords.appendedRecords entries must use type MagicEffect with only magicEffect, " +
                         "type Spell with only spell, type ArtObject with only artObject, " +
-                        "or type MovableStatic with only movableStatic.");
+                        "type MovableStatic with only movableStatic, or type MiscItem with only miscItem.");
             }
         }
 
@@ -555,7 +563,7 @@ public static class AffixSpecLoader
                         $"keywords.appendedRecords[{index}] contains duplicate property '{property.Name}'.");
                 }
 
-                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject" or "movableStatic"))
+                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject" or "movableStatic" or "miscItem"))
                 {
                     throw new InvalidDataException(
                         $"keywords.appendedRecords[{index}] contains unsupported property '{property.Name}'.");
@@ -572,19 +580,22 @@ public static class AffixSpecLoader
             var hasSpell = item.TryGetProperty("spell", out var spellElement);
             var hasArtObject = item.TryGetProperty("artObject", out var artObjectElement);
             var hasMovableStatic = item.TryGetProperty("movableStatic", out var movableStaticElement);
+            var hasMiscItem = item.TryGetProperty("miscItem", out var miscItemElement);
             switch (type)
             {
-                case "MagicEffect" when hasMagicEffect && !hasSpell && !hasArtObject && !hasMovableStatic && magicEffectElement.ValueKind == JsonValueKind.Object:
-                case "Spell" when hasSpell && !hasMagicEffect && !hasArtObject && !hasMovableStatic && spellElement.ValueKind == JsonValueKind.Object:
-                case "ArtObject" when hasArtObject && !hasMagicEffect && !hasSpell && !hasMovableStatic && artObjectElement.ValueKind == JsonValueKind.Object:
+                case "MagicEffect" when hasMagicEffect && !hasSpell && !hasArtObject && !hasMovableStatic && !hasMiscItem && magicEffectElement.ValueKind == JsonValueKind.Object:
+                case "Spell" when hasSpell && !hasMagicEffect && !hasArtObject && !hasMovableStatic && !hasMiscItem && spellElement.ValueKind == JsonValueKind.Object:
+                case "ArtObject" when hasArtObject && !hasMagicEffect && !hasSpell && !hasMovableStatic && !hasMiscItem && artObjectElement.ValueKind == JsonValueKind.Object:
                     break;
-                case "MovableStatic" when hasMovableStatic && !hasMagicEffect && !hasSpell && !hasArtObject && movableStaticElement.ValueKind == JsonValueKind.Object:
+                case "MovableStatic" when hasMovableStatic && !hasMagicEffect && !hasSpell && !hasArtObject && !hasMiscItem && movableStaticElement.ValueKind == JsonValueKind.Object:
                     if (movableStaticElement.TryGetProperty("mustUpdateAnimations", out var mustUpdateAnimationsElement) &&
                         mustUpdateAnimationsElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                     {
                         throw new InvalidDataException(
                             $"keywords.appendedRecords[{index}].movableStatic.mustUpdateAnimations must be a boolean.");
                     }
+                    break;
+                case "MiscItem" when hasMiscItem && !hasMagicEffect && !hasSpell && !hasArtObject && !hasMovableStatic && miscItemElement.ValueKind == JsonValueKind.Object:
                     break;
                 case "MagicEffect":
                     throw new InvalidDataException(
@@ -598,9 +609,12 @@ public static class AffixSpecLoader
                 case "MovableStatic":
                     throw new InvalidDataException(
                         $"keywords.appendedRecords[{index}] type MovableStatic requires only an object movableStatic payload.");
+                case "MiscItem":
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] type MiscItem requires only an object miscItem payload.");
                 default:
                     throw new InvalidDataException(
-                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, ArtObject, or MovableStatic (got: {type ?? "<null>"}).");
+                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, ArtObject, MovableStatic, or MiscItem (got: {type ?? "<null>"}).");
             }
 
             index += 1;

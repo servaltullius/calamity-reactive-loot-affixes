@@ -73,12 +73,12 @@ namespace CalamityAffixes
 
 		const auto slotsIt = _instanceTrackingState.instanceAffixes.find(instanceKey);
 		if (slotsIt == _instanceTrackingState.instanceAffixes.end()) {
-			result.message = "Affix expansion failed: add the first regular affix with standard reforge.";
+			result.message = "Affix expansion failed: identify this base with a Scroll of Identification first.";
 			return result;
 		}
 		const InstanceAffixSlots previousSlots = slotsIt->second;
 		if (!detail::HasUniqueAffixTokens(previousSlots)) {
-			result.message = "Affix expansion failed: invalid affix layout; standard reforge it first.";
+			result.message = "Affix expansion failed: invalid affix layout.";
 			return result;
 		}
 
@@ -99,7 +99,7 @@ namespace CalamityAffixes
 		for (std::uint8_t i = 0u; i < previousSlots.count; ++i) {
 			const auto token = previousSlots.tokens[i];
 			if (token == 0u) {
-				result.message = "Affix expansion failed: invalid affix layout; standard reforge it first.";
+				result.message = "Affix expansion failed: invalid affix layout.";
 				return result;
 			}
 			if (_runewordState.recipeIndexByResultAffixToken.contains(token)) {
@@ -159,7 +159,7 @@ namespace CalamityAffixes
 				regularSlots.count,
 				prefixCount,
 				suffixCount)) {
-			result.message = "Affix expansion failed: invalid affix layout; standard reforge it first.";
+			result.message = "Affix expansion failed: invalid affix layout.";
 			return result;
 		}
 

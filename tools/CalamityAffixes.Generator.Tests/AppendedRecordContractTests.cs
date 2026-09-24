@@ -230,6 +230,10 @@ public sealed class AppendedRecordContractTests
     }
 
     [Theory]
+    [InlineData("""{"type":"MiscItem"}""")]
+    [InlineData("""{"type":"MiscItem","miscItem":null}""")]
+    [InlineData("""{"type":"MiscItem","miscItem":{},"spell":{}}""")]
+    [InlineData("""{"type":"Spell","spell":{},"miscItem":{}}""")]
     [MemberData(nameof(InvalidLegacyDragonBlocks))]
     public void Load_WhenLegacyDragonAppendBlockIsNotExactlySealed_Throws(string legacyRecords)
     {

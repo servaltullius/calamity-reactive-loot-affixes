@@ -244,7 +244,7 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFiftyTypedRecords()
+    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFiftyTwoTypedRecords()
     {
         var repoRoot = FindRepoRoot();
         var fixture = ReadV140AllocationFixture(repoRoot);
@@ -252,7 +252,9 @@ public sealed class RepoSpecRegressionTests
         var mod = KeywordPluginBuilder.Build(spec);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(783, actual.Length);
+        Assert.Equal(785, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^2]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^1]);
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -277,7 +279,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B0Fu, ((IModGetter)mod).NextFormID);
+        Assert.Equal(0x000B11u, ((IModGetter)mod).NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -303,12 +305,12 @@ public sealed class RepoSpecRegressionTests
             using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
             var reimportedAllocation = AllocationSignature(reimported);
 
-            Assert.Equal(783, generatedAllocation.Length);
+            Assert.Equal(785, generatedAllocation.Length);
             Assert.Equal(generatedAllocation, reimportedAllocation);
             Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
-            Assert.Equal(generatedAllocation.TakeLast(50), reimportedAllocation.TakeLast(50));
+            Assert.Equal(generatedAllocation.TakeLast(52), reimportedAllocation.TakeLast(52));
             Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-            Assert.Equal(0x000B0Fu, reimported.NextFormID);
+            Assert.Equal(0x000B11u, reimported.NextFormID);
             AssertWorldMarkers(reimported);
         }
         finally
@@ -326,7 +328,9 @@ public sealed class RepoSpecRegressionTests
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(783, actual.Length);
+        Assert.Equal(785, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^2]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^1]);
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -351,7 +355,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B0Fu, mod.NextFormID);
+        Assert.Equal(0x000B11u, mod.NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(

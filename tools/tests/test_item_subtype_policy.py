@@ -69,7 +69,7 @@ class ItemSubtypePolicyTests(unittest.TestCase):
         self.assertIn("IsSuffixWeaponSubtypeEligible(", service)
         self.assertIn("ResolveWeaponSubtype(a_item->object->As<RE::TESObjectWEAP>())", tooltip)
         self.assertIn(
-            "RollSuffixIndex(*lootType, weaponSubtype, &chosenFamilies, &chosenIndices)",
+            "RollSuffixIndex(*lootType, weaponSubtype, &keptFamilies, &excludedIndices)",
             reforge,
         )
         self.assertNotIn("IsSuffixWeaponSubtypeEligible(", assign)

@@ -38,7 +38,6 @@
 		constexpr std::string_view kMcmUiLanguageKeyLower = "iuilanguage";
 		constexpr std::string_view kRunewordBaseSelectPrefix = "runeword.base.select:";
 		constexpr std::string_view kRunewordRecipeSelectPrefix = "runeword.recipe.select:";
-		constexpr std::string_view kRunewordLockedReforgePrefix = "runeword.reforge:";
 		constexpr std::string_view kAffixExpandPrefix = "affix.expand:";
 		constexpr std::string_view kPanelLayoutSavePrefix = "ui.layout.save:";
 		constexpr std::string_view kTooltipLayoutSavePrefix = "ui.tooltip.save:";

@@ -230,42 +230,33 @@
 					return true;
 				}
 
-				if (a_command.rfind(kRunewordLockedReforgePrefix, 0) == 0) {
-					const auto payload = a_command.substr(kRunewordLockedReforgePrefix.size());
-					const auto keys = CalamityAffixes::ParseLockedReforgeCommandKeys(payload);
-					if (!keys) {
-						PushUiFeedback("Invalid locked-reforge base or affix key.");
-						return true;
-					}
-
-					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-					if (!bridge) {
-						PushUiFeedback("Reforge system unavailable.");
-						return true;
-					}
-
-					const auto outcome = bridge->ReforgeSelectedRunewordBaseWithLockedAffix(
-						keys->expectedInstanceKey,
-						keys->affixToken);
-					RefreshRunewordPanelBindings(*bridge, false);
-					PushSelectedTooltipSnapshot(true);
-					PushUiFeedback(outcome.message.empty() ? "Locked reforge action processed." : outcome.message);
-					return true;
-				}
-
-				if (a_command == "runeword.reforge") {
-					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
-					if (!bridge) {
-						PushUiFeedback("Reforge system unavailable.");
-						return true;
-					}
-
-					const auto outcome = bridge->ReforgeSelectedRunewordBaseWithOrb();
-					RefreshRunewordPanelBindings(*bridge, false);
-					PushSelectedTooltipSnapshot(true);
-					PushUiFeedback(outcome.message.empty() ? "Reforge action processed." : outcome.message);
-					return true;
-				}
+                if (a_command.starts_with("affix.identify:") || a_command.starts_with("affix.reforge:") || a_command.starts_with("affix.scour:")) {
+                    const auto separator = a_command.find(':');
+                    const auto payload = a_command.substr(separator + 1u);
+                    auto action = CalamityAffixes::AffixCraftAction::kIdentify;
+                    std::uint64_t baseKey = 0u;
+                    std::uint64_t token = 0u;
+                    if (a_command.starts_with("affix.reforge:")) {
+                        action = CalamityAffixes::AffixCraftAction::kReforge;
+                        if (const auto keys = CalamityAffixes::ParseLockedReforgeCommandKeys(payload)) {
+                            baseKey = keys->expectedInstanceKey;
+                            token = keys->affixToken;
+                        }
+                    } else {
+                        action = a_command.starts_with("affix.scour:") ? CalamityAffixes::AffixCraftAction::kScour : action;
+                        baseKey = ParseUiCommandUint64(payload).value_or(0u);
+                    }
+                    auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+                    if (!bridge || baseKey == 0u) {
+                        PushUiFeedback("Invalid crafting selection. Select the base again.");
+                        return true;
+                    }
+                    const auto outcome = bridge->CraftSelectedAffixes(action, baseKey, token);
+                    RefreshRunewordPanelBindings(*bridge, false);
+                    PushSelectedTooltipSnapshot(true);
+                    PushUiFeedback(outcome.message);
+                    return true;
+                }
 
 				if (a_command == "runeword.reset") {
 					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();

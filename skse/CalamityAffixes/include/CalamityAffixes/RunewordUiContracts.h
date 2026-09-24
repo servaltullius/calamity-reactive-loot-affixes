@@ -121,6 +121,10 @@ namespace CalamityAffixes
 		// true. This keeps an unavailable snapshot distinct from a real zero.
 		bool reforgeOrbsKnown{ false };
 		std::uint32_t reforgeOrbsOwned{ 0 };
+        bool identifyScrollsKnown{ false };
+        std::uint32_t identifyScrollsOwned{ 0 };
+        bool scouringOrbsKnown{ false };
+        std::uint32_t scouringOrbsOwned{ 0 };
 		bool pityKnown{ false };
 		// A streak equal to its threshold means the next eligible ordinary
 		// currency evaluation is guaranteed. It is not a kill/drop countdown.

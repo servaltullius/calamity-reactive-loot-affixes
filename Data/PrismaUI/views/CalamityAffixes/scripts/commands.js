@@ -238,6 +238,37 @@ function dispatchPanelCommand(button) {
     return true;
   }
 
+  if (command.startsWith("affix.identify:") || command.startsWith("affix.reforge:") || command.startsWith("affix.scour:")) {
+    const action = resolveRunewordPanelActionState(runewordPanelState);
+    const allowed = (action.identifyEnabled && command === action.identifyCommand) ||
+      (action.reforgeEnabled && command === action.reforgeCommand) ||
+      (action.scourEnabled && command === action.scourCommand);
+    if (!allowed || affixCraftPendingState) return true;
+    if (command.startsWith("affix.scour:")) {
+      const signature = `${command}:${resolveReforgeLockCandidates(runewordPanelState).map(x => x.affixToken).join(",")}`;
+      if (!scourConfirmation || scourConfirmation.signature !== signature || Date.now() > scourConfirmation.until) {
+        scourConfirmation = { signature, until: Date.now() + 6000 };
+        setActionFeedback(t(
+          "Click Scour again within 6 seconds to reroll every regular affix at once. Slot count and runeword stay; current affixes and their growth are lost.",
+          "6초 안에 정제를 다시 누르면 일반 어픽스 전부를 한 번에 다시 굴립니다. 슬롯 수와 룬워드는 유지되며, 현재 어픽스와 그 성장 상태는 사라집니다."
+        ));
+        return true;
+      }
+    }
+    scourConfirmation = null;
+    const pending = { command };
+    affixCraftPendingState = pending;
+    schedulePanelRender(panelRenderSection.runewordPanelState);
+    window.setTimeout(() => {
+      if (affixCraftPendingState !== pending) return;
+      affixCraftPendingState = null;
+      setActionFeedback(t("Crafting response timed out. Refresh the base before retrying.", "제작 응답 시간이 초과되었습니다. 베이스를 다시 확인하세요."));
+      schedulePanelRender(panelRenderSection.runewordPanelState);
+    }, 8000);
+  } else {
+    scourConfirmation = null;
+  }
+
   if (command === "runeword.reset") {
     if (armRunewordResetConfirmation(button)) {
       return true;

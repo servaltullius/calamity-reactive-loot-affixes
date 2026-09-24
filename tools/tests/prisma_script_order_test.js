@@ -701,13 +701,13 @@ assert(
 );
 assert(
   completedRunewordActionState.reforgeHint.includes(
-    "reroll only the regular affixes"
+    "replace only the selected regular affix"
   ),
   "completed-runeword Reforge hint must describe the regular-affix-only runtime contract"
 );
 assert(
   completedRunewordActionState.reforgeHint.includes(
-    "완성된 룬워드는 유지됩니다"
+    "룬워드 성장 상태는 유지됩니다"
   ),
   "completed-runeword Reforge hint must say the runeword is preserved"
 );
@@ -718,13 +718,14 @@ assert(
 
 const reforgeBaseA = "4294967297";
 const reforgeBaseB = "4294967298";
-const lockedReforgeCommandPrefix = "runeword.reforge:";
+const lockedReforgeCommandPrefix = "affix.reforge:";
 const lockedPrefixToken = "18446744073709551614";
 const lockedSuffixToken = "9223372036854775807";
 const buildReforgePayload = (overrides = {}) => ({
   hasBase: true,
   hasRecipe: false,
   regularAffixCount: 3,
+  reforgeOrbsKnown: true,
   reforgeOrbsOwned: 1,
   standardReforgeCost: 1,
   lockedReforgeCost: 2,
@@ -761,9 +762,9 @@ let reforgeActionState = new vm.Script(
   "resolveRunewordPanelActionState(runewordPanelState)",
   { filename: "reforge-standard-cost-contract-test.js" }
 ).runInContext(context);
-assert.strictEqual(reforgeActionState.reforgeCommand, "runeword.reforge");
-assert.strictEqual(reforgeActionState.reforgeCost, 1);
-assert.strictEqual(reforgeActionState.reforgeEnabled, true);
+assert.strictEqual(reforgeActionState.reforgeCommand, "");
+assert.strictEqual(reforgeActionState.reforgeCost, 2);
+assert.strictEqual(reforgeActionState.reforgeEnabled, false);
 assert.strictEqual(reforgeActionState.reforgeLockCandidates.length, 2);
 assert.strictEqual(
   reforgeActionState.reforgeLockCandidates[0].affixToken,
@@ -792,7 +793,7 @@ assert.strictEqual(
 assert.strictEqual(reforgeActionState.reforgeCost, 2);
 assert.strictEqual(reforgeActionState.reforgeEnabled, false);
 assert(
-  reforgeActionState.reforgeCostSummary.includes("Need 1 more"),
+  reforgeActionState.reforgeCostSummary.includes("Owned: 1"),
   "locked reforge insufficient-orb summary is missing"
 );
 
@@ -845,16 +846,16 @@ sandbox.setRunewordPanelState(JSON.stringify(buildReforgePayload({
 })));
 assert.strictEqual(
   sandbox.selectReforgeLockCandidate(lockedPrefixToken, false),
-  false,
-  "single-affix base incorrectly allowed a no-op locked reforge"
+  true,
+  "single-affix base must allow selected-slot replacement"
 );
 reforgeActionState = new vm.Script(
   "resolveRunewordPanelActionState(runewordPanelState)",
   { filename: "reforge-single-affix-guidance-test.js" }
 ).runInContext(context);
-assert.strictEqual(reforgeActionState.reforgeLockCandidates.length, 0);
+assert.strictEqual(reforgeActionState.reforgeLockCandidates.length, 2);
 assert(
-  reforgeActionState.reforgeLockHint.includes("At least two regular affixes"),
+  reforgeActionState.reforgeLockHint.includes("Choose the one affix to reroll"),
   "single-affix lock guidance is missing"
 );
 
@@ -863,9 +864,92 @@ assert.strictEqual(sandbox.selectReforgeLockCandidate(lockedPrefixToken, false),
 assert.strictEqual(sandbox.selectReforgeLockCandidate("", false), true);
 assert.strictEqual(
   sandbox.buildReforgeCommand(),
-  "runeword.reforge",
-  "explicit no-lock selection did not restore the standard reforge command"
+  "",
+  "clearing the selection must disable reforge"
 );
+
+// Currency crafting through the actual classic-script UI and command dispatcher.
+const craftedCommands = [];
+sandbox.calamityCommand = command => craftedCommands.push(command);
+const emptyCraftPayload = {
+  hasBase: true, regularAffixCount: 0, maxRegularAffixCount: 3,
+  identifyScrollsKnown: true, identifyScrollsOwned: 2,
+  scouringOrbsKnown: true, scouringOrbsOwned: 1,
+  reforgeOrbsKnown: true, reforgeOrbsOwned: 4,
+  reforgeLockCandidates: [], debugTools: false
+};
+sandbox.setInventoryItems(JSON.stringify([{ key: reforgeBaseA, name: "Base A", selected: true }]));
+sandbox.setRunewordPanelState(JSON.stringify(emptyCraftPayload));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("affixIdentifyButton").disabled, false);
+assert.strictEqual(element("affixScourButton").disabled, true);
+assert.strictEqual(element("runewordReforgeButton").disabled, true);
+assert.strictEqual(element("runewordResetButton").disabled, true, "free reset must require debug mode");
+sandbox.dispatchPanelCommand(element("affixIdentifyButton"));
+sandbox.dispatchPanelCommand(element("affixIdentifyButton"));
+assert.deepStrictEqual(craftedCommands, [`affix.identify:${reforgeBaseA}`], "double click must charge at most once");
+const identifiedPayload = {
+  ...emptyCraftPayload, regularAffixCount: 1,
+  identifyScrollsOwned: 1, reforgeLockCandidates: [buildReforgePayload().reforgeLockCandidates[0]]
+};
+sandbox.setRunewordPanelState(JSON.stringify(identifiedPayload));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("affixIdentifyButton").disabled, true, "identified equipment cannot be identified again");
+assert.strictEqual(element("affixScourButton").disabled, false);
+assert.strictEqual(sandbox.selectReforgeLockCandidate(lockedPrefixToken, false), true);
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("runewordReforgeButton").disabled, false, "one-affix gear can be reforged");
+sandbox.dispatchPanelCommand(element("runewordReforgeButton"));
+assert.strictEqual(craftedCommands.at(-1), `affix.reforge:${reforgeBaseA}:${lockedPrefixToken}`);
+sandbox.setRunewordPanelState(JSON.stringify(identifiedPayload));
+sandbox.renderRunewordPanelState();
+const beforeScour = craftedCommands.length;
+sandbox.dispatchPanelCommand(element("affixScourButton"));
+assert.strictEqual(craftedCommands.length, beforeScour, "scouring needs confirmation");
+sandbox.dispatchPanelCommand(element("affixScourButton"));
+sandbox.dispatchPanelCommand(element("affixScourButton"));
+assert.strictEqual(craftedCommands.length, beforeScour + 1, "confirmed scouring must not repeat while pending");
+assert.strictEqual(craftedCommands.at(-1), `affix.scour:${reforgeBaseA}`);
+// Scour rerolls in place: the slot count stays, so identify stays unavailable.
+sandbox.setRunewordPanelState(JSON.stringify({ ...identifiedPayload, scouringOrbsOwned: 0 }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("affixIdentifyButton").disabled, true, "scoured gear keeps its slots and is not re-identified");
+assert.strictEqual(element("affixScourButton").disabled, true, "scouring needs a Scouring Orb");
+// A finished 3-affix base must keep every crafting path open.
+const fullPayload = {
+  ...identifiedPayload, regularAffixCount: 3,
+  reforgeLockCandidates: buildReforgePayload().reforgeLockCandidates
+};
+sandbox.setRunewordPanelState(JSON.stringify(fullPayload));
+assert.strictEqual(sandbox.selectReforgeLockCandidate(lockedPrefixToken, false), true);
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("affixIdentifyButton").disabled, true);
+assert.strictEqual(element("affixScourButton").disabled, false, "3-affix gear can be scoured");
+assert.strictEqual(element("runewordReforgeButton").disabled, false, "3-affix gear can be reforged");
+// Legacy tokens count as regular slots but are never reforge candidates.
+sandbox.setRunewordPanelState(JSON.stringify({ ...identifiedPayload, reforgeLockCandidates: [] }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("affixIdentifyButton").disabled, true);
+assert.strictEqual(element("affixScourButton").disabled, false, "legacy layouts are repaired by scour");
+assert.strictEqual(element("runewordReforgeButton").disabled, true);
+sandbox.setRunewordPanelState(JSON.stringify(emptyCraftPayload));
+sandbox.renderRunewordPanelState();
+sandbox.setRunewordPanelState(JSON.stringify({ ...emptyCraftPayload, identifyScrollsKnown: false }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("affixIdentifyButton").disabled, true, "unknown currency must fail closed");
+sandbox.setRunewordPanelState(JSON.stringify({ ...emptyCraftPayload, identifyScrollsOwned: 0 }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("affixIdentifyButton").disabled, true);
+sandbox.setRunewordPanelState(JSON.stringify(identifiedPayload));
+sandbox.renderRunewordPanelState();
+sandbox.dispatchPanelCommand(element("affixScourButton"));
+const beforeChangedBase = craftedCommands.length;
+sandbox.setInventoryItems(JSON.stringify([{ key: reforgeBaseB, name: "Base B", selected: true }]));
+sandbox.renderRunewordPanelState();
+sandbox.dispatchPanelCommand(element("affixScourButton"));
+assert.strictEqual(craftedCommands.length, beforeChangedBase, "confirmation cannot transfer to another base");
+new vm.Script("scourConfirmation = null").runInContext(context);
+delete sandbox.calamityCommand;
 
 const runeA = "18446744073709551615";
 const runeB = "9223372036854775808";

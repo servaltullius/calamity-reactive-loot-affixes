@@ -35,7 +35,8 @@ namespace CalamityAffixes
 			}
 
 			const std::string_view editorId(editorIdRaw);
-			return editorId == "CAFF_Misc_ReforgeOrb" || editorId.starts_with("CAFF_RuneFrag_");
+			return editorId == "CAFF_Misc_ReforgeOrb" || editorId == "CAFF_Misc_IdentifyScroll" ||
+                editorId == "CAFF_Misc_ScouringOrb" || editorId.starts_with("CAFF_RuneFrag_");
 		}
 	}
 

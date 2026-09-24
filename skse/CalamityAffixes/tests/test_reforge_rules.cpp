@@ -187,3 +187,81 @@ static_assert(!DidRestoreExactInventoryCount(1u, 1u, 1u),
 	"DidRestoreExactInventoryCount: rejects a failed compensation");
 static_assert(!DidRestoreExactInventoryCount(1u, 3u, 1u),
 	"DidRestoreExactInventoryCount: rejects an unexpected multi-item compensation");
+
+#include "CalamityAffixes/AffixCraftingPolicy.h"
+namespace {
+constexpr bool CheckCurrencyCrafting() {
+    using namespace CalamityAffixes;
+    using namespace CalamityAffixes::detail;
+    std::uint32_t frequencies[3]{};
+    for (std::uint32_t roll = 0; roll < 100; ++roll) ++frequencies[IdentifyAffixCount(roll) - 1];
+    if (frequencies[0] != 60 || frequencies[1] != 30 || frequencies[2] != 10) return false;
+    for (const auto rune : { 0u, 99u }) {
+        for (std::uint8_t count = 0u; count <= 3u; ++count) {
+            InstanceAffixSlots before{};
+            if (rune) before.AddToken(rune);
+            InstanceAffixSlots regular{};
+            for (std::uint64_t token = 1u; token <= count; ++token) {
+                before.AddToken(token);
+                regular.AddToken(token);
+            }
+            if (CanCraftAffixes(AffixCraftAction::kIdentify, regular, 0u) != (count == 0)) return false;
+            if (CanCraftAffixes(AffixCraftAction::kScour, regular, 0u) != (count != 0)) return false;
+            if (CanCraftAffixes(AffixCraftAction::kReforge, regular, 99u)) return false;
+            for (std::uint64_t token = 1; token <= count; ++token) {
+                auto after = before;
+                if (!CanCraftAffixes(AffixCraftAction::kReforge, regular, token) ||
+                    !ReplaceSelectedAffix(after, token, 50u) ||
+                    !IsValidCraftResult(AffixCraftAction::kReforge, before, after, rune, token)) return false;
+                if (IsValidCraftResult(AffixCraftAction::kReforge, before, before, rune, token)) return false;
+                if (ReplaceSelectedAffix(after, 50u, 50u)) return false;
+            }
+            // Scour rerolls in place: same slot count, runeword kept primary,
+            // and an identical result is rejected before any orb is spent.
+            InstanceAffixSlots empty{};
+            if (rune) empty.AddToken(rune);
+            InstanceAffixSlots scoured = empty;
+            for (std::uint64_t token = 1u; token <= count; ++token) scoured.AddToken(token + 20u);
+            if (IsValidCraftResult(AffixCraftAction::kScour, before, scoured, rune, 0u) != (count > 0)) return false;
+            if (IsValidCraftResult(AffixCraftAction::kScour, before, before, rune, 0u)) return false;
+            if (count > 0 && IsValidCraftResult(AffixCraftAction::kScour, before, empty, rune, 0u)) return false;
+            InstanceAffixSlots identified = empty;
+            identified.AddToken(8u);
+            identified.AddToken(9u);
+            if (!IsValidCraftResult(AffixCraftAction::kIdentify, empty, identified, rune, 0u)) return false;
+        }
+    }
+    return true;
+}
+static_assert(CheckCurrencyCrafting(), "Identify/reforge/scour must preserve unselected slots and runewords");
+}
+
+namespace {
+using CalamityAffixes::AffixCraftAction;
+using CalamityAffixes::detail::CanCraftAffixLayout;
+using CalamityAffixes::detail::IsCanonicalRegularAffixLayout;
+using CalamityAffixes::detail::ScourAffixCount;
+constexpr AffixCraftAction kAllCraftActions[]{
+    AffixCraftAction::kIdentify, AffixCraftAction::kReforge, AffixCraftAction::kScour };
+constexpr bool AllActionsAllowLayout(std::uint8_t count, std::uint8_t prefix, std::uint8_t suffix) {
+    for (const auto action : kAllCraftActions)
+        if (!CanCraftAffixLayout(action, count, prefix, suffix, false)) return false;
+    return true;
+}
+}
+static_assert(IsCanonicalRegularAffixLayout(1u, 1u, 0u) && IsCanonicalRegularAffixLayout(2u, 1u, 1u) &&
+    IsCanonicalRegularAffixLayout(3u, 1u, 2u), "every finished layout up to 1P+2S is canonical");
+static_assert(!IsCanonicalRegularAffixLayout(0u, 0u, 0u) && !IsCanonicalRegularAffixLayout(1u, 0u, 1u) &&
+    !IsCanonicalRegularAffixLayout(2u, 2u, 0u) && !IsCanonicalRegularAffixLayout(4u, 1u, 3u),
+    "non-canonical splits are rejected");
+static_assert(AllActionsAllowLayout(3u, 1u, 2u), "3-affix gear must stay craftable (regression: crafting-test1)");
+static_assert(AllActionsAllowLayout(1u, 1u, 0u) && AllActionsAllowLayout(2u, 1u, 1u) && AllActionsAllowLayout(0u, 0u, 0u));
+static_assert(!CanCraftAffixLayout(AffixCraftAction::kReforge, 1u, 0u, 1u, false) &&
+    !CanCraftAffixLayout(AffixCraftAction::kIdentify, 1u, 0u, 1u, false) &&
+    !CanCraftAffixLayout(AffixCraftAction::kReforge, 3u, 1u, 2u, true),
+    "legacy layouts cannot be reforged or identified");
+static_assert(CanCraftAffixLayout(AffixCraftAction::kScour, 1u, 0u, 1u, false) &&
+    CanCraftAffixLayout(AffixCraftAction::kScour, 3u, 1u, 2u, true) &&
+    CanCraftAffixLayout(AffixCraftAction::kScour, 4u, 0u, 0u, true), "scour repairs any legacy layout");
+static_assert(ScourAffixCount(1u) == 1u && ScourAffixCount(3u) == 3u && ScourAffixCount(4u) == 3u,
+    "scour keeps the slot count, clamping legacy overflow");

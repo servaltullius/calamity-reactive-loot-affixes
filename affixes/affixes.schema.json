@@ -645,6 +645,15 @@
         },
         {
           "type": "object",
+          "required": ["type", "miscItem"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "MiscItem" },
+            "miscItem": { "$ref": "#/$defs/miscItemRecord" }
+          }
+        },
+        {
+          "type": "object",
           "required": ["type", "movableStatic"],
           "additionalProperties": false,
           "properties": {
@@ -653,6 +662,16 @@
           }
         }
       ]
+    },
+    "miscItemRecord": {
+      "type": "object",
+      "required": ["editorId", "name", "modelPath"],
+      "additionalProperties": false,
+      "properties": {
+        "editorId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "modelPath": { "type": "string", "minLength": 1 }
+      }
     },
     "artObjectRecord": {
       "type": "object",

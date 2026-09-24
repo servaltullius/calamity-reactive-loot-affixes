@@ -23,6 +23,7 @@
 #include <SKSE/SKSE.h>
 
 #include "CalamityAffixes/ItemSubtypePolicy.h"
+#include "CalamityAffixes/AffixCraftingPolicy.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
 #include "CalamityAffixes/DeferredEventDispatcher.h"
 

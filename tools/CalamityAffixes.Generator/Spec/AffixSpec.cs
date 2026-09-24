@@ -153,6 +153,10 @@ public sealed class KeywordSpec
 
 public sealed class AppendedRecordSpec
 {
+    [JsonPropertyName("miscItem")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public MiscItemRecordSpec? MiscItem { get; init; }
+
     [JsonPropertyName("type")]
     public required string Type { get; init; }
 
@@ -171,6 +175,16 @@ public sealed class AppendedRecordSpec
     [JsonPropertyName("movableStatic")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public MovableStaticRecordSpec? MovableStatic { get; init; }
+}
+
+public sealed class MiscItemRecordSpec
+{
+    [JsonPropertyName("editorId")]
+    public required string EditorId { get; init; }
+    [JsonPropertyName("name")]
+    public required string Name { get; init; }
+    [JsonPropertyName("modelPath")]
+    public required string ModelPath { get; init; }
 }
 
 public sealed class ArtObjectRecordSpec

@@ -51,6 +51,7 @@ const runBehavior = new Function(
       "unavailable"
     ]);
     let affixExpandPendingState = null;
+    let affixCraftPendingState = null;
     function resolveSelectedRunewordBaseKey() { return ""; }
     ${uint64Source}
     ${reasonNormalizerSource}
@@ -138,7 +139,7 @@ const runBehavior = new Function(
     assert.strictEqual(view.countText, "0/3");
     assert.strictEqual(view.expandCommand, "");
     assert.strictEqual(view.unavailableReason, "requires_first_affix");
-    assert(view.expandButtonLabel.includes("First Affix"));
+    assert(view.expandButtonLabel.includes("Identify First"));
 
     const full = {
       ...readyOne,
@@ -204,6 +205,7 @@ const runPendingBehavior = new Function(
     const panelRenderSection = { runewordPanelState: "runewordPanelState" };
     const affixExpandPendingTimeoutMs = 2500;
     let affixExpandPendingState = null;
+    let affixCraftPendingState = null;
     let affixExpandPendingNonce = 0;
     let scheduled = 0;
     let chooserClosed = 0;

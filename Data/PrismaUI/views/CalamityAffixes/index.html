@@ -519,17 +519,17 @@
                   </div>
                   <details id="runewordReforgeDetails" class="rwActionDetails rwReforgeDetails">
                     <summary id="runewordReforgeSummary" class="rwActionDetailsSummary">
-                      Reforge: reroll all · 1 Orb / 재련: 모두 재굴림 · 오브 1개
+                      Choose an affix to replace / 교체할 어픽스 선택
                     </summary>
                     <div class="rwActionDetailsBody rwReforgeDetailsBody">
                       <div id="runewordReforgeLockHint" class="cpContextMeta rwReforgeLockHint">
-                        Only regular affixes can be locked. A completed runeword is preserved automatically. / 일반 어픽스만 잠글 수 있습니다. 완성된 룬워드는 자동으로 유지됩니다.
+                        Replace one regular affix; keep the rest and the runeword. / 일반 어픽스 하나만 바꾸고 나머지와 룬워드는 유지합니다.
                       </div>
                       <div
                         id="runewordReforgeLockList"
                         class="cpList rwReforgeLockList"
                         role="listbox"
-                        aria-label="Affix protection for reforge / 재련 어픽스 잠금"
+                        aria-label="Select the affix to replace / 교체할 어픽스 선택"
                       ></div>
                       <div
                         id="runewordReforgeCostSummary"
@@ -537,10 +537,13 @@
                         role="status"
                         aria-live="polite"
                         aria-atomic="true"
-                      >Cost: 1 Reforge Orb / 비용: 재련 오브 1개</div>
+                      >Cost: 2 Reforge Orbs / 비용: 재련 오브 2개</div>
                     </div>
                   </details>
+                  <div id="affixCurrencySummary" class="cpContextMeta" role="status" aria-live="polite"></div>
                   <div class="rwItemActionGrid affixMutationGrid">
+                    <button id="affixIdentifyButton" class="cpButton" type="button" disabled>Identify / 확인</button>
+                    <button id="affixScourButton" class="cpButton cpDangerButton" type="button" disabled>Scour / 정제</button>
                     <button
                       id="affixExpandButton"
                       class="cpButton affixExpandButton"
@@ -551,9 +554,9 @@
                     <button
                       id="runewordReforgeButton"
                       class="cpButton"
-                      data-cmd="runeword.reforge"
+                      disabled
                       aria-describedby="runewordReforgeLockHint runewordReforgeCostSummary"
-                    >Reforge (1 Orb) / 재련 (오브 1개)</button>
+                    >Reforge Selected (2 Orbs) / 선택 재련 (오브 2개)</button>
                   </div>
                 </section>
 

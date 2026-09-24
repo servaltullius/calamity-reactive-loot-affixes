@@ -6,6 +6,9 @@ let runewordAffixTextState = "";
 let runewordAffixPendingState = false;
 let runewordAffixPendingNonce = 0;
 const runewordAffixPendingTimeoutMs = 1200;
+// Legacy wire field names remain stable; the selection now identifies the affix to replace.
+let affixCraftPendingState = null;
+let scourConfirmation = null;
 let reforgeLockTokenState = "";
 let reforgeLockBaseKeyState = "";
 let affixExpandPendingState = null;
@@ -93,7 +96,7 @@ const panelOpenTabAttribute = "data-open-tab";
 const recipeFilterAttribute = "data-recipe-filter";
 const recipeMaterialFilterAttribute = "data-recipe-material-filter";
 const recipeSelectionCommandPrefix = "runeword.recipe.select:";
-const lockedReforgeCommandPrefix = "runeword.reforge:";
+const lockedReforgeCommandPrefix = "affix.reforge:";
 const affixExpandCommandPrefix = "affix.expand:";
 const reforgeLockTokenAttribute = "data-reforge-lock-token";
 const validAffixExpandUnavailableReasons = new Set([
@@ -136,12 +139,13 @@ const prismaInteropMethod = Object.freeze({
 });
 const previewInvalidatingCommands = new Set([
   "runeword.insert",
-  "runeword.reforge",
   "runeword.reset"
 ]);
 const previewInvalidatingCommandPrefixes = Object.freeze([
   "runeword.base.select:",
   lockedReforgeCommandPrefix,
+  "affix.identify:",
+  "affix.scour:",
   affixExpandCommandPrefix
 ]);
 const panelRenderState = {

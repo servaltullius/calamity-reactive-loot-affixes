@@ -586,6 +586,22 @@
             { "magicEffectForm": "Skyrim.esm|0x0004D3F9", "hostileOnly": true, "magnitude": 50, "duration": 0, "area": 0 }
           ]
         }
+      },
+      {
+        "type": "MiscItem",
+        "miscItem": {
+          "editorId": "CAFF_Misc_IdentifyScroll",
+          "name": "Scroll of Identification",
+          "modelPath": "Clutter\\Common\\Scroll01.nif"
+        }
+      },
+      {
+        "type": "MiscItem",
+        "miscItem": {
+          "editorId": "CAFF_Misc_ScouringOrb",
+          "name": "Scouring Orb",
+          "modelPath": "Clutter\\SoulGem\\SoulGemPiece02.nif"
+        }
       }
     ]
   }

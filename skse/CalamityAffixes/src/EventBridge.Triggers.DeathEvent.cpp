@@ -197,6 +197,28 @@ namespace CalamityAffixes
 				detail::kCorpseCurrencyAllProcessed & static_cast<std::uint8_t>(~processedMask));
 			MarkCorpseCurrencyProcessed(corpseFormId, dayStamp, newlyProcessedMask);
 
+            // Claim the corpse before crossing inventory engine callbacks. New
+            // currencies share the existing persisted once-per-corpse ledger.
+            if (processedMask == 0u) {
+                const auto multiplier = ResolveLootCurrencySourceChanceMultiplier(detail::LootCurrencySourceTier::kCorpse);
+                bool identifyDrop = false;
+                bool scourDrop = false;
+                {
+                    std::lock_guard<std::mutex> rngLock(_rngMutex);
+                    std::uniform_real_distribution<float> roll(0.0f, 100.0f);
+                    identifyDrop = roll(_rng) < detail::kIdentifyScrollDropChance * multiplier;
+                    scourDrop = roll(_rng) < detail::kScouringOrbDropChance * multiplier;
+                }
+                if (identifyDrop) {
+                    if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_IdentifyScroll"))
+                        TryAddLootCurrencyToCorpseInventory(item, dying);
+                }
+                if (scourDrop) {
+                    if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ScouringOrb"))
+                        TryAddLootCurrencyToCorpseInventory(item, dying);
+                }
+            }
+
 			if (_loot.debugLog) {
 				const auto probe = BuildCorpseCurrencyDropProbe(dying);
 				SKSE::log::info(

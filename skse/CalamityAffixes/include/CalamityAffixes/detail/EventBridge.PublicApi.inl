@@ -64,10 +64,9 @@
 		[[nodiscard]] RunewordPanelState GetRunewordPanelState();
 		// UI helper: affix tooltip for currently selected runeword base.
 		[[nodiscard]] std::optional<std::string> GetSelectedRunewordBaseAffixTooltip(int a_uiLanguageMode = 2);
-		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseWithOrb();
-		[[nodiscard]] OperationResult ReforgeSelectedRunewordBaseWithLockedAffix(
-			std::uint64_t a_expectedInstanceKey,
-			std::uint64_t a_lockedAffixToken);
+        [[nodiscard]] OperationResult CraftSelectedAffixes(
+            AffixCraftAction a_action, std::uint64_t a_expectedInstanceKey,
+            std::uint64_t a_selectedToken = 0u);
 		[[nodiscard]] OperationResult ExpandSelectedRunewordBaseAffixes(
 			std::uint64_t a_expectedInstanceKey,
 			std::uint8_t a_expectedRegularAffixCount);
