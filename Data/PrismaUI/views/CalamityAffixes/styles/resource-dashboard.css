@@ -314,13 +314,18 @@
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.58);
 }
 
+/* Title row, then the three crafting currencies beside the orb pity card. */
 .rdOrbSection {
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: minmax(112px, 0.72fr) minmax(82px, 0.5fr) minmax(190px, 1.28fr);
+  grid-template-columns: minmax(0, 1.55fr) minmax(150px, 1fr);
   align-items: center;
-  gap: calc(7px * var(--panel-ui-scale));
+  gap: calc(6px * var(--panel-ui-scale)) calc(7px * var(--panel-ui-scale));
   padding: calc(7px * var(--panel-ui-scale));
+}
+
+.rdOrbSection .rdHeader {
+  grid-column: 1 / -1;
 }
 
 .rdOrbSection .rdHeader,
@@ -330,9 +335,18 @@
   margin-top: 0;
 }
 
-.rdOrbSection .rdMetricGrid,
+.rdOrbSection .rdMetricGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(5px * var(--panel-ui-scale));
+}
+
 .rdOrbSection .rdPityGrid {
   grid-template-columns: minmax(0, 1fr);
+}
+
+.rdOrbSection .rdMetric {
+  padding-right: calc(6px * var(--panel-ui-scale));
+  padding-left: calc(6px * var(--panel-ui-scale));
 }
 
 .rdOrbHeader .cpSectionTitle {

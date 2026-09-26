@@ -1,3 +1,26 @@
+// The picker lists every base without scrolling whenever it fits. On a short
+// panel it would run past the bottom edge, where nothing can reach it, so cap
+// it at the room left inside the panel body and let it scroll instead.
+function fitWorkingBaseChooserToPanel() {
+  const overlay = workingBaseDetails?.querySelector(".wbChooserOverlay");
+  const body = document.getElementById("controlPanelBody");
+  if (!overlay || !body) {
+    return;
+  }
+
+  overlay.style.maxHeight = "";
+  overlay.style.overflowY = "";
+  if (!workingBaseDetails.open) {
+    return;
+  }
+
+  const room = Math.floor(body.getBoundingClientRect().bottom - overlay.getBoundingClientRect().top - 8);
+  if (room > 0 && overlay.scrollHeight > room) {
+    overlay.style.maxHeight = `${room}px`;
+    overlay.style.overflowY = "auto";
+  }
+}
+
 function focusWorkingBaseChooserOption() {
   if (!workingBaseDetails?.open || !inventoryBaseList) {
     return;
@@ -11,6 +34,7 @@ function focusWorkingBaseChooserOption() {
   }
 
   option.focus({ preventScroll: true });
+  option.scrollIntoView({ block: "nearest" });
 }
 
 function closeWorkingBaseChooser(restoreFocus = false) {
@@ -35,6 +59,7 @@ function handleWorkingBaseChooserToggle() {
     "aria-expanded",
     workingBaseDetails.open ? "true" : "false"
   );
+  fitWorkingBaseChooserToPanel();
   if (workingBaseDetails.open) {
     requestAnimationFrame(focusWorkingBaseChooserOption);
   }

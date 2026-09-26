@@ -1215,7 +1215,7 @@ namespace RuntimeGateStoreChecks
             }
             // The expansion-only layout check rejects finished 3-affix gear; crafting
             // must use the full-layout gate that the static tests cover.
-            const auto layoutGate = reforgeSource.find("detail::CanCraftAffixLayout(a_action, regular.count");
+            const auto layoutGate = reforgeSource.find("detail::CanCraftAffixLayout(");
             if (layoutGate == std::string::npos || layoutGate > charge ||
                 reforgeSource.find("IsCanonicalRegularAffixExpansionLayout") != std::string::npos) {
                 std::cerr << "crafting_safety: crafting must gate layouts with CanCraftAffixLayout\n";

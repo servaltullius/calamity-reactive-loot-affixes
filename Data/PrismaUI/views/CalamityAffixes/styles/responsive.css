@@ -25,6 +25,29 @@
   grid-template-columns: 1fr;
 }
 
+/* Wide keeps the workbench in place while it fits. When the panel is too short,
+   guarantee usable recipe-list and review heights and scroll the workspace,
+   instead of squeezing the list to a sliver (the UI scale grows with the panel,
+   so a larger panel alone never made room). */
+#controlPanel[data-layout="wide"] .rwWorkspace {
+  overflow-y: auto;
+  padding-right: calc(4px * var(--panel-ui-scale));
+}
+
+#controlPanel[data-layout="wide"] .rwWorkbench {
+  flex: 1 0 0;
+  min-height: calc(440px * var(--panel-ui-scale));
+}
+
+#controlPanel[data-layout="wide"] .rwActionSummary {
+  min-height: calc(72px * var(--panel-ui-scale));
+}
+
+/* An expanded rune grid can outgrow the review card; scroll it, never clip it. */
+#controlPanel[data-layout="wide"] .rwActionInspector .cpStepBody {
+  overflow-y: auto;
+}
+
 #controlPanel[data-layout="medium"] #mainRunewordPane,
 #controlPanel[data-layout="medium"] #mainAffixPane,
 #controlPanel[data-layout="narrow"] #mainRunewordPane,
@@ -190,11 +213,11 @@
 }
 
 #controlPanel[data-layout="narrow"] .rdOrbSection {
-  grid-template-columns: minmax(100px, 0.7fr) minmax(0, 1.3fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
-#controlPanel[data-layout="narrow"] .rdOrbSection .rdHeader {
-  grid-column: 1 / -1;
+#controlPanel[data-layout="narrow"] .rdOrbSection .rdMetricGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 @media (prefers-reduced-motion: reduce) {

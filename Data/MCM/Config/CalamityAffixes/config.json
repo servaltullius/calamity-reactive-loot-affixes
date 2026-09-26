@@ -24,7 +24,7 @@
           "type": "text",
           "id": "tLootPolicy:General",
           "text": "Loot Policy / 루팅 정책",
-          "help": "Auto affix assignment on pickup is disabled. Rune fragments/reforge orbs roll only for eligible hostile corpses from player-side kills; containers and world pickups are excluded. / 획득 시 자동 어픽스 부여는 비활성입니다. 룬 조각/재련 오브는 플레이어 측이 처치한 적격 적 시체에서만 판정하며 상자와 월드 픽업은 제외합니다.",
+          "help": "Auto affix assignment on pickup is disabled. Rune fragments, Reforge Orbs, Identify Scrolls, and Scouring Orbs roll only for eligible hostile corpses from player-side kills; containers and world pickups are excluded. / 획득 시 자동 어픽스 부여는 비활성입니다. 룬 조각·재련 오브·확인 스크롤·정제 오브는 플레이어 측이 처치한 적격 적 시체에서만 판정하며 상자와 월드 픽업은 제외합니다.",
           "valueOptions": {
             "value": "Corpse-only currency rolls / 적 시체 전용 통화 판정"
           }
@@ -131,6 +131,48 @@
           }
         },
         {
+          "type": "slider",
+          "id": "fIdentifyScrollChancePercent:General",
+          "text": "Identify Scroll Chance / 확인 스크롤 확률",
+          "help": "Chance (%) per eligible hostile corpse, rolled independently. Identify Scrolls grant the first 1-3 regular affixes. / 적격 적 시체 1구당 독립 판정 확률(%)입니다. 확인 스크롤은 일반 어픽스 1~3개를 처음 부여합니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 20.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 0.5,
+            "formatString": "{1}%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetIdentifyScrollChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fScouringOrbChancePercent:General",
+          "text": "Scouring Orb Chance / 정제 오브 확률",
+          "help": "Chance (%) per eligible hostile corpse, rolled independently. Scouring Orbs reroll every regular affix while keeping the slot count. / 적격 적 시체 1구당 독립 판정 확률(%)입니다. 정제 오브는 슬롯 수를 유지한 채 일반 어픽스 전부를 다시 굴립니다.",
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 2.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 0.5,
+            "formatString": "{1}%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetScouringOrbChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
           "type": "toggle",
           "id": "bDotSafetyAutoDisable:General",
           "text": "Dot Safety Auto-Disable / DoT 안전 자동비활성",
@@ -206,7 +248,7 @@
           "type": "text",
           "id": "tPrismaGuide:General",
           "text": "Guide / 안내",
-          "help": "Use Prisma panel buttons for runeword and reforge operations. Close with ESC or Close button. / 룬워드/재련 조작은 Prisma 패널 버튼을 사용하세요. ESC 또는 Close 버튼으로 닫습니다.",
+          "help": "Use the Prisma panel for runewords and affix crafting: identify with a Scroll, reforge one selected affix with Reforge Orbs, expand slots, or reroll all regular affixes with a Scouring Orb. Close with ESC or the Close button. / 룬워드와 어픽스 제작은 Prisma 패널에서 합니다: 확인 스크롤로 최초 부여, 재련 오브로 선택한 어픽스 하나 교체·슬롯 확장, 정제 오브로 일반 어픽스 전체 리롤. ESC 또는 닫기 버튼으로 닫습니다.",
           "valueOptions": {
             "value": "Prisma-first UX enabled / Prisma 우선 UX 적용"
           }

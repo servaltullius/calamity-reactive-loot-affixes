@@ -226,6 +226,9 @@ function updatePanelUiScale() {
   const heightRatio = rect.height / 860;
   const nextScale = clamp(Math.min(widthRatio, heightRatio) * 1.25, 0.9, 1.75);
   document.documentElement.style.setProperty("--panel-ui-scale", nextScale.toFixed(3));
+  if (typeof fitWorkingBaseChooserToPanel === "function") {
+    fitWorkingBaseChooserToPanel();
+  }
 }
 
 function setPanelAnchoredPosition(left, top) {

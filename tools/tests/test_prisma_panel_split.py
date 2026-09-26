@@ -250,6 +250,43 @@ class PrismaPanelSplitTests(unittest.TestCase):
         )
         self.assertIn("overflow-y: auto", responsive_css)
 
+    def test_wide_runeword_workbench_keeps_usable_heights(self) -> None:
+        """The UI scale grows with the panel, so a larger panel never made room:
+        without a floor the recipe list shrank to ~30px at every wide size, and
+        the review card clipped an expanded rune grid. Wide keeps the workbench
+        fixed while it fits, and scrolls the workspace once it cannot."""
+        runeword_css = (
+            INDEX_PATH.parent / "styles" / "runeword.css"
+        ).read_text(encoding="utf-8")
+        responsive_css = (
+            INDEX_PATH.parent / "styles" / "responsive.css"
+        ).read_text(encoding="utf-8")
+        self.assert_rule_contains(
+            responsive_css,
+            '#controlPanel[data-layout="wide"] .rwWorkspace',
+            "overflow-y: auto",
+        )
+        self.assert_rule_contains(
+            responsive_css,
+            '#controlPanel[data-layout="wide"] .rwWorkbench',
+            "flex: 1 0 0",
+            "min-height: calc(440px * var(--panel-ui-scale))",
+        )
+        self.assert_rule_contains(
+            responsive_css,
+            '#controlPanel[data-layout="wide"] .rwActionInspector .cpStepBody',
+            "overflow-y: auto",
+        )
+        # A cube cell stacks title, name, and count; 38px clipped all three.
+        self.assert_rule_contains(
+            runeword_css,
+            ".rwCubeGrid.compact",
+            "calc(56px * var(--panel-ui-scale))",
+        )
+        self.assert_rule_contains(
+            runeword_css, ".rwCellName", "-webkit-line-clamp: 2", "overflow: hidden"
+        )
+
     def test_tab_relationships_remain_bidirectional(self) -> None:
         for stem in ("Runeword", "Affix", "Advanced"):
             tab_id = f"main{stem}Tab"

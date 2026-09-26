@@ -563,6 +563,9 @@
 			float chancePercent{ 0.0f };
 			float runewordFragmentChancePercent{ 8.0f };
 			float reforgeOrbChancePercent{ 12.0f };
+			// Independent corpse rolls for the crafting currencies (MCM-tunable).
+			float identifyScrollChancePercent{ 20.0f };
+			float scouringOrbChancePercent{ 2.0f };
 			float uniqueActorGuaranteedRunewordChancePercent{ 40.0f };
 			float configuredRunewordFragmentChancePercent{ 8.0f };
 			float configuredReforgeOrbChancePercent{ 12.0f };

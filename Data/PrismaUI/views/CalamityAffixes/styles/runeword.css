@@ -493,8 +493,9 @@
   justify-content: center;
 }
 
+/* A cell stacks title, name, and count; 38px clipped every one of them. */
 .rwCubeGrid.compact {
-  --rwCell: calc(38px * var(--panel-ui-scale));
+  --rwCell: calc(56px * var(--panel-ui-scale));
 }
 
 .rwCell {
@@ -551,11 +552,25 @@
   font-weight: 600;
   line-height: 1.15;
   word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .rwCellCounts {
   font-size: calc(10px * var(--panel-ui-scale));
   color: rgba(255, 255, 255, 0.72);
+}
+
+/* Title and count stay one line so the name always keeps its room; the cell's
+   hover title carries the full text. */
+.rwCellTitle,
+.rwCellCounts {
+  flex: 0 0 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rwPrimaryAction .cpButton,

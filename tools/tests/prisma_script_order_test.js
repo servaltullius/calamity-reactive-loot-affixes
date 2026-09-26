@@ -194,6 +194,17 @@ assert.strictEqual(
   `${resourceRuneKindsExpected} / 33`
 );
 assert.strictEqual(element("resourceReforgeOrbs").textContent, "7");
+assert.strictEqual(element("resourceIdentifyScrolls").textContent, "—", "missing currency counts stay unknown");
+sandbox.setRunewordPanelState(JSON.stringify({
+  ...resourcePayload,
+  identifyScrollsKnown: true, identifyScrollsOwned: 4,
+  scouringOrbsKnown: true, scouringOrbsOwned: 1
+}));
+sandbox.renderResourceDashboard();
+assert.strictEqual(element("resourceIdentifyScrolls").textContent, "4");
+assert.strictEqual(element("resourceScouringOrbs").textContent, "1");
+sandbox.setRunewordPanelState(JSON.stringify(resourcePayload));
+sandbox.renderResourceDashboard();
 assert.strictEqual(element("resourceRuneList").children.length, 33);
 assert.strictEqual(
   element("resourceRuneList").children[0].children[0].textContent,
@@ -885,6 +896,7 @@ assert.strictEqual(element("affixIdentifyButton").disabled, false);
 assert.strictEqual(element("affixScourButton").disabled, true);
 assert.strictEqual(element("runewordReforgeButton").disabled, true);
 assert.strictEqual(element("runewordResetButton").disabled, true, "free reset must require debug mode");
+assert.strictEqual(element("runewordRecoveryDetails").hidden, true, "reset section is hidden outside debug mode");
 sandbox.dispatchPanelCommand(element("affixIdentifyButton"));
 sandbox.dispatchPanelCommand(element("affixIdentifyButton"));
 assert.deepStrictEqual(craftedCommands, [`affix.identify:${reforgeBaseA}`], "double click must charge at most once");

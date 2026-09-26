@@ -864,10 +864,19 @@ namespace RuntimeGateStoreChecks
 			std::cerr << "mcm_drop_chance_bridge: failed to open mode-control script: " << modeControlScriptFile << "\n";
 			return false;
 		}
-		if (modeControlText->find("Emit(\"CalamityAffixes_MCM_SetRunewordFragmentChance\"") == std::string::npos ||
-			modeControlText->find("Emit(\"CalamityAffixes_MCM_SetReforgeOrbChance\"") == std::string::npos) {
-			std::cerr << "mcm_drop_chance_bridge: mode-control mod-event bridge is missing\n";
-			return false;
+		// Papyrus must emit exactly the event names the runtime listens for, and each
+		// drop-chance event must persist to user_settings.json.
+		for (const auto eventName : {
+				 CalamityAffixes::RuntimePolicy::kMcmSetRunewordFragmentChanceEvent,
+				 CalamityAffixes::RuntimePolicy::kMcmSetReforgeOrbChanceEvent,
+				 CalamityAffixes::RuntimePolicy::kMcmSetIdentifyScrollChanceEvent,
+				 CalamityAffixes::RuntimePolicy::kMcmSetScouringOrbChanceEvent }) {
+			const std::string emitCall = "Emit(\"" + std::string(eventName) + "\"";
+			if (modeControlText->find(emitCall) == std::string::npos ||
+				!CalamityAffixes::RuntimePolicy::IsPersistedRuntimeUserSettingEvent(eventName)) {
+				std::cerr << "mcm_drop_chance_bridge: mode-control does not emit persisted event " << eventName << "\n";
+				return false;
+			}
 		}
 
 		if (!CalamityAffixes::RuntimePolicy::IsPersistedRuntimeUserSettingEvent("CalamityAffixes_MCM_SetRunewordFragmentChance") ||
@@ -895,6 +904,30 @@ namespace RuntimeGateStoreChecks
 				std::cerr << "mcm_drop_chance_bridge: trigger event handlers are missing\n";
 				return false;
 			}
+
+		// Crafting currencies ride the same MCM -> Papyrus -> ModEvent -> runtime chain:
+		// every slider id must be read by the MCM script, and its action must exist there.
+		for (const auto& [settingId, setter] : {
+				 std::pair<std::string_view, std::string_view>{ "fIdentifyScrollChancePercent:General", "SetIdentifyScrollChancePercent" },
+				 std::pair<std::string_view, std::string_view>{ "fScouringOrbChancePercent:General", "SetScouringOrbChancePercent" } }) {
+			const std::string idField = "\"id\": \"" + std::string(settingId) + "\"";
+			const std::string actionField = "\"function\": \"" + std::string(setter) + "\"";
+			const std::string settingLiteral = "\"" + std::string(settingId) + "\"";
+			const std::string setterDecl = "Function " + std::string(setter) + "(";
+			if (configJsonText->find(idField) == std::string::npos ||
+				configJsonText->find(actionField) == std::string::npos ||
+				mcmConfigText->find(settingLiteral) == std::string::npos ||
+				mcmConfigText->find(setterDecl) == std::string::npos ||
+				modeControlText->find(setterDecl) == std::string::npos) {
+				std::cerr << "mcm_drop_chance_bridge: crafting currency slider wiring is missing: " << settingId << "\n";
+				return false;
+			}
+		}
+		if (triggerTextCombined.find("kMcmSetIdentifyScrollChanceEvent") == std::string::npos ||
+			triggerTextCombined.find("kMcmSetScouringOrbChanceEvent") == std::string::npos) {
+			std::cerr << "mcm_drop_chance_bridge: crafting currency chance handler is missing\n";
+			return false;
+		}
 
 		return true;
 	}

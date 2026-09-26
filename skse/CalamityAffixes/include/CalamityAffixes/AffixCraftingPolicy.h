@@ -9,8 +9,6 @@ namespace CalamityAffixes
 	namespace detail
 	{
 		inline constexpr std::uint32_t kSelectedReforgeCost = 2u;
-		inline constexpr float kIdentifyScrollDropChance = 20.0f;
-		inline constexpr float kScouringOrbDropChance = 2.0f;
 
 		[[nodiscard]] constexpr std::uint8_t IdentifyAffixCount(std::uint32_t a_roll) noexcept
 		{

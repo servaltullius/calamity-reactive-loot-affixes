@@ -206,8 +206,8 @@ namespace CalamityAffixes
                 {
                     std::lock_guard<std::mutex> rngLock(_rngMutex);
                     std::uniform_real_distribution<float> roll(0.0f, 100.0f);
-                    identifyDrop = roll(_rng) < detail::kIdentifyScrollDropChance * multiplier;
-                    scourDrop = roll(_rng) < detail::kScouringOrbDropChance * multiplier;
+                    identifyDrop = roll(_rng) < _loot.identifyScrollChancePercent * multiplier;
+                    scourDrop = roll(_rng) < _loot.scouringOrbChancePercent * multiplier;
                 }
                 if (identifyDrop) {
                     if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_IdentifyScroll"))

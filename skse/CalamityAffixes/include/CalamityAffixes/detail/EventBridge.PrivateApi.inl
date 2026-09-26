@@ -320,6 +320,7 @@
 		void GrantNextRequiredRuneFragment(std::uint32_t a_amount = 1u);
 		void GrantCurrentRecipeRuneSet(std::uint32_t a_amount = 1u);
 		std::uint32_t GrantReforgeOrbs(std::uint32_t a_amount = 1u);
+		std::uint32_t GrantCraftingCurrency(std::string_view a_editorId, std::string_view a_label, std::uint32_t a_amount);
 		void MaybeMigrateMiscCurrency();
 		[[nodiscard]] bool TryRollRunewordFragmentToken(
 			float a_sourceChanceMultiplier,

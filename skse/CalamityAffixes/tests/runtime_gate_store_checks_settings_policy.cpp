@@ -146,7 +146,7 @@ namespace RuntimeGateStoreChecks
 		bool CheckRuntimeUserSettingsRoundTripFieldPolicy()
 		{
 			const auto& runtimeKeys = CalamityAffixes::RuntimePolicy::kRuntimeUserSettingKeys;
-			if (runtimeKeys.size() != 9u) {
+			if (runtimeKeys.size() != 11u) {
 				std::cerr << "runtime_user_settings_round_trip: runtime user-setting key count changed unexpectedly\n";
 				return false;
 			}

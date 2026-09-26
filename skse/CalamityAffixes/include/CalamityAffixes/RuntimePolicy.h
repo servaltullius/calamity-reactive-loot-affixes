@@ -25,10 +25,12 @@ namespace CalamityAffixes::RuntimePolicy
 	inline constexpr std::string_view kMcmSetProcChanceMultEvent = "CalamityAffixes_MCM_SetProcChanceMult";
 	inline constexpr std::string_view kMcmSetRunewordFragmentChanceEvent = "CalamityAffixes_MCM_SetRunewordFragmentChance";
 	inline constexpr std::string_view kMcmSetReforgeOrbChanceEvent = "CalamityAffixes_MCM_SetReforgeOrbChance";
+	inline constexpr std::string_view kMcmSetIdentifyScrollChanceEvent = "CalamityAffixes_MCM_SetIdentifyScrollChance";
+	inline constexpr std::string_view kMcmSetScouringOrbChanceEvent = "CalamityAffixes_MCM_SetScouringOrbChance";
 	inline constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = "CalamityAffixes_MCM_SetDotSafetyAutoDisable";
 	inline constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = "CalamityAffixes_MCM_SetAllowNonHostileFirstHitProc";
 
-	inline constexpr std::array<std::string_view, 9> kPersistedRuntimeUserSettingEventNames{
+	inline constexpr std::array<std::string_view, 11> kPersistedRuntimeUserSettingEventNames{
 		kMcmSetEnabledEvent,
 		kMcmSetDebugHudNotificationsEvent,
 		kMcmSetDebugVerboseLoggingEvent,
@@ -36,11 +38,13 @@ namespace CalamityAffixes::RuntimePolicy
 		kMcmSetProcChanceMultEvent,
 		kMcmSetRunewordFragmentChanceEvent,
 		kMcmSetReforgeOrbChanceEvent,
+		kMcmSetIdentifyScrollChanceEvent,
+		kMcmSetScouringOrbChanceEvent,
 		kMcmSetDotSafetyAutoDisableEvent,
 		kMcmSetAllowNonHostileFirstHitProcEvent
 	};
 
-	inline constexpr std::array<std::string_view, 9> kRuntimeUserSettingKeys{
+	inline constexpr std::array<std::string_view, 11> kRuntimeUserSettingKeys{
 		"enabled",
 		"debugHudNotifications",
 		"debugVerboseLogging",
@@ -48,6 +52,8 @@ namespace CalamityAffixes::RuntimePolicy
 		"procChanceMultiplier",
 		"runewordFragmentChancePercent",
 		"reforgeOrbChancePercent",
+		"identifyScrollChancePercent",
+		"scouringOrbChancePercent",
 		"dotSafetyAutoDisable",
 		"allowNonHostileFirstHitProc"
 	};

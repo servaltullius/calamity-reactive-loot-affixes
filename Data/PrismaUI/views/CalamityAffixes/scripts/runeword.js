@@ -482,9 +482,19 @@ ${buttonHint}`
       "Remove all Calamity affixes, runeword progress, and instance state from the selected base. No material refund.",
       "선택 베이스의 모든 Calamity 어픽스, 룬워드 진행도, 인스턴스 상태를 제거합니다. 재료는 환불되지 않습니다."
     ) :
+    !hasBase ?
     t(
       "Select a base first.",
       "베이스를 먼저 선택하세요."
+    ) :
+    state.debugTools !== true ?
+    t(
+      "Reset is a debug tool. Enable Debug Notifications in MCM, or use a Scouring Orb to reroll regular affixes.",
+      "초기화는 디버그 도구입니다. MCM에서 디버그 알림을 켜거나, 정제 오브로 일반 어픽스를 다시 굴리세요."
+    ) :
+    t(
+      "Wait for the current action to finish.",
+      "진행 중인 작업이 끝날 때까지 기다리세요."
     );
 
   return {
@@ -755,8 +765,8 @@ function renderReforgeLockOptions(actionState) {
     appendOption(
       candidate.affixToken,
       t(
-        `[${marker}] ${nameEn} · ${actionState.lockedReforgeCost} Orbs`,
-        `[${slotKo}] ${nameKo} · 오브 ${actionState.lockedReforgeCost}개`
+        `[${marker}] ${nameEn}`,
+        `[${slotKo}] ${nameKo}`
       ),
       t(
         `Replace ${slotEn} affix ${nameEn}. Reforge cost: ${actionState.lockedReforgeCost} Orbs.`,
@@ -796,10 +806,9 @@ function renderRunewordPanelState() {
     affixScourButton.setAttribute(panelCommandAttribute, actionState.scourCommand);
     affixScourButton.title = t("Reroll every regular affix at once, keeping the slot count. Runeword preserved. Also repairs legacy affix layouts.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다. 구버전 어픽스 구성도 정상 구성으로 바꿉니다.");
   }
-  if (affixCurrencySummary) {
-    const scrolls = state.identifyScrollsKnown ? state.identifyScrollsOwned : "?";
-    const scours = state.scouringOrbsKnown ? state.scouringOrbsOwned : "?";
-    affixCurrencySummary.textContent = t(`Owned: ${scrolls} Identify Scrolls · ${scours} Scouring Orbs`, `보유: 확인 스크롤 ${scrolls}개 · 정제 오브 ${scours}개`);
+  if (runewordRecoveryDetails) {
+    // Free reset is a debug tool; outside debug it could only ever be disabled.
+    runewordRecoveryDetails.hidden = state.debugTools !== true;
   }
   if (debugToolsPanel) {
     // Cheat-adjacent tools stay hidden unless the runtime reports a debug
@@ -889,6 +898,8 @@ function renderRunewordPanelState() {
         cell.appendChild(el);
       }
 
+      // Cells clamp long names; the full text stays available on hover.
+      cell.title = [title, name, counts].filter(Boolean).join("\n");
       runewordCubeGrid.appendChild(cell);
       filled += 1;
     };
@@ -897,7 +908,8 @@ function renderRunewordPanelState() {
       hasBase ? "base" : "base empty",
       t("Base", "베이스"),
       hasBase ? resolveSelectedWorkingBase()?.name || t("Selected", "선택됨") : t("None", "없음"),
-      hasBase ? t("Equipped", "착용") : ""
+      // Every selectable base is equipped; the cell's room goes to the name.
+      ""
     );
 
     if (hasRecipe && requiredRunes.length > 0) {

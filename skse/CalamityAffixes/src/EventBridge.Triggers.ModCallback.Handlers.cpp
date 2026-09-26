@@ -64,6 +64,7 @@ namespace CalamityAffixes
 	{
 		static auto s_lastRunewordChanceNotificationAt = std::chrono::steady_clock::time_point{};
 		static auto s_lastReforgeChanceNotificationAt = std::chrono::steady_clock::time_point{};
+		static auto s_lastCraftingChanceNotificationAt = std::chrono::steady_clock::time_point{};
 
 		if (a_eventName == kMcmSetEnabledEvent) {
 			const bool enabled = (a_numArg > kMcmBoolThreshold);
@@ -167,6 +168,24 @@ namespace CalamityAffixes
 			return true;
 		}
 
+		if (a_eventName == kMcmSetIdentifyScrollChanceEvent || a_eventName == kMcmSetScouringOrbChanceEvent) {
+			const bool identify = a_eventName == kMcmSetIdentifyScrollChanceEvent;
+			float& chance = identify ? _loot.identifyScrollChancePercent : _loot.scouringOrbChancePercent;
+			const float previousChance = chance;
+			chance = std::clamp(a_numArg, 0.0f, 100.0f);
+			const float chanceDelta = chance - previousChance;
+			if (chanceDelta > 0.001f || chanceDelta < -0.001f) {
+				QueueRuntimeUserSettingsPersist();
+				if (ShouldEmitChanceNotification(s_lastCraftingChanceNotificationAt, a_now)) {
+					std::string note = identify ? "Calamity: identify scroll chance " : "Calamity: scouring orb chance ";
+					note += std::to_string(chance);
+					note += "%";
+					EmitHudNotification(note.c_str());
+				}
+			}
+			return true;
+		}
+
 		if (a_eventName == kMcmSetDotSafetyAutoDisableEvent) {
 			_loot.dotTagSafetyAutoDisable = (a_numArg > kMcmBoolThreshold);
 			QueueRuntimeUserSettingsPersist();
@@ -237,6 +256,11 @@ namespace CalamityAffixes
 
 			const auto amount = (a_numArg > 0.0f) ? static_cast<std::uint32_t>(a_numArg) : 3u;
 			GrantReforgeOrbs(amount);
+			// The Scouring Orb is a rare drop; only debug sessions get the full crafting kit.
+			if (debugSession) {
+				GrantCraftingCurrency("CAFF_Misc_IdentifyScroll", "Identify Scrolls", amount);
+				GrantCraftingCurrency("CAFF_Misc_ScouringOrb", "Scouring Orbs", 1u);
+			}
 			return true;
 		}
 

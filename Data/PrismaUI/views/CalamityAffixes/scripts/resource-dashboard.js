@@ -46,11 +46,14 @@ function normalizeResourceDashboardSnapshot(data) {
     }
   }
 
+  const isKnownCount = (known, owned) => known === true &&
+    typeof owned === "number" &&
+    Number.isSafeInteger(owned) &&
+    owned >= 0;
   const reforgeOrbsOwned = data?.reforgeOrbsOwned;
-  const reforgeOrbsKnown = data?.reforgeOrbsKnown === true &&
-    typeof reforgeOrbsOwned === "number" &&
-    Number.isSafeInteger(reforgeOrbsOwned) &&
-    reforgeOrbsOwned >= 0;
+  const reforgeOrbsKnown = isKnownCount(data?.reforgeOrbsKnown, reforgeOrbsOwned);
+  const identifyScrollsKnown = isKnownCount(data?.identifyScrollsKnown, data?.identifyScrollsOwned);
+  const scouringOrbsKnown = isKnownCount(data?.scouringOrbsKnown, data?.scouringOrbsOwned);
 
   const fragmentStreak = data?.runewordFragmentFailStreak;
   const fragmentThreshold = data?.runewordFragmentFailStreakThreshold;
@@ -79,6 +82,10 @@ function normalizeResourceDashboardSnapshot(data) {
     runes,
     reforgeOrbsKnown,
     reforgeOrbsOwned: reforgeOrbsKnown ? reforgeOrbsOwned : 0,
+    identifyScrollsKnown,
+    identifyScrollsOwned: identifyScrollsKnown ? data.identifyScrollsOwned : 0,
+    scouringOrbsKnown,
+    scouringOrbsOwned: scouringOrbsKnown ? data.scouringOrbsOwned : 0,
     pityKnown,
     runewordFragmentFailStreak: pityKnown ? fragmentStreak : 0,
     runewordFragmentFailStreakThreshold: pityKnown ? fragmentThreshold : 0,
@@ -253,8 +260,19 @@ function renderResourceDashboard() {
   resourceRuneTotalMeta.textContent = t("Total owned", "총 보유량");
   resourceRuneKindsLabel.textContent = t("Rune Types", "룬 종류");
   resourceRuneKindsMeta.textContent = t("Types with at least one", "1개 이상 보유");
+  if (resourceCraftingTitle) {
+    resourceCraftingTitle.textContent = t("Crafting Resources", "제작 재료");
+  }
   resourceReforgeOrbsLabel.textContent = t("Reforge Orbs", "재련 오브");
-  resourceReforgeOrbsMeta.textContent = t("Current inventory", "현재 보유량");
+  resourceReforgeOrbsMeta.textContent = t("Reforge · expand", "재련·확장");
+  if (resourceIdentifyScrollsLabel && resourceIdentifyScrollsMeta) {
+    resourceIdentifyScrollsLabel.textContent = t("Identify Scrolls", "확인 스크롤");
+    resourceIdentifyScrollsMeta.textContent = t("First affixes", "최초 부여");
+  }
+  if (resourceScouringOrbsLabel && resourceScouringOrbsMeta) {
+    resourceScouringOrbsLabel.textContent = t("Scouring Orbs", "정제 오브");
+    resourceScouringOrbsMeta.textContent = t("Full reroll", "전체 리롤");
+  }
 
   let totalOwned = 0;
   let ownedKinds = 0;
@@ -274,6 +292,16 @@ function renderResourceDashboard() {
   resourceReforgeOrbs.textContent = state.reforgeOrbsKnown
     ? String(state.reforgeOrbsOwned)
     : "—";
+  if (resourceIdentifyScrolls) {
+    resourceIdentifyScrolls.textContent = state.identifyScrollsKnown
+      ? String(state.identifyScrollsOwned)
+      : "—";
+  }
+  if (resourceScouringOrbs) {
+    resourceScouringOrbs.textContent = state.scouringOrbsKnown
+      ? String(state.scouringOrbsOwned)
+      : "—";
+  }
 
   resourceFragmentPityLabel.textContent = t("Rune Fragment Pity", "룬 조각 피티");
   resourceOrbPityLabel.textContent = t("Reforge Orb Pity", "재련 오브 피티");

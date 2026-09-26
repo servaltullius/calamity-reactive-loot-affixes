@@ -432,17 +432,27 @@
                 <section
                   id="resourceOrbDashboardSection"
                   class="rdSection rdOrbSection"
-                  aria-label="Reforge resources and pity / 재련 자원 및 피티"
+                  aria-label="Crafting resources and pity / 제작 재료 및 피티"
                   aria-describedby="resourceOrbPityHint"
                   aria-busy="true">
                   <div class="rdHeader rdOrbHeader">
-                    <div class="cpSectionTitle">Reforge Resources / 재련 자원</div>
+                    <div id="resourceCraftingTitle" class="cpSectionTitle">Crafting Resources / 제작 재료</div>
                   </div>
-                  <div class="rdMetricGrid" aria-label="Reforge resource summary / 재련 자원 요약">
+                  <div class="rdMetricGrid" aria-label="Crafting resource summary / 제작 재료 요약">
+                    <div class="rdMetric">
+                      <div id="resourceIdentifyScrollsLabel" class="rdMetricLabel">Identify Scrolls / 확인 스크롤</div>
+                      <div id="resourceIdentifyScrolls" class="rdMetricValue">—</div>
+                      <div id="resourceIdentifyScrollsMeta" class="rdMetricMeta">First affixes / 최초 부여</div>
+                    </div>
                     <div class="rdMetric">
                       <div id="resourceReforgeOrbsLabel" class="rdMetricLabel">Reforge Orbs / 재련 오브</div>
                       <div id="resourceReforgeOrbs" class="rdMetricValue">—</div>
-                      <div id="resourceReforgeOrbsMeta" class="rdMetricMeta">Current inventory / 현재 보유량</div>
+                      <div id="resourceReforgeOrbsMeta" class="rdMetricMeta">Reforge · expand / 재련·확장</div>
+                    </div>
+                    <div class="rdMetric">
+                      <div id="resourceScouringOrbsLabel" class="rdMetricLabel">Scouring Orbs / 정제 오브</div>
+                      <div id="resourceScouringOrbs" class="rdMetricValue">—</div>
+                      <div id="resourceScouringOrbsMeta" class="rdMetricMeta">Full reroll / 전체 리롤</div>
                     </div>
                   </div>
                   <div class="rdPityGrid">
@@ -517,7 +527,7 @@
                       Select a base to view its regular slots. / 베이스를 선택하면 일반 슬롯을 표시합니다.
                     </div>
                   </div>
-                  <details id="runewordReforgeDetails" class="rwActionDetails rwReforgeDetails">
+                  <details id="runewordReforgeDetails" class="rwActionDetails rwReforgeDetails" open>
                     <summary id="runewordReforgeSummary" class="rwActionDetailsSummary">
                       Choose an affix to replace / 교체할 어픽스 선택
                     </summary>
@@ -540,10 +550,15 @@
                       >Cost: 2 Reforge Orbs / 비용: 재련 오브 2개</div>
                     </div>
                   </details>
-                  <div id="affixCurrencySummary" class="cpContextMeta" role="status" aria-live="polite"></div>
+                  <!-- Reading order follows the crafting flow: identify, refine, grow, full reroll. -->
                   <div class="rwItemActionGrid affixMutationGrid">
                     <button id="affixIdentifyButton" class="cpButton" type="button" disabled>Identify / 확인</button>
-                    <button id="affixScourButton" class="cpButton cpDangerButton" type="button" disabled>Scour / 정제</button>
+                    <button
+                      id="runewordReforgeButton"
+                      class="cpButton"
+                      disabled
+                      aria-describedby="runewordReforgeLockHint runewordReforgeCostSummary"
+                    >Reforge Selected (2 Orbs) / 선택 재련 (오브 2개)</button>
                     <button
                       id="affixExpandButton"
                       class="cpButton affixExpandButton"
@@ -551,17 +566,12 @@
                       aria-describedby="affixSlotProgressMeta"
                       disabled
                     >Select Base / 베이스 선택 필요</button>
-                    <button
-                      id="runewordReforgeButton"
-                      class="cpButton"
-                      disabled
-                      aria-describedby="runewordReforgeLockHint runewordReforgeCostSummary"
-                    >Reforge Selected (2 Orbs) / 선택 재련 (오브 2개)</button>
+                    <button id="affixScourButton" class="cpButton cpDangerButton" type="button" disabled>Scour / 정제</button>
                   </div>
                 </section>
 
                 <details class="rwActionDetails affixInspectionDetails">
-                  <summary class="rwActionDetailsSummary">Inspect Highlighted Item / 가리킨 아이템 확인</summary>
+                  <summary id="affixInspectionSummary" class="rwActionDetailsSummary">Inspect Highlighted Item / 가리킨 아이템 확인</summary>
                   <div class="rwActionDetailsBody affixInspectionBody">
                     <div class="cpAffixOverview">
                       <div class="cpContextLabel" id="affixSelectedItemLabel">Selected Item / 선택 아이템</div>
@@ -674,7 +684,7 @@
               <div class="cpGrid cpDangerBody">
                 <button id="debugGrantNextButton" class="cpButton" data-cmd="runeword.grant.next">+1 Next Fragment / 다음 조각 +1</button>
                 <button id="debugGrantSetButton" class="cpButton" data-cmd="runeword.grant.set">+1 Recipe Set / 레시피 세트 +1</button>
-                <button id="debugGrantStarterOrbsButton" class="cpButton" data-cmd="runeword.grant.orb3">Starter +3 Reforge Orbs / 스타트 재련 오브 +3</button>
+                <button id="debugGrantStarterOrbsButton" class="cpButton" data-cmd="runeword.grant.orb3">Starter Crafting Kit / 스타터 제작 재료</button>
                 <button id="debugSpawnTestButton" class="cpButton" data-cmd="spawn.test">Spawn Test Item / 테스트 아이템 지급</button>
                 <button id="debugGrantTrapAffixButton" class="cpButton" data-cmd="spawn.trapaffix">Grant Trap Affix to Selected Base / 선택 베이스에 함정 어픽스</button>
                 <button id="debugTrapProbeButton" class="cpButton" data-cmd="spawn.trapworldprobe">Production Trap World-Ref Probe / 실사용 함정 월드 참조 프로브</button>

@@ -36,6 +36,8 @@
 		static constexpr std::string_view kMcmSetProcChanceMultEvent = RuntimePolicy::kMcmSetProcChanceMultEvent;
 		static constexpr std::string_view kMcmSetRunewordFragmentChanceEvent = RuntimePolicy::kMcmSetRunewordFragmentChanceEvent;
 		static constexpr std::string_view kMcmSetReforgeOrbChanceEvent = RuntimePolicy::kMcmSetReforgeOrbChanceEvent;
+		static constexpr std::string_view kMcmSetIdentifyScrollChanceEvent = RuntimePolicy::kMcmSetIdentifyScrollChanceEvent;
+		static constexpr std::string_view kMcmSetScouringOrbChanceEvent = RuntimePolicy::kMcmSetScouringOrbChanceEvent;
 		static constexpr std::string_view kMcmSetDotSafetyAutoDisableEvent = RuntimePolicy::kMcmSetDotSafetyAutoDisableEvent;
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = RuntimePolicy::kMcmSetAllowNonHostileFirstHitProcEvent;
 		static constexpr std::string_view kMcmSpawnTestItemEvent = EventNames::kMcmSpawnTestItem;

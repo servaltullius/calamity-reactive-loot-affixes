@@ -12,8 +12,12 @@ string Property PluginFileName = "CalamityAffixes.esp" AutoReadOnly Hidden
 string Property LeaderTokenSettingName = "iMcmLeaderToken:General" AutoReadOnly Hidden
 string Property RunewordFragmentChanceSettingName = "fRunewordFragmentChancePercent:General" AutoReadOnly Hidden
 string Property ReforgeOrbChanceSettingName = "fReforgeOrbChancePercent:General" AutoReadOnly Hidden
+string Property IdentifyScrollChanceSettingName = "fIdentifyScrollChancePercent:General" AutoReadOnly Hidden
+string Property ScouringOrbChanceSettingName = "fScouringOrbChancePercent:General" AutoReadOnly Hidden
 float Property RunewordFragmentChanceDefault = 8.0 AutoReadOnly Hidden
 float Property ReforgeOrbChanceDefault = 12.0 AutoReadOnly Hidden
+float Property IdentifyScrollChanceDefault = 20.0 AutoReadOnly Hidden
+float Property ScouringOrbChanceDefault = 2.0 AutoReadOnly Hidden
 
 bool _didLeaderElection = false
 bool _isSessionLeader = false
@@ -109,7 +113,7 @@ Event OnSettingChange(string a_ID)
 		return
 	endif
 
-	if a_ID == RunewordFragmentChanceSettingName || a_ID == ReforgeOrbChanceSettingName
+	if a_ID == RunewordFragmentChanceSettingName || a_ID == ReforgeOrbChanceSettingName || a_ID == IdentifyScrollChanceSettingName || a_ID == ScouringOrbChanceSettingName
 		SyncRuntimeDropChanceSettings()
 	endif
 EndEvent
@@ -126,6 +130,18 @@ Function SyncRuntimeDropChanceSettings()
 		reforgeChance = ReforgeOrbChanceDefault
 	endif
 	SetReforgeOrbChancePercent(reforgeChance)
+
+	float identifyChance = GetModSettingFloat(IdentifyScrollChanceSettingName)
+	if identifyChance < 0.0
+		identifyChance = IdentifyScrollChanceDefault
+	endif
+	SetIdentifyScrollChancePercent(identifyChance)
+
+	float scouringChance = GetModSettingFloat(ScouringOrbChanceSettingName)
+	if scouringChance < 0.0
+		scouringChance = ScouringOrbChanceDefault
+	endif
+	SetScouringOrbChancePercent(scouringChance)
 EndFunction
 
 Function SetEnabled(bool a_enabled)
@@ -150,6 +166,14 @@ EndFunction
 
 Function SetReforgeOrbChancePercent(float a_percent)
 	CalamityAffixes_ModeControl.SetReforgeOrbChancePercent(a_percent)
+EndFunction
+
+Function SetIdentifyScrollChancePercent(float a_percent)
+	CalamityAffixes_ModeControl.SetIdentifyScrollChancePercent(a_percent)
+EndFunction
+
+Function SetScouringOrbChancePercent(float a_percent)
+	CalamityAffixes_ModeControl.SetScouringOrbChancePercent(a_percent)
 EndFunction
 
 Function SetLootChancePercent(float a_percent)

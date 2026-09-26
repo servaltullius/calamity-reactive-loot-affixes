@@ -169,6 +169,9 @@ function initUiText() {
   if (affixSelectedItemLabel) {
     affixSelectedItemLabel.textContent = t("Inspected Inventory Item", "확인 중인 인벤토리 아이템");
   }
+  if (affixInspectionSummary) {
+    affixInspectionSummary.textContent = t("Inspect Highlighted Item", "가리킨 아이템 확인");
+  }
   if (affixSelectedItemMeta) {
     affixSelectedItemMeta.textContent = t(
       "Highlight an inventory item to inspect it here. Item actions still use the working base above.",
@@ -299,8 +302,8 @@ function initUiText() {
   }
   if (debugGrantStarterOrbsButton) {
     debugGrantStarterOrbsButton.textContent = t(
-      "Starter +3 Reforge Orbs",
-      "스타트 재련 오브 +3"
+      "Starter Crafting Kit",
+      "스타터 제작 재료"
     );
   }
   if (debugGrantTrapAffixButton) {

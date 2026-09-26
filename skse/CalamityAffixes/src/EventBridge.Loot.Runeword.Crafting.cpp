@@ -103,6 +103,12 @@ namespace CalamityAffixes
 
 		std::uint32_t EventBridge::GrantReforgeOrbs(std::uint32_t a_amount)
 		{
+			return GrantCraftingCurrency("CAFF_Misc_ReforgeOrb", "Reforge Orbs", a_amount);
+		}
+
+		std::uint32_t EventBridge::GrantCraftingCurrency(
+			std::string_view a_editorId, std::string_view a_label, std::uint32_t a_amount)
+		{
 			if (!_configLoaded || a_amount == 0u) {
 				return 0u;
 			}
@@ -112,18 +118,20 @@ namespace CalamityAffixes
 				return 0u;
 			}
 
-			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
-			if (!orb) {
-				SKSE::log::error("CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
+			const std::string editorId(a_editorId);
+			auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(editorId);
+			if (!item) {
+				SKSE::log::error("CalamityAffixes: crafting currency item missing (editorId={}).", editorId);
 				return 0u;
 			}
 
 			const auto maxGive = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
 			const auto give = (a_amount > maxGive) ? maxGive : a_amount;
-			player->AddObjectToContainer(orb, nullptr, static_cast<std::int32_t>(give), nullptr);
+			player->AddObjectToContainer(item, nullptr, static_cast<std::int32_t>(give), nullptr);
 
-			const auto owned = std::max(0, player->GetItemCount(orb));
-			std::string note = "Reforge Orbs +";
+			const auto owned = std::max(0, player->GetItemCount(item));
+			std::string note(a_label);
+			note.append(" +");
 			note.append(std::to_string(give));
 			note.append(" (");
 			note.append(std::to_string(owned));

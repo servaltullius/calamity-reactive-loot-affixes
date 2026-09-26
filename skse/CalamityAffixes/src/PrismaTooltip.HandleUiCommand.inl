@@ -342,7 +342,7 @@
 				}
 				if (a_command == "runeword.grant.orb3") {
 					a_outSent = EmitModEvent(EventNames::kRunewordGrantStarterOrbs, {}, 3.0f);
-					a_outFeedback = "Debug -> +3 reforge orbs";
+					a_outFeedback = "Debug -> starter crafting kit";
 					return true;
 				}
 				if (a_command == "spawn.test") {

@@ -87,6 +87,10 @@ namespace CalamityAffixes
 				runtime.value("runewordFragmentChancePercent", static_cast<double>(_loot.runewordFragmentChancePercent));
 			const double reforgeOrbChancePercent =
 				runtime.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent));
+			const double identifyScrollChancePercent =
+				runtime.value("identifyScrollChancePercent", static_cast<double>(_loot.identifyScrollChancePercent));
+			const double scouringOrbChancePercent =
+				runtime.value("scouringOrbChancePercent", static_cast<double>(_loot.scouringOrbChancePercent));
 			const bool allowNonHostileFirstHitProc = runtime.value(
 				"allowNonHostileFirstHitProc",
 				_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed));
@@ -102,6 +106,8 @@ namespace CalamityAffixes
 			_runtimeSettings.procChanceMult = std::clamp(static_cast<float>(procChanceMultiplier), 0.0f, 3.0f);
 			_loot.runewordFragmentChancePercent = std::clamp(static_cast<float>(runewordFragmentChancePercent), 0.0f, 100.0f);
 			_loot.reforgeOrbChancePercent = std::clamp(static_cast<float>(reforgeOrbChancePercent), 0.0f, 100.0f);
+			_loot.identifyScrollChancePercent = std::clamp(static_cast<float>(identifyScrollChancePercent), 0.0f, 100.0f);
+			_loot.scouringOrbChancePercent = std::clamp(static_cast<float>(scouringOrbChancePercent), 0.0f, 100.0f);
 			_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.store(allowNonHostileFirstHitProc, std::memory_order_relaxed);
 
 			if (hadLegacyPlayerHookOverride) {
@@ -123,12 +129,14 @@ namespace CalamityAffixes
 		spdlog::flush_on(spdlog::level::warn);
 
 		SKSE::log::info(
-			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, broadRuntimeCurrencyDropsEnabled={}, corpseDeathCurrencyDropsEnabled={}, debugHud={}, debugVerbose={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
+			"CalamityAffixes: runtime overrides loaded from {} (enabled={}, procMult={}, runeFrag={}%, reforgeOrb={}%, identifyScroll={}%, scouringOrb={}%, broadRuntimeCurrencyDropsEnabled={}, corpseDeathCurrencyDropsEnabled={}, debugHud={}, debugVerbose={}, debugCombat={}, disableCombatEvidenceLease={}, disableHealthDamageRouting={}, allowPlayerHealthDamageHook={}, disablePassiveSuffixSpells={}, disableTrapSystemTick={}, disableTrapCasts={}, forceStopAlarmPulse={}).",
 			std::string(kUserSettingsRelativePath),
 			_runtimeSettings.enabled.load(std::memory_order_relaxed),
 			_runtimeSettings.procChanceMult,
 			_loot.runewordFragmentChancePercent,
 			_loot.reforgeOrbChancePercent,
+			_loot.identifyScrollChancePercent,
+			_loot.scouringOrbChancePercent,
 			_loot.runtimeCurrencyDropsEnabled,
 			_loot.runtimeCorpseDeathCurrencyDropsEnabled,
 			_loot.debugHudNotifications,
@@ -156,6 +164,8 @@ namespace CalamityAffixes
 		runtime["procChanceMultiplier"] = _runtimeSettings.procChanceMult;
 		runtime["runewordFragmentChancePercent"] = _loot.runewordFragmentChancePercent;
 		runtime["reforgeOrbChancePercent"] = _loot.reforgeOrbChancePercent;
+		runtime["identifyScrollChancePercent"] = _loot.identifyScrollChancePercent;
+		runtime["scouringOrbChancePercent"] = _loot.scouringOrbChancePercent;
 		runtime["dotSafetyAutoDisable"] = _loot.dotTagSafetyAutoDisable;
 		runtime["allowNonHostileFirstHitProc"] =
 			_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed);

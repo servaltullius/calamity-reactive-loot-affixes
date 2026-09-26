@@ -45,6 +45,14 @@ Function SetReforgeOrbChancePercent(float a_percent) global
 	Emit("CalamityAffixes_MCM_SetReforgeOrbChance", "", a_percent)
 EndFunction
 
+Function SetIdentifyScrollChancePercent(float a_percent) global
+	Emit("CalamityAffixes_MCM_SetIdentifyScrollChance", "", a_percent)
+EndFunction
+
+Function SetScouringOrbChancePercent(float a_percent) global
+	Emit("CalamityAffixes_MCM_SetScouringOrbChance", "", a_percent)
+EndFunction
+
 Function SetLootChancePercent(float a_percent) global
 	; Legacy no-op (pickup affix auto-assignment removed by design).
 	; Kept for backward compatibility with older MCM configs that may still call this function.
