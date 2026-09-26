@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Release](https://img.shields.io/badge/Release-v1.7.5-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5/CalamityAffixes_MO2_v1.7.5_2026-09-22.zip)
+[![Release](https://img.shields.io/badge/Release-v2.0.0-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.0.0)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.0/CalamityAffixes_MO2_v2.0.0_2026-09-26.zip)
 
 ## 어떤 모드인가요?
 
@@ -15,10 +15,10 @@
 
 ## 다운로드 (플레이어)
 
-> **현재 정식 릴리스:** [v1.7.5](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v1.7.5)
+> **현재 정식 릴리스:** [v2.0.0](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.0.0)
 
-- MO2 ZIP: [CalamityAffixes_MO2_v1.7.5_2026-09-22.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5/CalamityAffixes_MO2_v1.7.5_2026-09-22.zip)
-- SHA-256: [CalamityAffixes_MO2_v1.7.5_2026-09-22.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v1.7.5/CalamityAffixes_MO2_v1.7.5_2026-09-22.zip.sha256)
+- MO2 ZIP: [CalamityAffixes_MO2_v2.0.0_2026-09-26.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.0/CalamityAffixes_MO2_v2.0.0_2026-09-26.zip)
+- SHA-256: [CalamityAffixes_MO2_v2.0.0_2026-09-26.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.0/CalamityAffixes_MO2_v2.0.0_2026-09-26.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 
@@ -28,22 +28,21 @@
 
 - 일반 접두 73개, 일반 접미 66개(22계열), 룬워드 94개와 룬 33종을 데이터 기반으로 제공합니다.
 - 적중·피격·처치·저체력 조건의 주문, 전환, 함정, 소환, 시체 폭발 등 다양한 전투 효과를 지원합니다.
-- 장비는 owner FormID + UID 단위로 추적하며, 획득 시 자동 롤 대신 플레이어가 원하는 베이스를 선택해 재련합니다.
-- 룬 조각·재련 오브는 적격 적대 대상의 시체에서만 획득하며, 일반 확률·피티와 고유·보스·드래곤 확정 보상을 함께 지원합니다.
+- 장비는 owner FormID + UID 단위로 추적하며, 획득 시 자동 롤 대신 플레이어가 원하는 베이스를 골라 확인 스크롤로 감정하고 재련·정제로 다듬습니다.
+- 룬 조각·재련 오브·확인 스크롤·정제 오브는 적격 적대 대상의 시체에서만 획득하며, 일반 확률·피티와 고유·보스·드래곤 확정 보상을 함께 지원합니다.
 - Prisma UI에서 선택 장비 툴팁, 어픽스 슬롯 진행, 룬워드 검색·제작, 보유 통화와 피티 현황을 한국어·영어로 확인할 수 있습니다.
 
-## v1.7.5 핵심 변경
+## v2.0.0 핵심 변경
 
-- Calamity 자동 소환수의 플레이어·아군 피해와 유해 마법을 차단하고, 보호 정보를 저장·복원합니다. 2026-09-22 사용자 테스트에서 보호가 정상으로 보인다는 확인을 받았습니다.
-- 전투 중 Calamity 상태 락과 Skyrim 이벤트 락이 서로를 기다리던 교착 경로를 수정했습니다. 테스트 패키지 사용 후 프리징 개선이 보고됐습니다.
-- 치명타·강공 전용 효과에 일반 공격 발동을 추가하고, 중복 표준 발동 어픽스와 단계형 접미가 강화되도록 조정했습니다.
-- 근접 치명타·강공격은 치명 시전 주문을 최대 2개까지 발동하며, 기존 ICD와 재진입 방지는 유지합니다.
-- Calamity 공격 효과와 추적 가능한 소환 폭발의 시전자·아군·중립 피해를 차단했습니다.
-- 자세한 확률·호환성·검증 범위는 [정식 릴리스 노트](docs/releases/2026-09-22-github-release-body-v1.7.5.md)를 확인하세요.
+- **어픽스 제작을 세 재화로 나눴습니다.** 확인 스크롤로 처음 부여하고(1~3개), 재련 오브로 원하는 어픽스 하나만 바꾸고, 희귀한 정제 오브로 전부를 한 번에 다시 굴립니다. 아래 표를 참고하세요.
+- 새 재화 두 종은 적격 적대 시체에서 떨어지며(확인 20%, 정제 2%), MCM에서 확률을 조정할 수 있습니다.
+- 패널에 제작 재료 대시보드를 추가하고 제작 버튼을 흐름 순서로 정리했습니다. 넓은 레이아웃의 룬워드 탭에서 레시피 목록이 거의 보이지 않던 문제, 룬 그리드 칸이 잘리던 문제, 작은 패널에서 베이스 목록이 넘치던 문제도 고쳤습니다.
+- 기존 세이브와 호환되며 기존 장비의 어픽스·룬워드는 그대로 유지됩니다. 새 재화가 ESP에 추가되므로 **전체 ZIP으로 설치**하세요.
+- 자세한 규칙과 업데이트 방법은 [정식 릴리스 노트](docs/releases/2026-09-26-github-release-body-v2.0.0.md)를 확인하세요.
 
-## 개발 중: 확인·선택 재련·정제
+## 어픽스 제작: 확인·선택 재련·정제
 
-이 변경은 아직 정식 릴리스에 포함되지 않은 테스트 빌드입니다. 일반 어픽스는 `접두 1 + 접미 2`, 룬워드는 별도 1개 구조를 유지합니다.
+일반 어픽스는 `접두 1 + 접미 2`, 룬워드는 별도 1개 구조입니다.
 
 | 작업 | 결과 | 비용 |
 | --- | --- | ---: |
@@ -58,7 +57,7 @@
 - 구버전 세이브의 비정상 어픽스 구성(알 수 없는 어픽스, 접두/접미 배치 오류)은 선택 재련·확장이 막히며, 정제로 정상 구성으로 되돌릴 수 있습니다.
 - 적격 적대 시체에서 확인 스크롤은 기본 20%, 정제 오브는 기본 2%로 독립 판정합니다(MCM에서 조정 가능). 기존 룬 조각·재련 오브 보상은 유지됩니다. 새 재화에는 별도 보스 확정 보상이나 천장이 없습니다.
 - 이전 장비의 어픽스와 슬롯을 자동 변경하지 않습니다. 새 재화는 기존 ESP 레코드 뒤에 추가하며 DLL·ESP·패널을 함께 업데이트해야 합니다.
-- 상세 규칙과 인게임 확인 항목: [제작 시스템 테스트 안내](docs/testing/2026-09-22-affix-crafting.md).
+- 상세 규칙과 검증 기록: [제작 시스템 안내](docs/testing/2026-09-22-affix-crafting.md).
 
 ## 필수/권장 모드
 

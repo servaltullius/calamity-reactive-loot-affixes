@@ -8,18 +8,21 @@ Player-centric ARPG-style instance affix mod for Skyrim SE/AE
 
 ### 모드 소개
 Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG 스타일 어픽스 모드입니다.
-아이템 인스턴스(ExtraUniqueID) 단위로 상태를 추적하며, 현재 빌드 기본 정책은 **재련(Reforge) 중심**입니다.
+아이템 인스턴스(ExtraUniqueID) 단위로 상태를 추적하며, 장비는 **확인 스크롤 → 선택 재련 → 정제**의 제작 흐름으로 성장시킵니다.
 
 ### 현재 빌드 핵심 정책
 - 아이템 획득/제작 시 **자동 어픽스 부여 없음**
-- **개발 중 제작 변경(정식 1.7.5 이후)**: 확인 스크롤은 최초 부여, 재련 오브는 일반 어픽스 하나 교체, 정제 오브는 슬롯 수를 유지한 채 일반 어픽스 전부를 다시 굴리는 데 사용합니다. 룬워드는 유지됩니다.
+- **확인 스크롤**: 일반 어픽스가 없는 장비에 1~3개 부여(60%/30%/10%)
+- **재련 오브**: 고른 어픽스 하나만 교체(2개, 횟수 제한 없음), 슬롯 확장(1→2: 2개, 2→3: 4개)
+- **정제 오브**: 슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴림(희귀)
+- 모든 제작 작업은 완성 룬워드와 그 성장 상태를 보존
 - 슬롯 모델: **룬워드 1 + 일반 어픽스 최대 3**
 - 이름 마커(★ 계열) + Prisma 툴팁으로 인스턴스 상태 확인
 
 ### 룬워드
 - Diablo 2 스타일 **94개 레시피**
 - 룬워드 조각 수집 -> 레시피 완성 -> 장비 적용
-- 완성 룬워드 장비 재련 시 룬워드 보존, 일반 어픽스만 재롤
+- 확인·선택 재련·정제 모두 완성 룬워드를 보존하고 일반 어픽스만 바꿈
 - 룬워드 재변환: 기존 룬워드를 새 룬워드로 교체 가능
 - 효과 구성: **94개 전부 JSON 개별 정의** (스카이림 마법 아키타입 + 다양한 actorValue 활용)
 - Adaptive 계열은 기본 자동 선택을 유지하고, `modeCycle`이 있는 효과는 **수동 오버라이드 모드**를 지원
@@ -31,6 +34,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - 피해자가 팔로워/동료, 소환·지휘 액터, 아동, player-owned/비적대 대상이면 제외합니다. 환경 오브젝트와 player-owned가 아닌 독립 NPC/팔로워의 처치도 제외합니다.
 - **일반 상자/컨테이너 활성화, 픽업, 월드 생성, 새 SPID 통화 분배는 모두 없습니다.**
 - 일반 적 기본 확률: 룬워드 조각 `8%`, 재련 오브 `12%` (MCM 변경은 다음 적격 일반 적 사망부터 반영)
+- 확인 스크롤 `20%`, 정제 오브 `2%`는 별도 독립 판정(MCM 조정 가능, 보스 확정·피티 없음)
 - `Unique` 고유·네임드 적: 룬워드 조각 `40%` / 재련 오브 `60%` 중 1개 확정
 - `LocRefTypeBoss` 보스 또는 `ActorTypeDragon` 드래곤: 룬워드 조각 1개 + 재련 오브 1개 확정 (`Boss/Dragon`이 `Unique`보다 우선)
 - 고유·보스 확정 보상은 일반 확률 판정과 피티를 소비하거나 초기화하지 않음
@@ -88,18 +92,21 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 ### Overview
 Calamity - Reactive Loot & Affixes is a player-centric ARPG-style affix mod for Skyrim SE/AE.
-It tracks item instances via ExtraUniqueID, and the current build is **Reforge-centric**.
+It tracks item instances via ExtraUniqueID, and gear grows through a **Scroll of Identification → selected reforge → scouring** crafting flow.
 
 ### Current Core Policy
 - **No automatic affix assignment** on loot/craft
-- Use **Reforge Orb** to grant/reroll affixes on selected gear
+- **Scroll of Identification**: grants 1-3 regular affixes to gear without any (60%/30%/10%)
+- **Reforge Orb**: replaces one chosen affix (2 orbs, no attempt limit) and expands slots (1→2: 2 orbs, 2→3: 4 orbs)
+- **Scouring Orb**: rerolls every regular affix at once while keeping the slot count (rare)
+- Every crafting action preserves a completed runeword and its growth state
 - Slot model: **1 runeword + up to 3 regular affixes**
 - Star markers (★ series) + Prisma tooltip for instance readability
 
 ### Runewords
 - **94 Diablo 2-style recipes**
 - Collect runeword fragments -> complete recipe -> apply to equipment
-- Reforging completed runeword gear preserves the runeword; only regular affixes are rerolled
+- Identify, selected reforge, and scouring all preserve a completed runeword; only regular affixes change
 - Runeword re-transmutation: an existing runeword can be replaced with a new one
 - Effect composition: **all 94 runewords individually defined in JSON** (Skyrim magic archetypes + diverse actorValues)
 - Adaptive effects keep auto element selection by default, and `modeCycle` entries support **manual override mode**
@@ -111,6 +118,7 @@ It tracks item instances via ExtraUniqueID, and the current build is **Reforge-c
 - Followers/teammates, summoned or commanded victims, children, player-owned/non-hostile victims, environmental-object kills, and kills by independent non-player-owned NPCs/followers are excluded.
 - **No generic container activation, pickup roll, world spawn, or new SPID currency distribution.**
 - Normal-enemy rates: runeword fragment `8%`, reforge orb `12%` (MCM changes apply to the next eligible normal-enemy death)
+- Scroll of Identification `20%` and Scouring Orb `2%` roll independently (MCM-adjustable; no boss guarantee or pity)
 - Unique/named actors: one guaranteed currency reward, selected as `40%` fragment / `60%` reforge orb
 - `LocRefTypeBoss` actors and `ActorTypeDragon` dragons: one guaranteed fragment plus one guaranteed reforge orb (`Boss/Dragon` overrides `Unique`)
 - Unique/boss guarantees neither run additional normal rolls nor advance/reset normal pity
