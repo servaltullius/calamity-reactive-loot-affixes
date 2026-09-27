@@ -17,6 +17,8 @@
 ## 다운로드 (플레이어)
 
 > **현재 정식 릴리스:** [v2.1.3](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.1.3)
+>
+> **공개 테스트 빌드:** [v2.1.4-rc1](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.1.4-rc1) — 게임 안 한국어 표기를 "칼라미티"로 통일했습니다. 정식 버전은 v2.1.3입니다.
 
 - 넥서스: [Calamity 2 - Reactive Loot and Affixes](https://www.nexusmods.com/skyrimspecialedition/mods/193193) (2.0부터의 새 페이지. 옛 페이지 [mods/172116](https://www.nexusmods.com/skyrimspecialedition/mods/172116)은 1.2.21에서 멈춘 구버전입니다)
 - MO2 ZIP: [CalamityAffixes_MO2_v2.1.3_2026-09-27.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.3/CalamityAffixes_MO2_v2.1.3_2026-09-27.zip)
