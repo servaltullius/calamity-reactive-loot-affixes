@@ -266,6 +266,12 @@ function setRunewordPanelState(raw) {
     identifyScrollsOwned: data.identifyScrollsOwned,
     scouringOrbsKnown: data.scouringOrbsKnown === true && Number.isSafeInteger(data.scouringOrbsOwned) && data.scouringOrbsOwned >= 0,
     scouringOrbsOwned: data.scouringOrbsOwned,
+    exchangeReforgeScrollCost: Number.isSafeInteger(data.exchangeReforgeScrollCost) && data.exchangeReforgeScrollCost > 0
+      ? data.exchangeReforgeScrollCost
+      : 0,
+    exchangeScourScrollCost: Number.isSafeInteger(data.exchangeScourScrollCost) && data.exchangeScourScrollCost > 0
+      ? data.exchangeScourScrollCost
+      : 0,
     reforgeOrbsKnown,
     reforgeOrbsOwned: Number.isFinite(ownedRaw) && ownedRaw >= 0
       ? Math.trunc(ownedRaw)

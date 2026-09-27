@@ -292,6 +292,8 @@ namespace CalamityAffixes
 		panelState.standardReforgeCost = detail::kSelectedReforgeCost;
 		panelState.lockedReforgeCost = detail::kSelectedReforgeCost;
 		panelState.debugTools = _loot.debugHudNotifications || _loot.debugLog;
+		panelState.exchangeReforgeScrollCost = detail::kExchangeScrollsPerReforgeOrb;
+		panelState.exchangeScourScrollCost = detail::kExchangeScrollsPerScouringOrb;
 		PopulateEquippedBuildSummary(panelState);
 		if (!_configLoaded) {
 			return panelState;

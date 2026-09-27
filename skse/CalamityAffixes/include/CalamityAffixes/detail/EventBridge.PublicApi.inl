@@ -67,6 +67,7 @@
         [[nodiscard]] OperationResult CraftSelectedAffixes(
             AffixCraftAction a_action, std::uint64_t a_expectedInstanceKey,
             std::uint64_t a_selectedToken = 0u);
+        [[nodiscard]] OperationResult ExchangeCraftingCurrency(CurrencyExchange a_exchange);
 		[[nodiscard]] OperationResult ExpandSelectedRunewordBaseAffixes(
 			std::uint64_t a_expectedInstanceKey,
 			std::uint8_t a_expectedRegularAffixCount);

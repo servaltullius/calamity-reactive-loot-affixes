@@ -358,6 +358,26 @@
   margin-top: auto;
 }
 
+.rdExchange {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(5px * var(--panel-ui-scale));
+}
+
+.rdExchangeLabel {
+  grid-column: 1 / -1;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: calc(10px * var(--panel-ui-scale));
+}
+
+.rdExchangeButton {
+  min-width: 0;
+  padding: calc(5px * var(--panel-ui-scale)) calc(7px * var(--panel-ui-scale));
+  font-size: calc(11px * var(--panel-ui-scale));
+  line-height: 1.25;
+  white-space: normal;
+}
+
 .rdOrbHeader .cpSectionTitle {
   margin-bottom: 0;
   font-size: calc(12px * var(--panel-ui-scale));

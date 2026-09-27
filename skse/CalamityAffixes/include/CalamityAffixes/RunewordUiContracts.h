@@ -125,6 +125,9 @@ namespace CalamityAffixes
         std::uint32_t identifyScrollsOwned{ 0 };
         bool scouringOrbsKnown{ false };
         std::uint32_t scouringOrbsOwned{ 0 };
+        // Identify Scrolls spent per exchanged orb; 0 means exchange is unavailable.
+        std::uint32_t exchangeReforgeScrollCost{ 0 };
+        std::uint32_t exchangeScourScrollCost{ 0 };
 		bool pityKnown{ false };
 		// A streak equal to its threshold means the next eligible ordinary
 		// currency evaluation is guaranteed. It is not a kill/drop countdown.

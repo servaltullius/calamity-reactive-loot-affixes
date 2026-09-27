@@ -231,6 +231,63 @@ namespace CalamityAffixes
 		return OperationResult{ true, operation + name + " (" + runewordNote + "currency remaining: " + std::to_string(ownedAfter) + ")" };
 	}
 
+	EventBridge::OperationResult EventBridge::ExchangeCraftingCurrency(CurrencyExchange a_exchange)
+	{
+		const std::scoped_lock lock(_stateMutex);
+		auto fail = [](std::string a_message) { return OperationResult{ false, std::move(a_message) }; };
+		if (!_configLoaded || _runewordState.transmuteInProgress || _runewordState.affixExpansionInProgress) {
+			return fail("Exchange unavailable: wait for other actions to finish.");
+		}
+		// Same item-mutation guard as crafting, so a trade cannot interleave with a
+		// reforge or transmute that is spending the same currency.
+		struct InFlight {
+			bool& flag;
+			explicit InFlight(bool& a_flag) : flag(a_flag) { flag = true; }
+			~InFlight() { flag = false; }
+		} inFlight(_runewordState.affixExpansionInProgress);
+
+		const auto recipe = detail::ResolveCurrencyExchange(a_exchange);
+		const std::string targetName = a_exchange == CurrencyExchange::kScouringOrb ? "Scouring Orb" : "Reforge Orb";
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		auto* source = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(std::string(recipe.sourceEditorId));
+		auto* target = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(std::string(recipe.targetEditorId));
+		if (!player || !source || !target || recipe.sourceCost == 0u) {
+			return fail("Exchange currency unavailable. Install the matching ESP and DLL.");
+		}
+		const auto sourceBefore = static_cast<std::uint32_t>(std::max(0, player->GetItemCount(source)));
+		const auto targetBefore = static_cast<std::uint32_t>(std::max(0, player->GetItemCount(target)));
+		if (sourceBefore < recipe.sourceCost) {
+			return fail("Not enough Identify Scrolls: " + std::to_string(recipe.sourceCost) + " needed.");
+		}
+
+		player->RemoveItem(source, static_cast<std::int32_t>(recipe.sourceCost), RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+		const auto sourceAfter = static_cast<std::uint32_t>(std::max(0, player->GetItemCount(source)));
+		if (!detail::DidConsumeExactInventoryCount(sourceBefore, sourceAfter, recipe.sourceCost)) {
+			const auto observed = detail::ResolveObservedInventoryConsumption(sourceBefore, sourceAfter);
+			if (observed > 0u) player->AddObjectToContainer(source, nullptr, static_cast<std::int32_t>(observed), nullptr);
+			const bool restored = std::max(0, player->GetItemCount(source)) == static_cast<std::int32_t>(sourceBefore);
+			return fail(restored ? "Exchange failed; inventory restored." : "Exchange failed; check inventory.");
+		}
+
+		player->AddObjectToContainer(target, nullptr, 1, nullptr);
+		const auto targetAfter = static_cast<std::uint32_t>(std::max(0, player->GetItemCount(target)));
+		if (!detail::DidRestoreExactInventoryCount(targetBefore, targetAfter, 1u)) {
+			// The orb did not arrive exactly once: undo any partial grant and return
+			// the scrolls, so a failed trade never costs currency.
+			if (targetAfter > targetBefore) {
+				player->RemoveItem(target, static_cast<std::int32_t>(targetAfter - targetBefore), RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+			}
+			player->AddObjectToContainer(source, nullptr, static_cast<std::int32_t>(recipe.sourceCost), nullptr);
+			const bool restored = std::max(0, player->GetItemCount(source)) == static_cast<std::int32_t>(sourceBefore) &&
+				std::max(0, player->GetItemCount(target)) == static_cast<std::int32_t>(targetBefore);
+			return fail(restored ? "Exchange failed; inventory restored." : "Exchange failed; check inventory.");
+		}
+
+		return OperationResult{ true, "Exchanged " + std::to_string(recipe.sourceCost) + " Identify Scrolls for 1 " +
+			targetName + " (" + targetName + "s: " + std::to_string(targetAfter) + ", Identify Scrolls: " +
+			std::to_string(sourceAfter) + ")" };
+	}
+
 	EventBridge::OperationResult EventBridge::ResetSelectedRunewordBaseCalamityState()
 	{
 		const std::scoped_lock lock(_stateMutex);

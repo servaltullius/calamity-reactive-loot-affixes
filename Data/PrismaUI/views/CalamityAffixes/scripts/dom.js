@@ -204,3 +204,7 @@ const tooltipRunewordHint = document.getElementById("tooltipRunewordHint");
 const affixIdentifyButton = document.getElementById("affixIdentifyButton");
 const affixScourButton = document.getElementById("affixScourButton");
 const affixInspectionSummary = document.getElementById("affixInspectionSummary");
+const resourceExchangeGroup = document.getElementById("resourceExchangeGroup");
+const resourceExchangeLabel = document.getElementById("resourceExchangeLabel");
+const exchangeReforgeButton = document.getElementById("exchangeReforgeButton");
+const exchangeScourButton = document.getElementById("exchangeScourButton");

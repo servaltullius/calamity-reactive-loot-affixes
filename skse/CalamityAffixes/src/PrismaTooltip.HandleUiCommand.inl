@@ -258,6 +258,20 @@
                     return true;
                 }
 
+                if (a_command == "currency.exchange:reforge" || a_command == "currency.exchange:scour") {
+                    auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+                    if (!bridge) {
+                        PushUiFeedback("Currency system unavailable.");
+                        return true;
+                    }
+                    const auto outcome = bridge->ExchangeCraftingCurrency(
+                        a_command == "currency.exchange:scour" ? CalamityAffixes::CurrencyExchange::kScouringOrb :
+                                                                 CalamityAffixes::CurrencyExchange::kReforgeOrb);
+                    RefreshRunewordPanelBindings(*bridge, false);
+                    PushUiFeedback(outcome.message);
+                    return true;
+                }
+
 				if (a_command == "runeword.reset") {
 					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 					if (!bridge) {

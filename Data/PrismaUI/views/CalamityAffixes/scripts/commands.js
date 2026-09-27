@@ -263,11 +263,14 @@ function dispatchPanelCommand(button) {
     return true;
   }
 
-  if (command.startsWith("affix.identify:") || command.startsWith("affix.reforge:") || command.startsWith("affix.scour:")) {
+  if (command.startsWith("affix.identify:") || command.startsWith("affix.reforge:") || command.startsWith("affix.scour:") ||
+    command.startsWith("currency.exchange:")) {
     const action = resolveRunewordPanelActionState(runewordPanelState);
     const allowed = (action.identifyEnabled && command === action.identifyCommand) ||
       (action.reforgeEnabled && command === action.reforgeCommand) ||
-      (action.scourEnabled && command === action.scourCommand);
+      (action.scourEnabled && command === action.scourCommand) ||
+      (action.exchangeReforgeEnabled && command === "currency.exchange:reforge") ||
+      (action.exchangeScourEnabled && command === "currency.exchange:scour");
     if (!allowed || affixCraftPendingState) return true;
     if (command.startsWith("affix.scour:")) {
       const signature = `${command}:${resolveReforgeLockCandidates(runewordPanelState).map(x => x.affixToken).join(",")}`;

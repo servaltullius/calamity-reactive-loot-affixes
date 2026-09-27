@@ -265,3 +265,18 @@ static_assert(CanCraftAffixLayout(AffixCraftAction::kScour, 1u, 0u, 1u, false) &
     CanCraftAffixLayout(AffixCraftAction::kScour, 4u, 0u, 0u, true), "scour repairs any legacy layout");
 static_assert(ScourAffixCount(1u) == 1u && ScourAffixCount(3u) == 3u && ScourAffixCount(4u) == 3u,
     "scour keeps the slot count, clamping legacy overflow");
+
+// Scroll trades are one way: Identify Scrolls in, a scarcer currency out.
+static_assert(CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kReforgeOrb).sourceCost == 3u &&
+    CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kScouringOrb).sourceCost == 15u,
+    "exchange rates are 3 scrolls per Reforge Orb and 15 per Scouring Orb");
+static_assert(CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kReforgeOrb).sourceEditorId ==
+        "CAFF_Misc_IdentifyScroll" &&
+    CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kScouringOrb).sourceEditorId ==
+        "CAFF_Misc_IdentifyScroll",
+    "every trade spends Identify Scrolls");
+static_assert(CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kReforgeOrb).targetEditorId ==
+        "CAFF_Misc_ReforgeOrb" &&
+    CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kScouringOrb).targetEditorId ==
+        "CAFF_Misc_ScouringOrb",
+    "trades grant the matching orb");

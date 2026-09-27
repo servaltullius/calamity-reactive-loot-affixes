@@ -169,6 +169,8 @@
                 { "identifyScrollsOwned", a_state.identifyScrollsOwned },
                 { "scouringOrbsKnown", a_state.scouringOrbsKnown },
                 { "scouringOrbsOwned", a_state.scouringOrbsOwned },
+                { "exchangeReforgeScrollCost", a_state.exchangeReforgeScrollCost },
+                { "exchangeScourScrollCost", a_state.exchangeScourScrollCost },
 				{ "pityKnown", a_state.pityKnown },
 				{ "runewordFragmentFailStreak", a_state.runewordFragmentFailStreak },
 				{ "runewordFragmentFailStreakThreshold", a_state.runewordFragmentFailStreakThreshold },

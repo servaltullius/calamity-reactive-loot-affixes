@@ -1221,6 +1221,17 @@ namespace RuntimeGateStoreChecks
                 std::cerr << "crafting_safety: crafting must gate layouts with CanCraftAffixLayout\n";
                 return false;
             }
+            // Scroll trades verify the exact scroll cost before granting, then the
+            // single orb grant before reporting success.
+            const auto exchangeStart = reforgeSource.find("EventBridge::ExchangeCraftingCurrency(");
+            const auto exchangeConsume = exchangeStart == std::string::npos ? std::string::npos :
+                reforgeSource.find("DidConsumeExactInventoryCount(", exchangeStart);
+            const auto exchangeGrant = exchangeStart == std::string::npos ? std::string::npos :
+                reforgeSource.find("DidRestoreExactInventoryCount(", exchangeStart);
+            if (exchangeConsume == std::string::npos || exchangeGrant == std::string::npos || exchangeConsume > exchangeGrant) {
+                std::cerr << "crafting_safety: scroll trades must verify the scroll cost and the single orb grant\n";
+                return false;
+            }
             CalamityAffixes::InstanceAffixSlots before{};
             before.AddToken(99u); before.AddToken(1u); before.AddToken(2u); before.AddToken(3u);
             auto after = before;

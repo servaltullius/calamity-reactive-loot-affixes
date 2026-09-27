@@ -464,6 +464,16 @@ ${buttonHint}`
   const scourEnabled = ready && regularAffixCount > 0 && state.scouringOrbsKnown === true && state.scouringOrbsOwned >= 1;
   const identifyCommand = baseKey ? `affix.identify:${baseKey}` : "";
   const scourCommand = baseKey ? `affix.scour:${baseKey}` : "";
+  // Scroll trades need no base; costs come from the runtime (0 = unavailable).
+  const scrollsOwned = state.identifyScrollsKnown === true && Number.isSafeInteger(state.identifyScrollsOwned)
+    ? state.identifyScrollsOwned
+    : null;
+  const exchangeReforgeCost = Number.isSafeInteger(state.exchangeReforgeScrollCost) ? state.exchangeReforgeScrollCost : 0;
+  const exchangeScourCost = Number.isSafeInteger(state.exchangeScourScrollCost) ? state.exchangeScourScrollCost : 0;
+  const exchangeReforgeEnabled = !affixSlotState.expandPending && exchangeReforgeCost > 0 &&
+    scrollsOwned !== null && scrollsOwned >= exchangeReforgeCost;
+  const exchangeScourEnabled = !affixSlotState.expandPending && exchangeScourCost > 0 &&
+    scrollsOwned !== null && scrollsOwned >= exchangeScourCost;
   const selectedName = lockedReforgeCandidate ? t(resolveReforgeCandidateName(lockedReforgeCandidate, "en"), resolveReforgeCandidateName(lockedReforgeCandidate, "ko")) : "";
   const reforgeHint = t(
     "Spend 2 Reforge Orbs to replace only the selected regular affix. Other affixes, slot count, and runeword progress stay. No attempt limit.",
@@ -507,6 +517,7 @@ ${buttonHint}`
     buttonLabel,
     buttonHint,
     identifyEnabled, scourEnabled, identifyCommand, scourCommand,
+    exchangeReforgeCost, exchangeScourCost, exchangeReforgeEnabled, exchangeScourEnabled,
     reforgeEnabled,
     reforgeHint,
     reforgeButtonLabel,
@@ -805,6 +816,25 @@ function renderRunewordPanelState() {
     affixScourButton.textContent = t("Scour (1 Orb)", "정제 (정제 오브 1개)");
     affixScourButton.setAttribute(panelCommandAttribute, actionState.scourCommand);
     affixScourButton.title = t("Reroll every regular affix at once, keeping the slot count. Runeword preserved. Also repairs legacy affix layouts.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다. 구버전 어픽스 구성도 정상 구성으로 바꿉니다.");
+  }
+  if (resourceExchangeGroup) {
+    resourceExchangeGroup.hidden = actionState.exchangeReforgeCost <= 0 && actionState.exchangeScourCost <= 0;
+    resourceExchangeLabel.textContent = t("Trade Identify Scrolls (one way)", "확인 스크롤 교환 (되돌릴 수 없음)");
+    for (const [button, cost, enabled, command, en, ko] of [
+      [exchangeReforgeButton, actionState.exchangeReforgeCost, actionState.exchangeReforgeEnabled,
+        "currency.exchange:reforge", "Reforge Orb", "재련 오브"],
+      [exchangeScourButton, actionState.exchangeScourCost, actionState.exchangeScourEnabled,
+        "currency.exchange:scour", "Scouring Orb", "정제 오브"]
+    ]) {
+      button.hidden = cost <= 0;
+      button.disabled = !enabled;
+      button.textContent = t(`${cost} Scrolls → 1 ${en}`, `스크롤 ${cost}개 → ${ko} 1개`);
+      button.setAttribute(panelCommandAttribute, enabled ? command : "");
+      button.title = t(
+        `Trade ${cost} Identify Scrolls for 1 ${en}. This cannot be undone.`,
+        `확인 스크롤 ${cost}개를 ${ko} 1개로 바꿉니다. 되돌릴 수 없습니다.`
+      );
+    }
   }
   if (runewordRecoveryDetails) {
     // Free reset is a debug tool; outside debug it could only ever be disabled.

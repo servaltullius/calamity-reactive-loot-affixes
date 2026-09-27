@@ -1170,6 +1170,40 @@ assert.deepStrictEqual(
 );
 sandbox.setUiLanguage("en");
 
+// Scroll trades: enabled by the scroll count, one command per click, blocked
+// while a trade is pending, and hidden when the runtime offers no trades.
+const exchangeCommands = [];
+sandbox.calamityCommand = (command) => exchangeCommands.push(command);
+const exchangePayload = {
+  hasBase: false, identifyScrollsKnown: true, identifyScrollsOwned: 16,
+  exchangeReforgeScrollCost: 3, exchangeScourScrollCost: 15
+};
+sandbox.setRunewordPanelState(JSON.stringify(exchangePayload));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("resourceExchangeGroup").hidden, false);
+assert.strictEqual(element("exchangeReforgeButton").disabled, false, "trades need no working base");
+assert.strictEqual(element("exchangeScourButton").disabled, false);
+assert.strictEqual(element("exchangeScourButton").textContent, "15 Scrolls → 1 Scouring Orb");
+sandbox.dispatchPanelCommand(element("exchangeScourButton"));
+sandbox.dispatchPanelCommand(element("exchangeReforgeButton"));
+assert.deepStrictEqual(exchangeCommands, ["currency.exchange:scour"], "a pending trade blocks the next click");
+sandbox.setRunewordPanelState(JSON.stringify({ ...exchangePayload, identifyScrollsOwned: 14 }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("exchangeScourButton").disabled, true, "a Scouring Orb needs 15 scrolls");
+assert.strictEqual(element("exchangeReforgeButton").disabled, false);
+sandbox.dispatchPanelCommand(element("exchangeReforgeButton"));
+assert.deepStrictEqual(exchangeCommands, ["currency.exchange:scour", "currency.exchange:reforge"]);
+sandbox.setRunewordPanelState(JSON.stringify({ ...exchangePayload, identifyScrollsOwned: 2 }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("exchangeReforgeButton").disabled, true, "a Reforge Orb needs 3 scrolls");
+sandbox.setRunewordPanelState(JSON.stringify({ ...exchangePayload, identifyScrollsKnown: false }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("exchangeReforgeButton").disabled, true, "an unknown scroll count fails closed");
+sandbox.setRunewordPanelState(JSON.stringify({ ...exchangePayload, exchangeReforgeScrollCost: 0, exchangeScourScrollCost: 0 }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("resourceExchangeGroup").hidden, true, "a runtime without trades hides the row");
+delete sandbox.calamityCommand;
+
 const viewMarkup = fs.readFileSync(path.join(VIEW_DIR, "index.html"), "utf8");
 assert(
   /id="runewordReforgeLockList"[\s\S]*?role="listbox"/.test(viewMarkup),

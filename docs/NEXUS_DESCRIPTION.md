@@ -15,6 +15,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - **확인 스크롤**: 일반 어픽스가 없는 장비에 1~3개 부여(60%/30%/10%)
 - **재련 오브**: 고른 어픽스 하나만 교체(2개, 횟수 제한 없음), 슬롯 확장(1→2: 2개, 2→3: 4개)
 - **정제 오브**: 슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴림(희귀)
+- 남는 확인 스크롤은 재련 오브(3:1)나 정제 오브(15:1)로 교환(한 방향)
 - 모든 제작 작업은 완성 룬워드와 그 성장 상태를 보존
 - 슬롯 모델: **룬워드 1 + 일반 어픽스 최대 3**
 - 이름 마커(★ 계열) + Prisma 툴팁으로 인스턴스 상태 확인
@@ -99,6 +100,7 @@ It tracks item instances via ExtraUniqueID, and gear grows through a **Scroll of
 - **Scroll of Identification**: grants 1-3 regular affixes to gear without any (60%/30%/10%)
 - **Reforge Orb**: replaces one chosen affix (2 orbs, no attempt limit) and expands slots (1→2: 2 orbs, 2→3: 4 orbs)
 - **Scouring Orb**: rerolls every regular affix at once while keeping the slot count (rare)
+- Surplus Identify Scrolls trade one way for Reforge Orbs (3:1) or Scouring Orbs (15:1)
 - Every crafting action preserves a completed runeword and its growth state
 - Slot model: **1 runeword + up to 3 regular affixes**
 - Star markers (★ series) + Prisma tooltip for instance readability

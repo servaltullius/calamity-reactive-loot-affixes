@@ -6,6 +6,7 @@
 namespace CalamityAffixes
 {
 	enum class AffixCraftAction : std::uint8_t { kIdentify, kReforge, kScour };
+	enum class CurrencyExchange : std::uint8_t { kReforgeOrb, kScouringOrb };
 	namespace detail
 	{
 		inline constexpr std::uint32_t kSelectedReforgeCost = 2u;
@@ -53,6 +54,33 @@ namespace CalamityAffixes
 		{
 			return a_regularCount < kMaxRegularAffixesPerItem ?
 				a_regularCount : static_cast<std::uint8_t>(kMaxRegularAffixesPerItem);
+		}
+
+		// Identify Scrolls have no use once gear is identified (scour keeps the slot
+		// count), so they pile up. One-way trades turn them into the currencies that
+		// run out: 3:1 follows the 20% : 12% drop ratio with a small loss, and 15:1
+		// prices a Scouring Orb at ~5 Reforge Orbs, its full-reroll value.
+		inline constexpr std::uint32_t kExchangeScrollsPerReforgeOrb = 3u;
+		inline constexpr std::uint32_t kExchangeScrollsPerScouringOrb = 15u;
+
+		struct CurrencyExchangeRecipe
+		{
+			std::string_view sourceEditorId;
+			std::string_view targetEditorId;
+			std::uint32_t sourceCost{ 0u };
+		};
+
+		[[nodiscard]] constexpr CurrencyExchangeRecipe ResolveCurrencyExchange(CurrencyExchange a_exchange) noexcept
+		{
+			switch (a_exchange) {
+			case CurrencyExchange::kReforgeOrb:
+				return { CraftCurrency(AffixCraftAction::kIdentify), CraftCurrency(AffixCraftAction::kReforge),
+					kExchangeScrollsPerReforgeOrb };
+			case CurrencyExchange::kScouringOrb:
+				return { CraftCurrency(AffixCraftAction::kIdentify), CraftCurrency(AffixCraftAction::kScour),
+					kExchangeScrollsPerScouringOrb };
+			}
+			return {};
 		}
 
 		[[nodiscard]] constexpr bool CanCraftAffixes(
