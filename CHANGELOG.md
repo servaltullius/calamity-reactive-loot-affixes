@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-09-27
+
+v2.1.2는 룬워드 이름 표시 수정 릴리스입니다. 게임 동작과 코세이브는 2.1.1과 같고, ESP는 마법 효과 이름 19개만 바뀌었습니다.
+
 ### Fixed
 
 - 룬워드 7개의 툴팁 이름이 첫 단어만 남던 문제를 수정했습니다("Runeword Holy" → "Runeword Holy Thunder", "룬워드 홀리" → "룬워드 홀리 썬더"). 대상: Ancient's Pledge, Holy Thunder, King's Grace, Unbending Will, Voice of Reason, Crescent Moon, Flickering Flame.

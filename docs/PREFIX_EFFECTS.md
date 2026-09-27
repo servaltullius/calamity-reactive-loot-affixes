@@ -1,7 +1,7 @@
 # 프리픽스 효과 정리 (공개용)
 
 > 업데이트: 2026-09-27
-> 기준 버전: `v2.1.1`
+> 기준 버전: `v2.1.2`
 > 기준 코드:
 > - 효과 정의: `affixes/modules/keywords.affixes.core.json`
 > - 변환 스크립트: `tools/transform_prefixes.py`

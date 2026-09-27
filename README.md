@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Release](https://img.shields.io/badge/Release-v2.1.1-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.1.1)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.1/CalamityAffixes_MO2_v2.1.1_2026-09-27.zip)
+[![Release](https://img.shields.io/badge/Release-v2.1.2-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.1.2)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.2/CalamityAffixes_MO2_v2.1.2_2026-09-27.zip)
 
 ## 어떤 모드인가요?
 
@@ -15,10 +15,10 @@
 
 ## 다운로드 (플레이어)
 
-> **현재 정식 릴리스:** [v2.1.1](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.1.1)
+> **현재 정식 릴리스:** [v2.1.2](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.1.2)
 
-- MO2 ZIP: [CalamityAffixes_MO2_v2.1.1_2026-09-27.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.1/CalamityAffixes_MO2_v2.1.1_2026-09-27.zip)
-- SHA-256: [CalamityAffixes_MO2_v2.1.1_2026-09-27.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.1/CalamityAffixes_MO2_v2.1.1_2026-09-27.zip.sha256)
+- MO2 ZIP: [CalamityAffixes_MO2_v2.1.2_2026-09-27.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.2/CalamityAffixes_MO2_v2.1.2_2026-09-27.zip)
+- SHA-256: [CalamityAffixes_MO2_v2.1.2_2026-09-27.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.2/CalamityAffixes_MO2_v2.1.2_2026-09-27.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 
@@ -35,7 +35,7 @@
 ## v2.1.0 새 기능
 
 - **확인 스크롤 교환:** 장비를 한 번 확인하면 확인 스크롤은 다시 쓰지 않아 쌓이기만 했습니다. 이제 패널 "제작 재료"에서 스크롤 3개를 재련 오브 1개로, 15개를 정제 오브 1개로 바꿀 수 있습니다(한 방향, 되돌릴 수 없음).
-- 자세한 내용은 [2.1.0 릴리스 노트](docs/releases/2026-09-27-github-release-body-v2.1.0.md)를 확인하세요. 2.1.1은 패널 "선택 베이스 어픽스" 상자에서 첫 어픽스가 길면 나머지가 가려지던 문제를 고친 업데이트입니다.
+- 자세한 내용은 [2.1.0 릴리스 노트](docs/releases/2026-09-27-github-release-body-v2.1.0.md)를 확인하세요. 2.1.1은 패널 "선택 베이스 어픽스" 상자에서 첫 어픽스가 길면 나머지가 가려지던 문제를, 2.1.2는 룬워드 이름이 툴팁·패널·효과 창에서 제각각이던 문제를 고친 업데이트입니다.
 
 ## v2.0 핵심 변경
 

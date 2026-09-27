@@ -207,4 +207,6 @@ Source and full changelog: [url=https://github.com/servaltullius/calamity-reacti
 ## 4. 파일 설명과 변경 이력(2.1.1)
 
 - 메인 파일 이름·설명과 전체 변경 이력은 [launch 키트](2026-09-26-nexus-v2.0.0-launch.md) 1절을 그대로 쓴다(2.1.1로 갱신됨).
-- 이번 업로드의 변경 한 줄: `2.1.1: Fixed the Selected Base Affixes box hiding every affix after a long first one. / 선택 베이스 어픽스 상자에서 첫 어픽스가 길면 나머지가 가려지던 문제 수정`
+- 2.1.1 변경 한 줄: `2.1.1: Fixed the Selected Base Affixes box hiding every affix after a long first one. / 선택 베이스 어픽스 상자에서 첫 어픽스가 길면 나머지가 가려지던 문제 수정`
+- 2.1.2 변경 한 줄: `2.1.2: Every runeword now shows one full name in tooltips, the panel, and active effects (e.g. "Runeword Holy" is now "Runeword Holy Thunder"). / 룬워드 이름을 툴팁·패널·마법 효과 창에서 하나로 통일`
+- 메인 파일은 2.1.2 ZIP으로 올린다(내용물 설명은 launch 키트 1절).
