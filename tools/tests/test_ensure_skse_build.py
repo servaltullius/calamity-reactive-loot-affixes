@@ -46,6 +46,33 @@ class EnsureSkseBuildTests(unittest.TestCase):
                 )
             )
 
+    def test_cache_check_accepts_cmake_outside_usr_bin(self) -> None:
+        # GitHub runners ship cmake in /usr/local/bin; the cache is still current.
+        with tempfile.TemporaryDirectory(prefix="caff-cmake-cache-") as temp_dir:
+            temp_root = Path(temp_dir)
+            source_dir = temp_root / "src"
+            build_dir = temp_root / "build"
+            source_dir.mkdir()
+            build_dir.mkdir()
+            (build_dir / "CMakeCache.txt").write_text(
+                f"# For build in directory: {build_dir}\nCMAKE_HOME_DIRECTORY:INTERNAL={source_dir}\n",
+                encoding="utf-8",
+            )
+            (build_dir / "DartConfiguration.tcl").write_text(
+                f'SourceDirectory: {source_dir}\nBuildDirectory: {build_dir}\n'
+                f'ConfigureCommand: "/usr/local/bin/cmake" "{source_dir}"\n',
+                encoding="utf-8",
+            )
+
+            self.assertTrue(ensure_skse_build._cache_has_current_paths(source_dir, build_dir))
+
+            (build_dir / "DartConfiguration.tcl").write_text(
+                f'SourceDirectory: {source_dir}\nBuildDirectory: {build_dir}\n'
+                f'ConfigureCommand: "/usr/local/bin/cmake" "{temp_root / "other"}"\n',
+                encoding="utf-8",
+            )
+            self.assertFalse(ensure_skse_build._cache_has_current_paths(source_dir, build_dir))
+
     def test_cache_check_rejects_stale_source_path(self) -> None:
         with tempfile.TemporaryDirectory(prefix="caff-cmake-cache-stale-") as temp_dir:
             temp_root = Path(temp_dir)

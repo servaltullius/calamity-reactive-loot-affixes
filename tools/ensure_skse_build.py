@@ -41,9 +41,19 @@ def _cache_has_current_paths(source_dir: Path, build_dir: Path, required_cache_e
         and f"CMAKE_HOME_DIRECTORY:INTERNAL={expected_source}" in cache_text
         and f"SourceDirectory: {expected_source}" in dart_text
         and f"BuildDirectory: {expected_build}" in dart_text
-        and f'ConfigureCommand: "/usr/bin/cmake" "{expected_source}"' in dart_text
+        and _configured_from_source(dart_text, expected_source)
     )
     return path_matches and all(entry in cache_lines for entry in required_cache_entries)
+
+
+def _configured_from_source(dart_text: str, expected_source: str) -> bool:
+    # The command names whichever cmake ran it: /usr/bin here, /usr/local/bin on
+    # GitHub runners. Pinning /usr/bin made every runner check fail, so each
+    # ensure call there wiped the cache and recompiled the whole DLL (~8 min each).
+    return any(
+        line.startswith('ConfigureCommand: "') and line.endswith(f'" "{expected_source}"')
+        for line in dart_text.splitlines()
+    )
 
 
 def _required_tool(name: str) -> str:
