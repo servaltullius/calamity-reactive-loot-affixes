@@ -115,7 +115,7 @@ namespace CalamityAffixes
 			{ "rw_doom", "둠" },
 			{ "rw_hand_of_justice", "정의의 손길" },
 			{ "rw_pride", "프라이드" },
-			{ "rw_plague", "플래그" },
+			{ "rw_plague", "플레이그" },
 			{ "rw_metamorphosis", "메타모포시스" },
 			{ "rw_obsession", "집착" },
 			{ "rw_mist", "미스트" },

@@ -1270,11 +1270,11 @@ public sealed class RepoSpecRegressionTests
             "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350)");
         AssertUiText(
             "runeword_last_wish_final",
-            "룬워드 최후의 소원 [Jah-Mal-Jah-Sur-Jah-Ber]: 체력 35% 이하일 때 체력 250 즉시 회복, 방어도 +250·마법저항 +50(12초). 45초마다 발동.",
+            "룬워드 라스트 위시 [Jah-Mal-Jah-Sur-Jah-Ber]: 체력 35% 이하일 때 체력 250 즉시 회복, 방어도 +250·마법저항 +50(12초). 45초마다 발동.",
             "Runeword Last Wish (Jah-Mal-Jah-Sur-Jah-Ber): HP<35% / ICD 45s - Restore 250 Health + Armor 250 and Magic Resist 50 (12s)");
         AssertUiText(
             "runeword_plague_final",
-            "룬워드 역병 [Cham-Shael-Um]: 처치 시 40% 확률로 역병 시체 연쇄 폭발(독 피해 12 + 시체 최대 체력 3%, 반경 450, 최대 12명, 최대 연쇄 깊이 2). 4초마다 발동.",
+            "룬워드 플레이그 [Cham-Shael-Um]: 처치 시 40% 확률로 역병 시체 연쇄 폭발(독 피해 12 + 시체 최대 체력 3%, 반경 450, 최대 12명, 최대 연쇄 깊이 2). 4초마다 발동.",
             "Runeword Plague (Cham-Shael-Um): 40% on Kill / ICD 4s - Plague Corpse Chain Explosion (12 + 3% Corpse Max Health, Radius 450, up to 12 targets, max chain depth 2)");
         AssertUiText(
             "runeword_pride_final",

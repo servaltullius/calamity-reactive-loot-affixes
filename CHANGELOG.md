@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- 룬워드 7개의 툴팁 이름이 첫 단어만 남던 문제를 수정했습니다("Runeword Holy" → "Runeword Holy Thunder", "룬워드 홀리" → "룬워드 홀리 썬더"). 대상: Ancient's Pledge, Holy Thunder, King's Grace, Unbending Will, Voice of Reason, Crescent Moon, Flickering Flame.
+- 룬워드 한국어 툴팁 이름을 패널 레시피 목록의 이름으로 통일했습니다. 37개가 목록과 다른 번역을 쓰고 있었습니다(툴팁 "혼돈"·"영혼"·"전투 함성" → 목록과 같은 "카오스"·"스피릿"·"콜 투 암스"). 효과와 수치는 바뀌지 않습니다.
+- 룬워드 마법 효과 이름(게임의 마법 효과 창에 영어로 표시)에 남아 있던 줄임말을 레시피 이름으로 풀었습니다: CTA → Call to Arms, CoH → Chains of Honor, HOTO → Heart of the Oak, BotD → Breath of the Dying, Hustle(W)/(A) → Hustle-W/-A. ESP에서는 이 19개 기록의 이름 필드만 바뀌며 FormID와 EditorID는 그대로입니다.
+- 패널 레시피 목록의 Plague 표기 "플래그"(flag처럼 읽힘)를 "플레이그"로 바로잡았습니다. 툴팁도 같은 이름을 씁니다.
+
 ## [2.1.1] - 2026-09-27
 
 v2.1.1은 패널 표시 수정 릴리스입니다. 게임 동작, ESP, 코세이브는 2.1.0과 같습니다.
