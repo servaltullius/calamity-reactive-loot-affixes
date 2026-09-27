@@ -21,6 +21,7 @@ GENERATED_DOCS = (
     "SUFFIX_EFFECTS.md",
     "RUNEWORD_EFFECTS.md",
     "AFFIX_CATALOG.md",
+    "EFFECTS_EN.md",
 )
 
 
@@ -253,6 +254,7 @@ def generate_docs(output_dir: Path, metadata: PublicDocMetadata) -> None:
     run_generator("gen_suffix_doc.py", output_dir / "SUFFIX_EFFECTS.md")
     run_generator("gen_runeword_doc.py", output_dir / "RUNEWORD_EFFECTS.md")
     regenerate_affix_catalog(output_dir / "AFFIX_CATALOG.md", metadata)
+    run_generator("gen_effects_en_doc.py", output_dir / "EFFECTS_EN.md")
     print("\n완료!")
 
 

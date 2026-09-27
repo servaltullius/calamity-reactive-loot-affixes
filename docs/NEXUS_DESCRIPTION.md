@@ -86,6 +86,9 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 3. `CalamityAffixes.esp` 활성화
 4. SKSE로 실행
 
+### 전체 효과 목록
+- [접두](PREFIX_EFFECTS.md) · [접미](SUFFIX_EFFECTS.md) · [룬워드](RUNEWORD_EFFECTS.md)
+
 ### 주의사항
 - Prisma UI가 없으면 툴팁/패널 UI가 표시되지 않습니다.
 - KID DoT 태그를 과도하게 넓게 분배하면 부작용이 발생할 수 있습니다.
@@ -176,6 +179,9 @@ Current runtime scope is player-centric.
 2. Install with MO2
 3. Enable `CalamityAffixes.esp`
 4. Launch via SKSE
+
+### Full Effect List
+- [Every prefix, suffix, and runeword in its in-game English text](EFFECTS_EN.md)
 
 ### Notes
 - Without Prisma UI, tooltip/control panel UI will not be shown.

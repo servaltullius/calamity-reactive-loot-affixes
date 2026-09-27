@@ -41,6 +41,8 @@ GIF 8개(`gif-01`~`gif-08`, 각 2.7~6.2MB)는 이미지 갤러리보다 **설명
 
 설명문의 `[img]` 자리에는 이미지 탭에 올린 뒤 이미지를 열어 복사한 주소를 넣는다.
 
+효과 목록은 설명문에 붙이지 않고 GitHub 링크로 건다. 영어는 `docs/EFFECTS_EN.md`(게임 내 영문 문구, `tools/update_docs.py`가 릴리스마다 다시 만든다), 한국어는 기존 접두·접미·룬워드 문서다.
+
 ## 2. 설명문 (BBCode)
 
 넥서스 설명 편집기를 BBCode 모드로 바꾸고 아래 두 블록을 차례로 붙여 넣는다. 영어를 먼저 두고 한국어를 뒤에 둔다.
@@ -119,7 +121,8 @@ Calamity works on your gear and on kills by you and your summons. It is not an N
 [b]No tooltips.[/b] Check that Prisma UI is installed and enabled. The log is at Documents/My Games/Skyrim Special Edition/SKSE/CalamityAffixes.log.
 [b]Do I need a new game?[/b] No.
 
-Source, full changelog, and effect lists: [url=https://github.com/servaltullius/calamity-reactive-loot-affixes]GitHub[/url]
+[b]Full effect list:[/b] every prefix, suffix, and runeword with its in-game text - [url=https://github.com/servaltullius/calamity-reactive-loot-affixes/blob/main/docs/EFFECTS_EN.md]Effect List[/url]
+Source and full changelog: [url=https://github.com/servaltullius/calamity-reactive-loot-affixes]GitHub[/url]
 ```
 
 ```bbcode
@@ -181,6 +184,8 @@ Source, full changelog, and effect lists: [url=https://github.com/servaltullius/
 [b]패널이 안 열려요.[/b] 위 "시작하기"를 보세요. 대부분 다른 모드가 F11을 쓰고 있거나 Prisma UI가 없는 경우입니다.
 [b]툴팁이 안 보여요.[/b] Prisma UI가 설치·활성화돼 있는지 확인하세요. 로그: 문서/My Games/Skyrim Special Edition/SKSE/CalamityAffixes.log
 [b]새 게임이 필요한가요?[/b] 아니요.
+
+[b]전체 효과 목록:[/b] [url=https://github.com/servaltullius/calamity-reactive-loot-affixes/blob/main/docs/PREFIX_EFFECTS.md]접두[/url] · [url=https://github.com/servaltullius/calamity-reactive-loot-affixes/blob/main/docs/SUFFIX_EFFECTS.md]접미[/url] · [url=https://github.com/servaltullius/calamity-reactive-loot-affixes/blob/main/docs/RUNEWORD_EFFECTS.md]룬워드[/url]
 ```
 
 ## 3. 고정 댓글 (Sticky)
