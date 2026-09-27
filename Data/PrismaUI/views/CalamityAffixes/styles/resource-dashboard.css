@@ -364,6 +364,10 @@
   gap: calc(5px * var(--panel-ui-scale));
 }
 
+.rdExchange[hidden] {
+  display: none;
+}
+
 .rdExchangeLabel {
   grid-column: 1 / -1;
   color: rgba(255, 255, 255, 0.66);

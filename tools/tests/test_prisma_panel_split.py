@@ -304,6 +304,22 @@ class PrismaPanelSplitTests(unittest.TestCase):
             any("margin-top: auto" in body for body in value_rules),
             "crafting counts must be pinned to the bottom of each card",
         )
+        # display: grid overrides the hidden attribute, which left the exchange
+        # label visible without buttons whenever the DLL reports no exchange.
+        self.assert_rule_contains(dashboard_css, ".rdExchange[hidden]", "display: none")
+
+    def test_selected_base_affixes_show_every_affix(self) -> None:
+        """A 92px nested scroll box inside the already scrolling action column
+        showed one long affix and hid the rest below it."""
+        runeword_css = (
+            INDEX_PATH.parent / "styles" / "runeword.css"
+        ).read_text(encoding="utf-8")
+        self.assert_rule_contains(
+            runeword_css,
+            ".affixWorkingActions .rwAffixBox",
+            "max-height: none",
+            "overflow-y: visible",
+        )
 
     def test_tab_relationships_remain_bidirectional(self) -> None:
         for stem in ("Runeword", "Affix", "Advanced"):

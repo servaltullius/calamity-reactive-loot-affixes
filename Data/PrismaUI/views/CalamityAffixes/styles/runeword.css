@@ -942,8 +942,10 @@
   margin-top: calc(6px * var(--panel-ui-scale));
 }
 
+/* The action column already scrolls; a nested scroll box hid every affix after a long first one. */
 .affixWorkingActions .rwAffixBox {
-  max-height: calc(92px * var(--panel-ui-scale));
+  max-height: none;
+  overflow-y: visible;
 }
 
 .affixSlotProgress {
