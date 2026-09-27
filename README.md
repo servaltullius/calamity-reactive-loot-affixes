@@ -2,6 +2,7 @@
 
 [![Release](https://img.shields.io/badge/Release-v2.1.3-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.1.3)
 [![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.3/CalamityAffixes_MO2_v2.1.3_2026-09-27.zip)
+[![Nexus Mods](https://img.shields.io/badge/Nexus%20Mods-Calamity%202-d98f40)](https://www.nexusmods.com/skyrimspecialedition/mods/193193)
 
 ## 어떤 모드인가요?
 
@@ -17,6 +18,7 @@
 
 > **현재 정식 릴리스:** [v2.1.3](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.1.3)
 
+- 넥서스: [Calamity 2 - Reactive Loot and Affixes](https://www.nexusmods.com/skyrimspecialedition/mods/193193) (2.0부터의 새 페이지. 옛 페이지 [mods/172116](https://www.nexusmods.com/skyrimspecialedition/mods/172116)은 1.2.21에서 멈춘 구버전입니다)
 - MO2 ZIP: [CalamityAffixes_MO2_v2.1.3_2026-09-27.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.3/CalamityAffixes_MO2_v2.1.3_2026-09-27.zip)
 - SHA-256: [CalamityAffixes_MO2_v2.1.3_2026-09-27.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.1.3/CalamityAffixes_MO2_v2.1.3_2026-09-27.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
