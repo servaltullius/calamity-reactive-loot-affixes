@@ -34,6 +34,12 @@ function t(en, ko) {
   return `${en} / ${ko}`;
 }
 
+// For labels too small to hold "English / 한국어" (rune grid cells): one
+// language only, Korean in Korean mode. Callers keep the full t() text on hover.
+function tCompact(en, ko) {
+  return uiLang === "ko" ? ko : en;
+}
+
 // C++ pushes fixed English feedback strings; map the known ones through the
 // language mode so the status line is not the only untranslated text on screen.
 const engineFeedbackLocalizations = {

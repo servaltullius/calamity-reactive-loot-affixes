@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Release](https://img.shields.io/badge/Release-v2.0.0-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.0.0)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.0/CalamityAffixes_MO2_v2.0.0_2026-09-26.zip)
+[![Release](https://img.shields.io/badge/Release-v2.0.1-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.0.1)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.1/CalamityAffixes_MO2_v2.0.1_2026-09-27.zip)
 
 ## 어떤 모드인가요?
 
@@ -15,10 +15,10 @@
 
 ## 다운로드 (플레이어)
 
-> **현재 정식 릴리스:** [v2.0.0](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.0.0)
+> **현재 정식 릴리스:** [v2.0.1](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.0.1)
 
-- MO2 ZIP: [CalamityAffixes_MO2_v2.0.0_2026-09-26.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.0/CalamityAffixes_MO2_v2.0.0_2026-09-26.zip)
-- SHA-256: [CalamityAffixes_MO2_v2.0.0_2026-09-26.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.0/CalamityAffixes_MO2_v2.0.0_2026-09-26.zip.sha256)
+- MO2 ZIP: [CalamityAffixes_MO2_v2.0.1_2026-09-27.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.1/CalamityAffixes_MO2_v2.0.1_2026-09-27.zip)
+- SHA-256: [CalamityAffixes_MO2_v2.0.1_2026-09-27.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.0.1/CalamityAffixes_MO2_v2.0.1_2026-09-27.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 
@@ -32,13 +32,13 @@
 - 룬 조각·재련 오브·확인 스크롤·정제 오브는 적격 적대 대상의 시체에서만 획득하며, 일반 확률·피티와 고유·보스·드래곤 확정 보상을 함께 지원합니다.
 - Prisma UI에서 선택 장비 툴팁, 어픽스 슬롯 진행, 룬워드 검색·제작, 보유 통화와 피티 현황을 한국어·영어로 확인할 수 있습니다.
 
-## v2.0.0 핵심 변경
+## v2.0 핵심 변경
 
 - **어픽스 제작을 세 재화로 나눴습니다.** 확인 스크롤로 처음 부여하고(1~3개), 재련 오브로 원하는 어픽스 하나만 바꾸고, 희귀한 정제 오브로 전부를 한 번에 다시 굴립니다. 아래 표를 참고하세요.
 - 새 재화 두 종은 적격 적대 시체에서 떨어지며(확인 20%, 정제 2%), MCM에서 확률을 조정할 수 있습니다.
 - 패널에 제작 재료 대시보드를 추가하고 제작 버튼을 흐름 순서로 정리했습니다. 넓은 레이아웃의 룬워드 탭에서 레시피 목록이 거의 보이지 않던 문제, 룬 그리드 칸이 잘리던 문제, 작은 패널에서 베이스 목록이 넘치던 문제도 고쳤습니다.
 - 기존 세이브와 호환되며 기존 장비의 어픽스·룬워드는 그대로 유지됩니다. 새 재화가 ESP에 추가되므로 **전체 ZIP으로 설치**하세요.
-- 자세한 규칙과 업데이트 방법은 [정식 릴리스 노트](docs/releases/2026-09-26-github-release-body-v2.0.0.md)를 확인하세요.
+- 자세한 규칙과 업데이트 방법은 [2.0.0 릴리스 노트](docs/releases/2026-09-26-github-release-body-v2.0.0.md)를 확인하세요. 2.0.1은 패널 표시만 다듬은 업데이트입니다.
 
 ## 어픽스 제작: 확인·선택 재련·정제
 

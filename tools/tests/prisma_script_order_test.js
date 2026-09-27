@@ -203,6 +203,9 @@ sandbox.setRunewordPanelState(JSON.stringify({
 sandbox.renderResourceDashboard();
 assert.strictEqual(element("resourceIdentifyScrolls").textContent, "4");
 assert.strictEqual(element("resourceScouringOrbs").textContent, "1");
+// Metas are one short line: one language on screen, both on hover.
+assert.strictEqual(element("resourceReforgeOrbsMeta").textContent, "Reforge · expand");
+assert.strictEqual(element("resourceReforgeOrbsMeta").title, "Reforge · expand / 재련·확장");
 sandbox.setRunewordPanelState(JSON.stringify(resourcePayload));
 sandbox.renderResourceDashboard();
 assert.strictEqual(element("resourceRuneList").children.length, 33);
@@ -1143,6 +1146,29 @@ assert.strictEqual(
   null,
   "numeric static rune token was accepted into the recipe contract"
 );
+
+// Rune grid cells are 56px: one language on the cell, both on hover, and an
+// owned/required count that fits at any digit count.
+sandbox.setUiLanguage("both");
+sandbox.setInventoryItems(JSON.stringify([{ key: reforgeBaseA, name: "Base A", selected: true }]));
+sandbox.setRunewordPanelState(JSON.stringify({
+  hasBase: true, hasRecipe: true, recipeName: "Spirit", totalRunes: 2, insertedRunes: 0,
+  requiredRunes: [{ name: "Tal", required: 1, owned: 12 }, { name: "Ort", required: 2, owned: 0 }]
+}));
+sandbox.renderRunewordPanelState();
+const cubeCellText = (cell) => cell.children.map((child) => child.textContent);
+const missingRuneCell = element("runewordCubeGrid").children.find((cell) => cell.className.includes("missing"));
+const readyRuneCell = element("runewordCubeGrid").children.find((cell) => cell.className.includes("ready"));
+assert.deepStrictEqual(cubeCellText(missingRuneCell), ["Missing", "Ort", "0/2"]);
+assert.strictEqual(missingRuneCell.title, "Missing / 부족\nOrt\n0/2");
+assert.deepStrictEqual(cubeCellText(readyRuneCell), ["Rune", "Tal", "12/1"]);
+sandbox.setUiLanguage("ko");
+sandbox.renderRunewordPanelState();
+assert.deepStrictEqual(
+  cubeCellText(element("runewordCubeGrid").children.find((cell) => cell.className.includes("missing"))),
+  ["부족", "Ort", "0/2"]
+);
+sandbox.setUiLanguage("en");
 
 const viewMarkup = fs.readFileSync(path.join(VIEW_DIR, "index.html"), "utf8");
 assert(

@@ -286,6 +286,24 @@ class PrismaPanelSplitTests(unittest.TestCase):
         self.assert_rule_contains(
             runeword_css, ".rwCellName", "-webkit-line-clamp: 2", "overflow: hidden"
         )
+        # Korean fonts default to a taller line and pushed the rune name out.
+        self.assert_rule_contains(
+            runeword_css, ".rwCellTitle,\n.rwCellCounts", "white-space: nowrap", "line-height: 1.15"
+        )
+
+    def test_crafting_resource_counts_share_one_baseline(self) -> None:
+        """Sharing a row with the pity card left each currency ~85px, which
+        wrapped labels unevenly and cut the reforge description."""
+        dashboard_css = (
+            INDEX_PATH.parent / "styles" / "resource-dashboard.css"
+        ).read_text(encoding="utf-8")
+        self.assert_rule_contains(dashboard_css, ".rdOrbSection", "grid-template-columns: minmax(0, 1fr)")
+        self.assert_rule_contains(dashboard_css, ".rdOrbSection .rdMetric", "display: flex", "flex-direction: column")
+        value_rules = re.findall(r"\.rdOrbSection \.rdMetricValue\s*\{([^}]*)\}", dashboard_css)
+        self.assertTrue(
+            any("margin-top: auto" in body for body in value_rules),
+            "crafting counts must be pinned to the bottom of each card",
+        )
 
     def test_tab_relationships_remain_bidirectional(self) -> None:
         for stem in ("Runeword", "Affix", "Advanced"):

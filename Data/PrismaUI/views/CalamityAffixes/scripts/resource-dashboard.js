@@ -264,14 +264,23 @@ function renderResourceDashboard() {
     resourceCraftingTitle.textContent = t("Crafting Resources", "제작 재료");
   }
   resourceReforgeOrbsLabel.textContent = t("Reforge Orbs", "재련 오브");
-  resourceReforgeOrbsMeta.textContent = t("Reforge · expand", "재련·확장");
-  if (resourceIdentifyScrollsLabel && resourceIdentifyScrollsMeta) {
+  if (resourceIdentifyScrollsLabel) {
     resourceIdentifyScrollsLabel.textContent = t("Identify Scrolls", "확인 스크롤");
-    resourceIdentifyScrollsMeta.textContent = t("First affixes", "최초 부여");
   }
-  if (resourceScouringOrbsLabel && resourceScouringOrbsMeta) {
+  if (resourceScouringOrbsLabel) {
     resourceScouringOrbsLabel.textContent = t("Scouring Orbs", "정제 오브");
-    resourceScouringOrbsMeta.textContent = t("Full reroll", "전체 리롤");
+  }
+  // Metas are one short line; bilingual text would be cut, so show one
+  // language and keep both on hover.
+  for (const [meta, en, ko] of [
+    [resourceIdentifyScrollsMeta, "First affixes", "최초 부여"],
+    [resourceReforgeOrbsMeta, "Reforge · expand", "재련·확장"],
+    [resourceScouringOrbsMeta, "Full reroll", "전체 리롤"]
+  ]) {
+    if (meta) {
+      meta.textContent = tCompact(en, ko);
+      meta.title = t(en, ko);
+    }
   }
 
   let totalOwned = 0;

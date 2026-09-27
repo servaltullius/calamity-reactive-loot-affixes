@@ -571,6 +571,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Korean fonts default to a taller line; pin it so the name keeps its row. */
+  line-height: 1.15;
 }
 
 .rwPrimaryAction .cpButton,

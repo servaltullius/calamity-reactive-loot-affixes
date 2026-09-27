@@ -872,6 +872,11 @@ function renderRunewordPanelState() {
     const totalCells = 12;
     let filled = 0;
 
+    // Parts are plain text or [en, ko] pairs. A 56px cell cannot hold both
+    // languages, so it shows one (tCompact) and keeps both on hover (t).
+    const cellText = (part, compact) => Array.isArray(part)
+      ? (compact ? tCompact(part[0], part[1]) : t(part[0], part[1]))
+      : (part || "");
     const addCell = (className, title, name, counts) => {
       if (filled >= totalCells) return;
       const cell = document.createElement("div");
@@ -880,34 +885,33 @@ function renderRunewordPanelState() {
       if (title) {
         const el = document.createElement("div");
         el.className = "rwCellTitle";
-        el.textContent = title;
+        el.textContent = cellText(title, true);
         cell.appendChild(el);
       }
 
       if (name) {
         const el = document.createElement("div");
         el.className = "rwCellName";
-        el.textContent = name;
+        el.textContent = cellText(name, true);
         cell.appendChild(el);
       }
 
       if (counts) {
         const el = document.createElement("div");
         el.className = "rwCellCounts";
-        el.textContent = counts;
+        el.textContent = cellText(counts, true);
         cell.appendChild(el);
       }
 
-      // Cells clamp long names; the full text stays available on hover.
-      cell.title = [title, name, counts].filter(Boolean).join("\n");
+      cell.title = [title, name, counts].map((part) => cellText(part, false)).filter(Boolean).join("\n");
       runewordCubeGrid.appendChild(cell);
       filled += 1;
     };
 
     addCell(
       hasBase ? "base" : "base empty",
-      t("Base", "베이스"),
-      hasBase ? resolveSelectedWorkingBase()?.name || t("Selected", "선택됨") : t("None", "없음"),
+      ["Base", "베이스"],
+      hasBase ? resolveSelectedWorkingBase()?.name || ["Selected", "선택됨"] : ["None", "없음"],
       // Every selectable base is equipped; the cell's room goes to the name.
       ""
     );
@@ -922,13 +926,16 @@ function renderRunewordPanelState() {
         const missing = owned < required;
         addCell(
           missing ? "missing" : "ready",
-          missing ? t("Rune (Missing)", "룬(부족)") : t("Rune", "룬"),
-          `${name} x${required}`,
-          `${t("Owned", "보유")}: ${owned}/${required}`
+          // Short enough for a 56px cell in every language; the red cell already marks it.
+          missing ? ["Missing", "부족"] : ["Rune", "룬"],
+          // The count line already says "Have n/required"; the name alone fits one line.
+          name,
+          // owned/required reads the same in every language and fits even at 3 digits.
+          `${owned}/${required}`
         );
       }
     } else if (hasRecipe && requiredRunes.length === 0) {
-      addCell("empty", t("Runes", "룬"), t("No data", "정보 없음"), "");
+      addCell("empty", ["Runes", "룬"], ["No data", "정보 없음"], "");
     }
 
     while (filled < totalCells) {
