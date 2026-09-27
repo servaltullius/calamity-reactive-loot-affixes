@@ -43,6 +43,8 @@ REQUIRED_FILES: tuple[str, ...] = (
     "MCM/Config/CalamityAffixes/config.json",
     "MCM/Config/CalamityAffixes/keybinds.json",
     "PrismaUI/views/CalamityAffixes/index.html",
+    # MIT/BSD notices for the libraries compiled into the DLL.
+    "Docs/THIRD_PARTY_NOTICES.txt",
 )
 
 EXPECTED_PEX_FILES: frozenset[str] = frozenset(

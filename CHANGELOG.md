@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- 배포 ZIP에 서드파티 라이선스 고지(`Docs/THIRD_PARTY_NOTICES.txt`)를 넣었습니다. DLL에 컴파일되는 CommonLibSSE-NG·spdlog·fmt·nlohmann/json(MIT)과 rapidcsv·Xbyak(BSD 3-Clause)의 라이선스가 바이너리와 함께 고지를 배포하도록 요구합니다. 패키지 검사는 이 파일이 없으면 실패합니다.
+
 ## [2.1.2] - 2026-09-27
 
 v2.1.2는 룬워드 이름 표시 수정 릴리스입니다. 게임 동작과 코세이브는 2.1.1과 같고, ESP는 마법 효과 이름 19개만 바뀌었습니다.

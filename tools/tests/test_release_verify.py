@@ -672,6 +672,7 @@ class ReleaseVerifyTests(unittest.TestCase):
             "CalamityAffixes/Scripts/CalamityAffixes_ModeControl.pex": b"pex-mode",
             "CalamityAffixes/Scripts/CalamityAffixes_ModEventEmitter.pex": b"pex-events",
             "CalamityAffixes/Scripts/CalamityAffixes_MCMConfig.pex": b"pex-mcm",
+            "CalamityAffixes/Docs/THIRD_PARTY_NOTICES.txt": b"notices",
         }
         for omitted in omit or set():
             entries.pop(omitted, None)

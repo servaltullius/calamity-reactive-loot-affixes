@@ -170,6 +170,7 @@
 - `docs/AFFIX_CATALOG.md` : 현재 구현된 효과 목록(한국어 요약)
 - `docs/RUNEWORD_EFFECTS.md` : JSON에서 개별 정의한 룬워드 94개 레시피별 효과 설명
 - `docs/EFFECTS_EN.md` : 영어권 플레이어용 전체 효과 목록(접두·접미·룬워드, 게임 내 영문 문구, 넥서스 링크용)
+- `THIRD_PARTY_NOTICES.txt` : DLL에 들어가는 오픈소스(CommonLibSSE-NG, spdlog, fmt, nlohmann/json, rapidcsv, Xbyak)의 MIT·BSD 라이선스 고지. 배포 ZIP의 `Docs/`에도 들어갑니다.
 - `Data/` : 게임 `Data/`에 그대로 설치 가능한 “스테이징” 폴더 (MO2 테스트용)
   - `Data/CalamityAffixes.esp` : 키워드/스펠/MGEF + MCM Helper Quest(자동 생성, 단일 ESP)
   - `Data/Scripts/Source/` : Papyrus 소스(.psc)
