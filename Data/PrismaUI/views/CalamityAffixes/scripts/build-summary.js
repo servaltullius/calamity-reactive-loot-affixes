@@ -470,7 +470,7 @@ function renderEquippedBuildStateMessage(viewState) {
   if (viewState === "runtime-disabled") {
     appendEmptyState(
       equippedBuildStatus,
-      t("Calamity effects are disabled", "칼래미티 효과가 비활성화되었습니다"),
+      t("Calamity effects are disabled", "칼라미티 효과가 비활성화되었습니다"),
       t(
         "Enable runtime effects in MCM to rebuild the equipped-effect summary.",
         "MCM에서 런타임 효과를 활성화하면 장착 효과 요약을 다시 구성합니다."
@@ -481,7 +481,7 @@ function renderEquippedBuildStateMessage(viewState) {
   if (viewState === "empty") {
     appendEmptyState(
       equippedBuildStatus,
-      t("No Calamity affixes equipped", "장착된 칼래미티 어픽스가 없습니다"),
+      t("No Calamity affixes equipped", "장착된 칼라미티 어픽스가 없습니다"),
       t(
         "Equip an item with an affix or runeword to see its build role here.",
         "어픽스나 룬워드가 있는 아이템을 착용하면 여기에서 빌드 역할을 확인할 수 있습니다."
@@ -515,7 +515,7 @@ function updateEquippedBuildStaticText() {
   if (equippedBuildLead) {
     equippedBuildLead.textContent = t(
       "Read-only summary of Calamity effects on equipped items.",
-      "착용 아이템의 칼래미티 효과를 읽기 전용으로 요약합니다."
+      "착용 아이템의 칼라미티 효과를 읽기 전용으로 요약합니다."
     );
   }
   if (equippedBuildChanceHint) {

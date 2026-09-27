@@ -4,7 +4,7 @@
   "keybinds": [
     {
       "id": "prisma_panel_toggle",
-      "desc": "Toggle Calamity panel / 칼래미티 패널 토글",
+      "desc": "Toggle Calamity panel / 칼라미티 패널 토글",
       "action": {
         "type": "CallGlobalFunction",
         "script": "CalamityAffixes_ModeControl",

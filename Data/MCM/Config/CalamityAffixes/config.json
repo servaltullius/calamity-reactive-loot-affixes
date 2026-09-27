@@ -311,8 +311,8 @@
         {
           "type": "keymap",
           "id": "prisma_panel_toggle",
-          "text": "Toggle Calamity Panel / 칼래미티 패널 토글",
-          "help": "Single hotkey to open/close the Calamity panel. / 칼래미티 패널 열기/닫기 단축키(1개)입니다."
+          "text": "Toggle Calamity Panel / 칼라미티 패널 토글",
+          "help": "Single hotkey to open/close the Calamity panel. / 칼라미티 패널 열기/닫기 단축키(1개)입니다."
         },
         {
           "type": "empty"

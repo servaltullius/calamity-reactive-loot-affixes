@@ -77,7 +77,7 @@ function initUiText() {
     "인벤토리에서 선택한 아이템의 어픽스를 표시합니다."
   );
   if (panelTitle) {
-    panelTitle.textContent = t("Calamity Controls", "칼래미티 조작");
+    panelTitle.textContent = t("Calamity Controls", "칼라미티 조작");
   }
   if (panelSub) {
     panelSub.textContent = t(
@@ -86,16 +86,16 @@ function initUiText() {
     );
   }
   if (mainTabList) {
-    mainTabList.setAttribute("aria-label", t("Calamity tabs", "칼래미티 탭"));
+    mainTabList.setAttribute("aria-label", t("Calamity tabs", "칼라미티 탭"));
   }
   if (controlPanelCloseX) {
     controlPanelCloseX.setAttribute("aria-label", t("Close panel", "패널 닫기"));
   }
   if (quickOpenRuneword) {
-    quickOpenRuneword.setAttribute("aria-label", t("Open Calamity panel", "칼래미티 패널 열기"));
+    quickOpenRuneword.setAttribute("aria-label", t("Open Calamity panel", "칼라미티 패널 열기"));
   }
   if (tooltipRunewordHint) {
-    tooltipRunewordHint.setAttribute("aria-label", t("Open Calamity panel", "칼래미티 패널 열기"));
+    tooltipRunewordHint.setAttribute("aria-label", t("Open Calamity panel", "칼라미티 패널 열기"));
   }
   if (runewordFlowTitle) {
     runewordFlowTitle.textContent = t("Runeword Workbench", "룬워드 작업대");
