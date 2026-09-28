@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Release](https://img.shields.io/badge/Release-v2.2.0-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.0)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.0/CalamityAffixes_MO2_v2.2.0_2026-09-28.zip)
+[![Release](https://img.shields.io/badge/Release-v2.2.1-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.1)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.1/CalamityAffixes_MO2_v2.2.1_2026-09-28.zip)
 [![Nexus Mods](https://img.shields.io/badge/Nexus%20Mods-Calamity%202-d98f40)](https://www.nexusmods.com/skyrimspecialedition/mods/193193)
 
 ## 어떤 모드인가요?
@@ -16,11 +16,11 @@
 
 ## 다운로드 (플레이어)
 
-> **현재 정식 릴리스:** [v2.2.0](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.0)
+> **현재 정식 릴리스:** [v2.2.1](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.1)
 
 - 넥서스: [Calamity 2 - Reactive Loot and Affixes](https://www.nexusmods.com/skyrimspecialedition/mods/193193) (2.0부터의 새 페이지. 옛 페이지 [mods/172116](https://www.nexusmods.com/skyrimspecialedition/mods/172116)은 1.2.21에서 멈춘 구버전입니다)
-- MO2 ZIP: [CalamityAffixes_MO2_v2.2.0_2026-09-28.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.0/CalamityAffixes_MO2_v2.2.0_2026-09-28.zip)
-- SHA-256: [CalamityAffixes_MO2_v2.2.0_2026-09-28.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.0/CalamityAffixes_MO2_v2.2.0_2026-09-28.zip.sha256)
+- MO2 ZIP: [CalamityAffixes_MO2_v2.2.1_2026-09-28.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.1/CalamityAffixes_MO2_v2.2.1_2026-09-28.zip)
+- SHA-256: [CalamityAffixes_MO2_v2.2.1_2026-09-28.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.1/CalamityAffixes_MO2_v2.2.1_2026-09-28.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 
@@ -40,6 +40,7 @@
 - 정제 오브가 리셋 수단이 되면서 기본 드랍률을 2%에서 4%로, 확인 스크롤 교환을 15:1에서 10:1로 조정했습니다.
 - 게임 안 한국어 표기를 "칼라미티"로 통일했습니다.
 - 장비별 재련 횟수는 새 코세이브 레코드에 저장됩니다. 기존 세이브를 그대로 쓸 수 있고, 기존 장비는 0회부터 시작합니다. 자세한 내용은 [2.2.0 릴리스 노트](docs/releases/2026-09-28-github-release-body-v2.2.0.md)를 확인하세요.
+- 2.2.1은 영어 UI에서도 룬워드 레시피 이름이 한국어로 나오던 문제를 고친 업데이트입니다.
 - 2.1.x에서 추가된 것: 확인 스크롤 교환(2.1.0), 선택 베이스 어픽스 상자 수정(2.1.1), 룬워드 이름 통일(2.1.2), 서드파티 라이선스 고지(2.1.3).
 
 ## v2.0 핵심 변경
