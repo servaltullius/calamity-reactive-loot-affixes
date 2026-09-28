@@ -2,7 +2,7 @@
 
 아카라이브 편집기는 BBCode·마크다운을 쓰지 않는다. 아래 제목과 본문을 **일반 텍스트 그대로** 붙여 넣는다. 링크는 자동으로 걸린다.
 
-- `【이미지: 파일명】` 자리는 지우고 그 위치에 편집기 이미지 버튼으로 파일을 올린다. 파일 위치: `G:\TAKEALOOK\downloads\Calamity-2.1.1-nexus-media\`(GIF·단축키 안내·인게임 사진), `G:\TAKEALOOK\downloads\Calamity-2.2.0-nexus-images\`(대표 이미지 `00-hero-ko.png`).
+- `【이미지: 파일명】` 자리는 지우고 그 위치에 편집기 이미지 버튼으로 파일을 올린다. 파일 위치: `G:\TAKEALOOK\downloads\Calamity-2.2.2-nexus-media\`(GIF·단축키 안내·인게임 사진), `G:\TAKEALOOK\downloads\Calamity-2.2.0-nexus-images\`(대표 이미지 `00-hero-ko.png`).
 - `【영상】` 자리는 넥서스에 올린 영상 링크(유튜브)가 있으면 붙이고, 없으면 지운다.
 - 모드 이름과 게임 메뉴 이름 모두 "칼라미티"로 쓴다(게임 표기는 2.2.0부터 칼라미티). 2.2.2 기준이다.
 - 사실관계는 넥서스 키트([2026-09-28-nexus-v2.2.2.md](2026-09-28-nexus-v2.2.2.md))의 한국어 설명문과 같다.
