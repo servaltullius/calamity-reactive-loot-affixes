@@ -12,7 +12,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 ### 시작하기: 패널 열기
 - 기본 키는 **F11**입니다. 월드와 인벤토리 어디서든 열리고, 다시 누르거나 ESC·닫기로 닫습니다.
-- 키 바꾸기: ESC > 시스템 > 모드 설정 > Calamity Affixes > 단축키·디버그 > 칼래미티 패널 토글. 메뉴를 닫는 순간 적용되며 SkyUI와 MCM Helper가 필요합니다.
+- 키 바꾸기: ESC > 시스템 > 모드 설정 > Calamity Affixes > 단축키·디버그 > 칼라미티 패널 토글. 메뉴를 닫는 순간 적용되며 SkyUI와 MCM Helper가 필요합니다.
 - Calamity 아이템 툴팁 아래에 현재 키가 표시됩니다. 게임패드 버튼으로는 열 수 없습니다.
 - 반응이 없으면 다른 모드가 F11을 쓰는지 확인하고, MCM > 프리즈마 UI > 패널 토글(버튼)과 Prisma UI 상태 확인을 사용하세요.
 
