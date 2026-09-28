@@ -327,6 +327,29 @@ class ReleaseVerifyTests(unittest.TestCase):
         self.assertIn('echo "prerelease=true" >> "$GITHUB_OUTPUT"', source)
         self.assertIn('echo "prerelease=false" >> "$GITHUB_OUTPUT"', source)
 
+    def test_release_workflow_picks_the_release_body_over_same_version_docs(self) -> None:
+        """The Nexus kit and Arca post share the -vX.md suffix and sort later.
+
+        v2.1.3, v2.2.0 and v2.2.1 went out with the Nexus kit as the release
+        page because the lookup took the last file ending in -vX.md. Run the
+        workflow's own lookup line against that exact directory listing.
+        """
+        source = (self.repo_root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        lookup = next(line.strip() for line in source.splitlines() if line.strip().startswith('name="$(ls docs/releases'))
+        with tempfile.TemporaryDirectory() as tmp:
+            releases = Path(tmp) / "docs" / "releases"
+            releases.mkdir(parents=True)
+            for name in (
+                "2026-09-28-arcalive-post-v2.2.1.md",
+                "2026-09-28-github-release-body-v2.2.1.md",
+                "2026-09-28-nexus-v2.2.1.md",
+                "2026-09-28-github-release-body-v2.2.10.md",
+            ):
+                (releases / name).write_text("x", encoding="utf-8")
+            script = f'set -euo pipefail\ncandidate=2.2.1\n{lookup}\nprintf "%s" "$name"\n'
+            result = subprocess.run(["bash", "-c", script], cwd=tmp, capture_output=True, text=True, check=True)
+        self.assertEqual(result.stdout, "2026-09-28-github-release-body-v2.2.1.md")
+
     def test_build_mo2_zip_falls_back_only_when_the_compiler_is_absent(self) -> None:
         """The fallback must key on "no compiler", not on "compile failed".
 
