@@ -43,6 +43,8 @@
 				payload.push_back({
 					{ "token", std::to_string(entry.recipeToken) },
 					{ "name", entry.displayName },
+					{ "nameEn", entry.displayNameEn },
+					{ "nameKo", entry.displayNameKo },
 					{ "runes", entry.runeSequence },
 					{ "runeTokens", BuildRunewordRuneTokenArrayJson(entry.runeTokens) },
 					{ "summaryKey", entry.effectSummaryKey },
@@ -144,6 +146,8 @@
 				{ "hasRecipe", a_state.hasRecipe },
 				{ "isComplete", a_state.isComplete },
 				{ "recipeName", a_state.recipeName },
+				{ "recipeNameEn", a_state.recipeNameEn },
+				{ "recipeNameKo", a_state.recipeNameKo },
 				{ "recipeToken", a_state.recipeToken == 0u ? std::string{} : std::to_string(a_state.recipeToken) },
 				{ "insertedRunes", a_state.insertedRunes },
 				{ "totalRunes", a_state.totalRunes },

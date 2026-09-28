@@ -248,6 +248,20 @@ namespace RuntimeGateStoreChecks
 				return false;
 			}
 
+			// The legacy recipe name is Korean; English-mode panels need the pair.
+			if (recipeEntriesText->find(".displayNameEn = recipe.displayNameEn,") == std::string::npos ||
+				recipeEntriesText->find(".displayNameKo = recipe.displayNameKo,") == std::string::npos ||
+				prismaCoreText->find("{ \"nameEn\", entry.displayNameEn }") == std::string::npos ||
+				prismaCoreText->find("{ \"nameKo\", entry.displayNameKo }") == std::string::npos ||
+				prismaCoreText->find("{ \"recipeNameEn\", a_state.recipeNameEn }") == std::string::npos ||
+				prismaCoreText->find("{ \"recipeNameKo\", a_state.recipeNameKo }") == std::string::npos ||
+				prismaUiText->find("function resolveRecipeName(item)") == std::string::npos ||
+				prismaUiText->find("const name = resolveRecipeName(item);") == std::string::npos ||
+				prismaUiText->find("resolveLocalizedRecipeText(state, \"recipeName\")") == std::string::npos) {
+				std::cerr << "runeword_recipe_tooltip_text: recipe names are not localized\n";
+				return false;
+			}
+
 			return true;
 		}
 

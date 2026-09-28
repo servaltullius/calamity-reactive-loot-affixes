@@ -52,6 +52,8 @@ function buildRecipeCatalogSignature(items) {
   const catalog = (Array.isArray(items) ? items : []).map((item) => [
     resolveRecipeToken(item),
     typeof item?.name === "string" ? item.name : "",
+    typeof item?.nameEn === "string" ? item.nameEn : "",
+    typeof item?.nameKo === "string" ? item.nameKo : "",
     typeof item?.runes === "string" ? item.runes : "",
     typeof item?.summaryKey === "string" ? item.summaryKey : "",
     typeof item?.summaryEn === "string" ? item.summaryEn : "",
@@ -180,7 +182,11 @@ function getSelectedRecipeItem() {
 }
 
 function buildRecipeSearchDocument(item) {
-  const name = typeof item?.name === "string" ? item.name.toLowerCase() : "";
+  // Every name matches in every language mode: "spirit" and "스피릿" both work.
+  const name = [item?.nameEn, item?.nameKo, item?.name]
+    .filter((value) => typeof value === "string")
+    .join("\n")
+    .toLowerCase();
   const runes = typeof item?.runes === "string" ? item.runes.toLowerCase() : "";
   const base = resolveRecipeBaseBadge(item).text.toLowerCase();
   const summary = resolveRecipeNumericSummaryText(item).toLowerCase();
@@ -451,7 +457,7 @@ function resolveRecipeListViewModel() {
 
 function createRecipeButton(item) {
   const token = resolveRecipeToken(item);
-  const name = typeof item?.name === "string" ? item.name : "";
+  const name = resolveRecipeName(item);
   if (!token || !name) {
     return null;
   }

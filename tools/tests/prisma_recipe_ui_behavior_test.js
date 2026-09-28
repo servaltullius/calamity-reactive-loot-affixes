@@ -90,6 +90,31 @@ const runRecipeBehavior = new Function(
     assert(bilingualTooltip.includes(item.detailEn));
     assert(bilingualTooltip.includes(item.detailKo));
 
+    // Recipe names follow the UI language; old DLLs only send the Korean name.
+    const named = {
+      token: "43",
+      name: "스피릿",
+      nameEn: "Spirit",
+      nameKo: "스피릿",
+      runes: "Tal-Thul-Ort-Amn"
+    };
+    uiLang = "en";
+    assert.strictEqual(resolveRecipeName(named), "Spirit");
+    assert(buildRunewordTooltipLikeText(named).startsWith("Spirit [Tal-Thul-Ort-Amn]"));
+    assert(!buildRunewordTooltipLikeText(named).includes("스피릿"));
+    const namedSearch = buildRecipeSearchDocument(named);
+    assert(namedSearch.includes("spirit") && namedSearch.includes("스피릿"));
+    assert.strictEqual(resolveRecipeName({ name: "스피릿" }), "스피릿");
+    assert.strictEqual(
+      resolveLocalizedRecipeText({ recipeName: "스피릿", recipeNameEn: "Spirit", recipeNameKo: "스피릿" }, "recipeName"),
+      "Spirit"
+    );
+    uiLang = "ko";
+    assert.strictEqual(resolveRecipeName(named), "스피릿");
+    uiLang = "both";
+    assert.strictEqual(resolveRecipeName(named), "Spirit / 스피릿");
+    assert.strictEqual(resolveRecipeName({ name: "Zephyr", nameEn: "Zephyr", nameKo: "Zephyr" }), "Zephyr");
+
     uiLang = "en";
     assert.strictEqual(
       resolveRecipeNumericSummaryText({

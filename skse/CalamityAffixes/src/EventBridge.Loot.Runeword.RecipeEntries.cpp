@@ -1000,6 +1000,8 @@ namespace CalamityAffixes
 			entries.push_back(RunewordRecipeEntry{
 				.recipeToken = recipe.token,
 				.displayName = recipe.displayName,
+				.displayNameEn = recipe.displayNameEn,
+				.displayNameKo = recipe.displayNameKo,
 				.runeSequence = std::move(runes),
 				.runeTokens = recipe.runeTokens,
 				.effectSummaryKey = std::string(effectSummaryKey),

@@ -239,6 +239,8 @@ function setRunewordPanelState(raw) {
     hasRecipe: Boolean(data.hasRecipe),
     isComplete: Boolean(data.isComplete),
     recipeName: typeof data.recipeName === "string" ? data.recipeName : "",
+    recipeNameEn: typeof data.recipeNameEn === "string" ? data.recipeNameEn : "",
+    recipeNameKo: typeof data.recipeNameKo === "string" ? data.recipeNameKo : "",
     insertedRunes: Number.isFinite(Number(data.insertedRunes)) ? Number(data.insertedRunes) : 0,
     totalRunes: Number.isFinite(Number(data.totalRunes)) ? Number(data.totalRunes) : 0,
     nextRuneName: typeof data.nextRuneName === "string" ? data.nextRuneName : "",

@@ -173,7 +173,8 @@
 
 						if (after.isComplete && !before.isComplete) {
 							std::string msg = "Runeword: transmuted ";
-							msg.append(after.recipeName.empty() ? "Runeword" : after.recipeName);
+							const auto& recipeName = after.recipeNameEn.empty() ? after.recipeName : after.recipeNameEn;
+							msg.append(recipeName.empty() ? "Runeword" : recipeName);
 							PushUiFeedback(msg);
 							return true;
 						}

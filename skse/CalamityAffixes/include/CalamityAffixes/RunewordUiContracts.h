@@ -17,6 +17,8 @@ namespace CalamityAffixes
 	{
 		std::uint64_t recipeToken{ 0 };
 		std::string displayName{};
+		std::string displayNameEn{};
+		std::string displayNameKo{};
 		std::string runeSequence{};
 		// Preserve recipe order and duplicates. The Prisma view uses this
 		// authoritative token sequence to compare requirements with the dynamic
@@ -96,6 +98,8 @@ namespace CalamityAffixes
 		bool hasRecipe{ false };
 		bool isComplete{ false };
 		std::string recipeName{};
+		std::string recipeNameEn{};
+		std::string recipeNameKo{};
 		std::uint64_t recipeToken{ 0 };
 		std::uint32_t insertedRunes{ 0 };
 		std::uint32_t totalRunes{ 0 };

@@ -365,6 +365,8 @@ namespace CalamityAffixes
 
 		if (const auto* currentRecipe = GetCurrentRunewordRecipe()) {
 			panelState.recipeName = currentRecipe->displayName;
+			panelState.recipeNameEn = currentRecipe->displayNameEn;
+			panelState.recipeNameKo = currentRecipe->displayNameKo;
 			panelState.recipeToken = currentRecipe->token;
 		}
 		if (!_runewordState.selectedBaseKey) {
@@ -500,6 +502,8 @@ namespace CalamityAffixes
 
 		panelState.hasRecipe = true;
 		panelState.recipeName = recipe->displayName;
+		panelState.recipeNameEn = recipe->displayNameEn;
+		panelState.recipeNameKo = recipe->displayNameKo;
 		panelState.recipeToken = recipe->token;
 		panelState.totalRunes = static_cast<std::uint32_t>(recipe->runeTokens.size());
 		panelState.insertedRunes = std::min(inserted, panelState.totalRunes);

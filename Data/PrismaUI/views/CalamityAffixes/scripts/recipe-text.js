@@ -165,6 +165,11 @@ function resolveLocalizedRecipeText(
   return enValue || koValue || legacyValue;
 }
 
+// The legacy `name` is the Korean name; 2.2.1+ DLLs also send nameEn/nameKo.
+function resolveRecipeName(item) {
+  return resolveLocalizedRecipeText(item, "name");
+}
+
 function resolveRecipeSummaryText(item) {
   const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
   switch (key) {
@@ -473,7 +478,7 @@ function buildRunewordTooltipLikeText(item, a_options = {}) {
   const lines = [];
 
   if (includeName) {
-    const name = typeof item?.name === "string" ? item.name.trim() : "";
+    const name = resolveRecipeName(item);
     const runes = typeof item?.runes === "string" ? item.runes.trim() : "";
     if (name && runes) {
       lines.push(`${name} [${runes}]`);

@@ -887,7 +887,7 @@ function renderRunewordPanelState() {
 
   if (runewordContextRecipeName) {
     if (selectedRecipe) {
-      const recipeName = typeof selectedRecipe?.name === "string" ? selectedRecipe.name : t("Unknown", "알 수 없음");
+      const recipeName = resolveRecipeName(selectedRecipe) || t("Unknown", "알 수 없음");
       const runeOrder = typeof selectedRecipe?.runes === "string" ? selectedRecipe.runes.trim() : "";
       runewordContextRecipeName.textContent = runeOrder ? `${recipeName} [${runeOrder}]` : recipeName;
     } else {
@@ -1017,7 +1017,7 @@ function renderRunewordPanelState() {
       "룬워드 레시피를 선택하세요."
     );
   } else {
-    const recipeName = state.recipeName || t("Unknown", "알 수 없음");
+    const recipeName = resolveLocalizedRecipeText(state, "recipeName") || t("Unknown", "알 수 없음");
     const inserted = Number(state.insertedRunes) || 0;
     const total = Number(state.totalRunes) || 0;
 

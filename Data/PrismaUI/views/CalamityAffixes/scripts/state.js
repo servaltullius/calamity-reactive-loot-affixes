@@ -62,6 +62,8 @@ let runewordPanelState = {
   hasRecipe: false,
   isComplete: false,
   recipeName: "",
+  recipeNameEn: "",
+  recipeNameKo: "",
   insertedRunes: 0,
   totalRunes: 0,
   nextRuneName: "",

@@ -372,7 +372,7 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
             "function buildRecipeCatalogSignature(items)",
             "function resolveConfirmedRecipeToken(items)",
         )
-        for field in ("summaryEn", "summaryKo", "detailEn", "detailKo"):
+        for field in ("nameEn", "nameKo", "summaryEn", "summaryKo", "detailEn", "detailKo"):
             self.assertIn(field, signature)
 
     def test_motion_avoids_forced_reflow_and_infinite_paint(self) -> None:
