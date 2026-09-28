@@ -64,9 +64,8 @@ GitHub: https://github.com/servaltullius/calamity-reactive-loot-affixes
 - 룬워드: 룬 조각을 모아 94종 중 하나를 장비에 변환해요. 확인·재련·정제를 해도 완성된 룬워드는 지워지지 않아요.
 
 【이미지: gif-03-identify.gif】
-【이미지: gif-04-reforge.gif】
+【이미지: gif-09-reforge-limit.gif】
 【이미지: gif-05-expand.gif】
-【이미지: gif-06-scour.gif】
 【이미지: gif-07-exchange.gif】
 【이미지: gif-08-runeword.gif】
 
