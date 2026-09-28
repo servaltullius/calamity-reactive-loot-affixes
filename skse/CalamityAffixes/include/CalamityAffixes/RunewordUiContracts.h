@@ -9,7 +9,10 @@ namespace CalamityAffixes
 	struct RunewordBaseInventoryEntry
 	{
 		std::uint64_t instanceKey{ 0 };
-		std::string displayName{};
+		std::string displayName{};  // "<item> [Runeword: <Korean name>]" for older panels
+		std::string baseName{};
+		std::string runewordNameEn{};
+		std::string runewordNameKo{};
 		bool selected{ false };
 	};
 

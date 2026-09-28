@@ -16,7 +16,7 @@ function resolveSelectedWorkingBase() {
   const items = Array.isArray(inventoryItemsState) ? inventoryItemsState : [];
   const selected = items.find((item) => item && item.selected);
   const key = typeof selected?.key === "string" ? selected.key.trim() : "";
-  const name = typeof selected?.name === "string" ? selected.name.trim() : "";
+  const name = resolveBaseItemName(selected).trim();
   return key && name ? { key, name } : null;
 }
 
@@ -108,7 +108,7 @@ function renderInventoryItems() {
 
   for (const item of viewModel.items) {
     const key = typeof item?.key === "string" ? item.key : "";
-    const name = typeof item?.name === "string" ? item.name : "";
+    const name = resolveBaseItemName(item);
     const selected = Boolean(item?.selected);
     if (!key || !name) {
       continue;
@@ -168,6 +168,20 @@ function resolveLocalizedRecipeText(
 // The legacy `name` is the Korean name; 2.2.1+ DLLs also send nameEn/nameKo.
 function resolveRecipeName(item) {
   return resolveLocalizedRecipeText(item, "name");
+}
+
+// A base with a finished runeword: 2.2.2+ DLLs send the item name and the
+// runeword name pair; older ones only "<item> [Runeword: <Korean name>]".
+function resolveBaseItemName(item) {
+  const legacyName = typeof item?.name === "string" ? item.name : "";
+  const baseName = typeof item?.baseName === "string" ? item.baseName.trim() : "";
+  if (!baseName) {
+    return legacyName;
+  }
+  const runewordName = resolveLocalizedRecipeText(item, "runewordName", " / ", false);
+  return runewordName
+    ? `${baseName} [${tCompact("Runeword", "룬워드")}: ${runewordName}]`
+    : baseName;
 }
 
 function resolveRecipeSummaryText(item) {

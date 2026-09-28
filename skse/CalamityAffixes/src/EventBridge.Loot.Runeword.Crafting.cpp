@@ -97,7 +97,7 @@ namespace CalamityAffixes
 					return;
 				}
 
-				const std::string note = "Runeword Fragments + Set: " + recipe->displayName;
+				const std::string note = "Runeword Fragments + Set: " + recipe->HudName();
 				EmitHudNotification(note.c_str());
 			}
 
@@ -285,7 +285,7 @@ namespace CalamityAffixes
 		{
 			std::string note = "Runeword Status: ";
 			if (const auto* recipe = GetCurrentRunewordRecipe()) {
-				note.append(recipe->displayName);
+				note.append(recipe->HudName());
 			} else {
 				note.append("No recipe");
 			}

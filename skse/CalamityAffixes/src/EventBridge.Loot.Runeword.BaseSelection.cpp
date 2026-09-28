@@ -149,7 +149,7 @@ namespace CalamityAffixes
 		std::string note = "Runeword Base: " + selectedName;
 		if (recipe) {
 			note.append(" | ");
-			note.append(recipe->displayName);
+			note.append(recipe->HudName());
 			AppendRunewordSelectionRecommendation(note, *recipe, baseType);
 		}
 
@@ -176,16 +176,24 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			std::string displayName = ResolveInventoryDisplayName(entry, xList);
+			std::string baseName = ResolveInventoryDisplayName(entry, xList);
+			std::string displayName = baseName;
+			std::string runewordNameEn;
+			std::string runewordNameKo;
 			if (const auto* completed = ResolveCompletedRunewordRecipe(key)) {
 				displayName.append(" [Runeword: ");
 				displayName.append(completed->displayName);
 				displayName.push_back(']');
+				runewordNameEn = completed->displayNameEn;
+				runewordNameKo = completed->displayNameKo;
 			}
 
 			entries.push_back(RunewordBaseInventoryEntry{
 				.instanceKey = key,
 				.displayName = std::move(displayName),
+				.baseName = std::move(baseName),
+				.runewordNameEn = std::move(runewordNameEn),
+				.runewordNameKo = std::move(runewordNameKo),
 				.selected = (_runewordState.selectedBaseKey && *_runewordState.selectedBaseKey == key)
 			});
 		}

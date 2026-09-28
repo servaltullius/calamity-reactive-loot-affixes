@@ -66,3 +66,43 @@ class RunewordDisplayNameTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RunewordRecipeNameLanguageTests(unittest.TestCase):
+    """RunewordRecipe::displayName is the Korean name. 2.2.1 still let it into
+    the English base label "[Runeword: 카오스]" and three HUD notes, because
+    each site copied the name on its own. Text built in the DLL uses HudName()
+    (English); the panel gets En/Ko pairs. Only the catalog assignment,
+    empty-name fallbacks, and the legacy Korean payload fields may read
+    displayName directly."""
+
+    ALLOWED = {
+        ("EventBridge.Loot.Runeword.Catalog.cpp", "recipe.displayName = recipe.displayNameKo;"),
+        (
+            "EventBridge.Config.RunewordSynthesis.cpp",
+            "const std::string recipeNameEn = recipe.displayNameEn.empty() ? recipe.displayName : recipe.displayNameEn;",
+        ),
+        (
+            "EventBridge.Config.RunewordSynthesis.cpp",
+            "const std::string recipeNameKo = recipe.displayNameKo.empty() ? recipe.displayName : recipe.displayNameKo;",
+        ),
+        ("EventBridge.Loot.Runeword.RecipeEntries.cpp", ".displayName = recipe.displayName,"),
+        ("EventBridge.Loot.Runeword.BaseSelection.cpp", "displayName.append(completed->displayName);"),
+        ("EventBridge.Loot.Runeword.PanelState.cpp", "panelState.recipeName = currentRecipe->displayName;"),
+        ("EventBridge.Loot.Runeword.PanelState.cpp", "panelState.recipeName = recipe->displayName;"),
+    }
+
+    def test_only_legacy_payload_fields_read_the_korean_recipe_name(self) -> None:
+        pattern = re.compile(r"\b(?:a_)?(?:recipe|completed\w*|current\w*|\w+Recipe)(?:->|\.)displayName\b(?!En|Ko)")
+        found = set()
+        for path in sorted((REPO_ROOT / "skse/CalamityAffixes/src").glob("*")):
+            if path.suffix not in (".cpp", ".inl", ".h"):
+                continue
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if pattern.search(line):
+                    found.add((path.name, line.strip()))
+        self.assertEqual(found, self.ALLOWED)
+
+
+if __name__ == "__main__":
+    unittest.main()

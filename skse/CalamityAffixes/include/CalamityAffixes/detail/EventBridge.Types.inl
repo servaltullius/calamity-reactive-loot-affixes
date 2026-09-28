@@ -399,13 +399,19 @@
 		{
 			std::string id{};
 			std::uint64_t token{ 0 };
-			std::string displayName{};
+			std::string displayName{};  // Korean; the panel picks En/Ko by UI language.
 			std::string displayNameEn{};
 			std::string displayNameKo{};
 			std::vector<std::string> runeIds{};
 			std::vector<std::uint64_t> runeTokens{};
 			std::uint64_t resultAffixToken{ 0 };
 			std::optional<LootItemType> recommendedBaseType{};
+
+			// HUD notes are English sentences, and the English HUD font may lack Hangul.
+			[[nodiscard]] const std::string& HudName() const noexcept
+			{
+				return displayNameEn.empty() ? displayName : displayNameEn;
+			}
 		};
 
 		enum class SyntheticRunewordStyle : std::uint8_t

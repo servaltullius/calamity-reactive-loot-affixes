@@ -179,7 +179,7 @@ function setInventoryItems(raw) {
   }
   const selected = items.find((item) => item && item.selected && typeof item.name === "string");
   if (selected && typeof selected.name === "string") {
-    selectedItemNameState = selected.name;
+    selectedItemNameState = resolveBaseItemName(selected);
     selectedItemSourceState = "equipped";
   } else if (!selectedItemNameState) {
     selectedItemSourceState = "equipped";
@@ -476,6 +476,14 @@ function setUiLanguage(raw) {
   }
   uiLang = next;
   invalidateRecipePresentationCaches();
+  // The working base label carries a runeword name in the UI language.
+  if (selectedItemSourceState === "equipped") {
+    const items = Array.isArray(inventoryItemsState) ? inventoryItemsState : [];
+    const selected = items.find((item) => item && item.selected && typeof item.name === "string");
+    if (selected) {
+      selectedItemNameState = resolveBaseItemName(selected);
+    }
+  }
   initUiText();
 }
 

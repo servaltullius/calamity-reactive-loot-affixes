@@ -20,6 +20,9 @@
 				payload.push_back({
 					{ "key", std::to_string(entry.instanceKey) },
 					{ "name", entry.displayName },
+					{ "baseName", entry.baseName },
+					{ "runewordNameEn", entry.runewordNameEn },
+					{ "runewordNameKo", entry.runewordNameKo },
 					{ "selected", entry.selected }
 				});
 			}

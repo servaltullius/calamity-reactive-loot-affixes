@@ -257,7 +257,13 @@ namespace RuntimeGateStoreChecks
 				prismaCoreText->find("{ \"recipeNameKo\", a_state.recipeNameKo }") == std::string::npos ||
 				prismaUiText->find("function resolveRecipeName(item)") == std::string::npos ||
 				prismaUiText->find("const name = resolveRecipeName(item);") == std::string::npos ||
-				prismaUiText->find("resolveLocalizedRecipeText(state, \"recipeName\")") == std::string::npos) {
+				prismaUiText->find("resolveLocalizedRecipeText(state, \"recipeName\")") == std::string::npos ||
+				prismaCoreText->find("{ \"baseName\", entry.baseName }") == std::string::npos ||
+				prismaCoreText->find("{ \"runewordNameEn\", entry.runewordNameEn }") == std::string::npos ||
+				prismaCoreText->find("{ \"runewordNameKo\", entry.runewordNameKo }") == std::string::npos ||
+				prismaUiText->find("function resolveBaseItemName(item)") == std::string::npos ||
+				prismaUiText->find("const name = resolveBaseItemName(item);") == std::string::npos ||
+				prismaUiText->find("selectedItemNameState = resolveBaseItemName(selected);") == std::string::npos) {
 				std::cerr << "runeword_recipe_tooltip_text: recipe names are not localized\n";
 				return false;
 			}

@@ -29,7 +29,7 @@ namespace CalamityAffixes
 				*a_outFailureReason = "missing-result-affix";
 			}
 			std::string note = "Runeword failed: missing affix ";
-			note.append(a_recipe.displayNameEn.empty() ? a_recipe.displayName : a_recipe.displayNameEn);
+			note.append(a_recipe.HudName());
 			EmitHudNotification(note.c_str());
 			SKSE::log::error(
 				"CalamityAffixes: runeword result affix missing (recipe={}, resultToken={:016X}).",
@@ -110,7 +110,7 @@ namespace CalamityAffixes
 		RebuildActiveCounts();
 
 		std::string note = "Runeword Complete: ";
-		note.append(a_recipe.displayNameEn.empty() ? a_recipe.displayName : a_recipe.displayNameEn);
+		note.append(a_recipe.HudName());
 		EmitHudNotification(note.c_str());
 		SKSE::log::info(
 			"CalamityAffixes: runeword completed (recipe={}, resultAffix={}).",
@@ -172,7 +172,7 @@ namespace CalamityAffixes
 		const auto blockReason = ResolveRunewordApplyBlockReason(instanceKey, *recipe);
 		if (blockReason == RunewordApplyBlockReason::kMissingResultAffix) {
 			std::string note = "Runeword failed: missing affix ";
-			note.append(recipe->displayName);
+			note.append(recipe->HudName());
 			EmitHudNotification(note.c_str());
 			SKSE::log::error(
 				"CalamityAffixes: runeword result affix missing before transmute (recipe={}, resultToken={:016X}).",

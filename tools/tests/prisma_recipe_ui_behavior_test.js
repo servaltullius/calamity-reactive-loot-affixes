@@ -38,6 +38,9 @@ const runRecipeBehavior = new Function(
       if (uiLang === "ko") return ko;
       return en + " / " + ko;
     }
+    function tCompact(en, ko) {
+      return uiLang === "ko" ? ko : en;
+    }
     const recipeSearchDocumentByToken = new Map();
     let recipeItemsState = [];
     let runewordPanelState = {};
@@ -114,6 +117,24 @@ const runRecipeBehavior = new Function(
     uiLang = "both";
     assert.strictEqual(resolveRecipeName(named), "Spirit / 스피릿");
     assert.strictEqual(resolveRecipeName({ name: "Zephyr", nameEn: "Zephyr", nameKo: "Zephyr" }), "Zephyr");
+
+    // The working base label names its finished runeword in the UI language.
+    const runewordBase = {
+      key: "7",
+      name: "렘넌트 장갑*** [Runeword: 카오스]",
+      baseName: "렘넌트 장갑***",
+      runewordNameEn: "Chaos",
+      runewordNameKo: "카오스"
+    };
+    uiLang = "en";
+    assert.strictEqual(resolveBaseItemName(runewordBase), "렘넌트 장갑*** [Runeword: Chaos]");
+    uiLang = "ko";
+    assert.strictEqual(resolveBaseItemName(runewordBase), "렘넌트 장갑*** [룬워드: 카오스]");
+    uiLang = "both";
+    assert.strictEqual(resolveBaseItemName(runewordBase), "렘넌트 장갑*** [Runeword: Chaos / 카오스]");
+    uiLang = "en";
+    assert.strictEqual(resolveBaseItemName({ name: "Iron Sword", baseName: "Iron Sword" }), "Iron Sword");
+    assert.strictEqual(resolveBaseItemName({ name: "렘넌트 장갑 [Runeword: 카오스]" }), "렘넌트 장갑 [Runeword: 카오스]");
 
     uiLang = "en";
     assert.strictEqual(

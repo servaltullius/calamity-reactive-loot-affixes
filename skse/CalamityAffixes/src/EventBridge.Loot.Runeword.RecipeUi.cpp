@@ -56,9 +56,7 @@ namespace CalamityAffixes
 			runes.append(recipe.runeIds[i]);
 		}
 
-		// HUD notes are English, and the vanilla HUD font may lack Hangul.
-		const auto& recipeName = recipe.displayNameEn.empty() ? recipe.displayName : recipe.displayNameEn;
-		std::string note = "Runeword Recipe: " + recipeName + " [" + runes + "]";
+		std::string note = "Runeword Recipe: " + recipe.HudName() + " [" + runes + "]";
 		if (_runewordState.selectedBaseKey) {
 			AppendRunewordSelectionRecommendation(note, recipe, ResolveInstanceLootType(*_runewordState.selectedBaseKey));
 		}
