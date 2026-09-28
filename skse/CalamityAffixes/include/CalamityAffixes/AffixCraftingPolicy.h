@@ -10,6 +10,22 @@ namespace CalamityAffixes
 	namespace detail
 	{
 		inline constexpr std::uint32_t kSelectedReforgeCost = 2u;
+		// Selected reforge may be used 6 times per item; identifying or scouring the
+		// item starts the count over. Without a limit, keeping every other affix
+		// always beat rerolling all of them, so the rarer Scouring Orb had no job.
+		inline constexpr std::uint8_t kSelectedReforgesPerItem = 6u;
+
+		[[nodiscard]] constexpr std::uint8_t RemainingSelectedReforges(std::uint8_t a_reforgesDone) noexcept
+		{
+			return a_reforgesDone >= kSelectedReforgesPerItem ?
+				0u :
+				static_cast<std::uint8_t>(kSelectedReforgesPerItem - a_reforgesDone);
+		}
+
+		[[nodiscard]] constexpr std::uint8_t NextSelectedReforgeCount(std::uint8_t a_reforgesDone) noexcept
+		{
+			return a_reforgesDone == 0xFFu ? a_reforgesDone : static_cast<std::uint8_t>(a_reforgesDone + 1u);
+		}
 
 		[[nodiscard]] constexpr std::uint8_t IdentifyAffixCount(std::uint32_t a_roll) noexcept
 		{
@@ -58,10 +74,11 @@ namespace CalamityAffixes
 
 		// Identify Scrolls have no use once gear is identified (scour keeps the slot
 		// count), so they pile up. One-way trades turn them into the currencies that
-		// run out: 3:1 follows the 20% : 12% drop ratio with a small loss, and 15:1
-		// prices a Scouring Orb at ~5 Reforge Orbs, its full-reroll value.
+		// run out: 3:1 follows the 20% : 12% drop ratio with a small loss. 10:1
+		// (15:1 before the reforge limit) keeps the Scouring Orb scarcer than a
+		// Reforge Orb but reachable, since it is now how a spent item unlocks.
 		inline constexpr std::uint32_t kExchangeScrollsPerReforgeOrb = 3u;
-		inline constexpr std::uint32_t kExchangeScrollsPerScouringOrb = 15u;
+		inline constexpr std::uint32_t kExchangeScrollsPerScouringOrb = 10u;
 
 		struct CurrencyExchangeRecipe
 		{

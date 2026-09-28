@@ -455,11 +455,20 @@ ${buttonHint}`
   const reforgeLockCandidates = resolveReforgeLockCandidates(state);
   const lockedReforgeCandidate = resolveActiveReforgeLockCandidate(state);
   const reforgeCost = 2;
+  // Per-item limit from the runtime; null means an older DLL with no limit.
+  const reforgeLimit = Number.isSafeInteger(state.selectedReforgesPerItem) && state.selectedReforgesPerItem > 0
+    ? state.selectedReforgesPerItem
+    : 0;
+  const reforgesLeft = reforgeLimit > 0 && Number.isSafeInteger(state.selectedReforgesLeft)
+    ? Math.min(Math.max(state.selectedReforgesLeft, 0), reforgeLimit)
+    : null;
+  const reforgesSpent = reforgesLeft === 0;
   const reforgeOrbsOwned = state.reforgeOrbsKnown === true && Number.isSafeInteger(state.reforgeOrbsOwned) ? state.reforgeOrbsOwned : null;
   const reforgeCommand = buildReforgeCommand(state);
   const baseKey = normalizePositiveUint64DecimalString(resolveSelectedRunewordBaseKey());
   const ready = hasBase && Boolean(baseKey) && state.regularAffixCountKnown === true && !affixSlotState.expandPending;
-  const reforgeEnabled = ready && Boolean(lockedReforgeCandidate) && reforgeOrbsOwned !== null && reforgeOrbsOwned >= reforgeCost;
+  const reforgeEnabled = ready && Boolean(lockedReforgeCandidate) && reforgeOrbsOwned !== null &&
+    reforgeOrbsOwned >= reforgeCost && !reforgesSpent;
   const identifyEnabled = ready && regularAffixCount === 0 && state.identifyScrollsKnown === true && state.identifyScrollsOwned >= 1;
   const scourEnabled = ready && regularAffixCount > 0 && state.scouringOrbsKnown === true && state.scouringOrbsOwned >= 1;
   const identifyCommand = baseKey ? `affix.identify:${baseKey}` : "";
@@ -475,16 +484,31 @@ ${buttonHint}`
   const exchangeScourEnabled = !affixSlotState.expandPending && exchangeScourCost > 0 &&
     scrollsOwned !== null && scrollsOwned >= exchangeScourCost;
   const selectedName = lockedReforgeCandidate ? t(resolveReforgeCandidateName(lockedReforgeCandidate, "en"), resolveReforgeCandidateName(lockedReforgeCandidate, "ko")) : "";
-  const reforgeHint = t(
-    "Spend 2 Reforge Orbs to replace only the selected regular affix. Other affixes, slot count, and runeword progress stay. No attempt limit.",
-    "재련 오브 2개로 선택한 일반 어픽스 하나만 바꿉니다. 나머지 어픽스·슬롯 수·룬워드 성장 상태는 유지됩니다. 횟수 제한은 없습니다."
-  );
+  const reforgeHint = reforgeLimit > 0
+    ? t(
+      `Spend 2 Reforge Orbs to replace only the selected regular affix. Other affixes, slot count, and runeword progress stay. Each item allows ${reforgeLimit}; a Scouring Orb gives them back.`,
+      `재련 오브 2개로 선택한 일반 어픽스 하나만 바꿉니다. 나머지 어픽스·슬롯 수·룬워드 성장 상태는 유지됩니다. 장비마다 ${reforgeLimit}번까지이며, 정제 오브를 쓰면 다시 ${reforgeLimit}번이 됩니다.`
+    )
+    : t(
+      "Spend 2 Reforge Orbs to replace only the selected regular affix. Other affixes, slot count, and runeword progress stay. No attempt limit.",
+      "재련 오브 2개로 선택한 일반 어픽스 하나만 바꿉니다. 나머지 어픽스·슬롯 수·룬워드 성장 상태는 유지됩니다. 횟수 제한은 없습니다."
+    );
   const reforgeButtonLabel = t("Reforge Selected (2 Orbs)", "선택 어픽스 재련 (오브 2개)");
   const reforgeSummary = selectedName ? t(`Replace: ${selectedName}`, `교체 대상: ${selectedName}`) : t("Choose an affix to replace", "바꿀 어픽스 선택");
   const reforgeLockHint = regularAffixCount === 0
     ? t("Identify first: 1–3 regular affixes. Expand missing slots later.", "확인 스크롤로 일반 어픽스 1~3개를 부여하세요. 부족한 슬롯은 확장할 수 있습니다.")
     : t("Choose the one affix to reroll. All other effects are preserved.", "다시 굴릴 어픽스 하나를 선택하세요. 다른 효과는 유지됩니다.");
-  const reforgeCostSummary = t(`Cost: 2 Reforge Orbs · Owned: ${reforgeOrbsOwned ?? "?"}`, `비용: 재련 오브 2개 · 보유: ${reforgeOrbsOwned ?? "?"}개`);
+  const reforgeCostSummary = reforgesSpent
+    ? t(
+      `No reforges left on this item. Scour it to get ${reforgeLimit} back.`,
+      `이 장비는 재련을 모두 썼습니다. 정제하면 다시 ${reforgeLimit}번 할 수 있습니다.`
+    )
+    : reforgesLeft !== null
+      ? t(
+        `Cost: 2 Reforge Orbs · Owned: ${reforgeOrbsOwned ?? "?"} · Left on this item: ${reforgesLeft}/${reforgeLimit}`,
+        `비용: 재련 오브 2개 · 보유: ${reforgeOrbsOwned ?? "?"}개 · 이 장비 남은 재련: ${reforgesLeft}/${reforgeLimit}`
+      )
+      : t(`Cost: 2 Reforge Orbs · Owned: ${reforgeOrbsOwned ?? "?"}`, `비용: 재련 오브 2개 · 보유: ${reforgeOrbsOwned ?? "?"}개`);
 
   const resetEnabled = hasBase && state.debugTools === true && !affixSlotState.expandPending;
   const resetHint = resetEnabled ?
@@ -526,6 +550,8 @@ ${buttonHint}`
     reforgeCostSummary,
     reforgeCommand,
     reforgeCost,
+    reforgeLimit,
+    reforgesLeft,
     reforgeOrbsOwned,
     regularAffixCount,
     standardReforgeCost,
@@ -815,7 +841,12 @@ function renderRunewordPanelState() {
     affixScourButton.disabled = !actionState.scourEnabled;
     affixScourButton.textContent = t("Scour (1 Orb)", "정제 (정제 오브 1개)");
     affixScourButton.setAttribute(panelCommandAttribute, actionState.scourCommand);
-    affixScourButton.title = t("Reroll every regular affix at once, keeping the slot count. Runeword preserved. Also repairs legacy affix layouts.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다. 구버전 어픽스 구성도 정상 구성으로 바꿉니다.");
+    affixScourButton.title = actionState.reforgeLimit > 0
+      ? t(
+        `Reroll every regular affix at once, keeping the slot count, and get the item's ${actionState.reforgeLimit} selected reforges back. Runeword preserved. Also repairs legacy affix layouts.`,
+        `슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴리고, 그 장비의 선택 재련 ${actionState.reforgeLimit}회를 되돌려 받습니다. 룬워드는 유지됩니다. 구버전 어픽스 구성도 정상 구성으로 바꿉니다.`
+      )
+      : t("Reroll every regular affix at once, keeping the slot count. Runeword preserved. Also repairs legacy affix layouts.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다. 구버전 어픽스 구성도 정상 구성으로 바꿉니다.");
   }
   if (resourceExchangeGroup) {
     resourceExchangeGroup.hidden = actionState.exchangeReforgeCost <= 0 && actionState.exchangeScourCost <= 0;

@@ -277,6 +277,13 @@ function setRunewordPanelState(raw) {
       ? Math.trunc(ownedRaw)
       : null,
     standardReforgeCost: parsePositiveInteger(data.standardReforgeCost, 1),
+    // 0 per item means an older DLL without the per-item reforge limit.
+    selectedReforgesPerItem: Number.isSafeInteger(data.selectedReforgesPerItem) && data.selectedReforgesPerItem > 0
+      ? data.selectedReforgesPerItem
+      : 0,
+    selectedReforgesLeft: Number.isSafeInteger(data.selectedReforgesLeft) && data.selectedReforgesLeft >= 0
+      ? data.selectedReforgesLeft
+      : 0,
     lockedReforgeCost: parsePositiveInteger(data.lockedReforgeCost, 2),
     reforgeLockCandidates: normalizeReforgeLockCandidates(data.reforgeLockCandidates),
     requiredRunes: Array.isArray(data.requiredRunes)

@@ -93,6 +93,12 @@ namespace CalamityAffixes
 		if (_loot.stripTrackedSuffixSlots) {
 			return fail("Crafting unavailable: suffix slots are disabled by runtime policy.");
 		}
+		std::uint8_t reforgesDone = 0u;
+		if (const auto it = _instanceTrackingState.selectedReforgeCounts.find(instanceKey);
+			it != _instanceTrackingState.selectedReforgeCounts.end()) reforgesDone = it->second;
+		if (a_action == AffixCraftAction::kReforge && detail::RemainingSelectedReforges(reforgesDone) == 0u) {
+			return fail("This item has used all 6 selected reforges. Scour it to reroll every affix and get them back.");
+		}
 		const auto lootType = ResolveInstanceLootType(instanceKey);
 		if (!lootType) return fail("Crafting failed: unsupported item type.");
 		const auto weaponSubtype = detail::ResolveWeaponSubtype(entry->object->As<RE::TESObjectWEAP>());
@@ -219,6 +225,12 @@ namespace CalamityAffixes
 				(freshRegular && pair.first.affixToken != runewordToken));
 		});
 		_instanceTrackingState.instanceAffixes[instanceKey] = next;
+		// Reforge spends one of the item's six; identify and scour give them back.
+		if (a_action == AffixCraftAction::kReforge) {
+			_instanceTrackingState.selectedReforgeCounts[instanceKey] = detail::NextSelectedReforgeCount(reforgesDone);
+		} else {
+			_instanceTrackingState.selectedReforgeCounts.erase(instanceKey);
+		}
 		MarkLootEvaluatedInstance(instanceKey);
 		ForgetLootPreviewSlots(instanceKey);
 		for (const auto token : next) EnsureInstanceRuntimeState(instanceKey, token);
@@ -228,7 +240,12 @@ namespace CalamityAffixes
 		const std::string operation = a_action == AffixCraftAction::kIdentify ? "Identified: " :
 			(a_action == AffixCraftAction::kReforge ? "Selected affix reforged: " : "Regular affixes rerolled: ");
 		const std::string runewordNote = runewordToken != 0u ? "Runeword preserved; " : "";
-		return OperationResult{ true, operation + name + " (" + runewordNote + "currency remaining: " + std::to_string(ownedAfter) + ")" };
+		const std::string reforgeNote = a_action == AffixCraftAction::kReforge ?
+			"reforges left: " +
+				std::to_string(detail::RemainingSelectedReforges(detail::NextSelectedReforgeCount(reforgesDone))) + "/" +
+				std::to_string(detail::kSelectedReforgesPerItem) + "; " :
+			"";
+		return OperationResult{ true, operation + name + " (" + runewordNote + reforgeNote + "currency remaining: " + std::to_string(ownedAfter) + ")" };
 	}
 
 	EventBridge::OperationResult EventBridge::ExchangeCraftingCurrency(CurrencyExchange a_exchange)
@@ -324,6 +341,7 @@ namespace CalamityAffixes
 		}
 
 		const bool hadAffixes = _instanceTrackingState.instanceAffixes.erase(instanceKey) > 0u;
+		_instanceTrackingState.selectedReforgeCounts.erase(instanceKey);
 		const bool hadRuntimeState = std::ranges::any_of(
 			_instanceTrackingState.instanceStates,
 			[instanceKey](const auto& stateEntry) {

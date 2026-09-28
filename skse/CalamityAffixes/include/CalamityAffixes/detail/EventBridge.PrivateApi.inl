@@ -55,6 +55,10 @@
 			SKSE::SerializationInterface* a_intfc,
 			std::uint32_t a_version,
 			std::uint32_t a_length);
+		void LoadInstanceReforgeCountsRecord(
+			SKSE::SerializationInterface* a_intfc,
+			std::uint32_t a_version,
+			std::uint32_t a_length);
 		void ResetActiveCountsStateForRebuild();
 		void RefreshInventoryInstanceActiveState(
 			RE::InventoryEntryData* a_entry,

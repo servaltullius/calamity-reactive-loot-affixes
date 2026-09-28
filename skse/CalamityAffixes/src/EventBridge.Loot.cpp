@@ -816,6 +816,7 @@ namespace CalamityAffixes
 		}
 
 		_instanceTrackingState.instanceAffixes.erase(a_instanceKey);
+		_instanceTrackingState.selectedReforgeCounts.erase(a_instanceKey);
 		ForgetLootEvaluatedInstance(a_instanceKey);
 		ForgetLootPreviewSlots(a_instanceKey);
 		EraseInstanceRuntimeStates(a_instanceKey);
@@ -857,6 +858,14 @@ namespace CalamityAffixes
 		if (auto affixNode = _instanceTrackingState.instanceAffixes.extract(a_oldKey); !affixNode.empty()) {
 			affixNode.key() = a_newKey;
 			_instanceTrackingState.instanceAffixes.insert(std::move(affixNode));
+		}
+
+		// The destination owns no affixes (checked above), so any count there is stale.
+		auto countNode = _instanceTrackingState.selectedReforgeCounts.extract(a_oldKey);
+		_instanceTrackingState.selectedReforgeCounts.erase(a_newKey);
+		if (!countNode.empty()) {
+			countNode.key() = a_newKey;
+			_instanceTrackingState.selectedReforgeCounts.insert(std::move(countNode));
 		}
 
 		std::vector<std::pair<InstanceStateKey, InstanceRuntimeState>> remappedStates;

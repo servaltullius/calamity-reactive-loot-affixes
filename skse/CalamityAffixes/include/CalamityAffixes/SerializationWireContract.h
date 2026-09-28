@@ -37,8 +37,11 @@ namespace CalamityAffixes::SerializationWire
 	inline constexpr RecordContract kCorpseCurrencyRuntime{ MakeRecordType('C', 'C', 'R', 'T'), 1u };
 	inline constexpr RecordContract kLootShuffleBags{ MakeRecordType('L', 'S', 'B', 'G'), 2u };
 	inline constexpr RecordContract kMigrationFlags{ MakeRecordType('M', 'F', 'L', 'G'), 1u };
+	// Appended last so every earlier record keeps its position; older DLLs drain
+	// it as an unknown record.
+	inline constexpr RecordContract kInstanceReforgeCounts{ MakeRecordType('I', 'R', 'F', 'C'), 1u };
 
-	inline constexpr std::array<RecordContract, 8> kCurrentRecordSequence{
+	inline constexpr std::array<RecordContract, 9> kCurrentRecordSequence{
 		kInstanceAffixes,
 		kInstanceRuntimeStates,
 		kRunewordState,
@@ -47,6 +50,7 @@ namespace CalamityAffixes::SerializationWire
 		kCorpseCurrencyRuntime,
 		kLootShuffleBags,
 		kMigrationFlags,
+		kInstanceReforgeCounts,
 	};
 
 	struct InstanceAffixEntry
@@ -114,6 +118,15 @@ namespace CalamityAffixes::SerializationWire
 		[[nodiscard]] bool operator==(const CorpseCurrencyLedgerEntry&) const noexcept = default;
 	};
 
+	struct InstanceReforgeCountEntry
+	{
+		std::uint32_t baseFormId{ 0u };
+		std::uint16_t uniqueId{ 0u };
+		std::uint8_t count{ 0u };
+
+		[[nodiscard]] bool operator==(const InstanceReforgeCountEntry&) const noexcept = default;
+	};
+
 	struct LootShuffleBagEntry
 	{
 		std::uint8_t id{ 0u };
@@ -125,7 +138,7 @@ namespace CalamityAffixes::SerializationWire
 
 	// This is deliberately a wire DTO, not runtime state ownership. EventBridge
 	// still decides what state is saved and when; this snapshot only fixes the
-	// current eight-record order and scalar layout in one testable place.
+	// current nine-record order and scalar layout in one testable place.
 	struct CurrentSaveSnapshot
 	{
 		std::vector<InstanceAffixEntry> instanceAffixes{};
@@ -147,6 +160,8 @@ namespace CalamityAffixes::SerializationWire
 
 		std::vector<LootShuffleBagEntry> lootShuffleBags{};
 		std::uint8_t migrationFlags{ 0u };
+
+		std::vector<InstanceReforgeCountEntry> instanceReforgeCounts{};
 
 		[[nodiscard]] bool operator==(const CurrentSaveSnapshot&) const noexcept = default;
 	};
@@ -300,6 +315,22 @@ namespace CalamityAffixes::SerializationWire
 		return WriteScalar(a_write, a_snapshot.migrationFlags);
 	}
 
+	template <class Write>
+	[[nodiscard]] bool WriteInstanceReforgeCountsPayload(Write& a_write, const CurrentSaveSnapshot& a_snapshot)
+	{
+		if (!WriteScalar(a_write, static_cast<std::uint32_t>(a_snapshot.instanceReforgeCounts.size()))) {
+			return false;
+		}
+		for (const auto& entry : a_snapshot.instanceReforgeCounts) {
+			if (!WriteScalar(a_write, entry.baseFormId) ||
+				!WriteScalar(a_write, entry.uniqueId) ||
+				!WriteScalar(a_write, entry.count)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	template <class OpenRecord, class Write>
 	[[nodiscard]] bool WriteCurrentRecords(
 		const CurrentSaveSnapshot& a_snapshot,
@@ -318,7 +349,8 @@ namespace CalamityAffixes::SerializationWire
 		       writeRecord(kLootCurrencyLedger, WriteLootCurrencyLedgerPayload<Write>) &&
 		       writeRecord(kCorpseCurrencyRuntime, WriteCorpseCurrencyRuntimePayload<Write>) &&
 		       writeRecord(kLootShuffleBags, WriteLootShuffleBagsPayload<Write>) &&
-		       writeRecord(kMigrationFlags, WriteMigrationFlagsPayload<Write>);
+		       writeRecord(kMigrationFlags, WriteMigrationFlagsPayload<Write>) &&
+		       writeRecord(kInstanceReforgeCounts, WriteInstanceReforgeCountsPayload<Write>);
 	}
 
 }

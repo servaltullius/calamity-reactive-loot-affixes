@@ -5,19 +5,19 @@
       "source": "Data/Scripts/Source/CalamityAffixes_ModeControl.psc",
       "output": "Data/Scripts/CalamityAffixes_ModeControl.pex",
       "source_sha256": "05136cface24178adacd7e00f57a42e7b8bc5661a207387356692cd45302a6cb",
-      "output_sha256": "e74cbc7af0f5115990103e9885f0092c8e288a03c3f046e234fc302d1f78afe1"
+      "output_sha256": "e363e1ce57e4d2fabcd412341e16e2073c7e024bd7cf04d722552e4ab2ee1ce0"
     },
     {
       "source": "Data/Scripts/Source/CalamityAffixes_ModEventEmitter.psc",
       "output": "Data/Scripts/CalamityAffixes_ModEventEmitter.pex",
       "source_sha256": "04c13aecd278b06d2f393938a596e804c4a80bdfe61aafaef404b3b36d67fcc1",
-      "output_sha256": "2c1f7c9569a7e6582af8573ae640641c194f666af5a7c350f8fbbc56b8dcbdae"
+      "output_sha256": "9cc49a5e7fda560a57928556abe8d7d1b91ef5f7f120f4a5ce649c48a5121659"
     },
     {
       "source": "Data/Scripts/Source/CalamityAffixes_MCMConfig.psc",
       "output": "Data/Scripts/CalamityAffixes_MCMConfig.pex",
-      "source_sha256": "f8a48d5c842f86b96744ce627a5138e85a52c0b11cceb3298bb3171685793908",
-      "output_sha256": "0f4ef97931bcdefe84c6cb6f4e4b0d485e49489489942ff61f546c7f2cd528a1"
+      "source_sha256": "0ec767a2657fdc2a252d6710408806fd75146be2786ba6036584f51b312850db",
+      "output_sha256": "17d0247f6eb8f8fe5b6070fbd995640fa7876db4d8052fcc8b854e07279bfe39"
     }
   ],
   "shared_inputs": [

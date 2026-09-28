@@ -137,6 +137,10 @@ namespace CalamityAffixes
 		std::uint32_t reforgeOrbFailStreakThreshold{ 0 };
 		std::uint32_t standardReforgeCost{ 0 };
 		std::uint32_t lockedReforgeCost{ 0 };
+		// Selected reforges the working base may still use (0 = spent until
+		// scoured), out of selectedReforgesPerItem. Older DLLs send neither.
+		std::uint32_t selectedReforgesLeft{ 0 };
+		std::uint32_t selectedReforgesPerItem{ 0 };
 		std::vector<RunewordReforgeLockCandidate> reforgeLockCandidates{};
 		EquippedBuildSummary equippedBuild{};
 		// Gates the panel's cheat-adjacent debug tools; true only while a debug

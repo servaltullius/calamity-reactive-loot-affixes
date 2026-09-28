@@ -24,6 +24,7 @@ namespace CalamityAffixes
 		}
 		_instanceTrackingState.appliedPassiveSpells.clear();
 		_instanceTrackingState.instanceAffixes.clear();
+		_instanceTrackingState.selectedReforgeCounts.clear();
 		_instanceTrackingState.equippedInstanceKeysByToken.clear();
 		_instanceTrackingState.equippedTokenCacheReady = false;
 		_lootState.ResetForLoadOrRevert();

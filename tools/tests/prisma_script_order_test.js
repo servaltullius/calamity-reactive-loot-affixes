@@ -941,6 +941,22 @@ sandbox.renderRunewordPanelState();
 assert.strictEqual(element("affixIdentifyButton").disabled, true);
 assert.strictEqual(element("affixScourButton").disabled, false, "3-affix gear can be scoured");
 assert.strictEqual(element("runewordReforgeButton").disabled, false, "3-affix gear can be reforged");
+// Selected reforge: 6 per item. Older DLLs send no limit (above); a spent item
+// keeps Scour open, since scouring is how it gets its reforges back.
+sandbox.setRunewordPanelState(JSON.stringify({ ...fullPayload, selectedReforgesPerItem: 6, selectedReforgesLeft: 4 }));
+assert.strictEqual(sandbox.selectReforgeLockCandidate(lockedPrefixToken, false), true);
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("runewordReforgeButton").disabled, false);
+assert.ok(element("runewordReforgeCostSummary").textContent.includes("Left on this item: 4/6"),
+  "the cost line shows the item's reforges left");
+sandbox.setRunewordPanelState(JSON.stringify({ ...fullPayload, selectedReforgesPerItem: 6, selectedReforgesLeft: 0 }));
+assert.strictEqual(sandbox.selectReforgeLockCandidate(lockedPrefixToken, false), true);
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("runewordReforgeButton").disabled, true, "a spent item cannot be reforged");
+assert.strictEqual(element("affixScourButton").disabled, false, "scouring a spent item gives its reforges back");
+assert.ok(element("runewordReforgeCostSummary").textContent.includes("Scour it to get 6 back"),
+  "a spent item points to Scour");
+assert.ok(element("affixScourButton").title.includes("6 selected reforges back"));
 // Legacy tokens count as regular slots but are never reforge candidates.
 sandbox.setRunewordPanelState(JSON.stringify({ ...identifiedPayload, reforgeLockCandidates: [] }));
 sandbox.renderRunewordPanelState();
@@ -1176,20 +1192,20 @@ const exchangeCommands = [];
 sandbox.calamityCommand = (command) => exchangeCommands.push(command);
 const exchangePayload = {
   hasBase: false, identifyScrollsKnown: true, identifyScrollsOwned: 16,
-  exchangeReforgeScrollCost: 3, exchangeScourScrollCost: 15
+  exchangeReforgeScrollCost: 3, exchangeScourScrollCost: 10
 };
 sandbox.setRunewordPanelState(JSON.stringify(exchangePayload));
 sandbox.renderRunewordPanelState();
 assert.strictEqual(element("resourceExchangeGroup").hidden, false);
 assert.strictEqual(element("exchangeReforgeButton").disabled, false, "trades need no working base");
 assert.strictEqual(element("exchangeScourButton").disabled, false);
-assert.strictEqual(element("exchangeScourButton").textContent, "15 Scrolls → 1 Scouring Orb");
+assert.strictEqual(element("exchangeScourButton").textContent, "10 Scrolls → 1 Scouring Orb");
 sandbox.dispatchPanelCommand(element("exchangeScourButton"));
 sandbox.dispatchPanelCommand(element("exchangeReforgeButton"));
 assert.deepStrictEqual(exchangeCommands, ["currency.exchange:scour"], "a pending trade blocks the next click");
-sandbox.setRunewordPanelState(JSON.stringify({ ...exchangePayload, identifyScrollsOwned: 14 }));
+sandbox.setRunewordPanelState(JSON.stringify({ ...exchangePayload, identifyScrollsOwned: 9 }));
 sandbox.renderRunewordPanelState();
-assert.strictEqual(element("exchangeScourButton").disabled, true, "a Scouring Orb needs 15 scrolls");
+assert.strictEqual(element("exchangeScourButton").disabled, true, "a Scouring Orb needs 10 scrolls");
 assert.strictEqual(element("exchangeReforgeButton").disabled, false);
 sandbox.dispatchPanelCommand(element("exchangeReforgeButton"));
 assert.deepStrictEqual(exchangeCommands, ["currency.exchange:scour", "currency.exchange:reforge"]);

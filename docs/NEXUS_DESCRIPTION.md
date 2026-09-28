@@ -19,9 +19,9 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 ### 현재 빌드 핵심 정책
 - 아이템 획득/제작 시 **자동 어픽스 부여 없음**
 - **확인 스크롤**: 일반 어픽스가 없는 장비에 1~3개 부여(60%/30%/10%)
-- **재련 오브**: 고른 어픽스 하나만 교체(2개, 횟수 제한 없음), 슬롯 확장(1→2: 2개, 2→3: 4개)
-- **정제 오브**: 슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴림(희귀)
-- 남는 확인 스크롤은 재련 오브(3:1)나 정제 오브(15:1)로 교환(한 방향)
+- **재련 오브**: 고른 어픽스 하나만 교체(2개, 장비마다 6회), 슬롯 확장(1→2: 2개, 2→3: 4개)
+- **정제 오브**: 슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴리고 선택 재련 6회를 되돌림
+- 남는 확인 스크롤은 재련 오브(3:1)나 정제 오브(10:1)로 교환(한 방향)
 - 모든 제작 작업은 완성 룬워드와 그 성장 상태를 보존
 - 슬롯 모델: **룬워드 1 + 일반 어픽스 최대 3**
 - 이름 마커(★ 계열) + Prisma 툴팁으로 인스턴스 상태 확인
@@ -41,7 +41,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - 피해자가 팔로워/동료, 소환·지휘 액터, 아동, player-owned/비적대 대상이면 제외합니다. 환경 오브젝트와 player-owned가 아닌 독립 NPC/팔로워의 처치도 제외합니다.
 - **일반 상자/컨테이너 활성화, 픽업, 월드 생성, 새 SPID 통화 분배는 모두 없습니다.**
 - 일반 적 기본 확률: 룬워드 조각 `8%`, 재련 오브 `12%` (MCM 변경은 다음 적격 일반 적 사망부터 반영)
-- 확인 스크롤 `20%`, 정제 오브 `2%`는 별도 독립 판정(MCM 조정 가능, 보스 확정·피티 없음)
+- 확인 스크롤 `20%`, 정제 오브 `4%`는 별도 독립 판정(MCM 조정 가능, 보스 확정·피티 없음)
 - `Unique` 고유·네임드 적: 룬워드 조각 `40%` / 재련 오브 `60%` 중 1개 확정
 - `LocRefTypeBoss` 보스 또는 `ActorTypeDragon` 드래곤: 룬워드 조각 1개 + 재련 오브 1개 확정 (`Boss/Dragon`이 `Unique`보다 우선)
 - 고유·보스 확정 보상은 일반 확률 판정과 피티를 소비하거나 초기화하지 않음
@@ -113,9 +113,9 @@ It tracks item instances via ExtraUniqueID, and gear grows through a **Scroll of
 ### Current Core Policy
 - **No automatic affix assignment** on loot/craft
 - **Scroll of Identification**: grants 1-3 regular affixes to gear without any (60%/30%/10%)
-- **Reforge Orb**: replaces one chosen affix (2 orbs, no attempt limit) and expands slots (1→2: 2 orbs, 2→3: 4 orbs)
-- **Scouring Orb**: rerolls every regular affix at once while keeping the slot count (rare)
-- Surplus Identify Scrolls trade one way for Reforge Orbs (3:1) or Scouring Orbs (15:1)
+- **Reforge Orb**: replaces one chosen affix (2 orbs, 6 times per item) and expands slots (1→2: 2 orbs, 2→3: 4 orbs)
+- **Scouring Orb**: rerolls every regular affix at once while keeping the slot count, and gives the item its 6 selected reforges back
+- Surplus Identify Scrolls trade one way for Reforge Orbs (3:1) or Scouring Orbs (10:1)
 - Every crafting action preserves a completed runeword and its growth state
 - Slot model: **1 runeword + up to 3 regular affixes**
 - Star markers (★ series) + Prisma tooltip for instance readability
@@ -135,7 +135,7 @@ It tracks item instances via ExtraUniqueID, and gear grows through a **Scroll of
 - Followers/teammates, summoned or commanded victims, children, player-owned/non-hostile victims, environmental-object kills, and kills by independent non-player-owned NPCs/followers are excluded.
 - **No generic container activation, pickup roll, world spawn, or new SPID currency distribution.**
 - Normal-enemy rates: runeword fragment `8%`, reforge orb `12%` (MCM changes apply to the next eligible normal-enemy death)
-- Scroll of Identification `20%` and Scouring Orb `2%` roll independently (MCM-adjustable; no boss guarantee or pity)
+- Scroll of Identification `20%` and Scouring Orb `4%` roll independently (MCM-adjustable; no boss guarantee or pity)
 - Unique/named actors: one guaranteed currency reward, selected as `40%` fragment / `60%` reforge orb
 - `LocRefTypeBoss` actors and `ActorTypeDragon` dragons: one guaranteed fragment plus one guaranteed reforge orb (`Boss/Dragon` overrides `Unique`)
 - Unique/boss guarantees neither run additional normal rolls nor advance/reset normal pity

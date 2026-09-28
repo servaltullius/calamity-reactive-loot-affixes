@@ -62,6 +62,9 @@
 			std::unordered_set<RE::SpellItem*> appliedPassiveSpells{};
 			std::unordered_map<std::uint64_t, InstanceAffixSlots> instanceAffixes{};
 			std::unordered_map<InstanceStateKey, InstanceRuntimeState, InstanceStateKeyHash> instanceStates{};
+			// Selected reforges done on each item since it was last identified or
+			// scoured; drives the rising reforge price (saved in IRFC).
+			std::unordered_map<std::uint64_t, std::uint8_t> selectedReforgeCounts{};
 			std::unordered_map<std::uint64_t, std::vector<std::uint64_t>> equippedInstanceKeysByToken{};
 			bool equippedTokenCacheReady{ false };
 		};

@@ -177,6 +177,11 @@ namespace RuntimeGateStoreChecks
 				{ .id = 5u, .cursor = 2u, .order = { 3u, 1u, 8u } },
 			};
 			fixture.migrationFlags = 3u;
+			fixture.instanceReforgeCounts.push_back({
+				.baseFormId = 0x0F1E2D3Cu,
+				.uniqueId = 0x4B5Au,
+				.count = 4u,
+			});
 			return fixture;
 		}
 
@@ -184,7 +189,7 @@ namespace RuntimeGateStoreChecks
 			std::span<const EncodedRecord> a_records,
 			CurrentSaveSnapshot& a_out)
 		{
-			if (a_records.size() != 8u) {
+			if (a_records.size() != 9u) {
 				return false;
 			}
 
@@ -348,6 +353,19 @@ namespace RuntimeGateStoreChecks
 				}
 			}
 
+			{
+				WireReader reader(a_records[8].payload);
+				auto readScalar = [&reader]<std::unsigned_integral T>(T& a_value) {
+					return reader.Read(a_value);
+				};
+				auto applyCount = [&decoded](const InstanceReforgeCountEntry& a_entry) {
+					decoded.instanceReforgeCounts.push_back(a_entry);
+				};
+				if (!ReadCurrentInstanceReforgeCountsPayload(readScalar, applyCount) || !reader.AtEnd()) {
+					return false;
+				}
+			}
+
 			a_out = std::move(decoded);
 			return true;
 		}
@@ -357,7 +375,7 @@ namespace RuntimeGateStoreChecks
 	{
 		using namespace CalamityAffixes::SerializationWire;
 
-		constexpr std::array<RecordContract, 8> kGoldenContracts{
+		constexpr std::array<RecordContract, 9> kGoldenContracts{
 			RecordContract{ 0x49415846u, 7u },
 			RecordContract{ 0x49525354u, 1u },
 			RecordContract{ 0x52575244u, 1u },
@@ -366,8 +384,9 @@ namespace RuntimeGateStoreChecks
 			RecordContract{ 0x43435254u, 1u },
 			RecordContract{ 0x4C534247u, 2u },
 			RecordContract{ 0x4D464C47u, 1u },
+			RecordContract{ 0x49524643u, 1u },
 		};
-		constexpr std::array<std::string_view, 8> kGoldenPayloadHex{
+		constexpr std::array<std::string_view, 9> kGoldenPayloadHex{
 			"01000000443322116655020807060504030201181716151413121128272625242322213837363534333231",
 			"01000000d4c3b2a1f6e548474645444342414030201080706050c0b0a090",
 			"efcdab895713e0ac68240df0ad0b0100000002020202010101010303030301000000bebafecaefbe887766554433221103000000",
@@ -376,6 +395,7 @@ namespace RuntimeGateStoreChecks
 			"070000000b000000010000000d0c0b0a0403020103",
 			"06000100000002000000090000000400000001000000000000000002010000000100000007000000030000000000000000040000000000000000050200000003000000030000000100000008000000",
 			"03",
+			"010000003c2d1e0f5a4b04",
 		};
 
 		if (kCurrentRecordSequence != kGoldenContracts) {
@@ -386,7 +406,7 @@ namespace RuntimeGateStoreChecks
 		const auto fixture = BuildSerializationFixture();
 		const auto encoded = EncodeCurrentRecords(fixture);
 		if (encoded.size() != kGoldenContracts.size()) {
-			std::cerr << "serialization_wire_contract: current writer did not emit all eight records\n";
+			std::cerr << "serialization_wire_contract: current writer did not emit all nine records\n";
 			return false;
 		}
 		for (std::size_t i = 0u; i < encoded.size(); ++i) {
@@ -467,6 +487,19 @@ namespace RuntimeGateStoreChecks
 		std::uint8_t migrationFlags = 0xA5u;
 		if (ReadCurrentMigrationFlagsPayload(readTruncatedMigration, migrationFlags) || migrationFlags != 0xA5u) {
 			std::cerr << "serialization_wire_contract: production MFLG reader accepted a truncated payload\n";
+			return false;
+		}
+
+		auto truncatedReforgePayload = encoded[8].payload;
+		truncatedReforgePayload.pop_back();
+		WireReader truncatedReforgeReader(truncatedReforgePayload);
+		auto readTruncatedReforge = [&truncatedReforgeReader]<std::unsigned_integral T>(T& a_value) {
+			return truncatedReforgeReader.Read(a_value);
+		};
+		std::size_t recoveredReforgeCounts = 0u;
+		auto countRecovered = [&recoveredReforgeCounts](const InstanceReforgeCountEntry&) { ++recoveredReforgeCounts; };
+		if (ReadCurrentInstanceReforgeCountsPayload(readTruncatedReforge, countRecovered) || recoveredReforgeCounts != 0u) {
+			std::cerr << "serialization_wire_contract: production IRFC reader accepted a truncated entry\n";
 			return false;
 		}
 

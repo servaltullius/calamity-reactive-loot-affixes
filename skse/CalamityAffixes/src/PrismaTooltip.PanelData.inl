@@ -178,6 +178,8 @@
 				{ "reforgeOrbFailStreakThreshold", a_state.reforgeOrbFailStreakThreshold },
 				{ "standardReforgeCost", a_state.standardReforgeCost },
 				{ "lockedReforgeCost", a_state.lockedReforgeCost },
+				{ "selectedReforgesLeft", a_state.selectedReforgesLeft },
+				{ "selectedReforgesPerItem", a_state.selectedReforgesPerItem },
 				{ "reforgeLockCandidates", reforgeLockCandidates },
 				{ "equippedBuild", BuildEquippedBuildSummaryPayload(a_state.equippedBuild) },
 				{ "debugTools", a_state.debugTools }

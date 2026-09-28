@@ -294,6 +294,8 @@ namespace CalamityAffixes
 		panelState.debugTools = _loot.debugHudNotifications || _loot.debugLog;
 		panelState.exchangeReforgeScrollCost = detail::kExchangeScrollsPerReforgeOrb;
 		panelState.exchangeScourScrollCost = detail::kExchangeScrollsPerScouringOrb;
+		panelState.selectedReforgesPerItem = detail::kSelectedReforgesPerItem;
+		panelState.selectedReforgesLeft = detail::kSelectedReforgesPerItem;
 		PopulateEquippedBuildSummary(panelState);
 		if (!_configLoaded) {
 			return panelState;
@@ -370,6 +372,10 @@ namespace CalamityAffixes
 			return panelState;
 		}
 		panelState.hasBase = true;
+		if (const auto it = _instanceTrackingState.selectedReforgeCounts.find(*_runewordState.selectedBaseKey);
+			it != _instanceTrackingState.selectedReforgeCounts.end()) {
+			panelState.selectedReforgesLeft = detail::RemainingSelectedReforges(it->second);
+		}
 		bool expansionLayoutValid = true;
 		std::uint8_t expansionPrefixCount = 0u;
 		std::uint8_t expansionSuffixCount = 0u;

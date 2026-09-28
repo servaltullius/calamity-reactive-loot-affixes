@@ -80,6 +80,8 @@ let runewordPanelState = {
   reforgeOrbsOwned: null,
   standardReforgeCost: 1,
   lockedReforgeCost: 2,
+  selectedReforgesPerItem: 0,
+  selectedReforgesLeft: 0,
   reforgeLockCandidates: []
 };
 let runewordResetArmedUntil = 0;

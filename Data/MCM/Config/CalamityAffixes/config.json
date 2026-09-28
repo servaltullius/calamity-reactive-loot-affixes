@@ -155,10 +155,10 @@
           "type": "slider",
           "id": "fScouringOrbChancePercent:General",
           "text": "Scouring Orb Chance / 정제 오브 확률",
-          "help": "Chance (%) per eligible hostile corpse, rolled independently. Scouring Orbs reroll every regular affix while keeping the slot count. / 적격 적 시체 1구당 독립 판정 확률(%)입니다. 정제 오브는 슬롯 수를 유지한 채 일반 어픽스 전부를 다시 굴립니다.",
+          "help": "Chance (%) per eligible hostile corpse, rolled independently. Scouring Orbs reroll every regular affix while keeping the slot count, and give the item its 6 selected reforges back. / 적격 적 시체 1구당 독립 판정 확률(%)입니다. 정제 오브는 슬롯 수를 유지한 채 일반 어픽스 전부를 다시 굴리고, 그 장비의 선택 재련 6회를 되돌려 줍니다.",
           "valueOptions": {
             "sourceType": "ModSettingFloat",
-            "defaultValue": 2.0,
+            "defaultValue": 4.0,
             "min": 0.0,
             "max": 100.0,
             "step": 0.5,

@@ -268,8 +268,8 @@ static_assert(ScourAffixCount(1u) == 1u && ScourAffixCount(3u) == 3u && ScourAff
 
 // Scroll trades are one way: Identify Scrolls in, a scarcer currency out.
 static_assert(CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kReforgeOrb).sourceCost == 3u &&
-    CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kScouringOrb).sourceCost == 15u,
-    "exchange rates are 3 scrolls per Reforge Orb and 15 per Scouring Orb");
+    CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kScouringOrb).sourceCost == 10u,
+    "exchange rates are 3 scrolls per Reforge Orb and 10 per Scouring Orb");
 static_assert(CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kReforgeOrb).sourceEditorId ==
         "CAFF_Misc_IdentifyScroll" &&
     CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kScouringOrb).sourceEditorId ==
@@ -280,3 +280,14 @@ static_assert(CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::
     CalamityAffixes::detail::ResolveCurrencyExchange(CalamityAffixes::CurrencyExchange::kScouringOrb).targetEditorId ==
         "CAFF_Misc_ScouringOrb",
     "trades grant the matching orb");
+
+// Selected reforge: 6 per item until the item is scoured or identified again.
+using CalamityAffixes::detail::NextSelectedReforgeCount;
+using CalamityAffixes::detail::RemainingSelectedReforges;
+static_assert(CalamityAffixes::detail::kSelectedReforgesPerItem == 6u);
+static_assert(RemainingSelectedReforges(0u) == 6u && RemainingSelectedReforges(5u) == 1u,
+    "each selected reforge uses one of the item's six");
+static_assert(RemainingSelectedReforges(6u) == 0u && RemainingSelectedReforges(0xFFu) == 0u,
+    "a spent item stays locked until it is scoured");
+static_assert(NextSelectedReforgeCount(0u) == 1u && NextSelectedReforgeCount(0xFEu) == 0xFFu &&
+    NextSelectedReforgeCount(0xFFu) == 0xFFu, "the per-item count saturates instead of wrapping back to unlocked");

@@ -17,7 +17,7 @@ string Property ScouringOrbChanceSettingName = "fScouringOrbChancePercent:Genera
 float Property RunewordFragmentChanceDefault = 8.0 AutoReadOnly Hidden
 float Property ReforgeOrbChanceDefault = 12.0 AutoReadOnly Hidden
 float Property IdentifyScrollChanceDefault = 20.0 AutoReadOnly Hidden
-float Property ScouringOrbChanceDefault = 2.0 AutoReadOnly Hidden
+float Property ScouringOrbChanceDefault = 4.0 AutoReadOnly Hidden
 
 bool _didLeaderElection = false
 bool _isSessionLeader = false

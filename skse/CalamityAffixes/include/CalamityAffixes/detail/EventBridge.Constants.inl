@@ -72,11 +72,13 @@
 		static constexpr std::uint32_t kSerializationRecordLootCurrencyLedger = 'LCLD';
 		static constexpr std::uint32_t kSerializationRecordLootShuffleBags = 'LSBG';
 		static constexpr std::uint32_t kSerializationRecordMigrationFlags = 'MFLG';
+		static constexpr std::uint32_t kSerializationRecordInstanceReforgeCounts = 'IRFC';
 		static constexpr std::uint32_t kRunewordSerializationVersion = 1;
 		static constexpr std::uint32_t kMigrationFlagsVersion = 1;
 		static constexpr std::uint32_t kSerializationRecordCorpseCurrencyRuntime = 'CCRT';
 		static constexpr std::uint32_t kInstanceRuntimeStateSerializationVersion = 1;
 		static constexpr std::uint32_t kLootEvaluatedSerializationVersion = 1;
+		static constexpr std::uint32_t kInstanceReforgeCountSerializationVersion = 1;
 		static constexpr std::uint32_t kLootCurrencyLedgerSerializationVersion = 2;
 		static constexpr std::uint32_t kLootCurrencyLedgerSerializationVersionV1 = 1;
 		static constexpr std::uint32_t kLootShuffleBagSerializationVersion = 2;

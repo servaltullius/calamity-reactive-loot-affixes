@@ -63,6 +63,28 @@ namespace CalamityAffixes::SerializationWire
 		return {};
 	}
 
+	// Returns false on truncation; entries read before the cut are already applied.
+	template <class Read, class Apply>
+	[[nodiscard]] bool ReadCurrentInstanceReforgeCountsPayload(
+		Read& a_read,
+		Apply&& a_apply)
+	{
+		std::uint32_t count = 0u;
+		if (!static_cast<bool>(a_read(count))) {
+			return false;
+		}
+		for (std::uint32_t i = 0u; i < count; ++i) {
+			InstanceReforgeCountEntry entry{};
+			if (!static_cast<bool>(a_read(entry.baseFormId)) ||
+				!static_cast<bool>(a_read(entry.uniqueId)) ||
+				!static_cast<bool>(a_read(entry.count))) {
+				return false;
+			}
+			a_apply(entry);
+		}
+		return true;
+	}
+
 	template <class Read>
 	[[nodiscard]] bool ReadCurrentMigrationFlagsPayload(
 		Read& a_read,

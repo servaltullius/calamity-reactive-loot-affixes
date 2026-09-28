@@ -67,6 +67,7 @@ namespace CalamityAffixes
 		SKSE::log::info("CalamityAffixes: Load() — deserializing co-save records.");
 
 		_instanceTrackingState.instanceAffixes.clear();
+		_instanceTrackingState.selectedReforgeCounts.clear();
 		_instanceTrackingState.equippedInstanceKeysByToken.clear();
 		_instanceTrackingState.equippedTokenCacheReady = false;
 		_lootState.ResetForLoadOrRevert();
@@ -119,6 +120,9 @@ namespace CalamityAffixes
 				break;
 			case kSerializationRecordMigrationFlags:
 				LoadMigrationFlagsRecord(a_intfc, version, length);
+				break;
+			case kSerializationRecordInstanceReforgeCounts:
+				LoadInstanceReforgeCountsRecord(a_intfc, version, length);
 				break;
 			default:
 				DrainRecordBytes(a_intfc, length, "unknown-record");

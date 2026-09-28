@@ -55,6 +55,10 @@ const engineFeedbackLocalizations = {
   "Failed to select runeword base.": ["Failed to select runeword base.", "룬워드 베이스 선택에 실패했습니다."],
   "Failed to select runeword recipe.": ["Failed to select runeword recipe.", "룬워드 레시피 선택에 실패했습니다."],
   "Runeword system unavailable.": ["Runeword system unavailable.", "룬워드 시스템을 사용할 수 없습니다."],
+  "This item has used all 6 selected reforges. Scour it to reroll every affix and get them back.": [
+    "This item has used all 6 selected reforges. Scour it to reroll every affix and get them back.",
+    "이 장비는 선택 재련 6회를 모두 썼습니다. 정제하면 어픽스 전부를 다시 굴리고 6회를 되돌려 받습니다."
+  ],
   "Reforge system unavailable.": ["Reforge system unavailable.", "재련 시스템을 사용할 수 없습니다."],
   "Reset system unavailable.": ["Reset system unavailable.", "초기화 시스템을 사용할 수 없습니다."],
   "Currency system unavailable.": ["Currency system unavailable.", "화폐 시스템을 사용할 수 없습니다."]

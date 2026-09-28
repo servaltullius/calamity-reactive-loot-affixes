@@ -89,8 +89,15 @@ namespace CalamityAffixes
 				runtime.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent));
 			const double identifyScrollChancePercent =
 				runtime.value("identifyScrollChancePercent", static_cast<double>(_loot.identifyScrollChancePercent));
-			const double scouringOrbChancePercent =
+			double scouringOrbChancePercent =
 				runtime.value("scouringOrbChancePercent", static_cast<double>(_loot.scouringOrbChancePercent));
+			// 2% was the default until selected reforge got a per-item limit and the
+			// Scouring Orb became how a spent item unlocks. Without MCM Helper a saved
+			// 2 can only be that old default; MCM users get their own value back from
+			// the MCM sync on every load.
+			if (scouringOrbChancePercent == 2.0) {
+				scouringOrbChancePercent = 4.0;
+			}
 			const bool allowNonHostileFirstHitProc = runtime.value(
 				"allowNonHostileFirstHitProc",
 				_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed));

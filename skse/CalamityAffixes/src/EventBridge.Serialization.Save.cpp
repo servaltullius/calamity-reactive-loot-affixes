@@ -24,6 +24,8 @@ namespace CalamityAffixes
 		static_assert(kLootShuffleBagSerializationVersion == SerializationWire::kLootShuffleBags.version);
 		static_assert(kSerializationRecordMigrationFlags == SerializationWire::kMigrationFlags.type);
 		static_assert(kMigrationFlagsVersion == SerializationWire::kMigrationFlags.version);
+		static_assert(kSerializationRecordInstanceReforgeCounts == SerializationWire::kInstanceReforgeCounts.type);
+		static_assert(kInstanceReforgeCountSerializationVersion == SerializationWire::kInstanceReforgeCounts.version);
 
 		if (!a_intfc) {
 			return;
@@ -138,6 +140,20 @@ namespace CalamityAffixes
 
 		snapshot.migrationFlags = (_miscCurrencyMigrated ? 1u : 0u)
 			| (_miscCurrencyRecovered ? 2u : 0u);
+
+		// Only items that still carry affixes keep a count; a stale entry would
+		// otherwise price a future item that reuses the same instance key.
+		snapshot.instanceReforgeCounts.reserve(_instanceTrackingState.selectedReforgeCounts.size());
+		for (const auto& [key, count] : _instanceTrackingState.selectedReforgeCounts) {
+			if (count == 0u || !_instanceTrackingState.instanceAffixes.contains(key)) {
+				continue;
+			}
+			snapshot.instanceReforgeCounts.push_back({
+				.baseFormId = static_cast<std::uint32_t>(key >> 16),
+				.uniqueId = static_cast<std::uint16_t>(key & 0xFFFFu),
+				.count = count,
+			});
+		}
 
 		auto openRecord = [a_intfc](std::uint32_t a_type, std::uint32_t a_version) {
 			return a_intfc->OpenRecord(a_type, a_version);

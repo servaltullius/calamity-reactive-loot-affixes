@@ -600,12 +600,48 @@
 		_miscCurrencyRecovered = (flags & 2u) != 0;
 	}
 
+	void EventBridge::LoadInstanceReforgeCountsRecord(
+		SKSE::SerializationInterface* a_intfc,
+		std::uint32_t a_version,
+		std::uint32_t a_length)
+	{
+		if (a_version != kInstanceReforgeCountSerializationVersion) {
+			DrainRecordBytes(a_intfc, a_length, "unsupported-irfc-version");
+			return;
+		}
+
+		SerializationLoadCursor cursor{ .intfc = a_intfc, .length = a_length };
+		auto readScalar = [&cursor]<std::unsigned_integral T>(T& a_value) {
+			return cursor.Read(a_value);
+		};
+		auto apply = [&](const SerializationWire::InstanceReforgeCountEntry& a_entry) {
+			RE::FormID resolvedBaseID = 0;
+			if (a_entry.count == 0u || !a_intfc->ResolveFormID(a_entry.baseFormId, resolvedBaseID)) {
+				return;
+			}
+			if (const auto key = MakeInstanceKey(resolvedBaseID, a_entry.uniqueId); key != 0) {
+				_instanceTrackingState.selectedReforgeCounts[key] = a_entry.count;
+			}
+		};
+		if (!SerializationWire::ReadCurrentInstanceReforgeCountsPayload(readScalar, apply)) {
+			SKSE::log::warn(
+				"CalamityAffixes: truncated IRFC record; recovered {} reforge counts.",
+				_instanceTrackingState.selectedReforgeCounts.size());
+			cursor.DrainRemaining("partial-record-recovery");
+		}
+	}
+
 	void EventBridge::FinalizeLoadedSerializationState()
 	{
 		SKSE::log::info("CalamityAffixes: Load() — deserialized {} instance entries, {} runtime states.", _instanceTrackingState.instanceAffixes.size(), _instanceTrackingState.instanceStates.size());
 		if (!_affixRuntimeState.affixRegistry.affixIndexByToken.empty() && !_affixRuntimeState.affixes.empty()) {
 			SanitizeAllTrackedLootInstancesForCurrentLootRules("Serialization.Load");
 		}
+		// IRFC is read after IAXF; a count whose item did not load (or was just
+		// sanitized away) must not price a future item that reuses the key.
+		std::erase_if(_instanceTrackingState.selectedReforgeCounts, [this](const auto& a_entry) {
+			return !_instanceTrackingState.instanceAffixes.contains(a_entry.first);
+		});
 
 		for (const auto& [key, _] : _instanceTrackingState.instanceAffixes) {
 			_lootState.evaluatedInstances.insert(key);
