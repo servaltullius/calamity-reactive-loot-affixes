@@ -1,6 +1,8 @@
 # Calamity - Reactive Loot & Affixes v2.2.3
 
-v2.2.3은 **스카이림 AE 1.7.x에서 모드가 로드되지 않던 문제**를 고친 핫픽스입니다. 게임 동작, ESP, 코세이브, 게임 데이터는 2.2.2와 같습니다.
+v2.2.3은 **스카이림 AE 1.7.x에서 모드가 로드되지 않던 문제**를 고친 핫픽스입니다. 게임 동작, ESP, 코세이브, 게임 데이터는 2.2.2와 같습니다. 2.2.3-rc2에서 공개 테스트했고, 신고해 주신 분이 AE 1.7.104에서 로드와 새 게임 시작을 확인했습니다.
+
+*English summary: hotfix for Skyrim AE 1.7.x (e.g. 1.7.104), which failed at startup with `failed to open address library file` and then `Unsupported address library format: 5`. The plugin now recognizes 1.7.x as AE and reads the new format 5 Address Library. Confirmed loading into a new game on 1.7.104 by the reporter. SE 1.5.97 and AE 1.6.x are unchanged; install over 2.2.2 with Replace, no new game needed.*
 
 ## 고친 점
 
@@ -32,12 +34,12 @@ v2.2.3은 **스카이림 AE 1.7.x에서 모드가 로드되지 않던 문제**�
 
 - 수정은 CommonLibSSE-NG 로컬 패치로 넣었고, 벤더링한 코드가 원본 커밋과 패치 4개로 정확히 재현되는 것을 확인했습니다.
 - Python·생성기·SKSE 검사와 배포 패키지 검증을 통과했습니다.
-- 형식 5 읽기는 1.7.99 Address Library 파일로 파일 구조와 주소 값을 대조했고, Calamity가 훅을 거는 Actor·Character·PlayerCharacter 가상 함수 표는 1.6.1170과 1.7.99에서 크기가 같습니다.
-- AE 1.6.1170에서 정상 로드를 확인했습니다. AE 1.7.x에서의 실제 실행은 신고해 주신 분의 확인에 기대고 있습니다. 문제가 남아 있으면 `skse64.log`와 함께 알려 주세요.
+- 1.7.104 Address Library(v13)로 파일 구조를 대조했습니다. Calamity와 CommonLib가 참조하는 AE 주소 중 1.7.104에 없는 것은 쓰지 않는 전투 AI 내부 항목 2개뿐이고, 가상 함수 표 크기는 1.6.1170과 1.7.104에서 모두 같습니다.
+- AE 1.6.1170에서 정상 로드를 확인했고, 신고해 주신 분이 **AE 1.7.104에서 rc2로 로드와 새 게임 시작을 확인**했습니다. 1.7.x에서 문제가 보이면 `skse64.log`와 `CalamityAffixes.log`를 함께 알려 주세요.
 
 ## 설치와 업데이트
 
-1. **`CalamityAffixes_MO2_v2.2.3_2026-09-30.zip`** 전체를 설치하고, MO2에서 기존 Calamity 모드를 **Replace**하세요.
+1. **`CalamityAffixes_MO2_v2.2.3_2026-10-01.zip`** 전체를 설치하고, MO2에서 기존 Calamity 모드를 **Replace**하세요.
 2. 새 게임은 필요하지 않습니다.
 
 Prisma UI는 이 ZIP에 포함되지 않습니다. 공개 자산은 **MO2 ZIP, ZIP SHA256, DLL, ESP** 네 개입니다.
