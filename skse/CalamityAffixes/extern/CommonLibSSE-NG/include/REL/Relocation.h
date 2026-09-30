@@ -1057,6 +1057,19 @@ namespace REL {
 #endif
 
         [[nodiscard]] inline std::size_t id2offset(std::uint64_t a_id) const {
+            // Format 5 (AE 1.7.x) is a dense table indexed by id; 0 marks an unused id.
+            if (!_id2offsetDense.empty()) {
+                if (a_id >= _id2offsetDense.size() || _id2offsetDense[a_id] == 0) {
+                    stl::report_and_fail(
+                            fmt::format(
+                                    "Failed to find the id within the address library: {}\n"
+                                    "This means this script extender plugin is incompatible with the address "
+                                    "library for this version of the game, and thus does not support it."sv,
+                                    a_id));
+                }
+                return static_cast<std::size_t>(_id2offsetDense[a_id]);
+            }
+
             mapping_t elem{a_id, 0};
             const auto it = std::lower_bound(
                     _id2offset.begin(),
@@ -1110,6 +1123,10 @@ namespace REL {
 
             inline void ignore(std::streamsize a_count) { _stream.ignore(a_count); }
 
+            inline void read_bytes(void *a_dst, std::streamsize a_count) {
+                _stream.read(static_cast<char *>(a_dst), a_count);
+            }
+
             template<class T>
             inline void readin(T &a_val) {
                 _stream.read(reinterpret_cast<char *>(std::addressof(a_val)), sizeof(T));
@@ -1132,9 +1149,7 @@ namespace REL {
 
         class header_t {
         public:
-            void read(istream_t &a_in, std::uint8_t a_formatVersion) {
-                std::int32_t format{};
-                a_in.readin(format);
+            void read(istream_t &a_in, std::int32_t format, std::uint8_t a_formatVersion) {
                 if (format != a_formatVersion) {
                     stl::report_and_fail(
                             fmt::format(
@@ -1210,8 +1225,14 @@ namespace REL {
         bool load_file(stl::zwstring a_filename, Version a_version, std::uint8_t a_formatVersion, bool a_failOnError) {
             try {
                 istream_t in(a_filename.data(), std::ios::in | std::ios::binary);
+                std::int32_t format{};
+                in.readin(format);
+                // AE 1.7.x ships its address library in format 5.
+                if (format == 5 && a_formatVersion == 2) {
+                    return load_v5(in, a_version, a_failOnError);
+                }
                 header_t header;
-                header.read(in, a_formatVersion);
+                header.read(in, format, a_formatVersion);
                 if (header.version() != a_version) {
                     return stl::report_and_error("version mismatch"sv, a_failOnError);
                 }
@@ -1244,6 +1265,38 @@ namespace REL {
                                 stl::utf16_to_utf8(a_filename).value_or("<unknown filename>"s)), a_failOnError);
                 return false;
             }
+            return true;
+        }
+
+        // Format 5 header after the format field: version[4] (u32), name[64],
+        // pointerSize (i32), dataFormat (i32), offsetCount (i32), then offsetCount
+        // u32 offsets indexed directly by id.
+        bool load_v5(istream_t &a_in, Version a_version, bool a_failOnError) {
+            std::uint32_t version[4]{};
+            char name[64]{};
+            std::int32_t pointerSize{};
+            std::int32_t dataFormat{};
+            std::int32_t offsetCount{};
+            a_in.readin(version);
+            a_in.readin(name);
+            a_in.readin(pointerSize);
+            a_in.readin(dataFormat);
+            a_in.readin(offsetCount);
+
+            Version fileVersion;
+            for (std::size_t i = 0; i < std::extent_v<decltype(version)>; ++i) {
+                fileVersion[i] = static_cast<std::uint16_t>(version[i]);
+            }
+            if (fileVersion != a_version) {
+                return stl::report_and_error("version mismatch"sv, a_failOnError);
+            }
+            if (offsetCount <= 0 || offsetCount > (1 << 24)) {
+                return stl::report_and_error("invalid address library offset count"sv, a_failOnError);
+            }
+
+            std::vector<std::uint32_t> dense(static_cast<std::size_t>(offsetCount));
+            a_in.read_bytes(dense.data(), static_cast<std::streamsize>(dense.size() * sizeof(std::uint32_t)));
+            _id2offsetDense = std::move(dense);
             return true;
         }
 
@@ -1379,6 +1432,7 @@ namespace REL {
         void clear() {
             _mmap.close();
             _id2offset = {};
+            _id2offsetDense.clear();
         }
 
         static IDDatabase _instance;
@@ -1386,6 +1440,7 @@ namespace REL {
         static inline std::mutex _initLock;
         detail::memory_map _mmap;
         std::span<mapping_t> _id2offset;
+        std::vector<std::uint32_t> _id2offsetDense;
     };
 
     class Offset {

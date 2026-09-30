@@ -28,11 +28,11 @@
     {
       "file": "include/REL/Relocation.h",
       "patch": "patches/include-REL-Relocation.patch",
-      "reason": "Runtime detection matched minor version 6 exactly, so Skyrim AE 1.7.x (minor 7, e.g. 1.7.104) was classified as SE and the plugin failed at load looking for the SE-named address library file version-1-7-x.bin. Treat minor >= 6 as AE, as the maintained fork alandtse/CommonLibVR (ng) does.",
+      "reason": "Runtime detection matched minor version 6 exactly, so Skyrim AE 1.7.x (minor 7, e.g. 1.7.104) was classified as SE and the plugin failed at load looking for the SE-named address library file version-1-7-x.bin. Treat minor >= 6 as AE, as the maintained fork alandtse/CommonLibVR (ng) does. AE 1.7.x also ships its address library in format 5 (a dense u32 offset table indexed by id), which the loader rejected; format 5 is now read into a private table when AE expects format 2, following alandtse/CommonLibSSE-NG PR 299. Formats 1 and 2 load exactly as before.",
       "upstreamable": true,
-      "patched_sha256": "8cd02b51476b788b08cf1a27e5be1ca3012330809b46d4dc67d706a96419ec06"
+      "patched_sha256": "9177ae464cbad2721efc9f6112c9e348b4e4ea917a6fde432d403b598475f504"
     }
   ],
-  "tree_sha256": "be9f3d5c3f9a2b7fed2c99b8642d308ab0cb9d75a07154a62a7741bdd1fb0e70",
+  "tree_sha256": "56df2d6cd17b4649e4f5aa3473afa0e3b521d979b55c187f71a84976696cde13",
   "tracked_file_count": 1807
 }

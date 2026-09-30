@@ -14,6 +14,7 @@ v2.2.3은 스카이림 AE 1.7.x에서 모드가 로드되지 않던 문제를 �
 ### Fixed
 
 - **스카이림 AE 1.7.x(예: 1.7.104)에서 게임 시작 시 `REL/Relocation.h(1104): failed to open address library file` 오류로 멈추던 문제를 고쳤습니다.** DLL에 들어간 CommonLibSSE-NG가 게임 버전의 두 번째 자리가 정확히 6일 때만 AE로 인식해서, 1.7.x를 SE로 잘못 판단했습니다. 그래서 Address Library의 AE용 파일(`versionlib-1-7-104-0.bin`)이 아니라 존재하지 않는 SE식 파일(`version-1-7-104-0.bin`)을 찾다가 실패했습니다. 이제 6 이상을 AE로 인식합니다. 이 라이브러리를 이어서 관리하는 포크(alandtse/CommonLibVR)와 같은 수정이며, 로컬 패치로 추가해 벤더링 핀에 기록했습니다. 신고해 주신 분께 감사드립니다.
+- **AE 1.7.x에서 이어서 나던 `REL/Relocation.h(1139): Unsupported address library format: 5` 오류를 고쳤습니다.** 1.7.x용 Address Library는 새 형식(format 5, ID 순서대로 주소를 나열한 표)으로 배포되는데, DLL은 기존 형식 1·2만 읽을 수 있었습니다. 2.2.3-rc1에서 버전 인식을 고치자 올바른 파일을 열고 이 단계에서 멈췄습니다. AE가 형식 5 파일을 주면 이제 그대로 읽습니다. 유지 관리되는 포크 alandtse/CommonLibSSE-NG의 PR 299와 같은 파일 구조를 따르며, SE 1.5.97과 AE 1.6.x가 쓰는 형식 1·2는 전과 똑같이 읽습니다.
 
 ## [2.2.2] - 2026-09-28
 
