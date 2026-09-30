@@ -724,15 +724,15 @@ namespace REL {
             _instance._filename = _instance._filePath = a_filename.data();
             _instance._version = a_version;
             if (a_runtime == Runtime::Unknown) {
-                switch (a_version[1]) {
-                    case 4:
-                        _instance._runtime = Runtime::VR;
-                        break;
-                    case 6:
-                        _instance._runtime = Runtime::AE;
-                        break;
-                    default:
-                        _instance._runtime = Runtime::SE;
+                // Minor version 4 = VR, 5 = SE, 6+ = AE. AE 1.7.x bumped the
+                // minor version itself, so an exact match on 6 would
+                // misclassify newer AE runtimes as SE.
+                if (a_version[1] == 4) {
+                    _instance._runtime = Runtime::VR;
+                } else if (a_version[1] >= 6) {
+                    _instance._runtime = Runtime::AE;
+                } else {
+                    _instance._runtime = Runtime::SE;
                 }
             } else {
                 _instance._runtime = a_runtime;
@@ -889,15 +889,16 @@ namespace REL {
             const auto version = get_file_version(_filePath);
             if (version) {
                 _version = *version;
-                switch (_version[1]) {
-                    case 4:
-                        _runtime = Runtime::VR;
-                        break;
-                    case 6:
-                        _runtime = Runtime::AE;
-                        break;
-                    default:
-                        _runtime = Runtime::SE;
+                // Minor version 4 = VR, 5 = SE, 6+ = AE. AE 1.7.x bumped the
+                // minor version itself, so an exact match on 6 would
+                // misclassify newer AE runtimes as SE and load the SE-named
+                // address library file.
+                if (_version[1] == 4) {
+                    _runtime = Runtime::VR;
+                } else if (_version[1] >= 6) {
+                    _runtime = Runtime::AE;
+                } else {
+                    _runtime = Runtime::SE;
                 }
                 return true;
             }

@@ -24,8 +24,15 @@
       "reason": "Upstream typo: Assign() calls a_src.Begin()/End() which do not exist on the const path. Fixed to begin()/end().",
       "upstreamable": true,
       "patched_sha256": "2013cc3cf5495055c56a9b54e8f99f21ab4be13c0f4f56ac0319b33084f7f084"
+    },
+    {
+      "file": "include/REL/Relocation.h",
+      "patch": "patches/include-REL-Relocation.patch",
+      "reason": "Runtime detection matched minor version 6 exactly, so Skyrim AE 1.7.x (minor 7, e.g. 1.7.104) was classified as SE and the plugin failed at load looking for the SE-named address library file version-1-7-x.bin. Treat minor >= 6 as AE, as the maintained fork alandtse/CommonLibVR (ng) does.",
+      "upstreamable": true,
+      "patched_sha256": "8cd02b51476b788b08cf1a27e5be1ca3012330809b46d4dc67d706a96419ec06"
     }
   ],
-  "tree_sha256": "36d65c46c60d61a269e51580e93ea2eda9c5bb98dbc297d8716d6ad8737cf4ce",
+  "tree_sha256": "be9f3d5c3f9a2b7fed2c99b8642d308ab0cb9d75a07154a62a7741bdd1fb0e70",
   "tracked_file_count": 1807
 }
