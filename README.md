@@ -198,9 +198,9 @@
 
 ### 게임/런타임
 
-- 단일 CommonLibSSE-NG/Address Library 빌드로 Skyrim SE 1.5.97 및 AE 1.6.x를 대상으로 합니다. 자동 테스트는 Skyrim 실행 파일을 구동하지 않으므로, 실제 인게임 호환성은 사용 중인 런타임·SKSE·Address Library 조합에서 확인해야 합니다.
+- 단일 CommonLibSSE-NG/Address Library 빌드로 Skyrim SE 1.5.97 및 AE 1.6.x·1.7.x를 대상으로 합니다. 자동 테스트는 Skyrim 실행 파일을 구동하지 않으므로, 실제 인게임 호환성은 사용 중인 런타임·SKSE·Address Library 조합에서 확인해야 합니다.
 - SKSE64: 런타임에 맞는 버전 설치 (SE/AE 빌드가 분리됨) ([skse.silverlock.org](https://skse.silverlock.org/))
-- Address Library for SKSE Plugins: 런타임(1.5.x vs 1.6.x)에 맞는 파일 설치 ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/32444))
+- Address Library for SKSE Plugins: 런타임(1.5.x vs 1.6.x·1.7.x)에 맞는 파일 설치 ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/32444))
 
 ### 의존성(기본 UX 기준)
 
