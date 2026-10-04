@@ -152,6 +152,8 @@ namespace CalamityAffixes
 		}
 
 		ProcessTrigger(Trigger::kHit, context.playerOwner, a_target, a_hitData);
+		// After the trigger pass, so the power attack that opens the window echoes too.
+		ProcessEchoStrikeHit(a_attacker, a_target, a_hitData, a_now);
 
 		if (a_attacker->IsPlayerRef() && a_hitData && a_hitData->attackDataSpell && !_affixSpecialActions.archmageAffixIndices.empty()) {
 			ProcessArchmageSpellHit(a_attacker, a_target, a_hitData->attackDataSpell, a_hitData);

@@ -97,6 +97,7 @@ int main()
 	const bool triggerDispatchSnapshotIsolationOk = CheckTriggerDispatchSnapshotIsolation();
 	const bool triggerDispatchSnapshotNullSourceOk = CheckTriggerDispatchSnapshotNullSource();
 	const bool triggerDispatchSnapshotBufferReuseOk = CheckTriggerDispatchSnapshotBufferReuse();
+	const bool echoStrikeRuntimeStateOk = CheckEchoStrikeRuntimeState();
 	const bool affixCountRollDistributionOk = CheckAffixCountRollDistribution();
 	const bool affixCountRollUnitBoundsOk = CheckAffixCountRollUnitBounds();
 	const bool reforgeTargetAffixCountBoundsOk = CheckReforgeTargetAffixCountBounds();
@@ -170,6 +171,7 @@ int main()
 	        triggerDispatchSnapshotIsolationOk &&
 	        triggerDispatchSnapshotNullSourceOk &&
 	        triggerDispatchSnapshotBufferReuseOk &&
+	        echoStrikeRuntimeStateOk &&
 	        affixCountRollDistributionOk &&
 	        affixCountRollUnitBoundsOk &&
 	        reforgeTargetAffixCountBoundsOk &&

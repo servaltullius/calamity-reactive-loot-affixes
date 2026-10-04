@@ -122,6 +122,7 @@ namespace CalamityAffixes
 			{ "rw_phoenix", "weapon_shield" },
 			{ "rw_dream", "helm_shield" },
 			{ "rw_dragon", "armor_shield" },
+			{ "rw_shadow_boxer", "melee_weapon" },
 		};
 
 		static_assert(!HasDuplicateOverrideIds(kRecommendedBaseOverrides),
@@ -404,6 +405,8 @@ namespace CalamityAffixes
 				const auto spellName = spellNameOr(a_action.spell, "Spell");
 				return "치명타 시 " + spellName + " 시전";
 			}
+			case ActionType::kEchoStrike:
+				return "그림자 권투: 근접 적중마다 그림자가 한 번 더 타격";
 			case ActionType::kDebugNotify:
 				return "디버그 알림";
 			default:
@@ -470,6 +473,8 @@ namespace CalamityAffixes
 				return "detonate a summoned corpse";
 			case ActionType::kCastOnCrit:
 				return "cast " + spellNameOr(a_action.spell, "Spell") + " on critical hit";
+			case ActionType::kEchoStrike:
+				return "enter Shadow Boxing: your shadow repeats each melee hit";
 			case ActionType::kDebugNotify:
 				return "show a debug notification";
 			default:
@@ -516,6 +521,8 @@ namespace CalamityAffixes
 					return static_cast<float>(a_action.trapTtl.count()) / 1000.0f;
 				}
 				return maxSpellDurationSeconds(a_action.spell);
+			case ActionType::kEchoStrike:
+				return static_cast<float>(a_action.echoWindow.count()) / 1000.0f;
 			default:
 				return 0.0f;
 			}
@@ -568,7 +575,9 @@ namespace CalamityAffixes
 			}
 
 			std::string summary;
-			summary.append(triggerTextKo(a_affix.trigger));
+			summary.append(a_affix.action.type == ActionType::kEchoStrike && a_affix.action.echoRequirePowerAttack ?
+					std::string_view{ "강공격 적중 시" } :
+					triggerTextKo(a_affix.trigger));
 			summary.push_back(' ');
 			const auto chancePct = std::clamp(a_affix.procChancePct, 0.0f, 100.0f);
 			if (chancePct > 0.0f) {
@@ -614,7 +623,9 @@ namespace CalamityAffixes
 			}
 
 			std::string summary;
-			summary.append(triggerTextEn(a_affix.trigger));
+			summary.append(a_affix.action.type == ActionType::kEchoStrike && a_affix.action.echoRequirePowerAttack ?
+					std::string_view{ "On power attack hit" } :
+					triggerTextEn(a_affix.trigger));
 			summary.push_back(' ');
 			const auto chancePct = std::clamp(a_affix.procChancePct, 0.0f, 100.0f);
 			if (chancePct > 0.0f) {
@@ -697,6 +708,13 @@ namespace CalamityAffixes
 				break;
 			case ActionType::kSpawnTrap:
 				appendSpellProfile("함정 발동 효과 (Trap Trigger)", a_affix.action.spell);
+				break;
+			case ActionType::kEchoStrike:
+				appendSpellProfile("그림자 태세 (Stance)", a_affix.action.echoStanceSpell);
+				appendDelimited(
+					detail,
+					"그림자 타격 (Echo): " + formatFloat1(static_cast<float>(a_affix.action.echoDelay.count()) / 1000.0f) +
+						"초 뒤 재타격");
 				break;
 			default:
 				break;
@@ -851,6 +869,13 @@ namespace CalamityAffixes
 				break;
 			case ActionType::kSpawnTrap:
 				appendSpellProfile("Trap trigger", a_affix.action.spell);
+				break;
+			case ActionType::kEchoStrike:
+				appendSpellProfile("Shadow stance", a_affix.action.echoStanceSpell);
+				appendDelimited(
+					detail,
+					"Shadow echo: repeats the hit after " +
+						formatFloat1(static_cast<float>(a_affix.action.echoDelay.count()) / 1000.0f) + "s");
 				break;
 			default:
 				break;

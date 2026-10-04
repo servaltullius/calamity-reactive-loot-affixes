@@ -153,6 +153,7 @@ namespace CalamityAffixes::RunewordSummary
 		{ "rw_smoke", "self_smoke_escape" },
 		{ "rw_gloom", "absorb_magicka" },
 		{ "rw_lawbringer", "kill_turn_undead" },
+		{ "rw_shadow_boxer", "signature_shadow_boxer" },
 	};
 
 	static_assert(!HasDuplicateOverrideIds(kEffectSummaryOverrides),
@@ -219,6 +220,7 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "signature_faith") return "적중 시 공격력 +20%·공속 +15%(6초), 상시 공속 +15%";
 		if (a_key == "signature_chains_of_honor") return "피격 시 이동 속도 +35%(5초), 상시 3원소 저항 +15";
 		if (a_key == "signature_breath_of_the_dying") return "처치한 시체가 폭발해 반경 600에 독 피해 24 + 시체 최대 체력 6%";
+		if (a_key == "signature_shadow_boxer") return "그림자 권투: 근접 적중마다 0.25초 뒤 그림자가 물리 피해의 40%로 재타격";
 		if (a_key == "signature_obsession") return "적중 시 마법 피해 75~300(적중 피해 18%), 상시 마나 재생률 +25%";
 		if (a_key == "signature_hustle_a") return "피격 시 방어도 +60(5초), 상시 이동 속도 +8%";
 		if (a_key == "signature_treachery") return "피격 시 이동 속도 +28%(5초), 상시 공속 +10%";
@@ -331,6 +333,7 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "self_weapon_fury") return "gain +25% Attack Speed and restore 30 Stamina";
 		if (a_key == "self_smoke_escape") return "slow the attacker by 30%";
 		if (a_key == "self_carry_weight") return "Always active: +75 Carry Weight and +15 Speechcraft";
+		if (a_key == "signature_shadow_boxer") return "enter Shadow Boxing: your shadow repeats each melee hit 0.25s later for 40% of its physical damage";
 		return {};
 	}
 }

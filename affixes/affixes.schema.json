@@ -239,7 +239,8 @@
             "Archmage",
             "CorpseExplosion",
             "SummonCorpseExplosion",
-            "SpawnTrap"
+            "SpawnTrap",
+            "EchoStrike"
           ]
         },
         "spellEditorId": { "type": "string", "minLength": 1 },
@@ -283,6 +284,10 @@
         "maxTargetsPerTrigger": { "type": "integer", "minimum": 1, "maximum": 64 },
         "requireCritOrPowerAttack": { "type": "boolean" },
         "requireWeaponHit": { "type": "boolean" },
+        "stanceSpellEditorId": { "type": "string", "minLength": 1 },
+        "requirePowerAttack": { "type": "boolean" },
+        "windowSeconds": { "type": "number", "minimum": 0.5, "maximum": 30.0 },
+        "echoDelaySeconds": { "type": "number", "minimum": 0.05, "maximum": 1.5 },
         "extraSpells": {
           "type": "array",
           "minItems": 1,
@@ -611,7 +616,10 @@
         "archetype": { "type": ["string", "null"] },
         "hostile": { "type": "boolean" },
         "recover": { "type": "boolean" },
-        "hitSoundForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" }
+        "hitSoundForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
+        "hitShaderForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
+        "hitEffectArtForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
+        "fxPersist": { "type": "boolean" }
       }
     },
     "appendedRecord": {
@@ -659,6 +667,22 @@
           "properties": {
             "type": { "const": "MovableStatic" },
             "movableStatic": { "$ref": "#/$defs/movableStaticRecord" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "keyword"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "Keyword" },
+            "keyword": {
+              "type": "object",
+              "required": ["editorId"],
+              "additionalProperties": false,
+              "properties": {
+                "editorId": { "type": "string", "minLength": 1 }
+              }
+            }
           }
         }
       ]

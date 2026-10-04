@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "CalamityAffixes/EchoStrikeState.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
 
@@ -87,6 +88,7 @@ namespace CalamityAffixes
 		std::unordered_map<std::uint32_t, std::chrono::steady_clock::time_point> corpseExplosionSeenCorpses{};
 		CorpseExplosionRuntimeState summonCorpseExplosionState{};
 		std::unordered_map<std::uint32_t, std::chrono::steady_clock::time_point> summonCorpseExplosionSeenCorpses{};
+		EchoStrikeRuntimeState echoStrike{};
 
 		void ResetTransientState() noexcept
 		{
@@ -118,6 +120,7 @@ namespace CalamityAffixes
 			lastPapyrusHit = {};
 			lowHealthTriggerConsumed.clear();
 			lowHealthLastObservedPct.clear();
+			echoStrike.Reset();
 		}
 
 		void ResetCorpseExplosionState() noexcept

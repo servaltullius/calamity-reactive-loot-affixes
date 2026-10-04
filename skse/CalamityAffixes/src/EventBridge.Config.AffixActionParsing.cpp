@@ -454,6 +454,41 @@ namespace CalamityAffixes
 			return true;
 		}
 
+		if (a_type == RuntimeContract::kActionEchoStrike) {
+			a_out.action.type = ActionType::kEchoStrike;
+			a_out.action.spell = ParseSpell(a_action, a_handler);
+			a_out.action.echoStanceSpell = ParseSpellFromString(a_action.value("stanceSpellEditorId", std::string{}), a_handler);
+			a_out.action.echoRequirePowerAttack = a_action.value("requirePowerAttack", false);
+			a_out.action.effectiveness = a_action.value("effectiveness", 1.0f);
+			a_out.action.noHitEffectArt = a_action.value("noHitEffectArt", false);
+			ParseMagnitudeScaling(a_action, a_out.action.magnitudeScaling);
+
+			const float windowSeconds = std::clamp(a_action.value("windowSeconds", 0.0f), 0.0f, 30.0f);
+			const float delaySeconds = std::clamp(a_action.value("echoDelaySeconds", 0.25f), 0.05f, 1.5f);
+			a_out.action.echoWindow = std::chrono::milliseconds(static_cast<std::int64_t>(windowSeconds * 1000.0f));
+			a_out.action.echoDelay = std::chrono::milliseconds(static_cast<std::int64_t>(delaySeconds * 1000.0f));
+
+			if (!a_out.action.spell || !a_out.action.echoStanceSpell || a_out.action.echoWindow.count() <= 0 ||
+				a_out.action.magnitudeScaling.source == MagnitudeScaling::Source::kNone) {
+				SKSE::log::error(
+					"CalamityAffixes: EchoStrike action incomplete (affixId={}, spell={}, stanceSpell={}, windowMs={}, scaled={}).",
+					a_out.id,
+					a_out.action.spell != nullptr,
+					a_out.action.echoStanceSpell != nullptr,
+					a_out.action.echoWindow.count(),
+					a_out.action.magnitudeScaling.source != MagnitudeScaling::Source::kNone);
+				return false;
+			}
+			if (a_out.trigger != Trigger::kHit) {
+				SKSE::log::warn(
+					"CalamityAffixes: EchoStrike requires trigger=Hit (affixId={}, trigger={}); skipping.",
+					a_out.id,
+					static_cast<std::uint32_t>(a_out.trigger));
+				return false;
+			}
+			return true;
+		}
+
 		return false;
 	}
 

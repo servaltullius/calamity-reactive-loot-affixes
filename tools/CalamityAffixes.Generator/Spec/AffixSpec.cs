@@ -175,6 +175,27 @@ public sealed class AppendedRecordSpec
     [JsonPropertyName("movableStatic")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public MovableStaticRecordSpec? MovableStatic { get; init; }
+
+    // Relocates an affix's KYWD from the affix block into this tail slot, so a
+    // new affix can be added without renumbering the stable record prefix.
+    [JsonPropertyName("keyword")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public KeywordRecordSpec? Keyword { get; init; }
+
+    [JsonIgnore]
+    public int PayloadCount =>
+        (MagicEffect is null ? 0 : 1) +
+        (Spell is null ? 0 : 1) +
+        (ArtObject is null ? 0 : 1) +
+        (MovableStatic is null ? 0 : 1) +
+        (MiscItem is null ? 0 : 1) +
+        (Keyword is null ? 0 : 1);
+}
+
+public sealed class KeywordRecordSpec
+{
+    [JsonPropertyName("editorId")]
+    public required string EditorId { get; init; }
 }
 
 public sealed class MiscItemRecordSpec
@@ -377,6 +398,21 @@ public sealed class MagicEffectRecordSpec
     // CastSpellImmediate lanes this project uses.
     [JsonPropertyName("hitSoundForm")]
     public string? HitSoundForm { get; init; }
+
+    // Optional "Plugin|0xFORMID" EffectShader played on the affected actor.
+    // Overrides the default elemental hit shader chosen from resistValue.
+    [JsonPropertyName("hitShaderForm")]
+    public string? HitShaderForm { get; init; }
+
+    // Optional "Plugin|0xFORMID" ArtObject attached to the affected actor (MGEF
+    // Hit Effect Art), driven by the engine like vanilla cloak and aura bodies.
+    [JsonPropertyName("hitEffectArtForm")]
+    public string? HitEffectArtForm { get; init; }
+
+    // Keep the hit shader alive for the effect's whole duration (MGEF "FX Persist").
+    [JsonPropertyName("fxPersist")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool FxPersist { get; init; }
 }
 
 public sealed class SpellRecordSpec

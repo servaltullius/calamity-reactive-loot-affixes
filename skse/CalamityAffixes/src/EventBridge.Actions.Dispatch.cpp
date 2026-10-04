@@ -76,6 +76,13 @@ namespace CalamityAffixes
 			auto* cell = spawnTarget->GetParentCell();
 			return detail::IsTrapCellUsable(cell != nullptr, cell && cell->IsAttached());
 		}
+		case ActionType::kEchoStrike:
+			// Only the owner's own melee swing opens the window; reject everything
+			// else before chance or ICD are committed.
+			return action.spell && action.echoStanceSpell &&
+			       a_owner->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) &&
+			       IsHostileEffectTarget(a_owner, a_target) &&
+			       IsEchoStrikeActivationHit(action, a_owner, a_hitData);
 		default:
 			return false;
 		}
@@ -96,6 +103,9 @@ namespace CalamityAffixes
 			break;
 		case ActionType::kSpawnTrap:
 			ExecuteSpawnTrapAction(a_affix, a_owner, a_target, a_hitData);
+			break;
+		case ActionType::kEchoStrike:
+			ExecuteEchoStrikeActivation(a_affix, a_owner);
 			break;
 		default:
 			SKSE::log::warn("CalamityAffixes: DispatchActionByType unhandled ActionType {}.", static_cast<int>(a_action.type));

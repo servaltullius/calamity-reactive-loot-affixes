@@ -92,3 +92,4 @@
 	RunewordCatalogRow{ "rw_obsession", "Obsession", "Zod,Ist,Lem,Lum,Io,Nef", "runeword_obsession_final", LootItemType::kWeapon },
 	RunewordCatalogRow{ "rw_mist", "Mist", "Cham,Shael,Gul,Thul,Ith", "runeword_mist_final", LootItemType::kWeapon },
 	RunewordCatalogRow{ "rw_breath_of_the_dying", "Breath of the Dying", "Vex,Hel,El,Eld,Zod,Eth", "runeword_breath_of_the_dying_final", LootItemType::kWeapon },
+	RunewordCatalogRow{ "rw_shadow_boxer", "Shadow Boxer", "Shael,Ko,Um", "runeword_shadow_boxer_final", LootItemType::kWeapon },

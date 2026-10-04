@@ -56,6 +56,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/SuffixFamilySelection.h
 	    include/CalamityAffixes/TriggerGuards.h
 	    include/CalamityAffixes/TrapSystem.h
+	    include/CalamityAffixes/EchoStrikeState.h
+	    include/CalamityAffixes/HitSourcePolicy.h
+	    include/CalamityAffixes/EchoStrikeSystem.h
 	    include/CalamityAffixes/UserSettingsPersistence.h
 	)
 
@@ -122,6 +125,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Actions.Special.cpp
 	    src/EventBridge.Actions.Archmage.cpp
 	    src/EventBridge.Actions.Corpse.cpp
+	    src/EventBridge.Actions.EchoStrike.cpp
 	    src/EventBridge.Traps.cpp
 	    src/EventBridge.Serialization.Save.cpp
 	    src/EventBridge.Serialization.Load.cpp
@@ -136,6 +140,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/RunewordContractSnapshot.cpp
 	    src/RunewordIdentityOverrides.cpp
 	    src/TrapSystem.cpp
+	    src/EchoStrikeSystem.cpp
 	    src/UserSettingsPersistence.cpp
 	)
 
@@ -255,6 +260,7 @@ if (BUILD_TESTING)
             tests/test_corpse_explosion_selection.cpp
             tests/test_trap_cell_policy.cpp
             tests/test_trap_tick_selection.cpp
+            tests/test_hit_source_policy.cpp
             tests/test_tes_hit_fallback_policy.cpp
             tests/test_affix_parsing_policy.cpp
             tests/test_serialization_drain_policy.cpp

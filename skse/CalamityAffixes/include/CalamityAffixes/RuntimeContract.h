@@ -36,6 +36,7 @@ namespace CalamityAffixes::RuntimeContract
 	inline constexpr std::string_view kActionCorpseExplosion = "CorpseExplosion";
 	inline constexpr std::string_view kActionSummonCorpseExplosion = "SummonCorpseExplosion";
 	inline constexpr std::string_view kActionSpawnTrap = "SpawnTrap";
+	inline constexpr std::string_view kActionEchoStrike = "EchoStrike";
 
 	inline constexpr std::array<std::string_view, 5> kSupportedTriggers{
 		kTriggerHit,
@@ -45,7 +46,7 @@ namespace CalamityAffixes::RuntimeContract
 		kTriggerLowHealth
 	};
 
-	inline constexpr std::array<std::string_view, 10> kSupportedActionTypes{
+	inline constexpr std::array<std::string_view, 11> kSupportedActionTypes{
 		kActionDebugNotify,
 		kActionCastSpell,
 		kActionCastSpellAdaptiveElement,
@@ -55,7 +56,8 @@ namespace CalamityAffixes::RuntimeContract
 		kActionArchmage,
 		kActionCorpseExplosion,
 		kActionSummonCorpseExplosion,
-		kActionSpawnTrap
+		kActionSpawnTrap,
+		kActionEchoStrike
 	};
 
 	[[nodiscard]] inline bool IsSupportedTrigger(std::string_view a_trigger)

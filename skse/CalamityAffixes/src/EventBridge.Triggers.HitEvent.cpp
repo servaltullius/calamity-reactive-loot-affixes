@@ -158,6 +158,7 @@ namespace CalamityAffixes
 								_combatState.lastHitAt = {};
 							} else {
 								ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
+								ProcessEchoStrikeHit(aggressor, target, hitData, now);
 
 							if (aggressor->IsPlayerRef()) {
 								const auto cocBatch = EvaluateCastOnCrit(aggressor, target, hitData);

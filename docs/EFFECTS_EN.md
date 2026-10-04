@@ -180,7 +180,7 @@ Tier names read *of Minor X* (tier 1), *of X* or *of the X* (tier 2), and *of Gr
 | **Tenacity** | Stamina Regen +25% | Stamina Regen +50% | Stamina Regen +75% | Melee |
 | **Vitality** | Max Health +25 | Max Health +50 | Max Health +75 | Anyone |
 
-## Runewords (94)
+## Runewords (95)
 
 Collect the listed rune fragments, pick the recipe in the panel's Runeword tab, and transmute it onto an equipped weapon or armor.
 The suggested base is only a hint: the panel names a more specific one, and no base ever blocks the transmute.
@@ -212,7 +212,7 @@ The suggested base is only a hint: the panel names a more specific one, and no b
 | **Wind** | Sur-El | Weapon | 22% on hit / ICD 4s - Gale Pressure (Weapon Speed -20%, 5s) |
 | **Zephyr** | Ort-Eth | Weapon | 20% on hit / ICD 8s - Gale Shot (Bow Speed +30%, 6s) |
 
-### 3 runes (41)
+### 3 runes (42)
 
 | Runeword | Runes | Base | Effect |
 | --- | --- | --- | --- |
@@ -252,6 +252,7 @@ The suggested base is only a hint: the panel names a more specific one, and no b
 | **Radiance** | Nef-Sol-Ith | Armor | 15% on hit taken / ICD 40s - Radiance (Detect Life 200m, 30s) |
 | **Rain** | Ort-Mal-Ith | Armor | 22% on hit taken / ICD 11s - Rain of Life (Heal Rate +100%, 8s) |
 | **Sanctuary** | Ko-Ko-Mal | Armor | 100% on Hit Taken / ICD 0.5s - Reflect (15%) + Magic Resist +15 |
+| **Shadow Boxer** | Shael-Ko-Um | Weapon | on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.25s later for 40% of its physical damage |
 | **Temper** | Shael-Io-Ral | Armor | 18% on hit taken / ICD 8s - Tempered Endurance (Stamina Regen +5, 8s) |
 | **Treachery** | Shael-Thul-Lem | Armor | 26% on Hit Taken / ICD 10s - Haste (Move Speed +28%, 5s) + Attack Speed +10% |
 | **Venom** | Tal-Dol-Mal | Weapon | 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s) |

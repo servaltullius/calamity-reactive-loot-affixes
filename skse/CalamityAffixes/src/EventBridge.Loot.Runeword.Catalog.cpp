@@ -25,7 +25,7 @@ namespace CalamityAffixes
 			std::string_view ko{};
 		};
 
-		constexpr std::array<RunewordNameKoRow, 94> kRunewordNameKoRows{ {
+		constexpr std::array<RunewordNameKoRow, 95> kRunewordNameKoRows{ {
 			{ "rw_nadir", "나디르" },
 			{ "rw_steel", "스틸" },
 			{ "rw_malice", "맬리스" },
@@ -120,6 +120,7 @@ namespace CalamityAffixes
 			{ "rw_obsession", "집착" },
 			{ "rw_mist", "미스트" },
 			{ "rw_breath_of_the_dying", "죽음의 숨결" },
+			{ "rw_shadow_boxer", "쉐도우 복서" },
 		} };
 
 		[[nodiscard]] std::string_view ResolveRunewordDisplayNameKo(
@@ -306,7 +307,7 @@ namespace CalamityAffixes
 					std::optional<LootItemType> recommendedBaseType{};
 				};
 
-				constexpr std::array<RunewordCatalogRow, 94> kRunewordCatalogRows{ {
+				constexpr std::array<RunewordCatalogRow, 95> kRunewordCatalogRows{ {
 #include "RunewordCatalogRows.inl"
 				} };
 
@@ -326,7 +327,7 @@ namespace CalamityAffixes
 					return runes;
 				};
 
-				// Extended D2/D2R runeword catalog (94 recipes).
+				// Extended D2/D2R runeword catalog (94 recipes) plus Calamity originals (Shadow Boxer).
 				for (const auto& row : kRunewordCatalogRows) {
 					const auto runes = splitRunes(row.runeCsv);
 					if (runes.empty()) {

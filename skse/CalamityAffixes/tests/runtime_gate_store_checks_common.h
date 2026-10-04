@@ -235,6 +235,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckTriggerDispatchSnapshotIsolation();
 	bool CheckTriggerDispatchSnapshotNullSource();
 	bool CheckTriggerDispatchSnapshotBufferReuse();
+	bool CheckEchoStrikeRuntimeState();
 
 	bool CheckAffixCountRollDistribution();
 	bool CheckAffixCountRollUnitBounds();

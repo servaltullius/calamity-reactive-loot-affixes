@@ -270,6 +270,8 @@ function resolveRecipeSummaryText(item) {
       return t("Exile: emergency barrier sanctuary", "엑자일: 긴급 장벽 성역");
     case "signature_breath_of_the_dying":
       return t("Breath of the Dying: terminal reaper surge", "죽음의 숨결: 종말의 사신 폭주");
+    case "signature_shadow_boxer":
+      return t("Shadow Boxer: shadow follow-up punches", "쉐도우 복서: 그림자 추격 연타");
     case "signature_chains_of_honor":
       return t("Chains of Honor: venerated phase guard", "명예의 사슬: 성역 위상 수호");
     case "signature_dream":
@@ -550,6 +552,8 @@ function resolveRecipeBaseBadge(item) {
       return { className: "armor", text: t("Base: Armor", "베이스: 갑옷") };
     case "heavy_armor":
       return { className: "armor", text: t("Base: Heavy Armor", "베이스: 중갑") };
+    case "melee_weapon":
+      return { className: "weapon", text: t("Base: Melee Weapon", "베이스: 근접 무기") };
     case "weapon_shield":
       return { className: "mixed", text: t("Base: Weapon/Shield", "베이스: 무기/방패") };
     case "helm_shield":

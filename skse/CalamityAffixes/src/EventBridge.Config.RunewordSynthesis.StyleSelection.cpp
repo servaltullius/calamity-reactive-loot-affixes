@@ -133,7 +133,7 @@ namespace CalamityAffixes
 			return SyntheticRunewordStyle::kCurseSlowAttack;
 		}
 		// ── Attack/speed buffs ──
-		if (IdIsOneOf(id, { "rw_fury", "rw_hand_of_justice", "rw_memory", "rw_ground" })) {
+		if (IdIsOneOf(id, { "rw_fury", "rw_hand_of_justice", "rw_memory", "rw_ground", "rw_shadow_boxer" })) {
 			return SyntheticRunewordStyle::kSelfHaste;
 		}
 		// ── Absorb (siphon) ──

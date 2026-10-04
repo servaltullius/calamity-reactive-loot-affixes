@@ -5334,5 +5334,35 @@
       }
     },
     "slot": "prefix"
+  },
+  {
+    "id": "runeword_shadow_boxer_final",
+    "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SHADOW_BOXER",
+    "name": "룬워드 쉐도우 복서 [Shael-Ko-Um]: 근접 적중 시 그림자 권투(8초) - 지속 중 근접 적중마다 0.25초 뒤 그림자가 한 번 더 타격(그 적중 물리 피해의 40%). 12초마다 발동.",
+    "nameEn": "Runeword Shadow Boxer (Shael-Ko-Um): on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.25s later for 40% of its physical damage",
+    "nameKo": "룬워드 쉐도우 복서 [Shael-Ko-Um]: 근접 적중 시 그림자 권투(8초) - 지속 중 근접 적중마다 0.25초 뒤 그림자가 한 번 더 타격(그 적중 물리 피해의 40%). 12초마다 발동.",
+    "kid": {
+      "type": "None",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 0
+    },
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 100.0,
+      "icdSeconds": 12.0,
+      "action": {
+        "type": "EchoStrike",
+        "spellEditorId": "CAFF_SPEL_RW_SHADOW_BOXER_ECHO",
+        "stanceSpellEditorId": "CAFF_SPEL_RW_SHADOW_BOXER_STANCE",
+        "windowSeconds": 8.0,
+        "echoDelaySeconds": 0.25,
+        "magnitudeScaling": { "source": "HitPhysicalDealt", "mult": 0.4 },
+        "noHitEffectArt": false,
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000506D6", "soundForm": "Skyrim.esm|0x000AF664", "target": "Target", "durationSeconds": 0.6, "playOn": "Proc", "spatialSound": true }
+      }
+    },
+    "slot": "prefix"
   }
 ]

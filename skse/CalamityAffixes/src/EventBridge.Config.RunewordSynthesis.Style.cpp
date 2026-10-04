@@ -39,6 +39,7 @@ namespace CalamityAffixes
 			RecipeTuning{ "rw_last_wish", 17.0f, 2.9f, 6.0f, kUnsetValue },
 			RecipeTuning{ "rw_exile", 20.0f, 8.8f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 33.0f, 46.0f },
 			RecipeTuning{ "rw_breath_of_the_dying", 31.0f, 0.8f, kUnsetValue, 0.19f },
+			RecipeTuning{ "rw_shadow_boxer", 20.0f, 12.0f, kUnsetValue, kUnsetValue },
 			RecipeTuning{ "rw_chains_of_honor", 19.0f, 10.0f, kUnsetValue, kUnsetValue, static_cast<std::int32_t>(Trigger::kLowHealth), 36.0f, 49.0f },
 			RecipeTuning{ "rw_dream", 23.0f, 1.0f, kUnsetValue, 0.17f },
 			RecipeTuning{ "rw_faith", 28.0f, 2.4f, kUnsetValue, kUnsetValue },

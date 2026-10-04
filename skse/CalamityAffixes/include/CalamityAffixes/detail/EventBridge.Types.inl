@@ -32,6 +32,7 @@
 			kCorpseExplosion,
 			kSummonCorpseExplosion,
 			kSpawnTrap,
+			kEchoStrike,
 		};
 
 		enum class TrapSpawnAt : std::uint8_t
@@ -149,23 +150,24 @@
 		//
 		// Field validity per ActionType (✓ = used, · = ignored):
 		//
-		//  Field group             | Notify | Cast | Adaptive | OnCrit | Convert | MoM | Archmage | Corpse | Trap |
-		// -------------------------|--------|------|----------|--------|---------|-----|----------|--------|------|
-		//  text                    |   ✓    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
-		//  spell                   |   ·    |  ✓   |    ·     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |
-		//  applyToSelf             |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
-		//  effectiveness           |   ·    |  ✓   |    ✓     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |
-		//  magnitudeOverride       |   ·    |  ✓   |    ✓     |   ✓    |    ·    |  ·  |    ·     |   ·    |  ✓   |
-		//  magnitudeScaling        |   ·    |  ✓   |    ✓     |   ✓    |    ·    |  ·  |    ·     |   ·    |  ✓   |
-		//  noHitEffectArt          |   ·    |  ✓   |    ✓     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |
-		//  adaptive{Mode,F/Fr/Sh}  |   ·    |  ·   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
-		//  element, convertPct     |   ·    |  ·   |    ·     |   ·    |    ✓    |  ·  |    ·     |   ·    |  ·   |
-		//  mindOverMatter*         |   ·    |  ·   |    ·     |   ·    |    ·    |  ✓  |    ·     |   ·    |  ·   |
-		//  archmage*               |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ✓     |   ·    |  ·   |
-		//  corpseExplosion*        |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ✓    |  ·   |
-		//  trap*                   |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ✓   |
-		//  evolution*              |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
-		//  modeCycle*              |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |
+		//  Field group             | Notify | Cast | Adaptive | OnCrit | Convert | MoM | Archmage | Corpse | Trap | Echo |
+		// -------------------------|--------|------|----------|--------|---------|-----|----------|--------|------|------|
+		//  text                    |   ✓    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ·   |
+		//  spell                   |   ·    |  ✓   |    ·     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |  ✓   |
+		//  applyToSelf             |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ·   |
+		//  effectiveness           |   ·    |  ✓   |    ✓     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |  ✓   |
+		//  magnitudeOverride       |   ·    |  ✓   |    ✓     |   ✓    |    ·    |  ·  |    ·     |   ·    |  ✓   |  ·   |
+		//  magnitudeScaling        |   ·    |  ✓   |    ✓     |   ✓    |    ·    |  ·  |    ·     |   ·    |  ✓   |  ✓   |
+		//  noHitEffectArt          |   ·    |  ✓   |    ✓     |   ✓    |    ✓    |  ·  |    ✓     |   ✓    |  ✓   |  ✓   |
+		//  adaptive{Mode,F/Fr/Sh}  |   ·    |  ·   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ·   |
+		//  element, convertPct     |   ·    |  ·   |    ·     |   ·    |    ✓    |  ·  |    ·     |   ·    |  ·   |  ·   |
+		//  mindOverMatter*         |   ·    |  ·   |    ·     |   ·    |    ·    |  ✓  |    ·     |   ·    |  ·   |  ·   |
+		//  archmage*               |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ✓     |   ·    |  ·   |  ·   |
+		//  corpseExplosion*        |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ✓    |  ·   |  ·   |
+		//  trap*                   |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ✓   |  ·   |
+		//  echo*                   |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ✓   |
+		//  evolution*              |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ·   |
+		//  modeCycle*              |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ·   |
 		//
 		// "Corpse" column applies to both kCorpseExplosion and kSummonCorpseExplosion.
 		//
@@ -226,6 +228,15 @@
 			std::vector<RE::SpellItem*> trapExtraSpells{};
 			bool trapRequireCritOrPowerAttack{ false };
 			bool trapRequireWeaponHit{ true };
+
+			// EchoStrike: a melee hit (a power attack when echoRequirePowerAttack)
+			// casts the stance spell on the owner and opens the window; each melee
+			// hit inside it casts `spell` on the target after the delay, scaled
+			// from that hit by magnitudeScaling.
+			RE::SpellItem* echoStanceSpell{ nullptr };
+			bool echoRequirePowerAttack{ false };
+			std::chrono::milliseconds echoWindow{ 0 };
+			std::chrono::milliseconds echoDelay{ 0 };
 
 			// Evolution (growth): each successful proc grants XP and scales magnitude by stage.
 			bool evolutionEnabled{ false };

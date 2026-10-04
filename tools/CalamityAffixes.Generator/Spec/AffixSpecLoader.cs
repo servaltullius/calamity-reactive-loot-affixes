@@ -133,6 +133,7 @@ public static class AffixSpecLoader
         var seenArtObjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenMovableStatics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenMiscItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "CAFF_Misc_ReforgeOrb" };
+        var seenAppendedKeywords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var rune in GetRunewordRuneLadder()) seenMiscItems.Add($"CAFF_RuneFrag_{rune}");
         var spellDefinitions = new List<SpellRecordSpec>();
         foreach (var kw in spec.Keywords.Tags)
@@ -234,7 +235,7 @@ public static class AffixSpecLoader
         {
             switch (appendedRecord.Type)
             {
-                case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
+                case "MagicEffect" when appendedRecord.MagicEffect is not null && appendedRecord.PayloadCount == 1:
                 {
                     var magicEffect = appendedRecord.MagicEffect;
                     if (!seenMagicEffects.Add(magicEffect.EditorId))
@@ -250,7 +251,7 @@ public static class AffixSpecLoader
                     }
                     break;
                 }
-                case "Spell" when appendedRecord.Spell is not null && appendedRecord.MagicEffect is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
+                case "Spell" when appendedRecord.Spell is not null && appendedRecord.PayloadCount == 1:
                 {
                     var spell = appendedRecord.Spell;
                     if (!seenSpells.Add(spell.EditorId))
@@ -298,7 +299,7 @@ public static class AffixSpecLoader
                     spellDefinitions.Add(spell);
                     break;
                 }
-                case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.MovableStatic is null && appendedRecord.MiscItem is null:
+                case "ArtObject" when appendedRecord.ArtObject is not null && appendedRecord.PayloadCount == 1:
                 {
                     var artObject = appendedRecord.ArtObject;
                     if (!seenArtObjects.Add(artObject.EditorId))
@@ -333,7 +334,7 @@ public static class AffixSpecLoader
                     }
                     break;
                 }
-                case "MovableStatic" when appendedRecord.MovableStatic is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MiscItem is null:
+                case "MovableStatic" when appendedRecord.MovableStatic is not null && appendedRecord.PayloadCount == 1:
                 {
                     var movableStatic = appendedRecord.MovableStatic;
                     if (!seenMovableStatics.Add(movableStatic.EditorId))
@@ -347,17 +348,35 @@ public static class AffixSpecLoader
                         "MovableStatic");
                     break;
                 }
-                case "MiscItem" when appendedRecord.MiscItem is not null && appendedRecord.MagicEffect is null && appendedRecord.Spell is null && appendedRecord.ArtObject is null && appendedRecord.MovableStatic is null:
+                case "MiscItem" when appendedRecord.MiscItem is not null && appendedRecord.PayloadCount == 1:
                     ValidateWorldObjectModelPath(appendedRecord.MiscItem.EditorId, appendedRecord.MiscItem.ModelPath, "MiscItem");
                     if (string.IsNullOrWhiteSpace(appendedRecord.MiscItem.Name) ||
                         !seenMiscItems.Add(appendedRecord.MiscItem.EditorId))
                         throw new InvalidDataException("Appended MiscItem requires a name and unique editorId.");
                     break;
+                case "Keyword" when appendedRecord.Keyword is not null && appendedRecord.PayloadCount == 1:
+                {
+                    var editorId = appendedRecord.Keyword.EditorId;
+                    if (!seenAppendedKeywords.Add(editorId))
+                    {
+                        throw new InvalidDataException($"Duplicate appended Keyword editorId: {editorId}");
+                    }
+
+                    // An appended Keyword only relocates an affix's own KYWD; it never
+                    // declares a free-standing keyword.
+                    if (!spec.Keywords.Affixes.Any(affix => string.Equals(affix.EditorId, editorId, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        throw new InvalidDataException(
+                            $"Appended Keyword {editorId} must match the editorId of an affix whose keyword it relocates.");
+                    }
+                    break;
+                }
                 default:
                     throw new InvalidDataException(
                         "keywords.appendedRecords entries must use type MagicEffect with only magicEffect, " +
                         "type Spell with only spell, type ArtObject with only artObject, " +
-                        "type MovableStatic with only movableStatic, or type MiscItem with only miscItem.");
+                        "type MovableStatic with only movableStatic, type MiscItem with only miscItem, " +
+                        "or type Keyword with only keyword.");
             }
         }
 
@@ -563,7 +582,7 @@ public static class AffixSpecLoader
                         $"keywords.appendedRecords[{index}] contains duplicate property '{property.Name}'.");
                 }
 
-                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject" or "movableStatic" or "miscItem"))
+                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject" or "movableStatic" or "miscItem" or "keyword"))
                 {
                     throw new InvalidDataException(
                         $"keywords.appendedRecords[{index}] contains unsupported property '{property.Name}'.");
@@ -581,13 +600,17 @@ public static class AffixSpecLoader
             var hasArtObject = item.TryGetProperty("artObject", out var artObjectElement);
             var hasMovableStatic = item.TryGetProperty("movableStatic", out var movableStaticElement);
             var hasMiscItem = item.TryGetProperty("miscItem", out var miscItemElement);
+            var hasKeyword = item.TryGetProperty("keyword", out var keywordElement);
+            var payloadCount =
+                (hasMagicEffect ? 1 : 0) + (hasSpell ? 1 : 0) + (hasArtObject ? 1 : 0) +
+                (hasMovableStatic ? 1 : 0) + (hasMiscItem ? 1 : 0) + (hasKeyword ? 1 : 0);
             switch (type)
             {
-                case "MagicEffect" when hasMagicEffect && !hasSpell && !hasArtObject && !hasMovableStatic && !hasMiscItem && magicEffectElement.ValueKind == JsonValueKind.Object:
-                case "Spell" when hasSpell && !hasMagicEffect && !hasArtObject && !hasMovableStatic && !hasMiscItem && spellElement.ValueKind == JsonValueKind.Object:
-                case "ArtObject" when hasArtObject && !hasMagicEffect && !hasSpell && !hasMovableStatic && !hasMiscItem && artObjectElement.ValueKind == JsonValueKind.Object:
+                case "MagicEffect" when hasMagicEffect && payloadCount == 1 && magicEffectElement.ValueKind == JsonValueKind.Object:
+                case "Spell" when hasSpell && payloadCount == 1 && spellElement.ValueKind == JsonValueKind.Object:
+                case "ArtObject" when hasArtObject && payloadCount == 1 && artObjectElement.ValueKind == JsonValueKind.Object:
                     break;
-                case "MovableStatic" when hasMovableStatic && !hasMagicEffect && !hasSpell && !hasArtObject && !hasMiscItem && movableStaticElement.ValueKind == JsonValueKind.Object:
+                case "MovableStatic" when hasMovableStatic && payloadCount == 1 && movableStaticElement.ValueKind == JsonValueKind.Object:
                     if (movableStaticElement.TryGetProperty("mustUpdateAnimations", out var mustUpdateAnimationsElement) &&
                         mustUpdateAnimationsElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
                     {
@@ -595,7 +618,9 @@ public static class AffixSpecLoader
                             $"keywords.appendedRecords[{index}].movableStatic.mustUpdateAnimations must be a boolean.");
                     }
                     break;
-                case "MiscItem" when hasMiscItem && !hasMagicEffect && !hasSpell && !hasArtObject && !hasMovableStatic && miscItemElement.ValueKind == JsonValueKind.Object:
+                case "MiscItem" when hasMiscItem && payloadCount == 1 && miscItemElement.ValueKind == JsonValueKind.Object:
+                    break;
+                case "Keyword" when hasKeyword && payloadCount == 1 && keywordElement.ValueKind == JsonValueKind.Object:
                     break;
                 case "MagicEffect":
                     throw new InvalidDataException(
@@ -612,9 +637,12 @@ public static class AffixSpecLoader
                 case "MiscItem":
                     throw new InvalidDataException(
                         $"keywords.appendedRecords[{index}] type MiscItem requires only an object miscItem payload.");
+                case "Keyword":
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] type Keyword requires only an object keyword payload.");
                 default:
                     throw new InvalidDataException(
-                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, ArtObject, MovableStatic, or MiscItem (got: {type ?? "<null>"}).");
+                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, ArtObject, MovableStatic, MiscItem, or Keyword (got: {type ?? "<null>"}).");
             }
 
             index += 1;
@@ -733,7 +761,47 @@ public static class AffixSpecLoader
 
         ValidateActionFeedbackShape(actionElement, actionType, affix.Id);
         ValidateTrapFeedbackShape(actionElement, actionType, affix.Id);
+        ValidateEchoStrikeShape(actionElement, actionType, rt.Trigger, affix.Id);
 
+    }
+
+    private static void ValidateEchoStrikeShape(JsonElement action, string actionType, string trigger, string affixId)
+    {
+        if (actionType != "EchoStrike")
+        {
+            return;
+        }
+
+        // Activation is a melee Hit proc (optionally power attacks only); the echoes
+        // follow the owner's own melee hits, so no other trigger can open the window.
+        if (trigger != "Hit")
+        {
+            throw new InvalidDataException($"{affixId}: EchoStrike requires runtime.trigger Hit.");
+        }
+        if (!TryGetRequiredString(action, "spellEditorId", out _))
+        {
+            throw new InvalidDataException($"{affixId}: EchoStrike requires spellEditorId (the echo damage spell).");
+        }
+        if (!TryGetRequiredString(action, "stanceSpellEditorId", out _))
+        {
+            throw new InvalidDataException($"{affixId}: EchoStrike requires stanceSpellEditorId (the self stance spell).");
+        }
+        ValidateRequiredNumberRange(action, "windowSeconds", 0.5, 30.0, $"{affixId}: runtime.action");
+        ValidateRequiredNumberRange(action, "echoDelaySeconds", 0.05, 1.5, $"{affixId}: runtime.action");
+        if (action.TryGetProperty("requirePowerAttack", out var requirePowerAttack) &&
+            requirePowerAttack.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        {
+            throw new InvalidDataException($"{affixId}: EchoStrike requirePowerAttack must be a boolean.");
+        }
+        if (!action.TryGetProperty("magnitudeScaling", out var scaling) ||
+            scaling.ValueKind != JsonValueKind.Object ||
+            !TryGetRequiredString(scaling, "source", out var source) ||
+            source is not ("HitPhysicalDealt" or "HitTotalDealt"))
+        {
+            throw new InvalidDataException(
+                $"{affixId}: EchoStrike requires magnitudeScaling.source HitPhysicalDealt or HitTotalDealt.");
+        }
+        ValidateRequiredNumberRange(scaling, "mult", 0.01, 2.0, $"{affixId}: runtime.action.magnitudeScaling");
     }
 
     private static void ValidateActionFeedbackShape(JsonElement action, string actionType, string affixId)
@@ -1193,6 +1261,7 @@ public static class AffixSpecLoader
                 "CorpseExplosion",
                 "SummonCorpseExplosion",
                 "SpawnTrap",
+                "EchoStrike",
             });
     }
 

@@ -15,6 +15,7 @@
 #include "CalamityAffixes/Papyrus.h"
 #include "CalamityAffixes/PluginLogging.h"
 #include "CalamityAffixes/PrismaTooltip.h"
+#include "CalamityAffixes/EchoStrikeSystem.h"
 #include "CalamityAffixes/TrapSystem.h"
 #include "CalamityAffixes/Version.h"
 
@@ -110,6 +111,7 @@ SKSEPluginInfo(
 			} else {
 				SKSE::log::info("CalamityAffixes: disableTrapSystemTick=true; skipping TrapSystem install.");
 			}
+			CalamityAffixes::EchoStrikeSystem::Install();
 
 			if (!bridge->IsRuntimeEnabled()) {
 				SKSE::log::info("CalamityAffixes: runtime starts disabled; installed systems remain dormant until enabled.");

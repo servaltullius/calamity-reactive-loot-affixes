@@ -8,6 +8,7 @@
 #include <mutex>
 #include <optional>
 #include <unordered_map>
+#include <vector>
 
 #include <SKSE/SKSE.h>
 
@@ -226,6 +227,22 @@ namespace CalamityAffixes::Hooks::detail
 
 		std::unordered_map<std::uint64_t, ProcDispatchRecord> s_procDispatch;
 		std::mutex s_procDispatchMutex;
+
+		struct ExpectedEchoStrikeDamage
+		{
+			RE::FormID target{ 0u };
+			RE::FormID attacker{ 0u };
+			std::uint64_t hitSignature{ 0u };
+			float magnitude{ 0.0f };
+			std::chrono::steady_clock::time_point expiresAt{};
+		};
+
+		// Covers the engine applying the echo's instant damage on a later frame.
+		constexpr auto kExpectedEchoStrikeDamageLifetime = std::chrono::milliseconds(1500);
+		constexpr std::size_t kMaxExpectedEchoStrikeDamage = 32u;
+
+		std::vector<ExpectedEchoStrikeDamage> s_expectedEchoStrikeDamage;
+		std::mutex s_expectedEchoStrikeDamageMutex;
 		std::atomic_uint64_t s_runtimeGeneration{ 1u };
 
 		// Guards against proc-on-proc chain reactions across deferred SKSE tasks.
@@ -496,6 +513,70 @@ namespace CalamityAffixes::Hooks::detail
 			a_preHitData);
 	}
 
+	void ExpectEchoStrikeDamage(
+		RE::Actor* a_target,
+		RE::Actor* a_attacker,
+		float a_magnitude,
+		std::chrono::steady_clock::time_point a_now) noexcept
+	{
+		if (!a_target || !a_attacker) {
+			return;
+		}
+		const auto signature = HitDataUtil::MakeHitContentSignature(HitDataUtil::GetLastHitData(a_target));
+		if (signature == 0u) {
+			// Without lastHitData the echo's damage cannot be routed as a hit.
+			return;
+		}
+
+		const std::scoped_lock lock(s_expectedEchoStrikeDamageMutex);
+		std::erase_if(s_expectedEchoStrikeDamage, [&](const ExpectedEchoStrikeDamage& a_entry) {
+			return a_entry.expiresAt <= a_now;
+		});
+		if (s_expectedEchoStrikeDamage.size() >= kMaxExpectedEchoStrikeDamage) {
+			s_expectedEchoStrikeDamage.erase(s_expectedEchoStrikeDamage.begin());
+		}
+		s_expectedEchoStrikeDamage.push_back({
+			.target = a_target->GetFormID(),
+			.attacker = a_attacker->GetFormID(),
+			.hitSignature = signature,
+			.magnitude = a_magnitude,
+			.expiresAt = a_now + kExpectedEchoStrikeDamageLifetime,
+		});
+	}
+
+	bool ConsumeExpectedEchoStrikeDamage(
+		RE::Actor* a_target,
+		RE::Actor* a_attacker,
+		const RE::HitData* a_rawHitData,
+		std::chrono::steady_clock::time_point a_now,
+		float& a_outMagnitude) noexcept
+	{
+		if (!a_target || !a_attacker) {
+			return false;
+		}
+
+		const std::scoped_lock lock(s_expectedEchoStrikeDamageMutex);
+		if (s_expectedEchoStrikeDamage.empty()) {
+			return false;
+		}
+		// A genuine new swing rewrites lastHitData first, so its signature no
+		// longer matches and it is processed as a normal hit.
+		const auto signature = HitDataUtil::MakeHitContentSignature(a_rawHitData);
+		const auto targetFormID = a_target->GetFormID();
+		const auto attackerFormID = a_attacker->GetFormID();
+		for (auto it = s_expectedEchoStrikeDamage.begin(); it != s_expectedEchoStrikeDamage.end(); ++it) {
+			if (it->expiresAt <= a_now) {
+				continue;
+			}
+			if (it->target == targetFormID && it->attacker == attackerFormID && it->hitSignature == signature) {
+				a_outMagnitude = it->magnitude;
+				s_expectedEchoStrikeDamage.erase(it);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void InvalidateDeferredTasks() noexcept
 	{
 		s_runtimeGeneration.fetch_add(1u, std::memory_order_acq_rel);
@@ -510,6 +591,10 @@ namespace CalamityAffixes::Hooks::detail
 		{
 			const std::scoped_lock lock(s_nextAllowedByTargetMutex);
 			s_nextAllowedByTarget.clear();
+		}
+		{
+			const std::scoped_lock lock(s_expectedEchoStrikeDamageMutex);
+			s_expectedEchoStrikeDamage.clear();
 		}
 	}
 }

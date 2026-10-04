@@ -25,7 +25,7 @@ internal static class RunewordContractCatalog
     private const string RunewordCatalogRowsRelativePath = "skse/CalamityAffixes/src/RunewordCatalogRows.inl";
     private const string RunewordWeightsRelativePath = "skse/CalamityAffixes/src/EventBridge.Loot.Runeword.Detail.cpp";
     private const string AllowLegacyFallbackEnvironmentVariable = "CAFF_ALLOW_LEGACY_RUNEWORD_CONTRACT_FALLBACK";
-    private const int ExpectedRecipeCount = 94;
+    private const int ExpectedRecipeCount = 95;
     private const int ExpectedRuneWeightCount = 33;
 
     private static readonly Regex RunewordCatalogRowRegex = new(

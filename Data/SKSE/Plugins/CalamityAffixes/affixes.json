@@ -9936,6 +9936,46 @@
         }
       },
       {
+        "id": "runeword_shadow_boxer_final",
+        "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SHADOW_BOXER",
+        "name": "\uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C [Shael-Ko-Um]: \uADFC\uC811 \uC801\uC911 \uC2DC \uADF8\uB9BC\uC790 \uAD8C\uD22C(8\uCD08) - \uC9C0\uC18D \uC911 \uADFC\uC811 \uC801\uC911\uB9C8\uB2E4 0.25\uCD08 \uB4A4 \uADF8\uB9BC\uC790\uAC00 \uD55C \uBC88 \uB354 \uD0C0\uACA9(\uADF8 \uC801\uC911 \uBB3C\uB9AC \uD53C\uD574\uC758 40%). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Shadow Boxer (Shael-Ko-Um): on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.25s later for 40% of its physical damage",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C [Shael-Ko-Um]: \uADFC\uC811 \uC801\uC911 \uC2DC \uADF8\uB9BC\uC790 \uAD8C\uD22C(8\uCD08) - \uC9C0\uC18D \uC911 \uADFC\uC811 \uC801\uC911\uB9C8\uB2E4 0.25\uCD08 \uB4A4 \uADF8\uB9BC\uC790\uAC00 \uD55C \uBC88 \uB354 \uD0C0\uACA9(\uADF8 \uC801\uC911 \uBB3C\uB9AC \uD53C\uD574\uC758 40%). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "kid": {
+          "type": "None",
+          "strings": "NONE",
+          "formFilters": "NONE",
+          "traits": "-E",
+          "chance": 0
+        },
+        "slot": "prefix",
+        "runtime": {
+          "trigger": "Hit",
+          "procChancePercent": 100,
+          "icdSeconds": 12,
+          "action": {
+            "type": "EchoStrike",
+            "spellEditorId": "CAFF_SPEL_RW_SHADOW_BOXER_ECHO",
+            "stanceSpellEditorId": "CAFF_SPEL_RW_SHADOW_BOXER_STANCE",
+            "windowSeconds": 8.0,
+            "echoDelaySeconds": 0.25,
+            "magnitudeScaling": {
+              "source": "HitPhysicalDealt",
+              "mult": 0.4
+            },
+            "noHitEffectArt": false,
+            "feedback": {
+              "artObjectEditorId": "Skyrim.esm|0x000506D6",
+              "soundForm": "Skyrim.esm|0x000AF664",
+              "target": "Target",
+              "durationSeconds": 0.6,
+              "playOn": "Proc",
+              "spatialSound": true
+            }
+          }
+        }
+      },
+      {
         "id": "suffix_vitality_t1",
         "editorId": "CAFF_KYWD_SUFFIX_MAX_HEALTH_T1",
         "name": "\uC57D\uAC04\uC758 \uD65C\uB825: \uCD5C\uB300 \uCCB4\uB825 \u002B25",
@@ -13764,6 +13804,87 @@
           "modelPath": "Clutter\\SoulGem\\SoulGemPiece02.nif"
         },
         "type": "MiscItem"
+      },
+      {
+        "type": "Keyword",
+        "keyword": {
+          "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SHADOW_BOXER"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_SHADOW_BOXER_STANCE",
+          "name": "Calamity: Runeword Shadow Boxer / \uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C",
+          "actorValue": "None",
+          "hostile": false,
+          "recover": false,
+          "archetype": "Script",
+          "hitSoundForm": "Skyrim.esm|0x0010F720",
+          "hitShaderForm": "Skyrim.esm|0x00081180",
+          "hitEffectArtForm": "Skyrim.esm|0x001046CD",
+          "fxPersist": true
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_SHADOW_BOXER_ECHO",
+          "name": "Calamity: Runeword Shadow Boxer Echo / \uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C \uADF8\uB9BC\uC790 \uD0C0\uACA9",
+          "actorValue": "Health",
+          "hostile": true,
+          "recover": false,
+          "hitShaderForm": "Skyrim.esm|0x00103129"
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_SHADOW_BOXER_STANCE",
+          "name": "Calamity: Runeword Shadow Boxer / \uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C",
+          "delivery": "Self",
+          "effects": [
+            {
+              "magicEffectEditorId": "CAFF_MGEF_RW_SHADOW_BOXER_STANCE",
+              "magnitude": 1,
+              "duration": 8,
+              "area": 0
+            },
+            {
+              "magicEffectEditorId": "CAFF_MGEF_RW_SHADOW_BOXER_BURST",
+              "magnitude": 1,
+              "duration": 2,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_SHADOW_BOXER_ECHO",
+          "name": "Calamity: Runeword Shadow Boxer Echo / \uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C \uADF8\uB9BC\uC790 \uD0C0\uACA9",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_SHADOW_BOXER_ECHO",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_SHADOW_BOXER_BURST",
+          "name": "Calamity: Runeword Shadow Boxer Burst / \uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C \uBC1C\uB3D9",
+          "actorValue": "None",
+          "hostile": false,
+          "recover": false,
+          "archetype": "Script",
+          "hitEffectArtForm": "Skyrim.esm|0x0008AFD1",
+          "fxPersist": true
+        }
       }
     ]
   }

@@ -602,6 +602,70 @@
           "name": "Scouring Orb",
           "modelPath": "Clutter\\SoulGem\\SoulGemPiece02.nif"
         }
+      },
+      {
+        "type": "Keyword",
+        "keyword": { "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SHADOW_BOXER" }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_SHADOW_BOXER_STANCE",
+          "name": "Calamity: Runeword Shadow Boxer / 룬워드 쉐도우 복서",
+          "actorValue": "None",
+          "archetype": "Script",
+          "hostile": false,
+          "recover": false,
+          "hitShaderForm": "Skyrim.esm|0x00081180",
+          "hitEffectArtForm": "Skyrim.esm|0x001046CD",
+          "fxPersist": true,
+          "hitSoundForm": "Skyrim.esm|0x0010F720"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_SHADOW_BOXER_ECHO",
+          "name": "Calamity: Runeword Shadow Boxer Echo / 룬워드 쉐도우 복서 그림자 타격",
+          "actorValue": "Health",
+          "hostile": true,
+          "recover": false,
+          "hitShaderForm": "Skyrim.esm|0x00103129"
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_SHADOW_BOXER_STANCE",
+          "name": "Calamity: Runeword Shadow Boxer / 룬워드 쉐도우 복서",
+          "delivery": "Self",
+          "effects": [
+            { "magicEffectEditorId": "CAFF_MGEF_RW_SHADOW_BOXER_STANCE", "magnitude": 1, "duration": 8, "area": 0 },
+            { "magicEffectEditorId": "CAFF_MGEF_RW_SHADOW_BOXER_BURST", "magnitude": 1, "duration": 2, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_SHADOW_BOXER_ECHO",
+          "name": "Calamity: Runeword Shadow Boxer Echo / 룬워드 쉐도우 복서 그림자 타격",
+          "delivery": "TargetActor",
+          "effect": { "magicEffectEditorId": "CAFF_MGEF_RW_SHADOW_BOXER_ECHO", "magnitude": 1, "duration": 0, "area": 0 }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_SHADOW_BOXER_BURST",
+          "name": "Calamity: Runeword Shadow Boxer Burst / 룬워드 쉐도우 복서 발동",
+          "actorValue": "None",
+          "archetype": "Script",
+          "hostile": false,
+          "recover": false,
+          "hitEffectArtForm": "Skyrim.esm|0x0008AFD1",
+          "fxPersist": true
+        }
       }
     ]
   }

@@ -70,6 +70,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 		_eventDispatcher.Invalidate();
 		ClearTrapRuntimeState("pre-load", true);
+		_combatState.echoStrike.Reset();
 		Hooks::InvalidateDeferredTasks();
 		Hooks::ClearRuntimeState();
 	}

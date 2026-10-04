@@ -11,7 +11,7 @@ public sealed class RunewordContractCatalogTests
         var contractPath = Path.Combine(FindRepoRoot(), "affixes", "runeword.contract.json");
         var snapshot = RunewordContractCatalog.LoadFromPath(contractPath);
 
-        Assert.Equal(94, snapshot.Recipes.Count);
+        Assert.Equal(95, snapshot.Recipes.Count);
         Assert.Equal(33, snapshot.RuneWeights.Count);
         Assert.Equal(
             snapshot.Recipes.Count,

@@ -126,8 +126,11 @@ def _collect_spell_refs_from_action(
         if ref:
             out.append((ref, ctx))
 
-    if action_type in {"CastSpell", "CastOnCrit", "ConvertDamage", "Archmage", "CorpseExplosion", "SummonCorpseExplosion", "SpawnTrap"}:
+    if action_type in {"CastSpell", "CastOnCrit", "ConvertDamage", "Archmage", "CorpseExplosion", "SummonCorpseExplosion", "SpawnTrap", "EchoStrike"}:
         add(_extract_spell_editor_id(action.get("spellEditorId")), f"{affix_id}:action.spellEditorId")
+
+    if action_type == "EchoStrike":
+        add(_extract_spell_editor_id(action.get("stanceSpellEditorId")), f"{affix_id}:action.stanceSpellEditorId")
 
     if action_type == "CastSpellAdaptiveElement":
         spells = _as_dict(action.get("spells")) or {}
@@ -879,6 +882,25 @@ def _lint_spec(
                 errors.append(f"{affix_id}: SpawnTrap requires radius > 0.")
             if trigger == "DotApply" and action.get("requireWeaponHit", False):
                 warnings.append(f"{affix_id}: DotApply + SpawnTrap has requireWeaponHit=true (will never fire).")
+
+        if action_type == "EchoStrike":
+            if not isinstance(action.get("spellEditorId"), str):
+                errors.append(f"{affix_id}: EchoStrike requires spellEditorId (the echo damage spell).")
+            if not isinstance(action.get("stanceSpellEditorId"), str):
+                errors.append(f"{affix_id}: EchoStrike requires stanceSpellEditorId (the self stance spell).")
+            window = action.get("windowSeconds")
+            if not _is_number(window) or window <= 0.0 or window > 30.0:
+                errors.append(f"{affix_id}: EchoStrike requires windowSeconds in (0, 30].")
+            delay = action.get("echoDelaySeconds")
+            if not _is_number(delay) or delay < 0.05 or delay > 1.5:
+                errors.append(f"{affix_id}: EchoStrike requires echoDelaySeconds in [0.05, 1.5].")
+            scaling = _as_dict(action.get("magnitudeScaling")) or {}
+            if scaling.get("source") not in {"HitPhysicalDealt", "HitTotalDealt"}:
+                errors.append(f"{affix_id}: EchoStrike requires magnitudeScaling.source HitPhysicalDealt or HitTotalDealt.")
+            if "requirePowerAttack" in action and not isinstance(action.get("requirePowerAttack"), bool):
+                errors.append(f"{affix_id}: EchoStrike requirePowerAttack must be a boolean.")
+            if trigger != "Hit":
+                errors.append(f"{affix_id}: EchoStrike requires trigger=Hit.")
 
         if action_type == "MindOverMatter":
             damage_to_magicka_pct = action.get("damageToMagickaPct")

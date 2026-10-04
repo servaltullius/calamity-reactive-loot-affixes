@@ -29,6 +29,11 @@ public sealed class AppendedRecordContractTests
         """{"type":"MovableStatic","movableStatic":{"editorId":"CAFF_MSTT_TEST","modelPath":"Meshes\\Traps\\Test.nif"}}""",
         """{"type":"MovableStatic","movableStatic":{"editorId":"CAFF_MSTT_TEST","modelPath":""}}""",
         """{"type":"MovableStatic","movableStatic":{"editorId":"CAFF_MSTT_TEST","modelPath":"Traps\\Test.nif","mustUpdateAnimations":"true"}}""",
+        """{"type":"Keyword"}""",
+        """{"type":"Keyword","keyword":null}""",
+        """{"type":"Keyword","keyword":{"editorId":"LoreBox_CAFF_AFFIX_TEST"},"miscItem":{"editorId":"CAFF_Misc_TEST","name":"Test","modelPath":"Clutter\\Test.nif"}}""",
+        // A tail keyword only relocates an existing affix's KYWD; with no such affix it is an orphan.
+        """{"type":"Keyword","keyword":{"editorId":"LoreBox_CAFF_AFFIX_ORPHAN"}}""",
     };
 
     public static TheoryData<string> InvalidLegacyDragonBlocks => new()

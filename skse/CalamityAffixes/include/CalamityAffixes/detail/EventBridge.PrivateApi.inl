@@ -695,6 +695,17 @@
 			std::chrono::steady_clock::time_point a_now);
 		void LogSpawnTrapCreated(const TrapInstance& a_trap, const Action& a_action) const;
 		void ExecuteSpawnTrapAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
+		[[nodiscard]] static bool IsEchoStrikeEligibleHit(RE::Actor* a_owner, const RE::HitData* a_hitData);
+		[[nodiscard]] static bool IsEchoStrikeActivationHit(
+			const Action& a_action,
+			RE::Actor* a_owner,
+			const RE::HitData* a_hitData);
+		void ExecuteEchoStrikeActivation(const AffixRuntime& a_affix, RE::Actor* a_owner);
+		void ProcessEchoStrikeHit(
+			RE::Actor* a_attacker,
+			RE::Actor* a_target,
+			const RE::HitData* a_hitData,
+			std::chrono::steady_clock::time_point a_now);
 		[[nodiscard]] bool CanExecuteAction(
 			const AffixRuntime& a_affix,
 			RE::Actor* a_owner,

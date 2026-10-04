@@ -1,5 +1,7 @@
 #include "runtime_gate_store_checks_common.h"
 
+#include "CalamityAffixes/CombatRuntimeState.h"
+#include "CalamityAffixes/EchoStrikeState.h"
 #include "CalamityAffixes/TriggerDispatchSnapshot.h"
 
 namespace RuntimeGateStoreChecks
@@ -94,6 +96,113 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
+		return true;
+	}
+
+	// Shadow Boxer: the window gates echoes, each source hit echoes at most once,
+	// due echoes leave the queue in order, and every reset path drops them.
+	bool CheckEchoStrikeRuntimeState()
+	{
+		using namespace std::chrono;
+		using CalamityAffixes::EchoStrikePending;
+		using CalamityAffixes::EchoStrikeRuntimeState;
+
+		const steady_clock::time_point t0{ milliseconds(10'000) };
+		EchoStrikeRuntimeState state{};
+		if (state.IsWindowOpen(t0)) {
+			std::cerr << "echo_strike_state: a fresh state must have no open window\n";
+			return false;
+		}
+
+		state.OpenWindow(0xABCull, t0 + milliseconds(8'000));
+		if (!state.IsWindowOpen(t0 + milliseconds(7'999)) || state.IsWindowOpen(t0 + milliseconds(8'000))) {
+			std::cerr << "echo_strike_state: the window must cover [open, open + duration)\n";
+			return false;
+		}
+
+		if (!state.TryRememberSource(0x1111ull) || state.TryRememberSource(0x1111ull) || state.TryRememberSource(0u)) {
+			std::cerr << "echo_strike_state: a source hit must echo once, and a missing hit never\n";
+			return false;
+		}
+		// The dedupe ring forgets only after it wraps.
+		for (std::uint64_t sig = 1u; sig <= EchoStrikeRuntimeState::kRecentSourceCount; ++sig) {
+			(void)state.TryRememberSource(0x9000ull + sig);
+		}
+		if (!state.TryRememberSource(0x1111ull)) {
+			std::cerr << "echo_strike_state: a source evicted from the ring must be accepted again\n";
+			return false;
+		}
+
+		const auto queue = [&](std::uint32_t a_target, milliseconds a_at) {
+			return state.Enqueue(EchoStrikePending{
+				.affixToken = 0xABCull,
+				.targetFormID = a_target,
+				.magnitude = 10.0f,
+				.fireAt = t0 + a_at,
+			});
+		};
+		if (!queue(1u, milliseconds(250)) || !queue(2u, milliseconds(500)) || !queue(3u, milliseconds(250)) ||
+			!state.hasPending.load()) {
+			std::cerr << "echo_strike_state: enqueue must accept echoes and raise hasPending\n";
+			return false;
+		}
+
+		std::vector<EchoStrikePending> due;
+		if (state.TakeDue(t0 + milliseconds(100), due) != 0u || !state.hasPending.load()) {
+			std::cerr << "echo_strike_state: nothing is due before its delay\n";
+			return false;
+		}
+		if (state.TakeDue(t0 + milliseconds(250), due) != 2u ||
+			due[0].targetFormID != 1u || due[1].targetFormID != 3u ||
+			state.pending.size() != 1u || state.pending[0].targetFormID != 2u || !state.hasPending.load()) {
+			std::cerr << "echo_strike_state: due echoes must leave in order and keep the rest queued\n";
+			return false;
+		}
+		if (state.TakeDue(t0 + milliseconds(600), due) != 1u || !state.pending.empty() || state.hasPending.load()) {
+			std::cerr << "echo_strike_state: draining the queue must clear hasPending\n";
+			return false;
+		}
+
+		for (std::size_t i = 0; i < EchoStrikeRuntimeState::kMaxPending; ++i) {
+			(void)queue(static_cast<std::uint32_t>(i), milliseconds(250));
+		}
+		if (queue(99u, milliseconds(250)) || state.pending.size() != EchoStrikeRuntimeState::kMaxPending) {
+			std::cerr << "echo_strike_state: the queue must stop at kMaxPending\n";
+			return false;
+		}
+
+		CalamityAffixes::CombatRuntimeState combat{};
+		combat.echoStrike.OpenWindow(0xABCull, t0 + milliseconds(8'000));
+		(void)combat.echoStrike.TryRememberSource(0x2222ull);
+		(void)combat.echoStrike.Enqueue(EchoStrikePending{ .affixToken = 0xABCull, .targetFormID = 7u, .fireAt = t0 });
+		combat.ResetTransientState();
+		if (combat.echoStrike.IsWindowOpen(t0) || !combat.echoStrike.pending.empty() ||
+			combat.echoStrike.hasPending.load() || !combat.echoStrike.TryRememberSource(0x2222ull)) {
+			std::cerr << "echo_strike_state: combat transient reset must clear the window, queue, and sources\n";
+			return false;
+		}
+
+		static_assert(CalamityAffixes::detail::IsEchoStrikeEligibleHit(true, true, false, false, false, false));
+		static_assert(!CalamityAffixes::detail::IsEchoStrikeEligibleHit(false, true, false, false, false, false),
+			"a summon's hit routed to the player is not the player's swing");
+		static_assert(!CalamityAffixes::detail::IsEchoStrikeEligibleHit(true, true, true, false, false, false),
+			"bow and crossbow hits never echo");
+		static_assert(!CalamityAffixes::detail::IsEchoStrikeEligibleHit(true, true, false, true, false, false),
+			"spell hits never echo");
+		static_assert(!CalamityAffixes::detail::IsEchoStrikeEligibleHit(true, true, false, false, true, false),
+			"bashes never echo");
+		static_assert(!CalamityAffixes::detail::IsEchoStrikeEligibleHit(true, true, false, false, false, true),
+			"explosions never echo");
+		static_assert(!CalamityAffixes::detail::IsEchoStrikeEligibleHit(true, false, false, false, false, false),
+			"a hit without melee evidence never echoes");
+		static_assert(CalamityAffixes::detail::IsEchoStrikeActivationHit(true, false, false),
+			"by default any eligible swing opens the window");
+		static_assert(CalamityAffixes::detail::IsEchoStrikeActivationHit(true, true, false));
+		static_assert(CalamityAffixes::detail::IsEchoStrikeActivationHit(true, true, true));
+		static_assert(!CalamityAffixes::detail::IsEchoStrikeActivationHit(true, false, true),
+			"requirePowerAttack keeps normal swings from opening the window");
+		static_assert(!CalamityAffixes::detail::IsEchoStrikeActivationHit(false, true, false),
+			"an ineligible hit never opens the window");
 		return true;
 	}
 }

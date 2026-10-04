@@ -80,7 +80,8 @@ namespace CalamityAffixes
 			a_affix.action.type == ActionType::kDebugNotify ||
 			a_affix.action.type == ActionType::kCastSpell ||
 			a_affix.action.type == ActionType::kCastSpellAdaptiveElement ||
-			a_affix.action.type == ActionType::kSpawnTrap;
+			a_affix.action.type == ActionType::kSpawnTrap ||
+			a_affix.action.type == ActionType::kEchoStrike;
 		if (!isTriggerAction) {
 			return;
 		}

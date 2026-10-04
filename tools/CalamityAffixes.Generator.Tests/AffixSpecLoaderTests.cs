@@ -936,7 +936,7 @@ public sealed class AffixSpecLoaderTests
 
         Assert.True(root.TryGetProperty("runewordCatalog", out var runewordCatalog));
         Assert.Equal(JsonValueKind.Array, runewordCatalog.ValueKind);
-        Assert.Equal(94, runewordCatalog.GetArrayLength());
+        Assert.Equal(95, runewordCatalog.GetArrayLength());
 
         Assert.True(root.TryGetProperty("runewordRuneWeights", out var runewordRuneWeights));
         Assert.Equal(JsonValueKind.Array, runewordRuneWeights.ValueKind);

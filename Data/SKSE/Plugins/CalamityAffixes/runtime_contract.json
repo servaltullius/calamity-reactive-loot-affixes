@@ -14,6 +14,7 @@
     "ConvertDamage",
     "CorpseExplosion",
     "DebugNotify",
+    "EchoStrike",
     "MindOverMatter",
     "SpawnTrap",
     "SummonCorpseExplosion"
@@ -1098,6 +1099,17 @@
         "Eth"
       ],
       "resultAffixId": "runeword_breath_of_the_dying_final",
+      "recommendedBase": "Weapon"
+    },
+    {
+      "id": "rw_shadow_boxer",
+      "name": "Shadow Boxer",
+      "runes": [
+        "Shael",
+        "Ko",
+        "Um"
+      ],
+      "resultAffixId": "runeword_shadow_boxer_final",
       "recommendedBase": "Weapon"
     }
   ],

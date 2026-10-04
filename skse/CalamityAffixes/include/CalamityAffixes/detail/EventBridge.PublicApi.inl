@@ -27,6 +27,12 @@
 		// Tick lightweight runtime systems that need polling (e.g., ground traps).
 		void TickTraps();
 		[[nodiscard]] bool HasActiveTraps() const noexcept { return _trapState.hasActiveTraps.load(std::memory_order_relaxed); }
+		// Land the echo strikes whose delay has elapsed (main thread).
+		void TickEchoStrikes();
+		[[nodiscard]] bool HasPendingEchoStrikes() const noexcept
+		{
+			return _combatState.echoStrike.hasPending.load(std::memory_order_acquire);
+		}
 		[[nodiscard]] bool IsRuntimeEnabled() const noexcept { return _runtimeSettings.enabled.load(std::memory_order_relaxed); }
 		[[nodiscard]] bool IsHealthDamageRoutingDisabled() const noexcept { return _runtimeSettings.disableHealthDamageRouting; }
 		[[nodiscard]] bool IsTrapSystemTickDisabled() const noexcept { return _runtimeSettings.disableTrapSystemTick; }

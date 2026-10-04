@@ -5,7 +5,7 @@
 > 기준 코드: `affixes/modules/keywords.affixes.runewords.json`
 > 룬 조합 기준: `affixes/runeword.contract.json`
 
-- 총 룬워드: **94개**
+- 총 룬워드: **95개**
 - 각 효과 설명은 인게임 표시 문자열(`nameKo`/`nameEn`)을 그대로 사용
 
 ### Nadir
@@ -665,3 +665,10 @@
 - 추천 베이스: Weapon
 - 한글 표시: 룬워드 죽음의 숨결 [Vex-Hel-El-Eld-Zod-Eth]: 처치 시 50% 확률로 독 시체 폭발(독 피해 24 + 시체 최대 체력 6%, 반경 600). 3초마다 발동.
 - 영문 표시: Runeword Breath of the Dying (Vex-Hel-El-Eld-Zod-Eth): 50% on Kill / ICD 3s - Poison Corpse Explosion (24 + 6% Corpse Max Health, Radius 600)
+
+### Shadow Boxer
+
+- 룬 조합: `Shael-Ko-Um`
+- 추천 베이스: Weapon
+- 한글 표시: 룬워드 쉐도우 복서 [Shael-Ko-Um]: 근접 적중 시 그림자 권투(8초) - 지속 중 근접 적중마다 0.25초 뒤 그림자가 한 번 더 타격(그 적중 물리 피해의 40%). 12초마다 발동.
+- 영문 표시: Runeword Shadow Boxer (Shael-Ko-Um): on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.25s later for 40% of its physical damage

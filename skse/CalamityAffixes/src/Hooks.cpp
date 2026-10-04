@@ -3,6 +3,8 @@
 
 #include <atomic>
 #include <chrono>
+#include <cmath>
+#include <cstdint>
 #include <cstddef>
 
 #include <RE/Skyrim.h>
@@ -21,6 +23,13 @@ namespace CalamityAffixes::Hooks
 {
 	namespace
 	{
+		// 0 = Novice ... 5 = Legendary; -1 when the player is unavailable.
+		[[nodiscard]] std::int32_t ResolvePlayerDifficulty() noexcept
+		{
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			return player ? player->GetGameStatsData().difficulty : -1;
+		}
+
 		[[nodiscard]] bool IsLikelySkyrimTextAddress(std::uintptr_t a_address) noexcept
 		{
 			if (a_address == 0u) {
@@ -305,6 +314,22 @@ namespace CalamityAffixes::Hooks
 							return;
 						}
 
+						// An echo strike's damage is not a new hit: forward it without
+						// crit, conversion, or proc evaluation.
+						float echoMagnitude = 0.0f;
+						if (detail::ConsumeExpectedEchoStrikeDamage(safeTarget, safeAttacker, rawHitData, now, echoMagnitude)) {
+							// Difficulty probe: the echo effect has no resistance, so
+							// damage / magnitude is the engine's multiplier on our spells.
+							SKSE::log::debug(
+								"CalamityAffixes: damage probe echo (difficulty={}, magnitude={:.2f}, damage={:.2f}, ratio={:.3f}).",
+								ResolvePlayerDifficulty(),
+								echoMagnitude,
+								std::abs(a_damage),
+								echoMagnitude > 0.0f ? std::abs(a_damage) / echoMagnitude : 0.0f);
+							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							return;
+						}
+
 						const auto* preHitData = detail::ResolveStableHitDataForSpecialActions(
 							rawHitData,
 							safeTarget,
@@ -313,6 +338,22 @@ namespace CalamityAffixes::Hooks
 						if (!detail::ShouldAllowProcDispatch(safeTarget, safeAttacker, preHitData, a_damage, now)) {
 							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 							return;
+						}
+
+						if (safeAttacker && safeAttacker->IsPlayerRef() && preHitData && preHitData->weapon) {
+							// Difficulty probe: compare the swing's HitData with the damage
+							// the engine actually applies, to learn whether HitData (which
+							// echo strikes scale from) is before or after the difficulty cut.
+							SKSE::log::debug(
+								"CalamityAffixes: damage probe swing (difficulty={}, damage={:.2f}, hitTotal={:.2f}, hitPhysical={:.2f}, resistedPhysical={:.2f}, resistedTyped={:.2f}, powerAttack={}, crit={}).",
+								ResolvePlayerDifficulty(),
+								std::abs(a_damage),
+								preHitData->totalDamage,
+								preHitData->physicalDamage,
+								preHitData->resistedPhysicalDamage,
+								preHitData->resistedTypedDamage,
+								preHitData->flags.any(RE::HitData::Flag::kPowerAttack),
+								preHitData->flags.any(RE::HitData::Flag::kCritical));
 						}
 
 						const auto adj = detail::AdjustDamageAndEvaluateSpecials(
@@ -375,5 +416,14 @@ namespace CalamityAffixes::Hooks
 	{
 		detail::ClearDispatchRuntimeState();
 		ClearHostileEffectGuardRuntimeState();
+	}
+
+	void ExpectEchoStrikeDamage(RE::Actor* a_target, RE::Actor* a_attacker, float a_magnitude) noexcept
+	{
+		detail::ExpectEchoStrikeDamage(
+			SanitizeObjectPointer(a_target),
+			SanitizeObjectPointer(a_attacker),
+			a_magnitude,
+			std::chrono::steady_clock::now());
 	}
 }

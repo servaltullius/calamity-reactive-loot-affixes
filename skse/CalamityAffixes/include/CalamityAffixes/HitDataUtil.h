@@ -1,9 +1,13 @@
 #pragma once
 
+#include "CalamityAffixes/HitSourcePolicy.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 
 #include <RE/Skyrim.h>
+
+#include <bit>
+#include <cstdint>
 
 namespace CalamityAffixes::HitDataUtil
 {
@@ -190,16 +194,54 @@ namespace CalamityAffixes::HitDataUtil
 			return false;
 		}
 
-		if (a_hitData->weapon != nullptr || a_hitData->attackDataSpell != nullptr) {
-			return true;
+		const bool hasDirectWeapon = a_hitData->weapon != nullptr;
+		const bool hasAttackSpell = a_hitData->attackDataSpell != nullptr;
+		const bool hasMeleeFlag = a_hitData->flags.any(RE::HitData::Flag::kMeleeAttack);
+		const bool hasExplosionFlag = a_hitData->flags.any(RE::HitData::Flag::kExplosion);
+		// Bow/crossbow arrows: hitData->weapon may be null. Resolve through the
+		// projectile itself, never from whatever the attacker happens to hold.
+		const bool projectileWeaponIsRanged =
+			!hasDirectWeapon && !hasAttackSpell && !hasMeleeFlag && !hasExplosionFlag &&
+			IsBowOrCrossbow(ResolveCastOnCritHitWeapon(a_hitData, a_attacker));
+		return detail::IsHitLikeSourceEvidence(
+			hasDirectWeapon,
+			hasAttackSpell,
+			hasMeleeFlag,
+			hasExplosionFlag,
+			projectileWeaponIsRanged);
+	}
+
+	// Identifies one engine hit by its content. Damage applied later without a
+	// fresh hit (a spell landing after the swing) leaves the target's lastHitData
+	// untouched, so it reads back with the same signature as the swing itself.
+	// Zero means "no HitData".
+	[[nodiscard]] inline std::uint64_t MakeHitContentSignature(const RE::HitData* a_hitData) noexcept
+	{
+		if (!a_hitData) {
+			return 0u;
 		}
 
-		// Bow/crossbow arrows: hitData->weapon may be null — resolve from attacker.
-		if (ResolveHitWeapon(a_hitData, a_attacker)) {
-			return true;
-		}
+		std::uint64_t hash = 14695981039346656037ull;
+		const auto mix = [&](std::uint64_t a_value) {
+			hash ^= a_value;
+			hash *= 1099511628211ull;
+		};
+		const auto floatBits = [](float a_value) noexcept {
+			return static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(a_value));
+		};
 
-		return a_hitData->flags.any(RE::HitData::Flag::kMeleeAttack) ||
-		       a_hitData->flags.any(RE::HitData::Flag::kExplosion);
+		const auto target = a_hitData->target.get();
+		const auto aggressor = a_hitData->aggressor.get();
+		mix(static_cast<std::uint64_t>(target ? target->GetFormID() : 0u));
+		mix(static_cast<std::uint64_t>(aggressor ? aggressor->GetFormID() : 0u));
+		mix(static_cast<std::uint64_t>(a_hitData->flags.underlying()));
+		mix(floatBits(a_hitData->totalDamage));
+		mix(floatBits(a_hitData->hitPosition.x));
+		mix(floatBits(a_hitData->hitPosition.y));
+		mix(floatBits(a_hitData->hitPosition.z));
+		mix(floatBits(a_hitData->hitDirection.x));
+		mix(floatBits(a_hitData->hitDirection.y));
+		mix(floatBits(a_hitData->hitDirection.z));
+		return hash == 0u ? 1u : hash;
 	}
 }

@@ -230,7 +230,7 @@ def regenerate_affix_catalog(output_path: Path, metadata: PublicDocMetadata) -> 
             "",
             "## 룬워드 구성 요약",
             "",
-            "- 전체 룬워드는 **94개**이며, 현재는 모두 JSON 개별 정의입니다.",
+            "- 전체 룬워드는 **95개**이며, 현재는 모두 JSON 개별 정의입니다.",
             "- 상세 효과 문서는 각 룬워드의 인게임 표시 문자열을 그대로 사용합니다.",
             "- 상세 효과는 [룬워드 상세](RUNEWORD_EFFECTS.md)를 참조하세요.",
             "",

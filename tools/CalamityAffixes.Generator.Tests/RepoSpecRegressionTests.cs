@@ -21,6 +21,18 @@ public sealed class RepoSpecRegressionTests
         new(0x000B05u, "CAFF_MSTT_TRAP_CHAOS_VISUAL", @"Traps\PressurePlateMetal\TrapPressurePlateMetal01.nif", true),
     ];
 
+    // Shadow Boxer (v2.3.0): the first affix added after the prefix was sealed, so
+    // its KYWD is relocated into the tail together with its effects and spells.
+    private static readonly AllocationRecord[] ExpectedShadowBoxerTail =
+    [
+        new(0x000B11u, "KYWD", "LoreBox_CAFF_AFFIX_RUNEWORD_SHADOW_BOXER"),
+        new(0x000B12u, "MGEF", "CAFF_MGEF_RW_SHADOW_BOXER_STANCE"),
+        new(0x000B13u, "MGEF", "CAFF_MGEF_RW_SHADOW_BOXER_ECHO"),
+        new(0x000B14u, "SPEL", "CAFF_SPEL_RW_SHADOW_BOXER_STANCE"),
+        new(0x000B15u, "SPEL", "CAFF_SPEL_RW_SHADOW_BOXER_ECHO"),
+        new(0x000B16u, "MGEF", "CAFF_MGEF_RW_SHADOW_BOXER_BURST"),
+    ];
+
     [Fact]
     public void RepoSpec_GeneratorBuildsWithoutForwardMagicEffectReferences()
     {
@@ -244,7 +256,7 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFiftyTwoTypedRecords()
+    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFiftyEightTypedRecords()
     {
         var repoRoot = FindRepoRoot();
         var fixture = ReadV140AllocationFixture(repoRoot);
@@ -252,9 +264,10 @@ public sealed class RepoSpecRegressionTests
         var mod = KeywordPluginBuilder.Build(spec);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(785, actual.Length);
-        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^2]);
-        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^1]);
+        Assert.Equal(791, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^8]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^7]);
+        Assert.Equal(ExpectedShadowBoxerTail, actual.TakeLast(ExpectedShadowBoxerTail.Length));
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -279,7 +292,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B11u, ((IModGetter)mod).NextFormID);
+        Assert.Equal(0x000B17u, ((IModGetter)mod).NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -305,12 +318,12 @@ public sealed class RepoSpecRegressionTests
             using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
             var reimportedAllocation = AllocationSignature(reimported);
 
-            Assert.Equal(785, generatedAllocation.Length);
+            Assert.Equal(791, generatedAllocation.Length);
             Assert.Equal(generatedAllocation, reimportedAllocation);
             Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
-            Assert.Equal(generatedAllocation.TakeLast(52), reimportedAllocation.TakeLast(52));
+            Assert.Equal(generatedAllocation.TakeLast(58), reimportedAllocation.TakeLast(58));
             Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-            Assert.Equal(0x000B11u, reimported.NextFormID);
+            Assert.Equal(0x000B17u, reimported.NextFormID);
             AssertWorldMarkers(reimported);
         }
         finally
@@ -328,9 +341,10 @@ public sealed class RepoSpecRegressionTests
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(785, actual.Length);
-        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^2]);
-        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^1]);
+        Assert.Equal(791, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^8]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^7]);
+        Assert.Equal(ExpectedShadowBoxerTail, actual.TakeLast(ExpectedShadowBoxerTail.Length));
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -355,12 +369,55 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B11u, mod.NextFormID);
+        Assert.Equal(0x000B17u, mod.NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
             actual.Length,
             actual.Select(record => record.EditorId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
+    [Fact]
+    public void GeneratedDataEsp_ShadowBoxerStanceCarriesPersistentShadowShaderForTheWholeWindow()
+    {
+        var repoRoot = FindRepoRoot();
+        using var mod = SkyrimMod.CreateFromBinaryOverlay(
+            Path.Combine(repoRoot, "Data", "CalamityAffixes.esp"),
+            SkyrimRelease.SkyrimSE);
+        const uint fxPersist = 0x00001000u;
+
+        var stance = Assert.Single(mod.MagicEffects, record => record.EditorID == "CAFF_MGEF_RW_SHADOW_BOXER_STANCE");
+        var skyrim = ModKey.FromNameAndExtension("Skyrim.esm");
+        // The full vanilla Ebony Mail pairing (DA02AbArmorShadow): the DA02ArmorShadow
+        // shader alone is a faint grey tile; PoisonCloak01 is the visible black smoke.
+        Assert.Equal(new FormKey(skyrim, 0x081180u), stance.HitShader.FormKey);
+        Assert.Equal(new FormKey(skyrim, 0x1046CDu), stance.HitEffectArt.FormKey);
+        Assert.Equal(fxPersist, (uint)stance.Flags & fxPersist);
+
+        // Activation burst: the Nightingale Strife aura body art, briefly.
+        var burst = Assert.Single(mod.MagicEffects, record => record.EditorID == "CAFF_MGEF_RW_SHADOW_BOXER_BURST");
+        Assert.True(burst.HitShader.IsNull);
+        Assert.Equal(new FormKey(skyrim, 0x08AFD1u), burst.HitEffectArt.FormKey);
+        Assert.Equal(fxPersist, (uint)burst.Flags & fxPersist);
+
+        // Each echo flashes the bright violet ghost shader on the target, so it
+        // stays readable next to other on-hit procs (a dark flash vanished under
+        // a shock cloak in game). It must not persist, since echoes land every swing.
+        var echo = Assert.Single(mod.MagicEffects, record => record.EditorID == "CAFF_MGEF_RW_SHADOW_BOXER_ECHO");
+        Assert.Equal(new FormKey(skyrim, 0x103129u), echo.HitShader.FormKey);
+        Assert.True(echo.HitEffectArt.IsNull);
+        Assert.Equal(0u, (uint)echo.Flags & fxPersist);
+
+        using var document = JsonDocument.Parse(File.ReadAllText(
+            Path.Combine(repoRoot, "Data", "SKSE", "Plugins", "CalamityAffixes", "affixes.json")));
+        var affix = document.RootElement.GetProperty("keywords").GetProperty("affixes").EnumerateArray()
+            .Single(entry => entry.GetProperty("id").GetString() == "runeword_shadow_boxer_final");
+        var windowSeconds = affix.GetProperty("runtime").GetProperty("action").GetProperty("windowSeconds").GetDouble();
+        var stanceSpell = Assert.Single(mod.Spells, record => record.EditorID == "CAFF_SPEL_RW_SHADOW_BOXER_STANCE");
+        // The shader lasts exactly as long as the runtime echo window.
+        var stanceEffect = Assert.Single(stanceSpell.Effects, effect => effect.BaseEffect.FormKey == stance.FormKey);
+        Assert.Equal(windowSeconds, stanceEffect.Data!.Duration);
+        Assert.Contains(stanceSpell.Effects, effect => effect.BaseEffect.FormKey == burst.FormKey);
     }
 
     [Fact]
@@ -1054,7 +1111,10 @@ public sealed class RepoSpecRegressionTests
         var spells = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
         foreach (var affix in runewords.Values)
         {
-            var records = affix.GetProperty("records");
+            if (!affix.TryGetProperty("records", out var records))
+            {
+                continue;
+            }
             if (records.TryGetProperty("spell", out var one) && one.ValueKind == JsonValueKind.Object)
             {
                 spells.Add(one.GetProperty("editorId").GetString()!, one.Clone());
