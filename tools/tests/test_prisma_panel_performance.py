@@ -337,7 +337,7 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
     def test_recipe_localization_detail_and_selection_semantics_are_connected(self) -> None:
         for marker in (
             'role="listbox"',
-            'aria-label="Equipped runeword bases / 착용 룬워드 베이스"',
+            'aria-label="Equipped items / 착용 중인 장비"',
             'aria-label="Runeword recipes / 룬워드 레시피"',
             'button.setAttribute("role", "option")',
             'button.setAttribute("aria-selected", selected ? "true" : "false")',

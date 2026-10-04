@@ -66,15 +66,14 @@ class PrismaRecipeMaterialFilterTests(unittest.TestCase):
 
     def test_copy_limits_status_to_current_full_recipe_inventory(self) -> None:
         for marker in (
-            "Filters use only current inventory fragment counts for each full recipe.",
-            "They do not include inserted progress",
-            "do not indicate base compatibility",
-            "whether transmutation is currently available",
-            "필터는 전체 레시피 기준 현재 인벤토리의 룬 조각만 계산합니다.",
-            "기존 삽입 진행을 포함하지 않으며",
-            "베이스 호환성이나 현재 실제 변환 가능 여부를 뜻하지 않습니다.",
+            "Based on fragments you own.",
+            "보유한 룬 조각 기준",
+            "Loading fragments; showing all recipes.",
         ):
             self.assertIn(marker, self.source)
+        # One short line, not a paragraph of what the filter does not mean.
+        self.assertNotIn("They do not include inserted progress", self.source)
+        self.assertNotIn("뜻하지 않습니다", self.source)
 
         for marker in (
             'return t("Fragments ready", "룬 조각 준비")',

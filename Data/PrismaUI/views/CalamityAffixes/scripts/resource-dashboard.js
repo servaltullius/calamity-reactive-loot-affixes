@@ -124,23 +124,17 @@ function setResourceProgress(progress, valueNode, stateNode, received, known, st
       "aria-label",
       !received
         ? kind === "fragment"
-          ? t("Rune fragment pity is synchronizing", "룬 조각 피티 동기화 중")
-          : t("Reforge Orb pity is synchronizing", "재련 오브 피티 동기화 중")
+          ? t("Loading rune fragment pity", "룬 조각 천장 불러오는 중")
+          : t("Loading Reforge Orb pity", "재련 오브 천장 불러오는 중")
         : kind === "fragment"
-          ? t("Rune fragment pity is unavailable", "룬 조각 피티 사용 불가")
-          : t("Reforge Orb pity is unavailable", "재련 오브 피티 사용 불가")
+          ? t("Rune fragment pity unavailable", "룬 조각 천장 정보 없음")
+          : t("Reforge Orb pity unavailable", "재련 오브 천장 정보 없음")
     );
     progress.removeAttribute("aria-valuetext");
     valueNode.textContent = "— / —";
     stateNode.textContent = received
-      ? t(
-          "Pity data is unavailable; no count is assumed.",
-          "피티 데이터를 사용할 수 없어 수치를 추정하지 않습니다."
-        )
-      : t(
-          "Synchronizing eligible ordinary drop rolls.",
-          "적격 일반 드랍 판정을 동기화 중입니다."
-        );
+      ? t("Couldn't read pity data.", "천장 정보를 읽지 못했습니다.")
+      : t("Loading…", "불러오는 중…");
     return;
   }
 
@@ -152,27 +146,21 @@ function setResourceProgress(progress, valueNode, stateNode, received, known, st
   valueNode.textContent = `${streak} / ${threshold}`;
 
   const label = kind === "fragment"
-    ? t("Rune fragment pity", "룬 조각 피티")
-    : t("Reforge Orb pity", "재련 오브 피티");
+    ? t("Rune fragment pity", "룬 조각 천장")
+    : t("Reforge Orb pity", "재련 오브 천장");
   const valueText = guaranteeReady
-    ? t(
-        `${streak} eligible misses recorded; the next eligible ordinary drop roll is guaranteed.`,
-        `적격 실패 ${streak}회 기록; 다음 적격 일반 드랍 판정에서 확정 지급됩니다.`
-      )
+    ? t("Full: the next drop is guaranteed.", "가득 참: 다음 드랍 확정.")
     : t(
-        `${streak} of ${threshold} eligible ordinary drop misses recorded.`,
-        `적격 일반 드랍 실패 ${streak}/${threshold}회가 기록되었습니다.`
+        `${streak} of ${threshold}; when full, the next drop is guaranteed.`,
+        `${streak}/${threshold}, 다 차면 다음 드랍 확정.`
       );
   progress.setAttribute("aria-label", label);
   progress.setAttribute("aria-valuetext", valueText);
   stateNode.textContent = guaranteeReady
-    ? t(
-        "Next eligible ordinary drop roll: guaranteed.",
-        "다음 적격 일반 드랍 판정: 확정 지급."
-      )
+    ? t("Next drop guaranteed!", "다음 드랍 확정!")
     : t(
-        "Eligible ordinary drop misses recorded.",
-        "적격 일반 드랍 실패가 기록됩니다."
+        "Fills on each miss; when full, the next drop is guaranteed.",
+        "못 얻을 때마다 차고, 다 차면 다음 드랍은 확정입니다."
       );
 }
 
@@ -184,19 +172,13 @@ function renderResourceRuneList(state, totalOwned) {
   clearChildren(resourceRuneList);
   if (!state.runeInventoryKnown) {
     resourceRuneDetailsSummary.textContent = state.received
-      ? t("Rune Fragment Inventory · Unavailable", "룬 조각 보유량 · 사용 불가")
-      : t("Rune Fragment Inventory · Synchronizing", "룬 조각 보유량 · 동기화 중");
+      ? t("Rune Fragment Inventory · Unavailable", "룬 조각 보유량 · 읽지 못함")
+      : t("Rune Fragment Inventory · Loading", "룬 조각 보유량 · 불러오는 중");
     const unknown = document.createElement("li");
     unknown.className = "rdRuneEmpty";
     unknown.textContent = state.received
-      ? t(
-          "Rune inventory is unavailable because the received snapshot was not valid.",
-          "수신한 룬 보유량 스냅샷이 유효하지 않아 표시하지 않습니다."
-        )
-      : t(
-          "Rune inventory is synchronizing; no count is assumed.",
-          "룬 보유량을 동기화 중이며 수치를 추정하지 않습니다."
-        );
+      ? t("Couldn't read rune inventory.", "룬 보유량을 읽지 못했습니다.")
+      : t("Loading…", "불러오는 중…");
     resourceRuneList.appendChild(unknown);
     return;
   }
@@ -242,24 +224,23 @@ function renderResourceDashboard() {
     resourceOrbDashboardSection.setAttribute("aria-busy", state.received ? "false" : "true");
   }
 
-  resourceDashboardTitle.textContent = t("Rune Resources & Pity", "룬 자원 및 피티");
-  resourceDashboardLead.textContent = t(
-    "Current rune fragments and the ordinary rune-drop pity streak.",
-    "현재 룬 조각과 일반 룬 드랍 피티 연속 실패를 표시합니다."
-  );
+  resourceDashboardTitle.textContent = t("Runes & Pity", "룬 조각과 천장");
+  // The badge only speaks up when something is off; a "current" chip that
+  // is always on says nothing.
   resourceDashboardSync.textContent = !state.received
-    ? t("Synchronizing", "동기화 중")
+    ? t("Loading", "불러오는 중")
     : allKnown
-    ? t("Current", "현재 상태")
+    ? ""
     : anyKnown
-      ? t("Partially unavailable", "일부 사용 불가")
-      : t("Unavailable", "사용 불가");
+      ? t("Partly unavailable", "일부 읽지 못함")
+      : t("Unavailable", "읽지 못함");
+  resourceDashboardSync.hidden = state.received && allKnown;
   resourceDashboardSync.classList.toggle("ready", allKnown);
 
   resourceRuneTotalLabel.textContent = t("Rune Fragments", "룬 조각");
   resourceRuneTotalMeta.textContent = t("Total owned", "총 보유량");
   resourceRuneKindsLabel.textContent = t("Rune Types", "룬 종류");
-  resourceRuneKindsMeta.textContent = t("Types with at least one", "1개 이상 보유");
+  resourceRuneKindsMeta.textContent = t("Collected", "모은 종류");
   if (resourceCraftingTitle) {
     resourceCraftingTitle.textContent = t("Crafting Resources", "제작 재료");
   }
@@ -312,8 +293,8 @@ function renderResourceDashboard() {
       : "—";
   }
 
-  resourceFragmentPityLabel.textContent = t("Rune Fragment Pity", "룬 조각 피티");
-  resourceOrbPityLabel.textContent = t("Reforge Orb Pity", "재련 오브 피티");
+  resourceFragmentPityLabel.textContent = t("Rune Fragment Pity", "룬 조각 천장");
+  resourceOrbPityLabel.textContent = t("Reforge Orb Pity", "재련 오브 천장");
   setResourceProgress(
     resourceFragmentPityProgress,
     resourceFragmentPityValue,
@@ -336,13 +317,13 @@ function renderResourceDashboard() {
   );
 
   resourcePityHint.textContent = t(
-    "Only eligible ordinary rune-fragment drop rolls affect this streak; unrelated kills and forced rewards do not. At the threshold, the next eligible ordinary drop roll is guaranteed.",
-    "적격 일반 룬 조각 드랍 판정만 이 연속 실패를 바꾸며, 무관한 처치나 강제 지급은 포함되지 않습니다. 기준치에 도달하면 다음 적격 일반 드랍 판정에서 확정 지급됩니다."
+    "Goes up by 1 each time a kill that could drop a rune fragment doesn't. When full, the next one is guaranteed.",
+    "룬 조각이 나올 수 있는 처치에서 못 얻으면 1씩 오릅니다. 다 차면 다음엔 반드시 나옵니다."
   );
   if (resourceOrbPityHint) {
     resourceOrbPityHint.textContent = t(
-      "Only eligible ordinary Reforge Orb drop rolls affect this streak; unrelated kills and forced rewards do not. At the threshold, the next eligible ordinary drop roll is guaranteed.",
-      "적격 일반 재련 오브 드랍 판정만 이 연속 실패를 바꾸며, 무관한 처치나 강제 지급은 포함되지 않습니다. 기준치에 도달하면 다음 적격 일반 드랍 판정에서 확정 지급됩니다."
+      "Goes up by 1 each time a kill that could drop a Reforge Orb doesn't. When full, the next one is guaranteed.",
+      "재련 오브가 나올 수 있는 처치에서 못 얻으면 1씩 오릅니다. 다 차면 다음엔 반드시 나옵니다."
     );
   }
   resourceRuneList.setAttribute(

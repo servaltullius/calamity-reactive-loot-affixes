@@ -344,7 +344,7 @@ const runInspectorSplitBehavior = new Function(
     assert(!filled.recipeText.includes(filled.baseText));
     const empty = resolveRunewordInspectorTexts("", "", false);
     assert(empty.recipeText.includes("Select a recipe"));
-    assert(empty.baseText.includes("Select an equipped base"));
+    assert(empty.baseText.includes("Pick an item"));
     const pending = resolveRunewordInspectorTexts("", "", true);
     assert(pending.baseText.includes("Refreshing"));
   `

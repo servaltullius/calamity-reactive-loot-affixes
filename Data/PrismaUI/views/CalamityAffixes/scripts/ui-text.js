@@ -58,13 +58,10 @@ function updateRecipeFilterControls() {
   }
   if (recipeMaterialFilterHint) {
     recipeMaterialFilterHint.textContent = runeInventoryKnownState
-      ? t(
-          "Filters use only current inventory fragment counts for each full recipe. They do not include inserted progress and do not indicate base compatibility or whether transmutation is currently available.",
-          "필터는 전체 레시피 기준 현재 인벤토리의 룬 조각만 계산합니다. 기존 삽입 진행을 포함하지 않으며 베이스 호환성이나 현재 실제 변환 가능 여부를 뜻하지 않습니다."
-        )
+      ? t("Based on fragments you own.", "보유한 룬 조각 기준")
       : t(
-          "Fragment inventory is synchronizing. Material filters remain unavailable and show all recipes. They do not include inserted progress and do not indicate base compatibility or whether transmutation is currently available.",
-          "룬 조각 보유량을 동기화 중입니다. 재료 필터는 사용할 수 없으며 모든 레시피를 표시합니다. 기존 삽입 진행을 포함하지 않고 베이스 호환성이나 현재 실제 변환 가능 여부를 뜻하지 않습니다."
+          "Loading fragments; showing all recipes.",
+          "룬 조각을 불러오는 중이라 모든 레시피를 표시합니다."
         );
   }
 }
@@ -77,13 +74,7 @@ function initUiText() {
     "인벤토리에서 선택한 아이템의 어픽스를 표시합니다."
   );
   if (panelTitle) {
-    panelTitle.textContent = t("Calamity Controls", "칼라미티 조작");
-  }
-  if (panelSub) {
-    panelSub.textContent = t(
-      "This is the main Prisma control panel. Close with ESC or the Close button below.",
-      "Prisma 메인 조작 패널입니다. ESC 또는 아래 Close 버튼으로 닫습니다."
-    );
+    panelTitle.textContent = t("Calamity", "칼라미티");
   }
   if (mainTabList) {
     mainTabList.setAttribute("aria-label", t("Calamity tabs", "칼라미티 탭"));
@@ -101,13 +92,10 @@ function initUiText() {
     runewordFlowTitle.textContent = t("Runeword Workbench", "룬워드 작업대");
   }
   if (runewordFlowHint) {
-    runewordFlowHint.textContent = t(
-      "Start by selecting one equipped base.",
-      "먼저 착용 중인 베이스 아이템 하나를 선택하세요."
-    );
+    runewordFlowHint.textContent = t("Pick an item to work on.", "작업할 장비를 고르세요.");
   }
   if (runewordBaseStepTitle) {
-    runewordBaseStepTitle.textContent = t("Base Selection", "베이스 선택");
+    runewordBaseStepTitle.textContent = t("Item", "장비 선택");
   }
   if (runewordRecipeStepTitle) {
     runewordRecipeStepTitle.textContent = t("Recipe Explorer", "레시피 탐색기");
@@ -115,26 +103,8 @@ function initUiText() {
   if (runewordActionStepTitle) {
     runewordActionStepTitle.textContent = t("Review & Action", "검토 및 실행");
   }
-  if (runewordBaseStepHint) {
-    runewordBaseStepHint.textContent = t(
-      "Pick one compatible equipped item and keep it locked while you compare recipes.",
-      "호환되는 착용 아이템 하나를 고정한 뒤 레시피를 비교하세요."
-    );
-  }
-  if (runewordRecipeStepHint) {
-    runewordRecipeStepHint.textContent = t(
-      "This is the main workspace. Search, compare, and choose the recipe before you commit.",
-      "이곳이 메인 작업 영역입니다. 검색하고 비교한 뒤 적용할 레시피를 고르세요."
-    );
-  }
-  if (runewordActionStepHint) {
-    runewordActionStepHint.textContent = t(
-      "Review the requirements, then execute when ready.",
-      "요구 조건을 확인한 뒤 준비되면 실행하세요."
-    );
-  }
   if (runewordBaseChooserSummary) {
-    runewordBaseChooserSummary.textContent = t("Change Base", "베이스 변경");
+    runewordBaseChooserSummary.textContent = t("Change Item", "장비 변경");
   }
   if (runewordCubeDetailsSummary) {
     runewordCubeDetailsSummary.textContent = t("Rune Grid", "룬 그리드");
@@ -147,8 +117,8 @@ function initUiText() {
   }
   if (runewordBaseAffixSummary) {
     runewordBaseAffixSummary.textContent = t(
-      "Selected Base Affixes",
-      "선택 베이스 어픽스"
+      "Selected Item Affixes",
+      "선택한 장비 어픽스"
     );
   }
   if (selectedItemLabel) {
@@ -162,8 +132,8 @@ function initUiText() {
   }
   if (runewordContextRecipeMeta) {
     runewordContextRecipeMeta.textContent = t(
-      "Search the center explorer and select one recipe to review requirements.",
-      "중앙 탐색기에서 레시피를 선택하면 요구 조건을 검토할 수 있습니다."
+      "Pick a recipe from the list on the left.",
+      "왼쪽 목록에서 레시피를 고르세요."
     );
   }
   if (affixSelectedItemLabel) {
@@ -174,37 +144,27 @@ function initUiText() {
   }
   if (affixSelectedItemMeta) {
     affixSelectedItemMeta.textContent = t(
-      "Highlight an inventory item to inspect it here. Item actions still use the working base above.",
-      "인벤토리 아이템을 가리키면 여기에서 확인할 수 있으며, 아이템 작업은 위 작업 베이스를 사용합니다."
+      "The item you're pointing at in your inventory.",
+      "인벤토리에서 가리킨 아이템입니다."
     );
   }
   updateEquippedBuildStaticText();
   if (panelTooltipTitle) {
     panelTooltipTitle.textContent = t("Item Affix Details", "아이템 어픽스 상세");
   }
-  if (panelTooltipLead) {
-    panelTooltipLead.textContent = t(
-      "Read-only details for the item currently highlighted in inventory.",
-      "인벤토리에서 현재 가리킨 아이템의 상세를 읽기 전용으로 표시합니다."
-    );
-  }
   if (panelTooltipHint) {
     panelTooltipHint.textContent = t(
-      "Open inventory (Tab) and highlight an item. Reforge and reset always use the working base shown above.",
-      "인벤토리(Tab)를 열어 아이템을 가리키세요. 재련과 초기화는 항상 위 작업 베이스를 사용합니다."
+      "Open your inventory (Tab) and point at an item.",
+      "인벤토리(Tab)를 열고 아이템을 가리키세요."
     );
   }
   runewordRecipeListTitle.textContent = t("Search And Compare", "검색 및 비교");
-  runewordRecipeListHint.textContent = t(
-    "Select a recipe to load its requirements and actions on the right.",
-    "레시피를 선택하면 오른쪽 검토 영역에 요구 조건과 실행 기능이 표시됩니다."
-  );
   if (recipeSearchInput) {
     recipeSearchInput.setAttribute("aria-label", t("Search runeword recipe", "룬워드 레시피 검색"));
     recipeSearchInput.placeholder = t("Search recipe...", "레시피 검색...");
   }
   updateRecipeFilterControls();
-  runewordBaseListTitle.textContent = t("Compatible Equipped Bases", "호환 착용 베이스");
+  runewordBaseListTitle.textContent = t("Equipped Items", "착용 중인 장비");
   runewordBaseListHint.textContent = t(
     "Asterisks after a name show its affix count: * one, ** two, *** three or more.",
     "이름 뒤 별표는 어픽스 수입니다: * 1개 · ** 2개 · *** 3개 이상."
@@ -245,10 +205,9 @@ function initUiText() {
   if (tooltipResetButton) {
     tooltipResetButton.textContent = t("Reset Tooltip", "툴팁 초기화");
   }
-  panelDragHint.textContent = t(
-    "Drag this header to move panel",
-    "이 헤더를 드래그해 패널 위치 이동"
-  );
+  if (panelDragHandle) {
+    panelDragHandle.title = t("Drag to move", "드래그해서 이동");
+  }
   if (runewordStatusButton) {
     runewordStatusButton.textContent = t("Check Status", "상태 확인");
   }
@@ -256,12 +215,12 @@ function initUiText() {
     runewordReforgeButton.textContent = t("Reforge", "재련");
   }
   if (runewordResetButton && Date.now() >= runewordResetArmedUntil) {
-    runewordResetButton.textContent = t("Reset Selected Base", "선택 베이스 초기화");
+    runewordResetButton.textContent = t("Reset Selected Item", "선택한 장비 초기화");
   }
   if (runewordItemActionsTitle) {
     runewordItemActionsTitle.textContent = t(
-      "Working Base Affixes & Reforge",
-      "작업 베이스 어픽스 및 재련"
+      "Reforge Affixes",
+      "어픽스 재련"
     );
   }
   if (runewordRecoverySummary) {
@@ -308,14 +267,14 @@ function initUiText() {
   }
   if (debugGrantTrapAffixButton) {
     debugGrantTrapAffixButton.textContent = t(
-      "Grant Trap Affix to Selected Base",
-      "선택 베이스에 함정 어픽스"
+      "Grant Trap Affix to Selected Item",
+      "선택한 장비에 함정 어픽스"
     );
   }
   if (debugTrapProbeButton) {
     debugTrapProbeButton.textContent = t(
-      "Production Trap World-Ref Probe",
-      "실사용 함정 월드 참조 프로브"
+      "Trap Marker Test",
+      "함정 표시 테스트"
     );
   }
   if (debugSpawnTestButton) {

@@ -65,35 +65,36 @@ class PrismaBuildSummaryTests(unittest.TestCase):
         self.assertNotIn("scrollY", pane_attrs["class"].split())
 
     def test_probability_copy_keeps_independent_gates_explicit(self) -> None:
+        # Cooldowns and Lucky Hit still get named as separate from the shown
+        # chance, in words a player uses.
         self.assertIn(
-            "Shown chances are condition-qualified rolls after current modifiers",
+            "Chances include your current bonuses. Cooldowns and Lucky Hit apply on top.",
             self.source,
         )
-        self.assertIn(
-            "ICDs, proc budgets, action preconditions, and Lucky Hit still apply separately.",
-            self.source,
-        )
-        self.assertIn("Effective conditional proc chance", self.source)
-        self.assertIn("Normal weapon hit", self.source)
-        self.assertIn("Per-candidate roll", self.source)
-        self.assertIn("selected candidate rolls", self.source)
-        self.assertIn("fair cyclic selection executes at most 2 effects", self.source)
-        self.assertIn("normal weapon-hit chances are listed separately", self.source)
-        self.assertIn("Lucky Hit gate", self.source)
-        self.assertIn("combine up to 3 item-local chances with diminishing returns", self.source)
-        self.assertIn("special proc duplicates keep their shared single roll", self.source)
-        self.assertIn("Tiered suffix families add rank points up to the T3 cap", self.source)
-        self.assertIn("Scroll preservation keeps its separate additive 100% cap", self.source)
-        self.assertIn(
-            "Hybrid effects may appear in both their trigger group and Passives",
-            self.source,
-        )
+        self.assertIn("확률은 현재 보정이 반영된 값입니다. 재사용 대기시간과 행운 적중은 따로 적용됩니다.", self.source)
+        self.assertIn("% proc", self.source)
+        self.assertIn("Light attack", self.source)
+        self.assertIn("Lucky Hit ${chance}%", self.source)
+        self.assertIn("chances combine (diminishing)", self.source)
+        self.assertIn("Stacked copies still roll once", self.source)
+        # The proc engine's internals stay out of the panel.
+        for jargon in (
+            "condition-qualified",
+            "Per-candidate roll",
+            "fair cyclic selection",
+            "proc budgets",
+            "Lucky Hit gate",
+            "Effective conditional proc chance",
+            "유효 조건부",
+            "관문",
+        ):
+            self.assertNotIn(jargon, self.source)
 
     def test_passive_facets_distinguish_selection_from_runtime_activity(self) -> None:
         self.assertIn("Passive also active", self.source)
         self.assertIn("Passive active", self.source)
         self.assertIn("Stat passive active · spell off", self.source)
-        self.assertIn("Passive spell disabled by runtime setting", self.source)
+        self.assertIn("Off in settings", self.source)
         self.assertIn("Other passive contribution active", self.source)
         self.assertIn("Highest tier selected", self.source)
         self.assertIn("Promoted to", self.source)

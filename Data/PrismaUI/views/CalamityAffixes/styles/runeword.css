@@ -417,10 +417,6 @@
   grid-auto-rows: min-content;
 }
 
-#runewordRecipeListHint {
-  display: none;
-}
-
 .rwActionInspector .cpStepBody {
   display: flex;
   flex-direction: column;

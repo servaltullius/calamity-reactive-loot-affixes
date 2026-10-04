@@ -253,8 +253,8 @@ function resolveEquippedBuildPassiveFacetBadge(entry, facetGroupId) {
         }
       : {
           text: t(
-            "Passive spell disabled by runtime setting",
-            "런타임 설정으로 패시브 주문 꺼짐"
+            "Off in settings",
+            "설정에서 꺼짐"
           ),
           className: "passive-disabled"
         };
@@ -367,12 +367,7 @@ function createEquippedBuildEntry(entry, facetGroupId) {
     const chance = formatEquippedBuildChance(entry.procRollChancePct);
     appendEquippedBuildBadge(
       effectBadges,
-      entry.castOnCritSelectionLimited
-        ? t(
-          `Per-candidate roll ${chance}% · max 2 melee crit/power, 1 ranged`,
-          `후보별 판정 ${chance}% · 근접 치명/강공 최대 2개, 원거리 최대 1개`
-        )
-        : t(`Effective conditional proc chance ${chance}%`, `유효 조건부 발동 확률 ${chance}%`),
+      t(`${chance}% proc`, `발동 ${chance}%`),
       "proc"
     );
   }
@@ -380,15 +375,15 @@ function createEquippedBuildEntry(entry, facetGroupId) {
     appendEquippedBuildBadge(
       effectBadges,
       t(
-        `${entry.procRollStackCount}-copy diminishing chance · one action`,
-        `${entry.procRollStackCount}개 감쇠 확률 합성 · 효과 1회`
+        `${entry.procRollStackCount} stacked · chances combine (diminishing), fires once`,
+        `겹쳐 착용 ${entry.procRollStackCount}개: 확률 합산(감소) · 1회 발동`
       ),
       "shared-roll"
     );
   } else if (entry.hasProcRoll && entry.equippedCount > 1) {
     appendEquippedBuildBadge(
       effectBadges,
-      t("Duplicate copies share one roll", "중복 사본은 1회 판정 공유"),
+      t("Stacked copies still roll once", "겹쳐 착용해도 판정 1회"),
       "shared-roll"
     );
   }
@@ -396,20 +391,15 @@ function createEquippedBuildEntry(entry, facetGroupId) {
     const chance = formatEquippedBuildChance(entry.normalWeaponHitProcChancePct);
     appendEquippedBuildBadge(
       effectBadges,
-      entry.castOnCritSelectionLimited
-        ? t(
-          `Normal melee: selected candidate rolls ${chance}% · max 1 action`,
-          `근접 평타: 선택된 후보 ${chance}% 판정 · 효과 최대 1개`
-        )
-        : t(`Normal weapon hit ${chance}% effective`, `일반 무기 적중 유효 확률 ${chance}%`),
+      t(`Light attack ${chance}%`, `평타 ${chance}%`),
       "proc"
     );
     if (entry.normalWeaponHitProcStackCount > 1) {
       appendEquippedBuildBadge(
         effectBadges,
         t(
-          `Normal-hit ${entry.normalWeaponHitProcStackCount}-copy diminishing chance · one action`,
-          `일반 적중 ${entry.normalWeaponHitProcStackCount}개 감쇠 확률 합성 · 효과 1회`
+          `Light attack: ${entry.normalWeaponHitProcStackCount} stacked, chances combine (diminishing)`,
+          `평타: 겹쳐 착용 ${entry.normalWeaponHitProcStackCount}개, 확률 합산(감소)`
         ),
         "shared-roll"
       );
@@ -419,12 +409,12 @@ function createEquippedBuildEntry(entry, facetGroupId) {
     const chance = formatEquippedBuildChance(entry.luckyHitGateChancePct);
     appendEquippedBuildBadge(
       effectBadges,
-      t(`Lucky Hit gate ${chance}%`, `행운 적중 관문 ${chance}%`),
+      t(`Lucky Hit ${chance}%`, `행운 적중 ${chance}%`),
       "lucky"
     );
   }
   if (!entry.hasProcRoll && !entry.hasLuckyHitGate && entry.group !== "passive") {
-    appendEquippedBuildBadge(effectBadges, t("No random proc roll", "무작위 발동 굴림 없음"), "conditional");
+    appendEquippedBuildBadge(effectBadges, t("Always", "항상 발동"), "conditional");
   }
   item.appendChild(effectBadges);
 
@@ -439,10 +429,7 @@ function renderEquippedBuildGroup(groupId, entries) {
 
   clearChildren(elements.list);
   const slotCount = entries.reduce((sum, entry) => sum + entry.equippedCount, 0);
-  const countLabel = t(
-    `${slotCount} effect copies shown in this group`,
-    `이 그룹에 표시된 효과 복사본 ${slotCount}개`
-  );
+  const countLabel = t(`${slotCount} effects`, `효과 ${slotCount}개`);
   elements.count.textContent = String(slotCount);
   elements.count.setAttribute("aria-label", countLabel);
   elements.count.title = countLabel;
@@ -472,8 +459,8 @@ function renderEquippedBuildStateMessage(viewState) {
       equippedBuildStatus,
       t("Calamity effects are disabled", "칼라미티 효과가 비활성화되었습니다"),
       t(
-        "Enable runtime effects in MCM to rebuild the equipped-effect summary.",
-        "MCM에서 런타임 효과를 활성화하면 장착 효과 요약을 다시 구성합니다."
+        "Turn the effects back on in MCM to see them here.",
+        "MCM에서 효과를 켜면 다시 표시됩니다."
       )
     );
     return;
@@ -493,35 +480,23 @@ function renderEquippedBuildStateMessage(viewState) {
     appendEmptyState(
       equippedBuildStatus,
       t("Synchronizing equipped effects…", "장착 효과 동기화 중…"),
-      t(
-        "Waiting for the game's equipped-affix cache.",
-        "게임의 장착 어픽스 캐시를 기다리고 있습니다."
-      )
+      ""
     );
     return;
   }
 
+  // Ready needs no message: the header already shows the slot count.
   equippedBuildStatus.classList.add("ready");
-  equippedBuildStatus.textContent = t(
-    `${equippedBuildState.equippedAffixSlots} equipped affix slots synchronized.`,
-    `장착 어픽스 슬롯 ${equippedBuildState.equippedAffixSlots}개가 동기화되었습니다.`
-  );
 }
 
 function updateEquippedBuildStaticText() {
   if (equippedBuildTitle) {
     equippedBuildTitle.textContent = t("Equipped Build", "장착 빌드");
   }
-  if (equippedBuildLead) {
-    equippedBuildLead.textContent = t(
-      "Read-only summary of Calamity effects on equipped items.",
-      "착용 아이템의 칼라미티 효과를 읽기 전용으로 요약합니다."
-    );
-  }
   if (equippedBuildChanceHint) {
     equippedBuildChanceHint.textContent = t(
-      "Shown chances are condition-qualified rolls after current modifiers; normal weapon-hit chances are listed separately from critical/power-attack chances. Cast-on-crit values are per-candidate rolls, and fair cyclic selection executes at most 2 effects on a melee critical/power attack and 1 on a ranged or normal melee hit. Standard proc duplicates combine up to 3 item-local chances with diminishing returns and still execute one action; special proc duplicates keep their shared single roll. Tiered suffix families add rank points up to the T3 cap, while Scroll preservation keeps its separate additive 100% cap. ICDs, proc budgets, action preconditions, and Lucky Hit still apply separately. Hybrid effects may appear in both their trigger group and Passives without increasing the equipped-slot total.",
-      "표시 확률은 현재 보정 적용 후 조건부 판정값이며, 일반 무기 적중 확률은 치명타·강공 확률과 별도로 표시됩니다. 치명 시전은 후보별 판정값을 표시하고 공정 순환 선택으로 근접 치명타·강공은 공격당 최대 2개, 원거리와 근접 평타는 최대 1개만 실행합니다. 표준 발동 중복은 아이템별 확률을 최대 3개까지 감쇠 합성하지만 효과는 1회 실행하며, 특수 발동 중복은 기존 1회 판정을 공유합니다. 단계형 접미 계열은 티어 점수를 더해 3단계 상한까지 승급하고, 두루마리 보존은 별도의 합산·100% 상한을 유지합니다. ICD, 발동 예산, 행동 선행 조건, 행운 적중은 별도로 적용됩니다. 하이브리드 효과는 장착 슬롯 총계를 늘리지 않고 발동 그룹과 패시브 그룹에 함께 표시될 수 있습니다."
+      "Chances include your current bonuses. Cooldowns and Lucky Hit apply on top.",
+      "확률은 현재 보정이 반영된 값입니다. 재사용 대기시간과 행운 적중은 따로 적용됩니다."
     );
   }
 

@@ -119,7 +119,7 @@ function clearRunewordResetConfirmation() {
     return;
   }
   runewordResetButton.classList.remove("armed");
-  runewordResetButton.textContent = t("Reset Selected Base", "선택 베이스 초기화");
+  runewordResetButton.textContent = t("Reset Selected Item", "선택한 장비 초기화");
   const actionState = resolveRunewordPanelActionState(runewordPanelState);
   runewordResetButton.title = actionState.resetHint;
   runewordResetButton.setAttribute("aria-label", actionState.resetHint);
@@ -144,8 +144,8 @@ function armRunewordResetConfirmation(button) {
 
   if (!selectedBaseKey) {
     setActionFeedback(t(
-      "Select the equipped base again before resetting it.",
-      "초기화할 착용 베이스를 다시 선택하세요."
+      "Select the item again before resetting it.",
+      "초기화할 장비를 다시 고르세요."
     ));
     return true;
   }
@@ -290,7 +290,7 @@ function dispatchPanelCommand(button) {
     window.setTimeout(() => {
       if (affixCraftPendingState !== pending) return;
       affixCraftPendingState = null;
-      setActionFeedback(t("Crafting response timed out. Refresh the base before retrying.", "제작 응답 시간이 초과되었습니다. 베이스를 다시 확인하세요."));
+      setActionFeedback(t("No response from crafting. Check the item and try again.", "제작 응답이 없습니다. 장비를 확인한 뒤 다시 시도하세요."));
       schedulePanelRender(panelRenderSection.runewordPanelState);
     }, 8000);
   } else {
@@ -320,8 +320,8 @@ function dispatchPanelCommand(button) {
     if (!beginAffixExpandPending(command)) {
       if (!affixExpandPendingState) {
         setActionFeedback(t(
-          "The working base state changed. Review it before expanding a slot.",
-          "작업 베이스 상태가 바뀌었습니다. 슬롯을 확장하기 전에 다시 확인하세요."
+          "The item changed. Check it before expanding a slot.",
+          "장비 상태가 바뀌었습니다. 확인한 뒤 슬롯을 늘리세요."
         ));
         schedulePanelRender(panelRenderSection.runewordPanelState);
       }

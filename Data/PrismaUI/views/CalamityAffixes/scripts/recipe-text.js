@@ -5,7 +5,7 @@ function resolveSelectedItemContextViewModel() {
     : t("Current selection", "현재 선택");
   return {
     hasSelection,
-    name: selectedItemNameState || t("No base selected", "선택된 베이스 없음"),
+    name: selectedItemNameState || t("No item selected", "선택한 장비 없음"),
     sourceText: hasSelection
       ? sourceText
       : t("Equipped items only", "착용 장비만 대상")
@@ -28,16 +28,13 @@ function renderWorkingBaseContext() {
   const selected = resolveSelectedWorkingBase();
   workingBaseName.textContent = selected
     ? selected.name
-    : t("No working base selected", "선택된 작업 베이스 없음");
+    : t("No item selected", "선택한 장비 없음");
   workingBaseMeta.textContent = selected
     ? t(
-        "This equipped item is the authoritative target for runewords, reforge, and reset.",
-        "이 착용 장비가 룬워드, 재련, 초기화의 실제 작업 대상입니다."
+        "Runewords, reforges and scours apply to this item.",
+        "룬워드·재련·정제는 이 장비에 적용됩니다."
       )
-    : t(
-        "Choose one compatible equipped item before using item-changing actions.",
-        "아이템을 변경하는 기능을 사용하기 전에 호환 착용 장비를 선택하세요."
-      );
+    : t("Choose an item to work on.", "작업할 장비를 고르세요.");
 }
 
 function renderSelectedItemContext() {
@@ -55,14 +52,8 @@ function renderSelectedItemContext() {
   }
   if (affixSelectedItemMeta) {
     affixSelectedItemMeta.textContent = viewModel.hasSelection
-      ? t(
-          "Read-only inspection of the currently highlighted inventory item; item actions still use the working base above.",
-          "현재 인벤토리에서 강조된 아이템을 읽기 전용으로 보여주며, 아이템 작업은 위 작업 베이스를 사용합니다."
-        )
-      : t(
-          "Highlight an inventory item to inspect it here. This does not change the working base.",
-          "인벤토리 아이템을 가리키면 여기에서 확인할 수 있으며 작업 베이스는 바뀌지 않습니다."
-        );
+      ? t("The item you're pointing at in your inventory.", "인벤토리에서 가리킨 아이템입니다.")
+      : t("Point at an item in your inventory to see it here.", "인벤토리에서 아이템을 가리키면 여기에 표시됩니다.");
   }
 }
 
@@ -72,10 +63,10 @@ function resolveInventoryListViewModel() {
     items,
     emptyState: items.length === 0
       ? {
-          title: t("No compatible equipped base", "호환되는 착용 베이스가 없습니다"),
+          title: t("No equipped item to use", "쓸 수 있는 착용 장비가 없습니다"),
           body: t(
-            "Equip a weapon, armor, helm, or shield first so Calamity can use it as a runeword base.",
-            "룬워드 베이스로 사용할 무기, 갑옷, 투구, 방패를 먼저 착용하세요."
+            "Equip a weapon, armor, helm, or shield first.",
+            "무기, 갑옷, 투구, 방패 중 하나를 먼저 착용하세요."
           ),
           hint: t(
             "Only currently equipped gear can be selected here.",
@@ -344,125 +335,38 @@ function resolveRecipeNumericSummaryText(item) {
 }
 
 function resolveRecipeFlavorDetailText(item) {
+  // Only lines that tell the player something the numeric summary does not.
   const key = typeof item?.summaryKey === "string" ? item.summaryKey : "";
   switch (key) {
     case "adaptive_strike":
       return t(
-        "On hit, follows the target's lowest resistance lane for stable damage.",
-        "적중 시 대상의 가장 낮은 저항 축을 따라 안정적으로 피해를 넣습니다."
+        "On hit, deals damage in the element the target resists least.",
+        "적중 시 대상이 가장 약한 원소로 피해를 줍니다."
       );
     case "adaptive_exposure":
       return t(
-        "On hit, breaks the target's highest resistance first to open follow-up damage.",
-        "적중 시 대상의 가장 높은 저항을 먼저 깎아 후속 피해 창을 엽니다."
+        "On hit, lowers the target's strongest elemental resistance first.",
+        "적중 시 대상의 가장 강한 원소 저항부터 깎습니다."
       );
     case "signature_infinity":
       return t(
-        "Adaptive shred is default. In manual mode, you can lock Fire/Frost/Shock.",
-        "기본은 적응형 파쇄이며, 수동 모드에서 화염/냉기/번개를 고정할 수 있습니다."
+        "Picks the element automatically. Manual Mode in the Advanced tab can lock Fire, Frost or Shock.",
+        "원소는 자동으로 고릅니다. 고급 탭의 수동 모드에서 화염·냉기·번개를 고정할 수 있습니다."
       );
     case "signature_last_wish":
       return t(
-        "Adaptive shred is default. In manual mode, lock Inferno/Frost/Lightning variants.",
-        "기본은 적응형 파쇄이며, 수동 모드에서 열화/빙결/전격 변형을 고정할 수 있습니다."
+        "Picks the element automatically. Manual Mode in the Advanced tab can lock Inferno, Frost or Lightning.",
+        "원소는 자동으로 고릅니다. 고급 탭의 수동 모드에서 열화·빙결·전격을 고정할 수 있습니다."
       );
     case "signature_heart_of_the_oak":
       return t(
-        "In boss phases, it prioritizes breaking the highest resistance first (StrongestResist).",
-        "보스 구간에서 가장 높은 저항 축(StrongestResist)부터 먼저 파쇄합니다."
-      );
-    case "signature_call_to_arms":
-      return t(
-        "Triggers on hit and grants a short defensive warcry buff.",
-        "적중 시 발동해 짧은 방어형 전투 함성 버프를 부여합니다."
+        "Against bosses, lowers the strongest resistance first.",
+        "보스에게는 가장 강한 저항부터 깎습니다."
       );
     case "signature_faith":
       return t(
         "Fanatic Surge: +35 Move Speed, +60 Damage Resist for 6s.",
         "광신의 돌격: 6초 동안 이동속도 +35, 피해저항 +60."
-      );
-    case "signature_doom":
-    case "signature_dream":
-      return t(
-        "Uses dedicated runeword strike spells instead of generic dynamic spells.",
-        "범용 동적 스펠 대신 룬워드 전용 타격 스펠을 사용합니다."
-      );
-    case "poison_bloom":
-    case "tar_bloom":
-    case "siphon_bloom":
-      return t(
-        "Bloom-style damage-over-time effect. Faster hit rate improves uptime value.",
-        "블룸형 지속 피해 효과입니다. 적중 속도가 빠를수록 유지 효율이 좋아집니다."
-      );
-    case "curse_fragile":
-    case "curse_slow_attack":
-    case "curse_fear":
-    case "curse_frenzy":
-      return t(
-        "Control/debuff curse effect with cooldown and per-target safeguards.",
-        "쿨다운과 대상별 가드가 있는 제어/디버프 저주 효과입니다."
-      );
-    case "self_flame_cloak":
-    case "self_frost_cloak":
-    case "self_shock_cloak":
-      return t(
-        "Self-cloak aura effect for close-range pressure.",
-        "근접 압박에 유리한 자가 망토 오라 효과입니다."
-      );
-    case "self_oakflesh":
-    case "self_stoneflesh":
-    case "self_ironflesh":
-    case "self_ebonyflesh":
-      return t(
-        "Flesh armor effect that improves frontline survivability uptime.",
-        "전선에서 버티는 시간을 늘려주는 플레시 방어 효과입니다."
-      );
-    case "self_meditation":
-      return t(
-        "Sustain effect for keeping resources up during long boss phases.",
-        "장기 보스전에서 자원 유지를 돕는 지속 효과입니다."
-      );
-    case "self_phase":
-      return t(
-        "Mobility effect for emergency repositioning and reset timing.",
-        "긴급 재배치와 리셋 타이밍 확보용 기동 효과입니다."
-      );
-    case "self_haste":
-      return t(
-        "Haste effect that raises action speed and clear tempo.",
-        "행동 속도와 클리어 템포를 올리는 가속 효과입니다."
-      );
-    case "self_ward":
-    case "self_barrier":
-    case "self_phoenix":
-      return t(
-        "Mitigation effect for surviving danger windows.",
-        "위험 구간을 버티기 위한 피해 완화 효과입니다."
-      );
-    case "signature_spirit":
-      return t(
-        "Passively grants +30 Max Magicka. On hit, has a 28% chance to gain 10 percentage points of Spell Absorption for 5s (10s cooldown).",
-        "최대 마나 +30이 상시 적용됩니다. 적중 시 28% 확률로 주문 흡수 확률이 10%p 증가합니다(5초, 재사용 10초)."
-      );
-    case "self_weapon_fury":
-      return t(
-        "On hit, has a 24% chance to gain +25% Attack Speed for 6s and immediately restore 30 Stamina (12s cooldown).",
-        "적중 시 24% 확률로 공격 속도가 25% 증가하고 기력 30을 즉시 회복합니다(6초, 재사용 12초)."
-      );
-    case "self_smoke_escape":
-      return t(
-        "On taking a hit, has a 22% chance to reduce the attacker's Move Speed by 30% for 5s (12s cooldown).",
-        "피격 시 22% 확률로 공격자의 이동 속도를 30% 낮춥니다(5초, 재사용 12초)."
-      );
-    case "self_carry_weight":
-      return t(
-        "Passively grants +75 Carry Weight and +15 Speechcraft.",
-        "소지 무게 +75와 화술 +15가 상시 적용됩니다."
-      );
-    case "signature_insight":
-      return t(
-        "Hybrid sustain effect supporting both combat flow and resource recovery.",
-        "전투 흐름과 자원 회복을 함께 챙기는 하이브리드 유지 효과입니다."
       );
     default:
       return "";
@@ -470,11 +374,24 @@ function resolveRecipeFlavorDetailText(item) {
 }
 
 function resolveRecipeDetailText(item) {
+  // The detail payload opens with the runeword's own name line, which only
+  // repeats the summary shown right above it.
+  const summaries = [
+    resolveRecipeSummaryText(item),
+    item?.summaryEn,
+    item?.summaryKo
+  ]
+    .map((value) => (typeof value === "string" ? value.trim() : ""))
+    .filter((value) => value.length >= 8);
   const fallbackDetail = resolveLocalizedRecipeText(
     item,
     "detail",
     "\n"
-  );
+  )
+    .split("\n")
+    .filter((line) => !summaries.some((summary) => line.includes(summary)))
+    .join("\n")
+    .trim();
   const mergeDetail = (mappedDetail) => {
     const mapped = typeof mappedDetail === "string" ? mappedDetail.trim() : "";
     if (fallbackDetail && mapped) {
