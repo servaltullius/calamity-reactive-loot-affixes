@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 2.2.3 LANGUAGES CXX)
+project(CalamityAffixes VERSION 2.2.4 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -56,6 +56,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/SuffixFamilySelection.h
 	    include/CalamityAffixes/TriggerGuards.h
 	    include/CalamityAffixes/TrapSystem.h
+	    include/CalamityAffixes/HitSourcePolicy.h
 	    include/CalamityAffixes/UserSettingsPersistence.h
 	)
 
@@ -255,6 +256,7 @@ if (BUILD_TESTING)
             tests/test_corpse_explosion_selection.cpp
             tests/test_trap_cell_policy.cpp
             tests/test_trap_tick_selection.cpp
+            tests/test_hit_source_policy.cpp
             tests/test_tes_hit_fallback_policy.cpp
             tests/test_affix_parsing_policy.cpp
             tests/test_serialization_drain_policy.cpp

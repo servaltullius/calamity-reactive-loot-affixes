@@ -184,6 +184,8 @@ namespace CalamityAffixes::Hooks::detail
 		{
 			std::chrono::steady_clock::time_point dispatchTime{};
 			std::uint64_t signature{ 0u };
+			// Content of the last HitData this pair dispatched as a hit.
+			std::uint64_t dispatchedHitContent{ 0u };
 		};
 
 		[[nodiscard]] std::uint64_t MakeProcDispatchSignature(
@@ -377,6 +379,24 @@ namespace CalamityAffixes::Hooks::detail
 			return false;
 		}
 
+		// A target's lastHitData stays as it is until the next real hit, so a
+		// later spell or hazard tick reads back a hit that was already processed.
+		// Count each hit once, however long ago it landed: the stale-damage guard
+		// below only looks back 5 s, and an Ice Storm reaching a mammoth shot 13 s
+		// earlier re-fired that arrow as a new bow hit on every tick.
+		const auto hitContent = HitDataUtil::MakeHitContentSignature(a_preHitData);
+		if (hitContent != 0u && hasRecord && record.dispatchedHitContent == hitContent) {
+			static std::atomic_uint32_t logged{ 0u };
+			if (logged.fetch_add(1u, std::memory_order_relaxed) < 20u) {
+				SKSE::log::debug(
+					"CalamityAffixes: reused lastHitData not dispatched as a new hit (target={}, damage={}, ageMs={}).",
+					a_target->GetName(),
+					a_damage,
+					std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count());
+			}
+			return false;
+		}
+
 		if (a_preHitData && hasRecord && elapsed < kStaleDamageElapsedMax) {
 			const float expectedDealt = std::max(
 				0.0f,
@@ -390,6 +410,9 @@ namespace CalamityAffixes::Hooks::detail
 
 		record.dispatchTime = a_now;
 		record.signature = dispatchSignature;
+		if (hitContent != 0u) {
+			record.dispatchedHitContent = hitContent;
+		}
 
 		if (s_procDispatch.size() > kProcDispatchMaxEntries) {
 			for (auto it = s_procDispatch.begin(); it != s_procDispatch.end();) {
