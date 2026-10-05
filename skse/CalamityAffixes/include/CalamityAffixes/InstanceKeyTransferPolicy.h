@@ -110,7 +110,13 @@ namespace CalamityAffixes
 			a_context.newOwnerID == a_context.playerID;
 		const bool playerInventoryContainsEither =
 			a_context.playerHasOldKey || a_context.playerHasNewKey;
-		if (!ownerTouchesPlayer && !playerInventoryContainsEither) {
+		// The exact owner + UID key moving between two other owners is still the
+		// same item changing hands: Malborn passing the player's confiscated gear
+		// to the embassy chest, or a merchant moving sold stock. Leaving the state
+		// behind orphaned it, and the item came back to the player bare. Only the
+		// inexact legacy item-form key still needs the player as evidence.
+		const bool exactSourceMoves = a_context.oldKeyTracked;
+		if (!ownerTouchesPlayer && !playerInventoryContainsEither && !exactSourceMoves) {
 			return { InstanceKeyTransferDecision::kIgnore, sourceKey, newKey };
 		}
 

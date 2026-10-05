@@ -102,9 +102,27 @@ static_assert([] {
 		.oldKeyTracked = true,
 		.newKeyTracked = false,
 	});
+	return plan.decision == InstanceKeyTransferDecision::kRemap &&
+	       plan.oldKey == MakeTrackedInstanceKey(kMerchantID, 30u) &&
+	       plan.newKey == MakeTrackedInstanceKey(kChestID, 31u);
+}(),
+	"Instance key transfer: an exact key handed between two other owners follows the item (Malborn to the embassy chest)");
+
+static_assert([] {
+	const auto plan = ResolveInstanceKeyTransfer(InstanceKeyTransferContext{
+		.playerID = kPlayerID,
+		.oldOwnerID = kMerchantID,
+		.newOwnerID = kChestID,
+		.itemFormID = kItemFormID,
+		.oldUniqueID = 34u,
+		.newUniqueID = 35u,
+		.oldKeyTracked = false,
+		.legacyItemKeyTracked = true,
+		.newKeyTracked = false,
+	});
 	return plan.decision == InstanceKeyTransferDecision::kIgnore;
 }(),
-	"Instance key transfer: unrelated owner changes must not move player-tracked state");
+	"Instance key transfer: the inexact legacy item-form key never moves between two other owners");
 
 static_assert([] {
 	const auto plan = ResolveInstanceKeyTransfer(InstanceKeyTransferContext{
@@ -130,7 +148,8 @@ static_assert([] {
 		.itemFormID = kPlayerID,
 		.oldUniqueID = 40u,
 		.newUniqueID = 41u,
-		.oldKeyTracked = true,
+		.oldKeyTracked = false,
+		.legacyItemKeyTracked = true,
 		.newKeyTracked = false,
 	});
 	return plan.decision == InstanceKeyTransferDecision::kIgnore;
