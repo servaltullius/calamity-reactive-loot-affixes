@@ -107,8 +107,8 @@ function resolveAffixExpandUnavailableText(reason, state) {
   switch (reason) {
     case "no_base":
       return t(
-        "Select a working base to view and expand its regular affix slots.",
-        "작업 베이스를 선택하면 일반 어픽스 슬롯을 확인하고 확장할 수 있습니다."
+        "Pick an item to see and expand its affix slots.",
+        "장비를 고르면 어픽스 슬롯을 확인하고 늘릴 수 있습니다."
       );
     case "requires_first_affix":
       return t(
@@ -122,8 +122,8 @@ function resolveAffixExpandUnavailableText(reason, state) {
       );
     case "invalid_layout":
       return t(
-        "This base has an affix layout that cannot be expanded.",
-        "현재 베이스의 어픽스 구성은 확장할 수 없습니다."
+        "This item's affix layout can't be expanded.",
+        "이 장비의 어픽스 구성은 늘릴 수 없습니다."
       );
     case "suffix_slots_disabled":
       return t(
@@ -245,7 +245,7 @@ function resolveAffixSlotProgressState(
     t("Suffix 2", "접미 2")
   ];
   const ariaValueText = !hasValidBase
-    ? t("No base selected", "선택된 베이스 없음")
+    ? t("No item selected", "선택한 장비 없음")
     : displayCount === null
       ? t("Regular affix slots are synchronizing", "일반 어픽스 슬롯 동기화 중")
       : t(
@@ -285,7 +285,7 @@ function resolveAffixSlotProgressState(
       reforgeOrbsOwned
     });
     if (unavailableReason === "no_base") {
-      expandButtonLabel = t("Select Base", "베이스 선택 필요");
+      expandButtonLabel = t("Select Item", "장비 선택 필요");
     } else if (unavailableReason === "requires_first_affix") {
       expandButtonLabel = t("Identify First", "확인 스크롤 먼저 사용");
     } else if (unavailableReason === "max_slots") {
@@ -374,8 +374,8 @@ function beginAffixExpandPending(command) {
     }
     clearAffixExpandPending(false);
     setActionFeedback(t(
-      "Affix slot expansion response timed out. Check the current base state before trying again.",
-      "어픽스 슬롯 확장 응답 시간이 초과되었습니다. 다시 시도하기 전에 현재 베이스 상태를 확인하세요."
+      "Affix slot expansion timed out. Check the item before trying again.",
+      "어픽스 슬롯 확장 응답이 없습니다. 장비 상태를 확인한 뒤 다시 시도하세요."
     ));
     schedulePanelRender(panelRenderSection.runewordPanelState);
   }, affixExpandPendingTimeoutMs);
@@ -395,8 +395,8 @@ function resolveRunewordPanelActionState(state) {
   const baseCompatibilityWarning = Boolean(state.baseCompatibilityWarning);
   const baseCompatibilityMessage = baseCompatibilityWarning
     ? t(
-        typeof state.baseCompatibilityMessageEn === "string" ? state.baseCompatibilityMessageEn : "Selected base mismatch.",
-        typeof state.baseCompatibilityMessageKo === "string" ? state.baseCompatibilityMessageKo : "선택한 베이스가 권장 타입과 다릅니다."
+        typeof state.baseCompatibilityMessageEn === "string" ? state.baseCompatibilityMessageEn : "This item isn't the recommended base.",
+        typeof state.baseCompatibilityMessageKo === "string" ? state.baseCompatibilityMessageKo : "선택한 장비가 권장 베이스와 다릅니다."
       )
     : "";
 
@@ -406,13 +406,13 @@ function resolveRunewordPanelActionState(state) {
   if (isComplete) {
     buttonLabel = t("Complete", "완료");
     buttonHint = t(
-      "This base already has a completed runeword.",
-      "이 베이스에는 이미 룬워드가 완성되어 있습니다."
+      "This item already has a runeword.",
+      "이 장비에는 이미 룬워드가 있습니다."
     );
   } else if (!hasBase) {
     buttonHint = t(
-      "Select an equipped base first.",
-      "착용 베이스를 먼저 선택하세요."
+      "Select an item first.",
+      "장비를 먼저 고르세요."
     );
   } else if (!hasRecipe) {
     buttonHint = t(
@@ -426,8 +426,8 @@ function resolveRunewordPanelActionState(state) {
     );
   } else if (!canTransmute && state.missingSummary) {
     buttonHint = t(
-      "Fragments are missing — check the rune list above.",
-      "룬조각이 부족합니다 — 위 룬 목록을 확인하세요."
+      "Not enough rune fragments.",
+      "룬 조각이 부족합니다."
     );
   } else if (!canTransmute) {
     buttonHint = t(
@@ -436,8 +436,8 @@ function resolveRunewordPanelActionState(state) {
     );
   } else {
     buttonHint = t(
-      "Transmute consumes all required fragments and applies the runeword.",
-      "변환 시 필요한 룬조각을 모두 소모하고 룬워드를 적용합니다."
+      "Uses up all the required rune fragments.",
+      "필요한 룬 조각을 모두 사용합니다."
     );
   }
 
@@ -513,13 +513,13 @@ ${buttonHint}`
   const resetEnabled = hasBase && state.debugTools === true && !affixSlotState.expandPending;
   const resetHint = resetEnabled ?
     t(
-      "Remove all Calamity affixes, runeword progress, and instance state from the selected base. No material refund.",
-      "선택 베이스의 모든 Calamity 어픽스, 룬워드 진행도, 인스턴스 상태를 제거합니다. 재료는 환불되지 않습니다."
+      "Removes every Calamity affix and runeword from the selected item. Materials are not refunded.",
+      "선택한 장비의 칼라미티 어픽스와 룬워드를 모두 지웁니다. 재료는 돌려받지 못합니다."
     ) :
     !hasBase ?
     t(
-      "Select a base first.",
-      "베이스를 먼저 선택하세요."
+      "Select an item first.",
+      "장비를 먼저 고르세요."
     ) :
     state.debugTools !== true ?
     t(
@@ -616,18 +616,12 @@ function renderRunewordFlowProgress(actionState, state) {
   }
 
   if (!hasBase) {
-    runewordFlowHint.textContent = t(
-      "Start by selecting one equipped base.",
-      "먼저 착용 중인 베이스 아이템 하나를 선택하세요."
-    );
+    runewordFlowHint.textContent = t("Pick an item to work on.", "작업할 장비를 고르세요.");
     return;
   }
 
   if (!hasRecipe) {
-    runewordFlowHint.textContent = t(
-      "Base locked in. Now use the center recipe explorer to find the runeword that fits it.",
-      "베이스를 골랐습니다. 이제 중앙 레시피 탐색기에서 어울리는 룬워드를 찾으세요."
-    );
+    runewordFlowHint.textContent = t("Pick a recipe.", "레시피를 고르세요.");
     return;
   }
 
@@ -638,32 +632,25 @@ function renderRunewordFlowProgress(actionState, state) {
 
   if (isComplete) {
     runewordFlowHint.textContent = t(
-      "This base already has a completed runeword. Reforge rerolls only its regular affixes; the runeword stays.",
-      "이 베이스에는 이미 룬워드가 완성되어 있습니다. 재련해도 일반 어픽스만 바뀌고 룬워드는 유지됩니다."
+      "This item already has a runeword. Reforging changes only its regular affixes.",
+      "이 장비에는 이미 룬워드가 있습니다. 재련은 일반 어픽스만 바꿉니다."
     );
     return;
   }
 
   if (canTransmute) {
-    runewordFlowHint.textContent = t(
-      "Everything is ready. Use the review area to transmute and apply the runeword.",
-      "준비가 끝났습니다. 검토 영역에서 변환을 눌러 룬워드를 적용하세요."
-    );
+    // The recipe card on the right already says it is ready.
+    runewordFlowHint.textContent = "";
     return;
   }
 
   if (state?.missingSummary) {
-    runewordFlowHint.textContent = t(
-      "Fragments are missing — details in step 3 on the right.",
-      "룬조각이 부족합니다 — 상세는 우측 3단계에서 확인하세요."
-    );
+    // The recipe card and its badge already list what is missing.
+    runewordFlowHint.textContent = "";
     return;
   }
 
-  runewordFlowHint.textContent = t(
-    "Review the selected recipe on the right, then transmute when available.",
-    "오른쪽 검토 영역에서 선택한 레시피를 확인한 뒤, 가능해지면 변환하세요."
-  );
+  runewordFlowHint.textContent = "";
 }
 
 function renderAffixSlotProgress(actionState) {
@@ -762,11 +749,8 @@ function renderReforgeLockOptions(actionState) {
     runewordReforgeLockList.setAttribute("aria-disabled", "true");
     appendEmptyState(
       runewordReforgeLockList,
-      t("No base selected", "선택된 베이스 없음"),
-      t(
-        "Select an equipped base before choosing an affix to replace.",
-        "교체할 어픽스를 고르기 전에 착용 베이스를 선택하세요."
-      )
+      t("No item selected", "선택한 장비 없음"),
+      t("Select an item first.", "장비를 먼저 고르세요.")
     );
     return;
   }
@@ -843,10 +827,10 @@ function renderRunewordPanelState() {
     affixScourButton.setAttribute(panelCommandAttribute, actionState.scourCommand);
     affixScourButton.title = actionState.reforgeLimit > 0
       ? t(
-        `Reroll every regular affix at once, keeping the slot count, and get the item's ${actionState.reforgeLimit} selected reforges back. Runeword preserved. Also repairs legacy affix layouts.`,
-        `슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴리고, 그 장비의 선택 재련 ${actionState.reforgeLimit}회를 되돌려 받습니다. 룬워드는 유지됩니다. 구버전 어픽스 구성도 정상 구성으로 바꿉니다.`
+        `Reroll every regular affix at once, keeping the slot count, and get the item's ${actionState.reforgeLimit} selected reforges back. Runeword preserved.`,
+        `슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴리고, 그 장비의 선택 재련 ${actionState.reforgeLimit}회를 되돌려 받습니다. 룬워드는 유지됩니다.`
       )
-      : t("Reroll every regular affix at once, keeping the slot count. Runeword preserved. Also repairs legacy affix layouts.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다. 구버전 어픽스 구성도 정상 구성으로 바꿉니다.");
+      : t("Reroll every regular affix at once, keeping the slot count. Runeword preserved.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다.");
   }
   if (resourceExchangeGroup) {
     resourceExchangeGroup.hidden = actionState.exchangeReforgeCost <= 0 && actionState.exchangeScourCost <= 0;
@@ -897,33 +881,27 @@ function renderRunewordPanelState() {
 
   if (runewordContextRecipeMeta) {
     if (!hasBase) {
-      runewordContextRecipeMeta.textContent = t(
-        "Pick a base first so the recipe explorer has a stable context.",
-        "먼저 베이스를 골라야 레시피 탐색기를 안정적으로 사용할 수 있습니다."
-      );
+      runewordContextRecipeMeta.textContent = t("Pick an item first.", "먼저 장비를 고르세요.");
     } else if (!selectedRecipe) {
       runewordContextRecipeMeta.textContent = t(
-        "Search the center explorer and select the recipe you want to review.",
-        "중앙 탐색기에서 검토할 레시피를 선택하세요."
+        "Pick a recipe from the list on the left.",
+        "왼쪽 목록에서 레시피를 고르세요."
       );
     } else if (actionState.baseCompatibilityWarning) {
       runewordContextRecipeMeta.textContent = actionState.baseCompatibilityMessage;
     } else if (state.missingSummary) {
-      runewordContextRecipeMeta.textContent = `${t("Missing fragments", "부족한 룬조각")}: ${state.missingSummary}`;
+      runewordContextRecipeMeta.textContent = `${t("Missing fragments", "부족한 룬 조각")}: ${state.missingSummary}`;
     } else if (isComplete) {
       runewordContextRecipeMeta.textContent = t(
-        "This base already has a completed runeword. Reforge changes only its regular affixes.",
-        "이 베이스에는 이미 룬워드가 완성되어 있습니다. 재련은 일반 어픽스만 변경합니다."
+        "This item already has a runeword. Reforging changes only its regular affixes.",
+        "이 장비에는 이미 룬워드가 있습니다. 재련은 일반 어픽스만 바꿉니다."
       );
     } else if (canTransmute) {
-      runewordContextRecipeMeta.textContent = t(
-        "Everything is ready. Review the details and transmute when you are ready.",
-        "준비가 끝났습니다. 세부 정보를 확인한 뒤 변환하세요."
-      );
+      runewordContextRecipeMeta.textContent = t("Ready to transmute.", "변환할 수 있습니다.");
     } else {
       runewordContextRecipeMeta.textContent = t(
-        "Review the selected recipe and finish the missing requirements.",
-        "선택한 레시피를 검토하고 남은 요구 조건을 채우세요."
+        "Meet the remaining requirements to transmute.",
+        "남은 조건을 채우면 변환할 수 있습니다."
       );
     }
   }
@@ -1008,8 +986,8 @@ function renderRunewordPanelState() {
 
   if (!hasBase) {
     runewordPanelStatus.textContent = t(
-      "Select an equipped base first.",
-      "착용 베이스를 먼저 선택하세요."
+      "Select an item first.",
+      "장비를 먼저 고르세요."
     );
   } else if (!hasRecipe) {
     runewordPanelStatus.textContent = t(
@@ -1017,15 +995,15 @@ function renderRunewordPanelState() {
       "룬워드 레시피를 선택하세요."
     );
   } else {
-    const recipeName = resolveLocalizedRecipeText(state, "recipeName") || t("Unknown", "알 수 없음");
     const inserted = Number(state.insertedRunes) || 0;
     const total = Number(state.totalRunes) || 0;
 
     const header = document.createElement("div");
     header.className = "rwStatusHeader";
 
+    // The recipe name already heads the panel ("Selected Recipe"), so this
+    // row carries the status sentence next to its badge instead.
     const left = document.createElement("div");
-    left.textContent = `${t("Recipe", "레시피")}: ${recipeName}`;
 
     const badge = document.createElement("div");
     let badgeClass = "rwBadge";
@@ -1046,36 +1024,26 @@ function renderRunewordPanelState() {
     badge.className = badgeClass;
     badge.textContent = badgeText;
 
+    if (isComplete) {
+      left.textContent = t("This item already has a runeword.", "이 장비에는 이미 룬워드가 있습니다.");
+    } else if (canTransmute) {
+      left.textContent = t("Ready to transmute.", "변환할 수 있습니다.");
+    } else if (state.missingSummary) {
+      left.textContent = `${t("Missing", "부족")}: ${state.missingSummary}`;
+    }
+
     header.appendChild(left);
     header.appendChild(badge);
     runewordPanelStatus.appendChild(header);
-
-    const meta = document.createElement("div");
-    meta.className = "rwMetaLine";
-    if (isComplete) {
-      meta.textContent = t(
-        "This base already has a runeword.",
-        "이 베이스에는 이미 룬워드가 적용되어 있습니다."
-      );
-    } else if (canTransmute) {
-      meta.textContent = t(
-        "Transmute will consume all required fragments.",
-        "변환 시 필요한 룬조각을 모두 소모합니다."
-      );
-    } else if (state.missingSummary) {
-      meta.textContent = `${t("Missing", "부족")}: ${state.missingSummary}`;
-    }
-
-    if (meta.textContent) {
-      runewordPanelStatus.appendChild(meta);
-    }
 
     if (selectedRecipe) {
       const baseBadge = resolveRecipeBaseBadge(selectedRecipe);
 
       const baseLine = document.createElement("div");
       baseLine.className = "rwMetaLine";
-      baseLine.textContent = `${t("Recommended Base", "권장 베이스")}: ${baseBadge.text}`;
+      // The badge text carries its own "Base:" label for the recipe list.
+      const baseTypeText = baseBadge.text.replace(/(Base|베이스):\s*/g, "");
+      baseLine.textContent = `${t("Recommended Base", "권장 베이스")}: ${baseTypeText}`;
       runewordPanelStatus.appendChild(baseLine);
 
       if (actionState.baseCompatibilityWarning) {
@@ -1127,7 +1095,7 @@ function renderRunewordPanelState() {
     if (!actionState.resetEnabled || Date.now() >= runewordResetArmedUntil) {
       runewordResetArmedUntil = 0;
       runewordResetButton.classList.remove("armed");
-      runewordResetButton.textContent = t("Reset Selected Base", "선택 베이스 초기화");
+      runewordResetButton.textContent = t("Reset Selected Item", "선택한 장비 초기화");
       runewordResetButton.title = actionState.resetHint;
       runewordResetButton.setAttribute("aria-label", actionState.resetHint);
     }

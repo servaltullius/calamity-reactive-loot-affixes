@@ -257,7 +257,7 @@ namespace RuntimeGateStoreChecks
 				prismaCoreText->find("{ \"recipeNameKo\", a_state.recipeNameKo }") == std::string::npos ||
 				prismaUiText->find("function resolveRecipeName(item)") == std::string::npos ||
 				prismaUiText->find("const name = resolveRecipeName(item);") == std::string::npos ||
-				prismaUiText->find("resolveLocalizedRecipeText(state, \"recipeName\")") == std::string::npos ||
+				prismaUiText->find("const recipeName = resolveRecipeName(selectedRecipe)") == std::string::npos ||
 				prismaCoreText->find("{ \"baseName\", entry.baseName }") == std::string::npos ||
 				prismaCoreText->find("{ \"runewordNameEn\", entry.runewordNameEn }") == std::string::npos ||
 				prismaCoreText->find("{ \"runewordNameKo\", entry.runewordNameKo }") == std::string::npos ||
@@ -1707,7 +1707,7 @@ namespace RuntimeGateStoreChecks
 				uiText->find("function appendEmptyState(node, title, body, hint = \"\")") == std::string::npos ||
 				uiText->find("class=\"cpAffixPane\"") == std::string::npos ||
 				uiText->find("id=\"affixSelectedItemLabel\"") == std::string::npos ||
-				uiText->find("id=\"panelTooltipLead\"") == std::string::npos ||
+				uiText->find("id=\"panelTooltipHint\"") == std::string::npos ||
 				uiText->find("function triggerRunewordStateShift(element, state)") == std::string::npos ||
 				uiText->find("function setRunewordStepCardState(element, state)") == std::string::npos ||
 				uiText->find("element.setAttribute(\"aria-current\", \"step\")") == std::string::npos ||

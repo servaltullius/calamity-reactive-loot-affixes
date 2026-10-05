@@ -223,12 +223,12 @@ assert.strictEqual(element("resourceFragmentPityProgress").getAttribute("max"), 
 assert.strictEqual(element("resourceFragmentPityProgress").getAttribute("value"), "99");
 assert(
   element("resourceFragmentPityProgress").getAttribute("aria-valuetext").includes(
-    "the next eligible ordinary drop roll is guaranteed"
+    "the next drop is guaranteed"
   )
 );
 assert(
   element("resourceFragmentPityState").textContent.includes(
-    "Next eligible ordinary drop roll: guaranteed"
+    "Next drop guaranteed!"
   )
 );
 assert.strictEqual(element("resourceOrbPityValue").textContent, "12 / 39");
@@ -250,7 +250,7 @@ sandbox.setInventoryItems(JSON.stringify([
 sandbox.renderInventoryItems();
 assert.strictEqual(element("workingBaseName").textContent, "Steel Sword · Working Base");
 assert(
-  element("workingBaseMeta").textContent.includes("authoritative target"),
+  element("workingBaseMeta").textContent.includes("apply to this item"),
   "working-base mutation scope is not explicit"
 );
 sandbox.setSelectedItemName("Hovered Iron Helmet");
@@ -311,13 +311,14 @@ assert.strictEqual(
   false
 );
 assert.strictEqual(element("resourceDashboardSection").getAttribute("aria-busy"), "false");
-assert(element("resourceDashboardSync").textContent.includes("Partially unavailable"));
+assert(element("resourceDashboardSync").textContent.includes("Partly unavailable"));
+assert.strictEqual(element("resourceDashboardSync").hidden, false, "a partial snapshot must still show its badge");
 assert.strictEqual(element("resourceRuneTotal").textContent, "—");
 assert.strictEqual(element("resourceRuneKinds").textContent, "— / —");
 assert.strictEqual(element("resourceFragmentPityValue").textContent, "— / —");
 assert.strictEqual(element("resourceFragmentPityProgress").getAttribute("aria-busy"), "false");
 assert(
-  element("resourceFragmentPityState").textContent.includes("unavailable")
+  element("resourceFragmentPityState").textContent.includes("Couldn't read")
 );
 assert(
   element("resourceRuneDetailsSummary").textContent.includes("Unavailable")
@@ -528,7 +529,7 @@ assert.strictEqual(element("equippedBuildKillCount").textContent, "1");
 assert.strictEqual(element("equippedBuildPassiveCount").textContent, "6");
 assert(
   element("equippedBuildPassiveCount").getAttribute("aria-label").includes(
-    "6 effect copies shown in this group"
+    "6 effects"
   )
 );
 assert.strictEqual(element("equippedBuildOffenseList").children.length, 2);
@@ -541,13 +542,13 @@ function collectFakeElementText(node) {
 
 const offenseText = collectFakeElementText(element("equippedBuildOffenseList"));
 assert(offenseText.includes("On hit"));
-assert(offenseText.includes("Effective conditional proc chance 24.5%"));
-assert(offenseText.includes("2-copy diminishing chance · one action"));
-assert(offenseText.includes("Normal weapon hit 9.8% effective"));
-assert(offenseText.includes("Normal-hit 2-copy diminishing chance · one action"));
-assert(offenseText.includes("Per-candidate roll 100% · max 2 melee crit/power, 1 ranged"));
-assert(offenseText.includes("Normal melee: selected candidate rolls 45% · max 1 action"));
-assert(offenseText.includes("Lucky Hit gate 30%"));
+assert(offenseText.includes("24.5% proc"));
+assert(offenseText.includes("2 stacked · chances combine (diminishing), fires once"));
+assert(offenseText.includes("Light attack 9.8%"));
+assert(offenseText.includes("Light attack: 2 stacked, chances combine (diminishing)"));
+assert(offenseText.includes("100% proc"));
+assert(offenseText.includes("Light attack 45%"));
+assert(offenseText.includes("Lucky Hit 30%"));
 assert(offenseText.includes("Passive also active"));
 const passiveText = collectFakeElementText(element("equippedBuildPassiveList"));
 assert(passiveText.includes("Storm Brand"));
@@ -556,7 +557,7 @@ assert(passiveText.includes("Suppressed by higher tier"));
 assert(passiveText.includes("Independent suffix"));
 assert(passiveText.includes("Passive active"));
 assert(passiveText.includes("Stat passive active · spell off"));
-assert(passiveText.includes("Passive spell disabled by runtime setting"));
+assert(passiveText.includes("Off in settings"));
 assert(passiveText.includes("Other passive contribution active"));
 const suppressedPassiveEntry = element("equippedBuildPassiveList").children.find(
   (child) => child.children[0]?.children[0]?.textContent.startsWith("Vitality I /")
@@ -565,7 +566,7 @@ assert(suppressedPassiveEntry);
 assert.strictEqual(suppressedPassiveEntry.className, "ebEntry suppressed");
 assert(
   !collectFakeElementText(suppressedPassiveEntry).includes(
-    "Passive spell disabled by runtime setting"
+    "Off in settings"
   )
 );
 const partiallySuppressedPassiveEntry = element("equippedBuildPassiveList").children.find(
@@ -580,7 +581,7 @@ assert(
 );
 assert(
   element("equippedBuildChanceHint").textContent.includes(
-    "Hybrid effects may appear in both their trigger group and Passives"
+    "Cooldowns and Lucky Hit apply on top"
   )
 );
 

@@ -48,15 +48,11 @@
         role="dialog"
         aria-modal="false"
         aria-labelledby="panelTitle"
-        aria-describedby="panelSub"
         aria-live="polite">
       <div id="panelDragHandle" class="cpDragHandle">
         <div class="cpTitleRow">
           <div>
-            <div id="panelTitle" class="cpTitle">Calamity Controls / 칼라미티 조작</div>
-            <div id="panelSub" class="cpSub">
-              Prisma 메인 조작 패널입니다. ESC 또는 아래 Close 버튼으로 닫습니다.
-            </div>
+            <div id="panelTitle" class="cpTitle">Calamity / 칼라미티</div>
           </div>
           <button
             id="controlPanelCloseX"
@@ -67,9 +63,6 @@
             aria-label="Close panel">
             ✕
           </button>
-        </div>
-        <div class="cpDragHint" id="panelDragHint">
-          Drag this header to move panel / 이 헤더를 드래그해 패널 위치 이동
         </div>
       </div>
       <div id="controlPanelBody" class="cpBody">
@@ -111,8 +104,8 @@
             <div class="cpStepHeader">
               <div class="cpStepIndex">1</div>
               <div>
-                <div id="runewordBaseStepTitle" class="cpStepTitle">Base Selection / 베이스 선택</div>
-                <div id="workingBaseName" class="wbDockName">No working base selected / 선택된 작업 베이스 없음</div>
+                <div id="runewordBaseStepTitle" class="cpStepTitle">Item / 장비 선택</div>
+                <div id="workingBaseName" class="wbDockName">No item selected / 선택한 장비 없음</div>
                 <div id="workingBaseMeta" class="wbDockMeta">Choose one compatible equipped item. / 호환 착용 장비 하나를 선택하세요.</div>
                 <span id="selectedItemLabel" class="wbAssistiveLabel">Current Base / 현재 베이스</span>
                 <span id="selectedItemName" class="wbAssistiveLabel">No base selected / 선택된 베이스 없음</span>
@@ -127,25 +120,22 @@
                   aria-haspopup="listbox"
                   aria-controls="inventoryBaseList"
                   aria-expanded="false">
-                  Change Base / 베이스 변경
+                  Change Item / 장비 변경
                 </summary>
                 <div class="rwRailBody wbChooserOverlay">
-                  <div class="cpSectionSubtle" id="runewordBaseListTitle">Compatible Equipped Bases / 호환 착용 베이스</div>
+                  <div class="cpSectionSubtle" id="runewordBaseListTitle">Equipped Items / 착용 중인 장비</div>
                   <div
                     id="inventoryBaseList"
                     class="cpList rwBaseQuickList wbBaseList"
                     role="listbox"
-                    aria-label="Equipped runeword bases / 착용 룬워드 베이스"
+                    aria-label="Equipped items / 착용 중인 장비"
                   ></div>
                   <div class="cpContextMeta" id="runewordBaseListHint">
-                    Select one equipped item as the shared working base. / 모든 탭에서 사용할 착용 베이스 하나를 선택하세요.
+                    Asterisks after a name show its affix count: * one, ** two, *** three or more. / 이름 뒤 별표는 어픽스 수입니다: * 1개 · ** 2개 · *** 3개 이상.
                   </div>
                 </div>
               </details>
             </div>
-          </div>
-          <div id="runewordBaseStepHint" class="cpStepHint wbDockHint">
-            Pick one compatible equipped item and keep it locked while you compare recipes. / 호환되는 착용 아이템 하나를 고정한 뒤 레시피를 비교하세요.
           </div>
         </div>
 
@@ -161,7 +151,7 @@
                 <div class="rwFlowIntro">
                   <div class="cpSectionTitle" id="runewordFlowTitle">Runeword Workbench / 룬워드 작업대</div>
                   <div class="cpContextMeta" id="runewordFlowHint">
-                    Start by selecting one equipped base. / 먼저 착용 중인 베이스 아이템 하나를 선택하세요.
+                    Pick an item to work on. / 작업할 장비를 고르세요.
                   </div>
                 </div>
                 <div class="rwContextSnapshot" aria-label="Runeword context">
@@ -169,7 +159,7 @@
                     <div class="rwContextChipLabel" id="runewordContextRecipeLabel">Selected Recipe / 선택 레시피</div>
                     <div class="rwContextChipValue" id="runewordContextRecipeName">No recipe selected / 선택된 레시피 없음</div>
                     <div class="rwContextChipMeta" id="runewordContextRecipeMeta">
-                      Search the center explorer and select one recipe to review requirements. / 중앙 탐색기에서 레시피를 선택하면 요구 조건을 검토할 수 있습니다.
+                      Pick a recipe from the list on the left. / 왼쪽 목록에서 레시피를 고르세요.
                     </div>
                   </div>
                 </div>
@@ -178,15 +168,12 @@
                 id="resourceDashboardSection"
                 class="rdSection"
                 aria-labelledby="resourceDashboardTitle"
-                aria-describedby="resourceDashboardLead resourcePityHint"
+                aria-describedby="resourcePityHint"
                 aria-busy="true">
                 <div class="rdHeader">
                   <div>
                     <div id="resourceDashboardTitle" class="cpSectionTitle">
-                      Rune Resources &amp; Pity / 룬 자원 및 피티
-                    </div>
-                    <div id="resourceDashboardLead" class="cpContextMeta">
-                      Current crafting resources and ordinary-drop pity streaks. / 현재 제작 자원과 일반 드랍 피티 연속 실패를 표시합니다.
+                      Runes &amp; Pity / 룬 조각과 천장
                     </div>
                   </div>
                   <div
@@ -195,7 +182,7 @@
                     role="status"
                     aria-live="polite"
                     aria-atomic="true">
-                    Synchronizing / 동기화 중
+                    Loading / 불러오는 중
                   </div>
                 </div>
 
@@ -215,27 +202,27 @@
                 <div class="rdPityGrid">
                   <div class="rdPityCard">
                     <div class="rdPityHeader">
-                      <span id="resourceFragmentPityLabel">Rune Fragment Pity / 룬 조각 피티</span>
+                      <span id="resourceFragmentPityLabel">Rune Fragment Pity / 룬 조각 천장</span>
                       <strong id="resourceFragmentPityValue">— / —</strong>
                     </div>
                     <progress
                       id="resourceFragmentPityProgress"
                       class="rdProgress"
                       max="1"
-                      aria-label="Rune fragment pity is synchronizing / 룬 조각 피티 동기화 중"></progress>
+                      aria-label="Loading rune fragment pity / 룬 조각 천장 불러오는 중"></progress>
                     <div id="resourceFragmentPityState" class="rdPityState">
-                      Synchronizing eligible ordinary drop rolls. / 적격 일반 드랍 판정을 동기화 중입니다.
+                      Loading… / 불러오는 중…
                     </div>
                   </div>
                 </div>
 
                 <div id="resourcePityHint" class="cpContextMeta rdPityHint rdAssistiveText">
-                  Only eligible ordinary drop rolls affect these streaks; unrelated kills and forced rewards do not. At the threshold, the next eligible ordinary drop roll is guaranteed. / 적격 일반 드랍 판정만 연속 실패를 바꾸며, 무관한 처치나 강제 지급은 포함되지 않습니다. 기준치에 도달하면 다음 적격 일반 드랍 판정에서 확정 지급됩니다.
+                  Goes up by 1 each time a kill that could drop a rune fragment doesn't. When full, the next one is guaranteed. / 룬 조각이 나올 수 있는 처치에서 못 얻으면 1씩 오릅니다. 다 차면 다음엔 반드시 나옵니다.
                 </div>
 
                 <details id="resourceRuneDetails" class="rdDetails">
                   <summary id="resourceRuneDetailsSummary" class="rdDetailsSummary">
-                    Rune Fragment Inventory · Synchronizing / 룬 조각 보유량 · 동기화 중
+                    Rune Fragment Inventory · Loading / 룬 조각 보유량 · 불러오는 중
                   </summary>
                   <ul
                     id="resourceRuneList"
@@ -248,9 +235,6 @@
                   <div class="cpStepHeader">
                     <div class="cpStepIndex">2</div>
                     <div id="runewordRecipeStepTitle" class="cpStepTitle">Recipe Explorer / 레시피 탐색기</div>
-                  </div>
-                  <div id="runewordRecipeStepHint" class="cpStepHint">
-                    This is the main workspace. Search, compare, and choose the recipe before you commit. / 이곳이 메인 작업 영역입니다. 검색하고 비교한 뒤 적용할 레시피를 고르세요.
                   </div>
                   <div class="cpStepBody">
                     <div class="cpSectionSubtle" id="runewordRecipeListTitle">Search And Compare / 검색 및 비교</div>
@@ -290,7 +274,7 @@
                       role="status"
                       aria-live="polite"
                       aria-atomic="true">
-                      Fragment inventory is synchronizing. Material filters use only current inventory counts for each full recipe; they do not include inserted progress or indicate base compatibility or whether transmutation is currently available. / 룬 조각 보유량을 동기화 중입니다. 재료 필터는 전체 레시피 기준 현재 인벤토리 보유량만 계산하며, 기존 삽입 진행을 포함하지 않고 베이스 호환성이나 현재 실제 변환 가능 여부를 뜻하지 않습니다.
+                      Loading fragments; showing all recipes. / 룬 조각을 불러오는 중이라 모든 레시피를 표시합니다.
                     </div>
                     <div
                       id="recipeList"
@@ -299,9 +283,6 @@
                       aria-label="Runeword recipes / 룬워드 레시피"
                       data-wheel-scroll-mode="smooth"
                     ></div>
-                    <div class="cpContextMeta" id="runewordRecipeListHint">
-                      Select a recipe to load its requirements and actions on the right. / 레시피를 선택하면 오른쪽 검토 영역에 요구 조건과 실행 기능이 표시됩니다.
-                    </div>
                   </div>
                 </div>
 
@@ -310,17 +291,14 @@
                     <div class="cpStepIndex">3</div>
                     <div id="runewordActionStepTitle" class="cpStepTitle">Review & Action / 검토 및 실행</div>
                   </div>
-                  <div id="runewordActionStepHint" class="cpStepHint">
-                    Review the requirements, then execute when ready. / 요구 조건을 확인한 뒤 준비되면 실행하세요.
-                  </div>
                   <div class="cpStepBody">
                     <div class="rwActionSummary">
                       <div id="runewordPanelStatus">
-                        Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
+                        Select an item first. / 장비를 먼저 고르세요.
                       </div>
 
                       <div class="cpContextMeta rwActionHintBox" id="runewordActionHint">
-                        Select an equipped base first. / 착용 베이스를 먼저 선택하세요.
+                        Select an item first. / 장비를 먼저 고르세요.
                       </div>
 
                       <details id="runewordActionDetails" class="rwActionDetails" open>
@@ -372,13 +350,10 @@
                   id="equippedBuildSection"
                   class="cpSection ebSection"
                   aria-labelledby="equippedBuildTitle"
-                  aria-describedby="equippedBuildLead equippedBuildChanceHint">
+                  aria-describedby="equippedBuildChanceHint">
                 <div class="ebHeader">
                   <div>
                     <div id="equippedBuildTitle" class="cpSectionTitle">Equipped Build / 장착 빌드</div>
-                    <div id="equippedBuildLead" class="cpContextMeta">
-                      Read-only summary of Calamity effects on equipped items. / 착용 아이템의 칼라미티 효과를 읽기 전용으로 요약합니다.
-                    </div>
                   </div>
                   <div id="equippedBuildSlotCount" class="ebSlotCount">0</div>
                 </div>
@@ -424,7 +399,7 @@
                   </section>
                 </div>
                 <div id="equippedBuildChanceHint" class="cpContextMeta ebChanceHint" hidden>
-                  Shown chances are condition-qualified rolls after current modifiers; normal weapon-hit chances are listed separately from critical/power-attack chances. Cast-on-crit values are per-candidate rolls: fair cyclic selection executes at most 2 effects on a melee critical/power attack and 1 on a ranged or normal melee hit. Standard proc duplicates combine up to 3 item-local chances with diminishing returns and still execute one action; special proc duplicates keep their shared single roll. Tiered suffix families add rank points up to the T3 cap, while Scroll preservation keeps its separate additive 100% cap. ICDs, proc budgets, action preconditions, and Lucky Hit still apply separately. / 표시 확률은 현재 보정 적용 후 조건부 판정값이며, 일반 무기 적중 확률은 치명타·강공 확률과 별도로 표시됩니다. 치명 시전은 후보별 판정값을 표시하고 공정 순환 선택으로 근접 치명타·강공은 공격당 최대 2개, 원거리와 근접 평타는 최대 1개만 실행합니다. 표준 발동 중복은 아이템별 확률을 최대 3개까지 감쇠 합성하지만 효과는 1회 실행하며, 특수 발동 중복은 기존 1회 판정을 공유합니다. 단계형 접미 계열은 티어 점수를 더해 3단계 상한까지 승급하고, 두루마리 보존은 별도의 합산·100% 상한을 유지합니다. ICD, 발동 예산, 행동 선행 조건, 행운 적중은 별도로 적용됩니다.
+                  Chances include your current bonuses. Cooldowns and Lucky Hit apply on top. / 확률은 현재 보정이 반영된 값입니다. 재사용 대기시간과 행운 적중은 따로 적용됩니다.
                 </div>
                 </section>
               </div>
@@ -432,7 +407,7 @@
                 <section
                   id="resourceOrbDashboardSection"
                   class="rdSection rdOrbSection"
-                  aria-label="Crafting resources and pity / 제작 재료 및 피티"
+                  aria-label="Crafting resources and pity / 제작 재료와 천장"
                   aria-describedby="resourceOrbPityHint"
                   aria-busy="true">
                   <div class="rdHeader rdOrbHeader">
@@ -463,29 +438,29 @@
                   <div class="rdPityGrid">
                     <div class="rdPityCard">
                       <div class="rdPityHeader">
-                        <span id="resourceOrbPityLabel">Reforge Orb Pity / 재련 오브 피티</span>
+                        <span id="resourceOrbPityLabel">Reforge Orb Pity / 재련 오브 천장</span>
                         <strong id="resourceOrbPityValue">— / —</strong>
                       </div>
                       <progress
                         id="resourceOrbPityProgress"
                         class="rdProgress"
                         max="1"
-                        aria-label="Reforge Orb pity is synchronizing / 재련 오브 피티 동기화 중"></progress>
+                        aria-label="Loading Reforge Orb pity / 재련 오브 천장 불러오는 중"></progress>
                       <div id="resourceOrbPityState" class="rdPityState">
-                        Synchronizing eligible ordinary drop rolls. / 적격 일반 드랍 판정을 동기화 중입니다.
+                        Loading… / 불러오는 중…
                       </div>
                     </div>
                   </div>
                   <div id="resourceOrbPityHint" class="cpContextMeta rdPityHint rdAssistiveText">
-                    Only eligible ordinary drop rolls affect this streak. At the threshold, the next eligible roll is guaranteed. / 적격 일반 드랍 판정만 연속 실패를 바꿉니다. 기준치에 도달하면 다음 적격 판정에서 확정 지급됩니다.
+                    Goes up by 1 each time a kill that could drop a Reforge Orb doesn't. When full, the next one is guaranteed. / 재련 오브가 나올 수 있는 처치에서 못 얻으면 1씩 오릅니다. 다 차면 다음엔 반드시 나옵니다.
                   </div>
                 </section>
 
                 <section class="cpSection affixWorkingActions" aria-labelledby="runewordItemActionsTitle">
-                  <div id="runewordItemActionsTitle" class="cpSectionTitle">Working Base Affixes &amp; Reforge / 작업 베이스 어픽스 및 재련</div>
+                  <div id="runewordItemActionsTitle" class="cpSectionTitle">Reforge Affixes / 어픽스 재련</div>
                   <details id="runewordBaseAffixDetails" class="rwActionDetails" open>
                     <summary id="runewordBaseAffixSummary" class="rwActionDetailsSummary">
-                      Selected Base Affixes / 선택 베이스 어픽스
+                      Selected Item Affixes / 선택한 장비 어픽스
                     </summary>
                     <div class="rwActionDetailsBody">
                       <div class="rwAffixBlock">
@@ -582,17 +557,14 @@
                       <div class="cpContextLabel" id="affixSelectedItemLabel">Selected Item / 선택 아이템</div>
                       <div class="cpContextValue" id="affixSelectedItemName">No item selected / 선택된 아이템 없음</div>
                       <div class="cpContextMeta" id="affixSelectedItemMeta">
-                        Highlight one inventory item to mirror its affix details here. / 인벤토리에서 아이템 하나를 가리키면 여기에서 어픽스 상세를 확인할 수 있습니다.
+                        Point at an item in your inventory to see it here. / 인벤토리에서 아이템을 가리키면 여기에 표시됩니다.
                       </div>
                     </div>
                     <div class="cpSection">
                       <div class="cpSectionTitle" id="panelTooltipTitle">Item Affix Details / 아이템 어픽스 상세</div>
-                      <div class="cpAffixLead" id="panelTooltipLead">
-                        Focus one item at a time to read affix text without opening the full runeword flow. / 한 번에 아이템 하나에 집중해서 어픽스 텍스트를 읽을 수 있습니다.
-                      </div>
                       <div id="panelTooltipText" class="cpTooltipBox compact"></div>
                       <div class="cpContextMeta" id="panelTooltipHint">
-                        Select an item in inventory to view affixes. / 인벤토리에서 아이템을 선택하면 어픽스를 표시합니다.
+                        Open your inventory (Tab) and point at an item. / 인벤토리(Tab)를 열고 아이템을 가리키세요.
                       </div>
                     </div>
                   </div>
@@ -674,7 +646,7 @@
                 Recovery &amp; Reset / 복구 및 초기화
               </summary>
               <div class="cpGrid cpDangerBody">
-                <button id="runewordResetButton" class="cpButton cpDangerButton" data-cmd="runeword.reset">Reset Selected Base / 선택 베이스 초기화</button>
+                <button id="runewordResetButton" class="cpButton cpDangerButton" data-cmd="runeword.reset">Reset Selected Item / 선택한 장비 초기화</button>
               </div>
             </details>
 
@@ -691,8 +663,8 @@
                 <button id="debugGrantSetButton" class="cpButton" data-cmd="runeword.grant.set">+1 Recipe Set / 레시피 세트 +1</button>
                 <button id="debugGrantStarterOrbsButton" class="cpButton" data-cmd="runeword.grant.orb3">Starter Crafting Kit / 스타터 제작 재료</button>
                 <button id="debugSpawnTestButton" class="cpButton" data-cmd="spawn.test">Spawn Test Item / 테스트 아이템 지급</button>
-                <button id="debugGrantTrapAffixButton" class="cpButton" data-cmd="spawn.trapaffix">Grant Trap Affix to Selected Base / 선택 베이스에 함정 어픽스</button>
-                <button id="debugTrapProbeButton" class="cpButton" data-cmd="spawn.trapworldprobe">Production Trap World-Ref Probe / 실사용 함정 월드 참조 프로브</button>
+                <button id="debugGrantTrapAffixButton" class="cpButton" data-cmd="spawn.trapaffix">Grant Trap Affix to Selected Item / 선택한 장비에 함정 어픽스</button>
+                <button id="debugTrapProbeButton" class="cpButton" data-cmd="spawn.trapworldprobe">Trap Marker Test / 함정 표시 테스트</button>
                 <button id="currencyRecoverButton" class="cpButton" data-cmd="currency.recover">Recover Currency / 재료 복구</button>
               </div>
             </details>

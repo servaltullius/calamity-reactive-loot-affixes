@@ -8,8 +8,8 @@ function resolveRunewordInspectorTexts(recipePreviewText, baseAffixText, pending
       : pending
         ? t("Refreshing affix preview...", "어픽스 미리보기를 갱신 중입니다.")
         : t(
-            "Select an equipped base to see its current affixes.",
-            "착용 베이스를 선택하면 현재 어픽스가 표시됩니다."
+            "Pick an item to see its current affixes.",
+            "장비를 고르면 현재 어픽스가 표시됩니다."
           ),
     recipeText: recipePreviewText
       ? recipePreviewText
@@ -34,7 +34,7 @@ function applyTooltipPlacement() {
       // No inventory hover, but a runeword base is selected: show that item's
       // affix text instead of a dead-end empty state.
       panelTooltipText.textContent =
-        t("[Selected base]", "[선택된 베이스 기준]") + "\n" + runewordAffixTextState;
+        t("[Selected item]", "[선택한 장비]") + "\n" + runewordAffixTextState;
     } else {
       appendEmptyState(
         panelTooltipText,
@@ -44,8 +44,8 @@ function applyTooltipPlacement() {
           "패널을 연 채로 인벤토리(Tab)를 열고 아이템에 마우스를 올리면 어픽스 텍스트가 여기 표시됩니다."
         ),
         t(
-          "Selecting a runeword base in the Runeword tab also shows that item's affixes here.",
-          "룬워드 탭에서 베이스를 선택해도 그 아이템의 어픽스가 여기 표시됩니다."
+          "Picking an item in the Runeword tab also shows its affixes here.",
+          "룬워드 탭에서 장비를 골라도 그 장비의 어픽스가 여기 표시됩니다."
         )
       );
     }

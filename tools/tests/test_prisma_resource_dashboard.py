@@ -65,7 +65,7 @@ class PrismaResourceDashboardTests(unittest.TestCase):
             "received: false",
             "received: true",
             'resourceDashboardSection.setAttribute("aria-busy", state.received ? "false" : "true")',
-            't("Unavailable", "사용 불가")',
+            't("Unavailable", "읽지 못함")',
             'valueNode.textContent = "— / —"',
             'progress.removeAttribute("value")',
             'typeof owned !== "number"',
@@ -97,7 +97,7 @@ class PrismaResourceDashboardTests(unittest.TestCase):
             'id="resourceDashboardSync"',
             'role="status"',
             'aria-live="polite"',
-            'aria-describedby="resourceDashboardLead resourcePityHint"',
+            'aria-describedby="resourcePityHint"',
         ):
             self.assertIn(marker, self.index)
         self.assertEqual(2, self.index.count('class="rdProgress"'))
@@ -105,8 +105,11 @@ class PrismaResourceDashboardTests(unittest.TestCase):
         self.assertIn("left.runeName.localeCompare(right.runeName)", self.dashboard)
 
     def test_copy_describes_eligible_rolls_not_kill_countdowns(self) -> None:
-        self.assertIn("next eligible ordinary drop roll is guaranteed", self.dashboard)
-        self.assertIn("다음 적격 일반 드랍 판정에서 확정 지급", self.dashboard)
+        self.assertIn("When full, the next one is guaranteed.", self.dashboard)
+        self.assertIn("다 차면 다음엔 반드시 나옵니다.", self.dashboard)
+        self.assertIn("룬 조각 천장", self.dashboard)
+        for jargon in ("eligible ordinary", "적격", "피티"):
+            self.assertNotIn(jargon, self.dashboard)
         for forbidden in (
             "kills remaining",
             "kills left",

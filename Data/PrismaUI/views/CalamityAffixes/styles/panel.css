@@ -34,12 +34,6 @@
   font-weight: 700;
 }
 
-.cpSub {
-  margin-top: calc(4px * var(--panel-ui-scale));
-  color: var(--muted);
-  font-size: calc(13px * var(--panel-ui-scale));
-}
-
 .cpDragHandle {
   margin: 0;
   padding: calc(12px * var(--panel-ui-scale)) calc(14px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
@@ -118,12 +112,6 @@
 .cpMainPane.scrollY {
   overflow-y: auto;
   padding-right: calc(4px * var(--panel-ui-scale));
-}
-
-.cpDragHint {
-  margin-top: calc(6px * var(--panel-ui-scale));
-  font-size: calc(11px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.6);
 }
 
 .cpContext {
