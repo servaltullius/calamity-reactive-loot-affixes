@@ -21,5 +21,5 @@ namespace CalamityAffixes::Hooks
 	// Call just before casting an echo strike. The echo's damage reaches
 	// HandleHealthDamage carrying the target's previous swing as lastHitData;
 	// this marks that one callback as damage only, never a new hit.
-	void ExpectEchoStrikeDamage(RE::Actor* a_target, RE::Actor* a_attacker, float a_magnitude) noexcept;
+	void ExpectEchoStrikeDamage(RE::Actor* a_target, RE::Actor* a_attacker) noexcept;
 }

@@ -235,7 +235,6 @@ namespace CalamityAffixes::Hooks::detail
 			RE::FormID target{ 0u };
 			RE::FormID attacker{ 0u };
 			std::uint64_t hitSignature{ 0u };
-			float magnitude{ 0.0f };
 			std::chrono::steady_clock::time_point expiresAt{};
 		};
 
@@ -539,7 +538,6 @@ namespace CalamityAffixes::Hooks::detail
 	void ExpectEchoStrikeDamage(
 		RE::Actor* a_target,
 		RE::Actor* a_attacker,
-		float a_magnitude,
 		std::chrono::steady_clock::time_point a_now) noexcept
 	{
 		if (!a_target || !a_attacker) {
@@ -562,7 +560,6 @@ namespace CalamityAffixes::Hooks::detail
 			.target = a_target->GetFormID(),
 			.attacker = a_attacker->GetFormID(),
 			.hitSignature = signature,
-			.magnitude = a_magnitude,
 			.expiresAt = a_now + kExpectedEchoStrikeDamageLifetime,
 		});
 	}
@@ -571,8 +568,7 @@ namespace CalamityAffixes::Hooks::detail
 		RE::Actor* a_target,
 		RE::Actor* a_attacker,
 		const RE::HitData* a_rawHitData,
-		std::chrono::steady_clock::time_point a_now,
-		float& a_outMagnitude) noexcept
+		std::chrono::steady_clock::time_point a_now) noexcept
 	{
 		if (!a_target || !a_attacker) {
 			return false;
@@ -592,7 +588,6 @@ namespace CalamityAffixes::Hooks::detail
 				continue;
 			}
 			if (it->target == targetFormID && it->attacker == attackerFormID && it->hitSignature == signature) {
-				a_outMagnitude = it->magnitude;
 				s_expectedEchoStrikeDamage.erase(it);
 				return true;
 			}

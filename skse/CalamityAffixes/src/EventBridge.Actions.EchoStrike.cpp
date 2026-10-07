@@ -157,7 +157,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			Hooks::ExpectEchoStrikeDamage(target, player, echo.magnitude);
+			Hooks::ExpectEchoStrikeDamage(target, player);
 			{
 				const ScopedProcDepth procDepthGuard{ _combatState };
 				CastHostileOnlySpellImmediate(

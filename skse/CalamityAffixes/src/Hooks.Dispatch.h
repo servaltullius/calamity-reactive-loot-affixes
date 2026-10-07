@@ -53,15 +53,12 @@ namespace CalamityAffixes::Hooks::detail
 	void ExpectEchoStrikeDamage(
 		RE::Actor* a_target,
 		RE::Actor* a_attacker,
-		float a_magnitude,
 		std::chrono::steady_clock::time_point a_now) noexcept;
-	// On a match, a_outMagnitude receives the magnitude the echo was cast with.
 	[[nodiscard]] bool ConsumeExpectedEchoStrikeDamage(
 		RE::Actor* a_target,
 		RE::Actor* a_attacker,
 		const RE::HitData* a_rawHitData,
-		std::chrono::steady_clock::time_point a_now,
-		float& a_outMagnitude) noexcept;
+		std::chrono::steady_clock::time_point a_now) noexcept;
 	void InvalidateDeferredTasks() noexcept;
 	void ClearDispatchRuntimeState() noexcept;
 }
