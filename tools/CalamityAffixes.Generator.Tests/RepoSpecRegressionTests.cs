@@ -21,7 +21,7 @@ public sealed class RepoSpecRegressionTests
         new(0x000B05u, "CAFF_MSTT_TRAP_CHAOS_VISUAL", @"CalamityAffixes\TrapMarkers\TrapPressurePlateMetal01.nif", true),
     ];
 
-    // Shadow Boxer (v2.3.0): the first affix added after the prefix was sealed, so
+    // Shadow Boxer (v2.2.7): the first affix added after the prefix was sealed, so
     // its KYWD is relocated into the tail together with its effects and spells.
     private static readonly AllocationRecord[] ExpectedShadowBoxerTail =
     [
