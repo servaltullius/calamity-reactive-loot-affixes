@@ -857,6 +857,14 @@
           "hitEffectArtForm": "Skyrim.esm|0x0008AFD1",
           "fxPersist": true
         }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_SHADOW_ECHO_HIT",
+          "modelPath": "CalamityAffixes\\ShadowEchoHit.nif",
+          "artType": "MagicHitEffect"
+        }
       }
     ],
     "tags": [
@@ -10765,10 +10773,10 @@
             },
             "noHitEffectArt": false,
             "feedback": {
-              "artObjectEditorId": "Skyrim.esm|0x000506D6",
+              "artObjectEditorId": "CAFF_ARTO_VFX_SHADOW_ECHO_HIT",
               "soundForm": "Skyrim.esm|0x000AF664",
               "target": "Target",
-              "durationSeconds": 0.6,
+              "durationSeconds": 1.0,
               "playOn": "Proc",
               "spatialSound": true
             }

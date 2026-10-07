@@ -666,6 +666,14 @@
           "hitEffectArtForm": "Skyrim.esm|0x0008AFD1",
           "fxPersist": true
         }
+      },
+      {
+        "type": "ArtObject",
+        "artObject": {
+          "editorId": "CAFF_ARTO_VFX_SHADOW_ECHO_HIT",
+          "modelPath": "CalamityAffixes\\ShadowEchoHit.nif",
+          "artType": "MagicHitEffect"
+        }
       }
     ]
   }

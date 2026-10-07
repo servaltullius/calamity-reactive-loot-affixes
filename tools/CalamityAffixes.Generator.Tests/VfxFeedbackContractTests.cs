@@ -52,6 +52,7 @@ public sealed class VfxFeedbackContractTests
         new("CAFF_ARTO_VFX_PROC_REFLECT", @"Actors\Spriggan\FXSprigganAttachments.nif"),
         new("CAFF_ARTO_VFX_PROC_RADIANCE", @"Magic\HealRitualCastBodyFX.nif"),
         new("CAFF_ARTO_VFX_PROC_DRAGON_SCALE", @"Magic\FXFireCloak01.nif"),
+        new("CAFF_ARTO_VFX_SHADOW_ECHO_HIT", @"CalamityAffixes\ShadowEchoHit.nif"),
     ];
 
     private static readonly WorldMarkerExpectation[] ExpectedWorldMarkers =
@@ -88,7 +89,7 @@ public sealed class VfxFeedbackContractTests
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(58, records.Length);
+        Assert.Equal(59, records.Length);
         var artRecords = records
             .Where(record => record.GetProperty("type").GetString() == "ArtObject")
             .ToArray();

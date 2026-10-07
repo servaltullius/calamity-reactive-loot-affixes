@@ -5360,7 +5360,7 @@
         "echoDelaySeconds": 0.25,
         "magnitudeScaling": { "source": "HitPhysicalDealt", "mult": 0.4 },
         "noHitEffectArt": false,
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000506D6", "soundForm": "Skyrim.esm|0x000AF664", "target": "Target", "durationSeconds": 0.6, "playOn": "Proc", "spatialSound": true }
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_SHADOW_ECHO_HIT", "soundForm": "Skyrim.esm|0x000AF664", "target": "Target", "durationSeconds": 1.0, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
