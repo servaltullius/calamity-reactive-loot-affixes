@@ -13,12 +13,12 @@ public sealed class RepoSpecRegressionTests
 {
     private static readonly WorldMarkerExpectation[] ExpectedWorldMarkers =
     [
-        new(0x000B00u, "CAFF_MSTT_TRAP_BEAR_VISUAL", @"Traps\BearTrap\BearTrap01.nif", true),
-        new(0x000B01u, "CAFF_MSTT_TRAP_RUNE_VISUAL", @"Traps\PressurePlate\TrapStonePressurePlate01.nif", true),
-        new(0x000B02u, "CAFF_MSTT_TRAP_PLAGUE_VISUAL", @"actors\DLC02\Spider_poison\CharacterAssets\spidersackdead.nif", false),
-        new(0x000B03u, "CAFF_MSTT_TRAP_TAR_VISUAL", @"Traps\OilTrapPuddle01\OilTrapPuddle01.nif", true),
-        new(0x000B04u, "CAFF_MSTT_TRAP_SIPHON_VISUAL", @"Actors\DLC02\Spider_poison\CharacterAssets\ExpSpiderEggsAlbino.nif", false),
-        new(0x000B05u, "CAFF_MSTT_TRAP_CHAOS_VISUAL", @"Traps\PressurePlateMetal\TrapPressurePlateMetal01.nif", true),
+        new(0x000B00u, "CAFF_MSTT_TRAP_BEAR_VISUAL", @"CalamityAffixes\TrapMarkers\BearTrap01.nif", true),
+        new(0x000B01u, "CAFF_MSTT_TRAP_RUNE_VISUAL", @"CalamityAffixes\TrapMarkers\TrapStonePressurePlate01.nif", true),
+        new(0x000B02u, "CAFF_MSTT_TRAP_PLAGUE_VISUAL", @"CalamityAffixes\TrapMarkers\SpiderSackDead.nif", false),
+        new(0x000B03u, "CAFF_MSTT_TRAP_TAR_VISUAL", @"CalamityAffixes\TrapMarkers\OilTrapPuddle01.nif", true),
+        new(0x000B04u, "CAFF_MSTT_TRAP_SIPHON_VISUAL", @"CalamityAffixes\TrapMarkers\ExpSpiderEggsAlbino.nif", false),
+        new(0x000B05u, "CAFF_MSTT_TRAP_CHAOS_VISUAL", @"CalamityAffixes\TrapMarkers\TrapPressurePlateMetal01.nif", true),
     ];
 
     // Shadow Boxer (v2.3.0): the first affix added after the prefix was sealed, so

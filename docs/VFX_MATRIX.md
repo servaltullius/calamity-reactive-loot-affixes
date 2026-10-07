@@ -8,12 +8,12 @@ This document lists the always-on, data-driven P0–P1 feedback added without ch
 
 | Effects / 효과 | Persistent marker / 지속 마커 | Trigger burst / 발동 폭발 | Positional sounds / 위치 음향 |
 |---|---|---|---|
-| `bear_trap` | Scriptless world reference using animated vanilla `BearTrap01` metal jaws | Frost burst | Explicit placement cue; close/rearm sounds from the behavior graph |
-| `rune_trap` | Scriptless world reference using the vanilla stone pressure plate (`TrapStonePressurePlate01.nif`) | Frost burst | Magic place/rune trigger |
-| `plague_spore` | Scriptless world reference using the vanilla poison-spider sack (`spidersackdead.nif`) | Gas blast | Magic place/poison trigger |
-| `tar_blight` | Scriptless world reference using the vanilla oil puddle (`OilTrapPuddle01.nif`) | Gas pulse | Magic place/poison trigger |
-| `siphon_spore` | Scriptless world reference using vanilla albino exploding-spider eggs (`ExpSpiderEggsAlbino.nif`) | Absorb hit | Magic place/absorb trigger |
-| `chaos_rune` | Scriptless world reference using the vanilla metal pressure plate (`TrapPressurePlateMetal01.nif`) | Shock burst | Magic place/shock trigger |
+| `bear_trap` | Scriptless, collision-free world reference using animated vanilla `BearTrap01` metal jaws | Frost burst | Explicit placement cue; close/rearm sounds from the behavior graph |
+| `rune_trap` | Scriptless, collision-free world reference using the vanilla stone pressure plate (`TrapStonePressurePlate01.nif`) | Frost burst | Magic place/rune trigger |
+| `plague_spore` | Scriptless, collision-free world reference using the vanilla poison-spider sack (`spidersackdead.nif`) | Gas blast | Magic place/poison trigger |
+| `tar_blight` | Scriptless, collision-free world reference using the vanilla oil puddle (`OilTrapPuddle01.nif`) | Gas pulse | Magic place/poison trigger |
+| `siphon_spore` | Scriptless, collision-free world reference using vanilla albino exploding-spider eggs (`ExpSpiderEggsAlbino.nif`) | Absorb hit | Magic place/absorb trigger |
+| `chaos_rune` | Scriptless, collision-free world reference using the vanilla metal pressure plate (`TrapPressurePlateMetal01.nif`) | Shock burst | Magic place/shock trigger |
 
 Markers show location and armed state; they are not exact radius telegraphs. All six persistent markers are scriptless, non-persistent, collision- and activation-blocked Calamity-owned `MSTT` world references with no `VMAD`. The five non-bear traps keep their existing short armed, triggered, and natural-expiration particle/sound cues as overlays; those cues no longer serve as the persistent marker. Their spell effects use `Effect.Area=0`, and the runtime directly casts only on up to two hostile actors inside the configured trap radius so a spell-area splash cannot reach companions. The bear contract remains distinct: `CAFF_MSTT_TRAP_BEAR_VISUAL` sends `StartOpen` after placement, `Trigger01` when the logical trap fires, and `Reset01` when it rearms. A 900 ms open gate follows every accepted open event, and only its placement sound remains explicit because the behavior graph supplies the close and reset sounds. A pre-save hook cancels active traps and retires their world references before the engine save starts. Cap eviction, invalidation, reload, disable, save, load, and revert cleanup are silent.
 
