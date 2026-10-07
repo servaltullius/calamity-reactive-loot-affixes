@@ -2,8 +2,11 @@ Calamity - Reactive Loot & Affixes: Third-Party Notices
 
 CalamityAffixes.dll is built with the open-source components below, and parts
 of them are compiled into the DLL. Their licenses require these notices to
-travel with the binary. No other third-party assets (models, textures, sounds,
-or fonts) ship with this mod; visual effects reference the base game's files.
+travel with the binary. No other third-party textures, sounds, or fonts ship
+with this mod; visual effects reference the base game's files. The trap marker
+meshes under Meshes\CalamityAffixes\TrapMarkers are copies of Skyrim Special
+Edition meshes (Bethesda Softworks) with their collision removed; they are
+useful only with the base game.
 
 Permissions for the mod itself are listed on its Nexus Mods page.
 

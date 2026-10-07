@@ -13385,7 +13385,7 @@
         "type": "MovableStatic",
         "movableStatic": {
           "editorId": "CAFF_MSTT_TRAP_BEAR_VISUAL",
-          "modelPath": "Traps\\BearTrap\\BearTrap01.nif",
+          "modelPath": "CalamityAffixes\\TrapMarkers\\BearTrap01.nif",
           "mustUpdateAnimations": true
         }
       },
@@ -13393,7 +13393,7 @@
         "type": "MovableStatic",
         "movableStatic": {
           "editorId": "CAFF_MSTT_TRAP_RUNE_VISUAL",
-          "modelPath": "Traps\\PressurePlate\\TrapStonePressurePlate01.nif",
+          "modelPath": "CalamityAffixes\\TrapMarkers\\TrapStonePressurePlate01.nif",
           "mustUpdateAnimations": true
         }
       },
@@ -13401,7 +13401,7 @@
         "type": "MovableStatic",
         "movableStatic": {
           "editorId": "CAFF_MSTT_TRAP_PLAGUE_VISUAL",
-          "modelPath": "actors\\DLC02\\Spider_poison\\CharacterAssets\\spidersackdead.nif",
+          "modelPath": "CalamityAffixes\\TrapMarkers\\SpiderSackDead.nif",
           "mustUpdateAnimations": false
         }
       },
@@ -13409,7 +13409,7 @@
         "type": "MovableStatic",
         "movableStatic": {
           "editorId": "CAFF_MSTT_TRAP_TAR_VISUAL",
-          "modelPath": "Traps\\OilTrapPuddle01\\OilTrapPuddle01.nif",
+          "modelPath": "CalamityAffixes\\TrapMarkers\\OilTrapPuddle01.nif",
           "mustUpdateAnimations": true
         }
       },
@@ -13417,7 +13417,7 @@
         "type": "MovableStatic",
         "movableStatic": {
           "editorId": "CAFF_MSTT_TRAP_SIPHON_VISUAL",
-          "modelPath": "Actors\\DLC02\\Spider_poison\\CharacterAssets\\ExpSpiderEggsAlbino.nif",
+          "modelPath": "CalamityAffixes\\TrapMarkers\\ExpSpiderEggsAlbino.nif",
           "mustUpdateAnimations": false
         }
       },
@@ -13425,7 +13425,7 @@
         "type": "MovableStatic",
         "movableStatic": {
           "editorId": "CAFF_MSTT_TRAP_CHAOS_VISUAL",
-          "modelPath": "Traps\\PressurePlateMetal\\TrapPressurePlateMetal01.nif",
+          "modelPath": "CalamityAffixes\\TrapMarkers\\TrapPressurePlateMetal01.nif",
           "mustUpdateAnimations": true
         }
       },
