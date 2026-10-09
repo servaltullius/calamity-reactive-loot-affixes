@@ -29,7 +29,9 @@ CTestTestfile.cmake
 *.log
 *:Zone.Identifier
 
-.claude/
+.claude/*
+!.claude/skills/
+.claude/skills/*-workspace/
 skse/CalamityAffixes/tests/build/
 
 # OMC session/runtime artifacts
