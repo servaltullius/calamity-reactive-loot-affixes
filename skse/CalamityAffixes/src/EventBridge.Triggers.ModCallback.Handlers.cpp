@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/PrismaTooltip.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
@@ -246,7 +247,7 @@ namespace CalamityAffixes
 			// (the panel already hides this button unless a debug toggle is on).
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			auto* orb = player
-				? RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")
+				? PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")
 				: nullptr;
 			const bool debugSession = _loot.debugHudNotifications || _loot.debugLog;
 			if (!debugSession && player && orb && player->GetItemCount(orb) > 0) {

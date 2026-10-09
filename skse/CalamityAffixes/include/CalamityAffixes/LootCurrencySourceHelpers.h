@@ -3,6 +3,7 @@
 #include "CalamityAffixes/LootCurrencyLedger.h"
 #include "CalamityAffixes/CorpseCurrencyPolicy.h"
 #include "CalamityAffixes/LootEligibility.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 
 #include <RE/Skyrim.h>
 
@@ -54,16 +55,8 @@ namespace CalamityAffixes::detail
 			return LootCurrencySourceTier::kUnknown;
 		}
 
-		const char* sourceEditorIdRaw = sourceForm->GetFormEditorID();
-		const char* baseEditorIdRaw = sourceBase->GetFormEditorID();
-		if (IsBossContainerEditorId(
-				sourceEditorIdRaw ? std::string_view(sourceEditorIdRaw) : std::string_view{},
-				a_bossAllowContains,
-				a_bossDenyContains) ||
-			IsBossContainerEditorId(
-				baseEditorIdRaw ? std::string_view(baseEditorIdRaw) : std::string_view{},
-				a_bossAllowContains,
-				a_bossDenyContains)) {
+		if (IsBossContainerEditorId(PluginEditorIds::EditorIdOf(sourceForm), a_bossAllowContains, a_bossDenyContains) ||
+			IsBossContainerEditorId(PluginEditorIds::EditorIdOf(sourceBase), a_bossAllowContains, a_bossDenyContains)) {
 			return LootCurrencySourceTier::kBossContainer;
 		}
 
@@ -96,8 +89,7 @@ namespace CalamityAffixes::detail
 			if (!a_form) {
 				return false;
 			}
-			const char* editorIdRaw = a_form->GetFormEditorID();
-			return editorIdRaw && IsBossContainerEditorId(editorIdRaw, a_bossAllowContains, a_bossDenyContains);
+			return IsBossContainerEditorId(PluginEditorIds::EditorIdOf(a_form), a_bossAllowContains, a_bossDenyContains);
 		};
 
 		if (auto* sourceRef = sourceForm->As<RE::TESObjectREFR>()) {

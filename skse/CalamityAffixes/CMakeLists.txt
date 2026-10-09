@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 2.2.7 LANGUAGES CXX)
+project(CalamityAffixes VERSION 2.2.8 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -44,6 +44,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    include/CalamityAffixes/EquippedBuildSummaryPolicy.h
 	    include/CalamityAffixes/PointerSafety.h
 		    include/CalamityAffixes/PlayerOwnership.h
+		    include/CalamityAffixes/PluginEditorIdParser.h
+		    include/CalamityAffixes/PluginEditorIds.h
 		    include/CalamityAffixes/PrismaLayoutPersistence.h
 		    include/CalamityAffixes/PrismaTooltip.h
 		    include/CalamityAffixes/RuntimeContract.h
@@ -134,6 +136,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/Hooks.cpp
 	    src/Hooks.Dispatch.cpp
 	    src/Papyrus.cpp
+	    src/PluginEditorIds.cpp
 	    src/PrismaLayoutPersistence.cpp
 	    src/PrismaTooltip.cpp
 	    src/RuntimePaths.cpp

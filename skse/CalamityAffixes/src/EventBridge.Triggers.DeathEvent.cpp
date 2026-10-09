@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 
 #include "CalamityAffixes/CorpseCurrencyRewardPolicy.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/PlayerOwnership.h"
 #include "EventBridge.Triggers.Events.Detail.h"
@@ -210,11 +211,11 @@ namespace CalamityAffixes
                     scourDrop = roll(_rng) < _loot.scouringOrbChancePercent * multiplier;
                 }
                 if (identifyDrop) {
-                    if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_IdentifyScroll"))
+                    if (auto* item = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_IdentifyScroll"))
                         TryAddLootCurrencyToCorpseInventory(item, dying);
                 }
                 if (scourDrop) {
-                    if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ScouringOrb"))
+                    if (auto* item = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_ScouringOrb"))
                         TryAddLootCurrencyToCorpseInventory(item, dying);
                 }
             }

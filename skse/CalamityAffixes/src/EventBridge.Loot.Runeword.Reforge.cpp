@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
@@ -104,7 +105,7 @@ namespace CalamityAffixes
 		const auto weaponSubtype = detail::ResolveWeaponSubtype(entry->object->As<RE::TESObjectWEAP>());
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		const auto currencyId = detail::CraftCurrency(a_action);
-		auto* currency = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(currencyId.data());
+		auto* currency = PluginEditorIds::Lookup<RE::TESObjectMISC>(currencyId.data());
 		if (!player || !currency) return fail("Crafting currency unavailable. Install the matching ESP and DLL.");
 		const auto cost = a_action == AffixCraftAction::kReforge ? detail::kSelectedReforgeCost : 1u;
 		const auto ownedBefore = std::max(0, player->GetItemCount(currency));
@@ -266,8 +267,8 @@ namespace CalamityAffixes
 		const auto recipe = detail::ResolveCurrencyExchange(a_exchange);
 		const std::string targetName = a_exchange == CurrencyExchange::kScouringOrb ? "Scouring Orb" : "Reforge Orb";
 		auto* player = RE::PlayerCharacter::GetSingleton();
-		auto* source = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(std::string(recipe.sourceEditorId));
-		auto* target = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(std::string(recipe.targetEditorId));
+		auto* source = PluginEditorIds::Lookup<RE::TESObjectMISC>(std::string(recipe.sourceEditorId));
+		auto* target = PluginEditorIds::Lookup<RE::TESObjectMISC>(std::string(recipe.targetEditorId));
 		if (!player || !source || !target || recipe.sourceCost == 0u) {
 			return fail("Exchange currency unavailable. Install the matching ESP and DLL.");
 		}

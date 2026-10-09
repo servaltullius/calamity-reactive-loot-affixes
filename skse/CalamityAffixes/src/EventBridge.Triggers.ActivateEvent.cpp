@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 
 #include "CalamityAffixes/PointerSafety.h"
 
@@ -36,10 +37,7 @@ namespace CalamityAffixes
 			const bool murderAlarmBit = actionActor->GetActorRuntimeData().boolBits.any(RE::Actor::BOOL_BITS::kMurderAlarm);
 			const bool controllerStarted = combatController ? combatController->startedCombat : false;
 			const bool controllerStopped = combatController ? combatController->stoppedCombat : false;
-			const std::string_view baseEditorId =
-				(baseObject && baseObject->GetFormEditorID())
-					? std::string_view(baseObject->GetFormEditorID())
-					: std::string_view{};
+			const std::string baseEditorId = PluginEditorIds::EditorIdOf(baseObject);
 			SKSE::log::info(
 				"CalamityAffixes: activation probe (targetRef={}({:08X}), base={}({:08X}), baseEditorId={}, inCombat={}, runtimeTarget={:08X}, controllerTarget={:08X}, murderAlarm={}, ctrlStarted={}, ctrlStopped={}).",
 				sourceRef->GetName(),

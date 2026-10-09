@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/InstanceKeyTransferPolicy.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
@@ -436,7 +437,7 @@ namespace CalamityAffixes
 			return "Player not available.";
 		}
 
-		auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+		auto* orb = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
 		if (!orb) {
 			SKSE::log::warn("CalamityAffixes: RecoverMiscCurrency — reforge orb EditorID lookup failed.");
 			return "Reforge orb lookup failed.";

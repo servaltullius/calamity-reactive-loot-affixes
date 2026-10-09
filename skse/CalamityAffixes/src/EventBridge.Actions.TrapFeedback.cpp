@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/TrapCellPolicy.h"
 #include "CalamityAffixes/TrapMarkerAnimationPolicy.h"
 
@@ -502,10 +503,10 @@ namespace CalamityAffixes
 			// CreateReferenceAtLocation every trap tick.
 			a_trap.visualState = a_state;
 			if (_loot.debugLog) {
-				const auto* baseEditorID = a_trap.feedback.markerWorldObject->GetFormEditorID();
+				const auto baseEditorID = PluginEditorIds::OwnEditorIdOf(a_trap.feedback.markerWorldObject);
 				SKSE::log::debug(
 					"CalamityAffixes: trap world marker spawn (base={}, baseForm=0x{:X}, ref=0x{:X}, handle=0x{:X}, pos=({:.1f}, {:.1f}, {:.1f}), forcePersist=false, handleAllocated={}, resolved={}, strongOwnerRetained={}, deferredCleanupQueued={}, retainedForCleanup={}, activationBlockIssued={}, collisionDisableIssued={}, spawned={}).",
-					baseEditorID ? baseEditorID : "<none>",
+					baseEditorID.empty() ? std::string_view("<none>") : baseEditorID,
 					a_trap.feedback.markerWorldObject->GetFormID(),
 					marker ? marker->GetFormID() : 0u,
 					markerHandle ? markerHandle.native_handle() : 0u,
@@ -753,11 +754,11 @@ namespace CalamityAffixes
 				const bool handleAllocated = static_cast<bool>(storedProbe.markerReference);
 				const bool resolved = storedProbe.markerReferenceOwner != nullptr ||
 					(handleAllocated && storedProbe.markerReference.get() != nullptr);
-				const auto* markerEditorId = storedProbe.feedback.markerWorldObject->GetFormEditorID();
+				const auto markerEditorId = PluginEditorIds::OwnEditorIdOf(storedProbe.feedback.markerWorldObject);
 				SKSE::log::info(
 					"CalamityAffixes: trap world marker probe observation (affixId={}, marker={}, configured=true, handleAllocated={}, resolved={}, animationConfigured={}).",
 					affixId,
-					markerEditorId ? markerEditorId : "<none>",
+					markerEditorId.empty() ? std::string_view("<none>") : markerEditorId,
 					handleAllocated,
 					resolved,
 					storedProbe.feedback.worldMarkerAnimation.has_value());

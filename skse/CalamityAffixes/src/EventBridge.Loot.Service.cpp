@@ -3,6 +3,7 @@
 #include "CalamityAffixes/LootCurrencySourceHelpers.h"
 #include "CalamityAffixes/LootEligibility.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "EventBridge.Config.Shared.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
@@ -29,12 +30,11 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			const char* editorIdRaw = a_object->GetFormEditorID();
-			if (!editorIdRaw || editorIdRaw[0] == '\0') {
+			const auto editorId = PluginEditorIds::OwnEditorIdOf(a_object);
+			if (editorId.empty()) {
 				return false;
 			}
 
-			const std::string_view editorId(editorIdRaw);
 			return editorId == "CAFF_Misc_ReforgeOrb" || editorId == "CAFF_Misc_IdentifyScroll" ||
                 editorId == "CAFF_Misc_ScouringOrb" || editorId.starts_with("CAFF_RuneFrag_");
 		}
@@ -208,8 +208,7 @@ namespace CalamityAffixes
 			cursor = cursor->templateArmor;
 		}
 
-		const char* editorIdRaw = a_armor->GetFormEditorID();
-		const std::string_view editorId = editorIdRaw ? std::string_view(editorIdRaw) : std::string_view{};
+		const std::string editorId = PluginEditorIds::EditorIdOf(a_armor);
 		const bool editorIdDenied =
 			detail::MatchesAnyCaseInsensitiveMarker(editorId, _loot.armorEditorIdDenyContains);
 
@@ -537,7 +536,7 @@ namespace CalamityAffixes
 			if (a_allowReforgeRoll) {
 				bool reforgePityTriggered = false;
 				if (TryRollReforgeOrbGrant(a_sourceChanceMultiplier, reforgePityTriggered)) {
-					auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+					auto* orb = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
 					if (!orb) {
 						SKSE::log::error(
 							"CalamityAffixes: reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");
@@ -579,7 +578,7 @@ namespace CalamityAffixes
 		}
 
 		if (a_grantReforgeOrb) {
-			auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+			auto* orb = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
 			if (!orb) {
 				SKSE::log::error(
 					"CalamityAffixes: guaranteed reforge orb item missing (editorId=CAFF_Misc_ReforgeOrb).");

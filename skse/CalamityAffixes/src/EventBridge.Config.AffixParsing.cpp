@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 
 #include "CalamityAffixes/AffixParsingPolicy.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "EventBridge.Config.Shared.h"
 
 #include <algorithm>
@@ -81,7 +82,7 @@ namespace CalamityAffixes
 			a_out.label = a_out.displayName;
 		}
 
-		a_out.keyword = RE::TESForm::LookupByEditorID<RE::BGSKeyword>(a_out.keywordEditorId);
+		a_out.keyword = PluginEditorIds::Lookup<RE::BGSKeyword>(a_out.keywordEditorId);
 		return a_out.keyword != nullptr;
 	}
 
@@ -170,7 +171,7 @@ namespace CalamityAffixes
 		// Parse passiveSpell for ANY slot (prefix, suffix, runeword).
 		const auto passiveSpellId = a_action.value("passiveSpellEditorId", std::string{});
 		if (!passiveSpellId.empty()) {
-			a_out.passiveSpell = RE::TESForm::LookupByEditorID<RE::SpellItem>(passiveSpellId);
+			a_out.passiveSpell = PluginEditorIds::Lookup<RE::SpellItem>(passiveSpellId);
 			if (!a_out.passiveSpell) {
 				SKSE::log::warn(
 					"CalamityAffixes: passive spell not found (affixId={}, spellEditorId={}).",

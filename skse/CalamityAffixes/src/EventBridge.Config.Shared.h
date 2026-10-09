@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CalamityAffixes/PluginEditorIds.h"
+
 #include <RE/Skyrim.h>
 
 #include <charconv>
@@ -71,7 +73,7 @@ namespace CalamityAffixes::ConfigShared
 
 		const auto pipe = text.find('|');
 		if (pipe == std::string_view::npos) {
-			return RE::TESForm::LookupByEditorID<T>(std::string(text));
+			return PluginEditorIds::Lookup<T>(std::string(text));
 		}
 
 		if (!a_handler) {

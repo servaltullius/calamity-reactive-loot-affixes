@@ -14,6 +14,7 @@
 
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/HostileEffectGuard.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 
 namespace CalamityAffixes::Hooks::detail
 {
@@ -362,7 +363,7 @@ namespace CalamityAffixes::Hooks::detail
 		}
 
 		if (a_hitData->attackDataSpell) {
-			const auto editorId = SafeCStringView(a_hitData->attackDataSpell->GetFormEditorID());
+			const auto editorId = PluginEditorIds::OwnEditorIdOf(a_hitData->attackDataSpell);
 			if (!editorId.empty() && editorId.starts_with("CAFF_")) {
 				return nullptr;
 			}

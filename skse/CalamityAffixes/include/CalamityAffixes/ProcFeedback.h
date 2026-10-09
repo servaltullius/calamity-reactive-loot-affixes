@@ -5,6 +5,7 @@
 
 #include <RE/Skyrim.h>
 
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/PointerSafety.h"
 
 namespace CalamityAffixes::ProcFeedback
@@ -39,7 +40,7 @@ namespace CalamityAffixes::ProcFeedback
 			return false;
 		}
 
-		const auto editorId = SafeCStringView(a_spell->GetFormEditorID());
+		const auto editorId = PluginEditorIds::OwnEditorIdOf(a_spell);
 		return !editorId.empty() && editorId.starts_with(kBloomSpellEditorIdPrefix);
 	}
 
@@ -49,7 +50,7 @@ namespace CalamityAffixes::ProcFeedback
 			return "Bloom";
 		}
 
-		const auto editorId = SafeCStringView(a_spell->GetFormEditorID());
+		const auto editorId = PluginEditorIds::OwnEditorIdOf(a_spell);
 		if (editorId.find("POISON") != std::string_view::npos) {
 			return "Plague Spore";
 		}

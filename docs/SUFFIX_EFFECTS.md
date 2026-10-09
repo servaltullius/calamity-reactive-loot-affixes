@@ -1,7 +1,7 @@
 # 서픽스 효과 정리 (공개용)
 
 > 업데이트: 2026-10-09
-> 기준 버전: `v2.2.7`
+> 기준 버전: `v2.2.8`
 > 기준 코드: `affixes/modules/keywords.affixes.suffixes.json`
 
 - 총 서픽스 패밀리: **22개**

@@ -1,6 +1,8 @@
 #include "EventBridge.Config.RunewordSynthesis.SpellSet.h"
 #include "EventBridge.Config.Shared.h"
 
+#include "CalamityAffixes/PluginEditorIds.h"
+
 #include <string_view>
 
 namespace CalamityAffixes::RunewordSynthesis
@@ -12,27 +14,27 @@ namespace CalamityAffixes::RunewordSynthesis
 		};
 
 		SpellSet out{};
-		out.dynamicFire = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_DMG_FIRE_DYNAMIC");
-		out.dynamicFrost = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_DMG_FROST_DYNAMIC");
-		out.dynamicShock = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_DMG_SHOCK_DYNAMIC");
-		out.spellArcLightning = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_ARC_LIGHTNING");
-		out.shredFire = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_FIRE_SHRED");
-		out.shredFrost = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_FROST_SHRED");
-		out.shredShock = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_SHOCK_SHRED");
-		out.spellWard = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_RW_FORTITUDE_WARD");
-		out.spellPhase = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_RW_ENIGMA_PHASE");
-		out.spellMeditation = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_RW_INSIGHT_MEDITATION");
-		out.spellBarrier = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_RW_EXILE_BARRIER");
-		out.spellPhoenix = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_RW_PHOENIX_SURGE");
-		out.spellHaste = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_SWAP_JACKPOT_HASTE");
-		out.spellDotPoison = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_DOT_BLOOM_POISON");
-		out.spellDotTar = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_DOT_BLOOM_TAR_SLOW");
-		out.spellDotSiphon = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_DOT_BLOOM_SIPHON_MAG");
-		out.spellChaosSunder = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_CHAOS_CURSE_SUNDER");
-		out.spellChaosFragile = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_CHAOS_CURSE_FRAGILE");
-		out.spellChaosSlowAttack = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK");
+		out.dynamicFire = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_DMG_FIRE_DYNAMIC");
+		out.dynamicFrost = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_DMG_FROST_DYNAMIC");
+		out.dynamicShock = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_DMG_SHOCK_DYNAMIC");
+		out.spellArcLightning = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_ARC_LIGHTNING");
+		out.shredFire = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_FIRE_SHRED");
+		out.shredFrost = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_FROST_SHRED");
+		out.shredShock = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_SHOCK_SHRED");
+		out.spellWard = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_FORTITUDE_WARD");
+		out.spellPhase = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_ENIGMA_PHASE");
+		out.spellMeditation = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_INSIGHT_MEDITATION");
+		out.spellBarrier = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_EXILE_BARRIER");
+		out.spellPhoenix = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_PHOENIX_SURGE");
+		out.spellHaste = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_SWAP_JACKPOT_HASTE");
+		out.spellDotPoison = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_DOT_BLOOM_POISON");
+		out.spellDotTar = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_DOT_BLOOM_TAR_SLOW");
+		out.spellDotSiphon = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_DOT_BLOOM_SIPHON_MAG");
+		out.spellChaosSunder = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_CHAOS_CURSE_SUNDER");
+		out.spellChaosFragile = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_CHAOS_CURSE_FRAGILE");
+		out.spellChaosSlowAttack = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK");
 		out.spellVanillaSoulTrap = parseSpellFromString("Skyrim.esm|0004DBA4");
-		out.spellCustomInvisibility = RE::TESForm::LookupByEditorID<RE::SpellItem>("CAFF_SPEL_INVISIBILITY");
+		out.spellCustomInvisibility = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_INVISIBILITY");
 		out.spellVanillaMuffle = parseSpellFromString("Skyrim.esm|0008F3EB");
 		out.spellVanillaFlameCloak = parseSpellFromString("Skyrim.esm|0003AE9F");
 		out.spellVanillaFrostCloak = parseSpellFromString("Skyrim.esm|0003AEA2");

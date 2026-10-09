@@ -2,6 +2,7 @@
 
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootCurrencySourceHelpers.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/PointerSafety.h"
 
 #include <chrono>
@@ -65,7 +66,7 @@ namespace CalamityAffixes::TriggersDetail
 				continue;
 			}
 
-			const auto editorId = SafeCStringView(baseObject->GetFormEditorID());
+			const auto editorId = PluginEditorIds::OwnEditorIdOf(baseObject);
 			if (editorId.empty()) {
 				continue;
 			}
@@ -99,12 +100,12 @@ namespace CalamityAffixes::TriggersDetail
 		CorpseCurrencyDropProbe probe{};
 		(void)a_actor;
 		probe.runewordFragmentRecordFound =
-			RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_RuneFrag_El") != nullptr;
+			PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_RuneFrag_El") != nullptr;
 		probe.reforgeOrbRecordFound =
-			RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(kReforgeOrbEditorId.data()) != nullptr;
+			PluginEditorIds::Lookup<RE::TESObjectMISC>(kReforgeOrbEditorId.data()) != nullptr;
 
-		auto* runewordDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>(kRunewordDropListEditorId.data());
-		auto* reforgeDropList = RE::TESForm::LookupByEditorID<RE::TESLevItem>(kReforgeDropListEditorId.data());
+		auto* runewordDropList = PluginEditorIds::Lookup<RE::TESLevItem>(kRunewordDropListEditorId.data());
+		auto* reforgeDropList = PluginEditorIds::Lookup<RE::TESLevItem>(kReforgeDropListEditorId.data());
 		probe.runewordDropListFound = runewordDropList != nullptr;
 		probe.reforgeDropListFound = reforgeDropList != nullptr;
 		if (runewordDropList) {
@@ -129,7 +130,7 @@ namespace CalamityAffixes::TriggersDetail
 			return false;
 		}
 
-		const auto editorId = SafeCStringView(sourceSpell->GetFormEditorID());
+		const auto editorId = PluginEditorIds::OwnEditorIdOf(sourceSpell);
 		return !editorId.empty() && editorId.starts_with("CAFF_");
 	}
 

@@ -83,3 +83,9 @@ timeout 30s "${tmp_dir}/deferred_event_dispatcher_tests"
   -o "${tmp_dir}/summon_protection_tests"
 "${tmp_dir}/summon_protection_tests"
 echo "summon_protection_tests: OK"
+
+"${cxx}" -std=c++23 -O2 -Wall -Wextra -pedantic \
+  -I"${project_dir}/include" \
+  "${script_dir}/plugin_editor_id_tests.cpp" \
+  -o "${tmp_dir}/plugin_editor_id_tests"
+"${tmp_dir}/plugin_editor_id_tests"

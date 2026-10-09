@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
@@ -119,7 +120,7 @@ namespace CalamityAffixes
 			}
 
 			const std::string editorId(a_editorId);
-			auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(editorId);
+			auto* item = PluginEditorIds::Lookup<RE::TESObjectMISC>(editorId);
 			if (!item) {
 				SKSE::log::error("CalamityAffixes: crafting currency item missing (editorId={}).", editorId);
 				return 0u;

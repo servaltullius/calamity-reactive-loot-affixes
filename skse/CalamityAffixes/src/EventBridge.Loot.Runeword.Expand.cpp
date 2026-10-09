@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
@@ -184,7 +185,7 @@ namespace CalamityAffixes
 			result.message = "Affix expansion failed: player not available.";
 			return result;
 		}
-		auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
+		auto* orb = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb");
 		if (!orb) {
 			result.message = "Affix expansion failed: orb item missing.";
 			SKSE::log::error("CalamityAffixes: affix expansion orb item missing (editorId=CAFF_Misc_ReforgeOrb).");

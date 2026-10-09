@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/EquippedBuildSummaryPolicy.h"
 #include "CalamityAffixes/LootRollSelection.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/ProcChancePolicy.h"
 #include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/RunewordUtil.h"
@@ -309,17 +310,17 @@ namespace CalamityAffixes
 		SanitizeRunewordState();
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		if (player) {
-			if (auto* orb = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")) {
+			if (auto* orb = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_ReforgeOrb")) {
 				panelState.reforgeOrbsKnown = true;
 				panelState.reforgeOrbsOwned = static_cast<std::uint32_t>(
 					std::max(0, player->GetItemCount(orb)));
 			}
 
-            if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_IdentifyScroll")) {
+            if (auto* item = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_IdentifyScroll")) {
                 panelState.identifyScrollsKnown = true;
                 panelState.identifyScrollsOwned = static_cast<std::uint32_t>(std::max(0, player->GetItemCount(item)));
             }
-            if (auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>("CAFF_Misc_ScouringOrb")) {
+            if (auto* item = PluginEditorIds::Lookup<RE::TESObjectMISC>("CAFF_Misc_ScouringOrb")) {
                 panelState.scouringOrbsKnown = true;
                 panelState.scouringOrbsOwned = static_cast<std::uint32_t>(std::max(0, player->GetItemCount(item)));
             }

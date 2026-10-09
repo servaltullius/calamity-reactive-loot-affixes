@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HostileEffectGuard.h"
 
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
 #include "CalamityAffixes/SpecialActionSafetyPolicy.h"
@@ -167,7 +168,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		const auto sourceEditorId = SafeCStringView(a_sourceSpell->GetFormEditorID());
+		const auto sourceEditorId = PluginEditorIds::OwnEditorIdOf(a_sourceSpell);
 		if (detail::IsCalamityProcSource(sourceEditorId)) {
 			// Avoid recursive stacking on our own proc spells.
 			return;

@@ -76,7 +76,7 @@
 ## 필수/권장 모드
 
 - 필수: SKSE64, Address Library for SKSE Plugins, Prisma UI
-- 권장: SkyUI
+- 권장: SkyUI, powerofthree's Tweaks
 - 선택: KID, MCM Helper, I4
 
 ## 5분 설치 (MO2 기준)
@@ -218,6 +218,12 @@
 #### (권장) SkyUI
 
 - SkyUI (인벤/루팅 UI 품질 향상; 본 모드 핵심 로직에는 필수 아님) ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/12604))
+
+#### (권장) powerofthree's Tweaks
+
+- powerofthree's Tweaks ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/51073))
+- 2.2.7까지는 사실상 필수였습니다. 이 모드는 자기 주문·재화·이펙트를 이름(에디터 ID)으로 찾는데, 스카이림은 이 이름을 버리기 때문에 powerofthree's Tweaks의 "Load EditorIDs"(기본 켜짐)가 있어야 찾을 수 있었습니다.
+- 2.2.8부터는 DLL이 `CalamityAffixes.esp`를 직접 읽어 이름표를 만들므로 없어도 동작합니다. 있으면 다른 모드·바닐라 폼의 이름까지 읽을 수 있어서, 방어구 제외 목록(`rewardbox`·`lootbox` 등)과 보스 상자 이름 판정이 함께 적용됩니다.
 
 #### (권장) KID
 

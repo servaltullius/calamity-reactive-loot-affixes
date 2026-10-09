@@ -13,6 +13,7 @@
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/Papyrus.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/PluginLogging.h"
 #include "CalamityAffixes/PrismaTooltip.h"
 #include "CalamityAffixes/EchoStrikeSystem.h"
@@ -95,6 +96,8 @@ SKSEPluginInfo(
 
 		switch (a_message->type) {
 		case SKSE::MessagingInterface::kDataLoaded: {
+			// Index our own editor IDs first: the config resolves its forms through it.
+			CalamityAffixes::PluginEditorIds::Load();
 			auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 			bridge->LoadConfig();
 			bridge->Register();

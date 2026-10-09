@@ -76,6 +76,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 ### 권장/선택 의존성
 - SkyUI (권장)
+- powerofthree's Tweaks (권장. 2.2.7 이하에서는 사실상 필수, 2.2.8부터는 없어도 동작하며 있으면 다른 모드 방어구 제외 목록·보스 상자 이름 판정까지 적용)
 - KID (권장)
 - MCM Helper (권장)
 - I4 (선택)
@@ -170,6 +171,7 @@ Current runtime scope is player-centric.
 
 ### Recommended / Optional
 - SkyUI (recommended)
+- powerofthree's Tweaks (recommended. Effectively required up to 2.2.7; from 2.2.8 the mod works without it, and with it the armor deny list and boss-chest name checks also apply to other mods' forms)
 - KID (recommended)
 - MCM Helper (recommended)
 - I4 (optional)

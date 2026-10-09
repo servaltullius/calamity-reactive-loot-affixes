@@ -1,6 +1,7 @@
 #include "CalamityAffixes/EventBridge.h"
 
 #include "CalamityAffixes/PlayerOwnership.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "EventBridge.Triggers.Events.Detail.h"
 
 #include <chrono>
@@ -63,7 +64,7 @@ namespace CalamityAffixes
 
 		static RE::BGSKeyword* dotKeyword = nullptr;
 		if (!dotKeyword) {
-			dotKeyword = RE::TESForm::LookupByEditorID<RE::BGSKeyword>(kDotKeywordEditorID);
+			dotKeyword = PluginEditorIds::Lookup<RE::BGSKeyword>(kDotKeywordEditorID);
 		}
 
 		if (!dotKeyword || !mgef->HasKeyword(dotKeyword)) {

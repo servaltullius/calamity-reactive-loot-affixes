@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/PluginEditorIds.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
@@ -129,7 +130,7 @@ namespace CalamityAffixes::RunewordDetail
 					editorId.append(kRunewordFragmentEditorIdPrefix);
 					editorId.append(nameIt->second);
 
-					auto* item = RE::TESForm::LookupByEditorID<RE::TESObjectMISC>(editorId);
+					auto* item = PluginEditorIds::Lookup<RE::TESObjectMISC>(editorId);
 					if (item) {
 						cache.emplace(a_runeToken, item);
 					}
