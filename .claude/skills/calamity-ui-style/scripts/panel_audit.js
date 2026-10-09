@@ -243,8 +243,14 @@ function buildFixtures(repoRoot) {
     runeInventoryKnown: true,
     runeInventoryExpectedCount: runeInventory.length,
     runeInventory,
+    // A runeword holding the head slot plus two suffixes: shows Remove Runeword.
     regularAffixCount: 2,
     maxRegularAffixCount: 3,
+    affixHead: "runeword",
+    affixSlotCount: 3,
+    canRemoveRuneword: true,
+    transmuteRemovesPrefixEn: "",
+    transmuteRemovesPrefixKo: "",
     expandAffixCost: 3,
     canExpandAffix: true,
     expandAffixUnavailableReason: "",
@@ -265,7 +271,7 @@ function buildFixtures(repoRoot) {
     lockedReforgeCost: 2,
     selectedReforgesLeft: 4,
     selectedReforgesPerItem: 6,
-    reforgeLockCandidates: buildPicks.slice(0, 3).map((a, i) => ({
+    reforgeLockCandidates: buildPicks.filter((a) => a.slot === "suffix").slice(0, 2).map((a, i) => ({
       affixToken: String(7000 + i), displayNameEn: a.nameEn, displayNameKo: a.nameKo, slotKind: a.slot
     })),
     equippedBuild,

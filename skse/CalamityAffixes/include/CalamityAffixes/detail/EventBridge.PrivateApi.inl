@@ -143,6 +143,9 @@
 			std::uint64_t a_instanceKey,
 			const RunewordRecipe& a_recipe) const;
 		[[nodiscard]] static std::string BuildRunewordApplyBlockMessage(RunewordApplyBlockReason a_reason);
+		// Prefix tokens a transmute removes: the runeword takes the head slot.
+		[[nodiscard]] std::vector<std::uint64_t> ResolveRunewordDisplacedPrefixTokens(
+			const InstanceAffixSlots& a_slots) const;
 		void InitializeRunewordCatalog();
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);

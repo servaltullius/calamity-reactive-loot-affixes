@@ -189,6 +189,7 @@ static_assert(!DidRestoreExactInventoryCount(1u, 3u, 1u),
 	"DidRestoreExactInventoryCount: rejects an unexpected multi-item compensation");
 
 #include "CalamityAffixes/AffixCraftingPolicy.h"
+#include <initializer_list>
 namespace {
 constexpr bool CheckCurrencyCrafting() {
     using namespace CalamityAffixes;
@@ -244,10 +245,13 @@ using CalamityAffixes::detail::ScourAffixCount;
 constexpr AffixCraftAction kAllCraftActions[]{
     AffixCraftAction::kIdentify, AffixCraftAction::kReforge, AffixCraftAction::kScour };
 constexpr bool AllActionsAllowLayout(std::uint8_t count, std::uint8_t prefix, std::uint8_t suffix) {
+    const auto head = CalamityAffixes::detail::ResolveAffixHead(false, prefix);
     for (const auto action : kAllCraftActions)
-        if (!CanCraftAffixLayout(action, count, prefix, suffix, false)) return false;
+        if (!CanCraftAffixLayout(action, head, count, prefix, suffix, false)) return false;
     return true;
 }
+constexpr auto kNoHead = CalamityAffixes::AffixHead::kNone;
+constexpr auto kPrefixHead = CalamityAffixes::AffixHead::kPrefix;
 }
 static_assert(IsCanonicalRegularAffixLayout(1u, 1u, 0u) && IsCanonicalRegularAffixLayout(2u, 1u, 1u) &&
     IsCanonicalRegularAffixLayout(3u, 1u, 2u), "every finished layout up to 1P+2S is canonical");
@@ -256,13 +260,13 @@ static_assert(!IsCanonicalRegularAffixLayout(0u, 0u, 0u) && !IsCanonicalRegularA
     "non-canonical splits are rejected");
 static_assert(AllActionsAllowLayout(3u, 1u, 2u), "3-affix gear must stay craftable (regression: crafting-test1)");
 static_assert(AllActionsAllowLayout(1u, 1u, 0u) && AllActionsAllowLayout(2u, 1u, 1u) && AllActionsAllowLayout(0u, 0u, 0u));
-static_assert(!CanCraftAffixLayout(AffixCraftAction::kReforge, 1u, 0u, 1u, false) &&
-    !CanCraftAffixLayout(AffixCraftAction::kIdentify, 1u, 0u, 1u, false) &&
-    !CanCraftAffixLayout(AffixCraftAction::kReforge, 3u, 1u, 2u, true),
+static_assert(!CanCraftAffixLayout(AffixCraftAction::kReforge, kNoHead, 1u, 0u, 1u, false) &&
+    !CanCraftAffixLayout(AffixCraftAction::kIdentify, kNoHead, 1u, 0u, 1u, false) &&
+    !CanCraftAffixLayout(AffixCraftAction::kReforge, kPrefixHead, 3u, 1u, 2u, true),
     "legacy layouts cannot be reforged or identified");
-static_assert(CanCraftAffixLayout(AffixCraftAction::kScour, 1u, 0u, 1u, false) &&
-    CanCraftAffixLayout(AffixCraftAction::kScour, 3u, 1u, 2u, true) &&
-    CanCraftAffixLayout(AffixCraftAction::kScour, 4u, 0u, 0u, true), "scour repairs any legacy layout");
+static_assert(CanCraftAffixLayout(AffixCraftAction::kScour, kNoHead, 1u, 0u, 1u, false) &&
+    CanCraftAffixLayout(AffixCraftAction::kScour, kPrefixHead, 3u, 1u, 2u, true) &&
+    CanCraftAffixLayout(AffixCraftAction::kScour, kNoHead, 4u, 0u, 0u, true), "scour repairs any legacy layout");
 static_assert(ScourAffixCount(1u) == 1u && ScourAffixCount(3u) == 3u && ScourAffixCount(4u) == 3u,
     "scour keeps the slot count, clamping legacy overflow");
 
@@ -291,3 +295,91 @@ static_assert(RemainingSelectedReforges(6u) == 0u && RemainingSelectedReforges(0
     "a spent item stays locked until it is scoured");
 static_assert(NextSelectedReforgeCount(0u) == 1u && NextSelectedReforgeCount(0xFEu) == 0xFFu &&
     NextSelectedReforgeCount(0xFFu) == 0xFFu, "the per-item count saturates instead of wrapping back to unlocked");
+
+// v2.3.0: a runeword holds the head slot instead of sitting on top of the prefix.
+namespace {
+using CalamityAffixes::AffixHead;
+using CalamityAffixes::detail::HeadSlotAffixCount;
+using CalamityAffixes::detail::IsCanonicalAffixExpansionLayout;
+using CalamityAffixes::detail::IsCanonicalAffixLayout;
+using CalamityAffixes::detail::IsValidCraftResult;
+using CalamityAffixes::detail::MaxRegularAffixCount;
+using CalamityAffixes::detail::ResolveAffixHead;
+using CalamityAffixes::detail::RunewordIdentifySuffixCount;
+using CalamityAffixes::InstanceAffixSlots;
+
+constexpr InstanceAffixSlots Slots(std::initializer_list<std::uint64_t> a_tokens) {
+    InstanceAffixSlots slots{};
+    for (const auto token : a_tokens) slots.AddToken(token);
+    return slots;
+}
+
+constexpr bool CheckRunewordIdentifySplit() {
+    std::uint32_t frequencies[2]{};
+    for (std::uint32_t roll = 0; roll < 100; ++roll) ++frequencies[RunewordIdentifySuffixCount(roll) - 1];
+    return frequencies[0] == 75 && frequencies[1] == 25;
+}
+
+// Runeword 99 on the head; prefixes 1-9, suffixes 11-19, new rolls 21+.
+constexpr bool CheckRemoveRuneword() {
+    // A runeword head (two suffix slots) gives its slot to a new prefix; suffixes keep their place.
+    const auto head = Slots({ 99u, 11u, 12u });
+    const auto remove = AffixCraftAction::kRemoveRuneword;
+    if (!IsValidCraftResult(remove, head, Slots({ 21u, 11u, 12u }), 99u, 0u, 2u)) return false;
+    if (IsValidCraftResult(remove, head, Slots({ 21u, 12u, 11u }), 99u, 0u, 2u)) return false;
+    if (IsValidCraftResult(remove, head, Slots({ 11u, 12u }), 99u, 0u, 2u)) return false;
+    if (IsValidCraftResult(remove, head, head, 99u, 0u, 2u)) return false;
+    if (!IsValidCraftResult(remove, Slots({ 99u }), Slots({ 21u }), 99u, 0u, 2u)) return false;
+    // A legacy runeword sat on a prefix: it just leaves, nothing is rolled.
+    const auto legacy = Slots({ 99u, 1u, 11u });
+    if (!IsValidCraftResult(remove, legacy, Slots({ 1u, 11u }), 99u, 0u, 3u)) return false;
+    if (IsValidCraftResult(remove, legacy, Slots({ 11u, 1u }), 99u, 0u, 3u)) return false;
+    if (IsValidCraftResult(remove, legacy, Slots({ 21u, 1u, 11u }), 99u, 0u, 3u)) return false;
+    // Nothing to remove without a runeword.
+    return !IsValidCraftResult(remove, Slots({ 1u, 11u }), Slots({ 21u, 11u }), 0u, 0u, 2u);
+}
+
+constexpr bool CheckRunewordHeadCrafting() {
+    // Identify on a runeword-only item adds 1-2 suffixes, never a third regular affix.
+    const auto bare = Slots({ 99u });
+    if (!IsValidCraftResult(AffixCraftAction::kIdentify, bare, Slots({ 99u, 11u, 12u }), 99u, 0u, 2u)) return false;
+    if (IsValidCraftResult(AffixCraftAction::kIdentify, bare, Slots({ 99u, 11u, 12u, 13u }), 99u, 0u, 2u)) return false;
+    // Scour keeps the count and clamps legacy overflow to the two suffix slots.
+    if (!IsValidCraftResult(AffixCraftAction::kScour, Slots({ 99u, 11u, 12u }), Slots({ 99u, 13u, 14u }), 99u, 0u, 2u)) return false;
+    if (!IsValidCraftResult(AffixCraftAction::kScour, Slots({ 99u, 11u, 12u, 13u }), Slots({ 99u, 14u, 15u }), 99u, 0u, 2u)) return false;
+    return !IsValidCraftResult(AffixCraftAction::kScour, Slots({ 99u, 11u, 12u, 13u }), Slots({ 99u, 14u, 15u, 16u }), 99u, 0u, 2u);
+}
+}
+static_assert(ResolveAffixHead(false, 0u) == AffixHead::kNone && ResolveAffixHead(false, 1u) == AffixHead::kPrefix &&
+    ResolveAffixHead(true, 0u) == AffixHead::kRuneword && ResolveAffixHead(true, 1u) == AffixHead::kLegacyRunewordPrefix);
+static_assert(MaxRegularAffixCount(AffixHead::kRuneword) == 2u && MaxRegularAffixCount(AffixHead::kPrefix) == 3u &&
+    MaxRegularAffixCount(AffixHead::kLegacyRunewordPrefix) == 3u, "a runeword head leaves two suffix slots");
+static_assert(HeadSlotAffixCount(AffixHead::kRuneword, 0u) == 1u && HeadSlotAffixCount(AffixHead::kRuneword, 2u) == 3u &&
+    HeadSlotAffixCount(AffixHead::kPrefix, 2u) == 2u && HeadSlotAffixCount(AffixHead::kLegacyRunewordPrefix, 3u) == 3u,
+    "a runeword head fills one of the three slots; a legacy runeword sits outside them");
+static_assert(CheckRunewordIdentifySplit(), "runeword identify rolls 1 suffix 75%, 2 suffixes 25%");
+static_assert(IsCanonicalAffixLayout(AffixHead::kRuneword, 1u, 0u, 1u) && IsCanonicalAffixLayout(AffixHead::kRuneword, 2u, 0u, 2u) &&
+    !IsCanonicalAffixLayout(AffixHead::kRuneword, 3u, 0u, 3u) && !IsCanonicalAffixLayout(AffixHead::kRuneword, 0u, 0u, 0u) &&
+    IsCanonicalAffixLayout(AffixHead::kLegacyRunewordPrefix, 3u, 1u, 2u),
+    "runeword heads take 1-2 suffixes; legacy items keep the 1P+2S rule");
+static_assert(CanCraftAffixLayout(AffixCraftAction::kIdentify, AffixHead::kRuneword, 0u, 0u, 0u, false) &&
+    CanCraftAffixLayout(AffixCraftAction::kReforge, AffixHead::kRuneword, 2u, 0u, 2u, false) &&
+    CanCraftAffixLayout(AffixCraftAction::kScour, AffixHead::kRuneword, 2u, 0u, 2u, false) &&
+    CanCraftAffixLayout(AffixCraftAction::kReforge, AffixHead::kLegacyRunewordPrefix, 3u, 1u, 2u, false),
+    "runeword-head and legacy items stay craftable");
+static_assert(CanCraftAffixLayout(AffixCraftAction::kRemoveRuneword, AffixHead::kRuneword, 0u, 0u, 0u, false) &&
+    CanCraftAffixLayout(AffixCraftAction::kRemoveRuneword, AffixHead::kRuneword, 2u, 0u, 2u, false) &&
+    CanCraftAffixLayout(AffixCraftAction::kRemoveRuneword, AffixHead::kLegacyRunewordPrefix, 2u, 1u, 1u, false) &&
+    !CanCraftAffixLayout(AffixCraftAction::kRemoveRuneword, AffixHead::kPrefix, 2u, 1u, 1u, false) &&
+    !CanCraftAffixLayout(AffixCraftAction::kRemoveRuneword, AffixHead::kNone, 0u, 0u, 0u, false) &&
+    !CanCraftAffixLayout(AffixCraftAction::kRemoveRuneword, AffixHead::kRuneword, 3u, 0u, 3u, true),
+    "removal needs a runeword and a layout it can keep");
+static_assert(CheckRemoveRuneword(), "runeword removal changes only the head slot");
+static_assert(CheckRunewordHeadCrafting(), "runeword-head identify and scour roll suffixes only");
+static_assert(IsCanonicalAffixExpansionLayout(AffixHead::kRuneword, 0u, 0u, 0u) &&
+    IsCanonicalAffixExpansionLayout(AffixHead::kRuneword, 1u, 0u, 1u) &&
+    !IsCanonicalAffixExpansionLayout(AffixHead::kRuneword, 2u, 0u, 2u) &&
+    IsCanonicalAffixExpansionLayout(AffixHead::kPrefix, 1u, 1u, 0u),
+    "a runeword head expands like a prefix head");
+static_assert(CalamityAffixes::detail::CraftCurrency(AffixCraftAction::kRemoveRuneword) == "CAFF_Misc_ScouringOrb",
+    "removing a runeword costs a Scouring Orb");

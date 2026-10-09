@@ -117,8 +117,8 @@ function resolveAffixExpandUnavailableText(reason, state) {
       );
     case "max_slots":
       return t(
-        "All regular affix slots are unlocked.",
-        "모든 일반 어픽스 슬롯이 열렸습니다."
+        "All affix slots are unlocked.",
+        "모든 어픽스 슬롯이 열렸습니다."
       );
     case "invalid_layout":
       return t(
@@ -170,7 +170,13 @@ function resolveAffixSlotProgressState(
   const regularAffixCountKnown = state?.regularAffixCountKnown === true &&
     Number.isSafeInteger(state?.regularAffixCount) &&
     state.regularAffixCount >= 0;
-  const regularAffixCount = regularAffixCountKnown ? state.regularAffixCount : 0;
+  // Filled slots of the three: a runeword holding the head slot counts as
+  // one. Older DLLs send no affixSlotCount; then only regular affixes count.
+  const affixHead = typeof state?.affixHead === "string" ? state.affixHead : "";
+  const runewordHead = affixHead === "runeword";
+  const regularAffixCount = regularAffixCountKnown
+    ? (Number.isSafeInteger(state?.affixSlotCount) ? state.affixSlotCount : state.regularAffixCount)
+    : 0;
   const maxRegularAffixCountKnown = state?.maxRegularAffixCountKnown === true &&
     state?.maxRegularAffixCount === 3;
   const maxRegularAffixCount = 3;
@@ -240,17 +246,17 @@ function resolveAffixSlotProgressState(
     ? null
     : expectedRegularAffixCount + 1;
   const slotLabels = [
-    t("Prefix", "접두"),
+    runewordHead ? t("Runeword", "룬워드") : t("Prefix", "접두"),
     t("Suffix 1", "접미 1"),
     t("Suffix 2", "접미 2")
   ];
   const ariaValueText = !hasValidBase
     ? t("No item selected", "선택한 장비 없음")
     : displayCount === null
-      ? t("Regular affix slots are synchronizing", "일반 어픽스 슬롯 동기화 중")
+      ? t("Loading affix slots", "어픽스 슬롯 불러오는 중")
       : t(
-          `${displayCount} of ${maxRegularAffixCount} regular affix slots active`,
-          `일반 어픽스 슬롯 ${maxRegularAffixCount}개 중 ${displayCount}개 활성`
+          `${displayCount} of ${maxRegularAffixCount} affix slots filled`,
+          `어픽스 슬롯 ${maxRegularAffixCount}칸 중 ${displayCount}칸 사용`
         );
 
   let progressMeta = "";
@@ -307,6 +313,7 @@ function resolveAffixSlotProgressState(
 
   return {
     hasValidBase,
+    affixHead,
     regularAffixCount,
     regularAffixCountKnown,
     maxRegularAffixCount,
@@ -441,12 +448,21 @@ function resolveRunewordPanelActionState(state) {
     );
   }
 
-  if (baseCompatibilityMessage) {
-    buttonHint = buttonHint
-      ? `${baseCompatibilityMessage}
-${buttonHint}`
-      : baseCompatibilityMessage;
+  // The runeword takes the head slot, so a transmute removes the prefix there.
+  const transmuteRemovesPrefix = Boolean(state.transmuteRemovesPrefixEn || state.transmuteRemovesPrefixKo);
+  const transmuteConfirmText = canTransmute && transmuteRemovesPrefix
+    ? t(
+        `The runeword takes the prefix slot: ${state.transmuteRemovesPrefixEn} will be removed. Suffixes stay.`,
+        `룬워드가 접두 칸을 차지합니다. 접두 '${state.transmuteRemovesPrefixKo || state.transmuteRemovesPrefixEn}'이(가) 사라집니다. 접미는 유지됩니다.`
+      )
+    : "";
+  if (transmuteConfirmText) {
+    buttonHint = `${transmuteConfirmText}
+${buttonHint}`;
   }
+
+  // The base mismatch sentence lives in the review box only (with its badge);
+  // repeating it in the header, recipe chip and this note said it four times.
 
   const regularAffixCount = Number.isSafeInteger(state.regularAffixCount) ? state.regularAffixCount : 0;
   const standardReforgeCost = 2;
@@ -473,6 +489,11 @@ ${buttonHint}`
   const scourEnabled = ready && regularAffixCount > 0 && state.scouringOrbsKnown === true && state.scouringOrbsOwned >= 1;
   const identifyCommand = baseKey ? `affix.identify:${baseKey}` : "";
   const scourCommand = baseKey ? `affix.scour:${baseKey}` : "";
+  const runewordHead = affixSlotState.affixHead === "runeword";
+  const hasRuneword = runewordHead || affixSlotState.affixHead === "legacy";
+  const removeRunewordEnabled = ready && hasRuneword && state.canRemoveRuneword === true &&
+    state.scouringOrbsKnown === true && state.scouringOrbsOwned >= 1;
+  const removeRunewordCommand = baseKey && hasRuneword ? `runeword.remove:${baseKey}` : "";
   // Scroll trades need no base; costs come from the runtime (0 = unavailable).
   const scrollsOwned = state.identifyScrollsKnown === true && Number.isSafeInteger(state.identifyScrollsOwned)
     ? state.identifyScrollsOwned
@@ -496,7 +517,9 @@ ${buttonHint}`
   const reforgeButtonLabel = t("Reforge Selected (2 Orbs)", "선택 어픽스 재련 (오브 2개)");
   const reforgeSummary = selectedName ? t(`Replace: ${selectedName}`, `교체 대상: ${selectedName}`) : t("Choose an affix to replace", "바꿀 어픽스 선택");
   const reforgeLockHint = regularAffixCount === 0
-    ? t("Identify first: 1–3 regular affixes. Expand missing slots later.", "확인 스크롤로 일반 어픽스 1~3개를 부여하세요. 부족한 슬롯은 확장할 수 있습니다.")
+    ? (runewordHead
+      ? t("Identify first: 1–2 suffixes. Expand missing slots later.", "확인 스크롤로 접미 1~2개를 부여하세요. 부족한 슬롯은 확장할 수 있습니다.")
+      : t("Identify first: 1–3 regular affixes. Expand missing slots later.", "확인 스크롤로 일반 어픽스 1~3개를 부여하세요. 부족한 슬롯은 확장할 수 있습니다."))
     : t("Choose the one affix to reroll. All other effects are preserved.", "다시 굴릴 어픽스 하나를 선택하세요. 다른 효과는 유지됩니다.");
   const reforgeCostSummary = reforgesSpent
     ? t(
@@ -540,7 +563,9 @@ ${buttonHint}`
     baseCompatibilityMessage,
     buttonLabel,
     buttonHint,
+    transmuteConfirmText,
     identifyEnabled, scourEnabled, identifyCommand, scourCommand,
+    runewordHead, hasRuneword, removeRunewordEnabled, removeRunewordCommand,
     exchangeReforgeCost, exchangeScourCost, exchangeReforgeEnabled, exchangeScourEnabled,
     reforgeEnabled,
     reforgeHint,
@@ -625,11 +650,6 @@ function renderRunewordFlowProgress(actionState, state) {
     return;
   }
 
-  if (actionState.baseCompatibilityWarning) {
-    runewordFlowHint.textContent = actionState.baseCompatibilityMessage;
-    return;
-  }
-
   if (isComplete) {
     runewordFlowHint.textContent = t(
       "This item already has a runeword. Reforging changes only its regular affixes.",
@@ -660,7 +680,7 @@ function renderAffixSlotProgress(actionState) {
   }
 
   if (affixSlotProgressTitle) {
-    affixSlotProgressTitle.textContent = t("Regular Affix Slots", "일반 어픽스 슬롯");
+    affixSlotProgressTitle.textContent = t("Affix Slots", "어픽스 슬롯");
   }
   if (affixSlotProgressCount) {
     affixSlotProgressCount.textContent = slotState.countText;
@@ -819,7 +839,9 @@ function renderRunewordPanelState() {
     affixIdentifyButton.disabled = !actionState.identifyEnabled;
     affixIdentifyButton.textContent = t("Identify (1 Scroll)", "확인 (스크롤 1개)");
     affixIdentifyButton.setAttribute(panelCommandAttribute, actionState.identifyCommand);
-    affixIdentifyButton.title = t("Only without regular affixes. Gain 1/2/3 affixes at 60%/30%/10%. Runeword preserved.", "일반 어픽스가 없는 장비에만 사용. 1/2/3개를 60%/30%/10% 확률로 부여합니다. 룬워드는 유지됩니다.");
+    affixIdentifyButton.title = actionState.runewordHead
+      ? t("Only without regular affixes. The runeword holds the prefix slot, so this adds 1 suffix (75%) or 2 (25%).", "일반 어픽스가 없는 장비에만 사용. 룬워드가 접두 칸을 차지하므로 접미 1개(75%) 또는 2개(25%)를 부여합니다.")
+      : t("Only without regular affixes. Gain 1/2/3 affixes at 60%/30%/10%.", "일반 어픽스가 없는 장비에만 사용. 1/2/3개를 60%/30%/10% 확률로 부여합니다.");
   }
   if (affixScourButton) {
     affixScourButton.disabled = !actionState.scourEnabled;
@@ -831,6 +853,15 @@ function renderRunewordPanelState() {
         `슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴리고, 그 장비의 선택 재련 ${actionState.reforgeLimit}회를 되돌려 받습니다. 룬워드는 유지됩니다.`
       )
       : t("Reroll every regular affix at once, keeping the slot count. Runeword preserved.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다.");
+  }
+  if (runewordRemoveButton) {
+    runewordRemoveButton.hidden = !actionState.hasRuneword;
+    runewordRemoveButton.disabled = !actionState.removeRunewordEnabled;
+    runewordRemoveButton.textContent = t("Remove Runeword (1 Scouring Orb)", "룬워드 제거 (정제 오브 1개)");
+    runewordRemoveButton.setAttribute(panelCommandAttribute, actionState.removeRunewordCommand);
+    runewordRemoveButton.title = actionState.runewordHead
+      ? t("Removes the runeword and rolls a new prefix into its slot. Suffixes and reforges left stay.", "룬워드를 지우고 그 칸에 새 접두를 굴립니다. 접미와 남은 재련 횟수는 유지됩니다.")
+      : t("Removes the runeword. The prefix it sat on and the suffixes stay.", "룬워드를 지웁니다. 함께 있던 접두와 접미는 유지됩니다.");
   }
   if (resourceExchangeGroup) {
     resourceExchangeGroup.hidden = actionState.exchangeReforgeCost <= 0 && actionState.exchangeScourCost <= 0;
@@ -887,8 +918,6 @@ function renderRunewordPanelState() {
         "Pick a recipe from the list on the left.",
         "왼쪽 목록에서 레시피를 고르세요."
       );
-    } else if (actionState.baseCompatibilityWarning) {
-      runewordContextRecipeMeta.textContent = actionState.baseCompatibilityMessage;
     } else if (state.missingSummary) {
       runewordContextRecipeMeta.textContent = `${t("Missing fragments", "부족한 룬 조각")}: ${state.missingSummary}`;
     } else if (isComplete) {

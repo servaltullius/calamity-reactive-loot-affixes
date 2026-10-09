@@ -13,7 +13,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 [list]
 [*]아이템 획득/제작 시 [b]자동 어픽스 부여 없음[/b]
 [*][b]재련 오브(Reforge Orb)[/b] 사용 시 선택 장비에 어픽스를 부여/재롤
-[*]슬롯 모델: [b]룬워드 1 + 일반 어픽스 최대 3[/b]
+[*]슬롯 모델: [b]3칸 — 머리 칸(룬워드 또는 접두) 1 + 접미 최대 2[/b]
 [*]이름 마커(★ 계열) + Prisma 툴팁으로 인스턴스 상태 확인
 [/list]
 
@@ -113,7 +113,7 @@ It tracks item instances via ExtraUniqueID, and the current build is [b]Reforge-
 [list]
 [*][b]No automatic affix assignment[/b] on loot/craft
 [*]Use [b]Reforge Orb[/b] to grant/reroll affixes on selected gear
-[*]Slot model: [b]1 runeword + up to 3 regular affixes[/b]
+[*]Slot model: [b]3 slots — a head slot (runeword or prefix) + up to 2 suffixes[/b]
 [*]Star markers (★ series) + Prisma tooltip for instance readability
 [/list]
 

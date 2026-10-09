@@ -263,12 +263,39 @@ function dispatchPanelCommand(button) {
     return true;
   }
 
+  if (command === "runeword.insert" || command.startsWith("runeword.remove:")) {
+    const action = resolveRunewordPanelActionState(runewordPanelState);
+    if (command.startsWith("runeword.remove:") &&
+      (!action.removeRunewordEnabled || command !== action.removeRunewordCommand)) {
+      return true;
+    }
+    const warning = command === "runeword.insert"
+      ? action.transmuteConfirmText
+      : t(
+          "Click Remove Runeword again within 6 seconds. The runeword is lost; its rune fragments are not refunded.",
+          "6초 안에 룬워드 제거를 다시 누르세요. 룬워드는 사라지며 룬 조각은 돌려받지 못합니다."
+        );
+    const signature = `${command}:${resolveSelectedRunewordBaseKey()}`;
+    if (warning && (!runewordConfirmation || runewordConfirmation.signature !== signature ||
+      Date.now() > runewordConfirmation.until)) {
+      runewordConfirmation = { signature, until: Date.now() + 6000 };
+      setActionFeedback(command === "runeword.insert"
+        ? t(`Click Transmute again within 6 seconds. ${warning}`, `6초 안에 변환을 다시 누르세요. ${warning}`)
+        : warning);
+      return true;
+    }
+    runewordConfirmation = null;
+  } else {
+    runewordConfirmation = null;
+  }
+
   if (command.startsWith("affix.identify:") || command.startsWith("affix.reforge:") || command.startsWith("affix.scour:") ||
-    command.startsWith("currency.exchange:")) {
+    command.startsWith("runeword.remove:") || command.startsWith("currency.exchange:")) {
     const action = resolveRunewordPanelActionState(runewordPanelState);
     const allowed = (action.identifyEnabled && command === action.identifyCommand) ||
       (action.reforgeEnabled && command === action.reforgeCommand) ||
       (action.scourEnabled && command === action.scourCommand) ||
+      (action.removeRunewordEnabled && command === action.removeRunewordCommand) ||
       (action.exchangeReforgeEnabled && command === "currency.exchange:reforge") ||
       (action.exchangeScourEnabled && command === "currency.exchange:scour");
     if (!allowed || affixCraftPendingState) return true;

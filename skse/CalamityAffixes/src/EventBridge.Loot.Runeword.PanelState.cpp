@@ -1,3 +1,4 @@
+#include "CalamityAffixes/AffixCraftingPolicy.h"
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/EquippedBuildSummaryPolicy.h"
 #include "CalamityAffixes/LootRollSelection.h"
@@ -16,6 +17,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -460,18 +462,33 @@ namespace CalamityAffixes
 		const auto regularCount = static_cast<std::uint8_t>(std::min<std::uint32_t>(
 			panelState.regularAffixCount,
 			std::numeric_limits<std::uint8_t>::max()));
-		const auto expansionPolicy = detail::ResolveRegularAffixExpansionPolicy(regularCount);
+		const auto head = detail::ResolveAffixHead(expansionRunewordCount > 0u, expansionPrefixCount);
+		const auto headSlotCount = detail::HeadSlotAffixCount(head, regularCount);
+		panelState.affixSlotCount = headSlotCount;
+		switch (head) {
+		case AffixHead::kPrefix: panelState.affixHead = "prefix"; break;
+		case AffixHead::kRuneword: panelState.affixHead = "runeword"; break;
+		case AffixHead::kLegacyRunewordPrefix: panelState.affixHead = "legacy"; break;
+		case AffixHead::kNone: panelState.affixHead = "none"; break;
+		}
+		panelState.canRemoveRuneword = expansionLayoutValid && !_loot.stripTrackedSuffixSlots &&
+			!_runewordState.transmuteInProgress && !_runewordState.affixExpansionInProgress &&
+			panelState.scouringOrbsKnown && panelState.scouringOrbsOwned >= 1u &&
+			detail::CanCraftAffixLayout(
+				AffixCraftAction::kRemoveRuneword, head, regularCount, expansionPrefixCount, expansionSuffixCount, false);
+		const auto expansionPolicy = detail::ResolveRegularAffixExpansionPolicy(headSlotCount);
 		if (expansionPolicy) {
 			panelState.expandAffixCost = expansionPolicy->orbCost;
 		}
-		if (regularCount == 0u) {
+		if (headSlotCount == 0u) {
 			panelState.expandAffixUnavailableReason = "requires_first_affix";
-		} else if (regularCount == kMaxRegularAffixesPerItem) {
+		} else if (headSlotCount >= kMaxRegularAffixesPerItem) {
 			panelState.expandAffixUnavailableReason = "max_slots";
 		} else if (_loot.stripTrackedSuffixSlots) {
 			panelState.expandAffixUnavailableReason = "suffix_slots_disabled";
 		} else if (!expansionPolicy || !expansionLayoutValid ||
-			!detail::IsCanonicalRegularAffixExpansionLayout(
+			!detail::IsCanonicalAffixExpansionLayout(
+				head,
 				regularCount,
 				expansionPrefixCount,
 				expansionSuffixCount)) {
@@ -524,6 +541,24 @@ namespace CalamityAffixes
 		if (panelState.isComplete) {
 			panelState.insertedRunes = panelState.totalRunes;
 			return panelState;
+		}
+		// Name what the transmute takes away so the panel can ask before it does.
+		if (const auto slotsIt = _instanceTrackingState.instanceAffixes.find(*_runewordState.selectedBaseKey);
+			slotsIt != _instanceTrackingState.instanceAffixes.end()) {
+			for (const auto token : ResolveRunewordDisplacedPrefixTokens(slotsIt->second)) {
+				const auto& affix = _affixRuntimeState.affixes[
+					_affixRuntimeState.affixRegistry.affixIndexByToken.at(token)];
+				// "Storm Call (Lucky Hit 38% / ICD 1.5s): 10 Lightning ..." -> "Storm Call"
+				auto append = [&](std::string& a_out, const std::string& a_name) {
+					std::string_view name = !a_name.empty() ? a_name : (!affix.displayName.empty() ? affix.displayName : affix.id);
+					name = name.substr(0u, name.find(':'));
+					if (const auto paren = name.find(" ("); paren != std::string_view::npos) name = name.substr(0u, paren);
+					if (!a_out.empty()) a_out.append(", ");
+					a_out.append(name);
+				};
+				append(panelState.transmuteRemovesPrefixEn, affix.displayNameEn);
+				append(panelState.transmuteRemovesPrefixKo, affix.displayNameKo);
+			}
 		}
 		const bool canApplyResult = applyBlockReason == RunewordApplyBlockReason::kNone;
 

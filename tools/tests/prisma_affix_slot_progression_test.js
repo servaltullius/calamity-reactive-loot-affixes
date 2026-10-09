@@ -128,6 +128,32 @@ const runBehavior = new Function(
     );
     assert.strictEqual(view.unavailableReason, "unavailable");
 
+    // v2.3.0: a runeword holding the head slot fills one of the three slots.
+    const runewordOnly = {
+      ...readyOne,
+      regularAffixCount: 0,
+      affixHead: "runeword",
+      affixSlotCount: 1
+    };
+    view = resolveAffixSlotProgressState(runewordOnly, "42", null);
+    assert.strictEqual(view.countText, "1/3");
+    assert.strictEqual(view.slotLabels[0], "Runeword");
+    assert.strictEqual(view.expandEnabled, true);
+    assert.strictEqual(view.expandCommand, "affix.expand:42:1");
+    view = resolveAffixSlotProgressState(
+      { ...runewordOnly, regularAffixCount: 2, affixSlotCount: 3, canExpandAffix: false, expandAffixUnavailableReason: "max_slots" },
+      "42",
+      null
+    );
+    assert.strictEqual(view.countText, "3/3");
+    assert.strictEqual(view.unavailableReason, "max_slots");
+    assert.strictEqual(view.expandCommand, "");
+    // A prefix head, or an older DLL without the field, keeps counting regular affixes.
+    view = resolveAffixSlotProgressState({ ...readyOne, affixHead: "prefix", affixSlotCount: 1 }, "42", null);
+    assert.strictEqual(view.slotLabels[0], "Prefix");
+    view = resolveAffixSlotProgressState(readyOne, "42", null);
+    assert.strictEqual(view.countText, "1/3");
+
     const empty = {
       ...readyOne,
       regularAffixCount: 0,

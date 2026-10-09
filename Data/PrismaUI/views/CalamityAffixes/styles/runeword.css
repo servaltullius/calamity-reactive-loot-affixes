@@ -1037,6 +1037,15 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+/* Shown only on an item with a runeword; spans the grid so it reads as its own action. */
+.affixMutationGrid .rwRemoveRunewordButton {
+  grid-column: 1 / -1;
+}
+
+.affixMutationGrid .rwRemoveRunewordButton[hidden] {
+  display: none;
+}
+
 .affixMutationGrid .cpButton {
   min-width: 0;
   min-height: calc(38px * var(--panel-ui-scale));

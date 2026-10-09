@@ -1218,7 +1218,7 @@ namespace RuntimeGateStoreChecks
 				std::istreambuf_iterator<char>());
 
             const auto baseCheck = reforgeSource.find("instanceKey != a_expectedInstanceKey");
-            const auto candidateCheck = reforgeSource.find("IsValidCraftResult(a_action, previous, next, runewordToken, a_selectedToken)");
+            const auto candidateCheck = reforgeSource.find("IsValidCraftResult(a_action, previous, next, runewordToken, a_selectedToken, maxRegular)");
             const auto charge = reforgeSource.find("player->RemoveItem(");
             const auto revalidate = reforgeSource.find("currentKey != instanceKey", charge);
             const auto commit = reforgeSource.find("std::erase_if(_instanceTrackingState.instanceStates");

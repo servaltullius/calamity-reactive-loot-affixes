@@ -1,3 +1,4 @@
+#include "CalamityAffixes/AffixCraftingPolicy.h"
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/LootRollSelection.h"
 #include "CalamityAffixes/PluginEditorIds.h"
@@ -148,15 +149,20 @@ namespace CalamityAffixes
 			result.message = "Affix expansion failed: corrupted runeword or affix slot state.";
 			return result;
 		}
+		// The expected count is the item's filled slots, so a runeword holding the
+		// head slot counts as one of them.
+		const auto head = detail::ResolveAffixHead(preservedRunewordToken != 0u, prefixCount);
+		const auto headSlotCount = detail::HeadSlotAffixCount(head, regularSlots.count);
 		if (!detail::IsExpectedAffixExpansionState(
 				a_expectedInstanceKey,
 				instanceKey,
 				a_expectedRegularAffixCount,
-				regularSlots.count)) {
+				headSlotCount)) {
 			result.message = "Affix expansion failed: affix count changed; refresh and try again.";
 			return result;
 		}
-		if (!detail::IsCanonicalRegularAffixExpansionLayout(
+		if (!detail::IsCanonicalAffixExpansionLayout(
+				head,
 				regularSlots.count,
 				prefixCount,
 				suffixCount)) {
@@ -164,7 +170,7 @@ namespace CalamityAffixes
 			return result;
 		}
 
-		const auto expansionPolicy = detail::ResolveRegularAffixExpansionPolicy(regularSlots.count);
+		const auto expansionPolicy = detail::ResolveRegularAffixExpansionPolicy(headSlotCount);
 		if (!expansionPolicy ||
 			expansionPolicy->targetRegularAffixCount > kMaxRegularAffixesPerItem ||
 			previousSlots.count >= kMaxAffixesPerItem) {
@@ -229,8 +235,10 @@ namespace CalamityAffixes
 				}
 			}
 
+			// Only a legacy runeword sits outside the three slots.
 			const auto expectedTotalCount = static_cast<std::uint8_t>(
-				expansionPolicy->targetRegularAffixCount + runewordCount);
+				expansionPolicy->targetRegularAffixCount +
+				(head == AffixHead::kLegacyRunewordPrefix ? runewordCount : 0u));
 			if (!candidateAccepted || newSlots.count != expectedTotalCount ||
 				!detail::HasUniqueAffixTokens(newSlots) ||
 				(preservedRunewordToken != 0u &&

@@ -121,6 +121,16 @@ namespace CalamityAffixes
 		std::vector<RunewordRuneInventoryEntry> runeInventory{};
 		std::uint32_t regularAffixCount{ 0 };
 		std::uint32_t maxRegularAffixCount{ 0 };
+		// Who holds the head slot (v2.3.0): "none", "prefix", "runeword", or
+		// "legacy" for a pre-2.3.0 runeword sitting on a prefix. affixSlotCount
+		// is the filled slots of maxRegularAffixCount, counting a runeword head.
+		std::string affixHead{ "none" };
+		std::uint32_t affixSlotCount{ 0 };
+		// Removing the runeword costs one Scouring Orb and rolls a prefix.
+		bool canRemoveRuneword{ false };
+		// Prefixes the selected recipe's transmute would remove (empty when none).
+		std::string transmuteRemovesPrefixEn{};
+		std::string transmuteRemovesPrefixKo{};
 		std::uint32_t expandAffixCost{ 0 };
 		bool canExpandAffix{ false };
 		std::string expandAffixUnavailableReason{ "unavailable" };

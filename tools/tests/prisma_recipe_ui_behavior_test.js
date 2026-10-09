@@ -458,6 +458,7 @@ const runWorkingBaseChooserBehavior = new Function(
   `
     "use strict";
     let scourConfirmation = null;
+    let runewordConfirmation = null;
     let focusCount = 0;
     let expanded = "true";
     const workingBaseDetails = {

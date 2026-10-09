@@ -981,6 +981,43 @@ sandbox.renderRunewordPanelState();
 sandbox.dispatchPanelCommand(element("affixScourButton"));
 assert.strictEqual(craftedCommands.length, beforeChangedBase, "confirmation cannot transfer to another base");
 new vm.Script("scourConfirmation = null").runInContext(context);
+// v2.3.0: a runeword holds the head slot. Removing it takes a second click and a Scouring Orb.
+const runewordHeadPayload = {
+  ...emptyCraftPayload, regularAffixCount: 1, affixHead: "runeword", affixSlotCount: 2,
+  canRemoveRuneword: true, reforgeLockCandidates: [{ ...buildReforgePayload().reforgeLockCandidates[0], slotKind: "suffix" }]
+};
+sandbox.setRunewordPanelState(JSON.stringify(runewordHeadPayload));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("runewordRemoveButton").hidden, false, "a runeword item shows Remove Runeword");
+assert.strictEqual(element("runewordRemoveButton").disabled, false);
+const beforeRemove = craftedCommands.length;
+sandbox.dispatchPanelCommand(element("runewordRemoveButton"));
+assert.strictEqual(craftedCommands.length, beforeRemove, "removing a runeword needs confirmation");
+sandbox.dispatchPanelCommand(element("runewordRemoveButton"));
+assert.strictEqual(craftedCommands.at(-1), `runeword.remove:${reforgeBaseB}`);
+new vm.Script("affixCraftPendingState = null").runInContext(context);
+sandbox.setRunewordPanelState(JSON.stringify({ ...runewordHeadPayload, canRemoveRuneword: false }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("runewordRemoveButton").disabled, true, "the runtime decides whether removal is possible");
+sandbox.setRunewordPanelState(JSON.stringify({ ...runewordHeadPayload, scouringOrbsOwned: 0 }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("runewordRemoveButton").disabled, true, "removal costs a Scouring Orb");
+sandbox.setRunewordPanelState(JSON.stringify({ ...emptyCraftPayload, regularAffixCount: 1, affixHead: "prefix", affixSlotCount: 1 }));
+sandbox.renderRunewordPanelState();
+assert.strictEqual(element("runewordRemoveButton").hidden, true, "no runeword, no removal button");
+// Transmuting over a prefix names what is lost and waits for a second click.
+const transmuteState = vm.runInContext(
+  "resolveRunewordPanelActionState({ ...runewordPanelState, hasRecipe: true, canInsert: true, transmuteRemovesPrefixEn: 'Storm Call', transmuteRemovesPrefixKo: '폭풍 소환' })",
+  context
+);
+assert.ok(transmuteState.transmuteConfirmText.includes("Storm Call"), "transmute warns which prefix it removes");
+assert.ok(transmuteState.buttonHint.includes("Storm Call"));
+assert.strictEqual(
+  vm.runInContext("resolveRunewordPanelActionState({ ...runewordPanelState, hasRecipe: true, canInsert: true }).transmuteConfirmText", context),
+  "",
+  "no prefix, no transmute warning"
+);
+new vm.Script("runewordConfirmation = null; affixCraftPendingState = null").runInContext(context);
 delete sandbox.calamityCommand;
 
 const runeA = "18446744073709551615";

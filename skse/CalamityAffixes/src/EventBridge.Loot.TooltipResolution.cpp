@@ -587,7 +587,10 @@ namespace CalamityAffixes
 
 				if (a_candidate.slots.count > 1) {
 					tooltip.push_back('[');
-					if (affix.slot == AffixSlot::kPrefix) {
+					// Runeword result affixes are slotted as prefixes but hold the head slot themselves.
+					if (_runewordState.recipeIndexByResultAffixToken.contains(affix.token)) {
+						tooltip.push_back('R');
+					} else if (affix.slot == AffixSlot::kPrefix) {
 						tooltip.push_back('P');
 					} else if (affix.slot == AffixSlot::kSuffix) {
 						tooltip.push_back('S');

@@ -259,6 +259,15 @@ function setRunewordPanelState(raw) {
     regularAffixCountKnown,
     maxRegularAffixCount: maxRegularAffixCount === 3 ? maxRegularAffixCount : 3,
     maxRegularAffixCountKnown: maxRegularAffixCount === 3,
+    // v2.3.0: who holds the head slot. Older DLLs send neither field, so their
+    // panels keep counting regular affixes against the three slots.
+    affixHead: ["none", "prefix", "runeword", "legacy"].includes(data.affixHead) ? data.affixHead : "",
+    affixSlotCount: Number.isSafeInteger(data.affixSlotCount) && data.affixSlotCount >= 0
+      ? data.affixSlotCount
+      : null,
+    canRemoveRuneword: data.canRemoveRuneword === true,
+    transmuteRemovesPrefixEn: typeof data.transmuteRemovesPrefixEn === "string" ? data.transmuteRemovesPrefixEn : "",
+    transmuteRemovesPrefixKo: typeof data.transmuteRemovesPrefixKo === "string" ? data.transmuteRemovesPrefixKo : "",
     expandAffixCost,
     canExpandAffix: data.canExpandAffix === true,
     expandAffixUnavailableReason: normalizeAffixExpandUnavailableReason(

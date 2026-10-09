@@ -231,7 +231,8 @@
 					return true;
 				}
 
-                if (a_command.starts_with("affix.identify:") || a_command.starts_with("affix.reforge:") || a_command.starts_with("affix.scour:")) {
+                if (a_command.starts_with("affix.identify:") || a_command.starts_with("affix.reforge:") ||
+                    a_command.starts_with("affix.scour:") || a_command.starts_with("runeword.remove:")) {
                     const auto separator = a_command.find(':');
                     const auto payload = a_command.substr(separator + 1u);
                     auto action = CalamityAffixes::AffixCraftAction::kIdentify;
@@ -244,7 +245,8 @@
                             token = keys->affixToken;
                         }
                     } else {
-                        action = a_command.starts_with("affix.scour:") ? CalamityAffixes::AffixCraftAction::kScour : action;
+                        action = a_command.starts_with("affix.scour:") ? CalamityAffixes::AffixCraftAction::kScour :
+                            (a_command.starts_with("runeword.remove:") ? CalamityAffixes::AffixCraftAction::kRemoveRuneword : action);
                         baseKey = ParseUiCommandUint64(payload).value_or(0u);
                     }
                     auto* bridge = CalamityAffixes::EventBridge::GetSingleton();

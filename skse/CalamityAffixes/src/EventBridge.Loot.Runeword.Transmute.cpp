@@ -80,6 +80,12 @@ namespace CalamityAffixes
 		if (replacedResultToken != 0u && replacedResultToken != a_recipe.resultAffixToken) {
 			slots.RemoveToken(replacedResultToken);
 		}
+		// The runeword takes the head slot. A prefix there goes (the panel asks
+		// first); so does the prefix a legacy runeword sat on. Suffixes stay.
+		const auto displacedPrefixes = ResolveRunewordDisplacedPrefixTokens(slots);
+		for (const auto token : displacedPrefixes) {
+			slots.RemoveToken(token);
+		}
 
 		if (!slots.PromoteTokenToPrimary(a_recipe.resultAffixToken)) {
 			slots = previousSlots;
@@ -98,6 +104,9 @@ namespace CalamityAffixes
 		if (replacedResultToken != 0u && replacedResultToken != a_recipe.resultAffixToken) {
 			_instanceTrackingState.instanceStates.erase(MakeInstanceStateKey(a_instanceKey, replacedResultToken));
 		}
+		for (const auto token : displacedPrefixes) {
+			_instanceTrackingState.instanceStates.erase(MakeInstanceStateKey(a_instanceKey, token));
+		}
 		EnsureInstanceRuntimeState(a_instanceKey, a_recipe.resultAffixToken);
 		_runewordState.instanceStates.erase(a_instanceKey);
 
@@ -113,9 +122,10 @@ namespace CalamityAffixes
 		note.append(a_recipe.HudName());
 		EmitHudNotification(note.c_str());
 		SKSE::log::info(
-			"CalamityAffixes: runeword completed (recipe={}, resultAffix={}).",
+			"CalamityAffixes: runeword completed (recipe={}, resultAffix={}, prefixesRemoved={}).",
 			a_recipe.id,
-			_affixRuntimeState.affixes[affixIt->second].id);
+			_affixRuntimeState.affixes[affixIt->second].id,
+			displacedPrefixes.size());
 		return true;
 	}
 

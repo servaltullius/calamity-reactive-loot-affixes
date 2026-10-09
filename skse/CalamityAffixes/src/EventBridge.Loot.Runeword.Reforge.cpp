@@ -83,7 +83,12 @@ namespace CalamityAffixes
 			previous.count != regular.count + (runewordToken != 0u ? 1u : 0u)) {
 			return fail("Crafting failed: conflicting runeword state.");
 		}
-		if (!detail::CanCraftAffixLayout(a_action, regular.count, prefixCount, suffixCount, hasLegacyAffix)) {
+		const auto head = detail::ResolveAffixHead(runewordToken != 0u, prefixCount);
+		const auto maxRegular = detail::MaxRegularAffixCount(head);
+		if (a_action == AffixCraftAction::kRemoveRuneword && runewordToken == 0u) {
+			return fail("This item has no runeword to remove.");
+		}
+		if (!detail::CanCraftAffixLayout(a_action, head, regular.count, prefixCount, suffixCount, hasLegacyAffix)) {
 			return fail("Crafting failed: this base has a legacy affix layout. Use a Scouring Orb to reroll it.");
 		}
 		if (!detail::CanCraftAffixes(a_action, regular, a_selectedToken)) {
@@ -121,25 +126,28 @@ namespace CalamityAffixes
 		std::mt19937 rngAfter{};
 		InstanceAffixSlots next = previous;
 		bool accepted = false;
-		// Rolls a fresh canonical layout (Prefix, then distinct-family Suffixes).
-		// Identify and scour never exclude the previous tokens: a full reroll may
-		// land on the same effect again, like any other identify.
+		// Rolls a fresh canonical layout: Prefix, then distinct-family Suffixes,
+		// or Suffixes only when a runeword holds the head slot. Identify and scour
+		// never exclude the previous tokens: a full reroll may land on the same
+		// effect again, like any other identify.
+		const bool suffixOnly = head == AffixHead::kRuneword;
 		auto rollRegularLayout = [&](std::uint8_t a_count, InstanceAffixSlots& a_out) {
 			std::vector<std::size_t> chosen;
 			std::vector<std::string> chosenFamilies;
 			a_out.Clear();
 			for (std::uint8_t slot = 0u; slot < a_count; ++slot) {
-				const auto idx = slot == 0u ? RollLootAffixIndex(*lootType, &chosen, true) :
+				const bool prefixSlot = slot == 0u && !suffixOnly;
+				const auto idx = prefixSlot ? RollLootAffixIndex(*lootType, &chosen, true) :
 					RollSuffixIndex(*lootType, weaponSubtype, &chosenFamilies, &chosen);
 				if (!idx || *idx >= _affixRuntimeState.affixes.size()) return false;
 				const auto& affix = _affixRuntimeState.affixes[*idx];
-				if (affix.slot != (slot == 0u ? AffixSlot::kPrefix : AffixSlot::kSuffix) ||
+				if (affix.slot != (prefixSlot ? AffixSlot::kPrefix : AffixSlot::kSuffix) ||
 					_runewordState.recipeIndexByResultAffixToken.contains(affix.token) ||
-					(slot != 0u && (affix.family.empty() ||
+					(!prefixSlot && (affix.family.empty() ||
 						std::find(chosenFamilies.begin(), chosenFamilies.end(), affix.family) != chosenFamilies.end())) ||
 					!a_out.AddToken(affix.token)) return false;
 				chosen.push_back(*idx);
-				if (slot != 0u) chosenFamilies.push_back(affix.family);
+				if (!prefixSlot) chosenFamilies.push_back(affix.family);
 			}
 			return a_out.count == a_count;
 		};
@@ -158,17 +166,38 @@ namespace CalamityAffixes
 							std::find(keptFamilies.begin(), keptFamilies.end(), affix.family) == keptFamilies.end())) &&
 						detail::ReplaceSelectedAffix(next, a_selectedToken, affix.token);
 				}
+			} else if (a_action == AffixCraftAction::kRemoveRuneword) {
+				// A legacy item already has its prefix, so the runeword just leaves.
+				// Otherwise a new prefix takes the head slot; suffixes stay in place.
+				if (head == AffixHead::kLegacyRunewordPrefix) {
+					accepted = next.RemoveToken(runewordToken);
+				} else {
+					for (std::uint8_t attempt = 0u; attempt < detail::kCraftRollMaxAttempts && !accepted; ++attempt) {
+						const auto idx = RollLootAffixIndex(*lootType, &excludedIndices, true);
+						if (!idx || *idx >= _affixRuntimeState.affixes.size()) continue;
+						const auto& affix = _affixRuntimeState.affixes[*idx];
+						InstanceAffixSlots rolled = previous;
+						accepted = affix.slot == AffixSlot::kPrefix &&
+							!_runewordState.recipeIndexByResultAffixToken.contains(affix.token) &&
+							detail::ReplaceSelectedAffix(rolled, runewordToken, affix.token);
+						if (accepted) next = rolled;
+					}
+				}
 			} else {
 				// Identify draws its count once: candidate retries must never bias
-				// the 60/30/10 distribution. Scour keeps the current slot count.
+				// the 60/30/10 (or runeword 75/25) distribution. Scour keeps the
+				// current slot count.
 				const auto count = a_action == AffixCraftAction::kIdentify ?
-					detail::IdentifyAffixCount(std::uniform_int_distribution<std::uint32_t>(0u, 99u)(_rng)) :
-					detail::ScourAffixCount(regular.count);
+					(suffixOnly ?
+						detail::RunewordIdentifySuffixCount(std::uniform_int_distribution<std::uint32_t>(0u, 99u)(_rng)) :
+						detail::IdentifyAffixCount(std::uniform_int_distribution<std::uint32_t>(0u, 99u)(_rng))) :
+					detail::ScourAffixCount(regular.count, maxRegular);
 				for (std::uint8_t attempt = 0u; attempt < detail::kCraftRollMaxAttempts && !accepted; ++attempt) {
 					InstanceAffixSlots rolled{};
 					if (!rollRegularLayout(count, rolled) ||
 						(runewordToken != 0u && !rolled.PromoteTokenToPrimary(runewordToken))) continue;
-					accepted = detail::IsValidCraftResult(a_action, previous, rolled, runewordToken, a_selectedToken);
+					accepted = detail::IsValidCraftResult(
+						a_action, previous, rolled, runewordToken, a_selectedToken, maxRegular);
 					if (accepted) next = rolled;
 				}
 			}
@@ -184,7 +213,7 @@ namespace CalamityAffixes
 			std::lock_guard<std::mutex> rngLock(_rngMutex);
 			if (_rng == rngAfter) _rng = rngBefore;
 		};
-		if (!accepted || !detail::IsValidCraftResult(a_action, previous, next, runewordToken, a_selectedToken)) {
+		if (!accepted || !detail::IsValidCraftResult(a_action, previous, next, runewordToken, a_selectedToken, maxRegular)) {
 			restoreRoll();
 			return fail("No eligible affix result is available. No currency consumed.");
 		}
@@ -216,21 +245,24 @@ namespace CalamityAffixes
 			const bool restored = refund(cost);
 			return fail(restored ? "Base changed; currency restored." : "Base changed; check inventory.");
 		}
-		// Selected reforge deletes only the replaced effect, so unselected effects
-		// keep their exact runtime state (evolution/charge progress). Identify and
-		// scour start every regular effect fresh, even one rolled again. The
-		// runeword always keeps its state.
-		const bool freshRegular = a_action != AffixCraftAction::kReforge;
+		// Selected reforge and runeword removal delete only the replaced effect, so
+		// the rest keep their exact runtime state (evolution/charge progress).
+		// Identify and scour start every regular effect fresh, even one rolled
+		// again. The runeword keeps its state unless it is the one removed.
+		const bool freshRegular = a_action == AffixCraftAction::kIdentify || a_action == AffixCraftAction::kScour;
 		std::erase_if(_instanceTrackingState.instanceStates, [&](const auto& pair) {
 			return pair.first.instanceKey == instanceKey && (!next.HasToken(pair.first.affixToken) ||
 				(freshRegular && pair.first.affixToken != runewordToken));
 		});
 		_instanceTrackingState.instanceAffixes[instanceKey] = next;
 		// Reforge spends one of the item's six; identify and scour give them back.
+		// Removing a runeword rerolls nothing the player chose, so the count stays.
 		if (a_action == AffixCraftAction::kReforge) {
 			_instanceTrackingState.selectedReforgeCounts[instanceKey] = detail::NextSelectedReforgeCount(reforgesDone);
-		} else {
+		} else if (a_action != AffixCraftAction::kRemoveRuneword) {
 			_instanceTrackingState.selectedReforgeCounts.erase(instanceKey);
+		} else {
+			_runewordState.instanceStates.erase(instanceKey);
 		}
 		MarkLootEvaluatedInstance(instanceKey);
 		ForgetLootPreviewSlots(instanceKey);
@@ -239,8 +271,10 @@ namespace CalamityAffixes
 		RebuildActiveCounts();
 		const auto name = ResolveInventoryDisplayName(currentEntry, currentXList);
 		const std::string operation = a_action == AffixCraftAction::kIdentify ? "Identified: " :
-			(a_action == AffixCraftAction::kReforge ? "Selected affix reforged: " : "Regular affixes rerolled: ");
-		const std::string runewordNote = runewordToken != 0u ? "Runeword preserved; " : "";
+			(a_action == AffixCraftAction::kReforge ? "Selected affix reforged: " :
+			(a_action == AffixCraftAction::kRemoveRuneword ? "Runeword removed: " : "Regular affixes rerolled: "));
+		const std::string runewordNote =
+			runewordToken != 0u && a_action != AffixCraftAction::kRemoveRuneword ? "Runeword preserved; " : "";
 		const std::string reforgeNote = a_action == AffixCraftAction::kReforge ?
 			"reforges left: " +
 				std::to_string(detail::RemainingSelectedReforges(detail::NextSelectedReforgeCount(reforgesDone))) + "/" +

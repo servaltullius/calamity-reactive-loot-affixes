@@ -9,6 +9,8 @@ const runewordAffixPendingTimeoutMs = 1200;
 // Legacy wire field names remain stable; the selection now identifies the affix to replace.
 let affixCraftPendingState = null;
 let scourConfirmation = null;
+// Transmute over a prefix and runeword removal each lose something: second click within 6 s.
+let runewordConfirmation = null;
 let reforgeLockTokenState = "";
 let reforgeLockBaseKeyState = "";
 let affixExpandPendingState = null;
@@ -150,6 +152,7 @@ const previewInvalidatingCommandPrefixes = Object.freeze([
   lockedReforgeCommandPrefix,
   "affix.identify:",
   "affix.scour:",
+  "runeword.remove:",
   affixExpandCommandPrefix
 ]);
 const panelRenderState = {

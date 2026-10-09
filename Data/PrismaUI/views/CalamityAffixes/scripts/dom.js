@@ -194,6 +194,7 @@ const tooltipRunewordHint = document.getElementById("tooltipRunewordHint");
 
 const affixIdentifyButton = document.getElementById("affixIdentifyButton");
 const affixScourButton = document.getElementById("affixScourButton");
+const runewordRemoveButton = document.getElementById("runewordRemoveButton");
 const affixInspectionSummary = document.getElementById("affixInspectionSummary");
 const resourceExchangeGroup = document.getElementById("resourceExchangeGroup");
 const resourceExchangeLabel = document.getElementById("resourceExchangeLabel");

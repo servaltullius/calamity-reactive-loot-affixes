@@ -200,7 +200,7 @@ def main(argv: list[str] | None = None) -> int:
         f"> Version `v{metadata.version}` ({metadata.release_date}). Generated from the mod data; every line is the in-game English text.",
         f"> Korean lists: [prefixes](PREFIX_EFFECTS.md), [suffixes](SUFFIX_EFFECTS.md), [runewords](RUNEWORD_EFFECTS.md). Project: [GitHub]({REPO_URL})",
         "",
-        "Each item holds **1 runeword** and up to **3 regular affixes** (1 prefix + 2 suffixes).",
+        "Each item has **3 affix slots**: a head slot that holds **a runeword or a prefix**, then up to **2 suffixes**.",
         "",
         "## Reading an entry",
         "",
