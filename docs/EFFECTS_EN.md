@@ -1,6 +1,6 @@
 # Calamity Effect List
 
-> Version `v2.2.7` (2026-10-08). Generated from the mod data; every line is the in-game English text.
+> Version `v2.2.7` (2026-10-09). Generated from the mod data; every line is the in-game English text.
 > Korean lists: [prefixes](PREFIX_EFFECTS.md), [suffixes](SUFFIX_EFFECTS.md), [runewords](RUNEWORD_EFFECTS.md). Project: [GitHub](https://github.com/servaltullius/calamity-reactive-loot-affixes)
 
 Each item holds **1 runeword** and up to **3 regular affixes** (1 prefix + 2 suffixes).
@@ -252,7 +252,7 @@ The suggested base is only a hint: the panel names a more specific one, and no b
 | **Radiance** | Nef-Sol-Ith | Armor | 15% on hit taken / ICD 40s - Radiance (Detect Life 200m, 30s) |
 | **Rain** | Ort-Mal-Ith | Armor | 22% on hit taken / ICD 11s - Rain of Life (Heal Rate +100%, 8s) |
 | **Sanctuary** | Ko-Ko-Mal | Armor | 100% on Hit Taken / ICD 0.5s - Reflect (15%) + Magic Resist +15 |
-| **Shadow Boxer** | Shael-Ko-Um | Weapon | on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.25s later for 40% of its physical damage |
+| **Shadow Boxer** | Shael-Ko-Um | Weapon | on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.4s later for 40% of its physical damage |
 | **Temper** | Shael-Io-Ral | Armor | 18% on hit taken / ICD 8s - Tempered Endurance (Stamina Regen +5, 8s) |
 | **Treachery** | Shael-Thul-Lem | Armor | 26% on Hit Taken / ICD 10s - Haste (Move Speed +28%, 5s) + Attack Speed +10% |
 | **Venom** | Tal-Dol-Mal | Weapon | 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s) |

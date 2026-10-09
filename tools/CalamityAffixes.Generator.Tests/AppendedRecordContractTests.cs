@@ -34,6 +34,12 @@ public sealed class AppendedRecordContractTests
         """{"type":"Keyword","keyword":{"editorId":"LoreBox_CAFF_AFFIX_TEST"},"miscItem":{"editorId":"CAFF_Misc_TEST","name":"Test","modelPath":"Clutter\\Test.nif"}}""",
         // A tail keyword only relocates an existing affix's KYWD; with no such affix it is an orphan.
         """{"type":"Keyword","keyword":{"editorId":"LoreBox_CAFF_AFFIX_ORPHAN"}}""",
+        """{"type":"SoundDescriptor"}""",
+        """{"type":"SoundDescriptor","soundDescriptor":{"editorId":"CAFF_SNDR_TEST","soundFiles":[],"categoryForm":"Skyrim.esm|0x000172A1","outputModelForm":"Skyrim.esm|0x0007E5DC"}}""",
+        // Paths are Data\Sound-relative; a Sound\ prefix would make the engine look one folder too deep.
+        """{"type":"SoundDescriptor","soundDescriptor":{"editorId":"CAFF_SNDR_TEST","soundFiles":["Sound\\FX\\Test.wav"],"categoryForm":"Skyrim.esm|0x000172A1","outputModelForm":"Skyrim.esm|0x0007E5DC"}}""",
+        """{"type":"SoundDescriptor","soundDescriptor":{"editorId":"CAFF_SNDR_TEST","soundFiles":["FX\\Test.mp3"],"categoryForm":"Skyrim.esm|0x000172A1","outputModelForm":"Skyrim.esm|0x0007E5DC"}}""",
+        """{"type":"SoundDescriptor","soundDescriptor":{"editorId":"CAFF_SNDR_TEST","soundFiles":["FX\\Test.wav"],"categoryForm":"AudioCategorySFX","outputModelForm":"Skyrim.esm|0x0007E5DC"}}""",
     };
 
     public static TheoryData<string> InvalidLegacyDragonBlocks => new()

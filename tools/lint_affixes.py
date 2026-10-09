@@ -354,6 +354,29 @@ def _lint_spec(
                         "must be a boolean."
                     )
             continue
+        if record.get("type") == "SoundDescriptor":
+            sound = _as_dict(record.get("soundDescriptor")) or {}
+            files = sound.get("soundFiles")
+            if not isinstance(files, list) or not files:
+                errors.append(f"keywords.appendedRecords[{idx}].soundDescriptor.soundFiles must be a non-empty list.")
+            else:
+                for file in files:
+                    normalized = file.strip().replace("/", "\\").casefold() if isinstance(file, str) else ""
+                    if (
+                        not normalized
+                        or normalized.startswith(("sound\\", "data\\"))
+                        or not normalized.endswith((".wav", ".xwm"))
+                    ):
+                        errors.append(
+                            f"keywords.appendedRecords[{idx}].soundDescriptor.soundFiles entry {file!r} must be a "
+                            ".wav/.xwm path relative to Data\\Sound."
+                        )
+            for key in ("categoryForm", "outputModelForm"):
+                value = sound.get(key)
+                parts = value.rsplit("|", 1) if isinstance(value, str) else []
+                if len(parts) != 2 or not parts[1].lower().startswith("0x"):
+                    errors.append(f"keywords.appendedRecords[{idx}].soundDescriptor.{key} must use Plugin|0xFORMID syntax.")
+            continue
         if record.get("type") != "Spell":
             continue
         spell = _as_dict(record.get("spell"))

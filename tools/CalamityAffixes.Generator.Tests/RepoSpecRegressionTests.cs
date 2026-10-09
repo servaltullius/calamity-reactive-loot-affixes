@@ -32,6 +32,7 @@ public sealed class RepoSpecRegressionTests
         new(0x000B15u, "SPEL", "CAFF_SPEL_RW_SHADOW_BOXER_ECHO"),
         new(0x000B16u, "MGEF", "CAFF_MGEF_RW_SHADOW_BOXER_BURST"),
         new(0x000B17u, "ARTO", "CAFF_ARTO_VFX_SHADOW_ECHO_HIT"),
+        new(0x000B18u, "SNDR", "CAFF_SNDR_RW_SHADOW_PUNCH"),
     ];
 
     [Fact]
@@ -257,7 +258,7 @@ public sealed class RepoSpecRegressionTests
     }
 
     [Fact]
-    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsFiftyNineTypedRecords()
+    public void RepoSpec_PreservesFrozenV140PrefixAndAppendsSixtyTypedRecords()
     {
         var repoRoot = FindRepoRoot();
         var fixture = ReadV140AllocationFixture(repoRoot);
@@ -265,9 +266,9 @@ public sealed class RepoSpecRegressionTests
         var mod = KeywordPluginBuilder.Build(spec);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(792, actual.Length);
-        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^9]);
-        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^8]);
+        Assert.Equal(793, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^10]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^9]);
         Assert.Equal(ExpectedShadowBoxerTail, actual.TakeLast(ExpectedShadowBoxerTail.Length));
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
@@ -293,7 +294,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B18u, ((IModGetter)mod).NextFormID);
+        Assert.Equal(0x000B19u, ((IModGetter)mod).NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -319,12 +320,12 @@ public sealed class RepoSpecRegressionTests
             using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
             var reimportedAllocation = AllocationSignature(reimported);
 
-            Assert.Equal(792, generatedAllocation.Length);
+            Assert.Equal(793, generatedAllocation.Length);
             Assert.Equal(generatedAllocation, reimportedAllocation);
             Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
             Assert.Equal(generatedAllocation.TakeLast(58), reimportedAllocation.TakeLast(58));
             Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-            Assert.Equal(0x000B18u, reimported.NextFormID);
+            Assert.Equal(0x000B19u, reimported.NextFormID);
             AssertWorldMarkers(reimported);
         }
         finally
@@ -342,9 +343,9 @@ public sealed class RepoSpecRegressionTests
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(792, actual.Length);
-        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^9]);
-        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^8]);
+        Assert.Equal(793, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^10]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^9]);
         Assert.Equal(ExpectedShadowBoxerTail, actual.TakeLast(ExpectedShadowBoxerTail.Length));
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
@@ -370,7 +371,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B18u, mod.NextFormID);
+        Assert.Equal(0x000B19u, mod.NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -1568,6 +1569,7 @@ public sealed class RepoSpecRegressionTests
         ISpellGetter => "SPEL",
         IArtObjectGetter => "ARTO",
         IMoveableStaticGetter => "MSTT",
+        ISoundDescriptorGetter => "SNDR",
         IStaticGetter => "STAT",
         ILeveledItemGetter => "LVLI",
         _ => throw new InvalidDataException($"Unsupported allocation fixture record type: {record.GetType().Name}"),
@@ -1582,6 +1584,7 @@ public sealed class RepoSpecRegressionTests
         ISpellGetter value => value.EditorID,
         IArtObjectGetter value => value.EditorID,
         IMoveableStaticGetter value => value.EditorID,
+        ISoundDescriptorGetter value => value.EditorID,
         IStaticGetter value => value.EditorID,
         ILeveledItemGetter value => value.EditorID,
         _ => throw new InvalidDataException($"Unsupported allocation fixture record type: {record.GetType().Name}"),

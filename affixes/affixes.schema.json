@@ -671,6 +671,15 @@
         },
         {
           "type": "object",
+          "required": ["type", "soundDescriptor"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "SoundDescriptor" },
+            "soundDescriptor": { "$ref": "#/$defs/soundDescriptorRecord" }
+          }
+        },
+        {
+          "type": "object",
           "required": ["type", "keyword"],
           "additionalProperties": false,
           "properties": {
@@ -708,6 +717,25 @@
           "type": "string",
           "enum": ["MagicHitEffect"]
         }
+      }
+    },
+    "soundDescriptorRecord": {
+      "type": "object",
+      "required": ["editorId", "soundFiles", "categoryForm", "outputModelForm"],
+      "additionalProperties": false,
+      "properties": {
+        "editorId": { "type": "string", "minLength": 1 },
+        "soundFiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "\\.([Ww][Aa][Vv]|[Xx][Ww][Mm])$" }
+        },
+        "categoryForm": { "type": "string", "minLength": 1 },
+        "outputModelForm": { "type": "string", "minLength": 1 },
+        "staticAttenuationDb": { "type": "number", "minimum": 0, "maximum": 100 },
+        "frequencyVariancePercent": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "priority": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "dbVariance": { "type": "integer", "minimum": 0, "maximum": 100 }
       }
     },
     "movableStaticRecord": {

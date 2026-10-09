@@ -132,6 +132,7 @@ public static class AffixSpecLoader
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenArtObjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenMovableStatics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenSoundDescriptors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenMiscItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "CAFF_Misc_ReforgeOrb" };
         var seenAppendedKeywords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var rune in GetRunewordRuneLadder()) seenMiscItems.Add($"CAFF_RuneFrag_{rune}");
@@ -371,12 +372,24 @@ public static class AffixSpecLoader
                     }
                     break;
                 }
+                case "SoundDescriptor" when appendedRecord.SoundDescriptor is not null && appendedRecord.PayloadCount == 1:
+                {
+                    var sound = appendedRecord.SoundDescriptor;
+                    if (string.IsNullOrWhiteSpace(sound.EditorId) || !seenSoundDescriptors.Add(sound.EditorId))
+                    {
+                        throw new InvalidDataException(
+                            $"Appended SoundDescriptor requires a non-empty, unique editorId (got: {sound.EditorId}).");
+                    }
+
+                    ValidateSoundDescriptor(sound);
+                    break;
+                }
                 default:
                     throw new InvalidDataException(
                         "keywords.appendedRecords entries must use type MagicEffect with only magicEffect, " +
                         "type Spell with only spell, type ArtObject with only artObject, " +
                         "type MovableStatic with only movableStatic, type MiscItem with only miscItem, " +
-                        "or type Keyword with only keyword.");
+                        "type Keyword with only keyword, or type SoundDescriptor with only soundDescriptor.");
             }
         }
 
@@ -395,6 +408,46 @@ public static class AffixSpecLoader
 
         ValidateFeedbackArtObjectReferences(spec, seenArtObjects);
         ValidateTrapFeedbackWorldObjectReferences(spec, seenMovableStatics);
+    }
+
+    internal static void ValidateSoundDescriptor(SoundDescriptorRecordSpec sound)
+    {
+        if (sound.SoundFiles is null || sound.SoundFiles.Count == 0)
+        {
+            throw new InvalidDataException($"SoundDescriptor {sound.EditorId} requires at least one sound file.");
+        }
+
+        foreach (var file in sound.SoundFiles)
+        {
+            // Paths are relative to Data\Sound. A "Sound\" or "Data\" prefix makes the
+            // engine look one folder too deep and the descriptor plays nothing.
+            var normalized = (file ?? string.Empty).Replace('/', '\\').Trim();
+            if (normalized.Length == 0 ||
+                normalized.StartsWith("Sound\\", StringComparison.OrdinalIgnoreCase) ||
+                normalized.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase) ||
+                Path.IsPathRooted(normalized) ||
+                !(normalized.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
+                  normalized.EndsWith(".xwm", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidDataException(
+                    $"SoundDescriptor {sound.EditorId} sound file '{file}' must be a .wav/.xwm path relative to Data\\Sound.");
+            }
+        }
+
+        if (!IsValidFormSpec(sound.CategoryForm) || !IsValidFormSpec(sound.OutputModelForm))
+        {
+            throw new InvalidDataException(
+                $"SoundDescriptor {sound.EditorId} categoryForm and outputModelForm must use Plugin|0xFORMID syntax.");
+        }
+
+        if (sound.StaticAttenuationDb is < 0f or > 100f ||
+            sound.FrequencyVariancePercent is < 0 or > 100 ||
+            sound.Priority is < 0 or > 255 ||
+            sound.DbVariance is < 0 or > 100)
+        {
+            throw new InvalidDataException(
+                $"SoundDescriptor {sound.EditorId} has an out-of-range attenuation, frequency variance, priority, or dB variance.");
+        }
     }
 
     private static void ValidateWorldObjectModelPath(
@@ -582,7 +635,7 @@ public static class AffixSpecLoader
                         $"keywords.appendedRecords[{index}] contains duplicate property '{property.Name}'.");
                 }
 
-                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject" or "movableStatic" or "miscItem" or "keyword"))
+                if (property.Name is not ("type" or "magicEffect" or "spell" or "artObject" or "movableStatic" or "miscItem" or "keyword" or "soundDescriptor"))
                 {
                     throw new InvalidDataException(
                         $"keywords.appendedRecords[{index}] contains unsupported property '{property.Name}'.");
@@ -601,9 +654,11 @@ public static class AffixSpecLoader
             var hasMovableStatic = item.TryGetProperty("movableStatic", out var movableStaticElement);
             var hasMiscItem = item.TryGetProperty("miscItem", out var miscItemElement);
             var hasKeyword = item.TryGetProperty("keyword", out var keywordElement);
+            var hasSoundDescriptor = item.TryGetProperty("soundDescriptor", out var soundDescriptorElement);
             var payloadCount =
                 (hasMagicEffect ? 1 : 0) + (hasSpell ? 1 : 0) + (hasArtObject ? 1 : 0) +
-                (hasMovableStatic ? 1 : 0) + (hasMiscItem ? 1 : 0) + (hasKeyword ? 1 : 0);
+                (hasMovableStatic ? 1 : 0) + (hasMiscItem ? 1 : 0) + (hasKeyword ? 1 : 0) +
+                (hasSoundDescriptor ? 1 : 0);
             switch (type)
             {
                 case "MagicEffect" when hasMagicEffect && payloadCount == 1 && magicEffectElement.ValueKind == JsonValueKind.Object:
@@ -621,6 +676,8 @@ public static class AffixSpecLoader
                 case "MiscItem" when hasMiscItem && payloadCount == 1 && miscItemElement.ValueKind == JsonValueKind.Object:
                     break;
                 case "Keyword" when hasKeyword && payloadCount == 1 && keywordElement.ValueKind == JsonValueKind.Object:
+                    break;
+                case "SoundDescriptor" when hasSoundDescriptor && payloadCount == 1 && soundDescriptorElement.ValueKind == JsonValueKind.Object:
                     break;
                 case "MagicEffect":
                     throw new InvalidDataException(
@@ -640,9 +697,12 @@ public static class AffixSpecLoader
                 case "Keyword":
                     throw new InvalidDataException(
                         $"keywords.appendedRecords[{index}] type Keyword requires only an object keyword payload.");
+                case "SoundDescriptor":
+                    throw new InvalidDataException(
+                        $"keywords.appendedRecords[{index}] type SoundDescriptor requires only an object soundDescriptor payload.");
                 default:
                     throw new InvalidDataException(
-                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, ArtObject, MovableStatic, MiscItem, or Keyword (got: {type ?? "<null>"}).");
+                        $"keywords.appendedRecords[{index}].type must be MagicEffect, Spell, ArtObject, MovableStatic, MiscItem, Keyword, or SoundDescriptor (got: {type ?? "<null>"}).");
             }
 
             index += 1;

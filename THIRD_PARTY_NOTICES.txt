@@ -2,11 +2,14 @@ Calamity - Reactive Loot & Affixes: Third-Party Notices
 
 CalamityAffixes.dll is built with the open-source components below, and parts
 of them are compiled into the DLL. Their licenses require these notices to
-travel with the binary. No other third-party textures, sounds, or fonts ship
-with this mod; visual effects reference the base game's files. The meshes under
+travel with the binary. No other third-party fonts ship with this mod; visual
+effects otherwise reference the base game's files. The meshes under
 Meshes\CalamityAffixes are modified copies of Skyrim Special Edition meshes
 (Bethesda Softworks): the trap markers with their collision removed, and the
-Shadow Boxer hit effect recolored. They are useful only with the base game.
+Shadow Boxer hit effect reworked. Textures\CalamityAffixes\ShadowFistSmoke.dds
+is composed from the game's own smoke textures, and Sound\FX\CalamityAffixes
+is mixed from the game's own punch, swing and shout sounds. All of them are
+useful only with the base game; tools/vfx rebuilds them from an installed copy.
 
 Permissions for the mod itself are listed on its Nexus Mods page.
 

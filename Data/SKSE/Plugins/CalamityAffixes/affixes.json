@@ -9938,9 +9938,9 @@
       {
         "id": "runeword_shadow_boxer_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_SHADOW_BOXER",
-        "name": "\uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C [Shael-Ko-Um]: \uADFC\uC811 \uC801\uC911 \uC2DC \uADF8\uB9BC\uC790 \uAD8C\uD22C(8\uCD08) - \uC9C0\uC18D \uC911 \uADFC\uC811 \uC801\uC911\uB9C8\uB2E4 0.25\uCD08 \uB4A4 \uADF8\uB9BC\uC790\uAC00 \uD55C \uBC88 \uB354 \uD0C0\uACA9(\uADF8 \uC801\uC911 \uBB3C\uB9AC \uD53C\uD574\uC758 40%). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Shadow Boxer (Shael-Ko-Um): on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.25s later for 40% of its physical damage",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C [Shael-Ko-Um]: \uADFC\uC811 \uC801\uC911 \uC2DC \uADF8\uB9BC\uC790 \uAD8C\uD22C(8\uCD08) - \uC9C0\uC18D \uC911 \uADFC\uC811 \uC801\uC911\uB9C8\uB2E4 0.25\uCD08 \uB4A4 \uADF8\uB9BC\uC790\uAC00 \uD55C \uBC88 \uB354 \uD0C0\uACA9(\uADF8 \uC801\uC911 \uBB3C\uB9AC \uD53C\uD574\uC758 40%). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C [Shael-Ko-Um]: \uADFC\uC811 \uC801\uC911 \uC2DC \uADF8\uB9BC\uC790 \uAD8C\uD22C(8\uCD08) - \uC9C0\uC18D \uC911 \uADFC\uC811 \uC801\uC911\uB9C8\uB2E4 0.4\uCD08 \uB4A4 \uADF8\uB9BC\uC790\uAC00 \uD55C \uBC88 \uB354 \uD0C0\uACA9(\uADF8 \uC801\uC911 \uBB3C\uB9AC \uD53C\uD574\uC758 40%). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Shadow Boxer (Shael-Ko-Um): on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.4s later for 40% of its physical damage",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC250\uB3C4\uC6B0 \uBCF5\uC11C [Shael-Ko-Um]: \uADFC\uC811 \uC801\uC911 \uC2DC \uADF8\uB9BC\uC790 \uAD8C\uD22C(8\uCD08) - \uC9C0\uC18D \uC911 \uADFC\uC811 \uC801\uC911\uB9C8\uB2E4 0.4\uCD08 \uB4A4 \uADF8\uB9BC\uC790\uAC00 \uD55C \uBC88 \uB354 \uD0C0\uACA9(\uADF8 \uC801\uC911 \uBB3C\uB9AC \uD53C\uD574\uC758 40%). 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "None",
           "strings": "NONE",
@@ -9958,7 +9958,7 @@
             "spellEditorId": "CAFF_SPEL_RW_SHADOW_BOXER_ECHO",
             "stanceSpellEditorId": "CAFF_SPEL_RW_SHADOW_BOXER_STANCE",
             "windowSeconds": 8.0,
-            "echoDelaySeconds": 0.25,
+            "echoDelaySeconds": 0.4,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
               "mult": 0.4
@@ -9966,11 +9966,11 @@
             "noHitEffectArt": false,
             "feedback": {
               "artObjectEditorId": "CAFF_ARTO_VFX_SHADOW_ECHO_HIT",
-              "soundForm": "Skyrim.esm|0x000AF664",
+              "soundForm": "CalamityAffixes.esp|0x000B18",
               "target": "Target",
               "durationSeconds": 1.0,
               "playOn": "Proc",
-              "spatialSound": true
+              "spatialSound": false
             }
           }
         }
@@ -13892,6 +13892,23 @@
           "editorId": "CAFF_ARTO_VFX_SHADOW_ECHO_HIT",
           "modelPath": "CalamityAffixes\\ShadowEchoHit.nif",
           "artType": "MagicHitEffect"
+        }
+      },
+      {
+        "type": "SoundDescriptor",
+        "soundDescriptor": {
+          "editorId": "CAFF_SNDR_RW_SHADOW_PUNCH",
+          "soundFiles": [
+            "FX\\CalamityAffixes\\ShadowPunch01.wav",
+            "FX\\CalamityAffixes\\ShadowPunch02.wav",
+            "FX\\CalamityAffixes\\ShadowPunch03.wav"
+          ],
+          "categoryForm": "Skyrim.esm|0x000172A1",
+          "outputModelForm": "Skyrim.esm|0x0007EDCA",
+          "staticAttenuationDb": 0,
+          "frequencyVariancePercent": 5,
+          "priority": 128,
+          "dbVariance": 1
         }
       }
     ]

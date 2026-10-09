@@ -176,6 +176,10 @@ public sealed class AppendedRecordSpec
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public MovableStaticRecordSpec? MovableStatic { get; init; }
 
+    [JsonPropertyName("soundDescriptor")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SoundDescriptorRecordSpec? SoundDescriptor { get; init; }
+
     // Relocates an affix's KYWD from the affix block into this tail slot, so a
     // new affix can be added without renumbering the stable record prefix.
     [JsonPropertyName("keyword")]
@@ -189,7 +193,8 @@ public sealed class AppendedRecordSpec
         (ArtObject is null ? 0 : 1) +
         (MovableStatic is null ? 0 : 1) +
         (MiscItem is null ? 0 : 1) +
-        (Keyword is null ? 0 : 1);
+        (Keyword is null ? 0 : 1) +
+        (SoundDescriptor is null ? 0 : 1);
 }
 
 public sealed class KeywordRecordSpec
@@ -218,6 +223,36 @@ public sealed class ArtObjectRecordSpec
 
     [JsonPropertyName("artType")]
     public required string ArtType { get; init; }
+}
+
+// A standard sound descriptor (SNDR) for sound files the mod ships under Data\Sound.
+public sealed class SoundDescriptorRecordSpec
+{
+    [JsonPropertyName("editorId")]
+    public required string EditorId { get; init; }
+
+    // Relative to Data\Sound, e.g. "FX\CalamityAffixes\ShadowPunch01.wav". The engine
+    // picks one file at random each time the descriptor plays.
+    [JsonPropertyName("soundFiles")]
+    public required List<string> SoundFiles { get; init; }
+
+    [JsonPropertyName("categoryForm")]
+    public required string CategoryForm { get; init; }
+
+    [JsonPropertyName("outputModelForm")]
+    public required string OutputModelForm { get; init; }
+
+    [JsonPropertyName("staticAttenuationDb")]
+    public float StaticAttenuationDb { get; init; }
+
+    [JsonPropertyName("frequencyVariancePercent")]
+    public int FrequencyVariancePercent { get; init; }
+
+    [JsonPropertyName("priority")]
+    public int Priority { get; init; } = 128;
+
+    [JsonPropertyName("dbVariance")]
+    public int DbVariance { get; init; }
 }
 
 public sealed class MovableStaticRecordSpec

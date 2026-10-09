@@ -1,6 +1,6 @@
 # 룬워드 효과 정리 (공개용)
 
-> 업데이트: 2026-10-08
+> 업데이트: 2026-10-09
 > 기준 버전: `v2.2.7`
 > 기준 코드: `affixes/modules/keywords.affixes.runewords.json`
 > 룬 조합 기준: `affixes/runeword.contract.json`
@@ -670,5 +670,5 @@
 
 - 룬 조합: `Shael-Ko-Um`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 쉐도우 복서 [Shael-Ko-Um]: 근접 적중 시 그림자 권투(8초) - 지속 중 근접 적중마다 0.25초 뒤 그림자가 한 번 더 타격(그 적중 물리 피해의 40%). 12초마다 발동.
-- 영문 표시: Runeword Shadow Boxer (Shael-Ko-Um): on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.25s later for 40% of its physical damage
+- 한글 표시: 룬워드 쉐도우 복서 [Shael-Ko-Um]: 근접 적중 시 그림자 권투(8초) - 지속 중 근접 적중마다 0.4초 뒤 그림자가 한 번 더 타격(그 적중 물리 피해의 40%). 12초마다 발동.
+- 영문 표시: Runeword Shadow Boxer (Shael-Ko-Um): on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.4s later for 40% of its physical damage

@@ -125,6 +125,7 @@ public static class KeywordPluginBuilder
         var seenSpells = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenArtObjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seenMovableStatics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seenSoundDescriptors = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var magicEffectsByEditorId = new Dictionary<string, MagicEffect>(StringComparer.OrdinalIgnoreCase);
         var pendingSpells = new List<(Spell Record, SpellRecordSpec Spec)>();
         var magicEffectUsagesByEditorId = new Dictionary<string, MagicEffectUsage>(StringComparer.OrdinalIgnoreCase);
@@ -274,9 +275,21 @@ public static class KeywordPluginBuilder
                         AddKeyword(mod, appendedRecord.Keyword.EditorId);
                         break;
                     }
+                    case "SoundDescriptor" when appendedRecord.SoundDescriptor is not null && appendedRecord.PayloadCount == 1:
+                    {
+                        var sound = appendedRecord.SoundDescriptor;
+                        if (!seenSoundDescriptors.Add(sound.EditorId))
+                        {
+                            throw new InvalidDataException(
+                                $"Duplicate appended SoundDescriptor editorId: {sound.EditorId}");
+                        }
+
+                        AddSoundDescriptor(mod, sound);
+                        break;
+                    }
                     default:
                         throw new InvalidDataException(
-                            "Append-only records must be a valid MagicEffect, Spell, ArtObject, MovableStatic, MiscItem, or Keyword tagged union.");
+                            "Append-only records must be a valid MagicEffect, Spell, ArtObject, MovableStatic, MiscItem, Keyword, or SoundDescriptor tagged union.");
                 }
             }
         }
@@ -522,6 +535,30 @@ public static class KeywordPluginBuilder
         artObject.Model = new Model { File = spec.ModelPath };
         artObject.Type = (ArtObject.TypeEnum)MagicHitEffectRawDnam;
         return artObject;
+    }
+
+    private static SoundDescriptor AddSoundDescriptor(SkyrimMod mod, SoundDescriptorRecordSpec spec)
+    {
+        AffixSpecLoader.ValidateSoundDescriptor(spec);
+
+        var sound = mod.SoundDescriptors.AddNew();
+        sound.EditorID = spec.EditorId;
+        sound.Type = SoundDescriptor.DescriptorType.Standard;
+        sound.Category.SetTo(ParseFormSpec(spec.CategoryForm, $"SoundDescriptor.categoryForm: {spec.EditorId}"));
+        sound.OutputModel.SetTo(ParseFormSpec(spec.OutputModelForm, $"SoundDescriptor.outputModelForm: {spec.EditorId}"));
+        foreach (var file in spec.SoundFiles)
+        {
+            sound.SoundFiles.Add(new Mutagen.Bethesda.Plugins.Assets.AssetLink<Mutagen.Bethesda.Skyrim.Assets.SkyrimSoundAssetType>(
+                file.Replace('/', '\\').Trim()));
+        }
+        // LNAM as on vanilla one-shot descriptors (FXMeleePunchLarge): no loop, no rumble.
+        sound.LoopAndRumble = new SoundLoopAndRumble { Unknown = 1 };
+        sound.PercentFrequencyShift = 0;
+        sound.PercentFrequencyVariance = (sbyte)spec.FrequencyVariancePercent;
+        sound.Priority = (byte)spec.Priority;
+        sound.Variance = (byte)spec.DbVariance;
+        sound.StaticAttenuation = spec.StaticAttenuationDb;
+        return sound;
     }
 
     private static MoveableStatic AddMovableStatic(SkyrimMod mod, MovableStaticRecordSpec spec)

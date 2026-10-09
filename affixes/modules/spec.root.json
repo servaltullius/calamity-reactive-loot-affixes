@@ -674,6 +674,23 @@
           "modelPath": "CalamityAffixes\\ShadowEchoHit.nif",
           "artType": "MagicHitEffect"
         }
+      },
+      {
+        "type": "SoundDescriptor",
+        "soundDescriptor": {
+          "editorId": "CAFF_SNDR_RW_SHADOW_PUNCH",
+          "soundFiles": [
+            "FX\\CalamityAffixes\\ShadowPunch01.wav",
+            "FX\\CalamityAffixes\\ShadowPunch02.wav",
+            "FX\\CalamityAffixes\\ShadowPunch03.wav"
+          ],
+          "categoryForm": "Skyrim.esm|0x000172A1",
+          "outputModelForm": "Skyrim.esm|0x0007EDCA",
+          "staticAttenuationDb": 0,
+          "frequencyVariancePercent": 5,
+          "priority": 128,
+          "dbVariance": 1
+        }
       }
     ]
   }

@@ -89,7 +89,7 @@ public sealed class VfxFeedbackContractTests
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(59, records.Length);
+        Assert.Equal(60, records.Length);
         var artRecords = records
             .Where(record => record.GetProperty("type").GetString() == "ArtObject")
             .ToArray();
@@ -292,6 +292,42 @@ public sealed class VfxFeedbackContractTests
             Assert.False(
                 modelPath.Replace('/', '\\').TrimStart().StartsWith(@"Meshes\", StringComparison.OrdinalIgnoreCase),
                 $"{editorId}: MODL must be Data\\Meshes-relative, got '{modelPath}'.");
+        }
+    }
+
+    [Fact]
+    public void GeneratedDataEsp_ShadowPunchSoundMirrorsVanillaPunchAndShipsItsFiles()
+    {
+        var repoRoot = FindRepoRoot();
+        var feedback = ReadAffix("keywords.affixes.runewords.json", "runeword_shadow_boxer_final")
+            .GetProperty("runtime").GetProperty("action").GetProperty("feedback");
+        // soundForm must be Plugin|0xFORMID, so it names the tail slot the generator allocates.
+        Assert.Equal("CalamityAffixes.esp|0x000B18", feedback.GetProperty("soundForm").GetString());
+
+        var sounds = ReadRawSoundDescriptors(Path.Combine(repoRoot, "Data", "CalamityAffixes.esp"));
+        var sound = Assert.Single(sounds);
+        Assert.Equal(0x000B18u, sound.FormId & 0x00FFFFFFu);
+        Assert.Equal("CAFF_SNDR_RW_SHADOW_PUNCH", sound.EditorId);
+        // Standard descriptor in FXMeleePunchLarge's category (0x000172A1), no loop, priority
+        // 128, 5% pitch and 1 dB variance, but on Skyrim.esm's 2D output model SOMStereo
+        // (0x0007EDCA: no distance attenuation, fixed speaker levels) with no static
+        // attenuation, and played non-spatially, so it is not lost under the combat mix.
+        Assert.Equal(0x1EEF540Au, sound.Cnam);
+        Assert.Equal(0x000172A1u, sound.Gnam);
+        Assert.Equal(0x0007EDCAu, sound.Onam);
+        Assert.Equal(new byte[] { 0x01, 0x00, 0x00, 0x00 }, sound.Lnam);
+        Assert.Equal(new byte[] { 0x00, 0x05, 0x80, 0x01, 0x00, 0x00 }, sound.Bnam);
+        Assert.False(feedback.GetProperty("spatialSound").GetBoolean(), "the echo sound plays at the listener, not at the target");
+
+        Assert.Equal(3, sound.Files.Count);
+        foreach (var file in sound.Files)
+        {
+            Assert.False(file.StartsWith(@"Sound\", StringComparison.OrdinalIgnoreCase), $"{file}: must be Data\\Sound-relative.");
+            var shipped = Path.Combine(new[] { repoRoot, "Data", "Sound" }.Concat(file.Split('\\')).ToArray());
+            Assert.True(File.Exists(shipped), $"{file}: not shipped under Data\\Sound.");
+            var header = File.ReadAllBytes(shipped).AsSpan(0, 12).ToArray();
+            Assert.Equal("RIFF", Encoding.ASCII.GetString(header, 0, 4));
+            Assert.Equal("WAVE", Encoding.ASCII.GetString(header, 8, 4));
         }
     }
 
@@ -607,6 +643,63 @@ public sealed class VfxFeedbackContractTests
             }
             pos += 24 + dataSize;
         }
+    }
+
+    private sealed record RawSoundDescriptor(
+        uint FormId, string EditorId, uint Cnam, uint Gnam, uint Onam, byte[] Lnam, byte[] Bnam, List<string> Files);
+
+    // Minimal TES5 plugin reader for SNDR, independent of Mutagen so the assertions see the
+    // bytes the game reads.
+    private static List<RawSoundDescriptor> ReadRawSoundDescriptors(string pluginPath)
+    {
+        var buffer = File.ReadAllBytes(pluginPath);
+        var results = new List<RawSoundDescriptor>();
+        void Walk(int start, int end)
+        {
+            var pos = start;
+            while (pos + 24 <= end)
+            {
+                var recordType = Encoding.ASCII.GetString(buffer, pos, 4);
+                var size = BitConverter.ToInt32(buffer, pos + 4);
+                if (recordType == "GRUP")
+                {
+                    Walk(pos + 24, pos + size);
+                    pos += size;
+                    continue;
+                }
+                if (recordType == "SNDR")
+                {
+                    Assert.True((BitConverter.ToUInt32(buffer, pos + 8) & 0x00040000u) == 0, "Compressed SNDR records are not expected.");
+                    var formId = BitConverter.ToUInt32(buffer, pos + 12);
+                    string editorId = string.Empty;
+                    uint cnam = 0, gnam = 0, onam = 0;
+                    byte[] lnam = [], bnam = [];
+                    var files = new List<string>();
+                    var sub = pos + 24;
+                    while (sub + 6 <= pos + 24 + size)
+                    {
+                        var subType = Encoding.ASCII.GetString(buffer, sub, 4);
+                        int subSize = BitConverter.ToUInt16(buffer, sub + 4);
+                        var data = sub + 6;
+                        switch (subType)
+                        {
+                            case "EDID": editorId = ReadZString(buffer, data, subSize); break;
+                            case "CNAM": cnam = BitConverter.ToUInt32(buffer, data); break;
+                            case "GNAM": gnam = BitConverter.ToUInt32(buffer, data); break;
+                            case "ONAM": onam = BitConverter.ToUInt32(buffer, data); break;
+                            case "LNAM": lnam = buffer.AsSpan(data, subSize).ToArray(); break;
+                            case "BNAM": bnam = buffer.AsSpan(data, subSize).ToArray(); break;
+                            case "ANAM": files.Add(ReadZString(buffer, data, subSize)); break;
+                        }
+                        sub = data + subSize;
+                    }
+                    results.Add(new RawSoundDescriptor(formId, editorId, cnam, gnam, onam, lnam, bnam, files));
+                }
+                pos += 24 + size;
+            }
+        }
+        Walk(24 + BitConverter.ToInt32(buffer, 4), buffer.Length);
+        return results;
     }
 
     private static string ReadZString(byte[] buffer, int start, int size)
