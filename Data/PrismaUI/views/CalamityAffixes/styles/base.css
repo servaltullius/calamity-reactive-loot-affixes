@@ -2,16 +2,36 @@
   --scale: 1;
   --panel-ui-scale: 1;
   --tooltip-font-scale: 1;
+
+  /* Palette (v2.3.0, "Nord bone and gold"): sampled from the inventory and MCM
+     theme the panel sits next to -- smoky brown, bone text, a muted gold line.
+     Every colour in the view is rgba(var(--<role>-rgb), alpha); change it here. */
+  --base-rgb: 23, 20, 18;
+  --base-raised-rgb: 28, 25, 22;
+  --text-rgb: 236, 229, 214;
+  --accent-rgb: 201, 184, 140;
+  --accent-light-rgb: 232, 221, 192;
+  --magic-rgb: 171, 188, 203;
+  --magic-light-rgb: 237, 240, 243;
+  --danger-rgb: 205, 128, 112;
+  --danger-light-rgb: 240, 214, 206;
+  --warn-rgb: 214, 180, 128;
+  --warn-light-rgb: 236, 222, 196;
+
   --bg: rgba(0, 0, 0, 0.65);
-  --panel: rgba(10, 14, 18, 0.9);
-  --border: rgba(255, 255, 255, 0.16);
-  --accent: #00ff99;
-  --accent-soft: rgba(0, 255, 153, 0.25);
-  --accent-strong: rgba(173, 255, 219, 0.96);
-  --danger: rgba(255, 128, 128, 0.92);
-  --danger-soft: rgba(255, 96, 96, 0.12);
-  --text: rgba(255, 255, 255, 0.95);
-  --muted: rgba(255, 255, 255, 0.75);
+  --panel: rgba(var(--base-rgb), 0.9);
+  --border: rgba(var(--text-rgb), 0.16);
+  --accent: rgb(var(--accent-rgb));
+  --accent-soft: rgba(var(--accent-rgb), 0.25);
+  --accent-strong: rgba(var(--accent-light-rgb), 0.96);
+  --danger: rgba(var(--danger-rgb), 0.92);
+  --danger-soft: rgba(var(--danger-rgb), 0.12);
+  --text: rgba(var(--text-rgb), 0.95);
+  --muted: rgba(var(--text-rgb), 0.75);
+
+  /* Square-ish corners, like the game's frames; pills stay for small chips. */
+  --radius-panel: calc(4px * var(--panel-ui-scale));
+  --radius-box: calc(3px * var(--panel-ui-scale));
 }
 
 html,
@@ -44,10 +64,10 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(var(--text-rgb), 0.18);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.32);
+  background: rgba(var(--text-rgb), 0.32);
 }
 

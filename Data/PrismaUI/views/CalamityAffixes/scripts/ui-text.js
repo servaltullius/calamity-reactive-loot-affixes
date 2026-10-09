@@ -88,12 +88,6 @@ function initUiText() {
   if (tooltipRunewordHint) {
     tooltipRunewordHint.setAttribute("aria-label", t("Open Calamity panel", "칼라미티 패널 열기"));
   }
-  if (runewordFlowTitle) {
-    runewordFlowTitle.textContent = t("Runeword Workbench", "룬워드 작업대");
-  }
-  if (runewordFlowHint) {
-    runewordFlowHint.textContent = t("Pick an item to work on.", "작업할 장비를 고르세요.");
-  }
   if (runewordBaseStepTitle) {
     runewordBaseStepTitle.textContent = t("Item", "장비 선택");
   }
@@ -116,25 +110,14 @@ function initUiText() {
     );
   }
   if (runewordBaseAffixSummary) {
+    // The slot list below is the main view; this is the full tooltip text.
     runewordBaseAffixSummary.textContent = t(
-      "Selected Item Affixes",
-      "선택한 장비 어픽스"
+      "Full Item Effects",
+      "장비 효과 전체 보기"
     );
   }
   if (selectedItemLabel) {
     selectedItemLabel.textContent = t("Inspected Item", "확인 중인 아이템");
-  }
-  if (runewordContextRecipeLabel) {
-    runewordContextRecipeLabel.textContent = t("Selected Recipe", "선택 레시피");
-  }
-  if (runewordContextRecipeName) {
-    runewordContextRecipeName.textContent = t("No recipe selected", "선택된 레시피 없음");
-  }
-  if (runewordContextRecipeMeta) {
-    runewordContextRecipeMeta.textContent = t(
-      "Pick a recipe from the list on the left.",
-      "왼쪽 목록에서 레시피를 고르세요."
-    );
   }
   if (affixSelectedItemLabel) {
     affixSelectedItemLabel.textContent = t("Inspected Inventory Item", "확인 중인 인벤토리 아이템");

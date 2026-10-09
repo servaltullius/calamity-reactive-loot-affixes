@@ -2,10 +2,10 @@
   margin-top: calc(8px * var(--panel-ui-scale));
   margin-bottom: calc(8px * var(--panel-ui-scale));
   padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(var(--text-rgb), 0.14);
+  border-radius: var(--radius-box);
+  background: rgba(var(--text-rgb), 0.04);
+  color: rgba(var(--text-rgb), 0.9);
   font-size: calc(12px * var(--panel-ui-scale));
   line-height: 1.3;
   overflow-wrap: anywhere;
@@ -25,122 +25,75 @@
   padding: calc(4px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
   border-radius: 999px;
   font-size: calc(11px * var(--panel-ui-scale));
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(var(--text-rgb), 0.14);
+  background: rgba(var(--text-rgb), 0.05);
+  color: rgba(var(--text-rgb), 0.92);
   white-space: nowrap;
 }
 
 .rwBadge.ready {
-  border-color: rgba(0, 255, 153, 0.45);
-  background: rgba(0, 255, 153, 0.12);
-  color: rgba(173, 255, 219, 0.98);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: rgba(var(--accent-light-rgb), 0.98);
 }
 
 .rwBadge.missing {
-  border-color: rgba(255, 120, 120, 0.45);
-  background: rgba(255, 90, 90, 0.08);
-  color: rgba(255, 210, 210, 0.98);
+  border-color: rgba(var(--danger-rgb), 0.45);
+  background: rgba(var(--danger-rgb), 0.08);
+  color: rgba(var(--danger-light-rgb), 0.98);
 }
 
 .rwBadge.complete {
-  border-color: rgba(160, 200, 255, 0.45);
-  background: rgba(120, 170, 255, 0.10);
-  color: rgba(220, 235, 255, 0.98);
+  border-color: rgba(var(--magic-light-rgb), 0.45);
+  background: rgba(var(--magic-rgb), 0.10);
+  color: rgba(var(--magic-light-rgb), 0.98);
 }
 
 .rwBadge.warning {
-  border-color: rgba(255, 188, 86, 0.72);
-  background: rgba(255, 155, 45, 0.16);
-  color: rgba(255, 231, 184, 0.98);
+  border-color: rgba(var(--warn-rgb), 0.72);
+  background: rgba(var(--warn-rgb), 0.16);
+  color: rgba(var(--warn-light-rgb), 0.98);
 }
 
 .rwMetaLine {
   margin-top: calc(6px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.74);
+  color: rgba(var(--text-rgb), 0.74);
   line-height: 1.4;
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
 
 .rwMetaLine.warning {
-  color: rgba(255, 211, 142, 0.98);
+  color: rgba(var(--warn-rgb), 0.98);
   font-weight: 700;
 }
 
-.rwContextBar {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.1fr);
-  gap: calc(8px * var(--panel-ui-scale));
-  align-items: center;
-}
-
-.rwFlowIntro {
+.rwStatusTitle {
   min-width: 0;
 }
 
-.rwFlowIntro .cpSectionTitle {
-  font-size: calc(15px * var(--panel-ui-scale));
-  margin-bottom: calc(2px * var(--panel-ui-scale));
-}
-
-.rwFlowIntro .cpContextMeta {
-  font-size: calc(11px * var(--panel-ui-scale));
+.rwStatusRecipe {
+  color: rgba(var(--text-rgb), 0.98);
+  font-size: calc(14px * var(--panel-ui-scale));
+  font-weight: 700;
   line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
-.rwContextSnapshot {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: calc(8px * var(--panel-ui-scale));
-}
-
-.rwContextChip {
-  min-width: 0;
-  padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.02);
-}
-
-.rwContextChipLabel {
-  color: rgba(255, 255, 255, 0.66);
-  font-size: calc(10px * var(--panel-ui-scale));
-  letter-spacing: 0.22px;
-  text-transform: uppercase;
-}
-
-.rwContextChipValue {
-  margin-top: calc(3px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.98);
-  font-size: calc(13px * var(--panel-ui-scale));
-  font-weight: 700;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.rwContextChipMeta {
+.rwStatusSentence {
   margin-top: calc(2px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.68);
-  font-size: calc(10px * var(--panel-ui-scale));
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: rgba(var(--text-rgb), 0.75);
+  font-size: calc(12px * var(--panel-ui-scale));
 }
 
 .cpStepCard {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  border: 1px solid rgba(var(--text-rgb), 0.12);
+  border-radius: var(--radius-panel);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.02);
+    linear-gradient(180deg, rgba(var(--text-rgb), 0.04), rgba(var(--text-rgb), 0.02)),
+    rgba(var(--text-rgb), 0.02);
   padding: calc(12px * var(--panel-ui-scale));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 1px 0 rgba(var(--text-rgb), 0.03);
 }
 
 .cpStepCard + .cpStepCard {
@@ -148,17 +101,17 @@
 }
 
 .cpStepCard.active {
-  border-color: rgba(0, 255, 153, 0.26);
+  border-color: rgba(var(--accent-rgb), 0.26);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    0 0 0 1px rgba(0, 255, 153, 0.1);
+    inset 0 1px 0 rgba(var(--text-rgb), 0.03),
+    0 0 0 1px rgba(var(--accent-rgb), 0.1);
 }
 
 .cpStepCard.complete {
-  border-color: rgba(173, 255, 219, 0.22);
+  border-color: rgba(var(--accent-light-rgb), 0.22);
   background:
-    linear-gradient(180deg, rgba(173, 255, 219, 0.08), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.02);
+    linear-gradient(180deg, rgba(var(--accent-light-rgb), 0.08), rgba(var(--text-rgb), 0.02)),
+    rgba(var(--text-rgb), 0.02);
 }
 
 .cpStepCard.muted {
@@ -176,9 +129,9 @@
   width: calc(28px * var(--panel-ui-scale));
   height: calc(28px * var(--panel-ui-scale));
   border-radius: 999px;
-  background: rgba(0, 255, 153, 0.12);
-  border: 1px solid rgba(0, 255, 153, 0.24);
-  color: rgba(230, 255, 243, 0.98);
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.24);
+  color: rgba(var(--accent-light-rgb), 0.98);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -187,7 +140,7 @@
 }
 
 .cpStepTitle {
-  color: rgba(255, 255, 255, 0.98);
+  color: rgba(var(--text-rgb), 0.98);
   font-size: calc(15px * var(--panel-ui-scale));
   font-weight: 700;
   line-height: 1.25;
@@ -195,7 +148,7 @@
 
 .cpStepHint {
   margin-top: calc(8px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(var(--text-rgb), 0.72);
   font-size: calc(12px * var(--panel-ui-scale));
   line-height: 1.45;
 }
@@ -205,18 +158,18 @@
 }
 
 .cpPrimaryButton {
-  background: rgba(0, 255, 153, 0.12);
-  border-color: rgba(0, 255, 153, 0.28);
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--accent-rgb), 0.28);
   font-weight: 800;
 }
 
 .cpPrimaryButton:hover {
-  background: rgba(0, 255, 153, 0.18);
-  border-color: rgba(0, 255, 153, 0.4);
+  background: rgba(var(--accent-rgb), 0.18);
+  border-color: rgba(var(--accent-rgb), 0.4);
 }
 
 .cpPrimaryButton.attention {
-  box-shadow: 0 0 0 2px rgba(0, 255, 153, 0.12);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.12);
 }
 
 .rwStateShift {
@@ -226,10 +179,10 @@
 .rwRecipeEffectLine {
   margin-top: calc(6px * var(--panel-ui-scale));
   padding: calc(7px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
-  border-radius: 8px;
-  border: 1px solid rgba(0, 255, 153, 0.28);
-  background: rgba(0, 255, 153, 0.08);
-  color: rgba(215, 255, 236, 0.98);
+  border-radius: var(--radius-box);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  background: rgba(var(--accent-rgb), 0.08);
+  color: rgba(var(--accent-light-rgb), 0.98);
   font-size: calc(12px * var(--panel-ui-scale));
   line-height: 1.45;
   white-space: pre-line;
@@ -237,7 +190,7 @@
 }
 
 .rwRecipeDetailLine {
-  border-left: 2px solid rgba(0, 255, 153, 0.22);
+  border-left: 2px solid rgba(var(--accent-rgb), 0.22);
   padding-left: calc(8px * var(--panel-ui-scale));
 }
 
@@ -305,9 +258,9 @@
 }
 
 .rwRailDetails {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(var(--text-rgb), 0.1);
+  border-radius: var(--radius-box);
+  background: rgba(var(--text-rgb), 0.02);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -328,7 +281,7 @@
   list-style: none;
   cursor: pointer;
   padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
-  color: rgba(235, 255, 244, 0.92);
+  color: rgba(var(--accent-light-rgb), 0.92);
   font-size: calc(13px * var(--panel-ui-scale));
   font-weight: 700;
   line-height: 1.3;
@@ -379,7 +332,7 @@
 
 .rwBaseRail .cpSectionSubtle {
   font-size: calc(12px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(var(--text-rgb), 0.8);
 }
 
 #runewordBaseListHint {
@@ -447,9 +400,9 @@
 .rwActionHintBox {
   margin-top: calc(6px * var(--panel-ui-scale));
   padding: calc(6px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(var(--text-rgb), 0.1);
+  border-radius: var(--radius-box);
+  background: rgba(var(--text-rgb), 0.03);
   font-size: calc(11px * var(--panel-ui-scale));
   line-height: 1.35;
 }
@@ -465,11 +418,11 @@
 }
 
 .rwCubeFrame {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
+  border: 1px solid rgba(var(--text-rgb), 0.14);
+  border-radius: var(--radius-box);
   background:
-    radial-gradient(120% 120% at 50% 20%, rgba(255, 255, 255, 0.05), transparent 55%),
-    linear-gradient(180deg, rgba(20, 24, 28, 0.85), rgba(8, 10, 12, 0.88));
+    radial-gradient(120% 120% at 50% 20%, rgba(var(--text-rgb), 0.05), transparent 55%),
+    linear-gradient(180deg, rgba(var(--base-raised-rgb), 0.85), rgba(var(--base-rgb), 0.88));
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.35),
     0 14px 30px rgba(0, 0, 0, 0.35);
@@ -495,19 +448,19 @@
 }
 
 .rwCell {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 10px;
+  border: 1px solid rgba(var(--text-rgb), 0.16);
+  border-radius: var(--radius-box);
   background:
     repeating-linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.04) 0,
-      rgba(255, 255, 255, 0.04) 6px,
+      rgba(var(--text-rgb), 0.04) 0,
+      rgba(var(--text-rgb), 0.04) 6px,
       rgba(0, 0, 0, 0.0) 6px,
       rgba(0, 0, 0, 0.0) 12px
     ),
     rgba(0, 0, 0, 0.2);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(var(--text-rgb), 0.08),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35);
   padding: calc(6px * var(--panel-ui-scale)) calc(7px * var(--panel-ui-scale));
   display: flex;
@@ -522,29 +475,29 @@
 }
 
 .rwCell.base {
-  border-color: rgba(0, 255, 153, 0.28);
-  background: rgba(0, 255, 153, 0.06);
+  border-color: rgba(var(--accent-rgb), 0.28);
+  background: rgba(var(--accent-rgb), 0.06);
 }
 
 .rwCell.ready {
-  border-color: rgba(0, 255, 153, 0.32);
-  background: rgba(0, 255, 153, 0.08);
+  border-color: rgba(var(--accent-rgb), 0.32);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 
 .rwCell.missing {
-  border-color: rgba(255, 120, 120, 0.38);
-  background: rgba(255, 90, 90, 0.06);
+  border-color: rgba(var(--danger-rgb), 0.38);
+  background: rgba(var(--danger-rgb), 0.06);
 }
 
 .rwCellTitle {
   font-size: calc(10px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(var(--text-rgb), 0.72);
   letter-spacing: 0.2px;
 }
 
 .rwCellName {
   font-size: calc(12px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(var(--text-rgb), 0.95);
   font-weight: 600;
   line-height: 1.15;
   word-break: break-word;
@@ -556,7 +509,7 @@
 
 .rwCellCounts {
   font-size: calc(10px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(var(--text-rgb), 0.72);
 }
 
 /* Title and count stay one line so the name always keeps its room; the cell's
@@ -589,7 +542,7 @@
 }
 
 .rwActionSectionLabel {
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(var(--text-rgb), 0.72);
   font-size: calc(11px * var(--panel-ui-scale));
   font-weight: 700;
   letter-spacing: 0.18px;
@@ -617,6 +570,16 @@
   line-height: 1.35;
 }
 
+.rwReforgeHeadRow {
+  cursor: default;
+  color: rgba(var(--accent-light-rgb), 0.9);
+  border-style: dashed;
+}
+
+.rwReforgeHeadRow[hidden] {
+  display: none;
+}
+
 .rwReforgeLockList {
   max-height: calc(132px * var(--panel-ui-scale));
   overflow-y: auto;
@@ -630,7 +593,7 @@
 
 .rwReforgeCostSummary {
   min-height: calc(15px * var(--panel-ui-scale));
-  color: rgba(225, 255, 240, 0.84);
+  color: rgba(var(--accent-light-rgb), 0.84);
   font-weight: 600;
 }
 
@@ -656,9 +619,9 @@
 
 .rwActionDetails {
   margin-top: calc(8px * var(--panel-ui-scale));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(var(--text-rgb), 0.12);
+  border-radius: var(--radius-box);
+  background: rgba(var(--text-rgb), 0.03);
   overflow: hidden;
 }
 
@@ -666,7 +629,7 @@
   list-style: none;
   cursor: pointer;
   padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
-  color: rgba(225, 255, 240, 0.9);
+  color: rgba(var(--accent-light-rgb), 0.9);
   font-size: calc(12px * var(--panel-ui-scale));
   font-weight: 700;
 }
@@ -707,10 +670,10 @@
 
 .rwFilterButton {
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--text-rgb), 0.16);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.76);
+  background: rgba(var(--text-rgb), 0.04);
+  color: rgba(var(--text-rgb), 0.76);
   padding: calc(4px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
   font-family: inherit;
   font-size: calc(10px * var(--panel-ui-scale));
@@ -720,33 +683,33 @@
 
 .rwFilterButton:hover {
   border-color: var(--accent-soft);
-  background: rgba(0, 255, 153, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 
 .rwFilterButton[aria-pressed="true"] {
-  border-color: rgba(0, 255, 153, 0.52);
-  background: rgba(0, 255, 153, 0.15);
-  color: rgba(225, 255, 240, 0.98);
+  border-color: rgba(var(--accent-rgb), 0.52);
+  background: rgba(var(--accent-rgb), 0.15);
+  color: rgba(var(--accent-light-rgb), 0.98);
 }
 
 .rwFilterButton:disabled {
   cursor: not-allowed;
   opacity: 0.48;
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(var(--text-rgb), 0.12);
+  background: rgba(var(--text-rgb), 0.025);
 }
 
 .rwFilterButton:disabled:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(var(--text-rgb), 0.12);
+  background: rgba(var(--text-rgb), 0.025);
 }
 
 .rwSearchInput {
   flex: 1 1 auto;
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(var(--text-rgb), 0.2);
+  border-radius: var(--radius-box);
+  background: rgba(var(--text-rgb), 0.05);
   color: var(--text);
   padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
   font-size: calc(12px * var(--panel-ui-scale));
@@ -754,7 +717,7 @@
 
 .rwRecipeCount {
   flex: 0 0 auto;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(var(--text-rgb), 0.72);
   font-size: calc(11px * var(--panel-ui-scale));
   white-space: nowrap;
 }
@@ -792,35 +755,35 @@
 .rwRecipeBaseBadge {
   flex: 0 0 auto;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.26);
+  border: 1px solid rgba(var(--text-rgb), 0.26);
   padding: calc(1px * var(--panel-ui-scale)) calc(6px * var(--panel-ui-scale));
   font-size: calc(9px * var(--panel-ui-scale));
   line-height: 1.4;
   white-space: nowrap;
-  color: rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.08);
+  color: rgba(var(--text-rgb), 0.88);
+  background: rgba(var(--text-rgb), 0.08);
 }
 
 .rwRecipeBaseBadge.weapon {
-  border-color: rgba(255, 197, 118, 0.55);
-  background: rgba(255, 178, 79, 0.14);
+  border-color: rgba(var(--warn-rgb), 0.55);
+  background: rgba(var(--warn-rgb), 0.14);
 }
 
 .rwRecipeBaseBadge.armor {
-  border-color: rgba(124, 204, 255, 0.55);
-  background: rgba(74, 169, 255, 0.14);
+  border-color: rgba(var(--magic-rgb), 0.55);
+  background: rgba(var(--magic-rgb), 0.14);
 }
 
 .rwRecipeBaseBadge.mixed {
-  border-color: rgba(181, 255, 142, 0.55);
-  background: rgba(125, 235, 99, 0.14);
+  border-color: rgba(var(--accent-rgb), 0.55);
+  background: rgba(var(--accent-rgb), 0.14);
 }
 
 .rwRecipeSummary {
   margin-top: calc(1px * var(--panel-ui-scale));
   font-size: calc(10px * var(--panel-ui-scale));
   line-height: 1.25;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(var(--text-rgb), 0.72);
   white-space: normal;
   overflow: hidden;
   display: -webkit-box;
@@ -839,11 +802,11 @@
 
 .rwRecipeMaterialBadge {
   flex: 0 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(var(--text-rgb), 0.18);
   border-radius: 999px;
   padding: calc(1px * var(--panel-ui-scale)) calc(6px * var(--panel-ui-scale));
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.78);
+  background: rgba(var(--text-rgb), 0.05);
+  color: rgba(var(--text-rgb), 0.78);
   font-size: calc(9px * var(--panel-ui-scale));
   font-weight: 700;
   line-height: 1.35;
@@ -851,31 +814,31 @@
 }
 
 .rwRecipeMaterialBadge.ready {
-  border-color: rgba(0, 255, 153, 0.44);
-  background: rgba(0, 255, 153, 0.12);
-  color: rgba(215, 255, 236, 0.98);
+  border-color: rgba(var(--accent-rgb), 0.44);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: rgba(var(--accent-light-rgb), 0.98);
 }
 
 .rwRecipeMaterialBadge.missing1 {
-  border-color: rgba(255, 197, 118, 0.52);
-  background: rgba(255, 178, 79, 0.12);
-  color: rgba(255, 231, 195, 0.98);
+  border-color: rgba(var(--warn-rgb), 0.52);
+  background: rgba(var(--warn-rgb), 0.12);
+  color: rgba(var(--warn-light-rgb), 0.98);
 }
 
 .rwRecipeMaterialBadge.missing {
-  border-color: rgba(255, 120, 120, 0.38);
-  background: rgba(255, 90, 90, 0.07);
-  color: rgba(255, 210, 210, 0.94);
+  border-color: rgba(var(--danger-rgb), 0.38);
+  background: rgba(var(--danger-rgb), 0.07);
+  color: rgba(var(--danger-light-rgb), 0.94);
 }
 
 .rwRecipeMaterialBadge.unknown {
   border-style: dashed;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(var(--text-rgb), 0.58);
 }
 
 .rwRecipeMaterialCoverage {
   min-width: 0;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(var(--text-rgb), 0.62);
   font-size: calc(9px * var(--panel-ui-scale));
   line-height: 1.3;
   white-space: nowrap;
@@ -885,33 +848,27 @@
 
 .rwRecipeListItem {
   padding: calc(7px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
-  border-radius: 10px;
+  border-radius: var(--radius-box);
 }
 
 .cpListItem.selected .rwRecipeSummary {
-  color: rgba(225, 255, 240, 0.92);
+  color: rgba(var(--accent-light-rgb), 0.92);
 }
 
 .cpAffixPane {
   height: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.9fr);
+  /* Even split: the work column is short, the build list in the side column is long. */
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
   gap: calc(10px * var(--panel-ui-scale));
   overflow: hidden;
 }
 
-.affixBuildColumn,
-.affixActionColumn {
+.affixWorkColumn,
+.affixSideColumn {
   min-width: 0;
   min-height: 0;
-}
-
-.affixBuildColumn {
-  overflow: hidden;
-}
-
-.affixActionColumn {
   display: flex;
   flex-direction: column;
   gap: calc(8px * var(--panel-ui-scale));
@@ -919,17 +876,30 @@
   padding-right: calc(3px * var(--panel-ui-scale));
 }
 
+/* The equipped build is reference in the side column: one group per row, and
+   it grows with its content so the column is the only thing that scrolls. */
+.affixSideColumn .ebSection {
+  flex: 0 0 auto;
+  height: auto;
+  overflow: visible;
+}
+
+.affixSideColumn .ebGroupGrid {
+  grid-template-columns: minmax(0, 1fr);
+  overflow: visible;
+}
+
 .affixWorkingActions {
   margin-top: 0;
   padding: calc(9px * var(--panel-ui-scale));
-  border: 1px solid rgba(0, 255, 153, 0.18);
-  border-radius: 12px;
-  background: rgba(0, 255, 153, 0.035);
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border-radius: var(--radius-box);
+  background: rgba(var(--accent-rgb), 0.035);
 }
 
 .affixWorkingActions > .cpSectionTitle {
   margin-bottom: calc(5px * var(--panel-ui-scale));
-  color: rgba(225, 255, 240, 0.96);
+  color: rgba(var(--accent-light-rgb), 0.96);
   font-size: calc(13px * var(--panel-ui-scale));
   font-weight: 700;
 }
@@ -949,14 +919,14 @@
   gap: calc(4px * var(--panel-ui-scale));
   margin-top: calc(6px * var(--panel-ui-scale));
   padding: calc(6px * var(--panel-ui-scale)) calc(7px * var(--panel-ui-scale));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9px;
+  border: 1px solid rgba(var(--text-rgb), 0.1);
+  border-radius: var(--radius-box);
   background: rgba(0, 0, 0, 0.18);
 }
 
 .affixSlotProgress.pending {
-  border-color: rgba(0, 255, 153, 0.36);
-  background: rgba(0, 255, 153, 0.055);
+  border-color: rgba(var(--accent-rgb), 0.36);
+  background: rgba(var(--accent-rgb), 0.055);
 }
 
 .affixSlotProgress.muted {
@@ -972,7 +942,7 @@
 
 .affixSlotProgressTitle {
   min-width: 0;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(var(--text-rgb), 0.78);
   font-size: calc(10px * var(--panel-ui-scale));
   font-weight: 650;
   white-space: nowrap;
@@ -982,7 +952,7 @@
 
 .affixSlotProgressCount {
   flex: 0 0 auto;
-  color: rgba(184, 255, 222, 0.96);
+  color: rgba(var(--accent-light-rgb), 0.96);
   font-size: calc(10px * var(--panel-ui-scale));
 }
 
@@ -995,10 +965,10 @@
 .affixSlotNode {
   min-width: 0;
   padding: calc(3px * var(--panel-ui-scale)) calc(5px * var(--panel-ui-scale));
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(var(--text-rgb), 0.09);
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.46);
-  background: rgba(255, 255, 255, 0.025);
+  color: rgba(var(--text-rgb), 0.46);
+  background: rgba(var(--text-rgb), 0.025);
   font-size: calc(9px * var(--panel-ui-scale));
   line-height: 1.15;
   text-align: center;
@@ -1008,14 +978,14 @@
 }
 
 .affixSlotNode.active {
-  border-color: rgba(0, 255, 153, 0.34);
-  color: rgba(220, 255, 239, 0.96);
-  background: rgba(0, 255, 153, 0.11);
+  border-color: rgba(var(--accent-rgb), 0.34);
+  color: rgba(var(--accent-light-rgb), 0.96);
+  background: rgba(var(--accent-rgb), 0.11);
 }
 
 .affixSlotNode.next {
-  border-color: rgba(255, 210, 110, 0.3);
-  color: rgba(255, 231, 178, 0.9);
+  border-color: rgba(var(--warn-rgb), 0.3);
+  color: rgba(var(--warn-light-rgb), 0.9);
 }
 
 .affixSlotProgressMeta {
@@ -1056,15 +1026,15 @@
 }
 
 .cpAffixOverview {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border: 1px solid rgba(var(--text-rgb), 0.1);
+  border-radius: var(--radius-box);
   padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.02);
+    linear-gradient(180deg, rgba(var(--text-rgb), 0.04), rgba(var(--text-rgb), 0.02)),
+    rgba(var(--text-rgb), 0.02);
 }
 
-.affixActionColumn #panelTooltipText {
+.affixSideColumn #panelTooltipText {
   max-height: calc(92px * var(--panel-ui-scale));
   overflow-y: auto;
 }
@@ -1085,7 +1055,7 @@
 }
 
 .cpAffixLead {
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(var(--text-rgb), 0.72);
   font-size: calc(12px * var(--panel-ui-scale));
   line-height: 1.45;
 }
@@ -1101,7 +1071,7 @@
   flex: 0 0 auto;
   margin-bottom: calc(8px * var(--panel-ui-scale));
   padding: calc(7px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
-  border-radius: 11px;
+  border-radius: var(--radius-box);
 }
 
 .wbDockSummary {
@@ -1123,7 +1093,7 @@
 
 .wbDock .cpStepTitle {
   font-size: calc(11px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(var(--text-rgb), 0.68);
   text-transform: uppercase;
   letter-spacing: 0.22px;
 }
@@ -1131,7 +1101,7 @@
 .wbDockName {
   max-width: min(70vw, calc(760px * var(--panel-ui-scale)));
   margin-top: calc(1px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.98);
+  color: rgba(var(--text-rgb), 0.98);
   font-size: calc(13px * var(--panel-ui-scale));
   font-weight: 750;
   line-height: 1.2;
@@ -1143,7 +1113,7 @@
 .wbDockMeta {
   max-width: min(70vw, calc(760px * var(--panel-ui-scale)));
   margin-top: calc(1px * var(--panel-ui-scale));
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(var(--text-rgb), 0.62);
   font-size: calc(10px * var(--panel-ui-scale));
   line-height: 1.2;
   white-space: nowrap;
@@ -1176,8 +1146,8 @@
   min-height: 0;
   flex: 0 0 auto;
   overflow: visible;
-  border-color: rgba(0, 255, 153, 0.2);
-  background: rgba(0, 255, 153, 0.055);
+  border-color: rgba(var(--accent-rgb), 0.2);
+  background: rgba(var(--accent-rgb), 0.055);
 }
 
 .wbChooserDisclosure {
@@ -1209,9 +1179,9 @@
   width: min(calc(820px * var(--panel-ui-scale)), calc(100vw - 64px));
   max-height: none;
   padding: calc(14px * var(--panel-ui-scale));
-  border: 1px solid rgba(0, 255, 153, 0.3);
-  border-radius: 12px;
-  background: rgba(8, 13, 17, 0.985);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  border-radius: var(--radius-box);
+  background: rgba(var(--base-rgb), 0.985);
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.58);
   overflow: visible;
 }

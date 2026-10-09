@@ -363,7 +363,8 @@ function createEquippedBuildEntry(entry, facetGroupId) {
       passiveFacetBadge.className
     );
   }
-  if (entry.hasProcRoll) {
+  // 100% is the default; a chip only earns its place when it says something.
+  if (entry.hasProcRoll && entry.procRollChancePct < 100) {
     const chance = formatEquippedBuildChance(entry.procRollChancePct);
     appendEquippedBuildBadge(
       effectBadges,
@@ -433,6 +434,12 @@ function renderEquippedBuildGroup(groupId, entries) {
   elements.count.textContent = String(slotCount);
   elements.count.setAttribute("aria-label", countLabel);
   elements.count.title = countLabel;
+
+  // An empty group ("Kill Effects: None") took a whole box; hide it instead.
+  const groupSection = elements.list.parentElement;
+  if (groupSection) {
+    groupSection.hidden = entries.length === 0;
+  }
 
   if (entries.length === 0) {
     const empty = document.createElement("li");

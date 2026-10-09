@@ -635,42 +635,6 @@ function renderRunewordFlowProgress(actionState, state) {
   if (runewordInsertButton) {
     runewordInsertButton.classList.toggle("attention", canTransmute);
   }
-
-  if (!runewordFlowHint) {
-    return;
-  }
-
-  if (!hasBase) {
-    runewordFlowHint.textContent = t("Pick an item to work on.", "작업할 장비를 고르세요.");
-    return;
-  }
-
-  if (!hasRecipe) {
-    runewordFlowHint.textContent = t("Pick a recipe.", "레시피를 고르세요.");
-    return;
-  }
-
-  if (isComplete) {
-    runewordFlowHint.textContent = t(
-      "This item already has a runeword. Reforging changes only its regular affixes.",
-      "이 장비에는 이미 룬워드가 있습니다. 재련은 일반 어픽스만 바꿉니다."
-    );
-    return;
-  }
-
-  if (canTransmute) {
-    // The recipe card on the right already says it is ready.
-    runewordFlowHint.textContent = "";
-    return;
-  }
-
-  if (state?.missingSummary) {
-    // The recipe card and its badge already list what is missing.
-    runewordFlowHint.textContent = "";
-    return;
-  }
-
-  runewordFlowHint.textContent = "";
 }
 
 function renderAffixSlotProgress(actionState) {
@@ -854,6 +818,19 @@ function renderRunewordPanelState() {
       )
       : t("Reroll every regular affix at once, keeping the slot count. Runeword preserved.", "슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴립니다. 룬워드는 유지됩니다.");
   }
+  // The runeword holds the item's first slot but is not reforged; show it above
+  // the selectable affixes so the list reads as the item's three slots.
+  if (runewordReforgeHeadRow) {
+    const selectedBase = (Array.isArray(inventoryItemsState) ? inventoryItemsState : [])
+      .find((item) => item && item.selected);
+    const nameEn = selectedBase?.runewordNameEn || selectedBase?.runewordNameKo || "";
+    const nameKo = selectedBase?.runewordNameKo || selectedBase?.runewordNameEn || "";
+    const showHead = actionState.hasRuneword && Boolean(nameEn);
+    runewordReforgeHeadRow.hidden = !showHead;
+    runewordReforgeHeadRow.textContent = showHead
+      ? t(`[Runeword] ${nameEn} · not reforged`, `[룬워드] ${nameKo} · 재련 대상 아님`)
+      : "";
+  }
   if (runewordRemoveButton) {
     runewordRemoveButton.hidden = !actionState.hasRuneword;
     runewordRemoveButton.disabled = !actionState.removeRunewordEnabled;
@@ -899,41 +876,6 @@ function renderRunewordPanelState() {
   const selectedRecipe = getSelectedRecipeItem();
 
   renderRunewordFlowProgress(actionState, state);
-
-  if (runewordContextRecipeName) {
-    if (selectedRecipe) {
-      const recipeName = resolveRecipeName(selectedRecipe) || t("Unknown", "알 수 없음");
-      const runeOrder = typeof selectedRecipe?.runes === "string" ? selectedRecipe.runes.trim() : "";
-      runewordContextRecipeName.textContent = runeOrder ? `${recipeName} [${runeOrder}]` : recipeName;
-    } else {
-      runewordContextRecipeName.textContent = t("No recipe selected", "선택된 레시피 없음");
-    }
-  }
-
-  if (runewordContextRecipeMeta) {
-    if (!hasBase) {
-      runewordContextRecipeMeta.textContent = t("Pick an item first.", "먼저 장비를 고르세요.");
-    } else if (!selectedRecipe) {
-      runewordContextRecipeMeta.textContent = t(
-        "Pick a recipe from the list on the left.",
-        "왼쪽 목록에서 레시피를 고르세요."
-      );
-    } else if (state.missingSummary) {
-      runewordContextRecipeMeta.textContent = `${t("Missing fragments", "부족한 룬 조각")}: ${state.missingSummary}`;
-    } else if (isComplete) {
-      runewordContextRecipeMeta.textContent = t(
-        "This item already has a runeword. Reforging changes only its regular affixes.",
-        "이 장비에는 이미 룬워드가 있습니다. 재련은 일반 어픽스만 바꿉니다."
-      );
-    } else if (canTransmute) {
-      runewordContextRecipeMeta.textContent = t("Ready to transmute.", "변환할 수 있습니다.");
-    } else {
-      runewordContextRecipeMeta.textContent = t(
-        "Meet the remaining requirements to transmute.",
-        "남은 조건을 채우면 변환할 수 있습니다."
-      );
-    }
-  }
 
   if (runewordCubeGrid) {
     clearChildren(runewordCubeGrid);
@@ -1030,9 +972,19 @@ function renderRunewordPanelState() {
     const header = document.createElement("div");
     header.className = "rwStatusHeader";
 
-    // The recipe name already heads the panel ("Selected Recipe"), so this
-    // row carries the status sentence next to its badge instead.
+    // The recipe name heads the review box (the separate "Selected Recipe"
+    // chip above the workbench is gone); the status sentence sits under it.
     const left = document.createElement("div");
+    left.className = "rwStatusTitle";
+    const recipeLine = document.createElement("div");
+    recipeLine.className = "rwStatusRecipe";
+    if (selectedRecipe) {
+      const recipeName = resolveRecipeName(selectedRecipe) || t("Unknown", "알 수 없음");
+      const runeOrder = typeof selectedRecipe?.runes === "string" ? selectedRecipe.runes.trim() : "";
+      recipeLine.textContent = runeOrder ? `${recipeName} [${runeOrder}]` : recipeName;
+    }
+    const statusLine = document.createElement("div");
+    statusLine.className = "rwStatusSentence";
 
     const badge = document.createElement("div");
     let badgeClass = "rwBadge";
@@ -1054,12 +1006,14 @@ function renderRunewordPanelState() {
     badge.textContent = badgeText;
 
     if (isComplete) {
-      left.textContent = t("This item already has a runeword.", "이 장비에는 이미 룬워드가 있습니다.");
+      statusLine.textContent = t("This item already has this runeword.", "이 장비에는 이미 이 룬워드가 있습니다.");
     } else if (canTransmute) {
-      left.textContent = t("Ready to transmute.", "변환할 수 있습니다.");
+      statusLine.textContent = t("Ready to transmute.", "변환할 수 있습니다.");
     } else if (state.missingSummary) {
-      left.textContent = `${t("Missing", "부족")}: ${state.missingSummary}`;
+      statusLine.textContent = `${t("Missing", "부족")}: ${state.missingSummary}`;
     }
+    if (recipeLine.textContent) left.appendChild(recipeLine);
+    left.appendChild(statusLine);
 
     header.appendChild(left);
     header.appendChild(badge);

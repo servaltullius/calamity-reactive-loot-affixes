@@ -20,11 +20,6 @@
   }
 }
 
-#controlPanel[data-layout="medium"] .rwContextBar,
-#controlPanel[data-layout="narrow"] .rwContextBar {
-  grid-template-columns: 1fr;
-}
-
 /* Wide keeps the workbench in place while it fits. When the panel is too short,
    guarantee usable recipe-list and review heights and scroll the workspace,
    instead of squeezing the list to a sliver (the UI scale grows with the panel,
@@ -99,10 +94,10 @@
   overflow: visible;
 }
 
-#controlPanel[data-layout="medium"] .affixBuildColumn,
-#controlPanel[data-layout="medium"] .affixActionColumn,
-#controlPanel[data-layout="narrow"] .affixBuildColumn,
-#controlPanel[data-layout="narrow"] .affixActionColumn {
+#controlPanel[data-layout="medium"] .affixWorkColumn,
+#controlPanel[data-layout="medium"] .affixSideColumn,
+#controlPanel[data-layout="narrow"] .affixWorkColumn,
+#controlPanel[data-layout="narrow"] .affixSideColumn {
   overflow: visible;
 }
 
@@ -118,7 +113,7 @@
 }
 
 #controlPanel[data-layout="medium"] #resourceDashboardSection {
-  grid-template-columns: minmax(170px, 0.75fr) minmax(250px, 1.15fr);
+  grid-template-columns: auto minmax(250px, 1.15fr);
 }
 
 #controlPanel[data-layout="medium"] #resourceDashboardSection .rdDetails {
@@ -129,7 +124,6 @@
   width: 100%;
 }
 
-#controlPanel[data-layout="narrow"] .rwContextSnapshot,
 #controlPanel[data-layout="narrow"] .rwWorkbench {
   grid-template-columns: 1fr;
 }
@@ -254,12 +248,12 @@
   width: 24px;
   height: 24px;
   cursor: nwse-resize;
-  border-radius: 8px;
+  border-radius: var(--radius-box);
   background:
-    linear-gradient(135deg, transparent 44%, rgba(255, 255, 255, 0.28) 45%, rgba(255, 255, 255, 0.28) 56%, transparent 57%),
-    linear-gradient(135deg, transparent 58%, rgba(255, 255, 255, 0.45) 59%, rgba(255, 255, 255, 0.45) 70%, transparent 71%),
-    rgba(8, 12, 16, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+    linear-gradient(135deg, transparent 44%, rgba(var(--text-rgb), 0.28) 45%, rgba(var(--text-rgb), 0.28) 56%, transparent 57%),
+    linear-gradient(135deg, transparent 58%, rgba(var(--text-rgb), 0.45) 59%, rgba(var(--text-rgb), 0.45) 70%, transparent 71%),
+    rgba(var(--base-rgb), 0.65);
+  border: 1px solid rgba(var(--text-rgb), 0.25);
 }
 
 @media (max-width: 900px) {

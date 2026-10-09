@@ -290,6 +290,10 @@ function resolveRecipeMaterialCoverageText(materialState) {
   if (!materialState.known) {
     return t("Coverage unavailable", "보유량 확인 불가");
   }
+  // "Fragments ready" already says it; the count only helps while some are missing.
+  if (materialState.key === "ready") {
+    return "";
+  }
   return t(
     `${materialState.coveredFragments}/${materialState.requiredFragments} fragments covered`,
     `룬 조각 ${materialState.coveredFragments}/${materialState.requiredFragments}개 보유`

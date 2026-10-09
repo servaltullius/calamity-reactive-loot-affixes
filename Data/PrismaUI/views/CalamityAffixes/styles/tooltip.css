@@ -10,7 +10,7 @@
   padding: 14px 16px;
   border: 1px solid var(--border);
   background: var(--bg);
-  border-radius: 12px;
+  border-radius: var(--radius-box);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(8px);
   display: none;
@@ -59,11 +59,11 @@
 .tpPill {
   pointer-events: auto;
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(var(--text-rgb), 0.18);
+  background: rgba(var(--text-rgb), 0.06);
   color: var(--text);
   padding: 8px 10px;
-  border-radius: 10px;
+  border-radius: var(--radius-box);
   font-size: calc(12px * var(--tooltip-font-scale));
   line-height: 1.2;
   font-family: inherit;
@@ -72,7 +72,7 @@
 
 .tpPill:hover {
   border-color: var(--accent-soft);
-  background: rgba(0, 255, 153, 0.1);
+  background: rgba(var(--accent-rgb), 0.1);
 }
 
 .tpPill:active {
@@ -94,7 +94,7 @@
 .qpPill {
   pointer-events: auto;
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(var(--text-rgb), 0.18);
   background: rgba(0, 0, 0, 0.4);
   color: var(--text);
   padding: 8px 10px;
@@ -109,7 +109,7 @@
 
 .qpPill:hover {
   border-color: var(--accent-soft);
-  background: rgba(0, 255, 153, 0.12);
+  background: rgba(var(--accent-rgb), 0.12);
 }
 
 .qpPill:active {
@@ -120,7 +120,7 @@
   outline: none;
   border-color: var(--accent-strong);
   box-shadow:
-    0 0 0 1px rgba(0, 255, 153, 0.38),
-    0 0 0 3px rgba(173, 255, 219, 0.14);
+    0 0 0 1px rgba(var(--accent-rgb), 0.38),
+    0 0 0 3px rgba(var(--accent-light-rgb), 0.14);
 }
 

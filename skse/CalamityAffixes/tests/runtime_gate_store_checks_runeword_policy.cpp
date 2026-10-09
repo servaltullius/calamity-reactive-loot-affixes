@@ -1633,7 +1633,6 @@ namespace RuntimeGateStoreChecks
 			const auto baseStepTag = extractElementOpenTagById("runewordBaseStep");
 			const auto recipeStepTag = extractElementOpenTagById("runewordRecipeStep");
 			const auto actionStepTag = extractElementOpenTagById("runewordActionStep");
-			const auto recipeContextTag = extractElementOpenTagById("runewordContextRecipeName");
 			const auto baseChooserDetailsTag = extractElementOpenTagById("runewordBaseChooserDetails");
 			const auto cubeDetailsTag = extractElementOpenTagById("runewordCubeDetails");
 			const auto baseListTag = extractElementOpenTagById("inventoryBaseList");
@@ -1655,7 +1654,6 @@ namespace RuntimeGateStoreChecks
 				controlPanelTag->find("role=\"dialog\"") == std::string::npos ||
 				controlPanelTag->find("data-layout=\"wide\"") == std::string::npos ||
 				uiText->find("class=\"rwWorkspace\"") == std::string::npos ||
-				uiText->find("class=\"rwContextBar\"") == std::string::npos ||
 				uiText->find("class=\"rwWorkbench\"") == std::string::npos ||
 				uiText->find("overflow-y: auto;") == std::string::npos ||
 				progressTag.has_value() ||
@@ -1672,7 +1670,6 @@ namespace RuntimeGateStoreChecks
 				!tagHasClassToken(*actionStepTag, "cpActionCard") ||
 				!tagHasClassToken(*actionStepTag, "rwActionInspector") ||
 				!tagHasClassToken(*actionStepTag, "muted") ||
-				!recipeContextTag.has_value() ||
 				!baseChooserDetailsTag.has_value() ||
 				!tagHasClassToken(*baseChooserDetailsTag, "rwRailDetails") ||
 				!tagHasClassToken(*baseChooserDetailsTag, "rwRailDetailsStatic") ||
@@ -1741,8 +1738,7 @@ namespace RuntimeGateStoreChecks
 				uiText->find("button.title = name;") == std::string::npos ||
 				uiText->find("button.setAttribute(\"aria-label\", name);") == std::string::npos ||
 				!runewordBody.has_value() ||
-				runewordBody->find("runewordContextRecipeName.textContent") == std::string::npos ||
-				runewordBody->find("runewordContextRecipeMeta.textContent") == std::string::npos ||
+				runewordBody->find("recipeLine.className = \"rwStatusRecipe\"") == std::string::npos ||
 				runewordBody->find("renderRunewordFlowProgress(actionState, state);") == std::string::npos ||
 				uiText->find("runewordInsertButton.classList.toggle(\"attention\", canTransmute);") == std::string::npos ||
 				runewordBody->find("runewordActionHint.textContent = actionState.buttonHint;") == std::string::npos ||

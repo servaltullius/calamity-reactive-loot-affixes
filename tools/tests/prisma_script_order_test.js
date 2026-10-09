@@ -546,7 +546,7 @@ assert(offenseText.includes("24.5% proc"));
 assert(offenseText.includes("2 stacked · chances combine (diminishing), fires once"));
 assert(offenseText.includes("Light attack 9.8%"));
 assert(offenseText.includes("Light attack: 2 stacked, chances combine (diminishing)"));
-assert(offenseText.includes("100% proc"));
+assert(!offenseText.includes("100% proc"), "a 100% proc chip says nothing");
 assert(offenseText.includes("Light attack 45%"));
 assert(offenseText.includes("Lucky Hit 30%"));
 assert(offenseText.includes("Passive also active"));
@@ -1143,7 +1143,7 @@ assert.strictEqual(
   materialNodeBefore
 );
 assert.strictEqual(repeatedMaterialView.badge.textContent, "Fragments ready");
-assert.strictEqual(repeatedMaterialView.coverage.textContent, "3/3 fragments covered");
+assert.strictEqual(repeatedMaterialView.coverage.textContent, "", "a ready recipe needs no coverage count");
 assert.strictEqual(
   new vm.Script("recipeSearchDocumentByToken.size", { filename: "recipe-material-cache-count-change.js" }).runInContext(context),
   searchCacheSizeBeforeInventory

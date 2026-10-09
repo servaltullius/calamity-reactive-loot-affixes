@@ -135,6 +135,7 @@ function setResourceProgress(progress, valueNode, stateNode, received, known, st
     stateNode.textContent = received
       ? t("Couldn't read pity data.", "천장 정보를 읽지 못했습니다.")
       : t("Loading…", "불러오는 중…");
+    stateNode.hidden = false;
     return;
   }
 
@@ -156,12 +157,16 @@ function setResourceProgress(progress, valueNode, stateNode, received, known, st
       );
   progress.setAttribute("aria-label", label);
   progress.setAttribute("aria-valuetext", valueText);
-  stateNode.textContent = guaranteeReady
-    ? t("Next drop guaranteed!", "다음 드랍 확정!")
-    : t(
-        "Fills on each miss; when full, the next drop is guaranteed.",
-        "못 얻을 때마다 차고, 다 차면 다음 드랍은 확정입니다."
-      );
+  // How pity works is the same every time, so it lives on hover (and in
+  // aria-valuetext); the line under the bar only speaks when something changes.
+  stateNode.textContent = guaranteeReady ? t("Next drop guaranteed!", "다음 드랍 확정!") : "";
+  stateNode.hidden = !guaranteeReady;
+  if (stateNode.parentElement) {
+    stateNode.parentElement.title = t(
+      "Fills on each miss; when full, the next drop is guaranteed.",
+      "못 얻을 때마다 차고, 다 차면 다음 드랍은 확정입니다."
+    );
+  }
 }
 
 function renderResourceRuneList(state, totalOwned) {

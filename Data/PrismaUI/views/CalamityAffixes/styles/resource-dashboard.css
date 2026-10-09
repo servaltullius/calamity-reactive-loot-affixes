@@ -1,11 +1,11 @@
 .rdSection {
   flex: 0 0 auto;
   padding: calc(10px * var(--panel-ui-scale));
-  border: 1px solid rgba(119, 193, 255, 0.2);
-  border-radius: 12px;
+  border: 1px solid rgba(var(--magic-rgb), 0.2);
+  border-radius: var(--radius-box);
   background:
-    linear-gradient(135deg, rgba(66, 136, 193, 0.1), rgba(255, 255, 255, 0.025)),
-    rgba(255, 255, 255, 0.02);
+    linear-gradient(135deg, rgba(var(--magic-rgb), 0.1), rgba(var(--text-rgb), 0.025)),
+    rgba(var(--text-rgb), 0.02);
 }
 
 .rdHeader,
@@ -19,7 +19,7 @@
 
 .rdHeader .cpSectionTitle {
   margin-bottom: 0;
-  color: rgba(226, 244, 255, 0.96);
+  color: rgba(var(--magic-light-rgb), 0.96);
   font-size: calc(14px * var(--panel-ui-scale));
 }
 
@@ -30,19 +30,19 @@
 .rdSync {
   flex: 0 0 auto;
   padding: calc(4px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
-  border: 1px solid rgba(255, 194, 104, 0.32);
+  border: 1px solid rgba(var(--warn-rgb), 0.32);
   border-radius: 999px;
-  background: rgba(255, 170, 70, 0.08);
-  color: rgba(255, 225, 179, 0.95);
+  background: rgba(var(--warn-rgb), 0.08);
+  color: rgba(var(--warn-light-rgb), 0.95);
   font-size: calc(10px * var(--panel-ui-scale));
   font-weight: 700;
   white-space: nowrap;
 }
 
 .rdSync.ready {
-  border-color: rgba(0, 255, 153, 0.34);
-  background: rgba(0, 255, 153, 0.09);
-  color: rgba(194, 255, 226, 0.98);
+  border-color: rgba(var(--accent-rgb), 0.34);
+  background: rgba(var(--accent-rgb), 0.09);
+  color: rgba(var(--accent-light-rgb), 0.98);
 }
 
 .rdMetricGrid {
@@ -55,9 +55,9 @@
 .rdMetric,
 .rdPityCard {
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9px;
-  background: rgba(5, 9, 13, 0.34);
+  border: 1px solid rgba(var(--text-rgb), 0.1);
+  border-radius: var(--radius-box);
+  background: rgba(var(--base-rgb), 0.34);
 }
 
 .rdMetric {
@@ -67,14 +67,14 @@
 .rdMetricLabel,
 .rdMetricMeta,
 .rdPityState {
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(var(--text-rgb), 0.66);
   font-size: calc(10px * var(--panel-ui-scale));
   line-height: 1.3;
 }
 
 .rdMetricValue {
   margin-top: calc(2px * var(--panel-ui-scale));
-  color: rgba(242, 249, 255, 0.98);
+  color: rgba(var(--magic-light-rgb), 0.98);
   font-size: calc(17px * var(--panel-ui-scale));
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -96,12 +96,12 @@
 }
 
 .rdPityHeader {
-  color: rgba(235, 245, 255, 0.92);
+  color: rgba(var(--magic-light-rgb), 0.92);
   font-size: calc(10px * var(--panel-ui-scale));
 }
 
 .rdPityHeader strong {
-  color: rgba(255, 255, 255, 0.98);
+  color: rgba(var(--text-rgb), 0.98);
   font-size: calc(11px * var(--panel-ui-scale));
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -115,18 +115,18 @@
   border: 0;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
-  accent-color: rgba(0, 255, 153, 0.86);
+  background: rgba(var(--text-rgb), 0.08);
+  accent-color: rgba(var(--accent-rgb), 0.86);
 }
 
 .rdProgress::-webkit-progress-bar {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(var(--text-rgb), 0.08);
   border-radius: 999px;
 }
 
 .rdProgress::-webkit-progress-value {
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(80, 190, 255, 0.86), rgba(0, 255, 153, 0.88));
+  background: linear-gradient(90deg, rgba(var(--magic-rgb), 0.86), rgba(var(--accent-rgb), 0.88));
 }
 
 .rdPityHint {
@@ -136,13 +136,13 @@
 
 .rdDetails {
   margin-top: calc(7px * var(--panel-ui-scale));
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(var(--text-rgb), 0.08);
 }
 
 .rdDetailsSummary {
   cursor: pointer;
   padding: calc(7px * var(--panel-ui-scale)) 0 0;
-  color: rgba(215, 239, 255, 0.9);
+  color: rgba(var(--magic-light-rgb), 0.9);
   font-size: calc(11px * var(--panel-ui-scale));
   font-weight: 700;
 }
@@ -161,17 +161,17 @@
 .rdRuneItem {
   min-width: 0;
   padding: calc(5px * var(--panel-ui-scale)) calc(7px * var(--panel-ui-scale));
-  border: 1px solid rgba(119, 193, 255, 0.18);
-  border-radius: 7px;
-  background: rgba(65, 138, 196, 0.08);
-  color: rgba(238, 248, 255, 0.94);
+  border: 1px solid rgba(var(--magic-rgb), 0.18);
+  border-radius: var(--radius-box);
+  background: rgba(var(--magic-rgb), 0.08);
+  color: rgba(var(--magic-light-rgb), 0.94);
   font-size: calc(10px * var(--panel-ui-scale));
 }
 
 .rdRuneItem.empty {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.46);
+  border-color: rgba(var(--text-rgb), 0.08);
+  background: rgba(var(--text-rgb), 0.025);
+  color: rgba(var(--text-rgb), 0.46);
 }
 
 .rdRuneName {
@@ -189,9 +189,9 @@
 .rdRuneEmpty {
   grid-column: 1 / -1;
   padding: calc(7px * var(--panel-ui-scale));
-  border: 1px dashed rgba(255, 255, 255, 0.14);
-  border-radius: 7px;
-  color: rgba(255, 255, 255, 0.58);
+  border: 1px dashed rgba(var(--text-rgb), 0.14);
+  border-radius: var(--radius-box);
+  color: rgba(var(--text-rgb), 0.58);
   font-size: calc(10px * var(--panel-ui-scale));
 }
 
@@ -213,7 +213,7 @@
   position: relative;
   z-index: 10;
   display: grid;
-  grid-template-columns: minmax(170px, 0.72fr) minmax(250px, 1fr) minmax(250px, 1.08fr) auto;
+  grid-template-columns: auto minmax(250px, 1fr) minmax(250px, 1.08fr) auto;
   align-items: center;
   gap: calc(8px * var(--panel-ui-scale));
   padding: calc(7px * var(--panel-ui-scale)) calc(9px * var(--panel-ui-scale));
@@ -232,9 +232,27 @@
   display: none;
 }
 
+/* The metric labels say what this row is; the title only took width. The
+   header stays for its loading/partial status, which hides itself when ready. */
 #resourceDashboardSection .rdHeader .cpSectionTitle {
-  margin-bottom: 0;
-  white-space: nowrap;
+  display: none;
+}
+
+/* One line per metric: label, then value. The static meta lines
+   ("Total owned", "Collected") restated the label. */
+#resourceDashboardSection .rdMetric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(8px * var(--panel-ui-scale));
+}
+
+#resourceDashboardSection .rdMetricMeta {
+  display: none;
+}
+
+.rdPityState[hidden] {
+  display: none;
 }
 
 #resourceDashboardSection .rdMetricGrid {
@@ -281,9 +299,9 @@
 #resourceDashboardSection .rdDetailsSummary {
   min-width: calc(172px * var(--panel-ui-scale));
   padding: calc(8px * var(--panel-ui-scale)) calc(10px * var(--panel-ui-scale));
-  border: 1px solid rgba(119, 193, 255, 0.22);
-  border-radius: 9px;
-  background: rgba(65, 138, 196, 0.08);
+  border: 1px solid rgba(var(--magic-rgb), 0.22);
+  border-radius: var(--radius-box);
+  background: rgba(var(--magic-rgb), 0.08);
   line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
@@ -292,7 +310,7 @@
 
 #resourceDashboardSection .rdDetailsSummary::after {
   content: " ▾";
-  color: rgba(145, 214, 255, 0.96);
+  color: rgba(var(--magic-rgb), 0.96);
 }
 
 #resourceDashboardSection .rdDetails[open] .rdDetailsSummary::after {
@@ -308,9 +326,9 @@
   max-height: min(calc(310px * var(--panel-ui-scale)), calc(100vh - 260px));
   margin: 0;
   padding: calc(10px * var(--panel-ui-scale));
-  border: 1px solid rgba(119, 193, 255, 0.28);
-  border-radius: 12px;
-  background: rgba(8, 13, 18, 0.985);
+  border: 1px solid rgba(var(--magic-rgb), 0.28);
+  border-radius: var(--radius-box);
+  background: rgba(var(--base-rgb), 0.985);
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.58);
 }
 
@@ -370,7 +388,7 @@
 
 .rdExchangeLabel {
   grid-column: 1 / -1;
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(var(--text-rgb), 0.66);
   font-size: calc(10px * var(--panel-ui-scale));
 }
 

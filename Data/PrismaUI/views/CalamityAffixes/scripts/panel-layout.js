@@ -107,6 +107,11 @@ function setMainTab(nextTab) {
   const isRuneword = tab === "runeword";
   const isAffix = tab === "affix";
   const isAdvanced = tab === "advanced";
+  if (controlPanel) {
+    // CSS keys the shared item card off the tab (no step number outside the
+    // runeword flow, no card at all on the settings tab).
+    controlPanel.dataset.mainTab = tab;
+  }
 
   if (mainRunewordTab && mainRunewordPane) {
     mainRunewordTab.setAttribute("aria-selected", isRuneword ? "true" : "false");

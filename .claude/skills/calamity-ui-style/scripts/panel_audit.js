@@ -171,8 +171,9 @@ function buildFixtures(repoRoot) {
     key: String(9000 + i),
     name: `${en} / ${ko}`,
     baseName: `${en} / ${ko}`,
-    runewordNameEn: i === 2 ? "Enigma" : "",
-    runewordNameKo: i === 2 ? "수수께끼" : "",
+    // The selected base (0) carries the runeword the panel state says it has.
+    runewordNameEn: i === 0 ? "Exile" : i === 2 ? "Enigma" : "",
+    runewordNameKo: i === 0 ? "추방" : i === 2 ? "수수께끼" : "",
     selected: i === 0
   }));
 
@@ -486,7 +487,12 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exitCode = 2;
-});
+// Other scripts (mockup renderers) reuse the server and the game-sized fixtures.
+module.exports = { buildFixtures, serve, loadPlaywright, findChromium, resolveView };
+
+if (require.main === module) {
+  main().catch((e) => {
+    console.error(e);
+    process.exitCode = 2;
+  });
+}
