@@ -185,8 +185,8 @@ function resolveRecipeSummaryText(item) {
       );
     case "self_weapon_fury":
       return t(
-        "Fury: 24% on-hit chance for +25% Attack Speed (6s) and 30 Stamina (12s cooldown)",
-        "퓨리: 적중 시 24% 확률로 공격 속도 +25%(6초)·기력 30 회복(재사용 12초)"
+        "Fury: 24% on-hit chance for +15% Attack Damage (6s) and 30 Stamina (12s cooldown)",
+        "퓨리: 적중 시 24% 확률로 공격력 +15%(6초)·기력 30 회복(재사용 12초)"
       );
     case "self_smoke_escape":
       return t(

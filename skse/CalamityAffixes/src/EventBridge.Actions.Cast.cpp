@@ -1,6 +1,8 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HostileEffectGuard.h"
 #include "CalamityAffixes/ImmediateHealthReadback.h"
+#include "CalamityAffixes/PluginEditorIds.h"
+#include "CalamityAffixes/PointerSafety.h"
 
 #include <algorithm>
 #include <cmath>
@@ -13,6 +15,72 @@ namespace CalamityAffixes
 {
 	namespace
 	{
+		// Values whose timed change is a buff. Health, magicka and stamina are
+		// instant restores in our spells, not something to keep one of.
+		[[nodiscard]] bool IsReplaceableSelfBuffValue(RE::ActorValue a_value) noexcept
+		{
+			return a_value != RE::ActorValue::kNone && a_value != RE::ActorValue::kHealth &&
+				a_value != RE::ActorValue::kMagicka && a_value != RE::ActorValue::kStamina;
+		}
+
+		// v2.3.0, Elden Ring's rule: one Calamity self-buff per kind. A new timed
+		// buff from one of our spells removes our other timed buffs that raise
+		// the same value, so procs from several affixes stop stacking into one
+		// runaway bonus. Buffs of different kinds still combine; constant
+		// (equipped) effects, other mods' and vanilla buffs are never touched.
+		void DispelReplacedCalamitySelfBuffs(RE::Actor* a_owner, const RE::SpellItem* a_spell)
+		{
+			a_owner = SanitizeObjectPointer(a_owner);
+			if (!a_owner || !a_spell) {
+				return;
+			}
+			std::vector<RE::ActorValue> kinds;
+			for (const auto* effect : a_spell->effects) {
+				if (!effect || !effect->baseEffect || effect->effectItem.duration <= 0) {
+					continue;
+				}
+				const auto value = effect->baseEffect->data.primaryAV;
+				if (IsReplaceableSelfBuffValue(value) &&
+					std::find(kinds.begin(), kinds.end(), value) == kinds.end()) {
+					kinds.push_back(value);
+				}
+			}
+			if (kinds.empty()) {
+				return;
+			}
+			auto* magicTarget = a_owner->AsMagicTarget();
+			auto* effects = magicTarget ? magicTarget->GetActiveEffectList() : nullptr;
+			if (!effects) {
+				return;
+			}
+			std::vector<RE::ActiveEffect*> replaced;
+			for (auto* activeEffect : *effects) {
+				activeEffect = SanitizeObjectPointer(activeEffect);
+				if (!activeEffect || !activeEffect->spell || activeEffect->spell == a_spell ||
+					activeEffect->duration <= 0.0f ||
+					activeEffect->flags.any(RE::ActiveEffect::Flag::kDispelled) ||
+					!activeEffect->effect || !activeEffect->effect->baseEffect) {
+					continue;
+				}
+				if (!PluginEditorIds::OwnEditorIdOf(activeEffect->spell).starts_with("CAFF_SPEL_")) {
+					continue;
+				}
+				const auto value = activeEffect->effect->baseEffect->data.primaryAV;
+				if (std::find(kinds.begin(), kinds.end(), value) != kinds.end()) {
+					replaced.push_back(activeEffect);
+				}
+			}
+			// Dispel after the walk: dispelling edits the list being iterated.
+			for (auto* activeEffect : replaced) {
+				SKSE::log::debug(
+					"CalamityAffixes: self-buff replaced (old={}, new={}, value={}).",
+					PluginEditorIds::OwnEditorIdOf(activeEffect->spell),
+					PluginEditorIds::OwnEditorIdOf(a_spell),
+					static_cast<std::uint32_t>(activeEffect->effect->baseEffect->data.primaryAV));
+				activeEffect->Dispel(true);
+			}
+		}
+
 		float GetSpellBaseMagnitude(const RE::SpellItem* a_spell)
 		{
 			if (!a_spell) {
@@ -313,6 +381,19 @@ namespace CalamityAffixes
 				modeIndex);
 		}
 
+		// Shared statuses: Exposed keeps only the strongest per resistance, and
+		// every status our spell applies goes into the ledger after the cast.
+		auto* statusTarget = a_action.applyToSelf ? nullptr : (castTarget ? castTarget->As<RE::Actor>() : nullptr);
+		if (statusTarget && !PrepareExposureCast(a_action.statusTag, spell, statusTarget, magnitudeOverride)) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: Exposed skipped, a stronger one is active (affix={}, target={}).",
+					a_affix.id,
+					statusTarget->GetName());
+			}
+			return;
+		}
+
 		auto* healthTarget = _loot.debugLog ?
 			(a_action.applyToSelf ? caster : (castTarget ? castTarget->As<RE::Actor>() : nullptr)) :
 			nullptr;
@@ -323,6 +404,7 @@ namespace CalamityAffixes
 			[healthTarget]() { return ReadCurrentHealth(healthTarget); },
 			[&]() {
 				if (a_action.applyToSelf && !IsSummonLikeSpell(spell)) {
+					DispelReplacedCalamitySelfBuffs(caster, spell);
 					magicCaster->CastSpellImmediate(
 						spell,
 						a_action.noHitEffectArt,
@@ -350,6 +432,10 @@ namespace CalamityAffixes
 				healthTarget,
 				magnitudeOverride,
 				healthReadback);
+		}
+		if (statusTarget) {
+			RecordStatusApplication(a_action.statusTag, spell, statusTarget, magnitudeOverride);
+			ApplyTaggedBuildUp(a_action, caster, statusTarget, magicCaster);
 		}
 		PlayActionFeedback(a_action, a_owner, a_target, ActionFeedbackPlayOn::kProc);
 	}
@@ -429,6 +515,19 @@ namespace CalamityAffixes
 				evolutionMultiplier);
 		}
 
+		// Shared statuses: Exposed keeps only the strongest per resistance, and
+		// every status our spell applies goes into the ledger after the cast.
+		auto* statusTarget = a_action.applyToSelf ? nullptr : (castTarget ? castTarget->As<RE::Actor>() : nullptr);
+		if (statusTarget && !PrepareExposureCast(a_action.statusTag, spell, statusTarget, magnitudeOverride)) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: Exposed skipped, a stronger one is active (affix={}, target={}).",
+					a_affix.id,
+					statusTarget->GetName());
+			}
+			return;
+		}
+
 		auto* healthTarget = _loot.debugLog ?
 			(a_action.applyToSelf ? caster : (castTarget ? castTarget->As<RE::Actor>() : nullptr)) :
 			nullptr;
@@ -439,6 +538,7 @@ namespace CalamityAffixes
 			[healthTarget]() { return ReadCurrentHealth(healthTarget); },
 			[&]() {
 				if (a_action.applyToSelf) {
+					DispelReplacedCalamitySelfBuffs(caster, spell);
 					magicCaster->CastSpellImmediate(
 						spell,
 						a_action.noHitEffectArt,
@@ -466,6 +566,10 @@ namespace CalamityAffixes
 				healthTarget,
 				magnitudeOverride,
 				healthReadback);
+		}
+		if (statusTarget) {
+			RecordStatusApplication(a_action.statusTag, spell, statusTarget, magnitudeOverride);
+			ApplyTaggedBuildUp(a_action, caster, statusTarget, magicCaster);
 		}
 		PlayActionFeedback(a_action, a_owner, a_target, ActionFeedbackPlayOn::kProc);
 	}

@@ -92,7 +92,7 @@ namespace CalamityAffixes
 			bool noHitEffectArt{ false };
 		};
 
-		static constexpr std::size_t kMaxCastOnCritPerHit = 2;
+		static constexpr std::size_t kMaxCastOnCritPerHit = 1;
 		struct CastOnCritResults
 		{
 			std::array<CastOnCritResult, kMaxCastOnCritPerHit> entries{};

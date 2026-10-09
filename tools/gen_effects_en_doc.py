@@ -15,7 +15,7 @@ import json
 from itertools import groupby
 from pathlib import Path
 
-from gen_prefix_doc import CAT_ORDER, CORE_JSON, categorize
+from gen_prefix_doc import CAT_ORDER, categorize, load_prefix_entries
 from public_doc_metadata import load_public_doc_metadata
 
 SUFFIXES_PATH = Path("affixes/modules/keywords.affixes.suffixes.json")
@@ -45,6 +45,7 @@ PREFIX_CATEGORY_EN = {
     "성장형": "Evolving",
     "Thu'um (외침) — 신규": "Thu'um (Shouts)",
     "마법학파 — 신규": "Schools of Magic",
+    "공용 상태 (v2.3.0)": "Shared Statuses",
     "기타": "Other",
 }
 
@@ -189,7 +190,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     metadata = load_public_doc_metadata()
 
-    prefixes = json.loads(CORE_JSON.read_text(encoding="utf-8"))
+    prefixes = load_prefix_entries()
     suffixes = json.loads(SUFFIXES_PATH.read_text(encoding="utf-8"))
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     runewords = {e["id"]: e for e in json.loads(RUNEWORDS_PATH.read_text(encoding="utf-8"))}
@@ -213,8 +214,22 @@ def main(argv: list[str] | None = None) -> int:
         "",
         "- **A runeword and a prefix that both trigger on the same item** each fire at 80% of their listed chance; one triggered affix alone fires at 100%. Passive suffixes never lower it. (Chaos at 16% next to a Crit Cast prefix shows 12.8%.)",
         "- **The same triggered prefix on different items** (spells, adaptive spells, and traps) combines up to 3 copies: `1 - (1-p1)(1-p2)(1-p3)`, so 40% copies fire 40% → 64% → 78.4% of the time with 1, 2, or 3 equipped. It fires more often; it does not hit harder or fire twice.",
-        "- **Crit Cast** spells: melee critical and power attacks can cast up to 2 different spells, normal melee hits and bow or crossbow hits up to 1, and all share a 0.15s cooldown.",
+        "- **Crit Cast** spells: one attack (critical, power attack, normal melee, bow or crossbow) casts at most one Crit Cast spell. Several equipped take turns, and all share a 0.15s cooldown.",
         "- **Suffixes of the same family** add their tiers and cap at tier 3: tier 1 + tier 1 = tier 2, tier 1 + tier 2 = tier 3. Only the resulting tier applies (Guardian 1 + 2 gives +80 Armor, not +75).",
+        "- **Self buffs of the same kind** replace each other: a new Calamity attack damage buff ends the old one instead of stacking. Passive effects and other mods' buffs are untouched.",
+        "",
+        "## Shared statuses",
+        "",
+        "Affixes that apply a status say so at the end of their line. Statuses from different items work together.",
+        "",
+        "- **Freeze / Bleed / Shock build-up**: each proc fills the target's meter. At 100 the meter empties and pays off. Bosses, dragons and unique enemies start at 150 and need 50 more after each payoff (up to 300). A meter holds for 3s after the last gain, then drains 15 per second.",
+        "  - **Freeze**: the target moves 80% slower and deals 30% less damage for 3s.",
+        "  - **Bleed**: a burst of 8% of the target's max health (3% on tough targets; 10 to 400).",
+        "  - **Shock**: 40 shock damage to the target and up to 2 enemies within 300 units.",
+        "- **Burning**: each stack burns for 4 fire damage per second, up to 5 stacks. A new stack restarts the 4s timer.",
+        "- **Exposed**: a lowered resistance. Only the strongest Calamity Exposed on each resistance applies.",
+        "- **Doom**: a mark that bursts 1.5s later. Marking again moves the timer and keeps the larger burst.",
+        "- Statuses count toward **Exploit Weakness** (two or more different statuses) and pass on with **Contagion**.",
         "",
     ]
     lines += render_prefixes(prefixes)

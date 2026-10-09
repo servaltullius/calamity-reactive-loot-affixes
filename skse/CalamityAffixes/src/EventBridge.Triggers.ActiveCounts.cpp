@@ -189,7 +189,8 @@ namespace CalamityAffixes
 				const bool usesStandardTriggerProcLane =
 					affix.action.type == ActionType::kCastSpell ||
 					affix.action.type == ActionType::kCastSpellAdaptiveElement ||
-					affix.action.type == ActionType::kSpawnTrap;
+					affix.action.type == ActionType::kSpawnTrap ||
+					affix.action.type == ActionType::kDoomMark;
 				if (usesStandardTriggerProcLane &&
 					affix.slot != AffixSlot::kSuffix &&
 					(affix.procChancePct > 0.0f || affix.normalWeaponHitProcChancePct > 0.0f)) {

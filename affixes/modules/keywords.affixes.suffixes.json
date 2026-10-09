@@ -1883,14 +1883,14 @@
   {
     "id": "suffix_gladiator_t1",
     "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T1",
-    "name": "약간의 검투사: 공격 속도 +5%",
-    "nameEn": "of Minor Gladiator: Attack Speed +5%",
-    "nameKo": "약간의 검투사: 공격 속도 +5%",
+    "name": "약간의 검투사: 공격력 +3%",
+    "nameEn": "of Minor Gladiator: Attack Damage +3%",
+    "nameKo": "약간의 검투사: 공격력 +3%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
-        "name": "Calamity Suffix: Attack Speed +5% / 공격 속도 +5%",
-        "actorValue": "WeaponSpeedMult",
+        "name": "Calamity Suffix: Attack Damage +3% / 공격력 +3%",
+        "actorValue": "AttackDamageMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1898,13 +1898,13 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T1",
-        "name": "Calamity Suffix: Attack Speed +5% / 공격 속도 +5%",
+        "name": "Calamity Suffix: Attack Damage +3% / 공격력 +3%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T1",
-          "magnitude": 0.05,
+          "magnitude": 0.03,
           "duration": 0,
           "area": 0
         }
@@ -1931,14 +1931,14 @@
   {
     "id": "suffix_gladiator_t2",
     "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T2",
-    "name": "검투사: 공격 속도 +10%",
-    "nameEn": "of the Gladiator: Attack Speed +10%",
-    "nameKo": "검투사: 공격 속도 +10%",
+    "name": "검투사: 공격력 +6%",
+    "nameEn": "of the Gladiator: Attack Damage +6%",
+    "nameKo": "검투사: 공격력 +6%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
-        "name": "Calamity Suffix: Attack Speed +10% / 공격 속도 +10%",
-        "actorValue": "WeaponSpeedMult",
+        "name": "Calamity Suffix: Attack Damage +6% / 공격력 +6%",
+        "actorValue": "AttackDamageMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1946,13 +1946,13 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T2",
-        "name": "Calamity Suffix: Attack Speed +10% / 공격 속도 +10%",
+        "name": "Calamity Suffix: Attack Damage +6% / 공격력 +6%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T2",
-          "magnitude": 0.10,
+          "magnitude": 0.06,
           "duration": 0,
           "area": 0
         }
@@ -1979,14 +1979,14 @@
   {
     "id": "suffix_gladiator_t3",
     "editorId": "CAFF_KYWD_SUFFIX_ATTACK_SPEED_T3",
-    "name": "위대한 검투사: 공격 속도 +15%",
-    "nameEn": "of Grand Gladiator: Attack Speed +15%",
-    "nameKo": "위대한 검투사: 공격 속도 +15%",
+    "name": "위대한 검투사: 공격력 +9%",
+    "nameEn": "of Grand Gladiator: Attack Damage +9%",
+    "nameKo": "위대한 검투사: 공격력 +9%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
-        "name": "Calamity Suffix: Attack Speed +15% / 공격 속도 +15%",
-        "actorValue": "WeaponSpeedMult",
+        "name": "Calamity Suffix: Attack Damage +9% / 공격력 +9%",
+        "actorValue": "AttackDamageMult",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -1994,13 +1994,13 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_ATTACK_SPEED_T3",
-        "name": "Calamity Suffix: Attack Speed +15% / 공격 속도 +15%",
+        "name": "Calamity Suffix: Attack Damage +9% / 공격력 +9%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SUFFIX_ATTACK_SPEED_T3",
-          "magnitude": 0.15,
+          "magnitude": 0.09,
           "duration": 0,
           "area": 0
         }

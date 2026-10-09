@@ -269,16 +269,19 @@ namespace RuntimeGateStoreChecks
 
 		const auto deathText = loadText(repoRoot / "src" / "EventBridge.Triggers.DeathEvent.cpp");
 		const auto serviceText = loadText(repoRoot / "src" / "EventBridge.Loot.Service.cpp");
-		if (!deathText || !serviceText ||
-			deathText->find("kLocRefTypeBoss") == std::string::npos ||
+		// The boss probe is shared with the build-up statuses (v2.3.0).
+		const auto bossText = loadText(repoRoot / "include" / "CalamityAffixes" / "ActorTierQueries.h");
+		if (!deathText || !serviceText || !bossText ||
+			deathText->find("HasBossLocationRefType(dying)") == std::string::npos ||
+			bossText->find("kLocRefTypeBoss") == std::string::npos ||
 			deathText->find("actorBase->IsUnique()") == std::string::npos ||
 			deathText->find("ResolveCorpseCurrencyRewardPlan(") == std::string::npos ||
 			deathText->find("ExecuteGuaranteedCorpseCurrencyDrops(") == std::string::npos) {
 			std::cerr << "corpse_currency_special_reward: runtime tier/grant integration is incomplete\n";
 			return false;
 		}
-		if (deathText->find("defaultObjects->GetObject") != std::string::npos ||
-			deathText->find("defaultObjects->objects[bossObjectIndex]") == std::string::npos) {
+		if (bossText->find("defaultObjects->GetObject") != std::string::npos ||
+			bossText->find("defaultObjects->objects[bossObjectIndex]") == std::string::npos) {
 			std::cerr << "corpse_currency_special_reward: boss probe must bypass the unsafe default-object initialization helper\n";
 			return false;
 		}

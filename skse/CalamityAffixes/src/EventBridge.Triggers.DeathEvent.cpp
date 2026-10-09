@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 
+#include "CalamityAffixes/ActorTierQueries.h"
 #include "CalamityAffixes/CorpseCurrencyRewardPolicy.h"
 #include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/PointerSafety.h"
@@ -15,27 +16,6 @@
 namespace CalamityAffixes
 {
 	using namespace TriggersDetail;
-
-	namespace
-	{
-		[[nodiscard]] bool HasBossLocationRefType(RE::Actor* a_actor)
-		{
-			if (!a_actor) {
-				return false;
-			}
-
-			auto* defaultObjects = RE::BGSDefaultObjectManager::GetSingleton();
-			constexpr auto bossObjectIndex = static_cast<std::size_t>(
-				RE::BGSDefaultObjectManager::DefaultObject::kLocRefTypeBoss);
-			// The vendored CommonLib GetObject(DefaultObject) path reads objectInit through
-			// RelocateMember<bool*>, which can reinterpret initialized flag bytes as a pointer.
-			// The default-object form array itself is stable and null until populated.
-			auto* bossObject = defaultObjects ? defaultObjects->objects[bossObjectIndex] : nullptr;
-			auto* bossLocationRefType = bossObject ? bossObject->As<RE::BGSLocationRefType>() : nullptr;
-			auto* locationRefType = a_actor->extraList.GetByType<RE::ExtraLocationRefType>();
-			return bossLocationRefType && locationRefType && locationRefType->locRefType == bossLocationRefType;
-		}
-	}
 
 	static_assert(RuntimePolicy::kAllowCorpseDeathRuntimeCurrencyRoll);
 	RE::BSEventNotifyControl EventBridge::HandleDeathEvent(

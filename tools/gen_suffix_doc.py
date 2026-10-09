@@ -14,7 +14,7 @@ OUTPUT_PATH = Path("docs/SUFFIX_EFFECTS.md")
 
 
 def display_magnitude(actor_value: str, magnitude: float | int) -> str:
-    if actor_value == "WeaponSpeedMult":
+    if actor_value in ("WeaponSpeedMult", "AttackDamageMult"):
         return str(int(round(float(magnitude) * 100)))
     if isinstance(magnitude, float) and magnitude.is_integer():
         return str(int(magnitude))
@@ -74,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
         "guardian": "물리 방어",
         "spell_ward": "마법 저항",
         "shadow": "스텔스/도적",
-        "gladiator": "공격 속도",
+        "gladiator": "공격력",
         "assassin": "치명타",
         "swiftness": "범용 이동",
         "swordsman": "한손 전사",

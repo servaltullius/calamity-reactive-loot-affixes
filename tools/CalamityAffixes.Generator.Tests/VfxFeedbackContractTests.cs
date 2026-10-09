@@ -32,9 +32,9 @@ public sealed class VfxFeedbackContractTests
         // Retained as an unused append-only tombstone so every existing FormID and
         // record signature stays stable after the bear marker moves to a world object.
         new("CAFF_ARTO_VFX_TRAP_BEAR_MARKER", @"Magic\RuneFrostProjectile01.nif"),
-        new("CAFF_ARTO_VFX_TRAP_BEAR_BURST", @"Magic\ExplosionFrost01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_BEAR_BURST", @"Magic\IcicleImpact01.nif"),
         new("CAFF_ARTO_VFX_TRAP_RUNE_MARKER", @"Magic\RuneFireProjectile01.nif"),
-        new("CAFF_ARTO_VFX_TRAP_RUNE_BURST", @"Magic\ExplosionFrost01.nif"),
+        new("CAFF_ARTO_VFX_TRAP_RUNE_BURST", @"Magic\IcicleImpact01.nif"),
         new("CAFF_ARTO_VFX_TRAP_PLAGUE_MARKER", @"DLC02\Effects\RunePoisonProjectile.nif"),
         new("CAFF_ARTO_VFX_TRAP_PLAGUE_BURST", @"Effects\FXGasTrapBlast.nif"),
         new("CAFF_ARTO_VFX_TRAP_TAR_MARKER", @"DLC02\Effects\AshRuneProjectile01.nif"),
@@ -89,7 +89,7 @@ public sealed class VfxFeedbackContractTests
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(60, records.Length);
+        Assert.Equal(78, records.Length);
         var artRecords = records
             .Where(record => record.GetProperty("type").GetString() == "ArtObject")
             .ToArray();

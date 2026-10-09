@@ -704,6 +704,28 @@
 			RE::Actor* a_owner,
 			const RE::HitData* a_hitData);
 		void ExecuteEchoStrikeActivation(const AffixRuntime& a_affix, RE::Actor* a_owner);
+		// Shared statuses (v2.3.0, EventBridge.Actions.Status.cpp).
+		[[nodiscard]] static std::int64_t StatusClockNowMs() noexcept
+		{
+			return std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::steady_clock::now().time_since_epoch()).count();
+		}
+		void ExecuteDoomMarkAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
+		void ExecuteSpreadStatusAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_victim);
+		void TickDoomBursts(RE::PlayerCharacter* a_player, RE::MagicCaster* a_magicCaster);
+		// Exposed keeps only the strongest per resistance: false when the target
+		// already carries an equal or stronger Calamity Exposed on every value this
+		// spell lowers. Weaker ones are dispelled so the new one replaces them.
+		[[nodiscard]] bool PrepareExposureCast(StatusKind a_kind, const RE::SpellItem* a_spell, RE::Actor* a_target, float a_magnitudeOverride);
+		void RecordStatusApplication(StatusKind a_kind, const RE::SpellItem* a_spell, RE::Actor* a_target, float a_magnitudeOverride);
+		// Build-up statuses: a tagged cast fills the target's meter (or adds Burning
+		// stacks); a full meter casts its payoff.
+		void ApplyTaggedBuildUp(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, RE::MagicCaster* a_magicCaster);
+		void ApplyBuildUp(StatusKind a_kind, float a_amount, RE::Actor* a_owner, RE::Actor* a_target, RE::MagicCaster* a_magicCaster);
+		void ApplyBurningStacks(std::uint8_t a_stacks, RE::Actor* a_owner, RE::Actor* a_target, RE::MagicCaster* a_magicCaster);
+		void PlayStatusPayoffCue(StatusKind a_kind, RE::Actor* a_target) const;
+		[[nodiscard]] std::vector<RE::NiPointer<RE::Actor>> CollectNearbyHostiles(
+			RE::Actor* a_owner, RE::Actor* a_center, float a_radius, std::size_t a_maxTargets) const;
 		void ProcessEchoStrikeHit(
 			RE::Actor* a_attacker,
 			RE::Actor* a_target,

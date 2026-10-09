@@ -65,14 +65,16 @@ class CoreIdentityWaveTwoTests(unittest.TestCase):
         # prototype; 2026-08-09: frost/shock conversion sounds, then internal trap
         # record names gained Korean halves for the localized preview map;
         # 2026-08-11: the five non-bear trap spells moved engine Effect.Area to
-        # zero so the runtime hostile-only selector owns the full radius contract).
+        # zero so the runtime hostile-only selector owns the full radius contract;
+        # 2026-10-09: attack speed is ignored under MCO, so Battle Frenzy's buff and
+        # the Chaos Rune slow-attack curse moved to AttackDamageMult).
         self.assertEqual(
-            "16af97c056f77f2b31d1e03c3c6d4f6726b9f5b4a855fcc44d05dc474b59ad0d",
+            "283bdd1fd0b1e9d9527755d9b27ae495ca7c9efd4afaba17abce7852c0cdc611",
             hashlib.sha256(records_payload).hexdigest(),
             "records payload changed — if intentional, update this pin in the same commit",
         )
 
-    def test_shadow_stride_is_a_kill_haste_with_three_growth_stages(self) -> None:
+    def test_shadow_stride_is_a_kill_damage_buff_with_three_growth_stages(self) -> None:
         entry = self.by_id["shadow_stride"]
         runtime = entry["runtime"]
         action = runtime["action"]
@@ -87,8 +89,8 @@ class CoreIdentityWaveTwoTests(unittest.TestCase):
             {"xpPerProc": 1, "thresholds": [0, 10, 30], "multipliers": [1.0, 1.2, 1.4]},
             action["evolution"],
         )
-        self.assertIn("+15%", entry["nameKo"])
-        self.assertIn("+18%/+21%", entry["nameKo"])
+        self.assertIn("공격력 +10%", entry["nameKo"])
+        self.assertIn("+12%/+14%", entry["nameKo"])
 
     def test_nourishing_flame_is_a_reliable_post_kill_leech_window(self) -> None:
         entry = self.by_id["nourishing_flame"]

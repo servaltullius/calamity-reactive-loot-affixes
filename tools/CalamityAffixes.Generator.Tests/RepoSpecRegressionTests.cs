@@ -35,6 +35,31 @@ public sealed class RepoSpecRegressionTests
         new(0x000B18u, "SNDR", "CAFF_SNDR_RW_SHADOW_PUNCH"),
     ];
 
+    // Shared statuses (v2.3.0): Doom Brand, Exploit Weakness and Contagion. Their
+    // KYWDs, the Doom mark/burst and the Exploit strike follow Shadow Boxer, then
+    // the build-up payoffs (Freeze, Bleed burst, Shock discharge) and Burning.
+    private static readonly AllocationRecord[] ExpectedStatusTail =
+    [
+        new(0x000B19u, "KYWD", "LoreBox_CAFF_AFFIX_STATUS_DOOM_BRAND"),
+        new(0x000B1Au, "KYWD", "LoreBox_CAFF_AFFIX_STATUS_EXPLOIT_WEAKNESS"),
+        new(0x000B1Bu, "KYWD", "LoreBox_CAFF_AFFIX_STATUS_CONTAGION"),
+        new(0x000B1Cu, "MGEF", "CAFF_MGEF_STATUS_DOOM_MARK"),
+        new(0x000B1Du, "MGEF", "CAFF_MGEF_STATUS_DOOM_BURST"),
+        new(0x000B1Eu, "MGEF", "CAFF_MGEF_STATUS_EXPLOIT_STRIKE"),
+        new(0x000B1Fu, "SPEL", "CAFF_SPEL_STATUS_DOOM_MARK"),
+        new(0x000B20u, "SPEL", "CAFF_SPEL_STATUS_DOOM_BURST"),
+        new(0x000B21u, "SPEL", "CAFF_SPEL_STATUS_EXPLOIT_STRIKE"),
+        new(0x000B22u, "MGEF", "CAFF_MGEF_STATUS_FREEZE_SLOW"),
+        new(0x000B23u, "MGEF", "CAFF_MGEF_STATUS_FREEZE_WEAKEN"),
+        new(0x000B24u, "MGEF", "CAFF_MGEF_STATUS_BLEED_BURST"),
+        new(0x000B25u, "MGEF", "CAFF_MGEF_STATUS_SHOCK_DISCHARGE"),
+        new(0x000B26u, "MGEF", "CAFF_MGEF_STATUS_BURNING"),
+        new(0x000B27u, "SPEL", "CAFF_SPEL_STATUS_FREEZE"),
+        new(0x000B28u, "SPEL", "CAFF_SPEL_STATUS_BLEED_BURST"),
+        new(0x000B29u, "SPEL", "CAFF_SPEL_STATUS_SHOCK_DISCHARGE"),
+        new(0x000B2Au, "SPEL", "CAFF_SPEL_STATUS_BURNING"),
+    ];
+
     [Fact]
     public void RepoSpec_GeneratorBuildsWithoutForwardMagicEffectReferences()
     {
@@ -195,10 +220,10 @@ public sealed class RepoSpecRegressionTests
         AssertSpellEffect(Assert.Single(smokeSpell.Effects), "CAFF_MGEF_RW_SMOKE_SCREEN", 30.0f, 5);
 
         var furyEffect = MagicEffectById("CAFF_MGEF_RW_FURY_LIFESTEAL");
-        AssertActorValue(furyEffect, ActorValue.WeaponSpeedMult);
+        AssertActorValue(furyEffect, ActorValue.AttackDamageMult);
         var furySpell = SpellById("CAFF_SPEL_RW_FURY_LIFESTEAL");
         Assert.Equal(2, furySpell.Effects.Count);
-        AssertSpellEffect(furySpell.Effects[0], "CAFF_MGEF_RW_FURY_LIFESTEAL", 0.25f, 6);
+        AssertSpellEffect(furySpell.Effects[0], "CAFF_MGEF_RW_FURY_LIFESTEAL", 0.15f, 6);
         AssertSpellEffect(furySpell.Effects[1], "CAFF_MGEF_RW_FURY_RESTORE_STAMINA", 30.0f, 0);
 
         var wealthOldEffect = MagicEffectById("CAFF_MGEF_RW_WEALTH_VIGOR");
@@ -266,10 +291,11 @@ public sealed class RepoSpecRegressionTests
         var mod = KeywordPluginBuilder.Build(spec);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(793, actual.Length);
-        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^10]);
-        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^9]);
-        Assert.Equal(ExpectedShadowBoxerTail, actual.TakeLast(ExpectedShadowBoxerTail.Length));
+        Assert.Equal(811, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^28]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^27]);
+        Assert.Equal(ExpectedShadowBoxerTail, actual.SkipLast(ExpectedStatusTail.Length).TakeLast(ExpectedShadowBoxerTail.Length));
+        Assert.Equal(ExpectedStatusTail, actual.TakeLast(ExpectedStatusTail.Length));
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -294,7 +320,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B19u, ((IModGetter)mod).NextFormID);
+        Assert.Equal(0x000B2Bu, ((IModGetter)mod).NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -320,12 +346,12 @@ public sealed class RepoSpecRegressionTests
             using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
             var reimportedAllocation = AllocationSignature(reimported);
 
-            Assert.Equal(793, generatedAllocation.Length);
+            Assert.Equal(811, generatedAllocation.Length);
             Assert.Equal(generatedAllocation, reimportedAllocation);
             Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
-            Assert.Equal(generatedAllocation.TakeLast(58), reimportedAllocation.TakeLast(58));
+            Assert.Equal(generatedAllocation.TakeLast(76), reimportedAllocation.TakeLast(76));
             Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-            Assert.Equal(0x000B19u, reimported.NextFormID);
+            Assert.Equal(0x000B2Bu, reimported.NextFormID);
             AssertWorldMarkers(reimported);
         }
         finally
@@ -343,10 +369,11 @@ public sealed class RepoSpecRegressionTests
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(793, actual.Length);
-        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^10]);
-        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^9]);
-        Assert.Equal(ExpectedShadowBoxerTail, actual.TakeLast(ExpectedShadowBoxerTail.Length));
+        Assert.Equal(811, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^28]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^27]);
+        Assert.Equal(ExpectedShadowBoxerTail, actual.SkipLast(ExpectedStatusTail.Length).TakeLast(ExpectedShadowBoxerTail.Length));
+        Assert.Equal(ExpectedStatusTail, actual.TakeLast(ExpectedStatusTail.Length));
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -371,7 +398,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B19u, mod.NextFormID);
+        Assert.Equal(0x000B2Bu, mod.NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -1043,9 +1070,9 @@ public sealed class RepoSpecRegressionTests
             ("runeword_obsession_final", "CAFF_SPEL_RW_OBSESSION_PASSIVE", "CAFF_MGEF_RW_OBSESSION_PASSIVE_MPREGEN", "MagickaRateMult", 25.0, "Obsession passive"),
             ("runeword_rhyme_final", "CAFF_SPEL_RW_RHYME_SHIELD", "CAFF_MGEF_RW_RHYME_SHIELD", "DamageResist", 60.0, "Rhyme active"),
             ("runeword_rhyme_final", "CAFF_SPEL_RW_RHYME_PASSIVE", "CAFF_MGEF_RW_RHYME_PASSIVE_FROST", "ResistFrost", 40.0, "Rhyme passive"),
-            ("runeword_faith_final", "CAFF_SPEL_RW_FAITH_FANATIC", "CAFF_MGEF_RW_FAITH_FANATIC_SPEED", "WeaponSpeedMult", 0.15, "Faith active attack speed"),
+            ("runeword_faith_final", "CAFF_SPEL_RW_FAITH_FANATIC", "CAFF_MGEF_RW_FAITH_FANATIC_SPEED", "AttackDamageMult", 0.10, "Faith active extra attack damage (was attack speed)"),
             ("runeword_faith_final", "CAFF_SPEL_RW_FAITH_FANATIC", "CAFF_MGEF_RW_FAITH_FANATIC_WARD", "AttackDamageMult", 0.20, "Faith active attack damage"),
-            ("runeword_faith_final", "CAFF_SPEL_RW_FAITH_PASSIVE", "CAFF_MGEF_RW_FAITH_PASSIVE_IAS", "WeaponSpeedMult", 0.15, "Faith passive"),
+            ("runeword_faith_final", "CAFF_SPEL_RW_FAITH_PASSIVE", "CAFF_MGEF_RW_FAITH_PASSIVE_IAS", "AttackDamageMult", 0.08, "Faith passive"),
             ("runeword_call_to_arms_final", "CAFF_SPEL_RW_CTA_WARCRY", "CAFF_MGEF_RW_CTA_WARCRY", "AttackDamageMult", 0.20, "Call to Arms active"),
             ("runeword_honor_final", "CAFF_SPEL_RW_HONOR_VIGOR", "CAFF_MGEF_RW_HONOR_VIGOR", "HealRateMult", 80.0, "Honor active"),
             ("runeword_honor_final", "CAFF_SPEL_RW_HONOR_PASSIVE", "CAFF_MGEF_RW_HONOR_PASSIVE_HPREGEN", "HealRateMult", 20.0, "Honor passive"),
@@ -1294,12 +1321,11 @@ public sealed class RepoSpecRegressionTests
             ("CAFF_MGEF_RW_RIFT_SPARK", 30, 6, 0));
         AssertSpell("Famine", "CAFF_SPEL_RW_FAMINE_DRAIN",
             ("CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA", 30, 5, 0),
-            ("CAFF_MGEF_RW_FAMINE_DRAIN", 0.20, 6, 0),
-            ("CAFF_MGEF_RW_WIND_PUSH", 0.15, 6, 0));
+            ("CAFF_MGEF_RW_FAMINE_DRAIN", 0.20, 6, 0));
         AssertSpell("Beast", "CAFF_SPEL_RW_BEAST_RAGE",
             ("CAFF_MGEF_RW_BEAST_RAGE_POWER", 0.30, 10, 0),
             ("CAFF_MGEF_RW_BEAST_RAGE_ARMOR", 150, 10, 0),
-            ("CAFF_MGEF_RW_FAITH_FANATIC_SPEED", 0.15, 10, 0));
+            ("CAFF_MGEF_RW_FAITH_FANATIC_SPEED", 0.10, 10, 0));
         AssertSpell("Eternity", "CAFF_SPEL_RW_ETERNITY_BULWARK",
             ("CAFF_MGEF_INCOMING_WARDEN_SHELL", 300, 6, 0),
             ("CAFF_MGEF_RW_ETERNITY_BULWARK", 25, 6, 0));
@@ -1328,8 +1354,8 @@ public sealed class RepoSpecRegressionTests
         AssertScaling("runeword_obsession_final", "HitTotalDealt", 0.18, 75, 300, false);
         AssertUiText(
             "runeword_destruction_final",
-            "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동.",
-            "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350)");
+            "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동. 감전 축적 +70.",
+            "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350); Shock build-up +70");
         AssertUiText(
             "runeword_last_wish_final",
             "룬워드 라스트 위시 [Jah-Mal-Jah-Sur-Jah-Ber]: 체력 35% 이하일 때 체력 250 즉시 회복, 방어도 +250·마법저항 +50(12초). 45초마다 발동.",
@@ -1340,8 +1366,8 @@ public sealed class RepoSpecRegressionTests
             "Runeword Plague (Cham-Shael-Um): 40% on Kill / ICD 4s - Plague Corpse Chain Explosion (12 + 3% Corpse Max Health, Radius 450, up to 12 targets, max chain depth 2)");
         AssertUiText(
             "runeword_pride_final",
-            "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동.",
-            "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250)");
+            "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동. 빙결 축적 +60.",
+            "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250); Freeze build-up +60");
         foreach (var id in new[]
                  {
                      "runeword_dragon_final", "runeword_mist_final", "runeword_famine_final",
@@ -1385,8 +1411,8 @@ public sealed class RepoSpecRegressionTests
             ("rw_hand_of_justice", "signature_hand_of_justice", "화염 심판으로 체력 40~250 흡수(적중 피해 18%)", "self_judgment"),
             ("rw_dragon", "signature_dragon", "피격 시 방어도 +120·화염/냉기/전격 저항 +25(8초)", "self_light_armor"),
             ("rw_mist", "signature_mist", "마나 재생 -100%·마법 저항 -30(6초), 마나 75 즉시 소진", "debuff_magicka_suppress"),
-            ("rw_famine", "signature_famine", "기력 -30/초(5초), 공격력 -20%·공격 속도 -15%(6초)", "debuff_stamina_drain"),
-            ("rw_beast", "signature_beast", "공격력 +30%·방어도 +150·공격 속도 +15%(10초)", "long_cd_beast_rage"),
+            ("rw_famine", "signature_famine", "기력 -30/초(5초), 공격력 -20%(6초)", "debuff_stamina_drain"),
+            ("rw_beast", "signature_beast", "공격력 +40%·방어도 +150(10초)", "long_cd_beast_rage"),
             ("rw_eternity", "signature_eternity", "피격 시 방어도 +300·피해 반사 +25%(6초)", "long_cd_bulwark"),
             ("rw_enigma", "signature_enigma", "피격 시 투명화·이동 속도 +45%(4초), 상시 이동 속도 +10%", null),
             ("rw_last_wish", "signature_last_wish", "체력 35% 이하에서 체력 250 회복·방어도 +250·마법 저항 +50(12초)", "lowhealth_fade"),

@@ -206,6 +206,15 @@ namespace CalamityAffixes
 			return false;
 		}
 
+		// Exploit Weakness and other status payoffs: the target must carry enough
+		// distinct Calamity statuses before chance or cooldown are spent.
+		if (a_affix.requireTargetStatusCount > 0u &&
+			(!a_target ||
+				_combatState.statusLedger.CountDistinctKinds(a_target->GetFormID(), StatusClockNowMs()) <
+					a_affix.requireTargetStatusCount)) {
+			return false;
+		}
+
 		if (!PassesLuckyHitGate(a_affix, a_trigger, a_hitData, a_now)) {
 			return false;
 		}

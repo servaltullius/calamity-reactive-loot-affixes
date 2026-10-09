@@ -19,8 +19,8 @@
 
 - 룬 조합: `Tir-El`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 스틸 [Tir-El]: 적중 시 18% 확률로 강철 출혈(적 회복 억제 -80%, 5초). 8초마다 발동.
-- 영문 표시: Runeword Steel (Tir-El): 18% on hit / ICD 8s - Steel Bleed (Heal Suppress -80%, 5s)
+- 한글 표시: 룬워드 스틸 [Tir-El]: 적중 시 18% 확률로 강철 출혈(적 회복 억제 -80%, 5초). 8초마다 발동. 출혈 축적 +100.
+- 영문 표시: Runeword Steel (Tir-El): 18% on hit / ICD 8s - Steel Bleed (Heal Suppress -80%, 5s); Bleed build-up +100
 
 ### Malice
 
@@ -54,8 +54,8 @@
 
 - 룬 조합: `Eth-Ral-Ort-Tal`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 홀리 썬더 [Eth-Ral-Ort-Tal]: 적중 시 22% 확률로 성전 번개(전격 피해 30). 7초마다 발동.
-- 영문 표시: Runeword Holy Thunder (Eth-Ral-Ort-Tal): 22% on hit / ICD 7s - Holy Thunder (Shock Damage 30)
+- 한글 표시: 룬워드 홀리 썬더 [Eth-Ral-Ort-Tal]: 적중 시 22% 확률로 성전 번개(전격 피해 30). 7초마다 발동. 감전 축적 +100.
+- 영문 표시: Runeword Holy Thunder (Eth-Ral-Ort-Tal): 22% on hit / ICD 7s - Holy Thunder (Shock Damage 30); Shock build-up +100
 
 ### Zephyr
 
@@ -236,8 +236,8 @@
 
 - 룬 조합: `Shael-Ko-Eld`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 허슬(무기) [Shael-Ko-Eld]: 적중 시 26% 확률로 돌진 (이동+공속 강화). 공격속도 +12%. 7초마다 발동.
-- 영문 표시: Runeword Hustle-W (Shael-Ko-Eld): 26% on Hit / ICD 7s - Rush (Move+Attack Speed) + Attack Speed +12%
+- 한글 표시: 룬워드 허슬(무기) [Shael-Ko-Eld]: 적중 시 26% 확률로 돌진(이동속도 +30%, 5초). 공격력 +6%. 7초마다 발동.
+- 영문 표시: Runeword Hustle-W (Shael-Ko-Eld): 26% on Hit / ICD 7s - Rush (Move Speed +30%, 5s) + Attack Damage +6%
 
 ### Hustle-A
 
@@ -299,8 +299,8 @@
 
 - 룬 조합: `Shael-Thul-Lem`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 트래셔리 [Shael-Thul-Lem]: 피격 시 26% 확률로 가속(이동속도 +28%, 5초). 공격속도 +10%. 10초마다 발동.
-- 영문 표시: Runeword Treachery (Shael-Thul-Lem): 26% on Hit Taken / ICD 10s - Haste (Move Speed +28%, 5s) + Attack Speed +10%
+- 한글 표시: 룬워드 트래셔리 [Shael-Thul-Lem]: 피격 시 26% 확률로 가속(이동속도 +28%, 5초). 기력 재생 +25%. 10초마다 발동.
+- 영문 표시: Runeword Treachery (Shael-Thul-Lem): 26% on Hit Taken / ICD 10s - Haste (Move Speed +28%, 5s) + Stamina Regen +25%
 
 ### Enlightenment
 
@@ -404,8 +404,8 @@
 
 - 룬 조합: `Mal-Um-Gul-Fal`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 킹슬레이어 [Mal-Um-Gul-Fal]: 적중 시 30% 확률로 출혈 (3/초 × 8초, 물리 피해 4%). 0.6초마다 발동.
-- 영문 표시: Runeword Kingslayer (Mal-Um-Gul-Fal): 30% on Hit / ICD 0.6s - Bleed (3/s × 8s, 4% phys)
+- 한글 표시: 룬워드 킹슬레이어 [Mal-Um-Gul-Fal]: 적중 시 30% 확률로 출혈 (3/초 × 8초, 물리 피해 4%). 0.6초마다 발동. 출혈 축적 +35.
+- 영문 표시: Runeword Kingslayer (Mal-Um-Gul-Fal): 30% on Hit / ICD 0.6s - Bleed (3/s × 8s, 4% phys); Bleed build-up +35
 
 ### Rift
 
@@ -481,8 +481,8 @@
 
 - 룬 조합: `Eth-Tir-Lo-Mal-Ral`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 슬픔 [Eth-Tir-Lo-Mal-Ral]: 적중 시 30% 확률로 흡혈 (8%). 공격속도 +10%. 0.5초마다 발동.
-- 영문 표시: Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on Hit / ICD 0.5s - Heal 8% of Hit Damage + Attack Speed +10%
+- 한글 표시: 룬워드 슬픔 [Eth-Tir-Lo-Mal-Ral]: 적중 시 30% 확률로 흡혈 (8%). 공격력 +6%. 0.5초마다 발동.
+- 영문 표시: Runeword Grief (Eth-Tir-Lo-Mal-Ral): 30% on Hit / ICD 0.5s - Heal 8% of Hit Damage + Attack Damage +6%
 
 ### Bramble
 
@@ -495,8 +495,8 @@
 
 - 룬 조합: `Sur-El`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 윈드 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적 공속 -20%, 5초). 4초마다 발동.
-- 영문 표시: Runeword Wind (Sur-El): 22% on hit / ICD 4s - Gale Pressure (Weapon Speed -20%, 5s)
+- 한글 표시: 룬워드 윈드 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적이 주는 피해 -20%, 5초). 4초마다 발동.
+- 영문 표시: Runeword Wind (Sur-El): 22% on hit / ICD 4s - Gale Pressure (Enemy Damage Dealt -20%, 5s)
 
 ### Dragon
 
@@ -509,8 +509,8 @@
 
 - 룬 조합: `Ber-Tir-Um-Mal-Lum`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 비스트 [Ber-Tir-Um-Mal-Lum]: 적중 시 30% 확률로 야수 격노(공격력 +30%, 방어도 +150, 공격속도 +15%, 10초). 18초마다 발동.
-- 영문 표시: Runeword Beast (Ber-Tir-Um-Mal-Lum): 30% on Hit / ICD 18s - Beast Rage (Attack Damage +30%, Armor +150, Attack Speed +15%, 10s)
+- 한글 표시: 룬워드 비스트 [Ber-Tir-Um-Mal-Lum]: 적중 시 30% 확률로 야수 격노(공격력 +40%, 방어도 +150, 10초). 18초마다 발동.
+- 영문 표시: Runeword Beast (Ber-Tir-Um-Mal-Lum): 30% on Hit / ICD 18s - Beast Rage (Attack Damage +40%, Armor +150, 10s)
 
 ### Chains of Honor
 
@@ -537,15 +537,15 @@
 
 - 룬 조합: `Pul-Lum-Ber-Mal`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 래쓰 [Pul-Lum-Ber-Mal]: 적중 시 26% 확률로 신벌(화염 피해 30). 5초마다 발동.
-- 영문 표시: Runeword Wrath (Pul-Lum-Ber-Mal): 26% on hit / ICD 5s - Divine Wrath (Fire Damage 30)
+- 한글 표시: 룬워드 래쓰 [Pul-Lum-Ber-Mal]: 적중 시 26% 확률로 신벌(화염 피해 30). 5초마다 발동. 화상 2중첩.
+- 영문 표시: Runeword Wrath (Pul-Lum-Ber-Mal): 26% on hit / ICD 5s - Divine Wrath (Fire Damage 30); Burning +2 stacks
 
 ### Fury
 
 - 룬 조합: `Jah-Gul-Eth`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 퓨리 [Jah-Gul-Eth]: 적중 시 24% 확률로 공격속도 +25% (6초) 및 기력 30 즉시 회복. 12초마다 발동.
-- 영문 표시: Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 12s - Attack Speed +25% for 6s and restore 30 Stamina
+- 한글 표시: 룬워드 퓨리 [Jah-Gul-Eth]: 적중 시 24% 확률로 공격력 +15% (6초) 및 기력 30 즉시 회복. 12초마다 발동.
+- 영문 표시: Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 12s - Attack Damage +15% for 6s and restore 30 Stamina
 
 ### Enigma
 
@@ -558,36 +558,36 @@
 
 - 룬 조합: `Fal-Ohm-Ort-Jah`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 패민 [Fal-Ohm-Ort-Jah]: 적중 시 30% 확률로 기근(기력 -30/초 5초, 공격력 -20%·공격속도 -15% 6초). 7초마다 발동.
-- 영문 표시: Runeword Famine (Fal-Ohm-Ort-Jah): 30% on hit / ICD 7s - Famine (Stamina -30/s for 5s, Attack Damage -20% and Attack Speed -15% for 6s)
+- 한글 표시: 룬워드 패민 [Fal-Ohm-Ort-Jah]: 적중 시 30% 확률로 기근(기력 -30/초 5초, 공격력 -20% 6초). 7초마다 발동.
+- 영문 표시: Runeword Famine (Fal-Ohm-Ort-Jah): 30% on hit / ICD 7s - Famine (Stamina -30/s for 5s, Attack Damage -20% for 6s)
 
 ### Brand
 
 - 룬 조합: `Jah-Lo-Mal-Gul`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 브랜드 [Jah-Lo-Mal-Gul]: 적중 시 28% 확률로 낙인(화염 DoT 10/s, 6초). 5초마다 발동.
-- 영문 표시: Runeword Brand (Jah-Lo-Mal-Gul): 28% on hit / ICD 5s - Brand (Fire DoT 10/s, 6s)
+- 한글 표시: 룬워드 브랜드 [Jah-Lo-Mal-Gul]: 적중 시 28% 확률로 낙인(화염 DoT 10/s, 6초). 5초마다 발동. 화상 2중첩.
+- 영문 표시: Runeword Brand (Jah-Lo-Mal-Gul): 28% on hit / ICD 5s - Brand (Fire DoT 10/s, 6s); Burning +2 stacks
 
 ### Destruction
 
 - 룬 조합: `Vex-Lo-Ber-Jah-Ko`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동.
-- 영문 표시: Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350)
+- 한글 표시: 룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동. 감전 축적 +70.
+- 영문 표시: Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350); Shock build-up +70
 
 ### Dream
 
 - 룬 조합: `Io-Jah-Pul`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 드림 [Io-Jah-Pul]: 적중 시 30% 확률로 번개 타격. 번개 저항 +20. 0.8초마다 발동.
-- 영문 표시: Runeword Dream (Io-Jah-Pul): 30% on Hit / ICD 0.8s - Shock Strike + Shock Resist +20
+- 한글 표시: 룬워드 드림 [Io-Jah-Pul]: 적중 시 30% 확률로 번개 타격. 번개 저항 +20. 0.8초마다 발동. 감전 축적 +35.
+- 영문 표시: Runeword Dream (Io-Jah-Pul): 30% on Hit / ICD 0.8s - Shock Strike + Shock Resist +20; Shock build-up +35
 
 ### Faith
 
 - 룬 조합: `Ohm-Jah-Lem-Eld`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 신념 [Ohm-Jah-Lem-Eld]: 적중 시 22% 확률로 광신(공격력 +20%, 공격속도 +15%, 6초). 공격속도 +15%. 12초마다 발동.
-- 영문 표시: Runeword Faith (Ohm-Jah-Lem-Eld): 22% on Hit / ICD 12s - Fanaticism (Attack Damage +20%, Attack Speed +15%, 6s) + Attack Speed +15%
+- 한글 표시: 룬워드 신념 [Ohm-Jah-Lem-Eld]: 적중 시 22% 확률로 광신(공격력 +30%, 6초). 공격력 +8%. 12초마다 발동.
+- 영문 표시: Runeword Faith (Ohm-Jah-Lem-Eld): 22% on Hit / ICD 12s - Fanaticism (Attack Damage +30%, 6s) + Attack Damage +8%
 
 ### Ice
 
@@ -614,22 +614,22 @@
 
 - 룬 조합: `Hel-Ohm-Um-Lo-Cham`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 둠 [Hel-Ohm-Um-Lo-Cham]: 매 적중 시 냉기 감속 (이속-30%, 4초). 0.5초마다 발동.
-- 영문 표시: Runeword Doom (Hel-Ohm-Um-Lo-Cham): 100% on Hit / ICD 0.5s - Frost Slow (Speed-30%, 4s)
+- 한글 표시: 룬워드 둠 [Hel-Ohm-Um-Lo-Cham]: 매 적중 시 냉기 감속 (이속-30%, 4초). 0.5초마다 발동. 빙결 축적 +20.
+- 영문 표시: Runeword Doom (Hel-Ohm-Um-Lo-Cham): 100% on Hit / ICD 0.5s - Frost Slow (Speed-30%, 4s); Freeze build-up +20
 
 ### Hand of Justice
 
 - 룬 조합: `Sur-Cham-Amn-Lo`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 정의의 손길 [Sur-Cham-Amn-Lo]: 적중 시 28% 확률로 화염 심판 흡수(최소 40 또는 적중 피해 18%, 최대 250). 4초마다 발동.
-- 영문 표시: Runeword Hand of Justice (Sur-Cham-Amn-Lo): 28% on Hit / ICD 4s - Fire Judgment Absorb (40 or 18% of Hit Damage, max 250)
+- 한글 표시: 룬워드 정의의 손길 [Sur-Cham-Amn-Lo]: 적중 시 28% 확률로 화염 심판 흡수(최소 40 또는 적중 피해 18%, 최대 250). 4초마다 발동. 화상 2중첩.
+- 영문 표시: Runeword Hand of Justice (Sur-Cham-Amn-Lo): 28% on Hit / ICD 4s - Fire Judgment Absorb (40 or 18% of Hit Damage, max 250); Burning +2 stacks
 
 ### Pride
 
 - 룬 조합: `Cham-Sur-Io-Lo`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동.
-- 영문 표시: Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250)
+- 한글 표시: 룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동. 빙결 축적 +60.
+- 영문 표시: Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250); Freeze build-up +60
 
 ### Plague
 

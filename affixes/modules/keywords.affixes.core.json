@@ -2,9 +2,9 @@
   {
     "id": "storm_call",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_ARC_LIGHTNING",
-    "name": "폭풍 소환: 38% 확률로 번개 피해 10 + 적중의 10%. 1.5초마다 발동.",
-    "nameEn": "Storm Call (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage + 10% of Hit Damage",
-    "nameKo": "폭풍 소환: 38% 확률로 번개 피해 10 + 적중의 10%. 1.5초마다 발동.",
+    "name": "폭풍 소환: 38% 확률로 번개 피해 10 + 적중의 10%. 1.5초마다 발동. 감전 축적 +30.",
+    "nameEn": "Storm Call (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage + 10% of Hit Damage; Shock build-up +30",
+    "nameKo": "폭풍 소환: 38% 확률로 번개 피해 10 + 적중의 10%. 1.5초마다 발동. 감전 축적 +30.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_ARC_LIGHTNING",
@@ -41,6 +41,8 @@
       "icdSeconds": 1.5,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Shock",
+        "statusAmount": 30,
         "spellEditorId": "CAFF_SPEL_ARC_LIGHTNING",
         "applyTo": "Target",
         "magnitudeScaling": {
@@ -116,9 +118,9 @@
   {
     "id": "frost_strike",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_DAMAGE",
-    "name": "냉기 일격: 매 적중 시 냉기 피해 6 + 적중의 10%.",
-    "nameEn": "Frost Strike (100% on hit): 6 Frost Damage + 10% of Hit Damage",
-    "nameKo": "냉기 일격: 매 적중 시 냉기 피해 6 + 적중의 10%.",
+    "name": "냉기 일격: 매 적중 시 냉기 피해 6 + 적중의 10%. 빙결 축적 +20.",
+    "nameEn": "Frost Strike (100% on hit): 6 Frost Damage + 10% of Hit Damage; Freeze build-up +20",
+    "nameKo": "냉기 일격: 매 적중 시 냉기 피해 6 + 적중의 10%. 빙결 축적 +20.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_FROST_DAMAGE",
@@ -154,6 +156,8 @@
       "icdSeconds": 0.0,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Freeze",
+        "statusAmount": 20,
         "spellEditorId": "CAFF_SPEL_FROST_DAMAGE",
         "applyTo": "Target",
         "magnitudeScaling": {
@@ -172,9 +176,9 @@
   {
     "id": "spark_strike",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_DAMAGE",
-    "name": "전격 일격: 매 적중 시 번개 피해 6 + 적중의 10%.",
-    "nameEn": "Spark Strike (100% on hit): 6 Shock Damage + 10% of Hit Damage",
-    "nameKo": "전격 일격: 매 적중 시 번개 피해 6 + 적중의 10%.",
+    "name": "전격 일격: 매 적중 시 번개 피해 6 + 적중의 10%. 감전 축적 +20.",
+    "nameEn": "Spark Strike (100% on hit): 6 Shock Damage + 10% of Hit Damage; Shock build-up +20",
+    "nameKo": "전격 일격: 매 적중 시 번개 피해 6 + 적중의 10%. 감전 축적 +20.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SHOCK_DAMAGE",
@@ -210,6 +214,8 @@
       "icdSeconds": 0.0,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Shock",
+        "statusAmount": 20,
         "spellEditorId": "CAFF_SPEL_SHOCK_DAMAGE",
         "applyTo": "Target",
         "magnitudeScaling": {
@@ -266,6 +272,7 @@
       "icdSeconds": 2.8,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Exposed",
         "spellEditorId": "CAFF_SPEL_FIRE_SHRED",
         "applyTo": "Target",
         "feedback": { "artObjectEditorId": "Skyrim.esm|0x0002ACD7", "soundForm": "Skyrim.esm|0x0003C8FC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
@@ -314,6 +321,7 @@
       "icdSeconds": 2.4,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Exposed",
         "spellEditorId": "CAFF_SPEL_FROST_SHRED",
         "applyTo": "Target",
         "feedback": { "artObjectEditorId": "Skyrim.esm|0x0004253F", "soundForm": "Skyrim.esm|0x0003E5CC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
@@ -363,6 +371,7 @@
       "icdSeconds": 4.0,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Exposed",
         "spellEditorId": "CAFF_SPEL_SHOCK_SHRED",
         "applyTo": "Target",
         "magnitudeOverride": 25.0,
@@ -612,7 +621,7 @@
           "max": 24.0,
           "spellBaseAsMin": true
         },
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000531B0", "soundForm": "Skyrim.esm|0x0003D119", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF0E", "soundForm": "Skyrim.esm|0x0003D119", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
       },
       "lootWeight": 1.0
     },
@@ -982,9 +991,9 @@
   {
     "id": "ember_brand",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_EMBERBRAND_IGNITE",
-    "name": "잔불 낙인: 적중 시 40% 확률로 점화 피해 4 + 적중의 4% (4초). 0.8초마다 발동.",
-    "nameEn": "Ember Brand (40% on hit / ICD 0.8s): Ignite 4 + 4% of Hit Damage (4s)",
-    "nameKo": "잔불 낙인: 적중 시 40% 확률로 점화 피해 4 + 적중의 4% (4초). 0.8초마다 발동.",
+    "name": "잔불 낙인: 적중 시 40% 확률로 점화 피해 4 + 적중의 4% (4초). 0.8초마다 발동. 화상 1중첩.",
+    "nameEn": "Ember Brand (40% on hit / ICD 0.8s): Ignite 4 + 4% of Hit Damage (4s); Burning +1 stack",
+    "nameKo": "잔불 낙인: 적중 시 40% 확률로 점화 피해 4 + 적중의 4% (4초). 0.8초마다 발동. 화상 1중첩.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_HIT_EMBERBRAND_IGNITE",
@@ -1019,6 +1028,8 @@
       "icdSeconds": 0.8,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Burning",
+        "statusAmount": 1,
         "spellEditorId": "CAFF_SPEL_HIT_EMBERBRAND_IGNITE",
         "applyTo": "Target",
         "magnitudeScaling": {
@@ -1074,9 +1085,9 @@
   {
     "id": "ice_shackle",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_FROSTLOCK_SNARE",
-    "name": "얼음 족쇄: 적중 시 24% 확률로 냉기 감속 -35% (2초). 2.5초마다 발동.",
-    "nameEn": "Ice Shackle (24% on hit / ICD 2.5s): Frost snare -35% (2s)",
-    "nameKo": "얼음 족쇄: 적중 시 24% 확률로 냉기 감속 -35% (2초). 2.5초마다 발동.",
+    "name": "얼음 족쇄: 적중 시 24% 확률로 냉기 감속 -35% (2초). 2.5초마다 발동. 빙결 축적 +50.",
+    "nameEn": "Ice Shackle (24% on hit / ICD 2.5s): Frost snare -35% (2s); Freeze build-up +50",
+    "nameKo": "얼음 족쇄: 적중 시 24% 확률로 냉기 감속 -35% (2초). 2.5초마다 발동. 빙결 축적 +50.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_HIT_FROSTLOCK_SNARE",
@@ -1112,6 +1123,8 @@
       "icdSeconds": 2.5,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Freeze",
+        "statusAmount": 50,
         "spellEditorId": "CAFF_SPEL_HIT_FROSTLOCK_SNARE",
         "applyTo": "Target",
         "feedback": { "artObjectEditorId": "Skyrim.esm|0x0004253F", "soundForm": "Skyrim.esm|0x0003E5CC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
@@ -1280,9 +1293,9 @@
   {
     "id": "shadow_stride",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_SHADOWSTEP_BURST",
-    "name": "그림자 질주: 처치 시 무기 공격속도 +15% (4초), 발동 10/30회 후 +18%/+21%. 6초마다 발동.",
-    "nameEn": "Shadow Stride (on kill / ICD 6s): Weapon Attack Speed +15% (4s), evolves to +18%/+21% after 10/30 procs",
-    "nameKo": "그림자 질주: 처치 시 무기 공격속도 +15% (4초), 발동 10/30회 후 +18%/+21%. 6초마다 발동.",
+    "name": "그림자 질주: 처치 시 공격력 +10% (4초), 발동 10/30회 후 +12%/+14%. 6초마다 발동.",
+    "nameEn": "Shadow Stride (on kill / ICD 6s): Attack Damage +10% (4s), evolves to +12%/+14% after 10/30 procs",
+    "nameKo": "그림자 질주: 처치 시 공격력 +10% (4초), 발동 10/30회 후 +12%/+14%. 6초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_HIT_SHADOWSTEP_BURST",
@@ -1725,6 +1738,7 @@
       "perTargetICDSeconds": 10.0,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Exposed",
         "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER",
         "applyTo": "Target",
         "magnitudeOverride": 200.0,
@@ -1765,9 +1779,9 @@
   {
     "id": "ice_form",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_25",
-    "name": "얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동.",
-    "nameEn": "Ice Form (Lucky Hit 15% / ICD 10s): Move Speed -100% (2s)",
-    "nameKo": "얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동.",
+    "name": "얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동. 빙결 축적 +100.",
+    "nameEn": "Ice Form (Lucky Hit 15% / ICD 10s): Move Speed -100% (2s); Freeze build-up +100",
+    "nameKo": "얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동. 빙결 축적 +100.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
@@ -1805,6 +1819,8 @@
       "icdSeconds": 10.0,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Freeze",
+        "statusAmount": 100,
         "spellEditorId": "CAFF_SPEL_TRAP_IRONJAW_SNARE",
         "applyTo": "Target",
         "feedback": { "artObjectEditorId": "Skyrim.esm|0x0004253F", "soundForm": "Skyrim.esm|0x0003E5CC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
@@ -1844,9 +1860,9 @@
   {
     "id": "disarming_shout",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_75",
-    "name": "무장 해제: 10% 확률로 공격속도 감소. 10초마다 발동.",
-    "nameEn": "Disarming Shout (Lucky Hit 10% / ICD 10s): Attack Speed Reduction",
-    "nameKo": "무장 해제: 10% 확률로 공격속도 감소. 10초마다 발동.",
+    "name": "무장 해제: 10% 확률로 적이 주는 피해 -20% (6초). 10초마다 발동.",
+    "nameEn": "Disarming Shout (Lucky Hit 10% / ICD 10s): Enemy Damage Dealt -20% (6s)",
+    "nameKo": "무장 해제: 10% 확률로 적이 주는 피해 -20% (6초). 10초마다 발동.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -2012,6 +2028,7 @@
       "icdSeconds": 10.0,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Exposed",
         "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE",
         "applyTo": "Target",
         "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF0E", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
@@ -2059,7 +2076,7 @@
       "strings": "NONE",
       "formFilters": "NONE",
       "traits": "-E",
-      "chance": 2.0
+      "chance": 0.5
     },
     "runtime": {
       "trigger": "Hit",
@@ -2071,7 +2088,7 @@
         "costPctOfMaxMagicka": 5.0,
         "noHitEffectArt": false
       },
-      "lootWeight": 2
+      "lootWeight": 0.5
     },
     "family": "archmage",
     "slot": "prefix"
@@ -2087,7 +2104,7 @@
       "strings": "NONE",
       "formFilters": "NONE",
       "traits": "-E",
-      "chance": 1.0
+      "chance": 0.28
     },
     "runtime": {
       "trigger": "Hit",
@@ -2099,7 +2116,7 @@
         "costPctOfMaxMagicka": 5.0,
         "noHitEffectArt": false
       },
-      "lootWeight": 1
+      "lootWeight": 0.28
     },
     "family": "archmage",
     "slot": "prefix"
@@ -2115,7 +2132,7 @@
       "strings": "NONE",
       "formFilters": "NONE",
       "traits": "-E",
-      "chance": 0.5
+      "chance": 0.15
     },
     "runtime": {
       "trigger": "Hit",
@@ -2127,7 +2144,7 @@
         "costPctOfMaxMagicka": 5.0,
         "noHitEffectArt": false
       },
-      "lootWeight": 0.5
+      "lootWeight": 0.15
     },
     "family": "archmage",
     "slot": "prefix"
@@ -2143,7 +2160,7 @@
       "strings": "NONE",
       "formFilters": "NONE",
       "traits": "-E",
-      "chance": 0.2
+      "chance": 0.07
     },
     "runtime": {
       "trigger": "Hit",
@@ -2155,7 +2172,7 @@
         "costPctOfMaxMagicka": 5.0,
         "noHitEffectArt": false
       },
-      "lootWeight": 0.2
+      "lootWeight": 0.07
     },
     "family": "archmage",
     "slot": "prefix"
@@ -2190,7 +2207,7 @@
           "spellBaseAsMin": true
         }
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.4
     },
     "slot": "prefix"
   },
@@ -2224,7 +2241,7 @@
           "spellBaseAsMin": true
         }
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.4
     },
     "slot": "prefix"
   },
@@ -2258,7 +2275,7 @@
           "spellBaseAsMin": true
         }
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.4
     },
     "slot": "prefix"
   },
@@ -2292,7 +2309,7 @@
           "spellBaseAsMin": true
         }
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.2
     },
     "slot": "prefix"
   },
@@ -2326,7 +2343,7 @@
           "spellBaseAsMin": true
         }
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.2
     },
     "slot": "prefix"
   },
@@ -2360,7 +2377,7 @@
           "spellBaseAsMin": true
         }
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.2
     },
     "slot": "prefix"
   },
@@ -2394,7 +2411,7 @@
           "spellBaseAsMin": true
         }
       },
-      "lootWeight": 1.0
+      "lootWeight": 0.2
     },
     "slot": "prefix"
   },
@@ -2762,6 +2779,7 @@
       "perTargetICDSeconds": 12.0,
       "action": {
         "type": "CastSpellAdaptiveElement",
+        "statusTag": "Exposed",
         "mode": "StrongestResist",
         "spells": {
           "Fire": "CAFF_SPEL_FIRE_SHRED",
@@ -3280,14 +3298,14 @@
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
-        "name": "Calamity: Chaos Rune (Slow Attack Speed) / 혼돈의 룬 (공격 속도 저하)",
-        "actorValue": "WeaponSpeedMult",
+        "name": "Calamity: Chaos Rune (Weaken) / 혼돈의 룬 (약화)",
+        "actorValue": "AttackDamageMult",
         "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK",
-        "name": "Calamity: Chaos Rune (Slow Attack Speed) / 혼돈의 룬 (공격 속도 저하)",
+        "name": "Calamity: Chaos Rune (Weaken) / 혼돈의 룬 (약화)",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
@@ -3360,14 +3378,14 @@
   {
     "id": "battle_frenzy",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_SWAP_JACKPOT",
-    "name": "전투 광란: 적중 시 20% 확률로 무기 공격속도 +15% (4초). 0.6초마다 발동. 같은 대상 12초.",
-    "nameEn": "Battle Frenzy (20% on hit / ICD 0.6s / per-target ICD 12s): Weapon Attack Speed +15% (4s)",
-    "nameKo": "전투 광란: 적중 시 20% 확률로 무기 공격속도 +15% (4초). 0.6초마다 발동. 같은 대상 12초.",
+    "name": "전투 광란: 적중 시 20% 확률로 공격력 +10% (4초). 0.6초마다 발동. 같은 대상 12초.",
+    "nameEn": "Battle Frenzy (20% on hit / ICD 0.6s / per-target ICD 12s): Attack Damage +10% (4s)",
+    "nameKo": "전투 광란: 적중 시 20% 확률로 공격력 +10% (4초). 0.6초마다 발동. 같은 대상 12초.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
         "name": "Calamity: Battle Frenzy / 전투 광란",
-        "actorValue": "WeaponSpeedMult",
+        "actorValue": "AttackDamageMult",
         "recover": true
       },
       "spell": {
@@ -3376,7 +3394,7 @@
         "delivery": "Self",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_SWAP_JACKPOT_HASTE",
-          "magnitude": 0.15,
+          "magnitude": 0.10,
           "duration": 4,
           "area": 0
         }
@@ -3408,9 +3426,9 @@
   {
     "id": "thunder_mastery",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_EVOLVING_LIGHTNING",
-    "name": "뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동.",
-    "nameEn": "Thunder Mastery (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits)",
-    "nameKo": "뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동.",
+    "name": "뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동. 감전 축적 +15.",
+    "nameEn": "Thunder Mastery (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits); Shock build-up +15",
+    "nameKo": "뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동. 감전 축적 +15.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -3424,6 +3442,8 @@
       "icdSeconds": 0.2,
       "action": {
         "type": "CastSpell",
+        "statusTag": "Shock",
+        "statusAmount": 15,
         "spellEditorId": "CAFF_SPEL_SHOCK_DAMAGE",
         "applyTo": "Target",
         "magnitudeScaling": {

@@ -29,7 +29,7 @@
 | 8 | **endurance** | Stamina | +20 | +40 | +60 | 근접/궁수 |
 | 9 | **evasion** | LightArmorModifier | +5 | +10 | +15 | 경장/도적 |
 | 10 | **fortitude** | HeavyArmorModifier | +5 | +10 | +15 | 중장/탱커 |
-| 11 | **gladiator** | WeaponSpeedMult | +5 | +10 | +15 | 공격 속도 |
+| 11 | **gladiator** | AttackDamageMult | +3 | +6 | +9 | 공격력 |
 | 12 | **guardian** | DamageResist | +25 | +50 | +80 | 물리 방어 |
 | 13 | **marksman** | MarksmanModifier | +5 | +10 | +15 | 궁수 |
 | 14 | **meditation** | MagickaRateMult | +25 | +50 | +75 | 마법사 |
@@ -156,14 +156,14 @@
 
 ### gladiator
 
-- 영향 능력치: `WeaponSpeedMult`
-- 추천 빌드: 공격 속도
+- 영향 능력치: `AttackDamageMult`
+- 추천 빌드: 공격력
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
 |------|----|-------------|-----------|-----:|
-| T1 | `suffix_gladiator_t1` | 약간의 검투사: 공격 속도 +5% | of Minor Gladiator: Attack Speed +5% | 5 |
-| T2 | `suffix_gladiator_t2` | 검투사: 공격 속도 +10% | of the Gladiator: Attack Speed +10% | 10 |
-| T3 | `suffix_gladiator_t3` | 위대한 검투사: 공격 속도 +15% | of Grand Gladiator: Attack Speed +15% | 15 |
+| T1 | `suffix_gladiator_t1` | 약간의 검투사: 공격력 +3% | of Minor Gladiator: Attack Damage +3% | 3 |
+| T2 | `suffix_gladiator_t2` | 검투사: 공격력 +6% | of the Gladiator: Attack Damage +6% | 6 |
+| T3 | `suffix_gladiator_t3` | 위대한 검투사: 공격력 +9% | of Grand Gladiator: Attack Damage +9% | 9 |
 
 ### guardian
 

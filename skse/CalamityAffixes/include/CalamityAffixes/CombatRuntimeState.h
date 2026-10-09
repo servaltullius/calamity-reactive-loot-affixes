@@ -10,6 +10,8 @@
 #include "CalamityAffixes/EchoStrikeState.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
+#include "CalamityAffixes/StatusLedger.h"
+#include "CalamityAffixes/StatusMeters.h"
 
 namespace CalamityAffixes
 {
@@ -89,6 +91,21 @@ namespace CalamityAffixes
 		CorpseExplosionRuntimeState summonCorpseExplosionState{};
 		std::unordered_map<std::uint32_t, std::chrono::steady_clock::time_point> summonCorpseExplosionSeenCorpses{};
 		EchoStrikeRuntimeState echoStrike{};
+		// Shared statuses on enemies and the Doom bursts waiting to land (v2.3.0).
+		// Transient like the echo queue: cleared on load, revert and reload.
+		StatusLedger statusLedger{};
+		DoomQueue doomQueue{};
+		// Freeze, Bleed and Shock meters and Burning stacks per enemy.
+		StatusMeters statusMeters{};
+		std::atomic_bool hasPendingDoom{ false };
+
+		void ResetStatusState() noexcept
+		{
+			statusLedger.Clear();
+			doomQueue.Clear();
+			statusMeters.Clear();
+			hasPendingDoom.store(false, std::memory_order_release);
+		}
 
 		void ResetTransientState() noexcept
 		{
@@ -121,6 +138,7 @@ namespace CalamityAffixes
 			lowHealthTriggerConsumed.clear();
 			lowHealthLastObservedPct.clear();
 			echoStrike.Reset();
+			ResetStatusState();
 		}
 
 		void ResetCorpseExplosionState() noexcept

@@ -179,6 +179,7 @@
         "requireRecentlyHitSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
         "requireRecentlyKillSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
         "requireNotHitRecentlySeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "requireTargetStatusCount": { "type": "integer", "minimum": 0, "maximum": 6 },
         "lowHealthThresholdPercent": { "type": "number", "minimum": 1.0, "maximum": 95.0 },
         "lowHealthRearmPercent": { "type": "number", "minimum": 1.0, "maximum": 100.0 },
         "conditions": { "$ref": "#/$defs/runtimeConditions" },
@@ -216,6 +217,7 @@
         "requireRecentlyHitSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
         "requireRecentlyKillSeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
         "requireNotHitRecentlySeconds": { "type": "number", "minimum": 0.0, "maximum": 600.0 },
+        "requireTargetStatusCount": { "type": "integer", "minimum": 0, "maximum": 6 },
         "lowHealthThresholdPercent": { "type": "number", "minimum": 1.0, "maximum": 95.0 },
         "lowHealthRearmPercent": { "type": "number", "minimum": 1.0, "maximum": 100.0 },
         "luckyHitChancePercent": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
@@ -240,9 +242,15 @@
             "CorpseExplosion",
             "SummonCorpseExplosion",
             "SpawnTrap",
-            "EchoStrike"
+            "EchoStrike",
+            "DoomMark",
+            "SpreadStatus"
           ]
         },
+        "statusTag": { "type": "string", "enum": ["Exposed", "Doom", "Burning", "Freeze", "Bleed", "Shock"] },
+        "statusAmount": { "type": "number", "minimum": 1.0, "maximum": 100.0 },
+        "markSpellEditorId": { "type": "string", "minLength": 1 },
+        "delaySeconds": { "type": "number", "minimum": 0.25, "maximum": 5.0 },
         "spellEditorId": { "type": "string", "minLength": 1 },
         "spellForm": { "$ref": "#/$defs/formSpec" },
         "applyTo": { "type": "string", "enum": ["Self", "Target"] },

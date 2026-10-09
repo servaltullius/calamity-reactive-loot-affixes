@@ -250,8 +250,8 @@ function initUiText() {
   }
   if (debugGrantTrapAffixButton) {
     debugGrantTrapAffixButton.textContent = t(
-      "Grant Trap Affix to Selected Item",
-      "선택한 장비에 함정 어픽스"
+      "Grant Test Affix to Selected Item",
+      "선택한 장비에 테스트 어픽스"
     );
   }
   if (debugTrapProbeButton) {

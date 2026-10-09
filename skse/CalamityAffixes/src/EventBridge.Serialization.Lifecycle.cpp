@@ -72,6 +72,7 @@ namespace CalamityAffixes
 		_eventDispatcher.Invalidate();
 		ClearTrapRuntimeState("pre-load", true);
 		_combatState.echoStrike.Reset();
+		_combatState.ResetStatusState();
 		Hooks::InvalidateDeferredTasks();
 		Hooks::ClearRuntimeState();
 	}

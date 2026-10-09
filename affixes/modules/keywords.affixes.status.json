@@ -1,0 +1,99 @@
+[
+  {
+    "id": "doom_brand",
+    "editorId": "LoreBox_CAFF_AFFIX_STATUS_DOOM_BRAND",
+    "name": "파멸의 낙인: 적중 시 25% 확률로 그림자 낙인. 1.5초 뒤 그 적중 피해의 60%가 마법 피해로 터짐(다시 찍으면 시간만 갱신). 4초마다 발동.",
+    "nameEn": "Doom Brand (25% on hit / ICD 4s): marks the target; 1.5s later it bursts for 60% of that hit's damage as magic damage (re-marking only resets the timer)",
+    "nameKo": "파멸의 낙인: 적중 시 25% 확률로 그림자 낙인. 1.5초 뒤 그 적중 피해의 60%가 마법 피해로 터짐(다시 찍으면 시간만 갱신). 4초마다 발동.",
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1.0
+    },
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 25.0,
+      "icdSeconds": 4.0,
+      "action": {
+        "type": "DoomMark",
+        "spellEditorId": "CAFF_SPEL_STATUS_DOOM_BURST",
+        "markSpellEditorId": "CAFF_SPEL_STATUS_DOOM_MARK",
+        "delaySeconds": 1.5,
+        "magnitudeScaling": {
+          "source": "HitTotalDealt",
+          "mult": 0.6
+        }
+      },
+      "lootWeight": 1.0
+    },
+    "slot": "prefix"
+  },
+  {
+    "id": "exploit_weakness",
+    "editorId": "LoreBox_CAFF_AFFIX_STATUS_EXPLOIT_WEAKNESS",
+    "name": "약점 포착: 상태(노출·파멸 등)가 2가지 이상 걸린 적을 때리면 그 적중 피해의 15%를 추가 피해로 줌. 0.5초마다 발동.",
+    "nameEn": "Exploit Weakness (on hit / ICD 0.5s): against an enemy with 2+ kinds of status (Exposed, Doom, ...), deal +15% of the hit's damage as extra damage",
+    "nameKo": "약점 포착: 상태(노출·파멸 등)가 2가지 이상 걸린 적을 때리면 그 적중 피해의 15%를 추가 피해로 줌. 0.5초마다 발동.",
+    "kid": {
+      "type": "Weapon",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1.0
+    },
+    "runtime": {
+      "trigger": "Hit",
+      "procChancePercent": 100.0,
+      "icdSeconds": 0.5,
+      "requireTargetStatusCount": 2,
+      "action": {
+        "type": "CastSpell",
+        "spellEditorId": "CAFF_SPEL_STATUS_EXPLOIT_STRIKE",
+        "applyTo": "Target",
+        "noHitEffectArt": true,
+        "magnitudeScaling": {
+          "source": "HitTotalDealt",
+          "mult": 0.15
+        },
+        "feedback": {
+          "artObjectEditorId": "Skyrim.esm|0x00074795",
+          "soundForm": "Skyrim.esm|0x0006A165",
+          "target": "Target",
+          "durationSeconds": 0.45,
+          "playOn": "Proc",
+          "spatialSound": true
+        }
+      },
+      "lootWeight": 1.0
+    },
+    "slot": "prefix"
+  },
+  {
+    "id": "contagion",
+    "editorId": "LoreBox_CAFF_AFFIX_STATUS_CONTAGION",
+    "name": "전염: 상태(노출·파멸 등)가 걸린 적을 처치하면 반경 400 안의 적 최대 2명에게 같은 상태를 옮김. 3초마다 발동.",
+    "nameEn": "Contagion (on kill / ICD 3s): a slain enemy's statuses (Exposed, Doom, ...) pass to up to 2 enemies within 400",
+    "nameKo": "전염: 상태(노출·파멸 등)가 걸린 적을 처치하면 반경 400 안의 적 최대 2명에게 같은 상태를 옮김. 3초마다 발동.",
+    "kid": {
+      "type": "Armor",
+      "strings": "NONE",
+      "formFilters": "NONE",
+      "traits": "-E",
+      "chance": 1.0
+    },
+    "runtime": {
+      "trigger": "Kill",
+      "procChancePercent": 100.0,
+      "icdSeconds": 3.0,
+      "action": {
+        "type": "SpreadStatus",
+        "radius": 400.0,
+        "maxTargets": 2
+      },
+      "lootWeight": 1.0
+    },
+    "slot": "prefix"
+  }
+]

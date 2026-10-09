@@ -237,7 +237,7 @@
         "type": "ArtObject",
         "artObject": {
           "editorId": "CAFF_ARTO_VFX_TRAP_BEAR_BURST",
-          "modelPath": "Magic\\ExplosionFrost01.nif",
+          "modelPath": "Magic\\IcicleImpact01.nif",
           "artType": "MagicHitEffect"
         }
       },
@@ -253,7 +253,7 @@
         "type": "ArtObject",
         "artObject": {
           "editorId": "CAFF_ARTO_VFX_TRAP_RUNE_BURST",
-          "modelPath": "Magic\\ExplosionFrost01.nif",
+          "modelPath": "Magic\\IcicleImpact01.nif",
           "artType": "MagicHitEffect"
         }
       },
@@ -690,6 +690,222 @@
           "frequencyVariancePercent": 5,
           "priority": 128,
           "dbVariance": 1
+        }
+      },
+      {
+        "type": "Keyword",
+        "keyword": {
+          "editorId": "LoreBox_CAFF_AFFIX_STATUS_DOOM_BRAND"
+        }
+      },
+      {
+        "type": "Keyword",
+        "keyword": {
+          "editorId": "LoreBox_CAFF_AFFIX_STATUS_EXPLOIT_WEAKNESS"
+        }
+      },
+      {
+        "type": "Keyword",
+        "keyword": {
+          "editorId": "LoreBox_CAFF_AFFIX_STATUS_CONTAGION"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_STATUS_DOOM_MARK",
+          "name": "Calamity: Doom Mark / 파멸의 낙인",
+          "actorValue": "None",
+          "archetype": "Script",
+          "hostile": true,
+          "recover": false,
+          "hitShaderForm": "Skyrim.esm|0x00081180"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_STATUS_DOOM_BURST",
+          "name": "Calamity: Doom Burst / 파멸 폭발",
+          "actorValue": "Health",
+          "resistValue": "ResistMagic",
+          "hostile": true,
+          "recover": false,
+          "hitShaderForm": "Skyrim.esm|0x00103129"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_STATUS_EXPLOIT_STRIKE",
+          "name": "Calamity: Exploit Weakness / 약점 포착",
+          "actorValue": "Health",
+          "hostile": true,
+          "recover": false
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_STATUS_DOOM_MARK",
+          "name": "Calamity: Doom Mark / 파멸의 낙인",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_STATUS_DOOM_MARK",
+            "magnitude": 0,
+            "duration": 2,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_STATUS_DOOM_BURST",
+          "name": "Calamity: Doom Burst / 파멸 폭발",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_STATUS_DOOM_BURST",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_STATUS_EXPLOIT_STRIKE",
+          "name": "Calamity: Exploit Weakness / 약점 포착",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_STATUS_EXPLOIT_STRIKE",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_STATUS_FREEZE_SLOW",
+          "name": "Calamity: Freeze / 빙결",
+          "actorValue": "SpeedMult",
+          "hostile": true,
+          "recover": true,
+          "hitShaderForm": "Skyrim.esm|0x000DC20D",
+          "fxPersist": true
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_STATUS_FREEZE_WEAKEN",
+          "name": "Calamity: Freeze Weaken / 빙결 약화",
+          "actorValue": "AttackDamageMult",
+          "hostile": true,
+          "recover": true
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_STATUS_BLEED_BURST",
+          "name": "Calamity: Bleed Burst / 출혈 폭발",
+          "actorValue": "Health",
+          "hostile": true,
+          "recover": false,
+          "hitEffectArtForm": "Skyrim.esm|0x000F3A8A"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_STATUS_SHOCK_DISCHARGE",
+          "name": "Calamity: Shock Discharge / 감전 방전",
+          "actorValue": "Health",
+          "resistValue": "ResistShock",
+          "hostile": true,
+          "recover": false,
+          "hitShaderForm": "Skyrim.esm|0x000D22FC"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_STATUS_BURNING",
+          "name": "Calamity: Burning / 화상",
+          "actorValue": "Health",
+          "resistValue": "ResistFire",
+          "hostile": true,
+          "recover": false,
+          "hitShaderForm": "Skyrim.esm|0x0001B212",
+          "fxPersist": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_STATUS_FREEZE",
+          "name": "Calamity: Freeze / 빙결",
+          "delivery": "TargetActor",
+          "effects": [
+            {
+              "magicEffectEditorId": "CAFF_MGEF_STATUS_FREEZE_SLOW",
+              "magnitude": 80,
+              "duration": 3,
+              "area": 0
+            },
+            {
+              "magicEffectEditorId": "CAFF_MGEF_STATUS_FREEZE_WEAKEN",
+              "magnitude": 0.3,
+              "duration": 3,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_STATUS_BLEED_BURST",
+          "name": "Calamity: Bleed Burst / 출혈 폭발",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_STATUS_BLEED_BURST",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_STATUS_SHOCK_DISCHARGE",
+          "name": "Calamity: Shock Discharge / 감전 방전",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_STATUS_SHOCK_DISCHARGE",
+            "magnitude": 40,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_STATUS_BURNING",
+          "name": "Calamity: Burning / 화상",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_STATUS_BURNING",
+            "magnitude": 4,
+            "duration": 4,
+            "area": 0
+          }
         }
       }
     ]

@@ -77,17 +77,18 @@ public sealed class EffectReworkContractTests
     }
 
     [Fact]
-    public void Fury_UsesAttackSpeedAndInstantStaminaWithoutCriticalChance()
+    public void Fury_UsesAttackDamageAndInstantStaminaWithoutCriticalChance()
     {
         var affix = ReadAffix("keywords.affixes.runewords.json", "runeword_fury_final");
         var records = affix.GetProperty("records");
         var runtime = affix.GetProperty("runtime");
 
         Assert.Equal("CAFF_MGEF_RW_FURY_LIFESTEAL", records.GetProperty("magicEffect").GetProperty("editorId").GetString());
-        Assert.Equal("WeaponSpeedMult", records.GetProperty("magicEffect").GetProperty("actorValue").GetString());
+        // Attack speed is ignored under MCO (v2.3.0), so Fury raises attack damage instead.
+        Assert.Equal("AttackDamageMult", records.GetProperty("magicEffect").GetProperty("actorValue").GetString());
         var effects = records.GetProperty("spell").GetProperty("effects").EnumerateArray().ToArray();
         Assert.Equal(2, effects.Length);
-        AssertEffect(effects[0], "CAFF_MGEF_RW_FURY_LIFESTEAL", 0.25, 6);
+        AssertEffect(effects[0], "CAFF_MGEF_RW_FURY_LIFESTEAL", 0.15, 6);
         AssertEffect(effects[1], "CAFF_MGEF_RW_FURY_RESTORE_STAMINA", 30.0, 0);
         Assert.Equal("Hit", runtime.GetProperty("trigger").GetString());
         Assert.Equal(24.0, runtime.GetProperty("procChancePercent").GetDouble());
@@ -128,7 +129,7 @@ public sealed class EffectReworkContractTests
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(60, records.Length);
+        Assert.Equal(78, records.Length);
         AssertMagicEffect(records[0], "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA", "Stamina", hostile: false, recover: false);
         AssertMagicEffect(records[1], "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE", "AttackDamageMult", hostile: false, recover: true);
         AssertSpellEffects(records[2], "CAFF_SPEL_INCOMING_VOICE_POWER",
@@ -224,6 +225,37 @@ public sealed class EffectReworkContractTests
     {
         var module = ReadJson(Path.Combine("affixes", "modules", moduleFile));
         return module.EnumerateArray().Single(candidate => candidate.GetProperty("id").GetString() == id).Clone();
+    }
+
+    [Fact]
+    public void BuildUpTail_PayoffsAreHostileAndNamedAsTheRuntimeLooksThemUp()
+    {
+        var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
+        var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
+        var tail = records[^9..];
+
+        var magicEffects = tail.Take(5).Select(record => record.GetProperty("magicEffect")).ToArray();
+        Assert.Equal(
+            new[] { "CAFF_MGEF_STATUS_FREEZE_SLOW", "CAFF_MGEF_STATUS_FREEZE_WEAKEN", "CAFF_MGEF_STATUS_BLEED_BURST", "CAFF_MGEF_STATUS_SHOCK_DISCHARGE", "CAFF_MGEF_STATUS_BURNING" },
+            magicEffects.Select(effect => effect.GetProperty("editorId").GetString()));
+        Assert.All(magicEffects, effect => Assert.True(effect.GetProperty("hostile").GetBoolean()));
+
+        var spells = tail.Skip(5).Select(record => record.GetProperty("spell")).ToArray();
+        Assert.All(spells, spell => Assert.Equal("TargetActor", spell.GetProperty("delivery").GetString()));
+        var freeze = spells[0].GetProperty("effects").EnumerateArray().ToArray();
+        Assert.Equal(80.0, freeze[0].GetProperty("magnitude").GetDouble());
+        Assert.Equal(0.3, freeze[1].GetProperty("magnitude").GetDouble());
+        Assert.All(freeze, effect => Assert.Equal(3, effect.GetProperty("duration").GetInt32()));
+        // Burning lasts as long as the runtime keeps its stacks (kBurningDurationMs).
+        Assert.Equal(4, spells[3].GetProperty("effect").GetProperty("duration").GetInt32());
+
+        var runtime = File.ReadAllText(Path.Combine(FindRepoRoot(), "skse", "CalamityAffixes", "src", "EventBridge.Actions.Status.cpp"));
+        foreach (var spell in spells)
+        {
+            Assert.Contains($"\"{spell.GetProperty("editorId").GetString()}\"", runtime);
+        }
+        var meters = File.ReadAllText(Path.Combine(FindRepoRoot(), "skse", "CalamityAffixes", "include", "CalamityAffixes", "StatusMeters.h"));
+        Assert.Contains("kBurningDurationMs = 4000", meters);
     }
 
     private static JsonElement ReadJson(params string[] relativePath)

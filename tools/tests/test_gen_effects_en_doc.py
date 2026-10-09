@@ -38,7 +38,7 @@ class GenEffectsEnDocTests(unittest.TestCase):
         self.assertEqual([], re.findall(r"[가-힣]+", self.text))
 
     def test_every_public_prefix_suffix_and_runeword_is_listed(self) -> None:
-        prefixes = [e for e in load(gen_effects_en_doc.CORE_JSON) if not e["id"].startswith("internal_")]
+        prefixes = [e for e in gen_effects_en_doc.load_prefix_entries() if not e["id"].startswith("internal_")]
         for entry in prefixes:
             self.assertIn(f"- {gen_effects_en_doc.bold_name(entry['nameEn'])}\n", self.text, entry["id"])
         for entry in load(gen_effects_en_doc.SUFFIXES_PATH):

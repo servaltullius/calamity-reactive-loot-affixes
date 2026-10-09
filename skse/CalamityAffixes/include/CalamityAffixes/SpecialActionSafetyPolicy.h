@@ -96,13 +96,15 @@ namespace CalamityAffixes::detail
 		return offset < remaining ? start + offset : offset - remaining;
 	}
 
+	// One cast-on-crit spell per hit, every hit kind (v2.3.0). Two at once on a
+	// power attack was the largest single source of the "enemies melt" damage
+	// (2026-10-04 log readback); the cyclic cursor still rotates which one fires.
 	[[nodiscard]] constexpr std::size_t ResolveCastOnCritSelectionCount(
 		std::size_t a_candidateCount,
-		bool a_isRangedWeapon,
-		bool a_isNormalMeleeHit) noexcept
+		[[maybe_unused]] bool a_isRangedWeapon,
+		[[maybe_unused]] bool a_isNormalMeleeHit) noexcept
 	{
-		const std::size_t limit = (a_isRangedWeapon || a_isNormalMeleeHit) ? 1u : 2u;
-		return a_candidateCount < limit ? a_candidateCount : limit;
+		return a_candidateCount < 1u ? a_candidateCount : 1u;
 	}
 
 	[[nodiscard]] constexpr bool IsCalamityProcSource(std::string_view a_sourceEditorId) noexcept

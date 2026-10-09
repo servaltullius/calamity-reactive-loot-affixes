@@ -100,7 +100,7 @@ class GeneratedRuntimeRulesTests(unittest.TestCase):
         rendered = self.documents["PREFIX_EFFECTS.md"]
         for expected in (
             "최대 3개", "40% → 64% → 78.4%", "피해량을 2배·3배",
-            "근접 치명타·강공격은 최대 2개", "일반 근접 공격과 활·석궁은 최대 1개",
+            "한 번의 공격(치명타·강공격·일반 근접·활·석궁)에 주문 하나만", "차례로 돌아가며 발동",
             "0.15초", "이중 판정하지 않음", "근접 일반 공격 시 45%",
         ):
             with self.subTest(expected=expected):

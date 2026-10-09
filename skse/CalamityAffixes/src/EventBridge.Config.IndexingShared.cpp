@@ -81,7 +81,9 @@ namespace CalamityAffixes
 			a_affix.action.type == ActionType::kCastSpell ||
 			a_affix.action.type == ActionType::kCastSpellAdaptiveElement ||
 			a_affix.action.type == ActionType::kSpawnTrap ||
-			a_affix.action.type == ActionType::kEchoStrike;
+			a_affix.action.type == ActionType::kEchoStrike ||
+			a_affix.action.type == ActionType::kDoomMark ||
+			a_affix.action.type == ActionType::kSpreadStatus;
 		if (!isTriggerAction) {
 			return;
 		}

@@ -14,9 +14,11 @@
     "ConvertDamage",
     "CorpseExplosion",
     "DebugNotify",
+    "DoomMark",
     "EchoStrike",
     "MindOverMatter",
     "SpawnTrap",
+    "SpreadStatus",
     "SummonCorpseExplosion"
   ],
   "runewordCatalog": [

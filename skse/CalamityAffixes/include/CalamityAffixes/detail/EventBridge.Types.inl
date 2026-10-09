@@ -33,6 +33,8 @@
 			kSummonCorpseExplosion,
 			kSpawnTrap,
 			kEchoStrike,
+			kDoomMark,
+			kSpreadStatus,
 		};
 
 		enum class TrapSpawnAt : std::uint8_t
@@ -237,6 +239,21 @@
 			bool echoRequirePowerAttack{ false };
 			std::chrono::milliseconds echoWindow{ 0 };
 			std::chrono::milliseconds echoDelay{ 0 };
+
+			// Shared statuses (v2.3.0). statusTag marks the status a CastSpell or
+			// CastSpellAdaptiveElement puts on its target, for the ledger.
+			StatusKind statusTag{ StatusKind::kNone };
+			// Build-up statuses: meter gain per proc (Freeze/Bleed/Shock) or Burning
+			// stacks added per proc.
+			float statusAmount{ 0.0f };
+			// DoomMark: cast doomMarkSpell (the visible mark) on the target, then
+			// `spell` after doomDelay, scaled from the marking hit.
+			RE::SpellItem* doomMarkSpell{ nullptr };
+			std::chrono::milliseconds doomDelay{ 0 };
+			// SpreadStatus (on kill): copy the victim's statuses to the nearest
+			// spreadMaxTargets enemies within spreadRadius.
+			float spreadRadius{ 0.0f };
+			std::uint32_t spreadMaxTargets{ 0u };
 
 			// Evolution (growth): each successful proc grants XP and scales magnitude by stage.
 			bool evolutionEnabled{ false };
@@ -545,6 +562,8 @@
 			std::chrono::milliseconds requireRecentlyHit{ 0 };
 			std::chrono::milliseconds requireRecentlyKill{ 0 };
 			std::chrono::milliseconds requireNotHitRecently{ 0 };
+			// The target must carry this many distinct Calamity statuses (0 = no gate).
+			std::uint32_t requireTargetStatusCount{ 0u };
 			float lowHealthThresholdPct{ 35.0f };
 			float lowHealthRearmPct{ 45.0f };
 			float luckyHitChancePct{ 0.0f };

@@ -83,6 +83,15 @@ namespace CalamityAffixes
 			       a_owner->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) &&
 			       IsHostileEffectTarget(a_owner, a_target) &&
 			       IsEchoStrikeActivationHit(action, a_owner, a_hitData);
+		case ActionType::kDoomMark:
+			return action.spell && action.doomMarkSpell &&
+			       a_owner->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) &&
+			       IsHostileEffectTarget(a_owner, a_target);
+		case ActionType::kSpreadStatus:
+			// The victim is already dead; only its ledger entries matter.
+			return a_target != nullptr &&
+			       a_owner->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) &&
+			       _combatState.statusLedger.CountDistinctKinds(a_target->GetFormID(), StatusClockNowMs()) > 0u;
 		default:
 			return false;
 		}
@@ -106,6 +115,12 @@ namespace CalamityAffixes
 			break;
 		case ActionType::kEchoStrike:
 			ExecuteEchoStrikeActivation(a_affix, a_owner);
+			break;
+		case ActionType::kDoomMark:
+			ExecuteDoomMarkAction(a_affix, a_owner, a_target, a_hitData);
+			break;
+		case ActionType::kSpreadStatus:
+			ExecuteSpreadStatusAction(a_affix, a_owner, a_target);
 			break;
 		default:
 			SKSE::log::warn("CalamityAffixes: DispatchActionByType unhandled ActionType {}.", static_cast<int>(a_action.type));

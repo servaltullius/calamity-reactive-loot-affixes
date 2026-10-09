@@ -4,6 +4,7 @@
 #include "EventBridge.Config.Shared.h"
 
 #include <algorithm>
+#include <cmath>
 #include <string>
 #include <string_view>
 
@@ -489,6 +490,47 @@ namespace CalamityAffixes
 			return true;
 		}
 
+		if (a_type == RuntimeContract::kActionDoomMark) {
+			// Doom works on any hit (melee, ranged, spell): the mark lands now and
+			// the burst follows after the delay, scaled from the marking hit.
+			a_out.action.type = ActionType::kDoomMark;
+			a_out.action.spell = ParseSpell(a_action, a_handler);
+			a_out.action.doomMarkSpell = ParseSpellFromString(a_action.value("markSpellEditorId", std::string{}), a_handler);
+			a_out.action.effectiveness = a_action.value("effectiveness", 1.0f);
+			a_out.action.noHitEffectArt = a_action.value("noHitEffectArt", false);
+			ParseMagnitudeScaling(a_action, a_out.action.magnitudeScaling);
+			const float delaySeconds = std::clamp(a_action.value("delaySeconds", 1.5f), 0.25f, 5.0f);
+			a_out.action.doomDelay = std::chrono::milliseconds(static_cast<std::int64_t>(delaySeconds * 1000.0f));
+			a_out.action.statusTag = StatusKind::kDoom;
+			if (!a_out.action.spell || !a_out.action.doomMarkSpell ||
+				a_out.action.magnitudeScaling.source == MagnitudeScaling::Source::kNone ||
+				a_out.trigger != Trigger::kHit) {
+				SKSE::log::error(
+					"CalamityAffixes: DoomMark action incomplete (affixId={}, spell={}, markSpell={}, scaled={}, trigger={}).",
+					a_out.id,
+					a_out.action.spell != nullptr,
+					a_out.action.doomMarkSpell != nullptr,
+					a_out.action.magnitudeScaling.source != MagnitudeScaling::Source::kNone,
+					static_cast<std::uint32_t>(a_out.trigger));
+				return false;
+			}
+			return true;
+		}
+
+		if (a_type == RuntimeContract::kActionSpreadStatus) {
+			a_out.action.type = ActionType::kSpreadStatus;
+			a_out.action.spreadRadius = std::clamp(a_action.value("radius", 400.0f), 50.0f, 2000.0f);
+			a_out.action.spreadMaxTargets = std::clamp(a_action.value("maxTargets", 2u), 1u, 8u);
+			if (a_out.trigger != Trigger::kKill) {
+				SKSE::log::warn(
+					"CalamityAffixes: SpreadStatus requires trigger=Kill (affixId={}, trigger={}); skipping.",
+					a_out.id,
+					static_cast<std::uint32_t>(a_out.trigger));
+				return false;
+			}
+			return true;
+		}
+
 		return false;
 	}
 
@@ -512,12 +554,22 @@ namespace CalamityAffixes
 			return true;
 		}
 
-		if (ParseRuntimeSpellActionFromJson(a_action, a_type, a_handler, a_out)) {
-			return true;
+		const bool parsed = ParseRuntimeSpellActionFromJson(a_action, a_type, a_handler, a_out) ||
+			ParseRuntimeSpecialActionFromJson(a_action, a_type, a_handler, a_out) ||
+			ParseRuntimeAreaActionFromJson(a_action, a_type, a_handler, a_out);
+		if (parsed && a_out.action.statusTag == StatusKind::kNone) {
+			const auto tag = a_action.value("statusTag", std::string{});
+			a_out.action.statusTag = ParseStatusKind(tag);
+			if (!tag.empty() && a_out.action.statusTag == StatusKind::kNone) {
+				SKSE::log::warn("CalamityAffixes: unknown statusTag '{}' (affixId={}); ignored.", tag, a_out.id);
+			}
 		}
-		if (ParseRuntimeSpecialActionFromJson(a_action, a_type, a_handler, a_out)) {
-			return true;
+		// Build-up statuses fill a meter (0-100 per proc) or add Burning stacks (1-5).
+		if (parsed && IsBuildUpStatus(a_out.action.statusTag)) {
+			a_out.action.statusAmount = std::clamp(a_action.value("statusAmount", 20.0f), 1.0f, 100.0f);
+		} else if (parsed && a_out.action.statusTag == StatusKind::kBurning) {
+			a_out.action.statusAmount = std::clamp(std::round(a_action.value("statusAmount", 1.0f)), 1.0f, 5.0f);
 		}
-		return ParseRuntimeAreaActionFromJson(a_action, a_type, a_handler, a_out);
+		return parsed;
 	}
 }

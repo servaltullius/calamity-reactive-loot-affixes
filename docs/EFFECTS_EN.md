@@ -16,19 +16,33 @@ Each item has **3 affix slots**: a head slot that holds **a runeword or a prefix
 
 - **A runeword and a prefix that both trigger on the same item** each fire at 80% of their listed chance; one triggered affix alone fires at 100%. Passive suffixes never lower it. (Chaos at 16% next to a Crit Cast prefix shows 12.8%.)
 - **The same triggered prefix on different items** (spells, adaptive spells, and traps) combines up to 3 copies: `1 - (1-p1)(1-p2)(1-p3)`, so 40% copies fire 40% → 64% → 78.4% of the time with 1, 2, or 3 equipped. It fires more often; it does not hit harder or fire twice.
-- **Crit Cast** spells: melee critical and power attacks can cast up to 2 different spells, normal melee hits and bow or crossbow hits up to 1, and all share a 0.15s cooldown.
+- **Crit Cast** spells: one attack (critical, power attack, normal melee, bow or crossbow) casts at most one Crit Cast spell. Several equipped take turns, and all share a 0.15s cooldown.
 - **Suffixes of the same family** add their tiers and cap at tier 3: tier 1 + tier 1 = tier 2, tier 1 + tier 2 = tier 3. Only the resulting tier applies (Guardian 1 + 2 gives +80 Armor, not +75).
+- **Self buffs of the same kind** replace each other: a new Calamity attack damage buff ends the old one instead of stacking. Passive effects and other mods' buffs are untouched.
 
-## Prefixes (73)
+## Shared statuses
+
+Affixes that apply a status say so at the end of their line. Statuses from different items work together.
+
+- **Freeze / Bleed / Shock build-up**: each proc fills the target's meter. At 100 the meter empties and pays off. Bosses, dragons and unique enemies start at 150 and need 50 more after each payoff (up to 300). A meter holds for 3s after the last gain, then drains 15 per second.
+  - **Freeze**: the target moves 80% slower and deals 30% less damage for 3s.
+  - **Bleed**: a burst of 8% of the target's max health (3% on tough targets; 10 to 400).
+  - **Shock**: 40 shock damage to the target and up to 2 enemies within 300 units.
+- **Burning**: each stack burns for 4 fire damage per second, up to 5 stacks. A new stack restarts the 4s timer.
+- **Exposed**: a lowered resistance. Only the strongest Calamity Exposed on each resistance applies.
+- **Doom**: a mark that bursts 1.5s later. Marking again moves the timer and keeps the larger burst.
+- Statuses count toward **Exploit Weakness** (two or more different statuses) and pass on with **Contagion**.
+
+## Prefixes (76)
 
 Prefixes are triggered effects. An item holds at most one prefix.
 
 ### Elemental Strikes
 
-- **Storm Call** (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage + 10% of Hit Damage
+- **Storm Call** (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage + 10% of Hit Damage; Shock build-up +30
 - **Flame Strike** (100% on hit): 6 Fire Damage + 10% of Hit Damage
-- **Frost Strike** (100% on hit): 6 Frost Damage + 10% of Hit Damage
-- **Spark Strike** (100% on hit): 6 Shock Damage + 10% of Hit Damage
+- **Frost Strike** (100% on hit): 6 Frost Damage + 10% of Hit Damage; Freeze build-up +20
+- **Spark Strike** (100% on hit): 6 Shock Damage + 10% of Hit Damage; Shock build-up +20
 
 ### Elemental Weakness
 
@@ -64,21 +78,21 @@ Prefixes are triggered effects. An item holds at most one prefix.
 
 ### Burning
 
-- **Ember Brand** (40% on hit / ICD 0.8s): Ignite 4 + 4% of Hit Damage (4s)
+- **Ember Brand** (40% on hit / ICD 0.8s): Ignite 4 + 4% of Hit Damage (4s); Burning +1 stack
 - **Ember Pyre** (18% on kill / ICD 1s): Corpse explosion (320 radius, 8% max health + 14 fire)
 
 ### Control and Debuffs
 
-- **Ice Shackle** (24% on hit / ICD 2.5s): Frost snare -35% (2s)
+- **Ice Shackle** (24% on hit / ICD 2.5s): Frost snare -35% (2s); Freeze build-up +50
 - **Mana Burn** (Lucky Hit 35% / ICD 1.2s): Drain 60 Magicka
 - **Life Drain** (Lucky Hit 38% / ICD 0.7s): Heal 4 + 4.5% of physical hit damage (max 24)
 
 ### Utility
 
 - **Soul Siphon** (30% on kill / ICD 2s): Magicka Regen +35% (8s)
-- **Shadow Stride** (on kill / ICD 6s): Weapon Attack Speed +15% (4s), evolves to +18%/+21% after 10/30 procs
+- **Shadow Stride** (on kill / ICD 6s): Attack Damage +10% (4s), evolves to +12%/+14% after 10/30 procs
 - **Stealth Assault** (on kill / ICD 8s): Invisibility 3s + Move Speed +30% 6s
-- **Battle Frenzy** (20% on hit / ICD 0.6s / per-target ICD 12s): Weapon Attack Speed +15% (4s)
+- **Battle Frenzy** (20% on hit / ICD 0.6s / per-target ICD 12s): Attack Damage +10% (4s)
 
 ### Traps and Runes
 
@@ -132,15 +146,15 @@ Prefixes are triggered effects. An item holds at most one prefix.
 
 ### Evolving
 
-- **Thunder Mastery** (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits)
+- **Thunder Mastery** (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits); Shock build-up +15
 - **Elemental Attunement** (100% on hit): Fire/Frost/Shock manual switch + Growth (x1.0→1.3→1.7→2.2, stages: 20/60/120 hits)
 
 ### Thu'um (Shouts)
 
 - **Voice of Power** (25% on hit taken / ICD 8s): Restore 30 Stamina and gain +15% Attack Damage for 5s
 - **Death's Mark** (Lucky Hit 25% / ICD 1s / per-target ICD 10s): Armor -200 (6s)
-- **Ice Form** (Lucky Hit 15% / ICD 10s): Move Speed -100% (2s)
-- **Disarming Shout** (Lucky Hit 10% / ICD 10s): Attack Speed Reduction
+- **Ice Form** (Lucky Hit 15% / ICD 10s): Move Speed -100% (2s); Freeze build-up +100
+- **Disarming Shout** (Lucky Hit 10% / ICD 10s): Enemy Damage Dealt -20% (6s)
 - **Whirlwind Sprint** (100% on kill / ICD 3s): Move Speed Boost (Growth: x1.0→1.25→1.55→2.0)
 
 ### Schools of Magic
@@ -149,6 +163,12 @@ Prefixes are triggered effects. An item holds at most one prefix.
 - **Stamina Drain** (Lucky Hit 20% / ICD 4s): Stamina Drain
 - **Nourishing Flame** (on hit after a kill in the last 5s / ICD 2s): Heal 6 + 10% of Physical Hit Damage (max 50)
 - **Mana Knot** (Lucky Hit 35% / ICD 5s): Magicka Regen -100% (6s)
+
+### Shared Statuses
+
+- **Doom Brand** (25% on hit / ICD 4s): marks the target; 1.5s later it bursts for 60% of that hit's damage as magic damage (re-marking only resets the timer)
+- **Exploit Weakness** (on hit / ICD 0.5s): against an enemy with 2+ kinds of status (Exposed, Doom, ...), deal +15% of the hit's damage as extra damage
+- **Contagion** (on kill / ICD 3s): a slain enemy's statuses (Exposed, Doom, ...) pass to up to 2 enemies within 400
 
 ## Suffixes (66 in 22 families)
 
@@ -167,7 +187,7 @@ Tier names read *of Minor X* (tier 1), *of X* or *of the X* (tier 2), and *of Gr
 | **Endurance** | Max Stamina +20 | Max Stamina +40 | Max Stamina +60 | Melee and archers |
 | **Evasion** | Light Armor +5% | Light Armor +10% | Light Armor +15% | Light armor |
 | **Fortitude** | Heavy Armor +5% | Heavy Armor +10% | Heavy Armor +15% | Heavy armor |
-| **Gladiator** | Attack Speed +5% | Attack Speed +10% | Attack Speed +15% | Attack speed |
+| **Gladiator** | Attack Damage +3% | Attack Damage +6% | Attack Damage +9% | Attack speed |
 | **Guardian** | Armor +25 | Armor +50 | Armor +80 | Physical defense |
 | **Marksman** | Archery +5% | Archery +10% | Archery +15% | Archers |
 | **Meditation** | Magicka Regen +25% | Magicka Regen +50% | Magicka Regen +75% | Mages |
@@ -206,10 +226,10 @@ The suggested base is only a hint: the panel names a more specific one, and no b
 | **Smoke** | Nef-Lum | Armor | 22% on hit taken / ICD 12s - Slow the attacker by 30% for 5s |
 | **Splendor** | Eth-Lum | Armor | 18% on hit taken / ICD 10s - Magic Shield (Magic Resist +30, 7s) |
 | **Stealth** | Tal-Eth | Armor | 10% on hit taken / ICD 20s - Emergency Stealth (Invisibility 2s) |
-| **Steel** | Tir-El | Weapon | 18% on hit / ICD 8s - Steel Bleed (Heal Suppress -80%, 5s) |
+| **Steel** | Tir-El | Weapon | 18% on hit / ICD 8s - Steel Bleed (Heal Suppress -80%, 5s); Bleed build-up +100 |
 | **Strength** | Amn-Tir | Weapon | 20% on hit / ICD 9s - Heavy Strike (Two-Handed +25, 6s) |
 | **White** | Dol-Io | Weapon | 18% on hit / ICD 8s - Mana Surge (Magicka +50, 10s) |
-| **Wind** | Sur-El | Weapon | 22% on hit / ICD 4s - Gale Pressure (Weapon Speed -20%, 5s) |
+| **Wind** | Sur-El | Weapon | 22% on hit / ICD 4s - Gale Pressure (Enemy Damage Dealt -20%, 5s) |
 | **Zephyr** | Ort-Eth | Weapon | 20% on hit / ICD 8s - Gale Shot (Bow Speed +30%, 6s) |
 
 ### 3 runes (42)
@@ -225,18 +245,18 @@ The suggested base is only a hint: the panel names a more specific one, and no b
 | **Cure** | Shael-Io-Tal | Armor | 22% on hit taken / ICD 11s - Healing Awakening (Restoration +20, 8s) |
 | **Delirium** | Lem-Ist-Io | Armor | 10% on hit / ICD 15s - Delirium (Frenzy 5s) |
 | **Dragon** | Sur-Lo-Sol | Armor | 30% on hit taken / ICD 10s - Dragon Scales (Armor +120 and Fire/Frost/Shock Resist +25, 8s) |
-| **Dream** | Io-Jah-Pul | Armor | 30% on Hit / ICD 0.8s - Shock Strike + Shock Resist +20 |
+| **Dream** | Io-Jah-Pul | Armor | 30% on Hit / ICD 0.8s - Shock Strike + Shock Resist +20; Shock build-up +35 |
 | **Duress** | Shael-Um-Thul | Armor | 20% on hit taken / ICD 12s - Weaken Attacker (Attack -25%, 5s) |
 | **Edge** | Tir-Tal-Amn | Weapon | 20% on hit / ICD 8s - Sharp Shot (Marksman +20, 7s) |
 | **Enigma** | Jah-Ith-Ber | Armor | on Hit Taken / ICD 30s - Phase Escape (Invisibility and Move Speed +45%, 4s) + Move Speed +10% |
 | **Enlightenment** | Pul-Ral-Sol | Armor | 22% on hit taken / ICD 11s - Enlightenment (Alteration +25, 8s) |
 | **Flickering Flame** | Nef-Pul-Vex | Armor | 100% on hit / ICD 0.5s - Flame Erosion (Target Fire Resist -25, 6s) |
-| **Fury** | Jah-Gul-Eth | Weapon | 24% on Hit / ICD 12s - Attack Speed +25% for 6s and restore 30 Stamina |
+| **Fury** | Jah-Gul-Eth | Weapon | 24% on Hit / ICD 12s - Attack Damage +15% for 6s and restore 30 Stamina |
 | **Gloom** | Fal-Um-Pul | Armor | 12% on hit taken / ICD 18s - Dark Siphon (Absorb Magicka 30) |
 | **Ground** | Shael-Io-Ort | Armor | 22% on hit taken / ICD 11s - Grounding Force (Shout Recovery +50%, 8s) |
 | **Hearth** | Shael-Io-Thul | Armor | 22% on hit taken / ICD 11s - Conjuration Ember (Conjuration +20, 7s) |
 | **Hustle-A** | Shael-Ko-Eld | Armor | 26% on Hit Taken / ICD 10s - Defense Boost (Armor +60, 5s) + Move Speed +8% |
-| **Hustle-W** | Shael-Ko-Eld | Weapon | 26% on Hit / ICD 7s - Rush (Move+Attack Speed) + Attack Speed +12% |
+| **Hustle-W** | Shael-Ko-Eld | Weapon | 26% on Hit / ICD 7s - Rush (Move Speed +30%, 5s) + Attack Damage +6% |
 | **King's Grace** | Amn-Ral-Thul | Weapon | 22% on hit / ICD 9s - Holy Healing (HealRate +8, 7s) |
 | **Lawbringer** | Amn-Lem-Ko | Weapon | 40% on kill / ICD 6s - Justice (Turn Undead AoE, ICD 6s) |
 | **Lionheart** | Hel-Lum-Fal | Armor | HP<30% / ICD 45s - Lionheart (Emergency HP 200 restore) |
@@ -254,7 +274,7 @@ The suggested base is only a hint: the panel names a more specific one, and no b
 | **Sanctuary** | Ko-Ko-Mal | Armor | 100% on Hit Taken / ICD 0.5s - Reflect (15%) + Magic Resist +15 |
 | **Shadow Boxer** | Shael-Ko-Um | Weapon | on Melee Hit / ICD 12s - Shadow Boxing (8s): your shadow repeats each melee hit 0.4s later for 40% of its physical damage |
 | **Temper** | Shael-Io-Ral | Armor | 18% on hit taken / ICD 8s - Tempered Endurance (Stamina Regen +5, 8s) |
-| **Treachery** | Shael-Thul-Lem | Armor | 26% on Hit Taken / ICD 10s - Haste (Move Speed +28%, 5s) + Attack Speed +10% |
+| **Treachery** | Shael-Thul-Lem | Armor | 26% on Hit Taken / ICD 10s - Haste (Move Speed +28%, 5s) + Stamina Regen +25% |
 | **Venom** | Tal-Dol-Mal | Weapon | 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s) |
 | **Wealth** | Lem-Ko-Tir | Armor | Always active - Carry Weight +75 and Speechcraft +15 |
 | **Wisdom** | Pul-Ith-Eld | Armor | 18% on hit taken / ICD 11s - Wisdom Depth (Magicka Regen +5, 7s) |
@@ -264,42 +284,42 @@ The suggested base is only a hint: the panel names a more specific one, and no b
 | Runeword | Runes | Base | Effect |
 | --- | --- | --- | --- |
 | **Bramble** | Ral-Ohm-Sur-Eth | Armor | 22% on hit taken / ICD 10s - Bramble (Reflect Damage +25%, 6s) |
-| **Brand** | Jah-Lo-Mal-Gul | Weapon | 28% on hit / ICD 5s - Brand (Fire DoT 10/s, 6s) |
+| **Brand** | Jah-Lo-Mal-Gul | Weapon | 28% on hit / ICD 5s - Brand (Fire DoT 10/s, 6s); Burning +2 stacks |
 | **Chains of Honor** | Dol-Um-Ber-Ist | Armor | 20% on Hit Taken / ICD 16s - Phase (Move Speed +35%, 5s) + Fire/Frost/Shock Resist +15 |
 | **Exile** | Vex-Ohm-Ist-Dol | Armor | HP<40% / ICD 50s - Iron Skin (Armor+250, 10s) |
-| **Faith** | Ohm-Jah-Lem-Eld | Weapon | 22% on Hit / ICD 12s - Fanaticism (Attack Damage +20%, Attack Speed +15%, 6s) + Attack Speed +15% |
-| **Famine** | Fal-Ohm-Ort-Jah | Weapon | 30% on hit / ICD 7s - Famine (Stamina -30/s for 5s, Attack Damage -20% and Attack Speed -15% for 6s) |
+| **Faith** | Ohm-Jah-Lem-Eld | Weapon | 22% on Hit / ICD 12s - Fanaticism (Attack Damage +30%, 6s) + Attack Damage +8% |
+| **Famine** | Fal-Ohm-Ort-Jah | Weapon | 30% on hit / ICD 7s - Famine (Stamina -30/s for 5s, Attack Damage -20% for 6s) |
 | **Fortitude** | El-Sol-Dol-Lo | Any | 25% on Hit Taken / ICD 16s - Damage Resist boost + Armor +80 |
-| **Hand of Justice** | Sur-Cham-Amn-Lo | Weapon | 28% on Hit / ICD 4s - Fire Judgment Absorb (40 or 18% of Hit Damage, max 250) |
+| **Hand of Justice** | Sur-Cham-Amn-Lo | Weapon | 28% on Hit / ICD 4s - Fire Judgment Absorb (40 or 18% of Hit Damage, max 250); Burning +2 stacks |
 | **Harmony** | Tir-Ith-Sol-Ko | Weapon | 20% on hit / ICD 6s - Harmonic Disruption (Stamina Regen -80%, 5s) |
 | **Heart of the Oak** | Ko-Vex-Pul-Thul | Weapon | 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction) |
-| **Holy Thunder** | Eth-Ral-Ort-Tal | Weapon | 22% on hit / ICD 7s - Holy Thunder (Shock Damage 30) |
+| **Holy Thunder** | Eth-Ral-Ort-Tal | Weapon | 22% on hit / ICD 7s - Holy Thunder (Shock Damage 30); Shock build-up +100 |
 | **Ice** | Amn-Shael-Jah-Lo | Weapon | 100% on hit / ICD 0.5s - Frost Shards (Target Frost Resist -30, 6s) |
 | **Infinity** | Ber-Mal-Ber-Ist | Weapon | 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction |
 | **Insight** | Ral-Tir-Tal-Sol | Weapon | 30% on Hit / ICD 10s - Magicka Recovery boost + Magicka Regen +25 |
-| **Kingslayer** | Mal-Um-Gul-Fal | Weapon | 30% on Hit / ICD 0.6s - Bleed (3/s × 8s, 4% phys) |
+| **Kingslayer** | Mal-Um-Gul-Fal | Weapon | 30% on Hit / ICD 0.6s - Bleed (3/s × 8s, 4% phys); Bleed build-up +35 |
 | **Memory** | Lum-Io-Sol-Eth | Weapon | 20% on hit / ICD 9s - Stamina Recall (Stamina Regen +100%, 8s) |
 | **Oath** | Shael-Pul-Mal-Lum | Weapon | 24% on hit / ICD 7s - Oath Power (One-Handed +30, 7s) |
 | **Passion** | Dol-Ort-Eld-Lem | Weapon | 26% on hit / ICD 7s - Passionate Illusion (Illusion +20, 7s) |
 | **Phoenix** | Vex-Vex-Lo-Jah | Any | 60% on Kill / ICD 2s - Restore HP+MP |
-| **Pride** | Cham-Sur-Io-Lo | Weapon | 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250) |
+| **Pride** | Cham-Sur-Io-Lo | Weapon | 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250); Freeze build-up +60 |
 | **Rift** | Hel-Ko-Lem-Gul | Weapon | 8% on hit / ICD 18s - Magic Shred (Magic Resist -30, 6s) |
 | **Spirit** | Tal-Thul-Ort-Amn | Any | 28% on Hit / ICD 10s - Absorb Chance +10 points for 5s + Max Magicka +30 |
 | **Stone** | Shael-Um-Pul-Lum | Armor | 22% on hit taken / ICD 8s - Armor Crush (Target Armor -50, 6s) |
 | **Voice of Reason** | Lem-Ko-El-Eld | Weapon | 22% on hit / ICD 7s - Frost Shred (Frost Resist -35, 6s) |
-| **Wrath** | Pul-Lum-Ber-Mal | Weapon | 26% on hit / ICD 5s - Divine Wrath (Fire Damage 30) |
+| **Wrath** | Pul-Lum-Ber-Mal | Weapon | 26% on hit / ICD 5s - Divine Wrath (Fire Damage 30); Burning +2 stacks |
 
 ### 5 runes (10)
 
 | Runeword | Runes | Base | Effect |
 | --- | --- | --- | --- |
-| **Beast** | Ber-Tir-Um-Mal-Lum | Weapon | 30% on Hit / ICD 18s - Beast Rage (Attack Damage +30%, Armor +150, Attack Speed +15%, 10s) |
+| **Beast** | Ber-Tir-Um-Mal-Lum | Weapon | 30% on Hit / ICD 18s - Beast Rage (Attack Damage +40%, Armor +150, 10s) |
 | **Call to Arms** | Amn-Ral-Mal-Ist-Ohm | Weapon | 24% on Hit / ICD 18s - Battle Cry (Attack Damage +20%, 8s) + HP +50, MP +30 |
 | **Death** | Hel-El-Vex-Ort-Gul | Weapon | 24% on hit / ICD 5s - Death Touch (Absorb Health 15) |
-| **Destruction** | Vex-Lo-Ber-Jah-Ko | Weapon | 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350) |
-| **Doom** | Hel-Ohm-Um-Lo-Cham | Weapon | 100% on Hit / ICD 0.5s - Frost Slow (Speed-30%, 4s) |
+| **Destruction** | Vex-Lo-Ber-Jah-Ko | Weapon | 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350); Shock build-up +70 |
+| **Doom** | Hel-Ohm-Um-Lo-Cham | Weapon | 100% on Hit / ICD 0.5s - Frost Slow (Speed-30%, 4s); Freeze build-up +20 |
 | **Eternity** | Amn-Ber-Ist-Sol-Sur | Weapon | 25% on Hit Taken / ICD 15s - Eternal Bulwark (Armor +300, Reflect Damage +25%, 6s) |
-| **Grief** | Eth-Tir-Lo-Mal-Ral | Weapon | 30% on Hit / ICD 0.5s - Heal 8% of Hit Damage + Attack Speed +10% |
+| **Grief** | Eth-Tir-Lo-Mal-Ral | Weapon | 30% on Hit / ICD 0.5s - Heal 8% of Hit Damage + Attack Damage +6% |
 | **Honor** | Amn-El-Ith-Tir-Sol | Weapon | 26% on Hit / ICD 8s - Vigor (Health Regen Rate +80%, 7s) + Health Regen Rate +20% |
 | **Mist** | Cham-Shael-Gul-Thul-Ith | Weapon | 30% on hit / ICD 6s - Arcane Collapse (Magicka Regen -100% and Magic Resist -30 for 6s, instant Magicka drain 75) |
 | **Obedience** | Hel-Ko-Thul-Eth-Fal | Weapon | 18% on hit / ICD 5s - Crush (Target Speed -50%, 3s) |

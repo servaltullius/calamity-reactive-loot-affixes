@@ -822,7 +822,56 @@ public static class AffixSpecLoader
         ValidateActionFeedbackShape(actionElement, actionType, affix.Id);
         ValidateTrapFeedbackShape(actionElement, actionType, affix.Id);
         ValidateEchoStrikeShape(actionElement, actionType, rt.Trigger, affix.Id);
+        ValidateStatusActionShape(actionElement, actionType, rt.Trigger, affix.Id);
 
+    }
+
+    // Shared statuses (v2.3.0): Doom marks on a hit and bursts later, Contagion
+    // copies statuses from a kill. Both are generic triggers, not special actions.
+    private static void ValidateStatusActionShape(JsonElement action, string actionType, string trigger, string affixId)
+    {
+        if (actionType == "DoomMark")
+        {
+            if (trigger != "Hit")
+            {
+                throw new InvalidDataException($"{affixId}: DoomMark requires runtime.trigger Hit.");
+            }
+            if (!TryGetRequiredString(action, "spellEditorId", out _) || !TryGetRequiredString(action, "markSpellEditorId", out _))
+            {
+                throw new InvalidDataException($"{affixId}: DoomMark requires spellEditorId (burst) and markSpellEditorId (mark).");
+            }
+            if (!action.TryGetProperty("magnitudeScaling", out var scaling) ||
+                scaling.ValueKind != JsonValueKind.Object ||
+                !TryGetRequiredString(scaling, "source", out var source) ||
+                source is not ("HitPhysicalDealt" or "HitTotalDealt"))
+            {
+                throw new InvalidDataException($"{affixId}: DoomMark requires magnitudeScaling.source HitPhysicalDealt or HitTotalDealt.");
+            }
+        }
+        else if (actionType == "SpreadStatus" && trigger != "Kill")
+        {
+            throw new InvalidDataException($"{affixId}: SpreadStatus requires runtime.trigger Kill.");
+        }
+
+        // Build-up statuses ride on a hostile cast, which feeds the meter or adds stacks.
+        if (TryGetRequiredString(action, "statusTag", out var tag) && tag is "Burning" or "Freeze" or "Bleed" or "Shock")
+        {
+            var targetsSelf = TryGetRequiredString(action, "applyTo", out var applyTo) && applyTo == "Self";
+            if (actionType is not ("CastSpell" or "CastSpellAdaptiveElement") || targetsSelf)
+            {
+                throw new InvalidDataException($"{affixId}: statusTag {tag} requires a CastSpell on the target.");
+            }
+            if (!action.TryGetProperty("statusAmount", out var amount) || amount.ValueKind != JsonValueKind.Number)
+            {
+                throw new InvalidDataException($"{affixId}: statusTag {tag} requires statusAmount.");
+            }
+            var value = amount.GetDouble();
+            var valid = tag == "Burning" ? value is >= 1 and <= 5 && value == Math.Floor(value) : value is >= 1 and <= 100;
+            if (!valid)
+            {
+                throw new InvalidDataException($"{affixId}: statusAmount {value} is out of range for {tag}.");
+            }
+        }
     }
 
     private static void ValidateEchoStrikeShape(JsonElement action, string actionType, string trigger, string affixId)

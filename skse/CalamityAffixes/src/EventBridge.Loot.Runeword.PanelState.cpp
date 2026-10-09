@@ -127,6 +127,7 @@ namespace CalamityAffixes
 			case ActionType::kCastSpell:
 			case ActionType::kCastSpellAdaptiveElement:
 			case ActionType::kSpawnTrap:
+			case ActionType::kDoomMark:
 				return detail::EquippedBuildProcLane::kStandard;
 			case ActionType::kCastOnCrit:
 			case ActionType::kConvertDamage:

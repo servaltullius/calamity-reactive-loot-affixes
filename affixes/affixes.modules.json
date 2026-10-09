@@ -8,7 +8,8 @@
     "affixes": [
       "modules/keywords.affixes.core.json",
       "modules/keywords.affixes.runewords.json",
-      "modules/keywords.affixes.suffixes.json"
+      "modules/keywords.affixes.suffixes.json",
+      "modules/keywords.affixes.status.json"
     ],
     "kidRules": [
       "modules/keywords.kidRules.json"

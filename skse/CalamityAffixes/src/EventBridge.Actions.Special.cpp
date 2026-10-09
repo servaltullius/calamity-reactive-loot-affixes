@@ -398,7 +398,7 @@ namespace CalamityAffixes
 		const RE::HitData* a_hitData,
 		bool a_allowResync)
 	{
-		static_assert(kMaxCastOnCritPerHit == 2u);
+		static_assert(kMaxCastOnCritPerHit == 1u);
 		const std::scoped_lock lock(_stateMutex);
 
 		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || _affixSpecialActions.castOnCritAffixIndices.empty()) {

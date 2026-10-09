@@ -17,6 +17,8 @@
     "CorpseExplosion",
     "SummonCorpseExplosion",
     "SpawnTrap",
-    "EchoStrike"
+    "EchoStrike",
+    "DoomMark",
+    "SpreadStatus"
   ]
 }

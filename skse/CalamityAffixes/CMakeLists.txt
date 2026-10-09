@@ -128,6 +128,7 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Actions.Archmage.cpp
 	    src/EventBridge.Actions.Corpse.cpp
 	    src/EventBridge.Actions.EchoStrike.cpp
+	    src/EventBridge.Actions.Status.cpp
 	    src/EventBridge.Traps.cpp
 	    src/EventBridge.Serialization.Save.cpp
 	    src/EventBridge.Serialization.Load.cpp
@@ -274,6 +275,8 @@ if (BUILD_TESTING)
             tests/test_proc_chance_policy.cpp
             tests/test_synthesized_affix_display_name_policy.cpp
             tests/test_equipped_build_summary_policy.cpp
+            tests/test_status_ledger.cpp
+            tests/test_status_meters.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

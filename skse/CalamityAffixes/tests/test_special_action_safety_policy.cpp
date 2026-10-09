@@ -59,9 +59,9 @@ static_assert(!IsEligibleNormalWeaponHitFlags(false, false, false, false, false,
 
 static_assert(ResolveCastOnCritSelectionCount(0u, false, false) == 0u);
 static_assert(ResolveCastOnCritSelectionCount(1u, false, false) == 1u);
-static_assert(ResolveCastOnCritSelectionCount(2u, false, false) == 2u);
-static_assert(ResolveCastOnCritSelectionCount(7u, false, false) == 2u,
-	"qualifying melee hits select at most two successful candidates");
+static_assert(ResolveCastOnCritSelectionCount(2u, false, false) == 1u);
+static_assert(ResolveCastOnCritSelectionCount(7u, false, false) == 1u,
+	"power attacks and crits cast one spell, not two (v2.3.0)");
 static_assert(ResolveCastOnCritSelectionCount(7u, true, false) == 1u,
 	"ranged hits retain their existing one-result limit");
 static_assert(ResolveCastOnCritSelectionCount(7u, false, true) == 1u,

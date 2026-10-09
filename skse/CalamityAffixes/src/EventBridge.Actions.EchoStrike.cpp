@@ -131,17 +131,22 @@ namespace CalamityAffixes
 		auto& state = _combatState.echoStrike;
 		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
 			state.Reset();
-			return;
-		}
-
-		std::vector<EchoStrikePending> due;
-		if (state.TakeDue(std::chrono::steady_clock::now(), due) == 0u) {
+			_combatState.ResetStatusState();
 			return;
 		}
 
 		auto* player = RE::PlayerCharacter::GetSingleton();
 		auto* magicCaster = player ? player->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) : nullptr;
 		if (!magicCaster) {
+			return;
+		}
+		// Doom bursts share this timer: same delay mechanics, any hit type.
+		if (_combatState.hasPendingDoom.load(std::memory_order_acquire)) {
+			TickDoomBursts(player, magicCaster);
+		}
+
+		std::vector<EchoStrikePending> due;
+		if (state.TakeDue(std::chrono::steady_clock::now(), due) == 0u) {
 			return;
 		}
 

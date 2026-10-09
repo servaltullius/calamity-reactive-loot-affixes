@@ -123,6 +123,10 @@ namespace CalamityAffixes
 			a_out.requireRecentlyKill = std::chrono::milliseconds(static_cast<std::int64_t>(requireRecentlyKillSeconds * 1000.0));
 		}
 
+		// Distinct Calamity statuses the target must carry (Exploit Weakness).
+		a_out.requireTargetStatusCount = static_cast<std::uint32_t>(
+			std::clamp(readRuntimeNumber("requireTargetStatusCount"), 0.0, static_cast<double>(kStatusKindCount - 1u)));
+
 		const double requireNotHitRecentlySeconds = std::clamp(readRuntimeNumber("requireNotHitRecentlySeconds"), 0.0, 600.0);
 		if (requireNotHitRecentlySeconds > 0.0) {
 			a_out.requireNotHitRecently = std::chrono::milliseconds(static_cast<std::int64_t>(requireNotHitRecentlySeconds * 1000.0));

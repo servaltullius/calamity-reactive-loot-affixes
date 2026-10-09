@@ -407,10 +407,11 @@ namespace CalamityAffixes
 
 	void EventBridge::GrantTrapAffixToSelectedBase()
 	{
-		// QA helper behind the debug toggles: assigns trap affixes to the runeword
-		// panel's selected base so the stability scenarios (S1/S3) do not require
-		// farming trap prefixes. One affix per press, cycling bear -> rune ->
-		// plague -> tar -> siphon -> chaos and skipping ones already on the item.
+		// QA helper behind the debug toggles: assigns test affixes to the runeword
+		// panel's selected base so QA does not require farming prefixes. One affix
+		// per press, skipping ones already on the item: first the shared-status set
+		// (an Exposed source, Doom Brand, Exploit Weakness, Contagion; four presses
+		// fill a bare item), then the traps for the stability scenarios (S1/S3).
 		if (!(_loot.debugHudNotifications || _loot.debugLog)) {
 			return;
 		}
@@ -432,7 +433,11 @@ namespace CalamityAffixes
 			return;
 		}
 
-		static constexpr std::array<std::string_view, 6> kTrapAffixIds{
+		// Status test order (v2.3.0): build-ups and Burning first, so one base shows
+		// the meters, Contagion and Exploit Weakness together.
+		static constexpr std::array<std::string_view, 13> kTrapAffixIds{
+			"frost_strike", "spark_strike", "ember_brand", "contagion",
+			"exploit_weakness", "flame_weakness", "doom_brand",
 			"bear_trap", "rune_trap", "plague_spore", "tar_blight", "siphon_spore", "chaos_rune"
 		};
 
@@ -467,7 +472,7 @@ namespace CalamityAffixes
 			return;
 		}
 
-		EmitHudNotification("Calamity: all trap affixes already on this base.");
+		EmitHudNotification("Calamity: all test affixes already on this base.");
 	}
 
 	void EventBridge::EnsureMultiAffixDisplayName(

@@ -126,11 +126,14 @@ def _collect_spell_refs_from_action(
         if ref:
             out.append((ref, ctx))
 
-    if action_type in {"CastSpell", "CastOnCrit", "ConvertDamage", "Archmage", "CorpseExplosion", "SummonCorpseExplosion", "SpawnTrap", "EchoStrike"}:
+    if action_type in {"CastSpell", "CastOnCrit", "ConvertDamage", "Archmage", "CorpseExplosion", "SummonCorpseExplosion", "SpawnTrap", "EchoStrike", "DoomMark"}:
         add(_extract_spell_editor_id(action.get("spellEditorId")), f"{affix_id}:action.spellEditorId")
 
     if action_type == "EchoStrike":
         add(_extract_spell_editor_id(action.get("stanceSpellEditorId")), f"{affix_id}:action.stanceSpellEditorId")
+
+    if action_type == "DoomMark":
+        add(_extract_spell_editor_id(action.get("markSpellEditorId")), f"{affix_id}:action.markSpellEditorId")
 
     if action_type == "CastSpellAdaptiveElement":
         spells = _as_dict(action.get("spells")) or {}
@@ -924,6 +927,44 @@ def _lint_spec(
                 errors.append(f"{affix_id}: EchoStrike requirePowerAttack must be a boolean.")
             if trigger != "Hit":
                 errors.append(f"{affix_id}: EchoStrike requires trigger=Hit.")
+
+        if action_type == "DoomMark":
+            if not isinstance(action.get("spellEditorId"), str):
+                errors.append(f"{affix_id}: DoomMark requires spellEditorId (the burst spell).")
+            if not isinstance(action.get("markSpellEditorId"), str):
+                errors.append(f"{affix_id}: DoomMark requires markSpellEditorId (the visible mark).")
+            delay = action.get("delaySeconds")
+            if delay is not None and (not _is_number(delay) or delay < 0.25 or delay > 5.0):
+                errors.append(f"{affix_id}: DoomMark delaySeconds must be in [0.25, 5].")
+            scaling = _as_dict(action.get("magnitudeScaling")) or {}
+            if scaling.get("source") not in {"HitPhysicalDealt", "HitTotalDealt"}:
+                errors.append(f"{affix_id}: DoomMark requires magnitudeScaling.source HitPhysicalDealt or HitTotalDealt.")
+            if trigger != "Hit":
+                errors.append(f"{affix_id}: DoomMark requires trigger=Hit.")
+
+        if action_type == "SpreadStatus":
+            if trigger != "Kill":
+                errors.append(f"{affix_id}: SpreadStatus requires trigger=Kill.")
+            radius = action.get("radius")
+            if radius is not None and (not _is_number(radius) or radius <= 0.0):
+                errors.append(f"{affix_id}: SpreadStatus radius must be > 0.")
+
+        status_tag = action.get("statusTag")
+        if status_tag is not None and status_tag not in {"Exposed", "Doom", "Burning", "Freeze", "Bleed", "Shock"}:
+            errors.append(f"{affix_id}: unknown statusTag {status_tag!r}.")
+        status_amount = action.get("statusAmount")
+        if status_tag in {"Burning", "Freeze", "Bleed", "Shock"}:
+            # Build-up statuses ride on a hostile cast: the cast feeds the meter.
+            if action_type not in {"CastSpell", "CastSpellAdaptiveElement"} or action.get("applyTo") == "Self":
+                errors.append(f"{affix_id}: statusTag {status_tag} requires a CastSpell on the target.")
+            if not _is_number(status_amount):
+                errors.append(f"{affix_id}: statusTag {status_tag} requires statusAmount.")
+            elif status_tag == "Burning" and (status_amount != int(status_amount) or not 1 <= status_amount <= 5):
+                errors.append(f"{affix_id}: Burning statusAmount is stacks, a whole number 1-5.")
+            elif not 1.0 <= status_amount <= 100.0:
+                errors.append(f"{affix_id}: {status_tag} statusAmount must be 1-100.")
+        elif status_amount is not None:
+            errors.append(f"{affix_id}: statusAmount is only for Burning, Freeze, Bleed or Shock.")
 
         if action_type == "MindOverMatter":
             damage_to_magicka_pct = action.get("damageToMagickaPct")

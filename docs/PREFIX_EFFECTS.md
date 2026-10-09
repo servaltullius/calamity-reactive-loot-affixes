@@ -3,10 +3,10 @@
 > 업데이트: 2026-10-09
 > 기준 버전: `v2.3.0`
 > 기준 코드:
-> - 효과 정의: `affixes/modules/keywords.affixes.core.json`
+> - 효과 정의: `affixes/modules/keywords.affixes.core.json`, `affixes/modules/keywords.affixes.status.json`
 > - 변환 스크립트: `tools/transform_prefixes.py`
 
-- 총 공개 프리픽스: **73개**
+- 총 공개 프리픽스: **76개**
 - INTERNAL 항목은 공개 문서에서 숨김
 - 스카이림 로어 기반 전면 리네이밍 (v1.2.21)
 - 9개 freed slot → Thu'um 5종 + 마법학파 4종 신규 효과
@@ -20,9 +20,23 @@
 - 치명타·강공격에는 기존 판정만 사용하며 평타 확률을 추가로 이중 판정하지 않음. 주문·배시·폭발은 평타 발동 대상에서 제외
 - 서로 다른 장비에 장착한 동일 표준 발동 어픽스는 장비별 확률 페널티를 반영한 강한 사본부터 최대 3개를 합산. 일반 주문 발동·적응형 원소 주문·덫에 적용하며, 치명 시전·피해 전환 등 별도 처리 효과에 일괄 적용하지 않음
 - 합산 확률은 `1 - (1-p1)×(1-p2)×(1-p3)` 방식. 각 사본이 40%이고 추가 보정이 없으면 1/2/3개 장착 시 40% → 64% → 78.4%. 동일 효과의 피해량을 2배·3배로 만들거나 여러 번 실행하는 것은 아니며 발동 예산·ICD도 한 번만 소비
-- 치명 시전 주문은 서로 다른 주문 기준으로 근접 치명타·강공격은 최대 2개, 일반 근접 공격과 활·석궁은 최대 1개. 발동 묶음당 전역 ICD 0.15초를 공유하며 동일 주문 중복 장착으로 시전 개수가 늘어나지는 않음
+- 치명 시전은 한 번의 공격(치명타·강공격·일반 근접·활·석궁)에 주문 하나만 시전. 여러 개를 착용하면 차례로 돌아가며 발동하고, 발동 묶음당 전역 ICD 0.15초를 공유함
 - 표기된 확률은 기본값이며 장착 구성·런타임 보정·발동 조건·ICD에 따라 실제 발동 빈도가 달라짐. 접미 슬롯 자체는 표준 발동의 다중 어픽스 확률 페널티를 늘리지 않음
 - 접미의 티어 합산은 별도 규칙: [서픽스 효과 정리](SUFFIX_EFFECTS.md) 참조
+- 같은 종류의 자기 버프는 새것이 옛것을 대체함(예: 공격력 버프 두 개가 겹쳐 쌓이지 않음). 상시 효과와 다른 모드 버프는 건드리지 않음
+
+## 공용 상태 (v2.3.0)
+
+상태를 거는 어픽스는 설명 끝에 상태 이름을 적어 둠. 다른 장비에서 건 상태끼리도 함께 작동함
+
+- **빙결·출혈·감전 축적**: 발동할 때마다 대상의 미터가 참. 100이 되면 미터가 비면서 효과가 터짐. 보스·드래곤·고유 적은 150에서 시작하고 터질 때마다 50씩 올라감(최대 300). 마지막으로 쌓인 뒤 3초가 지나면 초당 15씩 줄어듦
+  - **빙결**: 3초 동안 이동속도 -80%, 주는 피해 -30%
+  - **출혈**: 대상 최대 체력의 8% 피해(강한 적은 3%, 최소 10·최대 400)
+  - **감전**: 대상과 반경 300 안의 적 최대 2명에게 번개 피해 40
+- **화상**: 1중첩당 초당 화염 피해 4, 최대 5중첩. 새 중첩이 붙으면 4초 지속이 다시 시작됨
+- **노출**: 저항 감소. 같은 저항에는 가장 강한 칼라미티 노출 하나만 적용
+- **파멸**: 표식 1.5초 뒤 폭발. 다시 걸면 시간만 갱신하고 더 큰 폭발을 유지
+- 상태는 **약점 포착**(서로 다른 상태 2개 이상)과 **전염**(처치 시 주변으로 옮김)에 쓰임
 
 ### 카테고리별 수량
 
@@ -46,13 +60,14 @@
 | 성장형 | 2 |
 | Thu'um (외침) — 신규 | 5 |
 | 마법학파 — 신규 | 4 |
-| **합계** | **73** |
+| 공용 상태 (v2.3.0) | 3 |
+| **합계** | **76** |
 
 ## 원소 타격
 
 - **`storm_call`** [Weapon]
-  - 한글 표시: 폭풍 소환: 38% 확률로 번개 피해 10 + 적중의 10%. 1.5초마다 발동.
-  - 영문 표시: Storm Call (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage + 10% of Hit Damage
+  - 한글 표시: 폭풍 소환: 38% 확률로 번개 피해 10 + 적중의 10%. 1.5초마다 발동. 감전 축적 +30.
+  - 영문 표시: Storm Call (Lucky Hit 38% / ICD 1.5s): 10 Lightning Damage + 10% of Hit Damage; Shock build-up +30
   - 대표 스펠: `CAFF_SPEL_ARC_LIGHTNING`
 
 - **`flame_strike`** [Weapon]
@@ -61,13 +76,13 @@
   - 대표 스펠: `CAFF_SPEL_FIRE_DAMAGE`
 
 - **`frost_strike`** [Weapon]
-  - 한글 표시: 냉기 일격: 매 적중 시 냉기 피해 6 + 적중의 10%.
-  - 영문 표시: Frost Strike (100% on hit): 6 Frost Damage + 10% of Hit Damage
+  - 한글 표시: 냉기 일격: 매 적중 시 냉기 피해 6 + 적중의 10%. 빙결 축적 +20.
+  - 영문 표시: Frost Strike (100% on hit): 6 Frost Damage + 10% of Hit Damage; Freeze build-up +20
   - 대표 스펠: `CAFF_SPEL_FROST_DAMAGE`
 
 - **`spark_strike`** [Weapon]
-  - 한글 표시: 전격 일격: 매 적중 시 번개 피해 6 + 적중의 10%.
-  - 영문 표시: Spark Strike (100% on hit): 6 Shock Damage + 10% of Hit Damage
+  - 한글 표시: 전격 일격: 매 적중 시 번개 피해 6 + 적중의 10%. 감전 축적 +20.
+  - 영문 표시: Spark Strike (100% on hit): 6 Shock Damage + 10% of Hit Damage; Shock build-up +20
   - 대표 스펠: `CAFF_SPEL_SHOCK_DAMAGE`
 
 ## 원소 취약
@@ -169,8 +184,8 @@
 ## 화염 DoT
 
 - **`ember_brand`** [Weapon]
-  - 한글 표시: 잔불 낙인: 적중 시 40% 확률로 점화 피해 4 + 적중의 4% (4초). 0.8초마다 발동.
-  - 영문 표시: Ember Brand (40% on hit / ICD 0.8s): Ignite 4 + 4% of Hit Damage (4s)
+  - 한글 표시: 잔불 낙인: 적중 시 40% 확률로 점화 피해 4 + 적중의 4% (4초). 0.8초마다 발동. 화상 1중첩.
+  - 영문 표시: Ember Brand (40% on hit / ICD 0.8s): Ignite 4 + 4% of Hit Damage (4s); Burning +1 stack
   - 대표 스펠: `CAFF_SPEL_HIT_EMBERBRAND_IGNITE`
 
 - **`ember_pyre`** [Weapon]
@@ -181,8 +196,8 @@
 ## CC / 디버프
 
 - **`ice_shackle`** [Weapon]
-  - 한글 표시: 얼음 족쇄: 적중 시 24% 확률로 냉기 감속 -35% (2초). 2.5초마다 발동.
-  - 영문 표시: Ice Shackle (24% on hit / ICD 2.5s): Frost snare -35% (2s)
+  - 한글 표시: 얼음 족쇄: 적중 시 24% 확률로 냉기 감속 -35% (2초). 2.5초마다 발동. 빙결 축적 +50.
+  - 영문 표시: Ice Shackle (24% on hit / ICD 2.5s): Frost snare -35% (2s); Freeze build-up +50
   - 대표 스펠: `CAFF_SPEL_HIT_FROSTLOCK_SNARE`
 
 - **`mana_burn`** [Weapon]
@@ -203,8 +218,8 @@
   - 대표 스펠: `CAFF_SPEL_KILL_SOUL_SURGE`
 
 - **`shadow_stride`** [Weapon]
-  - 한글 표시: 그림자 질주: 처치 시 무기 공격속도 +15% (4초), 발동 10/30회 후 +18%/+21%. 6초마다 발동.
-  - 영문 표시: Shadow Stride (on kill / ICD 6s): Weapon Attack Speed +15% (4s), evolves to +18%/+21% after 10/30 procs
+  - 한글 표시: 그림자 질주: 처치 시 공격력 +10% (4초), 발동 10/30회 후 +12%/+14%. 6초마다 발동.
+  - 영문 표시: Shadow Stride (on kill / ICD 6s): Attack Damage +10% (4s), evolves to +12%/+14% after 10/30 procs
   - 대표 스펠: `CAFF_SPEL_SWAP_JACKPOT_HASTE`
 
 - **`silent_step`** [Weapon]
@@ -213,8 +228,8 @@
   - 대표 스펠: `CAFF_SPEL_STEALTH_ASSAULT`
 
 - **`battle_frenzy`** [Weapon]
-  - 한글 표시: 전투 광란: 적중 시 20% 확률로 무기 공격속도 +15% (4초). 0.6초마다 발동. 같은 대상 12초.
-  - 영문 표시: Battle Frenzy (20% on hit / ICD 0.6s / per-target ICD 12s): Weapon Attack Speed +15% (4s)
+  - 한글 표시: 전투 광란: 적중 시 20% 확률로 공격력 +10% (4초). 0.6초마다 발동. 같은 대상 12초.
+  - 영문 표시: Battle Frenzy (20% on hit / ICD 0.6s / per-target ICD 12s): Attack Damage +10% (4s)
   - 대표 스펠: `CAFF_SPEL_SWAP_JACKPOT_HASTE`
 
 ## 덫 / 룬
@@ -378,8 +393,8 @@
 ## 성장형
 
 - **`thunder_mastery`** [Weapon]
-  - 한글 표시: 뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동.
-  - 영문 표시: Thunder Mastery (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits)
+  - 한글 표시: 뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동. 감전 축적 +15.
+  - 영문 표시: Thunder Mastery (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits); Shock build-up +15
   - 대표 스펠: `CAFF_SPEL_SHOCK_DAMAGE`
 
 - **`elemental_attunement`** [Weapon]
@@ -402,13 +417,13 @@
   - 대표 스펠: `CAFF_SPEL_CHAOS_CURSE_SUNDER`
 
 - **`ice_form`** [Weapon]
-  - 한글 표시: 얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동.
-  - 영문 표시: Ice Form (Lucky Hit 15% / ICD 10s): Move Speed -100% (2s)
+  - 한글 표시: 얼음 형상: 15% 확률로 이동속도 -100% (2초). 10초마다 발동. 빙결 축적 +100.
+  - 영문 표시: Ice Form (Lucky Hit 15% / ICD 10s): Move Speed -100% (2s); Freeze build-up +100
   - 대표 스펠: `CAFF_SPEL_TRAP_IRONJAW_SNARE`
 
 - **`disarming_shout`** [Weapon]
-  - 한글 표시: 무장 해제: 10% 확률로 공격속도 감소. 10초마다 발동.
-  - 영문 표시: Disarming Shout (Lucky Hit 10% / ICD 10s): Attack Speed Reduction
+  - 한글 표시: 무장 해제: 10% 확률로 적이 주는 피해 -20% (6초). 10초마다 발동.
+  - 영문 표시: Disarming Shout (Lucky Hit 10% / ICD 10s): Enemy Damage Dealt -20% (6s)
   - 대표 스펠: `CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK`
 
 - **`whirlwind_sprint`** [Weapon]
@@ -439,3 +454,19 @@
   - 한글 표시: 마나 매듭: 35% 확률로 매지카 재생 -100% (6초). 5초마다 발동.
   - 영문 표시: Mana Knot (Lucky Hit 35% / ICD 5s): Magicka Regen -100% (6s)
   - 대표 스펠: `CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN`
+
+## 공용 상태 (v2.3.0)
+
+- **`doom_brand`** [Weapon]
+  - 한글 표시: 파멸의 낙인: 적중 시 25% 확률로 그림자 낙인. 1.5초 뒤 그 적중 피해의 60%가 마법 피해로 터짐(다시 찍으면 시간만 갱신). 4초마다 발동.
+  - 영문 표시: Doom Brand (25% on hit / ICD 4s): marks the target; 1.5s later it bursts for 60% of that hit's damage as magic damage (re-marking only resets the timer)
+  - 대표 스펠: `CAFF_SPEL_STATUS_DOOM_BURST`
+
+- **`exploit_weakness`** [Weapon]
+  - 한글 표시: 약점 포착: 상태(노출·파멸 등)가 2가지 이상 걸린 적을 때리면 그 적중 피해의 15%를 추가 피해로 줌. 0.5초마다 발동.
+  - 영문 표시: Exploit Weakness (on hit / ICD 0.5s): against an enemy with 2+ kinds of status (Exposed, Doom, ...), deal +15% of the hit's damage as extra damage
+  - 대표 스펠: `CAFF_SPEL_STATUS_EXPLOIT_STRIKE`
+
+- **`contagion`** [Armor]
+  - 한글 표시: 전염: 상태(노출·파멸 등)가 걸린 적을 처치하면 반경 400 안의 적 최대 2명에게 같은 상태를 옮김. 3초마다 발동.
+  - 영문 표시: Contagion (on kill / ICD 3s): a slain enemy's statuses (Exposed, Doom, ...) pass to up to 2 enemies within 400

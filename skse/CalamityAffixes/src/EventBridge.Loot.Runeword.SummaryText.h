@@ -208,7 +208,7 @@ namespace CalamityAffixes::RunewordSummary
 
 	[[nodiscard]] inline std::string_view ActionSummaryTextByKey(std::string_view a_key) noexcept
 	{
-		if (a_key == "signature_grief") return "빈틈 없이 몰아치는 초고속 참격 연타";
+		if (a_key == "signature_grief") return "몰아치는 연타가 피를 빨아 버팀";
 		if (a_key == "signature_infinity") return "가장 낮은 원소 저항을 더 깎아 약점 피해 증폭";
 		if (a_key == "signature_enigma") return "피격 시 투명화·이동 속도 +45%(4초), 상시 이동 속도 +10%";
 		if (a_key == "signature_call_to_arms") return "적중 시 공격력 +20%(8초), 상시 체력 +50·마나 +30";
@@ -217,13 +217,13 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "signature_fortitude") return "강철 의지 버프로 난전 생존력 상승";
 		if (a_key == "signature_heart_of_the_oak") return "견고한 저항 축부터 깎아 후속 딜 창출";
 		if (a_key == "signature_dream") return "번개 공명을 축적해 전격 일격을 터뜨림";
-		if (a_key == "signature_faith") return "적중 시 공격력 +20%·공속 +15%(6초), 상시 공속 +15%";
+		if (a_key == "signature_faith") return "적중 시 공격력 +30%(6초), 상시 공격력 +8%";
 		if (a_key == "signature_chains_of_honor") return "피격 시 이동 속도 +35%(5초), 상시 3원소 저항 +15";
 		if (a_key == "signature_breath_of_the_dying") return "처치한 시체가 폭발해 반경 600에 독 피해 24 + 시체 최대 체력 6%";
 		if (a_key == "signature_shadow_boxer") return "그림자 권투: 근접 적중마다 0.4초 뒤 그림자가 물리 피해의 40%로 재타격";
 		if (a_key == "signature_obsession") return "적중 시 마법 피해 75~300(적중 피해 18%), 상시 마나 재생률 +25%";
 		if (a_key == "signature_hustle_a") return "피격 시 방어도 +60(5초), 상시 이동 속도 +8%";
-		if (a_key == "signature_treachery") return "피격 시 이동 속도 +28%(5초), 상시 공속 +10%";
+		if (a_key == "signature_treachery") return "피격 시 이동 속도 +28%(5초), 상시 기력 재생 +25%";
 		if (a_key == "signature_honor") return "적중 시 체력 재생률 +80%(7초), 상시 체력 재생률 +20%";
 		if (a_key == "signature_mosaic") return "화염·냉기·전격 피해를 각각 8~80(적중 피해 5%) 동시에 가함";
 		if (a_key == "signature_chaos") return "가장 낮은 원소 저항을 추적해 해당 원소 피해 45";
@@ -232,8 +232,8 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "signature_hand_of_justice") return "화염 심판으로 체력 40~250 흡수(적중 피해 18%)";
 		if (a_key == "signature_dragon") return "피격 시 방어도 +120·화염/냉기/전격 저항 +25(8초)";
 		if (a_key == "signature_mist") return "마나 재생 -100%·마법 저항 -30(6초), 마나 75 즉시 소진";
-		if (a_key == "signature_famine") return "기력 -30/초(5초), 공격력 -20%·공격 속도 -15%(6초)";
-		if (a_key == "signature_beast") return "공격력 +30%·방어도 +150·공격 속도 +15%(10초)";
+		if (a_key == "signature_famine") return "기력 -30/초(5초), 공격력 -20%(6초)";
+		if (a_key == "signature_beast") return "공격력 +40%·방어도 +150(10초)";
 		if (a_key == "signature_eternity") return "피격 시 방어도 +300·피해 반사 +25%(6초)";
 		if (a_key == "signature_last_wish") return "체력 35% 이하에서 체력 250 회복·방어도 +250·마법 저항 +50(12초)";
 		if (a_key == "signature_plague") return "시체 연쇄 폭발: 독 피해 12 + 시체 최대 체력 3%, 반경 450, 최대 연쇄 깊이 2";
@@ -261,7 +261,7 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "aura_fire_shred") return "타격마다 화염 저항을 깎아 후속 화상 극대화";
 		if (a_key == "aura_frost_shred") return "타격마다 냉기 저항을 깎아 후속 동결 극대화";
 		if (a_key == "self_haste") return "가속으로 빈틈을 메워 기동 우위 확보";
-		if (a_key == "self_weapon_fury") return "공격 속도 +25%·기력 30 즉시 회복";
+		if (a_key == "self_weapon_fury") return "공격력 +15%·기력 30 즉시 회복";
 		if (a_key == "self_judgment") return "심판의 기세를 실어 공격력을 대폭 끌어올림";
 		if (a_key == "self_stamina_recall") return "전투 기억을 되살려 스태미나 회복 가속";
 		if (a_key == "self_crit_chance") return "연계 리듬을 살려 치명타 확률 상승";
@@ -315,7 +315,7 @@ namespace CalamityAffixes::RunewordSummary
 		if (a_key == "absorb_magicka") return "암흑의 흡인으로 적의 마력을 빼앗아 전환";
 		if (a_key == "absorb_stamina") return "선율의 울림으로 적의 활력을 흡수해 전환";
 		if (a_key == "debuff_weaken") return "강압의 기운으로 공격자의 공격력을 약화";
-		if (a_key == "debuff_attack_slow") return "질풍의 압박이 적의 공격 속도를 둔화";
+		if (a_key == "debuff_attack_slow") return "질풍의 압박이 적의 공격력을 꺾음";
 		if (a_key == "debuff_armor_shred") return "돌의 무게가 적의 방어구를 압쇄";
 		if (a_key == "debuff_poison_shred") return "맹독의 침식으로 적의 독 저항을 와해";
 		if (a_key == "debuff_shock_shred") return "달빛 전류가 적의 전격 방어를 붕괴";
@@ -330,7 +330,7 @@ namespace CalamityAffixes::RunewordSummary
 	[[nodiscard]] inline std::string_view ActionSummaryTextEnByKey(std::string_view a_key) noexcept
 	{
 		if (a_key == "signature_spirit") return "gain +10 percentage points Spell Absorption; passively gain +30 Max Magicka";
-		if (a_key == "self_weapon_fury") return "gain +25% Attack Speed and restore 30 Stamina";
+		if (a_key == "self_weapon_fury") return "gain +15% Attack Damage and restore 30 Stamina";
 		if (a_key == "self_smoke_escape") return "slow the attacker by 30%";
 		if (a_key == "self_carry_weight") return "Always active: +75 Carry Weight and +15 Speechcraft";
 		if (a_key == "signature_shadow_boxer") return "enter Shadow Boxing: your shadow repeats each melee hit 0.4s later for 40% of its physical damage";
