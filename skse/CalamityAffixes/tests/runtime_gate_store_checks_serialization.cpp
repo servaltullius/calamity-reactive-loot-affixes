@@ -11,6 +11,10 @@
 #include <span>
 #include <string_view>
 #include <vector>
+#include <filesystem>
+#include <fstream>
+#include <optional>
+#include <string>
 
 namespace RuntimeGateStoreChecks
 {
@@ -527,4 +531,63 @@ namespace RuntimeGateStoreChecks
 
 		return true;
 	}
+
+	namespace
+	{
+		[[nodiscard]] std::optional<std::string> LoadPluginSource(std::string_view a_relative)
+		{
+			namespace fs = std::filesystem;
+			const fs::path testFile{ __FILE__ };
+			std::ifstream in(testFile.parent_path().parent_path() / fs::path(a_relative));
+			if (!in.is_open()) {
+				return std::nullopt;
+			}
+			return std::string((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+		}
+
+		// a_first must appear, and before a_second, inside the text that starts at a_scope.
+		[[nodiscard]] bool AppearsBefore(const std::string& a_text, std::string_view a_scope, std::string_view a_first, std::string_view a_second)
+		{
+			const auto scope = a_text.find(a_scope);
+			if (scope == std::string::npos) {
+				return false;
+			}
+			const auto first = a_text.find(a_first, scope);
+			const auto second = a_text.find(a_second, scope);
+			return first != std::string::npos && second != std::string::npos && first < second;
+		}
+	}
+
+	// v2.3.0 full review fixes (cppB): two orderings that only exist in
+	// engine-facing code. Both are order checks, not text pins: they fail only
+	// when the guarded step moves past the step it must precede.
+	bool CheckReviewFixSourcePins()
+	{
+		const auto lifecycle = LoadPluginSource("src/EventBridge.Serialization.Lifecycle.cpp");
+		const auto loot = LoadPluginSource("src/EventBridge.Loot.cpp");
+		if (!lifecycle || !loot) {
+			std::cerr << "review_fix_pins: failed to open plugin sources\n";
+			return false;
+		}
+
+		// items-0: the stale stat migration runs at PostLoad before any passive
+		// spell is added, removed or refreshed; removing an old effect first
+		// would take its amount off the new actor value.
+		if (!AppearsBefore(*lifecycle, "void EventBridge::OnPostLoadGame()", "MaybeMigrateStaleStatModifiers()", "RebuildActiveCounts(true)")) {
+			std::cerr << "review_fix_pins: the stale stat migration must run before RebuildActiveCounts at PostLoad\n";
+			return false;
+		}
+
+		// items-4: with the runtime off, drops and pickups still move item state
+		// between keys; only the loot roll waits for the enabled flag.
+		constexpr std::string_view kHandler = "RE::BSEventNotifyControl EventBridge::HandleContainerChangedEvent(";
+		if (!AppearsBefore(*loot, kHandler, "// 1a)", "if (!runtimeEnabled)") ||
+			!AppearsBefore(*loot, kHandler, "RemapInstanceKey(detachedWorldKey, pickupKey)", "if (!runtimeEnabled)") ||
+			!AppearsBefore(*loot, kHandler, "if (!runtimeEnabled)", "ProcessLootAcquired(")) {
+			std::cerr << "review_fix_pins: the enabled check moved above the drop/pickup ownership paths\n";
+			return false;
+		}
+		return true;
+	}
 }
+

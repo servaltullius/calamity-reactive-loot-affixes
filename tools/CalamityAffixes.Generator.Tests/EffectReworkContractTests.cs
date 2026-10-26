@@ -77,22 +77,29 @@ public sealed class EffectReworkContractTests
     }
 
     [Fact]
-    public void Fury_UsesAttackDamageAndInstantStaminaWithoutCriticalChance()
+    public void Fury_StrikesAndFillsBleedWithoutCriticalChance()
     {
         var affix = ReadAffix("keywords.affixes.runewords.json", "runeword_fury_final");
         var records = affix.GetProperty("records");
         var runtime = affix.GetProperty("runtime");
+        var action = runtime.GetProperty("action");
 
-        Assert.Equal("CAFF_MGEF_RW_FURY_LIFESTEAL", records.GetProperty("magicEffect").GetProperty("editorId").GetString());
-        // Attack speed is ignored under MCO (v2.3.0), so Fury raises attack damage instead.
-        Assert.Equal("AttackDamageMult", records.GetProperty("magicEffect").GetProperty("actorValue").GetString());
-        var effects = records.GetProperty("spell").GetProperty("effects").EnumerateArray().ToArray();
-        Assert.Equal(2, effects.Length);
-        AssertEffect(effects[0], "CAFF_MGEF_RW_FURY_LIFESTEAL", 0.15, 6);
-        AssertEffect(effects[1], "CAFF_MGEF_RW_FURY_RESTORE_STAMINA", 30.0, 0);
+        // v2.3.0 stage 4: the attack damage buff overlapped Faith, Beast and Call
+        // to Arms (and buff replacement made them exclusive), so Fury now strikes
+        // the target and fills its Bleed meter.
+        var magicEffect = records.GetProperty("magicEffect");
+        Assert.Equal("CAFF_MGEF_RW_FURY_LIFESTEAL", magicEffect.GetProperty("editorId").GetString());
+        Assert.Equal("Health", magicEffect.GetProperty("actorValue").GetString());
+        Assert.True(magicEffect.GetProperty("hostile").GetBoolean());
+        var spell = records.GetProperty("spell");
+        Assert.Equal("TargetActor", spell.GetProperty("delivery").GetString());
+        AssertEffect(spell.GetProperty("effect"), "CAFF_MGEF_RW_FURY_LIFESTEAL", 15.0, 0);
+        Assert.Equal("Target", action.GetProperty("applyTo").GetString());
+        Assert.Equal("Bleed", action.GetProperty("statusTag").GetString());
+        Assert.Equal(100.0, action.GetProperty("statusAmount").GetDouble());
         Assert.Equal("Hit", runtime.GetProperty("trigger").GetString());
         Assert.Equal(24.0, runtime.GetProperty("procChancePercent").GetDouble());
-        Assert.Equal(12.0, runtime.GetProperty("icdSeconds").GetDouble());
+        Assert.Equal(6.0, runtime.GetProperty("icdSeconds").GetDouble());
         Assert.DoesNotContain("CriticalChance", affix.GetRawText(), StringComparison.Ordinal);
     }
 
@@ -129,7 +136,7 @@ public sealed class EffectReworkContractTests
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(78, records.Length);
+        Assert.Equal(113, records.Length);
         AssertMagicEffect(records[0], "CAFF_MGEF_INCOMING_VOICE_POWER_STAMINA", "Stamina", hostile: false, recover: false);
         AssertMagicEffect(records[1], "CAFF_MGEF_INCOMING_VOICE_POWER_ATTACK_DAMAGE", "AttackDamageMult", hostile: false, recover: true);
         AssertSpellEffects(records[2], "CAFF_SPEL_INCOMING_VOICE_POWER",
@@ -147,6 +154,43 @@ public sealed class EffectReworkContractTests
         AssertSpellEffects(records[8], "CAFF_SPEL_RW_WEALTH_PASSIVE",
             ("CAFF_MGEF_RW_WEALTH_PASSIVE_CARRY_WEIGHT", 75.0, 0),
             ("CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT", 15.0, 0));
+
+        // v2.3.0 review tail (positional FormIDs: these stay last, in this order).
+        AssertMagicEffect(records[96], "CAFF_MGEF_DMG_FIRE_DYNAMIC_HITFX", "None", hostile: true, recover: false);
+        AssertMagicEffect(records[97], "CAFF_MGEF_DMG_FROST_DYNAMIC_HITFX", "None", hostile: true, recover: false);
+        AssertMagicEffect(records[98], "CAFF_MGEF_DMG_SHOCK_DYNAMIC_HITFX", "None", hostile: true, recover: false);
+        AssertMagicEffect(records[99], "CAFF_MGEF_RW_MIST_MANA_DRAIN", "Magicka", hostile: true, recover: false);
+        Assert.False(records[99].GetProperty("magicEffect").TryGetProperty("resistValue", out _));
+        AssertMagicEffect(records[100], "CAFF_MGEF_CHAOS_RUNE_TRAP_SUNDER", "DamageResist", hostile: true, recover: true);
+        Assert.Equal("CAFF_SPEL_CHAOS_RUNE_TRAP_SUNDER", records[101].GetProperty("spell").GetProperty("editorId").GetString());
+        AssertMagicEffect(records[102], "CAFF_MGEF_CHAOS_RUNE_TRAP_FRAGILE", "ResistMagic", hostile: true, recover: true);
+        Assert.Equal("CAFF_SPEL_CHAOS_RUNE_TRAP_FRAGILE", records[103].GetProperty("spell").GetProperty("editorId").GetString());
+        AssertMagicEffect(records[104], "CAFF_MGEF_RW_OBSESSION_ARCANE", "Health", hostile: true, recover: false);
+        Assert.Equal("CAFF_SPEL_RW_OBSESSION_ARCANE", records[105].GetProperty("spell").GetProperty("editorId").GetString());
+        string[] riders = ["FIREBOLT", "ICE_SPIKE", "LIGHTNING_BOLT", "THUNDERBOLT", "ICY_SPEAR", "CHAIN_LIGHTNING", "ICE_STORM"];
+        for (var index = 0; index < riders.Length; index++)
+        {
+            Assert.Equal($"CAFF_SPEL_COC_{riders[index]}_RIDER", records[106 + index].GetProperty("spell").GetProperty("editorId").GetString());
+        }
+    }
+
+    [Fact]
+    public void DynamicDamageSpells_DealDamageInstantlyAndCarryTheShaderSeparately()
+    {
+        // A 1s damage-over-time is replaced by the next cast of the same spell, losing
+        // the rest of the earlier hit; the damage is instant and a separate 1s effect
+        // keeps the elemental hit shader visible.
+        var module = ReadJson("affixes", "modules", "keywords.affixes.core.json");
+        foreach (var element in new[] { "FIRE", "FROST", "SHOCK" })
+        {
+            var spell = module.EnumerateArray()
+                .Select(affix => affix.TryGetProperty("records", out var records) && records.TryGetProperty("spell", out var s) ? s : default)
+                .Single(s => s.ValueKind == JsonValueKind.Object && s.GetProperty("editorId").GetString() == $"CAFF_SPEL_DMG_{element}_DYNAMIC");
+            var effects = spell.GetProperty("effects").EnumerateArray().ToArray();
+            Assert.Equal(2, effects.Length);
+            AssertEffect(effects[0], $"CAFF_MGEF_DMG_{element}_DYNAMIC", 1.0, 0);
+            AssertEffect(effects[1], $"CAFF_MGEF_DMG_{element}_DYNAMIC_HITFX", 0.0, 1);
+        }
     }
 
     [Fact]
@@ -167,6 +211,16 @@ public sealed class EffectReworkContractTests
                 return new[] { records.GetProperty("spell").Clone() };
             })
             .ToDictionary(spell => spell.GetProperty("editorId").GetString()!);
+
+        var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
+        foreach (var record in root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray())
+        {
+            if (record.GetProperty("type").GetString() == "Spell")
+            {
+                var spell = record.GetProperty("spell").Clone();
+                spells[spell.GetProperty("editorId").GetString()!] = spell;
+            }
+        }
 
         var expectedTraps = new (string AffixId, double Radius)[]
         {
@@ -221,10 +275,110 @@ public sealed class EffectReworkContractTests
         Assert.Equal("Self", runtime.GetProperty("action").GetProperty("applyTo").GetString());
     }
 
+    [Fact]
+    public void Ground_ShortensShoutRecoveryLikeVanillaTalos()
+    {
+        // ShoutRecoveryMult is a multiplier on 1: the old +50 made cooldowns tens
+        // of times longer. Vanilla Talos uses a Peak Value Modifier of 0.2.
+        var affix = ReadAffix("keywords.affixes.runewords.json", "runeword_ground_final");
+        var records = affix.GetProperty("records");
+        var magicEffect = records.GetProperty("magicEffect");
+        Assert.Equal("ShoutRecoveryMult", magicEffect.GetProperty("actorValue").GetString());
+        Assert.Equal("PeakValueModifier", magicEffect.GetProperty("archetype").GetString());
+        Assert.False(magicEffect.GetProperty("hostile").GetBoolean());
+        AssertEffect(records.GetProperty("spell").GetProperty("effect"), "CAFF_MGEF_RW_GROUND_ANCHOR", 0.5, 8);
+    }
+
+    [Theory]
+    [InlineData("keywords.affixes.suffixes.json", "suffix_eagle_eye_t1", 5)]
+    [InlineData("keywords.affixes.suffixes.json", "suffix_eagle_eye_t2", 10)]
+    [InlineData("keywords.affixes.suffixes.json", "suffix_eagle_eye_t3", 15)]
+    [InlineData("keywords.affixes.runewords.json", "runeword_zephyr_final", 30)]
+    public void BowSpeed_RidesOnANoOpCarrierForTheRuntime(string moduleFile, string id, double percent)
+    {
+        // BowSpeedBonus is Steady Hand's zoom slow-time. The bonus now rides on a
+        // no-op effect that the SKSE runtime turns into WeaponSpeedMult while a
+        // bow is drawn (BowDrawSpeed.h); its editor ID is how the runtime finds it.
+        var affix = ReadAffix(moduleFile, id);
+        var records = affix.GetProperty("records");
+        var magicEffect = records.GetProperty("magicEffect");
+        Assert.Equal("None", magicEffect.GetProperty("actorValue").GetString());
+        Assert.Equal("Script", magicEffect.GetProperty("archetype").GetString());
+        var effect = records.GetProperty("spell").GetProperty("effect");
+        Assert.Equal(percent, effect.GetProperty("magnitude").GetDouble());
+        var carrierSource = File.ReadAllText(Path.Combine(
+            FindRepoRoot(), "skse", "CalamityAffixes", "src", "EventBridge.BowDrawSpeed.cpp"));
+        Assert.Contains($"\"{magicEffect.GetProperty("editorId").GetString()}\"", carrierSource);
+    }
+
     private static JsonElement ReadAffix(string moduleFile, string id)
     {
         var module = ReadJson(Path.Combine("affixes", "modules", moduleFile));
         return module.EnumerateArray().Single(candidate => candidate.GetProperty("id").GetString() == id).Clone();
+    }
+
+    // v2.3.0 stage 4: the "+skill for a few seconds" runewords now apply a shared
+    // status (or pay off against two) and keep a smaller skill bonus always on.
+    public static TheoryData<string, string?, string, double> SkillRunewordRedesign => new()
+    {
+        { "runeword_leaf_final", "Burning", "DestructionModifier", 10 },
+        { "runeword_strength_final", "Exposed", "TwoHandedModifier", 10 },
+        { "runeword_edge_final", "Doom", "MarksmanModifier", 10 },
+        { "runeword_oath_final", "Bleed", "OneHandedModifier", 10 },
+        { "runeword_passion_final", "Shock", "IllusionModifier", 10 },
+        { "runeword_unbending_will_final", null, "BlockModifier", 15 },
+        { "runeword_cure_final", "Burning", "RestorationModifier", 10 },
+        { "runeword_hearth_final", "Freeze", "ResistFrost", 20 },
+        { "runeword_enlightenment_final", "Exposed", "AlterationModifier", 10 },
+        { "runeword_myth_final", "Bleed", "HeavyArmorModifier", 10 },
+    };
+
+    [Theory]
+    [MemberData(nameof(SkillRunewordRedesign))]
+    public void SkillRunewords_ApplyAStatusAndKeepAPassiveSkillBonus(string affixId, string? status, string passiveValue, double passiveMagnitude)
+    {
+        var affix = ReadAffix("keywords.affixes.runewords.json", affixId);
+        var action = affix.GetProperty("runtime").GetProperty("action");
+        if (status == "Doom")
+        {
+            Assert.Equal("DoomMark", action.GetProperty("type").GetString());
+        }
+        else
+        {
+            Assert.Equal("CastSpell", action.GetProperty("type").GetString());
+            Assert.Equal("Target", action.GetProperty("applyTo").GetString());
+            if (status is null)
+            {
+                Assert.Equal(2, affix.GetProperty("runtime").GetProperty("requireTargetStatusCount").GetInt32());
+            }
+            else
+            {
+                Assert.Equal(status, action.GetProperty("statusTag").GetString());
+            }
+            var magicEffect = affix.GetProperty("records").GetProperty("magicEffect");
+            Assert.True(magicEffect.GetProperty("hostile").GetBoolean(), affixId);
+        }
+
+        var passiveId = action.GetProperty("passiveSpellEditorId").GetString();
+        var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
+        var tail = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
+        var records = affix.GetProperty("records");
+        var passiveSpell = tail
+            .Where(record => record.GetProperty("type").GetString() == "Spell")
+            .Select(record => record.GetProperty("spell"))
+            .Append(records.GetProperty("spell"))
+            .Single(spell => spell.GetProperty("editorId").GetString() == passiveId);
+        Assert.Equal("Ability", passiveSpell.GetProperty("spellType").GetString());
+        var effect = passiveSpell.GetProperty("effect");
+        Assert.Equal(passiveMagnitude, effect.GetProperty("magnitude").GetDouble());
+        var effectId = effect.GetProperty("magicEffectEditorId").GetString();
+        var passiveEffect = tail
+            .Where(record => record.GetProperty("type").GetString() == "MagicEffect")
+            .Select(record => record.GetProperty("magicEffect"))
+            .Append(records.GetProperty("magicEffect"))
+            .Single(magicEffect => magicEffect.GetProperty("editorId").GetString() == effectId);
+        Assert.Equal(passiveValue, passiveEffect.GetProperty("actorValue").GetString());
+        Assert.False(passiveEffect.GetProperty("hostile").GetBoolean());
     }
 
     [Fact]
@@ -232,7 +386,10 @@ public sealed class EffectReworkContractTests
     {
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
-        var tail = records[^9..];
+        var start = Array.FindIndex(records, record =>
+            record.TryGetProperty("magicEffect", out var effect) &&
+            effect.GetProperty("editorId").GetString() == "CAFF_MGEF_STATUS_FREEZE_SLOW");
+        var tail = records[start..(start + 9)];
 
         var magicEffects = tail.Take(5).Select(record => record.GetProperty("magicEffect")).ToArray();
         Assert.Equal(

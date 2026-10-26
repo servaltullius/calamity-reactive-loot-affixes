@@ -138,6 +138,39 @@ class GenPrefixDocTests(unittest.TestCase):
         self.assertIn("영문 표시: Storm Call: 38% chance to deal Shock damage 10 + 10% of hit. Triggers every 1.5s.", rendered)
         self.assertNotIn("발동:", rendered)
 
+    def test_repo_zero_weight_public_prefixes_are_only_the_retired_strikes(self) -> None:
+        # runtime.lootWeight overrides kid.chance at runtime, so 0 means the prefix
+        # never rolls. Only the deliberate 9b8b916 retirements may have it.
+        import json
+
+        repo_entries = []
+        for name in ("keywords.affixes.core.json", "keywords.affixes.status.json"):
+            path = self.repo_root / "affixes" / "modules" / name
+            repo_entries += json.loads(path.read_text(encoding="utf-8"))
+        zero = {
+            e["id"]
+            for e in repo_entries
+            if not e["id"].startswith("internal_") and self.gen_prefix_doc.is_retired(e)
+        }
+        self.assertEqual(set(self.gen_prefix_doc.RETIRED_PREFIX_IDS), zero)
+
+    def test_retired_prefixes_leave_the_count_and_unlisted_zero_weight_fails(self) -> None:
+        entries = [
+            {"id": "storm_call", "nameKo": "폭풍 소환", "runtime": {"lootWeight": 1.0}},
+            {"id": "flame_strike", "nameKo": "화염 일격", "runtime": {"lootWeight": 0.0}},
+            {"id": "internal_hidden", "nameKo": "INTERNAL", "runtime": {"lootWeight": 0.0}},
+        ]
+        public, retired = self.gen_prefix_doc.split_retired(entries)
+        self.assertEqual(["storm_call"], [e["id"] for e in public])
+        self.assertEqual(["flame_strike"], [e["id"] for e in retired])
+        listed = [e["id"] for group in self.gen_prefix_doc.categorize(entries).values() for _, e in group]
+        self.assertEqual(["storm_call"], listed)
+
+        with self.assertRaises(SystemExit):
+            self.gen_prefix_doc.split_retired(
+                entries + [{"id": "accidental_zero", "nameKo": "실수", "runtime": {"lootWeight": 0}}]
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

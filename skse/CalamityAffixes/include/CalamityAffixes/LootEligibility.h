@@ -87,6 +87,25 @@ namespace CalamityAffixes::detail
 		return false;
 	}
 
+	struct LootWeaponEligibilityInput
+	{
+		bool bound{ false };
+		bool playable{ true };
+		// Crafting bases (the panel's base list and selection) also need a
+		// playable weapon. Tracked-item checks do not: a mod's non-playable weapon
+		// that already carries affixes keeps them.
+		bool asCraftingBase{ false };
+	};
+
+	// A bound weapon disappears when its spell ends, with everything spent on it.
+	[[nodiscard]] constexpr bool IsLootWeaponEligible(const LootWeaponEligibilityInput& a_input) noexcept
+	{
+		if (a_input.bound) {
+			return false;
+		}
+		return !a_input.asCraftingBase || a_input.playable;
+	}
+
 	struct LootArmorEligibilityInput
 	{
 		bool playable{ false };

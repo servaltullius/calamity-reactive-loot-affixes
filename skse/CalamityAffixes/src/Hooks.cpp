@@ -125,9 +125,11 @@ namespace CalamityAffixes::Hooks
 				_hookedPlayerCharacter = false;
 
 				REL::Relocation<std::uintptr_t> actorVtbl{ RE::VTABLE_Actor[0] };
+				_actorVtbl = actorVtbl.address();
 				_hookedActor = TryInstallVfuncHook(actorVtbl, idx, ThunkActor, _originalActor, "Actor");
 
 				REL::Relocation<std::uintptr_t> characterVtbl{ RE::VTABLE_Character[0] };
+				_characterVtbl = characterVtbl.address();
 				_hookedCharacter = TryInstallVfuncHook(characterVtbl, idx, ThunkCharacter, _originalCharacter, "Character");
 
 				bool allowPlayerHook = false;
@@ -137,6 +139,7 @@ namespace CalamityAffixes::Hooks
 
 				if (allowPlayerHook) {
 					REL::Relocation<std::uintptr_t> playerVtbl{ RE::VTABLE_PlayerCharacter[0] };
+					_playerVtbl = playerVtbl.address();
 					_hookedPlayerCharacter = TryInstallVfuncHook(
 						playerVtbl,
 						idx,
@@ -185,11 +188,67 @@ namespace CalamityAffixes::Hooks
 				if (_hookedPlayerCharacter && current == reinterpret_cast<const void*>(ThunkPlayerCharacter)) {
 					return true;
 				}
-				return false;
+
+				// The slot no longer points at our thunk: a plugin loaded after us
+				// hooked it. When that plugin still chains into our thunk (seen by
+				// the thunk itself), damage is routed and the TESHitEvent fallback
+				// must stay off, or every hit is processed twice.
+				const auto vtblAddress = reinterpret_cast<std::uintptr_t>(vtbl);
+				const auto* chained = ResolveChainedFlag(vtblAddress);
+				if (!chained) {
+					return false;
+				}
+				WarnSlotReplacedOnce(vtblAddress, current);
+				return chained->load(std::memory_order_relaxed);
 			}
 
 		private:
 			using ThunkFn = void(RE::Actor*, RE::Actor*, float);
+
+			// Chained flag of the hooked class whose vtable this is, or null.
+			[[nodiscard]] static std::atomic_bool* ResolveChainedFlag(std::uintptr_t a_vtblAddress) noexcept
+			{
+				if (a_vtblAddress == 0u) {
+					return nullptr;
+				}
+				if (_hookedActor && a_vtblAddress == _actorVtbl) {
+					return &_chainedActor;
+				}
+				if (_hookedCharacter && a_vtblAddress == _characterVtbl) {
+					return &_chainedCharacter;
+				}
+				if (_hookedPlayerCharacter && a_vtblAddress == _playerVtbl) {
+					return &_chainedPlayerCharacter;
+				}
+				return nullptr;
+			}
+
+			static void WarnSlotReplacedOnce(std::uintptr_t a_vtblAddress, const void* a_current) noexcept
+			{
+				static std::atomic_bool warned{ false };
+				if (!warned.exchange(true, std::memory_order_relaxed)) {
+					SKSE::log::warn(
+						"CalamityAffixes: HandleHealthDamage slot replaced after install (vtbl=0x{:X}, now=0x{:X}); routed only while the new hook still chains to ours.",
+						a_vtblAddress,
+						reinterpret_cast<std::uintptr_t>(a_current));
+				}
+			}
+
+			// Called from each thunk: a call that arrives while the slot points
+			// elsewhere means another hook chains into ours.
+			static void NoteThunkEntry(const RE::Actor* a_this, ThunkFn* a_thunk) noexcept
+			{
+				if (!a_this || _vfuncIndex == 0) {
+					return;
+				}
+				auto* const* vtbl = *reinterpret_cast<void* const* const*>(a_this);
+				if (!vtbl || vtbl[_vfuncIndex] == reinterpret_cast<void*>(a_thunk)) {
+					return;
+				}
+				if (auto* chained = ResolveChainedFlag(reinterpret_cast<std::uintptr_t>(vtbl))) {
+					chained->store(true, std::memory_order_relaxed);
+				}
+			}
 
 			[[nodiscard]] static bool TryInstallVfuncHook(
 				REL::Relocation<std::uintptr_t> a_vtbl,
@@ -281,12 +340,22 @@ namespace CalamityAffixes::Hooks
 					},
 					[&] { CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel); },
 					[&] {
-						if (!ShouldProcessHealthDamageHookPointers(safeTarget, safeAttacker)) {
+						auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+						// Damage the hit pipeline rejects below still counts for the
+						// player's low-health runewords. Apply it first, then queue the
+						// deferred check: health is read after the engine took it, and
+						// nothing is cast from inside this hook.
+						const auto forwardUnrouted = [&] {
 							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							detail::SchedulePlayerLowHealthOnlyCheck(bridge, safeTarget, safeAttacker, a_damage);
+						};
+
+						if (!ShouldProcessHealthDamageHookPointers(safeTarget, safeAttacker)) {
+							// No attacker: falls, ownerless traps.
+							forwardUnrouted();
 							return;
 						}
 
-						auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
 						if (!bridge || !bridge->IsRuntimeEnabled()) {
 							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 							return;
@@ -303,6 +372,22 @@ namespace CalamityAffixes::Hooks
 								context.hasPlayerOwner,
 								context.hostileEitherDirection,
 								bridge->AllowsNonHostilePlayerOwnedOutgoingProcs())) {
+							forwardUnrouted();
+							return;
+						}
+
+						// A hit on a corpse is not a hit: the target was already dead before
+						// this damage, so procs would only spend their cooldowns on it. A
+						// killing blow still counts, since the target is alive until the
+						// engine applies it below.
+						if (!context.targetIsPlayer && safeTarget->IsDead()) {
+							static std::atomic_uint32_t loggedCorpseHits{ 0u };
+							if (loggedCorpseHits.fetch_add(1u, std::memory_order_relaxed) < 8u) {
+								SKSE::log::info(
+									"CalamityAffixes: skipped procs on a corpse hit (target={:08X}).",
+									safeTarget->GetFormID());
+							}
+							bridge->NoteCorpseHitSkipped();
 							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
 							return;
 						}
@@ -310,7 +395,7 @@ namespace CalamityAffixes::Hooks
 						// An echo strike's damage is not a new hit: forward it without
 						// crit, conversion, or proc evaluation.
 						if (detail::ConsumeExpectedEchoStrikeDamage(safeTarget, safeAttacker, rawHitData, now)) {
-							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							forwardUnrouted();
 							return;
 						}
 
@@ -320,7 +405,9 @@ namespace CalamityAffixes::Hooks
 							safeAttacker);
 
 						if (!detail::ShouldAllowProcDispatch(safeTarget, safeAttacker, preHitData, a_damage, now)) {
-							CallOriginal(a_original, safeTarget, safeAttacker, a_damage, a_hookLabel);
+							// Reused/stale HitData (a breath tick after a bite): not a
+							// new hit, but the damage is real.
+							forwardUnrouted();
 							return;
 						}
 
@@ -338,16 +425,19 @@ namespace CalamityAffixes::Hooks
 
 			static void ThunkActor(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{
+				NoteThunkEntry(SanitizeObjectPointer(a_this), ThunkActor);
 				ThunkImpl(_originalActor, a_this, a_attacker, a_damage, "Actor");
 			}
 
 			static void ThunkCharacter(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{
+				NoteThunkEntry(SanitizeObjectPointer(a_this), ThunkCharacter);
 				ThunkImpl(_originalCharacter, a_this, a_attacker, a_damage, "Character");
 			}
 
 			static void ThunkPlayerCharacter(RE::Actor* a_this, RE::Actor* a_attacker, float a_damage)
 			{
+				NoteThunkEntry(SanitizeObjectPointer(a_this), ThunkPlayerCharacter);
 				ThunkImpl(_originalPlayerCharacter, a_this, a_attacker, a_damage, "PlayerCharacter");
 			}
 
@@ -359,15 +449,31 @@ namespace CalamityAffixes::Hooks
 			static inline bool _hookedActor{ false };
 			static inline bool _hookedCharacter{ false };
 			static inline bool _hookedPlayerCharacter{ false };
+			static inline std::uintptr_t _actorVtbl{ 0u };
+			static inline std::uintptr_t _characterVtbl{ 0u };
+			static inline std::uintptr_t _playerVtbl{ 0u };
+			static inline std::atomic_bool _chainedActor{ false };
+			static inline std::atomic_bool _chainedCharacter{ false };
+			static inline std::atomic_bool _chainedPlayerCharacter{ false };
 		};
+	}
+
+	void InstallHealthDamageHooks()
+	{
+		ActorHandleHealthDamageHook::Install();
+	}
+
+	void InstallFriendlyMagicHooks()
+	{
+		FriendlyMagicTargetHook<RE::VTABLE_Actor>::Install("Actor");
+		FriendlyMagicTargetHook<RE::VTABLE_Character>::Install("Character");
+		FriendlyMagicTargetHook<RE::VTABLE_PlayerCharacter>::Install("PlayerCharacter");
 	}
 
 	void Install()
 	{
-		ActorHandleHealthDamageHook::Install();
-		FriendlyMagicTargetHook<RE::VTABLE_Actor>::Install("Actor");
-		FriendlyMagicTargetHook<RE::VTABLE_Character>::Install("Character");
-		FriendlyMagicTargetHook<RE::VTABLE_PlayerCharacter>::Install("PlayerCharacter");
+		InstallHealthDamageHooks();
+		InstallFriendlyMagicHooks();
 	}
 
 	bool IsHandleHealthDamageHooked(const RE::Actor* a_actor) noexcept
@@ -380,10 +486,14 @@ namespace CalamityAffixes::Hooks
 		detail::InvalidateDeferredTasks();
 	}
 
-	void ClearRuntimeState() noexcept
+	void ClearRuntimeState(bool a_keepSummonRegistry) noexcept
 	{
 		detail::ClearDispatchRuntimeState();
-		ClearHostileEffectGuardRuntimeState();
+		if (a_keepSummonRegistry) {
+			ClearHostileEffectGuardTransientState();
+		} else {
+			ClearHostileEffectGuardRuntimeState();
+		}
 	}
 
 	void ExpectEchoStrikeDamage(RE::Actor* a_target, RE::Actor* a_attacker) noexcept

@@ -5,6 +5,7 @@
 #include "CalamityAffixes/Hooks.h"
 
 #include <chrono>
+#include <cmath>
 #include <string>
 
 namespace CalamityAffixes
@@ -13,7 +14,8 @@ namespace CalamityAffixes
 		RE::Actor* a_target,
 		RE::Actor* a_attacker,
 		const RE::HitData* a_hitData,
-		float a_damage)
+		float a_damage,
+		float a_appliedDamage)
 	{
 		const auto now = std::chrono::steady_clock::now();
 		// Keep shared trigger/ICD state protected through proc dispatch. Engine
@@ -111,6 +113,42 @@ namespace CalamityAffixes
 			ProcessImmediateCorpseExplosionFromLethalHit(a_target, a_attacker);
 		}
 
-		ProcessLowHealthTriggerFromHealthDamage(a_target, a_attacker, effectiveHitData);
+		ProcessLowHealthTriggerFromHealthDamage(
+			a_target,
+			a_attacker,
+			effectiveHitData,
+			std::abs(a_appliedDamage >= 0.0f ? a_appliedDamage : a_damage));
+	}
+
+	void EventBridge::OnPlayerHealthDamageLowHealthOnly(RE::FormID a_attackerFormID, float a_damageTaken)
+	{
+		const std::scoped_lock lock(_stateMutex);
+		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) ||
+			_runtimeSettings.disableHealthDamageRouting ||
+			_affixRuntimeState.activeLowHealthTriggerAffixIndices.empty()) {
+			return;
+		}
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return;
+		}
+		// The trigger needs a target: the attacker when it is still around,
+		// otherwise the player (a fall, an ownerless trap).
+		RE::Actor* target = player;
+		if (a_attackerFormID != 0u) {
+			if (auto* attacker = RE::TESForm::LookupByID<RE::Actor>(a_attackerFormID);
+				attacker && !attacker->IsDead()) {
+				target = attacker;
+			}
+		}
+		// Debug test plan: a low-health proc from damage the hit pipeline did not route.
+		struct UnroutedLowHealthScope
+		{
+			bool& flag;
+			bool previous;
+			explicit UnroutedLowHealthScope(bool& a_flag) : flag(a_flag), previous(a_flag) { flag = true; }
+			~UnroutedLowHealthScope() { flag = previous; }
+		} unroutedScope{ _lowHealthFromUnroutedDamage };
+		ProcessTrigger(Trigger::kLowHealth, player, target, nullptr, a_damageTaken);
 	}
 }

@@ -32,7 +32,7 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			if (!IsWeaponOrArmor(entry->object)) {
+			if (!IsCraftingBaseEligible(entry->object)) {
 				continue;
 			}
 
@@ -119,7 +119,7 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		if (!IsWeaponOrArmor(entry->object)) {
+		if (!IsCraftingBaseEligible(entry->object)) {
 			return false;
 		}
 		const RunewordRecipe* completedRecipe = ResolveCompletedRunewordRecipe(a_instanceKey);

@@ -262,6 +262,63 @@ assert.strictEqual(
 );
 assert.strictEqual(element("affixSelectedItemName").textContent, "Hovered Iron Helmet");
 
+function viewState(expression) {
+  return new vm.Script(expression, { filename: "view-state-contract-test.js" }).runInContext(context);
+}
+
+// The hovered menu item is not the working base: it must not clear the base's
+// affix preview, which the runtime does not resend while it is unchanged.
+sandbox.setRunewordAffixPreview("Steel Sword affixes");
+sandbox.setSelectedItemName("Hovered Dagger");
+assert.strictEqual(viewState("runewordAffixTextState"), "Steel Sword affixes",
+  "hovering another item cleared the selected item's affix preview");
+assert.strictEqual(viewState("selectedItemNameState"), "Steel Sword · Working Base");
+sandbox.setSelectedItemName("");
+sandbox.renderSelectedItemContext();
+assert(element("affixSelectedItemName").textContent.startsWith("No item highlighted"),
+  "the inspect card showed the working base as a hovered inventory item");
+// The same list again (same selected key) keeps the preview.
+sandbox.setInventoryItems(JSON.stringify([
+  { key: workingBaseKey, name: "Steel Sword · Working Base", selected: true },
+  { key: "9002", name: "Leather Armor", selected: false }
+]));
+assert.strictEqual(viewState("runewordAffixTextState"), "Steel Sword affixes");
+// A refresh that gets no new preview back (same text) restores the last one
+// when the reply or the timeout ends the wait.
+sandbox.invalidateRunewordAffixPreview(true);
+assert.strictEqual(viewState("runewordAffixTextState"), "");
+assert.strictEqual(viewState("runewordAffixPendingState"), true);
+sandbox.setActionFeedback("Runeword base selected.");
+assert.strictEqual(viewState("runewordAffixPendingState"), false);
+assert.strictEqual(viewState("runewordAffixTextState"), "Steel Sword affixes",
+  "an unchanged preview stayed blank after the refresh ended");
+sandbox.invalidateRunewordAffixPreview(true);
+sandbox.setRunewordAffixPreview("Steel Sword affixes v2");
+sandbox.setActionFeedback("Runeword base selected.");
+assert.strictEqual(viewState("runewordAffixTextState"), "Steel Sword affixes v2");
+
+// A tall tooltip is fitted on screen without replacing the chosen position,
+// so the next save (here a text-size change) stores what the player picked.
+{
+  const tooltipPanelElement = element("tooltipPanel");
+  const savedRect = tooltipPanelElement.getBoundingClientRect;
+  tooltipPanelElement.getBoundingClientRect = () => ({ left: 0, top: 0, right: 0, bottom: 0, width: 420, height: 700 });
+  viewState("tooltipLayout = { right: 40, top: 600, fontScale: 1 }; tooltipLayoutLoaded = true;");
+  sandbox.applyTooltipLayout();
+  assert.strictEqual(viewState("tooltipLayout.top"), 600, "fitting a tall tooltip overwrote the chosen position");
+  assert.strictEqual(viewState("tooltipRenderedLayout.top"), 1080 - 8 - 700);
+  assert.strictEqual(tooltipPanelElement.style.top, "372px");
+  const tooltipCommands = [];
+  sandbox.calamityCommand = (command) => tooltipCommands.push(command);
+  sandbox.handleTooltipUiCommand("ui.tooltip.font:0.08");
+  assert.deepStrictEqual(tooltipCommands, ["ui.tooltip.save:40,600,1080"]);
+  // A nudge is a position choice: it keeps the fitted (visible) spot.
+  sandbox.handleTooltipUiCommand("ui.tooltip.nudge:0,10");
+  assert.strictEqual(tooltipCommands.at(-1), "ui.tooltip.save:40,372,1080");
+  delete sandbox.calamityCommand;
+  tooltipPanelElement.getBoundingClientRect = savedRect;
+}
+
 // The equipped-base collector is intentionally unbounded. The picker must
 // render every supplied candidate instead of relying on a scroll-window slice.
 const manyWorkingBases = Array.from({ length: 34 }, (_, index) => ({
@@ -610,7 +667,7 @@ sandbox.setRunewordPanelState(JSON.stringify({
 sandbox.renderEquippedBuildSummary();
 assert.strictEqual(sandbox.resolveEquippedBuildViewState(), "syncing");
 assert.strictEqual(element("equippedBuildGroups").getAttribute("aria-busy"), "true");
-assert(collectFakeElementText(element("equippedBuildStatus")).includes("Synchronizing equipped effects"));
+assert(collectFakeElementText(element("equippedBuildStatus")).includes("Loading equipped effects"));
 
 sandbox.setRunewordPanelState(JSON.stringify({
   equippedBuild: { ready: true, runtimeEnabled: true, equippedAffixSlots: 0, entries: [] }
@@ -904,6 +961,17 @@ assert.strictEqual(element("runewordRecoveryDetails").hidden, true, "reset secti
 sandbox.dispatchPanelCommand(element("affixIdentifyButton"));
 sandbox.dispatchPanelCommand(element("affixIdentifyButton"));
 assert.deepStrictEqual(craftedCommands, [`affix.identify:${reforgeBaseA}`], "double click must charge at most once");
+// A craft the runtime refuses leaves the item unchanged, so no new panel state
+// arrives; the runtime's feedback reply alone must end the wait. A local
+// message must not, or a second click could charge twice.
+sandbox.showActionFeedback("Local note");
+sandbox.dispatchPanelCommand(element("affixIdentifyButton"));
+assert.strictEqual(craftedCommands.length, 1, "a local message ended a pending craft");
+sandbox.setActionFeedback("Can't identify this item right now.");
+assert.strictEqual(viewState("affixCraftPendingState"), null, "the runtime's reply did not end a pending craft");
+sandbox.dispatchPanelCommand(element("affixIdentifyButton"));
+assert.strictEqual(craftedCommands.length, 2);
+assert.strictEqual(craftedCommands.at(-1), `affix.identify:${reforgeBaseA}`);
 const identifiedPayload = {
   ...emptyCraftPayload, regularAffixCount: 1,
   identifyScrollsOwned: 1, reforgeLockCandidates: [buildReforgePayload().reforgeLockCandidates[0]]
@@ -1017,8 +1085,38 @@ assert.strictEqual(
   "",
   "no prefix, no transmute warning"
 );
+// Each language gets its own confirm sentence: the click-again wrapper uses t()
+// itself, so a pre-translated warning repeated every sentence in bilingual mode.
+assert.ok(!transmuteState.transmuteConfirmEn.includes("폭풍 소환"), "English confirm has no Korean half");
+assert.ok(transmuteState.transmuteConfirmKo.includes("폭풍 소환"), "Korean confirm names the prefix");
+// The confirm does not depend on the button being enabled (a craft may still be pending).
+assert.ok(
+  vm.runInContext("resolveRunewordPanelActionState({ ...runewordPanelState, hasRecipe: true, canInsert: false, transmuteRemovesPrefixEn: 'Storm Call', transmuteRemovesPrefixKo: '폭풍 소환' }).transmuteConfirmEn", context)
+    .includes("Storm Call"),
+  "transmute confirm survives a pending craft"
+);
+// Replacing another runeword warns too, and Remove Runeword says what replaces it.
+const replaceState = vm.runInContext(
+  "resolveRunewordPanelActionState({ ...runewordPanelState, hasRecipe: true, canInsert: true, isComplete: false, affixHead: 'runeword', affixSlotCount: 1, regularAffixCount: 0 })",
+  context
+);
+assert.ok(replaceState.transmuteConfirmEn.includes("is replaced"), "transmuting over another runeword warns");
+assert.ok(replaceState.removeRunewordConfirmEn.includes("random prefix takes its slot"), "removal says a prefix replaces the runeword");
+const legacyState = vm.runInContext(
+  "resolveRunewordPanelActionState({ ...runewordPanelState, hasRecipe: true, canInsert: true, isComplete: false, affixHead: 'legacy', affixSlotCount: 2, regularAffixCount: 1 })",
+  context
+);
+assert.ok(legacyState.removeRunewordConfirmEn.includes("its prefix and suffixes stay"), "legacy removal keeps the prefix");
 new vm.Script("runewordConfirmation = null; affixCraftPendingState = null").runInContext(context);
 delete sandbox.calamityCommand;
+// Debug test plan: every row sets up through a known command and turns to Seen
+// only when all of its events arrived in the panel state.
+const planItems = vm.runInContext("debugTestPlanItems", context);
+assert.ok(Array.isArray(planItems), "the test plan lists the pending checks (empty between rounds)");
+for (const item of planItems) {
+  assert.ok(/^spawn\.(testset:1[1-9]|testrw:rw_[a-z_]+)$/.test(item.setup), `test plan setup command: ${item.setup}`);
+  assert.ok(item.events.length > 0 && item.title.length === 2 && item.todo.length === 2, `test plan row: ${item.id}`);
+}
 
 const runeA = "18446744073709551615";
 const runeB = "9223372036854775808";
@@ -1257,6 +1355,65 @@ sandbox.setRunewordPanelState(JSON.stringify({ ...exchangePayload, exchangeRefor
 sandbox.renderRunewordPanelState();
 assert.strictEqual(element("resourceExchangeGroup").hidden, true, "a runtime without trades hides the row");
 delete sandbox.calamityCommand;
+
+// With every rune in hand, a blocked transmute says why instead of claiming
+// the runes are short.
+{
+  const blocked = {
+    hasBase: true, hasRecipe: true, canInsert: false,
+    missingSummary: "Affix slots full (max 3)",
+    requiredRunes: [{ name: "El", required: 1, owned: 1 }]
+  };
+  const blockedHint = viewState(`resolveRunewordPanelActionState(${JSON.stringify(blocked)}).buttonHint`);
+  assert(blockedHint.includes("Scour the item first"), "a full item was reported as missing runes");
+  assert(!blockedHint.includes("Not enough rune fragments"));
+  const short = { ...blocked, missingSummary: "El x1", requiredRunes: [{ name: "El", required: 1, owned: 0 }] };
+  assert(viewState(`resolveRunewordPanelActionState(${JSON.stringify(short)}).buttonHint`)
+    .includes("Not enough rune fragments"));
+}
+
+// Closing the panel clears the feedback line's hover text with the line.
+sandbox.setControlPanel("1");
+sandbox.setActionFeedback("Click Scour again within 6 seconds");
+assert.strictEqual(element("feedback").title, "Click Scour again within 6 seconds");
+sandbox.setControlPanel("0");
+assert.strictEqual(element("feedback").textContent, "");
+assert.strictEqual(element("feedback").title, "", "a closed panel kept the old message on hover");
+
+// Typing in a panel text field tells the DLL to ignore the panel hotkey;
+// closing the panel releases the field so the flag cannot stay set.
+{
+  const textInputCommands = [];
+  sandbox.calamityCommand = (command) => textInputCommands.push(command);
+  const search = new FakeElement("input");
+  search.type = "text";
+  sandbox.handlePanelFocusIn({ target: search });
+  sandbox.handlePanelFocusOut({ target: search });
+  sandbox.handlePanelFocusIn({ target: new FakeElement("button") });
+  sandbox.handlePanelFocusOut({ target: new FakeElement("button") });
+  assert.deepStrictEqual(textInputCommands, ["ui.textinput:1", "ui.textinput:0"]);
+  sandbox.setControlPanel("1");
+  search.blur = () => {
+    document.activeElement = null;
+    sandbox.handlePanelFocusOut({ target: search });
+  };
+  document.activeElement = search;
+  sandbox.handlePanelFocusIn({ target: search });
+  sandbox.setControlPanel("0");
+  assert.strictEqual(document.activeElement, null, "closing the panel left the search field focused");
+  assert.strictEqual(textInputCommands.at(-1), "ui.textinput:0");
+  delete sandbox.calamityCommand;
+}
+
+// Fixed English lines from the DLL are translated in the Korean UI.
+sandbox.setUiLanguage("ko");
+assert.strictEqual(sandbox.localizeEngineFeedback("Calamity is disabled in the MCM."), "MCM에서 칼라미티가 꺼져 있습니다.");
+sandbox.setPanelHotkeyText("Gamepad (not supported)");
+sandbox.updatePanelHotkeyHints();
+assert.strictEqual(element("quickOpenRuneword").textContent, "패널 열기/닫기: 게임패드(지원 안 함)");
+sandbox.setUiLanguage("en");
+sandbox.updatePanelHotkeyHints();
+assert.strictEqual(element("quickOpenRuneword").textContent, "Open/Close Panel: Gamepad (not supported)");
 
 const viewMarkup = fs.readFileSync(path.join(VIEW_DIR, "index.html"), "utf8");
 assert(

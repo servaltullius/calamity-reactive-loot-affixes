@@ -254,6 +254,10 @@ function initUiText() {
       "선택한 장비에 테스트 어픽스"
     );
   }
+  if (debugTestPlanLabel) {
+    debugTestPlanLabel.textContent = t("Test Plan", "테스트 목록");
+  }
+  renderDebugTestPlan();
   if (debugTrapProbeButton) {
     debugTrapProbeButton.textContent = t(
       "Trap Marker Test",
@@ -355,9 +359,102 @@ function invalidateRunewordAffixPreview(pending) {
   const pendingNonce = ++runewordAffixPendingNonce;
   // Failsafe: never leave preview in perpetual "refreshing" state.
   window.setTimeout(() => {
-    if (!runewordAffixPendingState) return;
     if (pendingNonce !== runewordAffixPendingNonce) return;
-    runewordAffixPendingState = false;
-    schedulePanelRender(panelRenderSection.tooltipPlacement);
+    settleRunewordAffixPreview();
   }, runewordAffixPendingTimeoutMs);
+}
+
+// Ends a pending refresh that got no new preview text. The runtime does not
+// resend text it already sent, so the last pushed text is still current.
+function settleRunewordAffixPreview() {
+  if (!runewordAffixPendingState) return false;
+  runewordAffixPendingState = false;
+  if (!runewordAffixTextState) {
+    runewordAffixTextState = runewordAffixConfirmedTextState;
+  }
+  schedulePanelRender(panelRenderSection.tooltipPlacement);
+  return true;
+}
+
+// Debug test plan (v2.3.0): the checks still waiting for an in-game look. Each
+// row says what to do, sets the selected item up in one click, and turns to
+// "Seen" once the runtime reports the event (debugTestEvents in the panel state).
+// Empty between test rounds: add a row when a change needs an in-game look, and
+// drop it once the game has reported it.
+const debugTestPlanItems = [
+  {
+    id: "archmage", base: "weapon", setup: "spawn.testset:16", events: ["archmage:spell"],
+    title: ["Archmage on your own spells", "직접 쓴 주문의 대마법사"],
+    todo: [
+      "Puts Archmage on the item. Equip it and hit an enemy with a plain spell (Firebolt, Ice Spike): an extra lightning hit should follow and cost some magicka.",
+      "대마법사를 붙입니다. 장착하고 화염탄·얼음 가시 같은 평범한 주문으로 적을 맞히세요. 번개 추가 피해가 나가고 매지카가 조금 더 빠져야 합니다."
+    ]
+  },
+  {
+    id: "lowHealthUnrouted", base: "armor", setup: "spawn.testrw:rw_lionheart", events: ["lowhealth:unrouted"],
+    title: ["Low-health runeword from breath or a fall", "브레스·낙하로 저체력 룬워드"],
+    todo: [
+      "Wear it and drop below 30% health from damage that is not a weapon hit: dragon breath, a spell, a fall. Lionheart should fire at once, not on the next weapon hit.",
+      "장착하고 무기 타격이 아닌 피해(드래곤 브레스, 주문, 낙하)로 체력을 30% 아래로 떨어뜨리세요. 다음 무기 타격을 기다리지 않고 사자의 심장이 바로 발동해야 합니다."
+    ]
+  },
+  {
+    id: "cocRider", base: "weapon", setup: "spawn.testset:17", events: ["coc:rider"],
+    title: ["Cast-on-crit slow", "치명 시전 둔화"],
+    todo: [
+      "Puts Crit Cast: Ice Spike on the item. Land critical hits: the Ice Spike should hit and the enemy should slow down (the slow is now a separate spell).",
+      "치명 시전: 얼음 가시를 붙입니다. 치명타를 맞히세요. 얼음 가시가 나가고 적이 느려져야 합니다(둔화가 별도 주문으로 바뀜)."
+    ]
+  }
+];
+
+function renderDebugTestPlan() {
+  if (!debugTestPlan) return;
+  const empty = debugTestPlanItems.length === 0;
+  for (const element of [debugTestPlanLabel, debugTestPlanHint, debugTestPlan]) {
+    if (element) element.hidden = empty;
+  }
+  if (empty) return;
+  const seen = new Set(Array.isArray(runewordPanelState?.debugTestEvents) ? runewordPanelState.debugTestEvents : []);
+  const done = debugTestPlanItems.filter((item) => item.events.every((key) => seen.has(key))).length;
+  if (debugTestPlanHint) {
+    // Quote the controls with the same helper that labels them: in both-language
+    // mode the button and chip show English, so the Korean half names that.
+    const setUpLabel = tCompact("Set up", "준비");
+    const seenLabel = tCompact("Seen", "확인됨");
+    debugTestPlanHint.textContent = t(
+      `${done}/${debugTestPlanItems.length} seen this session. Select a weapon or armor as the row says, then Set up: affix rows replace every affix on it; runeword rows put the runeword in its first slot (a prefix there goes, suffixes stay). Equip it and do what the row says; the row turns to Seen when the game reports the event.`,
+      `이번 세션에서 ${done}/${debugTestPlanItems.length}개 확인됨. 줄에 적힌 무기·방어구를 고른 뒤 "${setUpLabel}" 버튼을 누르세요. 어픽스 줄은 그 장비의 어픽스를 전부 바꾸고, 룬워드 줄은 첫 칸에 룬워드를 넣습니다(그 칸의 접두는 사라지고 접미는 남음). 장착하고 적힌 대로 하면, 게임이 효과를 감지하는 순간 줄이 "${seenLabel}" 표시로 바뀝니다.`
+    );
+  }
+  debugTestPlan.textContent = "";
+  for (const item of debugTestPlanItems) {
+    const isSeen = item.events.every((key) => seen.has(key));
+    const row = document.createElement("div");
+    row.className = isSeen ? "cpTestRow seen" : "cpTestRow";
+    const text = document.createElement("div");
+    text.className = "cpTestRowText";
+    const title = document.createElement("div");
+    title.className = "cpTestRowTitle";
+    const armor = item.base === "armor";
+    title.textContent = t(`${item.title[0]} · ${armor ? "armor" : "weapon"}`, `${item.title[1]} · ${armor ? "방어구" : "무기"}`);
+    const todo = document.createElement("div");
+    todo.className = "cpTestRowTodo";
+    todo.textContent = t(item.todo[0], item.todo[1]);
+    text.appendChild(title);
+    text.appendChild(todo);
+    const state = document.createElement("span");
+    state.className = isSeen ? "cpTestRowState seen" : "cpTestRowState";
+    state.textContent = isSeen ? tCompact("Seen", "확인됨") : tCompact("Waiting", "대기");
+    state.title = isSeen ? t("Seen", "확인됨") : t("Waiting", "대기");
+    const button = document.createElement("button");
+    button.className = "cpButton cpTestRowButton";
+    button.setAttribute(panelCommandAttribute, item.setup);
+    button.textContent = tCompact("Set up", "준비");
+    button.title = t("Set up", "준비");
+    row.appendChild(text);
+    row.appendChild(state);
+    row.appendChild(button);
+    debugTestPlan.appendChild(row);
+  }
 }

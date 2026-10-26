@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <mutex>
 #include <random>
 
@@ -28,6 +29,9 @@ namespace CalamityAffixes
 		if (a_context.procOrigin && !ScopedProcDepth::IsActiveOnCurrentThread(_combatState)) {
 			// A proc can still grant corpse currency / chain an explosion; only
 			// the normal Kill trigger is rejected by its existing depth gate.
+			// This covers a death raised synchronously inside a proc cast. A
+			// proc kill whose dead=true event arrives after the cast (Doom burst,
+			// echo, trap) is a normal player kill and fires Kill affixes.
 			originGuard.emplace(_combatState);
 		}
 		MaybeFlushRuntimeUserSettings(now, false);
@@ -47,8 +51,31 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		// Every death, whoever the killer: the TESHitEvent fallback tells a
+		// killing blow from a later corpse hit by this time. dead=false (start
+		// of dying) wins over the later dead=true.
+		{
+			auto& deaths = _combatState.recentDeathObservedMs;
+			const auto observedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+			if (!a_event->dead) {
+				deaths.insert_or_assign(dying->GetFormID(), observedMs);
+			} else {
+				deaths.try_emplace(dying->GetFormID(), observedMs);
+			}
+			if (deaths.size() > 512u) {
+				constexpr std::int64_t kDeathRecordTtlMs = 10 * 60 * 1000;
+				std::erase_if(deaths, [&](const auto& a_entry) { return observedMs - a_entry.second > kDeathRecordTtlMs; });
+			}
+		}
+
 		if (!a_event->dead) {
 			ForgetCorpseCurrencyProcessed(dying->GetFormID());
+			// Killed before its Doom burst: keep the Doom for Contagion at
+			// dead=true (which may come after the burst time) and never burst
+			// it on the dying body. State lock is held by the event drain.
+			if (_configLoaded) {
+				KeepDyingTargetDoom(dying->GetFormID());
+			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
 

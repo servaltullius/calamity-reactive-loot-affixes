@@ -3,6 +3,9 @@ Scriptname SKI_ConfigBase extends SKI_QuestBase hidden
 string Property ModName Auto
 string[] Property Pages Auto
 
+Function ForcePageReset()
+EndFunction
+
 Event OnGameReload()
 EndEvent
 

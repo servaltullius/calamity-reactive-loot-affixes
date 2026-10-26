@@ -994,7 +994,7 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
         self.assertTrue(
             any(
                 "invalid_instant_restore" in error
-                and "non-ConstantEffect restores require recover=false" in error
+                and "non-ConstantEffect instant effects require recover=false" in error
                 for error in errors
             ),
             msg=f"errors={errors}",
@@ -1058,6 +1058,48 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
                 and "records.magicEffects[0].actorValue" in error
                 for error in errors
             ),
+            msg=f"errors={errors}",
+        )
+
+    def test_one_based_multiplier_and_bow_speed_bonus_are_rejected(self) -> None:
+        def affix(affix_id: str, actor_value: str, magnitude: float) -> dict:
+            return {
+                "id": affix_id,
+                "editorId": f"CAFF_{affix_id.upper()}",
+                "records": {
+                    "magicEffect": {
+                        "editorId": f"CAFF_MGEF_{affix_id.upper()}",
+                        "actorValue": actor_value,
+                        "hostile": False,
+                        "recover": True,
+                    },
+                    "spell": {
+                        "editorId": f"CAFF_SPEL_{affix_id.upper()}",
+                        "delivery": "Self",
+                        "effect": {
+                            "magicEffectEditorId": f"CAFF_MGEF_{affix_id.upper()}",
+                            "magnitude": magnitude,
+                            "duration": 8,
+                            "area": 0,
+                        },
+                    },
+                },
+                "runtime": self._debug_runtime(),
+            }
+
+        errors, _ = self._lint([
+            affix("whole_percent_shout", "ShoutRecoveryMult", 50),
+            affix("fraction_shout", "ShoutRecoveryMult", 0.5),
+            affix("zoom_bow", "BowSpeedBonus", 5),
+        ])
+
+        self.assertTrue(
+            any("whole_percent_shout" in error and "multiplier based on 1" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+        self.assertFalse(any("fraction_shout" in error for error in errors), msg=f"errors={errors}")
+        self.assertTrue(
+            any("zoom_bow" in error and "BowSpeedBonus" in error and "not allowed" in error for error in errors),
             msg=f"errors={errors}",
         )
 
@@ -1211,6 +1253,356 @@ class LintAffixesGeneratedSyncTests(unittest.TestCase):
             any("valid_default_selection_priority" in error for error in errors),
             msg=f"errors={errors}",
         )
+
+    def test_control_archetypes_require_recover_like_vanilla(self) -> None:
+        def affix(archetype: str, actor_value: str, recover: bool) -> dict:
+            key = f"{archetype.lower()}_{'ok' if recover else 'bad'}"
+            return {
+                "id": key,
+                "editorId": f"CAFF_{key.upper()}",
+                "records": {
+                    "magicEffect": {
+                        "editorId": f"CAFF_MGEF_{key.upper()}",
+                        "actorValue": actor_value,
+                        "archetype": archetype,
+                        "hostile": True,
+                        "recover": recover,
+                    }
+                },
+                "runtime": self._debug_runtime(),
+            }
+
+        cases = [("Calm", "Aggression"), ("Frenzy", "Aggression"), ("Demoralize", "Confidence"), ("TurnUndead", "Confidence")]
+        affixes = [affix(a, av, False) for a, av in cases] + [affix(a, av, True) for a, av in cases]
+
+        errors, _ = self._lint(affixes)
+
+        for archetype, _ in cases:
+            bad = f"{archetype.lower()}_bad"
+            good = f"{archetype.lower()}_ok"
+            self.assertTrue(
+                any(bad in error and f"archetype={archetype} requires recover=true" in error for error in errors),
+                msg=f"errors={errors}",
+            )
+            self.assertFalse(any(good in error for error in errors), msg=f"errors={errors}")
+
+    def test_instant_hostile_absorb_with_recover_is_rejected(self) -> None:
+        # Recover on a duration-0 drain or absorb undoes it in the same update.
+        def affix(affix_id: str, archetype: str | None, recover: bool, duration: int) -> dict:
+            mgef = {
+                "editorId": f"CAFF_MGEF_{affix_id.upper()}",
+                "actorValue": "Health",
+                "hostile": True,
+                "recover": recover,
+            }
+            if archetype:
+                mgef["archetype"] = archetype
+            return {
+                "id": affix_id,
+                "editorId": f"CAFF_{affix_id.upper()}",
+                "records": {
+                    "magicEffect": mgef,
+                    "spell": {
+                        "editorId": f"CAFF_SPEL_{affix_id.upper()}",
+                        "delivery": "TargetActor",
+                        "effect": {
+                            "magicEffectEditorId": f"CAFF_MGEF_{affix_id.upper()}",
+                            "magnitude": 15,
+                            "duration": duration,
+                            "area": 0,
+                        },
+                    },
+                },
+                "runtime": self._debug_runtime(),
+            }
+
+        errors, _ = self._lint([
+            affix("bad_instant_absorb", "Absorb", True, 0),
+            affix("bad_instant_drain", None, True, 0),
+            affix("ok_instant_absorb", "Absorb", False, 0),
+            affix("ok_timed_drain", None, True, 5),
+        ])
+
+        for bad in ("bad_instant_absorb", "bad_instant_drain"):
+            self.assertTrue(
+                any(bad in error and "instant Health effect" in error for error in errors),
+                msg=f"errors={errors}",
+            )
+        for ok in ("ok_instant_absorb", "ok_timed_drain"):
+            self.assertFalse(any(ok in error for error in errors), msg=f"errors={errors}")
+
+    def test_effect_checks_cover_shared_and_appended_magic_effects(self) -> None:
+        # The MGEF lives in another affix or in keywords.appendedRecords; the spell
+        # effect checks must still run (Ground's +50 on a 1-based multiplier).
+        payload = {
+            "keywords": {
+                "appendedMagicEffects": [],
+                "appendedRecords": [
+                    {
+                        "type": "MagicEffect",
+                        "magicEffect": {
+                            "editorId": "CAFF_MGEF_APPENDED_ATTACK",
+                            "actorValue": "AttackDamageMult",
+                            "hostile": True,
+                            "recover": True,
+                        },
+                    },
+                    {
+                        "type": "Spell",
+                        "spell": {
+                            "editorId": "CAFF_SPEL_APPENDED_ATTACK",
+                            "delivery": "TargetActor",
+                            "effect": {
+                                "magicEffectEditorId": "CAFF_MGEF_APPENDED_ATTACK",
+                                "magnitude": 30,
+                                "duration": 3,
+                                "area": 0,
+                            },
+                        },
+                    },
+                    {
+                        "type": "MagicEffect",
+                        "magicEffect": {
+                            "editorId": "CAFF_MGEF_APPENDED_ZOOM",
+                            "actorValue": "BowSpeedBonus",
+                            "hostile": False,
+                            "recover": True,
+                        },
+                    },
+                ],
+                "affixes": [
+                    {
+                        "id": "owner_affix",
+                        "editorId": "CAFF_OWNER_AFFIX",
+                        "records": {
+                            "magicEffect": {
+                                "editorId": "CAFF_MGEF_OWNER_DAMAGE",
+                                "actorValue": "Health",
+                                "hostile": True,
+                                "recover": False,
+                            }
+                        },
+                        "runtime": self._debug_runtime(),
+                    },
+                    {
+                        "id": "borrowing_affix",
+                        "editorId": "CAFF_BORROWING_AFFIX",
+                        "records": {
+                            "spells": [
+                                {
+                                    "editorId": "CAFF_SPEL_BORROWING_NEGATIVE",
+                                    "delivery": "TargetActor",
+                                    "effect": {
+                                        "magicEffectEditorId": "CAFF_MGEF_OWNER_DAMAGE",
+                                        "magnitude": -5,
+                                        "duration": 0,
+                                        "area": 0,
+                                    },
+                                },
+                                {
+                                    "editorId": "CAFF_SPEL_BORROWING_MISSING",
+                                    "delivery": "TargetActor",
+                                    "effect": {
+                                        "magicEffectEditorId": "CAFF_MGEF_DOES_NOT_EXIST",
+                                        "magnitude": 5,
+                                        "duration": 0,
+                                        "area": 0,
+                                    },
+                                },
+                            ]
+                        },
+                        "runtime": self._debug_runtime(),
+                    },
+                ],
+            }
+        }
+
+        errors, _ = self._lint_payload(payload)
+
+        self.assertTrue(
+            any("keywords.appendedRecords[1].spell" in error and "multiplier based on 1" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+        self.assertTrue(
+            any("appendedRecords[2].magicEffect" in error and "BowSpeedBonus" in error and "not allowed" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+        self.assertTrue(
+            any(
+                "borrowing_affix" in error and "negative" in error and "owner_affix:records.magicEffect" in error
+                for error in errors
+            ),
+            msg=f"errors={errors}",
+        )
+        self.assertTrue(
+            any("borrowing_affix" in error and "undefined MagicEffect 'CAFF_MGEF_DOES_NOT_EXIST'" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+
+    def test_passive_spell_reference_must_be_generated(self) -> None:
+        def suffix(affix_id: str, passive: str) -> dict:
+            return {
+                "id": affix_id,
+                "editorId": f"CAFF_{affix_id.upper()}",
+                "records": {
+                    "magicEffect": {
+                        "editorId": f"CAFF_MGEF_{affix_id.upper()}",
+                        "actorValue": "OneHandedModifier",
+                        "hostile": False,
+                        "recover": True,
+                    },
+                    "spell": {
+                        "editorId": f"CAFF_SPEL_{affix_id.upper()}",
+                        "delivery": "Self",
+                        "spellType": "Ability",
+                        "castType": "ConstantEffect",
+                        "effect": {
+                            "magicEffectEditorId": f"CAFF_MGEF_{affix_id.upper()}",
+                            "magnitude": 10,
+                            "duration": 0,
+                            "area": 0,
+                        },
+                    },
+                },
+                "runtime": {
+                    "trigger": "Hit",
+                    "procChancePercent": 0,
+                    "action": {"type": "DebugNotify", "passiveSpellEditorId": passive},
+                },
+            }
+
+        errors, _ = self._lint([
+            suffix("typo_passive", "CAFF_SPEL_TYPO_PASSIVE_MISSPELLED"),
+            suffix("good_passive", "CAFF_SPEL_GOOD_PASSIVE"),
+        ])
+
+        self.assertTrue(
+            any("CAFF_SPEL_TYPO_PASSIVE_MISSPELLED" in error and "typo_passive:action.passiveSpellEditorId" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+        self.assertFalse(any("good_passive" in error for error in errors), msg=f"errors={errors}")
+
+    def test_mode_cycle_labels_must_be_english(self) -> None:
+        def affix(affix_id: str, labels: list[str]) -> dict:
+            return {
+                "id": affix_id,
+                "editorId": f"CAFF_{affix_id.upper()}",
+                "runtime": {
+                    "trigger": "Hit",
+                    "procChancePercent": 100.0,
+                    "action": {
+                        "type": "CastSpell",
+                        "spellForm": "Skyrim.esm|0x00012FCD",
+                        "modeCycle": {"spells": ["CAFF_SPEL_X", "CAFF_SPEL_Y"], "labels": labels},
+                    },
+                },
+            }
+
+        errors, _ = self._lint([
+            affix("korean_labels", ["화염 노출", "Frost Exposed"]),
+            affix("english_labels", ["Fire Exposed", "Frost Exposed"]),
+        ])
+
+        self.assertTrue(
+            any("korean_labels" in error and "modeCycle.labels[0] must be English" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+        self.assertFalse(
+            any("english_labels" in error and "must be English" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+
+    def test_mode_cycle_localized_labels(self) -> None:
+        def affix(affix_id: str, **labels: list[str]) -> dict:
+            return {
+                "id": affix_id,
+                "editorId": f"CAFF_{affix_id.upper()}",
+                "runtime": {
+                    "trigger": "Hit",
+                    "procChancePercent": 100.0,
+                    "action": {
+                        "type": "CastSpell",
+                        "spellForm": "Skyrim.esm|0x00012FCD",
+                        "modeCycle": {"spells": ["CAFF_SPEL_X", "CAFF_SPEL_Y"], **labels},
+                    },
+                },
+            }
+
+        errors, _ = self._lint([
+            affix("good_ko", labels=["Fire", "Frost"], labelsKo=["화염", "냉기"]),
+            affix("hangul_en", labels=["Fire", "Frost"], labelsEn=["화염", "Frost"]),
+            affix("short_ko", labels=["Fire", "Frost"], labelsKo=["화염"]),
+        ])
+
+        self.assertFalse(any("good_ko" in error and "label" in error for error in errors), msg=f"errors={errors}")
+        self.assertTrue(
+            any("hangul_en" in error and "modeCycle.labelsEn[0] must be English" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+        self.assertTrue(
+            any("short_ko" in error and "labelsKo has 1 entries but labels has 2" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+
+    def test_repo_mode_cycles_carry_korean_labels(self) -> None:
+        by_id = {affix["id"]: affix for affix in self.repo_spec["keywords"]["affixes"]}
+        expected = {
+            "runeword_infinity_final": ["화염 노출", "냉기 노출", "번개 노출"],
+            "elemental_attunement": ["화염", "냉기", "번개"],
+        }
+        for affix_id, labels_ko in expected.items():
+            mode_cycle = by_id[affix_id]["runtime"]["action"]["modeCycle"]
+            self.assertEqual(labels_ko, mode_cycle["labelsKo"], msg=affix_id)
+            self.assertEqual(len(mode_cycle["labels"]), len(labels_ko), msg=affix_id)
+
+    def test_rider_spell_is_cast_on_crit_only_and_must_be_generated(self) -> None:
+        def affix(affix_id: str, action_type: str, rider: str) -> dict:
+            return {
+                "id": affix_id,
+                "editorId": f"CAFF_{affix_id.upper()}",
+                "runtime": {
+                    "trigger": "Hit",
+                    "procChancePercent": 100.0,
+                    "action": {
+                        "type": action_type,
+                        "spellForm": "Skyrim.esm|0x00012FCD",
+                        "riderSpellEditorId": rider,
+                    },
+                },
+            }
+
+        errors, _ = self._lint([
+            affix("rider_on_cast_spell", "CastSpell", "CAFF_SPEL_SOME_RIDER"),
+            affix("rider_missing", "CastOnCrit", "CAFF_SPEL_MISSING_RIDER"),
+        ])
+
+        self.assertTrue(
+            any("rider_on_cast_spell" in error and "only read for CastOnCrit" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+        self.assertTrue(
+            any("CAFF_SPEL_MISSING_RIDER" in error and "rider_missing:action.riderSpellEditorId" in error for error in errors),
+            msg=f"errors={errors}",
+        )
+
+    def test_repo_crit_cast_affixes_use_rider_spells(self) -> None:
+        by_id = {affix["id"]: affix for affix in self.repo_spec["keywords"]["affixes"]}
+        appended = {
+            record["spell"]["editorId"]: record["spell"]
+            for record in self.repo_spec["keywords"]["appendedRecords"]
+            if record.get("type") == "Spell"
+        }
+        crit_cast_ids = [affix_id for affix_id in by_id if affix_id.startswith("crit_cast_")]
+        self.assertEqual(7, len(crit_cast_ids))
+        for affix_id in crit_cast_ids:
+            action = by_id[affix_id]["runtime"]["action"]
+            main = appended[action["spellEditorId"]]
+            rider = appended[action["riderSpellEditorId"]]
+            # The hit-scaled override reaches every effect of the cast spell, so the
+            # main spell carries the damage effect alone.
+            self.assertEqual(1, len(main["effects"]), msg=affix_id)
+            self.assertGreaterEqual(len(rider["effects"]), 2, msg=affix_id)
+            self.assertTrue(all(effect.get("hostileOnly") for effect in rider["effects"]), msg=affix_id)
 
 
 if __name__ == "__main__":

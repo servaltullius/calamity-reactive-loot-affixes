@@ -255,7 +255,7 @@ const runPendingBehavior = new Function(
       assert.strictEqual(scheduleRender, false);
       reforgeLockCleared += 1;
     }
-    function setActionFeedback(message) { feedback = message; }
+    function showActionFeedback(message) { feedback = message; }
     function resolveSelectedRunewordBaseKey() { return "42"; }
     const runewordPanelState = {
       hasBase: true,

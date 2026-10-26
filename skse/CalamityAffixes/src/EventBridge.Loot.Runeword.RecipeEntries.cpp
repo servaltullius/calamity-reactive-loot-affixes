@@ -65,10 +65,10 @@ namespace CalamityAffixes
 
 		static constexpr RecipeKeyOverride kRecommendedBaseOverrides[] = {
 			{ "rw_strength", "two_handed_melee" },
-			{ "rw_insight", "polearm" },
-			{ "rw_infinity", "polearm" },
-			{ "rw_pride", "polearm" },
-			{ "rw_obedience", "polearm" },
+			{ "rw_insight", "staff_wand" },
+			{ "rw_infinity", "two_handed_melee" },
+			{ "rw_pride", "two_handed_melee" },
+			{ "rw_obedience", "two_handed_melee" },
 			{ "rw_faith", "bow" },
 			{ "rw_ice", "bow" },
 			{ "rw_mist", "bow" },
@@ -82,8 +82,8 @@ namespace CalamityAffixes
 			{ "rw_memory", "staff_wand" },
 			{ "rw_white", "staff_wand" },
 			{ "rw_obsession", "staff_wand" },
-			{ "rw_chaos", "claw" },
-			{ "rw_mosaic", "claw" },
+			{ "rw_chaos", "one_handed_melee" },
+			{ "rw_mosaic", "one_handed_melee" },
 			{ "rw_grief", "sword" },
 			{ "rw_lawbringer", "sword" },
 			{ "rw_oath", "one_handed_melee" },
@@ -244,6 +244,18 @@ namespace CalamityAffixes
 			return name;
 		};
 
+		// The player-facing name of a spell: config names first, never the
+		// "Calamity: " developer prefix.
+		auto displaySpellName = [&](RE::SpellItem* a_spell, std::string_view a_fallback, bool a_korean) {
+			if (!a_spell) {
+				return std::string(a_fallback);
+			}
+			return ResolveRecordDisplayName(
+				a_spell,
+				pickLocalizedRecordName(spellNameOr(a_spell, a_fallback), a_korean),
+				a_korean);
+		};
+
 		auto buildSpellProfileText = [&](RE::SpellItem* a_spell, std::string_view a_prefix, bool a_korean) -> std::string {
 			if (!a_spell) {
 				return {};
@@ -297,9 +309,11 @@ namespace CalamityAffixes
 							(a_korean ? "초" : "s"));
 				}
 				if (effect->effectItem.area > 0u) {
+					// The record's area is in feet; the descriptions say metres.
 					appendDelimited(
 						metrics,
-						std::string(a_korean ? "범위 " : "Area ") + std::to_string(effect->effectItem.area));
+						std::string(a_korean ? "범위 약 " : "Area ~") +
+							formatNumberCompact(RunewordSummary::AreaFeetToMetres(effect->effectItem.area)) + "m");
 				}
 
 				if (!metrics.empty()) {
@@ -350,7 +364,7 @@ namespace CalamityAffixes
 		auto actionSummaryTextKo = [&](const Action& a_action) -> std::string {
 			switch (a_action.type) {
 			case ActionType::kCastSpell: {
-				const auto spellName = spellNameOr(a_action.spell, "Spell");
+				const auto spellName = displaySpellName(a_action.spell, "Spell", true);
 				return a_action.applyToSelf ?
 					       ("자신에게 " + spellName + " 시전") :
 					       ("적에게 " + spellName + " 시전");
@@ -394,7 +408,7 @@ namespace CalamityAffixes
 			case ActionType::kArchmage:
 				return "아크메이지 추가 피해 발동";
 			case ActionType::kSpawnTrap: {
-				const auto spellName = spellNameOr(a_action.spell, "Trap");
+				const auto spellName = displaySpellName(a_action.spell, "Trap", true);
 				return spellName + " 함정 설치";
 			}
 			case ActionType::kCorpseExplosion:
@@ -402,7 +416,7 @@ namespace CalamityAffixes
 			case ActionType::kSummonCorpseExplosion:
 				return "소환수 시체 폭발";
 			case ActionType::kCastOnCrit: {
-				const auto spellName = spellNameOr(a_action.spell, "Spell");
+				const auto spellName = displaySpellName(a_action.spell, "Spell", true);
 				return "치명타 시 " + spellName + " 시전";
 			}
 			case ActionType::kEchoStrike:
@@ -422,7 +436,7 @@ namespace CalamityAffixes
 		auto actionSummaryTextEn = [&](const Action& a_action) -> std::string {
 			switch (a_action.type) {
 			case ActionType::kCastSpell: {
-				const auto spellName = spellNameOr(a_action.spell, "Spell");
+				const auto spellName = displaySpellName(a_action.spell, "Spell", false);
 				return a_action.applyToSelf ?
 				       ("self-cast " + spellName) :
 				       ("cast " + spellName);
@@ -466,13 +480,13 @@ namespace CalamityAffixes
 			case ActionType::kArchmage:
 				return "trigger Archmage bonus damage";
 			case ActionType::kSpawnTrap:
-				return "deploy " + spellNameOr(a_action.spell, "Trap");
+				return "deploy " + displaySpellName(a_action.spell, "Trap", false);
 			case ActionType::kCorpseExplosion:
 				return "detonate a corpse";
 			case ActionType::kSummonCorpseExplosion:
 				return "detonate a summoned corpse";
 			case ActionType::kCastOnCrit:
-				return "cast " + spellNameOr(a_action.spell, "Spell") + " on critical hit";
+				return "cast " + displaySpellName(a_action.spell, "Spell", false) + " on critical hit";
 			case ActionType::kEchoStrike:
 				return "enter Shadow Boxing: your shadow repeats each melee hit";
 			case ActionType::kDebugNotify:
@@ -608,7 +622,8 @@ namespace CalamityAffixes
 			}
 
 			const float durationSeconds = actionDurationSeconds(a_affix.action);
-			if (durationSeconds > 0.0f) {
+			if (durationSeconds > 0.0f &&
+				!RunewordSummary::StatesDurationSeconds(mappedActionText, formatNumberCompact(durationSeconds), "초")) {
 				summary.append(" (지속 ");
 				summary.append(formatNumberCompact(durationSeconds));
 				summary.append("초)");
@@ -656,7 +671,8 @@ namespace CalamityAffixes
 			}
 
 			const float durationSeconds = actionDurationSeconds(a_affix.action);
-			if (durationSeconds > 0.0f) {
+			if (durationSeconds > 0.0f &&
+				!RunewordSummary::StatesDurationSeconds(mappedActionText, formatNumberCompact(durationSeconds), "s")) {
 				summary.append(" (Duration ");
 				summary.append(formatNumberCompact(durationSeconds));
 				summary.append("s)");

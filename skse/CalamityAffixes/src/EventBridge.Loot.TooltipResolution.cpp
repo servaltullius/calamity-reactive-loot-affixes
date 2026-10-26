@@ -167,27 +167,58 @@ namespace CalamityAffixes
 					static_cast<std::uint32_t>(action.modeCycleSpells.size());
 				const std::uint32_t idx = modeCount > 0u ? ((state ? state->modeIndex : 0u) % modeCount) : 0u;
 
-				detail.append("Mode ");
-				if (adaptiveManualMode && idx == 0u) {
-					detail.append("Auto");
-				} else {
-					const std::size_t labelIdx = adaptiveManualMode ?
-						static_cast<std::size_t>(idx - 1u) :
-						static_cast<std::size_t>(idx);
-					if (labelIdx < action.modeCycleLabels.size() && !action.modeCycleLabels[labelIdx].empty()) {
-						detail.append(action.modeCycleLabels[labelIdx]);
-					} else {
-						const auto displayIndex = adaptiveManualMode ? idx : (idx + 1u);
-						const auto displayCount = adaptiveManualMode ?
-							static_cast<std::uint32_t>(action.modeCycleSpells.size()) :
-							modeCount;
-						detail.append(std::to_string(displayIndex));
-						detail.push_back('/');
-						detail.append(std::to_string(displayCount));
+				auto labelAt = [&](std::size_t a_index, bool a_korean) -> std::string {
+					const auto& localized = a_korean ? action.modeCycleLabelsKo : action.modeCycleLabelsEn;
+					if (a_index < localized.size() && !localized[a_index].empty()) {
+						return localized[a_index];
 					}
+					if (a_index < action.modeCycleLabels.size()) {
+						return action.modeCycleLabels[a_index];
+					}
+					return {};
+				};
+				auto modeText = [&](bool a_korean) {
+					std::string text(a_korean ? "모드 " : "Mode ");
+					if (adaptiveManualMode && idx == 0u) {
+						text.append(a_korean ? "자동" : "Auto");
+					} else {
+						const std::size_t labelIdx = adaptiveManualMode ?
+							static_cast<std::size_t>(idx - 1u) :
+							static_cast<std::size_t>(idx);
+						if (const auto label = labelAt(labelIdx, a_korean); !label.empty()) {
+							text.append(label);
+						} else {
+							const auto displayIndex = adaptiveManualMode ? idx : (idx + 1u);
+							const auto displayCount = adaptiveManualMode ?
+								static_cast<std::uint32_t>(action.modeCycleSpells.size()) :
+								modeCount;
+							text.append(std::to_string(displayIndex));
+							text.push_back('/');
+							text.append(std::to_string(displayCount));
+						}
+					}
+					if (action.modeCycleManualOnly) {
+						text.append(a_korean ? " (수동)" : " (Manual)");
+					}
+					return text;
+				};
+				switch (a_uiLanguageMode) {
+				case 0:
+					detail.append(modeText(false));
+					break;
+				case 1:
+					detail.append(modeText(true));
+					break;
+				default: {
+					const auto ko = modeText(true);
+					const auto en = modeText(false);
+					detail.append(ko);
+					if (en != ko) {
+						detail.append(" / ");
+						detail.append(en);
+					}
+					break;
 				}
-				if (action.modeCycleManualOnly) {
-					detail.append(" (Manual)");
 				}
 			}
 
@@ -382,7 +413,10 @@ namespace CalamityAffixes
 				} else {
 					headerEn.append("Always ");
 				}
-				if (!effectEn.empty()) {
+				const auto mappedEn = RunewordSummary::ActionSummaryTextEnByKey(summaryKey);
+				if (!mappedEn.empty()) {
+					headerEn.append(mappedEn);
+				} else if (!effectEn.empty()) {
 					headerEn.append(effectEn);
 				} else {
 					headerEn.append("trigger an effect");
@@ -397,7 +431,8 @@ namespace CalamityAffixes
 					headerEn.append(formatNumberCompact(perTargetIcdSec));
 					headerEn.append("s)");
 				}
-				if (durationSec > 0.0f) {
+				if (durationSec > 0.0f &&
+					!RunewordSummary::StatesDurationSeconds(mappedEn, formatNumberCompact(durationSec), "s")) {
 					headerEn.append(" (Duration ");
 					headerEn.append(formatNumberCompact(durationSec));
 					headerEn.append("s)");
@@ -430,7 +465,8 @@ namespace CalamityAffixes
 					headerKo.append(formatNumberCompact(perTargetIcdSec));
 					headerKo.append("초)");
 				}
-				if (durationSec > 0.0f) {
+				if (durationSec > 0.0f &&
+					!RunewordSummary::StatesDurationSeconds(mappedKo, formatNumberCompact(durationSec), "초")) {
 					headerKo.append(" (지속 ");
 					headerKo.append(formatNumberCompact(durationSec));
 					headerKo.append("초)");
@@ -455,10 +491,7 @@ namespace CalamityAffixes
 				detail.append(autoSummary);
 			}
 
-			const bool usesStandardTriggerProcLane =
-				a_affix.action.type == ActionType::kCastSpell ||
-				a_affix.action.type == ActionType::kCastSpellAdaptiveElement ||
-				a_affix.action.type == ActionType::kSpawnTrap;
+			const bool usesStandardTriggerProcLane = IsStandardTriggerProcLaneAction(a_affix.action.type);
 			const bool usesSpecialProcLane =
 				a_affix.action.type == ActionType::kCastOnCrit ||
 				a_affix.action.type == ActionType::kConvertDamage ||

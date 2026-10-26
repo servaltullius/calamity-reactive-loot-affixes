@@ -269,6 +269,16 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
+		// Corpse hits skip procs; the check must read IsDead() before the engine
+		// applies this damage, or a killing blow would be skipped too.
+		const auto corpseHitGuard = hooksText->find("!context.targetIsPlayer && safeTarget->IsDead()");
+		const auto adjustedDamageCall = hooksText->find("CallOriginal(a_original, safeTarget, safeAttacker, finalDamage, a_hookLabel);");
+		if (corpseHitGuard == std::string::npos || adjustedDamageCall == std::string::npos ||
+			corpseHitGuard >= adjustedDamageCall) {
+			std::cerr << "hooks_dispatch_extraction: corpse hits must be detected before the damage is applied\n";
+			return false;
+		}
+
 		const auto summonRefreshSchedule = hostileEffectGuardText->find("ScheduleSummonRefreshIfNeeded();");
 		if (hostileEffectGuardText->find("std::this_thread::sleep_for(kSummonRefreshInterval);") == std::string::npos ||
 			summonRefreshSchedule == std::string::npos ||
@@ -282,6 +292,10 @@ namespace RuntimeGateStoreChecks
 			hooksText->find("!bridge->IsRuntimeEnabled()") == std::string::npos ||
 			hooksText->find("detail::AdjustDamageAndEvaluateSpecials(") == std::string::npos ||
 			hooksText->find("detail::SchedulePostHealthDamageActions(") == std::string::npos ||
+			// Player damage the hit pipeline rejects still drives low-health
+			// runewords, through a deferred task after the damage is applied.
+			hooksText->find("detail::SchedulePlayerLowHealthOnlyCheck(") == std::string::npos ||
+			hooksDispatchText->find("bridge->OnPlayerHealthDamageLowHealthOnly(") == std::string::npos ||
 			hooksText->find("detail::ClearDispatchRuntimeState();") == std::string::npos ||
 			hooksText->find("PlayCastOnCritProcFeedbackSfx(") != std::string::npos ||
 			hooksText->find("ExecutePostHealthDamageActions(") != std::string::npos ||
@@ -783,7 +797,11 @@ namespace RuntimeGateStoreChecks
 			source.find("detail::IsCommittedFallbackHitData(") == std::string::npos ||
 			source.find("if (!hasCommittedHitData)") == std::string::npos ||
 			source.find("Trigger::kIncomingHit") == std::string::npos ||
-			source.find("Trigger::kLowHealth") == std::string::npos) {
+			source.find("Trigger::kLowHealth") == std::string::npos ||
+			// A spell event after a swing reads that swing back: count it once.
+			source.find("IsReusedFallbackHitData(") == std::string::npos ||
+			// Archmage reads the spell from TESHitEvent::source in both modes.
+			source.find("ProcessArchmageFromHitEvent(aggressor, target, a_event->source, now);") == std::string::npos) {
 			std::cerr << "tes_hit_fallback_source_validation: TESHitEvent fallback must validate committed hit-like source data\n";
 			return false;
 		}

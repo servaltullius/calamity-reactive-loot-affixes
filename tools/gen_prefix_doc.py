@@ -10,6 +10,13 @@ from public_doc_metadata import load_public_doc_metadata
 CORE_JSON = Path("affixes/modules/keywords.affixes.core.json")
 # v2.3.0 shared-status prefixes live in their own module.
 STATUS_JSON = Path("affixes/modules/keywords.affixes.status.json")
+SPEC_ROOT_JSON = Path("affixes/modules/spec.root.json")
+
+# Prefixes retired from the loot pool on purpose (runtime.lootWeight 0, 9b8b916:
+# "stale vanilla-like affixes"). They never roll from loot, reforge, or refine, but
+# keep working on items that already carry them. A public prefix with lootWeight <= 0
+# that is not listed here is treated as an accident and stops doc generation.
+RETIRED_PREFIX_IDS = frozenset({"flame_strike", "frost_strike", "spark_strike"})
 
 
 def load_prefix_entries():
@@ -17,6 +24,37 @@ def load_prefix_entries():
     if STATUS_JSON.exists():
         entries += json.loads(STATUS_JSON.read_text(encoding="utf-8"))
     return entries
+
+
+def load_shared_pool() -> bool:
+    """True when prefixes roll from one pool shared by weapons and armor."""
+    if not SPEC_ROOT_JSON.exists():
+        return False
+    root = json.loads(SPEC_ROOT_JSON.read_text(encoding="utf-8"))
+    return bool(root.get("loot", {}).get("sharedPool", False))
+
+
+def is_public_prefix(entry) -> bool:
+    return not entry["id"].startswith("internal_")
+
+
+def is_retired(entry) -> bool:
+    """An explicit runtime.lootWeight <= 0 wins over kid.chance at runtime, so it never rolls."""
+    weight = entry.get("runtime", {}).get("lootWeight")
+    return isinstance(weight, (int, float)) and not isinstance(weight, bool) and weight <= 0
+
+
+def split_retired(entries):
+    """Return (rollable public prefixes, retired public prefixes); fail on an unlisted zero weight."""
+    public = [e for e in entries if is_public_prefix(e)]
+    retired = [e for e in public if is_retired(e)]
+    unexpected = sorted(e["id"] for e in retired if e["id"] not in RETIRED_PREFIX_IDS)
+    if unexpected:
+        raise SystemExit(
+            f"gen_prefix_doc.py: public prefixes {unexpected} have runtime.lootWeight <= 0 and never roll. "
+            "Give them a loot weight, or add them to RETIRED_PREFIX_IDS if the retirement is intended."
+        )
+    return [e for e in public if not is_retired(e)], retired
 OUTPUT = Path("docs/PREFIX_EFFECTS.md")
 
 
@@ -104,7 +142,7 @@ def categorize(entries):
 
     for i, e in enumerate(entries):
         eid = e["id"]
-        if eid.startswith("internal_"):
+        if eid.startswith("internal_") or is_retired(e):
             continue
         cat = cat_map.get(eid, "기타")
         cats.setdefault(cat, []).append((i, e))
@@ -152,7 +190,7 @@ def main(argv: list[str] | None = None) -> int:
 
     entries = load_prefix_entries()
 
-    public_entries = [entry for entry in entries if not entry["id"].startswith("internal_")]
+    public_entries, retired_entries = split_retired(entries)
     cats = categorize(entries)
 
     out = []
@@ -166,10 +204,14 @@ def main(argv: list[str] | None = None) -> int:
     out.append("")
     out.append(f"- 총 공개 프리픽스: **{len(public_entries)}개**")
     out.append("- INTERNAL 항목은 공개 문서에서 숨김")
+    if retired_entries:
+        out.append(f"- 루트 풀에서 빠진 접두 {len(retired_entries)}개는 개수에서 빼고 문서 끝에 따로 적음")
+    if load_shared_pool():
+        out.append("- 접두는 무기·방어구 공용 풀에서 뽑힘: 항목 옆 `[Weapon]`/`[Armor]`는 원래 의도한 장비 테마일 뿐, 모든 접두가 어느 장비에나 붙을 수 있음")
     out.append("- 스카이림 로어 기반 전면 리네이밍 (v1.2.21)")
     out.append("- 9개 freed slot → Thu'um 5종 + 마법학파 4종 신규 효과")
     out.append("- 각 효과 설명은 인게임 표시 문자열(`nameKo`/`nameEn`)을 그대로 사용")
-    out.append("- 티어형 프리픽스는 같은 패밀리가 한 아이템에 중복되지 않으며, 각 `kid.chance`를 실제 획득 가중치로 사용")
+    out.append("- 티어형 프리픽스는 같은 패밀리가 한 아이템에 중복되지 않으며, 각 `runtime.lootWeight`(없으면 `kid.chance`)를 실제 획득 가중치로 사용")
     out.append("- 같은 원소의 50%/100% 피해 주입도 하나의 배타적 패밀리로 취급")
     out.append("")
     out.append("## 발동과 중복 장착 규칙 (RC6 반영)")
@@ -181,18 +223,18 @@ def main(argv: list[str] | None = None) -> int:
     out.append("- 치명 시전은 한 번의 공격(치명타·강공격·일반 근접·활·석궁)에 주문 하나만 시전. 여러 개를 착용하면 차례로 돌아가며 발동하고, 발동 묶음당 전역 ICD 0.15초를 공유함")
     out.append("- 표기된 확률은 기본값이며 장착 구성·런타임 보정·발동 조건·ICD에 따라 실제 발동 빈도가 달라짐. 접미 슬롯 자체는 표준 발동의 다중 어픽스 확률 페널티를 늘리지 않음")
     out.append("- 접미의 티어 합산은 별도 규칙: [서픽스 효과 정리](SUFFIX_EFFECTS.md) 참조")
-    out.append("- 같은 종류의 자기 버프는 새것이 옛것을 대체함(예: 공격력 버프 두 개가 겹쳐 쌓이지 않음). 상시 효과와 다른 모드 버프는 건드리지 않음")
+    out.append("- 같은 종류의 자기 버프는 겹쳐 쌓이지 않고 더 강한 쪽 하나만 남음. 새 버프가 같거나 더 강하면 옛것을 대체하고, 이미 더 강한 버프가 있으면 새 버프의 그 능력치 부분은 걸리지 않음. 모든 능력치에서 지고 즉시 회복 같은 다른 효과도 없으면 발동을 건너뛰어 확률·재사용 대기도 쓰지 않음. 상시 효과와 다른 모드 버프는 건드리지 않음")
     out.append("")
     out.append("## 공용 상태 (v2.3.0)")
     out.append("")
     out.append("상태를 거는 어픽스는 설명 끝에 상태 이름을 적어 둠. 다른 장비에서 건 상태끼리도 함께 작동함")
     out.append("")
     out.append("- **빙결·출혈·감전 축적**: 발동할 때마다 대상의 미터가 참. 100이 되면 미터가 비면서 효과가 터짐. 보스·드래곤·고유 적은 150에서 시작하고 터질 때마다 50씩 올라감(최대 300). 마지막으로 쌓인 뒤 3초가 지나면 초당 15씩 줄어듦")
-    out.append("  - **빙결**: 3초 동안 이동속도 -80%, 주는 피해 -30%")
+    out.append("  - **빙결**: 3초 동안 이동속도 -80%, 공격력 -30%")
     out.append("  - **출혈**: 대상 최대 체력의 8% 피해(강한 적은 3%, 최소 10·최대 400)")
     out.append("  - **감전**: 대상과 반경 300 안의 적 최대 2명에게 번개 피해 40")
     out.append("- **화상**: 1중첩당 초당 화염 피해 4, 최대 5중첩. 새 중첩이 붙으면 4초 지속이 다시 시작됨")
-    out.append("- **노출**: 저항 감소. 같은 저항에는 가장 강한 칼라미티 노출 하나만 적용")
+    out.append("- **노출**: 저항·방어도 감소(미스트는 마나 재생도 낮춤). 같은 능력치에는 가장 강한 칼라미티 노출 하나만 적용")
     out.append("- **파멸**: 표식 1.5초 뒤 폭발. 다시 걸면 시간만 갱신하고 더 큰 폭발을 유지")
     out.append("- 상태는 **약점 포착**(서로 다른 상태 2개 이상)과 **전염**(처치 시 주변으로 옮김)에 쓰임")
     out.append("")
@@ -219,6 +261,15 @@ def main(argv: list[str] | None = None) -> int:
         out.append("")
         for idx, e in cats[cat]:
             out.append(format_entry(idx, e))
+            out.append("")
+
+    if retired_entries:
+        out.append("## 루트 풀에서 빠진 접두")
+        out.append("")
+        out.append("> 새 장비에는 붙지 않음(감정·정제·재련 포함). 이미 이 접두가 붙은 장비에서는 그대로 작동")
+        out.append("")
+        for e in retired_entries:
+            out.append(format_entry(0, e))
             out.append("")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)

@@ -118,20 +118,29 @@ namespace CalamityAffixes
 		}
 		ValidateRuntimeContractSnapshot();
 
-		ApplyLootConfigFromJson(j);
-		ApplyRuntimeUserSettingsOverrides();
+		// Last safety net: a value of the wrong type that a parser below still
+		// reads with json::value() must not crash the game at kDataLoaded. The
+		// runtime then stays unloaded, as for an unreadable file.
+		try {
+			ApplyLootConfigFromJson(j);
+			ApplyRuntimeUserSettingsOverrides();
 
-		const auto* affixes = ResolveAffixArray(j);
-		if (!affixes) {
-			SKSE::log::error("CalamityAffixes: invalid runtime config schema (keywords.affixes).");
+			const auto* affixes = ResolveAffixArray(j);
+			if (!affixes) {
+				SKSE::log::error("CalamityAffixes: invalid runtime config schema (keywords.affixes).");
+				return;
+			}
+
+			auto* handler = RE::TESDataHandler::GetSingleton();
+			BuildConfigDerivedAffixState(*affixes, handler);
+			HarvestSharedRecordDisplayNames(j, handler);
+
+			SanitizeRunewordState();
+			SanitizeAllTrackedLootInstancesForCurrentLootRules("LoadConfig.postIndex");
+		} catch (const nlohmann::json::exception& e) {
+			SKSE::log::critical("CalamityAffixes: runtime config has a value of the wrong type; Calamity stays off ({}).", e.what());
 			return;
 		}
-
-		auto* handler = RE::TESDataHandler::GetSingleton();
-		BuildConfigDerivedAffixState(*affixes, handler);
-
-		SanitizeRunewordState();
-		SanitizeAllTrackedLootInstancesForCurrentLootRules("LoadConfig.postIndex");
 		_configLoaded = true;
 
 		RebuildActiveCounts();
@@ -163,7 +172,9 @@ namespace CalamityAffixes
 				_affixSpecialActions.archmageAffixIndices.size(),
 				_affixSpecialActions.corpseExplosionAffixIndices.size());
 
-		if (_affixRuntimeState.affixes.empty()) {
+		// Counted before runeword synthesis: the synthesized affixes resolve from
+		// vanilla spells and would hide a missing plugin.
+		if (_parsedConfiguredAffixCount == 0u) {
 			SKSE::log::error("CalamityAffixes: no affixes loaded. Is the generated CalamityAffixes plugin enabled?");
 		}
 	}

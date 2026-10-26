@@ -146,6 +146,7 @@ namespace CalamityAffixes
 			.aggressor = a_attacker->GetFormID(),
 			.target = targetFormID,
 			.source = a_sourceFormID,
+			.content = HitDataUtil::MakeHitContentSignature(a_hitData),
 		};
 		if (ShouldSuppressDuplicateHit(key, a_now)) {
 			return;
@@ -154,10 +155,8 @@ namespace CalamityAffixes
 		ProcessTrigger(Trigger::kHit, context.playerOwner, a_target, a_hitData);
 		// After the trigger pass, so the power attack that opens the window echoes too.
 		ProcessEchoStrikeHit(a_attacker, a_target, a_hitData, a_now);
-
-		if (a_attacker->IsPlayerRef() && a_hitData && a_hitData->attackDataSpell && !_affixSpecialActions.archmageAffixIndices.empty()) {
-			ProcessArchmageSpellHit(a_attacker, a_target, a_hitData->attackDataSpell, a_hitData);
-		}
+		// Archmage is not evaluated here: HitData never names a cast spell.
+		// HandleHitEvent reads the spell from TESHitEvent::source instead.
 	}
 
 	void EventBridge::ProcessIncomingHealthDamageHit(
@@ -179,6 +178,7 @@ namespace CalamityAffixes
 			.aggressor = a_attacker->GetFormID(),
 			.target = a_target->GetFormID(),
 			.source = a_sourceFormID,
+			.content = HitDataUtil::MakeHitContentSignature(a_hitData),
 		};
 
 		if (!ShouldSuppressDuplicateHit(key, a_now)) {
@@ -213,7 +213,8 @@ namespace CalamityAffixes
 	void EventBridge::ProcessLowHealthTriggerFromHealthDamage(
 		RE::Actor* a_target,
 		RE::Actor* a_attacker,
-		const RE::HitData* a_hitData)
+		const RE::HitData* a_hitData,
+		float a_damageTaken)
 	{
 		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed) || !a_target || _affixRuntimeState.affixRegistry.lowHealthTriggerAffixIndices.empty()) {
 			return;
@@ -222,6 +223,6 @@ namespace CalamityAffixes
 			return;
 		}
 
-		ProcessTrigger(Trigger::kLowHealth, a_target, a_attacker, a_hitData);
+		ProcessTrigger(Trigger::kLowHealth, a_target, a_attacker, a_hitData, a_damageTaken);
 	}
 }

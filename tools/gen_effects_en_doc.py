@@ -15,7 +15,7 @@ import json
 from itertools import groupby
 from pathlib import Path
 
-from gen_prefix_doc import CAT_ORDER, categorize, load_prefix_entries
+from gen_prefix_doc import CAT_ORDER, categorize, load_prefix_entries, load_shared_pool, split_retired
 from public_doc_metadata import load_public_doc_metadata
 
 SUFFIXES_PATH = Path("affixes/modules/keywords.affixes.suffixes.json")
@@ -60,7 +60,7 @@ SUFFIX_GOOD_FOR = {
     "endurance": "Melee and archers",
     "evasion": "Light armor",
     "fortitude": "Heavy armor",
-    "gladiator": "Attack speed",
+    "gladiator": "Attack damage",
     "guardian": "Physical defense",
     "marksman": "Archers",
     "meditation": "Mages",
@@ -92,7 +92,7 @@ def bold_name(name_en: str) -> str:
 
 
 def render_prefixes(entries: list[dict]) -> list[str]:
-    public = [e for e in entries if not e["id"].startswith("internal_")]
+    public, retired = split_retired(entries)
     categories = categorize(entries)
     order = [c for c in CAT_ORDER if c in categories] + [c for c in categories if c not in CAT_ORDER]
     missing = [c for c in order if c not in PREFIX_CATEGORY_EN]
@@ -103,8 +103,10 @@ def render_prefixes(entries: list[dict]) -> list[str]:
         f"## Prefixes ({len(public)})",
         "",
         "Prefixes are triggered effects. An item holds at most one prefix.",
-        "",
     ]
+    if load_shared_pool():
+        lines.append("Every prefix can roll on any weapon or armor, whatever its theme.")
+    lines.append("")
     listed = 0
     for category in order:
         items = categories[category]
@@ -115,6 +117,15 @@ def render_prefixes(entries: list[dict]) -> list[str]:
         listed += len(items)
     if listed != len(public):
         raise SystemExit(f"gen_effects_en_doc.py: listed {listed} of {len(public)} prefixes")
+    if retired:
+        lines += [
+            "### Retired",
+            "",
+            "These no longer roll on new items (identify, refine, and reforge included). Items that already have one keep it working.",
+            "",
+        ]
+        lines += [f"- {bold_name(entry['nameEn'])}" for entry in retired]
+        lines.append("")
     return lines
 
 
@@ -212,22 +223,22 @@ def main(argv: list[str] | None = None) -> int:
         "",
         "## Stacking rules",
         "",
-        "- **A runeword and a prefix that both trigger on the same item** each fire at 80% of their listed chance; one triggered affix alone fires at 100%. Passive suffixes never lower it. (Chaos at 16% next to a Crit Cast prefix shows 12.8%.)",
+        "- **A runeword takes the prefix slot**, so a new item has one triggered head affix and fires it at its listed chance. Items made before 2.3.0 that still carry a runeword and a prefix fire each at 80% of the listed chance (Chaos at 16% next to a Crit Cast prefix shows 12.8%). Passive suffixes never lower it.",
         "- **The same triggered prefix on different items** (spells, adaptive spells, and traps) combines up to 3 copies: `1 - (1-p1)(1-p2)(1-p3)`, so 40% copies fire 40% → 64% → 78.4% of the time with 1, 2, or 3 equipped. It fires more often; it does not hit harder or fire twice.",
         "- **Crit Cast** spells: one attack (critical, power attack, normal melee, bow or crossbow) casts at most one Crit Cast spell. Several equipped take turns, and all share a 0.15s cooldown.",
         "- **Suffixes of the same family** add their tiers and cap at tier 3: tier 1 + tier 1 = tier 2, tier 1 + tier 2 = tier 3. Only the resulting tier applies (Guardian 1 + 2 gives +80 Armor, not +75).",
-        "- **Self buffs of the same kind** replace each other: a new Calamity attack damage buff ends the old one instead of stacking. Passive effects and other mods' buffs are untouched.",
+        "- **Self buffs of the same kind** do not stack; the stronger one stays. A new Calamity buff that matches or beats the one on you replaces it; if the one on you is stronger, the new buff's part on that value does not apply, and a buff that loses on every value with nothing else to give (such as an instant restore) is skipped without using its chance or cooldown. Passive effects and other mods' buffs are untouched.",
         "",
         "## Shared statuses",
         "",
         "Affixes that apply a status say so at the end of their line. Statuses from different items work together.",
         "",
         "- **Freeze / Bleed / Shock build-up**: each proc fills the target's meter. At 100 the meter empties and pays off. Bosses, dragons and unique enemies start at 150 and need 50 more after each payoff (up to 300). A meter holds for 3s after the last gain, then drains 15 per second.",
-        "  - **Freeze**: the target moves 80% slower and deals 30% less damage for 3s.",
+        "  - **Freeze**: the target moves 80% slower and deals 30% less attack damage for 3s.",
         "  - **Bleed**: a burst of 8% of the target's max health (3% on tough targets; 10 to 400).",
         "  - **Shock**: 40 shock damage to the target and up to 2 enemies within 300 units.",
         "- **Burning**: each stack burns for 4 fire damage per second, up to 5 stacks. A new stack restarts the 4s timer.",
-        "- **Exposed**: a lowered resistance. Only the strongest Calamity Exposed on each resistance applies.",
+        "- **Exposed**: a lowered resistance or armor (Mist also lowers magicka regen). Only the strongest Calamity Exposed on each value applies.",
         "- **Doom**: a mark that bursts 1.5s later. Marking again moves the timer and keeps the larger burst.",
         "- Statuses count toward **Exploit Weakness** (two or more different statuses) and pass on with **Contagion**.",
         "",

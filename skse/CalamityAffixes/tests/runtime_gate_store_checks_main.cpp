@@ -92,6 +92,7 @@ int main()
 	const bool lootRerollEdgeCasesOk = CheckLootRerollGuardEdgeCases();
 	const bool serializationLoadStateHelpersOk = CheckSerializationLoadStateHelpers();
 	const bool serializationWireContractOk = CheckSerializationWireContract();
+	const bool reviewFixSourcePinsOk = CheckReviewFixSourcePins();
 	const bool lowHealthTriggerSnapshotHelpersOk = CheckLowHealthTriggerSnapshotHelpers();
 	const bool scopedProcDepthGuardOk = CheckScopedProcDepthGuard();
 	const bool triggerDispatchSnapshotIsolationOk = CheckTriggerDispatchSnapshotIsolation();
@@ -166,6 +167,7 @@ int main()
 	        lootRerollEdgeCasesOk &&
 	        serializationLoadStateHelpersOk &&
 	        serializationWireContractOk &&
+	        reviewFixSourcePinsOk &&
 	        lowHealthTriggerSnapshotHelpersOk &&
 	        scopedProcDepthGuardOk &&
 	        triggerDispatchSnapshotIsolationOk &&

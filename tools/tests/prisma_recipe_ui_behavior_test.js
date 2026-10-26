@@ -373,7 +373,8 @@ const runTooltipLayoutBehavior = new Function(
     ${maxHeightSource}
     ${fitLayoutSource}
 
-    assert.strictEqual(getTooltipMaxLogicalHeight(), 560);
+    // The whole screen height is available (the tooltip cannot be scrolled).
+    assert.strictEqual(getTooltipMaxLogicalHeight(), 704);
     autoScale = 2;
     assert.strictEqual(getTooltipMaxLogicalHeight(), 352);
 
@@ -526,7 +527,7 @@ const runWorkingBaseChooserBehavior = new Function(
       begunAffixExpansions.push(command);
       return true;
     }
-    function setActionFeedback() {}
+    function showActionFeedback() {}
     function schedulePanelRender() {}
     function shouldInvalidatePreviewForCommand(command) {
       return command.startsWith("runeword.base.select:") ||

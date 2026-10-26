@@ -70,7 +70,17 @@
 			std::unordered_set<RE::SpellItem*>& a_desiredPassives);
 		[[nodiscard]] std::uint8_t CountProcPenaltySlots(const InstanceAffixSlots& a_slots) const;
 		void HarvestRecordDisplayNames(const nlohmann::json& a_affix, RE::TESDataHandler* a_handler);
+		void HarvestRecordDisplayName(const nlohmann::json& a_record, bool a_isSpell, RE::TESDataHandler* a_handler);
+		void HarvestSharedRecordDisplayNames(const nlohmann::json& a_configRoot, RE::TESDataHandler* a_handler);
 		void GrantTrapAffixToSelectedBase();
+		// Debug: replace the selected item's affixes with one test scenario's set.
+		void GrantTestSetToSelectedBase(int a_setId);
+		// Debug test plan: remember that a checked event happened this session.
+		void NoteDebugTestEvent(std::string_view a_key) const;
+		void NoteDebugTestEvent(std::string_view a_prefix, std::string_view a_name) const;
+		void RefreshBowDrawSpeedWanted();
+		void RebuildExposureLedgerFromLiveEffects();
+		void ForgetBowDrawSpeed() noexcept;
 		void SpawnTrapMarkerProbe();
 		[[nodiscard]] std::string ResolveRecordDisplayName(
 			const RE::TESForm* a_form,
@@ -149,6 +159,7 @@
 		void InitializeRunewordCatalog();
 		bool LoadRuntimeConfigJson(nlohmann::json& a_outJson) const;
 		void ApplyLootConfigFromJson(const nlohmann::json& a_configRoot);
+		[[nodiscard]] bool SeedRuntimeUserSettingsFromMcmIni();
 		void ApplyRuntimeUserSettingsOverrides();
 		void SyncCurrencyDropModeState(std::string_view a_contextTag);
 		[[nodiscard]] bool PersistRuntimeUserSettings();
@@ -329,6 +340,7 @@
 		std::uint32_t GrantReforgeOrbs(std::uint32_t a_amount = 1u);
 		std::uint32_t GrantCraftingCurrency(std::string_view a_editorId, std::string_view a_label, std::uint32_t a_amount);
 		void MaybeMigrateMiscCurrency();
+		void MaybeMigrateStaleStatModifiers();
 		[[nodiscard]] bool TryRollRunewordFragmentToken(
 			float a_sourceChanceMultiplier,
 			std::uint64_t& a_outRuneToken,
@@ -429,6 +441,9 @@
 				std::uint32_t a_erasedInstances) const;
 			void SanitizeAllTrackedLootInstancesForCurrentLootRules(std::string_view a_context);
 			[[nodiscard]] bool IsLootObjectEligibleForAffixes(const RE::TESBoundObject* a_object) const;
+			// IsLootObjectEligibleForAffixes plus a playable weapon: what the panel
+			// may offer as a crafting base.
+			[[nodiscard]] bool IsCraftingBaseEligible(const RE::TESBoundObject* a_object) const;
 			[[nodiscard]] bool IsLootArmorEligibleForAffixes(const RE::TESObjectARMO* a_armor) const;
 			[[nodiscard]] bool TryClearStaleLootDisplayName(
 				RE::InventoryEntryData* a_entry,
@@ -471,7 +486,8 @@
 		void ProcessLowHealthTriggerFromHealthDamage(
 			RE::Actor* a_target,
 			RE::Actor* a_attacker,
-			const RE::HitData* a_hitData);
+			const RE::HitData* a_hitData,
+			float a_damageTaken);
 		[[nodiscard]] bool IsPerTargetCooldownBlocked(
 			const AffixRuntime& a_affix,
 			RE::Actor* a_target,
@@ -485,7 +501,14 @@
 			RE::Actor* a_target,
 			RE::Actor* a_attacker);
 		[[nodiscard]] const std::vector<std::size_t>* ResolveActiveTriggerIndices(Trigger a_trigger) const noexcept;
-		void ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData = nullptr);
+		// a_lowHealthDamageTaken: health this observation removed, when known.
+		// Only kLowHealth reads it (pre-hit health for the rearm check).
+		void ProcessTrigger(
+			Trigger a_trigger,
+			RE::Actor* a_owner,
+			RE::Actor* a_target,
+			const RE::HitData* a_hitData = nullptr,
+			float a_lowHealthDamageTaken = 0.0f);
 		void RecordRecentCombatEvent(Trigger a_trigger, RE::Actor* a_owner, std::chrono::steady_clock::time_point a_now);
 		// Fills a_outIndices with a copy of the active indices for a_trigger.
 		// Deliberately not a pointer into the live cache: the dispatch loop
@@ -535,6 +558,16 @@
 		void MarkLowHealthTriggerConsumed(
 			const AffixRuntime& a_affix,
 			RE::Actor* a_owner);
+		// State-only rearm for every active low-health affix, run before any
+		// cooldown/chance/budget gate (LowHealthRearmPolicy.h).
+		void RearmLowHealthTriggers(
+			const std::vector<std::size_t>& a_affixIndices,
+			RE::Actor* a_owner,
+			float a_preHitHealthPct,
+			float a_currentHealthPct);
+		[[nodiscard]] float ResolveLowHealthTriggerDamagePct(
+			RE::Actor* a_owner,
+			float a_damageTaken) const noexcept;
 		[[nodiscard]] bool PassesTriggerProcPreconditions(
 			const AffixRuntime& a_affix,
 			Trigger a_trigger,
@@ -634,6 +667,13 @@
 			float a_extraCost,
 			float a_extraDamage);
 		void ProcessArchmageSpellHit(RE::Actor* a_caster, RE::Actor* a_target, RE::SpellItem* a_sourceSpell, const RE::HitData* a_hitData = nullptr);
+		void KeepDyingTargetDoom(RE::FormID a_target);
+		[[nodiscard]] bool IsZeroScaledHitCast(const Action& a_action, RE::SpellItem* a_spell, const RE::HitData* a_hitData) const;
+		void ProcessArchmageFromHitEvent(
+			RE::Actor* a_caster,
+			RE::Actor* a_target,
+			RE::FormID a_sourceFormID,
+			std::chrono::steady_clock::time_point a_now);
 		bool ShouldSuppressDuplicateHit(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept;
 		bool ShouldSuppressPapyrusHitEvent(const LastHitKey& a_key, std::chrono::steady_clock::time_point a_now) noexcept;
 		[[nodiscard]] bool TryConsumeTriggerProcBudget(std::chrono::steady_clock::time_point a_now) noexcept;
@@ -713,11 +753,21 @@
 		void ExecuteDoomMarkAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
 		void ExecuteSpreadStatusAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_victim);
 		void TickDoomBursts(RE::PlayerCharacter* a_player, RE::MagicCaster* a_magicCaster);
-		// Exposed keeps only the strongest per resistance: false when the target
-		// already carries an equal or stronger Calamity Exposed on every value this
-		// spell lowers. Weaker ones are dispelled so the new one replaces them.
-		[[nodiscard]] bool PrepareExposureCast(StatusKind a_kind, const RE::SpellItem* a_spell, RE::Actor* a_target, float a_magnitudeOverride);
+		// Exposed keeps only the strongest per resistance. The plan (read-only) says
+		// whether the cast beats what is on the target; FinishStatusCast applies it
+		// once the spell has landed and records the statuses.
+		// The magnitude override a cast will use, evolution included, for preflights.
+		[[nodiscard]] float ResolvePreflightMagnitudeOverride(const AffixRuntime& a_affix, RE::SpellItem* a_spell, const RE::HitData* a_hitData) const;
+		// Self buffs (v2.3.0): of two same-kind Calamity buffs the stronger stays.
+		[[nodiscard]] SelfBuffPlan PlanSelfBuffCast(RE::Actor* a_owner, const RE::SpellItem* a_spell, float a_magnitudeOverride) const;
+		void ApplySelfBuffPlanBeforeCast(const SelfBuffPlan& a_plan, const RE::SpellItem* a_spell) const;
+		void ApplySelfBuffPlanAfterCast(const SelfBuffPlan& a_plan, RE::Actor* a_owner, const RE::SpellItem* a_spell) const;
+		[[nodiscard]] ExposurePlan PlanExposureCast(const RE::SpellItem* a_spell, RE::Actor* a_target, float a_magnitudeOverride) const;
+		[[nodiscard]] static SpellEffectSnapshot SnapshotSpellEffectsOn(RE::Actor* a_target, const RE::SpellItem* a_spell);
+		void FinishStatusCast(StatusKind a_kind, const ExposurePlan& a_plan, const SpellEffectSnapshot& a_before, const RE::SpellItem* a_spell, RE::Actor* a_target, float a_magnitudeOverride);
 		void RecordStatusApplication(StatusKind a_kind, const RE::SpellItem* a_spell, RE::Actor* a_target, float a_magnitudeOverride);
+		// Contagion has something to pass on (an empty, just-paid-off meter does not count).
+		[[nodiscard]] bool HasSpreadableStatus(RE::Actor* a_victim) const;
 		// Build-up statuses: a tagged cast fills the target's meter (or adds Burning
 		// stacks); a full meter casts its payoff.
 		void ApplyTaggedBuildUp(const Action& a_action, RE::Actor* a_owner, RE::Actor* a_target, RE::MagicCaster* a_magicCaster);

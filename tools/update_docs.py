@@ -11,6 +11,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from gen_prefix_doc import is_retired
 from public_doc_metadata import PublicDocMetadata, load_public_doc_metadata
 
 REPO = Path(__file__).resolve().parent.parent
@@ -44,6 +45,8 @@ def regenerate_affix_catalog(output_path: Path, metadata: PublicDocMetadata) -> 
         if a.get("slot") == "prefix"
         and not a.get("id", "").startswith("internal_")
         and not (a.get("id", "").startswith("runeword_") and a.get("id", "").endswith("_final"))
+        # Retired prefixes (lootWeight 0) never roll; PREFIX_EFFECTS.md lists them separately.
+        and not is_retired(a)
     ]
     suffixes = [a for a in affixes if a.get("slot") == "suffix"]
     runewords = [

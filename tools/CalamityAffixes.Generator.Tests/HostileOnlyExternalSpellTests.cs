@@ -16,43 +16,25 @@ public sealed class HostileOnlyExternalSpellTests
         float Range,
         EffectExpectation[] Effects);
 
+    // The cast-on-crit clones keep only the damage effect: the runtime scales that
+    // spell by the hit, and the engine applies one override to every effect.
+    // Slow/stagger/perk effects live in the rider spells below (cast with no override).
     private static readonly SpellExpectation[] ExpectedSpells =
     [
         new("CAFF_SPEL_COC_FIREBOLT_HOSTILE_ONLY", TargetType.Aimed, 0.5f, 0.0f,
-        [
-            new(0x00012F03u, 25.0f, 0, 0), new(0x000153D3u, 0.25f, 0, 0),
-            new(0x000F392Du, 99.0f, 15, 0),
-        ]),
+            [new(0x00012F03u, 25.0f, 0, 0)]),
         new("CAFF_SPEL_COC_ICE_SPIKE_HOSTILE_ONLY", TargetType.Aimed, 0.5f, 0.0f,
-        [
-            new(0x0001CEA2u, 25.0f, 0, 0), new(0x000153D3u, 0.25f, 0, 0),
-            new(0x000B729Fu, 50.0f, 3, 0), new(0x000F3932u, 0.0f, 3, 0),
-        ]),
+            [new(0x0001CEA2u, 25.0f, 0, 0)]),
         new("CAFF_SPEL_COC_LIGHTNING_BOLT_HOSTILE_ONLY", TargetType.Aimed, 0.5f, 0.0f,
-        [
-            new(0x0001CEA8u, 25.0f, 0, 0), new(0x000153D3u, 0.25f, 0, 0),
-            new(0x000F3F0Du, 200.0f, 1, 0),
-        ]),
+            [new(0x0001CEA8u, 25.0f, 0, 0)]),
         new("CAFF_SPEL_COC_THUNDERBOLT_HOSTILE_ONLY", TargetType.Aimed, 0.5f, 0.0f,
-        [
-            new(0x0010F7EFu, 60.0f, 0, 0), new(0x000153D3u, 0.25f, 0, 0),
-            new(0x000F3F0Du, 200.0f, 1, 0),
-        ]),
+            [new(0x0010F7EFu, 60.0f, 0, 0)]),
         new("CAFF_SPEL_COC_ICY_SPEAR_HOSTILE_ONLY", TargetType.Aimed, 0.5f, 0.0f,
-        [
-            new(0x0010F7F0u, 60.0f, 0, 0), new(0x000153D3u, 0.25f, 0, 0),
-            new(0x000B729Fu, 50.0f, 3, 0), new(0x000F3932u, 0.0f, 3, 0),
-        ]),
+            [new(0x0010F7F0u, 60.0f, 0, 0)]),
         new("CAFF_SPEL_COC_CHAIN_LIGHTNING_HOSTILE_ONLY", TargetType.Aimed, 0.5f, 0.0f,
-        [
-            new(0x0005DBAEu, 40.0f, 0, 20), new(0x000153D3u, 0.25f, 0, 0),
-            new(0x000F3F0Fu, 200.0f, 1, 20),
-        ]),
+            [new(0x0005DBAEu, 40.0f, 0, 20)]),
         new("CAFF_SPEL_COC_ICE_STORM_HOSTILE_ONLY", TargetType.Aimed, 0.5f, 0.0f,
-        [
-            new(0x0001CEA3u, 40.0f, 0, 15), new(0x000B729Fu, 50.0f, 5, 0),
-            new(0x000F3935u, 0.0f, 3, 15), new(0x000153D3u, 0.25f, 0, 0),
-        ]),
+            [new(0x0001CEA3u, 40.0f, 0, 15)]),
         new("CAFF_SPEL_TRAP_BANISH_DAEDRA_HOSTILE_ONLY", TargetType.TargetActor, 0.5f, 50.0f,
         [
             new(0x0006D22Bu, 15.0f, 0, 0), new(0x0006D22Du, 100.0f, 0, 0),
@@ -62,6 +44,40 @@ public sealed class HostileOnlyExternalSpellTests
         [
             new(0x0004B145u, 6.0f, 30, 0), new(0x0004D3F9u, 50.0f, 0, 0),
         ]),
+    ];
+
+    // Rider spells were appended at the end of keywords.appendedRecords (v2.3.0),
+    // so their FormIDs follow the last record that existed before them.
+    private static readonly (uint FormId, SpellExpectation Spell)[] ExpectedRiderSpells =
+    [
+        (0x000B47u, new("CAFF_SPEL_COC_FIREBOLT_RIDER", TargetType.TargetActor, 0.5f, 4096.0f,
+        [
+            new(0x000153D3u, 0.25f, 0, 0), new(0x000F392Du, 99.0f, 15, 0),
+        ])),
+        (0x000B48u, new("CAFF_SPEL_COC_ICE_SPIKE_RIDER", TargetType.TargetActor, 0.5f, 4096.0f,
+        [
+            new(0x000153D3u, 0.25f, 0, 0), new(0x000B729Fu, 50.0f, 3, 0), new(0x000F3932u, 0.0f, 3, 0),
+        ])),
+        (0x000B49u, new("CAFF_SPEL_COC_LIGHTNING_BOLT_RIDER", TargetType.TargetActor, 0.5f, 4096.0f,
+        [
+            new(0x000153D3u, 0.25f, 0, 0), new(0x000F3F0Du, 200.0f, 1, 0),
+        ])),
+        (0x000B4Au, new("CAFF_SPEL_COC_THUNDERBOLT_RIDER", TargetType.TargetActor, 0.5f, 4096.0f,
+        [
+            new(0x000153D3u, 0.25f, 0, 0), new(0x000F3F0Du, 200.0f, 1, 0),
+        ])),
+        (0x000B4Bu, new("CAFF_SPEL_COC_ICY_SPEAR_RIDER", TargetType.TargetActor, 0.5f, 4096.0f,
+        [
+            new(0x000153D3u, 0.25f, 0, 0), new(0x000B729Fu, 50.0f, 3, 0), new(0x000F3932u, 0.0f, 3, 0),
+        ])),
+        (0x000B4Cu, new("CAFF_SPEL_COC_CHAIN_LIGHTNING_RIDER", TargetType.TargetActor, 0.5f, 4096.0f,
+        [
+            new(0x000153D3u, 0.25f, 0, 0), new(0x000F3F0Fu, 200.0f, 1, 20),
+        ])),
+        (0x000B4Du, new("CAFF_SPEL_COC_ICE_STORM_RIDER", TargetType.TargetActor, 0.5f, 4096.0f,
+        [
+            new(0x000B729Fu, 50.0f, 5, 0), new(0x000F3935u, 0.0f, 3, 15), new(0x000153D3u, 0.25f, 0, 0),
+        ])),
     ];
 
     private static readonly Dictionary<string, string> ExpectedCastOnCritActions = new(StringComparer.Ordinal)
@@ -105,6 +121,9 @@ public sealed class HostileOnlyExternalSpellTests
             var action = JsonSerializer.SerializeToElement(affix.Runtime.Action);
             Assert.Equal(expected.Value, action.GetProperty("spellEditorId").GetString());
             Assert.False(action.TryGetProperty("spellForm", out _));
+            Assert.Equal(
+                expected.Value.Replace("_HOSTILE_ONLY", "_RIDER", StringComparison.Ordinal),
+                action.GetProperty("riderSpellEditorId").GetString());
         }
 
         var bearTrap = Assert.Single(spec.Keywords.Affixes, candidate => candidate.Id == "bear_trap");
@@ -126,15 +145,25 @@ public sealed class HostileOnlyExternalSpellTests
     private static void AssertHostileOnlySpells(IEnumerable<ISpellGetter> spells)
     {
         var spellArray = spells.ToArray();
+        for (var spellIndex = 0; spellIndex < ExpectedSpells.Length; spellIndex++)
+        {
+            AssertHostileOnlySpell(spellArray, ExpectedSpells[spellIndex], 0x000B06u + (uint)spellIndex);
+        }
+
+        foreach (var (formId, rider) in ExpectedRiderSpells)
+        {
+            AssertHostileOnlySpell(spellArray, rider, formId);
+        }
+    }
+
+    private static void AssertHostileOnlySpell(ISpellGetter[] spellArray, SpellExpectation expected, uint expectedFormId)
+    {
         var skyrim = ModKey.FromNameAndExtension("Skyrim.esm");
         var playerRef = new FormKey(skyrim, 0x000014);
         var eitherHand = new FormKey(skyrim, 0x00013F44);
-
-        for (var spellIndex = 0; spellIndex < ExpectedSpells.Length; spellIndex++)
         {
-            var expected = ExpectedSpells[spellIndex];
             var spell = Assert.Single(spellArray, candidate => candidate.EditorID == expected.EditorId);
-            Assert.Equal(0x000B06u + (uint)spellIndex, spell.FormKey.ID);
+            Assert.Equal(expectedFormId, spell.FormKey.ID);
             Assert.Equal(SpellType.Spell, spell.Type);
             Assert.Equal(CastType.FireAndForget, spell.CastType);
             Assert.Equal(expected.TargetType, spell.TargetType);

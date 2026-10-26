@@ -58,6 +58,8 @@ function registerPanelEventHandlers() {
   wireButtons();
   wireMainTabs();
   controlPanel.addEventListener("keydown", handleListboxKeydown);
+  controlPanel.addEventListener("focusin", handlePanelFocusIn);
+  controlPanel.addEventListener("focusout", handlePanelFocusOut);
   if (workingBaseDetails) {
     workingBaseDetails.addEventListener("toggle", handleWorkingBaseChooserToggle);
     document.addEventListener("pointerdown", handleWorkingBaseOutsidePointerDown, true);

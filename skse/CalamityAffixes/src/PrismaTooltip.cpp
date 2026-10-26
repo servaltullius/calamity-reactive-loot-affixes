@@ -23,10 +23,12 @@
 
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/EventNames.h"
+#include "CalamityAffixes/HotkeyNames.h"
 #include "CalamityAffixes/LootUiGuards.h"
 #include "CalamityAffixes/PrismaLayoutPersistence.h"
 #include "CalamityAffixes/RunewordUiPolicy.h"
 #include "CalamityAffixes/UserSettingsPersistence.h"
+#include "CalamityAffixes/Utf8Text.h"
 
 #include "PrismaUI_API.h"
 
@@ -329,6 +331,22 @@ namespace CalamityAffixes::PrismaTooltip
 	{
 		QueueTask([a_open]() {
 			SetControlPanelOpenImpl(a_open);
+		});
+	}
+
+	void OnPreLoadGame()
+	{
+		// Atomics only: the gameplay-unavailable tick already hides the view, and
+		// the first tick after the load sees an unknown state and closes it.
+		g_controlPanelOpen.store(false);
+		g_panelTextInputFocused.store(false, std::memory_order_relaxed);
+	}
+
+	void PrewarmView()
+	{
+		QueueTask([]() {
+			// Respects the API retry backoff; a view that already exists is kept.
+			(void)EnsurePrisma(false);
 		});
 	}
 

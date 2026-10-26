@@ -1,9 +1,16 @@
 #include "CalamityAffixes/EventBridge.h"
 
 #include "CalamityAffixes/PlayerHealthDamageHookPolicy.h"
+#include "CalamityAffixes/RuntimePaths.h"
+#include "CalamityAffixes/UserSettingsMigration.h"
 #include "CalamityAffixes/UserSettingsPersistence.h"
 
 #include <algorithm>
+#include <charconv>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <optional>
 #include <string>
 
 #include <nlohmann/json.hpp>
@@ -11,6 +18,82 @@
 
 namespace CalamityAffixes
 {
+	namespace
+	{
+		constexpr std::string_view kMcmUserSettingsIniRelativePath = "Data/MCM/Settings/CalamityAffixes.ini";
+
+		[[nodiscard]] std::optional<double> ParseIniNumber(std::string_view a_text)
+		{
+			double value = 0.0;
+			const auto* end = a_text.data() + a_text.size();
+			const auto [ptr, ec] = std::from_chars(a_text.data(), end, value);
+			if (ec != std::errc{} || ptr != end) {
+				return std::nullopt;
+			}
+			return value;
+		}
+	}
+
+	bool EventBridge::SeedRuntimeUserSettingsFromMcmIni()
+	{
+		// Only the player's own MCM file (MCM Helper writes it on change), never the
+		// shipped defaults under MCM/Config.
+		const auto path = RuntimePaths::ResolveRuntimeRelativePath(kMcmUserSettingsIniRelativePath);
+		std::ifstream in(path, std::ios::binary);
+		if (!in.is_open()) {
+			return false;
+		}
+		const std::string text{ std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>() };
+
+		std::uint32_t applied = 0u;
+		auto number = [&](std::string_view a_key) -> std::optional<double> {
+			const auto raw = UserSettingsMigration::FindIniValue(text, "General", a_key);
+			auto value = raw.empty() ? std::nullopt : ParseIniNumber(raw);
+			if (value) {
+				++applied;
+			}
+			return value;
+		};
+		if (const auto v = number("bEnabled")) {
+			_runtimeSettings.enabled.store(*v != 0.0, std::memory_order_relaxed);
+		}
+		if (const auto v = number("fValidationInterval")) {
+			const float seconds = std::clamp(static_cast<float>(*v), 0.0f, 30.0f);
+			_equipResync.intervalMs = seconds <= 0.0f ? 0u : static_cast<std::uint64_t>(seconds * 1000.0f);
+			_equipResync.nextAtMs = 0;
+		}
+		if (const auto v = number("fProcChanceMult")) {
+			_runtimeSettings.procChanceMult = std::clamp(static_cast<float>(*v), 0.0f, 3.0f);
+		}
+		if (const auto v = number("fRunewordFragmentChancePercent")) {
+			_loot.runewordFragmentChancePercent = std::clamp(static_cast<float>(*v), 0.0f, 100.0f);
+		}
+		if (const auto v = number("fReforgeOrbChancePercent")) {
+			_loot.reforgeOrbChancePercent = std::clamp(static_cast<float>(*v), 0.0f, 100.0f);
+		}
+		if (const auto v = number("fIdentifyScrollChancePercent")) {
+			_loot.identifyScrollChancePercent = std::clamp(static_cast<float>(*v), 0.0f, 100.0f);
+		}
+		if (const auto v = number("fScouringOrbChancePercent")) {
+			_loot.scouringOrbChancePercent = std::clamp(static_cast<float>(*v), 0.0f, 100.0f);
+		}
+		if (const auto v = number("bDotSafetyAutoDisable")) {
+			_loot.dotTagSafetyAutoDisable = *v != 0.0;
+		}
+		if (const auto v = number("bAllowNonHostileFirstHitProc")) {
+			_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.store(*v != 0.0, std::memory_order_relaxed);
+		}
+		if (applied == 0u) {
+			return false;
+		}
+		SKSE::log::info(
+			"CalamityAffixes: {} is missing; took {} settings from {}.",
+			std::string(kUserSettingsRelativePath),
+			applied,
+			std::string(kMcmUserSettingsIniRelativePath));
+		return true;
+	}
+
 	void EventBridge::ApplyRuntimeUserSettingsOverrides()
 	{
 		_runtimeSettings.userSettingsPersist = {};
@@ -18,7 +101,21 @@ namespace CalamityAffixes
 
 		nlohmann::json root;
 		if (!UserSettingsPersistence::LoadJsonObject(kUserSettingsRelativePath, root)) {
+			// The runtime file is gone (an MO2 overwrite clean-up) but the MCM still
+			// shows the player's choices: run with those instead of the defaults,
+			// and write them down so the next start reads the file again.
+			std::error_code ec;
+			const bool missing = !std::filesystem::exists(RuntimePaths::ResolveRuntimeRelativePath(kUserSettingsRelativePath), ec) && !ec;
+			if (missing && SeedRuntimeUserSettingsFromMcmIni()) {
+				SyncCurrencyDropModeState("SeedRuntimeUserSettingsFromMcmIni");
+				(void)PersistRuntimeUserSettings();
+				_runtimeSettings.userSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
+			}
 			return;
+		}
+		int storedVersion = 0;
+		if (const auto versionIt = root.find("version"); versionIt != root.end() && versionIt->is_number_integer()) {
+			storedVersion = versionIt->get<int>();
 		}
 
 		if (!root.is_object()) {
@@ -89,15 +186,10 @@ namespace CalamityAffixes
 				runtime.value("reforgeOrbChancePercent", static_cast<double>(_loot.reforgeOrbChancePercent));
 			const double identifyScrollChancePercent =
 				runtime.value("identifyScrollChancePercent", static_cast<double>(_loot.identifyScrollChancePercent));
-			double scouringOrbChancePercent =
-				runtime.value("scouringOrbChancePercent", static_cast<double>(_loot.scouringOrbChancePercent));
-			// 2% was the default until selected reforge got a per-item limit and the
-			// Scouring Orb became how a spent item unlocks. Without MCM Helper a saved
-			// 2 can only be that old default; MCM users get their own value back from
-			// the MCM sync on every load.
-			if (scouringOrbChancePercent == 2.0) {
-				scouringOrbChancePercent = 4.0;
-			}
+			// One-time, by file version: a 2 the player picks after the bump stays 2.
+			const double scouringOrbChancePercent = UserSettingsMigration::MigrateScouringOrbChancePercent(
+				storedVersion,
+				runtime.value("scouringOrbChancePercent", static_cast<double>(_loot.scouringOrbChancePercent)));
 			const bool allowNonHostileFirstHitProc = runtime.value(
 				"allowNonHostileFirstHitProc",
 				_runtimeSettings.allowNonHostilePlayerOwnedOutgoingProcs.load(std::memory_order_relaxed));
@@ -157,6 +249,11 @@ namespace CalamityAffixes
 			_runtimeSettings.disableTrapCasts,
 			_runtimeSettings.forceStopAlarmPulse);
 
+		// Write the migrated values (and the new version) back right away, so the
+		// migration runs once.
+		if (storedVersion < UserSettingsMigration::kCurrentVersion) {
+			(void)PersistRuntimeUserSettings();
+		}
 		_runtimeSettings.userSettingsPersist.lastPersistedPayload = BuildRuntimeUserSettingsPayload();
 	}
 
@@ -236,7 +333,7 @@ namespace CalamityAffixes
 		const bool updated = UserSettingsPersistence::UpdateJsonObject(
 			kUserSettingsRelativePath,
 			[&runtimeSnapshot](nlohmann::json& root) {
-				root["version"] = 1;
+				root["version"] = UserSettingsMigration::kCurrentVersion;
 				auto& runtime = root["runtime"];
 				if (!runtime.is_object()) {
 					runtime = nlohmann::json::object();

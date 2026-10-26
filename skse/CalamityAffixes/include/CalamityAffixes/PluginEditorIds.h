@@ -19,6 +19,11 @@ namespace CalamityAffixes::PluginEditorIds
 	// Builds the index. Call once at kDataLoaded, before the runtime config loads.
 	void Load();
 
+	// True once Load() indexed the plugin (it is loaded, readable and parsed, and at
+	// least one record resolved). When false every FindOwn misses: the config and
+	// anything keyed on our editor IDs cannot be trusted.
+	[[nodiscard]] bool IsIndexed() noexcept;
+
 	// A form this plugin defines, by editor ID (case-insensitive), or nullptr.
 	[[nodiscard]] RE::TESForm* FindOwn(std::string_view a_editorId) noexcept;
 

@@ -286,6 +286,8 @@
 	{
 		if (!a_open) {
 			g_controlPanelOpen.store(false);
+			// A closed panel has no focused field (focusout may never arrive).
+			g_panelTextInputFocused.store(false, std::memory_order_relaxed);
 			ApplyControlPanelState(false);
 			g_lastPanelState = false;
 			g_lastPanelStateKnown = true;

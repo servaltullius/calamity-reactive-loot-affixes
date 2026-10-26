@@ -61,7 +61,7 @@ class PrismaTooltipScalingTests(unittest.TestCase):
         )
         self.assertIn("max-width: 720px", self.source)
         self.assertIn("transform: scale(var(--scale))", self.source)
-        self.assertIn("font-size: calc(18px * var(--tooltip-font-scale))", self.source)
+        self.assertIn("font-size: calc(18px * var(--tooltip-font-scale) * var(--tooltip-fit-scale, 1))", self.source)
 
         cases = (
             (3840, 2160, 2.5, 1800.0, 45.0),
@@ -143,7 +143,11 @@ class PrismaTooltipScalingTests(unittest.TestCase):
             "Math.floor(window.innerHeight - margin - rectHeight)",
             "function measureTooltipRect()",
             "tooltipPanel.getBoundingClientRect()",
-            "tooltipPanel.style.maxHeight = `${getTooltipMaxLogicalHeight()}px`;",
+            "tooltipPanel.style.maxHeight = trustedViewport ? `${getTooltipMaxLogicalHeight()}px` : \"none\";",
+            # A window height the engine reports as 0 while hidden must not
+            # freeze the tooltip at the 120px floor.
+            "const tooltipMinTrustedViewportHeight = 240;",
+            "const capStale = tooltipPanel.style.maxHeight !== expectedCap;",
         ):
             self.assertIn(marker, self.source)
 
@@ -153,9 +157,19 @@ class PrismaTooltipScalingTests(unittest.TestCase):
         self.assertLess(placement, reclamp)
         self.assertLess(reclamp, quick_launch)
 
-        # At 720p auto-scale bottoms out at 1.0. The 560 logical-pixel cap
-        # remains in force even at 180% text, with overflow scrolling the rest.
-        self.assertEqual(min(560, (720 - 16) // 1), 560)
+        # The tooltip cannot be scrolled in the item menu, so it may use the
+        # whole screen height, and text that still overflows is shrunk to fit
+        # (down to 70%) instead of being cut off at the bottom.
+        for marker in (
+            "function fitTooltipTextToHeight()",
+            "tooltipPanel.scrollHeight > tooltipPanel.clientHeight + 1",
+            "function scheduleTooltipFitRecheck()",
+            "if (key !== tooltipFitKey)",
+            "const canShrink = tooltipFitScale > tooltipMinFitScale && tooltipOverflows();",
+            "const tooltipMinFitScale = 0.7;",
+        ):
+            self.assertIn(marker, self.source)
+        self.assertNotIn("Math.min(560", self.source)
 
 
 if __name__ == "__main__":

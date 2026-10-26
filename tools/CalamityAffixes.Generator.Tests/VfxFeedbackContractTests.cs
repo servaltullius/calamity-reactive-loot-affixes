@@ -89,7 +89,7 @@ public sealed class VfxFeedbackContractTests
         var root = ReadJson(Path.Combine("affixes", "modules", "spec.root.json"));
         var records = root.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray().ToArray();
 
-        Assert.Equal(78, records.Length);
+        Assert.Equal(113, records.Length);
         var artRecords = records
             .Where(record => record.GetProperty("type").GetString() == "ArtObject")
             .ToArray();
@@ -177,10 +177,13 @@ public sealed class VfxFeedbackContractTests
         Assert.Equal(8, actions.Count(action =>
             action.TryGetProperty("feedback", out var feedback) &&
             feedback.GetProperty("target").GetString() == "Corpse"));
-        Assert.Equal(60, actions.Count(action =>
+        // 69 since v2.3.0 stage 4: nine skill-buff runewords now act on the target.
+        Assert.Equal(69, actions.Count(action =>
             action.TryGetProperty("feedback", out var feedback) &&
             feedback.GetProperty("target").GetString() == "Target"));
-        Assert.Equal(67, actions.Count(action =>
+        // 57 since stage 4: those nine moved to the target, and Edge's Doom mark
+        // shows on the target through its own mark spell.
+        Assert.Equal(57, actions.Count(action =>
             action.TryGetProperty("feedback", out var feedback) &&
             feedback.GetProperty("target").GetString() == "Owner" &&
             feedback.TryGetProperty("spatialSound", out var spatial) && spatial.GetBoolean()));

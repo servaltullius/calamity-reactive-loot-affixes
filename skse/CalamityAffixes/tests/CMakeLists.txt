@@ -40,6 +40,13 @@ if(BUILD_TESTING)
     target_include_directories(summon_protection_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
     add_test(NAME CalamityAffixesSummonProtectionChecks COMMAND summon_protection_tests)
 
+    # Also run by run_runtime_gate_store_checks.sh, but PR CI only runs this
+    # project: without it the editor-ID-lookup ban and the shipped ESP record
+    # count were first checked when a release tag was pushed.
+    add_executable(plugin_editor_id_tests plugin_editor_id_tests.cpp)
+    target_include_directories(plugin_editor_id_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+    add_test(NAME CalamityAffixesPluginEditorIdChecks COMMAND plugin_editor_id_tests)
+
     add_test(
         NAME CalamityAffixesDeferredEventDispatcherChecks
         COMMAND deferred_event_dispatcher_tests

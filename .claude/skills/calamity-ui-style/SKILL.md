@@ -51,7 +51,7 @@ Prisma UI는 CEF가 아니라 **Ultralight(WebKit 계열)** 이다. 코드 주�
 | `display: grid/flex`를 준 클래스가 `hidden` 속성을 덮음 | `.foo[hidden] { display: none; }` 짝 규칙을 함께 쓴다. |
 | 한국어 글꼴은 line-height normal이 영어보다 큼(14→17px) | 고정 높이 칸에서는 `line-height`를 명시한다. |
 | 영어판 스카이림 HUD 글꼴에 한글이 없음 | 패널 밖 HUD 알림(`RE::DebugNotification`)은 영어로 쓴다. |
-| `backdrop-filter`, 최신 CSS(`:has()`, 컨테이너 쿼리, `color-mix()`, `@layer`, subgrid)는 Ultralight 지원이 확인되지 않음 | 새로 도입하지 않는다. 꼭 써야 하면 실게임 확인을 전제로 하고, 없어도 깨지지 않게 쓴다. 툴팁의 `blur(8px)`는 옛 코드다. |
+| `backdrop-filter`, 최신 CSS(`:has()`, 컨테이너 쿼리, `color-mix()`, `@layer`, subgrid)는 Ultralight 지원이 확인되지 않음 | 새로 도입하지 않는다. 꼭 써야 하면 실게임 확인을 전제로 하고, 없어도 깨지지 않게 쓴다. 툴팁의 `blur(8px)`는 2.3.0에서 뺐다: 큰 툴팁의 자라난 부분이 다시 그려지지 않아 글자가 옛 높이에서 잘리는 증상의 원인으로 의심됨(사용자 스크린샷, 2026-10-26, 인게임 확인 전). |
 
 마크업 구조도 지킨다.
 - 뷰는 `index.html` + `styles/*.css` + `scripts/*.js`로 나뉘고 `<script src>` 순서가 실행 순서다. `type="module"`은 쓰지 않는다.

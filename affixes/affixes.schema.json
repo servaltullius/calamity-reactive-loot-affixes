@@ -293,6 +293,7 @@
         "requireCritOrPowerAttack": { "type": "boolean" },
         "requireWeaponHit": { "type": "boolean" },
         "stanceSpellEditorId": { "type": "string", "minLength": 1 },
+        "riderSpellEditorId": { "type": "string", "minLength": 1 },
         "requirePowerAttack": { "type": "boolean" },
         "windowSeconds": { "type": "number", "minimum": 0.5, "maximum": 30.0 },
         "echoDelaySeconds": { "type": "number", "minimum": 0.05, "maximum": 1.5 },
@@ -312,6 +313,13 @@
         "trapFeedback": { "$ref": "#/$defs/trapFeedback" }
       },
       "allOf": [
+        {
+          "if": { "required": ["riderSpellEditorId"] },
+          "then": {
+            "required": ["type"],
+            "properties": { "type": { "const": "CastOnCrit" } }
+          }
+        },
         {
           "if": {
             "required": ["type"],
@@ -495,6 +503,14 @@
           "type": "array",
           "items": { "type": "string", "minLength": 1 }
         },
+        "labelsEn": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "labelsKo": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
         "switchEveryProcs": { "type": "integer", "minimum": 1 },
         "manualOnly": { "type": "boolean" }
       }
@@ -627,7 +643,23 @@
         "hitSoundForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
         "hitShaderForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
         "hitEffectArtForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
-        "fxPersist": { "type": "boolean" }
+        "fxPersist": { "type": "boolean" },
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["function", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "function": { "enum": ["HasKeyword", "GetIsRace", "IsUndead", "IsInInterior", "IsCommandedActor", "IsChild"] },
+              "keywordForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
+              "raceForm": { "type": "string", "pattern": "^[^|]+\\|0[xX][0-9A-Fa-f]+$" },
+              "value": { "enum": [0, 1] },
+              "or": { "type": "boolean" }
+            }
+          }
+        }
       }
     },
     "appendedRecord": {

@@ -24,6 +24,8 @@ namespace CalamityAffixes
 			}
 		}
 		_instanceTrackingState.appliedPassiveSpells.clear();
+		ForgetBowDrawSpeed();
+		_bowDrawSpeed.wanted.store(false, std::memory_order_relaxed);
 		_instanceTrackingState.instanceAffixes.clear();
 		_instanceTrackingState.selectedReforgeCounts.clear();
 		_instanceTrackingState.equippedInstanceKeysByToken.clear();
@@ -43,6 +45,7 @@ namespace CalamityAffixes
 		_combatState.ResetTransientState();
 		_miscCurrencyMigrated = false;
 		_miscCurrencyRecovered = false;
+		_staleStatModifiersMigrated = false;
 
 		for (auto& affix : _affixRuntimeState.affixes) {
 			affix.nextAllowed = {};
@@ -58,12 +61,23 @@ namespace CalamityAffixes
 		// Also discard events captured during world restoration, not just tasks
 		// already pending when PreLoad/serialization started.
 		_eventDispatcher.Invalidate();
+		// Before anything adds, removes or refreshes a passive spell: removing one
+		// of the old effects first would take its amount off the new actor value.
+		MaybeMigrateStaleStatModifiers();
 		(void)NormalizeLegacyPlayerInstanceKeys();
 		(void)PruneOrphanedPlayerInstanceKeys();
 		// Serialization Load runs before inventory restoration. Always rebuild at
 		// PostLoadGame so normal saves cannot retain an empty/stale equipped cache.
 		RebuildActiveCounts(true);
+		RebuildExposureLedgerFromLiveEffects();
 		MaybeMigrateMiscCurrency();
+	}
+
+	void EventBridge::OnNewGame()
+	{
+		const std::scoped_lock lock(_stateMutex);
+		// A new game only ever has the current effects.
+		_staleStatModifiersMigrated = true;
 	}
 
 	void EventBridge::OnPreLoadGame()
@@ -73,6 +87,7 @@ namespace CalamityAffixes
 		ClearTrapRuntimeState("pre-load", true);
 		_combatState.echoStrike.Reset();
 		_combatState.ResetStatusState();
+		ForgetBowDrawSpeed();
 		Hooks::InvalidateDeferredTasks();
 		Hooks::ClearRuntimeState();
 	}
@@ -87,6 +102,8 @@ namespace CalamityAffixes
 		// is allowed; the SerializationInterface Save callback is already inside
 		// SkyrimVM::SaveGlobalData and must remain read/write-co-save only.
 		ClearTrapRuntimeState("pre-save");
+		// The trap worker puts the bow draw speed back on its next tick.
+		RemoveBowDrawSpeed();
 		if (_loot.debugLog) {
 			SKSE::log::debug(
 				"CalamityAffixes: pre-save trap cleanup complete (activeTraps={}, unresolvedDeferred={}).",
@@ -430,7 +447,7 @@ namespace CalamityAffixes
 		const std::scoped_lock lock(_stateMutex);
 
 		if (_miscCurrencyRecovered) {
-			return "Already recovered this save. / 이미 복구 완료된 세이브입니다.";
+			return "Already recovered this save.";
 		}
 
 		auto* player = RE::PlayerCharacter::GetSingleton();

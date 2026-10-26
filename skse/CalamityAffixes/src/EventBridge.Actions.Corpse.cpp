@@ -5,6 +5,7 @@
 #include "CalamityAffixes/ProcChanceUtil.h"
 #include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include <algorithm>
+#include <memory>
 #include <chrono>
 #include <cmath>
 #include <string>
@@ -22,6 +23,15 @@ namespace CalamityAffixes
 		{
 			if (!a_corpse) {
 				return 0.0f;
+			}
+
+			// The corpse's own permanent Health: leveled bosses, dragons and
+			// summons differ from the base NPC record.
+			if (auto* avOwner = a_corpse->AsActorValueOwner()) {
+				const float value = avOwner->GetPermanentActorValue(RE::ActorValue::kHealth);
+				if (value > 0.0f) {
+					return value;
+				}
 			}
 
 			auto* actorBase = a_corpse->GetActorBase();
@@ -99,17 +109,25 @@ namespace CalamityAffixes
 				continue;
 			}
 
-			if (!selection.bestIdx || detail::IsPreferredCorpseExplosionCandidate(
-				action.corpseExplosionSelectionPriority,
-				baseDamage,
-				selection.bestSelectionPriority,
-				selection.bestBaseDamage)) {
-				selection.bestIdx = idx;
-				selection.bestPerTargetKey = perTargetKey;
-				selection.bestUsesPerTargetIcd = usesPerTargetIcd;
-				selection.bestSelectionPriority = action.corpseExplosionSelectionPriority;
-				selection.bestBaseDamage = baseDamage;
-			}
+			// Insert before the first candidate this one is preferred over; the
+			// strict comparison keeps config order for equal candidates.
+			const auto insertAt = std::find_if(
+				selection.candidates.begin(),
+				selection.candidates.end(),
+				[&](const CorpseExplosionCandidate& a_existing) {
+					return detail::IsPreferredCorpseExplosionCandidate(
+						action.corpseExplosionSelectionPriority,
+						baseDamage,
+						a_existing.selectionPriority,
+						a_existing.baseDamage);
+				});
+			selection.candidates.insert(insertAt, CorpseExplosionCandidate{
+				.idx = idx,
+				.perTargetKey = perTargetKey,
+				.usesPerTargetIcd = usesPerTargetIcd,
+				.selectionPriority = action.corpseExplosionSelectionPriority,
+				.baseDamage = baseDamage,
+			});
 		}
 
 		return selection;
@@ -248,6 +266,20 @@ namespace CalamityAffixes
 		}
 
 		const auto now = std::chrono::steady_clock::now();
+		const auto corpseFormID = a_corpse->GetFormID();
+
+		// One kill gets one roll. The hook's immediate path and the later
+		// TESDeathEvent both arrive for a weapon kill; the event path is the
+		// only one for unrouted kills. Whichever comes first evaluates.
+		static constexpr auto kEvaluatedCorpseTTL = std::chrono::seconds(60);
+		if (!a_summonMode) {
+			auto& evaluated = _combatState.corpseExplosionEvaluatedCorpses;
+			if (const auto it = evaluated.find(corpseFormID);
+				it != evaluated.end() && (now - it->second) < kEvaluatedCorpseTTL) {
+				return;
+			}
+		}
+
 		const float corpseMaxHealth = ResolveSafeCorpseMaxHealth(a_corpse);
 
 		const auto selection = SelectBestCorpseExplosionAffix(
@@ -257,29 +289,54 @@ namespace CalamityAffixes
 			a_expectedActionType,
 			corpseMaxHealth,
 			now);
-		if (!selection.bestIdx) {
+
+		if (!a_summonMode) {
+			auto& evaluated = _combatState.corpseExplosionEvaluatedCorpses;
+			evaluated.insert_or_assign(corpseFormID, now);
+			if (evaluated.size() > 512u) {
+				std::erase_if(evaluated, [&](const auto& a_entry) {
+					return (now - a_entry.second) > kEvaluatedCorpseTTL;
+				});
+			}
+		}
+
+		if (selection.candidates.empty()) {
 			LogCorpseExplosionSelectionSkipped(selection, a_corpse, a_actionName, now);
 			return;
 		}
 
-		auto& bestAffix = _affixRuntimeState.affixes[*selection.bestIdx];
-
+		// Take the first candidate the budget admits: a falloff-limited pick
+		// (max chain depth 1) must not cancel a pyre that is still allowed.
+		const CorpseExplosionCandidate* chosen = nullptr;
 		std::uint32_t chainDepth = 0;
 		float chainMultiplier = 1.0f;
-		CorpseExplosionBudgetDenyReason denyReason{};
-		if (!TryConsumeCorpseExplosionBudget(
-				a_corpse->GetFormID(),
-				bestAffix.action,
-				now,
-				chainDepth,
-				chainMultiplier,
-				&denyReason,
-				a_summonMode)) {
-			LogCorpseExplosionBudgetDenied(denyReason, bestAffix, a_corpse, a_actionName, now);
+		for (const auto& candidate : selection.candidates) {
+			auto& candidateAffix = _affixRuntimeState.affixes[candidate.idx];
+			CorpseExplosionBudgetDenyReason denyReason{};
+			if (!TryConsumeCorpseExplosionBudget(
+					corpseFormID,
+					candidateAffix.action,
+					now,
+					chainDepth,
+					chainMultiplier,
+					&denyReason,
+					a_summonMode)) {
+				LogCorpseExplosionBudgetDenied(denyReason, candidateAffix, a_corpse, a_actionName, now);
+				if (denyReason == CorpseExplosionBudgetDenyReason::kDuplicateCorpse) {
+					return;
+				}
+				continue;
+			}
+			chosen = std::addressof(candidate);
+			break;
+		}
+		if (!chosen) {
 			return;
 		}
 
-		const float finalDamage = selection.bestBaseDamage * chainMultiplier;
+		auto& bestAffix = _affixRuntimeState.affixes[chosen->idx];
+
+		const float finalDamage = chosen->baseDamage * chainMultiplier;
 		if (finalDamage <= 0.0f) {
 			return;
 		}
@@ -294,7 +351,7 @@ namespace CalamityAffixes
 				a_actionName ? a_actionName : "CorpseExplosion",
 				a_corpse->GetName(),
 				corpseMaxHealth,
-				selection.bestBaseDamage,
+				chosen->baseDamage,
 				chainDepth,
 				chainMultiplier);
 		}
@@ -305,9 +362,9 @@ namespace CalamityAffixes
 			(void)procDepthGuard;
 			targetsHit = ExecuteCorpseExplosion(bestAffix.action, a_owner, a_corpse, finalDamage);
 		}
-		if (selection.bestUsesPerTargetIcd && targetsHit > 0u) {
+		if (chosen->usesPerTargetIcd && targetsHit > 0u) {
 			// Consume per-target ICD only when the explosion actually hit at least one target.
-			CommitPerTargetCooldown(selection.bestPerTargetKey, bestAffix.perTargetIcd, now);
+			CommitPerTargetCooldown(chosen->perTargetKey, bestAffix.perTargetIcd, now);
 		}
 
 		if (_loot.debugLog) {

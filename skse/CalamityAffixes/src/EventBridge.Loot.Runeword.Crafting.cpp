@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/PluginEditorIds.h"
+#include "CalamityAffixes/RunewordUtil.h"
 #include "EventBridge.Loot.Runeword.Detail.h"
 
 #include <algorithm>
@@ -7,6 +8,7 @@
 #include <limits>
 #include <mutex>
 #include <random>
+#include <span>
 #include <string>
 
 namespace CalamityAffixes
@@ -20,36 +22,47 @@ namespace CalamityAffixes
 			}
 
 			SanitizeRunewordState();
-			const RunewordRecipe* recipe = nullptr;
-			std::uint32_t nextIndex = 0u;
-			if (_runewordState.selectedBaseKey) {
-				const auto stateIt = _runewordState.instanceStates.find(*_runewordState.selectedBaseKey);
-				if (stateIt != _runewordState.instanceStates.end()) {
-					recipe = FindRunewordRecipeByToken(stateIt->second.recipeToken);
-					nextIndex = stateIt->second.insertedRunes;
-				}
-			}
-
-			if (!recipe) {
-				recipe = GetCurrentRunewordRecipe();
-			}
+			// The recipe the panel shows for the selected base, not the global cursor.
+			const RunewordRecipe* recipe = _runewordState.selectedBaseKey ?
+				ResolveSelectedRunewordRecipe(*_runewordState.selectedBaseKey) :
+				GetCurrentRunewordRecipe();
 			if (!recipe || recipe->runeTokens.empty()) {
 				return;
 			}
-
-				if (nextIndex >= recipe->runeTokens.size()) {
-					nextIndex = 0u;
+			std::uint32_t insertedRunes = 0u;
+			if (_runewordState.selectedBaseKey) {
+				if (const auto stateIt = _runewordState.instanceStates.find(*_runewordState.selectedBaseKey);
+					stateIt != _runewordState.instanceStates.end()) {
+					insertedRunes = stateIt->second.insertedRunes;
 				}
-
-				const auto runeToken = recipe->runeTokens[nextIndex];
-				std::string runeName = "Rune";
-				if (const auto nameIt = _runewordState.runeNameByToken.find(runeToken); nameIt != _runewordState.runeNameByToken.end()) {
-					runeName = nameIt->second;
-				}
+			}
+			if (insertedRunes >= recipe->runeTokens.size()) {
+				insertedRunes = 0u;
+			}
 
 				auto* player = RE::PlayerCharacter::GetSingleton();
 				if (!player) {
 					return;
+				}
+
+				// The first rune the player still has fewer of than the recipe needs
+				// (the panel's "missing" list); with everything owned, the next one in
+				// order.
+				std::uint64_t runeToken = recipe->runeTokens[insertedRunes];
+				const auto requiredCounts = BuildRuneTokenCounts<16>(
+					std::span<const std::uint64_t>(recipe->runeTokens.data(), recipe->runeTokens.size()),
+					insertedRunes);
+				for (std::size_t i = 0; i < requiredCounts.size; ++i) {
+					const auto token = requiredCounts.entries[i].token;
+					if (token != 0u &&
+						GetOwnedRunewordFragmentCount(player, _runewordState.runeNameByToken, token) < requiredCounts.entries[i].count) {
+						runeToken = token;
+						break;
+					}
+				}
+				std::string runeName = "Rune";
+				if (const auto nameIt = _runewordState.runeNameByToken.find(runeToken); nameIt != _runewordState.runeNameByToken.end()) {
+					runeName = nameIt->second;
 				}
 
 				const auto given = GrantRunewordFragments(player, _runewordState.runeNameByToken, runeToken, a_amount);
@@ -75,7 +88,10 @@ namespace CalamityAffixes
 				return;
 			}
 
-			const auto* recipe = GetCurrentRunewordRecipe();
+			SanitizeRunewordState();
+			const RunewordRecipe* recipe = _runewordState.selectedBaseKey ?
+				ResolveSelectedRunewordRecipe(*_runewordState.selectedBaseKey) :
+				GetCurrentRunewordRecipe();
 				if (!recipe) {
 					return;
 				}

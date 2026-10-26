@@ -750,18 +750,54 @@ namespace CalamityAffixes
 		}
 	}
 
-	void ClearHostileEffectGuardRuntimeState() noexcept
+	bool IsSummonCreatureSpellRecord(const RE::SpellItem* a_spell) noexcept
+	{
+		return IsSummonCreatureSpell(a_spell);
+	}
+
+	bool CommandsNonCalamitySummon(RE::Actor* a_owner) noexcept
+	{
+		a_owner = SanitizeObjectPointer(a_owner);
+		auto* process = a_owner ? a_owner->GetActorRuntimeData().currentProcess : nullptr;
+		auto* middleHigh = process ? process->middleHigh : nullptr;
+		if (!middleHigh) {
+			return false;
+		}
+		for (const auto& commanded : middleHigh->commandedActors) {
+			const auto holder = commanded.commandedActor.get();
+			auto* actor = SanitizeObjectPointer(holder.get());
+			if (!actor || actor->IsDead()) {
+				continue;
+			}
+			if (!IsRegisteredSummon(actor)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void ClearHostileEffectGuardTransientState() noexcept
 	{
 		g_summonRuntimeGeneration.fetch_add(1u, std::memory_order_relaxed);
 		g_hostileOnlyCastDepth = 0u;
 		g_hostileOnlyCastPlayerOwner.reset();
 		try {
 			const std::scoped_lock lock(g_summonStateMutex);
-			g_registeredSummons.clear();
-			g_loadedSummonFormIDs.clear();
 			g_pendingSummonCasts.clear();
 			g_explosionDamageWindows.clear();
 			g_summonRefreshScheduled = false;
+		} catch (...) {
+			// Runtime teardown must remain best-effort and noexcept.
+		}
+	}
+
+	void ClearHostileEffectGuardRuntimeState() noexcept
+	{
+		ClearHostileEffectGuardTransientState();
+		try {
+			const std::scoped_lock lock(g_summonStateMutex);
+			g_registeredSummons.clear();
+			g_loadedSummonFormIDs.clear();
 		} catch (...) {
 			// Runtime teardown must remain best-effort and noexcept.
 		}

@@ -211,13 +211,15 @@ namespace CalamityAffixes
 			.outgoing = a_key.outgoing,
 			.aggressor = a_key.aggressor,
 			.target = a_key.target,
-			.source = a_key.source
+			.source = a_key.source,
+			.content = a_key.content
 		};
 		const DuplicateHitKey last{
 			.outgoing = _combatState.lastHit.outgoing,
 			.aggressor = _combatState.lastHit.aggressor,
 			.target = _combatState.lastHit.target,
-			.source = _combatState.lastHit.source
+			.source = _combatState.lastHit.source,
+			.content = _combatState.lastHit.content
 		};
 		if (ShouldSuppressDuplicateHitWindow(
 				current,

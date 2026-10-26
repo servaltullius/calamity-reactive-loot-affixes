@@ -129,10 +129,12 @@ find_package(nlohmann_json CONFIG REQUIRED)
 	    src/EventBridge.Actions.Corpse.cpp
 	    src/EventBridge.Actions.EchoStrike.cpp
 	    src/EventBridge.Actions.Status.cpp
+	    src/EventBridge.BowDrawSpeed.cpp
 	    src/EventBridge.Traps.cpp
 	    src/EventBridge.Serialization.Save.cpp
 	    src/EventBridge.Serialization.Load.cpp
 	    src/EventBridge.Serialization.Lifecycle.cpp
+	    src/EventBridge.Serialization.StatMigration.cpp
 	    src/HostileEffectGuard.cpp
 	    src/Hooks.cpp
 	    src/Hooks.Dispatch.cpp
@@ -277,6 +279,15 @@ if (BUILD_TESTING)
             tests/test_equipped_build_summary_policy.cpp
             tests/test_status_ledger.cpp
             tests/test_status_meters.cpp
+            tests/test_bow_draw_speed.cpp
+            tests/test_corpse_hit_filter.cpp
+            tests/test_archmage_spell_hit_policy.cpp
+            tests/test_utf8_text.cpp
+            tests/test_low_health_rearm_policy.cpp
+            tests/test_hotkey_names.cpp
+            tests/test_stale_stat_migration.cpp
+            tests/test_runeword_summary_text.cpp
+            tests/test_user_settings_migration.cpp
     )
     target_include_directories(${PROJECT_NAME}Tests PRIVATE include)
 

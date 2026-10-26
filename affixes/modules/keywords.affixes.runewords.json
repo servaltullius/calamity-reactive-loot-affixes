@@ -82,9 +82,9 @@
   {
     "id": "runeword_infinity_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INFINITY",
-    "name": "룬워드 무한 [Ber-Mal-Ber-Ist]: 매 적중 시 약점 원소 저항 감소. 0.5초마다 발동. 같은 대상 6초.",
-    "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction",
-    "nameKo": "룬워드 무한 [Ber-Mal-Ber-Ist]: 매 적중 시 약점 원소 저항 감소. 0.5초마다 발동. 같은 대상 6초.",
+    "name": "룬워드 무한 [Ber-Mal-Ber-Ist]: 매 적중 시 약점 원소 저항 감소. 0.5초마다 발동. 같은 대상 6초. 노출.",
+    "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction; Exposed",
+    "nameKo": "룬워드 무한 [Ber-Mal-Ber-Ist]: 매 적중 시 약점 원소 저항 감소. 0.5초마다 발동. 같은 대상 6초. 노출.",
     "records": {
       "magicEffects": [
         {
@@ -172,6 +172,11 @@
             "CAFF_SPEL_RW_INFINITY_SHOCK_SHRED"
           ],
           "labels": [
+            "Fire Exposed",
+            "Frost Exposed",
+            "Shock Exposed"
+          ],
+          "labelsKo": [
             "화염 노출",
             "냉기 노출",
             "번개 노출"
@@ -262,9 +267,9 @@
   {
     "id": "runeword_insight_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INSIGHT",
-    "name": "룬워드 통찰 [Ral-Tir-Tal-Sol]: 적중 시 30% 확률로 마나 회복 강화. 마나 재생 +25. 10초마다 발동.",
-    "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Magicka Recovery boost + Magicka Regen +25",
-    "nameKo": "룬워드 통찰 [Ral-Tir-Tal-Sol]: 적중 시 30% 확률로 마나 회복 강화. 마나 재생 +25. 10초마다 발동.",
+    "name": "룬워드 통찰 [Ral-Tir-Tal-Sol]: 적중 시 30% 확률로 마나 회복 강화. 마나 재생 +25%. 10초마다 발동.",
+    "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Magicka Recovery boost + Magicka Regen +25%",
+    "nameKo": "룬워드 통찰 [Ral-Tir-Tal-Sol]: 적중 시 30% 확률로 마나 회복 강화. 마나 재생 +25%. 10초마다 발동.",
     "records": {
       "magicEffects": [
         {
@@ -300,7 +305,7 @@
           "delivery": "Self",
           "effect": {
             "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_PASSIVE_MPREGEN",
-            "magnitude": 25,
+            "magnitude": 0.75,
             "duration": 0,
             "area": 0
           },
@@ -693,9 +698,9 @@
   {
     "id": "runeword_heart_of_the_oak_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEART_OF_THE_OAK",
-    "name": "룬워드 참나무의 심장 [Ko-Vex-Pul-Thul]: 적중 시 32% 확률로 비전 균열(적응형 원소 저항 감소). 8초마다 발동.",
-    "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction)",
-    "nameKo": "룬워드 참나무의 심장 [Ko-Vex-Pul-Thul]: 적중 시 32% 확률로 비전 균열(적응형 원소 저항 감소). 8초마다 발동.",
+    "name": "룬워드 참나무의 심장 [Ko-Vex-Pul-Thul]: 적중 시 32% 확률로 비전 균열(적응형 원소 저항 감소). 8초마다 발동. 노출.",
+    "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction); Exposed",
+    "nameKo": "룬워드 참나무의 심장 [Ko-Vex-Pul-Thul]: 적중 시 32% 확률로 비전 균열(적응형 원소 저항 감소). 8초마다 발동. 노출.",
     "records": {
       "magicEffects": [
         {
@@ -800,7 +805,7 @@
         },
         {
           "editorId": "CAFF_MGEF_RW_FAITH_FANATIC_WARD",
-          "name": "Calamity: Runeword Faith Surge Ward / 룬워드 신념 돌격(저항)",
+          "name": "Calamity: Runeword Faith Fanaticism Power / 룬워드 신념 광신(추가 공격력)",
           "actorValue": "AttackDamageMult",
           "hostile": false,
           "recover": true
@@ -816,7 +821,7 @@
       "spells": [
         {
           "editorId": "CAFF_SPEL_RW_FAITH_FANATIC",
-          "name": "Calamity: Runeword Faith Surge / 룬워드 신념 돌격",
+          "name": "Calamity: Runeword Faith Fanaticism / 룬워드 신념 광신",
           "delivery": "Self",
           "effects": [
             {
@@ -1355,25 +1360,27 @@
   {
     "id": "runeword_leaf_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LEAF",
-    "name": "룬워드 리프 [Tir-Ral]: 적중 시 22% 확률로 나뭇잎의 불꽃(파괴 마법 +20, 8초). 7초마다 발동.",
-    "nameEn": "Runeword Leaf (Tir-Ral): 22% on hit / ICD 7s - Leaf Flame (Destruction +20, 8s)",
-    "nameKo": "룬워드 리프 [Tir-Ral]: 적중 시 22% 확률로 나뭇잎의 불꽃(파괴 마법 +20, 8초). 7초마다 발동.",
+    "name": "룬워드 리프 [Tir-Ral]: 적중 시 22% 확률로 나뭇잎의 불꽃(화염 피해 15). 파괴 마법 비용 -10%. 7초마다 발동. 화상 2중첩.",
+    "nameEn": "Runeword Leaf (Tir-Ral): 22% on hit / ICD 7s - Leaf Flame (Fire Damage 15) + Destruction spell cost -10%; Burning +2 stacks",
+    "nameKo": "룬워드 리프 [Tir-Ral]: 적중 시 22% 확률로 나뭇잎의 불꽃(화염 피해 15). 파괴 마법 비용 -10%. 7초마다 발동. 화상 2중첩.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_LEAF_FLAME",
         "name": "Calamity: Runeword Leaf / 룬워드 리프",
-        "actorValue": "DestructionModifier",
-        "hostile": false,
-        "recover": true
+        "actorValue": "Health",
+        "hostile": true,
+        "recover": false,
+        "resistValue": "ResistFire",
+        "magicSkill": "Destruction"
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_LEAF_FLAME",
         "name": "Calamity: Runeword Leaf / 룬워드 리프",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_LEAF_FLAME",
-          "magnitude": 20,
-          "duration": 8,
+          "magnitude": 15,
+          "duration": 0,
           "area": 0
         }
       }
@@ -1392,9 +1399,11 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_LEAF_FLAME",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0007331C", "soundForm": "Skyrim.esm|0x00081971", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "applyTo": "Target",
+        "statusTag": "Burning",
+        "statusAmount": 2,
+        "passiveSpellEditorId": "CAFF_SPEL_RW_LEAF_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0002ACD7", "soundForm": "Skyrim.esm|0x0003C8FC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -1460,7 +1469,8 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_ZEPHYR_RUSH",
         "name": "Calamity: Runeword Zephyr / 룬워드 제피르",
-        "actorValue": "BowSpeedBonus",
+        "actorValue": "None",
+        "archetype": "Script",
         "hostile": false,
         "recover": true
       },
@@ -1500,9 +1510,9 @@
   {
     "id": "runeword_pattern_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PATTERN",
-    "name": "룬워드 패턴 [Tal-Ort-Thul]: 적중 시 20% 확률로 연계 리듬(치명타 +15%, 6초). 8초마다 발동.",
-    "nameEn": "Runeword Pattern (Tal-Ort-Thul): 20% on hit / ICD 8s - Combo Rhythm (Crit Chance +15%, 6s)",
-    "nameKo": "룬워드 패턴 [Tal-Ort-Thul]: 적중 시 20% 확률로 연계 리듬(치명타 +15%, 6초). 8초마다 발동.",
+    "name": "룬워드 패턴 [Tal-Ort-Thul]: 적중 시 20% 확률로 연계 리듬(치명타 확률 +15%, 6초, 바닐라 치명타 퍽과 중첩 안 됨). 8초마다 발동.",
+    "nameEn": "Runeword Pattern (Tal-Ort-Thul): 20% on hit / ICD 8s - Combo Rhythm (Crit Chance +15%, 6s; does not stack with vanilla critical perks)",
+    "nameKo": "룬워드 패턴 [Tal-Ort-Thul]: 적중 시 20% 확률로 연계 리듬(치명타 확률 +15%, 6초, 바닐라 치명타 퍽과 중첩 안 됨). 8초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_PATTERN_WARD",
@@ -1594,24 +1604,24 @@
   {
     "id": "runeword_strength_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_STRENGTH",
-    "name": "룬워드 스트렝스 [Amn-Tir]: 적중 시 20% 확률로 맹타(양손 스킬 +25, 6초). 9초마다 발동.",
-    "nameEn": "Runeword Strength (Amn-Tir): 20% on hit / ICD 9s - Heavy Strike (Two-Handed +25, 6s)",
-    "nameKo": "룬워드 스트렝스 [Amn-Tir]: 적중 시 20% 확률로 맹타(양손 스킬 +25, 6초). 9초마다 발동.",
+    "name": "룬워드 스트렝스 [Amn-Tir]: 적중 시 20% 확률로 압쇄(대상 방어도 -100, 6초). 양손 무기 +10%. 9초마다 발동. 노출.",
+    "nameEn": "Runeword Strength (Amn-Tir): 20% on hit / ICD 9s - Crushing Blow (Target Armor -100, 6s) + Two-Handed +10%; Exposed",
+    "nameKo": "룬워드 스트렝스 [Amn-Tir]: 적중 시 20% 확률로 압쇄(대상 방어도 -100, 6초). 양손 무기 +10%. 9초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_STRENGTH_POWER",
         "name": "Calamity: Runeword Strength / 룬워드 스트렝스",
-        "actorValue": "TwoHandedModifier",
-        "hostile": false,
+        "actorValue": "DamageResist",
+        "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_STRENGTH_POWER",
         "name": "Calamity: Runeword Strength / 룬워드 스트렝스",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_STRENGTH_POWER",
-          "magnitude": 25,
+          "magnitude": 100,
           "duration": 6,
           "area": 0
         }
@@ -1631,9 +1641,10 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_STRENGTH_POWER",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0007331C", "soundForm": "Skyrim.esm|0x00081971", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "applyTo": "Target",
+        "statusTag": "Exposed",
+        "passiveSpellEditorId": "CAFF_SPEL_RW_STRENGTH_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0006DE86", "soundForm": "Skyrim.esm|0x0006A165", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -1641,9 +1652,9 @@
   {
     "id": "runeword_edge_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_EDGE",
-    "name": "룬워드 엣지 [Tir-Tal-Amn]: 적중 시 20% 확률로 예리한 사격(궁술 +20, 7초). 8초마다 발동.",
-    "nameEn": "Runeword Edge (Tir-Tal-Amn): 20% on hit / ICD 8s - Sharp Shot (Marksman +20, 7s)",
-    "nameKo": "룬워드 엣지 [Tir-Tal-Amn]: 적중 시 20% 확률로 예리한 사격(궁술 +20, 7초). 8초마다 발동.",
+    "name": "룬워드 엣지 [Tir-Tal-Amn]: 적중 시 20% 확률로 파멸 낙인(1.5초 뒤 그 적중 피해의 50%가 마법 피해로 터짐). 궁술 +10%. 8초마다 발동.",
+    "nameEn": "Runeword Edge (Tir-Tal-Amn): 20% on hit / ICD 8s - Doom Mark (1.5s later, 50% of that hit's damage bursts as magic damage) + Archery +10%",
+    "nameKo": "룬워드 엣지 [Tir-Tal-Amn]: 적중 시 20% 확률로 파멸 낙인(1.5초 뒤 그 적중 피해의 50%가 마법 피해로 터짐). 궁술 +10%. 8초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_EDGE_BLADE",
@@ -1658,10 +1669,12 @@
         "delivery": "Self",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_EDGE_BLADE",
-          "magnitude": 20,
-          "duration": 7,
+          "magnitude": 10,
+          "duration": 0,
           "area": 0
-        }
+        },
+        "spellType": "Ability",
+        "castType": "ConstantEffect"
       }
     },
     "kid": {
@@ -1676,11 +1689,15 @@
       "procChancePercent": 20.0,
       "icdSeconds": 8.0,
       "action": {
-        "type": "CastSpell",
-        "spellEditorId": "CAFF_SPEL_RW_EDGE_BLADE",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0007331C", "soundForm": "Skyrim.esm|0x00081971", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "type": "DoomMark",
+        "spellEditorId": "CAFF_SPEL_STATUS_DOOM_BURST",
+        "markSpellEditorId": "CAFF_SPEL_STATUS_DOOM_MARK",
+        "delaySeconds": 1.5,
+        "magnitudeScaling": {
+          "source": "HitTotalDealt",
+          "mult": 0.5
+        },
+        "passiveSpellEditorId": "CAFF_SPEL_RW_EDGE_BLADE"
       }
     },
     "slot": "prefix"
@@ -1911,7 +1928,7 @@
         "name": "Calamity: Runeword Melody Absorb Stamina / 룬워드 멜로디 기력 흡수",
         "actorValue": "Stamina",
         "hostile": true,
-        "recover": true,
+        "recover": false,
         "archetype": "Absorb"
       },
       "spell": {
@@ -2116,25 +2133,25 @@
   {
     "id": "runeword_unbending_will_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_UNBENDING_WILL",
-    "name": "룬워드 언벤딩 윌 [Fal-Io-Ith-Eld-El-Hel]: 적중 시 22% 확률로 굳건한 의지(방패 스킬 +30, 7초). 9초마다 발동.",
-    "nameEn": "Runeword Unbending Will (Fal-Io-Ith-Eld-El-Hel): 22% on hit / ICD 9s - Unbending Will (Block +30, 7s)",
-    "nameKo": "룬워드 언벤딩 윌 [Fal-Io-Ith-Eld-El-Hel]: 적중 시 22% 확률로 굳건한 의지(방패 스킬 +30, 7초). 9초마다 발동.",
+    "name": "룬워드 언벤딩 윌 [Fal-Io-Ith-Eld-El-Hel]: 상태가 2가지 이상 걸린 적을 때리면 굳건한 의지(그 적중 피해의 25% 추가 피해). 막기 +15%. 0.5초마다 발동.",
+    "nameEn": "Runeword Unbending Will (Fal-Io-Ith-Eld-El-Hel): on hit vs 2+ statuses / ICD 0.5s - Unbending Will (+25% of the hit's damage) + Block +15%",
+    "nameKo": "룬워드 언벤딩 윌 [Fal-Io-Ith-Eld-El-Hel]: 상태가 2가지 이상 걸린 적을 때리면 굳건한 의지(그 적중 피해의 25% 추가 피해). 막기 +15%. 0.5초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_UNBENDING_WILL_RESOLVE",
         "name": "Calamity: Runeword Unbending Will / 룬워드 언벤딩 윌",
-        "actorValue": "BlockModifier",
-        "hostile": false,
-        "recover": true
+        "actorValue": "Health",
+        "hostile": true,
+        "recover": false
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_UNBENDING_WILL_RESOLVE",
         "name": "Calamity: Runeword Unbending Will / 룬워드 언벤딩 윌",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_UNBENDING_WILL_RESOLVE",
-          "magnitude": 30,
-          "duration": 7,
+          "magnitude": 1,
+          "duration": 0,
           "area": 0
         }
       }
@@ -2148,40 +2165,48 @@
     },
     "runtime": {
       "trigger": "Hit",
-      "procChancePercent": 22.0,
-      "icdSeconds": 9.0,
+      "procChancePercent": 100.0,
+      "icdSeconds": 0.5,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_UNBENDING_WILL_RESOLVE",
-        "applyTo": "Self",
+        "applyTo": "Target",
         "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0007331C", "soundForm": "Skyrim.esm|0x00081971", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
-      }
+        "magnitudeScaling": {
+          "source": "HitTotalDealt",
+          "mult": 0.25
+        },
+        "passiveSpellEditorId": "CAFF_SPEL_RW_UNBENDING_WILL_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x00074795", "soundForm": "Skyrim.esm|0x0006A165", "target": "Target", "durationSeconds": 0.45, "playOn": "Proc", "spatialSound": true }
+      },
+      "requireTargetStatusCount": 2
     },
     "slot": "prefix"
   },
   {
     "id": "runeword_passion_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PASSION",
-    "name": "룬워드 패션 [Dol-Ort-Eld-Lem]: 적중 시 26% 확률로 정열의 환상(환혹 마법 +20, 7초). 7초마다 발동.",
-    "nameEn": "Runeword Passion (Dol-Ort-Eld-Lem): 26% on hit / ICD 7s - Passionate Illusion (Illusion +20, 7s)",
-    "nameKo": "룬워드 패션 [Dol-Ort-Eld-Lem]: 적중 시 26% 확률로 정열의 환상(환혹 마법 +20, 7초). 7초마다 발동.",
+    "name": "룬워드 패션 [Dol-Ort-Eld-Lem]: 적중 시 26% 확률로 정열의 번개(번개 피해 15). 환혹 마법 비용 -10%. 7초마다 발동. 감전 축적 +100.",
+    "nameEn": "Runeword Passion (Dol-Ort-Eld-Lem): 26% on hit / ICD 7s - Passion Bolt (Shock Damage 15) + Illusion spell cost -10%; Shock build-up +100",
+    "nameKo": "룬워드 패션 [Dol-Ort-Eld-Lem]: 적중 시 26% 확률로 정열의 번개(번개 피해 15). 환혹 마법 비용 -10%. 7초마다 발동. 감전 축적 +100.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_PASSION_FURY",
         "name": "Calamity: Runeword Passion / 룬워드 패션",
-        "actorValue": "IllusionModifier",
-        "hostile": false,
-        "recover": true
+        "actorValue": "Health",
+        "hostile": true,
+        "recover": false,
+        "resistValue": "ResistShock",
+        "magicSkill": "Destruction"
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_PASSION_FURY",
         "name": "Calamity: Runeword Passion / 룬워드 패션",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_PASSION_FURY",
-          "magnitude": 20,
-          "duration": 7,
+          "magnitude": 15,
+          "duration": 0,
           "area": 0
         }
       }
@@ -2200,9 +2225,11 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_PASSION_FURY",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_FURY_SURGE", "soundForm": "Skyrim.esm|0x000A28C4", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "applyTo": "Target",
+        "statusTag": "Shock",
+        "statusAmount": 100,
+        "passiveSpellEditorId": "CAFF_SPEL_RW_PASSION_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0005B1BC", "soundForm": "Skyrim.esm|0x0003F206", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -2210,25 +2237,31 @@
   {
     "id": "runeword_lawbringer_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAWBRINGER",
-    "name": "룬워드 로브링어 [Amn-Lem-Ko]: 처치 시 40% 확률로 정의 집행(언데드 퇴치 범위, ICD 6초). 6초마다 발동.",
-    "nameEn": "Runeword Lawbringer (Amn-Lem-Ko): 40% on kill / ICD 6s - Justice (Turn Undead AoE, ICD 6s)",
-    "nameKo": "룬워드 로브링어 [Amn-Lem-Ko]: 처치 시 40% 확률로 정의 집행(언데드 퇴치 범위, ICD 6초). 6초마다 발동.",
+    "name": "룬워드 로브링어 [Amn-Lem-Ko]: 처치 시 40% 확률로 정의 집행(주변 언데드 퇴치 8초, 레벨 60 이하). 6초마다 발동.",
+    "nameEn": "Runeword Lawbringer (Amn-Lem-Ko): 40% on kill / ICD 6s - Justice (Turn Undead AoE 8s, up to level 60)",
+    "nameKo": "룬워드 로브링어 [Amn-Lem-Ko]: 처치 시 40% 확률로 정의 집행(주변 언데드 퇴치 8초, 레벨 60 이하). 6초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_LAWBRINGER_HEAL",
-        "name": "Calamity: Runeword Lawbringer Soul Harvest / 룬워드 로브링어 영혼 수확",
+        "name": "Calamity: Runeword Lawbringer Justice / 룬워드 로브링어 정의 집행",
         "actorValue": "Confidence",
         "hostile": true,
-        "recover": false,
-        "archetype": "TurnUndead"
+        "recover": true,
+        "archetype": "TurnUndead",
+        "conditions": [
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013797", "value": 0 },
+          { "function": "GetIsRace", "raceForm": "Skyrim.esm|0x001052A3", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013796", "value": 1, "or": true },
+          { "function": "IsUndead", "value": 1 }
+        ]
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_LAWBRINGER_HEAL",
-        "name": "Calamity: Runeword Lawbringer Soul Harvest / 룬워드 로브링어 영혼 수확",
+        "name": "Calamity: Runeword Lawbringer Justice / 룬워드 로브링어 정의 집행",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_LAWBRINGER_HEAL",
-          "magnitude": 30,
+          "magnitude": 60,
           "duration": 8,
           "area": 15
         }
@@ -2258,9 +2291,9 @@
   {
     "id": "runeword_voice_of_reason_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_VOICE_OF_REASON",
-    "name": "룬워드 보이스 오브 리즌 [Lem-Ko-El-Eld]: 적중 시 22% 확률로 냉기 저항 분쇄(적 냉기저항 -35, 6초). 7초마다 발동.",
-    "nameEn": "Runeword Voice of Reason (Lem-Ko-El-Eld): 22% on hit / ICD 7s - Frost Shred (Frost Resist -35, 6s)",
-    "nameKo": "룬워드 보이스 오브 리즌 [Lem-Ko-El-Eld]: 적중 시 22% 확률로 냉기 저항 분쇄(적 냉기저항 -35, 6초). 7초마다 발동.",
+    "name": "룬워드 보이스 오브 리즌 [Lem-Ko-El-Eld]: 적중 시 22% 확률로 냉기 저항 분쇄(적 냉기저항 -35, 6초). 7초마다 발동. 노출.",
+    "nameEn": "Runeword Voice of Reason (Lem-Ko-El-Eld): 22% on hit / ICD 7s - Frost Shred (Frost Resist -35, 6s); Exposed",
+    "nameKo": "룬워드 보이스 오브 리즌 [Lem-Ko-El-Eld]: 적중 시 22% 확률로 냉기 저항 분쇄(적 냉기저항 -35, 6초). 7초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_VOICE_OF_REASON_CHILL",
@@ -2306,9 +2339,9 @@
   {
     "id": "runeword_crescent_moon_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CRESCENT_MOON",
-    "name": "룬워드 크레센트 문 [Shael-Um-Tir]: 적중 시 24% 확률로 전격 저항 분쇄(적 전격저항 -35, 6초). 6초마다 발동.",
-    "nameEn": "Runeword Crescent Moon (Shael-Um-Tir): 24% on hit / ICD 6s - Shock Shred (Shock Resist -35, 6s)",
-    "nameKo": "룬워드 크레센트 문 [Shael-Um-Tir]: 적중 시 24% 확률로 전격 저항 분쇄(적 전격저항 -35, 6초). 6초마다 발동.",
+    "name": "룬워드 크레센트 문 [Shael-Um-Tir]: 적중 시 24% 확률로 전격 저항 분쇄(적 전격저항 -35, 6초). 6초마다 발동. 노출.",
+    "nameEn": "Runeword Crescent Moon (Shael-Um-Tir): 24% on hit / ICD 6s - Shock Shred (Shock Resist -35, 6s); Exposed",
+    "nameKo": "룬워드 크레센트 문 [Shael-Um-Tir]: 적중 시 24% 확률로 전격 저항 분쇄(적 전격저항 -35, 6초). 6초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_CRESCENT_MOON_LUNAR",
@@ -2354,9 +2387,9 @@
   {
     "id": "runeword_venom_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_VENOM",
-    "name": "룬워드 베넘 [Tal-Dol-Mal]: 적중 시 24% 확률로 독 저항 분쇄(적 독저항 -40, 6초). 6초마다 발동.",
-    "nameEn": "Runeword Venom (Tal-Dol-Mal): 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s)",
-    "nameKo": "룬워드 베넘 [Tal-Dol-Mal]: 적중 시 24% 확률로 독 저항 분쇄(적 독저항 -40, 6초). 6초마다 발동.",
+    "name": "룬워드 베넘 [Tal-Dol-Mal]: 적중 시 24% 확률로 독 저항 분쇄(적 독저항 -40, 6초). 6초마다 발동. 노출.",
+    "nameEn": "Runeword Venom (Tal-Dol-Mal): 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s); Exposed",
+    "nameKo": "룬워드 베넘 [Tal-Dol-Mal]: 적중 시 24% 확률로 독 저항 분쇄(적 독저항 -40, 6초). 6초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_VENOM_POISON",
@@ -2402,25 +2435,25 @@
   {
     "id": "runeword_oath_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_OATH",
-    "name": "룬워드 오쓰 [Shael-Pul-Mal-Lum]: 적중 시 24% 확률로 서약의 힘(한손 스킬 +30, 7초). 7초마다 발동.",
-    "nameEn": "Runeword Oath (Shael-Pul-Mal-Lum): 24% on hit / ICD 7s - Oath Power (One-Handed +30, 7s)",
-    "nameKo": "룬워드 오쓰 [Shael-Pul-Mal-Lum]: 적중 시 24% 확률로 서약의 힘(한손 스킬 +30, 7초). 7초마다 발동.",
+    "name": "룬워드 오쓰 [Shael-Pul-Mal-Lum]: 매 적중 시 서약의 칼날(출혈 2/초, 3초). 한손 무기 +10%. 0.5초마다 발동. 출혈 축적 +15.",
+    "nameEn": "Runeword Oath (Shael-Pul-Mal-Lum): on every hit / ICD 0.5s - Sworn Blade (Bleed 2/s, 3s) + One-Handed +10%; Bleed build-up +15",
+    "nameKo": "룬워드 오쓰 [Shael-Pul-Mal-Lum]: 매 적중 시 서약의 칼날(출혈 2/초, 3초). 한손 무기 +10%. 0.5초마다 발동. 출혈 축적 +15.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_OATH_SWORN",
         "name": "Calamity: Runeword Oath / 룬워드 오쓰",
-        "actorValue": "OneHandedModifier",
-        "hostile": false,
-        "recover": true
+        "actorValue": "Health",
+        "hostile": true,
+        "recover": false
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_OATH_SWORN",
         "name": "Calamity: Runeword Oath / 룬워드 오쓰",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_OATH_SWORN",
-          "magnitude": 30,
-          "duration": 7,
+          "magnitude": 2,
+          "duration": 3,
           "area": 0
         }
       }
@@ -2434,14 +2467,16 @@
     },
     "runtime": {
       "trigger": "Hit",
-      "procChancePercent": 24.0,
-      "icdSeconds": 7.0,
+      "procChancePercent": 100.0,
+      "icdSeconds": 0.5,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_OATH_SWORN",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0007331C", "soundForm": "Skyrim.esm|0x00081971", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "applyTo": "Target",
+        "statusTag": "Bleed",
+        "statusAmount": 15,
+        "passiveSpellEditorId": "CAFF_SPEL_RW_OATH_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABEFA", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -2507,9 +2542,9 @@
   {
     "id": "runeword_rift_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RIFT",
-    "name": "룬워드 리프트 [Hel-Ko-Lem-Gul]: 적중 시 8% 확률로 마법 저항 분쇄(적 마저 -30, 6초). 18초마다 발동.",
-    "nameEn": "Runeword Rift (Hel-Ko-Lem-Gul): 8% on hit / ICD 18s - Magic Shred (Magic Resist -30, 6s)",
-    "nameKo": "룬워드 리프트 [Hel-Ko-Lem-Gul]: 적중 시 8% 확률로 마법 저항 분쇄(적 마저 -30, 6초). 18초마다 발동.",
+    "name": "룬워드 리프트 [Hel-Ko-Lem-Gul]: 적중 시 8% 확률로 마법 저항 분쇄(적 마저 -30, 6초). 18초마다 발동. 노출.",
+    "nameEn": "Runeword Rift (Hel-Ko-Lem-Gul): 8% on hit / ICD 18s - Magic Shred (Magic Resist -30, 6s); Exposed",
+    "nameKo": "룬워드 리프트 [Hel-Ko-Lem-Gul]: 적중 시 8% 확률로 마법 저항 분쇄(적 마저 -30, 6초). 18초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_RIFT_SPARK",
@@ -2680,7 +2715,7 @@
         "name": "Calamity: Runeword Death Life Steal / 룬워드 데스 흡혈",
         "actorValue": "Health",
         "hostile": true,
-        "recover": true,
+        "recover": false,
         "archetype": "Absorb"
       },
       "spell": {
@@ -2782,9 +2817,9 @@
   {
     "id": "runeword_wind_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WIND",
-    "name": "룬워드 윈드 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적이 주는 피해 -20%, 5초). 4초마다 발동.",
-    "nameEn": "Runeword Wind (Sur-El): 22% on hit / ICD 4s - Gale Pressure (Enemy Damage Dealt -20%, 5s)",
-    "nameKo": "룬워드 윈드 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적이 주는 피해 -20%, 5초). 4초마다 발동.",
+    "name": "룬워드 윈드 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적 공격력 -20%, 5초). 4초마다 발동.",
+    "nameEn": "Runeword Wind (Sur-El): 22% on hit / ICD 4s - Gale Pressure (Enemy Attack Damage -20%, 5s)",
+    "nameKo": "룬워드 윈드 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적 공격력 -20%, 5초). 4초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_WIND_PUSH",
@@ -3015,35 +3050,27 @@
   {
     "id": "runeword_fury_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FURY",
-    "name": "룬워드 퓨리 [Jah-Gul-Eth]: 적중 시 24% 확률로 공격력 +15% (6초) 및 기력 30 즉시 회복. 12초마다 발동.",
-    "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 12s - Attack Damage +15% for 6s and restore 30 Stamina",
-    "nameKo": "룬워드 퓨리 [Jah-Gul-Eth]: 적중 시 24% 확률로 공격력 +15% (6초) 및 기력 30 즉시 회복. 12초마다 발동.",
+    "name": "룬워드 퓨리 [Jah-Gul-Eth]: 적중 시 24% 확률로 격노의 일격(피해 15). 6초마다 발동. 출혈 축적 +100.",
+    "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on hit / ICD 6s - Furious Strike (15 Damage); Bleed build-up +100",
+    "nameKo": "룬워드 퓨리 [Jah-Gul-Eth]: 적중 시 24% 확률로 격노의 일격(피해 15). 6초마다 발동. 출혈 축적 +100.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
-        "name": "Calamity: Runeword Fury Weapon Fury / 룬워드 퓨리 격노의 흐름",
-        "actorValue": "AttackDamageMult",
-        "hostile": false,
-        "recover": true
+        "name": "Calamity: Runeword Fury Furious Strike / 룬워드 퓨리 격노의 일격",
+        "actorValue": "Health",
+        "hostile": true,
+        "recover": false
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
-        "name": "Calamity: Runeword Fury Weapon Fury / 룬워드 퓨리 격노의 흐름",
-        "delivery": "Self",
-        "effects": [
-          {
-            "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
-            "magnitude": 0.15,
-            "duration": 6,
-            "area": 0
-          },
-          {
-            "magicEffectEditorId": "CAFF_MGEF_RW_FURY_RESTORE_STAMINA",
-            "magnitude": 30,
-            "duration": 0,
-            "area": 0
-          }
-        ]
+        "name": "Calamity: Runeword Fury Furious Strike / 룬워드 퓨리 격노의 일격",
+        "delivery": "TargetActor",
+        "effect": {
+          "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
+          "magnitude": 15,
+          "duration": 0,
+          "area": 0
+        }
       }
     },
     "kid": {
@@ -3056,19 +3083,14 @@
     "runtime": {
       "trigger": "Hit",
       "procChancePercent": 24.0,
-      "icdSeconds": 12.0,
+      "icdSeconds": 6.0,
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": {
-          "artObjectEditorId": "CAFF_ARTO_VFX_FURY_SURGE",
-          "soundForm": "Skyrim.esm|0x000A28C4",
-          "target": "Owner",
-          "durationSeconds": 0.45,
-          "playOn": "Proc"
-        }
+        "applyTo": "Target",
+        "statusTag": "Bleed",
+        "statusAmount": 100,
+        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_FURY_SURGE", "soundForm": "Skyrim.esm|0x000A28C4", "target": "Owner", "durationSeconds": 0.45, "playOn": "Proc" }
       }
     },
     "slot": "prefix"
@@ -3190,13 +3212,13 @@
   {
     "id": "runeword_destruction_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DESTRUCTION",
-    "name": "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동. 감전 축적 +70.",
-    "nameEn": "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350); Shock build-up +70",
-    "nameKo": "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동. 감전 축적 +70.",
+    "name": "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 약 5m). 5초마다 발동. 감전 축적 +70.",
+    "nameEn": "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius ~5m); Shock build-up +70",
+    "nameKo": "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 약 5m). 5초마다 발동. 감전 축적 +70.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_DESTRUCTION_BLEED",
-        "name": "Calamity: Runeword Destruction Bleed / 룬워드 파괴 출혈",
+        "name": "Calamity: Runeword Destruction Shock Storm / 룬워드 파괴 전격 폭풍",
         "actorValue": "Health",
         "hostile": true,
         "recover": false,
@@ -3205,13 +3227,13 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_DESTRUCTION_BLEED",
-        "name": "Calamity: Runeword Destruction Bleed / 룬워드 파괴 출혈",
+        "name": "Calamity: Runeword Destruction Shock Storm / 룬워드 파괴 전격 폭풍",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_DESTRUCTION_BLEED",
           "magnitude": 10,
           "duration": 5,
-          "area": 350
+          "area": 16
         }
       }
     },
@@ -3249,9 +3271,9 @@
   {
     "id": "runeword_ice_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ICE",
-    "name": "룬워드 아이스 [Amn-Shael-Jah-Lo]: 매 적중 시 동결 파편(적 냉기저항 -30, 6초). 0.5초마다 발동.",
-    "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0.5s - Frost Shards (Target Frost Resist -30, 6s)",
-    "nameKo": "룬워드 아이스 [Amn-Shael-Jah-Lo]: 매 적중 시 동결 파편(적 냉기저항 -30, 6초). 0.5초마다 발동.",
+    "name": "룬워드 아이스 [Amn-Shael-Jah-Lo]: 매 적중 시 동결 파편(적 냉기저항 -30, 6초). 0.5초마다 발동. 노출.",
+    "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0.5s - Frost Shards (Target Frost Resist -30, 6s); Exposed",
+    "nameKo": "룬워드 아이스 [Amn-Shael-Jah-Lo]: 매 적중 시 동결 파편(적 냉기저항 -30, 6초). 0.5초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_ICE_FROST_SHRED",
@@ -3356,9 +3378,9 @@
   {
     "id": "runeword_pride_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PRIDE",
-    "name": "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동. 빙결 축적 +60.",
-    "nameEn": "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250); Freeze build-up +60",
-    "nameKo": "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동. 빙결 축적 +60.",
+    "name": "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 약 3.5m). 4초마다 발동. 빙결 축적 +60.",
+    "nameEn": "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius ~3.5m); Freeze build-up +60",
+    "nameKo": "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 약 3.5m). 4초마다 발동. 빙결 축적 +60.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_PRIDE_CHILL",
@@ -3377,7 +3399,7 @@
           "magicEffectEditorId": "CAFF_MGEF_RW_PRIDE_CHILL",
           "magnitude": 30,
           "duration": 0,
-          "area": 250
+          "area": 11
         }
       }
     },
@@ -3533,7 +3555,7 @@
       "icdSeconds": 5.0,
       "action": {
         "type": "CastSpell",
-        "spellEditorId": "CAFF_SPEL_RW_CHAOS_BLEED",
+        "spellEditorId": "CAFF_SPEL_RW_OBSESSION_ARCANE",
         "magnitudeOverride": 75,
         "applyTo": "Target",
         "noHitEffectArt": false,
@@ -3554,9 +3576,9 @@
   {
     "id": "runeword_mist_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MIST",
-    "name": "룬워드 미스트 [Cham-Shael-Gul-Thul-Ith]: 적중 시 30% 확률로 마력 붕괴(마나 재생 -100%·마법저항 -30, 6초, 마나 75 즉시 소진). 6초마다 발동.",
-    "nameEn": "Runeword Mist (Cham-Shael-Gul-Thul-Ith): 30% on hit / ICD 6s - Arcane Collapse (Magicka Regen -100% and Magic Resist -30 for 6s, instant Magicka drain 75)",
-    "nameKo": "룬워드 미스트 [Cham-Shael-Gul-Thul-Ith]: 적중 시 30% 확률로 마력 붕괴(마나 재생 -100%·마법저항 -30, 6초, 마나 75 즉시 소진). 6초마다 발동.",
+    "name": "룬워드 미스트 [Cham-Shael-Gul-Thul-Ith]: 적중 시 30% 확률로 마력 붕괴(마나 재생 -100%·마법저항 -30, 6초, 마나 75 즉시 소진). 6초마다 발동. 노출.",
+    "nameEn": "Runeword Mist (Cham-Shael-Gul-Thul-Ith): 30% on hit / ICD 6s - Arcane Collapse (Magicka Regen -100% and Magic Resist -30 for 6s, instant Magicka drain 75); Exposed",
+    "nameKo": "룬워드 미스트 [Cham-Shael-Gul-Thul-Ith]: 적중 시 30% 확률로 마력 붕괴(마나 재생 -100%·마법저항 -30, 6초, 마나 75 즉시 소진). 6초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_MIST_FOG",
@@ -3577,7 +3599,7 @@
             "area": 0
           },
           {
-            "magicEffectEditorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
+            "magicEffectEditorId": "CAFF_MGEF_RW_MIST_MANA_DRAIN",
             "magnitude": 75,
             "duration": 0,
             "area": 0
@@ -3616,17 +3638,25 @@
   {
     "id": "runeword_nadir_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_NADIR",
-    "name": "룬워드 나디르 [Nef-Tir]: 피격 시 12% 확률로 공포의 나락(공포 5초). 16초마다 발동.",
-    "nameEn": "Runeword Nadir (Nef-Tir): 12% on hit taken / ICD 16s - Nadir of Fear (Fear 5s)",
-    "nameKo": "룬워드 나디르 [Nef-Tir]: 피격 시 12% 확률로 공포의 나락(공포 5초). 16초마다 발동.",
+    "name": "룬워드 나디르 [Nef-Tir]: 피격 시 12% 확률로 공포의 나락(공포 5초, 레벨 60 이하). 16초마다 발동.",
+    "nameEn": "Runeword Nadir (Nef-Tir): 12% on hit taken / ICD 16s - Nadir of Fear (Fear 5s, up to level 60)",
+    "nameKo": "룬워드 나디르 [Nef-Tir]: 피격 시 12% 확률로 공포의 나락(공포 5초, 레벨 60 이하). 16초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_NADIR_WARD",
         "name": "Calamity: Runeword Nadir / 룬워드 나디르",
         "actorValue": "Confidence",
         "hostile": true,
-        "recover": false,
-        "archetype": "Demoralize"
+        "recover": true,
+        "archetype": "Demoralize",
+        "conditions": [
+          { "function": "IsCommandedActor", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013796", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013797", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00035D59", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x0001397A", "value": 0 },
+          { "function": "IsUndead", "value": 0 }
+        ]
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_NADIR_WARD",
@@ -3634,7 +3664,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_NADIR_WARD",
-          "magnitude": 20,
+          "magnitude": 60,
           "duration": 5,
           "area": 0
         }
@@ -3759,25 +3789,25 @@
   {
     "id": "runeword_myth_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MYTH",
-    "name": "룬워드 미스 [Hel-Amn-Nef]: 피격 시 20% 확률로 신화의 갑옷(중갑 스킬 +25, 7초). 11초마다 발동.",
-    "nameEn": "Runeword Myth (Hel-Amn-Nef): 20% on hit taken / ICD 11s - Mythic Armor (Heavy Armor +25, 7s)",
-    "nameKo": "룬워드 미스 [Hel-Amn-Nef]: 피격 시 20% 확률로 신화의 갑옷(중갑 스킬 +25, 7초). 11초마다 발동.",
+    "name": "룬워드 미스 [Hel-Amn-Nef]: 피격 시 20% 확률로 신화의 가시(공격자에게 피해 10). 중갑 착용 시 받는 피해 -10%. 11초마다 발동. 출혈 축적 +100.",
+    "nameEn": "Runeword Myth (Hel-Amn-Nef): 20% on hit taken / ICD 11s - Mythic Thorns (10 Damage to the attacker) + 10% less damage taken while wearing heavy armor; Bleed build-up +100",
+    "nameKo": "룬워드 미스 [Hel-Amn-Nef]: 피격 시 20% 확률로 신화의 가시(공격자에게 피해 10). 중갑 착용 시 받는 피해 -10%. 11초마다 발동. 출혈 축적 +100.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_MYTH_SHIELD",
         "name": "Calamity: Runeword Myth / 룬워드 미스",
-        "actorValue": "HeavyArmorModifier",
-        "hostile": false,
-        "recover": true
+        "actorValue": "Health",
+        "hostile": true,
+        "recover": false
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_MYTH_SHIELD",
         "name": "Calamity: Runeword Myth / 룬워드 미스",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_MYTH_SHIELD",
-          "magnitude": 25,
-          "duration": 7,
+          "magnitude": 10,
+          "duration": 0,
           "area": 0
         }
       }
@@ -3796,9 +3826,11 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_MYTH_SHIELD",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0007331C", "soundForm": "Skyrim.esm|0x00081971", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "applyTo": "Target",
+        "statusTag": "Bleed",
+        "statusAmount": 100,
+        "passiveSpellEditorId": "CAFF_SPEL_RW_MYTH_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABEFA", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -3853,17 +3885,26 @@
   {
     "id": "runeword_radiance_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RADIANCE",
-    "name": "룬워드 래디언스 [Nef-Sol-Ith]: 피격 시 15% 확률로 광채(생명 감지 200m, 30초). 40초마다 발동.",
-    "nameEn": "Runeword Radiance (Nef-Sol-Ith): 15% on hit taken / ICD 40s - Radiance (Detect Life 200m, 30s)",
-    "nameKo": "룬워드 래디언스 [Nef-Sol-Ith]: 피격 시 15% 확률로 광채(생명 감지 200m, 30초). 40초마다 발동.",
+    "name": "룬워드 래디언스 [Nef-Sol-Ith]: 피격 시 15% 확률로 광채(생명 감지 반경 약 60m, 30초). 40초마다 발동.",
+    "nameEn": "Runeword Radiance (Nef-Sol-Ith): 15% on hit taken / ICD 40s - Radiance (Detect Life ~60m radius, 30s)",
+    "nameKo": "룬워드 래디언스 [Nef-Sol-Ith]: 피격 시 15% 확률로 광채(생명 감지 반경 약 60m, 30초). 40초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_RADIANCE_GUARD",
         "name": "Calamity: Runeword Radiance / 룬워드 래디언스",
-        "actorValue": "DetectLifeRange",
+        "actorValue": "None",
         "hostile": false,
         "recover": true,
-        "archetype": "DetectLife"
+        "archetype": "DetectLife",
+        "hitShaderForm": "Skyrim.esm|0x000DC209",
+        "fxPersist": true,
+        "conditions": [
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013796", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x0001397A", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013797", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x000F82F4", "value": 0 },
+          { "function": "IsUndead", "value": 0 }
+        ]
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_RADIANCE_GUARD",
@@ -3871,9 +3912,9 @@
         "delivery": "Self",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_RADIANCE_GUARD",
-          "magnitude": 200,
+          "magnitude": 0,
           "duration": 30,
-          "area": 0
+          "area": 200
         }
       }
     },
@@ -3973,17 +4014,25 @@
   {
     "id": "runeword_peace_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PEACE",
-    "name": "룬워드 피스 [Shael-Thul-Amn]: 피격 시 10% 확률로 평화의 파동(진정 6초). 16초마다 발동.",
-    "nameEn": "Runeword Peace (Shael-Thul-Amn): 10% on hit taken / ICD 16s - Wave of Peace (Calm 6s)",
-    "nameKo": "룬워드 피스 [Shael-Thul-Amn]: 피격 시 10% 확률로 평화의 파동(진정 6초). 16초마다 발동.",
+    "name": "룬워드 피스 [Shael-Thul-Amn]: 피격 시 10% 확률로 평화의 파동(진정 6초, 레벨 60 이하). 16초마다 발동.",
+    "nameEn": "Runeword Peace (Shael-Thul-Amn): 10% on hit taken / ICD 16s - Wave of Peace (Calm 6s, up to level 60)",
+    "nameKo": "룬워드 피스 [Shael-Thul-Amn]: 피격 시 10% 확률로 평화의 파동(진정 6초, 레벨 60 이하). 16초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_PEACE_BARRIER",
         "name": "Calamity: Runeword Peace / 룬워드 피스",
         "actorValue": "Aggression",
         "hostile": true,
-        "recover": false,
-        "archetype": "Calm"
+        "recover": true,
+        "archetype": "Calm",
+        "conditions": [
+          { "function": "IsCommandedActor", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013796", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013797", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00035D59", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x0001397A", "value": 0 },
+          { "function": "IsUndead", "value": 0 }
+        ]
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_PEACE_BARRIER",
@@ -3991,7 +4040,7 @@
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_PEACE_BARRIER",
-          "magnitude": 25,
+          "magnitude": 60,
           "duration": 6,
           "area": 0
         }
@@ -4068,25 +4117,27 @@
   {
     "id": "runeword_cure_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CURE",
-    "name": "룬워드 큐어 [Shael-Io-Tal]: 피격 시 22% 확률로 치유의 각성(회복 마법 +20, 8초). 11초마다 발동.",
-    "nameEn": "Runeword Cure (Shael-Io-Tal): 22% on hit taken / ICD 11s - Healing Awakening (Restoration +20, 8s)",
-    "nameKo": "룬워드 큐어 [Shael-Io-Tal]: 피격 시 22% 확률로 치유의 각성(회복 마법 +20, 8초). 11초마다 발동.",
+    "name": "룬워드 큐어 [Shael-Io-Tal]: 피격 시 22% 확률로 정화의 태양(공격자에게 화염 피해 20). 회복 마법 비용 -10%. 11초마다 발동. 화상 2중첩.",
+    "nameEn": "Runeword Cure (Shael-Io-Tal): 22% on hit taken / ICD 11s - Cleansing Sun (Fire Damage 20 to the attacker) + Restoration spell cost -10%; Burning +2 stacks",
+    "nameKo": "룬워드 큐어 [Shael-Io-Tal]: 피격 시 22% 확률로 정화의 태양(공격자에게 화염 피해 20). 회복 마법 비용 -10%. 11초마다 발동. 화상 2중첩.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_CURE_HEAL",
         "name": "Calamity: Runeword Cure / 룬워드 큐어",
-        "actorValue": "RestorationModifier",
-        "hostile": false,
-        "recover": true
+        "actorValue": "Health",
+        "hostile": true,
+        "recover": false,
+        "resistValue": "ResistFire",
+        "magicSkill": "Restoration"
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_CURE_HEAL",
         "name": "Calamity: Runeword Cure / 룬워드 큐어",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_CURE_HEAL",
           "magnitude": 20,
-          "duration": 8,
+          "duration": 0,
           "area": 0
         }
       }
@@ -4105,9 +4156,11 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_CURE_HEAL",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_EMERGENCY_HEAL", "soundForm": "Skyrim.esm|0x0003F361", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "applyTo": "Target",
+        "statusTag": "Burning",
+        "statusAmount": 2,
+        "passiveSpellEditorId": "CAFF_SPEL_RW_CURE_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0002ACD7", "soundForm": "Skyrim.esm|0x0003C8FC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -4123,6 +4176,7 @@
         "editorId": "CAFF_MGEF_RW_GROUND_ANCHOR",
         "name": "Calamity: Runeword Ground / 룬워드 그라운드",
         "actorValue": "ShoutRecoveryMult",
+        "archetype": "PeakValueModifier",
         "hostile": false,
         "recover": true
       },
@@ -4132,7 +4186,7 @@
         "delivery": "Self",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_GROUND_ANCHOR",
-          "magnitude": 50,
+          "magnitude": 0.5,
           "duration": 8,
           "area": 0
         }
@@ -4162,25 +4216,27 @@
   {
     "id": "runeword_hearth_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEARTH",
-    "name": "룬워드 하스 [Shael-Io-Thul]: 피격 시 22% 확률로 소환의 불씨(소환 마법 +20, 7초). 11초마다 발동.",
-    "nameEn": "Runeword Hearth (Shael-Io-Thul): 22% on hit taken / ICD 11s - Conjuration Ember (Conjuration +20, 7s)",
-    "nameKo": "룬워드 하스 [Shael-Io-Thul]: 피격 시 22% 확률로 소환의 불씨(소환 마법 +20, 7초). 11초마다 발동.",
+    "name": "룬워드 하스 [Shael-Io-Thul]: 피격 시 22% 확률로 서리 반격(공격자에게 냉기 피해 10). 냉기 저항 +20. 11초마다 발동. 빙결 축적 +100.",
+    "nameEn": "Runeword Hearth (Shael-Io-Thul): 22% on hit taken / ICD 11s - Frost Riposte (Frost Damage 10 to the attacker) + Frost Resist +20; Freeze build-up +100",
+    "nameKo": "룬워드 하스 [Shael-Io-Thul]: 피격 시 22% 확률로 서리 반격(공격자에게 냉기 피해 10). 냉기 저항 +20. 11초마다 발동. 빙결 축적 +100.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_HEARTH_WARMTH",
         "name": "Calamity: Runeword Hearth / 룬워드 하스",
-        "actorValue": "ConjurationModifier",
-        "hostile": false,
-        "recover": true
+        "actorValue": "Health",
+        "hostile": true,
+        "recover": false,
+        "resistValue": "ResistFrost",
+        "magicSkill": "Destruction"
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_HEARTH_WARMTH",
         "name": "Calamity: Runeword Hearth / 룬워드 하스",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_HEARTH_WARMTH",
-          "magnitude": 20,
-          "duration": 7,
+          "magnitude": 10,
+          "duration": 0,
           "area": 0
         }
       }
@@ -4199,9 +4255,11 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_HEARTH_WARMTH",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "CAFF_ARTO_VFX_PROC_PHYSICAL_BULWARK", "soundForm": "Skyrim.esm|0x000571B2", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "applyTo": "Target",
+        "statusTag": "Freeze",
+        "statusAmount": 100,
+        "passiveSpellEditorId": "CAFF_SPEL_RW_HEARTH_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0004253F", "soundForm": "Skyrim.esm|0x0003E5CC", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -4476,9 +4534,9 @@
   {
     "id": "runeword_wealth_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WEALTH",
-    "name": "룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 화술 +15.",
-    "nameEn": "Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight +75 and Speechcraft +15",
-    "nameKo": "룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 화술 +15.",
+    "name": "룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 거래 가격 15% 유리.",
+    "nameEn": "Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight +75 and prices 15% better",
+    "nameKo": "룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 거래 가격 15% 유리.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_WEALTH_VIGOR",
@@ -4598,25 +4656,25 @@
   {
     "id": "runeword_enlightenment_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ENLIGHTENMENT",
-    "name": "룬워드 인라이트먼트 [Pul-Ral-Sol]: 피격 시 22% 확률로 깨달음(변화마법 +25, 8초). 11초마다 발동.",
-    "nameEn": "Runeword Enlightenment (Pul-Ral-Sol): 22% on hit taken / ICD 11s - Enlightenment (Alteration +25, 8s)",
-    "nameKo": "룬워드 인라이트먼트 [Pul-Ral-Sol]: 피격 시 22% 확률로 깨달음(변화마법 +25, 8초). 11초마다 발동.",
+    "name": "룬워드 인라이트먼트 [Pul-Ral-Sol]: 피격 시 22% 확률로 깨달음의 눈(공격자 마법 저항 -25, 6초). 변화 마법 비용 -10%. 11초마다 발동. 노출.",
+    "nameEn": "Runeword Enlightenment (Pul-Ral-Sol): 22% on hit taken / ICD 11s - Eye of Insight (Attacker Magic Resist -25, 6s) + Alteration spell cost -10%; Exposed",
+    "nameKo": "룬워드 인라이트먼트 [Pul-Ral-Sol]: 피격 시 22% 확률로 깨달음의 눈(공격자 마법 저항 -25, 6초). 변화 마법 비용 -10%. 11초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_ENLIGHTENMENT_AURA",
         "name": "Calamity: Runeword Enlightenment / 룬워드 인라이트먼트",
-        "actorValue": "AlterationModifier",
-        "hostile": false,
+        "actorValue": "ResistMagic",
+        "hostile": true,
         "recover": true
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_ENLIGHTENMENT_AURA",
         "name": "Calamity: Runeword Enlightenment / 룬워드 인라이트먼트",
-        "delivery": "Self",
+        "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_ENLIGHTENMENT_AURA",
           "magnitude": 25,
-          "duration": 8,
+          "duration": 6,
           "area": 0
         }
       }
@@ -4635,9 +4693,10 @@
       "action": {
         "type": "CastSpell",
         "spellEditorId": "CAFF_SPEL_RW_ENLIGHTENMENT_AURA",
-        "applyTo": "Self",
-        "noHitEffectArt": true,
-        "feedback": { "artObjectEditorId": "Skyrim.esm|0x0007331C", "soundForm": "Skyrim.esm|0x00081971", "target": "Owner", "durationSeconds": 0.5, "playOn": "Proc", "spatialSound": true }
+        "applyTo": "Target",
+        "statusTag": "Exposed",
+        "passiveSpellEditorId": "CAFF_SPEL_RW_ENLIGHTENMENT_PASSIVE",
+        "feedback": { "artObjectEditorId": "Skyrim.esm|0x000ABF0E", "soundForm": "Skyrim.esm|0x0003D119", "target": "Target", "durationSeconds": 0.55, "playOn": "Proc", "spatialSound": true }
       }
     },
     "slot": "prefix"
@@ -4749,7 +4808,7 @@
         "actorValue": "Magicka",
         "archetype": "Absorb",
         "hostile": true,
-        "recover": true
+        "recover": false
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_GLOOM_VEIL",
@@ -4787,9 +4846,9 @@
   {
     "id": "runeword_stone_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_STONE",
-    "name": "룬워드 스톤 [Shael-Um-Pul-Lum]: 피격 시 22% 확률로 방어구 분쇄(적 방어도 -50, 6초). 8초마다 발동.",
-    "nameEn": "Runeword Stone (Shael-Um-Pul-Lum): 22% on hit taken / ICD 8s - Armor Crush (Target Armor -50, 6s)",
-    "nameKo": "룬워드 스톤 [Shael-Um-Pul-Lum]: 피격 시 22% 확률로 방어구 분쇄(적 방어도 -50, 6초). 8초마다 발동.",
+    "name": "룬워드 스톤 [Shael-Um-Pul-Lum]: 피격 시 22% 확률로 방어구 분쇄(적 방어도 -50, 6초). 8초마다 발동. 노출.",
+    "nameEn": "Runeword Stone (Shael-Um-Pul-Lum): 22% on hit taken / ICD 8s - Armor Crush (Target Armor -50, 6s); Exposed",
+    "nameKo": "룬워드 스톤 [Shael-Um-Pul-Lum]: 피격 시 22% 확률로 방어구 분쇄(적 방어도 -50, 6초). 8초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_STONE_WALL",
@@ -5057,25 +5116,34 @@
   {
     "id": "runeword_delirium_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DELIRIUM",
-    "name": "룬워드 딜리리엄 [Lem-Ist-Io]: 적중 시 10% 확률로 정신착란(광란 5초). 15초마다 발동.",
-    "nameEn": "Runeword Delirium (Lem-Ist-Io): 10% on hit / ICD 15s - Delirium (Frenzy 5s)",
-    "nameKo": "룬워드 딜리리엄 [Lem-Ist-Io]: 적중 시 10% 확률로 정신착란(광란 5초). 15초마다 발동.",
+    "name": "룬워드 딜리리엄 [Lem-Ist-Io]: 적중 시 10% 확률로 정신착란(광란 5초, 레벨 60 이하). 15초마다 발동.",
+    "nameEn": "Runeword Delirium (Lem-Ist-Io): 10% on hit / ICD 15s - Delirium (Frenzy 5s, up to level 60)",
+    "nameKo": "룬워드 딜리리엄 [Lem-Ist-Io]: 적중 시 10% 확률로 정신착란(광란 5초, 레벨 60 이하). 15초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_DELIRIUM_CONFUSE",
-        "name": "Calamity: Runeword Delirium Confusion / 룬워드 딜리리엄 혼란",
+        "name": "Calamity: Runeword Delirium Frenzy / 룬워드 딜리리엄 광란",
         "actorValue": "Aggression",
         "hostile": true,
-        "recover": false,
-        "archetype": "Frenzy"
+        "recover": true,
+        "archetype": "Frenzy",
+        "conditions": [
+          { "function": "IsChild", "value": 0 },
+          { "function": "IsCommandedActor", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013796", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00013797", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x00035D59", "value": 0 },
+          { "function": "HasKeyword", "keywordForm": "Skyrim.esm|0x0001397A", "value": 0 },
+          { "function": "IsUndead", "value": 0 }
+        ]
       },
       "spell": {
         "editorId": "CAFF_SPEL_RW_DELIRIUM_CONFUSE",
-        "name": "Calamity: Runeword Delirium Confusion / 룬워드 딜리리엄 혼란",
+        "name": "Calamity: Runeword Delirium Frenzy / 룬워드 딜리리엄 광란",
         "delivery": "TargetActor",
         "effect": {
           "magicEffectEditorId": "CAFF_MGEF_RW_DELIRIUM_CONFUSE",
-          "magnitude": 20,
+          "magnitude": 60,
           "duration": 5,
           "area": 0
         }
@@ -5152,9 +5220,9 @@
   {
     "id": "runeword_flickering_flame_final",
     "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FLICKERING_FLAME",
-    "name": "룬워드 플리커링 플레임 [Nef-Pul-Vex]: 매 적중 시 화염 침식(적 화염저항 -25, 6초). 0.5초마다 발동.",
-    "nameEn": "Runeword Flickering Flame (Nef-Pul-Vex): 100% on hit / ICD 0.5s - Flame Erosion (Target Fire Resist -25, 6s)",
-    "nameKo": "룬워드 플리커링 플레임 [Nef-Pul-Vex]: 매 적중 시 화염 침식(적 화염저항 -25, 6초). 0.5초마다 발동.",
+    "name": "룬워드 플리커링 플레임 [Nef-Pul-Vex]: 매 적중 시 화염 침식(적 화염저항 -25, 6초). 0.5초마다 발동. 노출.",
+    "nameEn": "Runeword Flickering Flame (Nef-Pul-Vex): 100% on hit / ICD 0.5s - Flame Erosion (Target Fire Resist -25, 6s); Exposed",
+    "nameKo": "룬워드 플리커링 플레임 [Nef-Pul-Vex]: 매 적중 시 화염 침식(적 화염저항 -25, 6초). 0.5초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_FLICKER_FIRE_SHRED",
@@ -5321,7 +5389,7 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_RW_METAMORPHOSIS_SHIFT",
         "name": "Calamity: Runeword Metamorphosis / 룬워드 메타모포시스",
-        "actorValue": "Invisibility",
+        "actorValue": "None",
         "hostile": false,
         "recover": true,
         "archetype": "Etherealize"

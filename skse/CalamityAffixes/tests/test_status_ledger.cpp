@@ -5,7 +5,10 @@
 namespace
 {
 	using CalamityAffixes::DoomPending;
+	using CalamityAffixes::ExposureValue;
+	using CalamityAffixes::PlanExposure;
 	using CalamityAffixes::DoomQueue;
+	using CalamityAffixes::DyingDoomLedger;
 	using CalamityAffixes::ParseStatusKind;
 	using CalamityAffixes::StatusEntry;
 	using CalamityAffixes::StatusKind;
@@ -93,6 +96,72 @@ namespace
 		return queue.Empty();
 	}
 
+	constexpr bool CheckDoomKeepsTheAffixOfTheLargerBurst()
+	{
+		DoomQueue queue{};
+		queue.Mark({ 7u, kTarget, 40.0f, 1500 });
+		queue.Mark({ 9u, kTarget, 25.0f, 2500 });  // smaller: only the timer moves
+		if (queue.Find(kTarget)->affixToken != 7u) return false;
+		queue.Mark({ 9u, kTarget, 60.0f, 3000 });  // larger: its affix bursts
+		return queue.Find(kTarget)->affixToken == 9u && queue.Find(kTarget)->magnitude == 60.0f;
+	}
+
+	constexpr bool CheckExposurePlan()
+	{
+		constexpr std::uint32_t kMagicRes = 44u;
+		constexpr std::uint32_t kMagickaRate = 50u;
+		StatusLedger ledger{};
+		ledger.Record(Entry(kTarget, StatusKind::kExposed, 1u, kMagicRes, 30.0f, 6000));  // Rift: -30
+		// Mist (spell 2) lowers magicka regen (new) and magic resist by 30 (a tie).
+		std::array<ExposureValue, 2> mist{ { { kMagickaRate, 100.0f }, { kMagicRes, 30.0f } } };
+		auto plan = PlanExposure(ledger, kTarget, 2u, mist, 2u, 1000);
+		if (!plan.improves || plan.keepStrongerCount != 0u) return false;
+		if (plan.replacedCount != 1u || plan.replaced[0].spellFormID != 1u) return false;  // the tie replaces Rift
+		// Against a stronger -40 the resist part is dropped, the regen part still lands.
+		ledger.Record(Entry(kTarget, StatusKind::kExposed, 3u, kMagicRes, 40.0f, 6000));
+		plan = PlanExposure(ledger, kTarget, 2u, mist, 2u, 1000);
+		if (!plan.improves || plan.keepStrongerCount != 1u || plan.keepStronger[0] != kMagicRes) return false;
+		// Nothing gained on any value: skip the cast.
+		std::array<ExposureValue, 1> weak{ { { kMagicRes, 20.0f } } };
+		if (PlanExposure(ledger, kTarget, 4u, weak, 1u, 1000).improves) return false;
+		// The same spell again is a refresh, not compared with itself.
+		std::array<ExposureValue, 1> rift{ { { kMagicRes, 40.0f } } };
+		const auto refresh = PlanExposure(ledger, kTarget, 3u, rift, 1u, 1000);
+		if (refresh.replacedCount != 1u || refresh.replaced[0].spellFormID != 1u ||
+			PlanExposure(ledger, kTarget, 5u, rift, 1u, 1000).improves) return false;
+		// Two affixes sharing one spell (Shock Weakness -25, Elemental Bane -15):
+		// the weaker recast would replace the live -25, so it gains nothing; an
+		// equal recast refreshes.
+		StatusLedger shared{};
+		shared.Record(Entry(kTarget, StatusKind::kExposed, 7u, kShockRes, 25.0f, 6000));
+		std::array<ExposureValue, 1> weakerSame{ { { kShockRes, 15.0f } } };
+		std::array<ExposureValue, 1> equalSame{ { { kShockRes, 25.0f } } };
+		return !PlanExposure(shared, kTarget, 7u, weakerSame, 1u, 1000).improves &&
+		       PlanExposure(shared, kTarget, 7u, equalSame, 1u, 1000).improves;
+	}
+
+	// Killed at t=0.8 before a burst due at 1.5; dead=true arrives at 1.9.
+	constexpr bool CheckDyingDoomOutlivesTheBurstTime()
+	{
+		DyingDoomLedger dying{};
+		dying.Keep({ 9u, kTarget, 40.0f, 1500 }, 3u, 800);
+		const auto kept = dying.Find(kTarget, 1900);
+		if (!kept || kept->doom.magnitude != 40.0f || kept->markSpellFormID != 3u) return false;
+		if (dying.Find(kTarget, 800 + DyingDoomLedger::kGraceMs)) return false;  // grace over
+		dying.Forget(kTarget);
+		return !dying.Find(kTarget, 1900);
+	}
+
+	constexpr bool CheckDyingDoomBound()
+	{
+		DyingDoomLedger dying{};
+		for (std::uint32_t i = 0; i < DyingDoomLedger::kCapacity + 4u; ++i) {
+			dying.Keep({ 1u, 100u + i, 1.0f, 0 }, 3u, static_cast<std::int64_t>(i));
+		}
+		// The oldest were replaced; the newest is still there.
+		return !dying.Find(100u, 100) && dying.Find(100u + DyingDoomLedger::kCapacity + 3u, 100).has_value();
+	}
+
 	constexpr bool CheckDoomQueueBound()
 	{
 		DoomQueue queue{};
@@ -111,4 +180,8 @@ static_assert(CheckStrongestAndRefresh(), "the ledger finds the strongest of a k
 static_assert(CheckCollectAndPrune(), "Contagion collects only a target's live statuses");
 static_assert(CheckFullLedgerEvictsSoonestToExpire(), "a full ledger drops the entry closest to expiring");
 static_assert(CheckDoomRefreshesWithoutStacking(), "re-marking Doom moves the timer and keeps the larger burst");
+static_assert(CheckDoomKeepsTheAffixOfTheLargerBurst(), "a refresh keeps the affix whose burst it keeps");
+static_assert(CheckExposurePlan(), "Exposed casts only when they beat what is there, value by value");
 static_assert(CheckDoomQueueBound(), "the Doom queue is bounded but still refreshes marked targets");
+static_assert(CheckDyingDoomOutlivesTheBurstTime(), "a dying target keeps its Doom for Contagion past the burst time");
+static_assert(CheckDyingDoomBound(), "the dying-Doom ledger is bounded and replaces its oldest entry");

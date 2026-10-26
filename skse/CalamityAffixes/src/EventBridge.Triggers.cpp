@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LowHealthRearmPolicy.h"
 #include "CalamityAffixes/LowHealthTriggerSnapshot.h"
 #include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include "CalamityAffixes/TriggerDispatchSnapshot.h"
@@ -133,6 +134,9 @@ namespace CalamityAffixes
 
 		const bool usesPerTargetIcd = (affix.perTargetIcd.count() > 0 && a_target && affix.token != 0u);
 		CommitTriggerProcRuntime(affix, perTargetKey, usesPerTargetIcd, chance, a_now);
+		if (a_trigger == Trigger::kLowHealth && _lowHealthFromUnroutedDamage) {
+			NoteDebugTestEvent("lowhealth:unrouted");
+		}
 
 		if (_loot.debugLog) {
 			SKSE::log::debug(
@@ -170,7 +174,12 @@ namespace CalamityAffixes
 		RecordRecentCombatEvent(a_trigger, a_owner, a_now);
 	}
 
-	void EventBridge::ProcessTrigger(Trigger a_trigger, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData)
+	void EventBridge::ProcessTrigger(
+		Trigger a_trigger,
+		RE::Actor* a_owner,
+		RE::Actor* a_target,
+		const RE::HitData* a_hitData,
+		float a_lowHealthDamageTaken)
 	{
 		// Owned by this frame: the loop below dispatches affix actions that
 		// re-enter the engine, and a re-entrant RebuildActiveCounts rebuilds
@@ -182,11 +191,22 @@ namespace CalamityAffixes
 
 		const auto now = std::chrono::steady_clock::now();
 		const auto lowHealthOwnerFormID = (a_trigger == Trigger::kLowHealth && a_owner) ? a_owner->GetFormID() : 0u;
+		const float lowHealthCurrentPct =
+			lowHealthOwnerFormID != 0u ? ResolveLowHealthTriggerCurrentPct(a_trigger, a_owner) : 100.0f;
+		// "previous" is the health just before this damage when the amount is
+		// known; the last stored snapshot otherwise.
 		const auto lowHealthSnapshot = BuildLowHealthTriggerSnapshot(
 			a_trigger == Trigger::kLowHealth,
 			lowHealthOwnerFormID,
-			lowHealthOwnerFormID != 0u ? ResolveLowHealthTriggerCurrentPct(a_trigger, a_owner) : 100.0f,
-			ResolveLowHealthTriggerPreviousPct(lowHealthOwnerFormID));
+			lowHealthCurrentPct,
+			detail::ResolveLowHealthPreHitPct(
+				lowHealthCurrentPct,
+				lowHealthOwnerFormID != 0u ? ResolveLowHealthTriggerDamagePct(a_owner, a_lowHealthDamageTaken) : 0.0f,
+				ResolveLowHealthTriggerPreviousPct(lowHealthOwnerFormID)));
+		if (lowHealthSnapshot.hasSnapshot) {
+			// Before TryProcessTriggerAffix: a heal during the ICD must rearm.
+			RearmLowHealthTriggers(indices, a_owner, lowHealthSnapshot.previousPct, lowHealthSnapshot.currentPct);
+		}
 
 		if (indices.empty()) {
 			FinalizeTriggerDispatch(

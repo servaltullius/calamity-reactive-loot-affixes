@@ -1,5 +1,6 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/SerializationWireContract.h"
+#include "CalamityAffixes/StaleStatMigration.h"
 
 #include <array>
 #include <cstdint>
@@ -138,8 +139,9 @@ namespace CalamityAffixes
 			snapshot.lootShuffleBags.push_back(std::move(wireBag));
 		}
 
-		snapshot.migrationFlags = (_miscCurrencyMigrated ? 1u : 0u)
-			| (_miscCurrencyRecovered ? 2u : 0u);
+		snapshot.migrationFlags = static_cast<std::uint8_t>((_miscCurrencyMigrated ? 1u : 0u)
+			| (_miscCurrencyRecovered ? 2u : 0u)
+			| (_staleStatModifiersMigrated ? StaleStatMigration::kMigrationFlagBit : 0u));
 
 		// Only items that still carry affixes keep a count; a stale entry would
 		// otherwise price a future item that reuses the same instance key.

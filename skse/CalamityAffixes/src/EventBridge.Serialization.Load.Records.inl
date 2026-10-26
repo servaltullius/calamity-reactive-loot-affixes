@@ -598,6 +598,7 @@
 		}
 		_miscCurrencyMigrated = (flags & 1u) != 0;
 		_miscCurrencyRecovered = (flags & 2u) != 0;
+		_staleStatModifiersMigrated = (flags & StaleStatMigration::kMigrationFlagBit) != 0;
 	}
 
 	void EventBridge::LoadInstanceReforgeCountsRecord(

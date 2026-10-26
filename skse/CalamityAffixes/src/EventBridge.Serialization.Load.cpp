@@ -5,6 +5,7 @@
 #include "CalamityAffixes/SerializationCurrentRecordReader.h"
 #include "CalamityAffixes/SerializationDrainPolicy.h"
 #include "CalamityAffixes/SerializationLoadState.h"
+#include "CalamityAffixes/StaleStatMigration.h"
 
 #include <algorithm>
 #include <array>

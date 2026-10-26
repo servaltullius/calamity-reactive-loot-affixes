@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Release](https://img.shields.io/badge/Release-v2.2.2-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.2)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.2/CalamityAffixes_MO2_v2.2.2_2026-09-28.zip)
+[![Release](https://img.shields.io/badge/Release-v2.2.8-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.8)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.8/CalamityAffixes_MO2_v2.2.8_2026-10-09.zip)
 [![Nexus Mods](https://img.shields.io/badge/Nexus%20Mods-Calamity%202-d98f40)](https://www.nexusmods.com/skyrimspecialedition/mods/193193)
 
 ## 어떤 모드인가요?
@@ -16,11 +16,11 @@
 
 ## 다운로드 (플레이어)
 
-> **현재 정식 릴리스:** [v2.2.2](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.2)
+> **현재 정식 릴리스:** [v2.2.8](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.8)
 
 - 넥서스: [Calamity 2 - Reactive Loot and Affixes](https://www.nexusmods.com/skyrimspecialedition/mods/193193) (2.0부터의 새 페이지. 옛 페이지 [mods/172116](https://www.nexusmods.com/skyrimspecialedition/mods/172116)은 1.2.21에서 멈춘 구버전입니다)
-- MO2 ZIP: [CalamityAffixes_MO2_v2.2.2_2026-09-28.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.2/CalamityAffixes_MO2_v2.2.2_2026-09-28.zip)
-- SHA-256: [CalamityAffixes_MO2_v2.2.2_2026-09-28.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.2/CalamityAffixes_MO2_v2.2.2_2026-09-28.zip.sha256)
+- MO2 ZIP: [CalamityAffixes_MO2_v2.2.8_2026-10-09.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.8/CalamityAffixes_MO2_v2.2.8_2026-10-09.zip)
+- SHA-256: [CalamityAffixes_MO2_v2.2.8_2026-10-09.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.8/CalamityAffixes_MO2_v2.2.8_2026-10-09.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 
@@ -28,7 +28,7 @@
 
 스카이림 SE/AE의 개별 장비 인스턴스에 Diablo/PoE 스타일 어픽스와 룬워드를 부여하고, 전투 발동·ICD·통화 수급을 SKSE 런타임에서 처리합니다.
 
-- 일반 접두 73개, 일반 접미 66개(22계열), 룬워드 94개와 룬 33종을 데이터 기반으로 제공합니다.
+- 일반 접두 73개(루트 풀에서 빠진 3개 제외), 일반 접미 66개(22계열), 룬워드 95개와 룬 33종을 데이터 기반으로 제공합니다.
 - 적중·피격·처치·저체력 조건의 주문, 전환, 함정, 소환, 시체 폭발 등 다양한 전투 효과를 지원합니다.
 - 장비는 owner FormID + UID 단위로 추적하며, 획득 시 자동 롤 대신 플레이어가 원하는 베이스를 골라 확인 스크롤로 감정하고 재련·정제로 다듬습니다.
 - 룬 조각·재련 오브·확인 스크롤·정제 오브는 적격 적대 대상의 시체에서만 획득하며, 일반 확률·피티와 고유·보스·드래곤 확정 보상을 함께 지원합니다.
@@ -96,7 +96,7 @@
 - Prisma 조작 패널 토글: 기본 `F11` (MCM에서 변경 가능)
 - Prisma 패널에서 **재련 오브(Reforge Orb)** 를 사용해 선택 장비를 재련할 수 있습니다. 최초 부여는 확인 스크롤 1개, 선택 재련은 재련 오브 2개, 슬롯 확장은 2/4개를 사용합니다.
 - 일반 적은 룬 조각 8%와 재련 오브 12% 독립 판정을 사용하며, 적격 드래곤은 두 통화를 각각 1개씩 확정 지급합니다. 보상은 플레이어에게 바로 들어오지 않고 처치한 대상의 시체에 추가됩니다.
-- 잘못 연결된 어픽스 상태를 지우려면 디버그 모드를 켜고 장비를 착용·선택한 뒤 고급 탭 **복구 및 초기화**의 **Reset State / 상태 초기화**를 두 번 누릅니다. 이 섹션은 디버그 모드에서만 보입니다. 일반 어픽스만 다시 굴리려면 정제 오브를 사용하세요. Calamity 어픽스/룬워드/런타임 상태가 제거되며 재료는 환불되지 않습니다.
+- 잘못 연결된 어픽스 상태를 지우려면 디버그 모드를 켜고 장비를 착용·선택한 뒤 고급 탭 **복구 및 초기화** 섹션을 펼치고 **선택한 장비 초기화**를 누른 뒤, 버튼이 **전체 초기화 확인**으로 바뀌면 6초 안에 한 번 더 누릅니다. 이 섹션은 디버그 모드에서만 보입니다. 일반 어픽스만 다시 굴리려면 정제 오브를 사용하세요. Calamity 어픽스/룬워드/런타임 상태가 제거되며 재료는 환불되지 않습니다.
 - 룬워드 패널에서 레시피를 선택하면 **효과/권장 베이스/룬 순서/상세**가 한국어/영어 설정에 맞춰 상태 영역에 표시되며, 레시피 항목 hover로도 상세 효과를 확인할 수 있습니다.
 - 패널은 화면 경계 안에 자동 배치되고, 레시피 목록은 wheel·스크롤바 드래그·키보드 스크롤과 ARIA 접근성을 함께 지원합니다.
 
@@ -104,7 +104,7 @@
 
 - 툴팁이 안 뜸: Prisma UI 설치 확인, `Data/PrismaUI/views/CalamityAffixes/index.html`가 있는지 확인, 로그 확인
 - 실행/크래시: 런타임과 맞는 SKSE/Address Library인지 확인, `Data/SKSE/Plugins/*.dll` 충돌 여부 확인
-- 판매/상자 이동 뒤 다른 장비에 예전 어픽스가 보임: 잘못 표시된 장비를 착용·선택하고 디버그 모드에서 고급 탭의 **Reset State / 상태 초기화**를 두 번 누릅니다. v1.2.22부터 새 소유권 이동은 owner+UID 기준으로 추적되며 상태끼리 병합되지 않습니다.
+- 판매/상자 이동 뒤 다른 장비에 예전 어픽스가 보임: 잘못 표시된 장비를 착용·선택하고 디버그 모드에서 고급 탭 **복구 및 초기화**의 **선택한 장비 초기화**를 누르고, **전체 초기화 확인**으로 바뀌면 한 번 더 누릅니다. v1.2.22부터 새 소유권 이동은 owner+UID 기준으로 추적되며 상태끼리 병합되지 않습니다.
 - 업데이트 뒤 구 SPID 분배가 계속 보임: MO2에서 새 버전을 별도 모드로 겹쳐 켜면 충돌 우선순위에 따라 구 `CalamityAffixes_DISTR.ini`가 새 빈 파일보다 우선할 수 있습니다. 기존 Calamity 모드를 교체/덮어쓰거나 구 DISTR 파일을 비활성화하세요.
 - 설정 변경:
   - MCM Helper가 있으면 MCM에서 조정
@@ -112,6 +112,18 @@
   - 런타임/MCM UI 값은 `Data/SKSE/Plugins/CalamityAffixes/user_settings.json`에도 저장되어, 새 게임/재시작 후에도 마지막 설정을 복원합니다.
   - 런타임(MCM) 값 저장은 짧은 디바운스(약 250ms)로 묶어 디스크 쓰기 빈도를 줄입니다.
   - `user_settings.json` 파싱/IO 실패 시 기존 파일을 빈 값으로 덮어쓰지 않고 보존합니다.
+
+## 제거하거나 이전 버전으로 되돌릴 때
+
+접미와 룬워드 상시 효과는 기술·저항·체력·소지 무게를 실제로 바꾸는 능력입니다. 모드를 그냥 지우면 그 보너스가 캐릭터에 남을 수 있습니다.
+
+1. MCM에서 **Enable Mod**를 끕니다. `Calamity: disabled` 알림이 나오면 상시 효과가 모두 빠진 것입니다. (또는 Calamity 장비를 모두 벗습니다.)
+2. 메뉴 밖에서 10초쯤 기다려 시한 버프와 노출 효과가 끝나게 합니다.
+3. 새 슬롯에 저장합니다.
+4. 모드를 지울 때는 ESP·DLL·나머지 파일을 함께 지웁니다. ESP만 남기고 DLL을 지우면 상시 능력이 그대로 남습니다.
+5. 2.3.0에서 2.2.x나 rc로 되돌릴 때도 1~3을 한 뒤 옛 버전을 설치하고 그 세이브를 불러와 다시 켭니다. 끈 설정은 사용자 설정 파일에 남아 옛 DLL도 꺼진 채 시작합니다.
+
+이 순서를 건너뛰어 남은 보너스는 콘솔 `player.modav`, 마법 메뉴에 남은 Calamity 주문(예: 룬워드 엣지)은 `player.removespell`로 지울 수 있습니다. 활 당기기 속도 보너스는 저장할 때마다 빠지므로 따로 할 일이 없습니다.
 
 ## 이 레포는 무엇인가요?
 
@@ -176,7 +188,7 @@
 
 - `docs/design/` : 개발 명세서(컨셉/제약/설계)
 - `docs/AFFIX_CATALOG.md` : 현재 구현된 효과 목록(한국어 요약)
-- `docs/RUNEWORD_EFFECTS.md` : JSON에서 개별 정의한 룬워드 94개 레시피별 효과 설명
+- `docs/RUNEWORD_EFFECTS.md` : JSON에서 개별 정의한 룬워드 95개 레시피별 효과 설명
 - `docs/EFFECTS_EN.md` : 영어권 플레이어용 전체 효과 목록(접두·접미·룬워드, 게임 내 영문 문구, 넥서스 링크용)
 - `THIRD_PARTY_NOTICES.txt` : DLL에 들어가는 오픈소스(CommonLibSSE-NG, spdlog, fmt, nlohmann/json, rapidcsv, Xbyak)의 MIT·BSD 라이선스 고지. 배포 ZIP의 `Docs/`에도 들어갑니다.
 - `Data/` : 게임 `Data/`에 그대로 설치 가능한 “스테이징” 폴더 (MO2 테스트용)
@@ -224,7 +236,7 @@
 
 - powerofthree's Tweaks ([Nexus](https://www.nexusmods.com/skyrimspecialedition/mods/51073))
 - 2.2.7까지는 사실상 필수였습니다. 이 모드는 자기 주문·재화·이펙트를 이름(에디터 ID)으로 찾는데, 스카이림은 이 이름을 버리기 때문에 powerofthree's Tweaks의 "Load EditorIDs"(기본 켜짐)가 있어야 찾을 수 있었습니다.
-- 2.2.8부터는 DLL이 `CalamityAffixes.esp`를 직접 읽어 이름표를 만들므로 없어도 동작합니다. 있으면 다른 모드·바닐라 폼의 이름까지 읽을 수 있어서, 방어구 제외 목록(`rewardbox`·`lootbox` 등)과 보스 상자 이름 판정이 함께 적용됩니다.
+- 2.2.8부터는 DLL이 `CalamityAffixes.esp`를 직접 읽어 이름표를 만들므로 없어도 동작합니다. 있으면 다른 모드·바닐라 폼의 이름까지 읽을 수 있어서, 방어구 제외 목록(`rewardbox`·`lootbox` 등)이 다른 모드의 폼까지 넓게 적용됩니다. (화폐는 시체에서만 나오므로 상자·보스 상자 분류는 효과가 없습니다.)
 
 #### (권장) KID
 
@@ -340,8 +352,8 @@ python3 -m json.tool Data/MCM/Config/CalamityAffixes/keybinds.json >/dev/null
 ## 룬워드 제작(실험)
 
 - 현재는 **유저 자유 베이스 지정**을 지원합니다. (장착 중 무기/방어구를 순환 선택)
-- 레시피는 D2/D2R 기준 **94개 룬워드 카탈로그**(2차 확장)를 제공합니다. 레시피별 **권장 베이스 타입(무기/방어구)**은 안내만 하고 강제하지 않습니다.
-- 룬워드 94개는 `affixes/affixes.json`의 JSON 정의로 각각 명시되며, 생성기는 정확히 **94개 레시피 + 33개 룬 가중치** 계약이 아니거나 ID/레코드가 충돌하면 실패합니다.
+- 레시피는 D2/D2R 기준 **95개 룬워드 카탈로그**(2차 확장)를 제공합니다. 레시피별 **권장 베이스 타입(무기/방어구)**은 안내만 하고 강제하지 않습니다.
+- 룬워드 95개는 `affixes/affixes.json`의 JSON 정의로 각각 명시되며, 생성기는 정확히 **95개 레시피 + 33개 룬 가중치** 계약이 아니거나 ID/레코드가 충돌하면 실패합니다.
 - Prisma 룬워드 패널은 **검색 + 총/검색결과 카운트**와 한국어/영어 상세 설명을 표시하며, 화면 경계 제한과 wheel·스크롤바·키보드/ARIA 탐색을 지원합니다.
 - 조각 수급:
   - 설정 파일의 `hybrid` 값은 구버전 호환 토큰입니다. 실제 권한은 **SKSE death event corpse-only** 경로 하나입니다.

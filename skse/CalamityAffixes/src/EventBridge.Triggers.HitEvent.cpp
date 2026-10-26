@@ -2,6 +2,7 @@
 #include "CalamityAffixes/HostileEffectGuard.h"
 
 #include "CalamityAffixes/CombatContext.h"
+#include "CalamityAffixes/CorpseHitFilter.h"
 #include "CalamityAffixes/HitDataUtil.h"
 #include "CalamityAffixes/Hooks.h"
 #include "CalamityAffixes/PointerSafety.h"
@@ -14,11 +15,51 @@
 #include <atomic>
 #include <cstdint>
 #include <mutex>
+#include <unordered_map>
 
 
 namespace CalamityAffixes
 {
 	using namespace TriggersDetail;
+
+	namespace
+	{
+		using FallbackHitContentMap = std::unordered_map<std::uint64_t, FallbackHitContentRecord>;
+
+		// Bounded like the hook ledger, but by age only: a record keeps blocking
+		// its swing for as long as it is plausible a spell reads it back.
+		constexpr std::size_t kFallbackHitContentMaxEntries = 1024u;
+		constexpr auto kFallbackHitContentPruneAge = std::chrono::minutes(10);
+
+		[[nodiscard]] bool IsReusedFallbackHitData(
+			const FallbackHitContentMap& a_map,
+			std::uint64_t a_pairKey,
+			std::uint64_t a_content) noexcept
+		{
+			const auto it = a_map.find(a_pairKey);
+			return detail::IsReusedFallbackHitContent(
+				a_content,
+				it != a_map.end(),
+				it != a_map.end() ? it->second.content : 0u);
+		}
+
+		void RecordFallbackHitData(
+			FallbackHitContentMap& a_map,
+			std::uint64_t a_pairKey,
+			std::uint64_t a_content,
+			std::chrono::steady_clock::time_point a_now)
+		{
+			if (a_content == 0u) {
+				return;
+			}
+			a_map[a_pairKey] = FallbackHitContentRecord{ .content = a_content, .at = a_now };
+			if (a_map.size() > kFallbackHitContentMaxEntries) {
+				std::erase_if(a_map, [&](const auto& a_entry) {
+					return (a_now - a_entry.second.at) >= kFallbackHitContentPruneAge;
+				});
+			}
+		}
+	}
 
 	RE::BSEventNotifyControl EventBridge::HandleHitEvent(
 		const RE::TESHitEvent* a_event,
@@ -99,10 +140,11 @@ namespace CalamityAffixes
 		// NOTE: Some modlists can override vfunc hooks. If HandleHealthDamage is not routed through our hook
 		// for this actor, fall back to TESHitEvent-driven procs so affixes still work.
 		const bool hookRouted = CalamityAffixes::Hooks::IsHandleHealthDamageHooked(target);
-		if (!hookRouted) {
-			// KID can patch keywords after kDataLoaded; re-sync equipped counts occasionally so procs become active.
-			MaybeResyncEquippedAffixes(now);
-		}
+		// Safety-net resync on every hit, hook mode included: KID can patch
+		// keywords after kDataLoaded and an equip change can be missed. The
+		// configured interval is enforced inside. This runs in the deferred
+		// event drain on the game thread with _stateMutex held.
+		MaybeResyncEquippedAffixes(now);
 
 		if (!hookRouted) {
 			if (_loot.debugLog) {
@@ -125,9 +167,13 @@ namespace CalamityAffixes
 					}
 				}
 			} else {
-			// Outgoing (player-owned).
-			if (_configLoaded && relation.attackerIsPlayerOwned && relation.playerOwner) {
-				if (relation.hostileEitherDirection) {
+				const auto pairKey =
+					(static_cast<std::uint64_t>(aggressor->GetFormID()) << 32) |
+					static_cast<std::uint64_t>(target->GetFormID());
+
+				// Outgoing (player-owned).
+				if (_configLoaded && relation.attackerIsPlayerOwned && relation.playerOwner &&
+					relation.hostileEitherDirection) {
 					MarkPlayerCombatEvidence(
 						now,
 						PlayerCombatEvidenceSource::kTesHitOutgoing,
@@ -140,25 +186,63 @@ namespace CalamityAffixes
 						.source = a_event->source
 					};
 
-						if (!ShouldSuppressDuplicateHit(key, now)) {
-							const auto* hitData = a_context.hitData ? &*a_context.hitData : nullptr;
-							const bool hasCommittedHitData = detail::IsCommittedFallbackHitData(
-								hitData != nullptr,
-								hitData && HitDataUtil::HitDataMatchesActors(hitData, target, aggressor),
-								hitData && HitDataUtil::HasHitLikeSource(hitData, aggressor));
+					if (!ShouldSuppressDuplicateHit(key, now)) {
+						const auto* hitData = a_context.hitData ? &*a_context.hitData : nullptr;
+						const bool hasCommittedHitData = detail::IsCommittedFallbackHitData(
+							hitData != nullptr,
+							hitData && HitDataUtil::HitDataMatchesActors(hitData, target, aggressor),
+							hitData && HitDataUtil::HasHitLikeSource(hitData, aggressor));
+						const auto hitContent = hasCommittedHitData ? HitDataUtil::MakeHitContentSignature(hitData) : 0u;
 
-							// Some weapon types (especially modded weapons with custom
-							// animations) raise TESHitEvent before HitData is fully
-							// committed to the target actor.  The engine may fire the
-							// first event with stale/incomplete hitData (missing or
-							// actor-mismatched source data) and a follow-up event with
-							// the real data.
-							// Reset duplicate tracking so the follow-up is processed.
-							if (!hasCommittedHitData) {
-								_combatState.lastHitAt = {};
-							} else {
-								ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
-								ProcessEchoStrikeHit(aggressor, target, hitData, now);
+						// A spell, breath or enchantment event after a swing reads that
+						// swing back as committed HitData: count each content once.
+						const bool reusedHitContent =
+							hasCommittedHitData && IsReusedFallbackHitData(_combatState.fallbackOutgoingHitContent, pairKey, hitContent);
+
+						// Some weapon types (especially modded weapons with custom
+						// animations) raise TESHitEvent before HitData is fully
+						// committed to the target actor.  The engine may fire the
+						// first event with stale/incomplete hitData (missing or
+						// actor-mismatched source data) and a follow-up event with
+						// the real data.
+						// Reset duplicate tracking so the follow-up is processed.
+						// This event comes after the damage, so the killing blow already
+						// finds the target dead: only a hit right after the observed
+						// death counts (ClassifyDeadTargetHit), and only the first one.
+						bool corpseHit = false;
+						if (!reusedHitContent && hasCommittedHitData && target->IsDead()) {
+							const auto deathIt = _combatState.recentDeathObservedMs.find(target->GetFormID());
+							const auto verdict = ClassifyDeadTargetHit(
+								deathIt != _combatState.recentDeathObservedMs.end(),
+								std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count(),
+								deathIt != _combatState.recentDeathObservedMs.end() ? deathIt->second : 0);
+							corpseHit = verdict == DeadTargetHitVerdict::kCorpseHit ||
+								!_combatState.fallbackCorpseHits.AdmitDeadTargetHit(target->GetFormID(), StatusClockNowMs());
+						}
+						if (reusedHitContent) {
+							// Like uncommitted data: the real follow-up event for this
+							// pair must not fall into the duplicate window.
+							_combatState.lastHitAt = {};
+							if (_loot.debugLog) {
+								SKSE::log::debug(
+									"CalamityAffixes: TESHitEvent fallback skipped reused lastHitData (target={:08X}, source=0x{:X}).",
+									target->GetFormID(),
+									a_event->source);
+							}
+						} else if (corpseHit) {
+							RecordFallbackHitData(_combatState.fallbackOutgoingHitContent, pairKey, hitContent, now);
+							NoteDebugTestEvent("corpse:skipped");
+							if (_loot.debugLog) {
+								SKSE::log::debug(
+									"CalamityAffixes: TESHitEvent fallback skipped procs on a corpse hit (target={:08X}).",
+									target->GetFormID());
+							}
+						} else if (!hasCommittedHitData) {
+							_combatState.lastHitAt = {};
+						} else {
+							RecordFallbackHitData(_combatState.fallbackOutgoingHitContent, pairKey, hitContent, now);
+							ProcessTrigger(Trigger::kHit, relation.playerOwner, target, hitData);
+							ProcessEchoStrikeHit(aggressor, target, hitData, now);
 
 							if (aggressor->IsPlayerRef()) {
 								const auto cocBatch = EvaluateCastOnCrit(aggressor, target, hitData);
@@ -180,36 +264,38 @@ namespace CalamityAffixes
 												coc.effectiveness,
 												coc.magnitudeOverride,
 												aggressor);
+											if (coc.riderSpell) {
+												CastHostileOnlySpellImmediate(
+													magicCaster,
+													coc.riderSpell,
+													coc.noHitEffectArt,
+													target,
+													coc.effectiveness,
+													0.0f,
+													aggressor);
+												NoteDebugTestEvent("coc:rider");
+											}
 										}
 									}
-								}
-							}
-
-							if (aggressor->IsPlayerRef() && !_affixSpecialActions.archmageAffixIndices.empty()) {
-								auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_event->source);
-								auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
-								if (spell) {
-									ProcessArchmageSpellHit(aggressor, target, spell, hitData);
 								}
 							}
 						}
 					}
 				}
-			}
 
-			// Incoming (player hit).
-			if (_configLoaded && relation.targetIsPlayer && relation.hostileEitherDirection) {
-				MarkPlayerCombatEvidence(
-					now,
-					PlayerCombatEvidenceSource::kTesHitIncoming,
-					target,
-					aggressor);
-				const LastHitKey key{
-					.outgoing = false,
-					.aggressor = aggressor->GetFormID(),
-					.target = target->GetFormID(),
-					.source = a_event->source
-				};
+				// Incoming (player hit).
+				if (_configLoaded && relation.targetIsPlayer && relation.hostileEitherDirection) {
+					MarkPlayerCombatEvidence(
+						now,
+						PlayerCombatEvidenceSource::kTesHitIncoming,
+						target,
+						aggressor);
+					const LastHitKey key{
+						.outgoing = false,
+						.aggressor = aggressor->GetFormID(),
+						.target = target->GetFormID(),
+						.source = a_event->source
+					};
 
 					if (!ShouldSuppressDuplicateHit(key, now)) {
 						const auto* hitData = a_context.hitData ? &*a_context.hitData : nullptr;
@@ -228,40 +314,64 @@ namespace CalamityAffixes
 						if (!hasCommittedHitData) {
 							_combatState.lastHitAt = {};
 						} else {
-							// Hook-compat fallback:
-							// If HandleHealthDamage hook is not routed, emulate MoM by refunding Health after hit landed.
-							// (Hook path reduces damage pre-hit; TESHitEvent fallback can only correct post-hit.)
-							if (!target->IsDead()) {
-								float fallbackIncomingDamage = std::max(
-									0.0f,
-									hitData->totalDamage - hitData->resistedPhysicalDamage - hitData->resistedTypedDamage);
-								if (fallbackIncomingDamage > 0.0f) {
-									const auto mom = EvaluateMindOverMatter(target, aggressor, hitData, fallbackIncomingDamage);
-									if (mom.redirectedDamage > 0.0f) {
-										if (auto* avOwner = skyrim_cast<RE::ActorValueOwner*>(target)) {
-											avOwner->RestoreActorValue(
-												RE::ACTOR_VALUE_MODIFIER::kDamage,
-												RE::ActorValue::kHealth,
-												mom.redirectedDamage);
-											if (_loot.debugLog) {
-												SKSE::log::debug(
-													"CalamityAffixes: TESHitEvent fallback applied MoM heal correction (redirected={}).",
+							const auto hitContent = HitDataUtil::MakeHitContentSignature(hitData);
+							// An enemy's breath or spell after its swing reads that swing back:
+							// no second MoM refund or IncomingHit for it. LowHealth still runs.
+							const bool reusedHitContent =
+								IsReusedFallbackHitData(_combatState.fallbackIncomingHitContent, pairKey, hitContent);
+							if (!reusedHitContent) {
+								RecordFallbackHitData(_combatState.fallbackIncomingHitContent, pairKey, hitContent, now);
+								// Hook-compat fallback:
+								// If HandleHealthDamage hook is not routed, emulate MoM by refunding Health after hit landed.
+								// (Hook path reduces damage pre-hit; TESHitEvent fallback can only correct post-hit.)
+								if (!target->IsDead()) {
+									float fallbackIncomingDamage = std::max(
+										0.0f,
+										hitData->totalDamage - hitData->resistedPhysicalDamage - hitData->resistedTypedDamage);
+									if (fallbackIncomingDamage > 0.0f) {
+										const auto mom = EvaluateMindOverMatter(target, aggressor, hitData, fallbackIncomingDamage);
+										if (mom.redirectedDamage > 0.0f) {
+											if (auto* avOwner = skyrim_cast<RE::ActorValueOwner*>(target)) {
+												avOwner->RestoreActorValue(
+													RE::ACTOR_VALUE_MODIFIER::kDamage,
+													RE::ActorValue::kHealth,
 													mom.redirectedDamage);
+												if (_loot.debugLog) {
+													SKSE::log::debug(
+														"CalamityAffixes: TESHitEvent fallback applied MoM heal correction (redirected={}).",
+														mom.redirectedDamage);
+												}
 											}
 										}
 									}
 								}
+
+								if (!target->IsDead()) {
+									ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
+								}
+							} else {
+								// Like uncommitted data: the real follow-up event for this
+								// pair must not fall into the duplicate window.
+								_combatState.lastHitAt = {};
 							}
 
 							if (!target->IsDead()) {
-								ProcessTrigger(Trigger::kIncomingHit, target, aggressor, hitData);
-								ProcessTrigger(Trigger::kLowHealth, target, aggressor, hitData);
+								// A reused HitData's damage belongs to the old swing: unknown here.
+								const float dealt = reusedHitContent ? 0.0f : std::max(
+									0.0f,
+									hitData->totalDamage - hitData->resistedPhysicalDamage - hitData->resistedTypedDamage);
+								ProcessTrigger(Trigger::kLowHealth, target, aggressor, hitData, dealt);
 							}
-						}
 						}
 					}
 				}
+			}
 		}
+
+		// Archmage, in both hook and fallback modes: the spell that hit is only
+		// visible as TESHitEvent::source (HitData has no cast-spell field), so it
+		// needs no committed HitData. Own proc spells are excluded inside.
+		ProcessArchmageFromHitEvent(aggressor, target, a_event->source, now);
 
 		// Only forward the hit signal to Papyrus when the C++ HandleHealthDamage
 		// hook is NOT active for this target.  When hookRouted is true, all proc

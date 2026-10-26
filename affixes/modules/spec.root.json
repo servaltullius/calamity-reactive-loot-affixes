@@ -155,7 +155,7 @@
         "type": "MagicEffect",
         "magicEffect": {
           "editorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT",
-          "name": "Calamity: Runeword Wealth Speechcraft / 룬워드 부 화술",
+          "name": "Calamity: Runeword Wealth Barter / 룬워드 부 거래",
           "actorValue": "SpeechcraftModifier",
           "hostile": false,
           "recover": true
@@ -451,9 +451,7 @@
           "range": 0,
           "equipTypeForm": "Skyrim.esm|0x00013F44",
           "effects": [
-            { "magicEffectForm": "Skyrim.esm|0x00012F03", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000F392D", "hostileOnly": true, "magnitude": 99, "duration": 15, "area": 0 }
+            { "magicEffectForm": "Skyrim.esm|0x00012F03", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 }
           ]
         }
       },
@@ -467,10 +465,7 @@
           "range": 0,
           "equipTypeForm": "Skyrim.esm|0x00013F44",
           "effects": [
-            { "magicEffectForm": "Skyrim.esm|0x0001CEA2", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 3, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000F3932", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 0 }
+            { "magicEffectForm": "Skyrim.esm|0x0001CEA2", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 }
           ]
         }
       },
@@ -484,9 +479,7 @@
           "range": 0,
           "equipTypeForm": "Skyrim.esm|0x00013F44",
           "effects": [
-            { "magicEffectForm": "Skyrim.esm|0x0001CEA8", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000F3F0D", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 0 }
+            { "magicEffectForm": "Skyrim.esm|0x0001CEA8", "hostileOnly": true, "magnitude": 25, "duration": 0, "area": 0 }
           ]
         }
       },
@@ -500,9 +493,7 @@
           "range": 0,
           "equipTypeForm": "Skyrim.esm|0x00013F44",
           "effects": [
-            { "magicEffectForm": "Skyrim.esm|0x0010F7EF", "hostileOnly": true, "magnitude": 60, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000F3F0D", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 0 }
+            { "magicEffectForm": "Skyrim.esm|0x0010F7EF", "hostileOnly": true, "magnitude": 60, "duration": 0, "area": 0 }
           ]
         }
       },
@@ -516,10 +507,7 @@
           "range": 0,
           "equipTypeForm": "Skyrim.esm|0x00013F44",
           "effects": [
-            { "magicEffectForm": "Skyrim.esm|0x0010F7F0", "hostileOnly": true, "magnitude": 60, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 3, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000F3932", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 0 }
+            { "magicEffectForm": "Skyrim.esm|0x0010F7F0", "hostileOnly": true, "magnitude": 60, "duration": 0, "area": 0 }
           ]
         }
       },
@@ -533,9 +521,7 @@
           "range": 0,
           "equipTypeForm": "Skyrim.esm|0x00013F44",
           "effects": [
-            { "magicEffectForm": "Skyrim.esm|0x0005DBAE", "hostileOnly": true, "magnitude": 40, "duration": 0, "area": 20 },
-            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000F3F0F", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 20 }
+            { "magicEffectForm": "Skyrim.esm|0x0005DBAE", "hostileOnly": true, "magnitude": 40, "duration": 0, "area": 20 }
           ]
         }
       },
@@ -549,10 +535,7 @@
           "range": 0,
           "equipTypeForm": "Skyrim.esm|0x00013F44",
           "effects": [
-            { "magicEffectForm": "Skyrim.esm|0x0001CEA3", "hostileOnly": true, "magnitude": 40, "duration": 0, "area": 15 },
-            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 5, "area": 0 },
-            { "magicEffectForm": "Skyrim.esm|0x000F3935", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 15 },
-            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 }
+            { "magicEffectForm": "Skyrim.esm|0x0001CEA3", "hostileOnly": true, "magnitude": 40, "duration": 0, "area": 15 }
           ]
         }
       },
@@ -906,6 +889,461 @@
             "duration": 4,
             "area": 0
           }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_LEAF_PASSIVE",
+          "name": "Calamity: Runeword Leaf Destruction / 룬워드 리프 파괴",
+          "actorValue": "DestructionModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_LEAF_PASSIVE",
+          "name": "Calamity: Runeword Leaf Passive / 룬워드 리프 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_LEAF_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_STRENGTH_PASSIVE",
+          "name": "Calamity: Runeword Strength Two-Handed / 룬워드 스트렝스 양손",
+          "actorValue": "TwoHandedModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_STRENGTH_PASSIVE",
+          "name": "Calamity: Runeword Strength Passive / 룬워드 스트렝스 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_STRENGTH_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_OATH_PASSIVE",
+          "name": "Calamity: Runeword Oath One-Handed / 룬워드 오쓰 한손",
+          "actorValue": "OneHandedModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_OATH_PASSIVE",
+          "name": "Calamity: Runeword Oath Passive / 룬워드 오쓰 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_OATH_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_PASSION_PASSIVE",
+          "name": "Calamity: Runeword Passion Illusion / 룬워드 패션 환혹",
+          "actorValue": "IllusionModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_PASSION_PASSIVE",
+          "name": "Calamity: Runeword Passion Passive / 룬워드 패션 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_PASSION_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_UNBENDING_WILL_PASSIVE",
+          "name": "Calamity: Runeword Unbending Will Block / 룬워드 언벤딩 윌 막기",
+          "actorValue": "BlockModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_UNBENDING_WILL_PASSIVE",
+          "name": "Calamity: Runeword Unbending Will Passive / 룬워드 언벤딩 윌 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_UNBENDING_WILL_PASSIVE",
+            "magnitude": 15,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_CURE_PASSIVE",
+          "name": "Calamity: Runeword Cure Restoration / 룬워드 큐어 회복",
+          "actorValue": "RestorationModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_CURE_PASSIVE",
+          "name": "Calamity: Runeword Cure Passive / 룬워드 큐어 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_CURE_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_HEARTH_PASSIVE",
+          "name": "Calamity: Runeword Hearth Frost Resist / 룬워드 하스 냉기 저항",
+          "actorValue": "ResistFrost",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_HEARTH_PASSIVE",
+          "name": "Calamity: Runeword Hearth Passive / 룬워드 하스 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_HEARTH_PASSIVE",
+            "magnitude": 20,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_ENLIGHTENMENT_PASSIVE",
+          "name": "Calamity: Runeword Enlightenment Alteration / 룬워드 인라이트먼트 변화",
+          "actorValue": "AlterationModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_ENLIGHTENMENT_PASSIVE",
+          "name": "Calamity: Runeword Enlightenment Passive / 룬워드 인라이트먼트 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_ENLIGHTENMENT_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_MYTH_PASSIVE",
+          "name": "Calamity: Runeword Myth Heavy Armor Damage Taken / 룬워드 미스 중갑 받는 피해 감소",
+          "actorValue": "HeavyArmorModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_MYTH_PASSIVE",
+          "name": "Calamity: Runeword Myth Passive / 룬워드 미스 패시브",
+          "delivery": "Self",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_MYTH_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          },
+          "spellType": "Ability",
+          "castType": "ConstantEffect"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC_HITFX",
+          "name": "Calamity: Fire Hit Effect / 화염 피격 효과",
+          "actorValue": "None",
+          "hostile": true,
+          "recover": false,
+          "archetype": "Script",
+          "hitShaderForm": "Skyrim.esm|0x0001B212"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_DMG_FROST_DYNAMIC_HITFX",
+          "name": "Calamity: Frost Hit Effect / 냉기 피격 효과",
+          "actorValue": "None",
+          "hostile": true,
+          "recover": false,
+          "archetype": "Script",
+          "hitShaderForm": "Skyrim.esm|0x000435A3"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC_HITFX",
+          "name": "Calamity: Shock Hit Effect / 전격 피격 효과",
+          "actorValue": "None",
+          "hostile": true,
+          "recover": false,
+          "archetype": "Script",
+          "hitShaderForm": "Skyrim.esm|0x00057C67"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_MIST_MANA_DRAIN",
+          "name": "Calamity: Runeword Mist Magicka Drain / 룬워드 미스트 마나 소진",
+          "actorValue": "Magicka",
+          "hostile": true,
+          "recover": false
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_CHAOS_RUNE_TRAP_SUNDER",
+          "name": "Calamity: Chaos Rune (Sunder Armor) / 혼돈의 룬 (방어 분쇄)",
+          "actorValue": "DamageResist",
+          "hostile": true,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_CHAOS_RUNE_TRAP_SUNDER",
+          "name": "Calamity: Chaos Rune (Sunder Armor) / 혼돈의 룬 (방어 분쇄)",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_CHAOS_RUNE_TRAP_SUNDER",
+            "magnitude": 150,
+            "duration": 6,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_CHAOS_RUNE_TRAP_FRAGILE",
+          "name": "Calamity: Chaos Rune (Fragile Magic Resist) / 혼돈의 룬 (마법 저항 약화)",
+          "actorValue": "ResistMagic",
+          "hostile": true,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_CHAOS_RUNE_TRAP_FRAGILE",
+          "name": "Calamity: Chaos Rune (Fragile Magic Resist) / 혼돈의 룬 (마법 저항 약화)",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_CHAOS_RUNE_TRAP_FRAGILE",
+            "magnitude": 20,
+            "duration": 6,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_OBSESSION_ARCANE",
+          "name": "Calamity: Runeword Obsession Magic Damage / 룬워드 집착 마법 피해",
+          "actorValue": "Health",
+          "resistValue": "ResistMagic",
+          "hostile": true,
+          "recover": false,
+          "magicSkill": "Destruction"
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_OBSESSION_ARCANE",
+          "name": "Calamity: Runeword Obsession Magic Damage / 룬워드 집착 마법 피해",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_OBSESSION_ARCANE",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_FIREBOLT_RIDER",
+          "name": "Calamity: Hostile-Only Firebolt Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F392D", "hostileOnly": true, "magnitude": 99, "duration": 15, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICE_SPIKE_RIDER",
+          "name": "Calamity: Hostile-Only Ice Spike Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 3, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3932", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_LIGHTNING_BOLT_RIDER",
+          "name": "Calamity: Hostile-Only Lightning Bolt Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3F0D", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_THUNDERBOLT_RIDER",
+          "name": "Calamity: Hostile-Only Thunderbolt Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3F0D", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICY_SPEAR_RIDER",
+          "name": "Calamity: Hostile-Only Icy Spear Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 3, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3932", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 0 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_CHAIN_LIGHTNING_RIDER",
+          "name": "Calamity: Hostile-Only Chain Lightning Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3F0F", "hostileOnly": true, "magnitude": 200, "duration": 1, "area": 20 }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICE_STORM_RIDER",
+          "name": "Calamity: Hostile-Only Ice Storm Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            { "magicEffectForm": "Skyrim.esm|0x000B729F", "hostileOnly": true, "magnitude": 50, "duration": 5, "area": 0 },
+            { "magicEffectForm": "Skyrim.esm|0x000F3935", "hostileOnly": true, "magnitude": 0, "duration": 3, "area": 15 },
+            { "magicEffectForm": "Skyrim.esm|0x000153D3", "hostileOnly": true, "magnitude": 0.25, "duration": 0, "area": 0 }
+          ]
         }
       }
     ]

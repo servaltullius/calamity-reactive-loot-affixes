@@ -156,6 +156,16 @@ namespace CalamityAffixes
 	{
 		const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(a_token);
 		if (idxIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() || idxIt->second >= _affixRuntimeState.affixes.size()) {
+			// Keep it while the config is not trustworthy (see BuildConfigDerivedAffixState);
+			// the save then writes it back unchanged.
+			if (!_unknownAffixTokenPruningAllowed) {
+				return true;
+			}
+			// Configured, but its keyword did not resolve this session (an old
+			// plugin won a conflict): not a retired affix, keep it.
+			if (_unresolvedConfiguredAffixTokens.contains(a_token)) {
+				return true;
+			}
 			if (_loot.debugLog) {
 				SKSE::log::warn("CalamityAffixes: cleanup skipping unknown affix token {:016X}.", a_token);
 			}
@@ -433,8 +443,8 @@ namespace CalamityAffixes
 			return;
 		}
 
-		// Status test order (v2.3.0): build-ups and Burning first, so one base shows
-		// the meters, Contagion and Exploit Weakness together.
+		// Status test order (v2.3.0): Freeze and Shock build-ups, Burning and
+		// Contagion fill a fresh base's four slots; Exploit Weakness comes next.
 		static constexpr std::array<std::string_view, 13> kTrapAffixIds{
 			"frost_strike", "spark_strike", "ember_brand", "contagion",
 			"exploit_weakness", "flame_weakness", "doom_brand",
@@ -473,6 +483,86 @@ namespace CalamityAffixes
 		}
 
 		EmitHudNotification("Calamity: all test affixes already on this base.");
+	}
+
+	void EventBridge::GrantTestSetToSelectedBase(int a_setId)
+	{
+		// QA helper: each set is one scenario to check in game, so testing a rule
+		// no longer means farming the right prefixes. The panel shows what to look
+		// for. A set replaces every affix on the item (debug only, no refund).
+		struct TestSet
+		{
+			int id;
+			std::string_view name;
+			std::array<std::string_view, 4> affixIds;
+		};
+		static constexpr std::array<TestSet, 7> kTestSets{ {
+			{ 11, "buff replacement", { "battle_frenzy", "voice_of_power", "shadow_veil", "" } },
+			{ 12, "build-up meters", { "frost_strike", "spark_strike", "ember_brand", "contagion" } },
+			{ 13, "Exposed", { "flame_weakness", "frost_weakness", "shock_weakness", "elemental_bane" } },
+			{ 14, "traps", { "bear_trap", "rune_trap", "plague_spore", "tar_blight" } },
+			{ 15, "slow overlap", { "ice_form", "frost_strike", "", "" } },
+			{ 16, "archmage", { "archmage_t1", "", "", "" } },
+			{ 17, "cast-on-crit rider", { "crit_cast_ice_spike", "", "", "" } },
+		} };
+		if (!(_loot.debugHudNotifications || _loot.debugLog)) {
+			return;
+		}
+		if (!_configLoaded) {
+			EmitHudNotification("Calamity: config not loaded.");
+			return;
+		}
+		const auto set = std::ranges::find_if(kTestSets, [a_setId](const TestSet& s) { return s.id == a_setId; });
+		if (set == kTestSets.end()) {
+			return;
+		}
+		if (_runewordState.transmuteInProgress || _runewordState.affixExpansionInProgress) {
+			EmitHudNotification("Calamity: wait for the current crafting action to finish.");
+			return;
+		}
+
+		std::uint64_t instanceKey = 0u;
+		RE::InventoryEntryData* entry = nullptr;
+		RE::ExtraDataList* xList = nullptr;
+		std::string failure;
+		if (!ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &failure, false)) {
+			std::string note = "Calamity: select an item in the panel first";
+			if (!failure.empty()) {
+				note.append(" (").append(failure).append(")");
+			}
+			EmitHudNotification(note.c_str());
+			return;
+		}
+
+		InstanceAffixSlots slots{};
+		for (const auto affixId : set->affixIds) {
+			if (affixId.empty()) {
+				continue;
+			}
+			const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexById.find(std::string(affixId));
+			if (idxIt == _affixRuntimeState.affixRegistry.affixIndexById.end() ||
+				idxIt->second >= _affixRuntimeState.affixes.size()) {
+				SKSE::log::warn("CalamityAffixes: test set {} lists unknown affix {}.", set->name, affixId);
+				continue;
+			}
+			slots.AddToken(_affixRuntimeState.affixes[idxIt->second].token);
+		}
+		if (slots.count == 0u) {
+			return;
+		}
+
+		// Same clean-up as the debug reset, then the set's affixes.
+		EraseInstanceRuntimeStates(instanceKey);
+		_runewordState.instanceStates.erase(instanceKey);
+		ForgetLootPreviewSlots(instanceKey);
+		_instanceTrackingState.instanceAffixes[instanceKey] = slots;
+		MarkLootEvaluatedInstance(instanceKey);
+		EnsureMultiAffixDisplayName(entry, xList, slots);
+		RebuildActiveCounts();
+
+		std::string note = "Calamity: test set (";
+		note.append(set->name).append(") on the selected item");
+		EmitHudNotification(note.c_str());
 	}
 
 	void EventBridge::EnsureMultiAffixDisplayName(

@@ -18,6 +18,9 @@ EndEvent
 Event OnConfigClose()
 EndEvent
 
+Function RefreshMenu()
+EndFunction
+
 int Function GetModSettingInt(string a_settingName)
 	Return 0
 EndFunction

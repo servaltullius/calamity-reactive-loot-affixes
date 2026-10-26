@@ -18,20 +18,21 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 ### 현재 빌드 핵심 정책
 - 아이템 획득/제작 시 **자동 어픽스 부여 없음**
-- **확인 스크롤**: 일반 어픽스가 없는 장비에 1~3개 부여(60%/30%/10%)
+- **확인 스크롤**: 일반 어픽스가 없는 장비에 1~3개 부여(60%/30%/10%). 룬워드 장비는 접미 1~2개(75%/25%)
 - **재련 오브**: 고른 어픽스 하나만 교체(2개, 장비마다 6회), 슬롯 확장(1→2: 2개, 2→3: 4개)
 - **정제 오브**: 슬롯 수를 유지한 채 일반 어픽스 전부를 한 번에 다시 굴리고 선택 재련 6회를 되돌림
 - 남는 확인 스크롤은 재련 오브(3:1)나 정제 오브(10:1)로 교환(한 방향)
-- 모든 제작 작업은 완성 룬워드와 그 성장 상태를 보존
+- **룬워드 제거**: 정제 오브 1개로 룬워드를 지우고 비운 머리 칸에 새 접두를 굴림(접두가 함께 있던 옛 장비는 룬워드만 빠짐). 접미와 남은 재련 횟수는 유지, 6초 안에 한 번 더 눌러 확정
+- 룬워드 제거를 뺀 모든 제작 작업은 완성 룬워드와 그 성장 상태를 보존
 - 슬롯 모델: **3칸 — 머리 칸(룬워드 또는 접두) 1 + 접미 최대 2**
 - 이름 마커(★ 계열) + Prisma 툴팁으로 인스턴스 상태 확인
 
 ### 룬워드
-- Diablo 2 스타일 **94개 레시피**
+- Diablo 2 스타일 **95개 레시피**
 - 룬워드 조각 수집 -> 레시피 완성 -> 장비 적용
 - 확인·선택 재련·정제 모두 완성 룬워드를 보존하고 일반 어픽스만 바꿈
 - 룬워드 재변환: 기존 룬워드를 새 룬워드로 교체 가능
-- 효과 구성: **94개 전부 JSON 개별 정의** (스카이림 마법 아키타입 + 다양한 actorValue 활용)
+- 효과 구성: **95개 전부 JSON 개별 정의** (스카이림 마법 아키타입 + 다양한 actorValue 활용)
 - Adaptive 계열은 기본 자동 선택을 유지하고, `modeCycle`이 있는 효과는 **수동 오버라이드 모드**를 지원
 - 룬워드 패널에서 선택 레시피의 **효과/권장 베이스/룬 순서/상세**를 한국어/영어 설정에 맞춰 선택 상태·검색·hover에서 확인 가능
 
@@ -52,7 +53,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 ### 전투 시스템
 - Proc 발동 + ICD(내부 쿨다운) + 중복 히트 방지
-- 다중 어픽스 Proc 밸런스(Best Slot Wins): 아이템의 발동형 어픽스 수 기준 — 1개=100%, 2개=80%, 3개=65%, 4개=50%. 패시브(접미사) 효과는 단계 계산에 포함되지 않습니다.
+- 다중 어픽스 Proc 밸런스(Best Slot Wins): v2.3.0부터 룬워드가 접두 칸을 차지해, 새 장비의 발동형 어픽스는 첫 칸 하나뿐이고 표기 확률 그대로 발동합니다. 2.3.0 전에 룬워드와 접두를 함께 가진 장비는 발동형 수에 따라 2개=80%(3개=65%, 4개=50%)로 줄어듭니다. 패시브(접미사) 효과는 단계 계산에 포함되지 않습니다.
 - 크리티컬 히트 추가 증폭(SKSE 훅 기반)
 
 ### UI & 설정
@@ -76,7 +77,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 
 ### 권장/선택 의존성
 - SkyUI (권장)
-- powerofthree's Tweaks (권장. 2.2.7 이하에서는 사실상 필수, 2.2.8부터는 없어도 동작하며 있으면 다른 모드 방어구 제외 목록·보스 상자 이름 판정까지 적용)
+- powerofthree's Tweaks (권장. 2.2.7 이하에서는 사실상 필수, 2.2.8부터는 없어도 동작하며 있으면 방어구 제외 목록이 다른 모드의 폼까지 적용)
 - KID (권장)
 - MCM Helper (권장)
 - I4 (선택)
@@ -96,6 +97,7 @@ Calamity - Reactive Loot & Affixes는 Skyrim SE/AE용 플레이어 중심 ARPG �
 - 레벨리스트(LVLI) 주입/오버라이드는 사용하지 않습니다.
 - 새 버전을 MO2에서 별도 모드로 겹쳐 켜면 충돌 우선순위에 따라 구 `CalamityAffixes_DISTR.ini`가 새 빈 파일보다 우선할 수 있습니다. 기존 모드를 교체/덮어쓰거나 구 DISTR를 비활성화하세요.
 - 기존 장비, 보유 통화, 완성 룬워드와 기존 코세이브 레코드는 호환되며 새 게임이 필요하지 않습니다.
+- **제거·되돌리기**: MCM에서 Enable Mod를 끄고(`Calamity: disabled` 알림 = 상시 효과 제거됨) 10초쯤 기다린 뒤 새 슬롯에 저장하고, ESP·DLL을 함께 지우거나 옛 버전을 설치하세요. 건너뛰면 상시 기술·저항 보너스가 남을 수 있고 콘솔 `player.modav`/`player.removespell`로 지울 수 있습니다.
 
 ---
 
@@ -113,20 +115,21 @@ It tracks item instances via ExtraUniqueID, and gear grows through a **Scroll of
 
 ### Current Core Policy
 - **No automatic affix assignment** on loot/craft
-- **Scroll of Identification**: grants 1-3 regular affixes to gear without any (60%/30%/10%)
+- **Scroll of Identification**: grants 1-3 regular affixes to gear without any (60%/30%/10%); runeword gear gets 1-2 suffixes (75%/25%)
 - **Reforge Orb**: replaces one chosen affix (2 orbs, 6 times per item) and expands slots (1→2: 2 orbs, 2→3: 4 orbs)
 - **Scouring Orb**: rerolls every regular affix at once while keeping the slot count, and gives the item its 6 selected reforges back
 - Surplus Identify Scrolls trade one way for Reforge Orbs (3:1) or Scouring Orbs (10:1)
-- Every crafting action preserves a completed runeword and its growth state
+- **Remove Runeword**: one Scouring Orb clears the runeword and rolls a new prefix in the freed head slot (older items that also had a prefix just lose the runeword). Suffixes and remaining reforges stay; press again within 6 seconds to confirm
+- Every crafting action except Remove Runeword preserves a completed runeword and its growth state
 - Slot model: **3 slots — a head slot (runeword or prefix) + up to 2 suffixes**
 - Star markers (★ series) + Prisma tooltip for instance readability
 
 ### Runewords
-- **94 Diablo 2-style recipes**
+- **95 Diablo 2-style recipes**
 - Collect runeword fragments -> complete recipe -> apply to equipment
 - Identify, selected reforge, and scouring all preserve a completed runeword; only regular affixes change
 - Runeword re-transmutation: an existing runeword can be replaced with a new one
-- Effect composition: **all 94 runewords individually defined in JSON** (Skyrim magic archetypes + diverse actorValues)
+- Effect composition: **all 95 runewords individually defined in JSON** (Skyrim magic archetypes + diverse actorValues)
 - Adaptive effects keep auto element selection by default, and `modeCycle` entries support **manual override mode**
 - The runeword panel shows bilingual **effect/base/rune-order/detail** consistently in selection, search, and hover states
 
@@ -147,7 +150,7 @@ It tracks item instances via ExtraUniqueID, and gear grows through a **Scroll of
 
 ### Combat System
 - Proc chance + ICD (internal cooldown) + duplicate-hit protection
-- Multi-affix proc balancing (Best Slot Wins): tiered by the item's proc affix count — 1=100%, 2=80%, 3=65%, 4=50%. Passive suffix effects never raise the tier.
+- Multi-affix proc balancing (Best Slot Wins): since v2.3.0 a runeword takes the prefix slot, so a new item has one triggered affix (its first slot) and fires it at the listed chance. Items from before 2.3.0 that carry a runeword and a prefix drop to 80% each (65% for 3, 50% for 4). Passive suffix effects never raise the tier.
 - Critical hit amplification via SKSE hook
 
 ### UI & Settings
@@ -171,7 +174,7 @@ Current runtime scope is player-centric.
 
 ### Recommended / Optional
 - SkyUI (recommended)
-- powerofthree's Tweaks (recommended. Effectively required up to 2.2.7; from 2.2.8 the mod works without it, and with it the armor deny list and boss-chest name checks also apply to other mods' forms)
+- powerofthree's Tweaks (recommended. Effectively required up to 2.2.7; from 2.2.8 the mod works without it, and with it the armor deny list also applies to other mods' forms)
 - KID (recommended)
 - MCM Helper (recommended)
 - I4 (optional)
@@ -191,3 +194,4 @@ Current runtime scope is player-centric.
 - Leveled-list (LVLI) injection/override is not used.
 - If a new version is enabled as a separate MO2 mod, conflict priority may let the older `CalamityAffixes_DISTR.ini` override the new empty compatibility file. Replace/overwrite the old mod or disable the old DISTR file.
 - Existing gear, currencies, completed runewords, and prior co-save records remain compatible; no new game is required.
+- **Uninstalling or rolling back**: turn off Enable Mod in MCM (the `Calamity: disabled` notice means the passive effects are removed), wait about 10 seconds, save to a new slot, then remove the ESP and DLL together or install the older version. If you skip this, small skill/resistance bonuses can stay; `player.modav` / `player.removespell` in the console clear them.

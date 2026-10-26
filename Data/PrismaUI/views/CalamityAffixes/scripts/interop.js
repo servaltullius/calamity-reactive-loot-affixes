@@ -165,7 +165,6 @@ function applyRuneInventorySnapshot(data) {
 }
 
 function setInventoryItems(raw) {
-  const prevSelectedItemName = selectedItemNameState;
   const prevSelectedBaseKey = resolveSelectedRunewordBaseKey();
   const items = parseInteropArrayPayload(raw);
 
@@ -178,15 +177,13 @@ function setInventoryItems(raw) {
     clearRunewordResetConfirmation();
   }
   const selected = items.find((item) => item && item.selected && typeof item.name === "string");
-  if (selected && typeof selected.name === "string") {
-    selectedItemNameState = resolveBaseItemName(selected);
-    selectedItemSourceState = "equipped";
-  } else if (!selectedItemNameState) {
-    selectedItemSourceState = "equipped";
-  }
+  selectedItemNameState = selected ? resolveBaseItemName(selected) : "";
+  selectedItemSourceState = "equipped";
 
-  if (selectedItemNameState !== prevSelectedItemName) {
-    invalidateRunewordAffixPreview(Boolean(selectedItemNameState));
+  // Only a different working base changes the preview; a renamed label (for
+  // example a runeword name in another language) keeps the current text.
+  if (nextSelectedBaseKey !== prevSelectedBaseKey) {
+    invalidateRunewordAffixPreview(Boolean(nextSelectedBaseKey));
   }
 
   schedulePanelRender(
@@ -247,6 +244,9 @@ function setRunewordPanelState(raw) {
     nextRuneOwned: Number.isFinite(Number(data.nextRuneOwned)) ? Number(data.nextRuneOwned) : 0,
     canInsert: Boolean(data.canInsert),
     debugTools: Boolean(data.debugTools),
+    debugTestEvents: Array.isArray(data.debugTestEvents)
+      ? data.debugTestEvents.filter((key) => typeof key === "string")
+      : [],
     missingSummary: typeof data.missingSummary === "string" ? data.missingSummary : "",
     baseCompatibilityWarning: Boolean(data.baseCompatibilityWarning),
     baseCompatibilityMessageEn: typeof data.baseCompatibilityMessageEn === "string"
@@ -322,9 +322,7 @@ function setRunewordPanelState(raw) {
     applyConfirmedRecipeSelection(recipeToken);
   }
 
-  if (runewordAffixPendingState) {
-    runewordAffixPendingState = false;
-  }
+  settleRunewordAffixPreview();
   schedulePanelRender(
     panelRenderSection.runewordPanelState,
     panelRenderSection.equippedBuild,
@@ -334,6 +332,7 @@ function setRunewordPanelState(raw) {
 
 function setRunewordAffixPreview(raw) {
   runewordAffixTextState = typeof raw === "string" ? raw : "";
+  runewordAffixConfirmedTextState = runewordAffixTextState;
   runewordAffixPendingState = false;
   schedulePanelRender(panelRenderSection.tooltipPlacement);
 }
@@ -363,8 +362,10 @@ function applyControlPanelOpenState(nextOpen) {
 
   controlPanelOpen = nextOpen;
   if (!controlPanelOpen) {
+    blurPanelTextEntry();
     closeWorkingBaseChooser(false);
     feedback.textContent = "";
+    feedback.title = "";
     endPanelDrag();
     persistPanelLayout();
     controlPanel.classList.remove("is-visible");
@@ -457,15 +458,29 @@ function setTooltipLayout(raw) {
   schedulePanelRender(panelRenderSection.tooltipLayout);
 }
 
-function setActionFeedback(raw) {
+// Local status line writes (confirmations, tooltip moves, timeouts). The
+// runtime's own replies come in through setActionFeedback below.
+function showActionFeedback(raw) {
   const value = typeof raw === "string" ? raw : "";
   feedback.textContent = localizeEngineFeedback(value);
+  // The line shows three rows at most; hovering shows all of it.
+  feedback.title = feedback.textContent;
   const clearedAffixExpandPending = clearAffixExpandPending(false);
-  if (runewordAffixPendingState) {
-    runewordAffixPendingState = false;
-    schedulePanelRender(panelRenderSection.tooltipPlacement);
-  }
+  settleRunewordAffixPreview();
   if (clearedAffixExpandPending) {
+    schedulePanelRender(panelRenderSection.runewordPanelState);
+  }
+}
+
+// Interop entry (external API name): the runtime's reply to the last command.
+// A craft that fails without changing the item sends no new panel state (the
+// runtime skips an unchanged push), so this reply is what ends the pending
+// craft. Local messages use showActionFeedback and must not end it: the
+// request may still be in flight.
+function setActionFeedback(raw) {
+  showActionFeedback(raw);
+  if (affixCraftPendingState) {
+    affixCraftPendingState = null;
     schedulePanelRender(panelRenderSection.runewordPanelState);
   }
 }
@@ -496,22 +511,18 @@ function setUiLanguage(raw) {
   initUiText();
 }
 
+// The runtime sends the item hovered in a menu (inventory, barter, container).
+// It is not the working base, so it neither renames that base nor clears its
+// affix preview.
 function setSelectedItemName(raw) {
-  const prev = selectedItemNameState;
-  const value = typeof raw === "string" ? raw.trim() : "";
-  selectedItemNameState = value;
-  if (value !== prev) {
-    invalidateRunewordAffixPreview(Boolean(value));
-  }
+  hoveredItemNameState = typeof raw === "string" ? raw.trim() : "";
   schedulePanelRender(
     panelRenderSection.selectedItemContext,
-    panelRenderSection.runewordPanelState,
     panelRenderSection.tooltipPlacement
   );
 }
 
 function setSelectedItemSource(raw) {
-  const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
-  selectedItemSourceState = value;
+  hoveredItemSourceState = typeof raw === "string" ? raw.trim().toLowerCase() : "";
   schedulePanelRender(panelRenderSection.selectedItemContext);
 }

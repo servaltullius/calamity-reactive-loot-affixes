@@ -1,12 +1,16 @@
 #include "CalamityAffixes/EventBridge.h"
 #include "CalamityAffixes/HostileEffectGuard.h"
 
+#include "CalamityAffixes/ArchmageSpellHitPolicy.h"
+#include "CalamityAffixes/CombatContext.h"
+
 #include "CalamityAffixes/PluginEditorIds.h"
 #include "CalamityAffixes/PointerSafety.h"
 #include "CalamityAffixes/ProcChanceUtil.h"
 #include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
+#include <cstdint>
 #include <string_view>
 
 
@@ -190,6 +194,7 @@ namespace CalamityAffixes
 				selection.bestExtraDamage)) {
 			return;
 		}
+		NoteDebugTestEvent("archmage:spell");
 
 		auto& affix = _affixRuntimeState.affixes[*selection.bestIdx];
 		if (affix.icd.count() > 0) {
@@ -204,5 +209,67 @@ namespace CalamityAffixes
 		}
 	}
 
+
+	// Runs from the deferred TESHitEvent drain (game thread, _stateMutex held,
+	// procOrigin/procDepth already rejected by HandleHitEvent). Both hook and
+	// fallback modes come here: HandleHealthDamage never sees which spell hit.
+	void EventBridge::ProcessArchmageFromHitEvent(
+		RE::Actor* a_caster,
+		RE::Actor* a_target,
+		RE::FormID a_sourceFormID,
+		std::chrono::steady_clock::time_point a_now)
+	{
+		if (!_configLoaded || _affixSpecialActions.archmageAffixIndices.empty() || a_sourceFormID == 0u) {
+			return;
+		}
+		if (!a_caster || !a_target || !a_caster->IsPlayerRef() || a_target->IsPlayerRef() || a_target->IsDead()) {
+			return;
+		}
+		if (_combatState.procDepth > 0) {
+			return;
+		}
+		if (!BuildCombatTriggerContext(a_target, a_caster).hostileEitherDirection) {
+			return;
+		}
+
+		auto* source = RE::TESForm::LookupByID<RE::TESForm>(a_sourceFormID);
+		auto* spell = source ? source->As<RE::SpellItem>() : nullptr;
+		if (!spell) {
+			return;
+		}
+		const auto spellType = spell->GetSpellType();
+		if (!detail::IsArchmageSourceSpellType(
+				spellType == RE::MagicSystem::SpellType::kSpell,
+				spellType == RE::MagicSystem::SpellType::kScroll)) {
+			return;
+		}
+		if (detail::IsCalamityProcSource(PluginEditorIds::OwnEditorIdOf(spell))) {
+			return;
+		}
+
+		const auto key = (static_cast<std::uint64_t>(a_target->GetFormID()) << 32) |
+		                 static_cast<std::uint64_t>(a_sourceFormID);
+		const auto windowMs = detail::ResolveArchmageSpellHitDedupWindowMs(
+			spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration);
+		auto& seen = _combatState.archmageSpellHitAt;
+		if (const auto it = seen.find(key); it != seen.end()) {
+			const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(a_now - it->second).count();
+			if (detail::ShouldSuppressArchmageSpellHit(
+					true,
+					elapsed > 0 ? static_cast<std::uint64_t>(elapsed) : 0u,
+					windowMs)) {
+				return;
+			}
+		}
+		seen[key] = a_now;
+		if (seen.size() > 256u) {
+			std::erase_if(seen, [&](const auto& a_entry) {
+				return (a_now - a_entry.second) >=
+				       std::chrono::milliseconds(detail::kArchmageConcentrationHitDedupWindowMs);
+			});
+		}
+
+		ProcessArchmageSpellHit(a_caster, a_target, spell, nullptr);
+	}
 
 }

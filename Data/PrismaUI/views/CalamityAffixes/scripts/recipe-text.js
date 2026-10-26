@@ -1,14 +1,10 @@
+// The "Inspect Highlighted Item" card shows the item hovered in a menu, like
+// the affix text under it. The working base has its own card (Runeword tab).
 function resolveSelectedItemContextViewModel() {
-  const hasSelection = Boolean(selectedItemNameState);
-  const sourceText = selectedItemSourceState === "equipped"
-    ? t("Equipped item selection", "착용 아이템 선택")
-    : t("Current selection", "현재 선택");
+  const hasSelection = Boolean(hoveredItemNameState);
   return {
     hasSelection,
-    name: selectedItemNameState || t("No item selected", "선택한 장비 없음"),
-    sourceText: hasSelection
-      ? sourceText
-      : t("Equipped items only", "착용 장비만 대상")
+    name: hoveredItemNameState || t("No item highlighted", "가리킨 아이템 없음")
   };
 }
 
@@ -39,16 +35,20 @@ function renderWorkingBaseContext() {
 
 function renderSelectedItemContext() {
   const viewModel = resolveSelectedItemContextViewModel();
+  // The assistive labels name the working base, never the hovered item.
+  const baseName = selectedItemNameState;
   if (selectedItemName) {
-    selectedItemName.textContent = viewModel.name;
+    selectedItemName.textContent = baseName || t("No item selected", "선택한 장비 없음");
   }
   if (selectedItemSource) {
-    selectedItemSource.textContent = viewModel.sourceText;
+    selectedItemSource.textContent = baseName
+      ? t("Equipped item selection", "착용 아이템 선택")
+      : t("Equipped items only", "착용 장비만 대상");
   }
   if (affixSelectedItemName) {
     affixSelectedItemName.textContent = viewModel.hasSelection
       ? viewModel.name
-      : t("No item selected", "선택된 아이템 없음");
+      : t("No item highlighted", "가리킨 아이템 없음");
   }
   if (affixSelectedItemMeta) {
     affixSelectedItemMeta.textContent = viewModel.hasSelection
@@ -183,11 +183,6 @@ function resolveRecipeSummaryText(item) {
         "Spirit: +30 Max Magicka; 28% on-hit chance for +10 percentage points Spell Absorption (5s, 10s cooldown)",
         "스피릿: 최대 마나 +30, 적중 시 28% 확률로 주문 흡수 확률 +10%p(5초, 재사용 10초)"
       );
-    case "self_weapon_fury":
-      return t(
-        "Fury: 24% on-hit chance for +15% Attack Damage (6s) and 30 Stamina (12s cooldown)",
-        "퓨리: 적중 시 24% 확률로 공격력 +15%(6초)·기력 30 회복(재사용 12초)"
-      );
     case "self_smoke_escape":
       return t(
         "Smoke: 22% chance on taking a hit to slow the attacker by 30% (5s, 12s cooldown)",
@@ -195,8 +190,8 @@ function resolveRecipeSummaryText(item) {
       );
     case "self_carry_weight":
       return t(
-        "Wealth: passive +75 Carry Weight and +15 Speechcraft",
-        "웰스: 상시 소지 무게 +75·화술 +15"
+        "Wealth: passive Carry Weight +75 and prices 15% better",
+        "웰스: 상시 소지 무게 +75·거래 가격 15% 유리"
       );
     default:
       break;
@@ -226,7 +221,7 @@ function resolveRecipeSummaryText(item) {
     case "signature_stealth":
       return t("Stealth: emergency concealment", "스텔스: 긴급 은신");
     case "signature_leaf":
-      return t("Leaf: ember burst ignition", "리프: 불씨 폭발 점화");
+      return t("Leaf: burning leaf flame", "리프: 나뭇잎 불꽃 화상");
     case "signature_ancients_pledge":
       return t("Ancient's Pledge: last-stand bulwark", "고대인의 서약: 최후의 방벽");
     case "signature_holy_thunder":
@@ -238,17 +233,17 @@ function resolveRecipeSummaryText(item) {
     case "signature_kings_grace":
       return t("King's Grace: consecrated blade arc", "왕의 은총: 성스러운 검격");
     case "signature_strength":
-      return t("Strength: crushing pressure burst", "스트렝스: 압쇄 폭발");
+      return t("Strength: armor-crushing blow", "스트렝스: 방어구 압쇄");
     case "signature_edge":
-      return t("Edge: razor wind shot", "엣지: 예리한 바람 사격");
+      return t("Edge: doom-marking shot", "엣지: 파멸 낙인 사격");
     case "signature_grief":
-      return t("Grief: hyper-fast chaos strike", "그리프: 초고속 혼돈 참격");
+      return t("Grief: blood-drinking strikes", "그리프: 피를 마시는 연타");
     case "signature_infinity":
       return t("Infinity: conviction-style resistance shred", "인피니티: 확신형 저항 파쇄");
     case "signature_enigma":
       return t("Enigma: emergency phase shift", "에니그마: 긴급 위상 전환");
     case "signature_call_to_arms":
-      return t("Call to Arms: battle-cry haste", "콜 투 암스: 전투 함성 가속");
+      return t("Call to Arms: battle-cry power", "콜 투 암스: 전투 함성 강화");
     case "signature_insight":
       return t("Insight: meditation pulse engine", "인사이트: 명상 맥동 엔진");
     case "signature_fortitude":
@@ -290,7 +285,7 @@ function resolveRecipeSummaryText(item) {
     case "curse_fragile":
       return t("Fragility curse", "취약 저주");
     case "curse_slow_attack":
-      return t("Slow attack curse", "공속 저하 저주");
+      return t("Weakening curse", "약화 저주");
     case "curse_fear":
       return t("Fear crowd-control curse", "공포 군중제어 저주");
     case "curse_frenzy":
@@ -346,6 +341,7 @@ function resolveRecipeFlavorDetailText(item) {
         "적중 시 대상이 가장 약한 원소로 피해를 줍니다."
       );
     case "adaptive_exposure":
+    case "signature_heart_of_the_oak":
       return t(
         "On hit, lowers the target's strongest elemental resistance first.",
         "적중 시 대상의 가장 강한 원소 저항부터 깎습니다."
@@ -354,21 +350,6 @@ function resolveRecipeFlavorDetailText(item) {
       return t(
         "Picks the element automatically. Manual Mode in the Advanced tab can lock Fire, Frost or Shock.",
         "원소는 자동으로 고릅니다. 고급 탭의 수동 모드에서 화염·냉기·번개를 고정할 수 있습니다."
-      );
-    case "signature_last_wish":
-      return t(
-        "Picks the element automatically. Manual Mode in the Advanced tab can lock Inferno, Frost or Lightning.",
-        "원소는 자동으로 고릅니다. 고급 탭의 수동 모드에서 열화·빙결·전격을 고정할 수 있습니다."
-      );
-    case "signature_heart_of_the_oak":
-      return t(
-        "Against bosses, lowers the strongest resistance first.",
-        "보스에게는 가장 강한 저항부터 깎습니다."
-      );
-    case "signature_faith":
-      return t(
-        "Fanatic Surge: +35 Move Speed, +60 Damage Resist for 6s.",
-        "광신의 돌격: 6초 동안 이동속도 +35, 피해저항 +60."
       );
     default:
       return "";
@@ -447,8 +428,6 @@ function buildRecipePreviewTooltipText(item) {
 function resolveRecipeBaseBadge(item) {
   const key = typeof item?.baseKey === "string" ? item.baseKey : "";
   switch (key) {
-    case "polearm":
-      return { className: "weapon", text: t("Base: Polearm/Spear", "베이스: 폴암/창") };
     case "bow":
       return { className: "weapon", text: t("Base: Bow/Crossbow", "베이스: 활/석궁") };
     case "one_handed_melee":
@@ -457,8 +436,6 @@ function resolveRecipeBaseBadge(item) {
       return { className: "weapon", text: t("Base: Two-Handed Melee", "베이스: 양손 근접 무기") };
     case "staff_wand":
       return { className: "weapon", text: t("Base: Staff/Wand", "베이스: 지팡이/완드") };
-    case "claw":
-      return { className: "weapon", text: t("Base: Claw", "베이스: 클로") };
     case "sword":
       return { className: "weapon", text: t("Base: Sword", "베이스: 검") };
     case "shield":
@@ -479,6 +456,10 @@ function resolveRecipeBaseBadge(item) {
       return { className: "mixed", text: t("Base: Armor/Shield", "베이스: 갑옷/방패") };
     case "sword_shield":
       return { className: "mixed", text: t("Base: Sword/Shield", "베이스: 검/방패") };
+    // Older runtimes send "polearm" and "claw", which vanilla Skyrim has no
+    // items for; show them as any weapon.
+    case "polearm":
+    case "claw":
     case "weapon":
       return { className: "weapon", text: t("Base: Weapon", "베이스: 무기") };
     case "mixed":

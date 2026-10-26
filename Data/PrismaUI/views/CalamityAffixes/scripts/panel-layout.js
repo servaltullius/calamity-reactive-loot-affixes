@@ -70,6 +70,7 @@ function applyTooltipPlacement() {
   if (!hasTooltip) {
     tooltipPanel.style.display = "none";
     tooltipText.textContent = "";
+    resetTooltipFit();
     applyQuickLaunchVisibility();
     return;
   }
@@ -77,12 +78,17 @@ function applyTooltipPlacement() {
   if (controlPanelOpen) {
     tooltipPanel.style.display = "none";
     tooltipText.textContent = "";
+    resetTooltipFit();
     applyQuickLaunchVisibility();
     return;
   }
 
   tooltipPanel.style.display = "block";
-  tooltipText.textContent = tooltipTextState;
+  // Re-setting the same text makes the engine lay the whole tooltip out again
+  // on every panel render; only touch it when the text really changed.
+  if (tooltipText.textContent !== tooltipTextState) {
+    tooltipText.textContent = tooltipTextState;
+  }
   applyTooltipLayout();
   applyQuickLaunchVisibility();
 }
@@ -401,12 +407,15 @@ function beginTooltipDrag(event) {
   if (event.button !== undefined && event.button !== 0) return;
 
   tooltipLayout = normalizeTooltipLayout(tooltipLayout);
+  // Start from where the tooltip is drawn, which can sit above the chosen
+  // position when a tall tooltip was fitted to the screen.
   tooltipDragState = {
     pointerId: typeof event.pointerId === "number" ? event.pointerId : null,
     startX: event.clientX,
     startY: event.clientY,
-    startRight: tooltipLayout.right,
-    startTop: tooltipLayout.top
+    startRight: tooltipRenderedLayout.right,
+    startTop: tooltipRenderedLayout.top,
+    chosenLayout: { ...tooltipLayout }
   };
 
   tooltipTitle.classList.add("dragging");
@@ -419,7 +428,7 @@ function beginTooltipDrag(event) {
     } catch (_) {}
   }
 
-  setActionFeedback(t("Drag to move tooltip.", "드래그해서 툴팁 위치를 이동하세요."));
+  showActionFeedback(t("Drag to move tooltip.", "드래그해서 툴팁 위치를 이동하세요."));
   event.preventDefault();
   event.stopPropagation();
 }
@@ -499,6 +508,7 @@ function endPanelDrag(event) {
       right: tooltipDragState.startRight,
       top: tooltipDragState.startTop
     };
+    const chosenLayout = tooltipDragState.chosenLayout;
     const dragPointerId = tooltipDragState.pointerId;
     if (
       dragPointerId !== null &&
@@ -514,11 +524,17 @@ function endPanelDrag(event) {
     applyTooltipLayout();
 
     const moved =
-      Math.abs(tooltipLayout.right - dragStart.right) >= 1 ||
-      Math.abs(tooltipLayout.top - dragStart.top) >= 1;
+      Math.abs(tooltipRenderedLayout.right - dragStart.right) >= 1 ||
+      Math.abs(tooltipRenderedLayout.top - dragStart.top) >= 1;
+    // A real move keeps where the player dropped it (kept on screen); a click
+    // without one leaves the chosen position as it was.
+    tooltipLayout = moved ? { ...tooltipRenderedLayout } : chosenLayout;
+    if (!moved) {
+      applyTooltipLayout();
+    }
 
     if (wasCancel) {
-      setActionFeedback(t("Tooltip move canceled.", "툴팁 이동이 취소되었습니다."));
+      showActionFeedback(t("Tooltip move canceled.", "툴팁 이동이 취소되었습니다."));
       return;
     }
 
@@ -527,7 +543,7 @@ function endPanelDrag(event) {
     }
 
     persistTooltipLayout();
-    setActionFeedback(
+    showActionFeedback(
       t(
         `Tooltip moved (right ${tooltipLayout.right}px, top ${tooltipLayout.top}px).`,
         `툴팁 이동됨 (우측 ${tooltipLayout.right}px, 상단 ${tooltipLayout.top}px).`

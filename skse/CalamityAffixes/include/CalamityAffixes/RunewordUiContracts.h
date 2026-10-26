@@ -163,6 +163,8 @@ namespace CalamityAffixes
 		// Gates the panel's cheat-adjacent debug tools; true only while a debug
 		// toggle (HUD notifications or verbose logging) is enabled.
 		bool debugTools{ false };
+		// Debug test plan: events seen this session (see EventBridge::_debugTestEvents).
+		std::vector<std::string> debugTestEvents{};
 	};
 
 	struct OperationResult

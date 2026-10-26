@@ -168,6 +168,8 @@ public static class AffixSpecLoader
                 {
                     throw new InvalidDataException($"Unknown ActorValue: {magicEffect.ActorValue} (MagicEffect: {magicEffect.EditorId})");
                 }
+
+                ValidateMagicEffectConditions(magicEffect);
             }
 
             var spells = records?.ResolveSpells() ?? [];
@@ -250,6 +252,8 @@ public static class AffixSpecLoader
                         throw new InvalidDataException(
                             $"Unknown ActorValue: {magicEffect.ActorValue} (appended MagicEffect: {magicEffect.EditorId})");
                     }
+
+                    ValidateMagicEffectConditions(magicEffect);
                     break;
                 }
                 case "Spell" when appendedRecord.Spell is not null && appendedRecord.PayloadCount == 1:
@@ -408,6 +412,71 @@ public static class AffixSpecLoader
 
         ValidateFeedbackArtObjectReferences(spec, seenArtObjects);
         ValidateTrapFeedbackWorldObjectReferences(spec, seenMovableStatics);
+    }
+
+    internal static void ValidateMagicEffectConditions(MagicEffectRecordSpec magicEffect)
+    {
+        if (magicEffect.Conditions is null)
+        {
+            return;
+        }
+
+        if (magicEffect.Conditions.Count == 0)
+        {
+            throw new InvalidDataException(
+                $"MagicEffect {magicEffect.EditorId}: conditions must be omitted or non-empty.");
+        }
+
+        foreach (var condition in magicEffect.Conditions)
+        {
+            switch (condition.Function)
+            {
+                case "HasKeyword":
+                    if (string.IsNullOrWhiteSpace(condition.KeywordForm) || !IsValidFormSpec(condition.KeywordForm))
+                    {
+                        throw new InvalidDataException(
+                            $"MagicEffect {magicEffect.EditorId}: HasKeyword condition requires keywordForm as Plugin|0xFORMID.");
+                    }
+                    if (condition.RaceForm is not null)
+                    {
+                        throw new InvalidDataException(
+                            $"MagicEffect {magicEffect.EditorId}: HasKeyword condition takes no raceForm.");
+                    }
+                    break;
+                case "GetIsRace":
+                    if (string.IsNullOrWhiteSpace(condition.RaceForm) || !IsValidFormSpec(condition.RaceForm))
+                    {
+                        throw new InvalidDataException(
+                            $"MagicEffect {magicEffect.EditorId}: GetIsRace condition requires raceForm as Plugin|0xFORMID.");
+                    }
+                    if (condition.KeywordForm is not null)
+                    {
+                        throw new InvalidDataException(
+                            $"MagicEffect {magicEffect.EditorId}: GetIsRace condition takes no keywordForm.");
+                    }
+                    break;
+                case "IsUndead":
+                case "IsInInterior":
+                case "IsCommandedActor":
+                case "IsChild":
+                    if (condition.KeywordForm is not null || condition.RaceForm is not null)
+                    {
+                        throw new InvalidDataException(
+                            $"MagicEffect {magicEffect.EditorId}: {condition.Function} condition takes no keywordForm or raceForm.");
+                    }
+                    break;
+                default:
+                    throw new InvalidDataException(
+                        $"MagicEffect {magicEffect.EditorId}: unsupported condition function '{condition.Function}'. " +
+                        "Supported: HasKeyword, GetIsRace, IsUndead, IsInInterior, IsCommandedActor, IsChild.");
+            }
+
+            if (condition.Value is not (0.0 or 1.0))
+            {
+                throw new InvalidDataException(
+                    $"MagicEffect {magicEffect.EditorId}: condition {condition.Function} value must be 0 or 1.");
+            }
+        }
     }
 
     internal static void ValidateSoundDescriptor(SoundDescriptorRecordSpec sound)
@@ -823,7 +892,30 @@ public static class AffixSpecLoader
         ValidateTrapFeedbackShape(actionElement, actionType, affix.Id);
         ValidateEchoStrikeShape(actionElement, actionType, rt.Trigger, affix.Id);
         ValidateStatusActionShape(actionElement, actionType, rt.Trigger, affix.Id);
+        ValidateCastOnCritRiderShape(actionElement, actionType, affix.Id);
 
+    }
+
+    // The runtime casts riderSpellEditorId right after a CastOnCrit spell with no
+    // magnitude override, so slow/stagger/perk effects keep their record values.
+    private static void ValidateCastOnCritRiderShape(JsonElement action, string actionType, string affixId)
+    {
+        if (!action.TryGetProperty("riderSpellEditorId", out var rider))
+        {
+            return;
+        }
+        if (actionType != "CastOnCrit")
+        {
+            throw new InvalidDataException($"{affixId}: riderSpellEditorId is only read for CastOnCrit (got {actionType}).");
+        }
+        if (rider.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(rider.GetString()))
+        {
+            throw new InvalidDataException($"{affixId}: riderSpellEditorId must be a non-empty string.");
+        }
+        if (TryGetRequiredString(action, "spellEditorId", out var main) && main == rider.GetString())
+        {
+            throw new InvalidDataException($"{affixId}: riderSpellEditorId must differ from spellEditorId.");
+        }
     }
 
     // Shared statuses (v2.3.0): Doom marks on a hit and bursts later, Contagion
@@ -851,6 +943,18 @@ public static class AffixSpecLoader
         else if (actionType == "SpreadStatus" && trigger != "Kill")
         {
             throw new InvalidDataException($"{affixId}: SpreadStatus requires runtime.trigger Kill.");
+        }
+
+        if (TryGetRequiredString(action, "statusTag", out var anyTag) &&
+            anyTag is not ("Exposed" or "Doom" or "Burning" or "Freeze" or "Bleed" or "Shock"))
+        {
+            throw new InvalidDataException($"{affixId}: unknown statusTag {anyTag}.");
+        }
+        if (actionType == "SpreadStatus" &&
+            action.TryGetProperty("maxTargets", out var maxTargets) &&
+            (maxTargets.ValueKind != JsonValueKind.Number || !maxTargets.TryGetInt32(out var targets) || targets is < 1 or > 8))
+        {
+            throw new InvalidDataException($"{affixId}: SpreadStatus maxTargets must be a whole number in [1, 8].");
         }
 
         // Build-up statuses ride on a hostile cast, which feeds the meter or adds stacks.
@@ -1259,9 +1363,24 @@ public static class AffixSpecLoader
         var path = FindValidationContractPath();
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
-            return GetFallbackContract();
+            // No hardcoded fallback: a stale copy of the action list once made valid
+            // DoomMark/SpreadStatus affixes look like spec errors. Fail with the path instead.
+            throw new FileNotFoundException(
+                $"Required validation contract was not found: {ValidationContractRelativePath} " +
+                "(searched upward from the working directory and the generator binary).");
         }
 
+        return LoadValidationContractFromPath(path);
+    }
+
+    internal static (IReadOnlySet<string> SupportedTriggers, IReadOnlySet<string> SupportedActionTypes) ReadValidationContractForTests(string path)
+    {
+        var contract = LoadValidationContractFromPath(path);
+        return (contract.SupportedTriggers, contract.SupportedActionTypes);
+    }
+
+    private static ValidationContract LoadValidationContractFromPath(string path)
+    {
         try
         {
             using var doc = JsonDocument.Parse(File.ReadAllText(path));
@@ -1271,11 +1390,9 @@ public static class AffixSpecLoader
             var actionTypes = ReadStringSet(root, "supportedActionTypes");
             return new ValidationContract(triggers, actionTypes);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is JsonException or InvalidDataException or InvalidOperationException)
         {
-            Console.Error.WriteLine(
-                $"WARNING: Failed to load validation contract ({ex.Message}). Using hardcoded fallback.");
-            return GetFallbackContract();
+            throw new InvalidDataException($"Invalid validation contract {path}: {ex.Message}", ex);
         }
     }
 
@@ -1345,33 +1462,6 @@ public static class AffixSpecLoader
         }
 
         return output;
-    }
-
-    private static ValidationContract GetFallbackContract()
-    {
-        return new ValidationContract(
-            new HashSet<string>(StringComparer.Ordinal)
-            {
-                "Hit",
-                "IncomingHit",
-                "DotApply",
-                "Kill",
-                "LowHealth",
-            },
-            new HashSet<string>(StringComparer.Ordinal)
-            {
-                "DebugNotify",
-                "CastSpell",
-                "CastSpellAdaptiveElement",
-                "CastOnCrit",
-                "ConvertDamage",
-                "MindOverMatter",
-                "Archmage",
-                "CorpseExplosion",
-                "SummonCorpseExplosion",
-                "SpawnTrap",
-                "EchoStrike",
-            });
     }
 
     private sealed record ValidationContract(HashSet<string> SupportedTriggers, HashSet<string> SupportedActionTypes);

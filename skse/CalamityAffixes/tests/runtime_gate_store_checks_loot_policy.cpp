@@ -506,6 +506,14 @@ namespace RuntimeGateStoreChecks
 			return false;
 		}
 
+		// items-3: an affix the config names but whose keyword did not resolve
+		// (an old plugin won a conflict) is not retired; its tokens stay.
+		if (source.find("_unresolvedConfiguredAffixTokens.contains(a_token)", keepPos) == std::string::npos ||
+			source.find("_unresolvedConfiguredAffixTokens.contains(a_token)", keepPos) > equalPos) {
+			std::cerr << "loot_slot_sanitize_helper_extraction: unresolved configured affix tokens must be kept\n";
+			return false;
+		}
+
 		return true;
 	}
 
@@ -703,11 +711,15 @@ namespace RuntimeGateStoreChecks
 			source.find("kCorpseExplosionDefaultMaxTargets = 48u") == std::string::npos ||
 			source.find("RollProcChance(_rng, _rngMutex, chancePct)") == std::string::npos ||
 			source.find("detail::IsPreferredCorpseExplosionCandidate(") == std::string::npos ||
-			source.find("selection.bestSelectionPriority = action.corpseExplosionSelectionPriority;") == std::string::npos ||
+			source.find(".selectionPriority = action.corpseExplosionSelectionPriority,") == std::string::npos ||
 			parserSource.find("detail::ClampCorpseExplosionSelectionPriority(") == std::string::npos ||
 			parserSource.find("a_action.value(\"selectionPriority\", 0)") == std::string::npos ||
-			source.find("selection.bestUsesPerTargetIcd") == std::string::npos ||
-			source.find("if (selection.bestUsesPerTargetIcd && targetsHit > 0u)") == std::string::npos ||
+			source.find("chosen->usesPerTargetIcd") == std::string::npos ||
+			source.find("if (chosen->usesPerTargetIcd && targetsHit > 0u)") == std::string::npos ||
+			// One roll per kill: the hook's immediate path and TESDeathEvent share it.
+			source.find("_combatState.corpseExplosionEvaluatedCorpses") == std::string::npos ||
+			// A budget-denied candidate falls through to the next one.
+			source.find("for (const auto& candidate : selection.candidates)") == std::string::npos ||
 			icdPos == std::string::npos ||
 			icdPos < budgetPos) {
 			std::cerr << "corpse_explosion_budget_safety: corpse budget/rate-limit/target-cap guards are missing\n";

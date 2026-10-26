@@ -38,8 +38,10 @@ namespace CalamityAffixes
 				}
 			}
 
+			// What stays must fit beside the runeword: two suffixes (the head slot is
+			// the runeword's). An unknown token that is not a prefix still counts.
 			if (!slots.HasToken(a_recipe.resultAffixToken) &&
-				effectiveCount >= static_cast<std::uint8_t>(kMaxAffixesPerItem)) {
+				effectiveCount >= static_cast<std::uint8_t>(kMaxRegularAffixesPerItem)) {
 				return RunewordApplyBlockReason::kAffixSlotsFull;
 			}
 		}
@@ -74,7 +76,7 @@ namespace CalamityAffixes
 			return "Selected base already has this runeword";
 		case RunewordApplyBlockReason::kAffixSlotsFull: {
 			std::string reason = "Affix slots full (max ";
-			reason.append(std::to_string(kMaxAffixesPerItem));
+			reason.append(std::to_string(kMaxRegularAffixesPerItem));
 			reason.push_back(')');
 			return reason;
 		}

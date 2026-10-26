@@ -42,7 +42,6 @@
 		static constexpr std::string_view kMcmSetAllowNonHostileFirstHitProcEvent = RuntimePolicy::kMcmSetAllowNonHostileFirstHitProcEvent;
 		static constexpr std::string_view kMcmSpawnTestItemEvent = EventNames::kMcmSpawnTestItem;
 		static constexpr std::string_view kMcmForceRebuildEvent = EventNames::kMcmForceRebuild;
-		static constexpr std::string_view kMcmGrantRecoveryPackEvent = EventNames::kMcmGrantRecoveryPack;
 		static constexpr std::string_view kMcmRecoverMiscCurrencyEvent = EventNames::kMcmRecoverMiscCurrency;
 
 		// Policy constants.

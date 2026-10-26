@@ -1741,7 +1741,7 @@ namespace RuntimeGateStoreChecks
 				runewordBody->find("recipeLine.className = \"rwStatusRecipe\"") == std::string::npos ||
 				runewordBody->find("renderRunewordFlowProgress(actionState, state);") == std::string::npos ||
 				uiText->find("runewordInsertButton.classList.toggle(\"attention\", canTransmute);") == std::string::npos ||
-				runewordBody->find("runewordActionHint.textContent = actionState.buttonHint;") == std::string::npos ||
+				runewordBody->find("runewordActionHint.textContent = actionState.isComplete ? \"\" : actionState.buttonHint;") == std::string::npos ||
 				!tooltipPlacementBody.has_value() ||
 				tooltipPlacementBody->find("appendEmptyState(") == std::string::npos ||
 				uiText->find("function focusCurrentMainTab()") == std::string::npos ||

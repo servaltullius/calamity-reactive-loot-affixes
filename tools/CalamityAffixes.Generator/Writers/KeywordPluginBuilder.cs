@@ -699,6 +699,8 @@ public static class KeywordPluginBuilder
             });
         }
 
+        AddExtraMagicEffectConditions(mgef, spec);
+
         if (spec.Recover)
         {
             flags |= MagicEffect.Flag.Recover;
@@ -730,6 +732,68 @@ public static class KeywordPluginBuilder
         }
 
         return mgef;
+    }
+
+    private static void AddExtraMagicEffectConditions(MagicEffect mgef, MagicEffectRecordSpec spec)
+    {
+        if (spec.Conditions is null)
+        {
+            return;
+        }
+
+        foreach (var condition in spec.Conditions)
+        {
+            ConditionData data = condition.Function switch
+            {
+                "HasKeyword" => BuildHasKeywordCondition(condition, spec.EditorId),
+                "GetIsRace" => BuildGetIsRaceCondition(condition, spec.EditorId),
+                "IsUndead" => new IsUndeadConditionData { RunOnType = Condition.RunOnType.Subject },
+                "IsInInterior" => new IsInInteriorConditionData { RunOnType = Condition.RunOnType.Subject },
+                "IsCommandedActor" => new IsCommandedActorConditionData { RunOnType = Condition.RunOnType.Subject },
+                "IsChild" => new IsChildConditionData { RunOnType = Condition.RunOnType.Subject },
+                _ => throw new InvalidDataException(
+                    $"Unsupported MagicEffect condition function '{condition.Function}' (MagicEffect: {spec.EditorId}). " +
+                    "Supported: HasKeyword, GetIsRace, IsUndead, IsInInterior, IsCommandedActor, IsChild."),
+            };
+
+            mgef.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = (float)condition.Value,
+                Flags = condition.Or ? Condition.Flag.OR : 0,
+                Data = data,
+            });
+        }
+    }
+
+    private static HasKeywordConditionData BuildHasKeywordCondition(MagicEffectConditionSpec condition, string editorId)
+    {
+        if (string.IsNullOrWhiteSpace(condition.KeywordForm))
+        {
+            throw new InvalidDataException(
+                $"MagicEffect condition HasKeyword requires keywordForm (MagicEffect: {editorId}).");
+        }
+
+        var data = new HasKeywordConditionData { RunOnType = Condition.RunOnType.Subject };
+        data.Keyword = new FormLinkOrIndex<IKeywordGetter>(
+            data,
+            ParseFormSpec(condition.KeywordForm, $"MagicEffect.conditions.keywordForm: {editorId}"));
+        return data;
+    }
+
+    private static GetIsRaceConditionData BuildGetIsRaceCondition(MagicEffectConditionSpec condition, string editorId)
+    {
+        if (string.IsNullOrWhiteSpace(condition.RaceForm))
+        {
+            throw new InvalidDataException(
+                $"MagicEffect condition GetIsRace requires raceForm (MagicEffect: {editorId}).");
+        }
+
+        var data = new GetIsRaceConditionData { RunOnType = Condition.RunOnType.Subject };
+        data.Race = new FormLinkOrIndex<IRaceGetter>(
+            data,
+            ParseFormSpec(condition.RaceForm, $"MagicEffect.conditions.raceForm: {editorId}"));
+        return data;
     }
 
     private static FormKey ParseFormSpec(string spec, string context)

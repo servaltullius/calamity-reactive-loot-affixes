@@ -7,7 +7,7 @@ using CalamityAffixes::detail::IsHitLikeSourceEvidence;
 static_assert(IsHitLikeSourceEvidence(true, false, false, false, false),
 	"a swing's own weapon record routes as a hit");
 static_assert(IsHitLikeSourceEvidence(false, true, false, false, false),
-	"an attack-data spell keeps routing as a hit (Archmage lane)");
+	"an attack-data spell keeps routing as a hit (Archmage reads TESHitEvent::source instead)");
 static_assert(IsHitLikeSourceEvidence(false, false, true, false, false),
 	"an unarmed melee swing carries only the melee flag and still routes");
 static_assert(IsHitLikeSourceEvidence(false, false, false, true, false),

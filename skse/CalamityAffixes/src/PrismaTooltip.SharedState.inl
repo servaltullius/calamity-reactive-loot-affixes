@@ -78,6 +78,10 @@
 		std::atomic_int g_relevantMenusOpen{ 0 };
 		std::atomic_bool g_gatePollingOnMenus{ false };
 		std::atomic_bool g_controlPanelOpen{ false };
+		// A text field in the panel (recipe search) has focus; the JS view
+		// reports it with "ui.textinput:1/0". The hotkey must not toggle while
+		// the player types its letter there.
+		std::atomic_bool g_panelTextInputFocused{ false };
 		std::atomic_uint32_t g_controlPanelHotkey{ 0u };
 		std::atomic_int g_uiLanguageMode{ kDefaultUiLanguageMode };
 

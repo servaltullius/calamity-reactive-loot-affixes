@@ -226,13 +226,28 @@ namespace CalamityAffixes
 		if (!a_object) {
 			return false;
 		}
-		if (a_object->As<RE::TESObjectWEAP>()) {
-			return true;
+		if (const auto* weap = a_object->As<RE::TESObjectWEAP>()) {
+			return detail::IsLootWeaponEligible(detail::LootWeaponEligibilityInput{
+				.bound = weap->IsBound(),
+				.playable = weap->GetPlayable(),
+			});
 		}
 		if (const auto* armo = a_object->As<RE::TESObjectARMO>()) {
 			return IsLootArmorEligibleForAffixes(armo);
 		}
 		return false;
+	}
+
+	bool EventBridge::IsCraftingBaseEligible(const RE::TESBoundObject* a_object) const
+	{
+		if (const auto* weap = a_object ? a_object->As<RE::TESObjectWEAP>() : nullptr) {
+			return detail::IsLootWeaponEligible(detail::LootWeaponEligibilityInput{
+				.bound = weap->IsBound(),
+				.playable = weap->GetPlayable(),
+				.asCraftingBase = true,
+			});
+		}
+		return IsLootObjectEligibleForAffixes(a_object);
 	}
 
 	std::optional<EventBridge::LootItemType> EventBridge::ParseLootItemType(std::string_view a_kidType) const

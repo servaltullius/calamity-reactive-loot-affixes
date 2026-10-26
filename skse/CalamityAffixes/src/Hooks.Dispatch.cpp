@@ -228,8 +228,28 @@ namespace CalamityAffixes::Hooks::detail
 		constexpr auto kProcDispatchCleanupAge = std::chrono::seconds(10);
 		constexpr std::size_t kProcDispatchMaxEntries = 512u;
 
+		constexpr std::size_t kProcDispatchHardMaxEntries = 4096u;
+		// The sweep looks targets up; once a second is enough for a soft cap.
+		constexpr auto kProcDispatchCleanupInterval = std::chrono::seconds(1);
+		std::chrono::steady_clock::time_point s_procDispatchLastCleanupAt{};
+
 		std::unordered_map<std::uint64_t, ProcDispatchRecord> s_procDispatch;
 		std::mutex s_procDispatchMutex;
+
+		// Key is (target << 32 | attacker).
+		[[nodiscard]] bool IsStillBlockingReusedHit(std::uint64_t a_pairKey, const ProcDispatchRecord& a_record) noexcept
+		{
+			if (a_record.dispatchedHitContent == 0u) {
+				return false;
+			}
+			const auto targetFormID = static_cast<RE::FormID>(a_pairKey >> 32);
+			auto* target = RE::TESForm::LookupByID<RE::Actor>(targetFormID);
+			if (!target) {
+				return false;
+			}
+			return HitDataUtil::MakeHitContentSignature(HitDataUtil::GetLastHitData(target)) ==
+			       a_record.dispatchedHitContent;
+		}
 
 		struct ExpectedEchoStrikeDamage
 		{
@@ -277,7 +297,6 @@ namespace CalamityAffixes::Hooks::detail
 				~ScopedProcGuard() { g_inProcDispatch = false; }
 			} procGuard;
 
-			(void)a_adjustedDamage;
 
 			// Use the pre-captured hitData snapshot from the hook path.
 			// GetLastHitData(target) is unreliable for projectile hits because
@@ -290,7 +309,7 @@ namespace CalamityAffixes::Hooks::detail
 				hitData,
 				false);
 
-			bridge->OnHealthDamage(a_target, a_attacker, hitData, a_originalDamage);
+			bridge->OnHealthDamage(a_target, a_attacker, hitData, a_originalDamage, a_adjustedDamage);
 
 			for (std::size_t i = 0; i < a_conversionCount; ++i) {
 				const auto& conv = a_conversions[i];
@@ -327,6 +346,18 @@ namespace CalamityAffixes::Hooks::detail
 							coc.effectiveness,
 							coc.magnitudeOverride,
 							a_attacker);
+						if (coc.riderSpell) {
+							// Slow/stagger/perk riders keep their record magnitudes.
+							CastHostileOnlySpellImmediate(
+								magicCaster,
+								coc.riderSpell,
+								coc.noHitEffectArt,
+								a_target,
+								coc.effectiveness,
+								0.0f,
+								a_attacker);
+							bridge->NoteDebugTestEventLocked("coc:rider");
+						}
 						if (!feedbackSpell && coc.noHitEffectArt) {
 							feedbackSpell = coc.spell;
 						}
@@ -431,9 +462,18 @@ namespace CalamityAffixes::Hooks::detail
 			record.dispatchedHitContent = hitContent;
 		}
 
-		if (s_procDispatch.size() > kProcDispatchMaxEntries) {
+		if (s_procDispatch.size() > kProcDispatchMaxEntries &&
+			(s_procDispatchLastCleanupAt.time_since_epoch().count() == 0 ||
+				(a_now - s_procDispatchLastCleanupAt) >= kProcDispatchCleanupInterval)) {
+			s_procDispatchLastCleanupAt = a_now;
+			// A record whose target still carries the HitData it dispatched keeps
+			// blocking that hit from being re-read as new ("however long ago it
+			// landed"), so age alone does not drop it. Game thread (hook), so the
+			// lookup is safe. A hard cap still bounds the map.
+			const bool overHardCap = s_procDispatch.size() > kProcDispatchHardMaxEntries;
 			for (auto it = s_procDispatch.begin(); it != s_procDispatch.end();) {
-				if ((a_now - it->second.dispatchTime) >= kProcDispatchCleanupAge) {
+				if ((a_now - it->second.dispatchTime) >= kProcDispatchCleanupAge &&
+					(overHardCap || !IsStillBlockingReusedHit(it->first, it->second))) {
 					it = s_procDispatch.erase(it);
 				} else {
 					++it;
@@ -455,7 +495,8 @@ namespace CalamityAffixes::Hooks::detail
 		result.adjustedDamage = std::abs(a_damage);
 
 		const float critMult = a_bridge->GetCritDamageMultiplier(a_attacker, a_preHitData);
-		if (std::isfinite(critMult) && critMult > 1.0f) {
+		const bool appliesCritMult = std::isfinite(critMult) && critMult > 1.0f;
+		if (appliesCritMult) {
 			result.adjustedDamage *= critMult;
 		}
 		if (!std::isfinite(result.adjustedDamage)) {
@@ -463,8 +504,10 @@ namespace CalamityAffixes::Hooks::detail
 		}
 		result.originalDamage = result.adjustedDamage;
 
+		// Convert the crit-boosted physical part too: the affix converts X% of
+		// the physical damage this hit actually deals.
 		const auto conversionResults = a_bridge->EvaluateConversion(
-			a_attacker, a_target, a_preHitData, result.adjustedDamage, false);
+			a_attacker, a_target, a_preHitData, result.adjustedDamage, false, appliesCritMult ? critMult : 1.0f);
 		const auto mindOverMatter = a_bridge->EvaluateMindOverMatter(
 			a_target, a_attacker, a_preHitData, result.adjustedDamage, false);
 		(void)mindOverMatter;
@@ -596,6 +639,67 @@ namespace CalamityAffixes::Hooks::detail
 		return false;
 	}
 
+	namespace
+	{
+		// Coalesces unrouted player damage into one pending low-health task: a
+		// breath or Flames beam ticks many times a second.
+		std::mutex s_lowHealthOnlyMutex;
+		bool s_lowHealthOnlyPending{ false };
+		float s_lowHealthOnlyDamage{ 0.0f };
+		RE::FormID s_lowHealthOnlyAttacker{ 0u };
+	}
+
+	void SchedulePlayerLowHealthOnlyCheck(
+		CalamityAffixes::EventBridge* a_bridge,
+		RE::Actor* a_target,
+		RE::Actor* a_attacker,
+		float a_damage) noexcept
+	{
+		// Caller contract: inside the hook's process branch (not nested, not
+		// under the proc-dispatch guard), after CallOriginal applied the damage.
+		if (!a_bridge || !a_target || !a_target->IsPlayerRef() ||
+			!a_bridge->IsRuntimeEnabled() || !a_bridge->HasActiveLowHealthAffixesHint()) {
+			return;
+		}
+		auto* tasks = SKSE::GetTaskInterface();
+		if (!tasks) {
+			return;
+		}
+
+		{
+			const std::scoped_lock lock(s_lowHealthOnlyMutex);
+			s_lowHealthOnlyDamage += std::abs(a_damage);
+			if (a_attacker && a_attacker != a_target) {
+				s_lowHealthOnlyAttacker = a_attacker->GetFormID();
+			}
+			if (s_lowHealthOnlyPending) {
+				return;
+			}
+			s_lowHealthOnlyPending = true;
+		}
+
+		const auto runtimeGeneration = s_runtimeGeneration.load(std::memory_order_acquire);
+		tasks->AddTask([runtimeGeneration]() {
+			float damage = 0.0f;
+			RE::FormID attacker = 0u;
+			{
+				const std::scoped_lock lock(s_lowHealthOnlyMutex);
+				damage = s_lowHealthOnlyDamage;
+				attacker = s_lowHealthOnlyAttacker;
+				s_lowHealthOnlyDamage = 0.0f;
+				s_lowHealthOnlyAttacker = 0u;
+				s_lowHealthOnlyPending = false;
+			}
+			if (s_runtimeGeneration.load(std::memory_order_acquire) != runtimeGeneration) {
+				return;
+			}
+			if (auto* bridge = CalamityAffixes::EventBridge::GetSingleton()) {
+				// Takes _stateMutex (recursive) itself.
+				bridge->OnPlayerHealthDamageLowHealthOnly(attacker, damage);
+			}
+		});
+	}
+
 	void InvalidateDeferredTasks() noexcept
 	{
 		s_runtimeGeneration.fetch_add(1u, std::memory_order_acq_rel);
@@ -606,6 +710,7 @@ namespace CalamityAffixes::Hooks::detail
 		{
 			const std::scoped_lock lock(s_procDispatchMutex);
 			s_procDispatch.clear();
+			s_procDispatchLastCleanupAt = {};
 		}
 		{
 			const std::scoped_lock lock(s_nextAllowedByTargetMutex);

@@ -61,7 +61,14 @@ const engineFeedbackLocalizations = {
   ],
   "Reforge system unavailable.": ["Reforge system unavailable.", "재련 시스템을 사용할 수 없습니다."],
   "Reset system unavailable.": ["Reset system unavailable.", "초기화 시스템을 사용할 수 없습니다."],
-  "Currency system unavailable.": ["Currency system unavailable.", "화폐 시스템을 사용할 수 없습니다."]
+  "Currency system unavailable.": ["Currency system unavailable.", "화폐 시스템을 사용할 수 없습니다."],
+  "Calamity is disabled in the MCM.": ["Calamity is disabled in the MCM.", "MCM에서 칼라미티가 꺼져 있습니다."],
+  "Already recovered this save.": ["Already recovered this save.", "이 세이브에서는 이미 복구했습니다."]
+};
+
+// Hotkey names the DLL sends that are words rather than key labels.
+const hotkeyNameLocalizations = {
+  "Gamepad (not supported)": ["Gamepad (not supported)", "게임패드(지원 안 함)"]
 };
 
 function localizeEngineFeedback(value) {
@@ -71,9 +78,10 @@ function localizeEngineFeedback(value) {
 
 function updatePanelHotkeyHints() {
   const key = panelHotkeyTextState || "";
+  const keyNames = hotkeyNameLocalizations[key] || [key, key];
   const label = t(
-    `Open/Close Panel: ${key}`.trim(),
-    `패널 열기/닫기: ${key}`.trim()
+    `Open/Close Panel: ${keyNames[0]}`.trim(),
+    `패널 열기/닫기: ${keyNames[1]}`.trim()
   );
   if (quickOpenRuneword) {
     quickOpenRuneword.textContent = label;

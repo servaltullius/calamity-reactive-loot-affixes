@@ -23,5 +23,8 @@ namespace CalamityAffixes
 		_loot = {};
 		_runtimeSettings.Reset();
 		_configLoaded = false;
+		_parsedConfiguredAffixCount = 0u;
+		_unknownAffixTokenPruningAllowed = false;
+		_unresolvedConfiguredAffixTokens.clear();
 	}
 }

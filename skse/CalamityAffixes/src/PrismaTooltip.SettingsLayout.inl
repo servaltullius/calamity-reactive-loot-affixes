@@ -1,162 +1,22 @@
 		[[nodiscard]] std::string DescribeHotkey(std::uint32_t a_keyCode)
 		{
-			if (a_keyCode == 0u) {
+			switch (HotkeyNames::ClassifyKeyCode(a_keyCode)) {
+			case HotkeyNames::KeyDevice::kNone:
 				return {};
-			}
-
-			if (a_keyCode >= kMouseButtonOffset) {
-				const auto mouse = a_keyCode - kMouseButtonOffset;
-				switch (mouse) {
-				case 0:
-					return "Mouse1";
-				case 1:
-					return "Mouse2";
-				case 2:
-					return "Mouse3";
-				default:
-					return "Mouse" + std::to_string(mouse + 1);
-				}
-			}
-
-			switch (a_keyCode) {
-			case RE::BSKeyboardDevice::Keys::kEscape:
-				return "Esc";
-			case RE::BSKeyboardDevice::Keys::kNum1:
-				return "1";
-			case RE::BSKeyboardDevice::Keys::kNum2:
-				return "2";
-			case RE::BSKeyboardDevice::Keys::kNum3:
-				return "3";
-			case RE::BSKeyboardDevice::Keys::kNum4:
-				return "4";
-			case RE::BSKeyboardDevice::Keys::kNum5:
-				return "5";
-			case RE::BSKeyboardDevice::Keys::kNum6:
-				return "6";
-			case RE::BSKeyboardDevice::Keys::kNum7:
-				return "7";
-			case RE::BSKeyboardDevice::Keys::kNum8:
-				return "8";
-			case RE::BSKeyboardDevice::Keys::kNum9:
-				return "9";
-			case RE::BSKeyboardDevice::Keys::kNum0:
-				return "0";
-			case RE::BSKeyboardDevice::Keys::kMinus:
-				return "-";
-			case RE::BSKeyboardDevice::Keys::kEquals:
-				return "=";
-			case RE::BSKeyboardDevice::Keys::kBackspace:
-				return "Backspace";
-			case RE::BSKeyboardDevice::Keys::kTab:
-				return "Tab";
-			case RE::BSKeyboardDevice::Keys::kQ:
-				return "Q";
-			case RE::BSKeyboardDevice::Keys::kW:
-				return "W";
-			case RE::BSKeyboardDevice::Keys::kE:
-				return "E";
-			case RE::BSKeyboardDevice::Keys::kR:
-				return "R";
-			case RE::BSKeyboardDevice::Keys::kT:
-				return "T";
-			case RE::BSKeyboardDevice::Keys::kY:
-				return "Y";
-			case RE::BSKeyboardDevice::Keys::kU:
-				return "U";
-			case RE::BSKeyboardDevice::Keys::kI:
-				return "I";
-			case RE::BSKeyboardDevice::Keys::kO:
-				return "O";
-			case RE::BSKeyboardDevice::Keys::kP:
-				return "P";
-			case RE::BSKeyboardDevice::Keys::kBracketLeft:
-				return "[";
-			case RE::BSKeyboardDevice::Keys::kBracketRight:
-				return "]";
-			case RE::BSKeyboardDevice::Keys::kSpacebar:
-				return "Space";
-			case RE::BSKeyboardDevice::Keys::kEnter:
-				return "Enter";
-			case RE::BSKeyboardDevice::Keys::kLeftShift:
-				return "LShift";
-			case RE::BSKeyboardDevice::Keys::kRightShift:
-				return "RShift";
-			case RE::BSKeyboardDevice::Keys::kLeftControl:
-				return "LCtrl";
-			case RE::BSKeyboardDevice::Keys::kRightControl:
-				return "RCtrl";
-			case RE::BSKeyboardDevice::Keys::kLeftAlt:
-				return "LAlt";
-			case RE::BSKeyboardDevice::Keys::kRightAlt:
-				return "RAlt";
-			case RE::BSKeyboardDevice::Keys::kA:
-				return "A";
-			case RE::BSKeyboardDevice::Keys::kS:
-				return "S";
-			case RE::BSKeyboardDevice::Keys::kD:
-				return "D";
-			case RE::BSKeyboardDevice::Keys::kF:
-				return "F";
-			case RE::BSKeyboardDevice::Keys::kG:
-				return "G";
-			case RE::BSKeyboardDevice::Keys::kH:
-				return "H";
-			case RE::BSKeyboardDevice::Keys::kJ:
-				return "J";
-			case RE::BSKeyboardDevice::Keys::kK:
-				return "K";
-			case RE::BSKeyboardDevice::Keys::kL:
-				return "L";
-			case RE::BSKeyboardDevice::Keys::kZ:
-				return "Z";
-			case RE::BSKeyboardDevice::Keys::kX:
-				return "X";
-			case RE::BSKeyboardDevice::Keys::kC:
-				return "C";
-			case RE::BSKeyboardDevice::Keys::kV:
-				return "V";
-			case RE::BSKeyboardDevice::Keys::kB:
-				return "B";
-			case RE::BSKeyboardDevice::Keys::kN:
-				return "N";
-			case RE::BSKeyboardDevice::Keys::kM:
-				return "M";
-			case RE::BSKeyboardDevice::Keys::kF1:
-				return "F1";
-			case RE::BSKeyboardDevice::Keys::kF2:
-				return "F2";
-			case RE::BSKeyboardDevice::Keys::kF3:
-				return "F3";
-			case RE::BSKeyboardDevice::Keys::kF4:
-				return "F4";
-			case RE::BSKeyboardDevice::Keys::kF5:
-				return "F5";
-			case RE::BSKeyboardDevice::Keys::kF6:
-				return "F6";
-			case RE::BSKeyboardDevice::Keys::kF7:
-				return "F7";
-			case RE::BSKeyboardDevice::Keys::kF8:
-				return "F8";
-			case RE::BSKeyboardDevice::Keys::kF9:
-				return "F9";
-			case RE::BSKeyboardDevice::Keys::kF10:
-				return "F10";
-			case RE::BSKeyboardDevice::Keys::kF11:
-				return "F11";
-			case RE::BSKeyboardDevice::Keys::kF12:
-				return "F12";
-			case RE::BSKeyboardDevice::Keys::kUp:
-				return "Up";
-			case RE::BSKeyboardDevice::Keys::kDown:
-				return "Down";
-			case RE::BSKeyboardDevice::Keys::kLeft:
-				return "Left";
-			case RE::BSKeyboardDevice::Keys::kRight:
-				return "Right";
+			case HotkeyNames::KeyDevice::kGamepad:
+				// MCM Helper stores gamepad buttons at 266+; they never toggle the
+				// panel (documented), so do not dress them up as mouse buttons.
+				return std::string(HotkeyNames::kGamepadUnsupportedName);
+			case HotkeyNames::KeyDevice::kMouse:
+				return std::string(HotkeyNames::MouseKeyName(a_keyCode));
+			case HotkeyNames::KeyDevice::kKeyboard:
 			default:
 				break;
 			}
 
+			if (const auto name = HotkeyNames::KeyboardKeyName(a_keyCode); !name.empty()) {
+				return std::string(name);
+			}
 			return "Key" + std::to_string(a_keyCode);
 		}
 

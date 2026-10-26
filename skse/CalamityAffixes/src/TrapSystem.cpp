@@ -35,7 +35,12 @@ namespace CalamityAffixes::TrapSystem
 				return;
 			}
 
-			bridge->TickTraps();
+			if (bridge->HasActiveTraps()) {
+				bridge->TickTraps();
+			}
+			if (bridge->WantsBowDrawSpeedSync()) {
+				bridge->SyncBowDrawSpeed();
+			}
 		}
 	}
 
@@ -54,7 +59,8 @@ namespace CalamityAffixes::TrapSystem
 				if (!bridge) {
 					continue;
 				}
-				if (!bridge->HasActiveTraps()) {
+				// The same game-thread tick also keeps the bow draw speed in sync.
+				if (!bridge->HasActiveTraps() && !bridge->WantsBowDrawSpeedSync()) {
 					continue;
 				}
 

@@ -332,7 +332,12 @@ namespace CalamityAffixes
 		const auto now = a_context.observedAt;
 		MaybeFlushRuntimeUserSettings(now, false);
 
-		if (!_configLoaded || !_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
+		// Ownership bookkeeping (drop, stash, pickup) runs even while the MCM
+		// has the runtime off: an affix item dropped or picked up then would
+		// otherwise keep its state on the old key, and the next load or the
+		// re-enable prune would erase it. Only the paths that grant items or roll
+		// loot check the enabled flag.
+		if (!_configLoaded) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
@@ -345,11 +350,17 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		const bool runtimeEnabled = _runtimeSettings.enabled.load(std::memory_order_relaxed);
 		const auto playerId = player->GetFormID();
 		const auto refHandle = static_cast<LootRerollGuard::RefHandle>(RE::ObjectRefHandle(a_event->reference).native_handle());
 		RE::FormID referenceFormID = 0;
 		std::uint64_t referenceUniqueKey = 0;
-		if (a_event->reference) {
+		if (a_context.containerReferenceCaptured) {
+			referenceFormID = a_context.containerReferenceFormID;
+			if (a_context.containerReferenceUidBaseID != 0u && a_context.containerReferenceUniqueID != 0u) {
+				referenceUniqueKey = MakeInstanceKey(a_context.containerReferenceUidBaseID, a_context.containerReferenceUniqueID);
+			}
+		} else if (a_event->reference) {
 			if (auto ref = a_event->reference.get(); ref) {
 				referenceFormID = ref->GetFormID();
 				if (const auto* uid = ref->extraList.GetByType<RE::ExtraUniqueID>();
@@ -371,7 +382,7 @@ namespace CalamityAffixes
 				playerId)) {
 			auto* consumed = RE::TESForm::LookupByID<RE::TESForm>(a_event->baseObj);
 			auto* consumedScroll = consumed ? consumed->As<RE::ScrollItem>() : nullptr;
-			if (consumedScroll) {
+			if (consumedScroll && runtimeEnabled) {
 				const float preserveChancePct = ComputeActiveScrollNoConsumeChancePct();
 				const auto restoreCount = RollScrollNoConsumeRestoreCount(a_event->itemCount, preserveChancePct);
 				if (restoreCount > 0) {
@@ -530,6 +541,69 @@ namespace CalamityAffixes
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
+		// 2a) A companion or another NPC picked up a reference the player dropped
+		//     (a "pick that up" order, a disarm): move the detached world state to
+		//     the new owner's key so it is still there when the item comes back.
+		//     No loot roll on this path.
+		if (a_event->oldContainer == LootRerollGuard::kWorldContainer &&
+			a_event->newContainer != 0u &&
+			a_event->newContainer != playerId) {
+			std::optional<std::uint64_t> guardedDropKey;
+			if (refHandle != 0u) {
+				guardedDropKey = _lootState.rerollGuard.ConsumeDroppedReferenceInstanceKey(a_event->itemCount, refHandle);
+			}
+			const auto referenceDetachedWorldKey = MakeDetachedWorldInstanceKey(referenceFormID);
+			if (guardedDropKey && !IsDetachedWorldReferenceMatch(*guardedDropKey, referenceDetachedWorldKey)) {
+				guardedDropKey.reset();
+			}
+			std::uint64_t detachedWorldKey = guardedDropKey.value_or(0u);
+			if (!IsInstanceKeyTracked(detachedWorldKey) && IsInstanceKeyTracked(referenceDetachedWorldKey)) {
+				detachedWorldKey = referenceDetachedWorldKey;
+			}
+			if (IsInstanceKeyTracked(detachedWorldKey)) {
+				const auto newOwnerId = a_event->newContainer;
+				const auto targetKey = a_event->uniqueID != 0u ?
+					MakeInstanceKey(newOwnerId, a_event->uniqueID) :
+					((referenceUniqueKey >> 16u) == newOwnerId ? referenceUniqueKey : std::uint64_t{ 0 });
+				if (targetKey == 0u) {
+					// Keep it: a later UniqueIDChange or NPC-to-player transfer picks
+					// it up with the exact-key rules.
+					SKSE::log::info(
+						"CalamityAffixes: retained detached world state; the new owner has no unique ID for it yet (baseObj={:08X}, ref={:08X}, newOwner={:08X}, detachedKey={:016X}).",
+						a_event->baseObj,
+						referenceFormID,
+						newOwnerId,
+						detachedWorldKey);
+				} else if (HasMaterialInstanceState(targetKey)) {
+					// The detached key is this exact reference (checked above), so
+					// whatever the new owner's key still holds is left over from an
+					// item that unique ID named before: replace it, as a reused
+					// unique ID does on an NPC-to-NPC transfer.
+					SKSE::log::info(
+						"CalamityAffixes: replaced stale state on the new owner's reused unique ID (baseObj={:08X}, ref={:08X}, newOwner={:08X}, detachedKey={:016X}, targetKey={:016X}).",
+						a_event->baseObj,
+						referenceFormID,
+						newOwnerId,
+						detachedWorldKey,
+						targetKey);
+					DiscardInstanceKeyState(targetKey);
+					RemapInstanceKey(detachedWorldKey, targetKey);
+				} else {
+					RemapInstanceKey(detachedWorldKey, targetKey);
+					if (_loot.debugLog) {
+						SKSE::log::debug(
+							"CalamityAffixes: moved detached world state to its new owner (baseObj={:08X}, ref={:08X}, newOwner={:08X}, detachedKey={:016X}, targetKey={:016X}).",
+							a_event->baseObj,
+							referenceFormID,
+							newOwnerId,
+							detachedWorldKey,
+							targetKey);
+					}
+				}
+			}
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
 		if (a_event->newContainer != playerId) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -615,6 +689,12 @@ namespace CalamityAffixes
 				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
+		}
+
+		// Everything above only moved state between keys; rolling loot needs the
+		// runtime on.
+		if (!runtimeEnabled) {
+			return RE::BSEventNotifyControl::kContinue;
 		}
 
 		const auto baseObj = a_event->baseObj;
@@ -779,6 +859,18 @@ namespace CalamityAffixes
 			DiscardInstanceKeyState(transferPlan.oldKey);
 			DiscardInstanceKeyState(transferPlan.newKey);
 			return RE::BSEventNotifyControl::kContinue;
+		}
+		if (transferPlan.decision == InstanceKeyTransferDecision::kReplaceStaleDestination) {
+			SKSE::log::info(
+				"CalamityAffixes: replaced stale state on a reused unique ID (oldOwner={:08X}, newOwner={:08X}, item={:08X}, oldUid={}, newUid={}, oldKey={:016X}, newKey={:016X}).",
+				oldOwnerID,
+				newOwnerID,
+				itemFormID,
+				a_event->oldUniqueID,
+				a_event->newUniqueID,
+				transferPlan.oldKey,
+				transferPlan.newKey);
+			DiscardInstanceKeyState(transferPlan.newKey);
 		}
 
 		RemapInstanceKey(transferPlan.oldKey, transferPlan.newKey);

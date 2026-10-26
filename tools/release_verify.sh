@@ -3,7 +3,8 @@ set -euo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${repo_root}/tools/path_helpers.sh"
-repo_run_root="$(resolve_repo_run_root "${repo_root}")"
+resolve_repo_run_root "${repo_root}"
+repo_run_root="${CAFF_REPO_RUN_ROOT_RESULT}"
 package_path_file=""
 cleanup() {
   cleanup_repo_run_root
@@ -83,22 +84,6 @@ step() {
   echo ""
   echo "==> $*"
 }
-resolve_expected_package_version() {
-  if [[ -n "${CAFF_PACKAGE_VERSION:-}" ]]; then
-    printf '%s\n' "${CAFF_PACKAGE_VERSION#v}"
-    return
-  fi
-
-  local cmake_project_file="${repo_root}/skse/CalamityAffixes/CMakeLists.txt"
-  local cmake_version
-  cmake_version="$(grep -Eo 'project\(CalamityAffixes VERSION [0-9]+\.[0-9]+\.[0-9]+' "${cmake_project_file}" | awk '{print $3}' | head -n1)"
-  if [[ -z "${cmake_version}" ]]; then
-    echo "Could not resolve CalamityAffixes package version from ${cmake_project_file}" >&2
-    return 1
-  fi
-  printf '%s\n' "${cmake_version}"
-}
-
 
 step "Repo root: ${repo_root}"
 if [[ "${repo_run_root}" != "${repo_root}" ]]; then
@@ -128,7 +113,7 @@ python3 -m json.tool "${repo_root}/Data/MCM/Config/CalamityAffixes/config.json" 
 python3 -m json.tool "${repo_root}/Data/MCM/Config/CalamityAffixes/keybinds.json" >/dev/null
 echo "MCM config/keybinds: OK"
 
-step "Runtime contract snapshot sync"
+step "Generated Data outputs sync (runtime contract, ESP, ini, json)"
 python3 "${repo_root}/tools/verify_runtime_contract_sync.py"
 
 step "Generator tests"
@@ -157,8 +142,13 @@ fi
 
 if [[ "${with_mo2_zip}" -eq 1 ]]; then
   step "MO2 zip build"
+  # Resolve the version once and hand it to the builder, so the zip name and the
+  # expected version come from the same value.
+  expected_version="$(resolve_package_version "${repo_root}")"
   package_path_file="$(mktemp)"
-  CAFF_PACKAGE_OUTPUT_FILE="${package_path_file}" "${repo_root}/tools/build_mo2_zip.sh"
+  CAFF_PACKAGE_VERSION="${expected_version}" \
+    CAFF_PACKAGE_OUTPUT_FILE="${package_path_file}" \
+    "${repo_root}/tools/build_mo2_zip.sh"
 
   zip_path=""
   if ! IFS= read -r zip_path < "${package_path_file}" || [[ -z "${zip_path}" ]]; then
@@ -172,7 +162,6 @@ if [[ "${with_mo2_zip}" -eq 1 ]]; then
 
   package_skse_build_dir="${CAFF_SKSE_BUILD_DIR:-${skse_build_dir}}"
   expected_dll="${CAFF_LINUX_CROSS_DLL:-${package_skse_build_dir}/CalamityAffixes.dll}"
-  expected_version="$(resolve_expected_package_version)"
 
   step "MO2 zip structure, DLL hash, CRC, and package version"
   python3 "${repo_root}/tools/verify_mo2_zip.py" "${zip_path}" \

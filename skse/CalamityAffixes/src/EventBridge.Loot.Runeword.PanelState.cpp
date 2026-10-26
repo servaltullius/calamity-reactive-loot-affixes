@@ -123,12 +123,10 @@ namespace CalamityAffixes
 		};
 
 		const auto resolveProcLane = [](ActionType a_actionType) noexcept {
-			switch (a_actionType) {
-			case ActionType::kCastSpell:
-			case ActionType::kCastSpellAdaptiveElement:
-			case ActionType::kSpawnTrap:
-			case ActionType::kDoomMark:
+			if (IsStandardTriggerProcLaneAction(a_actionType)) {
 				return detail::EquippedBuildProcLane::kStandard;
+			}
+			switch (a_actionType) {
 			case ActionType::kCastOnCrit:
 			case ActionType::kConvertDamage:
 			case ActionType::kMindOverMatter:
@@ -296,6 +294,9 @@ namespace CalamityAffixes
 		panelState.standardReforgeCost = detail::kSelectedReforgeCost;
 		panelState.lockedReforgeCost = detail::kSelectedReforgeCost;
 		panelState.debugTools = _loot.debugHudNotifications || _loot.debugLog;
+		if (panelState.debugTools) {
+			panelState.debugTestEvents.assign(_debugTestEvents.begin(), _debugTestEvents.end());
+		}
 		panelState.exchangeReforgeScrollCost = detail::kExchangeScrollsPerReforgeOrb;
 		panelState.exchangeScourScrollCost = detail::kExchangeScrollsPerScouringOrb;
 		panelState.selectedReforgesPerItem = detail::kSelectedReforgesPerItem;

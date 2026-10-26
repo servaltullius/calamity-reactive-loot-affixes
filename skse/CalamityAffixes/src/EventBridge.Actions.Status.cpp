@@ -121,20 +121,6 @@ namespace CalamityAffixes
 			}
 		}
 
-		[[nodiscard]] std::string_view StatusNameKo(StatusKind a_kind) noexcept
-		{
-			switch (a_kind) {
-			case StatusKind::kFreeze:
-				return "빙결";
-			case StatusKind::kBleed:
-				return "출혈";
-			case StatusKind::kShock:
-				return "감전";
-			default:
-				return "?";
-			}
-		}
-
 		[[nodiscard]] std::string_view StatusName(StatusKind a_kind) noexcept
 		{
 			switch (a_kind) {
@@ -152,36 +138,301 @@ namespace CalamityAffixes
 		}
 	}
 
-	bool EventBridge::PrepareExposureCast(
-		StatusKind a_kind, const RE::SpellItem* a_spell, RE::Actor* a_target, float a_magnitudeOverride)
+	ExposurePlan EventBridge::PlanExposureCast(
+		const RE::SpellItem* a_spell, RE::Actor* a_target, float a_magnitudeOverride) const
 	{
-		if (a_kind != StatusKind::kExposed || !a_spell || !a_target) {
-			return true;
+		ExposurePlan plan{};
+		plan.improves = true;
+		if (!a_spell || !a_target) {
+			return plan;
 		}
-		const auto now = StatusClockNowMs();
-		const auto target = a_target->GetFormID();
-		bool improves = false;
+		// Only timed values are statuses; an instant part (Mist's magicka burn)
+		// never reaches the ledger and must not make the cast look like a gain.
+		std::array<ExposureValue, ExposurePlan::kMaxValues> values{};
+		std::size_t count = 0u;
 		for (const auto* effect : a_spell->effects) {
-			if (!effect || !effect->baseEffect) {
+			if (!effect || !effect->baseEffect || effect->effectItem.duration <= 0 || count >= values.size()) {
 				continue;
 			}
-			const auto value = effect->baseEffect->data.primaryAV;
-			const float magnitude = EffectMagnitude(*effect, a_magnitudeOverride);
-			// The same spell re-applied is a refresh, never compared with itself.
-			auto best = _combatState.statusLedger.Strongest(
-				target, StatusKind::kExposed, static_cast<std::uint32_t>(value), now, a_spell->GetFormID());
-			if (!best || magnitude > best->magnitude) {
-				improves = true;
-			}
-			// Replace every weaker Exposed on this value, so only the new one counts.
-			while (best && best->magnitude < magnitude) {
-				DispelSpellEffectsOn(a_target, best->spellFormID, value);
-				_combatState.statusLedger.EraseSpell(target, best->spellFormID, best->actorValue);
-				best = _combatState.statusLedger.Strongest(
-					target, StatusKind::kExposed, static_cast<std::uint32_t>(value), now, a_spell->GetFormID());
+			values[count++] = {
+				static_cast<std::uint32_t>(effect->baseEffect->data.primaryAV),
+				EffectMagnitude(*effect, a_magnitudeOverride),
+			};
+		}
+		if (count == 0u) {
+			return plan;
+		}
+		return PlanExposure(
+			_combatState.statusLedger, a_target->GetFormID(), a_spell->GetFormID(), values, count, StatusClockNowMs());
+	}
+
+	EventBridge::SpellEffectSnapshot EventBridge::SnapshotSpellEffectsOn(RE::Actor* a_target, const RE::SpellItem* a_spell)
+	{
+		SpellEffectSnapshot snapshot{};
+		auto* magicTarget = a_target && a_spell ? a_target->AsMagicTarget() : nullptr;
+		auto* effects = magicTarget ? magicTarget->GetActiveEffectList() : nullptr;
+		if (!effects) {
+			return snapshot;
+		}
+		for (auto* activeEffect : *effects) {
+			activeEffect = SanitizeObjectPointer(activeEffect);
+			if (activeEffect && activeEffect->spell == a_spell) {
+				snapshot.entries.push_back({ activeEffect, activeEffect->elapsedSeconds, activeEffect->magnitude });
 			}
 		}
-		return improves;
+		return snapshot;
+	}
+
+	namespace
+	{
+		[[nodiscard]] bool HasInstantEffect(const RE::SpellItem* a_spell) noexcept
+		{
+			for (const auto* effect : a_spell->effects) {
+				if (effect && effect->effectItem.duration <= 0) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// Whether the cast left something on the target: an instance that was not
+		// there before, or one the cast refreshed. An older cast of the same spell
+		// still running does not count.
+		// (A template so the bridge's private snapshot type can be passed in.)
+		template <class Snapshot>
+		[[nodiscard]] bool SpellLandedSince(RE::Actor* a_target, const RE::SpellItem* a_spell, const Snapshot& a_before)
+		{
+			auto* magicTarget = a_target ? a_target->AsMagicTarget() : nullptr;
+			auto* effects = magicTarget ? magicTarget->GetActiveEffectList() : nullptr;
+			if (!effects) {
+				return false;
+			}
+			for (auto* activeEffect : *effects) {
+				activeEffect = SanitizeObjectPointer(activeEffect);
+				if (!activeEffect || activeEffect->spell != a_spell ||
+					activeEffect->flags.any(RE::ActiveEffect::Flag::kDispelled)) {
+					continue;
+				}
+				const auto before = std::find_if(a_before.entries.begin(), a_before.entries.end(), [&](const auto& a_entry) {
+					return a_entry.effect == activeEffect;
+				});
+				if (before == a_before.entries.end() || activeEffect->elapsedSeconds < before->elapsed ||
+					activeEffect->magnitude != before->magnitude) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	void EventBridge::FinishStatusCast(
+		StatusKind a_kind, const ExposurePlan& a_plan, const SpellEffectSnapshot& a_before, const RE::SpellItem* a_spell,
+		RE::Actor* a_target, float a_magnitudeOverride)
+	{
+		if (a_kind != StatusKind::kExposed) {
+			RecordStatusApplication(a_kind, a_spell, a_target, a_magnitudeOverride);
+			return;
+		}
+		if (!a_spell || !a_target) {
+			return;
+		}
+		// Absorbed, reflected or fully resisted: nothing landed, so the weaker
+		// Exposed already there stays and nothing is recorded.
+		if (!SpellLandedSince(a_target, a_spell, a_before)) {
+			if (_loot.debugLog) {
+				SKSE::log::debug(
+					"CalamityAffixes: Exposed did not land (spell={}, target={}).", a_spell->GetName(), a_target->GetName());
+			}
+			return;
+		}
+		const auto target = a_target->GetFormID();
+		for (std::size_t i = 0; i < a_plan.replacedCount; ++i) {
+			const auto& old = a_plan.replaced[i];
+			DispelSpellEffectsOn(a_target, old.spellFormID, static_cast<RE::ActorValue>(old.actorValue));
+			_combatState.statusLedger.EraseSpell(target, old.spellFormID, old.actorValue);
+		}
+		const auto keptStronger = [&](std::uint32_t a_value) {
+			return std::find(a_plan.keepStronger.begin(), a_plan.keepStronger.begin() + a_plan.keepStrongerCount, a_value) !=
+			       a_plan.keepStronger.begin() + a_plan.keepStrongerCount;
+		};
+		for (std::size_t i = 0; i < a_plan.keepStrongerCount; ++i) {
+			// A stronger Exposed stays on this value: drop the new spell's part.
+			DispelSpellEffectsOn(a_target, a_spell->GetFormID(), static_cast<RE::ActorValue>(a_plan.keepStronger[i]));
+		}
+		const auto now = StatusClockNowMs();
+		for (const auto* effect : a_spell->effects) {
+			if (!effect || !effect->baseEffect || effect->effectItem.duration <= 0) {
+				continue;
+			}
+			const auto value = static_cast<std::uint32_t>(effect->baseEffect->data.primaryAV);
+			if (keptStronger(value)) {
+				continue;
+			}
+			_combatState.statusLedger.Record({
+				.target = target,
+				.kind = StatusKind::kExposed,
+				.spellFormID = a_spell->GetFormID(),
+				.actorValue = value,
+				.magnitude = EffectMagnitude(*effect, a_magnitudeOverride),
+				.expiresAtMs = now + static_cast<std::int64_t>(effect->effectItem.duration) * 1000,
+			});
+		}
+	}
+
+	void EventBridge::RebuildExposureLedgerFromLiveEffects()
+	{
+		// The ledger is runtime memory, but the engine saves the Exposed effects
+		// themselves. After a load, record what is still on each nearby actor so a
+		// weaker cut cannot stack on a stronger one that survived the save.
+		std::vector<const RE::SpellItem*> exposedSpells;
+		for (const auto& affix : _affixRuntimeState.affixes) {
+			if (affix.action.statusTag != StatusKind::kExposed) {
+				continue;
+			}
+			for (const auto* spell : { affix.action.spell, affix.action.adaptiveFire, affix.action.adaptiveFrost, affix.action.adaptiveShock }) {
+				if (spell && std::find(exposedSpells.begin(), exposedSpells.end(), spell) == exposedSpells.end()) {
+					exposedSpells.push_back(spell);
+				}
+			}
+		}
+		auto* processLists = RE::ProcessLists::GetSingleton();
+		if (exposedSpells.empty() || !processLists) {
+			return;
+		}
+		const auto now = StatusClockNowMs();
+		std::size_t recorded = 0u;
+		processLists->ForEachHighActor([&](RE::Actor& a_actor) {
+			auto* magicTarget = a_actor.IsDead() ? nullptr : a_actor.AsMagicTarget();
+			auto* effects = magicTarget ? magicTarget->GetActiveEffectList() : nullptr;
+			if (!effects) {
+				return RE::BSContainer::ForEachResult::kContinue;
+			}
+			for (auto* activeEffect : *effects) {
+				activeEffect = SanitizeObjectPointer(activeEffect);
+				if (!activeEffect || !activeEffect->spell || activeEffect->duration <= 0.0f ||
+					activeEffect->flags.any(RE::ActiveEffect::Flag::kDispelled) || !activeEffect->effect ||
+					!activeEffect->effect->baseEffect ||
+					std::find(exposedSpells.begin(), exposedSpells.end(), activeEffect->spell) == exposedSpells.end()) {
+					continue;
+				}
+				const float remaining = activeEffect->duration - activeEffect->elapsedSeconds;
+				if (remaining <= 0.0f) {
+					continue;
+				}
+				_combatState.statusLedger.Record({
+					.target = a_actor.GetFormID(),
+					.kind = StatusKind::kExposed,
+					.spellFormID = activeEffect->spell->GetFormID(),
+					.actorValue = static_cast<std::uint32_t>(activeEffect->effect->baseEffect->data.primaryAV),
+					.magnitude = std::abs(activeEffect->magnitude),
+					.expiresAtMs = now + static_cast<std::int64_t>(remaining * 1000.0f),
+				});
+				++recorded;
+			}
+			return RE::BSContainer::ForEachResult::kContinue;
+		});
+		if (_loot.debugLog && recorded > 0u) {
+			SKSE::log::debug("CalamityAffixes: restored {} Exposed entries from live effects after load.", recorded);
+		}
+	}
+
+	void EventBridge::NoteDebugTestEvent(std::string_view a_key) const
+	{
+		if (_loot.debugLog || _loot.debugHudNotifications) {
+			if (_debugTestEvents.find(a_key) == _debugTestEvents.end()) {
+				_debugTestEvents.emplace(a_key);
+			}
+		}
+	}
+
+	void EventBridge::NoteDebugTestEvent(std::string_view a_prefix, std::string_view a_name) const
+	{
+		// Builds the key only when it is recorded: proc paths call this on every
+		// cast, and debug logging is normally off.
+		if (_loot.debugLog || _loot.debugHudNotifications) {
+			std::string key;
+			key.reserve(a_prefix.size() + a_name.size());
+			key.append(a_prefix).append(a_name);
+			NoteDebugTestEvent(key);
+		}
+	}
+
+	void EventBridge::NoteDebugTestEventLocked(std::string_view a_key)
+	{
+		const std::scoped_lock lock(_stateMutex);
+		NoteDebugTestEvent(a_key);
+	}
+
+	void EventBridge::NoteCorpseHitSkipped()
+	{
+		const std::scoped_lock lock(_stateMutex);
+		NoteDebugTestEvent("corpse:skipped");
+	}
+
+	void EventBridge::KeepDyingTargetDoom(RE::FormID a_target)
+	{
+		const auto pending = _combatState.doomQueue.Find(a_target);
+		if (!pending) {
+			return;
+		}
+		std::uint32_t markSpellFormID = 0u;
+		std::array<StatusEntry, 16> statuses{};
+		const auto now = StatusClockNowMs();
+		const auto count = _combatState.statusLedger.Collect(a_target, now, statuses);
+		for (std::size_t i = 0; i < count; ++i) {
+			if (statuses[i].kind == StatusKind::kDoom) {
+				markSpellFormID = statuses[i].spellFormID;
+				break;
+			}
+		}
+		if (markSpellFormID == 0u) {
+			if (const auto idxIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(pending->affixToken);
+				idxIt != _affixRuntimeState.affixRegistry.affixIndexByToken.end() &&
+				idxIt->second < _affixRuntimeState.affixes.size()) {
+				if (auto* mark = _affixRuntimeState.affixes[idxIt->second].action.doomMarkSpell) {
+					markSpellFormID = mark->GetFormID();
+				}
+			}
+		}
+		_combatState.dyingDoom.Keep(*pending, markSpellFormID, now);
+		_combatState.doomQueue.Remove(a_target);
+		_combatState.hasPendingDoom.store(!_combatState.doomQueue.Empty(), std::memory_order_release);
+	}
+
+	bool EventBridge::HasSpreadableStatus(RE::Actor* a_victim) const
+	{
+		if (!a_victim) {
+			return false;
+		}
+		const auto victim = a_victim->GetFormID();
+		const auto now = StatusClockNowMs();
+		const bool hasDoom = _combatState.doomQueue.Find(victim).has_value() ||
+			_combatState.dyingDoom.Find(victim, now).has_value();
+		if (hasDoom) {
+			return true;
+		}
+		// Same rules as ExecuteSpreadStatusAction: Doom passes only while a burst
+		// waits, and a spell with an instant part (Mist) is never passed on.
+		std::array<StatusEntry, 16> statuses{};
+		const auto count = _combatState.statusLedger.Collect(victim, now, statuses);
+		for (std::size_t i = 0; i < count; ++i) {
+			const auto kind = statuses[i].kind;
+			if (kind == StatusKind::kBurning || IsBuildUpStatus(kind) || kind == StatusKind::kDoom) {
+				continue;
+			}
+			const auto* spell = RE::TESForm::LookupByID<RE::SpellItem>(statuses[i].spellFormID);
+			if (!spell || HasInstantEffect(spell)) {
+				continue;
+			}
+			return true;
+		}
+		// A meter that just paid off is empty: nothing of it is left to pass on.
+		for (const auto kind : { StatusKind::kFreeze, StatusKind::kBleed, StatusKind::kShock }) {
+			if (_combatState.statusMeters.Value(victim, kind, now) > 0.0f) {
+				return true;
+			}
+		}
+		return _combatState.statusMeters.BurningStacks(victim, now) > 0u;
 	}
 
 	void EventBridge::RecordStatusApplication(
@@ -264,7 +515,12 @@ namespace CalamityAffixes
 
 		auto* payoff = StatusPayoffSpell(a_kind);
 		if (!payoff) {
-			SKSE::log::error("CalamityAffixes: {} payoff spell missing from the plugin.", StatusName(a_kind));
+			// A DLL newer than the plugin: say it once, not on every payoff.
+			static bool logged = false;
+			if (!logged) {
+				logged = true;
+				SKSE::log::error("CalamityAffixes: {} payoff spell missing from the plugin.", StatusName(a_kind));
+			}
 			return;
 		}
 		switch (a_kind) {
@@ -295,10 +551,12 @@ namespace CalamityAffixes
 			break;
 		}
 		PlayStatusPayoffCue(a_kind, a_target);
+		NoteDebugTestEvent(std::string("payoff:").append(StatusName(a_kind)));
 		if (_loot.debugHudNotifications) {
 			// Payoffs are hard to tell apart in a busy fight; name them on the HUD.
-			std::string note = "CAFF 상태: ";
-			note.append(StatusNameKo(a_kind)).append(" → ").append(a_target->GetName());
+			// HUD text stays English: the English HUD font has no Hangul.
+			std::string note = "CAFF status: ";
+			note.append(StatusName(a_kind)).append(" -> ").append(a_target->GetName());
 			EmitDebugHudNotification(note.c_str());
 		}
 		if (_loot.debugLog) {
@@ -338,7 +596,11 @@ namespace CalamityAffixes
 		}
 		auto* burning = StatusPayoffSpell(StatusKind::kBurning);
 		if (!burning) {
-			SKSE::log::error("CalamityAffixes: Burning spell missing from the plugin.");
+			static bool logged = false;
+			if (!logged) {
+				logged = true;
+				SKSE::log::error("CalamityAffixes: Burning spell missing from the plugin.");
+			}
 			return;
 		}
 		const auto now = StatusClockNowMs();
@@ -494,7 +756,9 @@ namespace CalamityAffixes
 				DispelSpellEffectsOn(target, action.doomMarkSpell->GetFormID(), RE::ActorValue::kNone);
 			}
 			// Same guard as the shadow echo: the burst is not a new hit, so it never
-			// fires on-hit affixes, and a kill it causes does not start Kill chains.
+			// fires on-hit affixes. The guard only covers synchronous re-entry; a
+			// kill the burst causes still arrives later as TESDeathEvent(dead=true)
+			// and counts as a player kill (like DoT and trap kills).
 			Hooks::ExpectEchoStrikeDamage(target, a_player);
 			{
 				const ScopedProcDepth procDepthGuard{ _combatState };
@@ -524,12 +788,35 @@ namespace CalamityAffixes
 		const auto now = StatusClockNowMs();
 		const auto victim = a_victim->GetFormID();
 		std::array<StatusEntry, 16> statuses{};
-		const auto statusCount = _combatState.statusLedger.Collect(victim, now, statuses);
-		const auto pendingDoom = _combatState.doomQueue.Find(victim);
+		auto statusCount = _combatState.statusLedger.Collect(victim, now, statuses);
+		auto pendingDoom = _combatState.doomQueue.Find(victim);
+		// Killed before the burst: the Doom kept at dead=false (its ledger entry
+		// may have expired with the burst time by now).
+		if (const auto dying = _combatState.dyingDoom.Find(victim, now)) {
+			if (!pendingDoom) {
+				pendingDoom = dying->doom;
+			}
+			const bool hasDoomEntry = std::any_of(statuses.begin(), statuses.begin() + statusCount, [](const StatusEntry& a_entry) {
+				return a_entry.kind == StatusKind::kDoom;
+			});
+			if (!hasDoomEntry && dying->markSpellFormID != 0u && statusCount < statuses.size()) {
+				statuses[statusCount++] = StatusEntry{
+					.target = victim,
+					.kind = StatusKind::kDoom,
+					.spellFormID = dying->markSpellFormID,
+					.actorValue = 0u,
+					.magnitude = dying->doom.magnitude,
+					.expiresAtMs = now + 1,
+				};
+			}
+		}
 		const auto meters = _combatState.statusMeters.Take(victim, now);
 		_combatState.statusLedger.EraseTarget(victim);
 		_combatState.doomQueue.Remove(victim);
-		if (statusCount == 0u) {
+		_combatState.dyingDoom.Forget(victim);
+		const bool hasMeters = meters.burningStacks > 0u ||
+			std::ranges::any_of(meters.values, [](float a_value) { return a_value > 0.0f; });
+		if (statusCount == 0u && !hasMeters) {
 			return;
 		}
 
@@ -588,15 +875,26 @@ namespace CalamityAffixes
 					}
 					continue;
 				}
+				// Contagion passes on statuses, not hits: a spell with an instant part
+				// (Mist's magicka burn) would land that part again on every neighbour.
+				if (HasInstantEffect(spell)) {
+					continue;
+				}
 				// Keep the victim's strength for single-effect spells (scaled casts carry
 				// an override). An override would flatten every effect of a multi-effect
 				// spell to one value, so those are cast at their own magnitudes.
 				const float overrideMagnitude = spell->effects.size() == 1u ? status.magnitude : 0.0f;
-				if (!PrepareExposureCast(status.kind, spell, target, overrideMagnitude)) {
-					continue;
+				ExposurePlan plan{};
+				plan.improves = true;
+				if (status.kind == StatusKind::kExposed) {
+					plan = PlanExposureCast(spell, target, overrideMagnitude);
+					if (!plan.improves) {
+						continue;
+					}
 				}
+				const auto before = status.kind == StatusKind::kExposed ? SnapshotSpellEffectsOn(target, spell) : SpellEffectSnapshot{};
 				CastHostileOnlySpellImmediate(magicCaster, spell, true, target, 1.0f, overrideMagnitude, a_owner);
-				RecordStatusApplication(status.kind, spell, target, overrideMagnitude);
+				FinishStatusCast(status.kind, plan, before, spell, target, overrideMagnitude);
 			}
 			PlayActionFeedback(action, a_owner, target, ActionFeedbackPlayOn::kProc);
 		}

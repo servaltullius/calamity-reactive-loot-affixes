@@ -28,7 +28,11 @@ namespace CalamityAffixes
 
 		ClearTrapRuntimeState();
 		_combatState.ResetTransientState();
-		Hooks::ClearRuntimeState();
+		// Keep the summon registry: a Calamity summon alive when the MCM turns
+		// the mod off stays protected, and so does one a loaded save restores.
+		Hooks::ClearRuntimeState(/*a_keepSummonRegistry=*/true);
+		_bowDrawSpeed.wanted.store(false, std::memory_order_relaxed);
+		RemoveBowDrawSpeed();
 		_equipResync.nextAtMs = 0u;
 		for (auto& affix : _affixRuntimeState.affixes) {
 			affix.nextAllowed = {};
@@ -41,6 +45,9 @@ namespace CalamityAffixes
 		_lootState.activeProcSlotPenalties.assign(_affixRuntimeState.affixes.size(), {});
 		_affixRuntimeState.activeCritDamageBonusPct = 0.0f;
 		_affixRuntimeState.RebuildActiveTriggerIndexCaches();
+		_lowHealthAffixesActiveHint.store(
+			!_affixRuntimeState.activeLowHealthTriggerAffixIndices.empty(),
+			std::memory_order_relaxed);
 		_instanceTrackingState.equippedInstanceKeysByToken.clear();
 		_instanceTrackingState.equippedTokenCacheReady = false;
 		_instanceTrackingState.equippedInstanceKeysByToken.reserve(_affixRuntimeState.affixRegistry.affixIndexByToken.size());
@@ -186,11 +193,7 @@ namespace CalamityAffixes
 			if (affixIdx < _affixRuntimeState.affixes.size() &&
 				affixIdx < _lootState.activeProcSlotPenalties.size()) {
 				const auto& affix = _affixRuntimeState.affixes[affixIdx];
-				const bool usesStandardTriggerProcLane =
-					affix.action.type == ActionType::kCastSpell ||
-					affix.action.type == ActionType::kCastSpellAdaptiveElement ||
-					affix.action.type == ActionType::kSpawnTrap ||
-					affix.action.type == ActionType::kDoomMark;
+				const bool usesStandardTriggerProcLane = IsStandardTriggerProcLaneAction(affix.action.type);
 				if (usesStandardTriggerProcLane &&
 					affix.slot != AffixSlot::kSuffix &&
 					(affix.procChancePct > 0.0f || affix.normalWeaponHitProcChancePct > 0.0f)) {
@@ -416,10 +419,14 @@ namespace CalamityAffixes
 			keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
 		}
 		_affixRuntimeState.RebuildActiveTriggerIndexCaches();
+		_lowHealthAffixesActiveHint.store(
+			!_affixRuntimeState.activeLowHealthTriggerAffixIndices.empty(),
+			std::memory_order_relaxed);
 		_instanceTrackingState.equippedTokenCacheReady = true;
 
 		LogActiveAffixListDebug();
 		ApplyDesiredPassiveSpells(player, desiredPassives, a_refreshConfiguredPassivesOnPostLoad);
+		RefreshBowDrawSpeedWanted();
 		LogRebuildActiveCountsDebugSummary(desiredPassives);
 	}
 

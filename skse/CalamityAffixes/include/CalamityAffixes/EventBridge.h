@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <deque>
 #include <map>
+#include <set>
 #include <mutex>
 #include <optional>
 #include <random>
@@ -90,6 +91,8 @@ namespace CalamityAffixes
 			float effectiveness{ 1.0f };
 			float magnitudeOverride{ 0.0f };
 			bool noHitEffectArt{ false };
+			// Cast right after `spell`, with no magnitude override.
+			RE::SpellItem* riderSpell{ nullptr };
 		};
 
 		static constexpr std::size_t kMaxCastOnCritPerHit = 1;
@@ -134,6 +137,20 @@ namespace CalamityAffixes
 
 		// Runtime state storage.
 		CombatRuntimeState _combatState{};
+		// Debug test plan (v2.3.0): what this session has seen happen, for the
+		// panel's checklist ("affix:<id>", "buff:stronger", "payoff:Freeze", ...).
+		mutable std::set<std::string, std::less<>> _debugTestEvents{};
+		// Bow draw speed (v2.3.0): what the runtime added to the player's
+		// WeaponSpeedMult, and whether the trap worker should keep syncing it.
+		struct BowDrawSpeedState
+		{
+			float applied{ 0.0f };
+			std::atomic_bool wanted{ false };
+			std::atomic_bool active{ false };
+		};
+		BowDrawSpeedState _bowDrawSpeed{};
+		// Debug test plan: set while a low-health check runs for unrouted damage.
+		bool _lowHealthFromUnroutedDamage{ false };
 
 		AffixRuntimeCacheState _affixRuntimeState{};
 
@@ -148,8 +165,23 @@ namespace CalamityAffixes
 		RuntimeSettingsState _runtimeSettings{};
 		bool _miscCurrencyMigrated{ false };
 		bool _miscCurrencyRecovered{ false };
+		// MFLG bit 0x04 (StaleStatMigration.h): this game's player effects were
+		// cleaned of the pre-2.3.0 actor value modifiers, or never had them.
+		bool _staleStatModifiersMigrated{ false };
 		bool _configLoaded{ false };
+		// Affixes parsed from keywords.affixes, before runeword synthesis adds its
+		// own. Zero (or an unindexed plugin) means the ESP is missing or does not
+		// match: unknown tokens on saved items are then kept, not pruned.
+		std::size_t _parsedConfiguredAffixCount{ 0u };
+		bool _unknownAffixTokenPruningAllowed{ false };
+		// Tokens of keywords.affixes entries whose keyword did not resolve (an
+		// old plugin won a conflict, or the record is missing). Saved items keep
+		// them even when pruning is allowed: the config still names them.
+		std::unordered_set<std::uint64_t> _unresolvedConfiguredAffixTokens;
 		std::atomic_bool _eventSinksRegistered{ false };
+		// Mirrors !activeLowHealthTriggerAffixIndices.empty() for the damage
+		// hook, which must not read the index cache without _stateMutex.
+		std::atomic_bool _lowHealthAffixesActiveHint{ false };
 		static std::mt19937::result_type MakeRngSeed() noexcept
 		{
 			auto rd = std::random_device{}();
@@ -177,6 +209,12 @@ namespace CalamityAffixes
 			std::chrono::steady_clock::time_point observedAt{};
 			bool procOrigin{ false };
 			std::optional<RE::HitData> hitData;
+			// TESContainerChangedEvent: the moved reference, read in the engine
+			// callback while it still exists. A queued event can outlive it.
+			bool containerReferenceCaptured{ false };
+			RE::FormID containerReferenceFormID{ 0 };
+			RE::FormID containerReferenceUidBaseID{ 0 };
+			std::uint16_t containerReferenceUniqueID{ 0 };
 		};
 
 		ResyncScheduler _equipResync{ .nextAtMs = 0, .intervalMs = static_cast<std::uint64_t>(kEquipResyncInterval.count()) };

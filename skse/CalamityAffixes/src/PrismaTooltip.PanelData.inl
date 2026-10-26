@@ -12,6 +12,46 @@
 			g_api->InteropCall(g_view, a_method, a_cache.c_str());
 		}
 
+		// Item and spell names are raw game bytes (a Creation Kit plugin stores
+		// Windows-1252), and the default strict dump() throws type_error 316 on
+		// them -- out of an SKSE task, which takes the game down. Repair every
+		// string first so the name stays readable, keep ensure_ascii off so
+		// Korean goes out as UTF-8, and let the replace handler catch anything left.
+		void RepairPanelJsonStrings(nlohmann::json& a_value)
+		{
+			if (a_value.is_string()) {
+				auto& text = a_value.get_ref<std::string&>();
+				if (!Utf8Text::IsValidUtf8(text)) {
+					text = Utf8Text::RepairToUtf8(text);
+				}
+				return;
+			}
+			if (a_value.is_array() || a_value.is_object()) {
+				for (auto& child : a_value) {
+					RepairPanelJsonStrings(child);
+				}
+			}
+		}
+
+		[[nodiscard]] std::string DumpPanelJson(nlohmann::json a_payload)
+		{
+			RepairPanelJsonStrings(a_payload);
+			return a_payload.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+		}
+
+		// One bad payload must cost one push, never the game.
+		template <class Build>
+		void PushPanelJsonPayload(std::string& a_cache, const char* a_method, Build&& a_build) noexcept
+		{
+			try {
+				PushCachedInteropPayload(a_cache, a_method, DumpPanelJson(a_build()));
+			} catch (const std::exception& e) {
+				SKSE::log::error("CalamityAffixes: Prisma payload {} skipped ({}).", a_method, e.what());
+			} catch (...) {
+				SKSE::log::error("CalamityAffixes: Prisma payload {} skipped (unknown error).", a_method);
+			}
+		}
+
 		[[nodiscard]] nlohmann::json BuildRunewordBaseInventoryPayload(
 			const std::vector<RunewordBaseInventoryEntry>& a_entries)
 		{
@@ -32,10 +72,10 @@
 
 		void SetRunewordBaseInventoryList(const std::vector<RunewordBaseInventoryEntry>& a_entries)
 		{
-			PushCachedInteropPayload(
+			PushPanelJsonPayload(
 				g_runewordCache.baseListJson,
 				kInteropSetInventoryItems,
-				BuildRunewordBaseInventoryPayload(a_entries).dump());
+				[&] { return BuildRunewordBaseInventoryPayload(a_entries); });
 		}
 
 		[[nodiscard]] nlohmann::json BuildRunewordRecipePayload(
@@ -67,10 +107,10 @@
 
 		void SetRunewordRecipeList(const std::vector<RunewordRecipeEntry>& a_entries)
 		{
-			PushCachedInteropPayload(
+			PushPanelJsonPayload(
 				g_runewordCache.recipeListJson,
 				kInteropSetRecipeItems,
-				BuildRunewordRecipePayload(a_entries).dump());
+				[&] { return BuildRunewordRecipePayload(a_entries); });
 		}
 
 		void SetRunewordAffixPreview(std::string_view a_text)
@@ -194,7 +234,8 @@
 				{ "selectedReforgesPerItem", a_state.selectedReforgesPerItem },
 				{ "reforgeLockCandidates", reforgeLockCandidates },
 				{ "equippedBuild", BuildEquippedBuildSummaryPayload(a_state.equippedBuild) },
-				{ "debugTools", a_state.debugTools }
+				{ "debugTools", a_state.debugTools },
+				{ "debugTestEvents", a_state.debugTestEvents }
 			};
 
 			return payload;
@@ -202,10 +243,10 @@
 
 		void SetRunewordPanelState(const RunewordPanelState& a_state)
 		{
-			PushCachedInteropPayload(
+			PushPanelJsonPayload(
 				g_runewordCache.panelStateJson,
 				kInteropSetRunewordPanelState,
-				BuildRunewordPanelStatePayload(a_state).dump());
+				[&] { return BuildRunewordPanelStatePayload(a_state); });
 		}
 
 		[[nodiscard]] std::string ResolveSelectedItemDisplayName(const RE::ItemList::Item* a_item)

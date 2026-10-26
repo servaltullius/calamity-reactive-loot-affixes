@@ -164,6 +164,9 @@ namespace CalamityAffixes
 
 			Hooks::ExpectEchoStrikeDamage(target, player);
 			{
+				// Blocks synchronous re-entry only (the echo firing on-hit affixes).
+				// A kill it causes arrives later as TESDeathEvent(dead=true) and
+				// counts as a player kill.
 				const ScopedProcDepth procDepthGuard{ _combatState };
 				CastHostileOnlySpellImmediate(
 					magicCaster,

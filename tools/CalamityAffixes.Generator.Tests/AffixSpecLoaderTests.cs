@@ -1108,6 +1108,57 @@ public sealed class AffixSpecLoaderTests
         }
     }
 
+    [Theory]
+    [InlineData("CastSpell", "CAFF_SPEL_TEST_RIDER", "only read for CastOnCrit")]
+    [InlineData("CastOnCrit", "", "must be a non-empty string")]
+    [InlineData("CastOnCrit", "CAFF_SPEL_TEST", "must differ from spellEditorId")]
+    public void Load_WhenRiderSpellIsInvalid_Throws(string actionType, string rider, string expectedMessage)
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+
+        var specPath = Path.Combine(tempRoot, "affixes.json");
+        File.WriteAllText(specPath, $$"""
+        {
+          "version": 1,
+          "modKey": "CalamityAffixes_Keywords.esp",
+          "eslFlag": true,
+          "keywords": {
+            "tags": [],
+            "affixes": [
+              {
+                "id": "test_rider",
+                "editorId": "CAFF_AFFIX_RIDER",
+                "name": "Affix: Rider",
+                "kid": { "type": "Weapon", "strings": "NONE", "formFilters": "NONE", "traits": "-E", "chance": 1.0 },
+                "runtime": {
+                  "trigger": "Hit",
+                  "procChancePercent": 100.0,
+                  "action": {
+                    "type": "{{actionType}}",
+                    "spellEditorId": "CAFF_SPEL_TEST",
+                    "riderSpellEditorId": "{{rider}}"
+                  }
+                }
+              }
+            ],
+            "kidRules": [],
+            "spidRules": []
+          }
+        }
+        """, Encoding.UTF8);
+
+        try
+        {
+            var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.Load(specPath));
+            Assert.Contains(expectedMessage, ex.Message, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
     [Fact]
     public void Load_WhenSpecialActionProcChancePercentIsZero_Throws()
     {
@@ -1291,5 +1342,86 @@ public sealed class AffixSpecLoaderTests
         {
             Directory.Delete(tempRoot, recursive: true);
         }
+    }
+
+    [Fact]
+    public void ValidationContract_RepoFileListsEveryActionType()
+    {
+        // The loader no longer carries a hardcoded fallback list that can drift
+        // (it once missed DoomMark and SpreadStatus); the repo contract is the only source.
+        var path = FindContractPath();
+        var (triggers, actionTypes) = AffixSpecLoader.ReadValidationContractForTests(path);
+        Assert.Contains("Hit", triggers);
+        Assert.Contains("DoomMark", actionTypes);
+        Assert.Contains("SpreadStatus", actionTypes);
+    }
+
+    [Fact]
+    public void ValidationContract_InvalidFileFailsWithItsPath()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), "CalamityAffixes.Generator.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        var path = Path.Combine(tempRoot, "affix_validation_contract.json");
+        try
+        {
+            File.WriteAllText(path, """{ "supportedTriggers": ["Hit"] }""", Encoding.UTF8);
+            var missingArray = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.ReadValidationContractForTests(path));
+            Assert.Contains(path, missingArray.Message);
+            Assert.Contains("supportedActionTypes", missingArray.Message);
+
+            File.WriteAllText(path, "{ not json", Encoding.UTF8);
+            var badJson = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.ReadValidationContractForTests(path));
+            Assert.Contains(path, badJson.Message);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
+    }
+
+    [Theory]
+    [InlineData("GetIsSex", null, null, 1.0, "unsupported condition function")]
+    [InlineData("HasKeyword", null, null, 1.0, "requires keywordForm")]
+    [InlineData("HasKeyword", "Skyrim.esm|0x00013796", "Skyrim.esm|0x001052A3", 1.0, "takes no raceForm")]
+    [InlineData("GetIsRace", null, null, 0.0, "requires raceForm")]
+    [InlineData("GetIsRace", "Skyrim.esm|0x00013796", "Skyrim.esm|0x001052A3", 0.0, "takes no keywordForm")]
+    [InlineData("IsUndead", "Skyrim.esm|0x00013796", null, 1.0, "takes no keywordForm")]
+    [InlineData("IsChild", null, "Skyrim.esm|0x001052A3", 0.0, "takes no keywordForm or raceForm")]
+    [InlineData("IsCommandedActor", "Skyrim.esm|0x00013796", null, 0.0, "takes no keywordForm or raceForm")]
+    [InlineData("IsUndead", null, null, 2.0, "must be 0 or 1")]
+    public void MagicEffectConditions_RejectUnsupportedShapes(
+        string function, string? keywordForm, string? raceForm, double value, string expected)
+    {
+        var magicEffect = new MagicEffectRecordSpec
+        {
+            EditorId = "CAFF_MGEF_TEST_CONDITION",
+            ActorValue = "Confidence",
+            Conditions =
+            [
+                new MagicEffectConditionSpec
+                {
+                    Function = function, KeywordForm = keywordForm, RaceForm = raceForm, Value = value,
+                },
+            ],
+        };
+
+        var ex = Assert.Throws<InvalidDataException>(() => AffixSpecLoader.ValidateMagicEffectConditions(magicEffect));
+        Assert.Contains(expected, ex.Message);
+    }
+
+    private static string FindContractPath()
+    {
+        var current = AppContext.BaseDirectory;
+        while (!string.IsNullOrEmpty(current))
+        {
+            var candidate = Path.Combine(current, "tools", "affix_validation_contract.json");
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+            current = Directory.GetParent(current)?.FullName;
+        }
+
+        throw new FileNotFoundException("tools/affix_validation_contract.json not found above the test binary.");
     }
 }

@@ -21,4 +21,15 @@ namespace
 
 	// Neither partial signal is sufficient on its own.
 	static_assert(!IsCommittedFallbackHitData(true, false, false));
+
+	using CalamityAffixes::detail::IsReusedFallbackHitContent;
+
+	// The swing that was already processed, read back by a later spell event.
+	static_assert(IsReusedFallbackHitContent(0x1234u, true, 0x1234u));
+	// A new swing rewrites lastHitData, so its content differs.
+	static_assert(!IsReusedFallbackHitContent(0x5678u, true, 0x1234u));
+	// The first hit of a pair has nothing stored yet.
+	static_assert(!IsReusedFallbackHitContent(0x1234u, false, 0u));
+	// No HitData never counts as reused.
+	static_assert(!IsReusedFallbackHitContent(0u, true, 0u));
 }

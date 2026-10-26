@@ -83,6 +83,12 @@ namespace CalamityAffixes
 		}
 
 		a_out.keyword = PluginEditorIds::Lookup<RE::BGSKeyword>(a_out.keywordEditorId);
+		if (!a_out.keyword) {
+			SKSE::log::warn(
+				"CalamityAffixes: affix keyword not found; skipping affix (affixId={}, keyword={}).",
+				a_out.id,
+				a_out.keywordEditorId);
+		}
 		return a_out.keyword != nullptr;
 	}
 
@@ -430,6 +436,44 @@ namespace CalamityAffixes
 		}
 	}
 
+	void EventBridge::HarvestRecordDisplayName(const nlohmann::json& a_record, bool a_isSpell, RE::TESDataHandler* a_handler)
+	{
+		if (!a_record.is_object()) {
+			return;
+		}
+		// Read by type: a non-string name must skip this record, not throw out
+		// of config loading.
+		const auto nameIt = a_record.find("name");
+		const auto editorIdIt = a_record.find("editorId");
+		if (nameIt == a_record.end() || editorIdIt == a_record.end() || !nameIt->is_string() || !editorIdIt->is_string()) {
+			return;
+		}
+		const auto name = nameIt->get<std::string>();
+		const auto editorId = editorIdIt->get<std::string>();
+		if (name.empty() || editorId.empty()) {
+			return;
+		}
+
+		std::string english = name;
+		std::string korean;
+		if (const auto sep = name.find(" / "); sep != std::string::npos) {
+			english = name.substr(0, sep);
+			korean = name.substr(sep + 3);
+		}
+		constexpr std::string_view kCalamityPrefix = "Calamity: ";
+		if (english.rfind(kCalamityPrefix.data(), 0) == 0) {
+			english.erase(0, kCalamityPrefix.size());
+		}
+
+		const RE::TESForm* form = a_isSpell ?
+			static_cast<const RE::TESForm*>(ConfigShared::LookupFormFromSpec<RE::SpellItem>(editorId, a_handler)) :
+			static_cast<const RE::TESForm*>(ConfigShared::LookupFormFromSpec<RE::EffectSetting>(editorId, a_handler));
+		if (!form) {
+			return;
+		}
+		_affixRuntimeState.recordDisplayNames[form->GetFormID()] = { std::move(english), std::move(korean) };
+	}
+
 	void EventBridge::HarvestRecordDisplayNames(const nlohmann::json& a_affix, RE::TESDataHandler* a_handler)
 	{
 		// ESP FULL names are ASCII-only by design (ToPluginSafeName strips the Korean
@@ -440,51 +484,64 @@ namespace CalamityAffixes
 			return;
 		}
 
-		auto harvest = [&](const nlohmann::json& a_record, bool a_isSpell) {
-			if (!a_record.is_object()) {
-				return;
-			}
-			const auto name = a_record.value("name", std::string{});
-			const auto editorId = a_record.value("editorId", std::string{});
-			if (name.empty() || editorId.empty()) {
-				return;
-			}
-
-			std::string english = name;
-			std::string korean;
-			if (const auto sep = name.find(" / "); sep != std::string::npos) {
-				english = name.substr(0, sep);
-				korean = name.substr(sep + 3);
-			}
-			constexpr std::string_view kCalamityPrefix = "Calamity: ";
-			if (english.rfind(kCalamityPrefix.data(), 0) == 0) {
-				english.erase(0, kCalamityPrefix.size());
-			}
-
-			const RE::TESForm* form = a_isSpell ?
-				static_cast<const RE::TESForm*>(ConfigShared::LookupFormFromSpec<RE::SpellItem>(editorId, a_handler)) :
-				static_cast<const RE::TESForm*>(ConfigShared::LookupFormFromSpec<RE::EffectSetting>(editorId, a_handler));
-			if (!form) {
-				return;
-			}
-			_affixRuntimeState.recordDisplayNames[form->GetFormID()] = { std::move(english), std::move(korean) };
-		};
-
 		if (const auto it = recordsIt->find("magicEffect"); it != recordsIt->end()) {
-			harvest(*it, false);
+			HarvestRecordDisplayName(*it, false, a_handler);
 		}
 		if (const auto it = recordsIt->find("spell"); it != recordsIt->end()) {
-			harvest(*it, true);
+			HarvestRecordDisplayName(*it, true, a_handler);
 		}
 		if (const auto it = recordsIt->find("magicEffects"); it != recordsIt->end() && it->is_array()) {
 			for (const auto& record : *it) {
-				harvest(record, false);
+				HarvestRecordDisplayName(record, false, a_handler);
 			}
 		}
 		if (const auto it = recordsIt->find("spells"); it != recordsIt->end() && it->is_array()) {
 			for (const auto& record : *it) {
-				harvest(record, true);
+				HarvestRecordDisplayName(record, true, a_handler);
 			}
+		}
+	}
+
+	void EventBridge::HarvestSharedRecordDisplayNames(const nlohmann::json& a_configRoot, RE::TESDataHandler* a_handler)
+	{
+		// Records shared by several affixes (runeword passives, Shadow Boxer
+		// stances, Spirit's actions, Doom) live in keywords.appendedRecords and
+		// keywords.appendedMagicEffects, not under any affix's own records.
+		const auto keywordsIt = a_configRoot.find("keywords");
+		if (keywordsIt == a_configRoot.end() || !keywordsIt->is_object()) {
+			return;
+		}
+		auto keywords = *keywordsIt;
+		ConfigShared::StripNullValues(keywords);
+		try {
+			if (const auto it = keywords.find("appendedRecords"); it != keywords.end() && it->is_array()) {
+				for (const auto& entry : *it) {
+					if (!entry.is_object()) {
+						continue;
+					}
+					const auto typeIt = entry.find("type");
+					if (typeIt == entry.end() || !typeIt->is_string()) {
+						continue;
+					}
+					const auto type = typeIt->get<std::string>();
+					if (type == "MagicEffect") {
+						if (const auto recordIt = entry.find("magicEffect"); recordIt != entry.end()) {
+							HarvestRecordDisplayName(*recordIt, false, a_handler);
+						}
+					} else if (type == "Spell") {
+						if (const auto recordIt = entry.find("spell"); recordIt != entry.end()) {
+							HarvestRecordDisplayName(*recordIt, true, a_handler);
+						}
+					}
+				}
+			}
+			if (const auto it = keywords.find("appendedMagicEffects"); it != keywords.end() && it->is_array()) {
+				for (const auto& record : *it) {
+					HarvestRecordDisplayName(record, false, a_handler);
+				}
+			}
+		} catch (const nlohmann::json::exception& e) {
+			SKSE::log::warn("CalamityAffixes: skipped shared record display names ({}).", e.what());
 		}
 	}
 
@@ -514,17 +571,24 @@ namespace CalamityAffixes
 		// nlohmann::json::value() throws type_error::302 when a key exists with null value.
 		auto affixes = a_affixes;
 		ConfigShared::StripNullValues(affixes);
+		_unresolvedConfiguredAffixTokens.clear();
 
 		for (const auto& a : affixes) {
 			if (!a.is_object()) {
 				continue;
 			}
 
-			HarvestRecordDisplayNames(a, a_handler);
-
 			try {
+				// Inside the per-affix try: a bad record name drops only that
+				// affix's display names.
+				HarvestRecordDisplayNames(a, a_handler);
+
 				AffixRuntime out{};
 				if (!InitializeAffixFromJson(a, out)) {
+					// Still a configured affix: its saved tokens are not retired.
+					if (out.token != 0u) {
+						_unresolvedConfiguredAffixTokens.insert(out.token);
+					}
 					continue;
 				}
 

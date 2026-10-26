@@ -34,7 +34,7 @@
 	RunewordCatalogRow{ "rw_hustle_a", "Hustle-A", "Shael,Ko,Eld", "runeword_hustle_a_final", LootItemType::kArmor },
 	RunewordCatalogRow{ "rw_lionheart", "Lionheart", "Hel,Lum,Fal", "runeword_lionheart_final", LootItemType::kArmor },
 	RunewordCatalogRow{ "rw_obedience", "Obedience", "Hel,Ko,Thul,Eth,Fal", "runeword_obedience_final", LootItemType::kWeapon },
-	RunewordCatalogRow{ "rw_unbending_will", "Unbending Will", "Fal,Io,Ith,Eld,El,Hel", "runeword_unbending_will_final", LootItemType::kWeapon },
+	RunewordCatalogRow{ "rw_unbending_will", "Unbending Will", "Fal,Io,Ith,Eld,El,Hel", "runeword_unbending_will_final", LootItemType::kArmor },
 	RunewordCatalogRow{ "rw_wealth", "Wealth", "Lem,Ko,Tir", "runeword_wealth_final", LootItemType::kArmor },
 	RunewordCatalogRow{ "rw_passion", "Passion", "Dol,Ort,Eld,Lem", "runeword_passion_final", LootItemType::kWeapon },
 	RunewordCatalogRow{ "rw_lawbringer", "Lawbringer", "Amn,Lem,Ko", "runeword_lawbringer_final", LootItemType::kWeapon },

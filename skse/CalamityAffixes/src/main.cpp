@@ -104,15 +104,21 @@ SKSEPluginInfo(
 			// Install process-lifetime systems independently of the persisted enabled flag.
 			// Their runtime entrypoints stay dormant until the MCM enables the mod.
 			if (!bridge->IsHealthDamageRoutingDisabled()) {
-				CalamityAffixes::Hooks::Install();
+				CalamityAffixes::Hooks::InstallHealthDamageHooks();
 			} else {
 				SKSE::log::info("CalamityAffixes: disableHealthDamageRouting=true; skipping HandleHealthDamage hooks install.");
 			}
+			// Friendly-magic protection for Calamity summons does not depend on
+			// damage routing.
+			CalamityAffixes::Hooks::InstallFriendlyMagicHooks();
 
-			if (!bridge->IsTrapSystemTickDisabled()) {
-				CalamityAffixes::TrapSystem::Install();
-			} else {
-				SKSE::log::info("CalamityAffixes: disableTrapSystemTick=true; skipping TrapSystem install.");
+			// The worker also drives the bow draw speed sync (Eagle Eye, Zephyr),
+			// so it is always installed. disableTrapSystemTick only turns the trap
+			// tick off: TickTraps checks the flag under the state lock and clears
+			// any trap instead of ticking it.
+			CalamityAffixes::TrapSystem::Install();
+			if (bridge->IsTrapSystemTickDisabled()) {
+				SKSE::log::info("CalamityAffixes: disableTrapSystemTick=true; trap tick off, worker runs for bow draw speed only.");
 			}
 			CalamityAffixes::EchoStrikeSystem::Install();
 
@@ -127,11 +133,20 @@ SKSEPluginInfo(
 			break;
 		}
 		case SKSE::MessagingInterface::kPostLoadGame:
-			CalamityAffixes::EventBridge::GetSingleton()->OnPostLoadGame();
+			// Register the saved summons first: nothing in OnPostLoadGame may
+			// drop the loaded list before it is used.
 			CalamityAffixes::RestoreCalamitySummonsAfterLoad();
+			CalamityAffixes::EventBridge::GetSingleton()->OnPostLoadGame();
+			CalamityAffixes::PrismaTooltip::PrewarmView();
 			break;
 		case SKSE::MessagingInterface::kPreLoadGame:
+			CalamityAffixes::PrismaTooltip::OnPreLoadGame();
 			CalamityAffixes::EventBridge::GetSingleton()->OnPreLoadGame();
+			break;
+		case SKSE::MessagingInterface::kNewGame:
+			CalamityAffixes::PrismaTooltip::OnPreLoadGame();
+			CalamityAffixes::EventBridge::GetSingleton()->OnNewGame();
+			CalamityAffixes::PrismaTooltip::PrewarmView();
 			break;
 		case SKSE::MessagingInterface::kSaveGame:
 			CalamityAffixes::EventBridge::GetSingleton()->OnPreSaveGame();

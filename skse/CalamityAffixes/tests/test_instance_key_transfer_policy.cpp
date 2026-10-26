@@ -185,9 +185,27 @@ static_assert([] {
 		.oldKeyTracked = true,
 		.newKeyTracked = true,
 	});
-	return plan.decision == InstanceKeyTransferDecision::kConflict;
+	return plan.decision == InstanceKeyTransferDecision::kReplaceStaleDestination &&
+	       plan.oldKey == MakeTrackedInstanceKey(kPlayerID, 50u) &&
+	       plan.newKey == MakeTrackedInstanceKey(kMerchantID, 51u);
 }(),
-	"Instance key transfer: occupied destination is a conflict and must never merge source tokens into destination tokens");
+	"Instance key transfer: an exact source replaces the stale state on a reused destination UID (never merges)");
+
+static_assert([] {
+	// Merchant to merchant (stock moved between chests) onto a reused UID.
+	const auto plan = ResolveInstanceKeyTransfer(InstanceKeyTransferContext{
+		.playerID = kPlayerID,
+		.oldOwnerID = kMerchantID,
+		.newOwnerID = kChestID,
+		.itemFormID = kItemFormID,
+		.oldUniqueID = 52u,
+		.newUniqueID = 53u,
+		.oldKeyTracked = true,
+		.newKeyTracked = true,
+	});
+	return plan.decision == InstanceKeyTransferDecision::kReplaceStaleDestination;
+}(),
+	"Instance key transfer: merchant-to-merchant moves replace a stale destination too");
 
 static_assert([] {
 	const auto first = ResolveInstanceKeyTransfer(InstanceKeyTransferContext{

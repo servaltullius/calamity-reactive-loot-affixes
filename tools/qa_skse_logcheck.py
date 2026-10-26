@@ -158,7 +158,9 @@ def main(argv: list[str]) -> int:
             name="hit_pipeline",
             desc="Hit pipeline active (HandleHealthDamage hook or TESHit fallback)",
             any_of=[
-                re.compile(r"installed HandleHealthDamage vfunc hooks", re.IGNORECASE),
+                # Hooks.cpp prints "installed HandleHealthDamage hooks (idx=..., actor=...,
+                # character=..., player=...)"; logs from before 2026-02 said "vfunc hooks".
+                re.compile(r"installed HandleHealthDamage (?:vfunc )?hooks", re.IGNORECASE),
                 re.compile(r"HandleHealthDamage callback is active", re.IGNORECASE),
                 re.compile(r"TESHitEvent seen", re.IGNORECASE),
             ],
@@ -188,7 +190,9 @@ def main(argv: list[str]) -> int:
         ("generic_error", re.compile(r"\[error\]\s+CalamityAffixes:", re.IGNORECASE)),
     ]
     warn_pats: list[tuple[str, re.Pattern[str]]] = [
-        ("generic_warn", re.compile(r"\[warn\]\s+CalamityAffixes:", re.IGNORECASE)),
+        # spdlog's "[%l]" prints the warn level as "[warning]"; keep "[warn]" for
+        # hand-written or short-level logs.
+        ("generic_warn", re.compile(r"\[warn(?:ing)?\]\s+CalamityAffixes:", re.IGNORECASE)),
         ("dotapply_safety_warning", re.compile(r"DotApply safety warning", re.IGNORECASE)),
     ]
 

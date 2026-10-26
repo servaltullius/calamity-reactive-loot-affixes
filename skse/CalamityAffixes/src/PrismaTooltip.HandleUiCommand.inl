@@ -12,6 +12,13 @@
 
 			void HandleEventBackedUiCommand(std::string_view a_command) const
 			{
+				// These ride gameplay mod events, which EventBridge drops while the
+				// runtime is off: say so instead of reporting a request that never runs.
+				if (IsGameplayEventCommand(a_command) && IsRuntimeDisabled()) {
+					PushUiFeedback(kRuntimeDisabledFeedback);
+					return;
+				}
+
 				bool sent = false;
 				std::string_view feedback = {};
 				if (!DispatchEventBackedCommand(a_command, sent, feedback)) {
@@ -30,6 +37,23 @@
 			}
 
 		private:
+			static constexpr std::string_view kRuntimeDisabledFeedback = "Calamity is disabled in the MCM.";
+
+			[[nodiscard]] static bool IsRuntimeDisabled()
+			{
+				const auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+				return bridge && !bridge->IsRuntimeEnabled();
+			}
+
+			[[nodiscard]] static bool IsGameplayEventCommand(std::string_view a_command) noexcept
+			{
+				return a_command == "mode.next" || a_command == "mode.prev" ||
+				       a_command == "runeword.base.next" || a_command == "runeword.base.prev" ||
+				       a_command == "runeword.recipe.next" || a_command == "runeword.recipe.prev" ||
+				       a_command == "runeword.status" ||
+				       a_command == "runeword.grant.next" || a_command == "runeword.grant.set";
+			}
+
 			[[nodiscard]] static std::optional<std::uint64_t> ParseUiCommandUint64(std::string_view a_text)
 			{
 				std::uint64_t value = 0;
@@ -44,6 +68,10 @@
 
 			[[nodiscard]] static bool HandlePanelVisibilityCommand(std::string_view a_command)
 			{
+				if (a_command == "ui.textinput:1" || a_command == "ui.textinput:0") {
+					g_panelTextInputFocused.store(a_command.back() == '1', std::memory_order_relaxed);
+					return true;
+				}
 				if (a_command == "ui.toggle") {
 					SetControlPanelOpenImpl(!g_controlPanelOpen.load());
 					return true;
@@ -154,19 +182,23 @@
 			{
 				if (a_command == "runeword.insert") {
 					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+					if (bridge && !bridge->IsRuntimeEnabled()) {
+						PushUiFeedback(kRuntimeDisabledFeedback);
+						return true;
+					}
 					CalamityAffixes::RunewordPanelState before{};
 					if (bridge) {
 						before = bridge->GetRunewordPanelState();
-					}
-
-					const bool sent = EmitModEvent(EventNames::kRunewordInsertRune);
-					if (!sent) {
+						// Direct call (game-thread task, takes the state lock itself) so
+						// the result is known before the feedback below; the mod event
+						// is deferred and would land after it.
+						bridge->InsertRunewordRuneFromPanel();
+					} else if (!EmitModEvent(EventNames::kRunewordInsertRune)) {
 						PushUiFeedback("Failed to send command event.");
 						return true;
 					}
 
 					if (bridge) {
-						// SendEvent is synchronous; refresh status immediately so UI feedback isn't misleading.
 						const auto after = bridge->GetRunewordPanelState();
 						RefreshRunewordPanelBindings(*bridge, false);
 						PushSelectedTooltipSnapshot(true);
@@ -251,10 +283,19 @@
                     }
                     auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
                     if (!bridge || baseKey == 0u) {
+                        if (bridge) {
+                            g_runewordCache.panelStateJson.clear();
+                            RefreshRunewordPanelBindings(*bridge, false);
+                        }
                         PushUiFeedback("Invalid crafting selection. Select the base again.");
                         return true;
                     }
                     const auto outcome = bridge->CraftSelectedAffixes(action, baseKey, token);
+                    // Always push the panel state, even when a refused craft left it
+                    // unchanged: that push is what releases the panel's pending lock
+                    // (otherwise the buttons stay grey for 8 s and the real reason is
+                    // replaced by "No response from crafting").
+                    g_runewordCache.panelStateJson.clear();
                     RefreshRunewordPanelBindings(*bridge, false);
                     PushSelectedTooltipSnapshot(true);
                     PushUiFeedback(outcome.message);
@@ -270,10 +311,26 @@
                     const auto outcome = bridge->ExchangeCraftingCurrency(
                         a_command == "currency.exchange:scour" ? CalamityAffixes::CurrencyExchange::kScouringOrb :
                                                                  CalamityAffixes::CurrencyExchange::kReforgeOrb);
+                    // See the crafting branch: a refused exchange must still push state.
+                    g_runewordCache.panelStateJson.clear();
                     RefreshRunewordPanelBindings(*bridge, false);
                     PushUiFeedback(outcome.message);
                     return true;
                 }
+
+				if (a_command.starts_with("spawn.testrw:")) {
+					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
+					if (!bridge) {
+						PushUiFeedback("Runeword system unavailable.");
+						return true;
+					}
+					const auto outcome = bridge->DebugApplyRunewordToSelectedBase(
+						a_command.substr(std::string_view("spawn.testrw:").size()));
+					RefreshRunewordPanelBindings(*bridge, false);
+					PushSelectedTooltipSnapshot(true);
+					PushUiFeedback(outcome.message);
+					return true;
+				}
 
 				if (a_command == "runeword.reset") {
 					auto* bridge = CalamityAffixes::EventBridge::GetSingleton();
@@ -370,6 +427,24 @@
 				if (a_command == "spawn.trapaffix") {
 					a_outSent = EmitModEvent(EventNames::kMcmGrantTrapAffix, {}, 1.0f);
 					a_outFeedback = "Trap affix grant requested";
+					return true;
+				}
+				// Test sets (v2.3.0): spawn.testset:<id> puts a whole scenario's affixes on
+				// the selected item. The id rides the same grant event (ids start at 11).
+				if (a_command.starts_with("spawn.testset:")) {
+					const auto idText = a_command.substr(std::string_view("spawn.testset:").size());
+					int id = 0;
+					for (const char c : idText) {
+						if (c < '0' || c > '9' || id > 99) {
+							id = 0;
+							break;
+						}
+						id = id * 10 + (c - '0');
+					}
+					if (id >= 11 && id <= 19) {
+						a_outSent = EmitModEvent(EventNames::kMcmGrantTrapAffix, {}, static_cast<float>(id));
+						a_outFeedback = "Test set requested";
+					}
 					return true;
 				}
 				if (a_command == "spawn.trapworldprobe" || a_command == "spawn.trapprobe") {

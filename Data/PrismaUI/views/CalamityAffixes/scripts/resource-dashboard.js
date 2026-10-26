@@ -322,13 +322,13 @@ function renderResourceDashboard() {
   );
 
   resourcePityHint.textContent = t(
-    "Goes up by 1 each time a kill that could drop a rune fragment doesn't. When full, the next one is guaranteed.",
-    "룬 조각이 나올 수 있는 처치에서 못 얻으면 1씩 오릅니다. 다 차면 다음엔 반드시 나옵니다."
+    "Goes up by 1 each time an ordinary enemy could drop a rune fragment and doesn't. Named enemies, bosses and dragons don't count. When full, the next one is guaranteed.",
+    "룬 조각이 나올 수 있는 일반 적에게서 못 얻으면 1씩 오릅니다. 이름 있는 적·보스·드래곤은 세지 않습니다. 다 차면 다음엔 반드시 나옵니다."
   );
   if (resourceOrbPityHint) {
     resourceOrbPityHint.textContent = t(
-      "Goes up by 1 each time a kill that could drop a Reforge Orb doesn't. When full, the next one is guaranteed.",
-      "재련 오브가 나올 수 있는 처치에서 못 얻으면 1씩 오릅니다. 다 차면 다음엔 반드시 나옵니다."
+      "Goes up by 1 each time an ordinary enemy could drop a Reforge Orb and doesn't. Named enemies, bosses and dragons don't count. When full, the next one is guaranteed.",
+      "재련 오브가 나올 수 있는 일반 적에게서 못 얻으면 1씩 오릅니다. 이름 있는 적·보스·드래곤은 세지 않습니다. 다 차면 다음엔 반드시 나옵니다."
     );
   }
   resourceRuneList.setAttribute(

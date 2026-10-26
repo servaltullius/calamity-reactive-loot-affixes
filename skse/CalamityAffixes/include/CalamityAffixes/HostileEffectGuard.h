@@ -22,7 +22,20 @@ namespace CalamityAffixes
 		RE::Actor* a_attacker,
 		const RE::HitData* a_hitData) noexcept;
 
+	// Whether a spell summons a creature (kSummonCreature archetype).
+	[[nodiscard]] bool IsSummonCreatureSpellRecord(const RE::SpellItem* a_spell) noexcept;
+
+	// Whether a_owner commands a living summon or thrall that is not a Calamity
+	// summon (one the player cast or raised themselves). A summon proc shares
+	// the owner's summon slot and would push that one out.
+	[[nodiscard]] bool CommandsNonCalamitySummon(RE::Actor* a_owner) noexcept;
+
+	// Load/revert: everything, including which live summons are ours.
 	void ClearHostileEffectGuardRuntimeState() noexcept;
+	// Runtime disabled in the MCM: pending casts and windows only. Live
+	// Calamity summons (up to 60 s) keep their protection and the registry a
+	// save is about to restore survives.
+	void ClearHostileEffectGuardTransientState() noexcept;
 
 	// Exact reference identities only; never infer Calamity provenance from a
 	// vanilla summon base/spell shared with manual casts or enemy summons.

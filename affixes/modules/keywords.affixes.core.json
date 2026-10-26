@@ -234,9 +234,9 @@
   {
     "id": "flame_weakness",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_SHRED",
-    "name": "화염 취약: 36% 확률로 화염 저항 -15 (4초). 2.8초마다 발동.",
-    "nameEn": "Flame Weakness (Lucky Hit 36% / ICD 2.8s): Fire Resist -15 (4s)",
-    "nameKo": "화염 취약: 36% 확률로 화염 저항 -15 (4초). 2.8초마다 발동.",
+    "name": "화염 취약: 36% 확률로 화염 저항 -15 (4초). 2.8초마다 발동. 노출.",
+    "nameEn": "Flame Weakness (Lucky Hit 36% / ICD 2.8s): Fire Resist -15 (4s); Exposed",
+    "nameKo": "화염 취약: 36% 확률로 화염 저항 -15 (4초). 2.8초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_FIRE_SHRED",
@@ -284,9 +284,9 @@
   {
     "id": "frost_weakness",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_SHRED",
-    "name": "냉기 취약: 최근 2초 내 적중 유지 시 24% 확률로 냉기 저항 -15 (4초). 2.4초마다 발동.",
-    "nameEn": "Frost Weakness (24% on hit while chaining hits in the last 2s / ICD 2.4s): Frost Resist -15 (4s)",
-    "nameKo": "냉기 취약: 최근 2초 내 적중 유지 시 24% 확률로 냉기 저항 -15 (4초). 2.4초마다 발동.",
+    "name": "냉기 취약: 최근 2초 내 적중 유지 시 24% 확률로 냉기 저항 -15 (4초). 2.4초마다 발동. 노출.",
+    "nameEn": "Frost Weakness (24% on hit while chaining hits in the last 2s / ICD 2.4s): Frost Resist -15 (4s); Exposed",
+    "nameKo": "냉기 취약: 최근 2초 내 적중 유지 시 24% 확률로 냉기 저항 -15 (4초). 2.4초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_FROST_SHRED",
@@ -333,9 +333,9 @@
   {
     "id": "shock_weakness",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
-    "name": "전격 취약: 35% 확률로 번개 저항 -25 (4초). 4초마다 발동.",
-    "nameEn": "Shock Weakness (Lucky Hit 35% / ICD 4s): Shock Resist -25 (4s)",
-    "nameKo": "전격 취약: 35% 확률로 번개 저항 -25 (4초). 4초마다 발동.",
+    "name": "전격 취약: 35% 확률로 번개 저항 -25 (4초). 4초마다 발동. 노출.",
+    "nameEn": "Shock Weakness (Lucky Hit 35% / ICD 4s): Shock Resist -25 (4s); Exposed",
+    "nameKo": "전격 취약: 35% 확률로 번개 저항 -25 (4초). 4초마다 발동. 노출.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SHOCK_SHRED",
@@ -384,9 +384,9 @@
   {
     "id": "wolf_spirit",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FAMILIAR",
-    "name": "늑대 혼령: 적중 시 30% 확률로 패밀리어 소환 (60초). 24초마다 발동.",
-    "nameEn": "Wolf Spirit (30% on hit / ICD 24s): Summon Familiar (60s)",
-    "nameKo": "늑대 혼령: 적중 시 30% 확률로 패밀리어 소환 (60초). 24초마다 발동.",
+    "name": "늑대 혼령: 적중 시 30% 확률로 패밀리어 소환 (60초). 24초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
+    "nameEn": "Wolf Spirit (30% on hit / ICD 24s): Summon Familiar (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+    "nameKo": "늑대 혼령: 적중 시 30% 확률로 패밀리어 소환 (60초). 24초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -411,9 +411,9 @@
   {
     "id": "flame_sprite",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_FLAMING_FAMILIAR",
-    "name": "화염 정령: 36% 확률로 폭발하는 불꽃 패밀리어 소환. 14초마다 발동.",
-    "nameEn": "Flame Sprite (Lucky Hit 36% / ICD 14s): Summon Exploding Flame Familiar",
-    "nameKo": "화염 정령: 36% 확률로 폭발하는 불꽃 패밀리어 소환. 14초마다 발동.",
+    "name": "화염 정령: 36% 확률로 폭발하는 불꽃 패밀리어 소환. 14초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
+    "nameEn": "Flame Sprite (Lucky Hit 36% / ICD 14s): Summon Exploding Flame Familiar; skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+    "nameKo": "화염 정령: 36% 확률로 폭발하는 불꽃 패밀리어 소환. 14초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -440,9 +440,9 @@
   {
     "id": "flame_atronach",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FLAME_ATRONACH",
-    "name": "화염 아트로나크: 30% 확률로 화염 아트로낙 소환 (60초). 32초마다 발동.",
-    "nameEn": "Flame Atronach (Lucky Hit 30% / ICD 32s): Summon Flame Atronach (60s)",
-    "nameKo": "화염 아트로나크: 30% 확률로 화염 아트로낙 소환 (60초). 32초마다 발동.",
+    "name": "화염 아트로나크: 30% 확률로 화염 아트로낙 소환 (60초). 32초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
+    "nameEn": "Flame Atronach (Lucky Hit 30% / ICD 32s): Summon Flame Atronach (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+    "nameKo": "화염 아트로나크: 30% 확률로 화염 아트로낙 소환 (60초). 32초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -469,9 +469,9 @@
   {
     "id": "frost_atronach",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FROST_ATRONACH",
-    "name": "냉기 아트로나크: 30% 확률로 냉기 아트로낙 소환 (60초). 32초마다 발동.",
-    "nameEn": "Frost Atronach (Lucky Hit 30% / ICD 32s): Summon Frost Atronach (60s)",
-    "nameKo": "냉기 아트로나크: 30% 확률로 냉기 아트로낙 소환 (60초). 32초마다 발동.",
+    "name": "냉기 아트로나크: 30% 확률로 냉기 아트로낙 소환 (60초). 32초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
+    "nameEn": "Frost Atronach (Lucky Hit 30% / ICD 32s): Summon Frost Atronach (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+    "nameKo": "냉기 아트로나크: 30% 확률로 냉기 아트로낙 소환 (60초). 32초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -498,9 +498,9 @@
   {
     "id": "storm_atronach",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_STORM_ATRONACH",
-    "name": "폭풍 아트로나크: 26% 확률로 폭풍 아트로낙 소환 (60초). 40초마다 발동.",
-    "nameEn": "Storm Atronach (Lucky Hit 26% / ICD 40s): Summon Storm Atronach (60s)",
-    "nameKo": "폭풍 아트로나크: 26% 확률로 폭풍 아트로낙 소환 (60초). 40초마다 발동.",
+    "name": "폭풍 아트로나크: 26% 확률로 폭풍 아트로낙 소환 (60초). 40초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
+    "nameEn": "Storm Atronach (Lucky Hit 26% / ICD 40s): Summon Storm Atronach (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+    "nameKo": "폭풍 아트로나크: 26% 확률로 폭풍 아트로낙 소환 (60초). 40초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -527,9 +527,9 @@
   {
     "id": "dremora_pact",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_DREMORA_LORD",
-    "name": "드레모라 서약: 22% 확률로 드레모라 군주 소환 (60초). 52초마다 발동.",
-    "nameEn": "Dremora Pact (Lucky Hit 22% / ICD 52s): Summon Dremora Lord (60s)",
-    "nameKo": "드레모라 서약: 22% 확률로 드레모라 군주 소환 (60초). 52초마다 발동.",
+    "name": "드레모라 서약: 22% 확률로 드레모라 군주 소환 (60초). 52초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
+    "nameEn": "Dremora Pact (Lucky Hit 22% / ICD 52s): Summon Dremora Lord (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+    "nameKo": "드레모라 서약: 22% 확률로 드레모라 군주 소환 (60초). 52초마다 발동. 직접 부른 소환수나 되살린 시체가 있으면 발동하지 않음(앞서 발동한 소환수는 교체).",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -839,9 +839,9 @@
   {
     "id": "mage_armor_t1",
     "editorId": "LoreBox_CAFF_AFFIX_INCOMING_MIND_OVER_MATTER_T1",
-    "name": "마법사의 갑옷 I: 물리 피해 10%를 매지카로 전환",
-    "nameEn": "Mage Armor I: Redirect 10% of physical hit damage to Magicka",
-    "nameKo": "마법사의 갑옷 I: 물리 피해 10%를 매지카로 전환",
+    "name": "마법사의 갑옷 I: 물리 피해 10%를 매지카로 전환 (타격당 최대 35)",
+    "nameEn": "Mage Armor I: Redirect 10% of physical hit damage to Magicka (max 35 per hit)",
+    "nameKo": "마법사의 갑옷 I: 물리 피해 10%를 매지카로 전환 (타격당 최대 35)",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -865,9 +865,9 @@
   {
     "id": "mage_armor_t2",
     "editorId": "LoreBox_CAFF_AFFIX_INCOMING_MIND_OVER_MATTER_T2",
-    "name": "마법사의 갑옷 II: 물리 피해 15%를 매지카로 전환",
-    "nameEn": "Mage Armor II: Redirect 15% of physical hit damage to Magicka",
-    "nameKo": "마법사의 갑옷 II: 물리 피해 15%를 매지카로 전환",
+    "name": "마법사의 갑옷 II: 물리 피해 15%를 매지카로 전환 (타격당 최대 50)",
+    "nameEn": "Mage Armor II: Redirect 15% of physical hit damage to Magicka (max 50 per hit)",
+    "nameKo": "마법사의 갑옷 II: 물리 피해 15%를 매지카로 전환 (타격당 최대 50)",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -1136,9 +1136,9 @@
   {
     "id": "mana_burn",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_OVERLOAD",
-    "name": "마나 소진: 35% 확률로 매지카 60 흡수. 1.2초마다 발동.",
+    "name": "마나 소진: 35% 확률로 매지카 피해 60. 1.2초마다 발동.",
     "nameEn": "Mana Burn (Lucky Hit 35% / ICD 1.2s): Drain 60 Magicka",
-    "nameKo": "마나 소진: 35% 확률로 매지카 60 흡수. 1.2초마다 발동.",
+    "nameKo": "마나 소진: 35% 확률로 매지카 피해 60. 1.2초마다 발동.",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
@@ -1652,12 +1652,20 @@
         "editorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
         "name": "Calamity: Physical->Fire Conversion / 물리→화염 전환",
         "delivery": "TargetActor",
-        "effect": {
-          "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
-          "magnitude": 1,
-          "duration": 1,
-          "area": 0
-        }
+        "effects": [
+          {
+            "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          },
+          {
+            "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC_HITFX",
+            "magnitude": 0,
+            "duration": 1,
+            "area": 0
+          }
+        ]
       }
     },
     "kid": {
@@ -1719,9 +1727,9 @@
   {
     "id": "death_mark",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_75",
-    "name": "죽음의 표식: 25% 확률로 방어력 -200 (6초). 1초마다 발동. 같은 대상 10초.",
-    "nameEn": "Death's Mark (Lucky Hit 25% / ICD 1s / per-target ICD 10s): Armor -200 (6s)",
-    "nameKo": "죽음의 표식: 25% 확률로 방어력 -200 (6초). 1초마다 발동. 같은 대상 10초.",
+    "name": "죽음의 표식: 25% 확률로 방어력 -200 (6초). 1초마다 발동. 같은 대상 10초. 노출.",
+    "nameEn": "Death's Mark (Lucky Hit 25% / ICD 1s / per-target ICD 10s): Armor -200 (6s); Exposed",
+    "nameKo": "죽음의 표식: 25% 확률로 방어력 -200 (6초). 1초마다 발동. 같은 대상 10초. 노출.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -1796,12 +1804,20 @@
         "editorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
         "name": "Calamity: Physical->Frost Conversion / 물리→냉기 전환",
         "delivery": "TargetActor",
-        "effect": {
-          "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
-          "magnitude": 1,
-          "duration": 1,
-          "area": 0
-        }
+        "effects": [
+          {
+            "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          },
+          {
+            "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC_HITFX",
+            "magnitude": 0,
+            "duration": 1,
+            "area": 0
+          }
+        ]
       }
     },
     "kid": {
@@ -1860,9 +1876,9 @@
   {
     "id": "disarming_shout",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_75",
-    "name": "무장 해제: 10% 확률로 적이 주는 피해 -20% (6초). 10초마다 발동.",
-    "nameEn": "Disarming Shout (Lucky Hit 10% / ICD 10s): Enemy Damage Dealt -20% (6s)",
-    "nameKo": "무장 해제: 10% 확률로 적이 주는 피해 -20% (6초). 10초마다 발동.",
+    "name": "무장 해제: 10% 확률로 적 공격력 -20% (6초). 10초마다 발동.",
+    "nameEn": "Disarming Shout (Lucky Hit 10% / ICD 10s): Enemy Attack Damage -20% (6s)",
+    "nameKo": "무장 해제: 10% 확률로 적 공격력 -20% (6초). 10초마다 발동.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -1934,12 +1950,20 @@
         "editorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
         "name": "Calamity: Physical->Shock Conversion / 물리→번개 전환",
         "delivery": "TargetActor",
-        "effect": {
-          "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
-          "magnitude": 1,
-          "duration": 1,
-          "area": 0
-        }
+        "effects": [
+          {
+            "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          },
+          {
+            "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC_HITFX",
+            "magnitude": 0,
+            "duration": 1,
+            "area": 0
+          }
+        ]
       }
     },
     "kid": {
@@ -2010,9 +2034,9 @@
   {
     "id": "spell_breach",
     "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_75",
-    "name": "마법 약화: 12% 확률로 마법 저항 감소. 10초마다 발동.",
-    "nameEn": "Spell Breach (Lucky Hit 12% / ICD 10s): Magic Resist Reduction",
-    "nameKo": "마법 약화: 12% 확률로 마법 저항 감소. 10초마다 발동.",
+    "name": "마법 약화: 12% 확률로 마법 저항 감소. 10초마다 발동. 노출.",
+    "nameEn": "Spell Breach (Lucky Hit 12% / ICD 10s): Magic Resist Reduction; Exposed",
+    "nameKo": "마법 약화: 12% 확률로 마법 저항 감소. 10초마다 발동. 노출.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -2188,7 +2212,7 @@
       "strings": "NONE",
       "formFilters": "NONE",
       "traits": "-E",
-      "chance": 0.5
+      "chance": 0.4
     },
     "runtime": {
       "trigger": "Hit",
@@ -2197,6 +2221,7 @@
       "action": {
         "type": "CastOnCrit",
         "spellEditorId": "CAFF_SPEL_COC_FIREBOLT_HOSTILE_ONLY",
+        "riderSpellEditorId": "CAFF_SPEL_COC_FIREBOLT_RIDER",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2222,7 +2247,7 @@
       "strings": "NONE",
       "formFilters": "NONE",
       "traits": "-E",
-      "chance": 0.3
+      "chance": 0.4
     },
     "runtime": {
       "trigger": "Hit",
@@ -2231,6 +2256,7 @@
       "action": {
         "type": "CastOnCrit",
         "spellEditorId": "CAFF_SPEL_COC_ICE_SPIKE_HOSTILE_ONLY",
+        "riderSpellEditorId": "CAFF_SPEL_COC_ICE_SPIKE_RIDER",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2256,7 +2282,7 @@
       "strings": "NONE",
       "formFilters": "NONE",
       "traits": "-E",
-      "chance": 0.3
+      "chance": 0.4
     },
     "runtime": {
       "trigger": "Hit",
@@ -2265,6 +2291,7 @@
       "action": {
         "type": "CastOnCrit",
         "spellEditorId": "CAFF_SPEL_COC_LIGHTNING_BOLT_HOSTILE_ONLY",
+        "riderSpellEditorId": "CAFF_SPEL_COC_LIGHTNING_BOLT_RIDER",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2299,6 +2326,7 @@
       "action": {
         "type": "CastOnCrit",
         "spellEditorId": "CAFF_SPEL_COC_THUNDERBOLT_HOSTILE_ONLY",
+        "riderSpellEditorId": "CAFF_SPEL_COC_THUNDERBOLT_RIDER",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2333,6 +2361,7 @@
       "action": {
         "type": "CastOnCrit",
         "spellEditorId": "CAFF_SPEL_COC_ICY_SPEAR_HOSTILE_ONLY",
+        "riderSpellEditorId": "CAFF_SPEL_COC_ICY_SPEAR_RIDER",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2367,6 +2396,7 @@
       "action": {
         "type": "CastOnCrit",
         "spellEditorId": "CAFF_SPEL_COC_CHAIN_LIGHTNING_HOSTILE_ONLY",
+        "riderSpellEditorId": "CAFF_SPEL_COC_CHAIN_LIGHTNING_RIDER",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2401,6 +2431,7 @@
       "action": {
         "type": "CastOnCrit",
         "spellEditorId": "CAFF_SPEL_COC_ICE_STORM_HOSTILE_ONLY",
+        "riderSpellEditorId": "CAFF_SPEL_COC_ICE_STORM_RIDER",
         "noHitEffectArt": true,
         "magnitudeScaling": {
           "source": "HitPhysicalDealt",
@@ -2418,9 +2449,9 @@
   {
     "id": "death_pyre_t1",
     "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T1",
-    "name": "죽음의 화장 T1: 처치 시 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
-    "nameEn": "Death Pyre T1 (on kill): Radius 600, (12 + 6% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-    "nameKo": "죽음의 화장 T1: 처치 시 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
+    "name": "죽음의 화장 T1: 처치 시 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 30%씩 감소, 최대 5연속, 초당 4회 제한.",
+    "nameEn": "Death Pyre T1 (on kill): Radius 600, (12 + 6% corpse max HP) Fire Damage. Successive explosions within 0.9s deal 0.7x each (max 5 in a row), 4/sec limit",
+    "nameKo": "죽음의 화장 T1: 처치 시 반경 600, (12 + 시체 최대체력 6%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 30%씩 감소, 최대 5연속, 초당 4회 제한.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -2455,9 +2486,9 @@
   {
     "id": "death_pyre_t2",
     "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T2",
-    "name": "죽음의 화장 T2: 처치 시 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
-    "nameEn": "Death Pyre T2 (on kill): Radius 600, (14 + 7% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-    "nameKo": "죽음의 화장 T2: 처치 시 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
+    "name": "죽음의 화장 T2: 처치 시 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 30%씩 감소, 최대 5연속, 초당 4회 제한.",
+    "nameEn": "Death Pyre T2 (on kill): Radius 600, (14 + 7% corpse max HP) Fire Damage. Successive explosions within 0.9s deal 0.7x each (max 5 in a row), 4/sec limit",
+    "nameKo": "죽음의 화장 T2: 처치 시 반경 600, (14 + 시체 최대체력 7%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 30%씩 감소, 최대 5연속, 초당 4회 제한.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -2492,9 +2523,9 @@
   {
     "id": "death_pyre_t3",
     "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T3",
-    "name": "죽음의 화장 T3: 처치 시 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
-    "nameEn": "Death Pyre T3 (on kill): Radius 600, (16 + 8% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-    "nameKo": "죽음의 화장 T3: 처치 시 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 연쇄 폭발(위력 0.7x) 최대 5회, 초당 4회 제한.",
+    "name": "죽음의 화장 T3: 처치 시 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 30%씩 감소, 최대 5연속, 초당 4회 제한.",
+    "nameEn": "Death Pyre T3 (on kill): Radius 600, (16 + 8% corpse max HP) Fire Damage. Successive explosions within 0.9s deal 0.7x each (max 5 in a row), 4/sec limit",
+    "nameKo": "죽음의 화장 T3: 처치 시 반경 600, (16 + 시체 최대체력 8%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 30%씩 감소, 최대 5연속, 초당 4회 제한.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -2595,9 +2626,9 @@
   {
     "id": "conjured_pyre_t1",
     "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T1",
-    "name": "소환 화장 T1: 소환물 사망 시 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄 폭발(위력 0.8x) 최대 3회, 초당 3회 제한.",
-    "nameEn": "Conjured Pyre T1 (on summon death): Radius 600, (14 + 7% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
-    "nameKo": "소환 화장 T1: 소환물 사망 시 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 연쇄 폭발(위력 0.8x) 최대 3회, 초당 3회 제한.",
+    "name": "소환 화장 T1: 소환물 사망 시 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 20%씩 감소, 최대 3연속, 초당 3회 제한.",
+    "nameEn": "Conjured Pyre T1 (on summon death): Radius 600, (14 + 7% summon max HP) Fire Damage. Successive explosions within 0.9s deal 0.8x each (max 3 in a row), 3/sec limit",
+    "nameKo": "소환 화장 T1: 소환물 사망 시 반경 600, (14 + 소환물 최대체력 7%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 20%씩 감소, 최대 3연속, 초당 3회 제한.",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2632,9 +2663,9 @@
   {
     "id": "conjured_pyre_t2",
     "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T2",
-    "name": "소환 화장 T2: 소환물 사망 시 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄 폭발(위력 0.8x) 최대 3회, 초당 3회 제한.",
-    "nameEn": "Conjured Pyre T2 (on summon death): Radius 600, (18 + 8.5% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
-    "nameKo": "소환 화장 T2: 소환물 사망 시 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 연쇄 폭발(위력 0.8x) 최대 3회, 초당 3회 제한.",
+    "name": "소환 화장 T2: 소환물 사망 시 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 20%씩 감소, 최대 3연속, 초당 3회 제한.",
+    "nameEn": "Conjured Pyre T2 (on summon death): Radius 600, (18 + 8.5% summon max HP) Fire Damage. Successive explosions within 0.9s deal 0.8x each (max 3 in a row), 3/sec limit",
+    "nameKo": "소환 화장 T2: 소환물 사망 시 반경 600, (18 + 소환물 최대체력 8.5%) 화염 피해. 0.9초 안에 이어진 폭발은 위력 20%씩 감소, 최대 3연속, 초당 3회 제한.",
     "kid": {
       "type": "Armor",
       "strings": "NONE",
@@ -2762,9 +2793,9 @@
   {
     "id": "elemental_bane",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_ADAPTIVE_EXPOSURE",
-    "name": "원소 저주: 적중 시 20% 확률로 가장 높은 원소 저항 -15 (4초). 1초마다 발동. 같은 대상 12초.",
-    "nameEn": "Elemental Bane (20% on hit / ICD 1s / per-target ICD 12s): Highest elemental resist -15 (4s)",
-    "nameKo": "원소 저주: 적중 시 20% 확률로 가장 높은 원소 저항 -15 (4초). 1초마다 발동. 같은 대상 12초.",
+    "name": "원소 저주: 적중 시 20% 확률로 가장 높은 원소 저항 -15 (4초). 1초마다 발동. 같은 대상 12초. 노출.",
+    "nameEn": "Elemental Bane (20% on hit / ICD 1s / per-target ICD 12s): Highest elemental resist -15 (4s); Exposed",
+    "nameKo": "원소 저주: 적중 시 20% 확률로 가장 높은 원소 저항 -15 (4초). 1초마다 발동. 같은 대상 12초. 노출.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",
@@ -3130,7 +3161,7 @@
       "spellEditorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
         "extraSpells": [
           {
-            "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER"
+            "spellEditorId": "CAFF_SPEL_CHAOS_RUNE_TRAP_SUNDER"
           },
           {
             "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN"
@@ -3142,7 +3173,7 @@
             "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK"
           },
           {
-            "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE"
+            "spellEditorId": "CAFF_SPEL_CHAOS_RUNE_TRAP_FRAGILE"
           }
         ],
       "noHitEffectArt": true,
@@ -3292,9 +3323,9 @@
   {
     "id": "internal_spell_chaos_rune_slow_attack",
     "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_SLOW_ATTACK",
-    "name": "INTERNAL: Chaos Rune (Slow Attack Speed)",
-    "nameEn": "INTERNAL: Chaos Rune (Slow Attack Speed)",
-    "nameKo": "INTERNAL: Chaos Rune (Slow Attack Speed)",
+    "name": "INTERNAL: Chaos Rune (Weaken)",
+    "nameEn": "INTERNAL: Chaos Rune (Weaken)",
+    "nameKo": "INTERNAL: Chaos Rune (Weaken)",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
@@ -3427,7 +3458,7 @@
     "id": "thunder_mastery",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_EVOLVING_LIGHTNING",
     "name": "뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동. 감전 축적 +15.",
-    "nameEn": "Thunder Mastery (100% on hit): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits); Shock build-up +15",
+    "nameEn": "Thunder Mastery (100% on hit / ICD 0.2s): Lightning Damage Growth (x1.0→1.25→1.6→2.1, stages: 15/45/90 hits); Shock build-up +15",
     "nameKo": "뇌격 숙련: 매 적중 시 번개 피해 누적 성장 (×1.0→1.25→1.6→2.1, 단계: 15/45/90회). 0.2초마다 발동. 감전 축적 +15.",
     "kid": {
       "type": "Weapon",
@@ -3479,7 +3510,7 @@
     "id": "elemental_attunement",
     "editorId": "LoreBox_CAFF_AFFIX_HIT_MODE_CYCLE_ELEMENTS",
     "name": "원소 조율: 매 적중 시 화염/냉기/번개 수동 전환 + 성장 (×1.0→1.3→1.7→2.2, 단계: 20/60/120회). 0.2초마다 발동.",
-    "nameEn": "Elemental Attunement (100% on hit): Fire/Frost/Shock manual switch + Growth (x1.0→1.3→1.7→2.2, stages: 20/60/120 hits)",
+    "nameEn": "Elemental Attunement (100% on hit / ICD 0.2s): Fire/Frost/Shock manual switch + Growth (x1.0→1.3→1.7→2.2, stages: 20/60/120 hits)",
     "nameKo": "원소 조율: 매 적중 시 화염/냉기/번개 수동 전환 + 성장 (×1.0→1.3→1.7→2.2, 단계: 20/60/120회). 0.2초마다 발동.",
     "kid": {
       "type": "Weapon",
@@ -3526,6 +3557,11 @@
             "Flame",
             "Frost",
             "Storm"
+          ],
+          "labelsKo": [
+            "화염",
+            "냉기",
+            "번개"
           ],
           "spells": [
             "CAFF_SPEL_FIRE_DAMAGE",

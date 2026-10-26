@@ -200,7 +200,7 @@
                 </div>
 
                 <div id="resourcePityHint" class="cpContextMeta rdPityHint rdAssistiveText">
-                  Goes up by 1 each time a kill that could drop a rune fragment doesn't. When full, the next one is guaranteed. / 룬 조각이 나올 수 있는 처치에서 못 얻으면 1씩 오릅니다. 다 차면 다음엔 반드시 나옵니다.
+                  Goes up by 1 each time an ordinary enemy could drop a rune fragment and doesn't. Named enemies, bosses and dragons don't count. When full, the next one is guaranteed. / 룬 조각이 나올 수 있는 일반 적에게서 못 얻으면 1씩 오릅니다. 이름 있는 적·보스·드래곤은 세지 않습니다. 다 차면 다음엔 반드시 나옵니다.
                 </div>
 
                 <details id="resourceRuneDetails" class="rdDetails">
@@ -476,7 +476,7 @@
                     </div>
                   </div>
                   <div id="resourceOrbPityHint" class="cpContextMeta rdPityHint rdAssistiveText">
-                    Goes up by 1 each time a kill that could drop a Reforge Orb doesn't. When full, the next one is guaranteed. / 재련 오브가 나올 수 있는 처치에서 못 얻으면 1씩 오릅니다. 다 차면 다음엔 반드시 나옵니다.
+                    Goes up by 1 each time an ordinary enemy could drop a Reforge Orb and doesn't. Named enemies, bosses and dragons don't count. When full, the next one is guaranteed. / 재련 오브가 나올 수 있는 일반 적에게서 못 얻으면 1씩 오릅니다. 이름 있는 적·보스·드래곤은 세지 않습니다. 다 차면 다음엔 반드시 나옵니다.
                   </div>
                 </section>
                 <section
@@ -540,7 +540,7 @@
                   <div class="rwActionDetailsBody affixInspectionBody">
                     <div class="cpAffixOverview">
                       <div class="cpContextLabel" id="affixSelectedItemLabel">Selected Item / 선택 아이템</div>
-                      <div class="cpContextValue" id="affixSelectedItemName">No item selected / 선택된 아이템 없음</div>
+                      <div class="cpContextValue" id="affixSelectedItemName">No item highlighted / 가리킨 아이템 없음</div>
                       <div class="cpContextMeta" id="affixSelectedItemMeta">
                         Point at an item in your inventory to see it here. / 인벤토리에서 아이템을 가리키면 여기에 표시됩니다.
                       </div>
@@ -652,6 +652,9 @@
                 <button id="debugTrapProbeButton" class="cpButton" data-cmd="spawn.trapworldprobe">Trap Marker Test / 함정 표시 테스트</button>
                 <button id="currencyRecoverButton" class="cpButton" data-cmd="currency.recover">Recover Currency / 재료 복구</button>
               </div>
+              <div id="debugTestPlanLabel" class="cpTestSetLabel">Test Plan / 테스트 목록</div>
+              <div id="debugTestPlanHint" class="cpTestSetHint"></div>
+              <div id="debugTestPlan" class="cpTestPlan"></div>
             </details>
           </div>
         </div>

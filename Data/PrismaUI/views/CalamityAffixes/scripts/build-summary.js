@@ -486,7 +486,7 @@ function renderEquippedBuildStateMessage(viewState) {
   if (viewState === "syncing") {
     appendEmptyState(
       equippedBuildStatus,
-      t("Synchronizing equipped effects…", "장착 효과 동기화 중…"),
+      t("Loading equipped effects…", "장착 효과 불러오는 중…"),
       ""
     );
     return;

@@ -228,6 +228,7 @@ namespace RuntimeGateStoreChecks
 	bool CheckLootRerollGuardEdgeCases();
 	bool CheckSerializationLoadStateHelpers();
 	bool CheckSerializationWireContract();
+	bool CheckReviewFixSourcePins();
 	bool CheckLowHealthTriggerSnapshotHelpers();
 
 	bool CheckScopedProcDepthGuard();

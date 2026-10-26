@@ -3,6 +3,9 @@ const tooltipDefaultsMobile = Object.freeze({ right: 16, top: 180, fontScale: 1 
 let controlPanelOpen = false;
 let tooltipTextState = "";
 let runewordAffixTextState = "";
+// Last text the runtime pushed. The runtime skips a push when the text is
+// unchanged, so a refresh that ends without one restores this.
+let runewordAffixConfirmedTextState = "";
 let runewordAffixPendingState = false;
 let runewordAffixPendingNonce = 0;
 const runewordAffixPendingTimeoutMs = 1200;
@@ -17,8 +20,12 @@ let affixExpandPendingState = null;
 let affixExpandPendingNonce = 0;
 const affixExpandPendingTimeoutMs = 2500;
 let panelHotkeyTextState = "F11";
+// The working base (from the item list) and the item hovered in a menu are
+// separate: only the hovered one fills the "Inspect Highlighted Item" card.
 let selectedItemNameState = "";
 let selectedItemSourceState = "";
+let hoveredItemNameState = "";
+let hoveredItemSourceState = "";
 let inventoryItemsState = [];
 let recipeItemsState = [];
 let recipeSearchQuery = "";
@@ -96,7 +103,10 @@ let panelResizeState = null;
 let tooltipDragState = null;
 let panelLayoutLoaded = false;
 let tooltipLayoutLoaded = false;
+// tooltipLayout is the position the player chose; tooltipRenderedLayout is
+// where the current tooltip actually sits after it was fitted to the screen.
 let tooltipLayout = getDefaultTooltipLayout();
+let tooltipRenderedLayout = tooltipLayout;
 const panelCommandAttribute = "data-cmd";
 const panelOpenTabAttribute = "data-open-tab";
 const recipeFilterAttribute = "data-recipe-filter";

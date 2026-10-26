@@ -104,8 +104,8 @@ namespace
 			Expect(byEditorId.emplace(entry.editorId, entry.localFormId).second, "editor IDs are unique: " + entry.editorId);
 			Expect(formIds.insert(entry.localFormId).second, "FormIDs are unique");
 		}
-		// RepoSpecRegressionTests pins 811 records and these tail FormIDs.
-		Expect(parsed.entries.size() == 811, "all 811 records are indexed");
+		// RepoSpecRegressionTests pins 846 records and these tail FormIDs.
+		Expect(parsed.entries.size() == 846, "all 846 records are indexed");
 		const std::map<std::string, std::uint32_t> pinned{
 			{ "CAFF_ARTO_VFX_SHADOW_ECHO_HIT", 0x000B17 },
 			{ "CAFF_SNDR_RW_SHADOW_PUNCH", 0x000B18 },
@@ -113,6 +113,12 @@ namespace
 			{ "CAFF_SPEL_STATUS_EXPLOIT_STRIKE", 0x000B21 },
 			{ "CAFF_SPEL_STATUS_FREEZE", 0x000B27 },
 			{ "CAFF_SPEL_STATUS_BURNING", 0x000B2A },
+			{ "CAFF_SPEL_RW_LEAF_PASSIVE", 0x000B2C },
+			{ "CAFF_SPEL_RW_MYTH_PASSIVE", 0x000B3C },
+			{ "CAFF_SPEL_CHAOS_RUNE_TRAP_SUNDER", 0x000B42 },
+			{ "CAFF_SPEL_RW_OBSESSION_ARCANE", 0x000B46 },
+			{ "CAFF_SPEL_COC_FIREBOLT_RIDER", 0x000B47 },
+			{ "CAFF_SPEL_COC_ICE_STORM_RIDER", 0x000B4D },
 		};
 		for (const auto& [editorId, formId] : pinned) {
 			const auto it = byEditorId.find(editorId);

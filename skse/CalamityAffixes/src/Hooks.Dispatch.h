@@ -59,6 +59,14 @@ namespace CalamityAffixes::Hooks::detail
 		RE::Actor* a_attacker,
 		const RE::HitData* a_rawHitData,
 		std::chrono::steady_clock::time_point a_now) noexcept;
+	// Player damage that the hit pipeline does not route still drives
+	// low-health runewords: queue one coalesced SKSE task (game thread, after
+	// the damage landed) that evaluates kLowHealth only.
+	void SchedulePlayerLowHealthOnlyCheck(
+		CalamityAffixes::EventBridge* a_bridge,
+		RE::Actor* a_target,
+		RE::Actor* a_attacker,
+		float a_damage) noexcept;
 	void InvalidateDeferredTasks() noexcept;
 	void ClearDispatchRuntimeState() noexcept;
 }

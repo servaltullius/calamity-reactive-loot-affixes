@@ -1,0 +1,508 @@
+{
+  "_comment": "Source for Data/MCM/Config/CalamityAffixes/config.json. Run python3 tools/gen_mcm_config.py after editing. Localized fields take {en, ko, both}: the MCM shows the one that matches the Panel Language setting (English / Korean / both). 'both' must stay short so the MCM info box shows both languages; it defaults to 'en / ko' for labels.",
+  "$schema": "https://raw.githubusercontent.com/Exit-9B/MCM-Helper/main/docs/config.schema.json",
+  "modName": "CalamityAffixes",
+  "displayName": "Calamity Affixes",
+  "cursorFillMode": "topToBottom",
+  "pages": [
+    {
+      "pageDisplayName": "Runtime / 런타임",
+      "content": [
+        {
+          "type": "header",
+          "text": {
+            "en": "Runtime Settings",
+            "ko": "런타임 설정"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "en": "Runtime Scope",
+            "ko": "적용 범위"
+          },
+          "help": {
+            "en": "Affixes work on the player's gear; hits and kills by your own summons also trigger them. Follower and NPC gear is not tracked.",
+            "ko": "어픽스는 플레이어 장비에만 적용됩니다. 플레이어가 지휘하는 소환수의 타격·처치로도 발동합니다. 팔로워·NPC 장비는 따로 추적하지 않습니다.",
+            "both": "Player gear only (summons' hits count). / 플레이어 장비 전용(소환수 타격 포함)."
+          },
+          "valueOptions": {
+            "value": {
+              "en": "Player-centric",
+              "ko": "플레이어 중심"
+            }
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "en": "Loot Policy",
+            "ko": "루팅 정책"
+          },
+          "help": {
+            "en": "Picked-up gear gets no random affixes. Crafting currency drops only from eligible hostile corpses, never from containers or the world.",
+            "ko": "주운 장비에는 어픽스가 붙지 않습니다. 룬 조각·재련 오브·확인 스크롤·정제 오브는 적격 적의 시체에서만 나오고 상자·월드에서는 나오지 않습니다.",
+            "both": "Crafting currency drops from hostile corpses only. / 제작 재료는 적 시체에서만 나옵니다."
+          },
+          "valueOptions": {
+            "value": {
+              "en": "Corpses only",
+              "ko": "시체에서만"
+            }
+          }
+        },
+        {
+          "type": "toggle",
+          "id": "bEnabled:General",
+          "text": {
+            "en": "Enable Mod",
+            "ko": "모드 활성화"
+          },
+          "help": {
+            "en": "Master switch. Turn it off and save before uninstalling or downgrading, so the passive bonuses come off first.",
+            "ko": "모드 전체 스위치입니다. 모드를 지우거나 이전 버전으로 되돌리기 전에 끄고 저장하면 상시 보너스가 먼저 빠집니다.",
+            "both": "Master switch; turn off and save before uninstalling. / 전체 스위치. 제거 전 끄고 저장."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": true
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetEnabled",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fValidationInterval:General",
+          "text": {
+            "en": "Validation Interval",
+            "ko": "검증 주기"
+          },
+          "help": {
+            "en": "Seconds between safety-net rescans of equipped gear. 0 turns it off.",
+            "ko": "장착 장비를 다시 확인하는 안전망 주기(초)입니다. 0이면 끕니다.",
+            "both": "Safety-net rescan, seconds (0 = off). / 안전망 재검사 주기(초, 0=끔)."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 8.0,
+            "min": 0.0,
+            "max": 30.0,
+            "step": 1.0,
+            "formatString": "{0} s"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetValidationIntervalSeconds",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fProcChanceMult:General",
+          "text": {
+            "en": "Proc Multiplier",
+            "ko": "발동 배율"
+          },
+          "help": {
+            "en": "Scales every proc chance. 1.0 is the default.",
+            "ko": "모든 발동 확률에 곱하는 배율입니다. 기본은 1.0입니다.",
+            "both": "Scales all proc chances (1.0 default). / 전체 발동 확률 배율(기본 1.0)."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 1.0,
+            "min": 0.1,
+            "max": 3.0,
+            "step": 0.1,
+            "formatString": "{1}"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetProcChanceMultiplier",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fRunewordFragmentChancePercent:General",
+          "text": {
+            "en": "Runeword Fragment Chance",
+            "ko": "룬워드 조각 확률"
+          },
+          "help": {
+            "en": "Chance (%) per eligible hostile corpse. After 99 failed rolls the pity guarantees a fragment.",
+            "ko": "적격 적 시체 1구당 확률(%)입니다. 99번 실패하면 천장으로 조각이 확정됩니다.",
+            "both": "Per eligible corpse (%); pity after 99 misses. / 시체당 확률(%), 99회 실패 시 천장."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 8.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 0.5,
+            "formatString": "{1}%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetRunewordFragmentChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fReforgeOrbChancePercent:General",
+          "text": {
+            "en": "Reforge Orb Chance",
+            "ko": "재련 오브 확률"
+          },
+          "help": {
+            "en": "Chance (%) per eligible hostile corpse. Containers and world pickups never roll it.",
+            "ko": "적격 적 시체 1구당 확률(%)입니다. 상자·월드 줍기에서는 굴리지 않습니다.",
+            "both": "Per eligible corpse (%). / 적격 적 시체 1구당 확률(%)."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 12.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 0.5,
+            "formatString": "{1}%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetReforgeOrbChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fIdentifyScrollChancePercent:General",
+          "text": {
+            "en": "Identify Scroll Chance",
+            "ko": "확인 스크롤 확률"
+          },
+          "help": {
+            "en": "Chance (%) per eligible hostile corpse, rolled on its own. An Identify Scroll gives gear without affixes its first 1-3 regular affixes.",
+            "ko": "적격 적 시체 1구당 독립 확률(%)입니다. 확인 스크롤은 어픽스 없는 장비에 일반 어픽스 1~3개를 처음 붙입니다.",
+            "both": "Per eligible corpse (%); grants the first affixes. / 시체당 확률(%), 첫 어픽스 부여."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 20.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 0.5,
+            "formatString": "{1}%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetIdentifyScrollChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "slider",
+          "id": "fScouringOrbChancePercent:General",
+          "text": {
+            "en": "Scouring Orb Chance",
+            "ko": "정제 오브 확률"
+          },
+          "help": {
+            "en": "Chance (%) per eligible hostile corpse. A Scouring Orb rerolls every regular affix, keeps the slots and restores the 6 selected reforges.",
+            "ko": "적격 적 시체 1구당 독립 확률(%)입니다. 정제 오브는 칸 수를 유지한 채 일반 어픽스를 모두 다시 굴리고 선택 재련 6회를 돌려줍니다.",
+            "both": "Per eligible corpse (%); rerolls all affixes. / 시체당 확률(%), 어픽스 전체 리롤."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingFloat",
+            "defaultValue": 4.0,
+            "min": 0.0,
+            "max": 100.0,
+            "step": 0.5,
+            "formatString": "{1}%"
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetScouringOrbChancePercent",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "toggle",
+          "id": "bDotSafetyAutoDisable:General",
+          "text": {
+            "en": "DoT Safety Auto-Disable",
+            "ko": "DoT 안전 자동 끄기"
+          },
+          "help": {
+            "en": "If too many effects carry the CAFF_TAG_DOT tag, turn off DotApply triggers automatically. Off (recommended) only warns.",
+            "ko": "CAFF_TAG_DOT 태그가 너무 넓게 퍼지면 DotApply 트리거를 자동으로 끕니다. 끄면(권장) 경고만 합니다.",
+            "both": "Auto-off DotApply on over-broad DoT tags. / DoT 태그 과다 시 자동 끄기."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": false
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetDotSafetyAutoDisable",
+            "params": [
+              "{value}"
+            ]
+          }
+        },
+        {
+          "type": "toggle",
+          "id": "bAllowNonHostileFirstHitProc:General",
+          "text": {
+            "en": "Neutral First-Hit Procs",
+            "ko": "중립 첫 타격 발동"
+          },
+          "help": {
+            "en": "Off (recommended): no procs on the first hit against a non-hostile target, so talking NPCs do not get you stuck in combat.",
+            "ko": "끔(권장): 비적대 대상의 첫 타격에는 발동하지 않아 대화 근처에서 전투가 꼬이는 일을 막습니다. 켬: 그래도 발동합니다.",
+            "both": "Off (recommended): no procs on a neutral first hit. / 끔(권장): 중립 첫 타격 발동 없음."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": false
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetAllowNonHostileFirstHitProc",
+            "params": [
+              "{value}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "Prisma UI / 프리즈마 UI",
+      "content": [
+        {
+          "type": "header",
+          "text": {
+            "en": "Prisma UI Control Panel",
+            "ko": "프리즈마 UI 조작 패널"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "en": "Toggle Panel (Button)",
+            "ko": "패널 열기/닫기(버튼)"
+          },
+          "help": {
+            "en": "Opens or closes the Prisma panel now. Use it if the hotkey does not respond.",
+            "ko": "프리즈마 패널을 바로 열거나 닫습니다. 단축키가 반응하지 않을 때 쓰세요.",
+            "both": "Open/close the panel now. / 패널을 바로 열고 닫습니다."
+          },
+          "valueOptions": {
+            "value": {
+              "en": "Toggle",
+              "ko": "열기/닫기"
+            }
+          },
+          "action": {
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "TogglePrismaControlPanel"
+          }
+        },
+        {
+          "type": "enum",
+          "id": "iUiLanguage:General",
+          "text": {
+            "en": "Language (Panel & MCM)",
+            "ko": "언어(패널·MCM)",
+            "both": "Language / 언어"
+          },
+          "help": {
+            "en": "Language of the Prisma panel, tooltips and this MCM: English, Korean, or both.",
+            "ko": "프리즈마 패널·툴팁·이 MCM의 언어입니다. 영어, 한국어, 둘 다 중에서 고릅니다.",
+            "both": "Panel, tooltip and MCM language. / 패널·툴팁·MCM 언어."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingInt",
+            "defaultValue": 2,
+            "options": [
+              "English",
+              "한국어",
+              "English + 한국어"
+            ]
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "en": "Guide",
+            "ko": "안내"
+          },
+          "help": {
+            "en": "Craft in the Prisma panel: Identify Scroll for the first affixes, Reforge Orbs to replace one or add a slot, Scouring Orb to reroll all.",
+            "ko": "프리즈마 패널에서 제작합니다: 확인 스크롤로 첫 어픽스, 재련 오브로 교체·칸 추가, 정제 오브로 전체 리롤.",
+            "both": "Craft runewords and affixes in the panel. / 룬워드·어픽스 제작은 패널에서."
+          },
+          "valueOptions": {
+            "value": {
+              "en": "Use the panel",
+              "ko": "패널에서 제작"
+            }
+          }
+        },
+        {
+          "type": "header",
+          "text": {
+            "en": "Status & Safe Recovery",
+            "ko": "상태·안전 복구"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "en": "Check Prisma UI Status",
+            "ko": "Prisma UI 상태 확인"
+          },
+          "help": {
+            "en": "Checks that the Prisma API and the Calamity view are ready, and shows the result on the HUD.",
+            "ko": "Prisma API와 칼라미티 화면이 준비됐는지 확인해 HUD에 보여 줍니다.",
+            "both": "Check Prisma readiness (HUD). / Prisma 준비 상태 확인(HUD)."
+          },
+          "valueOptions": {
+            "value": {
+              "en": "Check",
+              "ko": "확인"
+            }
+          },
+          "action": {
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "CheckPrismaUiStatus"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "en": "Show Runeword Status",
+            "ko": "룬워드 상태 표시"
+          },
+          "help": {
+            "en": "Shows the selected base, recipe progress and needed runes on the HUD and in the log.",
+            "ko": "선택한 베이스, 레시피 진행도, 필요한 룬을 HUD와 로그에 보여 줍니다.",
+            "both": "Show recipe progress (HUD/log). / 레시피 진행 표시(HUD·로그)."
+          },
+          "valueOptions": {
+            "value": {
+              "en": "Show",
+              "ko": "표시"
+            }
+          },
+          "action": {
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "RunewordStatus"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "en": "Recover Missing Currency",
+            "ko": "누락 통화 복구"
+          },
+          "help": {
+            "en": "Once per save: gives 5 Reforge Orbs and 1 fragment of each rune you have none of. Gear is not reset.",
+            "ko": "세이브당 1회: 재련 오브 5개와, 하나도 없는 룬마다 조각 1개를 줍니다. 장비는 초기화하지 않습니다.",
+            "both": "Once per save: 5 orbs + missing runes. / 세이브당 1회: 오브 5 + 없는 룬."
+          },
+          "valueOptions": {
+            "value": {
+              "en": "Recover",
+              "ko": "복구"
+            }
+          },
+          "action": {
+            "type": "CallGlobalFunction",
+            "script": "CalamityAffixes_ModeControl",
+            "function": "RecoverMissingCurrency"
+          }
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "Hotkey & Debug / 단축키·디버그",
+      "content": [
+        {
+          "type": "header",
+          "text": {
+            "en": "Hotkey",
+            "ko": "단축키"
+          }
+        },
+        {
+          "type": "keymap",
+          "id": "prisma_panel_toggle",
+          "text": {
+            "en": "Toggle Calamity Panel",
+            "ko": "칼라미티 패널 열기/닫기"
+          },
+          "help": {
+            "en": "Hotkey that opens and closes the Calamity panel.",
+            "ko": "칼라미티 패널을 열고 닫는 단축키입니다.",
+            "both": "Opens/closes the panel. / 패널 열기/닫기 단축키."
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "type": "header",
+          "text": {
+            "en": "Debug",
+            "ko": "디버그"
+          }
+        },
+        {
+          "type": "toggle",
+          "id": "bDebugNotifications:General",
+          "text": {
+            "en": "Debug Notifications",
+            "ko": "디버그 알림"
+          },
+          "help": {
+            "en": "Shows extra notifications and writes extra log lines.",
+            "ko": "알림과 로그를 더 자세히 남깁니다.",
+            "both": "Extra notifications and logging. / 추가 알림·로그."
+          },
+          "valueOptions": {
+            "sourceType": "ModSettingBool",
+            "defaultValue": false
+          },
+          "action": {
+            "type": "CallFunction",
+            "function": "SetDebugNotificationsEnabled",
+            "params": [
+              "{value}"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

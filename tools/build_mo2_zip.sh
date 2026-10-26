@@ -4,29 +4,16 @@ set -euo pipefail
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 mod_name="CalamityAffixes"
 source "${repo_root}/tools/path_helpers.sh"
-repo_run_root="$(resolve_repo_run_root "${repo_root}")"
-version="0.0.0"
+resolve_repo_run_root "${repo_root}"
+repo_run_root="${CAFF_REPO_RUN_ROOT_RESULT}"
+# Cleans the temp alias even if a later step fails before the main trap is set.
+trap cleanup_repo_run_root EXIT
 
-# Version precedence for package naming:
+# Version precedence for package naming (shared with release_verify.sh):
 # 1) explicit env override (CAFF_PACKAGE_VERSION)
-# 2) exact git tag on HEAD (v*)
+# 2) exact git tag on HEAD (v*), preferring a final tag over rc tags
 # 3) fallback to CMake project version
-if [[ -n "${CAFF_PACKAGE_VERSION:-}" ]]; then
-  version="${CAFF_PACKAGE_VERSION}"
-elif command -v git >/dev/null 2>&1; then
-  tagged_version="$(git -C "${repo_root}" tag --points-at HEAD --list 'v*' | sort -V | tail -n1 || true)"
-  if [[ -n "${tagged_version}" ]]; then
-    version="${tagged_version#v}"
-  fi
-fi
-
-cmake_project_file="${repo_root}/skse/CalamityAffixes/CMakeLists.txt"
-if [[ "${version}" == "0.0.0" && -f "${cmake_project_file}" ]]; then
-  detected_version="$(grep -Eo 'project\(CalamityAffixes VERSION [0-9]+\.[0-9]+\.[0-9]+' "${cmake_project_file}" | awk '{print $3}' | head -n1)"
-  if [[ -n "${detected_version}" ]]; then
-    version="${detected_version}"
-  fi
-fi
+version="$(resolve_package_version "${repo_root}")"
 
 data_dir="${repo_root}/Data"
 dist_dir="${repo_root}/dist"

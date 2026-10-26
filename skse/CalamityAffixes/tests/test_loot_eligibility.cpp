@@ -53,3 +53,11 @@ static_assert(!IsLootArmorEligible(LootArmorEligibilityInput{
 	.hasArmorAddons = true,
 	.editorIdDenied = true
 }));
+
+// Bound weapons vanish with their spell, so they never take affixes or serve as
+// a crafting base; a non-playable weapon only stops being a crafting base.
+static_assert(!CalamityAffixes::detail::IsLootWeaponEligible({ .bound = true, .playable = true }));
+static_assert(!CalamityAffixes::detail::IsLootWeaponEligible({ .bound = true, .playable = true, .asCraftingBase = true }));
+static_assert(CalamityAffixes::detail::IsLootWeaponEligible({ .bound = false, .playable = true, .asCraftingBase = true }));
+static_assert(!CalamityAffixes::detail::IsLootWeaponEligible({ .bound = false, .playable = false, .asCraftingBase = true }));
+static_assert(CalamityAffixes::detail::IsLootWeaponEligible({ .bound = false, .playable = false }));

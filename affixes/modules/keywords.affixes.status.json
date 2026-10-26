@@ -2,9 +2,9 @@
   {
     "id": "doom_brand",
     "editorId": "LoreBox_CAFF_AFFIX_STATUS_DOOM_BRAND",
-    "name": "파멸의 낙인: 적중 시 25% 확률로 그림자 낙인. 1.5초 뒤 그 적중 피해의 60%가 마법 피해로 터짐(다시 찍으면 시간만 갱신). 4초마다 발동.",
-    "nameEn": "Doom Brand (25% on hit / ICD 4s): marks the target; 1.5s later it bursts for 60% of that hit's damage as magic damage (re-marking only resets the timer)",
-    "nameKo": "파멸의 낙인: 적중 시 25% 확률로 그림자 낙인. 1.5초 뒤 그 적중 피해의 60%가 마법 피해로 터짐(다시 찍으면 시간만 갱신). 4초마다 발동.",
+    "name": "파멸의 낙인: 적중 시 25% 확률로 그림자 낙인. 1.5초 뒤 그 적중 피해의 60%가 마법 피해로 터짐(다시 찍으면 시간만 갱신하고 더 큰 폭발을 유지). 4초마다 발동.",
+    "nameEn": "Doom Brand (25% on hit / ICD 4s): marks the target; 1.5s later it bursts for 60% of that hit's damage as magic damage (re-marking resets the timer and keeps the larger burst)",
+    "nameKo": "파멸의 낙인: 적중 시 25% 확률로 그림자 낙인. 1.5초 뒤 그 적중 피해의 60%가 마법 피해로 터짐(다시 찍으면 시간만 갱신하고 더 큰 폭발을 유지). 4초마다 발동.",
     "kid": {
       "type": "Weapon",
       "strings": "NONE",

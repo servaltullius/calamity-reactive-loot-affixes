@@ -58,7 +58,7 @@ namespace CalamityAffixes
 				"CalamityAffixes: runeword apply blocked (instance={:016X}, recipe={}, reason=max-affixes-full, max={}).",
 				a_instanceKey,
 				a_recipe.id,
-				kMaxAffixesPerItem);
+				kMaxRegularAffixesPerItem);
 			return false;
 		}
 
@@ -127,6 +127,56 @@ namespace CalamityAffixes
 			_affixRuntimeState.affixes[affixIt->second].id,
 			displacedPrefixes.size());
 		return true;
+	}
+
+	EventBridge::OperationResult EventBridge::DebugApplyRunewordToSelectedBase(std::string_view a_recipeId)
+	{
+		// QA helper for the panel's test plan: try a runeword without farming its
+		// fragments. Same result and rules as a transmute (a prefix in the head
+		// slot goes), minus the cost.
+		const std::scoped_lock lock(_stateMutex);
+		OperationResult result{};
+		if (!_configLoaded || !(_loot.debugHudNotifications || _loot.debugLog)) {
+			result.message = "Test setup unavailable: enable debug tools first.";
+			return result;
+		}
+		if (_runewordState.transmuteInProgress || _runewordState.affixExpansionInProgress) {
+			result.message = "Wait for the current crafting action to finish.";
+			return result;
+		}
+		SanitizeRunewordState();
+		std::uint64_t instanceKey = 0u;
+		RE::InventoryEntryData* entry = nullptr;
+		RE::ExtraDataList* xList = nullptr;
+		std::string baseResolveFailure;
+		if (!ResolveSelectedRunewordBaseInstance(instanceKey, entry, xList, &baseResolveFailure, false)) {
+			result.message = "Select an item first (" + baseResolveFailure + ").";
+			return result;
+		}
+		const auto recipeIt = std::ranges::find_if(
+			_runewordState.recipes, [&](const RunewordRecipe& r) { return r.id == a_recipeId; });
+		if (recipeIt == _runewordState.recipes.end()) {
+			result.message = "Unknown runeword recipe.";
+			return result;
+		}
+		std::string failure;
+		result.success = ApplyRunewordResult(instanceKey, *recipeIt, &failure);
+		result.message = result.success ?
+			"Test setup: runeword " + recipeIt->HudName() + " on the selected item." :
+			"Test setup failed (" + failure + ").";
+		if (result.success) {
+			SKSE::log::info("CalamityAffixes: debug runeword completed without fragments (recipe={}).", recipeIt->id);
+		}
+		return result;
+	}
+
+	void EventBridge::InsertRunewordRuneFromPanel()
+	{
+		const std::scoped_lock lock(_stateMutex);
+		if (!_runtimeSettings.enabled.load(std::memory_order_relaxed)) {
+			return;
+		}
+		InsertRunewordRuneIntoSelectedBase();
 	}
 
 	void EventBridge::InsertRunewordRuneIntoSelectedBase()

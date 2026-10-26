@@ -69,6 +69,17 @@ def _collect_record_objects(
     return objects
 
 
+# Multipliers whose base is 1 (or 0 read as 1): +0.5 is +50%. A whole-number
+# magnitude here multiplies the value many times over (Ground's +50 once made
+# shout cooldowns 51 times longer).
+_ONE_BASED_MULTIPLIER_AVS: Set[str] = {"AttackDamageMult", "WeaponSpeedMult", "ShoutRecoveryMult"}
+
+# BowSpeedBonus is Steady Hand's slow time while zoomed, not draw speed; bow
+# draw speed is applied at runtime from carrier effects (v2.3.0).
+_REJECTED_ACTOR_VALUES: Dict[str, str] = {
+    "BowSpeedBonus": "it is the zoom slow-time of Steady Hand, not bow draw speed",
+}
+
 _VALID_ACTOR_VALUES: Set[str] = {
     # Core stats
     "Health", "Magicka", "Stamina",
@@ -76,7 +87,7 @@ _VALID_ACTOR_VALUES: Set[str] = {
     "HealRateMult", "MagickaRateMult", "StaminaRateMult",
     # Combat
     "AttackDamageMult", "WeaponSpeedMult", "CriticalChance", "AbsorbChance",
-    "SpeedMult", "CarryWeight", "BowSpeedBonus",
+    "SpeedMult", "CarryWeight",
     "ReflectDamage", "ShoutRecoveryMult",
     # Resistances
     "DamageResist", "MagicResist", "ResistMagic",
@@ -92,10 +103,163 @@ _VALID_ACTOR_VALUES: Set[str] = {
     # Skills — crafting & social
     "SmithingModifier", "AlchemyModifier",
     "LockpickingModifier", "PickpocketModifier", "SpeechcraftModifier",
+    # Skills — base values (vanilla Fortify Enchanting uses Enchanting as a Peak Value Modifier)
+    "Enchanting",
     # Special
     "Invisibility", "Paralysis", "DetectLifeRange",
     "Aggression", "Confidence",
 }
+
+# Archetypes that change an AV toward a target value and must give it back when they
+# end: every vanilla Calm/Frenzy/Demoralize/TurnUndead/Paralysis MGEF has Recover.
+# Without it the target can stay calmed, frenzied, or scared after expiry.
+# (Vanilla Invisibility has Recover too, but three shipped Calamity invisibility
+# effects predate this rule and are left for an in-game check.)
+_RECOVER_REQUIRED_ARCHETYPES: Set[str] = {
+    "paralysis", "calm", "frenzy", "demoralize", "turnundead",
+}
+
+_POOL_ACTOR_VALUES: Set[str] = {"Health", "Magicka", "Stamina"}
+
+
+def _contains_hangul(text: str) -> bool:
+    return any(
+        "\uac00" <= ch <= "\ud7a3" or "\u1100" <= ch <= "\u11ff" or "\u3130" <= ch <= "\u318f"
+        for ch in text
+    )
+
+
+def _lint_magic_effect_definition(
+    owner: str, mgef_path: str, mgef: Dict[str, Any], errors: List[str]
+) -> Optional[str]:
+    """Checks that depend only on the MGEF itself. Returns its actorValue when it is a known string."""
+    archetype = mgef.get("archetype")
+    if (
+        isinstance(archetype, str)
+        and archetype.strip().casefold() in _RECOVER_REQUIRED_ARCHETYPES
+        and mgef.get("recover") is not True
+    ):
+        errors.append(
+            f"{owner}: {mgef_path} with archetype={archetype.strip()} requires recover=true."
+        )
+
+    av = mgef.get("actorValue")
+    if av is None or av == "None":
+        return None
+    if not isinstance(av, str):
+        errors.append(f"{owner}: {mgef_path}.actorValue must be a string.")
+        return None
+    if av in _REJECTED_ACTOR_VALUES:
+        errors.append(
+            f"{owner}: {mgef_path}.actorValue '{av}' is not allowed: {_REJECTED_ACTOR_VALUES[av]}."
+        )
+        return None
+    if av not in _VALID_ACTOR_VALUES:
+        errors.append(
+            f"{owner}: unknown actorValue '{av}' at {mgef_path}.actorValue. "
+            f"Valid values: {sorted(_VALID_ACTOR_VALUES)}"
+        )
+        return None
+    return av
+
+
+def _collect_all_magic_effects(
+    keywords: Dict[str, Any], affixes: List[Any]
+) -> Dict[str, Tuple[str, str, Dict[str, Any]]]:
+    """editorId -> (owner, path, mgef) across affix records and both appended lists."""
+    out: Dict[str, Tuple[str, str, Dict[str, Any]]] = {}
+
+    def add(owner: str, path: str, raw: Any) -> None:
+        mgef = _as_dict(raw)
+        edid = mgef.get("editorId") if mgef else None
+        if isinstance(edid, str) and edid.strip():
+            out.setdefault(edid.strip(), (owner, path, mgef))
+
+    for idx, raw in enumerate(affixes):
+        affix = _as_dict(raw)
+        records = _as_dict(affix.get("records")) if affix else None
+        if not records:
+            continue
+        owner = str(affix.get("id") or f"<index:{idx}>")
+        add(owner, "records.magicEffect", records.get("magicEffect"))
+        for m_idx, raw_mgef in enumerate(_as_list(records.get("magicEffects")) or []):
+            add(owner, f"records.magicEffects[{m_idx}]", raw_mgef)
+
+    for idx, raw_mgef in enumerate(_as_list(keywords.get("appendedMagicEffects")) or []):
+        add("keywords", f"keywords.appendedMagicEffects[{idx}]", raw_mgef)
+
+    for idx, raw_record in enumerate(_as_list(keywords.get("appendedRecords")) or []):
+        record = _as_dict(raw_record)
+        if record and record.get("type") == "MagicEffect":
+            add("keywords", f"keywords.appendedRecords[{idx}].magicEffect", record.get("magicEffect"))
+
+    return out
+
+
+def _lint_spell_effects(
+    owner: str,
+    spell_path: str,
+    spell_entry: Dict[str, Any],
+    all_mgefs: Dict[str, Tuple[str, str, Dict[str, Any]]],
+    errors: List[str],
+) -> None:
+    """Effect-level checks; the MGEF may live in any affix or in the appended lists."""
+    spell_effects = _collect_record_objects(
+        spell_entry,
+        singular_key="effect",
+        plural_key="effects",
+        base_path=spell_path,
+        affix_id=owner,
+        errors=errors,
+    )
+    is_constant_effect = spell_entry.get("castType") == "ConstantEffect"
+
+    for effect_path, spell_effect in spell_effects:
+        mgef_ref = spell_effect.get("magicEffectEditorId")
+        if not isinstance(mgef_ref, str):
+            continue
+        linked = all_mgefs.get(mgef_ref.strip())
+        if linked is None:
+            if mgef_ref.strip().startswith("CAFF_"):
+                errors.append(
+                    f"{owner}: {effect_path}.magicEffectEditorId references undefined MagicEffect '{mgef_ref}'."
+                )
+            continue
+
+        mgef_owner, mgef_path, mgef = linked
+        mgef_label = mgef_path if mgef_owner == owner else f"{mgef_owner}:{mgef_path}"
+        magnitude = spell_effect.get("magnitude")
+        duration = spell_effect.get("duration")
+        hostile = mgef.get("hostile") is True
+
+        if hostile and _is_number(magnitude) and magnitude < 0.0:
+            errors.append(
+                f"{owner}: {effect_path}.magnitude is negative ({magnitude}) for "
+                f"hostile {mgef_label}; Detrimental effects require a non-negative magnitude."
+            )
+
+        actor_value = mgef.get("actorValue")
+        if actor_value in _ONE_BASED_MULTIPLIER_AVS and _is_number(magnitude) and magnitude >= 2.0:
+            errors.append(
+                f"{owner}: {effect_path}.magnitude {magnitude} on {actor_value} is a whole-number "
+                f"percent; this value is a multiplier based on 1, so +50% is 0.5."
+            )
+
+        # An instant (duration 0) restore, damage, or absorb with Recover is undone in
+        # the same update, so it does nothing. Hostile or not, Absorb or not.
+        archetype = str(mgef.get("archetype") or "ValueModifier").strip().casefold()
+        if (
+            actor_value in _POOL_ACTOR_VALUES
+            and archetype in {"valuemodifier", "absorb"}
+            and mgef.get("recover") is True
+            and _is_number(duration)
+            and duration == 0.0
+            and not is_constant_effect
+        ):
+            errors.append(
+                f"{owner}: instant {actor_value} effect at {effect_path} "
+                f"uses recover=true on {mgef_label}; non-ConstantEffect instant effects require recover=false."
+            )
 
 
 _SUFFIX_REGEN_ACTOR_VALUES: Dict[str, str] = {
@@ -126,8 +290,14 @@ def _collect_spell_refs_from_action(
         if ref:
             out.append((ref, ctx))
 
+    # The runtime reads the passive spell for every slot and every action type.
+    add(_extract_spell_editor_id(action.get("passiveSpellEditorId")), f"{affix_id}:action.passiveSpellEditorId")
+
     if action_type in {"CastSpell", "CastOnCrit", "ConvertDamage", "Archmage", "CorpseExplosion", "SummonCorpseExplosion", "SpawnTrap", "EchoStrike", "DoomMark"}:
         add(_extract_spell_editor_id(action.get("spellEditorId")), f"{affix_id}:action.spellEditorId")
+
+    # The runtime reads the rider spell for CastOnCrit only; the check below rejects it elsewhere.
+    add(_extract_spell_editor_id(action.get("riderSpellEditorId")), f"{affix_id}:action.riderSpellEditorId")
 
     if action_type == "EchoStrike":
         add(_extract_spell_editor_id(action.get("stanceSpellEditorId")), f"{affix_id}:action.stanceSpellEditorId")
@@ -315,10 +485,25 @@ def _lint_spec(
     spell_refs: List[Tuple[str, str]] = []
     suffix_family_avs: Dict[str, Set[str]] = {}
 
+    # One map for every MGEF so effect checks also cover spells whose MGEF lives in
+    # another affix or in keywords.appendedMagicEffects / appendedRecords.
+    all_mgefs = _collect_all_magic_effects(keywords, affixes)
+    for idx, raw_mgef in enumerate(_as_list(keywords.get("appendedMagicEffects")) or []):
+        mgef = _as_dict(raw_mgef)
+        if mgef:
+            _lint_magic_effect_definition("keywords", f"keywords.appendedMagicEffects[{idx}]", mgef, errors)
+
     appended_records = _as_list(keywords.get("appendedRecords")) or []
     for idx, raw_record in enumerate(appended_records):
         record = _as_dict(raw_record)
         if not record:
+            continue
+        if record.get("type") == "MagicEffect":
+            mgef = _as_dict(record.get("magicEffect"))
+            if mgef:
+                _lint_magic_effect_definition(
+                    "keywords", f"keywords.appendedRecords[{idx}].magicEffect", mgef, errors
+                )
             continue
         if record.get("type") == "ArtObject":
             art = _as_dict(record.get("artObject"))
@@ -388,6 +573,9 @@ def _lint_spec(
         spell_edid = spell.get("editorId")
         if isinstance(spell_edid, str) and spell_edid.strip():
             generated_spells.add(spell_edid.strip())
+        _lint_spell_effects(
+            "keywords", f"keywords.appendedRecords[{idx}].spell", spell, all_mgefs, errors
+        )
 
     for idx, raw in enumerate(affixes):
         affix = _as_dict(raw)
@@ -440,7 +628,6 @@ def _lint_spec(
                 errors=errors,
             )
 
-            mgef_by_editor_id: Dict[str, Tuple[str, Dict[str, Any]]] = {}
             slot = affix.get("slot")
             family = affix.get("family")
             expected_suffix_av = (
@@ -450,20 +637,6 @@ def _lint_spec(
             )
 
             for mgef_path, mgef in magic_effects:
-                mgef_edid = mgef.get("editorId")
-                if isinstance(mgef_edid, str) and mgef_edid.strip():
-                    mgef_by_editor_id[mgef_edid.strip()] = (mgef_path, mgef)
-
-                archetype = mgef.get("archetype")
-                if (
-                    isinstance(archetype, str)
-                    and archetype.strip().casefold() == "paralysis"
-                    and mgef.get("recover") is not True
-                ):
-                    errors.append(
-                        f"{affix_id}: {mgef_path} with archetype=Paralysis requires recover=true."
-                    )
-
                 av = mgef.get("actorValue")
                 if expected_suffix_av is not None and av != expected_suffix_av:
                     errors.append(
@@ -471,69 +644,16 @@ def _lint_spec(
                         f"'{expected_suffix_av}' (got {av!r})."
                     )
 
-                if av is None or av == "None":
-                    continue
-                if not isinstance(av, str):
-                    errors.append(f"{affix_id}: {mgef_path}.actorValue must be a string.")
-                    continue
-                if av not in _VALID_ACTOR_VALUES:
-                    errors.append(
-                        f"{affix_id}: unknown actorValue '{av}' at {mgef_path}.actorValue. "
-                        f"Valid values: {sorted(_VALID_ACTOR_VALUES)}"
-                    )
-
-                if slot == "suffix" and isinstance(family, str):
-                    suffix_family_avs.setdefault(family, set()).add(av)
+                known_av = _lint_magic_effect_definition(str(affix_id), mgef_path, mgef, errors)
+                if known_av is not None and slot == "suffix" and isinstance(family, str):
+                    suffix_family_avs.setdefault(family, set()).add(known_av)
 
             for spell_path, spell_entry in spells:
                 spell_edid = spell_entry.get("editorId")
                 if isinstance(spell_edid, str) and spell_edid.strip():
                     generated_spells.add(spell_edid.strip())
 
-                spell_effects = _collect_record_objects(
-                    spell_entry,
-                    singular_key="effect",
-                    plural_key="effects",
-                    base_path=spell_path,
-                    affix_id=str(affix_id),
-                    errors=errors,
-                )
-                is_constant_effect = spell_entry.get("castType") == "ConstantEffect"
-
-                for effect_path, spell_effect in spell_effects:
-                    mgef_ref = spell_effect.get("magicEffectEditorId")
-                    if not isinstance(mgef_ref, str):
-                        continue
-                    linked = mgef_by_editor_id.get(mgef_ref.strip())
-                    if linked is None:
-                        continue
-
-                    mgef_path, mgef = linked
-                    magnitude = spell_effect.get("magnitude")
-                    duration = spell_effect.get("duration")
-                    hostile = mgef.get("hostile") is True
-
-                    if hostile and _is_number(magnitude) and magnitude < 0.0:
-                        errors.append(
-                            f"{affix_id}: {effect_path}.magnitude is negative ({magnitude}) for "
-                            f"hostile {mgef_path}; Detrimental effects require a non-negative magnitude."
-                        )
-
-                    actor_value = mgef.get("actorValue")
-                    if (
-                        not hostile
-                        and actor_value in {"Health", "Magicka", "Stamina"}
-                        and mgef.get("recover") is True
-                        and _is_number(magnitude)
-                        and magnitude > 0.0
-                        and _is_number(duration)
-                        and duration == 0.0
-                        and not is_constant_effect
-                    ):
-                        errors.append(
-                            f"{affix_id}: instant positive {actor_value} effect at {effect_path} "
-                            f"uses recover=true on {mgef_path}; non-ConstantEffect restores require recover=false."
-                        )
+                _lint_spell_effects(str(affix_id), spell_path, spell_entry, all_mgefs, errors)
 
         runtime = _as_dict(affix.get("runtime"))
         if not runtime:
@@ -869,11 +989,34 @@ def _lint_spec(
                                     f"{affix_id}: action.modeCycle.spells[{s_idx}] must be a spellEditorId string or spell object."
                                 )
 
-                    labels = _as_list(mode_cycle_obj.get("labels"))
-                    if labels is not None:
+                    # "labels" is the fallback for every UI language, "labelsEn"/"labelsKo"
+                    # localize it per index (the runtime falls back to "labels").
+                    label_lists: Dict[str, List[Any]] = {}
+                    for label_key in ("labels", "labelsEn", "labelsKo"):
+                        raw_labels = mode_cycle_obj.get(label_key)
+                        if raw_labels is None:
+                            continue
+                        labels = _as_list(raw_labels)
+                        if labels is None:
+                            errors.append(f"{affix_id}: action.modeCycle.{label_key} must be an array.")
+                            continue
+                        label_lists[label_key] = labels
                         for l_idx, label in enumerate(labels):
                             if not isinstance(label, str):
-                                errors.append(f"{affix_id}: action.modeCycle.labels[{l_idx}] must be a string.")
+                                errors.append(f"{affix_id}: action.modeCycle.{label_key}[{l_idx}] must be a string.")
+                            elif label_key != "labelsKo" and _contains_hangul(label):
+                                errors.append(
+                                    f"{affix_id}: action.modeCycle.{label_key}[{l_idx}] must be English "
+                                    f"(got {label!r}); it is shown in the English UI."
+                                )
+                    base_labels = label_lists.get("labels")
+                    for label_key in ("labelsEn", "labelsKo"):
+                        localized = label_lists.get(label_key)
+                        if localized is not None and base_labels is not None and len(localized) != len(base_labels):
+                            errors.append(
+                                f"{affix_id}: action.modeCycle.{label_key} has {len(localized)} entries "
+                                f"but labels has {len(base_labels)}."
+                            )
 
                     switch_every = mode_cycle_obj.get("switchEveryProcs")
                     if switch_every is not None:
@@ -883,6 +1026,15 @@ def _lint_spec(
                     manual_only = mode_cycle_obj.get("manualOnly")
                     if manual_only is not None and not isinstance(manual_only, bool):
                         errors.append(f"{affix_id}: action.modeCycle.manualOnly must be a boolean.")
+
+        rider = action.get("riderSpellEditorId")
+        if rider is not None:
+            if action_type != "CastOnCrit":
+                errors.append(f"{affix_id}: action.riderSpellEditorId is only read for CastOnCrit (got {action_type}).")
+            elif not isinstance(rider, str) or not rider.strip():
+                errors.append(f"{affix_id}: action.riderSpellEditorId must be a non-empty string.")
+            elif rider == action.get("spellEditorId"):
+                errors.append(f"{affix_id}: action.riderSpellEditorId must differ from spellEditorId.")
 
         if action_type == "CastSpell":
             if not isinstance(action.get("spellEditorId"), str) and not isinstance(action.get("spellForm"), str):
@@ -945,13 +1097,22 @@ def _lint_spec(
         if action_type == "SpreadStatus":
             if trigger != "Kill":
                 errors.append(f"{affix_id}: SpreadStatus requires trigger=Kill.")
+            # Same ranges the runtime clamps to (AffixActionParsing.cpp).
             radius = action.get("radius")
-            if radius is not None and (not _is_number(radius) or radius <= 0.0):
-                errors.append(f"{affix_id}: SpreadStatus radius must be > 0.")
+            if radius is not None and (not _is_number(radius) or not 50.0 <= radius <= 2000.0):
+                errors.append(f"{affix_id}: SpreadStatus radius must be in [50, 2000].")
+            max_targets = action.get("maxTargets")
+            if max_targets is not None and (not isinstance(max_targets, int) or not 1 <= max_targets <= 8):
+                errors.append(f"{affix_id}: SpreadStatus maxTargets must be a whole number in [1, 8].")
 
         status_tag = action.get("statusTag")
         if status_tag is not None and status_tag not in {"Exposed", "Doom", "Burning", "Freeze", "Bleed", "Shock"}:
             errors.append(f"{affix_id}: unknown statusTag {status_tag!r}.")
+        if status_tag in {"Exposed", "Doom"} and action_type not in {"CastSpell", "CastSpellAdaptiveElement", "DoomMark"}:
+            errors.append(f"{affix_id}: statusTag {status_tag} is only read on CastSpell, CastSpellAdaptiveElement or DoomMark.")
+        status_count = runtime.get("requireTargetStatusCount")
+        if status_count is not None and (not isinstance(status_count, int) or not 0 <= status_count <= 6):
+            errors.append(f"{affix_id}: runtime.requireTargetStatusCount must be a whole number in [0, 6].")
         status_amount = action.get("statusAmount")
         if status_tag in {"Burning", "Freeze", "Bleed", "Shock"}:
             # Build-up statuses ride on a hostile cast: the cast feeds the meter.

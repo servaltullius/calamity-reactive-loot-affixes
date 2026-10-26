@@ -12,6 +12,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
@@ -30,6 +31,61 @@ namespace CalamityAffixes
 				out.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
 			}
 			return out;
+		}
+
+		enum class LootFieldKind
+		{
+			kNumber,
+			kBoolean,
+			kString,
+		};
+
+		// The scalar loot fields read below with json::value(), which throws when
+		// a key holds another type ("chancePercent": "50"). A wrong value is
+		// dropped with a warning so the default stays and the clamps still run.
+		constexpr std::pair<std::string_view, LootFieldKind> kLootScalarFields[]{
+			{ "chancePercent", LootFieldKind::kNumber },
+			{ "runewordFragmentChancePercent", LootFieldKind::kNumber },
+			{ "reforgeOrbChancePercent", LootFieldKind::kNumber },
+			{ "uniqueActorGuaranteedRunewordChancePercent", LootFieldKind::kNumber },
+			{ "lootSourceChanceMultCorpse", LootFieldKind::kNumber },
+			{ "lootSourceChanceMultContainer", LootFieldKind::kNumber },
+			{ "lootSourceChanceMultBossContainer", LootFieldKind::kNumber },
+			{ "lootSourceChanceMultWorld", LootFieldKind::kNumber },
+			{ "renameItem", LootFieldKind::kBoolean },
+			{ "sharedPool", LootFieldKind::kBoolean },
+			{ "debugLog", LootFieldKind::kBoolean },
+			{ "debugHudNotifications", LootFieldKind::kBoolean },
+			{ "debugVerboseLogging", LootFieldKind::kBoolean },
+			{ "dotTagSafetyAutoDisable", LootFieldKind::kBoolean },
+			{ "dotTagSafetyUniqueEffectThreshold", LootFieldKind::kNumber },
+			{ "trapGlobalMaxActive", LootFieldKind::kNumber },
+			{ "trapCastBudgetPerTick", LootFieldKind::kNumber },
+			{ "triggerProcBudgetPerWindow", LootFieldKind::kNumber },
+			{ "triggerProcBudgetWindowMs", LootFieldKind::kNumber },
+			{ "cleanupInvalidLegacyAffixes", LootFieldKind::kBoolean },
+			{ "stripTrackedSuffixSlots", LootFieldKind::kBoolean },
+			{ "nameFormat", LootFieldKind::kString },
+		};
+
+		[[nodiscard]] nlohmann::json SanitizeLootScalarTypes(const nlohmann::json& a_loot)
+		{
+			auto loot = a_loot;
+			ConfigShared::StripNullValues(loot);
+			for (const auto& [key, kind] : kLootScalarFields) {
+				const auto it = loot.find(std::string(key));
+				if (it == loot.end()) {
+					continue;
+				}
+				const bool ok = kind == LootFieldKind::kNumber ? it->is_number() :
+				                kind == LootFieldKind::kBoolean ? it->is_boolean() :
+				                                                  it->is_string();
+				if (!ok) {
+					SKSE::log::warn("CalamityAffixes: loot.{} has the wrong type ({}); using the default.", key, it->type_name());
+					loot.erase(it);
+				}
+			}
+			return loot;
 		}
 
 		[[nodiscard]] std::optional<bool> ParseLootNameMarkerPositionIsTrailing(std::string_view a_text)
@@ -77,7 +133,10 @@ namespace CalamityAffixes
 		const auto currencyPolicy = detail::ResolveCorpseDeathOnlyCurrencyDropPolicy();
 		_loot.runtimeCurrencyDropsEnabled = currencyPolicy.broadRuntimeDropsEnabled;
 		_loot.runtimeCorpseDeathCurrencyDropsEnabled = currencyPolicy.corpseDeathRuntimeDropsEnabled;
-		const auto& loot = a_configRoot.value("loot", nlohmann::json::object());
+		const auto lootIt = a_configRoot.find("loot");
+		const auto loot = lootIt != a_configRoot.end() && lootIt->is_object() ?
+			SanitizeLootScalarTypes(*lootIt) :
+			nlohmann::json::object();
 		if (loot.is_object()) {
 			_loot.chancePercent = loot.value("chancePercent", 0.0f);
 			_loot.runewordFragmentChancePercent =

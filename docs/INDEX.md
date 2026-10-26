@@ -8,7 +8,7 @@
 |------|------|------|
 | `PREFIX_EFFECTS.md` | 공개용 프리픽스 73개 효과 정리, 인게임 표시 문자열 기준 | `tools/gen_prefix_doc.py` |
 | `SUFFIX_EFFECTS.md` | 공개용 서픽스 22패밀리 66개 효과 정리, 인게임 표시 문자열 기준 | `tools/gen_suffix_doc.py` |
-| `RUNEWORD_EFFECTS.md` | 공개용 룬워드 94개 효과 정리, 인게임 표시 문자열 기준 | `tools/gen_runeword_doc.py` |
+| `RUNEWORD_EFFECTS.md` | 공개용 룬워드 95개 효과 정리, 인게임 표시 문자열 기준 | `tools/gen_runeword_doc.py` |
 | `AFFIX_CATALOG.md` | 공개용 어픽스 전체 입구 문서 | `tools/update_docs.py` |
 
 ## 루트 문서
@@ -16,7 +16,7 @@
 | 파일 | 설명 |
 |------|------|
 | `NEXUS_DESCRIPTION.md` | Nexus Mods 배포 페이지 설명 (한국어/영어) |
-| `NEXUS_DESCRIPTION_BBCODE.txt` | Nexus Mods BBCode 포맷 설명 |
+| `NEXUS_DESCRIPTION_BBCODE.txt` | 퇴역(안내만 남음). BBCode는 릴리스 키트 `releases/<날짜>-nexus-v<버전>.md` 5절을 사용 |
 | `스카이림 바닐라 효과 ARPG 변환 아이디어.md` | 바닐라 효과 → ARPG 어픽스 변환 기획 노트 |
 
 ## design/ — 설계 문서

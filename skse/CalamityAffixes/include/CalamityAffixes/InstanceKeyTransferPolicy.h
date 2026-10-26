@@ -10,7 +10,12 @@ namespace CalamityAffixes
 	{
 		kIgnore,
 		kRemap,
-		kConflict
+		kConflict,
+		// The exact owner + UID source moves onto a key that still holds state.
+		// The engine only hands out a UID nothing in that inventory uses, so what
+		// sits there is left over from an item that is gone (a merchant chest
+		// reset, a sold item): drop it and move the source in. Never a merge.
+		kReplaceStaleDestination
 	};
 
 	struct InstanceKeyTransferContext
@@ -121,7 +126,12 @@ namespace CalamityAffixes
 		}
 
 		if (a_context.newKeyTracked) {
-			return { InstanceKeyTransferDecision::kConflict, sourceKey, newKey };
+			// Only the inexact legacy item-form key stays a conflict: it may not be
+			// this item at all.
+			return { exactSourceMoves ? InstanceKeyTransferDecision::kReplaceStaleDestination :
+			                            InstanceKeyTransferDecision::kConflict,
+				sourceKey,
+				newKey };
 		}
 
 		return { InstanceKeyTransferDecision::kRemap, sourceKey, newKey };

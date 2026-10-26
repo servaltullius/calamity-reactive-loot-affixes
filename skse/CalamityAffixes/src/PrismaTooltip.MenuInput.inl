@@ -42,6 +42,27 @@
 			return false;
 		}
 
+		// Typing is not a hotkey press: the panel's own search field, the
+		// console, or any game text entry (naming, MCM text boxes). Only a key
+		// that types a character can be typing; F-keys, navigation keys and
+		// mouse buttons always toggle.
+		if (HotkeyNames::IsCharacterTypingKey(pressedKey)) {
+			if (g_panelTextInputFocused.load(std::memory_order_relaxed)) {
+				return false;
+			}
+			if (auto* ui = RE::UI::GetSingleton(); ui && ui->IsMenuOpen(RE::Console::MENU_NAME)) {
+				return false;
+			}
+			// While the panel is open Prisma's own focus can hold a text entry
+			// count, so the panel's reported field focus is the only signal;
+			// the game's count would keep the panel from closing.
+			if (!g_controlPanelOpen.load()) {
+				if (auto* controlMap = RE::ControlMap::GetSingleton(); controlMap && controlMap->textEntryCount > 0) {
+					return false;
+				}
+			}
+		}
+
 		return IsGameplayReady();
 	}
 

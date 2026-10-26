@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/LowHealthRearmPolicy.h"
 #include "CalamityAffixes/ProcChancePolicy.h"
 
 #include "CalamityAffixes/TriggerGuards.h"
@@ -8,6 +9,7 @@
 #include <cstdint>
 #include <mutex>
 #include <random>
+#include <vector>
 
 namespace CalamityAffixes
 {
@@ -122,7 +124,7 @@ namespace CalamityAffixes
 	bool EventBridge::PassesLowHealthTriggerGate(
 		const AffixRuntime& a_affix,
 		RE::Actor* a_owner,
-		float a_previousHealthPct,
+		[[maybe_unused]] float a_previousHealthPct,
 		float a_currentHealthPct)
 	{
 		if (a_affix.trigger != Trigger::kLowHealth) {
@@ -137,11 +139,9 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		const float thresholdPct = std::clamp(a_affix.lowHealthThresholdPct, 1.0f, 95.0f);
-		const float rearmPct = std::clamp(a_affix.lowHealthRearmPct, thresholdPct + 1.0f, 100.0f);
-		const float healthPct = std::clamp(a_currentHealthPct, 0.0f, 100.0f);
-		const float previousHealthPct = std::clamp(a_previousHealthPct, 0.0f, 100.0f);
-
+		// Rearm already ran for this observation (RearmLowHealthTriggers, before
+		// the ICD gate); this only decides whether it fires now.
+		const auto bands = detail::ResolveLowHealthBands(a_affix.lowHealthThresholdPct, a_affix.lowHealthRearmPct);
 		LowHealthTriggerKey key{};
 		key.token = a_affix.token;
 		key.owner = ownerFormID;
@@ -150,20 +150,38 @@ namespace CalamityAffixes
 			consumed = it->second;
 		}
 
-		if (previousHealthPct >= rearmPct && healthPct <= thresholdPct) {
-			consumed = false;
-			_combatState.lowHealthTriggerConsumed[key] = false;
-		}
+		return detail::PassesLowHealthFireGate(a_currentHealthPct, consumed, bands);
+	}
 
-		if (healthPct >= rearmPct) {
-			_combatState.lowHealthTriggerConsumed[key] = false;
-			return false;
+	void EventBridge::RearmLowHealthTriggers(
+		const std::vector<std::size_t>& a_affixIndices,
+		RE::Actor* a_owner,
+		float a_preHitHealthPct,
+		float a_currentHealthPct)
+	{
+		if (!a_owner || a_owner->GetFormID() == 0u) {
+			return;
 		}
-		if (healthPct > thresholdPct) {
-			return false;
+		for (const auto idx : a_affixIndices) {
+			if (idx >= _affixRuntimeState.affixes.size()) {
+				continue;
+			}
+			const auto& affix = _affixRuntimeState.affixes[idx];
+			if (affix.trigger != Trigger::kLowHealth || affix.token == 0u) {
+				continue;
+			}
+			const auto bands = detail::ResolveLowHealthBands(affix.lowHealthThresholdPct, affix.lowHealthRearmPct);
+			if (!detail::ShouldRearmLowHealthTrigger(a_preHitHealthPct, a_currentHealthPct, bands)) {
+				continue;
+			}
+			LowHealthTriggerKey key{};
+			key.token = affix.token;
+			key.owner = a_owner->GetFormID();
+			if (const auto it = _combatState.lowHealthTriggerConsumed.find(key);
+				it != _combatState.lowHealthTriggerConsumed.end()) {
+				it->second = false;
+			}
 		}
-
-		return !consumed;
 	}
 
 	void EventBridge::MarkLowHealthTriggerConsumed(
@@ -298,6 +316,24 @@ namespace CalamityAffixes
 		}
 
 		return ResolveActorHealthPercent(a_owner);
+	}
+
+	float EventBridge::ResolveLowHealthTriggerDamagePct(
+		RE::Actor* a_owner,
+		float a_damageTaken) const noexcept
+	{
+		if (!a_owner || !(a_damageTaken > 0.0f)) {
+			return 0.0f;
+		}
+		auto* avOwner = skyrim_cast<RE::ActorValueOwner*>(a_owner);
+		if (!avOwner) {
+			return 0.0f;
+		}
+		const float maxHealth = avOwner->GetPermanentActorValue(RE::ActorValue::kHealth);
+		if (!(maxHealth > 0.0f)) {
+			return 0.0f;
+		}
+		return std::clamp((a_damageTaken / maxHealth) * 100.0f, 0.0f, 100.0f);
 	}
 
 	float EventBridge::ResolveLowHealthTriggerPreviousPct(RE::FormID a_ownerFormID) const noexcept

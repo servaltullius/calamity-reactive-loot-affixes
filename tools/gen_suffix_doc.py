@@ -13,6 +13,38 @@ SUFFIXES_PATH = Path("affixes/modules/keywords.affixes.suffixes.json")
 OUTPUT_PATH = Path("docs/SUFFIX_EFFECTS.md")
 
 
+# Carrier (no-op) suffix effects: the DLL applies the bonus at runtime, so the
+# record's actorValue is "None" and says nothing to a player.
+RUNTIME_STAT_LABELS: dict[str, str] = {
+    "eagle_eye": "활 당기기 속도 (런타임 적용)",
+}
+
+# Families whose actor value name misleads players: LightArmorModifier and
+# HeavyArmorModifier read like a skill bonus, but the game turns them into a
+# percent damage reduction while wearing that armor type.
+READABLE_STAT_LABELS: dict[str, str] = {
+    "evasion": "받는 피해 감소(경갑, %)",
+    "fortitude": "받는 피해 감소(중갑, %)",
+}
+
+
+def display_stat(fam: str, entries: list[dict]) -> str:
+    readable = READABLE_STAT_LABELS.get(fam)
+    if readable is not None:
+        return readable
+    mgef = entries[0]["records"]["magicEffect"]
+    av = str(mgef.get("actorValue"))
+    if av in ("None", "") or mgef.get("archetype") == "Script":
+        label = RUNTIME_STAT_LABELS.get(fam)
+        if label is None:
+            raise SystemExit(
+                f"gen_suffix_doc.py: suffix family '{fam}' uses a carrier effect (actorValue None); "
+                "add its stat label to RUNTIME_STAT_LABELS."
+            )
+        return label
+    return av
+
+
 def display_magnitude(actor_value: str, magnitude: float | int) -> str:
     if actor_value in ("WeaponSpeedMult", "AttackDamageMult"):
         return str(int(round(float(magnitude) * 100)))
@@ -91,15 +123,15 @@ def main(argv: list[str] | None = None) -> int:
 
     for idx, (fam, entries) in enumerate(sorted(families.items()), 1):
         entries.sort(key=lambda e: e["id"])
-        av = entries[0]["records"]["magicEffect"]["actorValue"]
-        av = str(av)
+        av = str(entries[0]["records"]["magicEffect"]["actorValue"])
+        stat = display_stat(fam, entries)
         mags = []
         for e in entries:
             mag = e["records"]["spell"]["effect"]["magnitude"]
             mags.append(f"+{display_magnitude(av, mag)}")
         build = BUILD_MAP.get(fam, "")
         lines.append(
-            f"| {idx} | **{fam}** | {av} | {mags[0]} | {mags[1]} | {mags[2]} | {build} |"
+            f"| {idx} | **{fam}** | {stat} | {mags[0]} | {mags[1]} | {mags[2]} | {build} |"
         )
 
     lines.append("")
@@ -110,7 +142,7 @@ def main(argv: list[str] | None = None) -> int:
         entries.sort(key=lambda e: e["id"])
         lines.append(f"### {fam}")
         lines.append("")
-        lines.append(f"- 영향 능력치: `{entries[0]['records']['magicEffect']['actorValue']}`")
+        lines.append(f"- 영향 능력치: `{display_stat(fam, entries)}`")
         if BUILD_MAP.get(fam):
             lines.append(f"- 추천 빌드: {BUILD_MAP[fam]}")
         lines.append("")

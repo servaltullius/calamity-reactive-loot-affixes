@@ -12,9 +12,23 @@ namespace CalamityAffixes
 		std::uint32_t aggressor{ 0 };
 		std::uint32_t target{ 0 };
 		std::uint32_t source{ 0 };
+		// HitData content signature on the hook path; 0 when unknown (TESHitEvent
+		// fallback). Two blades of the same base weapon, or several arrows, land
+		// separate HitData and are separate hits; one hit seen by two deferred
+		// tasks has the same content and is merged.
+		std::uint64_t content{ 0 };
 
 		[[nodiscard]] constexpr bool operator==(const DuplicateHitKey& a_rhs) const noexcept = default;
 	};
+
+	[[nodiscard]] constexpr bool IsSameDuplicateHit(const DuplicateHitKey& a_current, const DuplicateHitKey& a_last) noexcept
+	{
+		if (a_current.outgoing != a_last.outgoing || a_current.aggressor != a_last.aggressor ||
+			a_current.target != a_last.target || a_current.source != a_last.source) {
+			return false;
+		}
+		return a_current.content == 0u || a_last.content == 0u || a_current.content == a_last.content;
+	}
 
 	[[nodiscard]] constexpr bool ShouldSuppressDuplicateHitWindow(
 		const DuplicateHitKey& a_current,
@@ -33,7 +47,7 @@ namespace CalamityAffixes
 			return false;
 		}
 
-		return a_current == a_last;
+		return IsSameDuplicateHit(a_current, a_last);
 	}
 
 	[[nodiscard]] constexpr bool ShouldSuppressDuplicateHealthDamageSignature(

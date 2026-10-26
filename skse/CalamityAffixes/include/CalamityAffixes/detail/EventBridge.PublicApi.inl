@@ -17,6 +17,7 @@
 		// is fully loaded at this point, unlike the Serialization Load callback.
 		void OnPostLoadGame();
 		void OnPreLoadGame();
+		void OnNewGame();
 		void OnPreSaveGame();
 
 		// Called from SKSE SerializationInterface form delete callback.
@@ -27,6 +28,13 @@
 		// Tick lightweight runtime systems that need polling (e.g., ground traps).
 		void TickTraps();
 		[[nodiscard]] bool HasActiveTraps() const noexcept { return _trapState.hasActiveTraps.load(std::memory_order_relaxed); }
+		// Bow draw speed (v2.3.0): synced on the game thread from the trap worker.
+		void SyncBowDrawSpeed();
+		void RemoveBowDrawSpeed();
+		[[nodiscard]] bool WantsBowDrawSpeedSync() const noexcept
+		{
+			return _bowDrawSpeed.wanted.load(std::memory_order_relaxed) || _bowDrawSpeed.active.load(std::memory_order_relaxed);
+		}
 		// Land the echo strikes and Doom bursts whose delay has elapsed (main thread).
 		void TickEchoStrikes();
 		[[nodiscard]] bool HasPendingEchoStrikes() const noexcept
@@ -79,6 +87,15 @@
 			std::uint64_t a_expectedInstanceKey,
 			std::uint8_t a_expectedRegularAffixCount);
 		[[nodiscard]] OperationResult ResetSelectedRunewordBaseCalamityState();
+		// Debug test plan: complete a runeword on the selected item, no fragments.
+		[[nodiscard]] OperationResult DebugApplyRunewordToSelectedBase(std::string_view a_recipeId);
+		// The damage hook skipped procs on a corpse hit (debug test plan event).
+		void NoteCorpseHitSkipped();
+		// Debug test plan event from code outside the bridge lock (hook tasks).
+		void NoteDebugTestEventLocked(std::string_view a_key);
+		// Prisma "Transmute": the same work as the InsertRune mod event, run
+		// synchronously (game-thread UI task) so the panel knows the outcome.
+		void InsertRunewordRuneFromPanel();
 
 		// MCM manual recovery: grant starter orbs + missing rune fragments.
 		[[nodiscard]] std::string RecoverMiscCurrency();
@@ -86,18 +103,37 @@
 		// Combat/runtime evaluation entrypoints.
 		// Called from Actor::HandleHealthDamage hook to drive hit/incoming-hit procs reliably,
 		// even when TESHitEvent is delayed or suppressed by other mods.
+		// a_appliedDamage: what the engine actually removed (after crit and
+		// Mind over Matter); negative means "same as a_damage".
 		void OnHealthDamage(
 			RE::Actor* a_target,
 			RE::Actor* a_attacker,
 			const RE::HitData* a_hitData,
-			float a_damage);
+			float a_damage,
+			float a_appliedDamage = -1.0f);
 
+		// Deferred SKSE task from the HandleHealthDamage hook for player damage
+		// the hit pipeline does not route (breath/spell ticks reusing an old
+		// HitData, shouts, DoTs, falls, ownerless traps). Runs on the game
+		// thread after the damage landed; evaluates kLowHealth only.
+		void OnPlayerHealthDamageLowHealthOnly(RE::FormID a_attackerFormID, float a_damageTaken);
+		// Unsynchronized hint for the hook: false when no low-health affix is
+		// active, so unrouted damage does not queue a task at all.
+		[[nodiscard]] bool HasActiveLowHealthAffixesHint() const noexcept
+		{
+			return _lowHealthAffixesActiveHint.load(std::memory_order_relaxed);
+		}
+
+		// a_physicalScale: multiplier the hook already applied to this hit's
+		// damage (the Calamity crit bonus), so "convert X% of physical" covers
+		// the boosted physical part too.
 		[[nodiscard]] ConversionResults EvaluateConversion(
 			RE::Actor* a_attacker,
 			RE::Actor* a_target,
 			const RE::HitData* a_hitData,
 			float& a_inOutDamage,
-			bool a_allowResync = true);
+			bool a_allowResync = true,
+			float a_physicalScale = 1.0f);
 
 		[[nodiscard]] MindOverMatterResult EvaluateMindOverMatter(
 			RE::Actor* a_target,

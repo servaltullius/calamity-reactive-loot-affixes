@@ -314,7 +314,7 @@
   text-overflow: ellipsis;
   white-space: normal;
   line-height: 1.35;
-  max-height: calc(2.7em * var(--panel-ui-scale));
+  max-height: 4.05em;
 }
 
 .cpFooter {
@@ -379,6 +379,69 @@
   color: rgba(var(--danger-light-rgb), 0.82);
   font-size: calc(11px * var(--panel-ui-scale));
   line-height: 1.45;
+}
+
+/* Debug test sets: a neutral hint, unlike the warning text above. */
+.cpTestSetLabel {
+  padding: 0 calc(12px * var(--panel-ui-scale));
+  color: rgba(var(--text-rgb), 0.86);
+  font-size: calc(12px * var(--panel-ui-scale));
+  line-height: 1.45;
+}
+
+.cpTestSetHint {
+  padding: 0 calc(12px * var(--panel-ui-scale)) calc(12px * var(--panel-ui-scale));
+  color: rgba(var(--text-rgb), 0.72);
+  font-size: calc(11px * var(--panel-ui-scale));
+  line-height: 1.45;
+}
+
+.cpTestPlan[hidden],
+.cpTestSetLabel[hidden],
+.cpTestSetHint[hidden] {
+  display: none;
+}
+
+.cpTestPlan {
+  display: grid;
+  gap: calc(6px * var(--panel-ui-scale));
+  padding: 0 calc(12px * var(--panel-ui-scale)) calc(12px * var(--panel-ui-scale));
+}
+
+.cpTestRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: calc(8px * var(--panel-ui-scale));
+  padding: calc(6px * var(--panel-ui-scale)) calc(8px * var(--panel-ui-scale));
+  border: 1px solid rgba(var(--text-rgb), 0.1);
+  border-radius: var(--radius-box);
+}
+
+.cpTestRow.seen {
+  border-color: rgba(var(--accent-rgb), 0.32);
+}
+
+.cpTestRowTitle {
+  color: rgba(var(--text-rgb), 0.92);
+  font-size: calc(12px * var(--panel-ui-scale));
+  line-height: 1.4;
+}
+
+.cpTestRowTodo {
+  color: rgba(var(--text-rgb), 0.68);
+  font-size: calc(11px * var(--panel-ui-scale));
+  line-height: 1.45;
+}
+
+.cpTestRowState {
+  color: rgba(var(--text-rgb), 0.55);
+  font-size: calc(11px * var(--panel-ui-scale));
+  white-space: nowrap;
+}
+
+.cpTestRowState.seen {
+  color: rgba(var(--accent-light-rgb), 0.95);
 }
 
 .cpDangerBody {

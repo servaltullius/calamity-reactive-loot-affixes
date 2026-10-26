@@ -97,6 +97,11 @@ namespace CalamityAffixes::PluginEditorIds
 			parsed.compressedSkipped);
 	}
 
+	bool IsIndexed() noexcept
+	{
+		return !GetIndex().byFormId.empty();
+	}
+
 	RE::TESForm* FindOwn(std::string_view a_editorId) noexcept
 	{
 		if (a_editorId.empty()) {

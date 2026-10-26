@@ -60,6 +60,8 @@ namespace CalamityAffixes
 			out.id = recipe.id + "_auto";
 			out.token = recipe.resultAffixToken;
 			out.action.sourceToken = out.token;
+			// Authored runeword results take the prefix slot (v2.3.0); a stand-in counts the same.
+			out.slot = AffixSlot::kPrefix;
 			const std::string suffix = runeSequence.empty() ? "(Auto)" : ("[" + runeSequence + "]");
 			const std::string recipeNameEn = recipe.displayNameEn.empty() ? recipe.displayName : recipe.displayNameEn;
 			const std::string recipeNameKo = recipe.displayNameKo.empty() ? recipe.displayName : recipe.displayNameKo;
@@ -111,8 +113,11 @@ namespace CalamityAffixes
 
 				RegisterSynthesizedAffix(std::move(out), false);
 				synthesizedRunewordAffixes += 1u;
-				SKSE::log::info(
-					"CalamityAffixes: synthesized runeword runtime affix (recipe={}, style={}, resultToken={:016X}).",
+				// The shipped data authors every result affix, so reaching this means
+				// the plugin or affixes.json is partial or out of date: the item keeps
+				// the recipe's name and text but runs this stand-in in combat.
+				SKSE::log::warn(
+					"CalamityAffixes: authored runeword result affix missing; using a synthesized stand-in (recipe={}, style={}, resultToken={:016X}).",
 					recipe.id,
 					styleName(style),
 					recipe.resultAffixToken);

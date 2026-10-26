@@ -1595,13 +1595,13 @@
   {
     "id": "suffix_evasion_t1",
     "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T1",
-    "name": "약간의 회피: 경갑 +5%",
-    "nameEn": "of Minor Evasion: Light Armor +5%",
-    "nameKo": "약간의 회피: 경갑 +5%",
+    "name": "약간의 회피: 경갑 착용 시 받는 피해 -5%",
+    "nameEn": "of Minor Evasion: -5% damage taken while wearing light armor",
+    "nameKo": "약간의 회피: 경갑 착용 시 받는 피해 -5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T1",
-        "name": "Calamity Suffix: Light Armor +5% / 경갑 +5%",
+        "name": "Calamity Suffix: Light Armor Damage Taken -5% / 경갑 착용 시 받는 피해 -5%",
         "actorValue": "LightArmorModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -1610,7 +1610,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T1",
-        "name": "Calamity Suffix: Light Armor +5% / 경갑 +5%",
+        "name": "Calamity Suffix: Light Armor Damage Taken -5% / 경갑 착용 시 받는 피해 -5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1643,13 +1643,13 @@
   {
     "id": "suffix_evasion_t2",
     "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T2",
-    "name": "회피: 경갑 +10%",
-    "nameEn": "of Evasion: Light Armor +10%",
-    "nameKo": "회피: 경갑 +10%",
+    "name": "회피: 경갑 착용 시 받는 피해 -10%",
+    "nameEn": "of Evasion: -10% damage taken while wearing light armor",
+    "nameKo": "회피: 경갑 착용 시 받는 피해 -10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T2",
-        "name": "Calamity Suffix: Light Armor +10% / 경갑 +10%",
+        "name": "Calamity Suffix: Light Armor Damage Taken -10% / 경갑 착용 시 받는 피해 -10%",
         "actorValue": "LightArmorModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -1658,7 +1658,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T2",
-        "name": "Calamity Suffix: Light Armor +10% / 경갑 +10%",
+        "name": "Calamity Suffix: Light Armor Damage Taken -10% / 경갑 착용 시 받는 피해 -10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -1691,13 +1691,13 @@
   {
     "id": "suffix_evasion_t3",
     "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T3",
-    "name": "위대한 회피: 경갑 +15%",
-    "nameEn": "of Grand Evasion: Light Armor +15%",
-    "nameKo": "위대한 회피: 경갑 +15%",
+    "name": "위대한 회피: 경갑 착용 시 받는 피해 -15%",
+    "nameEn": "of Grand Evasion: -15% damage taken while wearing light armor",
+    "nameKo": "위대한 회피: 경갑 착용 시 받는 피해 -15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T3",
-        "name": "Calamity Suffix: Light Armor +15% / 경갑 +15%",
+        "name": "Calamity Suffix: Light Armor Damage Taken -15% / 경갑 착용 시 받는 피해 -15%",
         "actorValue": "LightArmorModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -1706,7 +1706,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T3",
-        "name": "Calamity Suffix: Light Armor +15% / 경갑 +15%",
+        "name": "Calamity Suffix: Light Armor Damage Taken -15% / 경갑 착용 시 받는 피해 -15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2027,9 +2027,9 @@
   {
     "id": "suffix_assassin_t1",
     "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T1",
-    "name": "약간의 암살자: 치명타 확률 +10%, 치명타 피해 +10%",
-    "nameEn": "of Minor Assassin: Critical Chance +10%, Critical Damage +10%",
-    "nameKo": "약간의 암살자: 치명타 확률 +10%, 치명타 피해 +10%",
+    "name": "약간의 암살자: 치명타 확률 +10%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +10%",
+    "nameEn": "of Minor Assassin: Critical Chance +10% (does not stack with vanilla critical perks), Critical Damage +10%",
+    "nameKo": "약간의 암살자: 치명타 확률 +10%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T1",
@@ -2076,9 +2076,9 @@
   {
     "id": "suffix_assassin_t2",
     "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T2",
-    "name": "암살자: 치명타 확률 +20%, 치명타 피해 +20%",
-    "nameEn": "of the Assassin: Critical Chance +20%, Critical Damage +20%",
-    "nameKo": "암살자: 치명타 확률 +20%, 치명타 피해 +20%",
+    "name": "암살자: 치명타 확률 +20%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +20%",
+    "nameEn": "of the Assassin: Critical Chance +20% (does not stack with vanilla critical perks), Critical Damage +20%",
+    "nameKo": "암살자: 치명타 확률 +20%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +20%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T2",
@@ -2125,9 +2125,9 @@
   {
     "id": "suffix_assassin_t3",
     "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T3",
-    "name": "위대한 암살자: 치명타 확률 +30%, 치명타 피해 +30%",
-    "nameEn": "of Grand Assassin: Critical Chance +30%, Critical Damage +30%",
-    "nameKo": "위대한 암살자: 치명타 확률 +30%, 치명타 피해 +30%",
+    "name": "위대한 암살자: 치명타 확률 +30%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +30%",
+    "nameEn": "of Grand Assassin: Critical Chance +30% (does not stack with vanilla critical perks), Critical Damage +30%",
+    "nameKo": "위대한 암살자: 치명타 확률 +30%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +30%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T3",
@@ -2174,13 +2174,13 @@
   {
     "id": "suffix_fortitude_t1",
     "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T1",
-    "name": "약간의 견고: 중갑 +5%",
-    "nameEn": "of Minor Fortitude: Heavy Armor +5%",
-    "nameKo": "약간의 견고: 중갑 +5%",
+    "name": "약간의 견고: 중갑 착용 시 받는 피해 -5%",
+    "nameEn": "of Minor Fortitude: -5% damage taken while wearing heavy armor",
+    "nameKo": "약간의 견고: 중갑 착용 시 받는 피해 -5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T1",
-        "name": "Calamity Suffix: Heavy Armor +5% / 중갑 +5%",
+        "name": "Calamity Suffix: Heavy Armor Damage Taken -5% / 중갑 착용 시 받는 피해 -5%",
         "actorValue": "HeavyArmorModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -2189,7 +2189,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T1",
-        "name": "Calamity Suffix: Heavy Armor +5% / 중갑 +5%",
+        "name": "Calamity Suffix: Heavy Armor Damage Taken -5% / 중갑 착용 시 받는 피해 -5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2222,13 +2222,13 @@
   {
     "id": "suffix_fortitude_t2",
     "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T2",
-    "name": "견고: 중갑 +10%",
-    "nameEn": "of Fortitude: Heavy Armor +10%",
-    "nameKo": "견고: 중갑 +10%",
+    "name": "견고: 중갑 착용 시 받는 피해 -10%",
+    "nameEn": "of Fortitude: -10% damage taken while wearing heavy armor",
+    "nameKo": "견고: 중갑 착용 시 받는 피해 -10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T2",
-        "name": "Calamity Suffix: Heavy Armor +10% / 중갑 +10%",
+        "name": "Calamity Suffix: Heavy Armor Damage Taken -10% / 중갑 착용 시 받는 피해 -10%",
         "actorValue": "HeavyArmorModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -2237,7 +2237,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T2",
-        "name": "Calamity Suffix: Heavy Armor +10% / 중갑 +10%",
+        "name": "Calamity Suffix: Heavy Armor Damage Taken -10% / 중갑 착용 시 받는 피해 -10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2270,13 +2270,13 @@
   {
     "id": "suffix_fortitude_t3",
     "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T3",
-    "name": "위대한 견고: 중갑 +15%",
-    "nameEn": "of Grand Fortitude: Heavy Armor +15%",
-    "nameKo": "위대한 견고: 중갑 +15%",
+    "name": "위대한 견고: 중갑 착용 시 받는 피해 -15%",
+    "nameEn": "of Grand Fortitude: -15% damage taken while wearing heavy armor",
+    "nameKo": "위대한 견고: 중갑 착용 시 받는 피해 -15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T3",
-        "name": "Calamity Suffix: Heavy Armor +15% / 중갑 +15%",
+        "name": "Calamity Suffix: Heavy Armor Damage Taken -15% / 중갑 착용 시 받는 피해 -15%",
         "actorValue": "HeavyArmorModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -2285,7 +2285,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T3",
-        "name": "Calamity Suffix: Heavy Armor +15% / 중갑 +15%",
+        "name": "Calamity Suffix: Heavy Armor Damage Taken -15% / 중갑 착용 시 받는 피해 -15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2613,7 +2613,8 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T1",
         "name": "Calamity Suffix: Bow Speed +5% / 활 속도 +5%",
-        "actorValue": "BowSpeedBonus",
+        "actorValue": "None",
+        "archetype": "Script",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2662,7 +2663,8 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T2",
         "name": "Calamity Suffix: Bow Speed +10% / 활 속도 +10%",
-        "actorValue": "BowSpeedBonus",
+        "actorValue": "None",
+        "archetype": "Script",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2711,7 +2713,8 @@
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3",
         "name": "Calamity Suffix: Bow Speed +15% / 활 속도 +15%",
-        "actorValue": "BowSpeedBonus",
+        "actorValue": "None",
+        "archetype": "Script",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2897,14 +2900,15 @@
   {
     "id": "suffix_enchanter_t1",
     "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T1",
-    "name": "약간의 부여술사: 부여 +5%",
-    "nameEn": "of Minor Enchanter: Enchanting +5%",
-    "nameKo": "약간의 부여술사: 부여 +5%",
+    "name": "약간의 부여술사: 부여 위력 +5%",
+    "nameEn": "of Minor Enchanter: Items you enchant are 5% stronger",
+    "nameKo": "약간의 부여술사: 부여 위력 +5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T1",
-        "name": "Calamity Suffix: Enchanting +5% / 부여 +5%",
-        "actorValue": "EnchantingModifier",
+        "name": "Calamity Suffix: Fortify Enchanting 5% / 부여 위력 +5%",
+        "actorValue": "Enchanting",
+        "archetype": "PeakValueModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2912,7 +2916,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T1",
-        "name": "Calamity Suffix: Enchanting +5% / 부여 +5%",
+        "name": "Calamity Suffix: Fortify Enchanting 5% / 부여 위력 +5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2945,14 +2949,15 @@
   {
     "id": "suffix_enchanter_t2",
     "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T2",
-    "name": "부여술사: 부여 +10%",
-    "nameEn": "of the Enchanter: Enchanting +10%",
-    "nameKo": "부여술사: 부여 +10%",
+    "name": "부여술사: 부여 위력 +10%",
+    "nameEn": "of the Enchanter: Items you enchant are 10% stronger",
+    "nameKo": "부여술사: 부여 위력 +10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T2",
-        "name": "Calamity Suffix: Enchanting +10% / 부여 +10%",
-        "actorValue": "EnchantingModifier",
+        "name": "Calamity Suffix: Fortify Enchanting 10% / 부여 위력 +10%",
+        "actorValue": "Enchanting",
+        "archetype": "PeakValueModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -2960,7 +2965,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T2",
-        "name": "Calamity Suffix: Enchanting +10% / 부여 +10%",
+        "name": "Calamity Suffix: Fortify Enchanting 10% / 부여 위력 +10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -2993,14 +2998,15 @@
   {
     "id": "suffix_enchanter_t3",
     "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T3",
-    "name": "위대한 부여술사: 부여 +15%",
-    "nameEn": "of Grand Enchanter: Enchanting +15%",
-    "nameKo": "위대한 부여술사: 부여 +15%",
+    "name": "위대한 부여술사: 부여 위력 +15%",
+    "nameEn": "of Grand Enchanter: Items you enchant are 15% stronger",
+    "nameKo": "위대한 부여술사: 부여 위력 +15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T3",
-        "name": "Calamity Suffix: Enchanting +15% / 부여 +15%",
-        "actorValue": "EnchantingModifier",
+        "name": "Calamity Suffix: Fortify Enchanting 15% / 부여 위력 +15%",
+        "actorValue": "Enchanting",
+        "archetype": "PeakValueModifier",
         "resistValue": null,
         "magicSkill": null,
         "hostile": false,
@@ -3008,7 +3014,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T3",
-        "name": "Calamity Suffix: Enchanting +15% / 부여 +15%",
+        "name": "Calamity Suffix: Fortify Enchanting 15% / 부여 위력 +15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -3041,13 +3047,13 @@
   {
     "id": "suffix_conjurer_t1",
     "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T1",
-    "name": "약간의 소환술사: 소환 +5%",
-    "nameEn": "of Minor Conjurer: Conjuration +5%",
-    "nameKo": "약간의 소환술사: 소환 +5%",
+    "name": "약간의 소환술사: 소환 마법 비용 -5%",
+    "nameEn": "of Minor Conjurer: Conjuration spell cost -5%",
+    "nameKo": "약간의 소환술사: 소환 마법 비용 -5%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T1",
-        "name": "Calamity Suffix: Conjuration +5% / 소환 +5%",
+        "name": "Calamity Suffix: Conjuration spell cost -5% / 소환 마법 비용 -5%",
         "actorValue": "ConjurationModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -3056,7 +3062,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T1",
-        "name": "Calamity Suffix: Conjuration +5% / 소환 +5%",
+        "name": "Calamity Suffix: Conjuration spell cost -5% / 소환 마법 비용 -5%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -3089,13 +3095,13 @@
   {
     "id": "suffix_conjurer_t2",
     "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T2",
-    "name": "소환술사: 소환 +10%",
-    "nameEn": "of the Conjurer: Conjuration +10%",
-    "nameKo": "소환술사: 소환 +10%",
+    "name": "소환술사: 소환 마법 비용 -10%",
+    "nameEn": "of the Conjurer: Conjuration spell cost -10%",
+    "nameKo": "소환술사: 소환 마법 비용 -10%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T2",
-        "name": "Calamity Suffix: Conjuration +10% / 소환 +10%",
+        "name": "Calamity Suffix: Conjuration spell cost -10% / 소환 마법 비용 -10%",
         "actorValue": "ConjurationModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -3104,7 +3110,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T2",
-        "name": "Calamity Suffix: Conjuration +10% / 소환 +10%",
+        "name": "Calamity Suffix: Conjuration spell cost -10% / 소환 마법 비용 -10%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",
@@ -3137,13 +3143,13 @@
   {
     "id": "suffix_conjurer_t3",
     "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T3",
-    "name": "위대한 소환술사: 소환 +15%",
-    "nameEn": "of Grand Conjurer: Conjuration +15%",
-    "nameKo": "위대한 소환술사: 소환 +15%",
+    "name": "위대한 소환술사: 소환 마법 비용 -15%",
+    "nameEn": "of Grand Conjurer: Conjuration spell cost -15%",
+    "nameKo": "위대한 소환술사: 소환 마법 비용 -15%",
     "records": {
       "magicEffect": {
         "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T3",
-        "name": "Calamity Suffix: Conjuration +15% / 소환 +15%",
+        "name": "Calamity Suffix: Conjuration spell cost -15% / 소환 마법 비용 -15%",
         "actorValue": "ConjurationModifier",
         "resistValue": null,
         "magicSkill": null,
@@ -3152,7 +3158,7 @@
       },
       "spell": {
         "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T3",
-        "name": "Calamity Suffix: Conjuration +15% / 소환 +15%",
+        "name": "Calamity Suffix: Conjuration spell cost -15% / 소환 마법 비용 -15%",
         "delivery": "Self",
         "spellType": "Ability",
         "castType": "ConstantEffect",

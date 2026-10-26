@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <string>
 #include <string_view>
 
@@ -15,6 +16,19 @@
 
 namespace CalamityAffixes
 {
+	namespace
+	{
+		// "8.5", "8", "1.2": one decimal like the MCM sliders, no trailing ".0".
+		[[nodiscard]] std::string FormatSettingNumber(float a_value)
+		{
+			auto text = std::format("{:.1f}", a_value);
+			if (text.ends_with(".0")) {
+				text.erase(text.size() - 2);
+			}
+			return text;
+		}
+	}
+
 	namespace
 	{
 		// MCM passes boolean settings as float 1.0/0.0; threshold for truthy conversion.
@@ -128,7 +142,7 @@ namespace CalamityAffixes
 			_runtimeSettings.procChanceMult = std::clamp(a_numArg, 0.0f, 3.0f);
 			QueueRuntimeUserSettingsPersist();
 			std::string note = "Calamity: proc x";
-			note += std::to_string(_runtimeSettings.procChanceMult);
+			note += FormatSettingNumber(_runtimeSettings.procChanceMult);
 			EmitHudNotification(note.c_str());
 			return true;
 		}
@@ -143,7 +157,7 @@ namespace CalamityAffixes
 				QueueRuntimeUserSettingsPersist();
 				if (ShouldEmitChanceNotification(s_lastRunewordChanceNotificationAt, a_now)) {
 					std::string note = "Calamity: runeword fragment chance ";
-					note += std::to_string(_loot.runewordFragmentChancePercent);
+					note += FormatSettingNumber(_loot.runewordFragmentChancePercent);
 					note += "%";
 					EmitHudNotification(note.c_str());
 				}
@@ -161,7 +175,7 @@ namespace CalamityAffixes
 				QueueRuntimeUserSettingsPersist();
 				if (ShouldEmitChanceNotification(s_lastReforgeChanceNotificationAt, a_now)) {
 					std::string note = "Calamity: reforge orb chance ";
-					note += std::to_string(_loot.reforgeOrbChancePercent);
+					note += FormatSettingNumber(_loot.reforgeOrbChancePercent);
 					note += "%";
 					EmitHudNotification(note.c_str());
 				}
@@ -179,7 +193,7 @@ namespace CalamityAffixes
 				QueueRuntimeUserSettingsPersist();
 				if (ShouldEmitChanceNotification(s_lastCraftingChanceNotificationAt, a_now)) {
 					std::string note = identify ? "Calamity: identify scroll chance " : "Calamity: scouring orb chance ";
-					note += std::to_string(chance);
+					note += FormatSettingNumber(chance);
 					note += "%";
 					EmitHudNotification(note.c_str());
 				}
@@ -232,7 +246,11 @@ namespace CalamityAffixes
 		}
 
 		if (a_eventName == kMcmGrantTrapAffixEvent) {
-			GrantTrapAffixToSelectedBase();
+			if (a_numArg >= 10.5f) {
+				GrantTestSetToSelectedBase(static_cast<int>(a_numArg + 0.5f));
+			} else {
+				GrantTrapAffixToSelectedBase();
+			}
 			return true;
 		}
 
@@ -255,7 +273,13 @@ namespace CalamityAffixes
 				return true;
 			}
 
-			const auto amount = (a_numArg > 0.0f) ? static_cast<std::uint32_t>(a_numArg) : 3u;
+			// Players get the fixed starter amount; only debug sessions may ask for
+			// more, and never an unbounded stack from a crafted mod event.
+			constexpr std::uint32_t kStarterOrbs = 3u;
+			constexpr float kMaxDebugGrant = 20.0f;
+			const auto amount = (debugSession && a_numArg > 0.0f) ?
+				static_cast<std::uint32_t>(std::min(a_numArg, kMaxDebugGrant)) :
+				kStarterOrbs;
 			GrantReforgeOrbs(amount);
 			// The Scouring Orb is a rare drop; only debug sessions get the full crafting kit.
 			if (debugSession) {
@@ -288,31 +312,6 @@ namespace CalamityAffixes
 			EmitHudNotification(note.c_str());
 			SKSE::log::info("CalamityAffixes: force-rebuild — {} active affixes, {} passive spells applied.",
 				activeCount, _instanceTrackingState.appliedPassiveSpells.size());
-			return true;
-		}
-
-		if (a_eventName == kMcmGrantRecoveryPackEvent) {
-			auto* recoveryPlayer = RE::PlayerCharacter::GetSingleton();
-			if (recoveryPlayer) {
-				GrantReforgeOrbs(5u);
-				if (_runewordState.runeNameByToken.empty()) {
-					InitializeRunewordCatalog();
-				}
-				std::uint32_t fragmentsGranted = 0u;
-				for (const auto& [runeToken, runeName] : _runewordState.runeNameByToken) {
-					if (runeToken == 0u || runeName.empty()) {
-						continue;
-					}
-					const auto given = RunewordDetail::GrantRunewordFragments(
-						recoveryPlayer, _runewordState.runeNameByToken, runeToken, 1u);
-					fragmentsGranted += given;
-				}
-				std::string note = "Calamity: recovery pack (5 orbs, ";
-				note += std::to_string(fragmentsGranted);
-				note += " fragments)";
-				EmitHudNotification(note.c_str());
-				SKSE::log::info("CalamityAffixes: granted recovery pack — 5 orbs, {} fragment types.", fragmentsGranted);
-			}
 			return true;
 		}
 

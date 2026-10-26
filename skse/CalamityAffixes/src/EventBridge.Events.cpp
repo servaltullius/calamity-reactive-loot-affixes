@@ -36,6 +36,19 @@ namespace CalamityAffixes
 				// This transient engine command is not used by affix dispatch.
 				context.hitData->VATSCommand = nullptr;
 			}
+		} else if constexpr (std::is_same_v<Event, RE::TESContainerChangedEvent>) {
+			// A dropped or picked-up reference can be gone by the time a queued
+			// event drains; resolve it now so ownership transfers still match it.
+			context.containerReferenceCaptured = true;
+			if (event.reference) {
+				if (auto ref = event.reference.get(); ref) {
+					context.containerReferenceFormID = ref->GetFormID();
+					if (const auto* uid = ref->extraList.GetByType<RE::ExtraUniqueID>(); uid) {
+						context.containerReferenceUidBaseID = uid->baseID;
+						context.containerReferenceUniqueID = uid->uniqueID;
+					}
+				}
+			}
 		} else if constexpr (std::is_same_v<Event, SKSE::ModCallbackEvent>) {
 			// The handler uses only owning BSFixedStrings and numArg. Do not retain
 			// the unused, non-owning sender pointer across a task boundary.

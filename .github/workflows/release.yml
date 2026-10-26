@@ -109,7 +109,11 @@ jobs:
       - name: Verify Prisma view structure
         run: python3 tools/verify_prisma_view.py
 
-      - name: Verify runtime contract snapshot sync
+      # Regenerates every generator output (ESP, KID/DISTR ini, InventoryInjector
+      # json, affixes.json, runtime_contract.json) into a temp folder and compares
+      # each with the committed Data/ copy, so a generator change or a partial
+      # commit that left the ESP behind cannot pass.
+      - name: Verify generated Data outputs (runtime contract, ESP, ini, json)
         run: python3 tools/verify_runtime_contract_sync.py
 
       # A tag must not publish stale effect tables even if the branch CI was

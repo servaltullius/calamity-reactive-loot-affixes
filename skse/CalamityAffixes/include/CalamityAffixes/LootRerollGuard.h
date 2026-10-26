@@ -76,7 +76,18 @@ namespace CalamityAffixes
 			if (a_newContainer != a_player) {
 				return std::nullopt;
 			}
+			return ConsumeDroppedReferenceInstanceKey(a_itemCount, a_reference);
+		}
 
+		// Same, for any new owner (a companion or NPC picking up what the player
+		// dropped).
+		[[nodiscard]] constexpr std::optional<InstanceKey> ConsumeDroppedReferenceInstanceKey(
+			std::int32_t a_itemCount,
+			RefHandle a_reference) noexcept
+		{
+			if (a_reference == 0 || a_itemCount == 0) {
+				return std::nullopt;
+			}
 			for (auto& entry : _refs) {
 				if (entry.ref == a_reference) {
 					const auto key = entry.instanceKey;

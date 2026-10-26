@@ -45,6 +45,23 @@ static_assert([] {
 	"ShouldSuppressDuplicateHitWindow: does not suppress when clock moves backwards");
 
 static_assert([] {
+	// Dual-wielded daggers of one base weapon: same key, different HitData.
+	constexpr DuplicateHitKey left{ .outgoing = true, .aggressor = 1u, .target = 2u, .source = 3u, .content = 0x11u };
+	constexpr DuplicateHitKey right{ .outgoing = true, .aggressor = 1u, .target = 2u, .source = 3u, .content = 0x22u };
+	return !ShouldSuppressDuplicateHitWindow(right, left, 150u, 100u, 100u);
+}(),
+	"ShouldSuppressDuplicateHitWindow: separate HitData of the same base weapon are separate hits");
+
+static_assert([] {
+	constexpr DuplicateHitKey first{ .outgoing = true, .aggressor = 1u, .target = 2u, .source = 3u, .content = 0x11u };
+	constexpr DuplicateHitKey again{ .outgoing = true, .aggressor = 1u, .target = 2u, .source = 3u, .content = 0x11u };
+	constexpr DuplicateHitKey unknown{ .outgoing = true, .aggressor = 1u, .target = 2u, .source = 3u };
+	return ShouldSuppressDuplicateHitWindow(again, first, 150u, 100u, 100u) &&
+	       ShouldSuppressDuplicateHitWindow(unknown, first, 150u, 100u, 100u);
+}(),
+	"ShouldSuppressDuplicateHitWindow: one hit seen twice, or without content, is still merged");
+
+static_assert([] {
 	return ShouldSuppressDuplicateHealthDamageSignature(0xAAu, 0xAAu, 150u, 100u, 100u);
 }(),
 	"ShouldSuppressDuplicateHealthDamageSignature: suppresses matching signatures inside stale window");

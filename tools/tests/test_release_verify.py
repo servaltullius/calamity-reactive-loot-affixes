@@ -23,11 +23,11 @@ class ReleaseVerifyTests(unittest.TestCase):
         cls.ci_verify_path = cls.repo_root / ".github" / "workflows" / "ci-verify.yml"
         cls.repo_build_dll = cls.repo_root / "skse" / "CalamityAffixes" / "build.linux-clangcl-rel" / "CalamityAffixes.dll"
 
-    def test_runtime_contract_sync_script_passes_for_repo_snapshot(self) -> None:
+    def _run_runtime_contract_sync_with_fake_dotnet(self, mutate: str = "") -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory(prefix="caff-fake-dotnet-contract-") as temp_dir:
             temp_root = Path(temp_dir)
             fake_dotnet = self._write_fake_dotnet(temp_root / "bin")
-            result = subprocess.run(
+            return subprocess.run(
                 ["python3", str(self.runtime_contract_sync_path)],
                 cwd=self.repo_root,
                 text=True,
@@ -37,10 +37,113 @@ class ReleaseVerifyTests(unittest.TestCase):
                     **os.environ,
                     "CAFF_DOTNET": str(fake_dotnet),
                     "CAFF_TEST_REPO_ROOT": str(self.repo_root),
+                    "CAFF_TEST_FAKE_MUTATE": mutate,
                 },
             )
-            self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
-            self.assertIn("runtime_contract sync: OK", result.stdout)
+
+    def test_runtime_contract_sync_routes_generator_output_through_run_root(self) -> None:
+        # Wiring smoke test: the fake dotnet copies the checked-in outputs, so this
+        # only proves the script runs the generator and reads what it wrote. The real
+        # generator comparison is ci-verify's "Verify generated Data outputs" step.
+        result = self._run_runtime_contract_sync_with_fake_dotnet()
+        self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+        self.assertIn("runtime_contract sync: OK", result.stdout)
+        self.assertIn("generated outputs sync: OK", result.stdout)
+
+    def test_runtime_contract_sync_fails_when_generated_contract_differs(self) -> None:
+        result = self._run_runtime_contract_sync_with_fake_dotnet(
+            "SKSE/Plugins/CalamityAffixes/runtime_contract.json"
+        )
+        self.assertEqual(result.returncode, 1, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+        self.assertIn("checked-in contract is stale", result.stderr)
+
+    def test_runtime_contract_sync_fails_when_generated_plugin_or_ini_differs(self) -> None:
+        for relative in (
+            "CalamityAffixes.esp",
+            "CalamityAffixes_KID.ini",
+            "CalamityAffixes_DISTR.ini",
+            "SKSE/Plugins/InventoryInjector/CalamityAffixes.json",
+        ):
+            with self.subTest(relative=relative):
+                result = self._run_runtime_contract_sync_with_fake_dotnet(relative)
+                self.assertEqual(result.returncode, 1, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+                self.assertIn(f"checked-in Data/{relative} is stale", result.stderr)
+                self.assertNotIn("checked-in contract is stale", result.stderr)
+
+    def _run_path_helper(self, script: str, *, cwd: Path, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+        helpers = self.repo_root / "tools" / "path_helpers.sh"
+        return subprocess.run(
+            ["bash", "-c", f'set -euo pipefail; source "{helpers}"; {script}'],
+            cwd=cwd,
+            text=True,
+            capture_output=True,
+            check=False,
+            env={**os.environ, **(env or {})},
+        )
+
+    def test_resolve_package_version_prefers_final_tag_over_rc_tag(self) -> None:
+        if shutil.which("git") is None:
+            self.skipTest("git not available")
+        with tempfile.TemporaryDirectory(prefix="caff-version-") as temp_dir:
+            repo = Path(temp_dir)
+            cmake_dir = repo / "skse" / "CalamityAffixes"
+            cmake_dir.mkdir(parents=True)
+            (cmake_dir / "CMakeLists.txt").write_text(
+                "project(CalamityAffixes VERSION 2.3.0 LANGUAGES CXX)\n", encoding="utf-8"
+            )
+            git_env = {
+                "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.invalid",
+                "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.invalid",
+            }
+            for args in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "init"]):
+                subprocess.run(["git", "-C", str(repo), *args], check=True, env={**os.environ, **git_env})
+
+            env = {"CAFF_PACKAGE_VERSION": ""}
+            resolve = f'resolve_package_version "{repo}"'
+
+            result = self._run_path_helper(resolve, cwd=repo, env=env)
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            self.assertEqual("2.3.0", result.stdout.strip(), "untagged HEAD falls back to CMake")
+
+            subprocess.run(["git", "-C", str(repo), "tag", "v2.3.0-rc4"], check=True)
+            result = self._run_path_helper(resolve, cwd=repo, env=env)
+            self.assertEqual("2.3.0-rc4", result.stdout.strip())
+
+            subprocess.run(["git", "-C", str(repo), "tag", "v2.3.0"], check=True)
+            result = self._run_path_helper(resolve, cwd=repo, env=env)
+            self.assertEqual("2.3.0", result.stdout.strip(), "a final tag must win over an rc tag on the same commit")
+
+            result = self._run_path_helper(resolve, cwd=repo, env={"CAFF_PACKAGE_VERSION": "v9.9.9"})
+            self.assertEqual("9.9.9", result.stdout.strip())
+
+    def test_release_verify_hands_its_resolved_version_to_the_zip_builder(self) -> None:
+        release_verify = self.release_verify_path.read_text(encoding="utf-8")
+        build_mo2_zip = self.build_mo2_zip_path.read_text(encoding="utf-8")
+        self.assertIn('expected_version="$(resolve_package_version "${repo_root}")"', release_verify)
+        self.assertIn('CAFF_PACKAGE_VERSION="${expected_version}"', release_verify)
+        self.assertIn('version="$(resolve_package_version "${repo_root}")"', build_mo2_zip)
+
+    def test_resolve_repo_run_root_temp_alias_is_removed_by_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="caff-run-root-") as temp_dir:
+            temp_root = Path(temp_dir)
+            repo = temp_root / "parent" / "repo with space"
+            repo.mkdir(parents=True)
+            alias_tmp = temp_root / "tmp"
+            alias_tmp.mkdir()
+            result = self._run_path_helper(
+                f'resolve_repo_run_root "{repo}"; '
+                'test -L "${CAFF_REPO_RUN_ROOT_RESULT}"; '
+                'printf "%s\\n" "${CAFF_REPO_RUN_ROOT_RESULT}"; '
+                "cleanup_repo_run_root",
+                cwd=temp_root,
+                env={"TMPDIR": str(alias_tmp), "CAFF_REPO_RUN_ROOT": ""},
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            self.assertTrue(result.stdout.strip().endswith("/calamity"), msg=result.stdout)
+            self.assertEqual([], list(alias_tmp.iterdir()), "temp repo alias must not be left behind")
+
+        for script in (self.release_verify_path, self.build_mo2_zip_path):
+            self.assertNotIn('$(resolve_repo_run_root', script.read_text(encoding="utf-8"), msg=str(script))
 
     def test_release_verify_invokes_runtime_contract_sync(self) -> None:
         source = self.release_verify_path.read_text(encoding="utf-8")
@@ -829,11 +932,23 @@ class ReleaseVerifyTests(unittest.TestCase):
             "if [[ \"$out_dir\" != /* ]]; then\n"
             "  out_dir=\"$PWD/$out_dir\"\n"
             "fi\n"
-            "mkdir -p \"$out_dir/SKSE/Plugins/CalamityAffixes\"\n"
-            "cp \"$repo_root/Data/SKSE/Plugins/CalamityAffixes/runtime_contract.json\" "
-            "\"$out_dir/SKSE/Plugins/CalamityAffixes/runtime_contract.json\"\n"
-            "cp \"$repo_root/Data/SKSE/Plugins/CalamityAffixes/affixes.json\" "
-            "\"$out_dir/SKSE/Plugins/CalamityAffixes/affixes.json\"\n"
+            "mkdir -p \"$out_dir/SKSE/Plugins/CalamityAffixes\" \"$out_dir/SKSE/Plugins/InventoryInjector\"\n"
+            "for rel in SKSE/Plugins/CalamityAffixes/runtime_contract.json SKSE/Plugins/CalamityAffixes/affixes.json "
+            "SKSE/Plugins/InventoryInjector/CalamityAffixes.json CalamityAffixes_KID.ini CalamityAffixes_DISTR.ini "
+            "CalamityAffixes.esp; do\n"
+            "  if [[ \"$repo_root/Data/$rel\" -ef \"$out_dir/$rel\" ]]; then continue; fi\n"
+            "  cp \"$repo_root/Data/$rel\" \"$out_dir/$rel\"\n"
+            "done\n"
+            # CAFF_TEST_FAKE_MUTATE=<Data-relative path> makes that one output differ
+            # from the checked-in copy, so the stale-output branch can be exercised.
+            "mutate=\"${CAFF_TEST_FAKE_MUTATE:-}\"\n"
+            "if [[ -n \"$mutate\" ]]; then\n"
+            "  if [[ \"$mutate\" == *.json ]]; then\n"
+            "    printf '{\"fakeMutated\": true}\\n' > \"$out_dir/$mutate\"\n"
+            "  else\n"
+            "    printf '\\n; fake mutation\\n' >> \"$out_dir/$mutate\"\n"
+            "  fi\n"
+            "fi\n"
             "exit 0\n",
             encoding="utf-8",
         )

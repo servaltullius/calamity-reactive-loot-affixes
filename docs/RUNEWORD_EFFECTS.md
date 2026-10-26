@@ -12,8 +12,8 @@
 
 - 룬 조합: `Nef-Tir`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 나디르 [Nef-Tir]: 피격 시 12% 확률로 공포의 나락(공포 5초). 16초마다 발동.
-- 영문 표시: Runeword Nadir (Nef-Tir): 12% on hit taken / ICD 16s - Nadir of Fear (Fear 5s)
+- 한글 표시: 룬워드 나디르 [Nef-Tir]: 피격 시 12% 확률로 공포의 나락(공포 5초, 레벨 60 이하). 16초마다 발동.
+- 영문 표시: Runeword Nadir (Nef-Tir): 12% on hit taken / ICD 16s - Nadir of Fear (Fear 5s, up to level 60)
 
 ### Steel
 
@@ -40,8 +40,8 @@
 
 - 룬 조합: `Tir-Ral`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 리프 [Tir-Ral]: 적중 시 22% 확률로 나뭇잎의 불꽃(파괴 마법 +20, 8초). 7초마다 발동.
-- 영문 표시: Runeword Leaf (Tir-Ral): 22% on hit / ICD 7s - Leaf Flame (Destruction +20, 8s)
+- 한글 표시: 룬워드 리프 [Tir-Ral]: 적중 시 22% 확률로 나뭇잎의 불꽃(화염 피해 15). 파괴 마법 비용 -10%. 7초마다 발동. 화상 2중첩.
+- 영문 표시: Runeword Leaf (Tir-Ral): 22% on hit / ICD 7s - Leaf Flame (Fire Damage 15) + Destruction spell cost -10%; Burning +2 stacks
 
 ### Ancient's Pledge
 
@@ -68,8 +68,8 @@
 
 - 룬 조합: `Tal-Ort-Thul`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 패턴 [Tal-Ort-Thul]: 적중 시 20% 확률로 연계 리듬(치명타 +15%, 6초). 8초마다 발동.
-- 영문 표시: Runeword Pattern (Tal-Ort-Thul): 20% on hit / ICD 8s - Combo Rhythm (Crit Chance +15%, 6s)
+- 한글 표시: 룬워드 패턴 [Tal-Ort-Thul]: 적중 시 20% 확률로 연계 리듬(치명타 확률 +15%, 6초, 바닐라 치명타 퍽과 중첩 안 됨). 8초마다 발동.
+- 영문 표시: Runeword Pattern (Tal-Ort-Thul): 20% on hit / ICD 8s - Combo Rhythm (Crit Chance +15%, 6s; does not stack with vanilla critical perks)
 
 ### King's Grace
 
@@ -82,27 +82,27 @@
 
 - 룬 조합: `Amn-Tir`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 스트렝스 [Amn-Tir]: 적중 시 20% 확률로 맹타(양손 스킬 +25, 6초). 9초마다 발동.
-- 영문 표시: Runeword Strength (Amn-Tir): 20% on hit / ICD 9s - Heavy Strike (Two-Handed +25, 6s)
+- 한글 표시: 룬워드 스트렝스 [Amn-Tir]: 적중 시 20% 확률로 압쇄(대상 방어도 -100, 6초). 양손 무기 +10%. 9초마다 발동. 노출.
+- 영문 표시: Runeword Strength (Amn-Tir): 20% on hit / ICD 9s - Crushing Blow (Target Armor -100, 6s) + Two-Handed +10%; Exposed
 
 ### Edge
 
 - 룬 조합: `Tir-Tal-Amn`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 엣지 [Tir-Tal-Amn]: 적중 시 20% 확률로 예리한 사격(궁술 +20, 7초). 8초마다 발동.
-- 영문 표시: Runeword Edge (Tir-Tal-Amn): 20% on hit / ICD 8s - Sharp Shot (Marksman +20, 7s)
+- 한글 표시: 룬워드 엣지 [Tir-Tal-Amn]: 적중 시 20% 확률로 파멸 낙인(1.5초 뒤 그 적중 피해의 50%가 마법 피해로 터짐). 궁술 +10%. 8초마다 발동.
+- 영문 표시: Runeword Edge (Tir-Tal-Amn): 20% on hit / ICD 8s - Doom Mark (1.5s later, 50% of that hit's damage bursts as magic damage) + Archery +10%
 
 ### Myth
 
 - 룬 조합: `Hel-Amn-Nef`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 미스 [Hel-Amn-Nef]: 피격 시 20% 확률로 신화의 갑옷(중갑 스킬 +25, 7초). 11초마다 발동.
-- 영문 표시: Runeword Myth (Hel-Amn-Nef): 20% on hit taken / ICD 11s - Mythic Armor (Heavy Armor +25, 7s)
+- 한글 표시: 룬워드 미스 [Hel-Amn-Nef]: 피격 시 20% 확률로 신화의 가시(공격자에게 피해 10). 중갑 착용 시 받는 피해 -10%. 11초마다 발동. 출혈 축적 +100.
+- 영문 표시: Runeword Myth (Hel-Amn-Nef): 20% on hit taken / ICD 11s - Mythic Thorns (10 Damage to the attacker) + 10% less damage taken while wearing heavy armor; Bleed build-up +100
 
 ### Spirit
 
 - 룬 조합: `Tal-Thul-Ort-Amn`
-- 추천 베이스: None
+- 추천 베이스: 혼합 (무기·방어구)
 - 한글 표시: 룬워드 스피릿 [Tal-Thul-Ort-Amn]: 적중 시 28% 확률로 주문 흡수 확률 +10%p (5초). 최대 마나 +30. 10초마다 발동.
 - 영문 표시: Runeword Spirit (Tal-Thul-Ort-Amn): 28% on Hit / ICD 10s - Absorb Chance +10 points for 5s + Max Magicka +30
 
@@ -124,15 +124,15 @@
 
 - 룬 조합: `Nef-Sol-Ith`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 래디언스 [Nef-Sol-Ith]: 피격 시 15% 확률로 광채(생명 감지 200m, 30초). 40초마다 발동.
-- 영문 표시: Runeword Radiance (Nef-Sol-Ith): 15% on hit taken / ICD 40s - Radiance (Detect Life 200m, 30s)
+- 한글 표시: 룬워드 래디언스 [Nef-Sol-Ith]: 피격 시 15% 확률로 광채(생명 감지 반경 약 60m, 30초). 40초마다 발동.
+- 영문 표시: Runeword Radiance (Nef-Sol-Ith): 15% on hit taken / ICD 40s - Radiance (Detect Life ~60m radius, 30s)
 
 ### Insight
 
 - 룬 조합: `Ral-Tir-Tal-Sol`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 통찰 [Ral-Tir-Tal-Sol]: 적중 시 30% 확률로 마나 회복 강화. 마나 재생 +25. 10초마다 발동.
-- 영문 표시: Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Magicka Recovery boost + Magicka Regen +25
+- 한글 표시: 룬워드 통찰 [Ral-Tir-Tal-Sol]: 적중 시 30% 확률로 마나 회복 강화. 마나 재생 +25%. 10초마다 발동.
+- 영문 표시: Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Magicka Recovery boost + Magicka Regen +25%
 
 ### Rhyme
 
@@ -145,8 +145,8 @@
 
 - 룬 조합: `Shael-Thul-Amn`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 피스 [Shael-Thul-Amn]: 피격 시 10% 확률로 평화의 파동(진정 6초). 16초마다 발동.
-- 영문 표시: Runeword Peace (Shael-Thul-Amn): 10% on hit taken / ICD 16s - Wave of Peace (Calm 6s)
+- 한글 표시: 룬워드 피스 [Shael-Thul-Amn]: 피격 시 10% 확률로 평화의 파동(진정 6초, 레벨 60 이하). 16초마다 발동.
+- 영문 표시: Runeword Peace (Shael-Thul-Amn): 10% on hit taken / ICD 16s - Wave of Peace (Calm 6s, up to level 60)
 
 ### Black
 
@@ -166,8 +166,8 @@
 
 - 룬 조합: `Shael-Io-Tal`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 큐어 [Shael-Io-Tal]: 피격 시 22% 확률로 치유의 각성(회복 마법 +20, 8초). 11초마다 발동.
-- 영문 표시: Runeword Cure (Shael-Io-Tal): 22% on hit taken / ICD 11s - Healing Awakening (Restoration +20, 8s)
+- 한글 표시: 룬워드 큐어 [Shael-Io-Tal]: 피격 시 22% 확률로 정화의 태양(공격자에게 화염 피해 20). 회복 마법 비용 -10%. 11초마다 발동. 화상 2중첩.
+- 영문 표시: Runeword Cure (Shael-Io-Tal): 22% on hit taken / ICD 11s - Cleansing Sun (Fire Damage 20 to the attacker) + Restoration spell cost -10%; Burning +2 stacks
 
 ### Ground
 
@@ -180,8 +180,8 @@
 
 - 룬 조합: `Shael-Io-Thul`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 하스 [Shael-Io-Thul]: 피격 시 22% 확률로 소환의 불씨(소환 마법 +20, 7초). 11초마다 발동.
-- 영문 표시: Runeword Hearth (Shael-Io-Thul): 22% on hit taken / ICD 11s - Conjuration Ember (Conjuration +20, 7s)
+- 한글 표시: 룬워드 하스 [Shael-Io-Thul]: 피격 시 22% 확률로 서리 반격(공격자에게 냉기 피해 10). 냉기 저항 +20. 11초마다 발동. 빙결 축적 +100.
+- 영문 표시: Runeword Hearth (Shael-Io-Thul): 22% on hit taken / ICD 11s - Frost Riposte (Frost Damage 10 to the attacker) + Frost Resist +20; Freeze build-up +100
 
 ### Temper
 
@@ -263,37 +263,37 @@
 ### Unbending Will
 
 - 룬 조합: `Fal-Io-Ith-Eld-El-Hel`
-- 추천 베이스: Weapon
-- 한글 표시: 룬워드 언벤딩 윌 [Fal-Io-Ith-Eld-El-Hel]: 적중 시 22% 확률로 굳건한 의지(방패 스킬 +30, 7초). 9초마다 발동.
-- 영문 표시: Runeword Unbending Will (Fal-Io-Ith-Eld-El-Hel): 22% on hit / ICD 9s - Unbending Will (Block +30, 7s)
+- 추천 베이스: Armor
+- 한글 표시: 룬워드 언벤딩 윌 [Fal-Io-Ith-Eld-El-Hel]: 상태가 2가지 이상 걸린 적을 때리면 굳건한 의지(그 적중 피해의 25% 추가 피해). 막기 +15%. 0.5초마다 발동.
+- 영문 표시: Runeword Unbending Will (Fal-Io-Ith-Eld-El-Hel): on hit vs 2+ statuses / ICD 0.5s - Unbending Will (+25% of the hit's damage) + Block +15%
 
 ### Wealth
 
 - 룬 조합: `Lem-Ko-Tir`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 화술 +15.
-- 영문 표시: Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight +75 and Speechcraft +15
+- 한글 표시: 룬워드 웰스 [Lem-Ko-Tir]: 상시 소지 무게 +75 및 거래 가격 15% 유리.
+- 영문 표시: Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight +75 and prices 15% better
 
 ### Passion
 
 - 룬 조합: `Dol-Ort-Eld-Lem`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 패션 [Dol-Ort-Eld-Lem]: 적중 시 26% 확률로 정열의 환상(환혹 마법 +20, 7초). 7초마다 발동.
-- 영문 표시: Runeword Passion (Dol-Ort-Eld-Lem): 26% on hit / ICD 7s - Passionate Illusion (Illusion +20, 7s)
+- 한글 표시: 룬워드 패션 [Dol-Ort-Eld-Lem]: 적중 시 26% 확률로 정열의 번개(번개 피해 15). 환혹 마법 비용 -10%. 7초마다 발동. 감전 축적 +100.
+- 영문 표시: Runeword Passion (Dol-Ort-Eld-Lem): 26% on hit / ICD 7s - Passion Bolt (Shock Damage 15) + Illusion spell cost -10%; Shock build-up +100
 
 ### Lawbringer
 
 - 룬 조합: `Amn-Lem-Ko`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 로브링어 [Amn-Lem-Ko]: 처치 시 40% 확률로 정의 집행(언데드 퇴치 범위, ICD 6초). 6초마다 발동.
-- 영문 표시: Runeword Lawbringer (Amn-Lem-Ko): 40% on kill / ICD 6s - Justice (Turn Undead AoE, ICD 6s)
+- 한글 표시: 룬워드 로브링어 [Amn-Lem-Ko]: 처치 시 40% 확률로 정의 집행(주변 언데드 퇴치 8초, 레벨 60 이하). 6초마다 발동.
+- 영문 표시: Runeword Lawbringer (Amn-Lem-Ko): 40% on kill / ICD 6s - Justice (Turn Undead AoE 8s, up to level 60)
 
 ### Voice of Reason
 
 - 룬 조합: `Lem-Ko-El-Eld`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 보이스 오브 리즌 [Lem-Ko-El-Eld]: 적중 시 22% 확률로 냉기 저항 분쇄(적 냉기저항 -35, 6초). 7초마다 발동.
-- 영문 표시: Runeword Voice of Reason (Lem-Ko-El-Eld): 22% on hit / ICD 7s - Frost Shred (Frost Resist -35, 6s)
+- 한글 표시: 룬워드 보이스 오브 리즌 [Lem-Ko-El-Eld]: 적중 시 22% 확률로 냉기 저항 분쇄(적 냉기저항 -35, 6초). 7초마다 발동. 노출.
+- 영문 표시: Runeword Voice of Reason (Lem-Ko-El-Eld): 22% on hit / ICD 7s - Frost Shred (Frost Resist -35, 6s); Exposed
 
 ### Treachery
 
@@ -306,8 +306,8 @@
 
 - 룬 조합: `Pul-Ral-Sol`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 인라이트먼트 [Pul-Ral-Sol]: 피격 시 22% 확률로 깨달음(변화마법 +25, 8초). 11초마다 발동.
-- 영문 표시: Runeword Enlightenment (Pul-Ral-Sol): 22% on hit taken / ICD 11s - Enlightenment (Alteration +25, 8s)
+- 한글 표시: 룬워드 인라이트먼트 [Pul-Ral-Sol]: 피격 시 22% 확률로 깨달음의 눈(공격자 마법 저항 -25, 6초). 변화 마법 비용 -10%. 11초마다 발동. 노출.
+- 영문 표시: Runeword Enlightenment (Pul-Ral-Sol): 22% on hit taken / ICD 11s - Eye of Insight (Attacker Magic Resist -25, 6s) + Alteration spell cost -10%; Exposed
 
 ### Wisdom
 
@@ -320,8 +320,8 @@
 
 - 룬 조합: `Shael-Um-Tir`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 크레센트 문 [Shael-Um-Tir]: 적중 시 24% 확률로 전격 저항 분쇄(적 전격저항 -35, 6초). 6초마다 발동.
-- 영문 표시: Runeword Crescent Moon (Shael-Um-Tir): 24% on hit / ICD 6s - Shock Shred (Shock Resist -35, 6s)
+- 한글 표시: 룬워드 크레센트 문 [Shael-Um-Tir]: 적중 시 24% 확률로 전격 저항 분쇄(적 전격저항 -35, 6초). 6초마다 발동. 노출.
+- 영문 표시: Runeword Crescent Moon (Shael-Um-Tir): 24% on hit / ICD 6s - Shock Shred (Shock Resist -35, 6s); Exposed
 
 ### Duress
 
@@ -341,8 +341,8 @@
 
 - 룬 조합: `Shael-Um-Pul-Lum`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 스톤 [Shael-Um-Pul-Lum]: 피격 시 22% 확률로 방어구 분쇄(적 방어도 -50, 6초). 8초마다 발동.
-- 영문 표시: Runeword Stone (Shael-Um-Pul-Lum): 22% on hit taken / ICD 8s - Armor Crush (Target Armor -50, 6s)
+- 한글 표시: 룬워드 스톤 [Shael-Um-Pul-Lum]: 피격 시 22% 확률로 방어구 분쇄(적 방어도 -50, 6초). 8초마다 발동. 노출.
+- 영문 표시: Runeword Stone (Shael-Um-Pul-Lum): 22% on hit taken / ICD 8s - Armor Crush (Target Armor -50, 6s); Exposed
 
 ### Bone
 
@@ -355,8 +355,8 @@
 
 - 룬 조합: `Tal-Dol-Mal`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 베넘 [Tal-Dol-Mal]: 적중 시 24% 확률로 독 저항 분쇄(적 독저항 -40, 6초). 6초마다 발동.
-- 영문 표시: Runeword Venom (Tal-Dol-Mal): 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s)
+- 한글 표시: 룬워드 베넘 [Tal-Dol-Mal]: 적중 시 24% 확률로 독 저항 분쇄(적 독저항 -40, 6초). 6초마다 발동. 노출.
+- 영문 표시: Runeword Venom (Tal-Dol-Mal): 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s); Exposed
 
 ### Prudence
 
@@ -376,8 +376,8 @@
 
 - 룬 조합: `Shael-Pul-Mal-Lum`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 오쓰 [Shael-Pul-Mal-Lum]: 적중 시 24% 확률로 서약의 힘(한손 스킬 +30, 7초). 7초마다 발동.
-- 영문 표시: Runeword Oath (Shael-Pul-Mal-Lum): 24% on hit / ICD 7s - Oath Power (One-Handed +30, 7s)
+- 한글 표시: 룬워드 오쓰 [Shael-Pul-Mal-Lum]: 매 적중 시 서약의 칼날(출혈 2/초, 3초). 한손 무기 +10%. 0.5초마다 발동. 출혈 축적 +15.
+- 영문 표시: Runeword Oath (Shael-Pul-Mal-Lum): on every hit / ICD 0.5s - Sworn Blade (Bleed 2/s, 3s) + One-Handed +10%; Bleed build-up +15
 
 ### Rain
 
@@ -397,8 +397,8 @@
 
 - 룬 조합: `Lem-Ist-Io`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 딜리리엄 [Lem-Ist-Io]: 적중 시 10% 확률로 정신착란(광란 5초). 15초마다 발동.
-- 영문 표시: Runeword Delirium (Lem-Ist-Io): 10% on hit / ICD 15s - Delirium (Frenzy 5s)
+- 한글 표시: 룬워드 딜리리엄 [Lem-Ist-Io]: 적중 시 10% 확률로 정신착란(광란 5초, 레벨 60 이하). 15초마다 발동.
+- 영문 표시: Runeword Delirium (Lem-Ist-Io): 10% on hit / ICD 15s - Delirium (Frenzy 5s, up to level 60)
 
 ### Kingslayer
 
@@ -411,8 +411,8 @@
 
 - 룬 조합: `Hel-Ko-Lem-Gul`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 리프트 [Hel-Ko-Lem-Gul]: 적중 시 8% 확률로 마법 저항 분쇄(적 마저 -30, 6초). 18초마다 발동.
-- 영문 표시: Runeword Rift (Hel-Ko-Lem-Gul): 8% on hit / ICD 18s - Magic Shred (Magic Resist -30, 6s)
+- 한글 표시: 룬워드 리프트 [Hel-Ko-Lem-Gul]: 적중 시 8% 확률로 마법 저항 분쇄(적 마저 -30, 6초). 18초마다 발동. 노출.
+- 영문 표시: Runeword Rift (Hel-Ko-Lem-Gul): 8% on hit / ICD 18s - Magic Shred (Magic Resist -30, 6s); Exposed
 
 ### Principle
 
@@ -439,8 +439,8 @@
 
 - 룬 조합: `Ko-Vex-Pul-Thul`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 참나무의 심장 [Ko-Vex-Pul-Thul]: 적중 시 32% 확률로 비전 균열(적응형 원소 저항 감소). 8초마다 발동.
-- 영문 표시: Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction)
+- 한글 표시: 룬워드 참나무의 심장 [Ko-Vex-Pul-Thul]: 적중 시 32% 확률로 비전 균열(적응형 원소 저항 감소). 8초마다 발동. 노출.
+- 영문 표시: Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction); Exposed
 
 ### Death
 
@@ -453,8 +453,8 @@
 
 - 룬 조합: `Nef-Pul-Vex`
 - 추천 베이스: Armor
-- 한글 표시: 룬워드 플리커링 플레임 [Nef-Pul-Vex]: 매 적중 시 화염 침식(적 화염저항 -25, 6초). 0.5초마다 발동.
-- 영문 표시: Runeword Flickering Flame (Nef-Pul-Vex): 100% on hit / ICD 0.5s - Flame Erosion (Target Fire Resist -25, 6s)
+- 한글 표시: 룬워드 플리커링 플레임 [Nef-Pul-Vex]: 매 적중 시 화염 침식(적 화염저항 -25, 6초). 0.5초마다 발동. 노출.
+- 영문 표시: Runeword Flickering Flame (Nef-Pul-Vex): 100% on hit / ICD 0.5s - Flame Erosion (Target Fire Resist -25, 6s); Exposed
 
 ### Chaos
 
@@ -473,7 +473,7 @@
 ### Fortitude
 
 - 룬 조합: `El-Sol-Dol-Lo`
-- 추천 베이스: None
+- 추천 베이스: 혼합 (무기·방어구)
 - 한글 표시: 룬워드 인내 [El-Sol-Dol-Lo]: 피격 시 25% 확률로 대미지 저항 강화. 방어도 +80. 16초마다 발동.
 - 영문 표시: Runeword Fortitude (El-Sol-Dol-Lo): 25% on Hit Taken / ICD 16s - Damage Resist boost + Armor +80
 
@@ -495,8 +495,8 @@
 
 - 룬 조합: `Sur-El`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 윈드 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적이 주는 피해 -20%, 5초). 4초마다 발동.
-- 영문 표시: Runeword Wind (Sur-El): 22% on hit / ICD 4s - Gale Pressure (Enemy Damage Dealt -20%, 5s)
+- 한글 표시: 룬워드 윈드 [Sur-El]: 적중 시 22% 확률로 질풍 압박(적 공격력 -20%, 5초). 4초마다 발동.
+- 영문 표시: Runeword Wind (Sur-El): 22% on hit / ICD 4s - Gale Pressure (Enemy Attack Damage -20%, 5s)
 
 ### Dragon
 
@@ -530,8 +530,8 @@
 
 - 룬 조합: `Ber-Mal-Ber-Ist`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 무한 [Ber-Mal-Ber-Ist]: 매 적중 시 약점 원소 저항 감소. 0.5초마다 발동. 같은 대상 6초.
-- 영문 표시: Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction
+- 한글 표시: 룬워드 무한 [Ber-Mal-Ber-Ist]: 매 적중 시 약점 원소 저항 감소. 0.5초마다 발동. 같은 대상 6초. 노출.
+- 영문 표시: Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction; Exposed
 
 ### Wrath
 
@@ -544,8 +544,8 @@
 
 - 룬 조합: `Jah-Gul-Eth`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 퓨리 [Jah-Gul-Eth]: 적중 시 24% 확률로 공격력 +15% (6초) 및 기력 30 즉시 회복. 12초마다 발동.
-- 영문 표시: Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 12s - Attack Damage +15% for 6s and restore 30 Stamina
+- 한글 표시: 룬워드 퓨리 [Jah-Gul-Eth]: 적중 시 24% 확률로 격노의 일격(피해 15). 6초마다 발동. 출혈 축적 +100.
+- 영문 표시: Runeword Fury (Jah-Gul-Eth): 24% on hit / ICD 6s - Furious Strike (15 Damage); Bleed build-up +100
 
 ### Enigma
 
@@ -572,8 +572,8 @@
 
 - 룬 조합: `Vex-Lo-Ber-Jah-Ko`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동. 감전 축적 +70.
-- 영문 표시: Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350); Shock build-up +70
+- 한글 표시: 룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 약 5m). 5초마다 발동. 감전 축적 +70.
+- 영문 표시: Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius ~5m); Shock build-up +70
 
 ### Dream
 
@@ -593,8 +593,8 @@
 
 - 룬 조합: `Amn-Shael-Jah-Lo`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 아이스 [Amn-Shael-Jah-Lo]: 매 적중 시 동결 파편(적 냉기저항 -30, 6초). 0.5초마다 발동.
-- 영문 표시: Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0.5s - Frost Shards (Target Frost Resist -30, 6s)
+- 한글 표시: 룬워드 아이스 [Amn-Shael-Jah-Lo]: 매 적중 시 동결 파편(적 냉기저항 -30, 6초). 0.5초마다 발동. 노출.
+- 영문 표시: Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0.5s - Frost Shards (Target Frost Resist -30, 6s); Exposed
 
 ### Last Wish
 
@@ -606,7 +606,7 @@
 ### Phoenix
 
 - 룬 조합: `Vex-Vex-Lo-Jah`
-- 추천 베이스: None
+- 추천 베이스: 혼합 (무기·방어구)
 - 한글 표시: 룬워드 피닉스 [Vex-Vex-Lo-Jah]: 처치 시 60% 확률로 체력+마나 회복. 2초마다 발동.
 - 영문 표시: Runeword Phoenix (Vex-Vex-Lo-Jah): 60% on Kill / ICD 2s - Restore HP+MP
 
@@ -628,8 +628,8 @@
 
 - 룬 조합: `Cham-Sur-Io-Lo`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동. 빙결 축적 +60.
-- 영문 표시: Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250); Freeze build-up +60
+- 한글 표시: 룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 약 3.5m). 4초마다 발동. 빙결 축적 +60.
+- 영문 표시: Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius ~3.5m); Freeze build-up +60
 
 ### Plague
 
@@ -656,8 +656,8 @@
 
 - 룬 조합: `Cham-Shael-Gul-Thul-Ith`
 - 추천 베이스: Weapon
-- 한글 표시: 룬워드 미스트 [Cham-Shael-Gul-Thul-Ith]: 적중 시 30% 확률로 마력 붕괴(마나 재생 -100%·마법저항 -30, 6초, 마나 75 즉시 소진). 6초마다 발동.
-- 영문 표시: Runeword Mist (Cham-Shael-Gul-Thul-Ith): 30% on hit / ICD 6s - Arcane Collapse (Magicka Regen -100% and Magic Resist -30 for 6s, instant Magicka drain 75)
+- 한글 표시: 룬워드 미스트 [Cham-Shael-Gul-Thul-Ith]: 적중 시 30% 확률로 마력 붕괴(마나 재생 -100%·마법저항 -30, 6초, 마나 75 즉시 소진). 6초마다 발동. 노출.
+- 영문 표시: Runeword Mist (Cham-Shael-Gul-Thul-Ith): 30% on hit / ICD 6s - Arcane Collapse (Magicka Regen -100% and Magic Resist -30 for 6s, instant Magicka drain 75); Exposed
 
 ### Breath of the Dying
 

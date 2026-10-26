@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "CalamityAffixes/CorpseHitFilter.h"
 #include "CalamityAffixes/EchoStrikeState.h"
 #include "CalamityAffixes/NonHostileFirstHitGate.h"
 #include "CalamityAffixes/PerTargetCooldownStore.h"
@@ -21,6 +22,8 @@ namespace CalamityAffixes
 		std::uint32_t aggressor{ 0 };
 		std::uint32_t target{ 0 };
 		std::uint32_t source{ 0 };
+		// See DuplicateHitKey::content.
+		std::uint64_t content{ 0 };
 	};
 
 	struct LowHealthTriggerKey
@@ -50,6 +53,14 @@ namespace CalamityAffixes
 		std::chrono::steady_clock::time_point rateWindowStartAt{};
 		std::uint32_t chainDepth{ 0u };
 		std::uint32_t explosionsInWindow{ 0u };
+	};
+
+	// Last HitData content the TESHitEvent fallback processed for one
+	// (aggressor, target) pair; see IsReusedFallbackHitContent.
+	struct FallbackHitContentRecord
+	{
+		std::uint64_t content{ 0u };
+		std::chrono::steady_clock::time_point at{};
 	};
 
 	struct CombatRuntimeState
@@ -88,6 +99,10 @@ namespace CalamityAffixes
 		std::unordered_map<std::uint32_t, float> lowHealthLastObservedPct{};
 		CorpseExplosionRuntimeState corpseExplosionState{};
 		std::unordered_map<std::uint32_t, std::chrono::steady_clock::time_point> corpseExplosionSeenCorpses{};
+		// Corpses whose kill already rolled for a corpse explosion. The hook's
+		// immediate path and the later TESDeathEvent both reach one kill; only
+		// the first evaluates, whatever it rolled (same 60 s TTL as seenCorpses).
+		std::unordered_map<std::uint32_t, std::chrono::steady_clock::time_point> corpseExplosionEvaluatedCorpses{};
 		CorpseExplosionRuntimeState summonCorpseExplosionState{};
 		std::unordered_map<std::uint32_t, std::chrono::steady_clock::time_point> summonCorpseExplosionSeenCorpses{};
 		EchoStrikeRuntimeState echoStrike{};
@@ -95,15 +110,30 @@ namespace CalamityAffixes
 		// Transient like the echo queue: cleared on load, revert and reload.
 		StatusLedger statusLedger{};
 		DoomQueue doomQueue{};
+		// Doom of targets killed before their burst, kept for Contagion.
+		DyingDoomLedger dyingDoom{};
 		// Freeze, Bleed and Shock meters and Burning stacks per enemy.
 		StatusMeters statusMeters{};
 		std::atomic_bool hasPendingDoom{ false };
+		CorpseHitFilter fallbackCorpseHits{};
+		// When each recent death was observed (TESDeathEvent, any killer),
+		// steady-clock ms. Feeds ClassifyDeadTargetHit on the fallback path.
+		std::unordered_map<std::uint32_t, std::int64_t> recentDeathObservedMs{};
+		// Archmage: last evaluation per (target << 32 | source spell), so a
+		// concentration beam or a multi-event projectile is one spell hit.
+		std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> archmageSpellHitAt{};
+		// Keyed by (aggressor << 32 | target).
+		std::unordered_map<std::uint64_t, FallbackHitContentRecord> fallbackOutgoingHitContent{};
+		std::unordered_map<std::uint64_t, FallbackHitContentRecord> fallbackIncomingHitContent{};
 
 		void ResetStatusState() noexcept
 		{
 			statusLedger.Clear();
 			doomQueue.Clear();
+			dyingDoom.Clear();
 			statusMeters.Clear();
+			fallbackCorpseHits.Clear();
+			recentDeathObservedMs.clear();
 			hasPendingDoom.store(false, std::memory_order_release);
 		}
 
@@ -138,6 +168,9 @@ namespace CalamityAffixes
 			lowHealthTriggerConsumed.clear();
 			lowHealthLastObservedPct.clear();
 			echoStrike.Reset();
+			archmageSpellHitAt.clear();
+			fallbackOutgoingHitContent.clear();
+			fallbackIncomingHitContent.clear();
 			ResetStatusState();
 		}
 
@@ -145,6 +178,7 @@ namespace CalamityAffixes
 		{
 			corpseExplosionState = {};
 			corpseExplosionSeenCorpses.clear();
+			corpseExplosionEvaluatedCorpses.clear();
 			summonCorpseExplosionState = {};
 			summonCorpseExplosionSeenCorpses.clear();
 		}

@@ -60,6 +60,56 @@ public sealed class RepoSpecRegressionTests
         new(0x000B2Au, "SPEL", "CAFF_SPEL_STATUS_BURNING"),
     ];
 
+    // Stage 4 (v2.3.0): the skill bonus the redesigned runewords keep as a
+    // passive. Edge reuses its own record; Fury has no passive.
+    private static readonly AllocationRecord[] ExpectedRunewordPassiveTail =
+    [
+        new(0x000B2Bu, "MGEF", "CAFF_MGEF_RW_LEAF_PASSIVE"),
+        new(0x000B2Cu, "SPEL", "CAFF_SPEL_RW_LEAF_PASSIVE"),
+        new(0x000B2Du, "MGEF", "CAFF_MGEF_RW_STRENGTH_PASSIVE"),
+        new(0x000B2Eu, "SPEL", "CAFF_SPEL_RW_STRENGTH_PASSIVE"),
+        new(0x000B2Fu, "MGEF", "CAFF_MGEF_RW_OATH_PASSIVE"),
+        new(0x000B30u, "SPEL", "CAFF_SPEL_RW_OATH_PASSIVE"),
+        new(0x000B31u, "MGEF", "CAFF_MGEF_RW_PASSION_PASSIVE"),
+        new(0x000B32u, "SPEL", "CAFF_SPEL_RW_PASSION_PASSIVE"),
+        new(0x000B33u, "MGEF", "CAFF_MGEF_RW_UNBENDING_WILL_PASSIVE"),
+        new(0x000B34u, "SPEL", "CAFF_SPEL_RW_UNBENDING_WILL_PASSIVE"),
+        new(0x000B35u, "MGEF", "CAFF_MGEF_RW_CURE_PASSIVE"),
+        new(0x000B36u, "SPEL", "CAFF_SPEL_RW_CURE_PASSIVE"),
+        new(0x000B37u, "MGEF", "CAFF_MGEF_RW_HEARTH_PASSIVE"),
+        new(0x000B38u, "SPEL", "CAFF_SPEL_RW_HEARTH_PASSIVE"),
+        new(0x000B39u, "MGEF", "CAFF_MGEF_RW_ENLIGHTENMENT_PASSIVE"),
+        new(0x000B3Au, "SPEL", "CAFF_SPEL_RW_ENLIGHTENMENT_PASSIVE"),
+        new(0x000B3Bu, "MGEF", "CAFF_MGEF_RW_MYTH_PASSIVE"),
+        new(0x000B3Cu, "SPEL", "CAFF_SPEL_RW_MYTH_PASSIVE"),
+    ];
+
+    // v2.3.0 full-review fixes: elemental hit-shader carriers, Mist's own magicka drain,
+    // Chaos Rune's trap-only Sunder/Fragile (no longer shared with Exposed procs), and
+    // Obsession's own magic damage spell (it showed the Chaos record names).
+    private static readonly AllocationRecord[] ExpectedReviewFixTail =
+    [
+        new(0x000B3Du, "MGEF", "CAFF_MGEF_DMG_FIRE_DYNAMIC_HITFX"),
+        new(0x000B3Eu, "MGEF", "CAFF_MGEF_DMG_FROST_DYNAMIC_HITFX"),
+        new(0x000B3Fu, "MGEF", "CAFF_MGEF_DMG_SHOCK_DYNAMIC_HITFX"),
+        new(0x000B40u, "MGEF", "CAFF_MGEF_RW_MIST_MANA_DRAIN"),
+        new(0x000B41u, "MGEF", "CAFF_MGEF_CHAOS_RUNE_TRAP_SUNDER"),
+        new(0x000B42u, "SPEL", "CAFF_SPEL_CHAOS_RUNE_TRAP_SUNDER"),
+        new(0x000B43u, "MGEF", "CAFF_MGEF_CHAOS_RUNE_TRAP_FRAGILE"),
+        new(0x000B44u, "SPEL", "CAFF_SPEL_CHAOS_RUNE_TRAP_FRAGILE"),
+        new(0x000B45u, "MGEF", "CAFF_MGEF_RW_OBSESSION_ARCANE"),
+        new(0x000B46u, "SPEL", "CAFF_SPEL_RW_OBSESSION_ARCANE"),
+        // Cast-on-crit riders: the slow/stagger/perk effects split off the
+        // hit-scaled CoC spells so the damage override no longer reaches them.
+        new(0x000B47u, "SPEL", "CAFF_SPEL_COC_FIREBOLT_RIDER"),
+        new(0x000B48u, "SPEL", "CAFF_SPEL_COC_ICE_SPIKE_RIDER"),
+        new(0x000B49u, "SPEL", "CAFF_SPEL_COC_LIGHTNING_BOLT_RIDER"),
+        new(0x000B4Au, "SPEL", "CAFF_SPEL_COC_THUNDERBOLT_RIDER"),
+        new(0x000B4Bu, "SPEL", "CAFF_SPEL_COC_ICY_SPEAR_RIDER"),
+        new(0x000B4Cu, "SPEL", "CAFF_SPEL_COC_CHAIN_LIGHTNING_RIDER"),
+        new(0x000B4Du, "SPEL", "CAFF_SPEL_COC_ICE_STORM_RIDER"),
+    ];
+
     [Fact]
     public void RepoSpec_GeneratorBuildsWithoutForwardMagicEffectReferences()
     {
@@ -111,8 +161,10 @@ public sealed class RepoSpecRegressionTests
 
         foreach (var effect in hostileEffects)
         {
-            Assert.Equal(2, effect.Conditions.Count);
+            // Extra MGEF conditions (vanilla target filters) come after the hostile pair.
+            Assert.Equal(2 + ExtraConditionCount(effect.EditorID), effect.Conditions.Count);
             var condition = Assert.IsAssignableFrom<IConditionFloatGetter>(effect.Conditions[0]);
+            Assert.False(condition.Flags.HasFlag(Condition.Flag.OR));
             Assert.Equal(CompareOperator.EqualTo, condition.CompareOperator);
             Assert.Equal(1.0f, condition.ComparisonValue);
 
@@ -141,8 +193,10 @@ public sealed class RepoSpecRegressionTests
 
         foreach (var effect in hostileEffects)
         {
-            Assert.Equal(2, effect.Conditions.Count);
+            // Extra MGEF conditions (vanilla target filters) come after the hostile pair.
+            Assert.Equal(2 + ExtraConditionCount(effect.EditorID), effect.Conditions.Count);
             var condition = Assert.IsAssignableFrom<IConditionFloatGetter>(effect.Conditions[0]);
+            Assert.False(condition.Flags.HasFlag(Condition.Flag.OR));
             Assert.Equal(CompareOperator.EqualTo, condition.CompareOperator);
             Assert.Equal(1.0f, condition.ComparisonValue);
 
@@ -155,6 +209,99 @@ public sealed class RepoSpecRegressionTests
             var teammateData = Assert.IsAssignableFrom<IGetPlayerTeammateConditionDataGetter>(teammateCondition.Data);
             Assert.Equal(Condition.RunOnType.Subject, teammateData.RunOnType);
         }
+    }
+
+    private static int ExtraConditionCount(string? editorId) => editorId switch
+    {
+        "CAFF_MGEF_RW_LAWBRINGER_HEAL" => 4,
+        "CAFF_MGEF_RW_NADIR_WARD" => 6,
+        "CAFF_MGEF_RW_PEACE_BARRIER" => 6,
+        "CAFF_MGEF_RW_DELIRIUM_CONFUSE" => 7,
+        _ => 0,
+    };
+
+    [Fact]
+    public void GeneratedDataEsp_InfluenceRunewordsSkipVanillaImmuneTargets()
+    {
+        var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
+        using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
+        var skyrim = ModKey.FromNameAndExtension("Skyrim.esm");
+        // Vanilla InfluenceConfDown/AggDown/AggUp + EnchInfluenceConfDownFFContactHigh:
+        // not undead/Daedra/dragon/Dwarven keyword, not IsUndead, not commanded; Frenzy also not a child.
+        var immuneKeywords = new uint[] { 0x013796, 0x013797, 0x035D59, 0x01397A };
+
+        foreach (var (editorId, expectChild) in new[]
+                 {
+                     ("CAFF_MGEF_RW_NADIR_WARD", false),
+                     ("CAFF_MGEF_RW_PEACE_BARRIER", false),
+                     ("CAFF_MGEF_RW_DELIRIUM_CONFUSE", true),
+                 })
+        {
+            var effect = mod.MagicEffects.Single(record => record.EditorID == editorId);
+            var extra = effect.Conditions.Skip(2).Cast<IConditionFloatGetter>().ToArray();
+            Assert.All(extra, condition =>
+            {
+                Assert.Equal(CompareOperator.EqualTo, condition.CompareOperator);
+                Assert.Equal(0.0f, condition.ComparisonValue);
+                Assert.False(condition.Flags.HasFlag(Condition.Flag.OR));
+                Assert.Equal(Condition.RunOnType.Subject, condition.Data.RunOnType);
+            });
+
+            var index = 0;
+            if (expectChild)
+            {
+                Assert.IsAssignableFrom<IIsChildConditionDataGetter>(extra[index++].Data);
+            }
+            Assert.IsAssignableFrom<IIsCommandedActorConditionDataGetter>(extra[index++].Data);
+            foreach (var keyword in immuneKeywords)
+            {
+                Assert.Equal(new FormKey(skyrim, keyword),
+                    Assert.IsAssignableFrom<IHasKeywordConditionDataGetter>(extra[index++].Data).Keyword.Link.FormKeyNullable);
+            }
+            Assert.IsAssignableFrom<IIsUndeadConditionDataGetter>(extra[index++].Data);
+            Assert.Equal(extra.Length, index);
+        }
+    }
+
+    [Fact]
+    public void GeneratedDataEsp_LawbringerTurnsOnlyUndeadAndRadianceDetectsLikeVanilla()
+    {
+        var pluginPath = Path.Combine(FindRepoRoot(), "Data", "CalamityAffixes.esp");
+        using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
+        var skyrim = ModKey.FromNameAndExtension("Skyrim.esm");
+
+        // Vanilla EnchTurnUndeadFFContact: not Daedra AND not UndeadDragonRace AND
+        // (undead keyword OR IsUndead).
+        var lawbringer = mod.MagicEffects.Single(effect => effect.EditorID == "CAFF_MGEF_RW_LAWBRINGER_HEAL");
+        Assert.True(lawbringer.Flags.HasFlag(MagicEffect.Flag.Recover));
+        var daedra = Assert.IsAssignableFrom<IConditionFloatGetter>(lawbringer.Conditions[2]);
+        Assert.Equal(0.0f, daedra.ComparisonValue);
+        Assert.False(daedra.Flags.HasFlag(Condition.Flag.OR));
+        Assert.Equal(new FormKey(skyrim, 0x013797),
+            Assert.IsAssignableFrom<IHasKeywordConditionDataGetter>(daedra.Data).Keyword.Link.FormKeyNullable);
+        var undeadDragon = Assert.IsAssignableFrom<IConditionFloatGetter>(lawbringer.Conditions[3]);
+        Assert.Equal(0.0f, undeadDragon.ComparisonValue);
+        Assert.False(undeadDragon.Flags.HasFlag(Condition.Flag.OR));
+        Assert.Equal(new FormKey(skyrim, 0x1052A3),
+            Assert.IsAssignableFrom<IGetIsRaceConditionDataGetter>(undeadDragon.Data).Race.Link.FormKeyNullable);
+        var undeadKeyword = Assert.IsAssignableFrom<IConditionFloatGetter>(lawbringer.Conditions[4]);
+        Assert.Equal(1.0f, undeadKeyword.ComparisonValue);
+        Assert.True(undeadKeyword.Flags.HasFlag(Condition.Flag.OR));
+        Assert.Equal(new FormKey(skyrim, 0x013796),
+            Assert.IsAssignableFrom<IHasKeywordConditionDataGetter>(undeadKeyword.Data).Keyword.Link.FormKeyNullable);
+        var isUndead = Assert.IsAssignableFrom<IConditionFloatGetter>(lawbringer.Conditions[5]);
+        Assert.Equal(1.0f, isUndead.ComparisonValue);
+        Assert.IsAssignableFrom<IIsUndeadConditionDataGetter>(isUndead.Data);
+
+        // Vanilla DetectLife: no actor value, LifeDetectedEnemy shader kept for the duration.
+        var radiance = mod.MagicEffects.Single(effect => effect.EditorID == "CAFF_MGEF_RW_RADIANCE_GUARD");
+        Assert.Equal(MagicEffectArchetype.TypeEnum.DetectLife, radiance.Archetype.Type);
+        Assert.Equal(ActorValue.None, radiance.Archetype.ActorValue);
+        Assert.Equal(new FormKey(skyrim, 0x0DC209), radiance.HitShader.FormKey);
+        Assert.True(radiance.Flags.HasFlag(MagicEffect.Flag.FXPersist));
+        Assert.Equal(5, radiance.Conditions.Count);
+        var radianceSpell = mod.Spells.Single(spell => spell.EditorID == "CAFF_SPEL_RW_RADIANCE_GUARD");
+        Assert.Equal(200, (int)radianceSpell.Effects.Single().Data!.Area);
     }
 
     [Fact]
@@ -220,11 +367,11 @@ public sealed class RepoSpecRegressionTests
         AssertSpellEffect(Assert.Single(smokeSpell.Effects), "CAFF_MGEF_RW_SMOKE_SCREEN", 30.0f, 5);
 
         var furyEffect = MagicEffectById("CAFF_MGEF_RW_FURY_LIFESTEAL");
-        AssertActorValue(furyEffect, ActorValue.AttackDamageMult);
+        AssertActorValue(furyEffect, ActorValue.Health);
+        Assert.True(furyEffect.Flags.HasFlag(MagicEffect.Flag.Hostile));
         var furySpell = SpellById("CAFF_SPEL_RW_FURY_LIFESTEAL");
-        Assert.Equal(2, furySpell.Effects.Count);
-        AssertSpellEffect(furySpell.Effects[0], "CAFF_MGEF_RW_FURY_LIFESTEAL", 0.15f, 6);
-        AssertSpellEffect(furySpell.Effects[1], "CAFF_MGEF_RW_FURY_RESTORE_STAMINA", 30.0f, 0);
+        Assert.Equal(TargetType.TargetActor, furySpell.TargetType);
+        AssertSpellEffect(Assert.Single(furySpell.Effects), "CAFF_MGEF_RW_FURY_LIFESTEAL", 15.0f, 0);
 
         var wealthOldEffect = MagicEffectById("CAFF_MGEF_RW_WEALTH_VIGOR");
         AssertActorValue(wealthOldEffect, ActorValue.CarryWeight);
@@ -291,11 +438,13 @@ public sealed class RepoSpecRegressionTests
         var mod = KeywordPluginBuilder.Build(spec);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(811, actual.Length);
-        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^28]);
-        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^27]);
-        Assert.Equal(ExpectedShadowBoxerTail, actual.SkipLast(ExpectedStatusTail.Length).TakeLast(ExpectedShadowBoxerTail.Length));
-        Assert.Equal(ExpectedStatusTail, actual.TakeLast(ExpectedStatusTail.Length));
+        Assert.Equal(846, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^63]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^62]);
+        Assert.Equal(ExpectedShadowBoxerTail, actual.SkipLast(ExpectedStatusTail.Length + ExpectedRunewordPassiveTail.Length + ExpectedReviewFixTail.Length).TakeLast(ExpectedShadowBoxerTail.Length));
+        Assert.Equal(ExpectedStatusTail, actual.SkipLast(ExpectedRunewordPassiveTail.Length + ExpectedReviewFixTail.Length).TakeLast(ExpectedStatusTail.Length));
+        Assert.Equal(ExpectedRunewordPassiveTail, actual.SkipLast(ExpectedReviewFixTail.Length).TakeLast(ExpectedRunewordPassiveTail.Length));
+        Assert.Equal(ExpectedReviewFixTail, actual.TakeLast(ExpectedReviewFixTail.Length));
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -320,7 +469,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B2Bu, ((IModGetter)mod).NextFormID);
+        Assert.Equal(0x000B4Eu, ((IModGetter)mod).NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -346,12 +495,12 @@ public sealed class RepoSpecRegressionTests
             using var reimported = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
             var reimportedAllocation = AllocationSignature(reimported);
 
-            Assert.Equal(811, generatedAllocation.Length);
+            Assert.Equal(846, generatedAllocation.Length);
             Assert.Equal(generatedAllocation, reimportedAllocation);
             Assert.Equal(fixture.Records, reimportedAllocation.Take(fixture.Records.Length));
-            Assert.Equal(generatedAllocation.TakeLast(76), reimportedAllocation.TakeLast(76));
+            Assert.Equal(generatedAllocation.TakeLast(104), reimportedAllocation.TakeLast(104));
             Assert.True(reimported.ModHeader.Flags.HasFlag(SkyrimModHeader.HeaderFlag.Small));
-            Assert.Equal(0x000B2Bu, reimported.NextFormID);
+            Assert.Equal(0x000B4Eu, reimported.NextFormID);
             AssertWorldMarkers(reimported);
         }
         finally
@@ -369,11 +518,13 @@ public sealed class RepoSpecRegressionTests
         using var mod = SkyrimMod.CreateFromBinaryOverlay(pluginPath, SkyrimRelease.SkyrimSE);
         var actual = AllocationSignature(mod);
 
-        Assert.Equal(811, actual.Length);
-        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^28]);
-        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^27]);
-        Assert.Equal(ExpectedShadowBoxerTail, actual.SkipLast(ExpectedStatusTail.Length).TakeLast(ExpectedShadowBoxerTail.Length));
-        Assert.Equal(ExpectedStatusTail, actual.TakeLast(ExpectedStatusTail.Length));
+        Assert.Equal(846, actual.Length);
+        Assert.Equal(new AllocationRecord(0x000B0Fu, "MISC", "CAFF_Misc_IdentifyScroll"), actual[^63]);
+        Assert.Equal(new AllocationRecord(0x000B10u, "MISC", "CAFF_Misc_ScouringOrb"), actual[^62]);
+        Assert.Equal(ExpectedShadowBoxerTail, actual.SkipLast(ExpectedStatusTail.Length + ExpectedRunewordPassiveTail.Length + ExpectedReviewFixTail.Length).TakeLast(ExpectedShadowBoxerTail.Length));
+        Assert.Equal(ExpectedStatusTail, actual.SkipLast(ExpectedRunewordPassiveTail.Length + ExpectedReviewFixTail.Length).TakeLast(ExpectedStatusTail.Length));
+        Assert.Equal(ExpectedRunewordPassiveTail, actual.SkipLast(ExpectedReviewFixTail.Length).TakeLast(ExpectedRunewordPassiveTail.Length));
+        Assert.Equal(ExpectedReviewFixTail, actual.TakeLast(ExpectedReviewFixTail.Length));
         Assert.Equal(fixture.Records, actual.Take(fixture.Records.Length));
         Assert.Equal(
             new[]
@@ -398,7 +549,7 @@ public sealed class RepoSpecRegressionTests
         Assert.Equal(
             ExpectedWorldMarkers.Select(expected => new AllocationRecord(expected.FormId, "MSTT", expected.EditorId)),
             actual.Where(record => record.FormId is >= 0x000B00u and <= 0x000B05u));
-        Assert.Equal(0x000B2Bu, mod.NextFormID);
+        Assert.Equal(0x000B4Eu, mod.NextFormID);
         AssertWorldMarkers(mod);
         Assert.Equal(actual.Length, actual.Select(record => record.FormId).Distinct().Count());
         Assert.Equal(
@@ -713,9 +864,10 @@ public sealed class RepoSpecRegressionTests
     {
         var hooksSource = ReadHooksRuntimeSource();
         // OnHealthDamage receives the pre-conversion original damage so the stale
-        // guard's expectedDealt comparison is like-for-like.
+        // guard's expectedDealt comparison is like-for-like (later arguments, such as
+        // the adjusted damage, may follow).
         Assert.Contains(
-            "bridge->OnHealthDamage(a_target, a_attacker, hitData, a_originalDamage);",
+            "bridge->OnHealthDamage(a_target, a_attacker, hitData, a_originalDamage",
             hooksSource,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
@@ -1028,7 +1180,7 @@ public sealed class RepoSpecRegressionTests
 
         var obsessionAction = Action(Affix("runeword_obsession_final"), "Obsession");
         StringValue(obsessionAction, "type", "CastSpell", "Obsession action");
-        StringValue(obsessionAction, "spellEditorId", "CAFF_SPEL_RW_CHAOS_BLEED", "Obsession action");
+        StringValue(obsessionAction, "spellEditorId", "CAFF_SPEL_RW_OBSESSION_ARCANE", "Obsession action");
         StringValue(obsessionAction, "applyTo", "Target", "Obsession action");
         NumberValue(obsessionAction, "magnitudeOverride", 75.0, "Obsession action");
         StringValue(obsessionAction, "passiveSpellEditorId", "CAFF_SPEL_RW_OBSESSION_PASSIVE", "Obsession action");
@@ -1153,6 +1305,17 @@ public sealed class RepoSpecRegressionTests
                 foreach (var spell in many.EnumerateArray())
                 {
                     spells.Add(spell.GetProperty("editorId").GetString()!, spell.Clone());
+                }
+            }
+        }
+        using (var rootDocument = JsonDocument.Parse(File.ReadAllText(Path.Combine(repoRoot, "affixes", "modules", "spec.root.json"))))
+        {
+            foreach (var record in rootDocument.RootElement.GetProperty("keywords").GetProperty("appendedRecords").EnumerateArray())
+            {
+                if (record.GetProperty("type").GetString() == "Spell")
+                {
+                    var spell = record.GetProperty("spell");
+                    spells.TryAdd(spell.GetProperty("editorId").GetString()!, spell.Clone());
                 }
             }
         }
@@ -1304,10 +1467,10 @@ public sealed class RepoSpecRegressionTests
         NumberValue(Action("runeword_plague_final"), "selectionPriority", 20.0, "Plague action");
         AssertRuntime("runeword_pride_final", "Hit", 30, 4, "CastSpell", "CAFF_SPEL_RW_PRIDE_CHILL", "Target", false);
         AssertRuntime("runeword_mosaic_final", "Hit", 26, 5, "CastSpell", "CAFF_SPEL_RW_MOSAIC_PRISM", "Target", false);
-        AssertRuntime("runeword_obsession_final", "Hit", 34, 5, "CastSpell", "CAFF_SPEL_RW_CHAOS_BLEED", "Target", false);
+        AssertRuntime("runeword_obsession_final", "Hit", 34, 5, "CastSpell", "CAFF_SPEL_RW_OBSESSION_ARCANE", "Target", false);
 
         AssertSpell("Destruction", "CAFF_SPEL_RW_DESTRUCTION_BLEED",
-            ("CAFF_MGEF_RW_DESTRUCTION_BLEED", 10, 5, 350));
+            ("CAFF_MGEF_RW_DESTRUCTION_BLEED", 10, 5, 16));
         AssertSpell("Hand of Justice", "CAFF_SPEL_RW_HOJ_LIFESTEAL",
             ("CAFF_MGEF_RW_HOJ_LIFESTEAL", 40, 0, 0));
         AssertSpell("Dragon", "CAFF_SPEL_RW_DRAGON_SCALE",
@@ -1317,7 +1480,7 @@ public sealed class RepoSpecRegressionTests
             ("CAFF_MGEF_RW_DRAGON_RESIST_SHOCK", 25, 8, 0));
         AssertSpell("Mist", "CAFF_SPEL_RW_MIST_FOG",
             ("CAFF_MGEF_RW_MIST_FOG", 100, 6, 0),
-            ("CAFF_MGEF_HIT_SHOCK_OVERLOAD", 75, 0, 0),
+            ("CAFF_MGEF_RW_MIST_MANA_DRAIN", 75, 0, 0),
             ("CAFF_MGEF_RW_RIFT_SPARK", 30, 6, 0));
         AssertSpell("Famine", "CAFF_SPEL_RW_FAMINE_DRAIN",
             ("CAFF_MGEF_TRAP_DRAGONTEETH_DRAIN_STAMINA", 30, 5, 0),
@@ -1339,13 +1502,13 @@ public sealed class RepoSpecRegressionTests
         AssertSpell("Plague", "CAFF_SPEL_RW_PLAGUE_CLOUD",
             ("CAFF_MGEF_RW_PLAGUE_CLOUD", 1, 1, 0));
         AssertSpell("Pride", "CAFF_SPEL_RW_PRIDE_CHILL",
-            ("CAFF_MGEF_RW_PRIDE_CHILL", 30, 0, 250));
+            ("CAFF_MGEF_RW_PRIDE_CHILL", 30, 0, 11));
         AssertSpell("Mosaic", "CAFF_SPEL_RW_MOSAIC_PRISM",
             ("CAFF_MGEF_DMG_FIRE_DYNAMIC", 8, 0, 0),
             ("CAFF_MGEF_DMG_FROST_DYNAMIC", 8, 0, 0),
             ("CAFF_MGEF_DMG_SHOCK_DYNAMIC", 8, 0, 0));
-        AssertSpell("Obsession", "CAFF_SPEL_RW_CHAOS_BLEED",
-            ("CAFF_MGEF_RW_CHAOS_BLEED", 1, 0, 0));
+        AssertSpell("Obsession", "CAFF_SPEL_RW_OBSESSION_ARCANE",
+            ("CAFF_MGEF_RW_OBSESSION_ARCANE", 1, 0, 0));
 
         AssertScaling("runeword_destruction_final", "HitPhysicalDealt", 0.04, 0, 40, true);
         AssertScaling("runeword_hand_of_justice_final", "HitTotalDealt", 0.18, 40, 250, true);
@@ -1354,8 +1517,8 @@ public sealed class RepoSpecRegressionTests
         AssertScaling("runeword_obsession_final", "HitTotalDealt", 0.18, 75, 300, false);
         AssertUiText(
             "runeword_destruction_final",
-            "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 350). 5초마다 발동. 감전 축적 +70.",
-            "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350); Shock build-up +70");
+            "룬워드 파괴 [Vex-Lo-Ber-Jah-Ko]: 적중 시 30% 확률로 전격 폭풍(물리 적중 피해의 4%, 전격 피해 10~40/초, 5초, 반경 약 5m). 5초마다 발동. 감전 축적 +70.",
+            "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius ~5m); Shock build-up +70");
         AssertUiText(
             "runeword_last_wish_final",
             "룬워드 라스트 위시 [Jah-Mal-Jah-Sur-Jah-Ber]: 체력 35% 이하일 때 체력 250 즉시 회복, 방어도 +250·마법저항 +50(12초). 45초마다 발동.",
@@ -1366,8 +1529,8 @@ public sealed class RepoSpecRegressionTests
             "Runeword Plague (Cham-Shael-Um): 40% on Kill / ICD 4s - Plague Corpse Chain Explosion (12 + 3% Corpse Max Health, Radius 450, up to 12 targets, max chain depth 2)");
         AssertUiText(
             "runeword_pride_final",
-            "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 250). 4초마다 발동. 빙결 축적 +60.",
-            "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250); Freeze build-up +60");
+            "룬워드 프라이드 [Cham-Sur-Io-Lo]: 적중 시 30% 확률로 냉기 충격파(물리 적중 피해의 16%, 냉기 피해 30~200, 반경 약 3.5m). 4초마다 발동. 빙결 축적 +60.",
+            "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius ~3.5m); Freeze build-up +60");
         foreach (var id in new[]
                  {
                      "runeword_dragon_final", "runeword_mist_final", "runeword_famine_final",
@@ -1407,19 +1570,19 @@ public sealed class RepoSpecRegressionTests
         var summary = File.ReadAllText(summaryPath);
         (string Id, string Key, string Text, string? OldKey)[] uiContracts =
         {
-            ("rw_destruction", "signature_destruction", "적중 시 반경 350 전격 폭풍: 물리 피해의 4%, 초당 10~40(5초)", "shock_dot"),
+            ("rw_destruction", "signature_destruction", "반경 약 5m 전격 폭풍: 물리 피해의 4%, 초당 10~40(5초)", "shock_dot"),
             ("rw_hand_of_justice", "signature_hand_of_justice", "화염 심판으로 체력 40~250 흡수(적중 피해 18%)", "self_judgment"),
-            ("rw_dragon", "signature_dragon", "피격 시 방어도 +120·화염/냉기/전격 저항 +25(8초)", "self_light_armor"),
+            ("rw_dragon", "signature_dragon", "방어도 +120·화염/냉기/전격 저항 +25(8초)", "self_light_armor"),
             ("rw_mist", "signature_mist", "마나 재생 -100%·마법 저항 -30(6초), 마나 75 즉시 소진", "debuff_magicka_suppress"),
             ("rw_famine", "signature_famine", "기력 -30/초(5초), 공격력 -20%(6초)", "debuff_stamina_drain"),
             ("rw_beast", "signature_beast", "공격력 +40%·방어도 +150(10초)", "long_cd_beast_rage"),
-            ("rw_eternity", "signature_eternity", "피격 시 방어도 +300·피해 반사 +25%(6초)", "long_cd_bulwark"),
-            ("rw_enigma", "signature_enigma", "피격 시 투명화·이동 속도 +45%(4초), 상시 이동 속도 +10%", null),
-            ("rw_last_wish", "signature_last_wish", "체력 35% 이하에서 체력 250 회복·방어도 +250·마법 저항 +50(12초)", "lowhealth_fade"),
+            ("rw_eternity", "signature_eternity", "방어도 +300·피해 반사 +25%(6초)", "long_cd_bulwark"),
+            ("rw_enigma", "signature_enigma", "투명화·이동 속도 +45%(4초), 상시 이동 속도 +10%", null),
+            ("rw_last_wish", "signature_last_wish", "체력 250 회복·방어도 +250·마법 저항 +50(12초)", "lowhealth_fade"),
             ("rw_plague", "signature_plague", "시체 연쇄 폭발: 독 피해 12 + 시체 최대 체력 3%, 반경 450, 최대 연쇄 깊이 2", "kill_poison_cloud"),
-            ("rw_pride", "signature_pride", "적중 시 반경 250 냉기 충격파: 물리 피해의 16%, 피해 30~200", "frost_strike"),
+            ("rw_pride", "signature_pride", "반경 약 3.5m 냉기 충격파: 물리 피해의 16%, 피해 30~200", "frost_strike"),
             ("rw_mosaic", "signature_mosaic", "화염·냉기·전격 피해를 각각 8~80(적중 피해 5%) 동시에 가함", null),
-            ("rw_obsession", "signature_obsession", "적중 시 마법 피해 75~300(적중 피해 18%), 상시 마나 재생률 +25%", null)
+            ("rw_obsession", "signature_obsession", "마법 피해 75~300(적중 피해 18%), 상시 마나 재생률 +25%", null)
         };
         foreach (var contract in uiContracts)
         {

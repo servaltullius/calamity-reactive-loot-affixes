@@ -108,7 +108,11 @@ jobs:
           CALAMITY_REQUIRE_NODE: "1"
         run: python3 -m unittest discover -s tools/tests -p 'test_*.py'
 
-      - name: Verify runtime contract snapshot sync
+      # Regenerates every generator output (ESP, KID/DISTR ini, InventoryInjector
+      # json, affixes.json, runtime_contract.json) into a temp folder and compares
+      # each with the committed Data/ copy, so a generator change or a partial
+      # commit that left the ESP behind cannot pass.
+      - name: Verify generated Data outputs (runtime contract, ESP, ini, json)
         run: python3 tools/verify_runtime_contract_sync.py
 
   runtime-gate-tests:

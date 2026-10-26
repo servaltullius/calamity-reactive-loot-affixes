@@ -139,15 +139,20 @@ namespace CalamityAffixes
 				}
 			}
 
-			const auto& labels = modeCycle.value("labels", nlohmann::json::array());
-			if (labels.is_array()) {
-				for (const auto& entry : labels) {
-					if (!entry.is_string()) {
-						continue;
-					}
-					a_outAction.modeCycleLabels.push_back(entry.get<std::string>());
+			// "labels" is the default; optional "labelsEn"/"labelsKo" localize it.
+			// A missing or empty localized label falls back to "labels" per index.
+			auto readLabels = [&](std::string_view a_key, std::vector<std::string>& a_out) {
+				const auto it = modeCycle.find(std::string(a_key));
+				if (it == modeCycle.end() || !it->is_array()) {
+					return;
 				}
-			}
+				for (const auto& entry : *it) {
+					a_out.push_back(entry.is_string() ? entry.get<std::string>() : std::string{});
+				}
+			};
+			readLabels("labels", a_outAction.modeCycleLabels);
+			readLabels("labelsEn", a_outAction.modeCycleLabelsEn);
+			readLabels("labelsKo", a_outAction.modeCycleLabelsKo);
 
 			const int switchEveryProcs = modeCycle.value("switchEveryProcs", 1);
 			a_outAction.modeCycleSwitchEveryProcs = (switchEveryProcs > 0) ? static_cast<std::uint32_t>(switchEveryProcs) : 1u;
@@ -258,6 +263,10 @@ namespace CalamityAffixes
 			a_out.action.magnitudeOverride = a_action.value("magnitudeOverride", 0.0f);
 			a_out.action.noHitEffectArt = a_action.value("noHitEffectArt", false);
 			ParseMagnitudeScaling(a_action, a_out.action.magnitudeScaling);
+			// Optional: non-damage effects cast without the hit-scaled override.
+			if (const auto rider = a_action.value("riderSpellEditorId", std::string{}); !rider.empty()) {
+				a_out.action.castOnCritRiderSpell = ParseSpellFromString(rider, a_handler);
+			}
 			return a_out.action.spell != nullptr;
 		}
 

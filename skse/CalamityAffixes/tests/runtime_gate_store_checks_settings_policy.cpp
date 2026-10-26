@@ -313,6 +313,10 @@ namespace RuntimeGateStoreChecks
 			state.corpseExplosionSeenCorpses.emplace(0x18u, steady_clock::time_point{ milliseconds(900) });
 			state.summonCorpseExplosionState.explosionsInWindow = 3u;
 			state.summonCorpseExplosionSeenCorpses.emplace(0x19u, steady_clock::time_point{ milliseconds(1000) });
+			state.corpseExplosionEvaluatedCorpses.emplace(0x1Au, steady_clock::time_point{ milliseconds(1100) });
+			state.archmageSpellHitAt.emplace(0x1Bull, steady_clock::time_point{ milliseconds(1200) });
+			state.fallbackOutgoingHitContent.emplace(0x1Cull, CalamityAffixes::FallbackHitContentRecord{ .content = 1u });
+			state.fallbackIncomingHitContent.emplace(0x1Dull, CalamityAffixes::FallbackHitContentRecord{ .content = 2u });
 
 			state.Reset();
 
@@ -337,8 +341,15 @@ namespace RuntimeGateStoreChecks
 				state.corpseExplosionState.chainDepth != 0u ||
 				!state.corpseExplosionSeenCorpses.empty() ||
 				state.summonCorpseExplosionState.explosionsInWindow != 0u ||
-				!state.summonCorpseExplosionSeenCorpses.empty()) {
+				!state.summonCorpseExplosionSeenCorpses.empty() ||
+				!state.corpseExplosionEvaluatedCorpses.empty()) {
 				std::cerr << "combat_runtime_state_reset: expected corpse-explosion runtime state to reset to defaults\n";
+				return false;
+			}
+			if (!state.archmageSpellHitAt.empty() ||
+				!state.fallbackOutgoingHitContent.empty() ||
+				!state.fallbackIncomingHitContent.empty()) {
+				std::cerr << "combat_runtime_state_reset: expected hit dedupe ledgers to be cleared\n";
 				return false;
 			}
 

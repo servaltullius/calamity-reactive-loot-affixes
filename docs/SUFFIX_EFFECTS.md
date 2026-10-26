@@ -24,11 +24,11 @@
 | 3 | **bulwark** | BlockModifier | +5 | +10 | +15 | 방패 탱커 |
 | 4 | **champion** | TwoHandedModifier | +5 | +10 | +15 | 양손 전사 |
 | 5 | **conjurer** | ConjurationModifier | +5 | +10 | +15 | 소환 마법사 |
-| 6 | **eagle_eye** | BowSpeedBonus | +5 | +10 | +15 | 궁수 |
-| 7 | **enchanter** | EnchantingModifier | +5 | +10 | +15 | 부여 마법사 |
+| 6 | **eagle_eye** | 활 당기기 속도 (런타임 적용) | +5 | +10 | +15 | 궁수 |
+| 7 | **enchanter** | Enchanting | +5 | +10 | +15 | 부여 마법사 |
 | 8 | **endurance** | Stamina | +20 | +40 | +60 | 근접/궁수 |
-| 9 | **evasion** | LightArmorModifier | +5 | +10 | +15 | 경장/도적 |
-| 10 | **fortitude** | HeavyArmorModifier | +5 | +10 | +15 | 중장/탱커 |
+| 9 | **evasion** | 받는 피해 감소(경갑, %) | +5 | +10 | +15 | 경장/도적 |
+| 10 | **fortitude** | 받는 피해 감소(중갑, %) | +5 | +10 | +15 | 중장/탱커 |
 | 11 | **gladiator** | AttackDamageMult | +3 | +6 | +9 | 공격력 |
 | 12 | **guardian** | DamageResist | +25 | +50 | +80 | 물리 방어 |
 | 13 | **marksman** | MarksmanModifier | +5 | +10 | +15 | 궁수 |
@@ -51,9 +51,9 @@
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
 |------|----|-------------|-----------|-----:|
-| T1 | `suffix_assassin_t1` | 약간의 암살자: 치명타 확률 +10%, 치명타 피해 +10% | of Minor Assassin: Critical Chance +10%, Critical Damage +10% | 10 |
-| T2 | `suffix_assassin_t2` | 암살자: 치명타 확률 +20%, 치명타 피해 +20% | of the Assassin: Critical Chance +20%, Critical Damage +20% | 20 |
-| T3 | `suffix_assassin_t3` | 위대한 암살자: 치명타 확률 +30%, 치명타 피해 +30% | of Grand Assassin: Critical Chance +30%, Critical Damage +30% | 30 |
+| T1 | `suffix_assassin_t1` | 약간의 암살자: 치명타 확률 +10%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +10% | of Minor Assassin: Critical Chance +10% (does not stack with vanilla critical perks), Critical Damage +10% | 10 |
+| T2 | `suffix_assassin_t2` | 암살자: 치명타 확률 +20%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +20% | of the Assassin: Critical Chance +20% (does not stack with vanilla critical perks), Critical Damage +20% | 20 |
+| T3 | `suffix_assassin_t3` | 위대한 암살자: 치명타 확률 +30%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +30% | of Grand Assassin: Critical Chance +30% (does not stack with vanilla critical perks), Critical Damage +30% | 30 |
 
 ### brilliance
 
@@ -95,13 +95,13 @@
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
 |------|----|-------------|-----------|-----:|
-| T1 | `suffix_conjurer_t1` | 약간의 소환술사: 소환 +5% | of Minor Conjurer: Conjuration +5% | 5 |
-| T2 | `suffix_conjurer_t2` | 소환술사: 소환 +10% | of the Conjurer: Conjuration +10% | 10 |
-| T3 | `suffix_conjurer_t3` | 위대한 소환술사: 소환 +15% | of Grand Conjurer: Conjuration +15% | 15 |
+| T1 | `suffix_conjurer_t1` | 약간의 소환술사: 소환 마법 비용 -5% | of Minor Conjurer: Conjuration spell cost -5% | 5 |
+| T2 | `suffix_conjurer_t2` | 소환술사: 소환 마법 비용 -10% | of the Conjurer: Conjuration spell cost -10% | 10 |
+| T3 | `suffix_conjurer_t3` | 위대한 소환술사: 소환 마법 비용 -15% | of Grand Conjurer: Conjuration spell cost -15% | 15 |
 
 ### eagle_eye
 
-- 영향 능력치: `BowSpeedBonus`
+- 영향 능력치: `활 당기기 속도 (런타임 적용)`
 - 추천 빌드: 궁수
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
@@ -112,14 +112,14 @@
 
 ### enchanter
 
-- 영향 능력치: `EnchantingModifier`
+- 영향 능력치: `Enchanting`
 - 추천 빌드: 부여 마법사
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
 |------|----|-------------|-----------|-----:|
-| T1 | `suffix_enchanter_t1` | 약간의 부여술사: 부여 +5% | of Minor Enchanter: Enchanting +5% | 5 |
-| T2 | `suffix_enchanter_t2` | 부여술사: 부여 +10% | of the Enchanter: Enchanting +10% | 10 |
-| T3 | `suffix_enchanter_t3` | 위대한 부여술사: 부여 +15% | of Grand Enchanter: Enchanting +15% | 15 |
+| T1 | `suffix_enchanter_t1` | 약간의 부여술사: 부여 위력 +5% | of Minor Enchanter: Items you enchant are 5% stronger | 5 |
+| T2 | `suffix_enchanter_t2` | 부여술사: 부여 위력 +10% | of the Enchanter: Items you enchant are 10% stronger | 10 |
+| T3 | `suffix_enchanter_t3` | 위대한 부여술사: 부여 위력 +15% | of Grand Enchanter: Items you enchant are 15% stronger | 15 |
 
 ### endurance
 
@@ -134,25 +134,25 @@
 
 ### evasion
 
-- 영향 능력치: `LightArmorModifier`
+- 영향 능력치: `받는 피해 감소(경갑, %)`
 - 추천 빌드: 경장/도적
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
 |------|----|-------------|-----------|-----:|
-| T1 | `suffix_evasion_t1` | 약간의 회피: 경갑 +5% | of Minor Evasion: Light Armor +5% | 5 |
-| T2 | `suffix_evasion_t2` | 회피: 경갑 +10% | of Evasion: Light Armor +10% | 10 |
-| T3 | `suffix_evasion_t3` | 위대한 회피: 경갑 +15% | of Grand Evasion: Light Armor +15% | 15 |
+| T1 | `suffix_evasion_t1` | 약간의 회피: 경갑 착용 시 받는 피해 -5% | of Minor Evasion: -5% damage taken while wearing light armor | 5 |
+| T2 | `suffix_evasion_t2` | 회피: 경갑 착용 시 받는 피해 -10% | of Evasion: -10% damage taken while wearing light armor | 10 |
+| T3 | `suffix_evasion_t3` | 위대한 회피: 경갑 착용 시 받는 피해 -15% | of Grand Evasion: -15% damage taken while wearing light armor | 15 |
 
 ### fortitude
 
-- 영향 능력치: `HeavyArmorModifier`
+- 영향 능력치: `받는 피해 감소(중갑, %)`
 - 추천 빌드: 중장/탱커
 
 | 티어 | ID | 한국어 이름 | 영어 이름 | 수치 |
 |------|----|-------------|-----------|-----:|
-| T1 | `suffix_fortitude_t1` | 약간의 견고: 중갑 +5% | of Minor Fortitude: Heavy Armor +5% | 5 |
-| T2 | `suffix_fortitude_t2` | 견고: 중갑 +10% | of Fortitude: Heavy Armor +10% | 10 |
-| T3 | `suffix_fortitude_t3` | 위대한 견고: 중갑 +15% | of Grand Fortitude: Heavy Armor +15% | 15 |
+| T1 | `suffix_fortitude_t1` | 약간의 견고: 중갑 착용 시 받는 피해 -5% | of Minor Fortitude: -5% damage taken while wearing heavy armor | 5 |
+| T2 | `suffix_fortitude_t2` | 견고: 중갑 착용 시 받는 피해 -10% | of Fortitude: -10% damage taken while wearing heavy armor | 10 |
+| T3 | `suffix_fortitude_t3` | 위대한 견고: 중갑 착용 시 받는 피해 -15% | of Grand Fortitude: -15% damage taken while wearing heavy armor | 15 |
 
 ### gladiator
 

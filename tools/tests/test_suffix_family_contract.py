@@ -14,18 +14,18 @@ AFFIX_PARSING_SOURCE = (
 EXPECTED_CHANCE_BY_TIER = {1: 6, 2: 3, 3: 1}
 EXPECTED_ASSASSIN_UI = {
     "suffix_assassin_t1": {
-        "nameKo": "약간의 암살자: 치명타 확률 +10%, 치명타 피해 +10%",
-        "nameEn": "of Minor Assassin: Critical Chance +10%, Critical Damage +10%",
+        "nameKo": "약간의 암살자: 치명타 확률 +10%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +10%",
+        "nameEn": "of Minor Assassin: Critical Chance +10% (does not stack with vanilla critical perks), Critical Damage +10%",
         "critDamageBonusPct": 10,
     },
     "suffix_assassin_t2": {
-        "nameKo": "암살자: 치명타 확률 +20%, 치명타 피해 +20%",
-        "nameEn": "of the Assassin: Critical Chance +20%, Critical Damage +20%",
+        "nameKo": "암살자: 치명타 확률 +20%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +20%",
+        "nameEn": "of the Assassin: Critical Chance +20% (does not stack with vanilla critical perks), Critical Damage +20%",
         "critDamageBonusPct": 20,
     },
     "suffix_assassin_t3": {
-        "nameKo": "위대한 암살자: 치명타 확률 +30%, 치명타 피해 +30%",
-        "nameEn": "of Grand Assassin: Critical Chance +30%, Critical Damage +30%",
+        "nameKo": "위대한 암살자: 치명타 확률 +30%(바닐라 치명타 퍽과 중첩 안 됨), 치명타 피해 +30%",
+        "nameEn": "of Grand Assassin: Critical Chance +30% (does not stack with vanilla critical perks), Critical Damage +30%",
         "critDamageBonusPct": 30,
     },
 }

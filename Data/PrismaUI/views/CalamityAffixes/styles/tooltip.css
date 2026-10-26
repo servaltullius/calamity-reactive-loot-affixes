@@ -3,16 +3,18 @@
   right: 70px;
   top: 255px;
   max-width: 720px;
-  max-height: 560px;
+  max-height: calc(100vh - 16px);
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 14px 16px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  /* No backdrop-filter: it is the main suspect for the grown part of a tall
+     tooltip not repainting in Ultralight (text cut at the old height until the
+     tooltip was reopened). A more opaque fill keeps it readable instead. */
+  background: rgba(var(--base-rgb), 0.86);
   border-radius: var(--radius-box);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(8px);
   display: none;
   pointer-events: none;
   transform: scale(var(--scale));
@@ -35,7 +37,7 @@
 }
 
 #tooltipText {
-  font-size: calc(18px * var(--tooltip-font-scale));
+  font-size: calc(18px * var(--tooltip-font-scale) * var(--tooltip-fit-scale, 1));
   line-height: 1.4;
   color: var(--text);
   white-space: pre-wrap;
@@ -103,7 +105,6 @@
   line-height: 1.2;
   font-family: inherit;
   cursor: pointer;
-  backdrop-filter: blur(8px);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
 }
 

@@ -8,6 +8,7 @@
 #include "CalamityAffixes/SpecialActionSafetyPolicy.h"
 #include "CalamityAffixes/TriggerGuards.h"
 #include <algorithm>
+#include <cmath>
 #include <string_view>
 #include <vector>
 
@@ -55,7 +56,8 @@ namespace CalamityAffixes
 		RE::Actor* a_target,
 		const RE::HitData* a_hitData,
 		float& a_inOutDamage,
-		bool a_allowResync)
+		bool a_allowResync,
+		float a_physicalScale)
 	{
 		const std::scoped_lock lock(_stateMutex);
 
@@ -168,7 +170,9 @@ namespace CalamityAffixes
 			return {};
 		}
 
-		const float physicalDealt = std::max(0.0f, a_hitData->physicalDamage - a_hitData->resistedPhysicalDamage);
+		const float physicalScale = (std::isfinite(a_physicalScale) && a_physicalScale > 1.0f) ? a_physicalScale : 1.0f;
+		const float physicalDealt =
+			std::max(0.0f, a_hitData->physicalDamage - a_hitData->resistedPhysicalDamage) * physicalScale;
 		if (physicalDealt <= 0.0f) {
 			return {};
 		}
@@ -584,6 +588,7 @@ namespace CalamityAffixes
 				.effectiveness = pick.effectiveness,
 				.magnitudeOverride = magnitudeOverride,
 				.noHitEffectArt = pick.noHitEffectArt,
+				.riderSpell = pick.castOnCritRiderSpell,
 			};
 		}
 

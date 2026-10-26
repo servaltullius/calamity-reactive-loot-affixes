@@ -448,6 +448,38 @@ public sealed class MagicEffectRecordSpec
     [JsonPropertyName("fxPersist")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool FxPersist { get; init; }
+
+    // Optional extra MGEF conditions (run on the affected actor), appended after the
+    // hostile-target pair. Mirrors vanilla target filters such as Turn Undead's
+    // "not Daedra AND (undead keyword OR IsUndead)".
+    [JsonPropertyName("conditions")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<MagicEffectConditionSpec>? Conditions { get; init; }
+}
+
+public sealed class MagicEffectConditionSpec
+{
+    // Supported: "HasKeyword" (needs keywordForm), "GetIsRace" (needs raceForm),
+    // "IsUndead", "IsInInterior", "IsCommandedActor", "IsChild".
+    [JsonPropertyName("function")]
+    public required string Function { get; init; }
+
+    [JsonPropertyName("keywordForm")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? KeywordForm { get; init; }
+
+    [JsonPropertyName("raceForm")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? RaceForm { get; init; }
+
+    // Compared with "==".
+    [JsonPropertyName("value")]
+    public double Value { get; init; }
+
+    // OR with the next condition (Skyrim groups consecutive ORs before ANDs).
+    [JsonPropertyName("or")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool Or { get; init; }
 }
 
 public sealed class SpellRecordSpec

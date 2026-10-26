@@ -318,9 +318,9 @@
       {
         "id": "flame_weakness",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FIRE_SHRED",
-        "name": "\uD654\uC5FC \uCDE8\uC57D: 36% \uD655\uB960\uB85C \uD654\uC5FC \uC800\uD56D -15 (4\uCD08). 2.8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Flame Weakness (Lucky Hit 36% / ICD 2.8s): Fire Resist -15 (4s)",
-        "nameKo": "\uD654\uC5FC \uCDE8\uC57D: 36% \uD655\uB960\uB85C \uD654\uC5FC \uC800\uD56D -15 (4\uCD08). 2.8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uD654\uC5FC \uCDE8\uC57D: 36% \uD655\uB960\uB85C \uD654\uC5FC \uC800\uD56D -15 (4\uCD08). 2.8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Flame Weakness (Lucky Hit 36% / ICD 2.8s): Fire Resist -15 (4s); Exposed",
+        "nameKo": "\uD654\uC5FC \uCDE8\uC57D: 36% \uD655\uB960\uB85C \uD654\uC5FC \uC800\uD56D -15 (4\uCD08). 2.8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FIRE_SHRED",
@@ -375,9 +375,9 @@
       {
         "id": "frost_weakness",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FROST_SHRED",
-        "name": "\uB0C9\uAE30 \uCDE8\uC57D: \uCD5C\uADFC 2\uCD08 \uB0B4 \uC801\uC911 \uC720\uC9C0 \uC2DC 24% \uD655\uB960\uB85C \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08). 2.4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Frost Weakness (24% on hit while chaining hits in the last 2s / ICD 2.4s): Frost Resist -15 (4s)",
-        "nameKo": "\uB0C9\uAE30 \uCDE8\uC57D: \uCD5C\uADFC 2\uCD08 \uB0B4 \uC801\uC911 \uC720\uC9C0 \uC2DC 24% \uD655\uB960\uB85C \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08). 2.4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB0C9\uAE30 \uCDE8\uC57D: \uCD5C\uADFC 2\uCD08 \uB0B4 \uC801\uC911 \uC720\uC9C0 \uC2DC 24% \uD655\uB960\uB85C \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08). 2.4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Frost Weakness (24% on hit while chaining hits in the last 2s / ICD 2.4s): Frost Resist -15 (4s); Exposed",
+        "nameKo": "\uB0C9\uAE30 \uCDE8\uC57D: \uCD5C\uADFC 2\uCD08 \uB0B4 \uC801\uC911 \uC720\uC9C0 \uC2DC 24% \uD655\uB960\uB85C \uB0C9\uAE30 \uC800\uD56D -15 (4\uCD08). 2.4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_FROST_SHRED",
@@ -431,9 +431,9 @@
       {
         "id": "shock_weakness",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_SHRED",
-        "name": "\uC804\uACA9 \uCDE8\uC57D: 35% \uD655\uB960\uB85C \uBC88\uAC1C \uC800\uD56D -25 (4\uCD08). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Shock Weakness (Lucky Hit 35% / ICD 4s): Shock Resist -25 (4s)",
-        "nameKo": "\uC804\uACA9 \uCDE8\uC57D: 35% \uD655\uB960\uB85C \uBC88\uAC1C \uC800\uD56D -25 (4\uCD08). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uC804\uACA9 \uCDE8\uC57D: 35% \uD655\uB960\uB85C \uBC88\uAC1C \uC800\uD56D -25 (4\uCD08). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Shock Weakness (Lucky Hit 35% / ICD 4s): Shock Resist -25 (4s); Exposed",
+        "nameKo": "\uC804\uACA9 \uCDE8\uC57D: 35% \uD655\uB960\uB85C \uBC88\uAC1C \uC800\uD56D -25 (4\uCD08). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SHOCK_SHRED",
@@ -489,9 +489,9 @@
       {
         "id": "wolf_spirit",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FAMILIAR",
-        "name": "\uB291\uB300 \uD63C\uB839: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08). 24\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Wolf Spirit (30% on hit / ICD 24s): Summon Familiar (60s)",
-        "nameKo": "\uB291\uB300 \uD63C\uB839: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08). 24\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB291\uB300 \uD63C\uB839: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08). 24\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
+        "nameEn": "Wolf Spirit (30% on hit / ICD 24s): Summon Familiar (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+        "nameKo": "\uB291\uB300 \uD63C\uB839: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658 (60\uCD08). 24\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -523,9 +523,9 @@
       {
         "id": "flame_sprite",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_FLAMING_FAMILIAR",
-        "name": "\uD654\uC5FC \uC815\uB839: 36% \uD655\uB960\uB85C \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658. 14\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Flame Sprite (Lucky Hit 36% / ICD 14s): Summon Exploding Flame Familiar",
-        "nameKo": "\uD654\uC5FC \uC815\uB839: 36% \uD655\uB960\uB85C \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658. 14\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uD654\uC5FC \uC815\uB839: 36% \uD655\uB960\uB85C \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658. 14\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
+        "nameEn": "Flame Sprite (Lucky Hit 36% / ICD 14s): Summon Exploding Flame Familiar; skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+        "nameKo": "\uD654\uC5FC \uC815\uB839: 36% \uD655\uB960\uB85C \uD3ED\uBC1C\uD558\uB294 \uBD88\uAF43 \uD328\uBC00\uB9AC\uC5B4 \uC18C\uD658. 14\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -559,9 +559,9 @@
       {
         "id": "flame_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FLAME_ATRONACH",
-        "name": "\uD654\uC5FC \uC544\uD2B8\uB85C\uB098\uD06C: 30% \uD655\uB960\uB85C \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 32\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Flame Atronach (Lucky Hit 30% / ICD 32s): Summon Flame Atronach (60s)",
-        "nameKo": "\uD654\uC5FC \uC544\uD2B8\uB85C\uB098\uD06C: 30% \uD655\uB960\uB85C \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 32\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uD654\uC5FC \uC544\uD2B8\uB85C\uB098\uD06C: 30% \uD655\uB960\uB85C \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 32\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
+        "nameEn": "Flame Atronach (Lucky Hit 30% / ICD 32s): Summon Flame Atronach (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+        "nameKo": "\uD654\uC5FC \uC544\uD2B8\uB85C\uB098\uD06C: 30% \uD655\uB960\uB85C \uD654\uC5FC \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 32\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -595,9 +595,9 @@
       {
         "id": "frost_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_FROST_ATRONACH",
-        "name": "\uB0C9\uAE30 \uC544\uD2B8\uB85C\uB098\uD06C: 30% \uD655\uB960\uB85C \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 32\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Frost Atronach (Lucky Hit 30% / ICD 32s): Summon Frost Atronach (60s)",
-        "nameKo": "\uB0C9\uAE30 \uC544\uD2B8\uB85C\uB098\uD06C: 30% \uD655\uB960\uB85C \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 32\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB0C9\uAE30 \uC544\uD2B8\uB85C\uB098\uD06C: 30% \uD655\uB960\uB85C \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 32\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
+        "nameEn": "Frost Atronach (Lucky Hit 30% / ICD 32s): Summon Frost Atronach (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+        "nameKo": "\uB0C9\uAE30 \uC544\uD2B8\uB85C\uB098\uD06C: 30% \uD655\uB960\uB85C \uB0C9\uAE30 \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 32\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -631,9 +631,9 @@
       {
         "id": "storm_atronach",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_STORM_ATRONACH",
-        "name": "\uD3ED\uD48D \uC544\uD2B8\uB85C\uB098\uD06C: 26% \uD655\uB960\uB85C \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 40\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Storm Atronach (Lucky Hit 26% / ICD 40s): Summon Storm Atronach (60s)",
-        "nameKo": "\uD3ED\uD48D \uC544\uD2B8\uB85C\uB098\uD06C: 26% \uD655\uB960\uB85C \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 40\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uD3ED\uD48D \uC544\uD2B8\uB85C\uB098\uD06C: 26% \uD655\uB960\uB85C \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 40\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
+        "nameEn": "Storm Atronach (Lucky Hit 26% / ICD 40s): Summon Storm Atronach (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+        "nameKo": "\uD3ED\uD48D \uC544\uD2B8\uB85C\uB098\uD06C: 26% \uD655\uB960\uB85C \uD3ED\uD48D \uC544\uD2B8\uB85C\uB099 \uC18C\uD658 (60\uCD08). 40\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -667,9 +667,9 @@
       {
         "id": "dremora_pact",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_CONJURE_DREMORA_LORD",
-        "name": "\uB4DC\uB808\uBAA8\uB77C \uC11C\uC57D: 22% \uD655\uB960\uB85C \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08). 52\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Dremora Pact (Lucky Hit 22% / ICD 52s): Summon Dremora Lord (60s)",
-        "nameKo": "\uB4DC\uB808\uBAA8\uB77C \uC11C\uC57D: 22% \uD655\uB960\uB85C \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08). 52\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB4DC\uB808\uBAA8\uB77C \uC11C\uC57D: 22% \uD655\uB960\uB85C \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08). 52\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
+        "nameEn": "Dremora Pact (Lucky Hit 22% / ICD 52s): Summon Dremora Lord (60s); skipped while your own summon or thrall is out (replaces an earlier proc summon)",
+        "nameKo": "\uB4DC\uB808\uBAA8\uB77C \uC11C\uC57D: 22% \uD655\uB960\uB85C \uB4DC\uB808\uBAA8\uB77C \uAD70\uC8FC \uC18C\uD658 (60\uCD08). 52\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uC9C1\uC811 \uBD80\uB978 \uC18C\uD658\uC218\uB098 \uB418\uC0B4\uB9B0 \uC2DC\uCCB4\uAC00 \uC788\uC73C\uBA74 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uC74C(\uC55E\uC11C \uBC1C\uB3D9\uD55C \uC18C\uD658\uC218\uB294 \uAD50\uCCB4).",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -1022,9 +1022,9 @@
       {
         "id": "mage_armor_t1",
         "editorId": "LoreBox_CAFF_AFFIX_INCOMING_MIND_OVER_MATTER_T1",
-        "name": "\uB9C8\uBC95\uC0AC\uC758 \uAC11\uC637 I: \uBB3C\uB9AC \uD53C\uD574 10%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658",
-        "nameEn": "Mage Armor I: Redirect 10% of physical hit damage to Magicka",
-        "nameKo": "\uB9C8\uBC95\uC0AC\uC758 \uAC11\uC637 I: \uBB3C\uB9AC \uD53C\uD574 10%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658",
+        "name": "\uB9C8\uBC95\uC0AC\uC758 \uAC11\uC637 I: \uBB3C\uB9AC \uD53C\uD574 10%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658 (\uD0C0\uACA9\uB2F9 \uCD5C\uB300 35)",
+        "nameEn": "Mage Armor I: Redirect 10% of physical hit damage to Magicka (max 35 per hit)",
+        "nameKo": "\uB9C8\uBC95\uC0AC\uC758 \uAC11\uC637 I: \uBB3C\uB9AC \uD53C\uD574 10%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658 (\uD0C0\uACA9\uB2F9 \uCD5C\uB300 35)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1048,9 +1048,9 @@
       {
         "id": "mage_armor_t2",
         "editorId": "LoreBox_CAFF_AFFIX_INCOMING_MIND_OVER_MATTER_T2",
-        "name": "\uB9C8\uBC95\uC0AC\uC758 \uAC11\uC637 II: \uBB3C\uB9AC \uD53C\uD574 15%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658",
-        "nameEn": "Mage Armor II: Redirect 15% of physical hit damage to Magicka",
-        "nameKo": "\uB9C8\uBC95\uC0AC\uC758 \uAC11\uC637 II: \uBB3C\uB9AC \uD53C\uD574 15%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658",
+        "name": "\uB9C8\uBC95\uC0AC\uC758 \uAC11\uC637 II: \uBB3C\uB9AC \uD53C\uD574 15%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658 (\uD0C0\uACA9\uB2F9 \uCD5C\uB300 50)",
+        "nameEn": "Mage Armor II: Redirect 15% of physical hit damage to Magicka (max 50 per hit)",
+        "nameKo": "\uB9C8\uBC95\uC0AC\uC758 \uAC11\uC637 II: \uBB3C\uB9AC \uD53C\uD574 15%\uB97C \uB9E4\uC9C0\uCE74\uB85C \uC804\uD658 (\uD0C0\uACA9\uB2F9 \uCD5C\uB300 50)",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -1341,9 +1341,9 @@
       {
         "id": "mana_burn",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_SHOCK_OVERLOAD",
-        "name": "\uB9C8\uB098 \uC18C\uC9C4: 35% \uD655\uB960\uB85C \uB9E4\uC9C0\uCE74 60 \uD761\uC218. 1.2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB9C8\uB098 \uC18C\uC9C4: 35% \uD655\uB960\uB85C \uB9E4\uC9C0\uCE74 \uD53C\uD574 60. 1.2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "nameEn": "Mana Burn (Lucky Hit 35% / ICD 1.2s): Drain 60 Magicka",
-        "nameKo": "\uB9C8\uB098 \uC18C\uC9C4: 35% \uD655\uB960\uB85C \uB9E4\uC9C0\uCE74 60 \uD761\uC218. 1.2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameKo": "\uB9C8\uB098 \uC18C\uC9C4: 35% \uD655\uB960\uB85C \uB9E4\uC9C0\uCE74 \uD53C\uD574 60. 1.2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
@@ -1904,12 +1904,20 @@
             "editorId": "CAFF_SPEL_DMG_FIRE_DYNAMIC",
             "name": "Calamity: Physical-\u003EFire Conversion / \uBB3C\uB9AC\u2192\uD654\uC5FC \uC804\uD658",
             "delivery": "TargetActor",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
-              "magnitude": 1,
-              "duration": 1,
-              "area": 0
-            }
+            "effects": [
+              {
+                "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC",
+                "magnitude": 1,
+                "duration": 0,
+                "area": 0
+              },
+              {
+                "magicEffectEditorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC_HITFX",
+                "magnitude": 0,
+                "duration": 1,
+                "area": 0
+              }
+            ]
           }
         },
         "kid": {
@@ -1971,9 +1979,9 @@
       {
         "id": "death_mark",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FIRE_75",
-        "name": "\uC8FD\uC74C\uC758 \uD45C\uC2DD: 25% \uD655\uB960\uB85C \uBC29\uC5B4\uB825 -200 (6\uCD08). 1\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 10\uCD08.",
-        "nameEn": "Death\u0027s Mark (Lucky Hit 25% / ICD 1s / per-target ICD 10s): Armor -200 (6s)",
-        "nameKo": "\uC8FD\uC74C\uC758 \uD45C\uC2DD: 25% \uD655\uB960\uB85C \uBC29\uC5B4\uB825 -200 (6\uCD08). 1\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 10\uCD08.",
+        "name": "\uC8FD\uC74C\uC758 \uD45C\uC2DD: 25% \uD655\uB960\uB85C \uBC29\uC5B4\uB825 -200 (6\uCD08). 1\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 10\uCD08. \uB178\uCD9C.",
+        "nameEn": "Death\u0027s Mark (Lucky Hit 25% / ICD 1s / per-target ICD 10s): Armor -200 (6s); Exposed",
+        "nameKo": "\uC8FD\uC74C\uC758 \uD45C\uC2DD: 25% \uD655\uB960\uB85C \uBC29\uC5B4\uB825 -200 (6\uCD08). 1\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 10\uCD08. \uB178\uCD9C.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2056,12 +2064,20 @@
             "editorId": "CAFF_SPEL_DMG_FROST_DYNAMIC",
             "name": "Calamity: Physical-\u003EFrost Conversion / \uBB3C\uB9AC\u2192\uB0C9\uAE30 \uC804\uD658",
             "delivery": "TargetActor",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
-              "magnitude": 1,
-              "duration": 1,
-              "area": 0
-            }
+            "effects": [
+              {
+                "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC",
+                "magnitude": 1,
+                "duration": 0,
+                "area": 0
+              },
+              {
+                "magicEffectEditorId": "CAFF_MGEF_DMG_FROST_DYNAMIC_HITFX",
+                "magnitude": 0,
+                "duration": 1,
+                "area": 0
+              }
+            ]
           }
         },
         "kid": {
@@ -2127,9 +2143,9 @@
       {
         "id": "disarming_shout",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_FROST_75",
-        "name": "\uBB34\uC7A5 \uD574\uC81C: 10% \uD655\uB960\uB85C \uC801\uC774 \uC8FC\uB294 \uD53C\uD574 -20% (6\uCD08). 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Disarming Shout (Lucky Hit 10% / ICD 10s): Enemy Damage Dealt -20% (6s)",
-        "nameKo": "\uBB34\uC7A5 \uD574\uC81C: 10% \uD655\uB960\uB85C \uC801\uC774 \uC8FC\uB294 \uD53C\uD574 -20% (6\uCD08). 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uBB34\uC7A5 \uD574\uC81C: 10% \uD655\uB960\uB85C \uC801 \uACF5\uACA9\uB825 -20% (6\uCD08). 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Disarming Shout (Lucky Hit 10% / ICD 10s): Enemy Attack Damage -20% (6s)",
+        "nameKo": "\uBB34\uC7A5 \uD574\uC81C: 10% \uD655\uB960\uB85C \uC801 \uACF5\uACA9\uB825 -20% (6\uCD08). 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2209,12 +2225,20 @@
             "editorId": "CAFF_SPEL_DMG_SHOCK_DYNAMIC",
             "name": "Calamity: Physical-\u003EShock Conversion / \uBB3C\uB9AC\u2192\uBC88\uAC1C \uC804\uD658",
             "delivery": "TargetActor",
-            "effect": {
-              "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
-              "magnitude": 1,
-              "duration": 1,
-              "area": 0
-            }
+            "effects": [
+              {
+                "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC",
+                "magnitude": 1,
+                "duration": 0,
+                "area": 0
+              },
+              {
+                "magicEffectEditorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC_HITFX",
+                "magnitude": 0,
+                "duration": 1,
+                "area": 0
+              }
+            ]
           }
         },
         "kid": {
@@ -2292,9 +2316,9 @@
       {
         "id": "spell_breach",
         "editorId": "LoreBox_CAFF_AFFIX_CONVERT_PHYS_TO_SHOCK_75",
-        "name": "\uB9C8\uBC95 \uC57D\uD654: 12% \uD655\uB960\uB85C \uB9C8\uBC95 \uC800\uD56D \uAC10\uC18C. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Spell Breach (Lucky Hit 12% / ICD 10s): Magic Resist Reduction",
-        "nameKo": "\uB9C8\uBC95 \uC57D\uD654: 12% \uD655\uB960\uB85C \uB9C8\uBC95 \uC800\uD56D \uAC10\uC18C. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB9C8\uBC95 \uC57D\uD654: 12% \uD655\uB960\uB85C \uB9C8\uBC95 \uC800\uD56D \uAC10\uC18C. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Spell Breach (Lucky Hit 12% / ICD 10s): Magic Resist Reduction; Exposed",
+        "nameKo": "\uB9C8\uBC95 \uC57D\uD654: 12% \uD655\uB960\uB85C \uB9C8\uBC95 \uC800\uD56D \uAC10\uC18C. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2477,7 +2501,7 @@
           "strings": "NONE",
           "formFilters": "NONE",
           "traits": "-E",
-          "chance": 0.5
+          "chance": 0.4
         },
         "slot": "prefix",
         "runtime": {
@@ -2488,6 +2512,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellEditorId": "CAFF_SPEL_COC_FIREBOLT_HOSTILE_ONLY",
+            "riderSpellEditorId": "CAFF_SPEL_COC_FIREBOLT_RIDER",
             "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
@@ -2511,7 +2536,7 @@
           "strings": "NONE",
           "formFilters": "NONE",
           "traits": "-E",
-          "chance": 0.3
+          "chance": 0.4
         },
         "slot": "prefix",
         "runtime": {
@@ -2522,6 +2547,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellEditorId": "CAFF_SPEL_COC_ICE_SPIKE_HOSTILE_ONLY",
+            "riderSpellEditorId": "CAFF_SPEL_COC_ICE_SPIKE_RIDER",
             "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
@@ -2545,7 +2571,7 @@
           "strings": "NONE",
           "formFilters": "NONE",
           "traits": "-E",
-          "chance": 0.3
+          "chance": 0.4
         },
         "slot": "prefix",
         "runtime": {
@@ -2556,6 +2582,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellEditorId": "CAFF_SPEL_COC_LIGHTNING_BOLT_HOSTILE_ONLY",
+            "riderSpellEditorId": "CAFF_SPEL_COC_LIGHTNING_BOLT_RIDER",
             "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
@@ -2590,6 +2617,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellEditorId": "CAFF_SPEL_COC_THUNDERBOLT_HOSTILE_ONLY",
+            "riderSpellEditorId": "CAFF_SPEL_COC_THUNDERBOLT_RIDER",
             "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
@@ -2624,6 +2652,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellEditorId": "CAFF_SPEL_COC_ICY_SPEAR_HOSTILE_ONLY",
+            "riderSpellEditorId": "CAFF_SPEL_COC_ICY_SPEAR_RIDER",
             "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
@@ -2658,6 +2687,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellEditorId": "CAFF_SPEL_COC_CHAIN_LIGHTNING_HOSTILE_ONLY",
+            "riderSpellEditorId": "CAFF_SPEL_COC_CHAIN_LIGHTNING_RIDER",
             "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
@@ -2692,6 +2722,7 @@
           "action": {
             "type": "CastOnCrit",
             "spellEditorId": "CAFF_SPEL_COC_ICE_STORM_HOSTILE_ONLY",
+            "riderSpellEditorId": "CAFF_SPEL_COC_ICE_STORM_RIDER",
             "noHitEffectArt": true,
             "magnitudeScaling": {
               "source": "HitPhysicalDealt",
@@ -2707,9 +2738,9 @@
       {
         "id": "death_pyre_t1",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T1",
-        "name": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T1: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (12 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 6%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.7x) \uCD5C\uB300 5\uD68C, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
-        "nameEn": "Death Pyre T1 (on kill): Radius 600, (12 \u002B 6% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-        "nameKo": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T1: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (12 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 6%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.7x) \uCD5C\uB300 5\uD68C, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
+        "name": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T1: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (12 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 6%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 30%\uC529 \uAC10\uC18C, \uCD5C\uB300 5\uC5F0\uC18D, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
+        "nameEn": "Death Pyre T1 (on kill): Radius 600, (12 \u002B 6% corpse max HP) Fire Damage. Successive explosions within 0.9s deal 0.7x each (max 5 in a row), 4/sec limit",
+        "nameKo": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T1: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (12 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 6%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 30%\uC529 \uAC10\uC18C, \uCD5C\uB300 5\uC5F0\uC18D, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2751,9 +2782,9 @@
       {
         "id": "death_pyre_t2",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T2",
-        "name": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T2: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (14 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.7x) \uCD5C\uB300 5\uD68C, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
-        "nameEn": "Death Pyre T2 (on kill): Radius 600, (14 \u002B 7% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-        "nameKo": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T2: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (14 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.7x) \uCD5C\uB300 5\uD68C, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
+        "name": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T2: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (14 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 30%\uC529 \uAC10\uC18C, \uCD5C\uB300 5\uC5F0\uC18D, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
+        "nameEn": "Death Pyre T2 (on kill): Radius 600, (14 \u002B 7% corpse max HP) Fire Damage. Successive explosions within 0.9s deal 0.7x each (max 5 in a row), 4/sec limit",
+        "nameKo": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T2: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (14 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 30%\uC529 \uAC10\uC18C, \uCD5C\uB300 5\uC5F0\uC18D, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2795,9 +2826,9 @@
       {
         "id": "death_pyre_t3",
         "editorId": "LoreBox_CAFF_AFFIX_KILL_CORPSE_EXPLOSION_T3",
-        "name": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T3: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (16 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 8%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.7x) \uCD5C\uB300 5\uD68C, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
-        "nameEn": "Death Pyre T3 (on kill): Radius 600, (16 \u002B 8% corpse max HP) Fire Damage. Chain(0.7x) max 5, 4/sec limit",
-        "nameKo": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T3: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (16 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 8%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.7x) \uCD5C\uB300 5\uD68C, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
+        "name": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T3: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (16 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 8%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 30%\uC529 \uAC10\uC18C, \uCD5C\uB300 5\uC5F0\uC18D, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
+        "nameEn": "Death Pyre T3 (on kill): Radius 600, (16 \u002B 8% corpse max HP) Fire Damage. Successive explosions within 0.9s deal 0.7x each (max 5 in a row), 4/sec limit",
+        "nameKo": "\uC8FD\uC74C\uC758 \uD654\uC7A5 T3: \uCC98\uCE58 \uC2DC \uBC18\uACBD 600, (16 \u002B \uC2DC\uCCB4 \uCD5C\uB300\uCCB4\uB825 8%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 30%\uC529 \uAC10\uC18C, \uCD5C\uB300 5\uC5F0\uC18D, \uCD08\uB2F9 4\uD68C \uC81C\uD55C.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -2919,9 +2950,9 @@
       {
         "id": "conjured_pyre_t1",
         "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T1",
-        "name": "\uC18C\uD658 \uD654\uC7A5 T1: \uC18C\uD658\uBB3C \uC0AC\uB9DD \uC2DC \uBC18\uACBD 600, (14 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.8x) \uCD5C\uB300 3\uD68C, \uCD08\uB2F9 3\uD68C \uC81C\uD55C.",
-        "nameEn": "Conjured Pyre T1 (on summon death): Radius 600, (14 \u002B 7% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
-        "nameKo": "\uC18C\uD658 \uD654\uC7A5 T1: \uC18C\uD658\uBB3C \uC0AC\uB9DD \uC2DC \uBC18\uACBD 600, (14 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.8x) \uCD5C\uB300 3\uD68C, \uCD08\uB2F9 3\uD68C \uC81C\uD55C.",
+        "name": "\uC18C\uD658 \uD654\uC7A5 T1: \uC18C\uD658\uBB3C \uC0AC\uB9DD \uC2DC \uBC18\uACBD 600, (14 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 20%\uC529 \uAC10\uC18C, \uCD5C\uB300 3\uC5F0\uC18D, \uCD08\uB2F9 3\uD68C \uC81C\uD55C.",
+        "nameEn": "Conjured Pyre T1 (on summon death): Radius 600, (14 \u002B 7% summon max HP) Fire Damage. Successive explosions within 0.9s deal 0.8x each (max 3 in a row), 3/sec limit",
+        "nameKo": "\uC18C\uD658 \uD654\uC7A5 T1: \uC18C\uD658\uBB3C \uC0AC\uB9DD \uC2DC \uBC18\uACBD 600, (14 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 7%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 20%\uC529 \uAC10\uC18C, \uCD5C\uB300 3\uC5F0\uC18D, \uCD08\uB2F9 3\uD68C \uC81C\uD55C.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -2963,9 +2994,9 @@
       {
         "id": "conjured_pyre_t2",
         "editorId": "LoreBox_CAFF_AFFIX_SUMMON_CORPSE_EXPLOSION_T2",
-        "name": "\uC18C\uD658 \uD654\uC7A5 T2: \uC18C\uD658\uBB3C \uC0AC\uB9DD \uC2DC \uBC18\uACBD 600, (18 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 8.5%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.8x) \uCD5C\uB300 3\uD68C, \uCD08\uB2F9 3\uD68C \uC81C\uD55C.",
-        "nameEn": "Conjured Pyre T2 (on summon death): Radius 600, (18 \u002B 8.5% summon max HP) Fire Damage. Chain(0.8x) max 3, 3/sec limit",
-        "nameKo": "\uC18C\uD658 \uD654\uC7A5 T2: \uC18C\uD658\uBB3C \uC0AC\uB9DD \uC2DC \uBC18\uACBD 600, (18 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 8.5%) \uD654\uC5FC \uD53C\uD574. \uC5F0\uC1C4 \uD3ED\uBC1C(\uC704\uB825 0.8x) \uCD5C\uB300 3\uD68C, \uCD08\uB2F9 3\uD68C \uC81C\uD55C.",
+        "name": "\uC18C\uD658 \uD654\uC7A5 T2: \uC18C\uD658\uBB3C \uC0AC\uB9DD \uC2DC \uBC18\uACBD 600, (18 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 8.5%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 20%\uC529 \uAC10\uC18C, \uCD5C\uB300 3\uC5F0\uC18D, \uCD08\uB2F9 3\uD68C \uC81C\uD55C.",
+        "nameEn": "Conjured Pyre T2 (on summon death): Radius 600, (18 \u002B 8.5% summon max HP) Fire Damage. Successive explosions within 0.9s deal 0.8x each (max 3 in a row), 3/sec limit",
+        "nameKo": "\uC18C\uD658 \uD654\uC7A5 T2: \uC18C\uD658\uBB3C \uC0AC\uB9DD \uC2DC \uBC18\uACBD 600, (18 \u002B \uC18C\uD658\uBB3C \uCD5C\uB300\uCCB4\uB825 8.5%) \uD654\uC5FC \uD53C\uD574. 0.9\uCD08 \uC548\uC5D0 \uC774\uC5B4\uC9C4 \uD3ED\uBC1C\uC740 \uC704\uB825 20%\uC529 \uAC10\uC18C, \uCD5C\uB300 3\uC5F0\uC18D, \uCD08\uB2F9 3\uD68C \uC81C\uD55C.",
         "kid": {
           "type": "Armor",
           "strings": "NONE",
@@ -3123,9 +3154,9 @@
       {
         "id": "elemental_bane",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_ADAPTIVE_EXPOSURE",
-        "name": "\uC6D0\uC18C \uC800\uC8FC: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uAC00\uC7A5 \uB192\uC740 \uC6D0\uC18C \uC800\uD56D -15 (4\uCD08). 1\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 12\uCD08.",
-        "nameEn": "Elemental Bane (20% on hit / ICD 1s / per-target ICD 12s): Highest elemental resist -15 (4s)",
-        "nameKo": "\uC6D0\uC18C \uC800\uC8FC: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uAC00\uC7A5 \uB192\uC740 \uC6D0\uC18C \uC800\uD56D -15 (4\uCD08). 1\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 12\uCD08.",
+        "name": "\uC6D0\uC18C \uC800\uC8FC: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uAC00\uC7A5 \uB192\uC740 \uC6D0\uC18C \uC800\uD56D -15 (4\uCD08). 1\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 12\uCD08. \uB178\uCD9C.",
+        "nameEn": "Elemental Bane (20% on hit / ICD 1s / per-target ICD 12s): Highest elemental resist -15 (4s); Exposed",
+        "nameKo": "\uC6D0\uC18C \uC800\uC8FC: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uAC00\uC7A5 \uB192\uC740 \uC6D0\uC18C \uC800\uD56D -15 (4\uCD08). 1\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 12\uCD08. \uB178\uCD9C.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -3549,7 +3580,7 @@
             "spellEditorId": "CAFF_SPEL_CHAOS_MINE_SNARE",
             "extraSpells": [
               {
-                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SUNDER"
+                "spellEditorId": "CAFF_SPEL_CHAOS_RUNE_TRAP_SUNDER"
               },
               {
                 "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_DRAIN_MAGREGEN"
@@ -3561,7 +3592,7 @@
                 "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_SLOW_ATTACK"
               },
               {
-                "spellEditorId": "CAFF_SPEL_CHAOS_CURSE_FRAGILE"
+                "spellEditorId": "CAFF_SPEL_CHAOS_RUNE_TRAP_FRAGILE"
               }
             ],
             "noHitEffectArt": true,
@@ -3725,9 +3756,9 @@
       {
         "id": "internal_spell_chaos_rune_slow_attack",
         "editorId": "CAFF_INTERNAL_SPEL_CHAOS_CURSE_SLOW_ATTACK",
-        "name": "INTERNAL: Chaos Rune (Slow Attack Speed)",
-        "nameEn": "INTERNAL: Chaos Rune (Slow Attack Speed)",
-        "nameKo": "INTERNAL: Chaos Rune (Slow Attack Speed)",
+        "name": "INTERNAL: Chaos Rune (Weaken)",
+        "nameEn": "INTERNAL: Chaos Rune (Weaken)",
+        "nameKo": "INTERNAL: Chaos Rune (Weaken)",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_CHAOS_CURSE_SLOW_ATTACK",
@@ -3868,7 +3899,7 @@
         "id": "thunder_mastery",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_EVOLVING_LIGHTNING",
         "name": "\uB1CC\uACA9 \uC219\uB828: \uB9E4 \uC801\uC911 \uC2DC \uBC88\uAC1C \uD53C\uD574 \uB204\uC801 \uC131\uC7A5 (\u00D71.0\u21921.25\u21921.6\u21922.1, \uB2E8\uACC4: 15/45/90\uD68C). 0.2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC10\uC804 \uCD95\uC801 \u002B15.",
-        "nameEn": "Thunder Mastery (100% on hit): Lightning Damage Growth (x1.0\u21921.25\u21921.6\u21922.1, stages: 15/45/90 hits); Shock build-up \u002B15",
+        "nameEn": "Thunder Mastery (100% on hit / ICD 0.2s): Lightning Damage Growth (x1.0\u21921.25\u21921.6\u21922.1, stages: 15/45/90 hits); Shock build-up \u002B15",
         "nameKo": "\uB1CC\uACA9 \uC219\uB828: \uB9E4 \uC801\uC911 \uC2DC \uBC88\uAC1C \uD53C\uD574 \uB204\uC801 \uC131\uC7A5 (\u00D71.0\u21921.25\u21921.6\u21922.1, \uB2E8\uACC4: 15/45/90\uD68C). 0.2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC10\uC804 \uCD95\uC801 \u002B15.",
         "kid": {
           "type": "Weapon",
@@ -3927,7 +3958,7 @@
         "id": "elemental_attunement",
         "editorId": "LoreBox_CAFF_AFFIX_HIT_MODE_CYCLE_ELEMENTS",
         "name": "\uC6D0\uC18C \uC870\uC728: \uB9E4 \uC801\uC911 \uC2DC \uD654\uC5FC/\uB0C9\uAE30/\uBC88\uAC1C \uC218\uB3D9 \uC804\uD658 \u002B \uC131\uC7A5 (\u00D71.0\u21921.3\u21921.7\u21922.2, \uB2E8\uACC4: 20/60/120\uD68C). 0.2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Elemental Attunement (100% on hit): Fire/Frost/Shock manual switch \u002B Growth (x1.0\u21921.3\u21921.7\u21922.2, stages: 20/60/120 hits)",
+        "nameEn": "Elemental Attunement (100% on hit / ICD 0.2s): Fire/Frost/Shock manual switch \u002B Growth (x1.0\u21921.3\u21921.7\u21922.2, stages: 20/60/120 hits)",
         "nameKo": "\uC6D0\uC18C \uC870\uC728: \uB9E4 \uC801\uC911 \uC2DC \uD654\uC5FC/\uB0C9\uAE30/\uBC88\uAC1C \uC218\uB3D9 \uC804\uD658 \u002B \uC131\uC7A5 (\u00D71.0\u21921.3\u21921.7\u21922.2, \uB2E8\uACC4: 20/60/120\uD68C). 0.2\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Weapon",
@@ -3976,6 +4007,11 @@
                 "Flame",
                 "Frost",
                 "Storm"
+              ],
+              "labelsKo": [
+                "\uD654\uC5FC",
+                "\uB0C9\uAE30",
+                "\uBC88\uAC1C"
               ],
               "spells": [
                 "CAFF_SPEL_FIRE_DAMAGE",
@@ -4085,9 +4121,9 @@
       {
         "id": "runeword_infinity_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INFINITY",
-        "name": "\uB8EC\uC6CC\uB4DC \uBB34\uD55C [Ber-Mal-Ber-Ist]: \uB9E4 \uC801\uC911 \uC2DC \uC57D\uC810 \uC6D0\uC18C \uC800\uD56D \uAC10\uC18C. 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 6\uCD08.",
-        "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uBB34\uD55C [Ber-Mal-Ber-Ist]: \uB9E4 \uC801\uC911 \uC2DC \uC57D\uC810 \uC6D0\uC18C \uC800\uD56D \uAC10\uC18C. 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 6\uCD08.",
+        "name": "\uB8EC\uC6CC\uB4DC \uBB34\uD55C [Ber-Mal-Ber-Ist]: \uB9E4 \uC801\uC911 \uC2DC \uC57D\uC810 \uC6D0\uC18C \uC800\uD56D \uAC10\uC18C. 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 6\uCD08. \uB178\uCD9C.",
+        "nameEn": "Runeword Infinity (Ber-Mal-Ber-Ist): 100% on Hit / ICD 0.5s / perTarget 6s - Element Resist Reduction; Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uBB34\uD55C [Ber-Mal-Ber-Ist]: \uB9E4 \uC801\uC911 \uC2DC \uC57D\uC810 \uC6D0\uC18C \uC800\uD56D \uAC10\uC18C. 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC19\uC740 \uB300\uC0C1 6\uCD08. \uB178\uCD9C.",
         "records": {
           "magicEffects": [
             {
@@ -4177,6 +4213,11 @@
                 "CAFF_SPEL_RW_INFINITY_SHOCK_SHRED"
               ],
               "labels": [
+                "Fire Exposed",
+                "Frost Exposed",
+                "Shock Exposed"
+              ],
+              "labelsKo": [
                 "\uD654\uC5FC \uB178\uCD9C",
                 "\uB0C9\uAE30 \uB178\uCD9C",
                 "\uBC88\uAC1C \uB178\uCD9C"
@@ -4279,9 +4320,9 @@
       {
         "id": "runeword_insight_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_INSIGHT",
-        "name": "\uB8EC\uC6CC\uB4DC \uD1B5\uCC30 [Ral-Tir-Tal-Sol]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB9C8\uB098 \uD68C\uBCF5 \uAC15\uD654. \uB9C8\uB098 \uC7AC\uC0DD \u002B25. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Magicka Recovery boost \u002B Magicka Regen \u002B25",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD1B5\uCC30 [Ral-Tir-Tal-Sol]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB9C8\uB098 \uD68C\uBCF5 \uAC15\uD654. \uB9C8\uB098 \uC7AC\uC0DD \u002B25. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD1B5\uCC30 [Ral-Tir-Tal-Sol]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB9C8\uB098 \uD68C\uBCF5 \uAC15\uD654. \uB9C8\uB098 \uC7AC\uC0DD \u002B25%. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Insight (Ral-Tir-Tal-Sol): 30% on Hit / ICD 10s - Magicka Recovery boost \u002B Magicka Regen \u002B25%",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD1B5\uCC30 [Ral-Tir-Tal-Sol]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB9C8\uB098 \uD68C\uBCF5 \uAC15\uD654. \uB9C8\uB098 \uC7AC\uC0DD \u002B25%. 10\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffects": [
             {
@@ -4319,7 +4360,7 @@
               "castType": "ConstantEffect",
               "effect": {
                 "magicEffectEditorId": "CAFF_MGEF_RW_INSIGHT_PASSIVE_MPREGEN",
-                "magnitude": 25,
+                "magnitude": 0.75,
                 "duration": 0,
                 "area": 0
               }
@@ -4738,9 +4779,9 @@
       {
         "id": "runeword_heart_of_the_oak_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEART_OF_THE_OAK",
-        "name": "\uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 [Ko-Vex-Pul-Thul]: \uC801\uC911 \uC2DC 32% \uD655\uB960\uB85C \uBE44\uC804 \uADE0\uC5F4(\uC801\uC751\uD615 \uC6D0\uC18C \uC800\uD56D \uAC10\uC18C). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 [Ko-Vex-Pul-Thul]: \uC801\uC911 \uC2DC 32% \uD655\uB960\uB85C \uBE44\uC804 \uADE0\uC5F4(\uC801\uC751\uD615 \uC6D0\uC18C \uC800\uD56D \uAC10\uC18C). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 [Ko-Vex-Pul-Thul]: \uC801\uC911 \uC2DC 32% \uD655\uB960\uB85C \uBE44\uC804 \uADE0\uC5F4(\uC801\uC751\uD615 \uC6D0\uC18C \uC800\uD56D \uAC10\uC18C). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Heart of the Oak (Ko-Vex-Pul-Thul): 32% on hit / ICD 8s - Arcane Rift (Adaptive elemental Resist Reduction); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uCC38\uB098\uBB34\uC758 \uC2EC\uC7A5 [Ko-Vex-Pul-Thul]: \uC801\uC911 \uC2DC 32% \uD655\uB960\uB85C \uBE44\uC804 \uADE0\uC5F4(\uC801\uC751\uD615 \uC6D0\uC18C \uC800\uD56D \uAC10\uC18C). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffects": [
             {
@@ -4852,7 +4893,7 @@
             },
             {
               "editorId": "CAFF_MGEF_RW_FAITH_FANATIC_WARD",
-              "name": "Calamity: Runeword Faith Surge Ward / \uB8EC\uC6CC\uB4DC \uC2E0\uB150 \uB3CC\uACA9(\uC800\uD56D)",
+              "name": "Calamity: Runeword Faith Fanaticism Power / \uB8EC\uC6CC\uB4DC \uC2E0\uB150 \uAD11\uC2E0(\uCD94\uAC00 \uACF5\uACA9\uB825)",
               "actorValue": "AttackDamageMult",
               "hostile": false,
               "recover": true
@@ -4868,7 +4909,7 @@
           "spells": [
             {
               "editorId": "CAFF_SPEL_RW_FAITH_FANATIC",
-              "name": "Calamity: Runeword Faith Surge / \uB8EC\uC6CC\uB4DC \uC2E0\uB150 \uB3CC\uACA9",
+              "name": "Calamity: Runeword Faith Fanaticism / \uB8EC\uC6CC\uB4DC \uC2E0\uB150 \uAD11\uC2E0",
               "delivery": "Self",
               "effects": [
                 {
@@ -5464,25 +5505,27 @@
       {
         "id": "runeword_leaf_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LEAF",
-        "name": "\uB8EC\uC6CC\uB4DC \uB9AC\uD504 [Tir-Ral]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uB098\uBB47\uC78E\uC758 \uBD88\uAF43(\uD30C\uAD34 \uB9C8\uBC95 \u002B20, 8\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Leaf (Tir-Ral): 22% on hit / ICD 7s - Leaf Flame (Destruction \u002B20, 8s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uB9AC\uD504 [Tir-Ral]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uB098\uBB47\uC78E\uC758 \uBD88\uAF43(\uD30C\uAD34 \uB9C8\uBC95 \u002B20, 8\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uB9AC\uD504 [Tir-Ral]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uB098\uBB47\uC78E\uC758 \uBD88\uAF43(\uD654\uC5FC \uD53C\uD574 15). \uD30C\uAD34 \uB9C8\uBC95 \uBE44\uC6A9 -10%. 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uD654\uC0C1 2\uC911\uCCA9.",
+        "nameEn": "Runeword Leaf (Tir-Ral): 22% on hit / ICD 7s - Leaf Flame (Fire Damage 15) \u002B Destruction spell cost -10%; Burning \u002B2 stacks",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uB9AC\uD504 [Tir-Ral]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uB098\uBB47\uC78E\uC758 \uBD88\uAF43(\uD654\uC5FC \uD53C\uD574 15). \uD30C\uAD34 \uB9C8\uBC95 \uBE44\uC6A9 -10%. 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uD654\uC0C1 2\uC911\uCCA9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_LEAF_FLAME",
             "name": "Calamity: Runeword Leaf / \uB8EC\uC6CC\uB4DC \uB9AC\uD504",
-            "actorValue": "DestructionModifier",
-            "hostile": false,
-            "recover": true
+            "actorValue": "Health",
+            "resistValue": "ResistFire",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_LEAF_FLAME",
             "name": "Calamity: Runeword Leaf / \uB8EC\uC6CC\uB4DC \uB9AC\uD504",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_LEAF_FLAME",
-              "magnitude": 20,
-              "duration": 8,
+              "magnitude": 15,
+              "duration": 0,
               "area": 0
             }
           }
@@ -5502,13 +5545,15 @@
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_LEAF_FLAME",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Burning",
+            "statusAmount": 2,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_LEAF_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "Skyrim.esm|0x0007331C",
-              "soundForm": "Skyrim.esm|0x00081971",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x0002ACD7",
+              "soundForm": "Skyrim.esm|0x0003C8FC",
+              "target": "Target",
+              "durationSeconds": 0.55,
               "playOn": "Proc",
               "spatialSound": true
             }
@@ -5583,9 +5628,10 @@
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ZEPHYR_RUSH",
             "name": "Calamity: Runeword Zephyr / \uB8EC\uC6CC\uB4DC \uC81C\uD53C\uB974",
-            "actorValue": "BowSpeedBonus",
+            "actorValue": "None",
             "hostile": false,
-            "recover": true
+            "recover": true,
+            "archetype": "Script"
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_ZEPHYR_RUSH",
@@ -5630,9 +5676,9 @@
       {
         "id": "runeword_pattern_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PATTERN",
-        "name": "\uB8EC\uC6CC\uB4DC \uD328\uD134 [Tal-Ort-Thul]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uC5F0\uACC4 \uB9AC\uB4EC(\uCE58\uBA85\uD0C0 \u002B15%, 6\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Pattern (Tal-Ort-Thul): 20% on hit / ICD 8s - Combo Rhythm (Crit Chance \u002B15%, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD328\uD134 [Tal-Ort-Thul]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uC5F0\uACC4 \uB9AC\uB4EC(\uCE58\uBA85\uD0C0 \u002B15%, 6\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD328\uD134 [Tal-Ort-Thul]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uC5F0\uACC4 \uB9AC\uB4EC(\uCE58\uBA85\uD0C0 \uD655\uB960 \u002B15%, 6\uCD08, \uBC14\uB2D0\uB77C \uCE58\uBA85\uD0C0 \uD37D\uACFC \uC911\uCCA9 \uC548 \uB428). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Pattern (Tal-Ort-Thul): 20% on hit / ICD 8s - Combo Rhythm (Crit Chance \u002B15%, 6s; does not stack with vanilla critical perks)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD328\uD134 [Tal-Ort-Thul]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uC5F0\uACC4 \uB9AC\uB4EC(\uCE58\uBA85\uD0C0 \uD655\uB960 \u002B15%, 6\uCD08, \uBC14\uB2D0\uB77C \uCE58\uBA85\uD0C0 \uD37D\uACFC \uC911\uCCA9 \uC548 \uB428). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PATTERN_WARD",
@@ -5738,24 +5784,24 @@
       {
         "id": "runeword_strength_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_STRENGTH",
-        "name": "\uB8EC\uC6CC\uB4DC \uC2A4\uD2B8\uB81D\uC2A4 [Amn-Tir]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uB9F9\uD0C0(\uC591\uC190 \uC2A4\uD0AC \u002B25, 6\uCD08). 9\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Strength (Amn-Tir): 20% on hit / ICD 9s - Heavy Strike (Two-Handed \u002B25, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC2A4\uD2B8\uB81D\uC2A4 [Amn-Tir]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uB9F9\uD0C0(\uC591\uC190 \uC2A4\uD0AC \u002B25, 6\uCD08). 9\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC2A4\uD2B8\uB81D\uC2A4 [Amn-Tir]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uC555\uC1C4(\uB300\uC0C1 \uBC29\uC5B4\uB3C4 -100, 6\uCD08). \uC591\uC190 \uBB34\uAE30 \u002B10%. 9\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Strength (Amn-Tir): 20% on hit / ICD 9s - Crushing Blow (Target Armor -100, 6s) \u002B Two-Handed \u002B10%; Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC2A4\uD2B8\uB81D\uC2A4 [Amn-Tir]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uC555\uC1C4(\uB300\uC0C1 \uBC29\uC5B4\uB3C4 -100, 6\uCD08). \uC591\uC190 \uBB34\uAE30 \u002B10%. 9\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_STRENGTH_POWER",
             "name": "Calamity: Runeword Strength / \uB8EC\uC6CC\uB4DC \uC2A4\uD2B8\uB81D\uC2A4",
-            "actorValue": "TwoHandedModifier",
-            "hostile": false,
+            "actorValue": "DamageResist",
+            "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_STRENGTH_POWER",
             "name": "Calamity: Runeword Strength / \uB8EC\uC6CC\uB4DC \uC2A4\uD2B8\uB81D\uC2A4",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_STRENGTH_POWER",
-              "magnitude": 25,
+              "magnitude": 100,
               "duration": 6,
               "area": 0
             }
@@ -5776,13 +5822,14 @@
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_STRENGTH_POWER",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Exposed",
+            "passiveSpellEditorId": "CAFF_SPEL_RW_STRENGTH_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "Skyrim.esm|0x0007331C",
-              "soundForm": "Skyrim.esm|0x00081971",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x0006DE86",
+              "soundForm": "Skyrim.esm|0x0006A165",
+              "target": "Target",
+              "durationSeconds": 0.55,
               "playOn": "Proc",
               "spatialSound": true
             }
@@ -5792,9 +5839,9 @@
       {
         "id": "runeword_edge_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_EDGE",
-        "name": "\uB8EC\uC6CC\uB4DC \uC5E3\uC9C0 [Tir-Tal-Amn]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uC608\uB9AC\uD55C \uC0AC\uACA9(\uAD81\uC220 \u002B20, 7\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Edge (Tir-Tal-Amn): 20% on hit / ICD 8s - Sharp Shot (Marksman \u002B20, 7s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC5E3\uC9C0 [Tir-Tal-Amn]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uC608\uB9AC\uD55C \uC0AC\uACA9(\uAD81\uC220 \u002B20, 7\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC5E3\uC9C0 [Tir-Tal-Amn]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uD30C\uBA78 \uB099\uC778(1.5\uCD08 \uB4A4 \uADF8 \uC801\uC911 \uD53C\uD574\uC758 50%\uAC00 \uB9C8\uBC95 \uD53C\uD574\uB85C \uD130\uC9D0). \uAD81\uC220 \u002B10%. 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Edge (Tir-Tal-Amn): 20% on hit / ICD 8s - Doom Mark (1.5s later, 50% of that hit\u0027s damage bursts as magic damage) \u002B Archery \u002B10%",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC5E3\uC9C0 [Tir-Tal-Amn]: \uC801\uC911 \uC2DC 20% \uD655\uB960\uB85C \uD30C\uBA78 \uB099\uC778(1.5\uCD08 \uB4A4 \uADF8 \uC801\uC911 \uD53C\uD574\uC758 50%\uAC00 \uB9C8\uBC95 \uD53C\uD574\uB85C \uD130\uC9D0). \uAD81\uC220 \u002B10%. 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_EDGE_BLADE",
@@ -5807,10 +5854,12 @@
             "editorId": "CAFF_SPEL_RW_EDGE_BLADE",
             "name": "Calamity: Runeword Edge / \uB8EC\uC6CC\uB4DC \uC5E3\uC9C0",
             "delivery": "Self",
+            "spellType": "Ability",
+            "castType": "ConstantEffect",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_EDGE_BLADE",
-              "magnitude": 20,
-              "duration": 7,
+              "magnitude": 10,
+              "duration": 0,
               "area": 0
             }
           }
@@ -5828,18 +5877,15 @@
           "procChancePercent": 20,
           "icdSeconds": 8,
           "action": {
-            "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_EDGE_BLADE",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
-            "feedback": {
-              "artObjectEditorId": "Skyrim.esm|0x0007331C",
-              "soundForm": "Skyrim.esm|0x00081971",
-              "target": "Owner",
-              "durationSeconds": 0.5,
-              "playOn": "Proc",
-              "spatialSound": true
-            }
+            "type": "DoomMark",
+            "spellEditorId": "CAFF_SPEL_STATUS_DOOM_BURST",
+            "markSpellEditorId": "CAFF_SPEL_STATUS_DOOM_MARK",
+            "delaySeconds": 1.5,
+            "magnitudeScaling": {
+              "source": "HitTotalDealt",
+              "mult": 0.5
+            },
+            "passiveSpellEditorId": "CAFF_SPEL_RW_EDGE_BLADE"
           }
         }
       },
@@ -6097,7 +6143,7 @@
             "name": "Calamity: Runeword Melody Absorb Stamina / \uB8EC\uC6CC\uB4DC \uBA5C\uB85C\uB514 \uAE30\uB825 \uD761\uC218",
             "actorValue": "Stamina",
             "hostile": true,
-            "recover": true,
+            "recover": false,
             "archetype": "Absorb"
           },
           "spell": {
@@ -6330,25 +6376,25 @@
       {
         "id": "runeword_unbending_will_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_UNBENDING_WILL",
-        "name": "\uB8EC\uC6CC\uB4DC \uC5B8\uBCA4\uB529 \uC70C [Fal-Io-Ith-Eld-El-Hel]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uAD73\uAC74\uD55C \uC758\uC9C0(\uBC29\uD328 \uC2A4\uD0AC \u002B30, 7\uCD08). 9\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Unbending Will (Fal-Io-Ith-Eld-El-Hel): 22% on hit / ICD 9s - Unbending Will (Block \u002B30, 7s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC5B8\uBCA4\uB529 \uC70C [Fal-Io-Ith-Eld-El-Hel]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uAD73\uAC74\uD55C \uC758\uC9C0(\uBC29\uD328 \uC2A4\uD0AC \u002B30, 7\uCD08). 9\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC5B8\uBCA4\uB529 \uC70C [Fal-Io-Ith-Eld-El-Hel]: \uC0C1\uD0DC\uAC00 2\uAC00\uC9C0 \uC774\uC0C1 \uAC78\uB9B0 \uC801\uC744 \uB54C\uB9AC\uBA74 \uAD73\uAC74\uD55C \uC758\uC9C0(\uADF8 \uC801\uC911 \uD53C\uD574\uC758 25% \uCD94\uAC00 \uD53C\uD574). \uB9C9\uAE30 \u002B15%. 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Unbending Will (Fal-Io-Ith-Eld-El-Hel): on hit vs 2\u002B statuses / ICD 0.5s - Unbending Will (\u002B25% of the hit\u0027s damage) \u002B Block \u002B15%",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC5B8\uBCA4\uB529 \uC70C [Fal-Io-Ith-Eld-El-Hel]: \uC0C1\uD0DC\uAC00 2\uAC00\uC9C0 \uC774\uC0C1 \uAC78\uB9B0 \uC801\uC744 \uB54C\uB9AC\uBA74 \uAD73\uAC74\uD55C \uC758\uC9C0(\uADF8 \uC801\uC911 \uD53C\uD574\uC758 25% \uCD94\uAC00 \uD53C\uD574). \uB9C9\uAE30 \u002B15%. 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_UNBENDING_WILL_RESOLVE",
             "name": "Calamity: Runeword Unbending Will / \uB8EC\uC6CC\uB4DC \uC5B8\uBCA4\uB529 \uC70C",
-            "actorValue": "BlockModifier",
-            "hostile": false,
-            "recover": true
+            "actorValue": "Health",
+            "hostile": true,
+            "recover": false
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_UNBENDING_WILL_RESOLVE",
             "name": "Calamity: Runeword Unbending Will / \uB8EC\uC6CC\uB4DC \uC5B8\uBCA4\uB529 \uC70C",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_UNBENDING_WILL_RESOLVE",
-              "magnitude": 30,
-              "duration": 7,
+              "magnitude": 1,
+              "duration": 0,
               "area": 0
             }
           }
@@ -6363,46 +6409,54 @@
         "slot": "prefix",
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 22,
-          "icdSeconds": 9,
+          "procChancePercent": 100,
+          "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_UNBENDING_WILL_RESOLVE",
-            "applyTo": "Self",
+            "applyTo": "Target",
             "noHitEffectArt": true,
+            "magnitudeScaling": {
+              "source": "HitTotalDealt",
+              "mult": 0.25
+            },
+            "passiveSpellEditorId": "CAFF_SPEL_RW_UNBENDING_WILL_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "Skyrim.esm|0x0007331C",
-              "soundForm": "Skyrim.esm|0x00081971",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x00074795",
+              "soundForm": "Skyrim.esm|0x0006A165",
+              "target": "Target",
+              "durationSeconds": 0.45,
               "playOn": "Proc",
               "spatialSound": true
             }
-          }
+          },
+          "requireTargetStatusCount": 2
         }
       },
       {
         "id": "runeword_passion_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PASSION",
-        "name": "\uB8EC\uC6CC\uB4DC \uD328\uC158 [Dol-Ort-Eld-Lem]: \uC801\uC911 \uC2DC 26% \uD655\uB960\uB85C \uC815\uC5F4\uC758 \uD658\uC0C1(\uD658\uD639 \uB9C8\uBC95 \u002B20, 7\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Passion (Dol-Ort-Eld-Lem): 26% on hit / ICD 7s - Passionate Illusion (Illusion \u002B20, 7s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD328\uC158 [Dol-Ort-Eld-Lem]: \uC801\uC911 \uC2DC 26% \uD655\uB960\uB85C \uC815\uC5F4\uC758 \uD658\uC0C1(\uD658\uD639 \uB9C8\uBC95 \u002B20, 7\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD328\uC158 [Dol-Ort-Eld-Lem]: \uC801\uC911 \uC2DC 26% \uD655\uB960\uB85C \uC815\uC5F4\uC758 \uBC88\uAC1C(\uBC88\uAC1C \uD53C\uD574 15). \uD658\uD639 \uB9C8\uBC95 \uBE44\uC6A9 -10%. 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC10\uC804 \uCD95\uC801 \u002B100.",
+        "nameEn": "Runeword Passion (Dol-Ort-Eld-Lem): 26% on hit / ICD 7s - Passion Bolt (Shock Damage 15) \u002B Illusion spell cost -10%; Shock build-up \u002B100",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD328\uC158 [Dol-Ort-Eld-Lem]: \uC801\uC911 \uC2DC 26% \uD655\uB960\uB85C \uC815\uC5F4\uC758 \uBC88\uAC1C(\uBC88\uAC1C \uD53C\uD574 15). \uD658\uD639 \uB9C8\uBC95 \uBE44\uC6A9 -10%. 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC10\uC804 \uCD95\uC801 \u002B100.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PASSION_FURY",
             "name": "Calamity: Runeword Passion / \uB8EC\uC6CC\uB4DC \uD328\uC158",
-            "actorValue": "IllusionModifier",
-            "hostile": false,
-            "recover": true
+            "actorValue": "Health",
+            "resistValue": "ResistShock",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_PASSION_FURY",
             "name": "Calamity: Runeword Passion / \uB8EC\uC6CC\uB4DC \uD328\uC158",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_PASSION_FURY",
-              "magnitude": 20,
-              "duration": 7,
+              "magnitude": 15,
+              "duration": 0,
               "area": 0
             }
           }
@@ -6422,13 +6476,15 @@
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_PASSION_FURY",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Shock",
+            "statusAmount": 100,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_PASSION_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "CAFF_ARTO_VFX_FURY_SURGE",
-              "soundForm": "Skyrim.esm|0x000A28C4",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x0005B1BC",
+              "soundForm": "Skyrim.esm|0x0003F206",
+              "target": "Target",
+              "durationSeconds": 0.55,
               "playOn": "Proc",
               "spatialSound": true
             }
@@ -6438,25 +6494,47 @@
       {
         "id": "runeword_lawbringer_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_LAWBRINGER",
-        "name": "\uB8EC\uC6CC\uB4DC \uB85C\uBE0C\uB9C1\uC5B4 [Amn-Lem-Ko]: \uCC98\uCE58 \uC2DC 40% \uD655\uB960\uB85C \uC815\uC758 \uC9D1\uD589(\uC5B8\uB370\uB4DC \uD1F4\uCE58 \uBC94\uC704, ICD 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Lawbringer (Amn-Lem-Ko): 40% on kill / ICD 6s - Justice (Turn Undead AoE, ICD 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uB85C\uBE0C\uB9C1\uC5B4 [Amn-Lem-Ko]: \uCC98\uCE58 \uC2DC 40% \uD655\uB960\uB85C \uC815\uC758 \uC9D1\uD589(\uC5B8\uB370\uB4DC \uD1F4\uCE58 \uBC94\uC704, ICD 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uB85C\uBE0C\uB9C1\uC5B4 [Amn-Lem-Ko]: \uCC98\uCE58 \uC2DC 40% \uD655\uB960\uB85C \uC815\uC758 \uC9D1\uD589(\uC8FC\uBCC0 \uC5B8\uB370\uB4DC \uD1F4\uCE58 8\uCD08, \uB808\uBCA8 60 \uC774\uD558). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Lawbringer (Amn-Lem-Ko): 40% on kill / ICD 6s - Justice (Turn Undead AoE 8s, up to level 60)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uB85C\uBE0C\uB9C1\uC5B4 [Amn-Lem-Ko]: \uCC98\uCE58 \uC2DC 40% \uD655\uB960\uB85C \uC815\uC758 \uC9D1\uD589(\uC8FC\uBCC0 \uC5B8\uB370\uB4DC \uD1F4\uCE58 8\uCD08, \uB808\uBCA8 60 \uC774\uD558). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_LAWBRINGER_HEAL",
-            "name": "Calamity: Runeword Lawbringer Soul Harvest / \uB8EC\uC6CC\uB4DC \uB85C\uBE0C\uB9C1\uC5B4 \uC601\uD63C \uC218\uD655",
+            "name": "Calamity: Runeword Lawbringer Justice / \uB8EC\uC6CC\uB4DC \uB85C\uBE0C\uB9C1\uC5B4 \uC815\uC758 \uC9D1\uD589",
             "actorValue": "Confidence",
             "hostile": true,
-            "recover": false,
-            "archetype": "TurnUndead"
+            "recover": true,
+            "archetype": "TurnUndead",
+            "conditions": [
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013797",
+                "value": 0
+              },
+              {
+                "function": "GetIsRace",
+                "raceForm": "Skyrim.esm|0x001052A3",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013796",
+                "value": 1,
+                "or": true
+              },
+              {
+                "function": "IsUndead",
+                "value": 1
+              }
+            ]
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_LAWBRINGER_HEAL",
-            "name": "Calamity: Runeword Lawbringer Soul Harvest / \uB8EC\uC6CC\uB4DC \uB85C\uBE0C\uB9C1\uC5B4 \uC601\uD63C \uC218\uD655",
+            "name": "Calamity: Runeword Lawbringer Justice / \uB8EC\uC6CC\uB4DC \uB85C\uBE0C\uB9C1\uC5B4 \uC815\uC758 \uC9D1\uD589",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_LAWBRINGER_HEAL",
-              "magnitude": 30,
+              "magnitude": 60,
               "duration": 8,
               "area": 15
             }
@@ -6493,9 +6571,9 @@
       {
         "id": "runeword_voice_of_reason_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_VOICE_OF_REASON",
-        "name": "\uB8EC\uC6CC\uB4DC \uBCF4\uC774\uC2A4 \uC624\uBE0C \uB9AC\uC98C [Lem-Ko-El-Eld]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uB0C9\uAE30 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB0C9\uAE30\uC800\uD56D -35, 6\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Voice of Reason (Lem-Ko-El-Eld): 22% on hit / ICD 7s - Frost Shred (Frost Resist -35, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uBCF4\uC774\uC2A4 \uC624\uBE0C \uB9AC\uC98C [Lem-Ko-El-Eld]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uB0C9\uAE30 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB0C9\uAE30\uC800\uD56D -35, 6\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uBCF4\uC774\uC2A4 \uC624\uBE0C \uB9AC\uC98C [Lem-Ko-El-Eld]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uB0C9\uAE30 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB0C9\uAE30\uC800\uD56D -35, 6\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Voice of Reason (Lem-Ko-El-Eld): 22% on hit / ICD 7s - Frost Shred (Frost Resist -35, 6s); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uBCF4\uC774\uC2A4 \uC624\uBE0C \uB9AC\uC98C [Lem-Ko-El-Eld]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uB0C9\uAE30 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB0C9\uAE30\uC800\uD56D -35, 6\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_VOICE_OF_REASON_CHILL",
@@ -6548,9 +6626,9 @@
       {
         "id": "runeword_crescent_moon_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CRESCENT_MOON",
-        "name": "\uB8EC\uC6CC\uB4DC \uD06C\uB808\uC13C\uD2B8 \uBB38 [Shael-Um-Tir]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uC804\uACA9 \uC800\uD56D \uBD84\uC1C4(\uC801 \uC804\uACA9\uC800\uD56D -35, 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Crescent Moon (Shael-Um-Tir): 24% on hit / ICD 6s - Shock Shred (Shock Resist -35, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD06C\uB808\uC13C\uD2B8 \uBB38 [Shael-Um-Tir]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uC804\uACA9 \uC800\uD56D \uBD84\uC1C4(\uC801 \uC804\uACA9\uC800\uD56D -35, 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD06C\uB808\uC13C\uD2B8 \uBB38 [Shael-Um-Tir]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uC804\uACA9 \uC800\uD56D \uBD84\uC1C4(\uC801 \uC804\uACA9\uC800\uD56D -35, 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Crescent Moon (Shael-Um-Tir): 24% on hit / ICD 6s - Shock Shred (Shock Resist -35, 6s); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD06C\uB808\uC13C\uD2B8 \uBB38 [Shael-Um-Tir]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uC804\uACA9 \uC800\uD56D \uBD84\uC1C4(\uC801 \uC804\uACA9\uC800\uD56D -35, 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_CRESCENT_MOON_LUNAR",
@@ -6603,9 +6681,9 @@
       {
         "id": "runeword_venom_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_VENOM",
-        "name": "\uB8EC\uC6CC\uB4DC \uBCA0\uB118 [Tal-Dol-Mal]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uB3C5 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB3C5\uC800\uD56D -40, 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Venom (Tal-Dol-Mal): 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uBCA0\uB118 [Tal-Dol-Mal]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uB3C5 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB3C5\uC800\uD56D -40, 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uBCA0\uB118 [Tal-Dol-Mal]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uB3C5 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB3C5\uC800\uD56D -40, 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Venom (Tal-Dol-Mal): 24% on hit / ICD 6s - Poison Shred (Poison Resist -40, 6s); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uBCA0\uB118 [Tal-Dol-Mal]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uB3C5 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB3C5\uC800\uD56D -40, 6\uCD08). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_VENOM_POISON",
@@ -6658,25 +6736,25 @@
       {
         "id": "runeword_oath_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_OATH",
-        "name": "\uB8EC\uC6CC\uB4DC \uC624\uC4F0 [Shael-Pul-Mal-Lum]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uC11C\uC57D\uC758 \uD798(\uD55C\uC190 \uC2A4\uD0AC \u002B30, 7\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Oath (Shael-Pul-Mal-Lum): 24% on hit / ICD 7s - Oath Power (One-Handed \u002B30, 7s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC624\uC4F0 [Shael-Pul-Mal-Lum]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uC11C\uC57D\uC758 \uD798(\uD55C\uC190 \uC2A4\uD0AC \u002B30, 7\uCD08). 7\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC624\uC4F0 [Shael-Pul-Mal-Lum]: \uB9E4 \uC801\uC911 \uC2DC \uC11C\uC57D\uC758 \uCE7C\uB0A0(\uCD9C\uD608 2/\uCD08, 3\uCD08). \uD55C\uC190 \uBB34\uAE30 \u002B10%. 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uCD9C\uD608 \uCD95\uC801 \u002B15.",
+        "nameEn": "Runeword Oath (Shael-Pul-Mal-Lum): on every hit / ICD 0.5s - Sworn Blade (Bleed 2/s, 3s) \u002B One-Handed \u002B10%; Bleed build-up \u002B15",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC624\uC4F0 [Shael-Pul-Mal-Lum]: \uB9E4 \uC801\uC911 \uC2DC \uC11C\uC57D\uC758 \uCE7C\uB0A0(\uCD9C\uD608 2/\uCD08, 3\uCD08). \uD55C\uC190 \uBB34\uAE30 \u002B10%. 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uCD9C\uD608 \uCD95\uC801 \u002B15.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_OATH_SWORN",
             "name": "Calamity: Runeword Oath / \uB8EC\uC6CC\uB4DC \uC624\uC4F0",
-            "actorValue": "OneHandedModifier",
-            "hostile": false,
-            "recover": true
+            "actorValue": "Health",
+            "hostile": true,
+            "recover": false
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_OATH_SWORN",
             "name": "Calamity: Runeword Oath / \uB8EC\uC6CC\uB4DC \uC624\uC4F0",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_OATH_SWORN",
-              "magnitude": 30,
-              "duration": 7,
+              "magnitude": 2,
+              "duration": 3,
               "area": 0
             }
           }
@@ -6691,18 +6769,20 @@
         "slot": "prefix",
         "runtime": {
           "trigger": "Hit",
-          "procChancePercent": 24,
-          "icdSeconds": 7,
+          "procChancePercent": 100,
+          "icdSeconds": 0.5,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_OATH_SWORN",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Bleed",
+            "statusAmount": 15,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_OATH_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "Skyrim.esm|0x0007331C",
-              "soundForm": "Skyrim.esm|0x00081971",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x000ABEFA",
+              "soundForm": "Skyrim.esm|0x0003D119",
+              "target": "Target",
+              "durationSeconds": 0.55,
               "playOn": "Proc",
               "spatialSound": true
             }
@@ -6777,9 +6857,9 @@
       {
         "id": "runeword_rift_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RIFT",
-        "name": "\uB8EC\uC6CC\uB4DC \uB9AC\uD504\uD2B8 [Hel-Ko-Lem-Gul]: \uC801\uC911 \uC2DC 8% \uD655\uB960\uB85C \uB9C8\uBC95 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB9C8\uC800 -30, 6\uCD08). 18\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Rift (Hel-Ko-Lem-Gul): 8% on hit / ICD 18s - Magic Shred (Magic Resist -30, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uB9AC\uD504\uD2B8 [Hel-Ko-Lem-Gul]: \uC801\uC911 \uC2DC 8% \uD655\uB960\uB85C \uB9C8\uBC95 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB9C8\uC800 -30, 6\uCD08). 18\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uB9AC\uD504\uD2B8 [Hel-Ko-Lem-Gul]: \uC801\uC911 \uC2DC 8% \uD655\uB960\uB85C \uB9C8\uBC95 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB9C8\uC800 -30, 6\uCD08). 18\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Rift (Hel-Ko-Lem-Gul): 8% on hit / ICD 18s - Magic Shred (Magic Resist -30, 6s); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uB9AC\uD504\uD2B8 [Hel-Ko-Lem-Gul]: \uC801\uC911 \uC2DC 8% \uD655\uB960\uB85C \uB9C8\uBC95 \uC800\uD56D \uBD84\uC1C4(\uC801 \uB9C8\uC800 -30, 6\uCD08). 18\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_RIFT_SPARK",
@@ -6971,7 +7051,7 @@
             "name": "Calamity: Runeword Death Life Steal / \uB8EC\uC6CC\uB4DC \uB370\uC2A4 \uD761\uD608",
             "actorValue": "Health",
             "hostile": true,
-            "recover": true,
+            "recover": false,
             "archetype": "Absorb"
           },
           "spell": {
@@ -7087,9 +7167,9 @@
       {
         "id": "runeword_wind_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WIND",
-        "name": "\uB8EC\uC6CC\uB4DC \uC708\uB4DC [Sur-El]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uC9C8\uD48D \uC555\uBC15(\uC801\uC774 \uC8FC\uB294 \uD53C\uD574 -20%, 5\uCD08). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Wind (Sur-El): 22% on hit / ICD 4s - Gale Pressure (Enemy Damage Dealt -20%, 5s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC708\uB4DC [Sur-El]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uC9C8\uD48D \uC555\uBC15(\uC801\uC774 \uC8FC\uB294 \uD53C\uD574 -20%, 5\uCD08). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC708\uB4DC [Sur-El]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uC9C8\uD48D \uC555\uBC15(\uC801 \uACF5\uACA9\uB825 -20%, 5\uCD08). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Wind (Sur-El): 22% on hit / ICD 4s - Gale Pressure (Enemy Attack Damage -20%, 5s)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC708\uB4DC [Sur-El]: \uC801\uC911 \uC2DC 22% \uD655\uB960\uB85C \uC9C8\uD48D \uC555\uBC15(\uC801 \uACF5\uACA9\uB825 -20%, 5\uCD08). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WIND_PUSH",
@@ -7348,35 +7428,27 @@
       {
         "id": "runeword_fury_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FURY",
-        "name": "\uB8EC\uC6CC\uB4DC \uD4E8\uB9AC [Jah-Gul-Eth]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uACF5\uACA9\uB825 \u002B15% (6\uCD08) \uBC0F \uAE30\uB825 30 \uC989\uC2DC \uD68C\uBCF5. 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on Hit / ICD 12s - Attack Damage \u002B15% for 6s and restore 30 Stamina",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD4E8\uB9AC [Jah-Gul-Eth]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uACF5\uACA9\uB825 \u002B15% (6\uCD08) \uBC0F \uAE30\uB825 30 \uC989\uC2DC \uD68C\uBCF5. 12\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD4E8\uB9AC [Jah-Gul-Eth]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uACA9\uB178\uC758 \uC77C\uACA9(\uD53C\uD574 15). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uCD9C\uD608 \uCD95\uC801 \u002B100.",
+        "nameEn": "Runeword Fury (Jah-Gul-Eth): 24% on hit / ICD 6s - Furious Strike (15 Damage); Bleed build-up \u002B100",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD4E8\uB9AC [Jah-Gul-Eth]: \uC801\uC911 \uC2DC 24% \uD655\uB960\uB85C \uACA9\uB178\uC758 \uC77C\uACA9(\uD53C\uD574 15). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uCD9C\uD608 \uCD95\uC801 \u002B100.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
-            "name": "Calamity: Runeword Fury Weapon Fury / \uB8EC\uC6CC\uB4DC \uD4E8\uB9AC \uACA9\uB178\uC758 \uD750\uB984",
-            "actorValue": "AttackDamageMult",
-            "hostile": false,
-            "recover": true
+            "name": "Calamity: Runeword Fury Furious Strike / \uB8EC\uC6CC\uB4DC \uD4E8\uB9AC \uACA9\uB178\uC758 \uC77C\uACA9",
+            "actorValue": "Health",
+            "hostile": true,
+            "recover": false
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
-            "name": "Calamity: Runeword Fury Weapon Fury / \uB8EC\uC6CC\uB4DC \uD4E8\uB9AC \uACA9\uB178\uC758 \uD750\uB984",
-            "delivery": "Self",
-            "effects": [
-              {
-                "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
-                "magnitude": 0.15,
-                "duration": 6,
-                "area": 0
-              },
-              {
-                "magicEffectEditorId": "CAFF_MGEF_RW_FURY_RESTORE_STAMINA",
-                "magnitude": 30,
-                "duration": 0,
-                "area": 0
-              }
-            ]
+            "name": "Calamity: Runeword Fury Furious Strike / \uB8EC\uC6CC\uB4DC \uD4E8\uB9AC \uACA9\uB178\uC758 \uC77C\uACA9",
+            "delivery": "TargetActor",
+            "effect": {
+              "magicEffectEditorId": "CAFF_MGEF_RW_FURY_LIFESTEAL",
+              "magnitude": 15,
+              "duration": 0,
+              "area": 0
+            }
           }
         },
         "kid": {
@@ -7390,12 +7462,13 @@
         "runtime": {
           "trigger": "Hit",
           "procChancePercent": 24,
-          "icdSeconds": 12,
+          "icdSeconds": 6,
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_FURY_LIFESTEAL",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Bleed",
+            "statusAmount": 100,
             "feedback": {
               "artObjectEditorId": "CAFF_ARTO_VFX_FURY_SURGE",
               "soundForm": "Skyrim.esm|0x000A28C4",
@@ -7537,13 +7610,13 @@
       {
         "id": "runeword_destruction_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DESTRUCTION",
-        "name": "\uB8EC\uC6CC\uB4DC \uD30C\uAD34 [Vex-Lo-Ber-Jah-Ko]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uC804\uACA9 \uD3ED\uD48D(\uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 4%, \uC804\uACA9 \uD53C\uD574 10~40/\uCD08, 5\uCD08, \uBC18\uACBD 350). 5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC10\uC804 \uCD95\uC801 \u002B70.",
-        "nameEn": "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius 350); Shock build-up \u002B70",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD30C\uAD34 [Vex-Lo-Ber-Jah-Ko]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uC804\uACA9 \uD3ED\uD48D(\uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 4%, \uC804\uACA9 \uD53C\uD574 10~40/\uCD08, 5\uCD08, \uBC18\uACBD 350). 5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC10\uC804 \uCD95\uC801 \u002B70.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD30C\uAD34 [Vex-Lo-Ber-Jah-Ko]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uC804\uACA9 \uD3ED\uD48D(\uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 4%, \uC804\uACA9 \uD53C\uD574 10~40/\uCD08, 5\uCD08, \uBC18\uACBD \uC57D 5m). 5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC10\uC804 \uCD95\uC801 \u002B70.",
+        "nameEn": "Runeword Destruction (Vex-Lo-Ber-Jah-Ko): 30% on hit / ICD 5s - Shock Storm (4% of Physical Hit Damage, 10-40 Shock Damage/s, 5s, Radius ~5m); Shock build-up \u002B70",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD30C\uAD34 [Vex-Lo-Ber-Jah-Ko]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uC804\uACA9 \uD3ED\uD48D(\uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 4%, \uC804\uACA9 \uD53C\uD574 10~40/\uCD08, 5\uCD08, \uBC18\uACBD \uC57D 5m). 5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uAC10\uC804 \uCD95\uC801 \u002B70.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_DESTRUCTION_BLEED",
-            "name": "Calamity: Runeword Destruction Bleed / \uB8EC\uC6CC\uB4DC \uD30C\uAD34 \uCD9C\uD608",
+            "name": "Calamity: Runeword Destruction Shock Storm / \uB8EC\uC6CC\uB4DC \uD30C\uAD34 \uC804\uACA9 \uD3ED\uD48D",
             "actorValue": "Health",
             "resistValue": "ResistShock",
             "magicSkill": "Destruction",
@@ -7552,13 +7625,13 @@
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_DESTRUCTION_BLEED",
-            "name": "Calamity: Runeword Destruction Bleed / \uB8EC\uC6CC\uB4DC \uD30C\uAD34 \uCD9C\uD608",
+            "name": "Calamity: Runeword Destruction Shock Storm / \uB8EC\uC6CC\uB4DC \uD30C\uAD34 \uC804\uACA9 \uD3ED\uD48D",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_DESTRUCTION_BLEED",
               "magnitude": 10,
               "duration": 5,
-              "area": 350
+              "area": 16
             }
           }
         },
@@ -7603,9 +7676,9 @@
       {
         "id": "runeword_ice_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ICE",
-        "name": "\uB8EC\uC6CC\uB4DC \uC544\uC774\uC2A4 [Amn-Shael-Jah-Lo]: \uB9E4 \uC801\uC911 \uC2DC \uB3D9\uACB0 \uD30C\uD3B8(\uC801 \uB0C9\uAE30\uC800\uD56D -30, 6\uCD08). 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0.5s - Frost Shards (Target Frost Resist -30, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC544\uC774\uC2A4 [Amn-Shael-Jah-Lo]: \uB9E4 \uC801\uC911 \uC2DC \uB3D9\uACB0 \uD30C\uD3B8(\uC801 \uB0C9\uAE30\uC800\uD56D -30, 6\uCD08). 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC544\uC774\uC2A4 [Amn-Shael-Jah-Lo]: \uB9E4 \uC801\uC911 \uC2DC \uB3D9\uACB0 \uD30C\uD3B8(\uC801 \uB0C9\uAE30\uC800\uD56D -30, 6\uCD08). 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Ice (Amn-Shael-Jah-Lo): 100% on hit / ICD 0.5s - Frost Shards (Target Frost Resist -30, 6s); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC544\uC774\uC2A4 [Amn-Shael-Jah-Lo]: \uB9E4 \uC801\uC911 \uC2DC \uB3D9\uACB0 \uD30C\uD3B8(\uC801 \uB0C9\uAE30\uC800\uD56D -30, 6\uCD08). 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ICE_FROST_SHRED",
@@ -7724,9 +7797,9 @@
       {
         "id": "runeword_pride_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PRIDE",
-        "name": "\uB8EC\uC6CC\uB4DC \uD504\uB77C\uC774\uB4DC [Cham-Sur-Io-Lo]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB0C9\uAE30 \uCDA9\uACA9\uD30C(\uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 16%, \uB0C9\uAE30 \uD53C\uD574 30~200, \uBC18\uACBD 250). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uBE59\uACB0 \uCD95\uC801 \u002B60.",
-        "nameEn": "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius 250); Freeze build-up \u002B60",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD504\uB77C\uC774\uB4DC [Cham-Sur-Io-Lo]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB0C9\uAE30 \uCDA9\uACA9\uD30C(\uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 16%, \uB0C9\uAE30 \uD53C\uD574 30~200, \uBC18\uACBD 250). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uBE59\uACB0 \uCD95\uC801 \u002B60.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD504\uB77C\uC774\uB4DC [Cham-Sur-Io-Lo]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB0C9\uAE30 \uCDA9\uACA9\uD30C(\uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 16%, \uB0C9\uAE30 \uD53C\uD574 30~200, \uBC18\uACBD \uC57D 3.5m). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uBE59\uACB0 \uCD95\uC801 \u002B60.",
+        "nameEn": "Runeword Pride (Cham-Sur-Io-Lo): 30% on hit / ICD 4s - Frost Impact (16% of Physical Hit Damage, 30-200 Frost Damage, Radius ~3.5m); Freeze build-up \u002B60",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD504\uB77C\uC774\uB4DC [Cham-Sur-Io-Lo]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB0C9\uAE30 \uCDA9\uACA9\uD30C(\uBB3C\uB9AC \uC801\uC911 \uD53C\uD574\uC758 16%, \uB0C9\uAE30 \uD53C\uD574 30~200, \uBC18\uACBD \uC57D 3.5m). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uBE59\uACB0 \uCD95\uC801 \u002B60.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PRIDE_CHILL",
@@ -7745,7 +7818,7 @@
               "magicEffectEditorId": "CAFF_MGEF_RW_PRIDE_CHILL",
               "magnitude": 30,
               "duration": 0,
-              "area": 250
+              "area": 11
             }
           }
         },
@@ -7916,7 +7989,7 @@
           "icdSeconds": 5,
           "action": {
             "type": "CastSpell",
-            "spellEditorId": "CAFF_SPEL_RW_CHAOS_BLEED",
+            "spellEditorId": "CAFF_SPEL_RW_OBSESSION_ARCANE",
             "magnitudeOverride": 75,
             "applyTo": "Target",
             "noHitEffectArt": false,
@@ -7943,9 +8016,9 @@
       {
         "id": "runeword_mist_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MIST",
-        "name": "\uB8EC\uC6CC\uB4DC \uBBF8\uC2A4\uD2B8 [Cham-Shael-Gul-Thul-Ith]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB9C8\uB825 \uBD95\uAD34(\uB9C8\uB098 \uC7AC\uC0DD -100%\u00B7\uB9C8\uBC95\uC800\uD56D -30, 6\uCD08, \uB9C8\uB098 75 \uC989\uC2DC \uC18C\uC9C4). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Mist (Cham-Shael-Gul-Thul-Ith): 30% on hit / ICD 6s - Arcane Collapse (Magicka Regen -100% and Magic Resist -30 for 6s, instant Magicka drain 75)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uBBF8\uC2A4\uD2B8 [Cham-Shael-Gul-Thul-Ith]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB9C8\uB825 \uBD95\uAD34(\uB9C8\uB098 \uC7AC\uC0DD -100%\u00B7\uB9C8\uBC95\uC800\uD56D -30, 6\uCD08, \uB9C8\uB098 75 \uC989\uC2DC \uC18C\uC9C4). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uBBF8\uC2A4\uD2B8 [Cham-Shael-Gul-Thul-Ith]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB9C8\uB825 \uBD95\uAD34(\uB9C8\uB098 \uC7AC\uC0DD -100%\u00B7\uB9C8\uBC95\uC800\uD56D -30, 6\uCD08, \uB9C8\uB098 75 \uC989\uC2DC \uC18C\uC9C4). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Mist (Cham-Shael-Gul-Thul-Ith): 30% on hit / ICD 6s - Arcane Collapse (Magicka Regen -100% and Magic Resist -30 for 6s, instant Magicka drain 75); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uBBF8\uC2A4\uD2B8 [Cham-Shael-Gul-Thul-Ith]: \uC801\uC911 \uC2DC 30% \uD655\uB960\uB85C \uB9C8\uB825 \uBD95\uAD34(\uB9C8\uB098 \uC7AC\uC0DD -100%\u00B7\uB9C8\uBC95\uC800\uD56D -30, 6\uCD08, \uB9C8\uB098 75 \uC989\uC2DC \uC18C\uC9C4). 6\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_MIST_FOG",
@@ -7966,7 +8039,7 @@
                 "area": 0
               },
               {
-                "magicEffectEditorId": "CAFF_MGEF_HIT_SHOCK_OVERLOAD",
+                "magicEffectEditorId": "CAFF_MGEF_RW_MIST_MANA_DRAIN",
                 "magnitude": 75,
                 "duration": 0,
                 "area": 0
@@ -8012,17 +8085,47 @@
       {
         "id": "runeword_nadir_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_NADIR",
-        "name": "\uB8EC\uC6CC\uB4DC \uB098\uB514\uB974 [Nef-Tir]: \uD53C\uACA9 \uC2DC 12% \uD655\uB960\uB85C \uACF5\uD3EC\uC758 \uB098\uB77D(\uACF5\uD3EC 5\uCD08). 16\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Nadir (Nef-Tir): 12% on hit taken / ICD 16s - Nadir of Fear (Fear 5s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uB098\uB514\uB974 [Nef-Tir]: \uD53C\uACA9 \uC2DC 12% \uD655\uB960\uB85C \uACF5\uD3EC\uC758 \uB098\uB77D(\uACF5\uD3EC 5\uCD08). 16\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uB098\uB514\uB974 [Nef-Tir]: \uD53C\uACA9 \uC2DC 12% \uD655\uB960\uB85C \uACF5\uD3EC\uC758 \uB098\uB77D(\uACF5\uD3EC 5\uCD08, \uB808\uBCA8 60 \uC774\uD558). 16\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Nadir (Nef-Tir): 12% on hit taken / ICD 16s - Nadir of Fear (Fear 5s, up to level 60)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uB098\uB514\uB974 [Nef-Tir]: \uD53C\uACA9 \uC2DC 12% \uD655\uB960\uB85C \uACF5\uD3EC\uC758 \uB098\uB77D(\uACF5\uD3EC 5\uCD08, \uB808\uBCA8 60 \uC774\uD558). 16\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_NADIR_WARD",
             "name": "Calamity: Runeword Nadir / \uB8EC\uC6CC\uB4DC \uB098\uB514\uB974",
             "actorValue": "Confidence",
             "hostile": true,
-            "recover": false,
-            "archetype": "Demoralize"
+            "recover": true,
+            "archetype": "Demoralize",
+            "conditions": [
+              {
+                "function": "IsCommandedActor",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013796",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013797",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00035D59",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x0001397A",
+                "value": 0
+              },
+              {
+                "function": "IsUndead",
+                "value": 0
+              }
+            ]
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_NADIR_WARD",
@@ -8030,7 +8133,7 @@
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_NADIR_WARD",
-              "magnitude": 20,
+              "magnitude": 60,
               "duration": 5,
               "area": 0
             }
@@ -8176,25 +8279,25 @@
       {
         "id": "runeword_myth_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_MYTH",
-        "name": "\uB8EC\uC6CC\uB4DC \uBBF8\uC2A4 [Hel-Amn-Nef]: \uD53C\uACA9 \uC2DC 20% \uD655\uB960\uB85C \uC2E0\uD654\uC758 \uAC11\uC637(\uC911\uAC11 \uC2A4\uD0AC \u002B25, 7\uCD08). 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Myth (Hel-Amn-Nef): 20% on hit taken / ICD 11s - Mythic Armor (Heavy Armor \u002B25, 7s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uBBF8\uC2A4 [Hel-Amn-Nef]: \uD53C\uACA9 \uC2DC 20% \uD655\uB960\uB85C \uC2E0\uD654\uC758 \uAC11\uC637(\uC911\uAC11 \uC2A4\uD0AC \u002B25, 7\uCD08). 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uBBF8\uC2A4 [Hel-Amn-Nef]: \uD53C\uACA9 \uC2DC 20% \uD655\uB960\uB85C \uC2E0\uD654\uC758 \uAC00\uC2DC(\uACF5\uACA9\uC790\uC5D0\uAC8C \uD53C\uD574 10). \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%. 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uCD9C\uD608 \uCD95\uC801 \u002B100.",
+        "nameEn": "Runeword Myth (Hel-Amn-Nef): 20% on hit taken / ICD 11s - Mythic Thorns (10 Damage to the attacker) \u002B 10% less damage taken while wearing heavy armor; Bleed build-up \u002B100",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uBBF8\uC2A4 [Hel-Amn-Nef]: \uD53C\uACA9 \uC2DC 20% \uD655\uB960\uB85C \uC2E0\uD654\uC758 \uAC00\uC2DC(\uACF5\uACA9\uC790\uC5D0\uAC8C \uD53C\uD574 10). \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%. 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uCD9C\uD608 \uCD95\uC801 \u002B100.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_MYTH_SHIELD",
             "name": "Calamity: Runeword Myth / \uB8EC\uC6CC\uB4DC \uBBF8\uC2A4",
-            "actorValue": "HeavyArmorModifier",
-            "hostile": false,
-            "recover": true
+            "actorValue": "Health",
+            "hostile": true,
+            "recover": false
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_MYTH_SHIELD",
             "name": "Calamity: Runeword Myth / \uB8EC\uC6CC\uB4DC \uBBF8\uC2A4",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_MYTH_SHIELD",
-              "magnitude": 25,
-              "duration": 7,
+              "magnitude": 10,
+              "duration": 0,
               "area": 0
             }
           }
@@ -8214,13 +8317,15 @@
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_MYTH_SHIELD",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Bleed",
+            "statusAmount": 100,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_MYTH_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "Skyrim.esm|0x0007331C",
-              "soundForm": "Skyrim.esm|0x00081971",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x000ABEFA",
+              "soundForm": "Skyrim.esm|0x0003D119",
+              "target": "Target",
+              "durationSeconds": 0.55,
               "playOn": "Proc",
               "spatialSound": true
             }
@@ -8284,17 +8389,45 @@
       {
         "id": "runeword_radiance_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_RADIANCE",
-        "name": "\uB8EC\uC6CC\uB4DC \uB798\uB514\uC5B8\uC2A4 [Nef-Sol-Ith]: \uD53C\uACA9 \uC2DC 15% \uD655\uB960\uB85C \uAD11\uCC44(\uC0DD\uBA85 \uAC10\uC9C0 200m, 30\uCD08). 40\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Radiance (Nef-Sol-Ith): 15% on hit taken / ICD 40s - Radiance (Detect Life 200m, 30s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uB798\uB514\uC5B8\uC2A4 [Nef-Sol-Ith]: \uD53C\uACA9 \uC2DC 15% \uD655\uB960\uB85C \uAD11\uCC44(\uC0DD\uBA85 \uAC10\uC9C0 200m, 30\uCD08). 40\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uB798\uB514\uC5B8\uC2A4 [Nef-Sol-Ith]: \uD53C\uACA9 \uC2DC 15% \uD655\uB960\uB85C \uAD11\uCC44(\uC0DD\uBA85 \uAC10\uC9C0 \uBC18\uACBD \uC57D 60m, 30\uCD08). 40\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Radiance (Nef-Sol-Ith): 15% on hit taken / ICD 40s - Radiance (Detect Life ~60m radius, 30s)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uB798\uB514\uC5B8\uC2A4 [Nef-Sol-Ith]: \uD53C\uACA9 \uC2DC 15% \uD655\uB960\uB85C \uAD11\uCC44(\uC0DD\uBA85 \uAC10\uC9C0 \uBC18\uACBD \uC57D 60m, 30\uCD08). 40\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_RADIANCE_GUARD",
             "name": "Calamity: Runeword Radiance / \uB8EC\uC6CC\uB4DC \uB798\uB514\uC5B8\uC2A4",
-            "actorValue": "DetectLifeRange",
+            "actorValue": "None",
             "hostile": false,
             "recover": true,
-            "archetype": "DetectLife"
+            "archetype": "DetectLife",
+            "hitShaderForm": "Skyrim.esm|0x000DC209",
+            "fxPersist": true,
+            "conditions": [
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013796",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x0001397A",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013797",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x000F82F4",
+                "value": 0
+              },
+              {
+                "function": "IsUndead",
+                "value": 0
+              }
+            ]
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_RADIANCE_GUARD",
@@ -8302,9 +8435,9 @@
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_RADIANCE_GUARD",
-              "magnitude": 200,
+              "magnitude": 0,
               "duration": 30,
-              "area": 0
+              "area": 200
             }
           }
         },
@@ -8418,17 +8551,47 @@
       {
         "id": "runeword_peace_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_PEACE",
-        "name": "\uB8EC\uC6CC\uB4DC \uD53C\uC2A4 [Shael-Thul-Amn]: \uD53C\uACA9 \uC2DC 10% \uD655\uB960\uB85C \uD3C9\uD654\uC758 \uD30C\uB3D9(\uC9C4\uC815 6\uCD08). 16\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Peace (Shael-Thul-Amn): 10% on hit taken / ICD 16s - Wave of Peace (Calm 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD53C\uC2A4 [Shael-Thul-Amn]: \uD53C\uACA9 \uC2DC 10% \uD655\uB960\uB85C \uD3C9\uD654\uC758 \uD30C\uB3D9(\uC9C4\uC815 6\uCD08). 16\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD53C\uC2A4 [Shael-Thul-Amn]: \uD53C\uACA9 \uC2DC 10% \uD655\uB960\uB85C \uD3C9\uD654\uC758 \uD30C\uB3D9(\uC9C4\uC815 6\uCD08, \uB808\uBCA8 60 \uC774\uD558). 16\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Peace (Shael-Thul-Amn): 10% on hit taken / ICD 16s - Wave of Peace (Calm 6s, up to level 60)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD53C\uC2A4 [Shael-Thul-Amn]: \uD53C\uACA9 \uC2DC 10% \uD655\uB960\uB85C \uD3C9\uD654\uC758 \uD30C\uB3D9(\uC9C4\uC815 6\uCD08, \uB808\uBCA8 60 \uC774\uD558). 16\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_PEACE_BARRIER",
             "name": "Calamity: Runeword Peace / \uB8EC\uC6CC\uB4DC \uD53C\uC2A4",
             "actorValue": "Aggression",
             "hostile": true,
-            "recover": false,
-            "archetype": "Calm"
+            "recover": true,
+            "archetype": "Calm",
+            "conditions": [
+              {
+                "function": "IsCommandedActor",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013796",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013797",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00035D59",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x0001397A",
+                "value": 0
+              },
+              {
+                "function": "IsUndead",
+                "value": 0
+              }
+            ]
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_PEACE_BARRIER",
@@ -8436,7 +8599,7 @@
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_PEACE_BARRIER",
-              "magnitude": 25,
+              "magnitude": 60,
               "duration": 6,
               "area": 0
             }
@@ -8527,25 +8690,27 @@
       {
         "id": "runeword_cure_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_CURE",
-        "name": "\uB8EC\uC6CC\uB4DC \uD050\uC5B4 [Shael-Io-Tal]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uCE58\uC720\uC758 \uAC01\uC131(\uD68C\uBCF5 \uB9C8\uBC95 \u002B20, 8\uCD08). 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Cure (Shael-Io-Tal): 22% on hit taken / ICD 11s - Healing Awakening (Restoration \u002B20, 8s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD050\uC5B4 [Shael-Io-Tal]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uCE58\uC720\uC758 \uAC01\uC131(\uD68C\uBCF5 \uB9C8\uBC95 \u002B20, 8\uCD08). 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD050\uC5B4 [Shael-Io-Tal]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uC815\uD654\uC758 \uD0DC\uC591(\uACF5\uACA9\uC790\uC5D0\uAC8C \uD654\uC5FC \uD53C\uD574 20). \uD68C\uBCF5 \uB9C8\uBC95 \uBE44\uC6A9 -10%. 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uD654\uC0C1 2\uC911\uCCA9.",
+        "nameEn": "Runeword Cure (Shael-Io-Tal): 22% on hit taken / ICD 11s - Cleansing Sun (Fire Damage 20 to the attacker) \u002B Restoration spell cost -10%; Burning \u002B2 stacks",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD050\uC5B4 [Shael-Io-Tal]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uC815\uD654\uC758 \uD0DC\uC591(\uACF5\uACA9\uC790\uC5D0\uAC8C \uD654\uC5FC \uD53C\uD574 20). \uD68C\uBCF5 \uB9C8\uBC95 \uBE44\uC6A9 -10%. 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uD654\uC0C1 2\uC911\uCCA9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_CURE_HEAL",
             "name": "Calamity: Runeword Cure / \uB8EC\uC6CC\uB4DC \uD050\uC5B4",
-            "actorValue": "RestorationModifier",
-            "hostile": false,
-            "recover": true
+            "actorValue": "Health",
+            "resistValue": "ResistFire",
+            "magicSkill": "Restoration",
+            "hostile": true,
+            "recover": false
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_CURE_HEAL",
             "name": "Calamity: Runeword Cure / \uB8EC\uC6CC\uB4DC \uD050\uC5B4",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_CURE_HEAL",
               "magnitude": 20,
-              "duration": 8,
+              "duration": 0,
               "area": 0
             }
           }
@@ -8565,13 +8730,15 @@
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_CURE_HEAL",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Burning",
+            "statusAmount": 2,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_CURE_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "CAFF_ARTO_VFX_PROC_EMERGENCY_HEAL",
-              "soundForm": "Skyrim.esm|0x0003F361",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x0002ACD7",
+              "soundForm": "Skyrim.esm|0x0003C8FC",
+              "target": "Target",
+              "durationSeconds": 0.55,
               "playOn": "Proc",
               "spatialSound": true
             }
@@ -8590,7 +8757,8 @@
             "name": "Calamity: Runeword Ground / \uB8EC\uC6CC\uB4DC \uADF8\uB77C\uC6B4\uB4DC",
             "actorValue": "ShoutRecoveryMult",
             "hostile": false,
-            "recover": true
+            "recover": true,
+            "archetype": "PeakValueModifier"
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_GROUND_ANCHOR",
@@ -8598,7 +8766,7 @@
             "delivery": "Self",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_GROUND_ANCHOR",
-              "magnitude": 50,
+              "magnitude": 0.5,
               "duration": 8,
               "area": 0
             }
@@ -8635,25 +8803,27 @@
       {
         "id": "runeword_hearth_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_HEARTH",
-        "name": "\uB8EC\uC6CC\uB4DC \uD558\uC2A4 [Shael-Io-Thul]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uC18C\uD658\uC758 \uBD88\uC528(\uC18C\uD658 \uB9C8\uBC95 \u002B20, 7\uCD08). 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Hearth (Shael-Io-Thul): 22% on hit taken / ICD 11s - Conjuration Ember (Conjuration \u002B20, 7s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD558\uC2A4 [Shael-Io-Thul]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uC18C\uD658\uC758 \uBD88\uC528(\uC18C\uD658 \uB9C8\uBC95 \u002B20, 7\uCD08). 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD558\uC2A4 [Shael-Io-Thul]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uC11C\uB9AC \uBC18\uACA9(\uACF5\uACA9\uC790\uC5D0\uAC8C \uB0C9\uAE30 \uD53C\uD574 10). \uB0C9\uAE30 \uC800\uD56D \u002B20. 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uBE59\uACB0 \uCD95\uC801 \u002B100.",
+        "nameEn": "Runeword Hearth (Shael-Io-Thul): 22% on hit taken / ICD 11s - Frost Riposte (Frost Damage 10 to the attacker) \u002B Frost Resist \u002B20; Freeze build-up \u002B100",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD558\uC2A4 [Shael-Io-Thul]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uC11C\uB9AC \uBC18\uACA9(\uACF5\uACA9\uC790\uC5D0\uAC8C \uB0C9\uAE30 \uD53C\uD574 10). \uB0C9\uAE30 \uC800\uD56D \u002B20. 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uBE59\uACB0 \uCD95\uC801 \u002B100.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_HEARTH_WARMTH",
             "name": "Calamity: Runeword Hearth / \uB8EC\uC6CC\uB4DC \uD558\uC2A4",
-            "actorValue": "ConjurationModifier",
-            "hostile": false,
-            "recover": true
+            "actorValue": "Health",
+            "resistValue": "ResistFrost",
+            "magicSkill": "Destruction",
+            "hostile": true,
+            "recover": false
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_HEARTH_WARMTH",
             "name": "Calamity: Runeword Hearth / \uB8EC\uC6CC\uB4DC \uD558\uC2A4",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_HEARTH_WARMTH",
-              "magnitude": 20,
-              "duration": 7,
+              "magnitude": 10,
+              "duration": 0,
               "area": 0
             }
           }
@@ -8673,13 +8843,15 @@
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_HEARTH_WARMTH",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Freeze",
+            "statusAmount": 100,
+            "passiveSpellEditorId": "CAFF_SPEL_RW_HEARTH_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "CAFF_ARTO_VFX_PROC_PHYSICAL_BULWARK",
-              "soundForm": "Skyrim.esm|0x000571B2",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x0004253F",
+              "soundForm": "Skyrim.esm|0x0003E5CC",
+              "target": "Target",
+              "durationSeconds": 0.55,
               "playOn": "Proc",
               "spatialSound": true
             }
@@ -8984,9 +9156,9 @@
       {
         "id": "runeword_wealth_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_WEALTH",
-        "name": "\uB8EC\uC6CC\uB4DC \uC6F0\uC2A4 [Lem-Ko-Tir]: \uC0C1\uC2DC \uC18C\uC9C0 \uBB34\uAC8C \u002B75 \uBC0F \uD654\uC220 \u002B15.",
-        "nameEn": "Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight \u002B75 and Speechcraft \u002B15",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC6F0\uC2A4 [Lem-Ko-Tir]: \uC0C1\uC2DC \uC18C\uC9C0 \uBB34\uAC8C \u002B75 \uBC0F \uD654\uC220 \u002B15.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC6F0\uC2A4 [Lem-Ko-Tir]: \uC0C1\uC2DC \uC18C\uC9C0 \uBB34\uAC8C \u002B75 \uBC0F \uAC70\uB798 \uAC00\uACA9 15% \uC720\uB9AC.",
+        "nameEn": "Runeword Wealth (Lem-Ko-Tir): Always active - Carry Weight \u002B75 and prices 15% better",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC6F0\uC2A4 [Lem-Ko-Tir]: \uC0C1\uC2DC \uC18C\uC9C0 \uBB34\uAC8C \u002B75 \uBC0F \uAC70\uB798 \uAC00\uACA9 15% \uC720\uB9AC.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_WEALTH_VIGOR",
@@ -9113,25 +9285,25 @@
       {
         "id": "runeword_enlightenment_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_ENLIGHTENMENT",
-        "name": "\uB8EC\uC6CC\uB4DC \uC778\uB77C\uC774\uD2B8\uBA3C\uD2B8 [Pul-Ral-Sol]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uAE68\uB2EC\uC74C(\uBCC0\uD654\uB9C8\uBC95 \u002B25, 8\uCD08). 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Enlightenment (Pul-Ral-Sol): 22% on hit taken / ICD 11s - Enlightenment (Alteration \u002B25, 8s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC778\uB77C\uC774\uD2B8\uBA3C\uD2B8 [Pul-Ral-Sol]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uAE68\uB2EC\uC74C(\uBCC0\uD654\uB9C8\uBC95 \u002B25, 8\uCD08). 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC778\uB77C\uC774\uD2B8\uBA3C\uD2B8 [Pul-Ral-Sol]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uAE68\uB2EC\uC74C\uC758 \uB208(\uACF5\uACA9\uC790 \uB9C8\uBC95 \uC800\uD56D -25, 6\uCD08). \uBCC0\uD654 \uB9C8\uBC95 \uBE44\uC6A9 -10%. 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Enlightenment (Pul-Ral-Sol): 22% on hit taken / ICD 11s - Eye of Insight (Attacker Magic Resist -25, 6s) \u002B Alteration spell cost -10%; Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC778\uB77C\uC774\uD2B8\uBA3C\uD2B8 [Pul-Ral-Sol]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uAE68\uB2EC\uC74C\uC758 \uB208(\uACF5\uACA9\uC790 \uB9C8\uBC95 \uC800\uD56D -25, 6\uCD08). \uBCC0\uD654 \uB9C8\uBC95 \uBE44\uC6A9 -10%. 11\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_ENLIGHTENMENT_AURA",
             "name": "Calamity: Runeword Enlightenment / \uB8EC\uC6CC\uB4DC \uC778\uB77C\uC774\uD2B8\uBA3C\uD2B8",
-            "actorValue": "AlterationModifier",
-            "hostile": false,
+            "actorValue": "ResistMagic",
+            "hostile": true,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_ENLIGHTENMENT_AURA",
             "name": "Calamity: Runeword Enlightenment / \uB8EC\uC6CC\uB4DC \uC778\uB77C\uC774\uD2B8\uBA3C\uD2B8",
-            "delivery": "Self",
+            "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_ENLIGHTENMENT_AURA",
               "magnitude": 25,
-              "duration": 8,
+              "duration": 6,
               "area": 0
             }
           }
@@ -9151,13 +9323,14 @@
           "action": {
             "type": "CastSpell",
             "spellEditorId": "CAFF_SPEL_RW_ENLIGHTENMENT_AURA",
-            "applyTo": "Self",
-            "noHitEffectArt": true,
+            "applyTo": "Target",
+            "statusTag": "Exposed",
+            "passiveSpellEditorId": "CAFF_SPEL_RW_ENLIGHTENMENT_PASSIVE",
             "feedback": {
-              "artObjectEditorId": "Skyrim.esm|0x0007331C",
-              "soundForm": "Skyrim.esm|0x00081971",
-              "target": "Owner",
-              "durationSeconds": 0.5,
+              "artObjectEditorId": "Skyrim.esm|0x000ABF0E",
+              "soundForm": "Skyrim.esm|0x0003D119",
+              "target": "Target",
+              "durationSeconds": 0.55,
               "playOn": "Proc",
               "spatialSound": true
             }
@@ -9284,7 +9457,7 @@
             "name": "Calamity: Runeword Gloom Absorb Magicka / \uB8EC\uC6CC\uB4DC \uAE00\uB8F8 \uB9C8\uB825 \uD761\uC218",
             "actorValue": "Magicka",
             "hostile": true,
-            "recover": true,
+            "recover": false,
             "archetype": "Absorb"
           },
           "spell": {
@@ -9330,9 +9503,9 @@
       {
         "id": "runeword_stone_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_STONE",
-        "name": "\uB8EC\uC6CC\uB4DC \uC2A4\uD1A4 [Shael-Um-Pul-Lum]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uBC29\uC5B4\uAD6C \uBD84\uC1C4(\uC801 \uBC29\uC5B4\uB3C4 -50, 6\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Stone (Shael-Um-Pul-Lum): 22% on hit taken / ICD 8s - Armor Crush (Target Armor -50, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uC2A4\uD1A4 [Shael-Um-Pul-Lum]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uBC29\uC5B4\uAD6C \uBD84\uC1C4(\uC801 \uBC29\uC5B4\uB3C4 -50, 6\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uC2A4\uD1A4 [Shael-Um-Pul-Lum]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uBC29\uC5B4\uAD6C \uBD84\uC1C4(\uC801 \uBC29\uC5B4\uB3C4 -50, 6\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Stone (Shael-Um-Pul-Lum): 22% on hit taken / ICD 8s - Armor Crush (Target Armor -50, 6s); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uC2A4\uD1A4 [Shael-Um-Pul-Lum]: \uD53C\uACA9 \uC2DC 22% \uD655\uB960\uB85C \uBC29\uC5B4\uAD6C \uBD84\uC1C4(\uC801 \uBC29\uC5B4\uB3C4 -50, 6\uCD08). 8\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_STONE_WALL",
@@ -9635,25 +9808,59 @@
       {
         "id": "runeword_delirium_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_DELIRIUM",
-        "name": "\uB8EC\uC6CC\uB4DC \uB51C\uB9AC\uB9AC\uC5C4 [Lem-Ist-Io]: \uC801\uC911 \uC2DC 10% \uD655\uB960\uB85C \uC815\uC2E0\uCC29\uB780(\uAD11\uB780 5\uCD08). 15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Delirium (Lem-Ist-Io): 10% on hit / ICD 15s - Delirium (Frenzy 5s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uB51C\uB9AC\uB9AC\uC5C4 [Lem-Ist-Io]: \uC801\uC911 \uC2DC 10% \uD655\uB960\uB85C \uC815\uC2E0\uCC29\uB780(\uAD11\uB780 5\uCD08). 15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uB51C\uB9AC\uB9AC\uC5C4 [Lem-Ist-Io]: \uC801\uC911 \uC2DC 10% \uD655\uB960\uB85C \uC815\uC2E0\uCC29\uB780(\uAD11\uB780 5\uCD08, \uB808\uBCA8 60 \uC774\uD558). 15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Runeword Delirium (Lem-Ist-Io): 10% on hit / ICD 15s - Delirium (Frenzy 5s, up to level 60)",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uB51C\uB9AC\uB9AC\uC5C4 [Lem-Ist-Io]: \uC801\uC911 \uC2DC 10% \uD655\uB960\uB85C \uC815\uC2E0\uCC29\uB780(\uAD11\uB780 5\uCD08, \uB808\uBCA8 60 \uC774\uD558). 15\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_DELIRIUM_CONFUSE",
-            "name": "Calamity: Runeword Delirium Confusion / \uB8EC\uC6CC\uB4DC \uB51C\uB9AC\uB9AC\uC5C4 \uD63C\uB780",
+            "name": "Calamity: Runeword Delirium Frenzy / \uB8EC\uC6CC\uB4DC \uB51C\uB9AC\uB9AC\uC5C4 \uAD11\uB780",
             "actorValue": "Aggression",
             "hostile": true,
-            "recover": false,
-            "archetype": "Frenzy"
+            "recover": true,
+            "archetype": "Frenzy",
+            "conditions": [
+              {
+                "function": "IsChild",
+                "value": 0
+              },
+              {
+                "function": "IsCommandedActor",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013796",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00013797",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x00035D59",
+                "value": 0
+              },
+              {
+                "function": "HasKeyword",
+                "keywordForm": "Skyrim.esm|0x0001397A",
+                "value": 0
+              },
+              {
+                "function": "IsUndead",
+                "value": 0
+              }
+            ]
           },
           "spell": {
             "editorId": "CAFF_SPEL_RW_DELIRIUM_CONFUSE",
-            "name": "Calamity: Runeword Delirium Confusion / \uB8EC\uC6CC\uB4DC \uB51C\uB9AC\uB9AC\uC5C4 \uD63C\uB780",
+            "name": "Calamity: Runeword Delirium Frenzy / \uB8EC\uC6CC\uB4DC \uB51C\uB9AC\uB9AC\uC5C4 \uAD11\uB780",
             "delivery": "TargetActor",
             "effect": {
               "magicEffectEditorId": "CAFF_MGEF_RW_DELIRIUM_CONFUSE",
-              "magnitude": 20,
+              "magnitude": 60,
               "duration": 5,
               "area": 0
             }
@@ -9744,9 +9951,9 @@
       {
         "id": "runeword_flickering_flame_final",
         "editorId": "LoreBox_CAFF_AFFIX_RUNEWORD_FLICKERING_FLAME",
-        "name": "\uB8EC\uC6CC\uB4DC \uD50C\uB9AC\uCEE4\uB9C1 \uD50C\uB808\uC784 [Nef-Pul-Vex]: \uB9E4 \uC801\uC911 \uC2DC \uD654\uC5FC \uCE68\uC2DD(\uC801 \uD654\uC5FC\uC800\uD56D -25, 6\uCD08). 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Runeword Flickering Flame (Nef-Pul-Vex): 100% on hit / ICD 0.5s - Flame Erosion (Target Fire Resist -25, 6s)",
-        "nameKo": "\uB8EC\uC6CC\uB4DC \uD50C\uB9AC\uCEE4\uB9C1 \uD50C\uB808\uC784 [Nef-Pul-Vex]: \uB9E4 \uC801\uC911 \uC2DC \uD654\uC5FC \uCE68\uC2DD(\uC801 \uD654\uC5FC\uC800\uD56D -25, 6\uCD08). 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uB8EC\uC6CC\uB4DC \uD50C\uB9AC\uCEE4\uB9C1 \uD50C\uB808\uC784 [Nef-Pul-Vex]: \uB9E4 \uC801\uC911 \uC2DC \uD654\uC5FC \uCE68\uC2DD(\uC801 \uD654\uC5FC\uC800\uD56D -25, 6\uCD08). 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
+        "nameEn": "Runeword Flickering Flame (Nef-Pul-Vex): 100% on hit / ICD 0.5s - Flame Erosion (Target Fire Resist -25, 6s); Exposed",
+        "nameKo": "\uB8EC\uC6CC\uB4DC \uD50C\uB9AC\uCEE4\uB9C1 \uD50C\uB808\uC784 [Nef-Pul-Vex]: \uB9E4 \uC801\uC911 \uC2DC \uD654\uC5FC \uCE68\uC2DD(\uC801 \uD654\uC5FC\uC800\uD56D -25, 6\uCD08). 0.5\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9. \uB178\uCD9C.",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_FLICKER_FIRE_SHRED",
@@ -9934,7 +10141,7 @@
           "magicEffect": {
             "editorId": "CAFF_MGEF_RW_METAMORPHOSIS_SHIFT",
             "name": "Calamity: Runeword Metamorphosis / \uB8EC\uC6CC\uB4DC \uBA54\uD0C0\uBAA8\uD3EC\uC2DC\uC2A4",
-            "actorValue": "Invisibility",
+            "actorValue": "None",
             "hostile": false,
             "recover": true,
             "archetype": "Etherealize"
@@ -11570,20 +11777,20 @@
       {
         "id": "suffix_evasion_t1",
         "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T1",
-        "name": "\uC57D\uAC04\uC758 \uD68C\uD53C: \uACBD\uAC11 \u002B5%",
-        "nameEn": "of Minor Evasion: Light Armor \u002B5%",
-        "nameKo": "\uC57D\uAC04\uC758 \uD68C\uD53C: \uACBD\uAC11 \u002B5%",
+        "name": "\uC57D\uAC04\uC758 \uD68C\uD53C: \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -5%",
+        "nameEn": "of Minor Evasion: -5% damage taken while wearing light armor",
+        "nameKo": "\uC57D\uAC04\uC758 \uD68C\uD53C: \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T1",
-            "name": "Calamity Suffix: Light Armor \u002B5% / \uACBD\uAC11 \u002B5%",
+            "name": "Calamity Suffix: Light Armor Damage Taken -5% / \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -5%",
             "actorValue": "LightArmorModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T1",
-            "name": "Calamity Suffix: Light Armor \u002B5% / \uACBD\uAC11 \u002B5%",
+            "name": "Calamity Suffix: Light Armor Damage Taken -5% / \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -11616,20 +11823,20 @@
       {
         "id": "suffix_evasion_t2",
         "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T2",
-        "name": "\uD68C\uD53C: \uACBD\uAC11 \u002B10%",
-        "nameEn": "of Evasion: Light Armor \u002B10%",
-        "nameKo": "\uD68C\uD53C: \uACBD\uAC11 \u002B10%",
+        "name": "\uD68C\uD53C: \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%",
+        "nameEn": "of Evasion: -10% damage taken while wearing light armor",
+        "nameKo": "\uD68C\uD53C: \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T2",
-            "name": "Calamity Suffix: Light Armor \u002B10% / \uACBD\uAC11 \u002B10%",
+            "name": "Calamity Suffix: Light Armor Damage Taken -10% / \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%",
             "actorValue": "LightArmorModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T2",
-            "name": "Calamity Suffix: Light Armor \u002B10% / \uACBD\uAC11 \u002B10%",
+            "name": "Calamity Suffix: Light Armor Damage Taken -10% / \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -11662,20 +11869,20 @@
       {
         "id": "suffix_evasion_t3",
         "editorId": "CAFF_KYWD_SUFFIX_POISON_RESIST_T3",
-        "name": "\uC704\uB300\uD55C \uD68C\uD53C: \uACBD\uAC11 \u002B15%",
-        "nameEn": "of Grand Evasion: Light Armor \u002B15%",
-        "nameKo": "\uC704\uB300\uD55C \uD68C\uD53C: \uACBD\uAC11 \u002B15%",
+        "name": "\uC704\uB300\uD55C \uD68C\uD53C: \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -15%",
+        "nameEn": "of Grand Evasion: -15% damage taken while wearing light armor",
+        "nameKo": "\uC704\uB300\uD55C \uD68C\uD53C: \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_POISON_RESIST_T3",
-            "name": "Calamity Suffix: Light Armor \u002B15% / \uACBD\uAC11 \u002B15%",
+            "name": "Calamity Suffix: Light Armor Damage Taken -15% / \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -15%",
             "actorValue": "LightArmorModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_POISON_RESIST_T3",
-            "name": "Calamity Suffix: Light Armor \u002B15% / \uACBD\uAC11 \u002B15%",
+            "name": "Calamity Suffix: Light Armor Damage Taken -15% / \uACBD\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -11984,9 +12191,9 @@
       {
         "id": "suffix_assassin_t1",
         "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T1",
-        "name": "\uC57D\uAC04\uC758 \uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B10%, \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B10%",
-        "nameEn": "of Minor Assassin: Critical Chance \u002B10%, Critical Damage \u002B10%",
-        "nameKo": "\uC57D\uAC04\uC758 \uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B10%, \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B10%",
+        "name": "\uC57D\uAC04\uC758 \uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B10%(\uBC14\uB2D0\uB77C \uCE58\uBA85\uD0C0 \uD37D\uACFC \uC911\uCCA9 \uC548 \uB428), \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B10%",
+        "nameEn": "of Minor Assassin: Critical Chance \u002B10% (does not stack with vanilla critical perks), Critical Damage \u002B10%",
+        "nameKo": "\uC57D\uAC04\uC758 \uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B10%(\uBC14\uB2D0\uB77C \uCE58\uBA85\uD0C0 \uD37D\uACFC \uC911\uCCA9 \uC548 \uB428), \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T1",
@@ -12031,9 +12238,9 @@
       {
         "id": "suffix_assassin_t2",
         "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T2",
-        "name": "\uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B20%, \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B20%",
-        "nameEn": "of the Assassin: Critical Chance \u002B20%, Critical Damage \u002B20%",
-        "nameKo": "\uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B20%, \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B20%",
+        "name": "\uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B20%(\uBC14\uB2D0\uB77C \uCE58\uBA85\uD0C0 \uD37D\uACFC \uC911\uCCA9 \uC548 \uB428), \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B20%",
+        "nameEn": "of the Assassin: Critical Chance \u002B20% (does not stack with vanilla critical perks), Critical Damage \u002B20%",
+        "nameKo": "\uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B20%(\uBC14\uB2D0\uB77C \uCE58\uBA85\uD0C0 \uD37D\uACFC \uC911\uCCA9 \uC548 \uB428), \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B20%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T2",
@@ -12078,9 +12285,9 @@
       {
         "id": "suffix_assassin_t3",
         "editorId": "CAFF_KYWD_SUFFIX_CRITICAL_DAMAGE_T3",
-        "name": "\uC704\uB300\uD55C \uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B30%, \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B30%",
-        "nameEn": "of Grand Assassin: Critical Chance \u002B30%, Critical Damage \u002B30%",
-        "nameKo": "\uC704\uB300\uD55C \uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B30%, \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B30%",
+        "name": "\uC704\uB300\uD55C \uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B30%(\uBC14\uB2D0\uB77C \uCE58\uBA85\uD0C0 \uD37D\uACFC \uC911\uCCA9 \uC548 \uB428), \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B30%",
+        "nameEn": "of Grand Assassin: Critical Chance \u002B30% (does not stack with vanilla critical perks), Critical Damage \u002B30%",
+        "nameKo": "\uC704\uB300\uD55C \uC554\uC0B4\uC790: \uCE58\uBA85\uD0C0 \uD655\uB960 \u002B30%(\uBC14\uB2D0\uB77C \uCE58\uBA85\uD0C0 \uD37D\uACFC \uC911\uCCA9 \uC548 \uB428), \uCE58\uBA85\uD0C0 \uD53C\uD574 \u002B30%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CRITICAL_DAMAGE_T3",
@@ -12125,20 +12332,20 @@
       {
         "id": "suffix_fortitude_t1",
         "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T1",
-        "name": "\uC57D\uAC04\uC758 \uACAC\uACE0: \uC911\uAC11 \u002B5%",
-        "nameEn": "of Minor Fortitude: Heavy Armor \u002B5%",
-        "nameKo": "\uC57D\uAC04\uC758 \uACAC\uACE0: \uC911\uAC11 \u002B5%",
+        "name": "\uC57D\uAC04\uC758 \uACAC\uACE0: \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -5%",
+        "nameEn": "of Minor Fortitude: -5% damage taken while wearing heavy armor",
+        "nameKo": "\uC57D\uAC04\uC758 \uACAC\uACE0: \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T1",
-            "name": "Calamity Suffix: Heavy Armor \u002B5% / \uC911\uAC11 \u002B5%",
+            "name": "Calamity Suffix: Heavy Armor Damage Taken -5% / \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -5%",
             "actorValue": "HeavyArmorModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T1",
-            "name": "Calamity Suffix: Heavy Armor \u002B5% / \uC911\uAC11 \u002B5%",
+            "name": "Calamity Suffix: Heavy Armor Damage Taken -5% / \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -12171,20 +12378,20 @@
       {
         "id": "suffix_fortitude_t2",
         "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T2",
-        "name": "\uACAC\uACE0: \uC911\uAC11 \u002B10%",
-        "nameEn": "of Fortitude: Heavy Armor \u002B10%",
-        "nameKo": "\uACAC\uACE0: \uC911\uAC11 \u002B10%",
+        "name": "\uACAC\uACE0: \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%",
+        "nameEn": "of Fortitude: -10% damage taken while wearing heavy armor",
+        "nameKo": "\uACAC\uACE0: \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T2",
-            "name": "Calamity Suffix: Heavy Armor \u002B10% / \uC911\uAC11 \u002B10%",
+            "name": "Calamity Suffix: Heavy Armor Damage Taken -10% / \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%",
             "actorValue": "HeavyArmorModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T2",
-            "name": "Calamity Suffix: Heavy Armor \u002B10% / \uC911\uAC11 \u002B10%",
+            "name": "Calamity Suffix: Heavy Armor Damage Taken -10% / \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -12217,20 +12424,20 @@
       {
         "id": "suffix_fortitude_t3",
         "editorId": "CAFF_KYWD_SUFFIX_DESTRUCTION_COST_T3",
-        "name": "\uC704\uB300\uD55C \uACAC\uACE0: \uC911\uAC11 \u002B15%",
-        "nameEn": "of Grand Fortitude: Heavy Armor \u002B15%",
-        "nameKo": "\uC704\uB300\uD55C \uACAC\uACE0: \uC911\uAC11 \u002B15%",
+        "name": "\uC704\uB300\uD55C \uACAC\uACE0: \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -15%",
+        "nameEn": "of Grand Fortitude: -15% damage taken while wearing heavy armor",
+        "nameKo": "\uC704\uB300\uD55C \uACAC\uACE0: \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_DESTRUCTION_COST_T3",
-            "name": "Calamity Suffix: Heavy Armor \u002B15% / \uC911\uAC11 \u002B15%",
+            "name": "Calamity Suffix: Heavy Armor Damage Taken -15% / \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -15%",
             "actorValue": "HeavyArmorModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_DESTRUCTION_COST_T3",
-            "name": "Calamity Suffix: Heavy Armor \u002B15% / \uC911\uAC11 \u002B15%",
+            "name": "Calamity Suffix: Heavy Armor Damage Taken -15% / \uC911\uAC11 \uCC29\uC6A9 \uC2DC \uBC1B\uB294 \uD53C\uD574 -15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -12546,9 +12753,10 @@
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T1",
             "name": "Calamity Suffix: Bow Speed \u002B5% / \uD65C \uC18D\uB3C4 \u002B5%",
-            "actorValue": "BowSpeedBonus",
+            "actorValue": "None",
             "hostile": false,
-            "recover": true
+            "recover": true,
+            "archetype": "Script"
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T1",
@@ -12596,9 +12804,10 @@
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T2",
             "name": "Calamity Suffix: Bow Speed \u002B10% / \uD65C \uC18D\uB3C4 \u002B10%",
-            "actorValue": "BowSpeedBonus",
+            "actorValue": "None",
             "hostile": false,
-            "recover": true
+            "recover": true,
+            "archetype": "Script"
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T2",
@@ -12646,9 +12855,10 @@
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3",
             "name": "Calamity Suffix: Bow Speed \u002B15% / \uD65C \uC18D\uB3C4 \u002B15%",
-            "actorValue": "BowSpeedBonus",
+            "actorValue": "None",
             "hostile": false,
-            "recover": true
+            "recover": true,
+            "archetype": "Script"
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_SHOUT_COOLDOWN_T3",
@@ -12827,20 +13037,21 @@
       {
         "id": "suffix_enchanter_t1",
         "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T1",
-        "name": "\uC57D\uAC04\uC758 \uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \u002B5%",
-        "nameEn": "of Minor Enchanter: Enchanting \u002B5%",
-        "nameKo": "\uC57D\uAC04\uC758 \uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \u002B5%",
+        "name": "\uC57D\uAC04\uC758 \uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \uC704\uB825 \u002B5%",
+        "nameEn": "of Minor Enchanter: Items you enchant are 5% stronger",
+        "nameKo": "\uC57D\uAC04\uC758 \uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \uC704\uB825 \u002B5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T1",
-            "name": "Calamity Suffix: Enchanting \u002B5% / \uBD80\uC5EC \u002B5%",
-            "actorValue": "EnchantingModifier",
+            "name": "Calamity Suffix: Fortify Enchanting 5% / \uBD80\uC5EC \uC704\uB825 \u002B5%",
+            "actorValue": "Enchanting",
             "hostile": false,
-            "recover": true
+            "recover": true,
+            "archetype": "PeakValueModifier"
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T1",
-            "name": "Calamity Suffix: Enchanting \u002B5% / \uBD80\uC5EC \u002B5%",
+            "name": "Calamity Suffix: Fortify Enchanting 5% / \uBD80\uC5EC \uC704\uB825 \u002B5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -12873,20 +13084,21 @@
       {
         "id": "suffix_enchanter_t2",
         "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T2",
-        "name": "\uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \u002B10%",
-        "nameEn": "of the Enchanter: Enchanting \u002B10%",
-        "nameKo": "\uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \u002B10%",
+        "name": "\uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \uC704\uB825 \u002B10%",
+        "nameEn": "of the Enchanter: Items you enchant are 10% stronger",
+        "nameKo": "\uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \uC704\uB825 \u002B10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T2",
-            "name": "Calamity Suffix: Enchanting \u002B10% / \uBD80\uC5EC \u002B10%",
-            "actorValue": "EnchantingModifier",
+            "name": "Calamity Suffix: Fortify Enchanting 10% / \uBD80\uC5EC \uC704\uB825 \u002B10%",
+            "actorValue": "Enchanting",
             "hostile": false,
-            "recover": true
+            "recover": true,
+            "archetype": "PeakValueModifier"
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T2",
-            "name": "Calamity Suffix: Enchanting \u002B10% / \uBD80\uC5EC \u002B10%",
+            "name": "Calamity Suffix: Fortify Enchanting 10% / \uBD80\uC5EC \uC704\uB825 \u002B10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -12919,20 +13131,21 @@
       {
         "id": "suffix_enchanter_t3",
         "editorId": "CAFF_KYWD_SUFFIX_ENCHANTING_T3",
-        "name": "\uC704\uB300\uD55C \uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \u002B15%",
-        "nameEn": "of Grand Enchanter: Enchanting \u002B15%",
-        "nameKo": "\uC704\uB300\uD55C \uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \u002B15%",
+        "name": "\uC704\uB300\uD55C \uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \uC704\uB825 \u002B15%",
+        "nameEn": "of Grand Enchanter: Items you enchant are 15% stronger",
+        "nameKo": "\uC704\uB300\uD55C \uBD80\uC5EC\uC220\uC0AC: \uBD80\uC5EC \uC704\uB825 \u002B15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_ENCHANTING_T3",
-            "name": "Calamity Suffix: Enchanting \u002B15% / \uBD80\uC5EC \u002B15%",
-            "actorValue": "EnchantingModifier",
+            "name": "Calamity Suffix: Fortify Enchanting 15% / \uBD80\uC5EC \uC704\uB825 \u002B15%",
+            "actorValue": "Enchanting",
             "hostile": false,
-            "recover": true
+            "recover": true,
+            "archetype": "PeakValueModifier"
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_ENCHANTING_T3",
-            "name": "Calamity Suffix: Enchanting \u002B15% / \uBD80\uC5EC \u002B15%",
+            "name": "Calamity Suffix: Fortify Enchanting 15% / \uBD80\uC5EC \uC704\uB825 \u002B15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -12965,20 +13178,20 @@
       {
         "id": "suffix_conjurer_t1",
         "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T1",
-        "name": "\uC57D\uAC04\uC758 \uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \u002B5%",
-        "nameEn": "of Minor Conjurer: Conjuration \u002B5%",
-        "nameKo": "\uC57D\uAC04\uC758 \uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \u002B5%",
+        "name": "\uC57D\uAC04\uC758 \uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -5%",
+        "nameEn": "of Minor Conjurer: Conjuration spell cost -5%",
+        "nameKo": "\uC57D\uAC04\uC758 \uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -5%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T1",
-            "name": "Calamity Suffix: Conjuration \u002B5% / \uC18C\uD658 \u002B5%",
+            "name": "Calamity Suffix: Conjuration spell cost -5% / \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -5%",
             "actorValue": "ConjurationModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T1",
-            "name": "Calamity Suffix: Conjuration \u002B5% / \uC18C\uD658 \u002B5%",
+            "name": "Calamity Suffix: Conjuration spell cost -5% / \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -5%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -13011,20 +13224,20 @@
       {
         "id": "suffix_conjurer_t2",
         "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T2",
-        "name": "\uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \u002B10%",
-        "nameEn": "of the Conjurer: Conjuration \u002B10%",
-        "nameKo": "\uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \u002B10%",
+        "name": "\uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -10%",
+        "nameEn": "of the Conjurer: Conjuration spell cost -10%",
+        "nameKo": "\uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -10%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T2",
-            "name": "Calamity Suffix: Conjuration \u002B10% / \uC18C\uD658 \u002B10%",
+            "name": "Calamity Suffix: Conjuration spell cost -10% / \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -10%",
             "actorValue": "ConjurationModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T2",
-            "name": "Calamity Suffix: Conjuration \u002B10% / \uC18C\uD658 \u002B10%",
+            "name": "Calamity Suffix: Conjuration spell cost -10% / \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -10%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -13057,20 +13270,20 @@
       {
         "id": "suffix_conjurer_t3",
         "editorId": "CAFF_KYWD_SUFFIX_CONJURATION_T3",
-        "name": "\uC704\uB300\uD55C \uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \u002B15%",
-        "nameEn": "of Grand Conjurer: Conjuration \u002B15%",
-        "nameKo": "\uC704\uB300\uD55C \uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \u002B15%",
+        "name": "\uC704\uB300\uD55C \uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -15%",
+        "nameEn": "of Grand Conjurer: Conjuration spell cost -15%",
+        "nameKo": "\uC704\uB300\uD55C \uC18C\uD658\uC220\uC0AC: \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -15%",
         "records": {
           "magicEffect": {
             "editorId": "CAFF_MGEF_SUFFIX_CONJURATION_T3",
-            "name": "Calamity Suffix: Conjuration \u002B15% / \uC18C\uD658 \u002B15%",
+            "name": "Calamity Suffix: Conjuration spell cost -15% / \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -15%",
             "actorValue": "ConjurationModifier",
             "hostile": false,
             "recover": true
           },
           "spell": {
             "editorId": "CAFF_SPEL_SUFFIX_CONJURATION_T3",
-            "name": "Calamity Suffix: Conjuration \u002B15% / \uC18C\uD658 \u002B15%",
+            "name": "Calamity Suffix: Conjuration spell cost -15% / \uC18C\uD658 \uB9C8\uBC95 \uBE44\uC6A9 -15%",
             "delivery": "Self",
             "spellType": "Ability",
             "castType": "ConstantEffect",
@@ -13103,9 +13316,9 @@
       {
         "id": "doom_brand",
         "editorId": "LoreBox_CAFF_AFFIX_STATUS_DOOM_BRAND",
-        "name": "\uD30C\uBA78\uC758 \uB099\uC778: \uC801\uC911 \uC2DC 25% \uD655\uB960\uB85C \uADF8\uB9BC\uC790 \uB099\uC778. 1.5\uCD08 \uB4A4 \uADF8 \uC801\uC911 \uD53C\uD574\uC758 60%\uAC00 \uB9C8\uBC95 \uD53C\uD574\uB85C \uD130\uC9D0(\uB2E4\uC2DC \uCC0D\uC73C\uBA74 \uC2DC\uAC04\uB9CC \uAC31\uC2E0). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
-        "nameEn": "Doom Brand (25% on hit / ICD 4s): marks the target; 1.5s later it bursts for 60% of that hit\u0027s damage as magic damage (re-marking only resets the timer)",
-        "nameKo": "\uD30C\uBA78\uC758 \uB099\uC778: \uC801\uC911 \uC2DC 25% \uD655\uB960\uB85C \uADF8\uB9BC\uC790 \uB099\uC778. 1.5\uCD08 \uB4A4 \uADF8 \uC801\uC911 \uD53C\uD574\uC758 60%\uAC00 \uB9C8\uBC95 \uD53C\uD574\uB85C \uD130\uC9D0(\uB2E4\uC2DC \uCC0D\uC73C\uBA74 \uC2DC\uAC04\uB9CC \uAC31\uC2E0). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "name": "\uD30C\uBA78\uC758 \uB099\uC778: \uC801\uC911 \uC2DC 25% \uD655\uB960\uB85C \uADF8\uB9BC\uC790 \uB099\uC778. 1.5\uCD08 \uB4A4 \uADF8 \uC801\uC911 \uD53C\uD574\uC758 60%\uAC00 \uB9C8\uBC95 \uD53C\uD574\uB85C \uD130\uC9D0(\uB2E4\uC2DC \uCC0D\uC73C\uBA74 \uC2DC\uAC04\uB9CC \uAC31\uC2E0\uD558\uACE0 \uB354 \uD070 \uD3ED\uBC1C\uC744 \uC720\uC9C0). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
+        "nameEn": "Doom Brand (25% on hit / ICD 4s): marks the target; 1.5s later it bursts for 60% of that hit\u0027s damage as magic damage (re-marking resets the timer and keeps the larger burst)",
+        "nameKo": "\uD30C\uBA78\uC758 \uB099\uC778: \uC801\uC911 \uC2DC 25% \uD655\uB960\uB85C \uADF8\uB9BC\uC790 \uB099\uC778. 1.5\uCD08 \uB4A4 \uADF8 \uC801\uC911 \uD53C\uD574\uC758 60%\uAC00 \uB9C8\uBC95 \uD53C\uD574\uB85C \uD130\uC9D0(\uB2E4\uC2DC \uCC0D\uC73C\uBA74 \uC2DC\uAC04\uB9CC \uAC31\uC2E0\uD558\uACE0 \uB354 \uD070 \uD3ED\uBC1C\uC744 \uC720\uC9C0). 4\uCD08\uB9C8\uB2E4 \uBC1C\uB3D9.",
         "kid": {
           "type": "Weapon",
           "strings": "NONE",
@@ -13324,7 +13537,7 @@
         "type": "MagicEffect",
         "magicEffect": {
           "editorId": "CAFF_MGEF_RW_WEALTH_PASSIVE_SPEECHCRAFT",
-          "name": "Calamity: Runeword Wealth Speechcraft / \uB8EC\uC6CC\uB4DC \uBD80 \uD654\uC220",
+          "name": "Calamity: Runeword Wealth Barter / \uB8EC\uC6CC\uB4DC \uBD80 \uAC70\uB798",
           "actorValue": "SpeechcraftModifier",
           "hostile": false,
           "recover": true
@@ -13626,20 +13839,6 @@
               "magnitude": 25,
               "duration": 0,
               "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000153D3",
-              "hostileOnly": true,
-              "magnitude": 0.25,
-              "duration": 0,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000F392D",
-              "hostileOnly": true,
-              "magnitude": 99,
-              "duration": 15,
-              "area": 0
             }
           ]
         }
@@ -13659,27 +13858,6 @@
               "hostileOnly": true,
               "magnitude": 25,
               "duration": 0,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000153D3",
-              "hostileOnly": true,
-              "magnitude": 0.25,
-              "duration": 0,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000B729F",
-              "hostileOnly": true,
-              "magnitude": 50,
-              "duration": 3,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000F3932",
-              "hostileOnly": true,
-              "magnitude": 0,
-              "duration": 3,
               "area": 0
             }
           ]
@@ -13701,20 +13879,6 @@
               "magnitude": 25,
               "duration": 0,
               "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000153D3",
-              "hostileOnly": true,
-              "magnitude": 0.25,
-              "duration": 0,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000F3F0D",
-              "hostileOnly": true,
-              "magnitude": 200,
-              "duration": 1,
-              "area": 0
             }
           ]
         }
@@ -13734,20 +13898,6 @@
               "hostileOnly": true,
               "magnitude": 60,
               "duration": 0,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000153D3",
-              "hostileOnly": true,
-              "magnitude": 0.25,
-              "duration": 0,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000F3F0D",
-              "hostileOnly": true,
-              "magnitude": 200,
-              "duration": 1,
               "area": 0
             }
           ]
@@ -13769,27 +13919,6 @@
               "magnitude": 60,
               "duration": 0,
               "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000153D3",
-              "hostileOnly": true,
-              "magnitude": 0.25,
-              "duration": 0,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000B729F",
-              "hostileOnly": true,
-              "magnitude": 50,
-              "duration": 3,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000F3932",
-              "hostileOnly": true,
-              "magnitude": 0,
-              "duration": 3,
-              "area": 0
             }
           ]
         }
@@ -13809,20 +13938,6 @@
               "hostileOnly": true,
               "magnitude": 40,
               "duration": 0,
-              "area": 20
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000153D3",
-              "hostileOnly": true,
-              "magnitude": 0.25,
-              "duration": 0,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000F3F0F",
-              "hostileOnly": true,
-              "magnitude": 200,
-              "duration": 1,
               "area": 20
             }
           ]
@@ -13844,27 +13959,6 @@
               "magnitude": 40,
               "duration": 0,
               "area": 15
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000B729F",
-              "hostileOnly": true,
-              "magnitude": 50,
-              "duration": 5,
-              "area": 0
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000F3935",
-              "hostileOnly": true,
-              "magnitude": 0,
-              "duration": 3,
-              "area": 15
-            },
-            {
-              "magicEffectForm": "Skyrim.esm|0x000153D3",
-              "hostileOnly": true,
-              "magnitude": 0.25,
-              "duration": 0,
-              "area": 0
             }
           ]
         }
@@ -14266,6 +14360,563 @@
             "duration": 4,
             "area": 0
           }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_LEAF_PASSIVE",
+          "name": "Calamity: Runeword Leaf Destruction / \uB8EC\uC6CC\uB4DC \uB9AC\uD504 \uD30C\uAD34",
+          "actorValue": "DestructionModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_LEAF_PASSIVE",
+          "name": "Calamity: Runeword Leaf Passive / \uB8EC\uC6CC\uB4DC \uB9AC\uD504 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_LEAF_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_STRENGTH_PASSIVE",
+          "name": "Calamity: Runeword Strength Two-Handed / \uB8EC\uC6CC\uB4DC \uC2A4\uD2B8\uB81D\uC2A4 \uC591\uC190",
+          "actorValue": "TwoHandedModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_STRENGTH_PASSIVE",
+          "name": "Calamity: Runeword Strength Passive / \uB8EC\uC6CC\uB4DC \uC2A4\uD2B8\uB81D\uC2A4 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_STRENGTH_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_OATH_PASSIVE",
+          "name": "Calamity: Runeword Oath One-Handed / \uB8EC\uC6CC\uB4DC \uC624\uC4F0 \uD55C\uC190",
+          "actorValue": "OneHandedModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_OATH_PASSIVE",
+          "name": "Calamity: Runeword Oath Passive / \uB8EC\uC6CC\uB4DC \uC624\uC4F0 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_OATH_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_PASSION_PASSIVE",
+          "name": "Calamity: Runeword Passion Illusion / \uB8EC\uC6CC\uB4DC \uD328\uC158 \uD658\uD639",
+          "actorValue": "IllusionModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_PASSION_PASSIVE",
+          "name": "Calamity: Runeword Passion Passive / \uB8EC\uC6CC\uB4DC \uD328\uC158 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_PASSION_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_UNBENDING_WILL_PASSIVE",
+          "name": "Calamity: Runeword Unbending Will Block / \uB8EC\uC6CC\uB4DC \uC5B8\uBCA4\uB529 \uC70C \uB9C9\uAE30",
+          "actorValue": "BlockModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_UNBENDING_WILL_PASSIVE",
+          "name": "Calamity: Runeword Unbending Will Passive / \uB8EC\uC6CC\uB4DC \uC5B8\uBCA4\uB529 \uC70C \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_UNBENDING_WILL_PASSIVE",
+            "magnitude": 15,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_CURE_PASSIVE",
+          "name": "Calamity: Runeword Cure Restoration / \uB8EC\uC6CC\uB4DC \uD050\uC5B4 \uD68C\uBCF5",
+          "actorValue": "RestorationModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_CURE_PASSIVE",
+          "name": "Calamity: Runeword Cure Passive / \uB8EC\uC6CC\uB4DC \uD050\uC5B4 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_CURE_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_HEARTH_PASSIVE",
+          "name": "Calamity: Runeword Hearth Frost Resist / \uB8EC\uC6CC\uB4DC \uD558\uC2A4 \uB0C9\uAE30 \uC800\uD56D",
+          "actorValue": "ResistFrost",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_HEARTH_PASSIVE",
+          "name": "Calamity: Runeword Hearth Passive / \uB8EC\uC6CC\uB4DC \uD558\uC2A4 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_HEARTH_PASSIVE",
+            "magnitude": 20,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_ENLIGHTENMENT_PASSIVE",
+          "name": "Calamity: Runeword Enlightenment Alteration / \uB8EC\uC6CC\uB4DC \uC778\uB77C\uC774\uD2B8\uBA3C\uD2B8 \uBCC0\uD654",
+          "actorValue": "AlterationModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_ENLIGHTENMENT_PASSIVE",
+          "name": "Calamity: Runeword Enlightenment Passive / \uB8EC\uC6CC\uB4DC \uC778\uB77C\uC774\uD2B8\uBA3C\uD2B8 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_ENLIGHTENMENT_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_MYTH_PASSIVE",
+          "name": "Calamity: Runeword Myth Heavy Armor Damage Taken / \uB8EC\uC6CC\uB4DC \uBBF8\uC2A4 \uC911\uAC11 \uBC1B\uB294 \uD53C\uD574 \uAC10\uC18C",
+          "actorValue": "HeavyArmorModifier",
+          "hostile": false,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_MYTH_PASSIVE",
+          "name": "Calamity: Runeword Myth Passive / \uB8EC\uC6CC\uB4DC \uBBF8\uC2A4 \uD328\uC2DC\uBE0C",
+          "delivery": "Self",
+          "spellType": "Ability",
+          "castType": "ConstantEffect",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_MYTH_PASSIVE",
+            "magnitude": 10,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_DMG_FIRE_DYNAMIC_HITFX",
+          "name": "Calamity: Fire Hit Effect / \uD654\uC5FC \uD53C\uACA9 \uD6A8\uACFC",
+          "actorValue": "None",
+          "hostile": true,
+          "recover": false,
+          "archetype": "Script",
+          "hitShaderForm": "Skyrim.esm|0x0001B212"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_DMG_FROST_DYNAMIC_HITFX",
+          "name": "Calamity: Frost Hit Effect / \uB0C9\uAE30 \uD53C\uACA9 \uD6A8\uACFC",
+          "actorValue": "None",
+          "hostile": true,
+          "recover": false,
+          "archetype": "Script",
+          "hitShaderForm": "Skyrim.esm|0x000435A3"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_DMG_SHOCK_DYNAMIC_HITFX",
+          "name": "Calamity: Shock Hit Effect / \uC804\uACA9 \uD53C\uACA9 \uD6A8\uACFC",
+          "actorValue": "None",
+          "hostile": true,
+          "recover": false,
+          "archetype": "Script",
+          "hitShaderForm": "Skyrim.esm|0x00057C67"
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_MIST_MANA_DRAIN",
+          "name": "Calamity: Runeword Mist Magicka Drain / \uB8EC\uC6CC\uB4DC \uBBF8\uC2A4\uD2B8 \uB9C8\uB098 \uC18C\uC9C4",
+          "actorValue": "Magicka",
+          "hostile": true,
+          "recover": false
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_CHAOS_RUNE_TRAP_SUNDER",
+          "name": "Calamity: Chaos Rune (Sunder Armor) / \uD63C\uB3C8\uC758 \uB8EC (\uBC29\uC5B4 \uBD84\uC1C4)",
+          "actorValue": "DamageResist",
+          "hostile": true,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_CHAOS_RUNE_TRAP_SUNDER",
+          "name": "Calamity: Chaos Rune (Sunder Armor) / \uD63C\uB3C8\uC758 \uB8EC (\uBC29\uC5B4 \uBD84\uC1C4)",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_CHAOS_RUNE_TRAP_SUNDER",
+            "magnitude": 150,
+            "duration": 6,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_CHAOS_RUNE_TRAP_FRAGILE",
+          "name": "Calamity: Chaos Rune (Fragile Magic Resist) / \uD63C\uB3C8\uC758 \uB8EC (\uB9C8\uBC95 \uC800\uD56D \uC57D\uD654)",
+          "actorValue": "ResistMagic",
+          "hostile": true,
+          "recover": true
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_CHAOS_RUNE_TRAP_FRAGILE",
+          "name": "Calamity: Chaos Rune (Fragile Magic Resist) / \uD63C\uB3C8\uC758 \uB8EC (\uB9C8\uBC95 \uC800\uD56D \uC57D\uD654)",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_CHAOS_RUNE_TRAP_FRAGILE",
+            "magnitude": 20,
+            "duration": 6,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "MagicEffect",
+        "magicEffect": {
+          "editorId": "CAFF_MGEF_RW_OBSESSION_ARCANE",
+          "name": "Calamity: Runeword Obsession Magic Damage / \uB8EC\uC6CC\uB4DC \uC9D1\uCC29 \uB9C8\uBC95 \uD53C\uD574",
+          "actorValue": "Health",
+          "resistValue": "ResistMagic",
+          "magicSkill": "Destruction",
+          "hostile": true,
+          "recover": false
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_RW_OBSESSION_ARCANE",
+          "name": "Calamity: Runeword Obsession Magic Damage / \uB8EC\uC6CC\uB4DC \uC9D1\uCC29 \uB9C8\uBC95 \uD53C\uD574",
+          "delivery": "TargetActor",
+          "effect": {
+            "magicEffectEditorId": "CAFF_MGEF_RW_OBSESSION_ARCANE",
+            "magnitude": 1,
+            "duration": 0,
+            "area": 0
+          }
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_FIREBOLT_RIDER",
+          "name": "Calamity: Hostile-Only Firebolt Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            {
+              "magicEffectForm": "Skyrim.esm|0x000153D3",
+              "hostileOnly": true,
+              "magnitude": 0.25,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000F392D",
+              "hostileOnly": true,
+              "magnitude": 99,
+              "duration": 15,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICE_SPIKE_RIDER",
+          "name": "Calamity: Hostile-Only Ice Spike Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            {
+              "magicEffectForm": "Skyrim.esm|0x000153D3",
+              "hostileOnly": true,
+              "magnitude": 0.25,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000B729F",
+              "hostileOnly": true,
+              "magnitude": 50,
+              "duration": 3,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000F3932",
+              "hostileOnly": true,
+              "magnitude": 0,
+              "duration": 3,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_LIGHTNING_BOLT_RIDER",
+          "name": "Calamity: Hostile-Only Lightning Bolt Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            {
+              "magicEffectForm": "Skyrim.esm|0x000153D3",
+              "hostileOnly": true,
+              "magnitude": 0.25,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000F3F0D",
+              "hostileOnly": true,
+              "magnitude": 200,
+              "duration": 1,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_THUNDERBOLT_RIDER",
+          "name": "Calamity: Hostile-Only Thunderbolt Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            {
+              "magicEffectForm": "Skyrim.esm|0x000153D3",
+              "hostileOnly": true,
+              "magnitude": 0.25,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000F3F0D",
+              "hostileOnly": true,
+              "magnitude": 200,
+              "duration": 1,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICY_SPEAR_RIDER",
+          "name": "Calamity: Hostile-Only Icy Spear Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            {
+              "magicEffectForm": "Skyrim.esm|0x000153D3",
+              "hostileOnly": true,
+              "magnitude": 0.25,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000B729F",
+              "hostileOnly": true,
+              "magnitude": 50,
+              "duration": 3,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000F3932",
+              "hostileOnly": true,
+              "magnitude": 0,
+              "duration": 3,
+              "area": 0
+            }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_CHAIN_LIGHTNING_RIDER",
+          "name": "Calamity: Hostile-Only Chain Lightning Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            {
+              "magicEffectForm": "Skyrim.esm|0x000153D3",
+              "hostileOnly": true,
+              "magnitude": 0.25,
+              "duration": 0,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000F3F0F",
+              "hostileOnly": true,
+              "magnitude": 200,
+              "duration": 1,
+              "area": 20
+            }
+          ]
+        }
+      },
+      {
+        "type": "Spell",
+        "spell": {
+          "editorId": "CAFF_SPEL_COC_ICE_STORM_RIDER",
+          "name": "Calamity: Hostile-Only Ice Storm Rider",
+          "delivery": "TargetActor",
+          "chargeTime": 0.5,
+          "equipTypeForm": "Skyrim.esm|0x00013F44",
+          "effects": [
+            {
+              "magicEffectForm": "Skyrim.esm|0x000B729F",
+              "hostileOnly": true,
+              "magnitude": 50,
+              "duration": 5,
+              "area": 0
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000F3935",
+              "hostileOnly": true,
+              "magnitude": 0,
+              "duration": 3,
+              "area": 15
+            },
+            {
+              "magicEffectForm": "Skyrim.esm|0x000153D3",
+              "hostileOnly": true,
+              "magnitude": 0.25,
+              "duration": 0,
+              "area": 0
+            }
+          ]
         }
       }
     ]

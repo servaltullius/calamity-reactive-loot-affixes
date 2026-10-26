@@ -37,6 +37,25 @@
 			kSpreadStatus,
 		};
 
+		// Actions whose chance is rolled by the standard trigger path
+		// (TryProcessTriggerAffix) and therefore take the multi-prefix proc
+		// penalty. Active counts, the item tooltip and the panel summary all use
+		// this one list so the penalty shown is the penalty rolled.
+		[[nodiscard]] static constexpr bool IsStandardTriggerProcLaneAction(ActionType a_type) noexcept
+		{
+			switch (a_type) {
+			case ActionType::kCastSpell:
+			case ActionType::kCastSpellAdaptiveElement:
+			case ActionType::kSpawnTrap:
+			case ActionType::kDoomMark:
+			case ActionType::kEchoStrike:
+			case ActionType::kSpreadStatus:
+				return true;
+			default:
+				return false;
+			}
+		}
+
 		enum class TrapSpawnAt : std::uint8_t
 		{
 			kOwnerFeet,
@@ -168,6 +187,7 @@
 		//  corpseExplosion*        |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ✓    |  ·   |  ·   |
 		//  trap*                   |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ✓   |  ·   |
 		//  echo*                   |   ·    |  ·   |    ·     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ✓   |
+		//  castOnCritRiderSpell    |   ·    |  ·   |    ·     |   ✓    |    ·    |  ·  |    ·     |   ·    |  ·   |  ·   |
 		//  evolution*              |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ·   |
 		//  modeCycle*              |   ·    |  ✓   |    ✓     |   ·    |    ·    |  ·  |    ·     |   ·    |  ·   |  ·   |
 		//
@@ -193,6 +213,12 @@
 			RE::SpellItem* adaptiveFire{ nullptr };
 			RE::SpellItem* adaptiveFrost{ nullptr };
 			RE::SpellItem* adaptiveShock{ nullptr };
+
+			// CastOnCrit: the hit-scaled magnitude override reaches every effect
+			// of the cast spell (one caster slot in CastSpellImmediate), so a
+			// spell's slow/stagger/perk riders live in this separate spell and
+			// are cast alongside it without an override.
+			RE::SpellItem* castOnCritRiderSpell{ nullptr };
 
 			// ConvertDamage
 			Element element{ Element::kNone };
@@ -265,6 +291,8 @@
 			bool modeCycleEnabled{ false };
 			std::vector<RE::SpellItem*> modeCycleSpells{};
 			std::vector<std::string> modeCycleLabels{};
+			std::vector<std::string> modeCycleLabelsEn{};
+			std::vector<std::string> modeCycleLabelsKo{};
 			std::uint32_t modeCycleSwitchEveryProcs{ 1 };
 			bool modeCycleManualOnly{ false };
 		};
@@ -652,13 +680,21 @@
 			kChainDepthExceeded,
 		};
 
+		struct CorpseExplosionCandidate
+		{
+			std::size_t idx{ 0u };
+			PerTargetCooldownKey perTargetKey{};
+			bool usesPerTargetIcd{ false };
+			std::int32_t selectionPriority{ 0 };
+			float baseDamage{ 0.0f };
+		};
+
 		struct CorpseExplosionSelection
 		{
-			std::optional<std::size_t> bestIdx{};
-			PerTargetCooldownKey bestPerTargetKey{};
-			bool bestUsesPerTargetIcd{ false };
-			std::int32_t bestSelectionPriority{ 0 };
-			float bestBaseDamage{ 0.0f };
+			// Every candidate that passed its chance and cooldowns, preferred
+			// first (priority, then damage, then config order). The caller takes
+			// the first one the explosion budget admits.
+			std::vector<CorpseExplosionCandidate> candidates{};
 			std::uint32_t activeAffixes{ 0 };
 			std::uint32_t blockedCooldown{ 0 };
 			std::uint32_t blockedNoSpell{ 0 };
@@ -674,6 +710,29 @@
 			float bestMaxMagicka{ 0.0f };
 			float bestExtraCost{ 0.0f };
 			float bestExtraDamage{ 0.0f };
+		};
+
+		// What a self-buff cast changes on the owner (see PlanSelfBuffCast).
+		// A target's live effects of one spell just before a cast (v2.3.0). After the
+		// cast, a new instance or one the cast refreshed (its clock or strength
+		// changed) proves the spell landed; an absorbed or reflected cast changes
+		// nothing.
+		struct SpellEffectSnapshot
+		{
+			struct Entry
+			{
+				const RE::ActiveEffect* effect{ nullptr };
+				float elapsed{ 0.0f };
+				float magnitude{ 0.0f };
+			};
+			std::vector<Entry> entries{};
+		};
+
+		struct SelfBuffPlan
+		{
+			bool cast{ true };
+			std::vector<RE::ActiveEffect*> replaced{};
+			std::vector<RE::ActorValue> keepOlder{};
 		};
 
 		struct AdaptiveCastSelection

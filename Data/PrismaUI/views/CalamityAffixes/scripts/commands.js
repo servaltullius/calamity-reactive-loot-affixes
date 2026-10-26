@@ -81,7 +81,49 @@ function sendCommand(command) {
     return;
   }
 
-  setActionFeedback(t("Command bridge unavailable.", "명령 브리지가 연결되지 않았습니다."));
+  showActionFeedback(t("Command bridge unavailable.", "명령 브리지가 연결되지 않았습니다."));
+}
+
+function isPanelTextEntryElement(element) {
+  if (!element || typeof element.tagName !== "string") {
+    return false;
+  }
+  const tag = element.tagName.toUpperCase();
+  if (tag === "TEXTAREA") {
+    return true;
+  }
+  if (tag !== "INPUT") {
+    return false;
+  }
+  const type = String(element.type || "text").toLowerCase();
+  return type === "text" || type === "search" || type === "number";
+}
+
+// The DLL ignores the panel hotkey while a panel text field has focus, so
+// typing the hotkey letter into the recipe search does not close the panel.
+function reportPanelTextInputFocus(focused) {
+  if (typeof window.calamityCommand === "function") {
+    window.calamityCommand(focused ? "ui.textinput:1" : "ui.textinput:0");
+  }
+}
+
+function handlePanelFocusIn(event) {
+  if (isPanelTextEntryElement(event.target)) {
+    reportPanelTextInputFocus(true);
+  }
+}
+
+function handlePanelFocusOut(event) {
+  if (isPanelTextEntryElement(event.target)) {
+    reportPanelTextInputFocus(false);
+  }
+}
+
+function blurPanelTextEntry() {
+  const active = document.activeElement;
+  if (isPanelTextEntryElement(active) && typeof active.blur === "function") {
+    active.blur();
+  }
 }
 
 function handlePanelKeydown(event) {
@@ -143,7 +185,7 @@ function armRunewordResetConfirmation(button) {
   }
 
   if (!selectedBaseKey) {
-    setActionFeedback(t(
+    showActionFeedback(t(
       "Select the item again before resetting it.",
       "초기화할 장비를 다시 고르세요."
     ));
@@ -160,7 +202,7 @@ function armRunewordResetConfirmation(button) {
   );
   button.title = warning;
   button.setAttribute("aria-label", warning);
-  setActionFeedback(warning);
+  showActionFeedback(warning);
   window.setTimeout(() => {
     if (runewordResetArmedUntil !== 0 && Date.now() >= runewordResetArmedUntil) {
       clearRunewordResetConfirmation();
@@ -269,19 +311,21 @@ function dispatchPanelCommand(button) {
       (!action.removeRunewordEnabled || command !== action.removeRunewordCommand)) {
       return true;
     }
-    const warning = command === "runeword.insert"
-      ? action.transmuteConfirmText
-      : t(
-          "Click Remove Runeword again within 6 seconds. The runeword is lost; its rune fragments are not refunded.",
-          "6초 안에 룬워드 제거를 다시 누르세요. 룬워드는 사라지며 룬 조각은 돌려받지 못합니다."
-        );
+    const insert = command === "runeword.insert";
+    const warningEn = insert ? action.transmuteConfirmEn : action.removeRunewordConfirmEn;
+    const warningKo = insert ? action.transmuteConfirmKo : action.removeRunewordConfirmKo;
     const signature = `${command}:${resolveSelectedRunewordBaseKey()}`;
-    if (warning && (!runewordConfirmation || runewordConfirmation.signature !== signature ||
+    if (warningEn && (!runewordConfirmation || runewordConfirmation.signature !== signature ||
       Date.now() > runewordConfirmation.until)) {
       runewordConfirmation = { signature, until: Date.now() + 6000 };
-      setActionFeedback(command === "runeword.insert"
-        ? t(`Click Transmute again within 6 seconds. ${warning}`, `6초 안에 변환을 다시 누르세요. ${warning}`)
-        : warning);
+      // Arming this confirm disarms the others, so a later click on them asks again.
+      scourConfirmation = null;
+      if (runewordResetArmedUntil !== 0) {
+        clearRunewordResetConfirmation();
+      }
+      showActionFeedback(insert
+        ? t(`Click again within 6s to transmute. ${warningEn}`, `6초 안에 다시 누르면 변환. ${warningKo}`)
+        : t(`Click again within 6s to remove. ${warningEn}`, `6초 안에 다시 누르면 제거. ${warningKo}`));
       return true;
     }
     runewordConfirmation = null;
@@ -303,7 +347,7 @@ function dispatchPanelCommand(button) {
       const signature = `${command}:${resolveReforgeLockCandidates(runewordPanelState).map(x => x.affixToken).join(",")}`;
       if (!scourConfirmation || scourConfirmation.signature !== signature || Date.now() > scourConfirmation.until) {
         scourConfirmation = { signature, until: Date.now() + 6000 };
-        setActionFeedback(t(
+        showActionFeedback(t(
           "Click Scour again within 6 seconds to reroll every regular affix at once. Slot count and runeword stay; current affixes and their growth are lost.",
           "6초 안에 정제를 다시 누르면 일반 어픽스 전부를 한 번에 다시 굴립니다. 슬롯 수와 룬워드는 유지되며, 현재 어픽스와 그 성장 상태는 사라집니다."
         ));
@@ -317,7 +361,7 @@ function dispatchPanelCommand(button) {
     window.setTimeout(() => {
       if (affixCraftPendingState !== pending) return;
       affixCraftPendingState = null;
-      setActionFeedback(t("No response from crafting. Check the item and try again.", "제작 응답이 없습니다. 장비를 확인한 뒤 다시 시도하세요."));
+      showActionFeedback(t("No response from crafting. Check the item and try again.", "제작 응답이 없습니다. 장비를 확인한 뒤 다시 시도하세요."));
       schedulePanelRender(panelRenderSection.runewordPanelState);
     }, 8000);
   } else {
@@ -346,7 +390,7 @@ function dispatchPanelCommand(button) {
   if (command.startsWith(affixExpandCommandPrefix)) {
     if (!beginAffixExpandPending(command)) {
       if (!affixExpandPendingState) {
-        setActionFeedback(t(
+        showActionFeedback(t(
           "The item changed. Check it before expanding a slot.",
           "장비 상태가 바뀌었습니다. 확인한 뒤 슬롯을 늘리세요."
         ));

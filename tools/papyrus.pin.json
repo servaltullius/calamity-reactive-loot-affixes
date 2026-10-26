@@ -5,19 +5,19 @@
       "source": "Data/Scripts/Source/CalamityAffixes_ModeControl.psc",
       "output": "Data/Scripts/CalamityAffixes_ModeControl.pex",
       "source_sha256": "05136cface24178adacd7e00f57a42e7b8bc5661a207387356692cd45302a6cb",
-      "output_sha256": "e363e1ce57e4d2fabcd412341e16e2073c7e024bd7cf04d722552e4ab2ee1ce0"
+      "output_sha256": "4383661036f80ac8aa4e3c9b2f1d853ff79817d38ea1dc27b685ac96029220bc"
     },
     {
       "source": "Data/Scripts/Source/CalamityAffixes_ModEventEmitter.psc",
       "output": "Data/Scripts/CalamityAffixes_ModEventEmitter.pex",
       "source_sha256": "04c13aecd278b06d2f393938a596e804c4a80bdfe61aafaef404b3b36d67fcc1",
-      "output_sha256": "9cc49a5e7fda560a57928556abe8d7d1b91ef5f7f120f4a5ce649c48a5121659"
+      "output_sha256": "f03ad06dfb17ded9c23071d8b11ed811d64e4617afea43fc1e9f7a8f26d092db"
     },
     {
       "source": "Data/Scripts/Source/CalamityAffixes_MCMConfig.psc",
       "output": "Data/Scripts/CalamityAffixes_MCMConfig.pex",
-      "source_sha256": "0ec767a2657fdc2a252d6710408806fd75146be2786ba6036584f51b312850db",
-      "output_sha256": "17d0247f6eb8f8fe5b6070fbd995640fa7876db4d8052fcc8b854e07279bfe39"
+      "source_sha256": "f4ad0b28840a6dfa9406f07a488bbd7344107dcf69dc0af87cfffc1ff3ee6c80",
+      "output_sha256": "d1aea0e0c3cb13f1247bd28f77ad7c82c035faf54ca52cdb1a981924c33a4555"
     }
   ],
   "shared_inputs": [
@@ -27,7 +27,7 @@
     },
     {
       "path": "tools/papyrus-stubs/MCM_ConfigBase.psc",
-      "sha256": "034511bbf2dc5d7d52d774b4a15fcf37cea099d7fab6f56a39cb0bc7bfd5d925"
+      "sha256": "448e4a9c22e295974596a02bce38dc1fa6a36d5c90b69da43cb64a48bd3f9255"
     },
     {
       "path": "tools/papyrus-stubs/ModEvent.psc",
@@ -35,7 +35,7 @@
     },
     {
       "path": "tools/papyrus-stubs/SKI_ConfigBase.psc",
-      "sha256": "7cde90cf4a7eb61c2bb152a90b3683c3ffa0d434d952b57a726a77ec3faafec0"
+      "sha256": "76e9bf06edab5e1c5d09a68df113da9b024a4c7c9ee4bfbe70d2729f28a3ed2d"
     },
     {
       "path": "tools/papyrus-stubs/SKI_ConfigManager.psc",

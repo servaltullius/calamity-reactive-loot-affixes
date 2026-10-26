@@ -13,6 +13,15 @@ CONTRACT_PATH = Path("affixes/runeword.contract.json")
 RUNEWORDS_PATH = Path("affixes/modules/keywords.affixes.runewords.json")
 OUTPUT_PATH = Path("docs/RUNEWORD_EFFECTS.md")
 
+# recommendedBase is null for recipes meant for either kind of base (Spirit,
+# Fortitude, Phoenix); printing it raw shows Python's "None".
+MIXED_BASE_LABEL = "혼합 (무기·방어구)"
+
+
+def recommended_base_label(recipe: dict) -> str:
+    base = recipe.get("recommendedBase")
+    return str(base) if base else MIXED_BASE_LABEL
+
 
 def load_payload() -> tuple[list[dict], dict[str, dict]]:
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
@@ -27,7 +36,7 @@ def render_entry(recipe: dict, affix: dict) -> str:
         f"### {recipe['name']}",
         "",
         f"- 룬 조합: `{rune_sequence}`",
-        f"- 추천 베이스: {recipe['recommendedBase']}",
+        f"- 추천 베이스: {recommended_base_label(recipe)}",
         f"- 한글 표시: {affix.get('nameKo', affix.get('name', ''))}",
     ]
     name_en = affix.get("nameEn", "")

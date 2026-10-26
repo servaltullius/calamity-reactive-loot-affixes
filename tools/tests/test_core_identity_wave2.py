@@ -67,9 +67,11 @@ class CoreIdentityWaveTwoTests(unittest.TestCase):
         # 2026-08-11: the five non-bear trap spells moved engine Effect.Area to
         # zero so the runtime hostile-only selector owns the full radius contract;
         # 2026-10-09: attack speed is ignored under MCO, so Battle Frenzy's buff and
-        # the Chaos Rune slow-attack curse moved to AttackDamageMult).
+        # the Chaos Rune slow-attack curse moved to AttackDamageMult; 2026-10-20: the
+        # three dynamic conversion spells deal instant damage and carry the hit shader
+        # on a separate 1s effect, since a recast replaced the 1s damage-over-time).
         self.assertEqual(
-            "283bdd1fd0b1e9d9527755d9b27ae495ca7c9efd4afaba17abce7852c0cdc611",
+            "b91429cef72b5371f5415cab1b4a7a0968855e4914d1d8da4ed26cb93e1278da",
             hashlib.sha256(records_payload).hexdigest(),
             "records payload changed — if intentional, update this pin in the same commit",
         )

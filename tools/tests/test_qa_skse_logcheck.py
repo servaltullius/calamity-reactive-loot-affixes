@@ -14,15 +14,33 @@ class QaSkseLogcheckTests(unittest.TestCase):
         cls.repo_root = Path(__file__).resolve().parents[2]
         cls.logcheck = cls.repo_root / "tools" / "qa_skse_logcheck.py"
 
-    def _run(self, *extra_lines: str, strict: bool = False) -> subprocess.CompletedProcess[str]:
+    TIMESTAMP = "[2026-10-20 12:00:00.000]"
+    # Startup lines as the DLL prints them today (main.cpp, EventBridge.Config.cpp,
+    # Hooks.cpp, PrismaTooltip.ViewLifecycle.inl, TrapSystem.cpp).
+    STARTUP_LINES = (
+        "[info] CalamityAffixes: plugin loaded, waiting for kDataLoaded.",
+        "[info] CalamityAffixes: runtime config loaded (affixes=243, prefixWeapon=50, prefixArmor=40, "
+        "suffixWeapon=30, suffixArmor=30, lootChance=25%, runeFragChance=5%, reforgeOrbChance=3%, "
+        "uniqueRewardRuneChance=50%, broadRuntimeCurrencyDropsEnabled=true, corpseDeathCurrencyDropsEnabled=true, "
+        "sourceMult(corpse/container/boss/world)=1.00/1.00/1.00/1.00, triggerBudget=12/250, trapCastBudgetPerTick=4).",
+        "[info] CalamityAffixes: installed HandleHealthDamage hooks (idx=0x104, actor=true, character=true, player=true).",
+        "[info] CalamityAffixes: Prisma tooltip/control overlay enabled (poll=100ms).",
+        "[info] CalamityAffixes: PrismaUI API acquired.",
+        "[info] CalamityAffixes: TrapSystem enabled (poll=100ms).",
+    )
+
+    def _run(
+        self,
+        *extra_lines: str,
+        strict: bool = False,
+        startup_lines: tuple[str, ...] | None = None,
+    ) -> subprocess.CompletedProcess[str]:
         lines = [
-            "[info] CalamityAffixes: plugin loaded, waiting for kDataLoaded.",
-            "[info] CalamityAffixes: runtime config loaded (affixes=243, prefixWeapon=50).",
-            "[info] CalamityAffixes: installed HandleHealthDamage vfunc hooks.",
-            "[info] CalamityAffixes: PrismaUI API acquired.",
-            "[info] CalamityAffixes: TrapSystem enabled.",
+            *(startup_lines if startup_lines is not None else self.STARTUP_LINES),
             *extra_lines,
         ]
+        # main.cpp sets the spdlog pattern "[%Y-%m-%d %H:%M:%S.%e] [%l] %v".
+        lines = [f"{self.TIMESTAMP} {line}" for line in lines]
         with tempfile.TemporaryDirectory(prefix="caff-logcheck-") as temp_dir:
             log_path = Path(temp_dir) / "CalamityAffixes.log"
             log_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -44,6 +62,29 @@ class QaSkseLogcheckTests(unittest.TestCase):
         self.assertIn("required_ok: 5 / 5", result.stdout)
         self.assertIn("RESULT: PASS", result.stdout)
 
+    def test_hook_install_line_is_required_for_a_combat_free_startup(self) -> None:
+        without_hook = tuple(line for line in self.STARTUP_LINES if "HandleHealthDamage" not in line)
+        result = self._run(startup_lines=without_hook)
+
+        self.assertEqual(result.returncode, 1, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+        self.assertIn("missing: hit_pipeline", result.stdout)
+
+    def test_legacy_vfunc_hook_line_still_passes(self) -> None:
+        legacy = tuple(
+            "[info] CalamityAffixes: installed HandleHealthDamage vfunc hooks." if "HandleHealthDamage" in line else line
+            for line in self.STARTUP_LINES
+        )
+        result = self._run(startup_lines=legacy)
+
+        self.assertEqual(result.returncode, 0, msg=f"stdout={result.stdout}\nstderr={result.stderr}")
+        self.assertIn("RESULT: PASS", result.stdout)
+
+    def test_legacy_short_warn_level_is_still_detected(self) -> None:
+        result = self._run("[warn] CalamityAffixes: synthetic warning")
+
+        self.assertIn("generic_warn", result.stdout)
+        self.assertIn("RESULT: WARN", result.stdout)
+
     def test_generic_error_is_detected(self) -> None:
         result = self._run("[error] CalamityAffixes: synthetic failure")
 
@@ -61,7 +102,7 @@ class QaSkseLogcheckTests(unittest.TestCase):
     def test_observational_groups_report_counts_without_gating_result(self) -> None:
         result = self._run(
             "[debug] CalamityAffixes: proc (affixId=runeword_dream_final, trigger=0, chancePct=30, target=Troll, hasHitData=true)",
-            "[debug] CalamityAffixes: CastSpellImmediate (affix=runeword_dream_final, spell=Shock Strike, magnitudeOverride=13.5, target=Troll).",
+            "[debug] CalamityAffixes: CastSpellImmediate (affix=runeword_dream_final, spell=Shock Strike, magnitudeOverride=13.5, target=Troll, evolutionStage=0, evolutionXP=0, evolutionMult=1, modeIndex=0).",
             "[debug] CalamityAffixes: magic effect apply observed (mgef=0xFE401915, caster=Prisoner (0x00000014), target=Troll (0x00107CAD)).",
             "[debug] CalamityAffixes: action feedback art (art=0x5B1BC, recipient=0x107CAD, instantiated=true).",
             "[debug] CalamityAffixes: action feedback sound (sound=0x3F206, spatial=true, built=true, played=true).",
@@ -119,8 +160,8 @@ class QaSkseLogcheckTests(unittest.TestCase):
         result = self._run(
             "[debug] CalamityAffixes: trap world marker spawn (base=CAFF_MSTT_TRAP_BEAR_VISUAL, handleAllocated=true, resolved=false, spawned=false).",
             "[info] CalamityAffixes: trap world marker probe observation (affixId=bear_trap, configured=true, handleAllocated=true, resolved=false, animationConfigured=true).",
-            "[warn] CalamityAffixes: trap world marker probe skipped (reason=logical-trap-headroom, active=47, requested=6, cap=48).",
-            "[warn] CalamityAffixes: trap world marker animation abandoned (phase=initial, event=StartOpen, ref=0x0, attempt=8, reason=reference-unusable); gameplay continues fail-open.",
+            "[warning] CalamityAffixes: trap world marker probe skipped (reason=logical-trap-headroom, active=47, requested=6, cap=48).",
+            "[warning] CalamityAffixes: trap world marker animation abandoned (phase=initial, event=StartOpen, ref=0x0, attempt=8, reason=reference-unusable); gameplay continues fail-open.",
             "[debug] CalamityAffixes: trap world marker cleanup (reason=pre-save, handle=0x1234, resolved=false, strongOwnerRetained=false, ref=0x0, cellAttached=false, disableIssued=false, deleteIssued=false, deferredQueued=true).",
             "[debug] CalamityAffixes: pre-save trap cleanup complete (activeTraps=0, unresolvedDeferred=1).",
             "[debug] CalamityAffixes: serialization save trap state (activeTraps=0, unresolvedDeferred=1).",
@@ -150,8 +191,8 @@ class QaSkseLogcheckTests(unittest.TestCase):
         self.assertIn("RESULT: PASS", result.stdout)
 
     def test_warning_is_nonfatal_unless_strict(self) -> None:
-        relaxed = self._run("[warn] CalamityAffixes: synthetic warning")
-        strict = self._run("[warn] CalamityAffixes: synthetic warning", strict=True)
+        relaxed = self._run("[warning] CalamityAffixes: synthetic warning")
+        strict = self._run("[warning] CalamityAffixes: synthetic warning", strict=True)
 
         self.assertEqual(relaxed.returncode, 0, msg=f"stdout={relaxed.stdout}\nstderr={relaxed.stderr}")
         self.assertIn("generic_warn", relaxed.stdout)
