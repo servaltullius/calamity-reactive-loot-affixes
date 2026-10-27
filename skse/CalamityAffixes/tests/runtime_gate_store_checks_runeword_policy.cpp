@@ -1711,7 +1711,9 @@ namespace RuntimeGateStoreChecks
 				uiText->find("element.removeAttribute(\"aria-current\")") == std::string::npos ||
 				uiText->find("@keyframes rwStateShift") == std::string::npos ||
 				uiText->find(".cpPrimaryButton.attention") == std::string::npos ||
-				uiText->find("animation: rwStateShift 160ms ease-out;") == std::string::npos ||
+				// No panel-wide state animation (full Ultralight redraws per frame that
+				// Prisma waits for; the open fade is checked in test_prisma_panel_performance.py).
+				uiText->find("animation: rwStateShift 160ms ease-out;") != std::string::npos ||
 				uiText->find("transform: translate3d(0, 2px, 0);") == std::string::npos ||
 				uiText->find("element.dataset.shiftNonce") == std::string::npos ||
 				uiText->find("window.setTimeout(() =>") == std::string::npos ||

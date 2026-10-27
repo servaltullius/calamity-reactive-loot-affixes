@@ -325,6 +325,7 @@ namespace CalamityAffixes::Hooks::detail
 								conv.effectiveness,
 								conv.magnitudeOverride,
 								a_attacker);
+							bridge->NoteDebugTestEventLocked("convert:hit");
 						}
 					}
 				}

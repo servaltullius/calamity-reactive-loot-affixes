@@ -1114,7 +1114,7 @@ delete sandbox.calamityCommand;
 const planItems = vm.runInContext("debugTestPlanItems", context);
 assert.ok(Array.isArray(planItems), "the test plan lists the pending checks (empty between rounds)");
 for (const item of planItems) {
-  assert.ok(/^spawn\.(testset:1[1-9]|testrw:rw_[a-z_]+)$/.test(item.setup), `test plan setup command: ${item.setup}`);
+  assert.ok(item.setup === "" || /^spawn\.(testset:1[1-9]|testrw:rw_[a-z_]+)$/.test(item.setup), `test plan setup command: ${item.setup}`);
   assert.ok(item.events.length > 0 && item.title.length === 2 && item.todo.length === 2, `test plan row: ${item.id}`);
 }
 

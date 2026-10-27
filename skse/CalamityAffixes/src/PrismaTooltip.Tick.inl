@@ -169,8 +169,19 @@
 			RefreshControlPanelHotkeyFromMcm(false);
 			const auto previousUiLanguageMode = g_uiLanguageMode.load(std::memory_order_relaxed);
 			RefreshUiLanguageFromMcm(false);
-			if (g_uiLanguageMode.load(std::memory_order_relaxed) != previousUiLanguageMode) {
+			// The first read after start-up only loads the saved setting; the test
+			// plan event is for the player changing it afterwards.
+			static bool s_uiLanguageReadOnce = false;
+			const bool languageChanged = g_uiLanguageMode.load(std::memory_order_relaxed) != previousUiLanguageMode;
+			const bool changedByPlayer = languageChanged && s_uiLanguageReadOnce;
+			s_uiLanguageReadOnce = true;
+			if (languageChanged) {
 				RequestRunewordPanelRefresh(true);
+			}
+			if (changedByPlayer) {
+				if (auto* bridge = CalamityAffixes::EventBridge::GetSingleton()) {
+					bridge->NoteDebugTestEventLocked("mcm:language");
+				}
 			}
 			(void)EnsurePrisma(false);
 

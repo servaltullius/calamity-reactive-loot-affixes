@@ -15,18 +15,19 @@
   border-radius: var(--radius-panel);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
   padding: 0;
-  display: none;
+  /* Closed is visibility:hidden (set from interop.js), not display:none:
+     display:none dropped the panel's layout, so every open recomputed and
+     redrew all of it in one frame (about 80 ms, HHF 2026-10-27). */
+  display: flex;
+  visibility: hidden;
   pointer-events: auto;
   resize: none;
   flex-direction: column;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  opacity: 0;
-  transition: opacity 140ms ease-out;
-}
-
-#controlPanel.is-visible {
-  opacity: 1;
+  /* No open fade: Prisma waits for Ultralight to finish drawing before each
+     frame is presented, so a 140 ms opacity fade redrew the whole panel on 3-4
+     frames in a row (about 60 ms hitch each, WPR 2026-10-27). */
 }
 
 .cpTitle {
@@ -249,9 +250,6 @@
   display: none;
 }
 
-.cpTabPane:not([hidden]) {
-  animation: cpPaneEnter 140ms ease-out;
-}
 
 .cpGrid {
   display: grid;

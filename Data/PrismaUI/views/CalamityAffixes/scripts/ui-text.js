@@ -383,27 +383,43 @@ function settleRunewordAffixPreview() {
 // drop it once the game has reported it.
 const debugTestPlanItems = [
   {
-    id: "archmage", base: "weapon", setup: "spawn.testset:16", events: ["archmage:spell"],
-    title: ["Archmage on your own spells", "직접 쓴 주문의 대마법사"],
+    id: "staleStatMigration", base: "any", setup: "", events: ["migration:cleaned"],
+    title: ["Old save cleanup", "옛 세이브 정리"],
     todo: [
-      "Puts Archmage on the item. Equip it and hit an enemy with a plain spell (Firebolt, Ice Spike): an extra lightning hit should follow and cost some magicka.",
-      "대마법사를 붙입니다. 장착하고 화염탄·얼음 가시 같은 평범한 주문으로 적을 맞히세요. 번개 추가 피해가 나가고 매지카가 조금 더 빠져야 합니다."
+      "Load a save made with 2.2.8 (or an rc) while wearing Gladiator, Eagle Eye or Enchanter gear. The log should show \"stale stat migration\" lines and no warning; attack speed, bow and enchanting values look normal.",
+      "2.2.8(또는 rc)에서 검투사·독수리눈·부여술사 장비를 낀 채 저장한 세이브를 불러오세요. 로그에 \"stale stat migration\" 줄이 찍히고 경고가 없어야 하며, 공격 속도·활·부여 수치가 정상이어야 합니다."
     ]
   },
   {
-    id: "lowHealthUnrouted", base: "armor", setup: "spawn.testrw:rw_lionheart", events: ["lowhealth:unrouted"],
-    title: ["Low-health runeword from breath or a fall", "브레스·낙하로 저체력 룬워드"],
+    id: "mcmLanguage", base: "any", setup: "", events: ["mcm:language"],
+    title: ["MCM language", "MCM 언어"],
     todo: [
-      "Wear it and drop below 30% health from damage that is not a weapon hit: dragon breath, a spell, a fall. Lionheart should fire at once, not on the next weapon hit.",
-      "장착하고 무기 타격이 아닌 피해(드래곤 브레스, 주문, 낙하)로 체력을 30% 아래로 떨어뜨리세요. 다음 무기 타격을 기다리지 않고 사자의 심장이 바로 발동해야 합니다."
+      "In the MCM, change Language: the open page should switch at once, the right-hand values (e.g. Player-centric) should show, and nothing should be missing. Also press F11 with the cursor in the recipe search box: the panel should close.",
+      "MCM에서 언어를 바꾸세요. 열린 페이지가 바로 바뀌고, 오른쪽 상태 문구(예: 플레이어 중심)가 보이고, 빠진 항목이 없어야 합니다. 레시피 검색칸에 커서를 둔 채 F11을 눌러 패널이 닫히는지도 보세요."
     ]
   },
   {
-    id: "cocRider", base: "weapon", setup: "spawn.testset:17", events: ["coc:rider"],
-    title: ["Cast-on-crit slow", "치명 시전 둔화"],
+    id: "illusionRuneword", base: "armor", setup: "spawn.testrw:rw_peace", events: ["affix:runeword_peace_final"],
+    title: ["Runeword Peace (calm)", "룬워드 피스(진정)"],
     todo: [
-      "Puts Crit Cast: Ice Spike on the item. Land critical hits: the Ice Spike should hit and the enemy should slow down (the slow is now a separate spell).",
-      "치명 시전: 얼음 가시를 붙입니다. 치명타를 맞히세요. 얼음 가시가 나가고 적이 느려져야 합니다(둔화가 별도 주문으로 바뀜)."
+      "Wear it and get hit by bandits or other people up to level 60: the attacker should stop fighting for a few seconds. Dragons, draugr, Daedra and Dwarven machines are not calmed.",
+      "장착하고 레벨 60 이하의 산적 같은 사람에게 맞으세요. 공격자가 몇 초 동안 싸움을 멈춰야 합니다. 드래곤·드라우그·데이드라·드워프 기계는 진정되지 않습니다."
+    ]
+  },
+  {
+    id: "elementalConversion", base: "weapon", setup: "spawn.testset:18", events: ["convert:hit"],
+    title: ["Fire conversion", "화염 전환"],
+    todo: [
+      "Puts Fire Infusion (100%) on the item. Hit enemies quickly: each hit's fire damage should land at once and the fire hit effect should still show.",
+      "화염 주입(100%)을 붙입니다. 적을 빠르게 연타하세요. 타격마다 화염 피해가 바로 들어가고 불 피격 연출이 그대로 보여야 합니다."
+    ]
+  },
+  {
+    id: "invisibilityEnds", base: "armor", setup: "spawn.testset:19", events: ["affix:shadow_veil", "affix:silent_step"],
+    title: ["Invisibility ends cleanly", "투명화가 깔끔히 끝나는지"],
+    todo: [
+      "Puts Shadow Counter and Silent Step on the item. Let both turn you invisible (get hit, then kill). After the effect ends, enemies must see you again and you must not stay invisible.",
+      "그림자 반격과 고요한 걸음을 붙입니다. 맞고 처치해서 두 효과로 투명해진 뒤, 효과가 끝나면 적이 다시 나를 알아보고 투명이 남지 않아야 합니다."
     ]
   }
 ];
@@ -437,7 +453,9 @@ function renderDebugTestPlan() {
     const title = document.createElement("div");
     title.className = "cpTestRowTitle";
     const armor = item.base === "armor";
-    title.textContent = t(`${item.title[0]} · ${armor ? "armor" : "weapon"}`, `${item.title[1]} · ${armor ? "방어구" : "무기"}`);
+    title.textContent = item.base === "any"
+      ? t(item.title[0], item.title[1])
+      : t(`${item.title[0]} · ${armor ? "armor" : "weapon"}`, `${item.title[1]} · ${armor ? "방어구" : "무기"}`);
     const todo = document.createElement("div");
     todo.className = "cpTestRowTodo";
     todo.textContent = t(item.todo[0], item.todo[1]);
@@ -447,14 +465,17 @@ function renderDebugTestPlan() {
     state.className = isSeen ? "cpTestRowState seen" : "cpTestRowState";
     state.textContent = isSeen ? tCompact("Seen", "확인됨") : tCompact("Waiting", "대기");
     state.title = isSeen ? t("Seen", "확인됨") : t("Waiting", "대기");
-    const button = document.createElement("button");
-    button.className = "cpButton cpTestRowButton";
-    button.setAttribute(panelCommandAttribute, item.setup);
-    button.textContent = tCompact("Set up", "준비");
-    button.title = t("Set up", "준비");
     row.appendChild(text);
     row.appendChild(state);
-    row.appendChild(button);
+    // Rows that need no item (an old save, an MCM setting) have no Set up button.
+    if (item.setup) {
+      const button = document.createElement("button");
+      button.className = "cpButton cpTestRowButton";
+      button.setAttribute(panelCommandAttribute, item.setup);
+      button.textContent = tCompact("Set up", "준비");
+      button.title = t("Set up", "준비");
+      row.appendChild(button);
+    }
     debugTestPlan.appendChild(row);
   }
 }

@@ -638,12 +638,8 @@ namespace CalamityAffixes
 		if (statusTarget) {
 			FinishStatusCast(a_action.statusTag, exposurePlan, exposureBefore, spell, statusTarget, magnitudeOverride);
 			ApplyTaggedBuildUp(a_action, caster, statusTarget, magicCaster);
-			if (a_action.statusTag != StatusKind::kNone) {
-				NoteDebugTestEvent("affix:", a_affix.id);
-			}
-		} else if (a_action.applyToSelf) {
-			NoteDebugTestEvent("affix:", a_affix.id);
 		}
+		NoteDebugTestEvent("affix:", a_affix.id);
 		PlayActionFeedback(a_action, a_owner, a_target, ActionFeedbackPlayOn::kProc);
 	}
 
@@ -801,12 +797,8 @@ namespace CalamityAffixes
 		if (statusTarget) {
 			FinishStatusCast(a_action.statusTag, exposurePlan, exposureBefore, spell, statusTarget, magnitudeOverride);
 			ApplyTaggedBuildUp(a_action, caster, statusTarget, magicCaster);
-			if (a_action.statusTag != StatusKind::kNone) {
-				NoteDebugTestEvent("affix:", a_affix.id);
-			}
-		} else if (a_action.applyToSelf) {
-			NoteDebugTestEvent("affix:", a_affix.id);
 		}
+		NoteDebugTestEvent("affix:", a_affix.id);
 		PlayActionFeedback(a_action, a_owner, a_target, ActionFeedbackPlayOn::kProc);
 	}
 }

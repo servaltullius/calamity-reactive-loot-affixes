@@ -310,6 +310,9 @@ namespace CalamityAffixes
 		}
 
 		_staleStatModifiersMigrated = true;
+		if (!found.empty() || !removals.empty()) {
+			NoteDebugTestEvent("migration:cleaned");
+		}
 		SKSE::log::info(
 			"CalamityAffixes: stale stat migration done ({} old effects, {} removed, {} refreshed, {} actor values cleaned).",
 			found.size(),

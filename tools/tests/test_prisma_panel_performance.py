@@ -384,14 +384,19 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
             re.compile(r"animation\s*:[^;{}]*\binfinite\b", re.IGNORECASE),
         )
 
+        # Opening the panel must not animate the whole panel: Prisma waits for
+        # Ultralight to finish each frame, so a 140 ms fade redrew the panel on
+        # 3-4 frames in a row (about 60 ms hitch each, WPR 2026-10-27).
         for marker in (
             "transition: opacity 140ms ease-out;",
             "animation: cpPaneEnter 140ms ease-out;",
             "animation: rwStateShift 160ms ease-out;",
-            "transform: translate3d(0, 2px, 0);",
-            "@media (prefers-reduced-motion: reduce)",
         ):
-            self.assertIn(marker, self.source)
+            self.assertNotIn(marker, self.source)
+        self.assertIn("@media (prefers-reduced-motion: reduce)", self.source)
+        panel_rule = self._between("#controlPanel {", "}")
+        self.assertIn("display: flex;", panel_rule)
+        self.assertIn("visibility: hidden;", panel_rule)
 
         shift = self._between(
             "function triggerRunewordStateShift(element, state)",
@@ -428,8 +433,14 @@ class PrismaPanelPerformanceTests(unittest.TestCase):
             "function setControlPanel(raw)",
         )
         self.assertIn("controlPanelOpen === nextOpen", open_state)
-        self.assertIn("controlPanel.style.display === expectedDisplay", open_state)
-        self.assertIn('controlPanel.classList.add("is-visible")', open_state)
+        # Closed keeps the layout (visibility:hidden), so opening only draws it.
+        self.assertIn("controlPanel.style.visibility === expectedVisibility", open_state)
+        self.assertNotIn("controlPanel.style.display", open_state)
+        # Inventory hovers must not write the hidden panel's card (it would be
+        # laid out again whenever the tooltip is measured).
+        flush = self._between("function flushPanelRender()", "function schedulePanelRender(")
+        self.assertIn("panelRenderState.dirty.selectedItemContext = true;", flush)
+        self.assertLess(flush.index("if (controlPanelOpen)"), flush.index("renderSelectedItemContext();"))
         self.assertIn("updatePanelUiScale();", open_state)
 
         layout_mode = self._between(

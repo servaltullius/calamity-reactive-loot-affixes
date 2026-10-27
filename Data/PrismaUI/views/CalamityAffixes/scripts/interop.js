@@ -352,10 +352,12 @@ function parseControlPanelOpenState(raw) {
 }
 
 function applyControlPanelOpenState(nextOpen) {
-  const expectedDisplay = nextOpen ? "flex" : "none";
+  // Closed is visibility:hidden, not display:none, so the panel keeps its
+  // layout and UI scale and opening only has to draw it (panel.css).
+  const expectedVisibility = nextOpen ? "visible" : "hidden";
   if (
     controlPanelOpen === nextOpen &&
-    controlPanel.style.display === expectedDisplay
+    controlPanel.style.visibility === expectedVisibility
   ) {
     return;
   }
@@ -368,11 +370,9 @@ function applyControlPanelOpenState(nextOpen) {
     feedback.title = "";
     endPanelDrag();
     persistPanelLayout();
-    controlPanel.classList.remove("is-visible");
-    controlPanel.style.display = "none";
+    controlPanel.style.visibility = "hidden";
   } else {
-    controlPanel.classList.remove("is-visible");
-    controlPanel.style.display = "flex";
+    controlPanel.style.visibility = "visible";
     if (!panelLayoutLoaded && !controlPanel.style.left) {
       const rect = controlPanel.getBoundingClientRect();
       controlPanel.style.left = Math.round(rect.left) + "px";
@@ -382,11 +382,6 @@ function applyControlPanelOpenState(nextOpen) {
     }
     updatePanelUiScale();
     keepPanelInViewport();
-    requestAnimationFrame(() => {
-      if (controlPanelOpen) {
-        controlPanel.classList.add("is-visible");
-      }
-    });
   }
 
   document.body.style.pointerEvents = controlPanelOpen ? "auto" : "none";

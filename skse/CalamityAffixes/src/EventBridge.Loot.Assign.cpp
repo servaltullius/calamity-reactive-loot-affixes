@@ -496,7 +496,7 @@ namespace CalamityAffixes
 			std::string_view name;
 			std::array<std::string_view, 4> affixIds;
 		};
-		static constexpr std::array<TestSet, 7> kTestSets{ {
+		static constexpr std::array<TestSet, 9> kTestSets{ {
 			{ 11, "buff replacement", { "battle_frenzy", "voice_of_power", "shadow_veil", "" } },
 			{ 12, "build-up meters", { "frost_strike", "spark_strike", "ember_brand", "contagion" } },
 			{ 13, "Exposed", { "flame_weakness", "frost_weakness", "shock_weakness", "elemental_bane" } },
@@ -504,6 +504,8 @@ namespace CalamityAffixes
 			{ 15, "slow overlap", { "ice_form", "frost_strike", "", "" } },
 			{ 16, "archmage", { "archmage_t1", "", "", "" } },
 			{ 17, "cast-on-crit rider", { "crit_cast_ice_spike", "", "", "" } },
+			{ 18, "elemental conversion", { "fire_infusion_100", "", "", "" } },
+			{ 19, "invisibility", { "shadow_veil", "silent_step", "", "" } },
 		} };
 		if (!(_loot.debugHudNotifications || _loot.debugLog)) {
 			return;

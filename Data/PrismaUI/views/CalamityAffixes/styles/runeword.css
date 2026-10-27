@@ -172,8 +172,10 @@
   box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.12);
 }
 
+/* .rwStateShift used to animate for 160 ms; removed for the same reason as the
+   panel open fade (whole-panel redraws on several frames in Ultralight). */
 .rwStateShift {
-  animation: rwStateShift 160ms ease-out;
+  animation: none;
 }
 
 .rwRecipeEffectLine {

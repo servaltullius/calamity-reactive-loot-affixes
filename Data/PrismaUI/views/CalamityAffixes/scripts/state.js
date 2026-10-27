@@ -192,7 +192,14 @@ function flushPanelRender() {
     updatePanelHotkeyHints();
   }
   if (next.selectedItemContext) {
-    renderSelectedItemContext();
+    if (controlPanelOpen) {
+      renderSelectedItemContext();
+    } else {
+      // The closed panel keeps its layout (visibility:hidden), so writing the
+      // hovered-item card on every inventory hover would relayout it when the
+      // tooltip is measured. Keep it dirty; opening the panel flushes it.
+      panelRenderState.dirty.selectedItemContext = true;
+    }
   }
   if (next.inventoryItems) {
     renderInventoryItems();
