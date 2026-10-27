@@ -1,7 +1,7 @@
 # Calamity - Reactive Loot & Affixes
 
-[![Release](https://img.shields.io/badge/Release-v2.2.8-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.8)
-[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.8/CalamityAffixes_MO2_v2.2.8_2026-10-09.zip)
+[![Release](https://img.shields.io/badge/Release-v2.3.0-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.3.0)
+[![Download (MO2 ZIP)](https://img.shields.io/badge/Download-MO2%20ZIP-2ea44f)](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.3.0/CalamityAffixes_MO2_v2.3.0_2026-10-27.zip)
 [![Nexus Mods](https://img.shields.io/badge/Nexus%20Mods-Calamity%202-d98f40)](https://www.nexusmods.com/skyrimspecialedition/mods/193193)
 
 ## 어떤 모드인가요?
@@ -16,11 +16,11 @@
 
 ## 다운로드 (플레이어)
 
-> **현재 정식 릴리스:** [v2.2.8](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.2.8)
+> **현재 정식 릴리스:** [v2.3.0](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/tag/v2.3.0)
 
 - 넥서스: [Calamity 2 - Reactive Loot and Affixes](https://www.nexusmods.com/skyrimspecialedition/mods/193193) (2.0부터의 새 페이지. 옛 페이지 [mods/172116](https://www.nexusmods.com/skyrimspecialedition/mods/172116)은 1.2.21에서 멈춘 구버전입니다)
-- MO2 ZIP: [CalamityAffixes_MO2_v2.2.8_2026-10-09.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.8/CalamityAffixes_MO2_v2.2.8_2026-10-09.zip)
-- SHA-256: [CalamityAffixes_MO2_v2.2.8_2026-10-09.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.2.8/CalamityAffixes_MO2_v2.2.8_2026-10-09.zip.sha256)
+- MO2 ZIP: [CalamityAffixes_MO2_v2.3.0_2026-10-27.zip](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.3.0/CalamityAffixes_MO2_v2.3.0_2026-10-27.zip)
+- SHA-256: [CalamityAffixes_MO2_v2.3.0_2026-10-27.zip.sha256](https://github.com/servaltullius/calamity-reactive-loot-affixes/releases/download/v2.3.0/CalamityAffixes_MO2_v2.3.0_2026-10-27.zip.sha256)
 - 전체 릴리스: https://github.com/servaltullius/calamity-reactive-loot-affixes/releases
 - 변경 이력: [CHANGELOG.md](CHANGELOG.md)
 
@@ -33,6 +33,13 @@
 - 장비는 owner FormID + UID 단위로 추적하며, 획득 시 자동 롤 대신 플레이어가 원하는 베이스를 골라 확인 스크롤로 감정하고 재련·정제로 다듬습니다.
 - 룬 조각·재련 오브·확인 스크롤·정제 오브는 적격 적대 대상의 시체에서만 획득하며, 일반 확률·피티와 고유·보스·드래곤 확정 보상을 함께 지원합니다.
 - Prisma UI에서 선택 장비 툴팁, 어픽스 슬롯 진행, 룬워드 검색·제작, 보유 통화와 피티 현황을 한국어·영어로 확인할 수 있습니다.
+
+## v2.3.0 새 기능
+
+- **룬워드가 접두 칸을 차지합니다.** 첫 칸에는 룬워드나 접두 중 하나만 들어가므로, 룬워드는 접두와 맞바꾸는 선택입니다. 정제 오브 1개로 룬워드를 지울 수도 있습니다. 2.3.0 전에 만든 장비는 그대로입니다.
+- **공용 상태:** 빙결·출혈·감전 축적, 화상, 노출, 파멸을 한 장비가 걸고 다른 장비가 이용합니다. 이를 쓰는 새 접두 3종(파멸의 낙인, 약점 포착, 전염)이 추가됐습니다.
+- MCO에서 효과가 없던 무기 공격속도 효과를 모두 바꿨고, 겹치던 스킬 버프 룬워드 10개를 다시 만들었습니다. 패널은 게임 메뉴에 맞춘 색과 배치로 바뀌었습니다.
+- 기존 세이브를 그대로 쓸 수 있습니다. 자세한 내용은 [2.3.0 릴리스 노트](docs/releases/2026-10-27-github-release-body-v2.3.0.md)를 확인하세요.
 
 ## v2.2.0 새 기능
 

@@ -1,6 +1,6 @@
 # 프리픽스 효과 정리 (공개용)
 
-> 업데이트: 2026-10-09
+> 업데이트: 2026-10-27
 > 기준 버전: `v2.3.0`
 > 기준 코드:
 > - 효과 정의: `affixes/modules/keywords.affixes.core.json`, `affixes/modules/keywords.affixes.status.json`
