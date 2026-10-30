@@ -24,8 +24,8 @@ namespace CalamityAffixes::RunewordSynthesis
 		out.spellWard = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_FORTITUDE_WARD");
 		out.spellPhase = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_ENIGMA_PHASE");
 		out.spellMeditation = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_INSIGHT_MEDITATION");
-		out.spellBarrier = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_EXILE_BARRIER");
-		out.spellPhoenix = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_PHOENIX_SURGE");
+		out.spellBarrier = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_EXILE_IRONSKIN");
+		out.spellPhoenix = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_RW_PHOENIX_RESTORE");
 		out.spellHaste = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_SWAP_JACKPOT_HASTE");
 		out.spellDotPoison = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_DOT_BLOOM_POISON");
 		out.spellDotTar = PluginEditorIds::Lookup<RE::SpellItem>("CAFF_SPEL_DOT_BLOOM_TAR_SLOW");

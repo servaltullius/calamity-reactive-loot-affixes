@@ -209,6 +209,7 @@ namespace CalamityAffixes
 			const StaleStatMigration::SlotValues slots{
 				.temporaryModifier = player->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, actorValue),
 				.permanentModifier = player->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kPermanent, actorValue),
+				.explainedByLiveEffects = pending.orphan > 0.0f ? ExplainedByLiveEffects(*effects, actorValue) : 0.0f,
 			};
 			const auto removal = StaleStatMigration::ResolveRemoval(slots, pending.expected, pending.orphan);
 			if (removal.slot == StaleStatMigration::Slot::kNone) {

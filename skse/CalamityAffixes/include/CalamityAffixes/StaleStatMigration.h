@@ -167,6 +167,9 @@ namespace CalamityAffixes::StaleStatMigration
 	{
 		float temporaryModifier{ 0.0f };
 		float permanentModifier{ 0.0f };
+		// What the live value-modifier effects account for now (they write to
+		// the temporary slot). Only the orphan sweep uses it.
+		float explainedByLiveEffects{ 0.0f };
 	};
 
 	struct Removal
@@ -208,8 +211,14 @@ namespace CalamityAffixes::StaleStatMigration
 			return Slot::kNone;
 		};
 		if (a_orphan > 0.0f) {
-			if (const auto slot = pick(a_expected + a_orphan); slot != Slot::kNone) {
-				return Removal{ slot, a_expected + a_orphan, true };
+			// Nothing proves where an amount with no effect behind it came from.
+			// A dropped timed buff leaves its amount in the temporary slot, so
+			// sweep only what that slot holds beyond the live effects, never the
+			// permanent slot (scripts and the console write there).
+			const float amount = a_expected + a_orphan;
+			if (Covers(a_slots.temporaryModifier + a_slots.permanentModifier, amount) &&
+				Covers(a_slots.temporaryModifier - a_slots.explainedByLiveEffects, amount)) {
+				return Removal{ Slot::kTemporary, amount, true };
 			}
 		}
 		if (const auto slot = pick(a_expected); slot != Slot::kNone) {

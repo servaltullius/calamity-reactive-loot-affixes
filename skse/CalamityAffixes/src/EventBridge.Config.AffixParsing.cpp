@@ -578,63 +578,80 @@ namespace CalamityAffixes
 				continue;
 			}
 
+			// An affix that is in the config but fails at any step (a spell the
+			// loaded plugin does not have, a value of the wrong type) is still
+			// configured: its saved tokens are not retired (ShouldKeepTrackedLootAffixToken).
+			std::uint64_t configuredToken = 0u;
+			bool parsed = false;
 			try {
-				// Inside the per-affix try: a bad record name drops only that
-				// affix's display names.
-				HarvestRecordDisplayNames(a, a_handler);
+				parsed = [&]() -> bool {
+					// Inside the per-affix try: a bad record name drops only that
+					// affix's display names.
+					HarvestRecordDisplayNames(a, a_handler);
 
-				AffixRuntime out{};
-				if (!InitializeAffixFromJson(a, out)) {
-					// Still a configured affix: its saved tokens are not retired.
-					if (out.token != 0u) {
-						_unresolvedConfiguredAffixTokens.insert(out.token);
+					AffixRuntime out{};
+					const bool initialized = InitializeAffixFromJson(a, out);
+					configuredToken = out.token;
+					if (!initialized) {
+						return false;
 					}
-					continue;
-				}
 
-				ApplyAffixSlotAndFamilyFromJson(a, out);
+					ApplyAffixSlotAndFamilyFromJson(a, out);
 
-				float kidChancePct = 0.0f;
-				ApplyAffixKidLootFromJson(a, out, kidChancePct);
+					float kidChancePct = 0.0f;
+					ApplyAffixKidLootFromJson(a, out, kidChancePct);
 
-				const auto& runtime = a.value("runtime", nlohmann::json::object());
-				if (!runtime.is_object()) {
-					continue;
-				}
+					const auto& runtime = a.value("runtime", nlohmann::json::object());
+					if (!runtime.is_object()) {
+						return false;
+					}
 
-				const auto& action = runtime.value("action", nlohmann::json::object());
-				if (!action.is_object()) {
-					SKSE::log::warn(
-						"CalamityAffixes: runtime.action must be an object (affixId={}); skipping affix.",
-						out.id);
-					continue;
-				}
-				out.action.debugNotify = action.value("debugNotify", false);
-				const auto type = action.value("type", std::string{});
+					const auto& action = runtime.value("action", nlohmann::json::object());
+					if (!action.is_object()) {
+						SKSE::log::warn(
+							"CalamityAffixes: runtime.action must be an object (affixId={}); skipping affix.",
+							out.id);
+						return false;
+					}
+					out.action.debugNotify = action.value("debugNotify", false);
+					const auto type = action.value("type", std::string{});
 
-				if (!ApplyAffixRuntimeGateFromJson(runtime, action, kidChancePct, type, out)) {
-					continue;
-				}
+					if (!ApplyAffixRuntimeGateFromJson(runtime, action, kidChancePct, type, out)) {
+						return false;
+					}
 
-				ApplyScrollNoConsumeChanceFromJson(action, out);
+					ApplyScrollNoConsumeChanceFromJson(action, out);
 
-				if (!ParseRuntimeActionFromJson(action, type, a_handler, out)) {
-					continue;
-				}
-				ParseActionFeedbackFromJson(action, a_handler, out);
-				ParseTrapFeedbackFromJson(action, a_handler, out);
+					if (!ParseRuntimeActionFromJson(action, type, a_handler, out)) {
+						return false;
+					}
+					ParseActionFeedbackFromJson(action, a_handler, out);
+					ParseTrapFeedbackFromJson(action, a_handler, out);
 
-				NormalizeParsedAffixRuntimePolicy(out, type);
+					NormalizeParsedAffixRuntimePolicy(out, type);
 
-				_affixRuntimeState.affixes.push_back(std::move(out));
-				const auto idx = _affixRuntimeState.affixes.size() - 1;
+					_affixRuntimeState.affixes.push_back(std::move(out));
+					const auto idx = _affixRuntimeState.affixes.size() - 1;
 
-				IndexAffixTriggerBucket(_affixRuntimeState.affixes[idx], idx);
-				IndexAffixSpecialActionBucket(_affixRuntimeState.affixes[idx], idx);
+					IndexAffixTriggerBucket(_affixRuntimeState.affixes[idx], idx);
+					IndexAffixSpecialActionBucket(_affixRuntimeState.affixes[idx], idx);
+					return true;
+				}();
 			} catch (const nlohmann::json::exception& e) {
 				SKSE::log::error(
 					"CalamityAffixes: JSON error while parsing affix entry; skipping. ({})",
 					e.what());
+			}
+			if (!parsed) {
+				if (configuredToken == 0u) {
+					const auto idIt = a.find("id");
+					if (idIt != a.end() && idIt->is_string() && !idIt->get_ref<const std::string&>().empty()) {
+						configuredToken = MakeAffixToken(idIt->get_ref<const std::string&>());
+					}
+				}
+				if (configuredToken != 0u) {
+					_unresolvedConfiguredAffixTokens.insert(configuredToken);
+				}
 			}
 		}
 	}

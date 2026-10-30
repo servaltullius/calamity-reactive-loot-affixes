@@ -336,10 +336,19 @@ namespace CalamityAffixes::PrismaTooltip
 
 	void OnPreLoadGame()
 	{
-		// Atomics only: the gameplay-unavailable tick already hides the view, and
-		// the first tick after the load sees an unknown state and closes it.
 		g_controlPanelOpen.store(false);
 		g_panelTextInputFocused.store(false, std::memory_order_relaxed);
+		// Close the view itself too. The worker ticks only while an inventory is
+		// open or the panel is requested, so after a load from plain gameplay (a
+		// death reload with the panel open) no tick would ever hide it.
+		QueueTask([]() {
+			if (g_controlPanelOpen.load()) {
+				return;  // reopened since the load began
+			}
+			ApplyControlPanelState(false);
+			g_lastPanelState = false;
+			g_lastPanelStateKnown = true;
+		});
 	}
 
 	void PrewarmView()

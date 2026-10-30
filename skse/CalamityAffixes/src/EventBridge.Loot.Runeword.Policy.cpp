@@ -15,6 +15,10 @@ namespace CalamityAffixes
 		if (affixIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixRuntimeState.affixes.size()) {
 			return RunewordApplyBlockReason::kMissingResultAffix;
 		}
+		if (const auto it = _instanceTrackingState.instanceAffixes.find(a_instanceKey);
+			it != _instanceTrackingState.instanceAffixes.end() && HasUnloadedConfiguredAffix(it->second)) {
+			return RunewordApplyBlockReason::kUnloadedAffix;
+		}
 
 		const auto* completed = ResolveCompletedRunewordRecipe(a_instanceKey);
 		if (IsSameCompletedRuneword(
@@ -49,6 +53,27 @@ namespace CalamityAffixes
 		return RunewordApplyBlockReason::kNone;
 	}
 
+	bool EventBridge::HasUnloadedConfiguredAffix(const InstanceAffixSlots& a_slots) const
+	{
+		for (const auto token : a_slots) {
+			if (token == 0u) {
+				continue;
+			}
+			const auto it = _affixRuntimeState.affixRegistry.affixIndexByToken.find(token);
+			if (it != _affixRuntimeState.affixRegistry.affixIndexByToken.end() &&
+				it->second < _affixRuntimeState.affixes.size()) {
+				continue;
+			}
+			// Kept by ShouldKeepTrackedLootAffixToken for the same reasons: the
+			// config is not trusted, or this affix is configured but failed to load.
+			// Crafting would guess its slot (prefix or runeword) and could delete it.
+			if (!_unknownAffixTokenPruningAllowed || _unresolvedConfiguredAffixTokens.contains(token)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	std::vector<std::uint64_t> EventBridge::ResolveRunewordDisplacedPrefixTokens(
 		const InstanceAffixSlots& a_slots) const
 	{
@@ -80,6 +105,8 @@ namespace CalamityAffixes
 			reason.push_back(')');
 			return reason;
 		}
+		case RunewordApplyBlockReason::kUnloadedAffix:
+			return std::string(kUnloadedAffixCraftMessage);
 		default:
 			break;
 		}

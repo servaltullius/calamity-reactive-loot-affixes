@@ -646,6 +646,9 @@ namespace CalamityAffixes::Hooks::detail
 		// breath or Flames beam ticks many times a second.
 		std::mutex s_lowHealthOnlyMutex;
 		bool s_lowHealthOnlyPending{ false };
+		// The runtime generation of the pending task. A load bumps the
+		// generation; the old task then leaves newer damage to a new task.
+		std::uint64_t s_lowHealthOnlyGeneration{ 0u };
 		float s_lowHealthOnlyDamage{ 0.0f };
 		RE::FormID s_lowHealthOnlyAttacker{ 0u };
 	}
@@ -667,8 +670,17 @@ namespace CalamityAffixes::Hooks::detail
 			return;
 		}
 
+		std::uint64_t runtimeGeneration = 0u;
 		{
 			const std::scoped_lock lock(s_lowHealthOnlyMutex);
+			runtimeGeneration = s_runtimeGeneration.load(std::memory_order_acquire);
+			if (s_lowHealthOnlyPending && s_lowHealthOnlyGeneration != runtimeGeneration) {
+				// Queued before a load: that task drops what it holds, so this
+				// damage starts a task of its own.
+				s_lowHealthOnlyPending = false;
+				s_lowHealthOnlyDamage = 0.0f;
+				s_lowHealthOnlyAttacker = 0u;
+			}
 			s_lowHealthOnlyDamage += std::abs(a_damage);
 			if (a_attacker && a_attacker != a_target) {
 				s_lowHealthOnlyAttacker = a_attacker->GetFormID();
@@ -677,14 +689,18 @@ namespace CalamityAffixes::Hooks::detail
 				return;
 			}
 			s_lowHealthOnlyPending = true;
+			s_lowHealthOnlyGeneration = runtimeGeneration;
 		}
 
-		const auto runtimeGeneration = s_runtimeGeneration.load(std::memory_order_acquire);
 		tasks->AddTask([runtimeGeneration]() {
 			float damage = 0.0f;
 			RE::FormID attacker = 0u;
 			{
 				const std::scoped_lock lock(s_lowHealthOnlyMutex);
+				if (s_lowHealthOnlyGeneration != runtimeGeneration) {
+					// A newer task owns the pending damage.
+					return;
+				}
 				damage = s_lowHealthOnlyDamage;
 				attacker = s_lowHealthOnlyAttacker;
 				s_lowHealthOnlyDamage = 0.0f;

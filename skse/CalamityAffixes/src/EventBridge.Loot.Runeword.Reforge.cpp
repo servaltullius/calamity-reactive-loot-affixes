@@ -42,6 +42,10 @@ namespace CalamityAffixes
 		if (previous.count > kMaxAffixesPerItem || !detail::HasUniqueAffixTokens(previous)) {
 			return fail("Crafting failed: invalid affix layout.");
 		}
+		if (HasUnloadedConfiguredAffix(previous)) {
+			// Scour or a removal would reroll an affix that only failed to load.
+			return fail(std::string(kUnloadedAffixCraftMessage));
+		}
 		const auto* recipe = ResolveCompletedRunewordRecipe(instanceKey);
 		const auto runewordToken = recipe ? recipe->resultAffixToken : 0u;
 		InstanceAffixSlots regular{};

@@ -529,8 +529,7 @@ namespace CalamityAffixes
 			break;
 		case StatusKind::kBleed:
 			{
-				auto* avOwner = a_target->AsActorValueOwner();
-				const float maxHealth = avOwner ? std::max(0.0f, avOwner->GetPermanentActorValue(RE::ActorValue::kHealth)) : 0.0f;
+				const float maxHealth = ResolveActorValueMax(a_target, RE::ActorValue::kHealth);
 				const float share = tough ? kBleedToughMaxHealthShare : kBleedMaxHealthShare;
 				const float damage = std::clamp(maxHealth * share, kBleedMinDamage, kBleedMaxDamage);
 				CastHostileOnlySpellImmediate(a_magicCaster, payoff, false, a_target, 1.0f, damage, a_owner);

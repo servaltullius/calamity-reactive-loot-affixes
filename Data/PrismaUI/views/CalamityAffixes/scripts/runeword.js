@@ -403,6 +403,9 @@ function resolveRunewordApplyBlockText(state) {
   if (summary === "Selected base already has this runeword") {
     return t("This item already has this runeword.", "이 장비에는 이미 이 룬워드가 있습니다.");
   }
+  if (summary === "An affix on the selected item did not load this session. Check that CalamityAffixes.esp matches this version; until then the item cannot be crafted.") {
+    return localizeEngineFeedback(summary);
+  }
   if (summary === "Runeword result affix missing") {
     return t(
       "This runeword's effect is missing from the mod data.",

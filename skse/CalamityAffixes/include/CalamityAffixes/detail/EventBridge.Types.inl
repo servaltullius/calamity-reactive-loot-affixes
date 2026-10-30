@@ -750,4 +750,5 @@
 			kMissingResultAffix,
 			kAlreadyComplete,
 			kAffixSlotsFull,
+			kUnloadedAffix,
 		};

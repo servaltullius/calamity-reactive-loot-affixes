@@ -61,6 +61,20 @@ namespace CalamityAffixes
 				kMaxRegularAffixesPerItem);
 			return false;
 		}
+		if (blockReason != RunewordApplyBlockReason::kNone) {
+			if (a_outFailureReason) {
+				*a_outFailureReason = "blocked";
+			}
+			std::string note = "Runeword blocked: ";
+			note.append(BuildRunewordApplyBlockMessage(blockReason));
+			EmitHudNotification(note.c_str());
+			SKSE::log::warn(
+				"CalamityAffixes: runeword apply blocked (instance={:016X}, recipe={}, reason={}).",
+				a_instanceKey,
+				a_recipe.id,
+				static_cast<int>(blockReason));
+			return false;
+		}
 
 		const auto affixIt = _affixRuntimeState.affixRegistry.affixIndexByToken.find(a_recipe.resultAffixToken);
 		if (affixIt == _affixRuntimeState.affixRegistry.affixIndexByToken.end() || affixIt->second >= _affixRuntimeState.affixes.size()) {
@@ -248,7 +262,7 @@ namespace CalamityAffixes
 				recipe->id);
 			return;
 		}
-		if (blockReason == RunewordApplyBlockReason::kAffixSlotsFull) {
+		if (blockReason != RunewordApplyBlockReason::kNone) {
 			std::string note = "Runeword blocked: ";
 			note.append(BuildRunewordApplyBlockMessage(blockReason));
 			EmitHudNotification(note.c_str());

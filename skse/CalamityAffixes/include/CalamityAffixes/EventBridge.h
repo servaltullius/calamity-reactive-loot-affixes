@@ -39,6 +39,7 @@
 	#include "CalamityAffixes/LootCurrencyLedger.h"
 	#include "CalamityAffixes/LootRuntimeState.h"
 	#include "CalamityAffixes/MagnitudeScaling.h"
+	#include "CalamityAffixes/PausedTimeClock.h"
 	#include "CalamityAffixes/RuntimeUserSettingsDebounce.h"
 #include "CalamityAffixes/EventNames.h"
 #include "CalamityAffixes/RunewordUiContracts.h"

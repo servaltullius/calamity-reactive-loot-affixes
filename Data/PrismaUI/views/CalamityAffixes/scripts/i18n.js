@@ -55,6 +55,10 @@ const engineFeedbackLocalizations = {
   "Failed to select runeword base.": ["Failed to select runeword base.", "룬워드 베이스 선택에 실패했습니다."],
   "Failed to select runeword recipe.": ["Failed to select runeword recipe.", "룬워드 레시피 선택에 실패했습니다."],
   "Runeword system unavailable.": ["Runeword system unavailable.", "룬워드 시스템을 사용할 수 없습니다."],
+  "An affix on the selected item did not load this session. Check that CalamityAffixes.esp matches this version; until then the item cannot be crafted.": [
+    "An affix on the selected item did not load this session. Check that CalamityAffixes.esp matches this version; until then the item cannot be crafted.",
+    "선택한 장비의 어픽스 하나를 이번 세션에 불러오지 못했습니다. CalamityAffixes.esp가 이 버전과 맞는지 확인하세요. 그 전까지는 이 장비를 제작할 수 없습니다."
+  ],
   "This item has used all 6 selected reforges. Scour it to reroll every affix and get them back.": [
     "This item has used all 6 selected reforges. Scour it to reroll every affix and get them back.",
     "이 장비는 선택 재련 6회를 모두 썼습니다. 정제하면 어픽스 전부를 다시 굴리고 6회를 되돌려 받습니다."

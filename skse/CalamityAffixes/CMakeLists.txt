@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(CalamityAffixes VERSION 2.3.0 LANGUAGES CXX)
+project(CalamityAffixes VERSION 2.3.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -286,6 +286,8 @@ if (BUILD_TESTING)
             tests/test_low_health_rearm_policy.cpp
             tests/test_hotkey_names.cpp
             tests/test_stale_stat_migration.cpp
+            tests/test_paused_time_clock.cpp
+            tests/test_actor_value_max.cpp
             tests/test_runeword_summary_text.cpp
             tests/test_user_settings_migration.cpp
     )

@@ -83,6 +83,10 @@ namespace CalamityAffixes
 			result.message = "Affix expansion failed: invalid affix layout.";
 			return result;
 		}
+		if (HasUnloadedConfiguredAffix(previousSlots)) {
+			result.message = std::string(kUnloadedAffixCraftMessage);
+			return result;
+		}
 
 		const auto* completedRunewordRecipe = ResolveCompletedRunewordRecipe(instanceKey);
 		const std::uint64_t preservedRunewordToken =

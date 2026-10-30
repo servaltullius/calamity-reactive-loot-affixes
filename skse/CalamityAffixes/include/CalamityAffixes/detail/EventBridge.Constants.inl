@@ -4,6 +4,10 @@
 
 		// Config/event string constants and runtime guards.
 		static constexpr std::string_view kDotKeywordEditorID = "CAFF_TAG_DOT";
+		// Panel feedback when an item holds an affix that did not load (v2.3.1);
+		// i18n.js has the Korean text under the same key.
+		static constexpr std::string_view kUnloadedAffixCraftMessage =
+			"An affix on the selected item did not load this session. Check that CalamityAffixes.esp matches this version; until then the item cannot be crafted.";
 		static constexpr std::chrono::milliseconds kDotApplyICD{ 1500 };
 		static constexpr std::chrono::milliseconds kCastOnCritICD{ 150 };
 		static constexpr std::chrono::milliseconds kDuplicateHitWindow{ 100 };

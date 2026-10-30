@@ -2,8 +2,22 @@
 
 #include <RE/Skyrim.h>
 
+#include "CalamityAffixes/ActorValueMax.h"
+
 namespace CalamityAffixes
 {
+	// Maximum health or magicka as the bar shows it (Fortify effects included).
+	[[nodiscard]] inline float ResolveActorValueMax(RE::Actor* a_actor, RE::ActorValue a_actorValue)
+	{
+		auto* avOwner = a_actor ? a_actor->AsActorValueOwner() : nullptr;
+		if (!avOwner) {
+			return 0.0f;
+		}
+		return CombineActorValueMax(
+			avOwner->GetPermanentActorValue(a_actorValue),
+			a_actor->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, a_actorValue));
+	}
+
 	// The actor carries the Boss location ref type (dungeon bosses).
 	[[nodiscard]] inline bool HasBossLocationRefType(RE::Actor* a_actor)
 	{

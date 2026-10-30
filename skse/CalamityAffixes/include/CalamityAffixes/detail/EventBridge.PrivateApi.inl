@@ -153,6 +153,9 @@
 			std::uint64_t a_instanceKey,
 			const RunewordRecipe& a_recipe) const;
 		[[nodiscard]] static std::string BuildRunewordApplyBlockMessage(RunewordApplyBlockReason a_reason);
+		// The item keeps an affix that is configured but did not load this
+		// session (v2.3.1). Its slot is unknown, so no crafting may run on it.
+		[[nodiscard]] bool HasUnloadedConfiguredAffix(const InstanceAffixSlots& a_slots) const;
 		// Prefix tokens a transmute removes: the runeword takes the head slot.
 		[[nodiscard]] std::vector<std::uint64_t> ResolveRunewordDisplacedPrefixTokens(
 			const InstanceAffixSlots& a_slots) const;
@@ -745,10 +748,15 @@
 			const RE::HitData* a_hitData);
 		void ExecuteEchoStrikeActivation(const AffixRuntime& a_affix, RE::Actor* a_owner);
 		// Shared statuses (v2.3.0, EventBridge.Actions.Status.cpp).
+		// Stops while a menu pauses the game, like the effects it tracks.
 		[[nodiscard]] static std::int64_t StatusClockNowMs() noexcept
 		{
-			return std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::steady_clock::now().time_since_epoch()).count();
+			// A missed close event must not freeze the clock (meters, Exposed and
+			// Doom would never end): a running game is never paused.
+			if (auto* ui = RE::UI::GetSingleton(); ui && !ui->GameIsPaused()) {
+				StatusClock::SetGamePaused(false);
+			}
+			return StatusClock::NowMs();
 		}
 		void ExecuteDoomMarkAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_target, const RE::HitData* a_hitData);
 		void ExecuteSpreadStatusAction(const AffixRuntime& a_affix, RE::Actor* a_owner, RE::Actor* a_victim);

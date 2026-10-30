@@ -103,6 +103,26 @@ namespace
 	}
 	static_assert(CheckSumOfSlotsMustCoverToo());
 
+	constexpr bool CheckOrphanNeedsAnUnexplainedTemporaryAmount()
+	{
+		// Another mod's live effect puts 30 on the value: it explains the slot.
+		const auto liveEffect = ResolveRemoval(
+			{ .temporaryModifier = 30.0f, .permanentModifier = 0.0f, .explainedByLiveEffects = 30.0f }, 0.0f, 30.0f);
+		// A script or the console put 30 in the permanent slot: not a dropped buff.
+		const auto permanent = ResolveRemoval({ .temporaryModifier = 0.0f, .permanentModifier = 30.0f }, 0.0f, 30.0f);
+		// Live effects explain part of it; what is left still holds the orphan.
+		const auto beyondLive = ResolveRemoval(
+			{ .temporaryModifier = 40.0f, .permanentModifier = 0.0f, .explainedByLiveEffects = 10.0f }, 0.0f, 30.0f);
+		// The found effects still go when the orphan cannot be proven.
+		const auto foundOnly = ResolveRemoval(
+			{ .temporaryModifier = 45.0f, .permanentModifier = 0.0f, .explainedByLiveEffects = 30.0f }, 15.0f, 30.0f);
+		return liveEffect.slot == Slot::kNone &&
+		       permanent.slot == Slot::kNone &&
+		       beyondLive.slot == Slot::kTemporary && Near(beyondLive.amount, 30.0f) && beyondLive.includesOrphan &&
+		       foundOnly.slot == Slot::kTemporary && Near(foundOnly.amount, 15.0f) && !foundOnly.includesOrphan;
+	}
+	static_assert(CheckOrphanNeedsAnUnexplainedTemporaryAmount());
+
 	// Entries whose current magnitude is still the old one are marked.
 	static_assert(FindEntry("CAFF_MGEF_SUFFIX_ENCHANTING_T2", 10.0f)->magnitudeUnchanged);
 	static_assert(FindEntry("CAFF_MGEF_SUFFIX_SHOUT_COOLDOWN_T3", 15.0f)->magnitudeUnchanged);

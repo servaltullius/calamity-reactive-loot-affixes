@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/ActorTierQueries.h"
 #include "CalamityAffixes/LowHealthRearmPolicy.h"
 #include "CalamityAffixes/ProcChancePolicy.h"
 
@@ -34,7 +35,8 @@ namespace CalamityAffixes
 				return 100.0f;
 			}
 
-			const float maxHealth = std::max(0.0f, avOwner->GetPermanentActorValue(RE::ActorValue::kHealth));
+			// The health bar's maximum, so the threshold in the text matches the bar.
+			const float maxHealth = ResolveActorValueMax(a_actor, RE::ActorValue::kHealth);
 			if (maxHealth <= 0.0f) {
 				return 100.0f;
 			}
@@ -325,11 +327,7 @@ namespace CalamityAffixes
 		if (!a_owner || !(a_damageTaken > 0.0f)) {
 			return 0.0f;
 		}
-		auto* avOwner = skyrim_cast<RE::ActorValueOwner*>(a_owner);
-		if (!avOwner) {
-			return 0.0f;
-		}
-		const float maxHealth = avOwner->GetPermanentActorValue(RE::ActorValue::kHealth);
+		const float maxHealth = ResolveActorValueMax(a_owner, RE::ActorValue::kHealth);
 		if (!(maxHealth > 0.0f)) {
 			return 0.0f;
 		}

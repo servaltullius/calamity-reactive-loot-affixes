@@ -1,4 +1,5 @@
 #include "CalamityAffixes/EventBridge.h"
+#include "CalamityAffixes/ActorTierQueries.h"
 #include "CalamityAffixes/HostileEffectGuard.h"
 
 #include "CalamityAffixes/ArchmageSpellHitPolicy.h"
@@ -100,7 +101,8 @@ namespace CalamityAffixes
 				return false;
 			}
 
-			a_outMaxMagicka = std::max(0.0f, avOwner->GetPermanentActorValue(RE::ActorValue::kMagicka));
+			// The magicka bar's maximum, Fortify Magicka included.
+			a_outMaxMagicka = ResolveActorValueMax(a_caster, RE::ActorValue::kMagicka);
 			const float currentMagicka = std::max(0.0f, avOwner->GetActorValue(RE::ActorValue::kMagicka));
 
 		a_outExtraCost = a_outMaxMagicka * (a_costPct / 100.0f);
